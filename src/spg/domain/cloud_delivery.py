@@ -165,6 +165,14 @@ class CloudOperationReceipt(BaseModel):
     invocation_id: str | None = None
     command_id: str | None = None
     provider_request_id: str | None = None
+    provider_error_code: str | None = Field(default=None,
+        pattern=r"^[A-Za-z][A-Za-z0-9_.-]{0,79}$")
+    # Only reconstructed, recognized provider messages are durable. Raw ErrorInfo
+    # remains transient because it can contain user data or credentials.
+    provider_error_info: str | None = Field(default=None, max_length=256,
+        pattern=r"^Deployment user [a-z_][a-z0-9_-]{0,31} is missing on target ECS\.$")
+    deployment_user: str | None = Field(default=None,
+        pattern=r"^[a-z_][a-z0-9_-]{0,31}$")
     started_at: datetime
     finished_at: datetime
     status: str

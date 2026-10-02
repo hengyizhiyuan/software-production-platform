@@ -92,6 +92,35 @@ def test_ecs_discovery_dry_run_and_typed_invocation(monkeypatch):
         provider.run(session,target,CheckPrerequisites(8080),"root",uuid4().hex)
 
 
+def test_invalid_invocation_keeps_provider_reason_transiently(monkeypatch):
+    class ECS:
+        def run_command(self, _request):
+            return Response({"InvokeId":"invoke-exact", "CommandId":"command-exact",
+                "RequestId":"request-exact"})
+
+        def describe_invocation_results(self, request):
+            assert request.invoke_id == "invoke-exact"
+            assert request.command_id == "command-exact"
+            return Response({"Invocation":{"InvocationResults":{"InvocationResult":[{
+                "InvocationStatus":"Invalid", "ExitCode":None, "Output":"",
+                "ErrorCode":"AccountNotExists",
+                "ErrorInfo":"The specified username does not exists: wattdeploy"
+            }]}}})
+
+    monkeypatch.setattr(AliyunCloudProvider, "_ecs_client",
+        staticmethod(lambda *_: ECS()))
+    target=CloudTarget(account_id="1234567890123456", region_id="cn-hangzhou",
+        instance_id="i-abcdefgh", name="test", os_name="Linux", os_type="Linux",
+        status="Running", cloud_assistant_ready=True)
+    result=AliyunCloudProvider(Settings()).run(object(), target,
+        CheckPrerequisites(8080), "wattdeploy", uuid4().hex)
+    assert result.status == "Invalid" and result.exit_code is None
+    assert result.error_code == "AccountNotExists"
+    assert result.error_info == "The specified username does not exists: wattdeploy"
+    assert result.request_id == "request-exact"
+    assert "wattdeploy" not in repr(result)
+
+
 def test_oss_staging_checks_digest_and_keeps_signed_url_transient(monkeypatch,tmp_path):
     import alibabacloud_oss_v2 as oss
     uploaded=[]

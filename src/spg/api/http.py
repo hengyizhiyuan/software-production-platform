@@ -1424,6 +1424,9 @@ def create_http_application(
             result["reality"]["cloud_deployment"] = (None if not deployments else {
                 "state": deployments[0]["state"],
                 "blocker": deployments[0]["blocker"],
+                "deployment_user": next((receipt.get("deployment_user") for receipt in
+                    deployments[0]["operations"] if receipt.get("output_summary") ==
+                    "DEPLOYMENT_USER_NOT_FOUND"), None),
                 "target_name": deployments[0]["target"]["name"]})
         if interaction is not None:
             if experience.interaction_product(getattr(http_request.state, "actor_id", ACTOR_ID), interaction) != str(product_id):

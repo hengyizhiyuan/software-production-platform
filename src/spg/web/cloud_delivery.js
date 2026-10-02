@@ -17,6 +17,16 @@
     const node=document.getElementById('cloud-delivery-message');
     if(node) {node.textContent=value;node.className=failure?'notice-error':'muted';}
   }
+  function blockerCopy(deployment) {
+    if(!deployment?.blocker)return '';
+    if(deployment.blocker==='DEPLOYMENT_USER_NOT_FOUND') {
+      const receipt=(deployment.operations||[]).find(item=>item.output_summary==='DEPLOYMENT_USER_NOT_FOUND');
+      const candidate=receipt?.deployment_user||deployment.deployment_user||'wattdeploy';
+      const username=/^[a-z_][a-z0-9_-]{0,31}$/.test(candidate)?candidate:'wattdeploy';
+      return `目标 ECS 缺少 Watt 部署用户 ${username}。部署尚未开始，未修改服务器运行状态；需要你完成服务器前置条件。`;
+    }
+    return deployment.blocker;
+  }
   async function renderFlow() {
     const node=box();if(!node||!state.open)return;
     const c=state.connection;
@@ -48,7 +58,7 @@
     else await renderFlow();
     box()?.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
-  window.WattCloudDelivery={render(detail){
+  window.WattCloudDelivery={blockerCopy,render(detail){
     const m=detail.manifest,a=detail.acceptance,s=detail.summary;
     if(!m.software||!a||a.decision!=='ACCEPT'||!detail.current)return;
     state.work=s.work_id;state.manifest=m.id;state.fingerprint=m.fingerprint;
@@ -56,7 +66,7 @@
     state.open=false;state.connection=null;
     const current=state.deployments[0];
     const panel=document.createElement('section');panel.className='detail-panel';
-    panel.innerHTML=`<h2>阿里云部署</h2><p>${current?escape({SUCCEEDED:'部署成功',NEEDS_HUMAN_ATTENTION:'需要你处理',ROLLED_BACK:'已回滚',FAILED:'部署失败'}[current.state]||'正在部署'):'这个已验收成果尚未部署到阿里云。'}</p>${current?.blocker?`<p class="muted">${escape(current.blocker)}</p>`:''}<button class="button" type="button" data-cloud-open>部署到阿里云</button><div id="cloud-delivery-flow"></div>`;
+    panel.innerHTML=`<h2>阿里云部署</h2><p>${current?escape({SUCCEEDED:'部署成功',NEEDS_HUMAN_ATTENTION:'需要你处理',ROLLED_BACK:'已回滚',FAILED:'部署失败'}[current.state]||'正在部署'):'这个已验收成果尚未部署到阿里云。'}</p>${current?.blocker?`<p class="muted">${escape(blockerCopy(current))}</p>`:''}<button class="button" type="button" data-cloud-open>部署到阿里云</button><div id="cloud-delivery-flow"></div>`;
     document.getElementById('content')?.append(panel);
   }};
   document.addEventListener('click',async event=>{
@@ -109,7 +119,7 @@
           port:p,rationale:form.elements.namedItem('rationale').value.trim()});
         const result=await request(`/api/cloud-deliveries/${auth.id}/execute`,'POST');
         message(result.state==='SUCCEEDED'?'部署成功，运行及公网验证均已通过。':
-          `部署状态：${result.state}。${result.blocker||'请查看证据。'}`,result.state!=='SUCCEEDED');
+          `部署状态：${result.state}。${blockerCopy(result)||'请查看证据。'}`,result.state!=='SUCCEEDED');
       }
     }catch(error){message(error.message,true);}finally{button.disabled=false;}
   });

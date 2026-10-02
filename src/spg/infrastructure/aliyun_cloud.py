@@ -35,7 +35,7 @@ class StagedCloudArtifact:
     request_id: str | None = None
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, repr=False)
 class InvocationResult:
     invocation_id: str
     command_id: str
@@ -43,6 +43,8 @@ class InvocationResult:
     exit_code: int | None
     output: str
     request_id: str | None = None
+    error_code: str | None = None
+    error_info: str | None = None
 
 
 class AliyunCloudProvider:
@@ -255,7 +257,11 @@ class AliyunCloudProvider:
                                   "Aborted", "Invalid", "Terminated"}:
                         return InvocationResult(invoke_id, command_id, status,
                             row.get("ExitCode"), str(row.get("Output") or "")[:24000],
-                            request_id)
+                            request_id,
+                            None if row.get("ErrorCode") is None else
+                                str(row["ErrorCode"])[:256],
+                            None if row.get("ErrorInfo") is None else
+                                str(row["ErrorInfo"])[:4096])
                 sleep(2)
             raise CloudProviderError("INVOCATION_TIMEOUT")
         except CloudProviderError:

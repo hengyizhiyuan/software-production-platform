@@ -33,6 +33,7 @@ class FakeCloud:
         self.grants = []
         self.fail_next_verify = False
         self.precheck_failure = None
+        self.precheck_result = None
         self.zero_exit_unverified = False
         self.assumed_role_override = None
 
@@ -76,6 +77,9 @@ class FakeCloud:
         assert len(client_token) <= 64
         kind, script = operation.kind, operation.compile()
         self.operations.append((kind, script))
+        if kind is CloudOperationKind.CHECK_DEPLOYMENT_PREREQUISITES and self.precheck_result:
+            result, self.precheck_result = self.precheck_result, None
+            return result
         output = {CloudOperationKind.CHECK_DEPLOYMENT_PREREQUISITES: "WATT_PRECHECK_OK",
             CloudOperationKind.DEPLOY_WATT_RELEASE: "WATT_ACTIVATED",
             CloudOperationKind.VERIFY_WATT_RUNTIME: "WATT_RUNTIME_HEALTHY",
@@ -230,6 +234,46 @@ def test_exact_connection_target_authorization_and_deployment(
         assert blocked["state"]=="FAILED" and blocked["blocker"]==failure
         assert [kind for kind,_ in provider.operations[before:]]==[
             CloudOperationKind.CHECK_DEPLOYMENT_PREREQUISITES]
+    for port, observed, expected in (
+        (9092, InvocationResult("invoke-missing-user", "command-missing-user",
+            "Invalid", None, "", "request-missing-user", "AccountNotExists",
+            "The specified username does not exists: wattdeploy"),
+            "DEPLOYMENT_USER_NOT_FOUND"),
+        (9093, InvocationResult("invoke-provider-failed", "command-provider-failed",
+            "Failed", None, "", "request-provider-failed", "GuestOSError",
+            "token=must-not-persist"), "CLOUD_ASSISTANT_REPORTED_FAILURE"),
+        (9094, InvocationResult("invoke-ambiguous", "command-ambiguous",
+            "Success", 0, "no observed health token"),
+            "CLOUD_OPERATION_UNVERIFIED"),
+        (9095, InvocationResult("invoke-sensitive-code", "command-sensitive-code",
+            "Failed", None, "", "request-sensitive-code",
+            "AccessKeySecret-must-not-persist", "token=must-not-persist"),
+            "CLOUD_ASSISTANT_REPORTED_FAILURE"),
+    ):
+        provider.precheck_result = observed
+        blocked_auth = service.authorize(actor, work_id, request.model_copy(update={
+            "expected_current_deployment_id": None, "port": port}))
+        before = len(provider.operations)
+        blocked = service.execute(actor, UUID(blocked_auth["id"]))
+        assert blocked["state"] == "FAILED" and blocked["blocker"] == expected
+        assert [kind for kind, _ in provider.operations[before:]] == [
+            CloudOperationKind.CHECK_DEPLOYMENT_PREREQUISITES]
+        assert len(blocked["operations"]) == 1
+        receipt = blocked["operations"][0]
+        assert receipt["output_summary"] == expected and not receipt["verified"]
+        assert receipt["invocation_id"] == observed.invocation_id
+        assert receipt["command_id"] == observed.command_id
+        assert receipt["provider_request_id"] == observed.request_id
+        assert "must-not-persist" not in str(blocked)
+        if expected == "DEPLOYMENT_USER_NOT_FOUND":
+            assert receipt["provider_error_code"] == "AccountNotExists"
+            assert receipt["deployment_user"] == "wattdeploy"
+            assert receipt["provider_error_info"] == (
+                "Deployment user wattdeploy is missing on target ECS.")
+        elif expected == "CLOUD_ASSISTANT_REPORTED_FAILURE":
+            assert receipt["provider_error_code"] == (
+                "GuestOSError" if port == 9093 else None)
+            assert receipt["provider_error_info"] is None
     with postgres_database.unit_of_work() as uow:
         persisted=str(uow.session.execute(select(cloud_connections.c.payload)).scalars().all())
         persisted+=str(uow.session.execute(select(cloud_delivery_authorizations.c.payload)).scalars().all())

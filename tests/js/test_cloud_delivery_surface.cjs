@@ -44,3 +44,21 @@ test('stale or unaccepted Deliverable cannot show deployment authority',()=>{
     current:true,acceptance:{decision:'REQUEST_CHANGES'}});
   assert.equal(second.content.children.length,0);
 });
+
+test('missing deployment user is explained without exposing provider text',()=>{
+  const {content,window}=surface();
+  window.WattCloudDelivery.render({
+    manifest:{id:'manifest',software:{runtime_recipe:{adapter:'STATIC_WEB'}},
+      fingerprint:'a'.repeat(64)},
+    acceptance:{decision:'ACCEPT'},current:true,summary:{work_id:'work'},
+    cloud_deployments:[{state:'FAILED',blocker:'DEPLOYMENT_USER_NOT_FOUND',
+      operations:[{output_summary:'DEPLOYMENT_USER_NOT_FOUND',
+        deployment_user:'wattdeploy',provider_error_code:'AccountNotExists'}]}],
+  });
+  const html=content.children[0].innerHTML;
+  assert.match(html,/目标 ECS 缺少 Watt 部署用户 wattdeploy/);
+  assert.match(html,/部署尚未开始/);
+  assert.match(html,/未修改服务器运行状态/);
+  assert.match(html,/需要你完成服务器前置条件/);
+  assert.doesNotMatch(html,/AccountNotExists|CLOUD_OPERATION_UNVERIFIED/);
+});

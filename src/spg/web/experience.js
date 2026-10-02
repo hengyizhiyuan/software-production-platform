@@ -101,7 +101,7 @@
     const needsReview = Boolean(candidate?.candidate_fingerprint && !acceptance && !readOnly);
     const cloudAction = ws.reality.cloud_deliverable_id && acceptance?.decision === 'ACCEPT' &&
       ws.reality.cloud_deployment?.state !== 'SUCCEEDED' ?
-      `<div class="workspace-review"><h3>阿里云部署</h3><p>${ws.reality.cloud_deployment?.blocker ? esc(ws.reality.cloud_deployment.blocker) : '可查看当前部署事实，或为这个已验收版本选择目标 ECS。'}</p>${link(`/deliverables/${ws.reality.cloud_deliverable_id}`,'查看部署','button secondary')}</div>` : '';
+      `<div class="workspace-review"><h3>阿里云部署</h3><p>${ws.reality.cloud_deployment?.blocker ? esc(window.WattCloudDelivery?.blockerCopy(ws.reality.cloud_deployment) || ws.reality.cloud_deployment.blocker) : '可查看当前部署事实，或为这个已验收版本选择目标 ECS。'}</p>${link(`/deliverables/${ws.reality.cloud_deliverable_id}`,'查看部署','button secondary')}</div>` : '';
     return `<section class="workspace-quadrant" data-workspace-quadrant="actions" aria-labelledby="workspace-actions-title"><div class="quadrant-heading"><p class="eyebrow">03 / 决定</p><h2 id="workspace-actions-title">待你处理</h2><p>Watt 现在真正需要我做什么？</p></div>${attention}${!attention && !needsReview && !cloudAction ? '<p class="quadrant-empty">当前无需你操作</p>' : ''}${review}${cloudAction}</section>`;
   }
   function renderWorkspaceProduction(ws, focus, reviewable, acceptance) {

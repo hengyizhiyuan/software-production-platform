@@ -18,7 +18,9 @@ from spg.domain.cloud_delivery import (
     CloudOperationKind, CloudOperationReceipt, CloudPreparedArtifact,
     discovery_policy, target_execution_policy, trust_policy,
 )
-from spg.infrastructure.aliyun_cloud import AliyunCloudProvider, CloudProviderError
+from spg.infrastructure.aliyun_cloud import (
+    AliyunCloudProvider, CloudProviderError, InvocationResult,
+)
 from spg.infrastructure.cloud_delivery_artifact import CloudDeliveryArtifactBuilder
 from spg.infrastructure import cloud_delivery_commands as commands
 from spg.infrastructure.persistence.cloud_delivery_schema import (
@@ -49,6 +51,43 @@ def _require_assumed_role(observed: dict, role_arn: str) -> None:
     if observed.get("IdentityType") != "AssumedRoleUser" or \
             observed.get("Arn") != expected:
         raise CloudDeliveryError("ASSUMED_ROLE_MISMATCH")
+
+
+def assess_invocation_result(result: InvocationResult, username: str,
+        kind: CloudOperationKind) -> tuple[
+        str, bool, str | None, str | None]:
+    """Return a stable blocker without persisting arbitrary provider output.
+
+    ErrorInfo is transient. Only one recognized, controlled username message is
+    reconstructed for durable evidence; unfamiliar text may contain secrets.
+    """
+    # Provider error text is not trusted as durable data. Keep only known
+    # non-sensitive codes; the raw code remains available in InvocationResult.
+    code = result.error_code if result.error_code in {
+        "AccountNotExists", "GuestOSError"} else None
+    info = result.error_info or ""
+    marker = next((line.strip() for line in result.output.splitlines()
+        if re.fullmatch(r"(?:WATT|BLOCKED)_[A-Z0-9_]{2,80}", line.strip())), None)
+    verified = (result.status == "Success" and result.exit_code == 0 and
+        code is None and not info.strip() and
+        marker is not None and marker.startswith("WATT_"))
+    if verified:
+        return marker, True, code, None
+    if kind is CloudOperationKind.CHECK_DEPLOYMENT_PREREQUISITES and \
+            code == "AccountNotExists" and result.status == "Invalid" and re.fullmatch(
+            r"The specified username does not exists?:\s*" + re.escape(username),
+            info.strip(), flags=re.IGNORECASE):
+        return ("DEPLOYMENT_USER_NOT_FOUND", False, code,
+            f"Deployment user {username} is missing on target ECS.")
+    if marker is not None and marker.startswith("BLOCKED_"):
+        return marker, False, None, None
+    if result.error_code or info.strip():
+        return "CLOUD_ASSISTANT_REPORTED_FAILURE", False, code, None
+    if result.status in {"Failed", "Error", "Timeout", "Cancelled",
+            "Aborted", "Invalid", "Terminated"} or (
+            result.exit_code is not None and result.exit_code != 0):
+        return "CLOUD_ASSISTANT_COMMAND_FAILED", False, None, None
+    return "CLOUD_OPERATION_UNVERIFIED", False, None, None
 
 
 class CloudDeliveryService:
@@ -400,25 +439,24 @@ class CloudDeliveryService:
         result = self.provider.run(session, deployment.target, operation,
             self.settings.aliyun_ecs_deployment_user,
             sha256(f"{deployment.id}:{kind.value}".encode()).hexdigest())
-        summary = next((line.strip() for line in result.output.splitlines()
-            if re.fullmatch(r"(?:WATT|BLOCKED)_[A-Z0-9_]{2,80}", line.strip())),
-            "UNRECOGNIZED_RESULT")
+        summary, verified, error_code, error_info = assess_invocation_result(
+            result, self.settings.aliyun_ecs_deployment_user, kind)
         receipt = CloudOperationReceipt(kind=kind,
             account_id=deployment.target.account_id,
             region_id=deployment.target.region_id,
             instance_id=deployment.target.instance_id,
             invocation_id=result.invocation_id, command_id=result.command_id,
             provider_request_id=result.request_id,
+            provider_error_code=error_code, provider_error_info=error_info,
+            deployment_user=self.settings.aliyun_ecs_deployment_user,
             started_at=started, finished_at=_now(), status=result.status,
             exit_code=result.exit_code, output_summary=summary,
-            verified=result.status == "Success" and result.exit_code == 0 and
-                summary.startswith("WATT_"))
+            verified=verified)
         deployment = deployment.model_copy(update={"operations": deployment.operations + (receipt,),
             "updated_at": _now()})
         self._save_deployment(deployment)
         if not receipt.verified:
-            raise CloudDeliveryError(summary if summary.startswith("BLOCKED_") else
-                "CLOUD_OPERATION_UNVERIFIED")
+            raise CloudDeliveryError(summary)
         return deployment
 
     def execute(self, actor: str, authorization_id: UUID) -> dict:
