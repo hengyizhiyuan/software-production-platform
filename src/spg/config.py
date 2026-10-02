@@ -63,6 +63,12 @@ class Settings(BaseSettings):
     aliyun_opensearch_vpc_endpoint: str | None = None
     aliyun_opensearch_workspace: str = "default"
     aliyun_opensearch_service_id: str = "ops-web-search-001"
+    aliyun_access_key_id: SecretStr | None = None
+    aliyun_access_key_secret: SecretStr | None = None
+    aliyun_oss_bucket: str | None = None
+    aliyun_oss_region: str | None = None
+    aliyun_ecs_deployment_user: str = "wattdeploy"
+    aliyun_ecs_static_base_image: str | None = None
     native_executor_deepseek_api_key: SecretStr | None = None
     native_executor_deepseek_base_url: str = "https://api.deepseek.com"
     native_executor_openai_api_key: SecretStr | None = None

@@ -18,6 +18,9 @@ from spg.infrastructure.persistence.managed_repository_schema import managed_rep
 from spg.infrastructure.persistence.github_delivery_schema import (
     github_access_grants, remote_delivery_authorizations, remote_delivery_receipts,
 )
+from spg.infrastructure.persistence.cloud_delivery_schema import (
+    cloud_connections, cloud_prepared_artifacts, cloud_delivery_authorizations, cloud_deployments,
+)
 from spg.infrastructure.persistence.control_room_schema import work_agreement_events
 from spg.infrastructure.persistence.evaluation_schema import evaluation_runs
 from spg.infrastructure.persistence.connector_schema import (
@@ -58,6 +61,10 @@ __all__ = [
     "github_access_grants",
     "remote_delivery_authorizations",
     "remote_delivery_receipts",
+    "cloud_connections",
+    "cloud_prepared_artifacts",
+    "cloud_delivery_authorizations",
+    "cloud_deployments",
     "work_agreement_events",
     "evaluation_runs",
     "connector_capabilities",

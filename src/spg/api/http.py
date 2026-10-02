@@ -69,6 +69,10 @@ from spg.application.control_state import (
     validate_control_state,
 )
 from spg.application.delivery import DeliveryApplicationService, artifact_media_type
+from spg.application.cloud_delivery import CloudDeliveryService, CloudDeliveryError
+from spg.infrastructure.aliyun_cloud import CloudProviderError
+from spg.infrastructure.cloud_delivery_artifact import CloudArtifactError
+from spg.domain.cloud_delivery import CloudDeliveryAuthorizationRequest
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.application.github_delivery import (
     GitHubDeliveryService, GitHubDeliveryError, GitHubGrantRequest,
@@ -124,7 +128,7 @@ from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionSt
 from spg.infrastructure.persistence import Database, DatabaseConfigurationError
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.evaluation_schema import evaluation_runs
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from spg.infrastructure.candidate_preview_runtime import DockerCandidatePreviewRuntime
 from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
 from spg.domain.production_environment import CandidatePreviewMode
@@ -135,6 +139,16 @@ class ProductHttpError(RuntimeError):
         super().__init__(message)
         self.status_code = status_code
         self.code = code
+
+
+class CloudRoleRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    role_arn: str = Field(min_length=30, max_length=255)
+
+
+class CloudTargetSelectionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    selection_token: UUID
 
 
 class SoftwareProductCreateRequest(BaseModel):
@@ -450,6 +464,10 @@ def create_http_application(
         work_service, delivery_service, guardian_assurance_client)
     experience_semantic = experience_compiler or SemanticExperienceCompiler(settings or Settings())
     api.state.product_experience = experience
+    cloud_delivery = CloudDeliveryService(selected_database, delivery_service,
+        settings or Settings(), preview=candidate_runtime_preview,
+        owner_check=experience.deliverable)
+    api.state.cloud_delivery = cloud_delivery
     web_root = Path(str(files("spg.web")))
     api.mount("/assets", StaticFiles(directory=web_root), name="assets")
 
@@ -663,6 +681,13 @@ def create_http_application(
         status = 401 if error.code == "CREDENTIAL_REQUIRED" else 403 if error.code in {
             "ACCESS_DENIED", "PERMISSION_DENIED", "WRITE_GRANT_REQUIRED"} else 409
         return _error(status, error.code, str(error))
+
+    @api.exception_handler(CloudDeliveryError)
+    @api.exception_handler(CloudProviderError)
+    @api.exception_handler(CloudArtifactError)
+    async def cloud_delivery_error_handler(_request: Request, error: Exception) -> JSONResponse:
+        code = getattr(error, "code", str(error))
+        return _error(409, code, code)
 
     @api.exception_handler(NativeExecutionError)
     async def native_execution_error_handler(
@@ -1386,7 +1411,20 @@ def create_http_application(
     @api.get("/api/experience/products/{product_id}/workspace")
     def experience_workspace(product_id: UUID, http_request: Request,
                              work: UUID | None = None, interaction: UUID | None = None):
-        result = experience.workspace(getattr(http_request.state, "actor_id", ACTOR_ID), product_id, work)
+        actor = getattr(http_request.state, "actor_id", ACTOR_ID)
+        result = experience.workspace(actor, product_id, work)
+        accepted = next((item for item in result["reality"]["deliveries"]
+            if item["current"] and item["acceptance"] and
+            item["acceptance"]["decision"] == "ACCEPT" and
+            item["manifest"].get("software")), None)
+        if accepted is not None:
+            manifest_id = UUID(accepted["manifest"]["id"])
+            deployments = cloud_delivery.deployments_for_manifest(actor, manifest_id)
+            result["reality"]["cloud_deliverable_id"] = str(manifest_id)
+            result["reality"]["cloud_deployment"] = (None if not deployments else {
+                "state": deployments[0]["state"],
+                "blocker": deployments[0]["blocker"],
+                "target_name": deployments[0]["target"]["name"]})
         if interaction is not None:
             if experience.interaction_product(getattr(http_request.state, "actor_id", ACTOR_ID), interaction) != str(product_id):
                 raise ProductHttpError(404, "INTERACTION_NOT_FOUND",
@@ -1401,7 +1439,73 @@ def create_http_application(
 
     @api.get("/api/experience/deliverables/{manifest_id}")
     def experience_deliverable(manifest_id: UUID, http_request: Request):
-        return experience.deliverable(getattr(http_request.state, "actor_id", ACTOR_ID), manifest_id)
+        actor = getattr(http_request.state, "actor_id", ACTOR_ID)
+        result = experience.deliverable(actor, manifest_id)
+        result["cloud_deployments"] = cloud_delivery.deployments_for_manifest(actor, manifest_id)
+        return result
+
+    @api.get("/api/cloud-connections/aliyun")
+    def aliyun_connections(http_request: Request):
+        return cloud_delivery.list_connections(getattr(http_request.state, "actor_id", ACTOR_ID))
+
+    @api.post("/api/cloud-connections/aliyun")
+    def create_aliyun_connection(http_request: Request):
+        return cloud_delivery.draft(getattr(http_request.state, "actor_id", ACTOR_ID))
+
+    @api.get("/api/cloud-connections/aliyun/{connection_id}")
+    def aliyun_connection(connection_id: UUID, http_request: Request):
+        return cloud_delivery.connection(getattr(http_request.state, "actor_id", ACTOR_ID), connection_id)
+
+    @api.get("/api/cloud-connections/aliyun/{connection_id}/deployments")
+    def aliyun_connection_deployments(connection_id: UUID, http_request: Request):
+        return cloud_delivery.deployments_for_connection(
+            getattr(http_request.state, "actor_id", ACTOR_ID), connection_id)
+
+    @api.post("/api/cloud-connections/aliyun/{connection_id}/role")
+    def bind_aliyun_role(connection_id: UUID, request: CloudRoleRequest,
+                         http_request: Request):
+        return cloud_delivery.set_role(getattr(http_request.state, "actor_id", ACTOR_ID),
+            connection_id, request.role_arn)
+
+    @api.post("/api/cloud-connections/aliyun/{connection_id}/verify")
+    def verify_aliyun_connection(connection_id: UUID, http_request: Request):
+        actor = getattr(http_request.state, "actor_id", ACTOR_ID)
+        current = cloud_delivery.connection(actor, connection_id)
+        if not current["role_arn"]:
+            raise CloudDeliveryError("ROLE_ARN_REQUIRED")
+        return cloud_delivery.verify_role(actor, connection_id, current["role_arn"])
+
+    @api.post("/api/cloud-connections/aliyun/{connection_id}/select")
+    def select_aliyun_target(connection_id: UUID, request: CloudTargetSelectionRequest,
+                             http_request: Request):
+        return cloud_delivery.select(getattr(http_request.state, "actor_id", ACTOR_ID),
+            connection_id, request.selection_token)
+
+    @api.post("/api/cloud-connections/aliyun/{connection_id}/verify-target")
+    def verify_aliyun_target(connection_id: UUID, http_request: Request):
+        return cloud_delivery.verify_target(getattr(http_request.state, "actor_id", ACTOR_ID),
+            connection_id)
+
+    @api.post("/api/cloud-connections/aliyun/{connection_id}/revoke")
+    def revoke_aliyun_connection(connection_id: UUID, http_request: Request):
+        return cloud_delivery.revoke(getattr(http_request.state, "actor_id", ACTOR_ID),
+            connection_id)
+
+    @api.post("/api/works/{work_id}/cloud-deliveries/authorize")
+    def authorize_cloud_delivery(work_id: UUID,
+            request: CloudDeliveryAuthorizationRequest, http_request: Request):
+        return cloud_delivery.authorize(getattr(http_request.state, "actor_id", ACTOR_ID),
+            work_id, request)
+
+    @api.post("/api/cloud-deliveries/{authorization_id}/execute")
+    def execute_cloud_delivery(authorization_id: UUID, http_request: Request):
+        return cloud_delivery.execute(getattr(http_request.state, "actor_id", ACTOR_ID),
+            authorization_id)
+
+    @api.get("/api/cloud-deployments/{deployment_id}")
+    def cloud_deployment(deployment_id: UUID, http_request: Request):
+        return cloud_delivery.deployment(getattr(http_request.state, "actor_id", ACTOR_ID),
+            deployment_id)
 
     @api.get("/api/experience/interactions/{interaction_id}")
     def experience_interaction(interaction_id: UUID, http_request: Request):
