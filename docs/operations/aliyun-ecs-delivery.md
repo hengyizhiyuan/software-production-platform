@@ -127,16 +127,27 @@ code, and verification outcome.
 
 The ignored environment file for this checkout is
 `/Users/yu/Documents/dev/software-production-platform/.env`. Configure variable
-**names** `SPG_ALIYUN_ACCESS_KEY_ID`, `SPG_ALIYUN_ACCESS_KEY_SECRET`,
+**names** `SPG_DATABASE_URL` (the existing Product database, reachable from the
+host), `SPG_OPERATOR_TOKEN` (required by the Product login),
+`SPG_OWNER_RUNTIME_STORE_ROOT` (a persistent host directory),
+`SPG_ALIYUN_ACCESS_KEY_ID`, `SPG_ALIYUN_ACCESS_KEY_SECRET`,
 `SPG_ALIYUN_OSS_BUCKET`, `SPG_ALIYUN_OSS_REGION`,
 `SPG_ALIYUN_ECS_DEPLOYMENT_USER` (default `wattdeploy`), and
 `SPG_ALIYUN_ECS_STATIC_BASE_IMAGE` (a Python 3.13 image pinned as
 `name@sha256:<digest>` and already pulled into Watt's service-side Docker daemon;
 the current local image is
 `python@sha256:2325bb286ec344af3e5898cc224b5844e2707ac6e26b1632516fd3edc84a5e26`).
-The existing `SPG_OWNER_RUNTIME_STORE_ROOT=/var/lib/spg/owner-runtime` and
-`/var/lib/spg` persistent app volume hold exported archives in the full
-container profile. Do not send any key or secret value in chat.
+For the current dogfood, run the Watt API from this checkout on the local host,
+with access to the existing Docker daemon and the same Product database. Use a
+persistent `SPG_OWNER_RUNTIME_STORE_ROOT` for exported archives. The existing
+Compose app image contains the Docker CLI but its service has no Docker daemon
+connection; that container therefore fails closed at image export. Do not add
+a Docker socket or elevate the app merely to pass this qualification. The
+Compose profile already points its owner runtime root at the persistent
+`/var/lib/spg/owner-runtime` volume for a future separately governed daemon
+access path. The existing host startup command is
+`uv run --env-file .env uvicorn spg.api.http:create_http_application --factory --host 127.0.0.1 --port 8000`.
+Do not send any key or secret value in chat.
 
 Official contracts used for the two RAM policies and execution:
 [RAM trust policy](https://www.alibabacloud.com/help/en/ram/user-guide/edit-the-trust-policy-of-a-ram-role),
