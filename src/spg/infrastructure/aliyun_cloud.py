@@ -11,7 +11,9 @@ import re
 from time import monotonic, sleep
 
 from spg.domain.cloud_delivery import CloudTarget
-from spg.infrastructure.cloud_delivery_commands import CloudCommand, compile_operation
+from spg.infrastructure.cloud_delivery_commands import (
+    CloudCommand, PrepareDeploymentHostV1, CheckPrerequisites, compile_operation,
+)
 
 
 class CloudProviderError(RuntimeError):
@@ -208,28 +210,27 @@ class AliyunCloudProvider:
             raise CloudProviderError("TARGET_OBSERVATION_FAILED") from error
 
     def target_grant_dry_run(self, session: TemporaryCloudSession,
-                             target: CloudTarget, username: str) -> None:
+                             target: CloudTarget) -> None:
         from alibabacloud_ecs20140526 import models
-        if not re.fullmatch(r"[a-z_][a-z0-9_-]{0,31}", username) or username == "root":
-            raise CloudProviderError("NON_ROOT_DEPLOYMENT_USER_REQUIRED")
         try:
-            self._ecs_client(session, target.region_id).run_command(
-                models.RunCommandRequest(region_id=target.region_id,
-                    instance_id=[target.instance_id], type="RunShellScript",
-                    command_content=":", username=username,
-                    working_dir=f"/home/{username}", keep_command=False,
-                    repeat_mode="DryRun", timeout=30))
+            for operation in (PrepareDeploymentHostV1(), CheckPrerequisites(8080)):
+                _, script = compile_operation(operation)
+                username = "root" if type(operation) is PrepareDeploymentHostV1 else "wattdeploy"
+                self._ecs_client(session, target.region_id).run_command(
+                    models.RunCommandRequest(region_id=target.region_id,
+                        instance_id=[target.instance_id], type="RunShellScript",
+                        command_content=script, username=username,
+                        working_dir="/root" if username == "root" else "/home/wattdeploy",
+                        keep_command=False, repeat_mode="DryRun", timeout=30))
         except Exception as error:
-            raise CloudProviderError("TARGET_EXECUTION_GRANT_REQUIRED") from error
+            raise CloudProviderError("CONNECTION_EXECUTION_GRANT_REQUIRED") from error
 
     def run(self, session: TemporaryCloudSession, target: CloudTarget,
-            operation: CloudCommand, username: str,
-            client_token: str) -> InvocationResult:
+            operation: CloudCommand, client_token: str) -> InvocationResult:
         """Compile only the exact closed operation union, never caller script text."""
         from alibabacloud_ecs20140526 import models
         _, script = compile_operation(operation)
-        if not re.fullmatch(r"[a-z_][a-z0-9_-]{0,31}", username) or username == "root":
-            raise CloudProviderError("NON_ROOT_DEPLOYMENT_USER_REQUIRED")
+        username = "root" if type(operation) is PrepareDeploymentHostV1 else "wattdeploy"
         if len(script.encode()) > 16_000:
             raise CloudProviderError("COMMAND_SIZE_EXCEEDED")
         client = self._ecs_client(session, target.region_id)

@@ -63,24 +63,25 @@ class FakeCloud:
         assert target.identity == self.target.identity
         return self.target
 
-    def target_grant_dry_run(self, _session, target, username):
-        self.grants.append((target.identity, username))
+    def target_grant_dry_run(self, _session, target):
+        self.grants.append(target.identity)
 
     def stage(self, archive, digest):
         assert sha256(archive.read_bytes()).hexdigest() == digest
         return StagedCloudArtifact("watt-delivery/sha256/" + digest + ".tar",
             digest, "https://staging.example.invalid/signed?secret=must-not-persist")
 
-    def run(self, _session, target, operation, username, client_token):
+    def run(self, _session, target, operation, client_token):
         assert target.identity == self.target.identity
-        assert username == "wattdeploy"
         assert len(client_token) <= 64
         kind, script = operation.kind, operation.compile()
         self.operations.append((kind, script))
         if kind is CloudOperationKind.CHECK_DEPLOYMENT_PREREQUISITES and self.precheck_result:
             result, self.precheck_result = self.precheck_result, None
             return result
-        output = {CloudOperationKind.CHECK_DEPLOYMENT_PREREQUISITES: "WATT_PRECHECK_OK",
+        output = {CloudOperationKind.PREPARE_WATT_DEPLOYMENT_HOST_V1:
+                "WATT_HOST_BEFORE_BOOTSTRAP_REQUIRED\nWATT_EFFECT_USER_CREATED\nWATT_HOST_READY",
+            CloudOperationKind.CHECK_DEPLOYMENT_PREREQUISITES: "WATT_PRECHECK_OK",
             CloudOperationKind.DEPLOY_WATT_RELEASE: "WATT_ACTIVATED",
             CloudOperationKind.VERIFY_WATT_RUNTIME: "WATT_RUNTIME_HEALTHY",
             CloudOperationKind.ROLLBACK_WATT_RELEASE: "WATT_ROLLBACK_HEALTHY"}[kind]
@@ -131,7 +132,7 @@ def test_exact_connection_target_authorization_and_deployment(
         authority_identity="human:test", rationale="inspected current result"))
     target = CloudTarget(account_id="1234567890123456",
         region_id="cn-hangzhou", instance_id="i-abcdefgh",
-        name="官网生产环境", os_name="Alibaba Cloud Linux",
+        name="官网生产环境", os_name="Alibaba Cloud Linux  3.2104 LTS 64位",
         os_type="Linux",
         status="Running", public_address="203.0.113.10",
         cloud_assistant_ready=True)
@@ -158,7 +159,7 @@ def test_exact_connection_target_authorization_and_deployment(
         service.verify_role(actor, UUID(first["id"]), role)
     provider.assumed_role_override=None
     bound = service.set_role(actor, UUID(first["id"]), role)
-    assert bound["discovery_policy"]["Statement"][0]["Action"] == [
+    assert bound["connection_policy"]["Statement"][0]["Action"] == [
         "ecs:DescribeInstances", "ecs:DescribeCloudAssistantStatus"]
     discovered = service.verify_role(actor, UUID(first["id"]), role)
     assert provider.assumptions[-1] == (role, first["external_id"])
@@ -166,7 +167,7 @@ def test_exact_connection_target_authorization_and_deployment(
     assert "instance_id" not in discovered["discovered_targets"][0]
     selected = service.select(actor, UUID(first["id"]),
         UUID(discovered["discovered_targets"][0]["selection_token"]))
-    assert selected["state"] == "TARGET_AUTHORIZATION_REQUIRED"
+    assert selected["state"] == "READY"
     provider.target = target.model_copy(update={"cloud_assistant_ready": False})
     with pytest.raises(CloudDeliveryError, match="TARGET_NOT_READY"):
         service.verify_target(actor, UUID(first["id"]))
@@ -174,7 +175,7 @@ def test_exact_connection_target_authorization_and_deployment(
     provider.target = target
     ready = service.verify_target(actor, UUID(first["id"]))
     assert ready["state"] == "READY"
-    assert provider.grants[-1] == (target.identity, "wattdeploy")
+    assert provider.grants[-1] == target.identity
     request = CloudDeliveryAuthorizationRequest(connection_id=UUID(first["id"]),
         manifest_id=manifest.id, manifest_fingerprint=manifest.fingerprint,
         target_account_id=target.account_id,
@@ -195,7 +196,8 @@ def test_exact_connection_target_authorization_and_deployment(
     assert result["state"] == "SUCCEEDED"
     assert result["health_verified"] and result["business_verified"]
     assert [row["kind"] for row in result["operations"]] == [
-        "CHECK_DEPLOYMENT_PREREQUISITES", "STAGE_ARTIFACT", "DEPLOY_WATT_RELEASE",
+        "PREPARE_WATT_DEPLOYMENT_HOST_V1", "CHECK_DEPLOYMENT_PREREQUISITES",
+        "STAGE_ARTIFACT", "DEPLOY_WATT_RELEASE",
         "VERIFY_WATT_RUNTIME", "VERIFY_PUBLIC_BUSINESS"]
     assert all(row["verified"] for row in result["operations"])
     assert all(row["invocation_id"] and row["command_id"]
@@ -203,7 +205,7 @@ def test_exact_connection_target_authorization_and_deployment(
             "STAGE_ARTIFACT", "VERIFY_PUBLIC_BUSINESS"})
     assert "must-not-persist" not in str(result)
     assert "must-not-persist" not in str(service.deployment(actor, UUID(result["id"])))
-    assert "must-not-persist" in provider.operations[1][1]
+    assert "must-not-persist" in provider.operations[2][1]
     with pytest.raises(CloudDeliveryError, match="AUTHORIZATION_ALREADY_USED"):
         service.execute(actor, UUID(authorized["id"]))
     replacement = service.authorize(actor, work_id, request.model_copy(update={
@@ -233,6 +235,7 @@ def test_exact_connection_target_authorization_and_deployment(
         blocked=service.execute(actor,UUID(blocked_auth["id"]))
         assert blocked["state"]=="FAILED" and blocked["blocker"]==failure
         assert [kind for kind,_ in provider.operations[before:]]==[
+            CloudOperationKind.PREPARE_WATT_DEPLOYMENT_HOST_V1,
             CloudOperationKind.CHECK_DEPLOYMENT_PREREQUISITES]
     for port, observed, expected in (
         (9092, InvocationResult("invoke-missing-user", "command-missing-user",
@@ -257,9 +260,10 @@ def test_exact_connection_target_authorization_and_deployment(
         blocked = service.execute(actor, UUID(blocked_auth["id"]))
         assert blocked["state"] == "FAILED" and blocked["blocker"] == expected
         assert [kind for kind, _ in provider.operations[before:]] == [
+            CloudOperationKind.PREPARE_WATT_DEPLOYMENT_HOST_V1,
             CloudOperationKind.CHECK_DEPLOYMENT_PREREQUISITES]
-        assert len(blocked["operations"]) == 1
-        receipt = blocked["operations"][0]
+        assert len(blocked["operations"]) == 2
+        receipt = blocked["operations"][1]
         assert receipt["output_summary"] == expected and not receipt["verified"]
         assert receipt["invocation_id"] == observed.invocation_id
         assert receipt["command_id"] == observed.command_id
@@ -295,9 +299,8 @@ def test_exact_connection_target_authorization_and_deployment(
     selected_new = service.select(actor, UUID(first["id"]),
         UUID(rediscovered["discovered_targets"][0]["selection_token"]))
     assert selected_new["target"]["instance_id"] == "i-newtarget1"
-    assert selected_new["target_grant_verified_at"] is None
-    assert "i-newtarget1" in str(selected_new["target_policy"])
-    assert "i-abcdefgh" not in str(selected_new["target_policy"])
+    assert selected_new["target_grant_verified_at"] is not None
+    assert "i-newtarget1" not in str(selected_new["connection_policy"])
     verified_new = service.verify_target(actor, UUID(first["id"]))
     assert verified_new["state"] == "READY"
     with pytest.raises(CloudDeliveryError, match="EXACT_CONNECTION_NOT_READY"):
@@ -306,7 +309,7 @@ def test_exact_connection_target_authorization_and_deployment(
         service.authorize(actor, work_id, request)
     assert service.deployment(actor, UUID(result["id"]))["target"]["instance_id"] == old_target[2]
     service.revoke(actor, UUID(first["id"]))
-    with pytest.raises(CloudDeliveryError, match="FRESH_EXACT_TARGET_GRANT_REQUIRED"):
+    with pytest.raises(CloudDeliveryError, match="CONNECTION_NOT_USABLE"):
         service.authorize(actor, work_id, request)
     with postgres_database.engine.begin() as connection:
         connection.execute(text("TRUNCATE cloud_deployments, cloud_delivery_authorizations, "

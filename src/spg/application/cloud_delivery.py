@@ -15,8 +15,8 @@ from sqlalchemy import insert, select, update
 from spg.domain.cloud_delivery import (
     CloudConnection, CloudConnectionState, CloudDeliveryAuthorization,
     CloudDeliveryAuthorizationRequest, CloudDeployment, CloudDeploymentState,
-    CloudOperationKind, CloudOperationReceipt, CloudPreparedArtifact,
-    discovery_policy, target_execution_policy, trust_policy,
+    CloudOperationKind, CloudOperationReceipt, CloudPreparedArtifact, HostProfileState,
+    connection_policy, trust_policy,
 )
 from spg.infrastructure.aliyun_cloud import (
     AliyunCloudProvider, CloudProviderError, InvocationResult,
@@ -66,11 +66,14 @@ def assess_invocation_result(result: InvocationResult, username: str,
     code = result.error_code if result.error_code in {
         "AccountNotExists", "GuestOSError"} else None
     info = result.error_info or ""
-    marker = next((line.strip() for line in result.output.splitlines()
-        if re.fullmatch(r"(?:WATT|BLOCKED)_[A-Z0-9_]{2,80}", line.strip())), None)
+    markers = [line.strip() for line in result.output.splitlines()
+        if re.fullmatch(r"(?:WATT|BLOCKED)_[A-Z0-9_]{2,80}", line.strip())]
+    marker = markers[-1] if markers else None
     verified = (result.status == "Success" and result.exit_code == 0 and
         code is None and not info.strip() and
-        marker is not None and marker.startswith("WATT_"))
+        marker is not None and marker.startswith("WATT_") and
+        (kind is not CloudOperationKind.PREPARE_WATT_DEPLOYMENT_HOST_V1 or
+            marker == "WATT_HOST_READY"))
     if verified:
         return marker, True, code, None
     if kind is CloudOperationKind.CHECK_DEPLOYMENT_PREREQUISITES and \
@@ -80,6 +83,10 @@ def assess_invocation_result(result: InvocationResult, username: str,
         return ("DEPLOYMENT_USER_NOT_FOUND", False, code,
             f"Deployment user {username} is missing on target ECS.")
     if marker is not None and marker.startswith("BLOCKED_"):
+        if marker == "BLOCKED_UNSUPPORTED_HOST_PROFILE":
+            return "UNSUPPORTED_HOST_PROFILE", False, None, None
+        if marker in {"BLOCKED_HOST_PROFILE_CONFLICT", "BLOCKED_SUBID_CONFLICT"}:
+            return "HOST_PROFILE_CONFLICT", False, None, None
         return marker, False, None, None
     if result.error_code or info.strip():
         return "CLOUD_ASSISTANT_REPORTED_FAILURE", False, code, None
@@ -95,6 +102,8 @@ class CloudDeliveryService:
 
     def __init__(self, database, delivery, settings, *, preview=None,
                  provider=None, builder=None, owner_check=None, external_probe=None):
+        if settings.aliyun_ecs_deployment_user != "wattdeploy":
+            raise CloudDeliveryError("UNSUPPORTED_DEPLOYMENT_IDENTITY")
         self.database, self.delivery, self.settings = database, delivery, settings
         self.provider = provider or AliyunCloudProvider(settings)
         self.builder = builder or CloudDeliveryArtifactBuilder(delivery, preview,
@@ -173,11 +182,8 @@ class CloudDeliveryService:
         result = _payload(connection)
         result["trust_policy"] = trust_policy(connection.service_principal_arn,
             connection.external_id)
-        result["discovery_policy"] = (None if connection.customer_account_id is None
-            else discovery_policy(connection.customer_account_id))
-        result["target_policy"] = (None if connection.target is None else
-            target_execution_policy(connection.target,
-                self.settings.aliyun_ecs_deployment_user))
+        result["connection_policy"] = (None if connection.customer_account_id is None
+            else connection_policy(connection.customer_account_id))
         result["discovered_targets"] = [{"selection_token": str(uuid5(NAMESPACE_URL,
             f"watt:ecs:{connection.id}:{target.account_id}:{target.region_id}:{target.instance_id}")),
             "name": target.name, "region_id": target.region_id,
@@ -205,6 +211,10 @@ class CloudDeliveryService:
             for target in self.provider.instances(session, account, region))
         if len(targets) > 1000 or any(target.account_id != account for target in targets):
             raise CloudDeliveryError("DISCOVERY_IDENTITY_INVALID")
+        eligible = next((target for target in targets if target.status == "Running" and
+            target.os_type.lower() == "linux" and target.cloud_assistant_ready), None)
+        if eligible is not None:
+            self.provider.target_grant_dry_run(session, eligible)
         with self.database.unit_of_work() as uow:
             locked = self._connection(uow.session, actor, connection_id, lock=True)
             if locked.version != connection.version:
@@ -248,11 +258,11 @@ class CloudDeliveryService:
             if target is None:
                 raise CloudDeliveryError("TARGET_NOT_IN_DISCOVERY")
             updated = connection.model_copy(update={"target": target,
-                "state": CloudConnectionState.TARGET_AUTHORIZATION_REQUIRED,
+                "state": CloudConnectionState.TARGET_SELECTED,
                 "target_grant_verified_at": None})
             self._save_connection(uow.session, updated)
             uow.commit()
-        return self.connection(actor, connection_id)
+        return self.verify_target(actor, connection_id)
 
     def verify_target(self, actor: str, connection_id: UUID) -> dict:
         with self.database.unit_of_work() as uow:
@@ -270,15 +280,16 @@ class CloudDeliveryService:
                 target.os_type.lower() != "linux" or \
                 not target.cloud_assistant_ready:
             raise CloudDeliveryError("TARGET_NOT_READY")
+        if not re.match(r"^Alibaba Cloud Linux\s+3(?:\.|\b)", target.os_name):
+            raise CloudDeliveryError("UNSUPPORTED_HOST_PROFILE")
         try:
-            self.provider.target_grant_dry_run(session, target,
-                self.settings.aliyun_ecs_deployment_user)
+            self.provider.target_grant_dry_run(session, target)
         except CloudProviderError:
             with self.database.unit_of_work() as uow:
                 locked = self._connection(uow.session, actor, connection_id, lock=True)
                 if locked.target is not None and locked.target.identity == target.identity:
                     self._save_connection(uow.session, locked.model_copy(update={
-                        "state": CloudConnectionState.TARGET_AUTHORIZATION_REQUIRED,
+                        "state": CloudConnectionState.TARGET_SELECTED,
                         "target_grant_verified_at": None}))
                     uow.commit()
             raise
@@ -329,6 +340,13 @@ class CloudDeliveryService:
 
     def authorize(self, actor: str, work_id: UUID,
                   request: CloudDeliveryAuthorizationRequest) -> dict:
+        # Expiry means recheck the same one-time grant, never send the Human
+        # back to RAM for an instance-specific policy.
+        with self.database.unit_of_work() as uow:
+            current = self._connection(uow.session, actor, request.connection_id)
+        if current.target is not None and (current.target_grant_verified_at is None or
+                _now() - current.target_grant_verified_at > timedelta(minutes=10)):
+            self.verify_target(actor, request.connection_id)
         manifest, context = self._own_manifest(actor, work_id, request.manifest_id)
         if manifest.fingerprint != request.manifest_fingerprint:
             raise CloudDeliveryError("MANIFEST_FINGERPRINT_MISMATCH")
@@ -367,6 +385,8 @@ class CloudDeliveryService:
             manifest_fingerprint=manifest.fingerprint,
             artifact_sha256=prepared.artifact_sha256,
             candidate_revision=manifest.repository_revision, target=target,
+            host_recipe_version=commands.HOST_RECIPE_VERSION,
+            host_recipe_fingerprint=commands.HOST_RECIPE_FINGERPRINT,
             expected_current_deployment_id=request.expected_current_deployment_id,
             port=request.port, rationale=request.rationale, authorized_at=now)
         with self.database.unit_of_work() as uow:
@@ -437,10 +457,24 @@ class CloudDeliveryService:
         kind = operation.kind
         started = _now()
         result = self.provider.run(session, deployment.target, operation,
-            self.settings.aliyun_ecs_deployment_user,
             sha256(f"{deployment.id}:{kind.value}".encode()).hexdigest())
         summary, verified, error_code, error_info = assess_invocation_result(
             result, self.settings.aliyun_ecs_deployment_user, kind)
+        host_operation = kind is CloudOperationKind.PREPARE_WATT_DEPLOYMENT_HOST_V1
+        markers = set(result.output.splitlines()) if host_operation else set()
+        before = (HostProfileState.READY if "WATT_HOST_BEFORE_READY" in markers else
+            HostProfileState.BOOTSTRAP_REQUIRED if
+                "WATT_HOST_BEFORE_BOOTSTRAP_REQUIRED" in markers else None)
+        effects = tuple(sorted(marker for marker in markers if marker in {
+            "WATT_EFFECT_USER_CREATED", "WATT_EFFECT_SUBUID_ALLOCATED",
+            "WATT_EFFECT_SUBGID_ALLOCATED", "WATT_EFFECT_DOCKER_KEY_INSTALLED",
+            "WATT_EFFECT_DOCKER_REPOSITORY_ADDED",
+            "WATT_EFFECT_PACKAGES_INSTALLED", "WATT_EFFECT_USER_LINGER_ENABLED",
+            "WATT_EFFECT_ROOTLESS_RUNTIME_STARTED"}))
+        host_after = (HostProfileState.READY if verified and host_operation else
+            HostProfileState.UNSUPPORTED if summary == "UNSUPPORTED_HOST_PROFILE" else
+            HostProfileState.CONFLICTED if summary == "HOST_PROFILE_CONFLICT" else
+            HostProfileState.FAILED if host_operation else None)
         receipt = CloudOperationReceipt(kind=kind,
             account_id=deployment.target.account_id,
             region_id=deployment.target.region_id,
@@ -448,11 +482,17 @@ class CloudDeliveryService:
             invocation_id=result.invocation_id, command_id=result.command_id,
             provider_request_id=result.request_id,
             provider_error_code=error_code, provider_error_info=error_info,
-            deployment_user=self.settings.aliyun_ecs_deployment_user,
+            deployment_user="root" if host_operation else
+                self.settings.aliyun_ecs_deployment_user,
+            recipe_version=operation.recipe_version if host_operation else None,
+            recipe_fingerprint=operation.recipe_fingerprint if host_operation else None,
+            host_os_profile="ALIBABA_CLOUD_LINUX_3_X86_64" if host_operation else None,
+            host_before=before, host_after=host_after, host_effects=effects,
             started_at=started, finished_at=_now(), status=result.status,
             exit_code=result.exit_code, output_summary=summary,
             verified=verified)
         deployment = deployment.model_copy(update={"operations": deployment.operations + (receipt,),
+            "host_profile_state": host_after if host_operation else deployment.host_profile_state,
             "updated_at": _now()})
         self._save_deployment(deployment)
         if not receipt.verified:
@@ -467,6 +507,9 @@ class CloudDeliveryService:
         if row is None:
             raise CloudDeliveryError("AUTHORIZATION_NOT_FOUND")
         authorization = CloudDeliveryAuthorization.model_validate(row)
+        if authorization.host_recipe_version != commands.HOST_RECIPE_VERSION or \
+                authorization.host_recipe_fingerprint != commands.HOST_RECIPE_FINGERPRINT:
+            raise CloudDeliveryError("HOST_RECIPE_AUTHORIZATION_STALE")
         manifest, context = self._own_manifest(actor, authorization.work_id,
             authorization.manifest_id)
         if manifest.fingerprint != authorization.manifest_fingerprint or \
@@ -522,8 +565,15 @@ class CloudDeliveryService:
                     observed.os_type.lower() != "linux" or \
                     not observed.cloud_assistant_ready:
                 raise CloudDeliveryError("TARGET_NOT_READY")
-            self.provider.target_grant_dry_run(session, observed,
-                self.settings.aliyun_ecs_deployment_user)
+            self.provider.target_grant_dry_run(session, observed)
+            if not re.match(r"^Alibaba Cloud Linux\s+3(?:\.|\b)", observed.os_name):
+                raise CloudDeliveryError("UNSUPPORTED_HOST_PROFILE")
+            deployment = deployment.model_copy(update={
+                "host_profile_state": HostProfileState.BOOTSTRAPPING,
+                "updated_at": _now()})
+            self._save_deployment(deployment)
+            deployment = self._effect(deployment, session,
+                commands.PrepareDeploymentHostV1())
             deployment = self._effect(deployment, session,
                 commands.CheckPrerequisites(deployment.port,
                     previous_name=None if previous is None else previous.runtime_name,
@@ -646,6 +696,8 @@ class CloudDeliveryService:
                         "state": (CloudDeploymentState.NEEDS_HUMAN_ATTENTION if uncertain
                                   else CloudDeploymentState.FAILED), "blocker": (
                             "RECONCILIATION_REQUIRED" if uncertain else code),
+                        "host_profile_state": (HostProfileState.UNSUPPORTED if code ==
+                            "UNSUPPORTED_HOST_PROFILE" else deployment.host_profile_state),
                         "updated_at": _now()})
             except Exception:
                 deployment = CloudDeployment.model_validate(

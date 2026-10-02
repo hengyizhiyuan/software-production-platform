@@ -29,6 +29,7 @@ class CloudOperationKind(StrEnum):
     DISCOVER_INSTANCE = "DISCOVER_INSTANCE"
     CHECK_INSTANCE_STATE = "CHECK_INSTANCE_STATE"
     CHECK_CLOUD_ASSISTANT = "CHECK_CLOUD_ASSISTANT"
+    PREPARE_WATT_DEPLOYMENT_HOST_V1 = "PREPARE_WATT_DEPLOYMENT_HOST_V1"
     CHECK_DEPLOYMENT_PREREQUISITES = "CHECK_DEPLOYMENT_PREREQUISITES"
     STAGE_ARTIFACT = "STAGE_ARTIFACT"
     DEPLOY_WATT_RELEASE = "DEPLOY_WATT_RELEASE"
@@ -49,6 +50,16 @@ class CloudDeploymentState(StrEnum):
     FAILED = "FAILED"
     ROLLED_BACK = "ROLLED_BACK"
     NEEDS_HUMAN_ATTENTION = "NEEDS_HUMAN_ATTENTION"
+
+
+class HostProfileState(StrEnum):
+    UNKNOWN = "UNKNOWN"
+    BOOTSTRAP_REQUIRED = "BOOTSTRAP_REQUIRED"
+    BOOTSTRAPPING = "BOOTSTRAPPING"
+    READY = "READY"
+    UNSUPPORTED = "UNSUPPORTED"
+    CONFLICTED = "CONFLICTED"
+    FAILED = "FAILED"
 
 
 class CloudTarget(BaseModel):
@@ -134,6 +145,9 @@ class CloudDeliveryAuthorization(BaseModel):
     candidate_revision: str = Field(pattern=r"^[0-9a-f]{40,64}$")
     target: CloudTarget
     operation_profile: str = "WATT_MANAGED_CONTAINER_V1"
+    host_recipe_version: str | None = None
+    host_recipe_fingerprint: str | None = Field(default=None,
+        pattern=r"^[0-9a-f]{64}$")
     expected_current_deployment_id: UUID | None = None
     port: int = Field(ge=1024, le=65535)
     rationale: str
@@ -173,6 +187,12 @@ class CloudOperationReceipt(BaseModel):
         pattern=r"^Deployment user [a-z_][a-z0-9_-]{0,31} is missing on target ECS\.$")
     deployment_user: str | None = Field(default=None,
         pattern=r"^[a-z_][a-z0-9_-]{0,31}$")
+    recipe_version: str | None = None
+    recipe_fingerprint: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    host_os_profile: str | None = None
+    host_before: HostProfileState | None = None
+    host_after: HostProfileState | None = None
+    host_effects: tuple[str, ...] = ()
     started_at: datetime
     finished_at: datetime
     status: str
@@ -201,6 +221,7 @@ class CloudDeployment(BaseModel):
     business_verified: bool = False
     rollback_verified: bool = False
     blocker: str | None = None
+    host_profile_state: HostProfileState = HostProfileState.UNKNOWN
     created_at: datetime
     updated_at: datetime
 
@@ -213,8 +234,25 @@ class CloudDeployment(BaseModel):
         return self
 
 
+def connection_policy(account_id: str) -> dict:
+    """One bounded grant before selection; Watt binds each effect to an exact ECS."""
+    if not re.fullmatch(r"[0-9]{8,32}", account_id):
+        raise ValueError("Invalid customer account ID")
+    instance = f"acs:ecs:*:{account_id}:instance/*"
+    command = f"acs:ecs:*:{account_id}:command/*"
+    return {"Version": "1", "Statement": [
+        {"Effect": "Allow", "Action": ["ecs:DescribeInstances",
+            "ecs:DescribeCloudAssistantStatus"], "Resource": [instance]},
+        {"Effect": "Allow", "Action": ["ecs:RunCommand"],
+            "Resource": [instance],
+            "Condition": {"StringEquals": {"ecs:CommandRunAs": ["root", "wattdeploy"]}}},
+        {"Effect": "Allow", "Action": ["ecs:DescribeInvocations",
+            "ecs:DescribeInvocationResults"], "Resource": [instance, command]},
+    ]}
+
+
 def discovery_policy(account_id: str) -> dict:
-    """Only the two ECS reads used by discovery; DescribeRegions/STS need no grant."""
+    """Legacy read-only dogfood policy, retained for historical evidence."""
     if not re.fullmatch(r"[0-9]{8,32}", account_id):
         raise ValueError("Invalid customer account ID")
     return {"Version": "1", "Statement": [{"Effect": "Allow",

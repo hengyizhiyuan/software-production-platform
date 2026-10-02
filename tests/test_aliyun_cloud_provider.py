@@ -11,7 +11,7 @@ from pydantic import SecretStr
 from spg.config import Settings
 from spg.domain.cloud_delivery import CloudTarget
 from spg.infrastructure.aliyun_cloud import AliyunCloudProvider, CloudProviderError
-from spg.infrastructure.cloud_delivery_commands import CheckPrerequisites
+from spg.infrastructure.cloud_delivery_commands import CheckPrerequisites, PrepareDeploymentHostV1
 
 
 class Response:
@@ -77,19 +77,19 @@ def test_ecs_discovery_dry_run_and_typed_invocation(monkeypatch):
     assert target.identity == ("1234567890123456","cn-hangzhou","i-abcdefgh")
     assert target.os_type == "Linux" and target.cloud_assistant_ready
     assert provider.exact_instance(session,target).identity==target.identity
-    provider.target_grant_dry_run(session,target,"wattdeploy")
+    provider.target_grant_dry_run(session,target)
     assert calls[0].repeat_mode == "DryRun"
-    assert calls[0].username == "wattdeploy"
-    assert calls[0].working_dir == "/home/wattdeploy"
+    assert [calls[0].username, calls[1].username] == ["root", "wattdeploy"]
+    assert calls[1].working_dir == "/home/wattdeploy"
     assert calls[0].keep_command is False
-    observed=provider.run(session,target,CheckPrerequisites(8080),
-        "wattdeploy",uuid4().hex)
+    observed=provider.run(session,target,CheckPrerequisites(8080),uuid4().hex)
     assert observed.invocation_id=="invoke-exact" and observed.exit_code==0
-    assert calls[1].repeat_mode == "Once"
-    assert "BLOCKED_ROOTLESS_DOCKER_REQUIRED" in calls[1].command_content
-    assert calls[1].username == "wattdeploy"
-    with pytest.raises(CloudProviderError, match="NON_ROOT_DEPLOYMENT_USER_REQUIRED"):
-        provider.run(session,target,CheckPrerequisites(8080),"root",uuid4().hex)
+    assert calls[2].repeat_mode == "Once"
+    assert "BLOCKED_ROOTLESS_DOCKER_REQUIRED" in calls[2].command_content
+    assert calls[2].username == "wattdeploy"
+    provider.run(session,target,PrepareDeploymentHostV1(),uuid4().hex)
+    assert calls[3].username == "root"
+    assert "WATT_EFFECT_USER_CREATED" in calls[3].command_content
 
 
 def test_invalid_invocation_keeps_provider_reason_transiently(monkeypatch):
@@ -113,7 +113,7 @@ def test_invalid_invocation_keeps_provider_reason_transiently(monkeypatch):
         instance_id="i-abcdefgh", name="test", os_name="Linux", os_type="Linux",
         status="Running", cloud_assistant_ready=True)
     result=AliyunCloudProvider(Settings()).run(object(), target,
-        CheckPrerequisites(8080), "wattdeploy", uuid4().hex)
+        CheckPrerequisites(8080), uuid4().hex)
     assert result.status == "Invalid" and result.exit_code is None
     assert result.error_code == "AccountNotExists"
     assert result.error_info == "The specified username does not exists: wattdeploy"

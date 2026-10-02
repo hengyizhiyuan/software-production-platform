@@ -7,6 +7,7 @@ No caller-supplied script or command is accepted by the application boundary.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from hashlib import sha256
 import re
 from shlex import quote
 from typing import ClassVar
@@ -39,6 +40,198 @@ def _safe_port(port: int) -> int:
     if isinstance(port, bool) or not isinstance(port, int) or not 1024 <= port <= 65535:
         raise CloudCommandError("INVALID_PORT")
     return port
+
+
+HOST_RECIPE_VERSION = "ALINUX3_WATT_DEPLOYMENT_HOST_V1"
+
+# Fixed source and package allowlist. This is deliberately not a request field.
+_HOST_RECIPE = r'''#!/bin/sh
+set -eu
+umask 077
+fail() { echo "$1"; exit 20; }
+test "$(id -u)" -eq 0 || fail BLOCKED_BOOTSTRAP_NOT_ROOT
+test -r /etc/os-release || fail BLOCKED_UNSUPPORTED_HOST_PROFILE
+. /etc/os-release
+test "$ID" = alinux && test "$VERSION_ID" = 3 || fail BLOCKED_UNSUPPORTED_HOST_PROFILE
+test "$(uname -m)" = x86_64 || fail BLOCKED_UNSUPPORTED_HOST_PROFILE
+command -v python3 >/dev/null || fail BLOCKED_HOST_PROFILE_CONFLICT
+command -v dnf >/dev/null || fail BLOCKED_HOST_PROFILE_CONFLICT
+command -v newuidmap >/dev/null || fail BLOCKED_HOST_PROFILE_CONFLICT
+command -v newgidmap >/dev/null || fail BLOCKED_HOST_PROFILE_CONFLICT
+for tool in curl sha256sum ss; do command -v "$tool" >/dev/null || fail BLOCKED_HOST_PROFILE_CONFLICT; done
+test "$(df -Pk /home | awk 'NR==2 {print $4}')" -ge 2097152 || fail BLOCKED_DISK_SPACE
+
+user_present=0
+if getent passwd wattdeploy >/dev/null; then
+  user_present=1
+  test "$(id -u wattdeploy)" -ne 0 || fail BLOCKED_HOST_PROFILE_CONFLICT
+  test "$(getent passwd wattdeploy | cut -d: -f6)" = /home/wattdeploy || fail BLOCKED_HOST_PROFILE_CONFLICT
+  test -d /home/wattdeploy && test ! -L /home/wattdeploy || fail BLOCKED_HOST_PROFILE_CONFLICT
+  test "$(stat -c %u /home/wattdeploy)" = "$(id -u wattdeploy)" || fail BLOCKED_HOST_PROFILE_CONFLICT
+  test "$(stat -c %g /home/wattdeploy)" = "$(id -g wattdeploy)" || fail BLOCKED_HOST_PROFILE_CONFLICT
+  test "$(stat -c %a /home/wattdeploy)" = 700 || fail BLOCKED_HOST_PROFILE_CONFLICT
+else
+  test ! -e /home/wattdeploy && test ! -L /home/wattdeploy || fail BLOCKED_HOST_PROFILE_CONFLICT
+fi
+
+ready() {
+  test "$user_present" = 1 || return 1
+  uid=$(id -u wattdeploy)
+  test -S "/run/user/$uid/docker.sock" || return 1
+  runuser -u wattdeploy -- test -w /home/wattdeploy || return 1
+  runuser -u wattdeploy -- env HOME=/home/wattdeploy \
+    XDG_RUNTIME_DIR="/run/user/$uid" \
+    docker context show 2>/dev/null | grep -qx rootless || return 1
+  runuser -u wattdeploy -- env HOME=/home/wattdeploy \
+    XDG_RUNTIME_DIR="/run/user/$uid" \
+    docker info --format '{{json .SecurityOptions}}' 2>/dev/null | grep -q rootless
+}
+if ready; then
+  echo WATT_HOST_BEFORE_READY
+  echo WATT_HOST_READY
+  exit 0
+fi
+echo WATT_HOST_BEFORE_BOOTSTRAP_REQUIRED
+if test "$user_present" = 1; then
+  # A compatible existing account can be completed. Unknown Docker data cannot.
+  test ! -e /home/wattdeploy/.local/share/docker || fail BLOCKED_HOST_PROFILE_CONFLICT
+  test ! -e /home/wattdeploy/.docker || fail BLOCKED_HOST_PROFILE_CONFLICT
+fi
+if command -v docker >/dev/null && test ! -f /etc/yum.repos.d/watt-docker-ce-v1.repo; then
+  fail BLOCKED_HOST_PROFILE_CONFLICT
+fi
+if systemctl is-active --quiet docker.service || systemctl is-active --quiet docker.socket; then
+  fail BLOCKED_HOST_PROFILE_CONFLICT
+fi
+test ! -e /etc/yum.repos.d/docker-ce.repo || fail BLOCKED_HOST_PROFILE_CONFLICT
+# Validate both allocation maps before creating or changing any account.
+test -f /etc/subuid && test -f /etc/subgid || fail BLOCKED_SUBID_CONFLICT
+test ! -L /etc/subuid && test ! -L /etc/subgid || fail BLOCKED_SUBID_CONFLICT
+python3 - <<'PY' || fail BLOCKED_SUBID_CONFLICT
+from pathlib import Path
+for name in ('subuid', 'subgid'):
+    entries = []
+    for raw in Path('/etc/' + name).read_text().splitlines():
+        owner, start, count = raw.split(':')
+        start, count = int(start), int(count)
+        if start < 1 or count < 1: raise ValueError('invalid allocation')
+        end = start + count - 1
+        if any(start <= other_end and other_start <= end
+               for other_start, other_end in entries):
+            raise ValueError('overlapping allocation')
+        entries.append((start, end))
+PY
+
+if test "$user_present" = 0; then
+  useradd -m -d /home/wattdeploy -s /bin/bash wattdeploy || fail BLOCKED_USER_CREATE
+  user_present=1
+  test -d /home/wattdeploy && test ! -L /home/wattdeploy || fail BLOCKED_HOST_PROFILE_CONFLICT
+  test "$(stat -c %u /home/wattdeploy)" = "$(id -u wattdeploy)" || fail BLOCKED_HOST_PROFILE_CONFLICT
+  test "$(stat -c %g /home/wattdeploy)" = "$(id -g wattdeploy)" || fail BLOCKED_HOST_PROFILE_CONFLICT
+  chmod 700 /home/wattdeploy || fail BLOCKED_HOST_PROFILE_CONFLICT
+  echo WATT_EFFECT_USER_CREATED
+fi
+
+# Select a free, aligned range before either usermod call. Never alter an
+# existing or overlapping mapping. Shadow may already have created both.
+range=$(python3 - <<'PY'
+from pathlib import Path
+import sys
+files = (Path('/etc/subuid'), Path('/etc/subgid'))
+entries = []
+mine = []
+try:
+    for path in files:
+        parsed = []
+        for raw in path.read_text().splitlines():
+            owner, start, count = raw.split(':')
+            start, count = int(start), int(count)
+            if count < 1 or start < 1: raise ValueError()
+            parsed.append((owner, start, start + count - 1))
+        for i, (_, a, b) in enumerate(parsed):
+            if any(a <= d and c <= b for _, c, d in parsed[i+1:]):
+                raise ValueError()
+        own = [(a,b) for owner,a,b in parsed if owner == 'wattdeploy']
+        if len(own) > 1 or (own and own[0][1] - own[0][0] + 1 < 65536):
+            raise ValueError()
+        mine.append(bool(own))
+        entries.extend((a,b) for _,a,b in parsed)
+    for start in range(100000, 1000000000, 65536):
+        end = start + 65535
+        if all(end < a or start > b for a,b in entries):
+            print(f'{start}-{end}'); break
+    else: raise ValueError()
+except (OSError, ValueError):
+    sys.exit(1)
+PY
+) || fail BLOCKED_SUBID_CONFLICT
+if ! grep -q '^wattdeploy:' /etc/subuid; then
+  usermod --add-subuids "$range" wattdeploy || fail BLOCKED_SUBID_CONFLICT
+  echo WATT_EFFECT_SUBUID_ALLOCATED
+fi
+if ! grep -q '^wattdeploy:' /etc/subgid; then
+  usermod --add-subgids "$range" wattdeploy || fail BLOCKED_SUBID_CONFLICT
+  echo WATT_EFFECT_SUBGID_ALLOCATED
+fi
+
+# Static Alibaba Cloud Linux 3 / CentOS 8 compatible Docker CE repository.
+# Pin the official Docker signing key bytes before importing it. No existing
+# repository is rewritten.
+key_path=/etc/pki/rpm-gpg/WATT-DOCKER-CE-V1
+key_digest=e6c650e0700b1bf4868b693b30761b926844befc8a0acb7ac0dd9b1faf1b7423
+if test -e "$key_path"; then
+  test -f "$key_path" && test ! -L "$key_path" &&
+    test "$(sha256sum "$key_path" | cut -d' ' -f1)" = "$key_digest" ||
+    fail BLOCKED_HOST_PROFILE_CONFLICT
+else
+  key_tmp=$(mktemp /root/watt-docker-key.XXXXXX) || fail BLOCKED_APPROVED_PACKAGE_SOURCE
+  curl -fsSL --max-time 30 https://mirrors.aliyun.com/docker-ce/linux/centos/gpg \
+    -o "$key_tmp" || fail BLOCKED_APPROVED_PACKAGE_SOURCE
+  test "$(sha256sum "$key_tmp" | cut -d' ' -f1)" = "$key_digest" ||
+    fail BLOCKED_APPROVED_PACKAGE_SOURCE
+  install -m 0644 "$key_tmp" "$key_path" || fail BLOCKED_APPROVED_PACKAGE_SOURCE
+  rm -f "$key_tmp"
+  echo WATT_EFFECT_DOCKER_KEY_INSTALLED
+fi
+rpm --import "$key_path" >/dev/null 2>&1 || fail BLOCKED_APPROVED_PACKAGE_SOURCE
+repo_expected=$(cat <<'REPO'
+[watt-docker-ce-v1]
+name=Watt approved Docker CE stable for Alibaba Cloud Linux 3
+baseurl=https://mirrors.aliyun.com/docker-ce/linux/centos/8/$basearch/stable
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/WATT-DOCKER-CE-V1
+REPO
+)
+if test -e /etc/yum.repos.d/watt-docker-ce-v1.repo; then
+  test -f /etc/yum.repos.d/watt-docker-ce-v1.repo &&
+    test ! -L /etc/yum.repos.d/watt-docker-ce-v1.repo &&
+    test "$(cat /etc/yum.repos.d/watt-docker-ce-v1.repo)" = "$repo_expected" ||
+    fail BLOCKED_HOST_PROFILE_CONFLICT
+else
+  printf '%s\n' "$repo_expected" > /etc/yum.repos.d/watt-docker-ce-v1.repo
+  echo WATT_EFFECT_DOCKER_REPOSITORY_ADDED
+fi
+dnf -y --setopt=install_weak_deps=False --disablerepo='*' \
+  --enablerepo='alinux3*' --enablerepo=watt-docker-ce-v1 install \
+  docker-ce docker-ce-cli containerd.io docker-ce-rootless-extras \
+  fuse-overlayfs systemd-container >/dev/null 2>&1 || fail BLOCKED_APPROVED_PACKAGE_INSTALL
+echo WATT_EFFECT_PACKAGES_INSTALLED
+if systemctl is-active --quiet docker.service || systemctl is-active --quiet docker.socket; then
+  fail BLOCKED_HOST_PROFILE_CONFLICT
+fi
+loginctl enable-linger wattdeploy >/dev/null 2>&1 || fail BLOCKED_ROOTLESS_SETUP
+echo WATT_EFFECT_USER_LINGER_ENABLED
+machinectl shell wattdeploy@ /bin/sh -lc \
+  'dockerd-rootless-setuptool.sh install >/dev/null 2>&1 && systemctl --user enable --now docker.service >/dev/null 2>&1 && docker context use rootless >/dev/null 2>&1' \
+  >/dev/null 2>&1 || fail BLOCKED_ROOTLESS_SETUP
+echo WATT_EFFECT_ROOTLESS_RUNTIME_STARTED
+ready || fail BLOCKED_ROOTLESS_VERIFICATION
+test "$(df -Pk /home/wattdeploy | awk 'NR==2 {print $4}')" -ge 2097152 || fail BLOCKED_DISK_SPACE
+echo WATT_HOST_READY
+'''
+
+HOST_RECIPE_FINGERPRINT = sha256(_HOST_RECIPE.encode()).hexdigest()
 
 
 def precheck(port: int, *, previous_name: str | None = None,
@@ -163,6 +356,16 @@ echo WATT_CLEANUP_OK
 
 
 @dataclass(frozen=True)
+class PrepareDeploymentHostV1:
+    kind: ClassVar[CloudOperationKind] = CloudOperationKind.PREPARE_WATT_DEPLOYMENT_HOST_V1
+    recipe_version: ClassVar[str] = HOST_RECIPE_VERSION
+    recipe_fingerprint: ClassVar[str] = HOST_RECIPE_FINGERPRINT
+
+    def compile(self) -> str:
+        return _HOST_RECIPE
+
+
+@dataclass(frozen=True)
 class CheckPrerequisites:
     port: int
     previous_name: str | None = None
@@ -227,12 +430,12 @@ class StopFailedRuntime:
         return cleanup(self.deployment_id)
 
 
-CloudCommand = (CheckPrerequisites | DeployRelease | VerifyRuntime |
+CloudCommand = (PrepareDeploymentHostV1 | CheckPrerequisites | DeployRelease | VerifyRuntime |
     RollbackRelease | StopFailedRuntime)
 
 
 def compile_operation(operation: CloudCommand) -> tuple[CloudOperationKind, str]:
-    if type(operation) not in {CheckPrerequisites, DeployRelease,
+    if type(operation) not in {PrepareDeploymentHostV1, CheckPrerequisites, DeployRelease,
             VerifyRuntime, RollbackRelease, StopFailedRuntime}:
         raise CloudCommandError("UNSUPPORTED_OPERATION")
     return operation.kind, operation.compile()
