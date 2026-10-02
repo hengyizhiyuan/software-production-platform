@@ -96,6 +96,7 @@ if test "$user_present" = 1; then
   # A compatible existing account can be completed. Unknown Docker data cannot.
   test ! -e /home/wattdeploy/.local/share/docker || fail BLOCKED_HOST_PROFILE_CONFLICT
   test ! -e /home/wattdeploy/.docker || fail BLOCKED_HOST_PROFILE_CONFLICT
+  test ! -e /home/wattdeploy/.config/systemd/user/docker.service || fail BLOCKED_HOST_PROFILE_CONFLICT
 fi
 if command -v docker >/dev/null && test ! -f /etc/yum.repos.d/watt-docker-ce-v1.repo; then
   fail BLOCKED_HOST_PROFILE_CONFLICT
@@ -222,13 +223,22 @@ if systemctl is-active --quiet docker.service || systemctl is-active --quiet doc
 fi
 loginctl enable-linger wattdeploy >/dev/null 2>&1 || fail BLOCKED_ROOTLESS_SETUP
 echo WATT_EFFECT_USER_LINGER_ENABLED
-machinectl shell wattdeploy@ /bin/sh -lc \
-  'dockerd-rootless-setuptool.sh install >/dev/null 2>&1 && systemctl --user enable --now docker.service >/dev/null 2>&1 && docker context use rootless >/dev/null 2>&1' \
-  >/dev/null 2>&1 || fail BLOCKED_ROOTLESS_SETUP
-echo WATT_EFFECT_ROOTLESS_RUNTIME_STARTED
-ready || fail BLOCKED_ROOTLESS_VERIFICATION
-test "$(df -Pk /home/wattdeploy | awk 'NR==2 {print $4}')" -ge 2097152 || fail BLOCKED_DISK_SPACE
-echo WATT_HOST_READY
+machinectl shell wattdeploy@ /bin/sh -c \
+  'export HOME=/home/wattdeploy XDG_RUNTIME_DIR=/run/user/$(id -u); test "$(id -u)" -ne 0 && dockerd-rootless-setuptool.sh --skip-iptables install && systemctl --user enable --now docker.service && docker context use rootless' \
+  || fail BLOCKED_ROOTLESS_SETUP
+test -f /home/wattdeploy/.config/systemd/user/docker.service || fail BLOCKED_ROOTLESS_SETUP
+test -d /home/wattdeploy/.docker || fail BLOCKED_ROOTLESS_SETUP
+for attempt in 1 2 3 4 5 6 7 8 9 10; do
+  if ready; then
+    echo WATT_EFFECT_ROOTLESS_IPTABLES_DISABLED
+    echo WATT_EFFECT_ROOTLESS_RUNTIME_STARTED
+    test "$(df -Pk /home/wattdeploy | awk 'NR==2 {print $4}')" -ge 2097152 || fail BLOCKED_DISK_SPACE
+    echo WATT_HOST_READY
+    exit 0
+  fi
+  sleep 2
+done
+fail BLOCKED_ROOTLESS_VERIFICATION
 '''
 
 HOST_RECIPE_FINGERPRINT = sha256(_HOST_RECIPE.encode()).hexdigest()

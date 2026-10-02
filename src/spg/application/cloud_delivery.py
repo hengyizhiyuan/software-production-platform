@@ -470,6 +470,7 @@ class CloudDeliveryService:
             "WATT_EFFECT_SUBGID_ALLOCATED", "WATT_EFFECT_DOCKER_KEY_INSTALLED",
             "WATT_EFFECT_DOCKER_REPOSITORY_ADDED",
             "WATT_EFFECT_PACKAGES_INSTALLED", "WATT_EFFECT_USER_LINGER_ENABLED",
+            "WATT_EFFECT_ROOTLESS_IPTABLES_DISABLED",
             "WATT_EFFECT_ROOTLESS_RUNTIME_STARTED"}))
         host_after = (HostProfileState.READY if verified and host_operation else
             HostProfileState.UNSUPPORTED if summary == "UNSUPPORTED_HOST_PROFILE" else

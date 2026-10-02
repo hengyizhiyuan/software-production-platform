@@ -87,8 +87,10 @@ def test_ecs_discovery_dry_run_and_typed_invocation(monkeypatch):
     assert calls[2].repeat_mode == "Once"
     assert "BLOCKED_ROOTLESS_DOCKER_REQUIRED" in calls[2].command_content
     assert calls[2].username == "wattdeploy"
+    assert calls[2].working_dir == "/home/wattdeploy"
     provider.run(session,target,PrepareDeploymentHostV1(),uuid4().hex)
     assert calls[3].username == "root"
+    assert calls[3].working_dir == calls[0].working_dir == "/root"
     assert "WATT_EFFECT_USER_CREATED" in calls[3].command_content
 
 

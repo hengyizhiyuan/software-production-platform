@@ -43,8 +43,12 @@ def test_bootstrap_is_fixed_fingerprinted_and_separate_from_nonroot_precheck():
     assert re.search(r'test "\$ID" = alinux && test "\$VERSION_ID" = 3', script)
     assert script.index("getent passwd wattdeploy") < script.index("useradd -m")
     assert script.index("overlapping allocation") < script.index("useradd -m")
+    assert script.index('test ! -e /home/wattdeploy/.config/systemd/user/docker.service') < script.index('dnf -y')
     assert "--add-subuids" in script and "--add-subgids" in script
-    assert "dockerd-rootless-setuptool.sh install" in script
+    assert "dockerd-rootless-setuptool.sh --skip-iptables install" in script
+    assert "export HOME=/home/wattdeploy XDG_RUNTIME_DIR=/run/user/$(id -u)" in script
+    assert "test -f /home/wattdeploy/.config/systemd/user/docker.service" in script
+    assert script.index('if ready; then\n    echo WATT_EFFECT_ROOTLESS_IPTABLES_DISABLED') < script.index('echo WATT_HOST_READY\n    exit 0')
     assert "systemctl --user enable --now docker.service" in script
     assert "docker info --format '{{json .SecurityOptions}}'" in script
     assert "docker context show" in script

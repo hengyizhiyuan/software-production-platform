@@ -238,7 +238,7 @@ class AliyunCloudProvider:
             body = self._body(client.run_command(models.RunCommandRequest(
                 region_id=target.region_id, instance_id=[target.instance_id],
                 type="RunShellScript", command_content=script, username=username,
-                working_dir=f"/home/{username}",
+                working_dir="/root" if username == "root" else f"/home/{username}",
                 keep_command=False, repeat_mode="Once", timeout=600,
                 client_token=client_token)))
             invoke_id, command_id = body["InvokeId"], body["CommandId"]
