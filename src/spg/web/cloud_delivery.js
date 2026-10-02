@@ -32,6 +32,7 @@
     const c=state.connection;
     const choices=state.connections.map(item=>`<option value="${escape(item.id)}" ${c?.id===item.id?'selected':''}>${escape(item.target?.name||item.role_arn||'待授权的云连接')} · ${escape(item.state)}</option>`).join('');
     const choose=state.connections.length?`<div class="field"><label for="cloud-connection-choice">已有云连接</label><select id="cloud-connection-choice">${choices}</select></div>`:'';
+    const reselect=c?.target&&c.state!=='REVOKED'?`<div class="workspace-review"><p>当前目标：${escape(c.target.name)} · ${escape(c.target.region_id)} · ${escape(c.target.instance_id)}。更换目标会重新发现 ECS，并要求验证新目标的精确授权；现有云连接和历史部署记录会保留。</p><button class="button secondary" type="button" data-cloud-reselect>重新选择 ECS</button></div>`:'';
     let step='';
     if(!c) step='<p>连接阿里云后，Watt 才能列出你授权的 ECS。</p><button class="button" type="button" data-cloud-create>连接阿里云</button>';
     else if(c.state==='REVOKED') step='<p>这个云连接已撤销。请选择其他连接或创建新连接。</p>';
@@ -43,7 +44,7 @@
       const prior=state.targetDeployments.find(d=>d.state==='SUCCEEDED'&&d.target.account_id===c.target.account_id&&d.target.region_id===c.target.region_id&&d.target.instance_id===c.target.instance_id);
       step=`<h3>确认本次部署</h3><div class="facts"><div class="fact"><span class="fact-label">成果版本</span><span>${escape(state.fingerprint?.slice(0,16))}</span></div><div class="fact"><span class="fact-label">目标 ECS</span><span>${escape(c.target.name)} · ${escape(c.target.region_id)}</span></div><div class="fact"><span class="fact-label">运行方式</span><span>Watt 管理的独立容器</span></div>${prior?`<div class="fact"><span class="fact-label">当前 Watt 部署</span><span>${escape(prior.manifest_id.slice(0,12))} · 端口 ${escape(prior.port)}。将先验证新版本，再替换此精确运行版本。</span></div>`:''}</div><form id="cloud-deploy-form"><div class="field"><label for="cloud-port">对外端口</label><input id="cloud-port" name="port" type="number" min="1024" max="65535" value="${prior?.port||8080}" required></div><div class="field"><label for="cloud-rationale">本次授权依据</label><input id="cloud-rationale" name="rationale" required placeholder="确认把这个已验收版本部署到所选 ECS"></div><p class="muted">Watt 会先检查服务器条件和端口归属。若需要安装软件或提升权限，部署会停止并说明原因。</p><button class="button" type="submit">授权并部署</button></form>`;
     }
-    node.innerHTML=`${choose}<div class="link-row"><button class="button quiet" type="button" data-cloud-create>添加云连接</button></div>${step}<p id="cloud-delivery-message" class="muted" role="status"></p>`;
+    node.innerHTML=`${choose}${reselect}<div class="link-row"><button class="button quiet" type="button" data-cloud-create>添加云连接</button></div>${step}<p id="cloud-delivery-message" class="muted" role="status"></p>`;
   }
   async function loadConnection(id) {
     state.connection=await request(`/api/cloud-connections/aliyun/${encodeURIComponent(id)}`);
@@ -70,7 +71,7 @@
     document.getElementById('content')?.append(panel);
   }};
   document.addEventListener('click',async event=>{
-    const button=event.target.closest('[data-cloud-open],[data-cloud-create],[data-cloud-verify],[data-cloud-select],[data-cloud-verify-target]');
+    const button=event.target.closest('[data-cloud-open],[data-cloud-create],[data-cloud-verify],[data-cloud-reselect],[data-cloud-select],[data-cloud-verify-target]');
     if(!button)return;
     button.disabled=true;
     try{
@@ -79,6 +80,9 @@
         const result=await request('/api/cloud-connections/aliyun','POST');
         await loadConnection(result.id);
       }else if(button.hasAttribute('data-cloud-verify')){
+        const result=await request(`/api/cloud-connections/aliyun/${state.connection.id}/verify`,'POST');
+        await loadConnection(result.id);
+      }else if(button.hasAttribute('data-cloud-reselect')){
         const result=await request(`/api/cloud-connections/aliyun/${state.connection.id}/verify`,'POST');
         await loadConnection(result.id);
       }else if(button.dataset.cloudSelect){

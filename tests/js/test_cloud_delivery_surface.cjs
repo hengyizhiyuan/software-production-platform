@@ -7,17 +7,23 @@ const path = require('node:path');
 const source = fs.readFileSync(path.join(__dirname,
   '../../src/spg/web/cloud_delivery.js'), 'utf8');
 
-function surface() {
+function surface(respond) {
   const content = {children:[], append(node){this.children.push(node);}};
+  const flow = {innerHTML:'',scrollIntoView(){}};
   const listeners = {};
+  const calls = [];
   const document = {
     createElement(){return {className:'',innerHTML:''};},
-    getElementById(id){return id==='content'?content:null;},
+    getElementById(id){return id==='content'?content:id==='cloud-delivery-flow'?flow:null;},
     addEventListener(name,callback){listeners[name]=callback;},
   };
   const window = {};
-  vm.runInNewContext(source,{document,window,fetch(){throw Error('unexpected network');}});
-  return {content,window,listeners};
+  vm.runInNewContext(source,{document,window,async fetch(url,options){
+    if(!respond)throw Error('unexpected network');
+    calls.push([url,options?.method||'GET']);
+    return {ok:true,async json(){return respond(url,options?.method||'GET');}};
+  }});
+  return {content,flow,window,listeners,calls};
 }
 
 test('qualified Deliverable gets a cloud deployment action without a remote terminal',()=>{
@@ -61,4 +67,35 @@ test('missing deployment user is explained without exposing provider text',()=>{
   assert.match(html,/未修改服务器运行状态/);
   assert.match(html,/需要你完成服务器前置条件/);
   assert.doesNotMatch(html,/AccountNotExists|CLOUD_OPERATION_UNVERIFIED/);
+});
+
+test('existing connection can rediscover targets without creating a connection or deployment',async()=>{
+  const id='existing-connection';
+  let rediscovered=false;
+  const target={name:'旧 CentOS ECS',region_id:'cn-beijing',instance_id:'i-oldtarget'};
+  const base={id,state:'READY',role_arn:'acs:ram::1234567890123456:role/wattecsdelivery',
+    target,discovered_targets:[]};
+  const {flow,listeners,calls}=surface((url,method)=>{
+    if(url==='/api/cloud-connections/aliyun'&&method==='GET')return [base];
+    if(url===`/api/cloud-connections/aliyun/${id}/deployments`)return [];
+    if(url===`/api/cloud-connections/aliyun/${id}/verify`&&method==='POST'){
+      rediscovered=true;return {id};
+    }
+    if(url===`/api/cloud-connections/aliyun/${id}`)return rediscovered?{
+      ...base,state:'DISCOVERY_READY',target:null,
+      discovered_targets:[{selection_token:'new-selection',name:'新 Alibaba Cloud Linux ECS',
+        region_id:'cn-beijing',status:'Running',os_name:'Alibaba Cloud Linux 3',
+        cloud_assistant_ready:true}],
+    }:base;
+    throw Error(`unexpected request ${method} ${url}`);
+  });
+  const button=attribute=>({disabled:false,hasAttribute(name){return name===attribute;}});
+  await listeners.click({target:{closest(){return button('data-cloud-open');}}});
+  assert.match(flow.innerHTML,/重新选择 ECS/);
+  assert.match(flow.innerHTML,/现有云连接和历史部署记录会保留/);
+  await listeners.click({target:{closest(){return button('data-cloud-reselect');}}});
+  assert.match(flow.innerHTML,/新 Alibaba Cloud Linux ECS/);
+  assert.ok(calls.some(([url,method])=>url===`/api/cloud-connections/aliyun/${id}/verify`&&method==='POST'));
+  assert.ok(!calls.some(([url,method])=>url==='/api/cloud-connections/aliyun'&&method==='POST'));
+  assert.ok(!calls.some(([url,method])=>url.endsWith('/select')&&method==='POST'));
 });

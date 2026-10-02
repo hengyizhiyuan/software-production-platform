@@ -282,6 +282,29 @@ def test_exact_connection_target_authorization_and_deployment(
                    "must-not-persist"):
         assert secret not in persisted
     assert "BLOCKED_UNKNOWN_PORT_OWNER" in persisted
+    old_target = target.identity
+    provider.target = target.model_copy(update={
+        "instance_id": "i-newtarget1", "name": "Alibaba Cloud Linux ECS",
+        "os_name": "Alibaba Cloud Linux 3"})
+    rediscovered = service.verify_role(actor, UUID(first["id"]), role)
+    assert rediscovered["id"] == first["id"]
+    assert rediscovered["target"] is None
+    assert rediscovered["target_grant_verified_at"] is None
+    with pytest.raises(CloudDeliveryError, match="EXACT_CONNECTION_NOT_READY"):
+        service.execute(actor, UUID(authorized["id"]))
+    selected_new = service.select(actor, UUID(first["id"]),
+        UUID(rediscovered["discovered_targets"][0]["selection_token"]))
+    assert selected_new["target"]["instance_id"] == "i-newtarget1"
+    assert selected_new["target_grant_verified_at"] is None
+    assert "i-newtarget1" in str(selected_new["target_policy"])
+    assert "i-abcdefgh" not in str(selected_new["target_policy"])
+    verified_new = service.verify_target(actor, UUID(first["id"]))
+    assert verified_new["state"] == "READY"
+    with pytest.raises(CloudDeliveryError, match="EXACT_CONNECTION_NOT_READY"):
+        service.execute(actor, UUID(authorized["id"]))
+    with pytest.raises(CloudDeliveryError, match="AUTHORIZATION_TARGET_MISMATCH"):
+        service.authorize(actor, work_id, request)
+    assert service.deployment(actor, UUID(result["id"]))["target"]["instance_id"] == old_target[2]
     service.revoke(actor, UUID(first["id"]))
     with pytest.raises(CloudDeliveryError, match="FRESH_EXACT_TARGET_GRANT_REQUIRED"):
         service.authorize(actor, work_id, request)
