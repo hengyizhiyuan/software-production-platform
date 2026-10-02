@@ -57,6 +57,12 @@ class Settings(BaseSettings):
     github_read_token: SecretStr | None = None
     github_write_token: SecretStr | None = None
     web_search_api_key: SecretStr | None = None
+    web_search_provider: Literal["brave", "aliyun-opensearch"] = "brave"
+    aliyun_opensearch_api_key: SecretStr | None = None
+    aliyun_opensearch_endpoint: str | None = None
+    aliyun_opensearch_vpc_endpoint: str | None = None
+    aliyun_opensearch_workspace: str = "default"
+    aliyun_opensearch_service_id: str = "ops-web-search-001"
     native_executor_deepseek_api_key: SecretStr | None = None
     native_executor_deepseek_base_url: str = "https://api.deepseek.com"
     native_executor_openai_api_key: SecretStr | None = None

@@ -1,4 +1,33 @@
-# Deferred real Web Search qualification
+# Real Web Search qualification
+
+## Current Aliyun qualification (2026-10-02)
+
+Watt selects `aliyun-opensearch` for the local dogfood run. The public HTTPS
+OpenSearch endpoint and actual `watt` workspace returned real results with the
+server-side key. The independent `web-live` trial passed with persisted Search
+evidence, inspected Web sources, cited inspected sources, and complete
+Interaction events. Direct Chinese and technical queries, combined GitHub +
+Web research, and model-initiated Web research returned real provider evidence.
+GC-EX-12 trials 3 and 4 are **PASS**; trial 4 ran after the final semantic-role
+consumer correction and all 11 oracle checks passed, including the exact
+project repository observation, inspected GitHub and Aliyun Web sources, cited
+fetched Web content, and complete Human SSE. Trial 1 lacked an inspected Web
+citation; trial 2 cited inspected GitHub and Web sources but lacked the project
+repository observation. The bounded correction adds a typed
+`PROJECT_REPOSITORY` reference role to Human-confirmed Engineering Semantic
+Truth. Research routing now consumes that role without interpreting the fact
+subject's language or the URL's shape. Historical `BLOCKED_EXTERNAL` and failed
+trial receipts remain unchanged.
+The preserved L1–L6 receipts and final GC-EX-12 trial 4 establish L1–L7 PASS
+for this Search task; Human Acceptance remains a separate governance step.
+
+Private local receipts are under `.spg/search-aliyun-live/receipts/`; they omit
+the API key. The running app must receive the selected provider, Aliyun
+endpoint, workspace, service ID, and key through server-side configuration.
+Search snippets and fetched page content retain the same source identity and
+distinct completeness states.
+
+## Historical Brave credential deferral (2026-09-27)
 
 The 2026-09-27 batch continues without `SPG_WEB_SEARCH_API_KEY` by Human
 instruction. Every qualification that requires actual Web Search is

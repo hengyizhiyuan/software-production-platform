@@ -217,8 +217,9 @@ Public `/app` journeys and PostgreSQL/Git ledger tests supply effect evidence.
 Holdout must be generated after a recorded implementation freeze and reported
 separately. Failed candidates, harness errors and failed live trials are retained.
 
-Missing `SPG_WEB_SEARCH_API_KEY` blocks real Web Search qualification and
-GC-EX-12 only. It cannot stop implementation or the rest of the regression batch.
-See [external qualification](external-qualification.md) for separate rerun entry.
+The former Brave credential blocker is historical. Watt now supports selected
+Aliyun OpenSearch with its own server-side credential. See
+[external qualification](external-qualification.md) for the current live
+result and retained earlier trials.
 This architecture does not claim universal language understanding. Final
 qualification must report residual errors and each invariant from actual receipts.

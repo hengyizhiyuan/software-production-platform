@@ -563,8 +563,10 @@ GitHub REST executes public repository and issue search, repository metadata,
 README/root-path and available package-manifest inspection, and exact public-file fetch. Repository and issue
 search need no credential. Code search uses an optional `SPG_GITHUB_READ_TOKEN`;
 without it, Capability Reality reports `github.code.search` as credential
-required. Public Web search uses the Brave Web Search API and requires the
-server-side `SPG_WEB_SEARCH_API_KEY`. `web.resource.fetch` fetches selected
+required. Public Web search selects Brave (`SPG_WEB_SEARCH_API_KEY`) or
+Aliyun OpenSearch (`SPG_ALIYUN_OPENSEARCH_API_KEY`) through
+`SPG_WEB_SEARCH_PROVIDER`; local dogfood currently selects Aliyun.
+`web.resource.fetch` fetches selected
 public HTTPS text through a bounded transport with public-address and redirect
 checks. Neither search credential permits external writes or private-source
 research. The configured read secrets are supplied only to their provider;

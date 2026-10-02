@@ -66,7 +66,17 @@ def built_in_executable_capabilities() -> tuple[ExecutableCapability, ...]:
     E = SideEffectLevel.EXTERNAL_WRITE
     D = SideEffectLevel.DESTRUCTIVE
     github_read_available = bool(os.environ.get("SPG_GITHUB_READ_TOKEN"))
-    web_search_available = bool(os.environ.get("SPG_WEB_SEARCH_API_KEY"))
+    web_provider = os.environ.get("SPG_WEB_SEARCH_PROVIDER", "brave").strip().lower()
+    if web_provider not in {"brave", "aliyun-opensearch"}:
+        raise ValueError("Unsupported Web Search provider")
+    if web_provider == "aliyun-opensearch":
+        web_key_available = bool(os.environ.get("SPG_ALIYUN_OPENSEARCH_API_KEY"))
+        web_endpoint_available = bool(os.environ.get("SPG_ALIYUN_OPENSEARCH_ENDPOINT"))
+        web_credential = "aliyun.opensearch"
+    else:
+        web_key_available = bool(os.environ.get("SPG_WEB_SEARCH_API_KEY"))
+        web_endpoint_available = True
+        web_credential = "brave.search"
     entries = (
         _cap("filesystem", "read", provider="native-tool:file.read"),
         _cap("filesystem", "write", provider="native-tool:file.write", effect=W, permissions=("work.workspace.write",)),
@@ -100,8 +110,9 @@ def built_in_executable_capabilities() -> tuple[ExecutableCapability, ...]:
         _cap("github", "issue.search", provider="github-rest-public"),
         _cap("github", "code.search", provider="github-rest-public",
              credentials=() if github_read_available else ("github.read",)),
-        _cap("web", "search", provider="brave-web-search",
-             credentials=() if web_search_available else ("brave.search",)),
+        _cap("web", "search", provider=web_provider if web_provider == "aliyun-opensearch" else "brave-web-search",
+             credentials=() if web_key_available else (web_credential,),
+             adapter_ready=web_key_available and not web_endpoint_available),
         _cap("web", "resource.fetch", provider="public-https-read"),
         _cap("gitlab", "push", effect=E, credentials=("gitlab.write",), permissions=("delivery.authorize",)),
         _cap("gitlab", "mr.prepare", effect=E, credentials=("gitlab.write",), permissions=("delivery.authorize",)),

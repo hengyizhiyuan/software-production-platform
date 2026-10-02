@@ -66,9 +66,12 @@ configurable through `SPG_CONVERSATION_PROVIDER_ADAPTER=deepseek` and
 
 Public GitHub repository/issue search and README inspection are read-only and
 need no GitHub credential. GitHub code search can use the optional server-side
-`SPG_GITHUB_READ_TOKEN`. Public Web search uses the Brave Search API and requires
-`SPG_WEB_SEARCH_API_KEY` in the ignored local environment; without it Watt
-reports `CREDENTIAL_REQUIRED` and does not claim to have searched the Web.
+`SPG_GITHUB_READ_TOKEN`. Public Web search supports Brave
+(`SPG_WEB_SEARCH_API_KEY`) and Alibaba Cloud OpenSearch
+(`SPG_ALIYUN_OPENSEARCH_API_KEY`) behind one Watt Search capability.
+`SPG_WEB_SEARCH_PROVIDER` selects the provider; missing selected credentials
+report `CREDENTIAL_REQUIRED` without provider fallback. The current local
+dogfood configuration selects Aliyun OpenSearch.
 The Compose application services pass these optional values to Watt; no secret
 is sent to the browser. Search evidence is visible through the Interaction
 reply and `/api/interactions/{interaction_id}/turns/{turn_id}/external-evidence`.

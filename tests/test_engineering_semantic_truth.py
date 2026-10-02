@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 import hashlib
 import inspect
+from types import SimpleNamespace
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 import pytest
@@ -12,6 +13,7 @@ from spg.application.engineering_semantics import (
     admit_semantic_facts,
     bind_engineering_semantic_facts,
 )
+from spg.application.interaction import _research_repository_source
 from spg.domain.conversation import (
     ConversationTurnIntent,
     StructuredCollaborationResult,
@@ -24,6 +26,7 @@ from spg.domain.engineering_semantics import (
     SemanticEpistemicStatus,
     SemanticFactAuthority,
     SemanticRelation,
+    SemanticReferenceRole,
     SemanticRoleOrigin,
     current_semantic_facts,
     semantic_fact_reference,
@@ -97,12 +100,14 @@ def _fact(
     role_origin: SemanticRoleOrigin = SemanticRoleOrigin.EXPLICIT,
     supersedes: tuple[UUID, ...] = (),
     operation: SemanticCandidateOperation = SemanticCandidateOperation.UPSERT,
+    reference_role: SemanticReferenceRole | None = None,
 ) -> EngineeringSemanticFactCandidate:
     return EngineeringSemanticFactCandidate(
         candidate_id=candidate_id,
         operation=operation,
         subject=subject,
         relation=relation,
+        reference_role=reference_role,
         value=value,
         unit=unit,
         scope=scope,
@@ -125,6 +130,114 @@ def _bind(record, extractions, facts, *, prior=()):
         candidates=tuple(facts),
         prior_facts=tuple(prior),
     )
+
+
+def _project_reference(record: InteractionRecord, *, subject: str = "project.source",
+                       role: SemanticReferenceRole | None = SemanticReferenceRole.PROJECT_REPOSITORY,
+                       value: str = "https://github.com/acme/app.git",
+                       candidate_id: str = "repository") -> EngineeringSemanticFactCandidate:
+    return _fact(record, candidate_id=candidate_id, subject=subject,
+        relation=SemanticRelation.REFERENCE, reference_role=role, value=value,
+        source_text=record.content)
+
+
+def _reference_assessment(records: tuple[InteractionRecord, ...],
+                          candidates: tuple[EngineeringSemanticFactCandidate, ...],
+                          *, direct: str | None = None):
+    from uuid import uuid4
+    ir = SimpleNamespace(id=uuid4(), items=(), compiler_reference="test:semantic",
+        semantic_fact_candidates=candidates, repository_source=direct)
+    facts = bind_engineering_semantic_facts(basis_fingerprint="b" * 64,
+        records=records, extractions=(), candidates=candidates, semantic_ir=ir)
+    return SimpleNamespace(semantic_ir=ir, engineering_semantic_facts=facts)
+
+
+@pytest.mark.parametrize("text,subject", (
+    ("当前项目仓库是 https://github.com/acme/app.git", "project.source"),
+    ("Our project repository is https://github.com/acme/app.git", "project.source"),
+    ("当前项目仓库是 https://github.com/acme/app.git", "arbitrary.reference"),
+))
+def test_typed_project_repository_resolves_independent_of_language_or_subject(text, subject):
+    record = _record(text)
+    assessment = _reference_assessment((record,), (_project_reference(record, subject=subject),))
+    assert _research_repository_source(assessment) == "https://github.com/acme/app.git"
+    fact = assessment.engineering_semantic_facts[0]
+    assert fact.reference_role is SemanticReferenceRole.PROJECT_REPOSITORY
+    assert fact.provenance.source_record_ids == (record.id,)
+    assert semantic_fact_reference(fact, work_revision_id=UUID(int=12)).reference_role is SemanticReferenceRole.PROJECT_REPOSITORY
+    assert type(fact).model_validate(fact.model_dump(mode="json")).reference_role is SemanticReferenceRole.PROJECT_REPOSITORY
+
+
+def test_external_reference_repository_is_not_project_source():
+    record = _record("参考这个仓库 https://github.com/acme/app.git")
+    assessment = _reference_assessment((record,), (_project_reference(record,
+        role=SemanticReferenceRole.EXTERNAL_REFERENCE),))
+    assert _research_repository_source(assessment) is None
+
+
+def test_documentation_url_without_project_role_is_not_project_source():
+    record = _record("See https://docs.example.com/guide for documentation")
+    assessment = _reference_assessment((record,), (_project_reference(record,
+        subject="project.repository", role=None,
+        value="https://docs.example.com/guide"),))
+    assert _research_repository_source(assessment) is None
+
+
+def test_system_inferred_project_role_cannot_be_admitted():
+    record = _record("See https://github.com/acme/app.git")
+    with pytest.raises(ValueError, match="PROJECT_REPOSITORY"):
+        EngineeringSemanticFactCandidate.model_validate(
+            _project_reference(record).model_dump() | {
+                "authority": SemanticFactAuthority.SYSTEM_INFERRED,
+                "epistemic_status": SemanticEpistemicStatus.WORKING_ASSUMPTION,
+                "role_origin": SemanticRoleOrigin.INFERRED,
+            })
+
+
+def test_superseded_project_repository_is_not_selected():
+    record = _record("当前项目仓库是 https://github.com/acme/app.git")
+    assessment = _reference_assessment((record,), (_project_reference(record),))
+    old = assessment.engineering_semantic_facts[0].model_copy(update={
+        "epistemic_status": SemanticEpistemicStatus.SUPERSEDED})
+    assessment.engineering_semantic_facts = (old,)
+    assert _research_repository_source(assessment) is None
+
+
+def test_two_current_project_repositories_are_ambiguous():
+    first = _record("当前项目仓库是 https://github.com/acme/app.git", sequence=1)
+    second = _record("另一个项目仓库是 https://github.com/acme/other.git", sequence=2)
+    assessment = _reference_assessment((first, second), (
+        _project_reference(first, subject="project.first", candidate_id="first"),
+        _project_reference(second, subject="project.second", candidate_id="second",
+            value="https://github.com/acme/other.git")))
+    assert _research_repository_source(assessment) is None
+
+
+def test_direct_typed_repository_source_has_priority():
+    record = _record("当前项目仓库是 https://github.com/acme/app.git")
+    assessment = _reference_assessment((record,), (_project_reference(record),),
+        direct="https://git.example.com/owner/typed.git")
+    assert _research_repository_source(assessment) == "https://git.example.com/owner/typed.git"
+
+
+def test_current_admitted_repository_role_survives_later_semantic_ir():
+    from uuid import uuid4
+    record = _record("当前项目仓库是 https://github.com/acme/app.git")
+    assessment = _reference_assessment((record,), (_project_reference(record),))
+    assessment.semantic_ir.id = uuid4()
+    assert _research_repository_source(assessment) == "https://github.com/acme/app.git"
+
+
+def test_historical_fact_without_reference_role_deserializes():
+    record = _record("当前项目仓库是 https://github.com/acme/app.git")
+    assessment = _reference_assessment((record,), (_project_reference(record, role=None),))
+    fact = assessment.engineering_semantic_facts[0]
+    payload = fact.model_dump(mode="json")
+    payload.pop("reference_role")
+    historical = type(fact).model_validate(payload)
+    assert historical.reference_role is None
+    assessment.engineering_semantic_facts = (historical,)
+    assert _research_repository_source(assessment) is None
 
 
 def test_neutral_extraction_pads_missing_roles_without_inventing_meaning() -> None:

@@ -48,6 +48,7 @@ from spg.domain.engineering_semantics import (
     EngineeringSemanticFactCandidate,
     SemanticEpistemicStatus,
     SemanticFactAuthority,
+    SemanticReferenceRole,
     SemanticRelation,
     SemanticRoleOrigin,
     current_semantic_facts,
@@ -187,38 +188,25 @@ def _research_repository_source(assessment):
     def supported_url(value):
         try:
             parsed = urlsplit(value)
-            return parsed.scheme in {"http", "https"} and bool(parsed.hostname)
+            return (isinstance(value, str) and parsed.scheme in {"http", "https"}
+                and bool(parsed.hostname) and not parsed.username and not parsed.password
+                and not parsed.query and not parsed.fragment)
         except ValueError:
             return False
     direct = assessment.semantic_ir.repository_source
     if direct is not None:
         return direct
-    def repository_reference_subject(subject):
-        parts = set(re.split(r"[._]", subject.lower()))
-        return (bool(parts & {"repository", "repo"})
-            and bool(parts & {"url", "source", "reference"}))
     sources = {fact.value for fact in assessment.engineering_semantic_facts
-        if fact.is_current and repository_reference_subject(fact.subject)
+        if fact.is_current
         and fact.relation is SemanticRelation.REFERENCE
+        and fact.reference_role is SemanticReferenceRole.PROJECT_REPOSITORY
         and fact.authority is SemanticFactAuthority.HUMAN_EXPLICIT
         and fact.epistemic_status is SemanticEpistemicStatus.CONFIRMED
         and fact.provenance.role_origin is SemanticRoleOrigin.EXPLICIT
+        and bool(fact.provenance.source_record_ids)
         and isinstance(fact.value, str)
         and fact.value in fact.provenance.source_text
         and supported_url(fact.value)}
-    for item in getattr(assessment.semantic_ir, "items", ()):
-        if item.kind is not SemanticKind.FACT or not item.subject:
-            continue
-        if "repository" not in set(re.split(r"[._]", item.subject.lower())):
-            continue
-        for provenance in item.provenance:
-            if (provenance.origin is not SemanticOrigin.HUMAN_EXPLICIT
-                    or not provenance.source_text):
-                continue
-            for value in re.findall(r"https?://[^\s，。]+", provenance.source_text):
-                value = value.rstrip(".,;:!?)]}、")
-                if supported_url(value):
-                    sources.add(value)
     return next(iter(sources)) if len(sources) == 1 else None
 
 

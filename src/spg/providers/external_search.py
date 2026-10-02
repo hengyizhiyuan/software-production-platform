@@ -1,4 +1,4 @@
-"""Read-only GitHub and Brave connectors for public evidence acquisition."""
+"""Read-only GitHub and replaceable Web connectors for public evidence."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from html.parser import HTMLParser
 import ipaddress
 import json
 import socket
+from typing import Protocol
 from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qsl, quote, urlencode, urljoin, urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
@@ -81,6 +82,30 @@ class BoundedPublicHttp:
             except (URLError, TimeoutError, OSError) as error:
                 raise SearchProviderError(SearchFailure.NETWORK_FAILURE, "Public source network request failed") from error
         raise SearchProviderError(SearchFailure.FETCH_FAILED, "Public source redirected too many times")
+
+    def post_json(self, url: str, payload: dict, *, bearer: str) -> bytes:
+        """Send one bounded, non-redirecting request to a configured provider."""
+        self._check_url(url)
+        request = Request(url, data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+            headers={"User-Agent": "Watt-Evidence-Research/1.0",
+                     "Content-Type": "application/json", "Authorization": f"Bearer {bearer}"},
+            method="POST")
+        try:
+            with self.opener.open(request, timeout=self.timeout) as response:
+                body = response.read(self.max_bytes + 1)
+                if len(body) > self.max_bytes:
+                    raise SearchProviderError(SearchFailure.PROVIDER_PROTOCOL_ERROR,
+                        "Web provider response exceeds bounded size")
+                return body
+        except HTTPError as error:
+            category = (SearchFailure.AUTHENTICATION_FAILED if error.code in {401, 403}
+                else SearchFailure.RATE_LIMITED if error.code == 429
+                else SearchFailure.PROVIDER_UNAVAILABLE if error.code >= 500
+                else SearchFailure.PROVIDER_PROTOCOL_ERROR)
+            raise SearchProviderError(category, f"Web provider returned HTTP {error.code}") from None
+        except (URLError, TimeoutError, OSError):
+            raise SearchProviderError(SearchFailure.NETWORK_FAILURE,
+                "Web provider network request failed") from None
 
 
 def _identity(url: str) -> str:
@@ -375,6 +400,105 @@ class GitHubPublicSearchProvider:
                              "updated_at": issue.get("updated_at")},
             })
         raise SearchProviderError(SearchFailure.UNSUPPORTED_SEARCH_TYPE, "Unsupported GitHub search result shape")
+
+
+class WebSearchProvider(Protocol):
+    identity: str
+
+    def search(self, query: str, *, limit: int = 6) -> tuple[SearchEvidence, ...]: ...
+
+
+class AliyunOpenSearchWebProvider:
+    identity = "aliyun-opensearch"
+
+    def __init__(self, http: BoundedPublicHttp, *, api_key: str | None,
+                 endpoint: str | None, workspace: str = "default",
+                 service_id: str = "ops-web-search-001") -> None:
+        self.http = http
+        self.api_key = api_key
+        self.endpoint = endpoint
+        self.workspace = workspace
+        self.service_id = service_id
+
+    def search(self, query: str, *, limit: int = 6) -> tuple[SearchEvidence, ...]:
+        if not self.api_key:
+            raise SearchProviderError(SearchFailure.CREDENTIAL_REQUIRED,
+                "Aliyun OpenSearch API key is not configured")
+        if not self.endpoint or not self.workspace:
+            raise SearchProviderError(SearchFailure.PROVIDER_UNAVAILABLE,
+                "Aliyun OpenSearch endpoint or workspace is not configured")
+        parts = urlsplit(self.endpoint)
+        if (parts.scheme not in {"http", "https"} or not parts.hostname
+                or not parts.hostname.endswith(".opensearch.aliyuncs.com")
+                or parts.username or parts.password or parts.path.strip("/")
+                or parts.query or parts.fragment or not self.workspace.replace("-", "").replace("_", "").isalnum()):
+            raise SearchProviderError(SearchFailure.PROVIDER_UNAVAILABLE,
+                "Aliyun OpenSearch endpoint or workspace is invalid")
+        if not self.service_id.replace("-", "").isalnum():
+            raise SearchProviderError(SearchFailure.PROVIDER_UNAVAILABLE,
+                "Aliyun OpenSearch service ID is invalid")
+        # Official examples use HTTP; the issued public host supports TLS.
+        # Never send a bearer credential over plaintext or redirect to another host.
+        url = (f"https://{parts.netloc}/v3/openapi/workspaces/{quote(self.workspace)}"
+               f"/web-search/{quote(self.service_id)}")
+        body = self.http.post_json(url, {"query": query, "query_rewrite": True,
+            "top_k": min(max(limit, 1), 8), "content_type": "snippet", "way": "pro"},
+            bearer=self.api_key)
+        try:
+            payload = json.loads(body)
+            if not isinstance(payload, dict):
+                raise ValueError("response root")
+            if payload.get("code"):
+                code = str(payload["code"]).casefold()
+                category = (SearchFailure.AUTHENTICATION_FAILED if any(
+                    marker in code for marker in ("auth", "permission", "apikey", "api_key"))
+                    else SearchFailure.RATE_LIMITED if any(
+                    marker in code for marker in ("rate", "throttl", "quota"))
+                    else SearchFailure.PROVIDER_PROTOCOL_ERROR)
+                raise SearchProviderError(category, "Aliyun OpenSearch returned a provider error")
+            items = payload["result"]["search_result"]
+            if not isinstance(items, list):
+                raise ValueError("result list")
+        except (ValueError, TypeError, KeyError) as error:
+            raise SearchProviderError(SearchFailure.PROVIDER_PROTOCOL_ERROR,
+                "Aliyun OpenSearch returned invalid results") from None
+        request_id = payload.get("request_id")
+        usage = payload.get("usage")
+        results = []
+        skipped_non_https = 0
+        usable = []
+        for rank, item in enumerate(items[:min(max(limit, 1), 8)], start=1):
+            if not isinstance(item, dict) or not isinstance(item.get("link"), str):
+                raise SearchProviderError(SearchFailure.PROVIDER_PROTOCOL_ERROR,
+                    "Aliyun OpenSearch returned an invalid result")
+            source = urlsplit(item["link"])
+            if source.scheme != "https" or not source.hostname:
+                skipped_non_https += 1
+                continue
+            usable.append((rank, item, source))
+        for rank, item, source in usable:
+            meta = item.get("meta_info") or {}
+            if not isinstance(meta, dict):
+                raise SearchProviderError(SearchFailure.PROVIDER_PROTOCOL_ERROR,
+                    "Aliyun OpenSearch returned invalid result metadata")
+            metadata = {"domain": source.hostname,
+                "provider_request_id": request_id if isinstance(request_id, str) else None,
+                "published_at": meta.get("publishedTime") if isinstance(meta.get("publishedTime"), str) else None,
+                "content_type": "snippet", "provider_skipped_non_https": skipped_non_https}
+            if isinstance(usage, dict):
+                metadata.update({f"usage:{key}": value for key, value in usage.items()
+                    if isinstance(key, str) and isinstance(value, int)})
+            snippet = item.get("snippet") or item.get("content") or ""
+            if not isinstance(snippet, str):
+                raise SearchProviderError(SearchFailure.PROVIDER_PROTOCOL_ERROR,
+                    "Aliyun OpenSearch returned invalid snippet")
+            results.append(_evidence(source_type="WEB", provider=self.identity,
+                query=query, title=item.get("title") or item["link"],
+                url=item["link"], rank=rank, snippet=snippet, metadata=metadata))
+        if items and not results and skipped_non_https:
+            raise SearchProviderError(SearchFailure.PROVIDER_PROTOCOL_ERROR,
+                "Aliyun OpenSearch returned no usable HTTPS results")
+        return tuple(results)
 
 
 class BraveWebSearchProvider:

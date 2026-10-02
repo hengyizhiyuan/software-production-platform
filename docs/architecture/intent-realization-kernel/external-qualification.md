@@ -1,9 +1,13 @@
 # Separate Web Search live qualification
 
-Current constraint: `SPG_WEB_SEARCH_API_KEY` is withheld. Every qualification
-that requires actual Web retrieval is `BLOCKED_EXTERNAL`; deterministic provider
-fixtures and available GitHub retrieval may still be tested. A partial pass
-cannot be reported as full GC-EX-12 or Web Search live success.
+The 2026-09-27 Brave credential constraint below is historical. Watt now has
+a selected Aliyun OpenSearch provider with a separate server-side key. Current
+real Web Search qualification is recorded in the
+[live qualification runbook](../../operations/web-search-live-qualification.md).
+Deterministic provider fixtures and direct Fetch alone never prove live Web
+Search success.
+
+## Historical deferred entry
 
 Current frozen-source test service is at port 8079; the completed predecessor at
 8078 is stopped and its database/workspace volumes are preserved. Verify the

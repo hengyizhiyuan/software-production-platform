@@ -22,7 +22,7 @@ else:
     from journey import ProductClient, ROOT
 
 
-def qualification_checks(scope, interaction, evidence, stream):
+def qualification_checks(scope, interaction, evidence, stream, selected_web_provider=None):
     sources = evidence.get('evidence', [])
     messages = interaction.get('conversation_messages', [])
     answer = next((item for item in reversed(messages) if item.get('actor') == 'WATT'), {})
@@ -41,7 +41,8 @@ def qualification_checks(scope, interaction, evidence, stream):
             and 'event: message.completed\n' in stream and 'event: turn.failed\n' not in stream,
         'no_unrequested_production': interaction.get('governed_work_id') is None,
         'real_web_retrieval': any(item.get('source_type') == 'WEB'
-            and item.get('provider') == 'brave-web-search' for item in sources),
+            and item.get('provider') in ({selected_web_provider} if selected_web_provider else
+                {'brave-web-search', 'aliyun-opensearch'}) for item in sources),
         'inspected_web_source_cited': any(item.get('source_type') == 'WEB'
             and item.get('evidence_id') in cited for item in inspected),
     }
@@ -93,9 +94,16 @@ def main():
     def save(name, value):
         (directory / name).write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
-    if not env.get('SPG_WEB_SEARCH_API_KEY', '').strip() and not args.allow_partial:
+    selected = env.get('SPG_WEB_SEARCH_PROVIDER', 'brave').strip() or 'brave'
+    if selected not in {'brave', 'aliyun-opensearch'}:
+        raise SystemExit('Unsupported Web Search provider in qualification environment')
+    credential_name = ('SPG_ALIYUN_OPENSEARCH_API_KEY' if selected == 'aliyun-opensearch'
+        else 'SPG_WEB_SEARCH_API_KEY')
+    provider_identity = ('aliyun-opensearch' if selected == 'aliyun-opensearch'
+        else 'brave-web-search')
+    if not env.get(credential_name, '').strip() and not args.allow_partial:
         receipt = {'scope': args.scope, 'trial': args.trial, 'status': 'BLOCKED_EXTERNAL',
-            'external_dependency': 'SPG_WEB_SEARCH_API_KEY', 'retrieval_attempted': False,
+            'external_dependency': credential_name, 'retrieval_attempted': False,
             'recorded_at': datetime.now(UTC).isoformat(), 'human_acceptance': 'PENDING'}
         save('qualification.json', receipt)
         print(json.dumps(receipt))
@@ -148,7 +156,8 @@ def main():
             if line.startswith('event: ')],
         'source_head': activation.get('active_application_revision'),
         'transport_failure': stream_failure})
-    checks = qualification_checks(args.scope, interaction, evidence, stream)
+    checks = qualification_checks(args.scope, interaction, evidence, stream,
+        selected_web_provider=provider_identity)
     if stream_failure:
         checks['browser_stream_completed'] = False
     status, code_owned = qualification_status(checks, evidence.get('failures', []))
@@ -156,7 +165,7 @@ def main():
         status = 'FAIL'
     receipt = {'case': args.scope, 'trial': args.trial, 'status': status, 'checks': checks,
         'qualified_code_owned_surface': 'PASS' if code_owned else 'FAIL',
-        'external_dependency': 'SPG_WEB_SEARCH_API_KEY' if status == 'BLOCKED_EXTERNAL' else None,
+        'external_dependency': credential_name if status == 'BLOCKED_EXTERNAL' else None,
         'elapsed_seconds': round(time.monotonic() - started, 3),
         'observed_metrics': evidence.get('metrics'), 'manual_rescue_actions': [],
         'human_acceptance': 'PENDING', 'recorded_at': datetime.now(UTC).isoformat()}

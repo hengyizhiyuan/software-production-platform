@@ -15,6 +15,7 @@ from spg.domain.engineering_semantics import (
     SemanticEpistemicStatus,
     SemanticFactAuthority,
     SemanticFactProvenance,
+    SemanticReferenceRole,
 )
 from spg.domain.interaction import (
     InteractionActor,
@@ -77,6 +78,15 @@ def bind_engineering_semantic_facts(
         candidate = candidate.model_copy(
             update={"source_record_ids": source_ids, "source_text": source_text}
         )
+        if candidate.reference_role is SemanticReferenceRole.PROJECT_REPOSITORY and (
+            not isinstance(candidate.value, str)
+            or candidate.value not in source_text
+            or not any(candidate.value in record_by_id[source_id].content
+                       for source_id in source_ids)
+        ):
+            raise InteractionInvariantViolation(
+                "Project repository role requires exact Human source provenance"
+            )
         if any(item not in extraction_by_id for item in candidate.source_extraction_ids):
             raise InteractionInvariantViolation(
                 "Engineering semantic fact cites an unknown neutral extraction"
@@ -91,6 +101,7 @@ def bind_engineering_semantic_facts(
         if existing is not None and candidate.operation is SemanticCandidateOperation.UPSERT:
             same_claim = (
                 existing.value == candidate.value
+                and existing.reference_role == candidate.reference_role
                 and existing.unit == candidate.unit
                 and existing.qualifiers == candidate.qualifiers
             )
@@ -121,6 +132,7 @@ def bind_engineering_semantic_facts(
             id=identity,
             subject=candidate.subject,
             relation=candidate.relation,
+            reference_role=candidate.reference_role,
             value=candidate.value,
             unit=candidate.unit,
             scope=candidate.scope,
@@ -269,6 +281,8 @@ def _fact_identity(
     candidate: EngineeringSemanticFactCandidate,
 ) -> UUID:
     payload = candidate.model_dump(mode="json", exclude={"candidate_id"})
+    if payload.get("reference_role") is None:
+        payload.pop("reference_role", None)
     canonical = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     digest = sha256(canonical.encode("utf-8")).hexdigest()
     return uuid5(NAMESPACE_URL, f"spg:engineering-semantic-fact:{basis_fingerprint}:{digest}")

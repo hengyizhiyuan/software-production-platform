@@ -394,20 +394,31 @@ class Application:
         from spg.application.connectors import ConnectorResolver
         from spg.application.external_research import GovernedExternalResearch
         from spg.providers.external_search import (
-            BoundedPublicHttp, BraveWebSearchProvider, GitHubPublicSearchProvider,
+            AliyunOpenSearchWebProvider, BoundedPublicHttp, BraveWebSearchProvider,
+            GitHubPublicSearchProvider,
         )
         capability = self.interaction_capability()
         http = BoundedPublicHttp()
         github_key = self.settings.github_read_token
         web_key = self.settings.web_search_api_key
+        if self.settings.web_search_provider == "aliyun-opensearch":
+            aliyun_key = self.settings.aliyun_opensearch_api_key
+            web = AliyunOpenSearchWebProvider(
+                http, api_key=None if aliyun_key is None else aliyun_key.get_secret_value(),
+                endpoint=self.settings.aliyun_opensearch_endpoint,
+                workspace=self.settings.aliyun_opensearch_workspace,
+                service_id=self.settings.aliyun_opensearch_service_id,
+            )
+        else:
+            web = BraveWebSearchProvider(
+                http, api_key=None if web_key is None else web_key.get_secret_value(),
+            )
         research = GovernedExternalResearch(
             ConnectorResolver(selected_database),
             github=GitHubPublicSearchProvider(
                 http, token=None if github_key is None else github_key.get_secret_value(),
             ),
-            web=BraveWebSearchProvider(
-                http, api_key=None if web_key is None else web_key.get_secret_value(),
-            ),
+            web=web,
             http=http,
             model=getattr(capability, "runtime", None),
             project_repository=self.repository_asset_service(selected_database).research_context,

@@ -41,6 +41,11 @@ class SemanticRelation(StrEnum):
     ACCEPTANCE_ASSERTION = "ACCEPTANCE_ASSERTION"
 
 
+class SemanticReferenceRole(StrEnum):
+    PROJECT_REPOSITORY = "PROJECT_REPOSITORY"
+    EXTERNAL_REFERENCE = "EXTERNAL_REFERENCE"
+
+
 class SemanticFactAuthority(StrEnum):
     HUMAN_EXPLICIT = "HUMAN_EXPLICIT"
     SYSTEM_INFERRED = "SYSTEM_INFERRED"
@@ -112,6 +117,7 @@ class EngineeringSemanticFactCandidate(BaseModel):
     operation: SemanticCandidateOperation = SemanticCandidateOperation.UPSERT
     subject: str = Field(pattern=r"^[a-z][a-z0-9_.-]{0,127}$")
     relation: SemanticRelation
+    reference_role: SemanticReferenceRole | None = None
     value: SemanticValue
     unit: str | None = Field(default=None, max_length=64)
     scope: str | None = Field(default=None, max_length=255)
@@ -126,6 +132,16 @@ class EngineeringSemanticFactCandidate(BaseModel):
 
     @model_validator(mode="after")
     def candidate_authority_is_observable(self) -> "EngineeringSemanticFactCandidate":
+        if self.reference_role is not None and self.relation is not SemanticRelation.REFERENCE:
+            raise ValueError("A typed reference role requires a REFERENCE relation")
+        if self.reference_role is SemanticReferenceRole.PROJECT_REPOSITORY and (
+            self.authority is not SemanticFactAuthority.HUMAN_EXPLICIT
+            or self.epistemic_status is not SemanticEpistemicStatus.CONFIRMED
+            or self.role_origin is not SemanticRoleOrigin.EXPLICIT
+            or not isinstance(self.value, str)
+            or self.value not in self.source_text
+        ):
+            raise ValueError("PROJECT_REPOSITORY requires exact confirmed Human provenance")
         if self.epistemic_status is SemanticEpistemicStatus.SUPERSEDED:
             raise ValueError("Provider candidates cannot directly assert SUPERSEDED status")
         if (
@@ -157,6 +173,7 @@ class EngineeringSemanticFact(BaseModel):
     id: UUID
     subject: str = Field(pattern=r"^[a-z][a-z0-9_.-]{0,127}$")
     relation: SemanticRelation
+    reference_role: SemanticReferenceRole | None = None
     value: SemanticValue
     unit: str | None = Field(default=None, max_length=64)
     scope: str | None = Field(default=None, max_length=255)
@@ -184,6 +201,7 @@ class SemanticFactReference(BaseModel):
     fact_id: UUID
     subject: str
     relation: SemanticRelation
+    reference_role: SemanticReferenceRole | None = None
     value: SemanticValue
     unit: str | None = None
     scope: str | None = None
@@ -208,6 +226,7 @@ def semantic_fact_reference(
         fact_id=fact.id,
         subject=fact.subject,
         relation=fact.relation,
+        reference_role=fact.reference_role,
         value=fact.value,
         unit=fact.unit,
         scope=fact.scope,

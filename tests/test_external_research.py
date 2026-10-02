@@ -413,6 +413,50 @@ def test_model_information_gap_can_request_governed_search_then_resume_with_evid
     assert "比较与判断" in result.answer
 
 
+def test_combined_research_inspects_both_sources_within_budget_after_web_fetch_failure(monkeypatch):
+    monkeypatch.setenv("SPG_WEB_SEARCH_PROVIDER", "aliyun-opensearch")
+    monkeypatch.setenv("SPG_ALIYUN_OPENSEARCH_API_KEY", "fake-unit-key")
+    monkeypatch.setenv("SPG_ALIYUN_OPENSEARCH_ENDPOINT", "https://example.opensearch.aliyuncs.com")
+
+    web_items = tuple(SearchEvidence(
+        evidence_id=f"external-search:web-{rank}", source_type="WEB",
+        provider="aliyun-opensearch", query="async queue", title=f"Async queue guide {rank}",
+        url=f"https://example.org/guide-{rank}", retrieved_at=datetime.now(UTC),
+        rank=rank, snippet="Async queue implementation", completeness="SEARCH_RESULT",
+    ) for rank in (1, 2))
+
+    class Web:
+        def search(self, query, *, limit=6):
+            return web_items
+
+    class Http:
+        def __init__(self):
+            self.visited = []
+
+        def get(self, url, *, headers=None):
+            self.visited.append(url)
+            if url.endswith("guide-1"):
+                raise SearchProviderError(SearchFailure.FETCH_FAILED, "Unavailable page")
+            return b"<main>Observed async queue implementation</main>", "text/html"
+
+    http = Http()
+    service = GovernedExternalResearch(_Resolver(),
+        github=_GitHub(((_evidence("one"), _evidence("two", 2)),)),
+        web=Web(), http=http, budget=SearchBudget(max_fetches=2))
+    result = service.run(turn_id=uuid4(), interaction_id=uuid4(), work_id=None,
+        user_id="human:test", text="搜索 GitHub 和 Web 中成熟的 async queue 实现",
+        requests=(
+            SearchRequest(intent=SearchIntent.SEARCH_GITHUB_REPOSITORIES,
+                query="async queue", reason="Combined research", origin="HUMAN_EXPLICIT"),
+            SearchRequest(intent=SearchIntent.SEARCH_WEB,
+                query="async queue", reason="Combined research", origin="HUMAN_EXPLICIT"),
+        ))
+    assert result.metrics.fetch_count == 2
+    assert {item.source_type for item in result.evidence if item.completeness == "INSPECTED"} == {
+        "GITHUB", "WEB"}
+    assert http.visited == ["https://example.org/guide-1", "https://example.org/guide-2"]
+
+
 def test_project_specific_research_supplies_committed_asset_evidence_without_work():
     calls, packets, events = [], [], []
     def inspect(**kwargs):

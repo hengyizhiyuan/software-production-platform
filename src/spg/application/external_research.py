@@ -24,7 +24,7 @@ from spg.domain.model_runtime import ModelPurpose, WattModelRuntime
 from spg.domain.response_contract import production_intent_evidence
 from spg.domain.production_intelligence import EngineeringActivity
 from spg.providers.external_search import (
-    BoundedPublicHttp, BraveWebSearchProvider, GitHubPublicSearchProvider,
+    BoundedPublicHttp, WebSearchProvider, GitHubPublicSearchProvider,
     inspect_web_resource,
 )
 
@@ -139,6 +139,17 @@ def _review_order(items: tuple[SearchEvidence, ...], text: str) -> tuple[SearchE
     return tuple((*github, *web))
 
 
+def _inspection_order(items: tuple[SearchEvidence, ...], text: str) -> tuple[SearchEvidence, ...]:
+    """Reserve a chance to inspect Web content in combined research."""
+
+    ordered = _review_order(items, text)
+    github = tuple(item for item in ordered if item.source_type == "GITHUB")
+    web = tuple(item for item in ordered if item.source_type == "WEB")
+    if github and web:
+        return (github[0], *web, *github[1:])
+    return ordered
+
+
 class _SearchDecision(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -211,7 +222,7 @@ class GovernedExternalResearch:
 
     def __init__(
         self, resolver: ConnectorResolver, *, github: GitHubPublicSearchProvider,
-        web: BraveWebSearchProvider, http: BoundedPublicHttp,
+        web: WebSearchProvider, http: BoundedPublicHttp,
         model: WattModelRuntime | None = None, budget: SearchBudget | None = None,
         project_repository=None,
     ) -> None:
@@ -450,7 +461,7 @@ class GovernedExternalResearch:
                 providers.add(resolution.capability.execution_provider)
                 novel = [item for item in found if item.evidence_id not in evidence]
                 if not novel and attempt == 1 and len(evidence) < 2:
-                    failures.append(SearchFailure.NO_RESULTS if not found and not evidence
+                    failures.append(SearchFailure.EMPTY_RESULTS if request.intent is SearchIntent.SEARCH_WEB and not found and not evidence else SearchFailure.NO_RESULTS if not found and not evidence
                                     else SearchFailure.INSUFFICIENT_EVIDENCE)
                 for item in novel:
                     evidence[item.evidence_id] = item
@@ -473,12 +484,12 @@ class GovernedExternalResearch:
                 improved_query = _refined_query(query)
                 if improved_query == query:
                     if not novel and len(evidence) < 2:
-                        failures.append(SearchFailure.NO_RESULTS if not found and not evidence
+                        failures.append(SearchFailure.EMPTY_RESULTS if request.intent is SearchIntent.SEARCH_WEB and not found and not evidence else SearchFailure.NO_RESULTS if not found and not evidence
                                         else SearchFailure.INSUFFICIENT_EVIDENCE)
                     break
                 query = improved_query
                 refinement_count += 1
-        for item in _review_order(tuple(evidence.values()), text):
+        for item in _inspection_order(tuple(evidence.values()), text):
             if fetch_count >= self.budget.max_fetches or monotonic() - started >= self.budget.max_seconds:
                 break
             if item.completeness == "INSPECTED":
@@ -553,10 +564,13 @@ class GovernedExternalResearch:
                     deadline: float | None = None) -> tuple[str, int | None]:
         explanations = {
             SearchFailure.CREDENTIAL_REQUIRED: "部分来源需要配置只读检索凭据；配置后可继续检索当前问题",
+            SearchFailure.AUTHENTICATION_FAILED: "检索凭据未通过提供方验证",
             SearchFailure.RATE_LIMITED: "检索提供方限流，可稍后重试",
             SearchFailure.NETWORK_FAILURE: "网络请求失败，结果不代表来源不存在",
             SearchFailure.PROVIDER_UNAVAILABLE: "当前没有可用的检索提供方",
+            SearchFailure.PROVIDER_PROTOCOL_ERROR: "检索提供方返回了无法解析的响应",
             SearchFailure.NO_RESULTS: "当前查询未返回结果，不能推断实现不存在",
+            SearchFailure.EMPTY_RESULTS: "当前查询未返回结果，不能推断实现不存在",
             SearchFailure.FETCH_FAILED: "部分页面无法读取，只有搜索摘要可用",
             SearchFailure.UNSUPPORTED_SEARCH_TYPE: "请求的检索类型当前不受支持",
             SearchFailure.INSUFFICIENT_EVIDENCE: "现有来源不足以形成可靠结论",
