@@ -308,6 +308,40 @@ def test_chinese_add_link_with_repository_and_preview_is_production_request():
     assert evidence.action_requested
 
 
+def test_greenfield_response_contract_admits_work_without_fabricating_repository_action():
+    record = _record("我想开发一个恒溢启源公司的企业官网主页")
+    ir = governed_ir(record, production=ProductionIntent(
+        objective="开发恒溢启源公司的企业官网主页",
+        primary_change="创建企业官网首页", current=True,
+        bounded_change=True, new_work=True, repository_required=False))
+    contract = build_response_contract(_assessment(Intent.BUILD, semantic_ir=ir),
+        source_records=(record,), interpretation=_intent(Mode.DESIGN))
+    assert contract.interaction_mode is Mode.EXECUTE
+    assert contract.advancement_obligation is Advance.ACK_AND_EXECUTE
+    assert all("explicit repository action request" not in reason
+        for reason in contract.decision_basis)
+
+
+def test_unresolved_existing_source_stays_a_human_decision_not_execution():
+    record = _record("继续修改我之前那个官网项目")
+    ir = governed_ir(record, production=ProductionIntent(
+        objective="继续修改之前的官网", primary_change="修改官网",
+        current=True, bounded_change=True, repository_required=True,
+        unresolved_arguments=("repository_reference",)), requires_human=True)
+    readiness = WorkAdmissionReadiness(
+        status=WorkAdmissionReadinessStatus.NOT_READY,
+        profile="test", profile_version="1", satisfied_requirements=("intent",),
+        missing_information=("repository_reference",),
+        unresolved_material_questions=("选择之前的官网项目",),
+        reasons=("Existing source selection is unresolved",),
+        basis_fingerprint="a" * 64)
+    contract = build_response_contract(_assessment(Intent.BUILD,
+        semantic_ir=ir, readiness=readiness), source_records=(record,),
+        interpretation=_intent(Mode.DESIGN))
+    assert contract.interaction_mode is Mode.DECIDE
+    assert contract.advancement_obligation is not Advance.ACK_AND_EXECUTE
+
+
 @pytest.mark.parametrize("human_text", [
     "搜索 GitHub 和 Web 中成熟的表单验证实现，结合当前项目建议该如何使用，并给出真实来源。",
     "帮我查下 GitHub 上有没有能增加缓存的实现，给出建议。",

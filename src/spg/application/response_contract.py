@@ -388,16 +388,21 @@ def build_response_contract(
     mode = interpretation.interaction_mode if interpretation else _LEGACY_MODES[intent]
     from spg.application.intent_realization import production_evidence as governed_production_evidence
     production_evidence = governed_production_evidence(getattr(assessment, "semantic_ir", None))
+    human_source_selection = bool(getattr(assessment, "semantic_ir", None) and any(
+        item.production is not None and item.production.current
+        and item.production.repository_required
+        and "repository_reference" in item.production.unresolved_arguments
+        for item in assessment.semantic_ir.items))
     if capability_alignment.response_mode is CapabilityAlignmentMode.PRODUCTION_ADVISORY:
         mode = Mode.ANSWER
     elif capability_alignment.response_mode in {
         CapabilityAlignmentMode.PRODUCTION_REQUEST,
         CapabilityAlignmentMode.PRODUCTION,
     }:
-        if (
-            production_evidence.production_request
-            and production_evidence.repository_relevant
-        ):
+        if human_source_selection:
+            mode = Mode.DECIDE
+        elif (production_evidence.production_request
+                and assessment.readiness.status is WorkAdmissionReadinessStatus.READY):
             mode = Mode.EXECUTE
         elif intent in {
             ConversationTurnIntent.BUILD,
@@ -507,19 +512,20 @@ def build_response_contract(
     if (
         capability_alignment.response_mode
         is CapabilityAlignmentMode.PRODUCTION_REQUEST
-        and production_evidence.repository_relevant
+        and production_evidence.production_request
+        and assessment.readiness.status is WorkAdmissionReadinessStatus.READY
         and assessment.basis_work_revision_id is None
     ):
-        # The explicit Human command is itself authority for Work formation and
-        # read-only repository acquisition. Later private-access, delivery and
-        # acceptance boundaries remain separately governed.
+        # The current production goal authorizes Work formation. Repository
+        # acquisition is only an additional effect when its typed source/action
+        # is actually present in governed IR.
         advancement = Advance.ACK_AND_EXECUTE
         if Move.PROCEED not in moves:
             moves = (*moves, Move.PROCEED)
         reasons.append(
-            "The explicit repository action request authorizes governed Work "
-            "admission and read-only baseline acquisition without another "
-            "ceremonial confirmation."
+            "The current governed production request authorizes Work admission "
+            "without another ceremonial confirmation; source effects remain "
+            "owned by the applicable repository or managed-source owner."
         )
 
     explore_strategy = None

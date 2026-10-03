@@ -8,13 +8,14 @@ from pydantic import ValidationError
 from spg.application.intent_realization import (
     IntentRealizationKernel, IntentRealizationViolation, canonical_operation,
     executable_semantic_actions, blocking_action_arguments, reconcile_obligation, validate_turn_completion,
+    production_evidence,
 )
 from spg.application.interaction import (
     _grounded_named_branch_question, _grounded_status_facts, _research_repository_source,
 )
 from spg.domain.engineering_semantics import (
     EngineeringSemanticFactCandidate, SemanticEpistemicStatus, SemanticFactAuthority,
-    SemanticRelation, SemanticRoleOrigin,
+    SemanticRelation, SemanticRoleOrigin, SemanticReferenceRole,
 )
 from spg.domain.interaction_actions import CanonicalOperation as O, ActionSpeechAct as S
 from spg.domain.intent_realization import (
@@ -59,10 +60,12 @@ def test_named_branch_question_requires_exact_human_target_and_owner_branch_list
 def test_project_research_uses_one_confirmed_human_repository_fact():
     url = "http://qualified-git:8080/business-app.git"
     fact = SimpleNamespace(is_current=True, subject="repository.url",
-        relation=SemanticRelation.REFERENCE, value=url,
+        relation=SemanticRelation.REFERENCE, reference_role=SemanticReferenceRole.PROJECT_REPOSITORY,
+        value=url,
         authority=SemanticFactAuthority.HUMAN_EXPLICIT,
         epistemic_status=SemanticEpistemicStatus.CONFIRMED,
         provenance=SimpleNamespace(role_origin=SemanticRoleOrigin.EXPLICIT,
+            source_record_ids=(uuid4(),),
             source_text=f"Current project repository: {url}"))
     assessment = SimpleNamespace(semantic_ir=SimpleNamespace(repository_source=None),
         engineering_semantic_facts=(fact,))
@@ -78,11 +81,12 @@ def test_project_research_uses_one_confirmed_human_repository_fact():
             source_text=f"Current project repository: {url}"),))
     fact_only = SimpleNamespace(semantic_ir=SimpleNamespace(repository_source=None,
         items=(fact_item,)), engineering_semantic_facts=())
-    assert _research_repository_source(fact_only) == url
+    assert _research_repository_source(fact_only) is None
     other = "https://example.invalid/other.git"
     conflicting = SimpleNamespace(**{**fact.__dict__, "value": other,
-        "provenance": SimpleNamespace(role_origin=SemanticRoleOrigin.EXPLICIT,
-            source_text=f"Current project repository: {other}")})
+            "provenance": SimpleNamespace(role_origin=SemanticRoleOrigin.EXPLICIT,
+                source_record_ids=(uuid4(),),
+                source_text=f"Current project repository: {other}")})
     assert _research_repository_source(SimpleNamespace(semantic_ir=assessment.semantic_ir,
         engineering_semantic_facts=(fact, conflicting))) is None
     inferred = SimpleNamespace(**{**fact.__dict__,
@@ -158,7 +162,7 @@ def action(record, *, op=O.CREATE_AND_SWITCH_BRANCH, act=S.EXPLICIT_REQUEST, ide
                 for effect in effects if branch is not None)))
 
 
-def govern(record, items, *, records=None, clauses=None, history=()):
+def govern(record, items, *, records=None, clauses=None, history=(), active_work=None, observations=()):
     effects = tuple(dict.fromkeys(effect.effect for item in items if item.action
         for effect in item.action.atomic_branch_effects))
     raw = TurnSemanticCandidate(items=tuple(items), clauses=clauses or (SemanticClause(
@@ -170,7 +174,8 @@ def govern(record, items, *, records=None, clauses=None, history=()):
         temporal_scope="CURRENT" if effects else "UNRESOLVED",
         requested_effects=effects),))
     basis = SimpleNamespace(records=records or (record,), interaction=SimpleNamespace(id=uuid4()),
-        basis_fingerprint="a"*64, governed_semantic_history=history)
+        basis_fingerprint="a"*64, governed_semantic_history=history,
+        active_work_context=active_work, observed_reality=observations)
     candidate = SimpleNamespace(semantic_intent=raw, provider_identity="test:semantic-compiler")
     return IntentRealizationKernel().govern(candidate, basis)
 
@@ -185,6 +190,125 @@ def test_work_history_question_uses_persisted_status_owner():
     assert ir.items[0].kind is K.STATUS_QUERY
     assert ir.items[0].subject == "WORK_HISTORY"
     assert ir.items[0].answer is None
+
+
+def _production_item(record, **changes):
+    production = ProductionIntent(objective=record.content,
+        primary_change="创建企业官网首页", current=True, bounded_change=True,
+        new_work=True, **changes)
+    return SemanticItem(item_id="website", kind=K.PRODUCTION_INTENT,
+        statement=record.content, provenance=(provenance(record),),
+        confidence=.95, production=production)
+
+
+def test_greenfield_incident_has_work_obligation_without_repository_action():
+    record = source("我想开发一个恒溢启源公司的企业官网主页")
+    ir = govern(record, (_production_item(record),))
+    assert len(ir.current_production) == 1
+    assert ir.current_production[0].repository_reference is None
+    assert not ir.current_production[0].repository_required
+    assert not ir.operational_requests
+    evidence = production_evidence(ir)
+    assert evidence.production_request
+    assert not evidence.repository_relevant
+    assert not evidence.action_requested
+    obligations = IntentRealizationKernel().obligations(ir, uuid4())
+    assert len(obligations) == 1
+    assert obligations[0].plane.value == "WORK"
+    assert obligations[0].semantic_item_id == "website"
+
+
+def test_new_website_source_storage_does_not_imply_existing_repository():
+    record = source("开发一个新的企业官网")
+    ir = govern(record, (_production_item(record),))
+    assert ir.current_production[0].repository_reference is None
+    assert not ir.current_production[0].repository_required
+    assert production_evidence(ir).production_request
+    assert not production_evidence(ir).repository_relevant
+
+
+def test_future_repository_action_cannot_become_current_greenfield_source():
+    url = "https://github.com/acme/later"
+    record = source(f"开发一个新的企业官网；以后再看 {url}")
+    future = SemanticItem(item_id="future-repository",
+        kind=K.OPERATIONAL_ACTION, statement="以后再看现有仓库",
+        provenance=(provenance(record),), confidence=.95,
+        action=OperationalIntent(operation="INSPECT_REPOSITORY",
+            arguments={"repository_source": SemanticArgument(value=url,
+                provenance=provenance(record, url))},
+            speech_act=S.EXPLICIT_REQUEST, current=False))
+    ir = govern(record, (_production_item(record), future))
+    evidence = production_evidence(ir)
+    assert evidence.production_request
+    assert evidence.repository_source is None
+    assert not evidence.repository_relevant
+    assert not evidence.action_requested
+
+
+def test_advisory_website_question_has_no_production_or_source_obligation():
+    record = source("企业官网一般应该包含哪些内容？")
+    item = SemanticItem(item_id="advice", kind=K.QUESTION,
+        statement=record.content, provenance=(provenance(record),),
+        confidence=.95, answer="介绍、服务和联系方式。")
+    ir = govern(record, (item,))
+    assert not ir.current_production
+    assert not production_evidence(ir).production_request
+    assert all(obligation.plane.value != "WORK"
+        for obligation in IntentRealizationKernel().obligations(ir, uuid4()))
+
+
+def test_existing_source_requirement_without_basis_or_uncertainty_is_rejected():
+    record = source("我想开发一个恒溢启源公司的企业官网主页")
+    with pytest.raises(IntentRealizationViolation, match="PRODUCTION_SOURCE_BASIS_MISSING"):
+        govern(record, (_production_item(record, repository_required=True),))
+
+
+def test_existing_repository_reference_is_preserved():
+    url = "https://github.com/acme/site"
+    record = source(f"把 {url} 这个项目首页改版")
+    argument = SemanticArgument(value=url, provenance=provenance(record, url))
+    ir = govern(record, (_production_item(record,
+        repository_required=True, repository_reference=argument),))
+    assert ir.repository_source == url
+    assert ir.current_production[0].repository_required
+
+
+def test_model_cannot_invent_an_existing_repository_url_under_human_provenance():
+    record = source("继续修改我之前那个官网项目")
+    invented = SemanticArgument(value="https://github.com/acme/invented",
+        provenance=provenance(record))
+    with pytest.raises(IntentRealizationViolation, match="ACTION_ARGUMENT_PROVENANCE_INVALID"):
+        govern(record, (_production_item(record, repository_required=True,
+            repository_reference=invented),))
+
+
+def test_unresolved_existing_project_requires_human_source_selection():
+    record = source("继续修改我之前那个官网项目")
+    ir = govern(record, (_production_item(record, repository_required=True,
+        unresolved_arguments=("repository_reference",)),))
+    assert ir.items[0].requires_human
+    assert ir.current_production[0].repository_reference is None
+
+
+def test_governed_current_work_source_satisfies_existing_basis():
+    record = source("给这个产品增加一个联系页面")
+    active = SimpleNamespace(work_revision=SimpleNamespace(
+        repository_identity="watt://product/site", repository_ref="refs/heads/main",
+        source_revision="abc123"), relevant_reality_references=())
+    ir = govern(record, (_production_item(record, repository_required=True),),
+        active_work=active)
+    assert ir.current_production[0].repository_required
+    assert not ir.items[0].requires_human
+
+
+def test_owner_observed_product_source_satisfies_existing_basis():
+    record = source("给这个产品增加一个联系页面")
+    observed = ObservedEffect(owner="product-managed-source",
+        evidence_references=("product-source:one:1",),
+        facts={"repository_identity": "watt://product/site", "accepted_revision": "abc123"})
+    ir = govern(record, (_production_item(record, repository_required=True),),
+        observations=(observed,))
+    assert not ir.items[0].requires_human
 
 
 @pytest.mark.parametrize("raw", ["CREATE_AND_SWITCH_BRANCH", "CREATE_BRANCH_AND_CHECKOUT", "CREATE_NEW_BRANCH_AND_SWITCH", "NEW_BRANCH_AND_SWITCH"])

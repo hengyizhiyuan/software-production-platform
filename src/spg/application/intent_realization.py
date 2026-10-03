@@ -373,6 +373,22 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
                 "operation": operation.value, "arguments": bound_arguments})})
         if item.production is not None:
             production = item.production
+            existing_source = bool(active is not None and
+                active.work_revision.repository_identity and
+                active.work_revision.repository_ref and
+                active.work_revision.source_revision)
+            existing_source = existing_source or any(
+                observation.owner == "product-managed-source"
+                and observation.facts.get("repository_identity")
+                and observation.facts.get("accepted_revision")
+                for observation in getattr(basis, "observed_reality", ()))
+            if (production.current and production.repository_required
+                    and production.repository_reference is None
+                    and "repository_reference" not in production.unresolved_arguments
+                    and not existing_source):
+                raise IntentRealizationViolation(
+                    "PRODUCTION_SOURCE_BASIS_MISSING: existing repository requirement needs "
+                    "an exact source, governed source basis, or unresolved repository selection")
             if production.current and production.unresolved_arguments:
                 item = item.model_copy(update={"requires_human": True})
             if production.current and not any(s.origin in {SemanticOrigin.HUMAN_EXPLICIT,
@@ -381,6 +397,13 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
             if production.repository_reference:
                 validate_source(production.repository_reference.provenance,
                     argument=production.repository_reference, key="repository_source")
+                if (production.repository_reference.provenance.origin in {
+                        SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}
+                        and production.repository_reference.value not in
+                            production.repository_reference.provenance.source_text):
+                    raise IntentRealizationViolation(
+                        "ACTION_ARGUMENT_PROVENANCE_INVALID: existing repository source "
+                        "must be exact in its Human clause")
             for argument in (*production.target_paths,*production.allowed_areas):
                 validate_source(argument.provenance,argument=argument,key="explicit_target_path")
                 if (argument.provenance.origin not in {SemanticOrigin.HUMAN_EXPLICIT,SemanticOrigin.HUMAN_CORRECTION}
@@ -873,9 +896,27 @@ def production_evidence(ir):
     """Compatibility shape for admitted production consumers, derived only from IR."""
     from spg.domain.response_contract import ProductionIntentEvidence
     current = bool(ir and ir.current_production)
-    source = None if ir is None else ir.repository_source
-    return ProductionIntentEvidence(production_request=current, repository_relevant=current,
-        action_requested=current, repository_source=source)
+    source = None
+    if ir is not None:
+        source = next((goal.repository_reference.value for goal in ir.current_production
+            if goal.repository_reference is not None), None)
+        if source is None:
+            source = next((item.action.arguments["repository_source"].value
+                for item in ir.operational_requests
+                if "repository_source" in item.action.arguments), None)
+    from spg.domain.interaction_actions import CanonicalOperation
+    repository_operations = {CanonicalOperation.ACQUIRE_REPOSITORY,
+        CanonicalOperation.INSPECT_REPOSITORY, CanonicalOperation.SEARCH_REPOSITORY,
+        CanonicalOperation.QUERY_CURRENT_BRANCH, CanonicalOperation.CREATE_BRANCH,
+        CanonicalOperation.SWITCH_BRANCH, CanonicalOperation.CREATE_AND_SWITCH_BRANCH}
+    action_requested = bool(ir and any(
+        canonical_operation(item.action.operation) in repository_operations
+        for item in ir.operational_requests))
+    required = bool(ir and any(goal.repository_required or goal.repository_reference
+        for goal in ir.current_production))
+    return ProductionIntentEvidence(production_request=current,
+        repository_relevant=bool(source or required or action_requested),
+        action_requested=action_requested, repository_source=source)
 
 
 def current_dependent_analysis_requests(ir) -> tuple[str, ...]:

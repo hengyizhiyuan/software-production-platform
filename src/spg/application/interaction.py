@@ -13,6 +13,7 @@ import re
 from threading import RLock
 from time import monotonic, sleep
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
+from sqlalchemy import select
 
 from spg.application.intent_realization import (
     IntentRealizationKernel, executable_semantic_actions, latest_assessment_revision,
@@ -127,6 +128,7 @@ from spg.infrastructure.model_runtime import ModelFailureKind, ModelProviderErro
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.product_schema import product_managed_sources
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
 
@@ -886,8 +888,6 @@ class WorkInteractionService:
                 not recovery
                 and (
                     not evidence.production_request
-                    or not evidence.repository_relevant
-                    or not evidence.action_requested
                     or assessment.readiness.status
                     is not WorkAdmissionReadinessStatus.READY
                 )
@@ -902,12 +902,12 @@ class WorkInteractionService:
                 if evidence.repository_source
                 else None
                 if recovery
-                else RepositoryAcquisitionState.WAITING_FOR_REPOSITORY_SOURCE
+                else RepositoryAcquisitionState.NOT_STARTED
             ),
             next_step=(
                 "Acquire the Human-supplied repository baseline."
                 if evidence.repository_source
-                else "Bind the referenced repository source."
+                else "Prepare the governed Product source or Watt managed workspace."
             ),
         )
         try:
@@ -924,7 +924,7 @@ class WorkInteractionService:
                 repository_state=(
                     RepositoryAcquisitionState.FAILED_RETRYABLE
                     if evidence.repository_source
-                    else RepositoryAcquisitionState.WAITING_FOR_REPOSITORY_SOURCE
+                    else RepositoryAcquisitionState.FAILED_RETRYABLE
                 ),
                 next_step=(
                     "Retry governed Work admission from the preserved request."
@@ -2007,6 +2007,11 @@ class WorkInteractionService:
         with self.database.unit_of_work() as uow:
             interaction_store = InteractionStore(uow.session)
             interaction = interaction_store.interaction(interaction_id)
+            product_id = interaction_store.product_context(interaction_id)
+            managed_source = (None if product_id is None else uow.session.execute(
+                select(product_managed_sources).where(
+                    product_managed_sources.c.product_id == product_id)
+            ).mappings().one_or_none())
             ledger = IntentRealizationStore(uow.session)
             for previous_turn in interaction_store.turns(interaction_id):
                 for obligation in ledger.obligations(previous_turn.id):
@@ -2017,6 +2022,15 @@ class WorkInteractionService:
                                 "semantic_item_id":obligation.semantic_item_id,"version":obligation.version}))
             revision = None if interaction is None or interaction.current_work_id is None else (
                 ProductStore(uow.session).current_work_reality_revision(interaction.current_work_id))
+        if managed_source is not None:
+            observations.append(ObservedEffect(owner="product-managed-source",
+                evidence_references=(f"product-source:{product_id}:{managed_source['version']}",),
+                facts={"product_id": str(product_id),
+                    "repository_identity": managed_source["repository_identity"],
+                    "accepted_ref": managed_source["accepted_ref"],
+                    "accepted_revision": managed_source["accepted_revision"],
+                    "accepted_tree": managed_source["accepted_tree"],
+                    "version": managed_source["version"]}))
         if revision is not None:
             observations.append(ObservedEffect(owner="work-reality",
                 evidence_references=(f"work-reality-revision:{revision.id}",),
@@ -2432,8 +2446,12 @@ class WorkInteractionService:
                 final_basis = self._basis(turn.interaction_id)
                 if final_basis.active_work_context is not None:
                     actual = self.get_shared_understanding(turn.interaction_id)
+                    report_branch = any(item.action is not None and item.action.current
+                        and item.action.operation in {"QUERY_CURRENT_BRANCH", "CREATE_BRANCH",
+                            "SWITCH_BRANCH", "CREATE_AND_SWITCH_BRANCH"}
+                        for item in assessment.semantic_ir.items)
                     independent_action_answer = "\n".join(filter(None,(
-                        _repository_branch_status_answer("",actual),
+                        _repository_branch_status_answer("", actual) if report_branch else None,
                         f"当前目标已准入生产 Work：{final_basis.active_work_context.work_revision.desired_outcome}",
                         self._work_reality_status_candidate(final_basis).natural_response)))
             running_obligations = [item for item in ledger_projection["obligations"]
@@ -2477,7 +2495,13 @@ class WorkInteractionService:
                     item = by_item[obligation["semantic_item_id"]]
                     meaning = item.statement
                     disposition = "需要确认" if obligation["state"] == "REQUIRES_HUMAN" else "已阻塞并保留证据"
-                    boundaries.append(f"尚未完成：{meaning}（{disposition}）。")
+                    if (item.production is not None
+                            and item.production.repository_required
+                            and "repository_reference" in item.production.unresolved_arguments):
+                        boundaries.append(
+                            "尚未确认要继续的现有项目源码；请指定仓库或选择已有产品。")
+                    else:
+                        boundaries.append(f"尚未完成：{meaning}（{disposition}）。")
                 independent_action_answer = "\n".join(filter(None, (
                     independent_action_answer, *boundaries)))
             if blocked and any(item["state"] == "REQUIRES_HUMAN" for item in blocked):
@@ -2528,8 +2552,12 @@ class WorkInteractionService:
                 # reconciliation. Discard its earlier Work-state prose and
                 # render from the newly observed owner revision.
                 current_work = self.get_shared_understanding(turn.interaction_id)
+                report_branch = any(item.action is not None and item.action.current
+                    and item.action.operation in {"QUERY_CURRENT_BRANCH", "CREATE_BRANCH",
+                        "SWITCH_BRANCH", "CREATE_AND_SWITCH_BRANCH"}
+                    for item in assessment.semantic_ir.items)
                 response_content = "\n".join(filter(None, (
-                    _repository_branch_status_answer("", current_work),
+                    _repository_branch_status_answer("", current_work) if report_branch else None,
                     self._work_reality_status_candidate(final_response_basis).natural_response,
                     *(item.answer for item in answer_items),
                 )))
@@ -4349,6 +4377,15 @@ class WorkInteractionService:
                 "当前没有需要你处理的事项；下一步由 Watt 按当前步骤继续推进。"
                 if current is not None
                 else "当前没有需要你处理的事项；下一步由 Watt 形成可执行步骤。"
+            )
+        reality_reader = getattr(self, "get_shared_understanding", None)
+        repository_reality = (reality_reader(basis.interaction.id)
+            if callable(reality_reader) else None)
+        if (repository_reality is not None
+                and repository_reality.repository_acquisition_state
+                    is RepositoryAcquisitionState.WAITING_FOR_REPOSITORY_SOURCE):
+            next_step = (
+                "当前缺少继续现有项目所需的仓库来源；需要你确认要继续的源码。"
             )
         answer = conclusion + progress + next_step + limitation
         diagnose = bool(semantic_ir and any(item.subject == "WORK_DIAGNOSTIC" for item in semantic_ir.items))

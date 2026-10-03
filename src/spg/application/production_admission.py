@@ -47,9 +47,9 @@ from spg.application.intent_realization import executable_semantic_actions, curr
 class ProductionAdmissionTrigger:
     """Translate explicit Human authority into existing Work admission actions.
 
-    The Human request authorizes Work formation and read-only acquisition of an
-    explicitly supplied repository source. It does not grant private repository
-    access, delivery authority, or Human acceptance.
+    The current production request authorizes Work formation. An exact existing
+    source may be acquired read-only; greenfield Work uses Watt's managed source.
+    Neither path grants private access, delivery authority, or Human acceptance.
     """
 
     def __init__(
@@ -124,6 +124,22 @@ class ProductionAdmissionTrigger:
         if work_id is None:
             return None
         observation = self.assets.latest_attempt_for_work(work_id)
+        with self.work.database.unit_of_work() as uow:
+            product = ProductStore(uow.session)
+            selected = product.resource_for_work(work_id)
+            revision = product.current_work_reality_revision(work_id)
+        if (observation is None and revision is not None
+                and revision.source_revision is not None
+                and (self._has_product_source_basis(work_id)
+                    or (selected is not None
+                        and revision.repository_identity == selected.repository_identity
+                        and revision.repository_ref == selected.authoritative_ref))):
+            return (
+                ProductionAdmissionExecutionState.WORK_CREATED,
+                RepositoryAcquisitionState.READY,
+                "Continue Steering from the bound Work source.",
+                None,
+            )
         if observation is None:
             return (
                 ProductionAdmissionExecutionState.WORK_CREATED,
@@ -646,8 +662,6 @@ class ProductionAdmissionTrigger:
             return
         if (
             not evidence.production_request
-            or not evidence.repository_relevant
-            or not evidence.action_requested
             or assessment.readiness.status is not WorkAdmissionReadinessStatus.READY
             or projection.latest_assessment is None
             or not projection.latest_assessment_current
@@ -665,10 +679,9 @@ class ProductionAdmissionTrigger:
             basis_fingerprint=assessment.basis_fingerprint,
             authority_identity=request_record.source,
             rationale=(
-                "The Human explicitly requested repository acquisition and software "
-                "production. That request authorizes Work formation and read-only "
-                "baseline acquisition; private access, delivery, and final acceptance "
-                "remain separately governed."
+                "The current governed production request authorizes Work formation. "
+                "Source acquisition or managed-source preparation follows the typed "
+                "source basis; delivery and final acceptance remain separately governed."
             ),
         )
         if self._has_product_source_basis(admitted.work_id):

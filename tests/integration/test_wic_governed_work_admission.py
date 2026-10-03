@@ -264,10 +264,26 @@ class _DeclaredRepositoryIntent(_ReadyCapability):
                 raw = raw.model_copy(update={"items": (raw.items[0].model_copy(update={"action":
                     raw.items[0].action.model_copy(update={"arguments": {} if argument is None else {"repository_source":argument}})}),)})
             else:
+                has_product_source = any(effect.owner == "product-managed-source"
+                    and effect.facts.get("accepted_revision")
+                    for effect in basis.observed_reality)
                 raw = semantic_candidate(record,production=ProductionIntent(objective=candidate.interpreted_motive,
                     primary_change=candidate.desired_outcome,current=True,bounded_change=True,
-                    repository_required=True,repository_reference=argument))
+                    repository_required=True,repository_reference=argument,
+                    unresolved_arguments=("repository_reference",)
+                        if argument is None and not has_product_source else ()))
         return candidate.model_copy(update={"semantic_intent":raw})
+
+
+class _DeclaredGreenfieldIntent(_ReadyCapability):
+    def interpret(self, basis):
+        candidate = super().interpret(basis)
+        record = basis.records[-1]
+        return candidate.model_copy(update={"semantic_intent": semantic_candidate(record,
+            production=ProductionIntent(objective="开发恒溢启源公司的企业官网主页",
+                primary_change="创建恒溢启源公司的企业官网主页（首页）",
+                current=True, bounded_change=True, new_work=True,
+                repository_reference=None, repository_required=False))})
 
 
 class _BoundedFeatureExecutionCapability:
@@ -2300,15 +2316,68 @@ def test_explicit_pull_recovers_admitted_work_that_has_no_prior_acquisition_atte
     assert driver.scheduled == [admitted.work_id]
 
 
+def test_exact_greenfield_incident_reaches_managed_source_and_steering(
+    postgres_database: Database, tmp_path: Path,
+) -> None:
+    work, interactions = _services_for_resource(
+        postgres_database, tmp_path, "test://greenfield-incident")
+    interactions.capability = _DeclaredGreenfieldIntent()
+    assets = RepositoryAssetService(postgres_database,
+        asset_root=tmp_path / "greenfield-assets", import_root=tmp_path)
+    driver = _RecordingDriver()
+    client = TestClient(create_http_application(application=object(),
+        database=postgres_database, work_service=work,
+        orchestrator=_NoopOrchestrator(), steering_driver=driver,
+        runtime_activation=_RuntimeActivation(), interaction_service=interactions,
+        repository_asset_service=assets), raise_server_exceptions=False)
+    interaction = interactions.create_interaction(
+        human_identity="human:requester", start_work_context=True)
+    with client:
+        submitted = client.post(f"/api/interactions/{interaction.id}/turns",
+            json={"content": "我想开发一个恒溢启源公司的企业官网主页",
+                "human_identity": "human:requester"})
+        assert submitted.status_code == 202, submitted.text
+        turn_id = UUID(submitted.json()["turn_id"])
+        deadline = time.monotonic() + 10
+        while interactions.get_turn(turn_id).status.value not in {"COMPLETED", "FAILED"}:
+            assert time.monotonic() < deadline
+            time.sleep(.02)
+    assert interactions.get_turn(turn_id).status.value == "COMPLETED"
+    final = interactions.get_shared_understanding(interaction.id)
+    assert final.latest_assessment is not None
+    ir = final.latest_assessment.semantic_ir
+    assert len(ir.current_production) == 1
+    assert ir.current_production[0].repository_reference is None
+    assert not ir.current_production[0].repository_required
+    assert not ir.operational_requests
+    work_id = final.governed_work_id
+    assert work_id is not None
+    assert final.repository_acquisition_state.value == "READY", (
+        final.production_next_step, final.governed_revision, driver.scheduled)
+    assert final.governed_revision.repository_identity is not None
+    with postgres_database.unit_of_work() as uow:
+        selected = ProductStore(uow.session).resource_for_work(work_id)
+        assert selected is not None
+        assert selected.repository_identity == final.governed_revision.repository_identity
+        assert final.governed_revision.source_revision is not None
+        plan = SteeringStore(uow.session).plan_for_work(work_id)
+        assert plan is not None
+        assert SteeringStore(uow.session).active_revision(plan.id) is not None
+    assert driver.scheduled == [work_id]
+    ledger = interactions.realization_projection(turn_id)["obligations"]
+    assert any(item["plane"] == "WORK" and item["state"] == "SATISFIED"
+        for item in ledger)
+    response = final.conversation_messages[-1].content
+    assert "尚未绑定可确认的仓库分支" not in response
+    assert "WAITING_FOR_REPOSITORY_SOURCE" not in response
+
+
 @pytest.mark.parametrize(
     "content,expected_repository_state,expected_intakes",
     (
-        ("Fix this bug in my repo.", "WAITING_FOR_REPOSITORY_SOURCE", 0),
-        (
-            "Pull https://github.com/acme/private-repository and fix this bug.",
-            "WAITING_FOR_AUTHORIZATION",
-            1,
-        ),
+        ("Fix this bug in my repo.", "UNRESOLVED_SOURCE", 0),
+        ("Pull https://github.com/acme/private-repository and fix this bug.",
+            "WAITING_FOR_AUTHORIZATION", 1),
     ),
 )
 def test_unbound_repository_request_creates_work_without_bypassing_access(
@@ -2408,6 +2477,12 @@ def test_unbound_repository_request_creates_work_without_bypassing_access(
             candidate = client.get(
                 f"/api/interactions/{interaction.id}/shared-understanding"
             ).json()
+            if expected_repository_state == "UNRESOLVED_SOURCE" and (
+                candidate["governed_work_id"] is None
+                and candidate.get("latest_assessment") is not None
+            ):
+                payload = candidate
+                break
             if (
                 candidate["governed_work_id"] is not None
                 and candidate["production_admission_state"] == "WORK_CREATED"
@@ -2419,6 +2494,22 @@ def test_unbound_repository_request_creates_work_without_bypassing_access(
             time.sleep(0.01)
 
     assert payload is not None
+    if expected_repository_state == "UNRESOLVED_SOURCE":
+        assert payload["governed_work_id"] is None
+        assert len(assets.requests) == 0
+        assert driver.scheduled == []
+        turn_id = UUID(response.json()["turn_id"])
+        deadline = time.monotonic() + 5
+        while interactions.get_turn(turn_id).status.value not in {"COMPLETED", "FAILED"}:
+            assert time.monotonic() < deadline
+            time.sleep(.01)
+        assert interactions.get_turn(turn_id).status.value == "COMPLETED"
+        final = interactions.get_shared_understanding(interaction.id)
+        assert final.latest_assessment.semantic_ir.items[0].requires_human
+        assert final.conversation_messages
+        assert "请指定仓库或选择已有产品" in final.conversation_messages[-1].content
+        assert "当前没有需要你处理的事项" not in final.conversation_messages[-1].content
+        return
     assert payload["production_admission_state"] == "WORK_CREATED"
     assert payload["repository_acquisition_state"] == expected_repository_state
     assert payload["governed_revision"]["repository_identity"] is None

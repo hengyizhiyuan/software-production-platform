@@ -10,6 +10,7 @@ import pytest
 import spg.application.interaction as interaction_module
 from spg.application.interaction import WorkInteractionService
 from spg.domain.interaction import WorkImpactDisposition
+from spg.domain.interaction import RepositoryAcquisitionState
 from spg.domain.native_execution import QueueCondition
 from spg.domain.response_contract import InteractionMode
 
@@ -24,8 +25,10 @@ def projection(monkeypatch):
             candidate_id=None, authorization_id=None,
         ),
         queue=[],
+        repository_state=None,
     )
     basis = SimpleNamespace(
+        interaction=SimpleNamespace(id=uuid4()),
         active_work_context=SimpleNamespace(
             work_revision=SimpleNamespace(
                 work_id=work_id, motive="Account access",
@@ -65,7 +68,9 @@ def projection(monkeypatch):
     monkeypatch.setattr(interaction_module, "ProductStore", lambda _: ProductReads())
     monkeypatch.setattr(interaction_module, "SteeringStore", lambda _: SteeringReads())
     monkeypatch.setattr(interaction_module, "NativeExecutionStore", lambda _: QueueReads())
-    service = SimpleNamespace(database=ReadOnlyDatabase())
+    service = SimpleNamespace(database=ReadOnlyDatabase(),
+        get_shared_understanding=lambda _interaction_id: SimpleNamespace(
+            repository_acquisition_state=state.repository_state))
     now = datetime.now(UTC)
 
     def entry(*, old_pwu=False, old_attempt=False, condition=QueueCondition.EXECUTING,
@@ -138,3 +143,12 @@ def test_without_current_binding_historical_queue_does_not_imply_running(project
     assert "当前 Work 尚未进入生产执行" in candidate.natural_response
     assert "重要限制：目前还没有可报告的生产或验证结果" in candidate.natural_response
     assert "EXECUTING" not in candidate.natural_response
+
+
+def test_waiting_for_existing_source_reports_human_blocker_instead_of_no_action(projection):
+    state, _entry, project = projection
+    state.binding = None
+    state.repository_state = RepositoryAcquisitionState.WAITING_FOR_REPOSITORY_SOURCE
+    answer = project().natural_response
+    assert "需要你确认要继续的源码" in answer
+    assert "当前没有需要你处理的事项" not in answer
