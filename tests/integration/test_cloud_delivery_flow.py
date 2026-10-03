@@ -20,6 +20,7 @@ from spg.domain.delivery import HumanAcceptanceRequest
 from spg.infrastructure.aliyun_cloud import (
     InvocationResult, StagedCloudArtifact, TemporaryCloudSession,
 )
+from spg.infrastructure.cloud_delivery_network import IngressResult
 from spg.infrastructure.persistence.cloud_delivery_schema import (
     cloud_connections, cloud_delivery_authorizations, cloud_deployments,
     cloud_prepared_artifacts,
@@ -40,6 +41,12 @@ class FakeCloud:
         self.precheck_result = None
         self.zero_exit_unverified = False
         self.assumed_role_override = None
+        self.ingress_operations = []
+
+    def ensure_public_ingress(self, _session, operation):
+        self.ingress_operations.append(operation)
+        return IngressResult("sg-abcdefgh", "sgr-abcdefgh",
+            operation.description, "CREATED", "request-ingress", True)
 
     def service_identity(self):
         return {"AccountId": "1111111111111111",
@@ -147,13 +154,15 @@ def test_exact_connection_target_authorization_and_deployment(
         region_id="cn-hangzhou", instance_id="i-abcdefgh",
         name="官网生产环境", os_name="Alibaba Cloud Linux  3.2104 LTS 64位",
         os_type="Linux",
-        status="Running", public_address="203.0.113.10",
+        status="Running", public_address="8.8.8.8",
         cloud_assistant_ready=True)
     provider = FakeCloud(target)
+    product_id = uuid4()
     service = CloudDeliveryService(postgres_database, delivery, Settings(),
         provider=provider, builder=FakeBuilder(tmp_path),
         owner_check=lambda _actor, manifest_id: {
-            "summary": {"work_id": str(work_id)}, "current": manifest_id == manifest.id,
+            "summary": {"work_id": str(work_id), "product_id": str(product_id)},
+            "current": manifest_id == manifest.id,
             "acceptance": {"decision": "ACCEPT"}},
         external_probe=lambda *_: True)
     actor = "human:owner"
@@ -194,7 +203,8 @@ def test_exact_connection_target_authorization_and_deployment(
         target_account_id=target.account_id,
         target_region_id=target.region_id,
         target_instance_id=target.instance_id,
-        port=8080, rationale="approved exact version and target")
+        port=8080, exposure_mode="PUBLIC",
+        rationale="approved exact version and target")
     wrong = request.model_copy(update={"target_instance_id": "i-different"})
     with pytest.raises(CloudDeliveryError, match="AUTHORIZATION_TARGET_MISMATCH"):
         service.authorize(actor, work_id, wrong)
@@ -210,12 +220,13 @@ def test_exact_connection_target_authorization_and_deployment(
     assert result["health_verified"] and result["business_verified"]
     assert [row["kind"] for row in result["operations"]] == [
         "PREPARE_WATT_DEPLOYMENT_HOST_V1", "CHECK_DEPLOYMENT_PREREQUISITES",
-        "STAGE_ARTIFACT", "DEPLOY_WATT_RELEASE",
+        "ENSURE_WATT_PUBLIC_INGRESS_V1", "STAGE_ARTIFACT", "DEPLOY_WATT_RELEASE",
         "VERIFY_WATT_RUNTIME", "VERIFY_PUBLIC_BUSINESS"]
     assert all(row["verified"] for row in result["operations"])
     assert all(row["invocation_id"] and row["command_id"]
         for row in result["operations"] if row["kind"] not in {
-            "STAGE_ARTIFACT", "VERIFY_PUBLIC_BUSINESS"})
+            "ENSURE_WATT_PUBLIC_INGRESS_V1", "STAGE_ARTIFACT",
+            "VERIFY_PUBLIC_BUSINESS"})
     assert "must-not-persist" not in str(result)
     assert "must-not-persist" not in str(service.deployment(actor, UUID(result["id"])))
     assert "must-not-persist" in provider.operations[2][1]
@@ -300,6 +311,33 @@ def test_exact_connection_target_authorization_and_deployment(
             assert receipt["provider_error_code"] == (
                 "GuestOSError" if port == 9093 else None)
             assert receipt["provider_error_info"] is None
+    service.external_probe = lambda *_: False
+    blocked_public_auth = service.authorize(actor, work_id,
+        request.model_copy(update={"expected_current_deployment_id": None,
+            "port": 9097}))
+    blocked_public = service.execute(actor, UUID(blocked_public_auth["id"]))
+    assert blocked_public["state"] == "NEEDS_HUMAN_ATTENTION"
+    assert blocked_public["health_verified"] and not blocked_public["business_verified"]
+    service.external_probe = lambda *_: True
+    retry_auth = service.authorize(actor, work_id, request.model_copy(update={
+        "expected_current_deployment_id": UUID(blocked_public["id"]),
+        "port": 9097}))
+    retried = service.execute(actor, UUID(retry_auth["id"]))
+    assert retried["state"] == "SUCCEEDED" and retried["business_verified"]
+    assert service.deployment(actor, UUID(blocked_public["id"]))["state"] == (
+        "NEEDS_HUMAN_ATTENTION")
+    before_ingress = len(provider.ingress_operations)
+    service.external_probe = lambda *_: (_ for _ in ()).throw(
+        AssertionError("PRIVATE deployment must not probe public HTTP"))
+    private_auth = service.authorize(actor, work_id, request.model_copy(update={
+        "expected_current_deployment_id": None, "port": 9096,
+        "exposure_mode": "PRIVATE"}))
+    private = service.execute(actor, UUID(private_auth["id"]))
+    assert private["state"] == "SUCCEEDED" and private["health_verified"]
+    assert not private["business_verified"]
+    assert len(provider.ingress_operations) == before_ingress
+    assert not any(row["kind"] in {"ENSURE_WATT_PUBLIC_INGRESS_V1",
+        "VERIFY_PUBLIC_BUSINESS"} for row in private["operations"])
     with postgres_database.unit_of_work() as uow:
         persisted=str(uow.session.execute(select(cloud_connections.c.payload)).scalars().all())
         persisted+=str(uow.session.execute(select(cloud_delivery_authorizations.c.payload)).scalars().all())

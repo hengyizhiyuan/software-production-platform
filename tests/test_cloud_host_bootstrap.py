@@ -15,14 +15,16 @@ from spg.infrastructure.cloud_delivery_commands import (
 )
 
 
-def test_one_connection_policy_has_exact_five_actions_and_two_run_as_identities():
+def test_one_connection_policy_has_only_delivery_and_network_actions():
     policy = connection_policy("1284723705318814")
     statements = policy["Statement"]
-    assert len(statements) == 3
+    assert len(statements) == 5
     assert {action for row in statements for action in row["Action"]} == {
         "ecs:DescribeInstances", "ecs:DescribeCloudAssistantStatus",
         "ecs:RunCommand", "ecs:DescribeInvocations",
-        "ecs:DescribeInvocationResults"}
+        "ecs:DescribeInvocationResults", "ecs:DescribeSecurityGroups",
+        "ecs:DescribeSecurityGroupAttribute", "ecs:AuthorizeSecurityGroup",
+        "ecs:RevokeSecurityGroup"}
     instance = "acs:ecs:*:1284723705318814:instance/*"
     command = "acs:ecs:*:1284723705318814:command/*"
     assert statements[0]["Resource"] == [instance]
@@ -30,7 +32,10 @@ def test_one_connection_policy_has_exact_five_actions_and_two_run_as_identities(
     assert statements[1]["Condition"] == {"StringEquals": {
         "ecs:CommandRunAs": ["root", "wattdeploy"]}}
     assert statements[2]["Resource"] == [instance, command]
-    assert all(row["Resource"] != ["*"] for row in statements)
+    assert statements[3]["Resource"] == [
+        "acs:ecs:*:1284723705318814:securitygroup/*"]
+    assert statements[4] == {"Effect":"Allow", "Action":[
+        "ecs:AuthorizeSecurityGroup"], "Resource":"*"}
 
 
 def test_bootstrap_is_fixed_fingerprinted_and_separate_from_nonroot_precheck():

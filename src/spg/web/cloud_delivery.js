@@ -20,6 +20,7 @@
   }
   function errorCopy(code) {
     if(code==='CONNECTION_EXECUTION_GRANT_REQUIRED')return '当前云连接缺少受控执行能力。请为这个连接完成一次连接策略更新；更换 ECS 不需要创建目标专用策略。';
+    if(['SECURITY_GROUP_DISCOVERY_FAILED','SECURITY_GROUP_RULE_READ_FAILED','PUBLIC_INGRESS_CREATE_FAILED'].includes(code))return '当前开发期云连接缺少受控网络暴露能力。完成一次连接策略迁移后，未来选择 ECS 不再需要修改 RAM。';
     if(code==='UNSUPPORTED_HOST_PROFILE')return '这台 ECS 的系统不在当前自动准备范围内，请选择 Alibaba Cloud Linux 3 ECS。';
     if(code==='HOST_PROFILE_CONFLICT')return '这台 ECS 的现有状态无法安全自动准备，请选择另一台 ECS。';
     return code;
@@ -36,6 +37,7 @@
     if(deployment.blocker==='HOST_PROFILE_CONFLICT')return '这台 ECS 的现有主机状态与受控部署环境冲突，Watt 已安全停止。请选择另一台 ECS。';
     if(['BLOCKED_APPROVED_PACKAGE_SOURCE','BLOCKED_APPROVED_PACKAGE_INSTALL'].includes(deployment.blocker))return '这台 ECS 无法从受控软件源准备所需组件，Watt 已停止且没有部署交付物。请选择另一台 ECS，或检查云侧软件源可达性。';
     if(['BLOCKED_ROOTLESS_SETUP','BLOCKED_ROOTLESS_VERIFICATION'].includes(deployment.blocker))return '这台 ECS 的非 root 容器运行时未能安全完成准备，Watt 已停止且没有部署交付物。请选择另一台 ECS。';
+    if(deployment.blocker==='PUBLIC_BUSINESS_VERIFICATION_REQUIRED')return '目标机本地服务已启动，但公网 HTTP 验证尚未通过。可选择“公网部署”发起新的受控尝试；Watt 会检查并在授权范围内创建精确入站规则。';
     return deployment.blocker;
   }
   async function renderFlow() {
@@ -55,7 +57,7 @@
       const prior=state.targetDeployments.find(d=>d.state==='SUCCEEDED'&&d.target.account_id===c.target.account_id&&d.target.region_id===c.target.region_id&&d.target.instance_id===c.target.instance_id);
       const latest=state.targetDeployments.find(d=>d.target.account_id===c.target.account_id&&d.target.region_id===c.target.region_id&&d.target.instance_id===c.target.instance_id);
       const targetLabel=`${escape(c.target.name)} · ${escape(c.target.region_id)} · ${escape(c.target.instance_id)}`;
-      step=`<h3>确认本次部署</h3><div class="facts"><div class="fact"><span class="fact-label">成果版本</span><span>${escape(state.fingerprint?.slice(0,16))}</span></div><div class="fact"><span class="fact-label">目标 ECS</span><span>${targetLabel}</span></div><div class="fact"><span class="fact-label">环境状态</span><span>Watt 将自动检查并在受支持时准备</span></div>${prior?`<div class="fact"><span class="fact-label">当前 Watt 部署</span><span>${escape(prior.manifest_id.slice(0,12))} · 端口 ${escape(prior.port)}。</span></div>`:''}</div>${latest?.blocker?`<p class="muted">${escape(blockerCopy(latest))}</p>`:''}<form id="cloud-deploy-form"><div class="field"><label for="cloud-port">对外端口</label><input id="cloud-port" name="port" type="number" min="1024" max="65535" value="${prior?.port||8080}" required></div><div class="field"><label for="cloud-rationale">本次授权依据</label><input id="cloud-rationale" name="rationale" required placeholder="确认把这个已验收版本部署到所选 ECS"></div><p class="muted">授权后 Watt 会自动检查并在需要时创建专用部署环境、准备 rootless 容器运行时、部署交付物并验证。Watt 不会修改 Nginx、安全组、防火墙或其他服务。</p><button class="button" type="submit">授权并部署</button></form>`;
+      step=`<h3>确认本次部署</h3><div class="facts"><div class="fact"><span class="fact-label">成果版本</span><span>${escape(state.fingerprint?.slice(0,16))}</span></div><div class="fact"><span class="fact-label">目标 ECS</span><span>${targetLabel}</span></div><div class="fact"><span class="fact-label">环境状态</span><span>Watt 将自动检查并在受支持时准备</span></div>${prior?`<div class="fact"><span class="fact-label">当前 Watt 部署</span><span>${escape(prior.manifest_id.slice(0,12))} · 端口 ${escape(prior.port)}。</span></div>`:''}</div>${latest?.blocker?`<p class="muted">${escape(blockerCopy(latest))}</p>`:''}<form id="cloud-deploy-form"><div class="field"><label for="cloud-port">部署端口</label><input id="cloud-port" name="port" type="number" min="1024" max="65535" value="${prior?.port||8080}" required></div><div class="field"><label for="cloud-exposure-mode">网络暴露方式</label><select id="cloud-exposure-mode" name="exposure_mode" required><option value="PRIVATE" selected>内部部署：不修改安全组</option><option value="PUBLIC">公网部署：允许所有 IPv4 地址访问所选 TCP 端口</option></select></div><div class="field"><label for="cloud-rationale">本次授权依据</label><input id="cloud-rationale" name="rationale" required placeholder="确认把这个已验收版本部署到所选 ECS"></div><p class="muted">Watt 会自动准备主机并部署。选择公网部署时，Watt 仅检查或创建当前 ECS 关联安全组中该 TCP 端口的入站规则，并在创建后重新读取规则、验证真实公网 HTTP。不会修改 Nginx 或主机防火墙。</p><details class="advanced-disclosure"><summary>查看一次连接所需的完整受限云策略</summary><pre class="code-view">${escape(JSON.stringify(c.connection_policy,null,2))}</pre></details><button class="button" type="submit">授权并部署</button></form>`;
     }
     node.innerHTML=`${choose}${reselect}<div class="link-row"><button class="button quiet" type="button" data-cloud-create>添加云连接</button></div>${step}<p id="cloud-delivery-message" class="muted" role="status"></p>`;
   }
@@ -137,7 +139,10 @@
         await loadConnection(result.id);
       }else{
         const c=state.connection,p=Number(form.elements.namedItem('port').value);
-        const prior=state.targetDeployments.find(d=>d.state==='SUCCEEDED'&&d.port===p&&
+        const exposureMode=form.elements.namedItem('exposure_mode').value;
+        const prior=state.targetDeployments.find(d=>(d.state==='SUCCEEDED'||
+          (exposureMode==='PUBLIC'&&d.state==='NEEDS_HUMAN_ATTENTION'&&d.health_verified&&
+            !d.business_verified&&d.manifest_id===state.manifest))&&d.port===p&&
           d.target.account_id===c.target.account_id&&d.target.region_id===c.target.region_id&&
           d.target.instance_id===c.target.instance_id);
         message('正在检查交付成果并部署，请勿重复提交。');
@@ -145,9 +150,11 @@
           connection_id:c.id,manifest_id:state.manifest,manifest_fingerprint:state.fingerprint,
           target_account_id:c.target.account_id,target_region_id:c.target.region_id,
           target_instance_id:c.target.instance_id,expected_current_deployment_id:prior?.id||null,
-          port:p,rationale:form.elements.namedItem('rationale').value.trim()});
+          port:p,exposure_mode:exposureMode,
+          rationale:form.elements.namedItem('rationale').value.trim()});
         const result=await request(`/api/cloud-deliveries/${auth.id}/execute`,'POST');
-        message(result.state==='SUCCEEDED'?'部署成功，运行及公网验证均已通过。':
+        message(result.state==='SUCCEEDED'?(exposureMode==='PUBLIC'?
+          '公网部署成功，运行及真实公网 HTTP 验证均已通过。':'内部部署成功，目标机运行验证已通过。'):
           `部署状态：${result.state}。${blockerCopy(result)||'请查看证据。'}`,result.state!=='SUCCEEDED');
       }
     }catch(error){message(errorCopy(error.message),true);}finally{button.disabled=false;}

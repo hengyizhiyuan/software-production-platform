@@ -15,13 +15,17 @@ from sqlalchemy import insert, select, update
 from spg.domain.cloud_delivery import (
     CloudConnection, CloudConnectionState, CloudDeliveryAuthorization,
     CloudDeliveryAuthorizationRequest, CloudDeployment, CloudDeploymentState,
-    CloudOperationKind, CloudOperationReceipt, CloudPreparedArtifact, HostProfileState,
+    CloudExposureMode, CloudOperationKind, CloudOperationReceipt, CloudPreparedArtifact,
+    HostProfileState,
     connection_policy, trust_policy,
 )
 from spg.infrastructure.aliyun_cloud import (
     AliyunCloudProvider, CloudProviderError, InvocationResult,
 )
 from spg.infrastructure.cloud_delivery_artifact import CloudDeliveryArtifactBuilder
+from spg.infrastructure.cloud_delivery_network import (
+    CloudNetworkError, EnsureWattPublicIngressV1,
+)
 from spg.infrastructure import cloud_delivery_commands as commands
 from spg.infrastructure.persistence.cloud_delivery_schema import (
     cloud_connections, cloud_delivery_authorizations, cloud_deployments,
@@ -41,6 +45,28 @@ def _now() -> datetime:
 
 def _payload(value) -> dict:
     return value.model_dump(mode="json")
+
+
+def _has_public_ipv4(target) -> bool:
+    try:
+        address = ip_address(target.public_address)
+        return address.version == 4 and address.is_global
+    except ValueError:
+        return False
+
+
+def _verified_previous(previous: CloudDeployment, target, port: int,
+        exposure_mode: CloudExposureMode, prepared: CloudPreparedArtifact) -> bool:
+    if (previous.target.identity != target.identity or previous.port != port or
+            not previous.health_verified or not previous.runtime_name or
+            not previous.image_identity):
+        return False
+    if previous.state is CloudDeploymentState.SUCCEEDED:
+        return True
+    return (previous.state is CloudDeploymentState.NEEDS_HUMAN_ATTENTION and
+        exposure_mode is CloudExposureMode.PUBLIC and not previous.business_verified and
+        previous.artifact_sha256 == prepared.artifact_sha256 and
+        previous.image_identity == prepared.image_identity)
 
 
 def _require_assumed_role(observed: dict, role_arn: str) -> None:
@@ -126,6 +152,7 @@ class CloudDeliveryService:
         context = self.delivery.candidate_context(work_id)
         if context is None or context["repository_revision"] != manifest.repository_revision:
             raise CloudDeliveryError("STALE_CANDIDATE")
+        context = {**context, "product_id": detail["summary"].get("product_id")}
         return manifest, context
 
     @staticmethod
@@ -376,19 +403,27 @@ class CloudDeliveryService:
         if target.identity != (request.target_account_id,
                 request.target_region_id, request.target_instance_id):
             raise CloudDeliveryError("AUTHORIZATION_TARGET_MISMATCH")
-        if previous_row is not None:
-            previous = CloudDeployment.model_validate(previous_row)
-            if previous.state is not CloudDeploymentState.SUCCEEDED or \
-                    previous.target.identity != target.identity or previous.port != request.port or \
-                    previous.image_identity is None:
-                raise CloudDeliveryError("PREVIOUS_DEPLOYMENT_NOT_VERIFIED")
-        elif request.expected_current_deployment_id is not None:
+        if request.exposure_mode is CloudExposureMode.PUBLIC and not _has_public_ipv4(target):
+            raise CloudDeliveryError("PUBLIC_ADDRESS_REQUIRED")
+        if previous_row is None and request.expected_current_deployment_id is not None:
             raise CloudDeliveryError("PREVIOUS_DEPLOYMENT_NOT_FOUND")
         prepared = self._prepared(manifest, context)
+        if previous_row is not None and not _verified_previous(
+                CloudDeployment.model_validate(previous_row), target, request.port,
+                request.exposure_mode, prepared):
+            raise CloudDeliveryError("PREVIOUS_DEPLOYMENT_NOT_VERIFIED")
+        try:
+            product_id = UUID(str(context["product_id"])) if context.get(
+                "product_id") else None
+        except ValueError as error:
+            raise CloudDeliveryError("PRODUCT_IDENTITY_INVALID") from error
+        if request.exposure_mode is CloudExposureMode.PUBLIC and product_id is None:
+            raise CloudDeliveryError("PRODUCT_IDENTITY_REQUIRED")
         if prepared.artifact_kind == "FULL_APPLICATION_RUNTIME":
             raise CloudDeliveryError("FULL_APPLICATION_RUNTIME_CONFIGURATION_REQUIRED")
         now = _now()
         authorization = CloudDeliveryAuthorization(id=uuid4(), work_id=work_id,
+            product_id=product_id,
             actor_id=actor, connection_id=connection.id, manifest_id=manifest.id,
             manifest_fingerprint=manifest.fingerprint,
             artifact_sha256=prepared.artifact_sha256,
@@ -396,7 +431,8 @@ class CloudDeliveryService:
             host_recipe_version=commands.HOST_RECIPE_VERSION,
             host_recipe_fingerprint=commands.HOST_RECIPE_FINGERPRINT,
             expected_current_deployment_id=request.expected_current_deployment_id,
-            port=request.port, rationale=request.rationale, authorized_at=now)
+            port=request.port, exposure_mode=request.exposure_mode,
+            rationale=request.rationale, authorized_at=now)
         with self.database.unit_of_work() as uow:
             uow.session.execute(insert(cloud_delivery_authorizations).values(
                 id=authorization.id, connection_id=connection.id,
@@ -547,12 +583,14 @@ class CloudDeliveryService:
             deployment_id = uuid4()
             deployment = CloudDeployment(id=deployment_id, authorization_id=authorization_id,
                 connection_id=connection.id, manifest_id=manifest.id,
-                work_id=authorization.work_id, target=authorization.target,
+                work_id=authorization.work_id, product_id=authorization.product_id,
+                target=authorization.target,
                 state=CloudDeploymentState.PRECHECK,
                 artifact_sha256=prepared.artifact_sha256,
                 image_identity=prepared.image_identity,
                 runtime_name=commands.runtime_name(deployment_id),
-                port=authorization.port, created_at=now, updated_at=now)
+                port=authorization.port, exposure_mode=authorization.exposure_mode,
+                created_at=now, updated_at=now)
             uow.session.execute(insert(cloud_deployments).values(id=deployment.id,
                 authorization_id=authorization_id, connection_id=connection.id,
                 manifest_id=manifest.id, state=deployment.state.value,
@@ -564,9 +602,8 @@ class CloudDeliveryService:
             if authorization.expected_current_deployment_id:
                 previous = CloudDeployment.model_validate(self.deployment(actor,
                     authorization.expected_current_deployment_id))
-                if previous.state is not CloudDeploymentState.SUCCEEDED or \
-                        previous.target.identity != deployment.target.identity or \
-                        previous.port != deployment.port or not previous.health_verified:
+                if not _verified_previous(previous, deployment.target, deployment.port,
+                        deployment.exposure_mode, prepared):
                     raise CloudDeliveryError("PREVIOUS_DEPLOYMENT_CHANGED")
             session = self.provider.assume_role(connection.role_arn, connection.external_id)
             identity = self.provider.assumed_identity(session)
@@ -576,6 +613,12 @@ class CloudDeliveryService:
                     observed.os_type.lower() != "linux" or \
                     not observed.cloud_assistant_ready:
                 raise CloudDeliveryError("TARGET_NOT_READY")
+            if authorization.exposure_mode is CloudExposureMode.PUBLIC and not _has_public_ipv4(
+                    observed):
+                raise CloudDeliveryError("PUBLIC_ADDRESS_REQUIRED")
+            deployment = deployment.model_copy(update={"target": observed,
+                "updated_at": _now()})
+            self._save_deployment(deployment)
             self.provider.target_grant_dry_run(session, observed)
             if not re.match(r"^Alibaba Cloud Linux\s+3(?:\.|\b)", observed.os_name):
                 raise CloudDeliveryError("UNSUPPORTED_HOST_PROFILE")
@@ -589,6 +632,48 @@ class CloudDeliveryService:
                 commands.CheckPrerequisites(deployment.port,
                     previous_name=None if previous is None else previous.runtime_name,
                     previous_image=None if previous is None else previous.image_identity))
+            if authorization.exposure_mode is CloudExposureMode.PUBLIC:
+                network_started = _now()
+                network_op = EnsureWattPublicIngressV1(authorization,
+                    deployment.id, deployment.target, deployment.port)
+                try:
+                    ingress = self.provider.ensure_public_ingress(session, network_op)
+                    network_receipt = CloudOperationReceipt(
+                        kind=CloudOperationKind.ENSURE_WATT_PUBLIC_INGRESS_V1,
+                        account_id=deployment.target.account_id,
+                        region_id=deployment.target.region_id,
+                        instance_id=deployment.target.instance_id,
+                        security_group_id=ingress.security_group_id,
+                        security_group_rule_id=ingress.rule_id,
+                        network_rule_description=(ingress.description if
+                            ingress.effect == "CREATED" else None),
+                        network_effect=ingress.effect,
+                        provider_request_id=ingress.request_id,
+                        started_at=network_started, finished_at=_now(),
+                        status="OBSERVED", exit_code=None,
+                        output_summary=("WATT_PUBLIC_INGRESS_CREATED" if
+                            ingress.effect == "CREATED" else
+                            "WATT_PUBLIC_INGRESS_REUSED"), verified=ingress.verified)
+                except (CloudProviderError, CloudNetworkError) as error:
+                    network_receipt = CloudOperationReceipt(
+                        kind=CloudOperationKind.ENSURE_WATT_PUBLIC_INGRESS_V1,
+                        account_id=deployment.target.account_id,
+                        region_id=deployment.target.region_id,
+                        instance_id=deployment.target.instance_id,
+                        started_at=network_started, finished_at=_now(),
+                        status="FAILED", exit_code=None,
+                        output_summary=error.code, verified=False)
+                    deployment = deployment.model_copy(update={
+                        "operations": deployment.operations + (network_receipt,),
+                        "updated_at": _now()})
+                    self._save_deployment(deployment)
+                    raise
+                deployment = deployment.model_copy(update={
+                    "operations": deployment.operations + (network_receipt,),
+                    "updated_at": _now()})
+                self._save_deployment(deployment)
+                if not network_receipt.verified:
+                    raise CloudNetworkError("PUBLIC_INGRESS_UNVERIFIED")
             deployment = deployment.model_copy(update={"state": CloudDeploymentState.STAGING,
                 "updated_at": _now()})
             self._save_deployment(deployment)
@@ -623,6 +708,13 @@ class CloudDeliveryService:
             deployment = self._effect(deployment, session,
                 commands.VerifyRuntime(deployment.id, prepared.image_identity,
                     deployment.port))
+            if deployment.exposure_mode is CloudExposureMode.PRIVATE:
+                deployment = deployment.model_copy(update={
+                    "state": CloudDeploymentState.SUCCEEDED,
+                    "health_verified": True, "business_verified": False,
+                    "blocker": None, "updated_at": _now()})
+                self._save_deployment(deployment)
+                return _payload(deployment)
             entrypoint = manifest.software.runtime_recipe.entrypoint
             if entrypoint is None:
                 raise CloudDeliveryError("BUSINESS_VERIFICATION_UNAVAILABLE")
@@ -656,7 +748,7 @@ class CloudDeliveryService:
             return _payload(deployment)
         except Exception as error:
             code = (getattr(error, "code", str(error)) if isinstance(error,
-                (CloudDeliveryError, CloudProviderError)) else
+                (CloudDeliveryError, CloudProviderError, CloudNetworkError)) else
                 "CLOUD_EXECUTION_INTERNAL_ERROR")
             # _effect commits the invocation receipt before it reports a failed
             # observed operation. Reload it so reconciliation never erases that

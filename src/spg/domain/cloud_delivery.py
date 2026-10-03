@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
+from typing import Literal
 import re
 from uuid import UUID
 
@@ -35,6 +36,8 @@ class CloudOperationKind(StrEnum):
     DEPLOY_WATT_RELEASE = "DEPLOY_WATT_RELEASE"
     VERIFY_WATT_RUNTIME = "VERIFY_WATT_RUNTIME"
     VERIFY_PUBLIC_BUSINESS = "VERIFY_PUBLIC_BUSINESS"
+    ENSURE_WATT_PUBLIC_INGRESS_V1 = "ENSURE_WATT_PUBLIC_INGRESS_V1"
+    REVOKE_WATT_PUBLIC_INGRESS_V1 = "REVOKE_WATT_PUBLIC_INGRESS_V1"
     ROLLBACK_WATT_RELEASE = "ROLLBACK_WATT_RELEASE"
     VERIFY_ROLLBACK_BUSINESS = "VERIFY_ROLLBACK_BUSINESS"
     STOP_WATT_RUNTIME = "STOP_WATT_RUNTIME"
@@ -60,6 +63,11 @@ class HostProfileState(StrEnum):
     UNSUPPORTED = "UNSUPPORTED"
     CONFLICTED = "CONFLICTED"
     FAILED = "FAILED"
+
+
+class CloudExposureMode(StrEnum):
+    PRIVATE = "PRIVATE"
+    PUBLIC = "PUBLIC"
 
 
 class CloudTarget(BaseModel):
@@ -129,6 +137,7 @@ class CloudDeliveryAuthorizationRequest(BaseModel):
     target_instance_id: str = Field(pattern=r"^i-[a-zA-Z0-9]{6,64}$")
     expected_current_deployment_id: UUID | None = None
     port: int = Field(ge=1024, le=65535)
+    exposure_mode: CloudExposureMode = CloudExposureMode.PRIVATE
     rationale: str = Field(min_length=1, max_length=4000)
 
 
@@ -137,6 +146,7 @@ class CloudDeliveryAuthorization(BaseModel):
 
     id: UUID
     work_id: UUID
+    product_id: UUID | None = None
     actor_id: str
     connection_id: UUID
     manifest_id: UUID
@@ -150,6 +160,8 @@ class CloudDeliveryAuthorization(BaseModel):
         pattern=r"^[0-9a-f]{64}$")
     expected_current_deployment_id: UUID | None = None
     port: int = Field(ge=1024, le=65535)
+    # Historical authorizations predate this field and always requested public reachability.
+    exposure_mode: CloudExposureMode = CloudExposureMode.PUBLIC
     rationale: str
     authorized_at: datetime
 
@@ -193,6 +205,12 @@ class CloudOperationReceipt(BaseModel):
     host_before: HostProfileState | None = None
     host_after: HostProfileState | None = None
     host_effects: tuple[str, ...] = ()
+    security_group_id: str | None = Field(default=None,
+        pattern=r"^sg-[A-Za-z0-9]{6,64}$")
+    security_group_rule_id: str | None = Field(default=None,
+        pattern=r"^sgr-[A-Za-z0-9]{6,64}$")
+    network_rule_description: str | None = Field(default=None, max_length=512)
+    network_effect: Literal["REUSED", "CREATED", "REVOKED"] | None = None
     started_at: datetime
     finished_at: datetime
     status: str
@@ -209,6 +227,7 @@ class CloudDeployment(BaseModel):
     connection_id: UUID
     manifest_id: UUID
     work_id: UUID
+    product_id: UUID | None = None
     target: CloudTarget
     state: CloudDeploymentState
     artifact_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
@@ -216,6 +235,7 @@ class CloudDeployment(BaseModel):
     staging_object: str | None = None
     runtime_name: str | None = None
     port: int = Field(ge=1024, le=65535)
+    exposure_mode: CloudExposureMode = CloudExposureMode.PUBLIC
     operations: tuple[CloudOperationReceipt, ...] = ()
     health_verified: bool = False
     business_verified: bool = False
@@ -240,6 +260,7 @@ def connection_policy(account_id: str) -> dict:
         raise ValueError("Invalid customer account ID")
     instance = f"acs:ecs:*:{account_id}:instance/*"
     command = f"acs:ecs:*:{account_id}:command/*"
+    security_group = f"acs:ecs:*:{account_id}:securitygroup/*"
     return {"Version": "1", "Statement": [
         {"Effect": "Allow", "Action": ["ecs:DescribeInstances",
             "ecs:DescribeCloudAssistantStatus"], "Resource": [instance]},
@@ -248,6 +269,11 @@ def connection_policy(account_id: str) -> dict:
             "Condition": {"StringEquals": {"ecs:CommandRunAs": ["root", "wattdeploy"]}}},
         {"Effect": "Allow", "Action": ["ecs:DescribeInvocations",
             "ecs:DescribeInvocationResults"], "Resource": [instance, command]},
+        {"Effect": "Allow", "Action": ["ecs:DescribeSecurityGroups",
+            "ecs:DescribeSecurityGroupAttribute", "ecs:RevokeSecurityGroup"],
+            "Resource": [security_group]},
+        {"Effect": "Allow", "Action": ["ecs:AuthorizeSecurityGroup"],
+            "Resource": "*"},
     ]}
 
 

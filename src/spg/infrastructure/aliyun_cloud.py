@@ -14,6 +14,10 @@ from spg.domain.cloud_delivery import CloudTarget
 from spg.infrastructure.cloud_delivery_commands import (
     CloudCommand, PrepareDeploymentHostV1, CheckPrerequisites, compile_operation,
 )
+from spg.infrastructure.cloud_delivery_network import (
+    CloudNetworkError, EnsureWattPublicIngressV1, IngressResult,
+    RevokeWattPublicIngressV1,
+)
 
 
 class CloudProviderError(RuntimeError):
@@ -117,6 +121,144 @@ class AliyunCloudProvider:
                 session.access_key_secret, session.security_token).get_caller_identity())
         except Exception as error:
             raise CloudProviderError("ASSUMED_IDENTITY_UNAVAILABLE") from error
+
+    def _selected_security_group(self, session: TemporaryCloudSession,
+                                 target: CloudTarget) -> str:
+        """The caller never supplies a security group; resolve it from the exact ECS."""
+        from alibabacloud_ecs20140526 import models
+        client = self._ecs_client(session, target.region_id)
+        try:
+            body = self._body(client.describe_instances(models.DescribeInstancesRequest(
+                region_id=target.region_id,
+                instance_ids=json.dumps([target.instance_id]))))
+            rows = body["Instances"]["Instance"]
+            if len(rows) != 1 or rows[0].get("InstanceId") != target.instance_id:
+                raise CloudNetworkError("EXACT_TARGET_CHANGED")
+            groups = rows[0].get("SecurityGroupIds", {}).get("SecurityGroupId", [])
+            if (not isinstance(groups, list) or len(groups) != 1 or
+                    not re.fullmatch(r"sg-[A-Za-z0-9]{6,64}", groups[0])):
+                raise CloudNetworkError("SECURITY_GROUP_SELECTION_AMBIGUOUS")
+            group = groups[0]
+            listed = self._body(client.describe_security_groups(
+                models.DescribeSecurityGroupsRequest(region_id=target.region_id,
+                    security_group_ids=json.dumps([group]))))
+            matches = listed.get("SecurityGroups", {}).get("SecurityGroup", [])
+            if len(matches) != 1 or matches[0].get("SecurityGroupId") != group:
+                raise CloudNetworkError("EXACT_SECURITY_GROUP_NOT_VERIFIED")
+            return group
+        except CloudNetworkError:
+            raise
+        except Exception as error:
+            raise CloudProviderError("SECURITY_GROUP_DISCOVERY_FAILED") from error
+
+    def _ingress_rules(self, session: TemporaryCloudSession, target: CloudTarget,
+                       group: str) -> tuple[dict, ...]:
+        from alibabacloud_ecs20140526 import models
+        client = self._ecs_client(session, target.region_id)
+        found, token = [], None
+        try:
+            for _ in range(10):
+                body = self._body(client.describe_security_group_attribute(
+                    models.DescribeSecurityGroupAttributeRequest(
+                        region_id=target.region_id, security_group_id=group,
+                        direction="ingress", max_results=1000, next_token=token)))
+                if body.get("SecurityGroupId") != group or body.get(
+                        "RegionId", target.region_id) != target.region_id:
+                    raise CloudNetworkError("EXACT_SECURITY_GROUP_NOT_VERIFIED")
+                rules = body.get("Permissions", {}).get("Permission", [])
+                if not isinstance(rules, list):
+                    raise CloudNetworkError("SECURITY_GROUP_RULES_UNVERIFIED")
+                found.extend(rules)
+                if len(found) > 10_000:
+                    raise CloudNetworkError("SECURITY_GROUP_RULES_UNVERIFIED")
+                next_token = body.get("NextToken") or None
+                if not next_token:
+                    return tuple(found)
+                if next_token == token:
+                    raise CloudNetworkError("SECURITY_GROUP_RULES_UNVERIFIED")
+                token = next_token
+            raise CloudNetworkError("SECURITY_GROUP_RULES_UNVERIFIED")
+        except CloudNetworkError:
+            raise
+        except Exception as error:
+            raise CloudProviderError("SECURITY_GROUP_RULE_READ_FAILED") from error
+
+    @staticmethod
+    def _exact_public_rule(rule: dict, port: int) -> bool:
+        return (str(rule.get("Direction", "")).lower() == "ingress" and
+            str(rule.get("IpProtocol", "")).lower() == "tcp" and
+            str(rule.get("Policy", "")).lower() == "accept" and
+            rule.get("PortRange") == f"{port}/{port}" and
+            rule.get("SourceCidrIp") == "0.0.0.0/0" and
+            not any(rule.get(key) for key in ("SourceGroupId", "SourcePrefixListId",
+                "Ipv6SourceCidrIp", "PortRangeListId")) and
+            rule.get("SourcePortRange") in (None, "", "-1/-1"))
+
+    def ensure_public_ingress(self, session: TemporaryCloudSession,
+                              operation: EnsureWattPublicIngressV1) -> IngressResult:
+        from alibabacloud_ecs20140526 import models
+        if type(operation) is not EnsureWattPublicIngressV1:
+            raise CloudNetworkError("UNSUPPORTED_NETWORK_OPERATION")
+        target, port = operation.target, operation.port
+        group = self._selected_security_group(session, target)
+        before = self._ingress_rules(session, target, group)
+        exact = [rule for rule in before if self._exact_public_rule(rule, port)]
+        if exact:
+            rule = sorted(exact, key=lambda item: str(item.get("SecurityGroupRuleId", "")))[0]
+            rule_id = rule.get("SecurityGroupRuleId")
+            if not isinstance(rule_id, str) or not re.fullmatch(
+                    r"sgr-[A-Za-z0-9]{6,64}", rule_id):
+                raise CloudNetworkError("SECURITY_GROUP_RULES_UNVERIFIED")
+            return IngressResult(group, rule_id, "",
+                "REUSED", None, True)
+        client = self._ecs_client(session, target.region_id)
+        try:
+            response = self._body(client.authorize_security_group(
+                models.AuthorizeSecurityGroupRequest(region_id=target.region_id,
+                    security_group_id=group,
+                    client_token=f"WattIngressV1-{operation.deployment_id.hex}",
+                    permissions=[models.AuthorizeSecurityGroupRequestPermissions(
+                        ip_protocol="TCP", port_range=f"{port}/{port}",
+                        source_cidr_ip="0.0.0.0/0", policy="accept", priority="1",
+                        description=operation.description)])))
+        except Exception as error:
+            raise CloudProviderError("PUBLIC_INGRESS_CREATE_FAILED") from error
+        after = self._ingress_rules(session, target, group)
+        created = [rule for rule in after if self._exact_public_rule(rule, port) and
+            rule.get("Description") == operation.description]
+        if len(created) != 1 or not re.fullmatch(r"sgr-[A-Za-z0-9]{6,64}",
+                str(created[0].get("SecurityGroupRuleId", ""))):
+            raise CloudNetworkError("PUBLIC_INGRESS_UNVERIFIED")
+        return IngressResult(group, created[0]["SecurityGroupRuleId"],
+            operation.description, "CREATED", response.get("RequestId"), True)
+
+    def revoke_public_ingress(self, session: TemporaryCloudSession,
+                              operation: RevokeWattPublicIngressV1) -> IngressResult:
+        from alibabacloud_ecs20140526 import models
+        if type(operation) is not RevokeWattPublicIngressV1:
+            raise CloudNetworkError("UNSUPPORTED_NETWORK_OPERATION")
+        target, receipt = operation.target, operation.creation_receipt
+        group = self._selected_security_group(session, target)
+        if group != receipt.security_group_id:
+            raise CloudNetworkError("EXACT_SECURITY_GROUP_CHANGED")
+        matches = [rule for rule in self._ingress_rules(session, target, group)
+            if rule.get("SecurityGroupRuleId") == receipt.security_group_rule_id]
+        if (len(matches) != 1 or not self._exact_public_rule(matches[0], operation.port)
+                or matches[0].get("Description") != receipt.network_rule_description):
+            raise CloudNetworkError("WATT_CREATED_RULE_REALITY_CHANGED")
+        try:
+            response = self._body(self._ecs_client(session, target.region_id)
+                .revoke_security_group(models.RevokeSecurityGroupRequest(
+                    region_id=target.region_id, security_group_id=group,
+                    security_group_rule_id=[receipt.security_group_rule_id],
+                    client_token=f"WattRevokeV1-{operation.deployment_id.hex}")))
+        except Exception as error:
+            raise CloudProviderError("PUBLIC_INGRESS_REVOKE_FAILED") from error
+        if any(rule.get("SecurityGroupRuleId") == receipt.security_group_rule_id
+                for rule in self._ingress_rules(session, target, group)):
+            raise CloudNetworkError("PUBLIC_INGRESS_REVOKE_UNVERIFIED")
+        return IngressResult(group, receipt.security_group_rule_id,
+            receipt.network_rule_description, "REVOKED", response.get("RequestId"), True)
 
     def regions(self, session: TemporaryCloudSession) -> tuple[str, ...]:
         from alibabacloud_ecs20140526 import models
