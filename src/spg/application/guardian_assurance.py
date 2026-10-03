@@ -21,6 +21,43 @@ from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
 
 
+def _protected_context_for_guardian(task, verification_records) -> tuple:
+    """Project only exact covered obligations from persisted verification evidence."""
+    from guardian.contracts.software_assurance import ProtectedContextEvidence
+
+    lineage = None if task is None else task.decision_context
+    if lineage is None:
+        return ()
+    projected = []
+    for obligation in lineage.protected_obligations:
+        matching_refs = []
+        for record in verification_records:
+            if record is None or record.result.value != "PASS":
+                continue
+            context = record.evidence.metadata.get("decision_context")
+            if not context or context.get("package_fingerprint") != lineage.package_fingerprint:
+                continue
+            if any(
+                item.get("context_class") == obligation.context_class
+                and item.get("semantic_key") == obligation.semantic_key
+                and item.get("source_ref") == obligation.source_ref
+                and item.get("source_revision") == obligation.source_revision
+                and item.get("coverage") == "COVERED"
+                for item in context.get("protected_obligations", ())
+            ):
+                matching_refs.append(f"verification:{record.id}")
+        projected.append(ProtectedContextEvidence(
+            context_class=obligation.context_class,
+            semantic_key=obligation.semantic_key,
+            source_ref=obligation.source_ref,
+            source_revision=obligation.source_revision,
+            package_fingerprint=lineage.package_fingerprint,
+            coverage="COVERED" if matching_refs else "GUARDIAN_REQUIRED",
+            verification_refs=tuple(matching_refs),
+        ))
+    return tuple(projected)
+
+
 class GuardianAssuranceClient:
     """Submit immutable governed effects; consume an exact Guardian result."""
 
@@ -62,9 +99,7 @@ class GuardianAssuranceClient:
         return self.preview_store.admit_guardian_requirements(work_id, basis_id, payload)
 
     def assess_ready_preview(self, session: CandidatePreviewSessionV1) -> dict:
-        from guardian.contracts.software_assurance import (
-            AssuranceRequest, ProtectedContextEvidence,
-        )
+        from guardian.contracts.software_assurance import AssuranceRequest
 
         if session.status is not PreviewRuntimeStatus.READY or not session.endpoint:
             raise ProductInvariantViolation("Guardian requires an exact READY Candidate Preview")
@@ -125,34 +160,7 @@ class GuardianAssuranceClient:
                                              lineage.package_fingerprint)}
         request_id = uuid5(NAMESPACE_URL, "watt:guardian-assurance:" + sha256(
             json.dumps(basis, sort_keys=True).encode()).hexdigest())
-        protected_context = ()
-        if lineage is not None:
-            protected_context = tuple(
-                ProtectedContextEvidence(
-                    context_class=item.context_class,
-                    semantic_key=item.semantic_key,
-                    source_ref=item.source_ref,
-                    source_revision=item.source_revision,
-                    package_fingerprint=lineage.package_fingerprint,
-                    coverage=("COVERED" if any(
-                        record is not None and record.result.value == "PASS"
-                        and (context_metadata := record.evidence.metadata.get("decision_context"))
-                        and context_metadata.get("package_fingerprint") == lineage.package_fingerprint
-                        and any(
-                            covered.get("context_class") == item.context_class
-                            and covered.get("semantic_key") == item.semantic_key
-                            and covered.get("source_revision") == item.source_revision
-                            and covered.get("coverage") == "COVERED"
-                            for covered in context_metadata.get("protected_obligations", ())
-                        ) for record in verification_records
-                    ) else "GUARDIAN_REQUIRED"),
-                    verification_refs=tuple(
-                        f"verification:{record.id}" for record in verification_records
-                        if record is not None and record.result.value == "PASS"
-                    ),
-                )
-                for item in lineage.protected_obligations
-            )
+        protected_context = _protected_context_for_guardian(task, verification_records)
         request = AssuranceRequest(request_id=request_id,
             product_ref=f"product:{product_id}" if product_id else f"work-product:{session.work_id}",
             work_ref=f"work:{session.work_id}",

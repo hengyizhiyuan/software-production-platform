@@ -332,6 +332,20 @@ class ProtectedContextObligation(BaseModel):
         return self
 
 
+class DecisionContextSourceTrace(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    context_id: str = Field(min_length=1)
+    source_ref: str = Field(min_length=1)
+    source_revision: str = Field(min_length=1)
+    authority: str = Field(min_length=1)
+    authority_ref: str = Field(min_length=1)
+    provenance: str = Field(min_length=1)
+    product_id: str | None = None
+    work_id: str | None = None
+    subject: str | None = None
+
+
 class DecisionContextLineage(BaseModel):
     """Consumption lineage; ECF retains ownership of package semantics."""
 
@@ -349,6 +363,7 @@ class DecisionContextLineage(BaseModel):
     repository_identity: str | None = None
     repository_revision: str = Field(min_length=1)
     source_references: tuple[str, ...] = Field(min_length=1)
+    generated_from: tuple[DecisionContextSourceTrace, ...] = Field(min_length=1)
     protected_obligations: tuple[ProtectedContextObligation, ...] = ()
 
 

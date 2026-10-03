@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import sys
+from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
@@ -19,10 +20,17 @@ from spg.application.decision_context import (
     MILESTONE_SURFACE,
     WORKSPACE_SURFACE,
     WattDecisionContextGateway,
+    MilestoneClosureContextService,
     policy_for_targets,
 )
 from spg.application.production_intelligence import (
     TaskContractRequest, default_task_contract_builder,
+)
+from spg.application.verification import _project_decision_context_evidence
+from spg.application.guardian_assurance import _protected_context_for_guardian
+from spg.domain.verification import (
+    VerificationCapabilityRequest, VerificationCapabilityResult,
+    VerificationEvidence, VerificationResultValue,
 )
 
 
@@ -122,8 +130,15 @@ def test_workspace_invariant_is_required_before_task_formation(source_repo: Path
     assert invariant.source_revision == git(source_repo, "rev-parse",
         f"{req.repository_revision}:docs/product/workspace-first-experience-principles.md")
     assert invariant.verification_ref == "tests/js/test_product_workspace_quadrants.cjs"
+    assert {item.context_class for item in lineage.protected_obligations} == {
+        "PRODUCT_INTENT", "PRODUCT_INVARIANT", "APPROVED_DECISION",
+    }
     assert "Agenda" in invariant.content and "Production" in invariant.content
     assert any(item.reference == invariant.source_ref for item in formed.relevant_context)
+    assert any(trace.source_ref == invariant.source_ref
+               and trace.source_revision == invariant.source_revision
+               and trace.provenance.startswith("git:")
+               for trace in lineage.generated_from)
     document = source_repo / "docs/product/workspace-first-experience-principles.md"
     document.write_text(document.read_text().replace(
         "## 11. Workspace Four-Quadrant Invariant", "## 11. Unapproved replacement"))
@@ -165,6 +180,12 @@ def test_ecs_ready_task_carries_both_protected_obligations(source_repo: Path):
     classes = {item.context_class for item in
                formed.decision_context.protected_obligations}
     assert classes == {"PRODUCT_INTENT", "APPROVED_CONSTRAINT"}
+    obligations = {item.context_class: item.content for item in
+                   formed.decision_context.protected_obligations}
+    assert "automatically prepares a supported host" in obligations["PRODUCT_INTENT"]
+    assert "does not need to" in obligations["PRODUCT_INTENT"]
+    assert "Human-selected exact" in obligations["APPROVED_CONSTRAINT"]
+    assert "PUBLIC exposure" in obligations["APPROVED_CONSTRAINT"]
     assert formed.decision_context.package_fingerprint == package.fingerprint
     assert all(item.package_fingerprint == package.fingerprint for item in
                formed.decision_context.protected_obligations)
@@ -322,3 +343,119 @@ def test_handoff_summary_projection_cannot_satisfy_session_contract(source_repo:
                                    ecf.SourceSnapshot((projected_summary,)))
     assert package.context_status.value == "INCOMPLETE"
     assert ecf.ContextClass.APPROVED_DECISION in package.missing_required_classes
+
+
+def test_closure_service_requires_same_product_persisted_verification(
+    source_repo: Path, monkeypatch,
+):
+    from spg.domain.verification import VerificationResultValue
+    record_id, work_id = uuid4(), uuid4()
+    req = requirement(source_repo, MILESTONE_SURFACE, work_id=work_id)
+    record = SimpleNamespace(id=record_id, result=VerificationResultValue.PASS,
+                             work_unit_id=uuid4(), basis_fingerprint="f" * 64)
+    store = SimpleNamespace(
+        verification_record=lambda _: record,
+        work_unit=lambda _: SimpleNamespace(production_run_id=uuid4()),
+        run=lambda _: SimpleNamespace(intent_ref=f"work:{work_id}"),
+    )
+    monkeypatch.setattr("spg.infrastructure.persistence.runtime_store.RuntimeStore",
+                        lambda _: store)
+    class Session:
+        owner = req.product_id
+        def execute(self, _):
+            return SimpleNamespace(scalar_one_or_none=lambda: self.owner)
+    class Database:
+        def __init__(self):
+            self.session = Session()
+        def unit_of_work(self):
+            database = self
+            class Unit:
+                session = database.session
+                def __enter__(self):
+                    return self
+                def __exit__(self, *_):
+                    return False
+            return Unit()
+    database = Database()
+    service = MilestoneClosureContextService(database)
+    ready = service.assess(req, verification_record_ids=(record_id,))
+    assert ready.status == "CONTEXT_READY_FOR_GOVERNANCE"
+    assert ready.context_status == "READY"
+    assert not hasattr(ready, "closure_decision")
+    database.session.owner = uuid4()
+    missing = service.assess(req, verification_record_ids=(record_id,))
+    assert missing.status == "DECISION_CONTEXT_NOT_READY"
+    assert "VERIFICATION_EVIDENCE" in missing.missing_classes
+    database.session.owner = req.product_id
+    other_work = service.assess(replace(req, work_id=uuid4()),
+                                verification_record_ids=(record_id,))
+    assert other_work.status == "DECISION_CONTEXT_NOT_READY"
+
+
+def test_verification_preserves_exact_lineage_without_fabricating_coverage(source_repo: Path):
+    gateway = WattDecisionContextGateway()
+    req = requirement(source_repo, WORKSPACE_SURFACE)
+    lineage = gateway.lineage(gateway.require_ready(
+        req, work_statement="UI change", work_revision="work-1"), req)
+    verification = VerificationCapabilityRequest(
+        verification_identity=uuid4(), obligation="NODE_TEST_TARGET",
+        task_contract_id=uuid4(), snapshot_id=uuid4(),
+        proposed_commit_identity="a" * 40, tree_identity="b" * 40,
+        completion_evaluation_id=uuid4(), plan_revision_id=uuid4(),
+        source_baseline_id=uuid4(),
+        decision_context_fingerprint=lineage.package_fingerprint,
+        protected_context_obligations=lineage.protected_obligations,
+    )
+    result = VerificationCapabilityResult(
+        result=VerificationResultValue.PASS,
+        evidence=VerificationEvidence(
+            obligation="NODE_TEST_TARGET", subject_commit_identity="a" * 40,
+            subject_tree_identity="b" * 40, expected="quadrants preserved",
+            observed="PASS", metadata={
+                "kind": "NODE_TEST_TARGET",
+                "target": "tests/js/test_product_workspace_quadrants.cjs",
+            },
+        ),
+    )
+    context = _project_decision_context_evidence(verification, result)["metadata"]["decision_context"]
+    assert context["package_fingerprint"] == lineage.package_fingerprint
+    coverage = {item["context_class"]: item for item in context["protected_obligations"]}
+    assert coverage["PRODUCT_INVARIANT"]["coverage"] == "COVERED"
+    assert coverage["PRODUCT_INVARIANT"]["source_revision"] == next(
+        item.source_revision for item in lineage.protected_obligations
+        if item.context_class == "PRODUCT_INVARIANT")
+    assert coverage["PRODUCT_INTENT"]["coverage"] == "UNVERIFIED"
+    failed = result.model_copy(update={"result": VerificationResultValue.FAIL})
+    failed_context = _project_decision_context_evidence(
+        verification, failed)["metadata"]["decision_context"]
+    assert all(item["coverage"] == "UNVERIFIED" for item in
+               failed_context["protected_obligations"])
+
+
+def test_guardian_receives_only_exact_covered_context_evidence(source_repo: Path):
+    gateway = WattDecisionContextGateway()
+    req = requirement(source_repo, WORKSPACE_SURFACE)
+    lineage = gateway.lineage(gateway.require_ready(
+        req, work_statement="UI change", work_revision="work-1"), req)
+    obligation = next(item for item in lineage.protected_obligations
+                      if item.context_class == "PRODUCT_INVARIANT")
+    covered = {**obligation.model_dump(mode="json"), "coverage": "COVERED"}
+    record = SimpleNamespace(id=uuid4(), result=VerificationResultValue.PASS,
+        evidence=SimpleNamespace(metadata={"decision_context": {
+            "package_fingerprint": lineage.package_fingerprint,
+            "protected_obligations": [covered],
+        }}))
+    task_contract = SimpleNamespace(decision_context=lineage)
+    projected = _protected_context_for_guardian(task_contract, (record,))
+    invariant = next(item for item in projected
+                     if item.context_class == "PRODUCT_INVARIANT")
+    assert invariant.coverage == "COVERED"
+    assert invariant.verification_refs == (f"verification:{record.id}",)
+    assert all(not item.verification_refs for item in projected
+               if item.context_class != "PRODUCT_INVARIANT")
+    wrong_package = SimpleNamespace(id=uuid4(), result=VerificationResultValue.PASS,
+        evidence=SimpleNamespace(metadata={"decision_context": {
+            "package_fingerprint": "0" * 64, "protected_obligations": [covered],
+        }}))
+    assert all(item.coverage == "GUARDIAN_REQUIRED" for item in
+               _protected_context_for_guardian(task_contract, (wrong_package,)))

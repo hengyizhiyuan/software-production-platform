@@ -245,26 +245,7 @@ class VerificationService:
                 "Verification evidence does not bind the exact requested subject"
             )
 
-        evidence = result.evidence.model_dump(mode="json")
-        if request.decision_context_fingerprint is not None:
-            metadata = dict(evidence["metadata"])
-            metadata["decision_context"] = {
-                "package_fingerprint": request.decision_context_fingerprint,
-                "protected_obligations": [
-                    {
-                        **item.model_dump(mode="json"),
-                        "coverage": (
-                            "COVERED" if item.verification_ref is not None
-                            and result.result is VerificationResultValue.PASS
-                            and metadata.get("kind") == "NODE_TEST_TARGET"
-                            and metadata.get("target") == item.verification_ref
-                            else "UNVERIFIED"
-                        ),
-                    }
-                    for item in request.protected_context_obligations
-                ],
-            }
-            evidence["metadata"] = metadata
+        evidence = _project_decision_context_evidence(request, result)
         timestamp = datetime.now(UTC)
         with self.database.unit_of_work() as unit_of_work:
             store = RuntimeStore(unit_of_work.session)
@@ -777,3 +758,28 @@ def _fingerprint(value: object) -> str:
         ensure_ascii=False,
     ).encode()
     return sha256(canonical).hexdigest()
+
+
+def _project_decision_context_evidence(request, result) -> dict:
+    evidence = result.evidence.model_dump(mode="json")
+    if request.decision_context_fingerprint is None:
+        return evidence
+    metadata = dict(evidence["metadata"])
+    metadata["decision_context"] = {
+        "package_fingerprint": request.decision_context_fingerprint,
+        "protected_obligations": [
+            {
+                **item.model_dump(mode="json"),
+                "coverage": (
+                    "COVERED" if item.verification_ref is not None
+                    and result.result is VerificationResultValue.PASS
+                    and metadata.get("kind") == "NODE_TEST_TARGET"
+                    and metadata.get("target") == item.verification_ref
+                    else "UNVERIFIED"
+                ),
+            }
+            for item in request.protected_context_obligations
+        ],
+    }
+    evidence["metadata"] = metadata
+    return evidence

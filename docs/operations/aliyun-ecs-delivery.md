@@ -133,7 +133,7 @@ code, and verification outcome.
    **no OSS permission**. The service explicitly uploads each object with private
    object ACL. The service needs no bucket-list or object-delete grant because
    lifecycle handles expiry.
-3. Start Watt from this branch and open an accepted software Deliverable. Click
+3. Start the current Watt runtime and open an accepted software Deliverable. Click
    **连接阿里云**. Watt calls `GetCallerIdentity`, creates a unique ExternalId,
    and shows the exact trust policy in technical details. Create the suggested
    `WattECSDelivery` customer RAM Role with this policy; do not broaden its
@@ -141,17 +141,26 @@ code, and verification outcome.
    ARN into Watt. Watt then shows `WattECSDeliveryConnectionV1` for the customer
    account ID embedded in that Role ARN. Attach this **one** policy and verify
    the connection. It grants only `DescribeInstances`,
-   `DescribeCloudAssistantStatus`, `RunCommand`, `DescribeInvocations`, and
-   `DescribeInvocationResults` over this account's ECS instance namespace;
+   `DescribeCloudAssistantStatus`, `RunCommand`, `DescribeInvocations`,
+   `DescribeInvocationResults`, `DescribeSecurityGroups`,
+   `DescribeSecurityGroupAttribute`, `AuthorizeSecurityGroup`, and
+   `RevokeSecurityGroup` for the governed Delivery capability;
    `RunCommand` is conditioned on `ecs:CommandRunAs` being exactly `root` or
    `wattdeploy`. `root` is used only by the typed bootstrap operation. The
-   invocation reads include the account's command namespace. No ECS FullAccess,
-   generic command UI, or unrelated ECS mutation is granted.
+   invocation reads include the account's command namespace.
+   Alibaba RAM requires `Resource="*"` for `AuthorizeSecurityGroup`; Watt still
+   binds each effect to the selected instance's attached group, exact TCP port,
+   exposure mode, and Delivery Authorization. Revocation is allowed only for a
+   Watt-created rule with exact evidence. No ECS FullAccess, generic command
+   UI, or unrelated ECS mutation is granted.
 4. Select one discovered ECS. Watt binds its exact AccountId, RegionId, and
    InstanceId internally and dry-runs both permitted execution identities against
    the **same** connection grant. The user stays in Watt and authorizes the exact
-   Deliverable, target, and port. Watt then classifies and, if safe, bootstraps
-   the host automatically before the non-root precheck and deployment.
+   Deliverable, target, port, and PRIVATE or PUBLIC exposure. Watt then
+   classifies and, if safe, bootstraps the host automatically before the
+   non-root precheck and deployment. PUBLIC exposure checks and, when needed,
+   creates only the exact selected TCP ingress rule, then reobserves it and
+   verifies public HTTP. PRIVATE exposure leaves ingress untouched.
 
 The authority layers are deliberate: Alibaba RAM grants a narrow capability
 over eligible instances **before** selection; Watt permits an effect only for

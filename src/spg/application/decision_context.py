@@ -16,6 +16,7 @@ from uuid import UUID, NAMESPACE_URL, uuid5
 
 from spg.domain.production_intelligence import (
     DecisionContextLineage,
+    DecisionContextSourceTrace,
     ProtectedContextObligation,
 )
 from spg.domain.product import ProductInvariantViolation
@@ -142,7 +143,8 @@ class MilestoneClosureContextService:
                     select(product_works.c.product_id).where(
                         product_works.c.id == work_id)
                 ).scalar_one_or_none()
-                if product_id == requirement.product_id:
+                if (product_id == requirement.product_id
+                        and (requirement.work_id is None or work_id == requirement.work_id)):
                     verified.append(f"{record.id}@{record.basis_fingerprint}")
         package = self.gateway.assemble(
             requirement, verification_statement=(
@@ -163,6 +165,55 @@ class MilestoneClosureContextService:
                 for ref in conflict.provenance
             ),
         )
+
+    def assess_work_milestone(self, work_id: UUID) -> MilestoneClosureReadiness:
+        """Read the current Product/Work/source/evidence; never mutate closure."""
+        from sqlalchemy import select
+        from spg.infrastructure.persistence.product_schema import (
+            product_managed_sources, product_works,
+        )
+        from spg.infrastructure.persistence.product_store import ProductStore
+        from spg.infrastructure.persistence.runtime_store import RuntimeStore
+
+        with self.database.unit_of_work() as unit_of_work:
+            product = ProductStore(unit_of_work.session)
+            work = product.work(work_id)
+            product_id = unit_of_work.session.execute(
+                select(product_works.c.product_id).where(product_works.c.id == work_id)
+            ).scalar_one_or_none()
+            resource = product.resource_for_work(work_id)
+            if work is None or product_id is None or resource is None:
+                raise DecisionContextAuthorityMissing(
+                    "DECISION_CONTEXT_NOT_READY: exact Product/Work/Repository missing"
+                )
+            accepted = unit_of_work.session.execute(
+                select(product_managed_sources).where(
+                    product_managed_sources.c.product_id == product_id,
+                    product_managed_sources.c.repository_identity ==
+                        resource.repository_identity,
+                )
+            ).mappings().first()
+            if accepted is None:
+                raise DecisionContextAuthorityMissing(
+                    "DECISION_CONTEXT_NOT_READY: accepted Product source missing"
+                )
+            binding = product.runtime_binding(work_id)
+            summary = None if binding is None else product.runtime_summary(binding)
+            runtime = RuntimeStore(unit_of_work.session)
+            candidate = (None if summary is None or summary.candidate_id is None
+                         else runtime.baseline_candidate(summary.candidate_id))
+            verification_ids = (() if candidate is None else
+                                candidate.verification_record_ids)
+            revision = accepted["accepted_revision"]
+        requirement = DecisionContextRequirement(
+            surface=MILESTONE_SURFACE, product_id=product_id, work_id=work_id,
+            subject=f"milestone:work:{work_id}",
+            repository_path=Path(resource.location_ref),
+            repository_revision=revision,
+            repository_identity=resource.repository_identity,
+        )
+        return self.assess(requirement,
+                           verification_record_ids=tuple(verification_ids))
 
 
 def policy_for_targets(paths: tuple[str, ...]) -> str | None:
@@ -306,6 +357,8 @@ class WattDecisionContextGateway:
             import ecf.decision_context as ecf
         except ImportError as error:
             raise RuntimeError("ECF v0.1 owner unavailable for required decision") from error
+        if ecf.VERSION != "0.1":
+            raise RuntimeError("ECF Decision Context owner version is incompatible")
         return ecf
 
     def assemble(self, requirement: DecisionContextRequirement, *,
@@ -499,6 +552,17 @@ class WattDecisionContextGateway:
                 f"{trace.source.ref}@{trace.source.revision}"
                 for trace in package.generated_from
             ),
+            generated_from=tuple(DecisionContextSourceTrace(
+                context_id=trace.context_id,
+                source_ref=trace.source.ref,
+                source_revision=trace.source.revision,
+                authority=trace.source.authority_owner,
+                authority_ref=trace.source.authority_ref,
+                provenance=trace.source.provenance,
+                product_id=trace.scope.product_id,
+                work_id=trace.scope.work_id,
+                subject=trace.scope.subject,
+            ) for trace in package.generated_from),
             protected_obligations=tuple(obligations),
         )
 

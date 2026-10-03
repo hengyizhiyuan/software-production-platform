@@ -1704,6 +1704,14 @@ def create_http_application(
     def get_work(work_id: UUID) -> WorkResponse:
         return work_response(work_service.get_work(work_id))
 
+    @api.get("/api/works/{work_id}/milestone-context-readiness")
+    def work_milestone_context_readiness(work_id: UUID) -> dict:
+        """Expose Decision Context readiness without declaring milestone closure."""
+        from dataclasses import asdict
+        from spg.application.decision_context import MilestoneClosureContextService
+        return asdict(MilestoneClosureContextService(selected_database)
+                      .assess_work_milestone(work_id))
+
     @api.get("/api/works/{work_id}/economics")
     def work_economics(work_id: UUID):
         return production_measurement.graph_economics(work_id)

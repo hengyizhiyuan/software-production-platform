@@ -29,6 +29,9 @@ unrelated repository changes, and legacy tasks keep their existing admission
 path. Product ownership is resolved from the Work and the Product's accepted
 Managed Source before projecting any source. The current Git revision supplies
 document and repository provenance; Work Reality comes from persisted Work.
+The initial policy applies to Watt's exact canonical source remote and an
+exact Product owner of that managed source. It does not claim to protect
+arbitrary customer repositories with similar file names.
 
 The gated path is Work/Steering Reality → canonical `ecf.assemble_context` →
 `READY` → Task Contract → Production. Missing, conflicting, or stale context
