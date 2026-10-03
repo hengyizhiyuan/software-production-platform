@@ -51,7 +51,7 @@ test('stale or unaccepted Deliverable cannot show deployment authority',()=>{
   assert.equal(second.content.children.length,0);
 });
 
-test('missing deployment user is explained without exposing provider text',()=>{
+test('historical missing deployment user leads to automatic host preparation',()=>{
   const {content,window}=surface();
   window.WattCloudDelivery.render({
     manifest:{id:'manifest',software:{runtime_recipe:{adapter:'STATIC_WEB'}},
@@ -63,11 +63,15 @@ test('missing deployment user is explained without exposing provider text',()=>{
         deployment_user:'wattdeploy',provider_error_code:'AccountNotExists'}]}],
   });
   const html=content.children[0].innerHTML;
-  assert.match(html,/目标 ECS 缺少 Watt 部署用户 wattdeploy/);
+  assert.match(html,/历史尝试：目标 ECS 当时缺少部署用户 wattdeploy/);
   assert.match(html,/部署尚未开始/);
-  assert.match(html,/未修改服务器运行状态/);
-  assert.match(html,/需要你完成服务器前置条件/);
+  assert.match(html,/Watt 现在会在新授权的部署尝试中自动评估并准备受支持的主机/);
+  assert.doesNotMatch(html,/SSH|手[动工](?:创建用户|安装 Docker|准备服务器)|需要你完成服务器前置条件/i);
   assert.doesNotMatch(html,/AccountNotExists|CLOUD_OPERATION_UNVERIFIED/);
+  assert.match(window.WattCloudDelivery.blockerCopy({blocker:'UNSUPPORTED_HOST_PROFILE'}),
+    /不在当前自动部署支持范围内/);
+  assert.match(window.WattCloudDelivery.blockerCopy({blocker:'HOST_PROFILE_CONFLICT'}),
+    /Watt 已安全停止/);
 });
 
 test('existing connection can rediscover targets without creating a connection or deployment',async()=>{
@@ -108,7 +112,7 @@ test('existing connection can rediscover targets without creating a connection o
   assert.ok(!calls.some(([url,method])=>url.endsWith('/select')&&method==='POST'));
 });
 
-test('verified target remains in inspection mode until a separate deploy decision',async()=>{
+test('READY target presents exact governed Delivery authorization directly',async()=>{
   const id='existing-connection';
   const target={account_id:'1234567890123456',name:'新 Alibaba Cloud Linux ECS',
     region_id:'cn-hongkong',instance_id:'i-newtarget'};
@@ -132,11 +136,15 @@ test('verified target remains in inspection mode until a separate deploy decisio
   assert.match(content.children[0].innerHTML,/新 Alibaba Cloud Linux ECS/);
   const button=attribute=>({disabled:false,dataset:{},hasAttribute(name){return name===attribute;}});
   await listeners.click({target:{closest(){return button('data-cloud-open');}}});
-  assert.match(flow.innerHTML,/目标授权已验证/);
-  assert.match(flow.innerHTML,/目标 ECS 缺少 Watt 部署用户 wattdeploy/);
-  assert.doesNotMatch(flow.innerHTML,/cloud-deploy-form|授权并部署/);
-  assert.ok(!calls.some(([,method])=>method==='POST'));
-  await listeners.click({target:{closest(){return button('data-cloud-show-deploy');}}});
-  assert.match(flow.innerHTML,/cloud-deploy-form|授权并部署/);
+  assert.match(flow.innerHTML,/新 Alibaba Cloud Linux ECS · cn-hongkong · i-newtarget/);
+  assert.match(flow.innerHTML,/Watt 将自动检查并在受支持时准备/);
+  assert.match(flow.innerHTML,/id="cloud-deploy-form"/);
+  assert.match(flow.innerHTML,/name="exposure_mode"/);
+  assert.match(flow.innerHTML,/value="PRIVATE" selected/);
+  assert.match(flow.innerHTML,/value="PUBLIC"/);
+  assert.match(flow.innerHTML,/name="rationale" required/);
+  assert.match(flow.innerHTML,/授权并部署/);
+  assert.doesNotMatch(flow.innerHTML,/我决定准备部署|前往阿里云授权此主机|目标授权已验证|data-cloud-show-deploy/);
+  assert.doesNotMatch(flow.innerHTML,/SSH|手[动工](?:创建用户|安装 Docker|准备服务器)|需要你完成服务器前置条件/i);
   assert.ok(!calls.some(([,method])=>method==='POST'));
 });
