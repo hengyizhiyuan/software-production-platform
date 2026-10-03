@@ -43,12 +43,12 @@ def test_bootstrap_is_fixed_fingerprinted_and_separate_from_nonroot_precheck():
     assert re.search(r'test "\$ID" = alinux && test "\$VERSION_ID" = 3', script)
     assert script.index("getent passwd wattdeploy") < script.index("useradd -m")
     assert script.index("overlapping allocation") < script.index("useradd -m")
-    assert script.index('test ! -e /home/wattdeploy/.config/systemd/user/docker.service') < script.index('dnf -y')
+    assert script.index('partial_unit_verified=1') < script.index('dnf -y')
     assert "--add-subuids" in script and "--add-subgids" in script
     assert "dockerd-rootless-setuptool.sh --skip-iptables install" in script
     assert "export HOME=/home/wattdeploy XDG_RUNTIME_DIR=/run/user/$(id -u)" in script
     assert "test -f /home/wattdeploy/.config/systemd/user/docker.service" in script
-    assert script.index('if ready; then\n    echo WATT_EFFECT_ROOTLESS_IPTABLES_DISABLED') < script.index('echo WATT_HOST_READY\n    exit 0')
+    assert script.index('echo WATT_EFFECT_ROOTLESS_IPTABLES_DISABLED') < script.index('echo WATT_HOST_READY\n    exit 0')
     assert "systemctl --user enable --now docker.service" in script
     assert "docker info --format '{{json .SecurityOptions}}'" in script
     assert "docker context show" in script
@@ -60,6 +60,23 @@ def test_bootstrap_is_fixed_fingerprinted_and_separate_from_nonroot_precheck():
         assert forbidden not in script
     _, ordinary = compile_operation(CheckPrerequisites(8080))
     assert "useradd" not in ordinary and "dnf" not in ordinary
+
+
+def test_alinux3_partial_glib_upgrade_is_pinned_and_checked_before_rootless_start():
+    script = PrepareDeploymentHostV1().compile()
+    assert HOST_RECIPE_VERSION == "ALINUX3_WATT_DEPLOYMENT_HOST_V1_1"
+    assert "glib2-2.68.4-19.0.1.al8.10.x86_64" in script
+    assert "libslirp-4.4.0-2.al8.x86_64 slirp4netns-1.2.3-1.al8.x86_64" in script
+    assert "--enablerepo=alinux3-os --enablerepo=alinux3-updates" in script
+    assert "expect_installed glib2 0:2.68.4-19.0.1.al8.10.x86_64 alinux3-updates" in script
+    assert script.index("glib2-2.68.4-19.0.1.al8.10.x86_64") < script.index(
+        "slirp4netns --help") < script.index("machinectl shell wattdeploy@")
+    assert "g_spawn_async_with_fds" in script
+    assert "BLOCKED_ROOTLESS_ABI_MISMATCH" in script
+    assert "342577d580dce43c1de94bfc2f5a8599352090c619487f365709802f0f136694" in script
+    assert script.index("partial_unit_verified=1") < script.index(
+        "systemctl --user reset-failed docker.service")
+    assert "dnf update" not in script and "--allowerasing" not in script
 
 
 def test_bootstrap_receipt_requires_final_ready_marker_and_keeps_failures_typed():
@@ -80,6 +97,10 @@ def test_bootstrap_receipt_requires_final_ready_marker_and_keeps_failures_typed(
         "BLOCKED_UNSUPPORTED_HOST_PROFILE")
     assert assess_invocation_result(unsupported, "wattdeploy", kind)[:2] == (
         "UNSUPPORTED_HOST_PROFILE", False)
+    abi_failure = InvocationResult("inv", "cmd", "Failed", 20,
+        "WATT_HOST_BEFORE_BOOTSTRAP_REQUIRED\nBLOCKED_ROOTLESS_ABI_MISMATCH")
+    assert assess_invocation_result(abi_failure, "wattdeploy", kind)[:2] == (
+        "BLOCKED_ROOTLESS_ABI_MISMATCH", False)
 
 
 def test_embedded_subid_allocator_rejects_collision_and_chooses_free_range(tmp_path):

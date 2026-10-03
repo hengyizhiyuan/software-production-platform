@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from hashlib import sha256
+import json
 from pathlib import Path
 from pathlib import PurePosixPath
 import re
 import subprocess
+import tarfile
 from uuid import uuid4
 
 from spg.domain.cloud_delivery import CloudPreparedArtifact
@@ -32,6 +34,39 @@ class CloudDeliveryArtifactBuilder:
             return completed.stdout.strip()
         except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
             raise CloudArtifactError("EXACT_IMAGE_EXPORT_UNAVAILABLE") from error
+
+    @staticmethod
+    def archive_image_identity(archive: Path) -> str:
+        """Return the image ID Docker load assigns from the saved config blob."""
+        try:
+            with tarfile.open(archive, "r") as saved:
+                manifest_member = saved.getmember("manifest.json")
+                if not manifest_member.isfile() or manifest_member.size > 1_000_000:
+                    raise CloudArtifactError("EXPORTED_IMAGE_IDENTITY_UNAVAILABLE")
+                manifest_file = saved.extractfile(manifest_member)
+                if manifest_file is None:
+                    raise CloudArtifactError("EXPORTED_IMAGE_IDENTITY_UNAVAILABLE")
+                entries = json.loads(manifest_file.read())
+                if not isinstance(entries, list) or len(entries) != 1 or \
+                        not isinstance(entries[0], dict):
+                    raise CloudArtifactError("EXPORTED_IMAGE_IDENTITY_UNAVAILABLE")
+                config_name = entries[0].get("Config")
+                if not isinstance(config_name, str) or not re.fullmatch(
+                        r"(?:blobs/sha256/)?[0-9a-f]{64}(?:\.json)?", config_name):
+                    raise CloudArtifactError("EXPORTED_IMAGE_IDENTITY_UNAVAILABLE")
+                config_member = saved.getmember(config_name)
+                if not config_member.isfile() or config_member.size > 10_000_000:
+                    raise CloudArtifactError("EXPORTED_IMAGE_IDENTITY_UNAVAILABLE")
+                config_file = saved.extractfile(config_member)
+                if config_file is None:
+                    raise CloudArtifactError("EXPORTED_IMAGE_IDENTITY_UNAVAILABLE")
+                digest = sha256(config_file.read()).hexdigest()
+                if digest not in config_name:
+                    raise CloudArtifactError("EXPORTED_IMAGE_IDENTITY_UNAVAILABLE")
+                return f"sha256:{digest}"
+        except (OSError, ValueError, KeyError, json.JSONDecodeError,
+                tarfile.TarError) as error:
+            raise CloudArtifactError("EXPORTED_IMAGE_IDENTITY_UNAVAILABLE") from error
 
     def prepare(self, manifest, candidate_id) -> CloudPreparedArtifact:
         if manifest.software is None:
@@ -98,6 +133,7 @@ class CloudDeliveryArtifactBuilder:
         if not image or not re.fullmatch(r"sha256:[0-9a-f]{64}", image):
             raise CloudArtifactError("IMAGE_IDENTITY_UNAVAILABLE")
         self._docker("save", "-o", str(archive), image)
+        loaded_image = self.archive_image_identity(archive)
         digest = sha256()
         with archive.open("rb") as stream:
             for chunk in iter(lambda: stream.read(1024 * 1024), b""):
@@ -106,5 +142,5 @@ class CloudDeliveryArtifactBuilder:
             manifest_fingerprint=manifest.fingerprint,
             candidate_revision=manifest.repository_revision,
             artifact_sha256=digest.hexdigest(), archive_path=str(archive),
-            image_identity=image, internal_port=internal_port,
+            image_identity=loaded_image, internal_port=internal_port,
             artifact_kind=adapter, created_at=datetime.now(UTC))

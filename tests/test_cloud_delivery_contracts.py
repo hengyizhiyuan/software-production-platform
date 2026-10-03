@@ -1,7 +1,11 @@
 """Fail-closed contracts for the bounded ECS operation set."""
 
 from datetime import UTC, datetime
+from hashlib import sha256
+from io import BytesIO
+import json
 from pathlib import Path
+import tarfile
 from uuid import uuid4
 
 import pytest
@@ -16,6 +20,20 @@ from spg.infrastructure import cloud_delivery_commands as commands
 from spg.infrastructure.cloud_delivery_artifact import (
     CloudArtifactError, CloudDeliveryArtifactBuilder,
 )
+
+
+def _saved_image(archive: Path) -> str:
+    config = b'{"architecture":"amd64","os":"linux","config":{"User":"101"}}'
+    digest = sha256(config).hexdigest()
+    manifest = json.dumps([{"Config": f"blobs/sha256/{digest}",
+        "RepoTags": None, "Layers": []}]).encode()
+    with tarfile.open(archive, "w") as saved:
+        for name, content in (("manifest.json", manifest),
+                (f"blobs/sha256/{digest}", config)):
+            member = tarfile.TarInfo(name)
+            member.size = len(content)
+            saved.addfile(member, BytesIO(content))
+    return f"sha256:{digest}"
 
 
 @pytest.fixture
@@ -155,15 +173,18 @@ def test_static_builder_requires_pinned_base_and_never_copies_code(tmp_path):
         builder.prepare(Manifest(), uuid4())
     builder.static_base_image = "python@sha256:" + "c" * 64
     calls=[]
+    loaded_image=[]
     def docker(*args, **_):
         calls.append(args)
         if args[0:2] == ("image", "inspect"):
             return "sha256:" + "d" * 64
         if args[0] == "save":
-            Path(args[2]).write_bytes(b"image archive")
+            loaded_image.append(_saved_image(Path(args[2])))
         return ""
     builder._docker = docker
     result = builder.prepare(Manifest(), uuid4())
+    assert result.image_identity == loaded_image[0]
+    assert result.image_identity != "sha256:" + "d" * 64
     assert result.artifact_kind == "STATIC_WEB"
     site=Path(result.archive_path).parent/"site"
     assert (site/"index.html").read_bytes() == b"<h1>Ready</h1>"
@@ -199,12 +220,27 @@ def test_full_application_export_uses_exact_served_preview_image(tmp_path):
     manifest,candidate=Manifest(),uuid4()
     builder=CloudDeliveryArtifactBuilder(Delivery(),Preview(),tmp_path,None)
     calls=[]
+    loaded_image=[]
     def docker(*args,**_):
         calls.append(args)
-        if args[0]=="save": Path(args[2]).write_bytes(b"exact preview image")
+        if args[0]=="save": loaded_image.append(_saved_image(Path(args[2])))
         return ""
     builder._docker=docker
     prepared=builder.prepare(manifest,candidate)
-    assert prepared.image_identity==image
+    assert prepared.image_identity==loaded_image[0]
+    assert prepared.image_identity!=image
     assert calls==[("save","-o",prepared.archive_path,image)]
     assert prepared.artifact_kind=="FULL_APPLICATION_RUNTIME"
+
+
+def test_exported_image_identity_rejects_ambiguous_or_corrupt_config(tmp_path):
+    archive=tmp_path/"image.tar"
+    expected=_saved_image(archive)
+    assert CloudDeliveryArtifactBuilder.archive_image_identity(archive)==expected
+    with tarfile.open(archive,"w") as saved:
+        content=b'[{"Config":"blobs/sha256/' + b"0"*64 + b'","Layers":[]}]'
+        member=tarfile.TarInfo("manifest.json")
+        member.size=len(content)
+        saved.addfile(member,BytesIO(content))
+    with pytest.raises(CloudArtifactError,match="EXPORTED_IMAGE_IDENTITY_UNAVAILABLE"):
+        CloudDeliveryArtifactBuilder.archive_image_identity(archive)

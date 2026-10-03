@@ -329,6 +329,14 @@ class CloudDeliveryService:
             if prepared.manifest_fingerprint != manifest.fingerprint or \
                     digest.hexdigest() != prepared.artifact_sha256:
                 raise CloudDeliveryError("PREPARED_ARTIFACT_UNAVAILABLE")
+            loaded_image = CloudDeliveryArtifactBuilder.archive_image_identity(path)
+            if prepared.image_identity != loaded_image:
+                prepared = prepared.model_copy(update={"image_identity": loaded_image})
+                with self.database.unit_of_work() as uow:
+                    uow.session.execute(update(cloud_prepared_artifacts).where(
+                        cloud_prepared_artifacts.c.manifest_id == manifest.id).values(
+                            payload=_payload(prepared)))
+                    uow.commit()
             return prepared
         prepared = self.builder.prepare(manifest, UUID(context["candidate_id"]))
         with self.database.unit_of_work() as uow:
@@ -470,6 +478,8 @@ class CloudDeliveryService:
             "WATT_EFFECT_SUBGID_ALLOCATED", "WATT_EFFECT_DOCKER_KEY_INSTALLED",
             "WATT_EFFECT_DOCKER_REPOSITORY_ADDED",
             "WATT_EFFECT_PACKAGES_INSTALLED", "WATT_EFFECT_USER_LINGER_ENABLED",
+            "WATT_EFFECT_GLIB2_COMPAT_UPGRADED",
+            "WATT_EFFECT_PARTIAL_UNIT_RECONCILED",
             "WATT_EFFECT_ROOTLESS_IPTABLES_DISABLED",
             "WATT_EFFECT_ROOTLESS_RUNTIME_STARTED"}))
         host_after = (HostProfileState.READY if verified and host_operation else

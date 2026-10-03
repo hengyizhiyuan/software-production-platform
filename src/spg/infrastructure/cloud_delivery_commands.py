@@ -42,7 +42,7 @@ def _safe_port(port: int) -> int:
     return port
 
 
-HOST_RECIPE_VERSION = "ALINUX3_WATT_DEPLOYMENT_HOST_V1"
+HOST_RECIPE_VERSION = "ALINUX3_WATT_DEPLOYMENT_HOST_V1_1"
 
 # Fixed source and package allowlist. This is deliberately not a request field.
 _HOST_RECIPE = r'''#!/bin/sh
@@ -56,6 +56,8 @@ test "$ID" = alinux && test "$VERSION_ID" = 3 || fail BLOCKED_UNSUPPORTED_HOST_P
 test "$(uname -m)" = x86_64 || fail BLOCKED_UNSUPPORTED_HOST_PROFILE
 command -v python3 >/dev/null || fail BLOCKED_HOST_PROFILE_CONFLICT
 command -v dnf >/dev/null || fail BLOCKED_HOST_PROFILE_CONFLICT
+command -v rpm >/dev/null || fail BLOCKED_HOST_PROFILE_CONFLICT
+command -v readelf >/dev/null || fail BLOCKED_HOST_PROFILE_CONFLICT
 command -v newuidmap >/dev/null || fail BLOCKED_HOST_PROFILE_CONFLICT
 command -v newgidmap >/dev/null || fail BLOCKED_HOST_PROFILE_CONFLICT
 for tool in curl sha256sum ss; do command -v "$tool" >/dev/null || fail BLOCKED_HOST_PROFILE_CONFLICT; done
@@ -92,11 +94,34 @@ if ready; then
   exit 0
 fi
 echo WATT_HOST_BEFORE_BOOTSTRAP_REQUIRED
+partial_unit_verified=0
 if test "$user_present" = 1; then
   # A compatible existing account can be completed. Unknown Docker data cannot.
   test ! -e /home/wattdeploy/.local/share/docker || fail BLOCKED_HOST_PROFILE_CONFLICT
   test ! -e /home/wattdeploy/.docker || fail BLOCKED_HOST_PROFILE_CONFLICT
-  test ! -e /home/wattdeploy/.config/systemd/user/docker.service || fail BLOCKED_HOST_PROFILE_CONFLICT
+  unit=/home/wattdeploy/.config/systemd/user/docker.service
+  if test -e "$unit" || test -L "$unit"; then
+    # Only the exact unit created by the preceding Watt V1 attempt may resume.
+    for path in /home/wattdeploy/.config /home/wattdeploy/.config/systemd \
+        /home/wattdeploy/.config/systemd/user; do
+      test -d "$path" && test ! -L "$path" || fail BLOCKED_HOST_PROFILE_CONFLICT
+      test "$(stat -c %u "$path")" = "$(id -u wattdeploy)" || fail BLOCKED_HOST_PROFILE_CONFLICT
+    done
+    test -f "$unit" && test ! -L "$unit" || fail BLOCKED_HOST_PROFILE_CONFLICT
+    test "$(stat -c %u "$unit")" = "$(id -u wattdeploy)" || fail BLOCKED_HOST_PROFILE_CONFLICT
+    test "$(stat -c %g "$unit")" = "$(id -g wattdeploy)" || fail BLOCKED_HOST_PROFILE_CONFLICT
+    test "$(stat -c %a "$unit")" = 644 || fail BLOCKED_HOST_PROFILE_CONFLICT
+    test "$(sha256sum "$unit" | cut -d' ' -f1)" = \
+      342577d580dce43c1de94bfc2f5a8599352090c619487f365709802f0f136694 ||
+      fail BLOCKED_HOST_PROFILE_CONFLICT
+    uid=$(id -u wattdeploy)
+    if runuser -u wattdeploy -- env HOME=/home/wattdeploy \
+        XDG_RUNTIME_DIR="/run/user/$uid" \
+        systemctl --user is-active --quiet docker.service; then
+      fail BLOCKED_HOST_PROFILE_CONFLICT
+    fi
+    partial_unit_verified=1
+  fi
 fi
 if command -v docker >/dev/null && test ! -f /etc/yum.repos.d/watt-docker-ce-v1.repo; then
   fail BLOCKED_HOST_PROFILE_CONFLICT
@@ -105,6 +130,29 @@ if systemctl is-active --quiet docker.service || systemctl is-active --quiet doc
   fail BLOCKED_HOST_PROFILE_CONFLICT
 fi
 test ! -e /etc/yum.repos.d/docker-ce.repo || fail BLOCKED_HOST_PROFILE_CONFLICT
+# The 2023 base image glib2 lacks a symbol required by the Alibaba Linux 3
+# libslirp update. Admit only the observed base or the pinned compatible build.
+glib_before=$(rpm -q --qf '%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}' glib2) ||
+  fail BLOCKED_ROOTLESS_ABI_MISMATCH
+case "$glib_before" in
+  0:2.56.4-159.0.1.al8.x86_64|0:2.68.4-19.0.1.al8.10.x86_64) ;;
+  *) fail BLOCKED_HOST_PROFILE_CONFLICT ;;
+esac
+allow_installed() {
+  if rpm -q "$1" >/dev/null 2>&1; then
+    observed=$(rpm -q --qf '%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}' "$1") ||
+      fail BLOCKED_HOST_PROFILE_CONFLICT
+    test "$observed" = "$2" || fail BLOCKED_HOST_PROFILE_CONFLICT
+  fi
+}
+allow_installed libslirp 0:4.4.0-2.al8.x86_64
+allow_installed slirp4netns 0:1.2.3-1.al8.x86_64
+allow_installed docker-ce 3:26.1.3-1.el8.x86_64
+allow_installed docker-ce-cli 1:26.1.3-1.el8.x86_64
+allow_installed docker-ce-rootless-extras 0:26.1.3-1.el8.x86_64
+allow_installed containerd.io 0:1.6.32-3.1.el8.x86_64
+allow_installed fuse-overlayfs 0:1.13-1.0.1.al8.x86_64
+allow_installed systemd-container 0:239-82.0.4.5.al8.5.x86_64
 # Validate both allocation maps before creating or changing any account.
 test -f /etc/subuid && test -f /etc/subgid || fail BLOCKED_SUBID_CONFLICT
 test ! -L /etc/subuid && test ! -L /etc/subgid || fail BLOCKED_SUBID_CONFLICT
@@ -213,16 +261,60 @@ else
   printf '%s\n' "$repo_expected" > /etc/yum.repos.d/watt-docker-ce-v1.repo
   echo WATT_EFFECT_DOCKER_REPOSITORY_ADDED
 fi
+packages_needed=0
+for name in libslirp slirp4netns docker-ce docker-ce-cli \
+    docker-ce-rootless-extras containerd.io fuse-overlayfs systemd-container; do
+  rpm -q "$name" >/dev/null 2>&1 || packages_needed=1
+done
 dnf -y --setopt=install_weak_deps=False --disablerepo='*' \
-  --enablerepo='alinux3*' --enablerepo=watt-docker-ce-v1 install \
-  docker-ce docker-ce-cli containerd.io docker-ce-rootless-extras \
-  fuse-overlayfs systemd-container >/dev/null 2>&1 || fail BLOCKED_APPROVED_PACKAGE_INSTALL
-echo WATT_EFFECT_PACKAGES_INSTALLED
+  --enablerepo=alinux3-os --enablerepo=alinux3-updates \
+  --enablerepo=watt-docker-ce-v1 install \
+  glib2-2.68.4-19.0.1.al8.10.x86_64 \
+  libslirp-4.4.0-2.al8.x86_64 slirp4netns-1.2.3-1.al8.x86_64 \
+  docker-ce-3:26.1.3-1.el8.x86_64 \
+  docker-ce-cli-1:26.1.3-1.el8.x86_64 \
+  docker-ce-rootless-extras-26.1.3-1.el8.x86_64 \
+  containerd.io-1.6.32-3.1.el8.x86_64 \
+  fuse-overlayfs-1.13-1.0.1.al8.x86_64 \
+  systemd-container-239-82.0.4.5.al8.5.x86_64 >/dev/null 2>&1 ||
+  fail BLOCKED_APPROVED_PACKAGE_INSTALL
+test "$packages_needed" = 0 || echo WATT_EFFECT_PACKAGES_INSTALLED
+test "$glib_before" = 0:2.68.4-19.0.1.al8.10.x86_64 ||
+  echo WATT_EFFECT_GLIB2_COMPAT_UPGRADED
+expect_installed() {
+  observed=$(rpm -q --qf '%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}' "$1") ||
+    fail BLOCKED_APPROVED_PACKAGE_INSTALL
+  test "$observed" = "$2" || fail BLOCKED_APPROVED_PACKAGE_INSTALL
+  source=$(dnf -C -q repoquery --installed --qf '%{from_repo}' "$1" 2>/dev/null) ||
+    fail BLOCKED_APPROVED_PACKAGE_SOURCE
+  test "$source" = "$3" || fail BLOCKED_APPROVED_PACKAGE_SOURCE
+}
+expect_installed glib2 0:2.68.4-19.0.1.al8.10.x86_64 alinux3-updates
+expect_installed libslirp 0:4.4.0-2.al8.x86_64 alinux3-updates
+expect_installed slirp4netns 0:1.2.3-1.al8.x86_64 alinux3-updates
+expect_installed docker-ce 3:26.1.3-1.el8.x86_64 watt-docker-ce-v1
+expect_installed docker-ce-cli 1:26.1.3-1.el8.x86_64 watt-docker-ce-v1
+expect_installed docker-ce-rootless-extras 0:26.1.3-1.el8.x86_64 watt-docker-ce-v1
+expect_installed containerd.io 0:1.6.32-3.1.el8.x86_64 watt-docker-ce-v1
+expect_installed fuse-overlayfs 0:1.13-1.0.1.al8.x86_64 alinux3-updates
+expect_installed systemd-container 0:239-82.0.4.5.al8.5.x86_64 alinux3-updates
+readelf -Ws /lib64/libglib-2.0.so.0 | awk \
+  '$8 == "g_spawn_async_with_fds" && $7 != "UND" {found=1} END {exit !found}' ||
+  fail BLOCKED_ROOTLESS_ABI_MISMATCH
+if ldd -r /usr/bin/slirp4netns 2>&1 | grep -q 'undefined symbol'; then
+  fail BLOCKED_ROOTLESS_ABI_MISMATCH
+fi
+slirp4netns --help >/dev/null 2>&1 || fail BLOCKED_ROOTLESS_ABI_MISMATCH
 if systemctl is-active --quiet docker.service || systemctl is-active --quiet docker.socket; then
   fail BLOCKED_HOST_PROFILE_CONFLICT
 fi
 loginctl enable-linger wattdeploy >/dev/null 2>&1 || fail BLOCKED_ROOTLESS_SETUP
 echo WATT_EFFECT_USER_LINGER_ENABLED
+if test "$partial_unit_verified" = 1; then
+  machinectl shell wattdeploy@ /bin/sh -c \
+    'export HOME=/home/wattdeploy XDG_RUNTIME_DIR=/run/user/$(id -u); systemctl --user reset-failed docker.service' \
+    >/dev/null 2>&1 || fail BLOCKED_ROOTLESS_SETUP
+fi
 machinectl shell wattdeploy@ /bin/sh -c \
   'export HOME=/home/wattdeploy XDG_RUNTIME_DIR=/run/user/$(id -u); test "$(id -u)" -ne 0 && dockerd-rootless-setuptool.sh --skip-iptables install && systemctl --user enable --now docker.service && docker context use rootless' \
   || fail BLOCKED_ROOTLESS_SETUP
@@ -230,6 +322,7 @@ test -f /home/wattdeploy/.config/systemd/user/docker.service || fail BLOCKED_ROO
 test -d /home/wattdeploy/.docker || fail BLOCKED_ROOTLESS_SETUP
 for attempt in 1 2 3 4 5 6 7 8 9 10; do
   if ready; then
+    test "$partial_unit_verified" = 0 || echo WATT_EFFECT_PARTIAL_UNIT_RECONCILED
     echo WATT_EFFECT_ROOTLESS_IPTABLES_DISABLED
     echo WATT_EFFECT_ROOTLESS_RUNTIME_STARTED
     test "$(df -Pk /home/wattdeploy | awk 'NR==2 {print $4}')" -ge 2097152 || fail BLOCKED_DISK_SPACE

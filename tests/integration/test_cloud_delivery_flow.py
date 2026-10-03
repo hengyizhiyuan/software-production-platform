@@ -1,6 +1,9 @@
 """Fake-provider proof of durable cloud authority and exact Delivery binding."""
 
 from hashlib import sha256
+from io import BytesIO
+import json
+import tarfile
 from uuid import UUID, uuid4
 
 import pytest
@@ -19,6 +22,7 @@ from spg.infrastructure.aliyun_cloud import (
 )
 from spg.infrastructure.persistence.cloud_delivery_schema import (
     cloud_connections, cloud_delivery_authorizations, cloud_deployments,
+    cloud_prepared_artifacts,
 )
 
 
@@ -109,7 +113,16 @@ class FakeBuilder:
 
     def prepare(self, manifest, _candidate_id):
         path = self.tmp_path / "exact-image.tar"
-        path.write_bytes(b"exact qualified image")
+        config = b'{"architecture":"amd64","os":"linux"}'
+        digest = sha256(config).hexdigest()
+        image_manifest = json.dumps([{"Config": f"blobs/sha256/{digest}",
+            "RepoTags": None, "Layers": []}]).encode()
+        with tarfile.open(path, "w") as archive:
+            for name, content in (("manifest.json", image_manifest),
+                    (f"blobs/sha256/{digest}", config)):
+                member = tarfile.TarInfo(name)
+                member.size = len(content)
+                archive.addfile(member, BytesIO(content))
         return CloudPreparedArtifact(id=uuid4(), manifest_id=manifest.id,
             manifest_fingerprint=manifest.fingerprint,
             candidate_revision=manifest.repository_revision,
@@ -210,8 +223,17 @@ def test_exact_connection_target_authorization_and_deployment(
         service.execute(actor, UUID(authorized["id"]))
     replacement = service.authorize(actor, work_id, request.model_copy(update={
         "expected_current_deployment_id": UUID(result["id"])}))
+    loaded_id = "sha256:" + sha256(
+        b'{"architecture":"amd64","os":"linux"}').hexdigest()
+    with postgres_database.unit_of_work() as uow:
+        repaired = uow.session.execute(select(cloud_prepared_artifacts.c.payload)
+            .where(cloud_prepared_artifacts.c.manifest_id == manifest.id)).scalar_one()
+    assert repaired["image_identity"] == loaded_id
+    assert repaired["artifact_sha256"] == authorized["artifact_sha256"]
+    assert result["image_identity"] == "sha256:" + "a" * 64
     provider.fail_next_verify = True
     rolled_back = service.execute(actor, UUID(replacement["id"]))
+    assert rolled_back["image_identity"] == loaded_id
     assert rolled_back["state"] == "ROLLED_BACK"
     assert rolled_back["rollback_verified"]
     assert [item["kind"] for item in rolled_back["operations"]][-3:] == [
