@@ -58,6 +58,20 @@ class Application:
 
     settings: Settings
 
+    def __post_init__(self) -> None:
+        if self.settings.owner_runtime_mode != "REQUIRED":
+            return
+        try:
+            from ecf.decision_context import VERSION as ecf_version, assemble_context
+            from ecf.runtime import ECFRealityRuntime, JsonRealityStore
+            from guardian.runtime import JsonAssuranceIntakeStore
+        except ImportError as error:
+            raise RuntimeError(
+                "REQUIRED owner runtime needs canonical ECF v0.1 and Guardian"
+            ) from error
+        if ecf_version != "0.1" or not callable(assemble_context):
+            raise RuntimeError("REQUIRED owner runtime has incompatible ECF Decision Context")
+
     def status(self) -> dict[str, str]:
         """Return foundation metadata without fabricating production state."""
 
@@ -80,6 +94,11 @@ class Application:
         """Compose governed Runtime operations over explicit persistence."""
 
         return RuntimeService(database or self.persistence())
+
+    def milestone_closure_context(self, database: Database | None = None):
+        """Review context readiness; never assert Domain closure on ECF READY."""
+        from spg.application.decision_context import MilestoneClosureContextService
+        return MilestoneClosureContextService(database or self.persistence())
 
     def native_executor_runtime(
         self,

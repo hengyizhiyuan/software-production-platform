@@ -13,6 +13,7 @@ from spg.application.production_intelligence import (
     TaskContractRequest,
     default_task_contract_builder,
 )
+from spg.application.decision_context import lineage_for_work_task
 from spg.application.runtime import RuntimeService
 from spg.application.steering import SteeringApplicationService
 from spg.application.steering_decision import (
@@ -447,7 +448,7 @@ class SteeringProductionService:
             raise ProductInvariantViolation(
                 "Individual Steering PRODUCE Step has no executable PWU boundary"
             )
-        task_contract = self._task_contract(request)
+        task_contract = self._task_contract(request, repository_path=resource.location_ref)
         if request.target_kind is ProductionTargetKind.DOCUMENTATION_WORK:
             target = request.artifact_targets[0]
             artifact = ArtifactContract(
@@ -495,8 +496,8 @@ class SteeringProductionService:
             WorkApplicationService._code_change_objective(contract),
         )
 
-    @staticmethod
-    def _task_contract(request: SteeringProductionRequest) -> TaskContract:
+    def _task_contract(self, request: SteeringProductionRequest, *,
+                       repository_path: str) -> TaskContract:
         if request.target_kind is ProductionTargetKind.DOCUMENTATION_WORK:
             scope = tuple(
                 f"{target.operation.value}:{target.path}"
@@ -536,6 +537,16 @@ class SteeringProductionService:
             if request.steering_decision_id is not None
             else f"steering-step:{request.steering_step_id}"
         )
+        target_paths = (tuple(target.path for target in request.artifact_targets)
+                        if request.target_kind is ProductionTargetKind.DOCUMENTATION_WORK
+                        else tuple(target.path for target in request.change_contract.exact_targets))
+        decision_context = lineage_for_work_task(
+            self.database, work_id=request.work_id,
+            repository_identity=request.repository_identity,
+            repository_path=Path(repository_path),
+            repository_revision=request.source_revision,
+            target_paths=target_paths,
+        )
         return default_task_contract_builder().build(
             TaskContractRequest(
                 activity=EngineeringActivity.FEATURE_DELIVERY,
@@ -556,6 +567,9 @@ class SteeringProductionService:
                 ),
                 semantic_facts=request.engineering_semantic_facts,
                 decision_reference=decision_reference,
+                governed_surface=(None if decision_context is None else
+                                  decision_context.surface),
+                decision_context=decision_context,
             )
         )
 

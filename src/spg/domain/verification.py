@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from spg.domain.runtime import WorkUnitRecord
 from spg.domain.engineering_semantics import SemanticFactReference
+from spg.domain.production_intelligence import ProtectedContextObligation
 
 
 class VerificationResultValue(StrEnum):
@@ -78,6 +79,8 @@ class VerificationCapabilityRequest(BaseModel):
     obligation: str = Field(min_length=1)
     semantic_fact_obligations: tuple[SemanticFactReference, ...] = ()
     task_contract_id: UUID | None = None
+    decision_context_fingerprint: str | None = None
+    protected_context_obligations: tuple[ProtectedContextObligation, ...] = ()
     snapshot_id: UUID
     proposed_commit_identity: str
     tree_identity: str

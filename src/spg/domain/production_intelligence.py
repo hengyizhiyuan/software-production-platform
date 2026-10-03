@@ -310,6 +310,48 @@ class TaskContextReference(BaseModel):
     authority: str = Field(min_length=1)
 
 
+class ProtectedContextObligation(BaseModel):
+    """Watt's execution obligation derived from an ECF-selected governed source."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    context_class: str = Field(min_length=1)
+    semantic_key: str = Field(min_length=1)
+    source_ref: str = Field(min_length=1)
+    source_revision: str = Field(min_length=1)
+    authority: str = Field(min_length=1)
+    content_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    content: str = Field(min_length=1, max_length=6000)
+    package_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    verification_ref: str | None = None
+
+    @model_validator(mode="after")
+    def content_matches_digest(self) -> Self:
+        if sha256(self.content.encode()).hexdigest() != self.content_digest:
+            raise ValueError("Protected context content differs from its digest")
+        return self
+
+
+class DecisionContextLineage(BaseModel):
+    """Consumption lineage; ECF retains ownership of package semantics."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    version: str = Field(min_length=1)
+    contract_id: str = Field(min_length=1)
+    request_id: str = Field(min_length=1)
+    package_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    surface: str = Field(min_length=1)
+    product_id: str = Field(min_length=1)
+    work_id: str | None = None
+    subject: str = Field(min_length=1)
+    repository_path: str = Field(min_length=1)
+    repository_identity: str | None = None
+    repository_revision: str = Field(min_length=1)
+    source_references: tuple[str, ...] = Field(min_length=1)
+    protected_obligations: tuple[ProtectedContextObligation, ...] = ()
+
+
 class TaskContract(BaseModel):
     """Explicit execution obligation projected into a PWU Completion Contract."""
 
@@ -334,6 +376,7 @@ class TaskContract(BaseModel):
     reasoning_summary: ReasoningSummary
     decision_trace: DecisionTrace
     evidence_lineage: tuple[EvidenceReference, ...] = ()
+    decision_context: DecisionContextLineage | None = None
 
     @model_validator(mode="after")
     def preserve_semantic_lineage(self) -> Self:
@@ -349,6 +392,14 @@ class TaskContract(BaseModel):
             raise ValueError(
                 "Task Contract prerequisites require exact persisted evidence"
             )
+        if self.decision_context is not None:
+            lineage = self.decision_context
+            if any(item.package_fingerprint != lineage.package_fingerprint
+                   for item in lineage.protected_obligations):
+                raise ValueError("Protected obligations must bind the exact ECF package")
+            represented = {item.reference for item in self.relevant_context}
+            if not {item.source_ref for item in lineage.protected_obligations}.issubset(represented):
+                raise ValueError("Task Contract must carry every protected context source")
         return self
 
     @property

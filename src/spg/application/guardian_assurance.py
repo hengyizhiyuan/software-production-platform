@@ -17,6 +17,7 @@ from spg.domain.product import ProductInvariantViolation
 from spg.domain.production_environment import CandidatePreviewSessionV1, PreviewRuntimeStatus
 from spg.infrastructure.persistence.product_schema import product_works
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
 
 
@@ -61,7 +62,9 @@ class GuardianAssuranceClient:
         return self.preview_store.admit_guardian_requirements(work_id, basis_id, payload)
 
     def assess_ready_preview(self, session: CandidatePreviewSessionV1) -> dict:
-        from guardian.contracts.software_assurance import AssuranceRequest
+        from guardian.contracts.software_assurance import (
+            AssuranceRequest, ProtectedContextEvidence,
+        )
 
         if session.status is not PreviewRuntimeStatus.READY or not session.endpoint:
             raise ProductInvariantViolation("Guardian requires an exact READY Candidate Preview")
@@ -86,6 +89,22 @@ class GuardianAssuranceClient:
             product_id = uow.session.execute(select(product_works.c.product_id).where(
                 product_works.c.id == session.work_id)).scalar_one_or_none()
             objective, constraints = work.desired_outcome, tuple(work.constraints)
+            binding = product.runtime_binding(session.work_id)
+            task = None
+            verification_records = ()
+            if binding is not None and isinstance(getattr(binding, "work_unit_id", None), UUID):
+                runtime = RuntimeStore(uow.session)
+                work_unit = runtime.work_unit(binding.work_unit_id)
+                if work_unit is None:
+                    raise ProductInvariantViolation("Guardian requires current Task Contract lineage")
+                task = (None if work_unit is None else
+                        work_unit.completion_contract.task_contract)
+                candidate_record = runtime.baseline_candidate(session.candidate_id)
+                if candidate_record is not None:
+                    verification_records = tuple(
+                        runtime.verification_record(record_id)
+                        for record_id in candidate_record.verification_record_ids
+                    )
         governed = self.preview_store.guardian_requirements(session.work_id, basis_id)
         if governed is None:
             return {"status": "BLOCKED", "gate": "BLOCKED", "candidate_id": str(session.candidate_id),
@@ -98,11 +117,42 @@ class GuardianAssuranceClient:
             projection = self.preview_store.guardian_projection(item.id)
             if projection:
                 prior_findings.extend(projection.get("finding_ids", []))
+        lineage = None if task is None else task.decision_context
         basis = {"preview_id": str(session.id), "candidate_id": str(session.candidate_id),
             "candidate_fingerprint": session.candidate_fingerprint,
-            "requirements": governed}
+            "requirements": governed,
+            "decision_context_fingerprint": (None if lineage is None else
+                                             lineage.package_fingerprint)}
         request_id = uuid5(NAMESPACE_URL, "watt:guardian-assurance:" + sha256(
             json.dumps(basis, sort_keys=True).encode()).hexdigest())
+        protected_context = ()
+        if lineage is not None:
+            protected_context = tuple(
+                ProtectedContextEvidence(
+                    context_class=item.context_class,
+                    semantic_key=item.semantic_key,
+                    source_ref=item.source_ref,
+                    source_revision=item.source_revision,
+                    package_fingerprint=lineage.package_fingerprint,
+                    coverage=("COVERED" if any(
+                        record is not None and record.result.value == "PASS"
+                        and (context_metadata := record.evidence.metadata.get("decision_context"))
+                        and context_metadata.get("package_fingerprint") == lineage.package_fingerprint
+                        and any(
+                            covered.get("context_class") == item.context_class
+                            and covered.get("semantic_key") == item.semantic_key
+                            and covered.get("source_revision") == item.source_revision
+                            and covered.get("coverage") == "COVERED"
+                            for covered in context_metadata.get("protected_obligations", ())
+                        ) for record in verification_records
+                    ) else "GUARDIAN_REQUIRED"),
+                    verification_refs=tuple(
+                        f"verification:{record.id}" for record in verification_records
+                        if record is not None and record.result.value == "PASS"
+                    ),
+                )
+                for item in lineage.protected_obligations
+            )
         request = AssuranceRequest(request_id=request_id,
             product_ref=f"product:{product_id}" if product_id else f"work-product:{session.work_id}",
             work_ref=f"work:{session.work_id}",
@@ -114,6 +164,11 @@ class GuardianAssuranceClient:
             artifact_refs=tuple(f"artifact:{item}" for item in context["artifacts"]),
             runtime_ref=f"candidate-preview:{session.id}", runtime_url=session.endpoint,
             disposable_preview=True, verification_refs=tuple(context["verification_references"]),
+            task_contract_ref=(f"task-contract:{task.task_contract_id}"
+                               if lineage is not None and task is not None else None),
+            decision_context_fingerprint=(lineage.package_fingerprint
+                                          if lineage is not None else None),
+            protected_context=protected_context,
             acceptance_state="PENDING", delivery_authorization_state="NOT_AUTHORIZED",
             required_effects=tuple(governed["required_effects"]),
             prior_finding_ids=tuple(dict.fromkeys(prior_findings)),

@@ -201,6 +201,16 @@ class VerificationService:
                 if snapshot_basis.basis.work_unit.completion_contract.task_contract is None
                 else snapshot_basis.basis.work_unit.completion_contract.task_contract.task_contract_id
             ),
+            decision_context_fingerprint=(
+                None if snapshot_basis.basis.work_unit.completion_contract.task_contract is None
+                or snapshot_basis.basis.work_unit.completion_contract.task_contract.decision_context is None
+                else snapshot_basis.basis.work_unit.completion_contract.task_contract.decision_context.package_fingerprint
+            ),
+            protected_context_obligations=(
+                () if snapshot_basis.basis.work_unit.completion_contract.task_contract is None
+                or snapshot_basis.basis.work_unit.completion_contract.task_contract.decision_context is None
+                else snapshot_basis.basis.work_unit.completion_contract.task_contract.decision_context.protected_obligations
+            ),
             snapshot_id=snapshot_basis.proposed_snapshot.id,
             proposed_commit_identity=snapshot_basis.proposed_snapshot.proposed_commit_identity,
             tree_identity=snapshot_basis.proposed_snapshot.tree_identity,
@@ -235,6 +245,26 @@ class VerificationService:
                 "Verification evidence does not bind the exact requested subject"
             )
 
+        evidence = result.evidence.model_dump(mode="json")
+        if request.decision_context_fingerprint is not None:
+            metadata = dict(evidence["metadata"])
+            metadata["decision_context"] = {
+                "package_fingerprint": request.decision_context_fingerprint,
+                "protected_obligations": [
+                    {
+                        **item.model_dump(mode="json"),
+                        "coverage": (
+                            "COVERED" if item.verification_ref is not None
+                            and result.result is VerificationResultValue.PASS
+                            and metadata.get("kind") == "NODE_TEST_TARGET"
+                            and metadata.get("target") == item.verification_ref
+                            else "UNVERIFIED"
+                        ),
+                    }
+                    for item in request.protected_context_obligations
+                ],
+            }
+            evidence["metadata"] = metadata
         timestamp = datetime.now(UTC)
         with self.database.unit_of_work() as unit_of_work:
             store = RuntimeStore(unit_of_work.session)
@@ -259,7 +289,7 @@ class VerificationService:
                     "obligation_fingerprint": obligation_fingerprint,
                     "provider_binding": binding.model_dump(mode="json"),
                     "result": result.result.value,
-                    "evidence": result.evidence.model_dump(mode="json"),
+                    "evidence": evidence,
                     "basis_fingerprint": basis_fingerprint,
                     "created_at": timestamp,
                 }

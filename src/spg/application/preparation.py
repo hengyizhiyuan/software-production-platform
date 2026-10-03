@@ -277,6 +277,11 @@ class PreparationService:
                     preparation.context_package_id,
                 )
             )
+        from spg.application.decision_context import assert_task_context_fresh
+        if work_unit.completion_contract.task_contract is not None:
+            assert_task_context_fresh(
+                self.database, work_unit.completion_contract.task_contract,
+            )
         self.validate_ready_workspace(preparation.workspace, work_unit)
         return self._execution_request(
             preparation,

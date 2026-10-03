@@ -27,6 +27,7 @@ from spg.application.production_intelligence import (
     TaskContractRequest,
     default_task_contract_builder,
 )
+from spg.application.decision_context import lineage_for_work_task
 from spg.application.preparation import PreparationService
 from spg.application.repository_branch_authority import (
     BRANCH_FACT_SUBJECTS,
@@ -1920,6 +1921,16 @@ class WorkApplicationService:
             f"source-baseline:{baseline.id}@{baseline.repository_revision}",
         )
         decision_reference = f"work-admission:{work.id}:{authority_identity}"
+        target_paths = ((artifact.path,) if artifact is not None else
+                        tuple(target.path for target in change_contract.exact_targets)
+                        if change_contract is not None else ())
+        decision_context = lineage_for_work_task(
+            self.database, work_id=work.id,
+            repository_identity=resource.repository_identity,
+            repository_path=Path(resource.location_ref),
+            repository_revision=baseline.repository_revision,
+            target_paths=target_paths,
+        )
         if artifact is not None:
             verification_obligation = (
                 work.verification_expectation
@@ -1953,6 +1964,9 @@ class WorkApplicationService:
                     ecf_references=ecf_references,
                     semantic_facts=semantic_facts,
                     decision_reference=decision_reference,
+                    governed_surface=(None if decision_context is None else
+                                      decision_context.surface),
+                    decision_context=decision_context,
                 )
             )
             completion_contract = CompletionContract(
@@ -1991,6 +2005,9 @@ class WorkApplicationService:
                     ecf_references=ecf_references,
                     semantic_facts=semantic_facts,
                     decision_reference=decision_reference,
+                    governed_surface=(None if decision_context is None else
+                                      decision_context.surface),
+                    decision_context=decision_context,
                 )
             )
             completion_contract = CompletionContract(

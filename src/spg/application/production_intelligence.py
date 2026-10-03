@@ -23,6 +23,7 @@ from spg.domain.production_intelligence import (
     ContextSource,
     DecisionTrace,
     DecisionTraceStatus,
+    DecisionContextLineage,
     EngineeringActivity,
     EngineeringPattern,
     EvidenceCategory,
@@ -73,6 +74,8 @@ class TaskContractRequest(BaseModel):
     ecf_references: tuple[str, ...] = ()
     semantic_facts: tuple[SemanticFactReference, ...] = ()
     decision_reference: str
+    governed_surface: str | None = None
+    decision_context: DecisionContextLineage | None = None
 
 
 class EngineeringPatternCatalog:
@@ -273,6 +276,11 @@ class TaskContractBuilder:
         self.orchestrator = orchestrator
 
     def build(self, request: TaskContractRequest) -> TaskContract:
+        if request.governed_surface is not None and (
+            request.decision_context is None
+            or request.decision_context.surface != request.governed_surface
+        ):
+            raise ValueError("Registered governed task requires an exact READY ECF package")
         interaction_discovery = (
             request.activity is EngineeringActivity.DISCOVERY
             and any(item.startswith("interaction-turn:") for item in request.authority_lineage)
@@ -309,6 +317,24 @@ class TaskContractBuilder:
             )
             for index, reference in enumerate(request.ecf_references, start=1)
         )
+        if request.decision_context is not None:
+            candidates.extend(
+                ContextCandidate(
+                    candidate_id=f"protected-context:{index}:{obligation.context_class}",
+                    source=ContextSource.ECF_REALITY,
+                    content=obligation.content,
+                    source_reference=obligation.source_ref,
+                    authority=obligation.authority,
+                    provenance=(obligation.source_ref, obligation.source_revision,
+                                request.decision_context.package_fingerprint),
+                    priority=100,
+                    authoritative=True,
+                    required=True,
+                )
+                for index, obligation in enumerate(
+                    request.decision_context.protected_obligations, start=1
+                )
+            )
         candidates.extend(
             ContextCandidate(
                 candidate_id=f"semantic-fact:{fact.fact_id}",
@@ -456,6 +482,7 @@ class TaskContractBuilder:
             ),
             decision_trace=decision,
             evidence_lineage=evidence,
+            decision_context=request.decision_context,
         )
 
     def _sop_expectations(

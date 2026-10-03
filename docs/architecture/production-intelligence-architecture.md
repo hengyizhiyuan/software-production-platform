@@ -160,6 +160,13 @@ MVP remains focused on the basic Production Planner loop, Work/Production Realit
 
 YiJue integration, multi-user parallel development, Engineering Branching, complete Pattern Library, automatic Model Routing, complete Guardian, and complete ECF are Future Capabilities and Architecture Directions, Not Implemented in the MVP.
 
+ECF Decision-scoped Context v0.1 is now production-integrated for the explicit
+Workspace Product UI and Alibaba ECS Delivery Design policies. It runs before
+final Task Contract formation and yields typed protected obligations; complete
+ECF coverage of all tasks remains future work. Governed Milestone Closure has
+a separate context-readiness consumer. These additions do not change PWU,
+Steering, Guardian, or Human authority over their own decisions.
+
 
 ## SPG Capability Model
 

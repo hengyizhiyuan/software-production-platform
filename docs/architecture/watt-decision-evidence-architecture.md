@@ -155,12 +155,22 @@ boundary.
 
 ## Task and PWU lineage direction
 
-Future Task Contracts and their PWUs should preserve:
+Current Task Contracts and their PWUs preserve:
 
 - SOP lineage;
 - Task Contract lineage;
 - Decision lineage; and
 - Evidence lineage.
+
+For the bounded ECF v0.1 policies, the Task Contract also stores the canonical
+Decision Context contract/request identity, package fingerprint, exact source
+revisions, and typed protected obligations. Work admission or Steering forms
+the package before Task creation; execution revalidates it before an effect.
+Verification records the same fingerprint and only marks an obligation
+`COVERED` when an exact executable check passes. Guardian receives the
+lineage and reports a coverage gap instead of accepting an unsupported
+readiness claim. ECF `READY` is context completeness, never a Product or
+Guardian decision.
 
 Lineage links the exact governed basis used for execution and verification. It
 does not imply that all referenced inputs remain current, nor does it promote a

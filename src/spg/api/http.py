@@ -200,6 +200,14 @@ def _error(status_code: int, code: str, message: str) -> JSONResponse:
 
 
 def _invariant_code(error: ProductInvariantViolation) -> str:
+    from spg.application.decision_context import (
+        DecisionContextAuthorityMissing, DecisionContextChanged,
+        DecisionContextNotReady,
+    )
+    if isinstance(error, DecisionContextChanged):
+        return "DECISION_CONTEXT_CHANGED"
+    if isinstance(error, (DecisionContextNotReady, DecisionContextAuthorityMissing)):
+        return "DECISION_CONTEXT_NOT_READY"
     message = str(error).lower()
     if "refinement" in message or "refined" in message:
         return "NEEDS_REFINEMENT"

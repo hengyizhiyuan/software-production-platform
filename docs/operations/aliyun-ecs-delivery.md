@@ -1,5 +1,28 @@
 # Governed Alibaba Cloud ECS Delivery v1
 
+## Product Intent
+
+After one Cloud Connection authorization and Human selection of an exact ECS,
+Watt automatically prepares a supported host, stages the accepted artifact,
+deploys it, and verifies the real business endpoint. The Human does not need to
+SSH to create users, install Docker, configure the runtime, or edit RAM and
+security groups per target. Human authority remains required for the exact
+Delivery Authorization and for choosing PRIVATE or PUBLIC exposure.
+
+## Approved Safety Constraint
+
+Cloud effects are limited to the current Cloud Connection, Human-selected exact
+ECS, current Delivery Authorization, fixed typed operations, and the exact
+deployment port. Root is used only for the fingerprinted host bootstrap recipe;
+ordinary deployment runs as wattdeploy with rootless Docker. PUBLIC exposure
+may only inspect or create an exact TCP ingress rule on a security group
+actually attached to that ECS, then must read the rules again and verify real
+public HTTP. PRIVATE exposure never mutates ingress. Watt may revoke only a
+rule it created with recorded provenance. Unrelated host and cloud resources
+remain untouched.
+
+## Current operation
+
 The owner-facing path starts from a current, Human-accepted software Deliverable:
 **部署到阿里云 → 一次连接授权 → 选择发现的 ECS → 授权并部署**.
 The existing Delivery manifest, exact Candidate revision, Guardian decision
@@ -21,7 +44,7 @@ exact target, port, and expected prior deployment.
 Remote Server Operation is a capability, not a Product surface. Infrastructure
 effects are deny-by-default and allowlisted only after bounded implementation
 and verification. There is no SSH, terminal, user-supplied command, arbitrary
-package installation, IAM mutation, security-group change, host nginx edit, or generic server
+package installation, IAM mutation, arbitrary security-group change, host nginx edit, or generic server
 administration. The only root operation is the fixed, fingerprinted
 `PREPARE_WATT_DEPLOYMENT_HOST_V1` recipe for Alibaba Cloud Linux 3. It observes
 the host first, creates only the Watt deployment account and approved rootless
@@ -67,8 +90,11 @@ the archive digest before loading. The signed URL exists only in transient
 execution material; persisted Delivery Reality retains the digest and OSS object
 identity, not the URL. Configure OSS lifecycle expiry for this prefix (one day is
 sufficient for dogfood). If public reachability fails while local health passes,
-the result asks the Human to inspect their network settings; Watt does not edit
-Security Groups or a firewall. Deployment receipts retain the typed operation,
+the governed PUBLIC exposure flow checks the attached security group, creates
+only the exact missing TCP ingress rule when authorized, rereads cloud Reality,
+and then verifies the real public HTTP result. A cloud API success alone does
+not establish network PASS. Watt does not edit the host firewall. Deployment
+receipts retain the typed operation,
 account/region/instance, invocation and command IDs, exit status, bounded status
 code, and verification outcome.
 

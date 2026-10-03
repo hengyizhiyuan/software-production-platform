@@ -77,6 +77,20 @@ def render_governed_instruction(
         task_capabilities = "\n".join(
             f"- {item}" for item in task_contract.required_capabilities
         ) or "- None"
+        protected_context = ""
+        if task_contract.decision_context is not None:
+            lineage = task_contract.decision_context
+            protected_context = (
+                f"ECF Decision Context {lineage.contract_id} v{lineage.version} "
+                f"fingerprint {lineage.package_fingerprint}:\n"
+                + "\n".join(
+                    f"- [{item.context_class}] {item.semantic_key} "
+                    f"({item.source_ref}@{item.source_revision}, "
+                    f"authority {item.authority}):\n{item.content}"
+                    for item in lineage.protected_obligations
+                )
+                + "\nThese protected obligations are required; do not omit or reinterpret them.\n"
+            )
         task_contract_section = (
             "Task Contract projection:\n"
             f"- Identity: {task_contract.task_contract_id}\n"
@@ -91,6 +105,7 @@ def render_governed_instruction(
             f"Required executable capabilities:\n{task_capabilities}\n"
             f"Persisted prerequisite evidence:\n{prerequisite_evidence}\n"
             f"Out of scope:\n{task_out_of_scope}\n"
+            f"{protected_context}"
             "This projection preserves already admitted intent and lineage. It does "
             "not widen execution authority; the target contracts below remain decisive.\n\n"
         )

@@ -360,8 +360,10 @@ cross-host scheduling or deep Human end-to-end production acceptance.
 **Purpose:** provide decision-scoped context discovery, assembly, freshness,
 provenance, and governed delivery to planning and execution capabilities.
 
-**Status:** full ECF is deferred; current Context Assembly Lite and integration
-boundaries remain the available foundation. See
+**Status:** ECF Decision-scoped Context v0.1 is production-integrated for
+registered Workspace UI and Alibaba ECS Delivery Design decisions, with a
+Milestone Closure context-readiness consumer. Context Assembly Lite remains
+Watt-owned; full ECF and universal Task coverage remain deferred. See
 [ECF Integration](../context/ecf-integration.md).
 
 ### 5.4 Guardian Enhancement

@@ -37,6 +37,13 @@ authoritative Context Projection semantics as described by
 consume an ECF projection alongside other governed sources, but it does not
 become ECF or redefine what exists.
 
+For the registered Workspace and ECS Design decisions, Watt first asks ECF
+v0.1 whether the Decision Context is ready. The Context Orchestrator then
+assembles execution context with Work, Semantic Truth, SOP, capability Reality,
+and assurance evidence. Protected ECF Intent, Invariant, Constraint, and
+Decision content is required input and cannot be dropped by a Context Budget.
+Unregistered tasks retain the existing WIC context path.
+
 This WIC-level selection responsibility also does not transfer ECF's existing
 least-context responsibility. ECF may minimize an ECF-owned projection for a
 consumer; the Context Orchestrator composes the current interaction/task context

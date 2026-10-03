@@ -12,7 +12,8 @@ services:
       PYTHONPATH: /opt/watt-owners/ecf/src:/opt/watt-owners/guardian/src:/app/src
     volumes:
       - type: bind
-        source: ${SPG_ECF_OWNER_SOURCE_PATH:?Mount the approved ECF owner checkout}
+        # Canonical ECF main supplies both v0.1 Decision Context and owner Reality.
+        source: ${SPG_ECF_OWNER_SOURCE_PATH:?Mount the canonical ECF v0.1 owner checkout}
         target: /opt/watt-owners/ecf
         read_only: true
       - type: bind

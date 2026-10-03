@@ -207,6 +207,13 @@ class ExecutionService:
     def _persist_dispatch(self, request) -> ExecutionDispatchRecord:
         dispatch_id = uuid4()
         timestamp = datetime.now(UTC)
+        from spg.application.decision_context import assert_task_context_fresh
+        with self.database.unit_of_work() as freshness_uow:
+            freshness_unit = RuntimeStore(freshness_uow.session).work_unit(request.work_unit_id)
+        if freshness_unit is not None and freshness_unit.completion_contract.task_contract is not None:
+            assert_task_context_fresh(
+                self.database, freshness_unit.completion_contract.task_contract,
+            )
         with self.database.unit_of_work() as unit_of_work:
             store = RuntimeStore(unit_of_work.session)
             if store.execution_dispatch_for_attempt(request.attempt_id) is not None:
