@@ -15,11 +15,12 @@ is [`deploy/cloud-worker/docker-compose.yml`](../../deploy/cloud-worker/docker-c
 | OS | Alibaba Cloud Linux 3.2104 U13.4, x86_64; kernel `5.10.134-19.8.al8.x86_64` |
 | Disks | 40 GB system disk; 100 GB ext4 data disk mounted read-write at `/data` |
 | Containers | Docker Engine 26.1.3 and Compose v2.27.0; Docker root `/data/docker` |
-| Network | API published on ECS loopback `127.0.0.1:8000`; PostgreSQL and Tool Host have no host port; Compose `executor` network is internal |
+| Network | Initially API-only on ECS loopback `127.0.0.1:8000`; the Phase 4 test Web entrypoint is `0.0.0.0:8080` to the same authenticated API/Web process. PostgreSQL and Tool Host have no host port; Compose `executor` network is internal |
 | External dependency | Worker uses an external DeepSeek model API; the ECS does not host model inference |
 
 The ECS network permits outbound access to the selected model API and container
-image sources. This runtime does not assert a public URL, load balancer, TLS,
+image sources. The temporary Phase 4 browser endpoint uses plain HTTP on the
+test node; it does not assert a production domain, TLS, load balancer,
 cross-node routing, or a multi-zone failure domain. The host Docker socket is
 shared with the API and Tool Host for Production Environment containers; it is
 a host-level privilege boundary that must be revisited before moving services
@@ -27,9 +28,20 @@ to separate nodes.
 
 ## Current service topology
 
+The Phase 4 browser entrypoint is Watt's existing static HTML/CSS/JavaScript
+Product Experience served by FastAPI. It is not a second application or a
+mocked frontend. Browser requests for `/assets/*` and the Product/Workspace
+routes reach that process; same-origin `/api/*` requests reach the existing
+Product/Work/Execution owners. The single owner signs in through
+`/auth/session`, receiving an HTTP-only session cookie. The browser does not
+hold Worker leases or production state: closing or reloading it does not stop
+the queue, Worker, verification, or Candidate governance. The API service is
+the sole host-published container; Gitea, PostgreSQL, Coordinator, Worker, and
+Tool Host remain unexposed by Compose.
+
 ```text
 Single ECS / Docker Compose
-  API ───────────────► PostgreSQL (persistent queue and product state)
+  Browser ──TCP/8080──► Watt Web/API ──► PostgreSQL (persistent queue and product state)
    │                       ▲
    └──► Tool Host           │
            ▲                │

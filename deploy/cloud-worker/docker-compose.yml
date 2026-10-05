@@ -112,7 +112,9 @@ services:
       SPG_MANAGED_SOURCE_WORKSPACE_ROOT: /var/lib/spg/managed-source
       PYTHONPATH: /opt/watt-owners/ecf/src:/opt/watt-owners/guardian/src:/app/src
     ports:
-      - "127.0.0.1:8000:8000"
+      # The existing FastAPI process serves both Watt Web assets and same-origin API.
+      # Only this authenticated browser entrypoint is published on the test ECS.
+      - "0.0.0.0:8080:8000"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
       interval: 5s
