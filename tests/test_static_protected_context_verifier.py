@@ -66,3 +66,20 @@ def test_exact_tree_cannot_be_substituted(subject):
     repo,base,request,task,contract=subject
     with pytest.raises(ValueError,match='TREE_MISMATCH'):
         invoke((repo,base,request.model_copy(update={'tree_identity':'0'*40}),task,contract),[check()])
+
+
+def test_wire_repair_is_bounded_and_preserves_a_contradiction(subject):
+    repo,base,request,task,contract=subject
+    outputs=[{'checks':[check('CONTRADICTED',quote='not an observed quote')]},
+             {'checks':[check('CONTRADICTED')]}]
+    payloads=[]
+    def generate(**kwargs):
+        payloads.append(json.loads(kwargs['input_text']))
+        from spg.domain.model_runtime import ModelUsage
+        return SimpleNamespace(output_text=json.dumps(outputs[len(payloads)-1]),provider=SimpleNamespace(value='test'),effective_model='test',request_id='test',usage=ModelUsage())
+    runtime=SimpleNamespace(generate=generate,registry=SimpleNamespace(close=lambda:None))
+    result=StaticProtectedContextVerifier(lambda:runtime).verify(request,task,contract,repo,base)
+    assert len(payloads)==2
+    assert payloads[1]['wire_feedback']=='PROTECTED_CONTEXT_WITNESS_NOT_OBSERVED'
+    assert result[0]['disposition']=='CONTRADICTED'
+    assert result[0]['coverage']=='UNVERIFIED'

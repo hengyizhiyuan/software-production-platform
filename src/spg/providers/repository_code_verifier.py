@@ -112,6 +112,8 @@ class RepositoryCodeVerifier:
                 "target": target,
                 "failure_type": type(error).__name__,
             }
+            if isinstance(error, ValueError) and str(error).startswith("PROTECTED_CONTEXT_"):
+                metadata["failure_code"] = str(error)
         metadata["semantic_fact_ids"] = [
             str(item.fact_id) for item in request.semantic_fact_obligations
         ]

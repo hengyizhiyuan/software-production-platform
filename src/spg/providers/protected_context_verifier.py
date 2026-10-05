@@ -121,17 +121,31 @@ class StaticProtectedContextVerifier:
             "and a nonempty exact quote from candidate_sources[path]. Do not create or run tests, code or shell commands.")
         from spg.providers.semantic_wire import _provider_strict_output_schema
         runtime = self.runtime_factory()
+        expected = {(item.context_class, item.semantic_key): item for item in request.protected_context_obligations}
         try:
-            response = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
-                instructions=instructions, input_text=json.dumps(payload, ensure_ascii=False),
-                output_schema=_provider_strict_output_schema(ContextChecks.model_json_schema()))
-            observed = ContextChecks.model_validate_json(response.output_text)
+            for attempt in range(2):
+                response = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
+                    instructions=instructions, input_text=json.dumps(payload, ensure_ascii=False),
+                    output_schema=_provider_strict_output_schema(ContextChecks.model_json_schema()))
+                observed = ContextChecks.model_validate_json(response.output_text)
+                keys = [(c.context_class, c.semantic_key) for c in observed.checks]
+                failure = None
+                if len(keys) != len(expected) or set(keys) != set(expected):
+                    failure = "PROTECTED_CONTEXT_INCOMPLETE_COVERAGE"
+                elif any(not c.witnesses or any(w.path not in materials
+                        or w.quote not in materials[w.path]
+                        or PurePosixPath(w.path).suffix == ".md" for w in c.witnesses)
+                        for c in observed.checks):
+                    failure = "PROTECTED_CONTEXT_WITNESS_NOT_OBSERVED"
+                if failure is None:
+                    break
+                if attempt:
+                    raise ValueError(failure)
+                payload = {**payload, "invalid_previous_checks": response.output_text,
+                    "wire_feedback": failure,
+                    "repair_instruction": "Repair only coverage identities and literal implementation quotes using exact candidate_sources. Preserve CONTRADICTED or UNVERIFIABLE judgments; never turn a contradiction into satisfaction to pass the check."}
         finally:
             runtime.registry.close()
-        expected = {(item.context_class, item.semantic_key): item for item in request.protected_context_obligations}
-        keys = [(c.context_class, c.semantic_key) for c in observed.checks]
-        if len(keys) != len(expected) or set(keys) != set(expected):
-            raise ValueError("PROTECTED_CONTEXT_INCOMPLETE_COVERAGE")
         checks = []
         for check in observed.checks:
             obligation = expected[(check.context_class, check.semantic_key)]
