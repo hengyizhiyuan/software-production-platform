@@ -25,8 +25,8 @@ def run(args, data=None, env=None):
     result = subprocess.run(args, cwd=str(RUNTIME), input=data, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, env=env)
     if result.returncode:
-        # Docker/SQL error bodies may include connection secrets. Emit command
-        # kind + exit only; private stderr remains available to the operator.
+        # Docker/SQL error bodies may include connection secrets. Emit only
+        # command kind and exit code; never forward secret-bearing stderr.
         raise RuntimeError('qualification command failed: {} exit {}'.format(args[0], result.returncode))
     return result.stdout
 
@@ -89,6 +89,9 @@ def main(destination):
                                      '-U', 'spg', '-d', 'spg_dev', '-Fc'], cwd=str(RUNTIME), stdout=out, stderr=subprocess.PIPE)
             if result.returncode:
                 raise RuntimeError('pg_dump failed')
+        source_members = {name: {path: digest for path, digest in fingerprint(source).items()
+            if exclude(tarfile.TarInfo(name + '/' + path)) is not None}
+            for name, source in members.items()}
         with tarfile.open(str(target / 'runtime.tar.gz'), 'w:gz') as archive:
             for name, source in members.items():
                 if not source.is_dir():
@@ -116,6 +119,7 @@ def main(destination):
                         raise RuntimeError('Unsafe recovery archive link')
             archive.extractall(str(restored))
         archive_members = {name: fingerprint(restored / name) for name in members}
+        assert archive_members == source_members, 'Restored engineering files differ from the quiesced cut'
         # Restore into an isolated PostgreSQL container/network, with no host port,
         # no shared production data mount, and an ephemeral qualification secret.
         run(['docker', 'network', 'create', '--internal', restore_net])
@@ -175,7 +179,7 @@ def main(destination):
                     'archives': {name: {'sha256': sha(target / name), 'bytes': (target / name).stat().st_size}
                                  for name in ['postgres.dump', 'runtime.tar.gz']},
                     'disk_used_before': disk_before, 'disk_used_after': shutil.disk_usage('/data').used,
-                    'full_stop_services': SERVICES, 'sql_equal': True, 'git_equal': True,
+                    'full_stop_services': SERVICES, 'sql_equal': True, 'git_equal': True, 'file_equal': True,
                     'restore_worker_started': False, 'public_ports_added': 0}
         (target / 'manifest.json').write_text(json.dumps(manifest, sort_keys=True, indent=2))
         (target / 'file-hashes.json').write_text(json.dumps(archive_members, sort_keys=True))

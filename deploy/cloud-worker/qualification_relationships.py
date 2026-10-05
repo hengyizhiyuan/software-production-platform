@@ -43,6 +43,7 @@ def snapshot():
                 for key in ('request_id','candidate_id','candidate_fingerprint','source_revision','source_tree','runtime_ref'):
                     assert request[key] == result[key]
                 candidate = candidates[result['candidate_id']]
+                assert candidate['fingerprint'] == result['candidate_fingerprint']
                 assert candidate['proposed_commit_identity'] == result['source_revision']
                 assert candidate['proposed_tree_identity'] == result['source_tree']
                 ref = request.get('task_contract_ref')
