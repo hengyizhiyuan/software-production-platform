@@ -24,7 +24,7 @@ x-logging: &bounded-logging
 
 services:
   postgres:
-    image: postgres:17.6-alpine
+    image: public.ecr.aws/docker/library/postgres:17.6-alpine
     restart: unless-stopped
     environment:
       POSTGRES_DB: spg_dev
@@ -44,7 +44,7 @@ services:
     <<: *runtime-image
     build:
       context: ./source
-      dockerfile: Dockerfile
+      dockerfile: deploy/cloud-worker/Dockerfile
       target: runtime
     command: ["python", "-m", "alembic", "upgrade", "head"]
     restart: "no"
