@@ -93,6 +93,29 @@ product_source_versions = Table(
     UniqueConstraint("acceptance_id", name="uq_product_source_acceptance"),
 )
 
+product_source_promotion_intents = Table(
+    "product_source_promotion_intents", metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("product_id", Uuid(as_uuid=True), ForeignKey("software_products.id"), nullable=False),
+    Column("work_id", Uuid(as_uuid=True), ForeignKey("product_works.id"), nullable=False),
+    Column("acceptance_id", Uuid(as_uuid=True), ForeignKey("work_delivery_acceptances.id"), nullable=False, unique=True),
+    Column("candidate_id", Uuid(as_uuid=True), ForeignKey("baseline_candidates.id"), nullable=False),
+    Column("runtime_commit_id", Uuid(as_uuid=True), ForeignKey("runtime_commits.id"), nullable=False),
+    Column("expected_version", Integer, nullable=False),
+    Column("expected_revision", String(64), nullable=False),
+    Column("expected_tree", String(64), nullable=False),
+    Column("revision", String(64), nullable=False),
+    Column("tree", String(64), nullable=False),
+    Column("state", String(16), nullable=False),
+    Column("error_code", String(80), nullable=True),
+    Column("assurance_references", JSONB, nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+    Column("updated_at", DateTime(timezone=True), nullable=False),
+    CheckConstraint("state IN ('PENDING', 'COMPLETED', 'BLOCKED')", name="ck_source_promotion_state"),
+    Index("uq_product_pending_promotion", "product_id", unique=True,
+          postgresql_where=text("state <> 'COMPLETED'")),
+)
+
 work_source_bases = Table(
     "work_source_bases", metadata,
     Column("work_id", Uuid(as_uuid=True), ForeignKey("product_works.id"), primary_key=True),
@@ -807,6 +830,7 @@ product_tables = (
     software_product_assets,
     product_managed_sources,
     product_source_versions,
+    product_source_promotion_intents,
     work_source_bases,
     product_works,
     engineering_scopes,

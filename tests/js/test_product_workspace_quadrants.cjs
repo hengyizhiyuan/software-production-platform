@@ -30,7 +30,7 @@ test('Actions and Production retain the existing review and attention paths', ()
   assert.match(helpers, /data-diff=/);
   assert.match(helpers, /data-accept=/);
   assert.match(helpers, /const review = candidate\?\.candidate_fingerprint \?/);
-  assert.match(helpers, /acceptance \? '当前成果已验收'/);
+  assert.match(helpers, /acceptance \? acceptanceCopy\(ws, acceptance\)/);
   assert.match(helpers, /当前无需你操作/);
   assert.match(helpers, /guardian[\s\S]*REPAIR_IN_PROGRESS/);
   assert.match(workspace, /id="workspace-turn-form"/);
@@ -127,5 +127,20 @@ for (const [status, gate] of [['NOT_STARTED', null], ['RUNNING', null],
     }
     assert.equal((actions.match(/data-workspace-quadrant=/g)||[]).length,1);
     assert.equal((production.match(/data-workspace-quadrant=/g)||[]).length,1);
+  });
+}
+
+for (const [promotionState, copy] of [['PENDING', '正在更新正式版本'], ['BLOCKED', '正式版本更新受阻'], ['COMPLETED', '已验收']]) {
+  test(`immutable acceptance distinguishes Product promotion ${promotionState}`, () => {
+    const source = script.slice(script.indexOf('  function acceptanceCopy(ws,'), script.indexOf('  async function renderWorkspace(id) {'));
+    const {renderWorkspaceActions} = vm.runInNewContext(`${source}; ({renderWorkspaceActions})`, {
+      esc: value => String(value ?? ''), link: () => '', renderAttention: () => '',
+    });
+    const ws = {actions:[], reality:{guardian:{required:true,gate:'PASS'}, deliveries:[{source_promotion:{state:promotionState}}]}};
+    const html = renderWorkspaceActions(ws,{candidate_fingerprint:'exact'}, {id:'manifest',fingerprint:'exact'}, {decision:'ACCEPT'}, 'work', false);
+    assert.match(html, new RegExp(copy));
+    assert.doesNotMatch(html, /data-accept=/);
+    assert.equal(html.includes('data-promotion-retry='), promotionState !== 'COMPLETED');
+    assert.equal((html.match(/data-workspace-quadrant=/g)||[]).length,1);
   });
 }

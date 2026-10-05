@@ -100,7 +100,7 @@ def test_real_guardian_covers_each_required_pwu_not_root_context(
     binding = SimpleNamespace(work_unit_id=units[0].id, plan_revision_id=plan_id)
     product = SimpleNamespace(work=lambda _: work, scope_for_work=lambda _: SimpleNamespace(id=scope_id),
         runtime_binding=lambda _: binding)
-    runtime = SimpleNamespace(baseline_candidate=lambda _: SimpleNamespace(satisfied_work_unit_ids=[unit.id for unit in units]),
+    runtime = SimpleNamespace(baseline_candidate=lambda _: SimpleNamespace(plan_revision_id=plan_id, satisfied_work_unit_ids=[unit.id for unit in units]),
         plan_revision=lambda _: SimpleNamespace(id=plan_id, revision_number=1), work_units_for_plan=lambda _: units,
         snapshot=lambda _: SimpleNamespace(repository_revision=revision, repository_tree_identity=tree),
         verification_records_for_work_unit=lambda identity: (records[[u.id for u in units].index(identity)],),

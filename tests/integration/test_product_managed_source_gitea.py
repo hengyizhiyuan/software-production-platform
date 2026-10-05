@@ -457,3 +457,75 @@ def test_brownfield_import_acceptance_next_work_and_provider_fail_closed(postgre
     with pytest.raises(ProductInvariantViolation, match="exact Product accepted source basis"):
         WorkApplicationService(postgres_database).refine_work(failed_work_id,
             WorkRefinementRequest(code_exact_targets=("README.md",)))
+
+@pytest.mark.parametrize('cut', ['BEFORE_GIT', 'AFTER_GIT', 'BEFORE_SQL_COMMIT'])
+def test_durable_promotion_replays_exact_authorized_decision_after_interruption(
+    postgres_database, tmp_path, monkeypatch, cut,
+):
+    from spg.infrastructure.persistence.product_schema import (
+        product_source_promotion_intents, product_source_versions)
+    from spg.infrastructure.persistence.delivery_schema import work_delivery_acceptances, work_delivery_manifests
+    from spg.infrastructure.persistence.unit_of_work import UnitOfWork
+
+    class PowerLoss(BaseException):
+        pass
+
+    product = ProductAssetService(postgres_database).create('human:owner', 'Promotion interruption ' + cut)
+    product_id = UUID(product['id'])
+    source = ProductManagedSourceService(postgres_database)
+    before = source.describe(product_id, 'human:owner')['accepted']
+    original_promote = GiteaManagedSourceProvider.promote
+    interrupted = False
+    def promote(provider, reference, revision, expected):
+        nonlocal interrupted
+        if interrupted:
+            return original_promote(provider, reference, revision, expected)
+        if cut == 'BEFORE_GIT':
+            interrupted = True
+            raise ManagedSourceError('PROVIDER_UNAVAILABLE', 'bounded qualification interruption')
+        observed = original_promote(provider, reference, revision, expected)
+        if cut == 'AFTER_GIT':
+            interrupted = True
+            raise PowerLoss()
+        return observed
+    monkeypatch.setattr(GiteaManagedSourceProvider, 'promote', promote)
+    original_commit = UnitOfWork.commit
+    def commit(uow):
+        nonlocal interrupted
+        # An updated intent in this transaction marks the Git→SQL boundary.
+        if cut == 'BEFORE_SQL_COMMIT' and not interrupted and uow.session.execute(
+                select(product_source_promotion_intents.c.state).where(
+                    product_source_promotion_intents.c.product_id == product_id)).scalar_one_or_none() == 'COMPLETED':
+            interrupted = True
+            raise PowerLoss()
+        return original_commit(uow)
+    monkeypatch.setattr(UnitOfWork, 'commit', commit)
+    with pytest.raises((PowerLoss, ManagedSourceError)):
+        _run_and_accept(postgres_database, product_id, '# Durable acceptance\n\nExact V1.\n', tmp_path)
+    assert interrupted
+    with postgres_database.unit_of_work() as u:
+        intent = dict(u.session.execute(select(product_source_promotion_intents).where(
+            product_source_promotion_intents.c.product_id == product_id)).mappings().one())
+        acceptance = u.session.execute(select(work_delivery_acceptances.c.payload).where(
+            work_delivery_acceptances.c.id == intent['acceptance_id'])).scalar_one()
+        manifest = u.session.execute(select(work_delivery_manifests.c.payload).where(
+            work_delivery_manifests.c.id == UUID(acceptance['manifest_id']))).scalar_one()
+        assert u.session.scalar(select(func.count()).select_from(product_source_versions).where(
+            product_source_versions.c.product_id == product_id)) == 1
+    assert intent['state'] == ('BLOCKED' if cut == 'BEFORE_GIT' else 'PENDING')
+    assert source.describe(product_id, 'human:owner')['accepted'] == before
+    assert source.provider.resolve_ref('product-' + product_id.hex).revision == (
+        before['revision'] if cut == 'BEFORE_GIT' else intent['revision'])
+    with pytest.raises(ProductInvariantViolation, match='PRODUCT_SOURCE_PROMOTION_PENDING'):
+        WorkApplicationService(postgres_database).submit_work('New Work cannot consume ambiguous source', product_id=product_id)
+    decision = HumanAcceptanceRequest(**{k: acceptance[k] for k in HumanAcceptanceRequest.model_fields})
+    delivery = DeliveryApplicationService(postgres_database)
+    for _ in range(3):
+        result = delivery.decide(intent['work_id'], UUID(manifest['id']), decision)
+        assert str(result.id) == acceptance['id']
+    after = source.describe(product_id, 'human:owner')
+    assert after['accepted'] == {'version': 1, 'revision': intent['revision'], 'tree': intent['tree']}
+    assert len(after['versions']) == 2 and after['versions'][-1]['acceptance_id'] == acceptance['id']
+    assert not source.pending_promotions()
+    next_work = WorkApplicationService(postgres_database).submit_work('Continue exact accepted baseline', product_id=product_id)
+    assert _basis(postgres_database, next_work.work_id)['source_revision'] == intent['revision']

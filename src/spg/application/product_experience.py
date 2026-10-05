@@ -374,7 +374,7 @@ class ProductExperienceProjection:
         return {"revision": _fingerprint(summary, exact, guardian),
                 "summary": summary, "manifest": exact["manifest"],
                 "acceptance": exact["acceptance"], "current": exact["current"],
-                "guardian": guardian}
+                "guardian": guardian, "source_promotion": exact.get("source_promotion")}
 
     def interaction_product(self, owner_id: str, interaction_id: UUID) -> str | None:
         with self.database.unit_of_work() as uow:

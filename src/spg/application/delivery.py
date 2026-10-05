@@ -509,7 +509,12 @@ class DeliveryApplicationService:
                 manifest = DeliveryManifest.model_validate(row)
                 decision = uow.session.execute(select(work_delivery_acceptances.c.payload).where(work_delivery_acceptances.c.manifest_id == manifest.id)).scalar_one_or_none()
                 current = bool(binding and binding.id == manifest.runtime_binding_id and current_commit == manifest.runtime_commit_id and work.current_work_reality_revision_id == manifest.work_reality_revision_id)
-                manifests.append({"manifest": row, "current": current, "acceptance": decision})
+                from spg.infrastructure.persistence.product_schema import product_source_promotion_intents
+                promotion = None if decision is None else uow.session.execute(select(
+                    product_source_promotion_intents).where(product_source_promotion_intents.c.acceptance_id == UUID(decision['id']))).mappings().one_or_none()
+                from spg.application.product_managed_source import ProductManagedSourceService
+                manifests.append({"manifest": row, "current": current, "acceptance": decision,
+                    "source_promotion": None if promotion is None else ProductManagedSourceService._promotion_projection(promotion)})
             return {"work_id": str(work_id), "target": None if target is None else target.model_dump(mode="json"),
                     "supported_target_kinds": [DeliveryTargetKind.DOCUMENT_PACKAGE.value, DeliveryTargetKind.SOFTWARE_ARTIFACT.value], "deliveries": manifests}
 
@@ -555,16 +560,37 @@ class DeliveryApplicationService:
             manifest = self._manifest(uow.session, work_id, manifest_id)
             if manifest.fingerprint != request.manifest_fingerprint:
                 raise ProductInvariantViolation("Human acceptance must reference the exact displayed manifest fingerprint")
+            existing = uow.session.execute(select(work_delivery_acceptances.c.payload).where(
+                work_delivery_acceptances.c.manifest_id == manifest_id)).scalar_one_or_none()
+            if existing:
+                record = HumanAcceptance.model_validate(existing)
+                if not all(getattr(record, field) == getattr(request, field) for field in HumanAcceptanceRequest.model_fields):
+                    raise ProductInvariantViolation("This exact delivery already has an immutable Human decision")
+                # The immutable Human decision survives failed/uncertain promotion.
+                # Its exact intent is replayed below, never replaced by current HEAD.
+                uow.rollback()
+            else:
+                record = None
+        if record is None:
+            return self._record_acceptance(work_id, manifest_id, request)
+        self.reconcile_acceptance(record.id)
+        return record
+
+    def _record_acceptance(self, work_id, manifest_id, request):
+        with self.database.unit_of_work() as uow:
+            self._work(uow.session, work_id)
+            manifest = self._manifest(uow.session, work_id, manifest_id)
+            # Lock the manifest: two concurrent Human requests cannot create two decisions.
+            uow.session.execute(select(work_delivery_manifests.c.id).where(
+                work_delivery_manifests.c.id == manifest_id).with_for_update()).scalar_one()
+            existing = uow.session.execute(select(work_delivery_acceptances.c.payload).where(
+                work_delivery_acceptances.c.manifest_id == manifest_id)).scalar_one_or_none()
+            if existing is not None:
+                raise ProductInvariantViolation("This exact delivery already has an immutable Human decision; retry the same decision")
             work, binding, _, commit, _ = self._trusted_basis(uow.session, work_id)
             if (manifest.runtime_binding_id != binding.id or manifest.runtime_commit_id != commit.id
                     or manifest.work_reality_revision_id != work.current_work_reality_revision_id):
                 raise ProductInvariantViolation("Delivery is stale against current Work Reality or production cycle")
-            existing = uow.session.execute(select(work_delivery_acceptances.c.payload).where(work_delivery_acceptances.c.manifest_id == manifest_id)).scalar_one_or_none()
-            if existing:
-                record = HumanAcceptance.model_validate(existing)
-                if all(getattr(record, field) == getattr(request, field) for field in HumanAcceptanceRequest.model_fields):
-                    return record
-                raise ProductInvariantViolation("This exact delivery already has an immutable Human decision")
             if manifest.software is not None and request.decision.value == "ACCEPT":
                 if (self.guardian_assurance_client is not None
                         and not self.guardian_assurance_client.passed(work_id, commit.candidate_id)):
@@ -589,11 +615,47 @@ class DeliveryApplicationService:
             ))
             if request.decision.value == "ACCEPT":
                 from spg.infrastructure.persistence.product_schema import work_source_bases
-                managed = uow.session.execute(select(work_source_bases.c.work_id).where(
-                    work_source_bases.c.work_id == work_id)).scalar_one_or_none()
-                if managed is not None:
+                if uow.session.execute(select(work_source_bases.c.work_id).where(
+                        work_source_bases.c.work_id == work_id)).first():
                     from spg.application.product_managed_source import ProductManagedSourceService
-                    ProductManagedSourceService(self.database, self.settings).promote_acceptance(
-                        uow.session, work_id, commit, record)
+                    ProductManagedSourceService(self.database, self.settings).prepare_promotion(
+                        uow.session, work_id, commit, record,
+                        assurance=None if self.guardian_assurance_client is None else
+                            self.guardian_assurance_client.projection(work_id))
             uow.commit()
+        self.reconcile_acceptance(record.id)
         return record
+
+    def _require_promotion_assurance(self, intent):
+        if intent['assurance_references'].get('required'):
+            if (self.guardian_assurance_client is None or
+                    not self.guardian_assurance_client.passed(intent['work_id'], intent['candidate_id'])):
+                raise ProductInvariantViolation('SOURCE_PROMOTION_ASSURANCE_UNAVAILABLE')
+            current_refs = self.guardian_assurance_client.projection(intent['work_id']).get('result_refs', [])
+            if current_refs != intent['assurance_references'].get('result_refs'):
+                raise ProductInvariantViolation('SOURCE_PROMOTION_ASSURANCE_BASIS_CHANGED')
+
+    def reconcile_acceptance(self, acceptance_id):
+        from spg.infrastructure.persistence.product_schema import product_source_promotion_intents
+        from spg.application.product_managed_source import ProductManagedSourceService
+        with self.database.unit_of_work() as uow:
+            intent_id = uow.session.execute(select(product_source_promotion_intents.c.id).where(
+                product_source_promotion_intents.c.acceptance_id == acceptance_id)).scalar_one_or_none()
+        if intent_id is not None:
+            return ProductManagedSourceService(self.database, self.settings).reconcile_promotion(
+                intent_id, require_assurance=self._require_promotion_assurance)
+        return None
+
+    def restore_promotions(self):
+        from spg.application.product_managed_source import ProductManagedSourceService
+        from spg.infrastructure.persistence.product_schema import product_source_promotion_intents
+        with self.database.unit_of_work() as uow:
+            pending = tuple(uow.session.execute(select(product_source_promotion_intents.c.id).where(
+                product_source_promotion_intents.c.state != 'COMPLETED')).scalars())
+        for intent_id in pending:
+            try:
+                ProductManagedSourceService(self.database, self.settings).reconcile_promotion(
+                    intent_id, require_assurance=self._require_promotion_assurance)
+            except (ProductInvariantViolation, RuntimeError):
+                # Owner persists the exact blocker; HTTP/read models retain it for retry.
+                continue

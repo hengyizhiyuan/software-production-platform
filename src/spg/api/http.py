@@ -425,6 +425,8 @@ def create_http_application(
         software_runtime.restore()
         if candidate_runtime_preview is not None:
             candidate_runtime_preview.restore()
+        if getattr(settings, "managed_source_provider", None) == "gitea":
+            delivery_service.restore_promotions()
         if production_admission_trigger is not None:
             for work_id in production_admission_trigger.governed_branch_work_ids():
                 selected_steering_driver.schedule(work_id)
@@ -2597,6 +2599,16 @@ def create_http_application(
     @api.post("/api/works/{work_id}/deliveries/{manifest_id}/acceptance")
     def human_acceptance(work_id: UUID, manifest_id: UUID, request: HumanAcceptanceRequest):
         return delivery_service.decide(work_id, manifest_id, request)
+
+    @api.post("/api/works/{work_id}/deliveries/{manifest_id}/reconcile-source")
+    def reconcile_delivery_source(work_id: UUID, manifest_id: UUID):
+        # Existing immutable Human Acceptance is authority; no new decision,
+        # arbitrary ref, or unqualified Candidate can be supplied here.
+        exact = next((item for item in delivery_service.view(work_id)['deliveries']
+            if item['manifest']['id'] == str(manifest_id)), None)
+        if exact is None or exact['acceptance'] is None or exact['acceptance']['decision'] != 'ACCEPT':
+            raise ProductInvariantViolation('Source reconciliation requires existing exact Human Acceptance')
+        return delivery_service.reconcile_acceptance(UUID(exact['acceptance']['id']))
 
     @api.get("/api/works/{work_id}/result", response_model=WorkResultResponse)
     def get_work_result(work_id: UUID) -> WorkResultResponse:

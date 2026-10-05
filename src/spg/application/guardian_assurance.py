@@ -132,7 +132,7 @@ class GuardianAssuranceClient:
             if binding is not None and isinstance(getattr(binding, "work_unit_id", None), UUID):
                 runtime = RuntimeStore(uow.session)
                 candidate_record = runtime.baseline_candidate(session.candidate_id)
-                plan = runtime.plan_revision(binding.plan_revision_id)
+                plan = None if candidate_record is None or candidate_record.plan_revision_id != binding.plan_revision_id else runtime.plan_revision(candidate_record.plan_revision_id)
                 if candidate_record is None or plan is None:
                     raise ProductInvariantViolation("Guardian requires current Task Contract lineage")
                 units = runtime.work_units_for_plan(plan.id)

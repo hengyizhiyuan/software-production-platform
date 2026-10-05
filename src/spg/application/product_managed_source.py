@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 import subprocess
-from uuid import UUID, uuid4
+from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
 from sqlalchemy import insert, select, update
 
@@ -14,11 +14,13 @@ from spg.domain.product import EngineeringContextReference, ProductInvariantViol
 from spg.domain.runtime import BootstrapRequest
 from spg.infrastructure.managed_source_provider import GiteaManagedSourceProvider, ManagedSourceError
 from spg.infrastructure.persistence.product_schema import (
-    engineering_resources, product_managed_sources, product_source_versions,
+    engineering_resources, product_managed_sources, product_source_versions, product_source_promotion_intents,
     software_product_assets, software_products, work_source_bases,
     work_runtime_bindings,
 )
 from spg.infrastructure.persistence.runtime_schema import runtime_commits
+from spg.infrastructure.persistence.runtime_store import RuntimeStore
+from spg.infrastructure.persistence.delivery_schema import work_delivery_acceptances
 
 
 def _git(path: Path, *args: str) -> str:
@@ -110,7 +112,13 @@ class ProductManagedSourceService:
 
     def provision(self, product_id: UUID, owner_id: str, name: str) -> dict:
         reference = "product-" + product_id.hex
-        initial = f"# {name}\n\nManaged by Watt.\n"
+        with self.database.unit_of_work() as uow:
+            # Preserve the Human's explicit Product description in its initial
+            # source. Do not synthesize approved decisions or protected context.
+            description = uow.session.execute(select(software_products.c.description).where(
+                software_products.c.id == product_id, software_products.c.owner_id == owner_id)).scalar_one()
+        initial = f"# {name}\n\nManaged by Watt.\n" + (
+            "\n" + description + "\n" if description else "")
         revision = self.provider.provision(reference, initial)
         checkout = self.root / "products" / str(product_id) / "accepted"
         if not checkout.exists():
@@ -148,6 +156,10 @@ class ProductManagedSourceService:
                 work_source_bases.c.work_id == work_id)).mappings().one_or_none()
             if existing is not None:
                 return dict(existing)
+            if uow.session.execute(select(product_source_promotion_intents.c.id).where(
+                    product_source_promotion_intents.c.product_id == product_id,
+                    product_source_promotion_intents.c.state != "COMPLETED")).first():
+                raise ProductInvariantViolation("PRODUCT_SOURCE_PROMOTION_PENDING")
             source = dict(source)
         branch = "work-" + work_id.hex
         work_ref = "refs/heads/" + branch
@@ -224,34 +236,113 @@ class ProductManagedSourceService:
         if observed.tree != tree:
             raise ProductInvariantViolation("Candidate tree differs from persisted provider source")
 
-    def promote_acceptance(self, session, work_id: UUID, commit, acceptance) -> None:
+    def prepare_promotion(self, session, work_id: UUID, commit, acceptance,
+                          assurance: dict | None = None) -> UUID | None:
+        """Persist explicit authority before any external ref mutation."""
         basis = session.execute(select(work_source_bases).where(
             work_source_bases.c.work_id == work_id)).mappings().one_or_none()
         if basis is None:
-            return
-        source = self._source(session, basis["product_id"], lock=True)
-        if (source["version"] != basis["source_version"]
-                or source["accepted_revision"] != basis["source_revision"]):
-            raise ProductInvariantViolation("Product accepted source advanced since this Work began")
+            return None
+        source = self._source(session, basis['product_id'], lock=True)
+        if (source['version'] != basis['source_version']
+                or source['accepted_revision'] != basis['source_revision']
+                or source['accepted_tree'] != basis['source_tree']):
+            raise ProductInvariantViolation('Product accepted source advanced since this Work began')
+        if acceptance.decision.value != 'ACCEPT':
+            raise ProductInvariantViolation('Source promotion requires explicit Human Acceptance')
         if commit.repository_identity != session.execute(select(engineering_resources.c.repository_identity).where(
-                engineering_resources.c.id == basis["resource_id"])).scalar_one():
-            raise ProductInvariantViolation("Accepted Candidate does not belong to Work source")
-        observed = self.provider.promote(source["provider_reference"],
-            commit.repository_revision, source["accepted_revision"])
-        if observed.tree != commit.repository_tree_identity:
-            raise ProductInvariantViolation("Accepted Candidate source tree differs from provider")
-        now = datetime.now(UTC)
-        version = source["version"] + 1
-        session.execute(insert(product_source_versions).values(
-            id=uuid4(), product_id=basis["product_id"], version=version,
-            revision=observed.revision, tree=observed.tree, work_id=work_id,
-            candidate_id=commit.candidate_id, acceptance_id=acceptance.id,
-            authority_identity=acceptance.authority_identity, created_at=now))
-        session.execute(update(product_managed_sources).where(
-            product_managed_sources.c.product_id == basis["product_id"],
-            product_managed_sources.c.version == source["version"])
-            .values(accepted_revision=observed.revision, accepted_tree=observed.tree,
-                    version=version, updated_at=now))
+                engineering_resources.c.id == basis['resource_id'])).scalar_one():
+            raise ProductInvariantViolation('Accepted Candidate does not belong to Work source')
+        pending = session.execute(select(product_source_promotion_intents.c.id).where(
+            product_source_promotion_intents.c.product_id == basis['product_id'],
+            product_source_promotion_intents.c.state != 'COMPLETED')).scalar_one_or_none()
+        if pending is not None:
+            raise ProductInvariantViolation('PRODUCT_SOURCE_PROMOTION_PENDING: reconcile the prior accepted Candidate first')
+        intent_id = uuid5(NAMESPACE_URL, f'watt:source-promotion:{acceptance.id}')
+        session.execute(insert(product_source_promotion_intents).values(
+            id=intent_id, product_id=basis['product_id'], work_id=work_id,
+            acceptance_id=acceptance.id, candidate_id=commit.candidate_id,
+            runtime_commit_id=commit.id, expected_version=source['version'],
+            expected_revision=source['accepted_revision'], expected_tree=source['accepted_tree'],
+            revision=commit.repository_revision, tree=commit.repository_tree_identity,
+            state='PENDING', assurance_references={key: assurance[key] for key in
+                ('required', 'result_refs', 'required_pwu_ids') if assurance and key in assurance},
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC)))
+        return intent_id
+
+    def reconcile_promotion(self, intent_id: UUID, *, require_assurance=None) -> dict:
+        """Replay an exact CAS; Git success never substitutes for SQL acceptance."""
+        try:
+            with self.database.unit_of_work() as uow:
+                intent = uow.session.execute(select(product_source_promotion_intents).where(
+                    product_source_promotion_intents.c.id == intent_id)).mappings().one()
+                source = self._source(uow.session, intent['product_id'], lock=True)
+                # Serialize on Product first, then reread intent after a concurrent replay.
+                intent = uow.session.execute(select(product_source_promotion_intents).where(
+                    product_source_promotion_intents.c.id == intent_id).with_for_update()).mappings().one()
+                if intent['state'] == 'COMPLETED':
+                    return self._promotion_projection(intent)
+                raw = uow.session.execute(select(work_delivery_acceptances.c.payload).where(
+                    work_delivery_acceptances.c.id == intent['acceptance_id'])).scalar_one()
+                from spg.domain.delivery import HumanAcceptance
+                acceptance = HumanAcceptance.model_validate(raw)
+                commit = RuntimeStore(uow.session).runtime_commit(intent['runtime_commit_id'])
+                if (acceptance.decision.value != 'ACCEPT' or commit.candidate_id != intent['candidate_id']
+                        or commit.repository_revision != intent['revision']
+                        or commit.repository_tree_identity != intent['tree']):
+                    raise ProductInvariantViolation('SOURCE_PROMOTION_AUTHORITY_MISMATCH')
+                if (source['version'], source['accepted_revision'], source['accepted_tree']) != (
+                        intent['expected_version'], intent['expected_revision'], intent['expected_tree']):
+                    raise ProductInvariantViolation('SOURCE_PROMOTION_BASELINE_CONFLICT')
+                if require_assurance is not None:
+                    require_assurance(intent)
+                observed = self.provider.promote(source['provider_reference'],
+                    intent['revision'], intent['expected_revision'])
+                if (observed.revision, observed.tree) != (intent['revision'], intent['tree']):
+                    raise ProductInvariantViolation('SOURCE_PROMOTION_TREE_MISMATCH')
+                now = datetime.now(UTC)
+                uow.session.execute(insert(product_source_versions).values(
+                    id=uuid5(NAMESPACE_URL, f'watt:source-version:{acceptance.id}'),
+                    product_id=intent['product_id'], version=intent['expected_version'] + 1,
+                    revision=intent['revision'], tree=intent['tree'], work_id=intent['work_id'],
+                    candidate_id=intent['candidate_id'], acceptance_id=acceptance.id,
+                    authority_identity=acceptance.authority_identity, created_at=now))
+                uow.session.execute(update(product_managed_sources).where(
+                    product_managed_sources.c.product_id == intent['product_id'])
+                    .values(accepted_revision=intent['revision'], accepted_tree=intent['tree'],
+                        version=intent['expected_version'] + 1, updated_at=now))
+                uow.session.execute(update(product_source_promotion_intents).where(
+                    product_source_promotion_intents.c.id == intent_id).values(
+                        state='COMPLETED', error_code=None, updated_at=now))
+                uow.commit()
+                return {**self._promotion_projection(intent), 'state': 'COMPLETED', 'error_code': None}
+        except (ManagedSourceError, ProductInvariantViolation) as error:
+            # Persist a category, never a provider message or credential-bearing URL.
+            code = error.category if isinstance(error, ManagedSourceError) else str(error).split(':')[0]
+            if not isinstance(code, str):
+                code = str(getattr(code, 'value', 'SOURCE_PROMOTION_BLOCKED'))
+            if not code.replace('_', '').isalnum() or len(code) > 80:
+                code = 'SOURCE_PROMOTION_BLOCKED'
+            with self.database.unit_of_work() as uow:
+                uow.session.execute(update(product_source_promotion_intents).where(
+                    product_source_promotion_intents.c.id == intent_id,
+                    product_source_promotion_intents.c.state != 'COMPLETED').values(
+                        state='BLOCKED', error_code=code, updated_at=datetime.now(UTC)))
+                uow.commit()
+            raise
+
+    @staticmethod
+    def _promotion_projection(row) -> dict:
+        return {key: str(row[key]) if key == 'id' or key.endswith('_id') else row[key] for key in (
+            'id', 'product_id', 'work_id', 'candidate_id', 'acceptance_id', 'state',
+            'expected_version', 'expected_revision', 'revision', 'tree', 'error_code')}
+
+    def pending_promotions(self) -> tuple[UUID, ...]:
+        with self.database.unit_of_work() as uow:
+            return tuple(uow.session.execute(select(product_source_promotion_intents.c.id)
+                .where(product_source_promotion_intents.c.state != 'COMPLETED')
+                .order_by(product_source_promotion_intents.c.created_at)).scalars())
 
     def describe(self, product_id: UUID, owner_id: str) -> dict:
         with self.database.unit_of_work() as uow:
