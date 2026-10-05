@@ -1929,6 +1929,76 @@ def test_tool_host_api_returns_failed_receipt_for_rejected_recipe(
     assert response.json()["output"]["error_type"] == "ValueError"
 
 
+def test_production_environment_only_host_rejects_unbound_tool_effect(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    workspace_root = tmp_path / "workspaces"
+    workspace = workspace_root / "attempt-1"
+    workspace.mkdir(parents=True)
+    monkeypatch.setenv("SPG_NATIVE_EXECUTOR_WORKSPACE_ROOT", str(workspace_root))
+    monkeypatch.setenv("SPG_NATIVE_EXECUTOR_RECEIPT_SPOOL_ROOT", str(tmp_path / "receipts"))
+    monkeypatch.setenv("SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN", "test-internal-token")
+    monkeypatch.setenv("SPG_NATIVE_EXECUTOR_CONTAINER_ISOLATION_REQUIRED", "true")
+    monkeypatch.setenv(
+        "SPG_NATIVE_EXECUTOR_TOOL_HOST_ISOLATION", "production-environment-only"
+    )
+    monkeypatch.setenv(
+        "SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_WORKSPACE_VOLUME", "test-workspaces"
+    )
+    binding, _ = _binding()
+    manifest = binding.workspace.model_copy(update={
+        "host_storage_id": str(workspace),
+        "mounts": (binding.workspace.mounts[0].model_copy(update={
+            "host_path": str(workspace), "write_scope": ("result.txt",),
+        }),),
+    })
+    request = ToolExecutionRequest(
+        delivery_id=uuid4(), attempt_id=binding.attempt_id, worker_epoch=1,
+        step_id=uuid4(),
+        proposal=ToolCallProposal(
+            proposal_index=0, tool_identity="file.write",
+            arguments={"path": "result.txt", "content": "must not write"},
+        ),
+        capability_grants=(CapabilityGrant(
+            identity="file.write", version="1", scope={"paths": ["result.txt"]},
+        ),),
+        workspace=manifest,
+    )
+
+    with TestClient(create_tool_host_application()) as client:
+        health = client.get("/health")
+        response = client.post(
+            "/internal/native-tools/execute",
+            headers={"X-Watt-Internal-Token": "test-internal-token"},
+            json=request.model_dump(mode="json"),
+        )
+
+    assert health.status_code == 200
+    assert health.json()["isolation"] == "production-environment-only"
+    assert response.status_code == 200
+    assert response.json()["condition"] == "FAILED"
+    assert response.json()["output"]["effect_observed"] is False
+    assert response.json()["output"]["error_type"] == "ValueError"
+    assert not (workspace / "result.txt").exists()
+
+
+def test_production_environment_only_host_requires_isolation_and_shared_volume(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("SPG_NATIVE_EXECUTOR_WORKSPACE_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN", "test-internal-token")
+    monkeypatch.setenv(
+        "SPG_NATIVE_EXECUTOR_TOOL_HOST_ISOLATION", "production-environment-only"
+    )
+    monkeypatch.delenv("SPG_NATIVE_EXECUTOR_CONTAINER_ISOLATION_REQUIRED", raising=False)
+    monkeypatch.delenv(
+        "SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_WORKSPACE_VOLUME", raising=False
+    )
+
+    with pytest.raises(RuntimeError, match="requires container isolation"):
+        create_tool_host_application()
+
+
 def test_openai_capacity_response_is_typed_and_retryable(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

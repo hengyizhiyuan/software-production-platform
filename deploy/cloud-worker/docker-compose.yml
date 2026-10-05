@@ -8,7 +8,7 @@ x-database-url: &database-url
 
 x-runtime-state: &runtime-state
   SPG_RUNTIME_PROFILE: cloud-worker-single-ecs-v1
-  SPG_WORKSPACE_ROOT: /var/lib/spg/workspaces
+  SPG_WORKSPACE_ROOT: /var/lib/spg/native-workspaces
   SPG_OWNER_RUNTIME_STORE_ROOT: /var/lib/spg/owner-runtime
   SPG_NATIVE_EXECUTOR_STORAGE_ROOT: /var/lib/spg/native-executor
   SPG_NATIVE_EXECUTOR_WORKSPACE_ROOT: /var/lib/spg/native-workspaces
@@ -122,6 +122,7 @@ services:
       SPG_NATIVE_EXECUTOR_RECEIPT_SPOOL_ROOT: /var/lib/spg/native-tool-receipts
       SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN: ${SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN:?Set SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN}
       SPG_NATIVE_EXECUTOR_CONTAINER_ISOLATION_REQUIRED: "true"
+      SPG_NATIVE_EXECUTOR_TOOL_HOST_ISOLATION: production-environment-only
       SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_WORKSPACE_VOLUME: watt-native-workspaces
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8011/health', timeout=3).read()"]

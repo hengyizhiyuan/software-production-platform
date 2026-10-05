@@ -61,17 +61,34 @@ def create_tool_host_application() -> FastAPI:
     isolation_required = os.environ.get(
         "SPG_NATIVE_EXECUTOR_CONTAINER_ISOLATION_REQUIRED", "false"
     ).lower() in {"1", "true", "yes", "on"}
+    isolation_mode = os.environ.get(
+        "SPG_NATIVE_EXECUTOR_TOOL_HOST_ISOLATION", "landlock"
+    )
+    if isolation_mode not in {"landlock", "production-environment-only"}:
+        raise RuntimeError("unsupported Native Tool Host isolation mode")
+    production_environment_only = isolation_mode == "production-environment-only"
+    if production_environment_only and (
+        not isolation_required or production_workspace_volume is None
+    ):
+        raise RuntimeError(
+            "Production Environment-only Tool Host requires container isolation "
+            "and a shared Workspace volume"
+        )
     process_sandbox = (
-        LandlockProcessSandbox() if isolation_required else None
+        LandlockProcessSandbox()
+        if isolation_required and not production_environment_only
+        else None
     )
     api = FastAPI(title="Watt Native Tool Host", docs_url=None, redoc_url=None)
 
     @api.get("/health")
     def health() -> dict[str, object]:
         isolation = (
-            process_sandbox.readiness()
-            if process_sandbox is not None
-            else {"isolation": "in-process-test-only"}
+            {"isolation": "production-environment-only"}
+            if production_environment_only
+            else (process_sandbox.readiness()
+                if process_sandbox is not None
+                else {"isolation": "in-process-test-only"})
         )
         return {"service": "native-tool-host", "status": "ready", **isolation}
 
@@ -120,6 +137,10 @@ def create_tool_host_application() -> FastAPI:
                     )
                 ),
             )
+            if production_environment_only and production_host is None:
+                raise ValueError(
+                    "Production Environment binding is required before Tool execution"
+                )
             registry = (
                 production_host.registry()
                 if production_host is not None
