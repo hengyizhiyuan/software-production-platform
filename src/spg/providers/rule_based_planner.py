@@ -207,10 +207,17 @@ class RuleBasedProductionPlanner:
             # Source, tests, and documentation for one capability are one
             # coherent production unit, even when they live in different roots.
             return None
-        normalized = request.admitted_requirement.casefold()
+        # Steering may reduce the requirement to a short desired-outcome title.
+        # Dependency obligations remain part of the governed authority envelope
+        # and must survive that projection into production planning.
+        normalized = "\n".join((
+            request.admitted_requirement, request.production_objective,
+            request.desired_outcome, *request.constraints,
+        )).casefold()
         coupled = any(token in normalized for token in (
             "shared", "migration", "schema", "interface", "contract", "coupled",
             "共享", "迁移", "接口", "联动", "统一",
+            "depends on", "dependent on", "predecessor", "依赖前", "在其之后",
         ))
         parallel = not coupled
         groups = tuple(grouped)

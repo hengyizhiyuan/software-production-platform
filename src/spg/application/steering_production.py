@@ -1,4 +1,4 @@
-"""Authority-safe bridge from one Steering PRODUCE Step to one SPG cycle."""
+"""Authority-safe bridge from a Steering PRODUCE Step to governed production."""
 
 from __future__ import annotations
 
@@ -69,12 +69,12 @@ from spg.providers.rule_based_planner import RuleBasedProductionPlanner
 
 
 class SteeringProductionService:
-    """Materialize and admit independent one-PWU cycles without steering them."""
+    """Admit the Step's versioned production plan without deciding WHAT NEXT."""
 
     def __init__(self, database: Database) -> None:
         self.database = database
         self.runtime = RuntimeService(database)
-        self.planning = ProductionPlanningService(RuleBasedProductionPlanner())
+        self.planning = ProductionPlanningService(RuleBasedProductionPlanner(), database=database)
 
     def materialize_request(self, work_id: UUID) -> SteeringProductionRequest:
         reconstruction = SteeringApplicationService(self.database).reconstruct(work_id)

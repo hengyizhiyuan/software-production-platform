@@ -66,6 +66,17 @@ def test_shared_interface_risk_forces_serial_baseline_evolution():
     assert executable[1].dependency_ids == (executable[0].node_id,)
 
 
+def test_steering_summary_cannot_discard_governed_predecessor_constraint():
+    request = _request("team.html", "team-directory.html", requirement="Create two pages").model_copy(update={
+        "constraints": ("team-directory 页面依赖前一步已验证的团队页，须在其之后产出。",),
+    })
+    plan = RuleBasedProductionPlanner().propose(request)
+    units = [node for node in plan.graph.nodes if node.kind is not ProductionNodeKind.GROUP]
+    assert [node.writable_paths for node in units] == [("team.html",), ("team-directory.html",)]
+    assert units[0].dependency_ids == ()
+    assert units[1].dependency_ids == (units[0].node_id,)
+
+
 def test_estimated_oversize_is_split_at_safe_capability_boundary():
     request = _request("src/auth.py", "src/billing.py").model_copy(update={
         "target_effort_seconds": {"src/auth.py": 1_500, "src/billing.py": 1_500},
