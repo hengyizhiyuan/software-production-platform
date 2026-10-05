@@ -165,6 +165,52 @@ def test_multi_pwu_replan_api_replaces_active_revision_without_widening_scope(ap
     assert len(actual["production_plan_runtime"]["pwus"]) == 3
 
 
+def test_multi_pwu_serial_context_consumes_only_this_works_verified_revision(app_facts: "AppFacts") -> None:
+    import json
+    from spg.application.multi_pwu_lineage import work_consumes_revision
+    from spg.domain.runtime import RuntimeInvariantViolation
+    submitted = app_facts.service.submit_work('Update shared comments across Python and web')
+    draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
+        code_exact_targets=('src/spg_example.py', 'src/spg/web/app.js'),
+    ))
+    app_facts.service.approve_work(draft.work_id, authority_identity='human:multi-pwu')
+    class CommentExecutor:
+        def dispatch(self, request):
+            with app_facts.database.unit_of_work() as uow:
+                unit = RuntimeStore(uow.session).work_unit(request.execution.work_unit_id)
+            target = unit.completion_contract.change_contract.exact_targets[0].path
+            content = (Path(request.execution.workspace.workspace_path)/target).read_text()
+            content += '\n' + ('#' if target.endswith('.py') else '//') + ' qualified shared comment\n'
+            return DeterministicTestExecutor(DeterministicExecutionSpecification(
+                operations=(DeterministicFileOperation(operation=DeterministicFileOperationType.MODIFY,
+                    repository_relative_path=target, content=content),),
+                reported_outcome=ProviderReportedOutcome.SUCCESS)).dispatch(request)
+    service = WorkApplicationService(app_facts.database, workspace_root=app_facts.workspace_root,
+        executor=CommentExecutor(), verifier=ContractDrivenRepositoryVerifier(app_facts.database))
+    for _ in range(40):
+        projection = service.advance_work(draft.work_id)
+        if projection.status is WorkStatus.NEEDS_ATTENTION: break
+    with app_facts.database.unit_of_work() as uow:
+        store = RuntimeStore(uow.session)
+        binding = ProductStore(uow.session).runtime_binding(draft.work_id)
+        first = store.work_unit_for_node(binding.plan_revision_id, 'pwu:1')
+        second = store.work_unit_for_node(binding.plan_revision_id, 'pwu:2')
+        source = store.snapshot(second.source_baseline_id)
+        assert first.verified_output_baseline_id == second.source_baseline_id
+        assert work_consumes_revision(uow.session, draft.work_id, source.repository_identity, source.repository_revision)
+        assert not work_consumes_revision(uow.session, uuid4(), source.repository_identity, source.repository_revision)
+        assert not work_consumes_revision(uow.session, draft.work_id, source.repository_identity, 'f'*40)
+        task = second.completion_contract.task_contract
+        inputs = [json.loads(item.removeprefix('qualified-predecessor:')) for item in task.prerequisite_evidence
+                  if item.startswith('qualified-predecessor:')]
+        assert len(inputs) == 1
+        assert inputs[0]['pwu_id'] == str(first.id)
+        assert inputs[0]['revision'] == source.repository_revision
+        assert inputs[0]['execution_id'] and inputs[0]['verification_ids']
+        with pytest.raises(RuntimeInvariantViolation, match='cannot be rewritten'):
+            store.bind_pending_task_contract(first, first.completion_contract)
+
+
 def test_multi_pwu_terminal_no_output_is_evaluated_and_bounded(app_facts: "AppFacts") -> None:
     submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
     draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
