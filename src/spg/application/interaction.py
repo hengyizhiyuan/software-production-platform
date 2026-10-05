@@ -2930,6 +2930,35 @@ class WorkInteractionService:
                 observed_reality=(*self._semantic_owner_observations(interaction_id),
                     *(observation for provider in self._intent_observation_providers for observation in provider(interaction_id))))
             semantic_ir = IntentRealizationKernel().govern(candidate, semantic_basis)
+            explicit_new_work_origin = None
+            # A current, unambiguous typed Human request to start an independent
+            # bounded Work is already the Human focus choice. Preserve old Work
+            # and Candidate; only this Interaction focus moves to a new PRE_WORK.
+            goals = semantic_ir.current_production
+            if (active_context is not None and store.product_context(interaction_id) is not None
+                    and not semantic_ir.legacy_typed_projection and goals
+                    and all(goal.new_work and goal.bounded_change and not goal.systemic_design
+                            and not goal.unresolved_arguments and not goal.unresolved for goal in goals)
+                    and not semantic_ir.operational_requests
+                    and not latest_human_record.supporting_references
+                    and all(not item.requires_human and item.confidence >= .8 for item in semantic_ir.items)
+                    and not any(question.blocks_current_step for question in semantic_ir.questions)):
+                explicit_new_work_origin = active_context.work_revision.work_id
+                new_work_id = uuid5(NAMESPACE_URL, f'watt:independent-work:{latest_human_record.id}')
+                self._insert_pre_work(ProductStore(uow.session), work_id=new_work_id,
+                    timestamp=now, product_id=store.product_context(interaction_id))
+                store.replace_current_work(interaction_id, expected_work_id=explicit_new_work_origin,
+                    new_work_id=new_work_id, updated_by=latest_human_record.source, updated_at=now)
+                interaction = store.interaction(interaction_id)
+                active_context = None
+                current_basis = interaction_basis_fingerprint(interaction, records, None)
+                semantic_basis = semantic_basis.model_copy(update={'interaction': interaction,
+                    'active_work_context': None, 'basis_fingerprint': current_basis,
+                    'governed_semantic_history': (), 'observed_reality': ()})
+                semantic_ir = IntentRealizationKernel().govern(candidate, semantic_basis)
+                # Prior Work context is not an engineering fact for the new unit.
+                prior_assessment = None
+                semantic_history = ()
             candidate = project_interaction_candidate(candidate, semantic_ir)
             if active_context is not None and any(item.kind is SemanticKind.STATUS_QUERY
                     and item.subject in {"WORK_CURRENT", "WORK_HISTORY", "WORK_DIAGNOSTIC"}
@@ -3180,6 +3209,19 @@ class WorkInteractionService:
                     ledger.record_refinement(RealizationRefinement(id=uuid4(), parent_id=first_id,
                         turn_id=current_turn.id, scope=RealizationScope.TURN, signal=signal,
                         attempt=2, attempt_budget=2, evidence_references=references, local_recovered=True))
+            if explicit_new_work_origin is not None:
+                store.insert_work_transition({
+                    'id': uuid5(NAMESPACE_URL, f'watt:wic-work-transition:{assessment_id}'),
+                    'interaction_id': interaction.id, 'source_record_id': latest_human_record.id,
+                    'source_assessment_id': assessment_id, 'originating_work_id': explicit_new_work_origin,
+                    'target_work_id': interaction.current_work_id,
+                    'reason': f'Explicit governed independent bounded Work: semantic-ir:{semantic_ir.id}',
+                    'focus_classification': WorkFocusClassification.UNRELATED_NEW_DEMAND.value,
+                    'impact_disposition': WorkImpactDisposition.NEW_WORK_RECOMMENDED.value,
+                    'choice': WorkTransitionChoice.START_NEW_WORK.value,
+                    'decided_by': latest_human_record.source,
+                    'decision_rationale': 'The current Human Turn explicitly requests independent Work',
+                    'decided_at': now, 'created_at': now})
             if (
                 active_context is not None
                 and impact is WorkImpactDisposition.NEW_WORK_RECOMMENDED
