@@ -87,6 +87,8 @@
     'Draft generation does not create execution authority.': '确认后 Watt 才能按这项工作继续推进。',
     'Refine this Work before production admission.': '请进一步说明这项工作的范围。',
     'The current Work cannot form a trustworthy single-PWU plan.': '当前信息还不足以形成可靠的执行计划。',
+    'Authorize exact sealed Candidate integration?': '是否授权将这次已验证的候选改动纳入产品正式版本？',
+    'Repository integration requires exact Human Authority.': '正式纳入产品代码前，需要你授权当前候选改动。',
   };
   function renderAttention(a) { const question=a.conversation_prompt||a.decision||a.reason; const detail=a.reason&&a.reason!==question?`<p class="muted">${esc(attentionLabels[a.reason]||a.reason)}</p>`:''; const controls=a.actions.length?a.actions.map(action=>`<button class="button secondary" type="button" data-attention="${esc(a.id)}" data-action="${esc(action)}">${esc(actionText(action))}</button>`).join(''):`<button class="button secondary" type="button" ${a.governed_subject_ref?.startsWith('steering-decision:')?`data-conversation-attention="${esc(a.id)}"`:'data-focus-composer'}>回答这个问题</button>`; return `<div class="action"><h3>${a.actions.length?'需要你决定':'需要你回答'}</h3><p>${esc(attentionLabels[question]||question)}</p>${detail}<div class="link-row">${controls}</div></div>`; }
   const agendaLabels = {
@@ -128,7 +130,7 @@
   }
   function renderWorkspaceActions(ws, candidate, manifest, acceptance, workId, readOnly) {
     const attention = ws.actions.length ? `<div class="action-list">${ws.actions.map(renderAttention).join('')}</div>` : '';
-    const review = candidate?.candidate_fingerprint ? `<div class="workspace-review"><h3>${acceptance ? '当前成果已验收' : '查看新版本'}</h3><p>${acceptance ? '可继续查看运行效果与改动。' : '先核对运行效果与改动，再决定是否验收。'}</p><div class="candidate-actions"><button class="button" data-preview="${esc(workId)}" data-preview-manifest="${esc(manifest?.id || '')}" type="button">打开预览</button><button class="button secondary" data-diff="${esc(workId)}" data-fingerprint="${esc(candidate.candidate_fingerprint)}" type="button">查看改动</button>${manifest && !acceptance && !readOnly ? `<button class="button secondary" data-accept="${esc(workId)}" data-manifest="${esc(manifest.id)}" data-manifest-fingerprint="${esc(manifest.fingerprint)}" type="button">验收结果</button>` : ''}${readOnly ? '' : '<button class="button quiet" data-focus-composer type="button">继续修改</button>'}</div>${!manifest && !acceptance ? '<p class="muted">交付物形成后可做正式验收。</p>' : ''}</div>` : '';
+    const review = candidate?.candidate_fingerprint ? `<div class="workspace-review"><h3>${acceptance ? '当前成果已验收' : '查看新版本'}</h3><p>${acceptance ? '可继续查看运行效果与改动。' : '先查看预览与改动；确认后授权当前候选。'}</p><div class="candidate-actions"><button class="button" data-preview="${esc(workId)}" data-preview-manifest="${esc(manifest?.id || '')}" type="button">打开预览</button><button class="button secondary" data-diff="${esc(workId)}" data-fingerprint="${esc(candidate.candidate_fingerprint)}" type="button">查看改动</button>${manifest && !acceptance && !readOnly ? `<button class="button secondary" data-accept="${esc(workId)}" data-manifest="${esc(manifest.id)}" data-manifest-fingerprint="${esc(manifest.fingerprint)}" type="button">验收结果</button>` : ''}${readOnly ? '' : '<button class="button quiet" data-focus-composer type="button">继续修改</button>'}</div>${!manifest && !acceptance ? '<p class="muted">交付物形成后可做正式验收。</p>' : ''}</div>` : '';
     const needsReview = Boolean(candidate?.candidate_fingerprint && !acceptance && !readOnly);
     const cloudAction = ws.reality.cloud_deliverable_id && acceptance?.decision === 'ACCEPT' &&
       ws.reality.cloud_deployment?.state !== 'SUCCEEDED' ?
