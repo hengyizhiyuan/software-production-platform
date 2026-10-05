@@ -397,6 +397,7 @@ class Application:
                 if context is not None and preview.mode_for(context) in {
                     CandidatePreviewMode.FULL_APPLICATION_RUNTIME,
                     CandidatePreviewMode.FRONTEND_RUNTIME,
+                    CandidatePreviewMode.STATIC_PREVIEW,
                 }:
                     preview.require_ready(work_id, candidate_id)
                     if preview.assurance_client is not None and not preview.assurance_client.passed(
@@ -404,7 +405,7 @@ class Application:
                         raise RuntimeError("Guardian PASS is required for exact Candidate authorization")
 
             service.configure_candidate_authorization_guard(require_functional_preview)
-            service.configure_candidate_review(preview.prepare_review, preview.review_ready)
+            service.configure_candidate_review(preview.prepare_review, preview.review_ready, preview.review_state)
         return service
 
     def interaction(

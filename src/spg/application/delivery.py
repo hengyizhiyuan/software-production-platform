@@ -85,10 +85,11 @@ def git_bytes(repository: str, *args: str) -> bytes:
 def candidate_file_inventory(repository: str, revision: str, artifacts: tuple[str, ...]) -> tuple[list[str], str | None]:
     """Bound Web preview to small trees; keep large code results inspectable."""
     html_artifacts = [path for path in artifacts if path.endswith(".html")]
-    if html_artifacts:
+    if html_artifacts or any(path.endswith((".js", ".mjs", ".css")) for path in artifacts):
         paths = git_bytes(repository, "ls-tree", "-r", "--name-only", "-z", revision).decode().split("\0")[:-1]
-        if len(paths) <= 500:
-            entrypoint = next((path for path in html_artifacts if path in paths), None)
+        if len(paths) <= 500 and (html_artifacts or "index.html" in paths):
+            entrypoint = ("index.html" if "index.html" in paths else
+                next((path for path in html_artifacts if path in paths), None))
             return paths, entrypoint
         # An existing application is not a bounded, browser-runnable static site.
         # The changed files remain downloadable and its exact diff is reviewable.
@@ -123,6 +124,7 @@ class DeliveryApplicationService:
         self.settings = settings or Settings()
         self.runtime_probe = None
         self.full_application_runtime_probe = None
+        self.candidate_runtime_probe = None
         self.guardian_assurance_client = None
 
     @staticmethod
@@ -223,16 +225,19 @@ class DeliveryApplicationService:
                         "entrypoint": None})
         html = [path for path in paths if path.endswith(".html")]
         if (work.production_plan is not None
-                and work.production_plan.target_kind.value == "CODE_WORK" and len(html) == 1):
+                and work.production_plan.target_kind.value == "CODE_WORK"
+                and (len(html) == 1 or (commit is not None and resource is not None
+                    and "index.html" in tree_paths))):
+            entrypoint = "index.html" if commit is not None and resource is not None and "index.html" in tree_paths else html[0]
             criteria = (work.desired_outcome, *work.constraints,
-                f"{html[0]} opens as a browser-runnable static Web result.",
+                f"{entrypoint} opens as a browser-runnable static Web result.",
                 "All governed verification obligations for the current repository revision pass.")
             return DeliveryTargetRequest(kind=DeliveryTargetKind.SOFTWARE_ARTIFACT,
                 title=work.refined_title or work.desired_outcome[:255],
                 acceptance_criteria=tuple(dict.fromkeys(criteria)),
                 authority_identity="system:governed-delivery-context",
                 software_form=DeliveryTargetKind.WEB_APPLICATION,
-                runtime_recipe={"adapter": "STATIC_WEB", "entrypoint": html[0]})
+                runtime_recipe={"adapter": "STATIC_WEB", "entrypoint": entrypoint})
         return None
 
     def context(self, work_id: UUID) -> dict:
@@ -570,6 +575,9 @@ class DeliveryApplicationService:
                         raise ProductInvariantViolation(
                             "Full application acceptance requires an exact served Candidate runtime")
                     self.full_application_runtime_probe(work_id, commit.candidate_id,
+                        commit.repository_revision, commit.repository_tree_identity)
+                elif self.candidate_runtime_probe is not None:
+                    self.candidate_runtime_probe(work_id, commit.candidate_id,
                         commit.repository_revision, commit.repository_tree_identity)
                 else:
                     if self.runtime_probe is None:

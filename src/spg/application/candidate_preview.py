@@ -57,6 +57,9 @@ class CandidatePreviewApplicationService:
         self.assurance_outcome_listener: Callable[[UUID, dict], None] | None = None
 
     def shutdown(self) -> None:
+        shutdown = getattr(self.provider, "shutdown", None)
+        if callable(shutdown):
+            shutdown()
         with self._lock:
             for timer in self._retry_timers.values():
                 timer.cancel()
@@ -101,6 +104,7 @@ class CandidatePreviewApplicationService:
         context = self.delivery.candidate_context(work_id)
         if context is not None and self.mode_for(context) in {
             CandidatePreviewMode.FULL_APPLICATION_RUNTIME, CandidatePreviewMode.FRONTEND_RUNTIME,
+            CandidatePreviewMode.STATIC_PREVIEW,
         }:
             self.request(work_id)
 
@@ -114,6 +118,7 @@ class CandidatePreviewApplicationService:
             return False
         if self.mode_for(context) not in {
             CandidatePreviewMode.FULL_APPLICATION_RUNTIME, CandidatePreviewMode.FRONTEND_RUNTIME,
+            CandidatePreviewMode.STATIC_PREVIEW,
         }:
             return True
         session = self.store.current_candidate_preview(work_id)
@@ -124,6 +129,14 @@ class CandidatePreviewApplicationService:
                 for item in session.evidence))
         return ready and (self.assurance_client is None
             or self.assurance_client.passed(work_id, candidate_id))
+
+    def review_state(self, work_id: UUID) -> dict:
+        session = self.store.current_candidate_preview(work_id)
+        if session is not None and session.status is PreviewRuntimeStatus.FAILED:
+            return {"status": "BLOCKED", "reason": session.failure_reason}
+        if self.assurance_client is not None:
+            return self.assurance_client.projection(work_id)
+        return {"status": "PENDING"}
 
     def retention_decision(self, work_id: UUID, *,
                            hot_retention: timedelta = timedelta(days=30),
@@ -244,7 +257,7 @@ class CandidatePreviewApplicationService:
             if context is None:
                 raise CandidatePreviewUnavailable("No current verified Candidate is available")
             mode = self.mode_for(context)
-            if mode not in {CandidatePreviewMode.FULL_APPLICATION_RUNTIME, CandidatePreviewMode.FRONTEND_RUNTIME}:
+            if mode not in {CandidatePreviewMode.FULL_APPLICATION_RUNTIME, CandidatePreviewMode.FRONTEND_RUNTIME, CandidatePreviewMode.STATIC_PREVIEW}:
                 raise CandidatePreviewUnavailable("Candidate has no supported container runtime definition")
             previous = self.store.current_candidate_preview(work_id)
             history = tuple(item for item in self.store.candidate_preview_history(work_id)
@@ -287,7 +300,8 @@ class CandidatePreviewApplicationService:
                 repository_tree=context["tree"], workspace_id=uuid4(),
                 environment_id=uuid4(), mode=mode, status=PreviewRuntimeStatus.REQUESTED,
                 definition_version=self.provider.definition_version if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME
-                    else "frontend-docker-runtime-v1",
+                    else ("static-git-preview-v1" if mode is CandidatePreviewMode.STATIC_PREVIEW
+                     else "frontend-docker-runtime-v1"),
                 created_at=now, updated_at=now,
                 evidence=(() if previous is None else ({"kind": "REFINEMENT_LINEAGE",
                     "previous_preview_id": str(previous.id), "attempt": len(history) + 1,
@@ -308,14 +322,19 @@ class CandidatePreviewApplicationService:
                     mount_path="/workspace/principal", writable=False,
                     provenance_reference=f"baseline-candidate:{session.candidate_id}"),),
                 environment_configuration=EnvironmentConfiguration(
-                    provider_profile="container-v1",
+                    provider_profile=("static-git-v1" if mode is CandidatePreviewMode.STATIC_PREVIEW
+                        else "container-v1"),
                     dependency_profile_reference=("candidate:pyproject.toml+uv.lock"
-                        if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME else "candidate:package.json"),
-                    toolchain_references=("candidate:Dockerfile",),
+                        if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME else "candidate:static-git-tree" if mode is CandidatePreviewMode.STATIC_PREVIEW
+                        else "candidate:package.json"),
+                    toolchain_references=(("candidate:immutable-git-blobs",)
+                        if mode is CandidatePreviewMode.STATIC_PREVIEW else ("candidate:Dockerfile",)),
                     lifecycle_policy_references=(self._lifecycle.policy.reference,)),
                 runtime_configuration=RuntimeConfiguration(
-                    runtime_profile=self.provider.definition_version,
-                    preview_enabled=True, network_policy_reference="isolated-internal+fixed-gateway",
+                    runtime_profile=session.definition_version,
+                    preview_enabled=True, network_policy_reference=(
+                        "private-loopback+authenticated-exact-artifact-route"
+                        if mode is CandidatePreviewMode.STATIC_PREVIEW else "isolated-internal+fixed-gateway"),
                     resource_policy_reference="candidate-preview:single-host-v1"),
                 created_at=now,
             )
@@ -358,7 +377,7 @@ class CandidatePreviewApplicationService:
         context = self.delivery.candidate_context(work_id)
         if context is None or UUID(context["candidate_id"]) != candidate_id:
             raise CandidatePreviewUnavailable("Candidate Preview no longer matches this Work")
-        if self.mode_for(context) not in {CandidatePreviewMode.FULL_APPLICATION_RUNTIME, CandidatePreviewMode.FRONTEND_RUNTIME}:
+        if self.mode_for(context) not in {CandidatePreviewMode.FULL_APPLICATION_RUNTIME, CandidatePreviewMode.FRONTEND_RUNTIME, CandidatePreviewMode.STATIC_PREVIEW}:
             raise CandidatePreviewUnavailable("Functional Preview requirement has no supported runtime")
         session = self.current(work_id)
         if (session is None or session.status is not PreviewRuntimeStatus.READY
@@ -371,7 +390,7 @@ class CandidatePreviewApplicationService:
         revision: str, tree: str) -> CandidatePreviewSessionV1:
         """Human acceptance needs the same exact, observed application runtime."""
         session = self.require_ready(work_id, candidate_id)
-        if (session.mode is not CandidatePreviewMode.FULL_APPLICATION_RUNTIME
+        if (session.mode not in {CandidatePreviewMode.FULL_APPLICATION_RUNTIME, CandidatePreviewMode.STATIC_PREVIEW}
                 or session.repository_revision != revision
                 or session.repository_tree != tree
                 or not any(item.get("kind") == "SERVED_VERIFICATION"
@@ -426,9 +445,13 @@ class CandidatePreviewApplicationService:
                         if self.outcome_listener is not None:
                             self.outcome_listener(session.work_id, True)
                     continue
+                if session.status is PreviewRuntimeStatus.READY and session.mode is CandidatePreviewMode.STATIC_PREVIEW:
+                    self.provider.restore_static(session.id, session.repository_revision, session.repository_tree)
                 if session.status is PreviewRuntimeStatus.READY and self.provider.probe(
                     session.id, session.repository_revision, session.repository_tree, mode=session.mode,
                 ):
+                    if self.assurance_client is not None and self.store.guardian_projection(session.id) is None:
+                        self.assurance_client.assess_ready_preview(session)
                     continue
                 # A stopped runtime after a host restart is not authorization to
                 # destroy its Candidate source or database volumes. Keep the

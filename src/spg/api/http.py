@@ -290,8 +290,10 @@ def create_http_application(
             delivery_service.guardian_assurance_client = guardian_assurance_client
         delivery_service.full_application_runtime_probe = (
             candidate_runtime_preview.require_served_for_delivery)
+        delivery_service.candidate_runtime_probe = (
+            candidate_runtime_preview.require_served_for_delivery)
         work_service.configure_candidate_review(candidate_runtime_preview.prepare_review,
-            candidate_runtime_preview.review_ready)
+            candidate_runtime_preview.review_ready, candidate_runtime_preview.review_state)
     software_runtime = SoftwareRuntimeService(delivery_service,
         enabled=getattr(settings, "delivery_runtime_enabled", False),
         bind_host=getattr(settings, "delivery_runtime_bind_host", "127.0.0.1"),
@@ -2260,6 +2262,7 @@ def create_http_application(
                 context = delivery_service.candidate_context(attention.work_id)
                 if context is not None and CandidatePreviewApplicationService.mode_for(context) in {
                     CandidatePreviewMode.FULL_APPLICATION_RUNTIME, CandidatePreviewMode.FRONTEND_RUNTIME,
+                    CandidatePreviewMode.STATIC_PREVIEW,
                 }:
                     if candidate_runtime_preview is None:
                         raise CandidatePreviewUnavailable("Functional Candidate Preview is unavailable")
@@ -2505,10 +2508,13 @@ def create_http_application(
 
     @api.get("/api/works/{work_id}/candidate-preview/{candidate_fingerprint}/{path:path}")
     def candidate_preview_artifact(work_id: UUID, candidate_fingerprint: str, path: str):
+        context = delivery_service.candidate_context(work_id)
         return Response(delivery_service.candidate_artifact(work_id, candidate_fingerprint, path),
             media_type=artifact_media_type(path), headers={"X-Content-Type-Options": "nosniff",
                 "Cache-Control": "no-store",
-                "Content-Security-Policy": PREVIEW_CONTENT_SECURITY_POLICY})
+                "Content-Security-Policy": PREVIEW_CONTENT_SECURITY_POLICY,
+                "X-Candidate-Revision": context["repository_revision"],
+                "X-Candidate-Tree": context["tree"]})
 
     @api.get("/api/works/{work_id}/candidate-download/{candidate_fingerprint}/{path:path}")
     def candidate_download_artifact(work_id: UUID, candidate_fingerprint: str, path: str):
@@ -2529,7 +2535,10 @@ def create_http_application(
 
     def full_application_basis(work_id: UUID, manifest_id: UUID):
         manifest = delivery_service.manifest(work_id, manifest_id)
-        if manifest.software is None or manifest.software.runtime_recipe.adapter != "FULL_APPLICATION_RUNTIME":
+        if manifest.software is None or manifest.software.runtime_recipe.adapter not in {"FULL_APPLICATION_RUNTIME", "STATIC_WEB"}:
+            return None
+        if (manifest.software.runtime_recipe.adapter == "STATIC_WEB"
+                and candidate_runtime_preview is None):
             return None
         if candidate_runtime_preview is None:
             raise CandidatePreviewUnavailable("Full-application Preview Runtime is not configured")
@@ -2547,8 +2556,13 @@ def create_http_application(
 
     @api.post("/api/works/{work_id}/deliveries/{manifest_id}/runtime")
     def start_software_runtime(work_id: UUID, manifest_id: UUID):
-        if full_application_basis(work_id, manifest_id) is not None:
-            return candidate_runtime_preview.request(work_id).model_dump(mode="json")
+        commit = full_application_basis(work_id, manifest_id)
+        if commit is not None:
+            session = candidate_runtime_preview.request(work_id)
+            context = delivery_service.candidate_context(work_id)
+            return {**session.model_dump(mode="json"), "url":
+                f"/api/works/{work_id}/candidate-preview/{context['candidate_fingerprint']}/{quote(context['entrypoint'], safe='/')}"
+                if session.mode is CandidatePreviewMode.STATIC_PREVIEW else session.endpoint}
         return software_runtime.start(work_id, manifest_id)
 
     @api.get("/api/works/{work_id}/deliveries/{manifest_id}/runtime")
@@ -2562,7 +2576,10 @@ def create_http_application(
             ready = candidate_runtime_preview.require_served_for_delivery(
                 work_id, commit.candidate_id, commit.repository_revision,
                 commit.repository_tree_identity)
-            return {"status": "READY", "url": ready.endpoint,
+            context = delivery_service.candidate_context(work_id)
+            return {"status": "READY", "url":
+                f"/api/works/{work_id}/candidate-preview/{context['candidate_fingerprint']}/{quote(context['entrypoint'], safe='/')}"
+                if ready.mode is CandidatePreviewMode.STATIC_PREVIEW else ready.endpoint,
                 "candidate_revision": ready.repository_revision,
                 "served_verification": "PASS"}
         return software_runtime.view(work_id, manifest_id)

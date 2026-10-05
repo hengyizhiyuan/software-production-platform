@@ -16,6 +16,10 @@ import shutil
 import subprocess
 import time
 import json
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from threading import Thread
+from urllib.parse import unquote, urlsplit
+from urllib.request import urlopen
 from base64 import b64decode
 from uuid import UUID
 
@@ -35,6 +39,100 @@ class DockerCandidatePreviewRuntime:
         self.docker_binary = docker_binary
         self.verification_image = verification_image
         self._preview_auth_tokens: dict[UUID, str] = {}
+        self._static_servers: dict[UUID, ThreadingHTTPServer] = {}
+
+    def _static_record_path(self, preview_id: UUID) -> Path:
+        return self._workspace(preview_id).parent / "static-runtime.json"
+
+    def _static_start(self, preview_id: UUID, revision: str, tree: str) -> dict:
+        """Serve immutable Git blobs; never execute Candidate code in the API.
+
+        Guardian uses this private observation endpoint. Human review remains
+        on Watt's authenticated, sandboxed exact-Candidate artifact route.
+        """
+        from spg.application.delivery import read_artifact, artifact_media_type
+        from spg.application.preview_security import PREVIEW_CONTENT_SECURITY_POLICY
+
+        repository = self._workspace(preview_id)
+        record_path = self._static_record_path(preview_id)
+        record = json.loads(record_path.read_text()) if record_path.exists() else None
+        if record and (record["revision"], record["tree"]) != (revision, tree):
+            raise EnvironmentProviderError("Static runtime identity changed")
+        paths = self._run(["git", "-C", str(repository), "ls-tree", "-r",
+            "--name-only", revision]).stdout.splitlines()
+        html = sorted(path for path in paths if path.endswith(".html"))
+        if not html or len(paths) > 500:
+            raise EnvironmentProviderError("Candidate is not a bounded static Web tree")
+        entrypoint = "index.html" if "index.html" in html else html[0]
+        allowed = {path for path in paths if Path(path).suffix.lower() in {
+            ".html", ".css", ".js", ".mjs", ".json", ".svg", ".png", ".jpg",
+            ".jpeg", ".gif", ".ico", ".webp", ".woff", ".woff2", ".ttf"}}
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                path = unquote(urlsplit(self.path).path).removeprefix("/") or entrypoint
+                try:
+                    if path not in allowed:
+                        raise ValueError("not a declared static asset")
+                    body = read_artifact(str(repository), revision, path, software=True)
+                except (ValueError, RuntimeError):
+                    self.send_error(404)
+                    return
+                self.send_response(200)
+                self.send_header("Content-Type", artifact_media_type(path))
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("X-Candidate-Revision", revision)
+                self.send_header("X-Candidate-Tree", tree)
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("Content-Security-Policy", PREVIEW_CONTENT_SECURITY_POLICY)
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, *_):
+                pass
+
+        server = self._static_servers.get(preview_id)
+        if server is None:
+            server = ThreadingHTTPServer(("127.0.0.1", 0 if record is None else record["port"]), Handler)
+            self._static_servers[preview_id] = server
+            Thread(target=server.serve_forever, daemon=True,
+                name=f"candidate-static-{preview_id}").start()
+            record = {"revision": revision, "tree": tree, "port": server.server_port,
+                "entrypoint": entrypoint}
+            temporary = record_path.with_suffix(".tmp")
+            temporary.write_text(json.dumps(record, sort_keys=True))
+            os.replace(temporary, record_path)
+        return {"endpoint": f"http://127.0.0.1:{server.server_port}/",
+            "services": (f"static-git:{preview_id}",), "resources": (str(repository),),
+            "health": {"application": "READY", "repository_revision": revision,
+                "repository_tree": tree}, "topology": {"frontend": "immutable-git-blobs"}}
+
+    def _static_verify(self, preview_id: UUID, revision: str, tree: str) -> dict:
+        from spg.application.delivery import read_artifact
+        record = json.loads(self._static_record_path(preview_id).read_text())
+        if (record["revision"], record["tree"]) != (revision, tree):
+            raise EnvironmentProviderError("Static runtime differs from Candidate")
+        expected = read_artifact(str(self._workspace(preview_id)), revision,
+            record["entrypoint"], software=True)
+        with urlopen(f"http://127.0.0.1:{record['port']}/", timeout=3) as response:
+            observed = response.read(len(expected) + 1)
+            if (response.status != 200 or observed != expected
+                    or response.headers.get("X-Candidate-Revision") != revision
+                    or response.headers.get("X-Candidate-Tree") != tree):
+                raise EnvironmentProviderError("Served static subject differs from exact Git result")
+        return {"result": "PASS", "candidate_revision": revision, "candidate_tree": tree,
+            "http_status": 200, "entrypoint_sha256": sha256(observed).hexdigest(),
+            "entrypoint": record["entrypoint"]}
+
+    def restore_static(self, preview_id: UUID, revision: str, tree: str) -> None:
+        self._static_start(preview_id, revision, tree)
+
+    def shutdown(self) -> None:
+        for server in self._static_servers.values():
+            server.shutdown()
+            server.server_close()
+        self._static_servers.clear()
 
     @staticmethod
     def _names(preview_id: UUID) -> dict[str, str]:
@@ -167,7 +265,8 @@ with response:
     def prepare(self, preview_id: UUID, repository: Path, revision: str, tree: str,
         *, mode: CandidatePreviewMode = CandidatePreviewMode.FULL_APPLICATION_RUNTIME) -> dict:
         """Make an isolated branch at the exact sealed commit; source remains untouched."""
-        topology = self.preflight()
+        topology = ({"verifier_namespace": "api-private-static-observation"}
+            if mode is CandidatePreviewMode.STATIC_PREVIEW else self.preflight())
         workspace = self._workspace(preview_id)
         if workspace.exists():
             raise EnvironmentProviderError("Preview Workspace already exists")
@@ -183,6 +282,9 @@ with response:
                 raise EnvironmentProviderError("Preview Workspace differs from sealed Candidate")
             if self._run(["git", "-C", str(workspace), "status", "--porcelain"]).stdout.strip():
                 raise EnvironmentProviderError("Preview Workspace is not clean")
+            if mode is CandidatePreviewMode.STATIC_PREVIEW:
+                return {"workspace": str(workspace), "revision": observed_revision,
+                    "tree": observed_tree, "topology_preflight": topology}
             required = ("Dockerfile", "pyproject.toml", "uv.lock", "docker/start_app.py", "alembic.ini") \
                 if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME else ("Dockerfile", "package.json")
             if any(not (workspace / item).is_file() for item in required) or (
@@ -214,6 +316,15 @@ with response:
     def build(self, preview_id: UUID, revision: str, tree: str,
         *, mode: CandidatePreviewMode = CandidatePreviewMode.FULL_APPLICATION_RUNTIME) -> dict:
         workspace = self._workspace(preview_id)
+        if mode is CandidatePreviewMode.STATIC_PREVIEW:
+            observed = self._run(["git", "-C", str(workspace), "rev-parse", "HEAD", "HEAD^{tree}"]).stdout.splitlines()
+            if observed != [revision, tree]:
+                raise EnvironmentProviderError("Static build differs from exact Candidate")
+            log = self._evidence(preview_id) / "static-build.json"
+            log.write_text(json.dumps({"revision": revision, "tree": tree,
+                "code_executed": False}))
+            return {"image_id": f"git-tree:{tree}", "build_log": str(log),
+                "build_log_sha256": sha256(log.read_bytes()).hexdigest()}
         names = self._names(preview_id)
         dockerfile = (workspace / "Dockerfile").read_text(encoding="utf-8")
         if mode is CandidatePreviewMode.FULL_APPLICATION_RUNTIME and not re.search(
@@ -256,6 +367,8 @@ with response:
 
     def start(self, preview_id: UUID, revision: str, tree: str,
         *, mode: CandidatePreviewMode = CandidatePreviewMode.FULL_APPLICATION_RUNTIME) -> dict:
+        if mode is CandidatePreviewMode.STATIC_PREVIEW:
+            return self._static_start(preview_id, revision, tree)
         names = self._names(preview_id)
         label = f"watt.candidate-preview={preview_id}"
         workspace = self._workspace(preview_id)
@@ -379,6 +492,12 @@ with response:
 
     def probe(self, preview_id: UUID, revision: str, tree: str,
         *, mode: CandidatePreviewMode = CandidatePreviewMode.FULL_APPLICATION_RUNTIME) -> bool:
+        if mode is CandidatePreviewMode.STATIC_PREVIEW:
+            try:
+                self._static_verify(preview_id, revision, tree)
+                return True
+            except (OSError, ValueError, EnvironmentProviderError):
+                return False
         # A caller without Docker authority must not convert an unobservable
         # healthy runtime into an observed runtime failure.
         self._docker("info", "--format", "{{.ServerVersion}}", timeout=15)
@@ -425,6 +544,8 @@ with response:
         process or a successful image build cannot establish application
         correctness through the gateway.
         """
+        if mode is CandidatePreviewMode.STATIC_PREVIEW:
+            return self._static_verify(preview_id, revision, tree)
         if not self.probe(preview_id, revision, tree, mode=mode):
             raise EnvironmentProviderError("Served runtime differs from the exact Candidate")
         names = self._names(preview_id)
@@ -498,6 +619,13 @@ with response:
         return observations
 
     def stop(self, preview_id: UUID) -> dict:
+        if self._static_record_path(preview_id).exists():
+            server = self._static_servers.pop(preview_id, None)
+            if server is not None:
+                server.shutdown()
+                server.server_close()
+            self._remove_workspace(preview_id)
+            return {"static_runtime": "STOPPED"}
         self._preview_auth_tokens.pop(preview_id, None)
         names = self._names(preview_id)
         label = str(preview_id)

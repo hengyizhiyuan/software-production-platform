@@ -100,3 +100,32 @@ test('multi-unit Reality preserves waiting, dependency and reconciliation meanin
   assert.doesNotMatch(html, /正在执行/);
   assert.equal((html.match(/data-workspace-quadrant=/g) || []).length,1);
 });
+
+for (const [status, gate] of [['NOT_STARTED', null], ['RUNNING', null],
+  ['FINDINGS_PRESENT', 'FAIL_REPAIRABLE'], ['BLOCKED', 'BLOCKED'], ['PASS', 'PASS']]) {
+  test(`required Guardian ${status} controls Human acceptance without changing quadrants`, () => {
+    const source = script.slice(script.indexOf('  function renderWorkspaceActions(ws,'),
+      script.indexOf('  async function renderWorkspace(id) {'));
+    const {renderWorkspaceActions, renderWorkspaceProduction} = vm.runInNewContext(
+      `${source}; ({renderWorkspaceActions, renderWorkspaceProduction})`, {
+        esc: value => String(value ?? ''), link: () => '', renderAttention: () => '',
+      });
+    const ws = {actions:[], reality:{guardian:{required:true,status,gate}}};
+    const candidate = {candidate_fingerprint:'exact-current-candidate'};
+    const manifest = {id:'manifest',fingerprint:'exact-manifest'};
+    const actions = renderWorkspaceActions(ws,candidate,manifest,null,'work',false);
+    const production = renderWorkspaceProduction(ws,{now:'验证候选',reason:'独立证据',next:'质量检查'},true,null);
+    assert.match(actions,/data-preview=/);
+    assert.match(actions,/data-diff=/);
+    if (gate === 'PASS') {
+      assert.match(actions,/data-accept=/);
+      assert.match(production,/等待你的明确决定/);
+    } else {
+      assert.doesNotMatch(actions,/data-accept=/);
+      assert.match(actions,/还不能授权或验收/);
+      assert.doesNotMatch(production,/新版本已经准备好/);
+    }
+    assert.equal((actions.match(/data-workspace-quadrant=/g)||[]).length,1);
+    assert.equal((production.match(/data-workspace-quadrant=/g)||[]).length,1);
+  });
+}

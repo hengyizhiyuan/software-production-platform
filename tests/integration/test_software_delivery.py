@@ -241,6 +241,54 @@ def free_port():
         return sock.getsockname()[1]
 
 
+def test_required_guardian_static_review_precedes_explicit_acceptance(postgres_database, tmp_path):
+    import time
+    from guardian.runtime import JsonSoftwareAssuranceStore
+    from spg.application.candidate_preview import CandidatePreviewApplicationService
+    from spg.application.guardian_assurance import GuardianAssuranceClient
+    from spg.infrastructure.candidate_preview_runtime import DockerCandidatePreviewRuntime
+    from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
+
+    service, work_id, delivery, _ = produce(postgres_database, tmp_path,
+        authorize_candidate=False, set_delivery_target=False)
+    owner = JsonSoftwareAssuranceStore(tmp_path / 'guardian-owner')
+    preview = CandidatePreviewApplicationService(delivery,
+        JsonProductionEnvironmentStore(tmp_path / 'preview-state'),
+        DockerCandidatePreviewRuntime(tmp_path / 'preview-runtime', docker_binary='must-not-use-docker'))
+    assurance = GuardianAssuranceClient(delivery, preview.store, owner)
+    preview.assurance_client = assurance
+    delivery.guardian_assurance_client = assurance
+    delivery.candidate_runtime_probe = preview.require_served_for_delivery
+    service.configure_candidate_review(preview.prepare_review, preview.review_ready, preview.review_state)
+    context = delivery.candidate_context(work_id)
+    assert not preview.review_ready(work_id, UUID(context['candidate_id']))
+    assert not any(a.kind is AttentionKind.CANDIDATE_AUTHORIZATION for a in service.list_attention(work_id=work_id))
+    try:
+        service.prepare_candidate_review(work_id)
+        deadline = time.monotonic() + 20
+        while time.monotonic() < deadline and not assurance.passed(work_id, UUID(context['candidate_id'])):
+            time.sleep(.05)
+        projection = assurance.projection(work_id)
+        assert projection['gate'] == 'PASS', projection
+        assert len(projection['required_pwu_ids']) == 1
+        assert list((owner.root / 'results').glob('*.json'))
+        assert not service.get_work_result(work_id).trusted_result
+        authority = next(a for a in service.list_attention(work_id=work_id)
+            if a.kind is AttentionKind.CANDIDATE_AUTHORIZATION)
+        service.resolve_attention(authority.id, AttentionResolutionRequest(
+            action=AttentionAction.AUTHORIZE, authority_identity='human:qualification'))
+        manifest = delivery.publish(work_id)
+        assert manifest.repository_revision == context['repository_revision']
+        assert delivery.view(work_id)['deliveries'][0]['acceptance'] is None
+        request = HumanAcceptanceRequest(manifest_fingerprint=manifest.fingerprint,
+            decision='ACCEPT', authority_identity='human:qualification', rationale='Review exact qualified result')
+        acceptance = delivery.decide(work_id, manifest.id, request)
+        assert acceptance.decision.value == 'ACCEPT'
+        assert delivery.decide(work_id, manifest.id, request).id == acceptance.id
+    finally:
+        preview.shutdown()
+
+
 def test_script_only_code_candidate_exposes_review_diff(postgres_database, tmp_path, monkeypatch):
     # A functional Preview can be based on the unchanged entrypoint. Review
     # availability must follow the Code Work Candidate, not changed HTML files.
@@ -248,7 +296,8 @@ def test_script_only_code_candidate_exposes_review_diff(postgres_database, tmp_p
     service, work_id, delivery, _ = produce(
         postgres_database, tmp_path, authorize_candidate=False, set_delivery_target=False)
     context = delivery.candidate_context(work_id)
-    assert context['preview_kind'] == 'CODE_DIFF'
+    assert context['preview_kind'] == 'STATIC_WEB'
+    assert context['entrypoint'] == 'index.html'
     diff = delivery.candidate_code_diff(work_id, context['candidate_fingerprint'])
     assert 'inventory.js' in diff
 

@@ -50,20 +50,23 @@ def _basis(tmp_path, monkeypatch):
         "artifacts": ["index.html"], "verification_references": ["verification:one"]}
     delivery = SimpleNamespace(database=_Database(), candidate_context=lambda _: context)
     store = JsonProductionEnvironmentStore(tmp_path / "watt")
-    guardian = SimpleNamespace(requests=[])
+    guardian = SimpleNamespace(requests=[], results={})
 
     def assess(request):
         from guardian.contracts.software_assurance import AssuranceResult, Gate
         guardian.requests.append(request)
-        return AssuranceResult(result_id=uuid4(), request_id=request.request_id,
+        result = AssuranceResult(result_id=uuid4(), request_id=request.request_id,
             candidate_id=request.candidate_id,
             candidate_fingerprint=request.candidate_fingerprint,
             source_revision=request.source_revision, source_tree=request.source_tree,
             runtime_ref=request.runtime_ref, gate=Gate.PASS,
             coverage_obligation_refs=tuple(item.obligation_ref for item in request.required_effects),
             evidence=(), findings=(), assessed_at=datetime.now(UTC))
+        guardian.results[request.request_id] = result
+        return result
 
     guardian.assess = assess
+    guardian.get_result = guardian.results.get
     client = GuardianAssuranceClient(delivery, store, guardian)
     preview = SimpleNamespace(id=preview_id, work_id=work_id, candidate_id=candidate_id,
         candidate_fingerprint=context["candidate_fingerprint"],

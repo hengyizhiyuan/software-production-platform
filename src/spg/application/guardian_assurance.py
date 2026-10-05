@@ -14,7 +14,8 @@ from sqlalchemy import select
 
 from spg.application.delivery import DeliveryApplicationService
 from spg.domain.product import ProductInvariantViolation
-from spg.domain.production_environment import CandidatePreviewSessionV1, PreviewRuntimeStatus
+from spg.domain.production_environment import CandidatePreviewMode, CandidatePreviewSessionV1, PreviewRuntimeStatus
+from spg.domain.runtime import WorkUnitCondition
 from spg.infrastructure.persistence.product_schema import product_works
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
@@ -125,22 +126,69 @@ class GuardianAssuranceClient:
                 product_works.c.id == session.work_id)).scalar_one_or_none()
             objective, constraints = work.desired_outcome, tuple(work.constraints)
             binding = product.runtime_binding(session.work_id)
-            task = None
+            units = ()
+            unit_evidence = []
             verification_records = ()
             if binding is not None and isinstance(getattr(binding, "work_unit_id", None), UUID):
                 runtime = RuntimeStore(uow.session)
-                work_unit = runtime.work_unit(binding.work_unit_id)
-                if work_unit is None:
-                    raise ProductInvariantViolation("Guardian requires current Task Contract lineage")
-                task = (None if work_unit is None else
-                        work_unit.completion_contract.task_contract)
                 candidate_record = runtime.baseline_candidate(session.candidate_id)
-                if candidate_record is not None:
-                    verification_records = tuple(
-                        runtime.verification_record(record_id)
-                        for record_id in candidate_record.verification_record_ids
-                    )
+                plan = runtime.plan_revision(binding.plan_revision_id)
+                if candidate_record is None or plan is None:
+                    raise ProductInvariantViolation("Guardian requires current Task Contract lineage")
+                units = runtime.work_units_for_plan(plan.id)
+                if (not units or set(candidate_record.satisfied_work_unit_ids) != {unit.id for unit in units}
+                        or any(unit.condition is not WorkUnitCondition.SATISFIED for unit in units)):
+                    raise ProductInvariantViolation("Guardian requires all required PWUs satisfied")
+                for unit in units:
+                    task = unit.completion_contract.task_contract
+                    if task is None or unit.source_baseline_id is None:
+                        raise ProductInvariantViolation("Guardian requires every exact PWU Task and input")
+                    output = (None if unit.verified_output_baseline_id is None else
+                        runtime.snapshot(unit.verified_output_baseline_id))
+                    revision = session.repository_revision if output is None else output.repository_revision
+                    tree = session.repository_tree if output is None else output.repository_tree_identity
+                    records = tuple(record for record in runtime.verification_records_for_work_unit(unit.id)
+                        if record.proposed_commit_identity == revision and record.tree_identity == tree
+                        and record.plan_revision_id == plan.id
+                        and record.source_baseline_id == unit.source_baseline_id)
+                    if not records or any(record.result.value != "PASS" for record in records):
+                        raise ProductInvariantViolation("Guardian requires exact qualified PWU Verification")
+                    refs = [f"production-plan:{plan.id}:version:{plan.revision_number}",
+                        f"pwu:{unit.id}", f"source-baseline:{unit.source_baseline_id}",
+                        f"task-contract:{task.task_contract_id}",
+                        f"qualified-result:{revision}:tree:{tree}",
+                        *(f"parent-baseline:{item}" for item in (unit.parent_baseline_ids or ()))]
+                    for attempt in runtime.attempts_for_work_unit(unit.id):
+                        if attempt.generation != unit.current_execution_generation:
+                            continue
+                        refs.append(f"execution-attempt:{attempt.id}")
+                        dispatch = runtime.execution_dispatch_for_attempt(attempt.id)
+                        if dispatch is not None:
+                            refs.append(f"execution-dispatch:{dispatch.id}")
+                    if unit.reconciliation_evidence is not None:
+                        refs.append(f"pwu-reconciliation:{unit.id}:" + sha256(json.dumps(
+                            unit.reconciliation_evidence, sort_keys=True).encode()).hexdigest())
+                    unit_evidence.append((unit, task, records, tuple(refs)))
         governed = self.preview_store.guardian_requirements(session.work_id, basis_id)
+        if governed is None and units:
+            # These paths are approved production obligations, never inferred
+            # from arbitrary Candidate prose or a new Human interpretation.
+            paths = sorted({path for unit in units for path in
+                (*unit.completion_contract.required_outputs, *unit.completion_contract.required_changes)
+                if session.mode is CandidatePreviewMode.STATIC_PREVIEW
+                and path.endswith(".html") and path in context["paths"]})
+            effects = [{"obligation_ref": f"work-route:{path}", "kind": "HTTP_ROUTE",
+                "expected_behavior": f"Approved static result {path} is served from the exact Candidate",
+                "path": "/" + path} for path in paths]
+            if not effects:
+                effects = [{"obligation_ref": "work-runtime-entry", "kind": "HTTP_ROUTE",
+                    "expected_behavior": objective, "path": "/"}]
+            governed = self.preview_store.admit_guardian_requirements(session.work_id, basis_id, {
+                "work_id": str(session.work_id), "governed_basis_ref": f"work-reality-revision:{basis_id}",
+                "authority_ref": f"engineering-scope:{scope.id}",
+                "admitted_by": "system:admitted-production-plan",
+                "plan_revision_id": str(binding.plan_revision_id),
+                "required_effects": effects})
         if governed is None:
             return {"status": "BLOCKED", "gate": "BLOCKED", "candidate_id": str(session.candidate_id),
                 "finding_count": 0, "summary": "No governed business-effect assurance scope is admitted",
@@ -152,16 +200,20 @@ class GuardianAssuranceClient:
             projection = self.preview_store.guardian_projection(item.id)
             if projection:
                 prior_findings.extend(projection.get("finding_ids", []))
-        lineage = None if task is None else task.decision_context
-        basis = {"preview_id": str(session.id), "candidate_id": str(session.candidate_id),
-            "candidate_fingerprint": session.candidate_fingerprint,
-            "requirements": governed,
-            "decision_context_fingerprint": (None if lineage is None else
-                                             lineage.package_fingerprint)}
-        request_id = uuid5(NAMESPACE_URL, "watt:guardian-assurance:" + sha256(
-            json.dumps(basis, sort_keys=True).encode()).hexdigest())
-        protected_context = _protected_context_for_guardian(task, verification_records)
-        request = AssuranceRequest(request_id=request_id,
+        # Guardian's v1 request is scoped to one ECF package. Submit each exact
+        # required PWU separately rather than inventing a merged ECF fingerprint.
+        results = []
+        for unit, task, records, refs in unit_evidence or [(None, None, verification_records, ())]:
+            lineage = None if task is None else task.decision_context
+            basis = {"preview_id": str(session.id), "candidate_id": str(session.candidate_id),
+                "candidate_fingerprint": session.candidate_fingerprint, "requirements": governed,
+                "pwu_id": None if unit is None else str(unit.id), "lineage_refs": refs,
+                "verification_ids": [str(record.id) for record in records],
+                "task_fingerprint": None if task is None else task.content_fingerprint}
+            request_id = uuid5(NAMESPACE_URL, "watt:guardian-assurance:" + sha256(
+                json.dumps(basis, sort_keys=True).encode()).hexdigest())
+            protected_context = _protected_context_for_guardian(task, records)
+            request = AssuranceRequest(request_id=request_id,
             product_ref=f"product:{product_id}" if product_id else f"work-product:{session.work_id}",
             work_ref=f"work:{session.work_id}",
             governed_intent_ref=governed["governed_basis_ref"],
@@ -169,27 +221,35 @@ class GuardianAssuranceClient:
             authority_ref=governed["authority_ref"], candidate_id=session.candidate_id,
             candidate_fingerprint=session.candidate_fingerprint,
             source_revision=session.repository_revision, source_tree=session.repository_tree,
-            artifact_refs=tuple(f"artifact:{item}" for item in context["artifacts"]),
+            artifact_refs=tuple(f"artifact:{item}" for item in context["artifacts"]) + refs,
             runtime_ref=f"candidate-preview:{session.id}", runtime_url=session.endpoint,
-            disposable_preview=True, verification_refs=tuple(context["verification_references"]),
+            disposable_preview=True, verification_refs=tuple(dict.fromkeys((
+                *context["verification_references"], *(f"verification:{record.id}" for record in records)))),
             task_contract_ref=(f"task-contract:{task.task_contract_id}"
-                               if lineage is not None and task is not None else None),
+                               if task is not None else None),
             decision_context_fingerprint=(lineage.package_fingerprint
-                                          if lineage is not None else None),
+                if lineage is not None and protected_context else None),
             protected_context=protected_context,
             acceptance_state="PENDING", delivery_authorization_state="NOT_AUTHORIZED",
             required_effects=tuple(governed["required_effects"]),
             prior_finding_ids=tuple(dict.fromkeys(prior_findings)),
             submitted_at=session.created_at)
-        result = self.guardian_store.assess(request)
-        projection = {"status": ("PASS" if result.gate.value == "PASS" else
-            "BLOCKED" if result.gate.value == "BLOCKED" else "FINDINGS_PRESENT"),
-            "gate": result.gate.value, "candidate_id": str(result.candidate_id),
+            results.append(self.guardian_store.assess(request))
+        gate = ("BLOCKED" if any(item.gate.value == "BLOCKED" for item in results)
+            else "FAIL_REPAIRABLE" if any(item.gate.value == "FAIL_REPAIRABLE" for item in results)
+            else "PASS")
+        result = results[0]
+        findings = tuple(item for result in results for item in result.findings)
+        projection = {"status": ("PASS" if gate == "PASS" else
+            "BLOCKED" if gate == "BLOCKED" else "FINDINGS_PRESENT"),
+            "gate": gate, "candidate_id": str(result.candidate_id),
             "request_id": str(result.request_id),
             "result_ref": f"guardian:assurance-result:{result.request_id}",
-            "finding_count": len(result.findings),
-            "finding_ids": [str(item.finding_id) for item in result.findings],
-            "summary": "; ".join(item.observed_reality for item in result.findings[:3]),
+            "result_refs": [f"guardian:assurance-result:{item.request_id}" for item in results],
+            "required_pwu_ids": [str(unit.id) for unit in units],
+            "finding_count": len(findings),
+            "finding_ids": [str(item.finding_id) for item in findings],
+            "summary": "; ".join(item.observed_reality for item in findings[:3]),
             "evidence_ref": (f"guardian:evidence:{result.evidence[0].evidence_id}"
                 if result.evidence else None)}
         return self.preview_store.save_guardian_projection(session.id, projection)
@@ -197,14 +257,21 @@ class GuardianAssuranceClient:
     def projection(self, work_id: UUID) -> dict:
         session = self.preview_store.current_candidate_preview(work_id)
         if session is None:
-            return {"status": "NOT_STARTED", "gate": None, "finding_count": 0}
+            from spg.application.candidate_preview import CandidatePreviewApplicationService
+            context = self.delivery.candidate_context(work_id)
+            required = bool(context is not None and CandidatePreviewApplicationService.mode_for(context) is not None)
+            return {"status": "NOT_STARTED", "gate": None, "finding_count": 0,
+                "required": required}
         projection = self.preview_store.guardian_projection(session.id)
         if projection:
             feedback_error = self.preview_store.guardian_feedback_error(session.id)
             if feedback_error:
-                return {**projection, "status": "BLOCKED",
+                return {**projection, "required": True, "status": "BLOCKED",
                     "failure_attribution": "WATT_PLATFORM_DEFECT",
                     "platform_error_ref": feedback_error["reference"]}
+            if projection["gate"] == "PASS" and not self.passed(work_id, session.candidate_id):
+                return {**projection, "required": True, "status": "BLOCKED", "gate": "BLOCKED",
+                    "summary": "Exact Guardian owner result is unavailable; acceptance is blocked"}
             if projection["gate"] == "FAIL_REPAIRABLE":
                 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
                 with self.delivery.database.unit_of_work() as uow:
@@ -213,20 +280,36 @@ class GuardianAssuranceClient:
                     facts = None if binding is None else product.runtime_summary(binding)
                     history = NativeExecutionStore(uow.session).work_convergence_history(work_id)
                 if history and history[-1].condition == "NON_CONVERGING":
-                    return {**projection, "status": "NON_CONVERGING"}
+                    return {**projection, "required": True, "status": "NON_CONVERGING"}
                 if facts is not None and facts.candidate_id != session.candidate_id:
-                    return {**projection, "status": "REPAIR_IN_PROGRESS"}
-            return projection
+                    return {**projection, "required": True, "status": "REPAIR_IN_PROGRESS"}
+            return {**projection, "required": True}
         earlier = [self.preview_store.guardian_projection(item.id)
             for item in self.preview_store.candidate_preview_history(work_id)
             if item.id != session.id]
         return {"status": "REVERIFYING" if any(item and item["gate"] == "FAIL_REPAIRABLE"
-            for item in earlier) else "RUNNING", "gate": None, "finding_count": 0}
+            for item in earlier) else "RUNNING", "gate": None, "finding_count": 0,
+            "required": True}
 
     def passed(self, work_id: UUID, candidate_id: UUID) -> bool:
         session = self.preview_store.current_candidate_preview(work_id)
-        return bool(session is not None and session.candidate_id == candidate_id
+        ready = bool(session is not None and session.status is PreviewRuntimeStatus.READY
+            and session.candidate_id == candidate_id
             and self.preview_store.guardian_feedback_error(session.id) is None
             and (projection := self.preview_store.guardian_projection(session.id)) is not None
             and projection["candidate_id"] == str(candidate_id)
             and projection["gate"] == "PASS")
+        if not ready:
+            return False
+        references = projection.get("result_refs", [projection["result_ref"]])
+        if not references:
+            return False
+        for reference in references:
+            result = self.guardian_store.get_result(UUID(reference.removeprefix("guardian:assurance-result:")))
+            if (result is None or result.gate.value != "PASS" or result.candidate_id != candidate_id
+                    or result.candidate_fingerprint != session.candidate_fingerprint
+                    or result.source_revision != session.repository_revision
+                    or result.source_tree != session.repository_tree
+                    or result.runtime_ref != f"candidate-preview:{session.id}"):
+                return False
+        return True

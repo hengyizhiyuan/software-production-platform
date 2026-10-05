@@ -247,6 +247,7 @@ class WorkApplicationService:
         self.candidate_authorization_guard: Callable[[UUID, UUID], None] | None = None
         self.candidate_review_preparer: Callable[[UUID], None] | None = None
         self.candidate_review_readiness: Callable[[UUID, UUID], bool] | None = None
+        self.candidate_review_state: Callable[[UUID], dict] | None = None
         self.integration = RepositoryIntegrationService(database)
         self.runtime_commit = RuntimeCommitService(database, settings=self.settings)
 
@@ -256,10 +257,11 @@ class WorkApplicationService:
         self.candidate_authorization_guard = guard
 
     def configure_candidate_review(self, prepare: Callable[[UUID], None],
-        ready: Callable[[UUID, UUID], bool]) -> None:
+        ready: Callable[[UUID, UUID], bool], state: Callable[[UUID], dict] | None = None) -> None:
         """Prepare review autonomously without granting integration authority."""
         self.candidate_review_preparer = prepare
         self.candidate_review_readiness = ready
+        self.candidate_review_state = state
 
     def prepare_candidate_review(self, work_id: UUID) -> None:
         if self.candidate_review_preparer is not None:
@@ -4022,6 +4024,11 @@ class WorkApplicationService:
         if facts.candidate_id is not None and facts.authorization_id is None:
             if (self.candidate_review_readiness is not None
                     and not self.candidate_review_readiness(work.id, facts.candidate_id)):
+                review = ({} if self.candidate_review_state is None else
+                    self.candidate_review_state(work.id))
+                if review.get("status") in {"BLOCKED", "NON_CONVERGING"}:
+                    return (WorkStatus.BLOCKED, "GUARDIAN_ASSURANCE", "CANDIDATE_SEALED",
+                        "质量检查受阻，当前候选不能接受；需要先恢复精确的运行与质量证据")
                 return (WorkStatus.RUNNING, "CANDIDATE_PREVIEW", "CANDIDATE_SEALED",
                     "Watt prepares and verifies the exact Candidate Preview before Human review")
             return (
