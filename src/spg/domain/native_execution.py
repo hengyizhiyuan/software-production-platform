@@ -806,6 +806,10 @@ class WorkerRegistrationRecord(NativeRecord):
     status: WorkerStatus
     current_task_id: UUID | None = None
     capacity: dict[str, int]
+    active_execution_count: int = Field(default=0, ge=0)
+    active_execution_ids: tuple[UUID, ...] = ()
+    available_slots: int = Field(default=0, ge=0)
+    safe_to_restart: bool = False
     registered_at: datetime
     worker_profile: str = Field(min_length=1)
     provider_profiles: tuple[str, ...]
@@ -842,6 +846,12 @@ class CloudExecutionRequest(NativeRecord):
     lease_expire_at: datetime | None = None
     queue_entry_id: UUID
     recovery_reason: str | None = None
+    queue_condition: QueueCondition | None = None
+    wait_reason: str | None = None
+    wait_age_seconds: int = Field(default=0, ge=0)
+    fairness_group: str | None = None
+    scheduling_policy_version: str | None = None
+    scheduling: QueueCapacityObservation | None = None
 
 
 class QueueProgressionState(StrEnum):
@@ -857,6 +867,10 @@ class QueueCapacityObservation(NativeRecord):
     scheduler_alive: bool
     compatible_worker_count: int = Field(ge=0)
     occupied_worker_count: int = Field(ge=0)
+    compatible_slots: int = Field(default=0, ge=0)
+    occupied_slots: int = Field(default=0, ge=0)
+    available_slots: int = Field(default=0, ge=0)
+    draining_worker_count: int = Field(default=0, ge=0)
     observed_at: datetime
 
 

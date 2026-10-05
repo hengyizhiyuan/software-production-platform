@@ -1,6 +1,7 @@
 """Explicit application composition for the S1-A foundation."""
 
 from dataclasses import dataclass
+from datetime import timedelta
 from pathlib import Path
 
 from spg.config import Settings
@@ -41,7 +42,7 @@ from spg.application.steering_bootstrap import (
     SteeringBootstrapService,
 )
 from spg.application.runtime_activation import RuntimeActivationService
-from spg.application.executor_runtime import NativeExecutorRuntimeService
+from spg.application.executor_runtime import NativeExecutorRuntimeService, FairCapacityScheduler
 from spg.application.work import WorkApplicationService
 from spg.domain.executor import ExecutorCapabilityContract
 from spg.domain.interaction import WorkInteractionCapability
@@ -108,6 +109,9 @@ class Application:
 
         return NativeExecutorRuntimeService(
             database or self.persistence(),
+            scheduler=FairCapacityScheduler(
+                aging_threshold=timedelta(
+                    seconds=self.settings.native_executor_scheduling_aging_seconds)),
             self_refine_attempt_budget=self.settings.native_executor_self_refine_attempt_budget,
             same_failure_threshold=self.settings.native_executor_same_failure_threshold,
             self_refine_time_budget_seconds=self.settings.native_executor_self_refine_time_budget_seconds,

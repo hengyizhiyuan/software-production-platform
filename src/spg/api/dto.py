@@ -1450,6 +1450,10 @@ class NativeQueueEntryResponse(ApiDto):
     scheduler_alive: bool | None = None
     compatible_worker_count: int | None = None
     occupied_worker_count: int | None = None
+    compatible_slots: int | None = None
+    occupied_slots: int | None = None
+    available_slots: int | None = None
+    draining_worker_count: int | None = None
     capacity_observed_at: datetime | None = None
     production_cycle_number: int | None = None
     work_reality_revision_id: UUID | None = None
@@ -1486,6 +1490,10 @@ class NativeQueueEntryResponse(ApiDto):
                 observation.occupied_worker_count if observation else None
             ),
             capacity_observed_at=observation.observed_at if observation else None,
+            compatible_slots=observation.compatible_slots if observation else None,
+            occupied_slots=observation.occupied_slots if observation else None,
+            available_slots=observation.available_slots if observation else None,
+            draining_worker_count=observation.draining_worker_count if observation else None,
             production_cycle_number=production_cycle_number,
             work_reality_revision_id=work_reality_revision_id,
         )
@@ -1502,6 +1510,12 @@ class CloudExecutionRequestResponse(ApiDto):
     lease_expire_at: datetime | None
     queue_entry_id: UUID
     recovery_reason: str | None
+    queue_condition: str | None = None
+    wait_reason: str | None = None
+    wait_age_seconds: int = 0
+    fairness_group: str | None = None
+    scheduling_policy_version: str | None = None
+    scheduling: QueueCapacityObservation | None = None
 
     @classmethod
     def from_record(cls, record: CloudExecutionRequest) -> Self:
@@ -1518,6 +1532,10 @@ class CloudWorkerResponse(ApiDto):
     last_heartbeat_at: datetime
     registered_at: datetime
     capacity: dict[str, int]
+    active_execution_count: int
+    active_execution_ids: tuple[UUID, ...]
+    available_slots: int
+    safe_to_restart: bool
     current_task_id: UUID | None
     expires_at: datetime
 
@@ -1530,6 +1548,9 @@ class CloudWorkerResponse(ApiDto):
             last_heartbeat_at=record.heartbeat_at,
             registered_at=record.registered_at, capacity=record.capacity,
             current_task_id=record.current_task_id, expires_at=record.expires_at,
+            active_execution_count=record.active_execution_count,
+            active_execution_ids=record.active_execution_ids,
+            available_slots=record.available_slots, safe_to_restart=record.safe_to_restart,
         )
 
 

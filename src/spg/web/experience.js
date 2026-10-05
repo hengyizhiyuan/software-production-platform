@@ -53,6 +53,15 @@
   function guardianCopy(g) { const status = g?.status || 'NOT_STARTED'; if (status === 'PASS') return `质量检查已通过${g.finding_count ? `；保留 ${g.finding_count} 条历史问题证据` : ''}。`; if (status === 'REPAIR_IN_PROGRESS') return '质量检查发现问题，Watt 正在自动修复。'; if (status === 'REVERIFYING' || status === 'RUNNING') return '质量检查正在重新验证。'; if (status === 'FINDINGS_PRESENT') return `质量检查发现 ${g.finding_count || 1} 个问题，正在处理。`; if (status === 'BLOCKED' || status === 'NON_CONVERGING') return '质量检查暂时受阻，请查看是否需要你提供信息。'; return '尚未开始质量检查。'; }
   function executionCopy(execution) {
     if (!execution) return '尚未进入 Worker 队列';
+    if (execution.status === 'QUEUED' && execution.scheduling) {
+      const scheduling = execution.scheduling;
+      if (scheduling.progression_state === 'CAPACITY_WAIT')
+        return scheduling.draining_worker_count && scheduling.compatible_slots === 0 ? '执行资源正在维护，任务在等待' : '等待执行容量';
+      if (scheduling.progression_state === 'INFRASTRUCTURE_UNAVAILABLE')
+        return '执行资源暂不可用，恢复后自动继续';
+      if (scheduling.progression_state === 'NOT_APPLICABLE') return '执行暂缓，等待所需条件';
+      return '已可执行，等待分配';
+    }
     return ({QUEUED:'排队中',ASSIGNED:'Worker 已领取',RUNNING:'Worker 正在执行',
       VERIFYING:'正在独立验证',VERIFIED:'独立验证已通过',COMPLETED:'执行和验证已完成',
       RECOVERY_REQUIRED:'正在恢复执行',FAILED:'执行或验证失败',CANCELLED:'执行已取消'})

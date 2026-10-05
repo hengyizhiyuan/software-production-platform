@@ -329,7 +329,7 @@ class NativeExecutionStore:
         self,
         now: datetime,
         *,
-        limit: int = 256,
+        limit: int | None = 256,
     ) -> list[ExecutionQueueEntryRecord]:
         rows = self.session.execute(
             select(executor_queue)
@@ -401,6 +401,13 @@ class NativeExecutionStore:
             .with_for_update()
         ).mappings().one()
         if row["policy_version"] != policy_version:
+            if row["policy_version"] == "fair-round-robin-v1" and policy_version == "fair-round-robin-v2":
+                # Existing cursor remains valid: v2 rotates aged groups as well.
+                self.session.execute(update(executor_scheduler_state).where(
+                    executor_scheduler_state.c.scheduler_identity == scheduler_identity
+                ).values(policy_version=policy_version, version=row["version"] + 1,
+                         updated_at=_utcnow()))
+                return row["last_fairness_group"], row["version"] + 1
             raise NativeExecutionConflict("scheduler policy version differs from durable state")
         return row["last_fairness_group"], row["version"]
 
@@ -460,15 +467,24 @@ class NativeExecutionStore:
                 executor_worker_registrations.c.worker_id == offer.worker_id
             )
         ).mappings().one()
-        self.append_worker_event(
-            offer.worker_id,
-            "WorkerRegistered" if previous is None else "WorkerHeartbeat",
-            {"status": row["status"], "runtime_version": offer.runtime_version,
-             "capacity": offer.max_concurrency,
-             "current_task_id": str(row["current_task_id"]) if row["current_task_id"] else None,
-             "capabilities": list(offer.capability_identities)},
-            created_at=heartbeat_at,
-        )
+        # Liveness is overwritten durably; unchanged periodic heartbeats do not
+        # grow permanent evidence. Preserve evidence of registration/transitions.
+        if previous is None or any(getattr(previous, key) != value for key, value in {
+            "status": WorkerStatus(row["status"]), "runtime_version": offer.runtime_version,
+            "capacity": {"max_concurrency": offer.max_concurrency},
+            "provider_profiles": offer.provider_profiles,
+            "resource_profiles": offer.resource_profiles,
+            "capability_identities": offer.capability_identities,
+        }.items()):
+            self.append_worker_event(
+                offer.worker_id,
+                "WorkerRegistered" if previous is None else "WorkerHeartbeat",
+                {"status": row["status"], "runtime_version": offer.runtime_version,
+                 "capacity": offer.max_concurrency,
+                 "current_task_id": str(row["current_task_id"]) if row["current_task_id"] else None,
+                 "capabilities": list(offer.capability_identities)},
+                created_at=heartbeat_at,
+            )
         return WorkerRegistrationRecord.model_validate(dict(row))
 
     def worker_registration(self, worker_id: str, *, lock: bool = False) -> WorkerRegistrationRecord | None:
@@ -488,6 +504,28 @@ class NativeExecutionStore:
                 )),
             )
         ) or 0)
+
+    def active_allocation_counts(self) -> dict[str, int]:
+        return dict(self.session.execute(select(
+            execution_allocations.c.worker_id, func.count()
+        ).where(execution_allocations.c.condition.in_((
+            AllocationCondition.ISSUED.value, AllocationCondition.ACTIVE.value,
+        ))).group_by(execution_allocations.c.worker_id)).all())
+
+    def active_execution_ids(self, worker_id: str) -> tuple[UUID, ...]:
+        return tuple(self.session.scalars(select(execution_allocations.c.attempt_id).where(
+            execution_allocations.c.worker_id == worker_id,
+            execution_allocations.c.condition.in_((AllocationCondition.ISSUED.value,
+                                                   AllocationCondition.ACTIVE.value)),
+        ).order_by(execution_allocations.c.issued_at, execution_allocations.c.id)))
+
+    def observe_worker_wait(self, worker_id: str, reason: str, *, now: datetime) -> None:
+        latest = self.worker_events(worker_id, limit=1)
+        if latest and latest[0]["event_type"] == "WorkerAllocationDeferred" and latest[0]["payload"].get("reason") == reason:
+            return
+        self.append_worker_event(worker_id, "WorkerAllocationDeferred", {
+            "reason": reason, "active_execution_count": self.active_allocation_count(worker_id),
+        }, created_at=now)
 
     def set_worker_status(
         self, worker_id: str, status: WorkerStatus, *,
@@ -511,6 +549,8 @@ class NativeExecutionStore:
         rows = self.session.execute(select(executor_worker_registrations).where(
             executor_worker_registrations.c.expires_at < now,
             executor_worker_registrations.c.status != WorkerStatus.OFFLINE.value,
+            # Maintenance intent survives liveness loss and re-registration.
+            executor_worker_registrations.c.status != WorkerStatus.DRAINING.value,
         ).with_for_update(skip_locked=True)).mappings().all()
         for row in rows:
             worker_id = str(row["worker_id"])
@@ -537,7 +577,7 @@ class NativeExecutionStore:
             select(executor_worker_registrations)
             .where(executor_worker_registrations.c.expires_at > now,
                    executor_worker_registrations.c.status.in_((
-                       WorkerStatus.READY.value, WorkerStatus.BUSY.value,
+                       WorkerStatus.READY.value, WorkerStatus.BUSY.value, WorkerStatus.DRAINING.value,
                    )))
             .order_by(executor_worker_registrations.c.worker_id)
         ).mappings()

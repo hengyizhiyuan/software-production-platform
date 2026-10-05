@@ -3507,6 +3507,17 @@ def test_cloud_worker_api_projects_registered_worker_and_exact_execution(
     assert workers.status_code == 200
     assert any(item["worker_id"] == worker_id and item["status"] == "READY"
                for item in workers.json())
+    worker_view = next(item for item in workers.json() if item["worker_id"] == worker_id)
+    assert worker_view["available_slots"] == 1 and worker_view["active_execution_count"] == 0
+    assert observed.json()["scheduling"]["available_slots"] == 1
+    assert observed.json()["fairness_group"] == admission.fairness_group
+    grant = service.allocate(offer)
+    assert grant is not None
+    assigned = client.get(f"/api/cloud-worker/executions/{admission.binding.attempt_id}")
+    assert assigned.json()["status"] == "ASSIGNED"
+    busy = next(item for item in client.get("/api/cloud-worker/workers").json() if item["worker_id"] == worker_id)
+    assert busy["active_execution_ids"] == [str(admission.binding.attempt_id)]
+    assert busy["available_slots"] == 0
     evidence = client.get(f"/api/cloud-worker/executions/{admission.binding.attempt_id}/evidence")
     assert evidence.status_code == 200
     assert {item["event_type"] for item in evidence.json()} >= {

@@ -56,6 +56,13 @@ test('Workspace reports persisted Execution and verification without claiming ea
     guardian:{status:'NOT_STARTED'}, deliveries:[], execution:{status},
   }});
   assert.equal(executionCopy({status:'QUEUED'}), '排队中');
+  assert.equal(executionCopy({status:'QUEUED',scheduling:{progression_state:'CAPACITY_WAIT'}}), '等待执行容量');
+  assert.equal(executionCopy({status:'QUEUED',scheduling:{progression_state:'CAPACITY_WAIT',draining_worker_count:1,compatible_slots:0}}), '执行资源正在维护，任务在等待');
+  assert.equal(executionCopy({status:'QUEUED',scheduling:{progression_state:'CAPACITY_WAIT',draining_worker_count:1,compatible_slots:2}}), '等待执行容量');
+  assert.equal(executionCopy({status:'QUEUED',scheduling:{progression_state:'INFRASTRUCTURE_UNAVAILABLE'}}), '执行资源暂不可用，恢复后自动继续');
+  assert.equal(executionCopy({status:'QUEUED',scheduling:{progression_state:'SCHEDULING',available_slots:1}}), '已可执行，等待分配');
+  assert.equal(executionCopy({status:'QUEUED',scheduling:{progression_state:'NOT_APPLICABLE'}}), '执行暂缓，等待所需条件');
+  assert.equal(executionCopy({status:'ASSIGNED',scheduling:{progression_state:'NOT_APPLICABLE'}}), 'Worker 已领取');
   assert.equal(focusCopy(workspace('RUNNING')).now, 'Worker 正在执行');
   assert.equal(focusCopy(workspace('VERIFYING')).now, '正在独立验证');
   assert.equal(focusCopy(workspace('FAILED')).now, '执行或验证失败');

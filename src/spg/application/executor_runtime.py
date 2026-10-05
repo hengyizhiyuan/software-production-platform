@@ -78,7 +78,7 @@ def _utcnow() -> datetime:
 class FairCapacityScheduler:
     """Pure fair-round-robin scheduler with FIFO groups and starvation aging."""
 
-    policy_version = "fair-round-robin-v1"
+    policy_version = "fair-round-robin-v2"
 
     def __init__(self, *, aging_threshold: timedelta = timedelta(minutes=5)) -> None:
         if aging_threshold.total_seconds() <= 0:
@@ -103,28 +103,25 @@ class FairCapacityScheduler:
                 considered_entry_ids=considered,
             )
 
-        oldest = min(eligible, key=lambda item: (item.enqueued_at, str(item.id)))
-        if now - oldest.enqueued_at >= self.aging_threshold:
-            return SchedulingDecision(
-                selected_queue_entry_id=oldest.id,
-                selected_fairness_group=oldest.fairness_group,
-                reason="aging threshold selected the oldest eligible entry",
-                considered_entry_ids=considered,
-            )
-
         groups: dict[str, list[ExecutionQueueEntryRecord]] = defaultdict(list)
         for entry in eligible:
             groups[entry.fairness_group].append(entry)
-        names = sorted(groups)
-        if last_fairness_group in names:
-            selected_group = names[(names.index(last_fairness_group) + 1) % len(names)]
-        else:
-            selected_group = names[0]
-        selected = min(groups[selected_group], key=lambda item: (-item.priority, item.enqueued_at, str(item.id)))
+        aged = {name: [item for item in items
+                       if now - item.enqueued_at >= self.aging_threshold]
+                for name, items in groups.items()}
+        aged = {name: items for name, items in aged.items() if items}
+        # Rotate aged Works too: a large old backlog cannot monopolize aging.
+        selected_groups = aged or groups
+        names = sorted(selected_groups)
+        selected_group = next((name for name in names
+                               if last_fairness_group is None or name > last_fairness_group), names[0])
+        selected = min(selected_groups[selected_group], key=lambda item: (
+            0 if aged else -item.priority, item.enqueued_at, str(item.id)))
         return SchedulingDecision(
             selected_queue_entry_id=selected.id,
             selected_fairness_group=selected_group,
-            reason="fair round-robin between groups; FIFO within selected group",
+            reason=("aging precedence; fair round-robin between Works; oldest aged entry within Work"
+                    if aged else "fair round-robin between Works; explicit priority then FIFO within Work"),
             considered_entry_ids=considered,
         )
 
@@ -428,7 +425,7 @@ class NativeExecutorRuntimeService:
                 status=WorkerStatus.REGISTERING,
             )
             uow.commit()
-            return record
+            return self._worker_capacity(store, record)
 
     def heartbeat_worker(self, offer: WorkerOffer) -> WorkerRegistrationRecord:
         now = self._now()
@@ -448,7 +445,7 @@ class NativeExecutorRuntimeService:
                 status=status,
             )
             uow.commit()
-            return record
+            return self._worker_capacity(store, record)
 
     def reconcile_worker_liveness(self) -> tuple[str, ...]:
         with self.database.unit_of_work() as uow:
@@ -494,7 +491,22 @@ class NativeExecutorRuntimeService:
 
     def list_workers(self) -> tuple[WorkerRegistrationRecord, ...]:
         with self.database.unit_of_work() as uow:
-            return tuple(NativeExecutionStore(uow.session).all_worker_registrations())
+            store = NativeExecutionStore(uow.session)
+            return tuple(self._worker_capacity(store, item)
+                         for item in store.all_worker_registrations())
+
+    def _worker_capacity(self, store, record):
+        execution_ids = store.active_execution_ids(record.worker_id)
+        active = len(execution_ids)
+        accepts = (record.expires_at > self._now() and record.status in {
+            WorkerStatus.READY, WorkerStatus.BUSY})
+        return record.model_copy(update={
+            "active_execution_count": active,
+            "active_execution_ids": execution_ids,
+            "current_task_id": execution_ids[0] if active == 1 else None,
+            "available_slots": max(0, record.capacity["max_concurrency"] - active) if accepts else 0,
+            "safe_to_restart": record.status is WorkerStatus.DRAINING and active == 0,
+        })
 
     def set_worker_draining(self, worker_id: str, *, draining: bool) -> WorkerRegistrationRecord:
         with self.database.unit_of_work() as uow:
@@ -518,7 +530,7 @@ class NativeExecutorRuntimeService:
             result = store.worker_registration(worker_id)
             uow.commit()
             assert result is not None
-            return result
+            return self._worker_capacity(store, result)
 
     def worker_evidence(self, worker_id: str) -> tuple[dict[str, object], ...]:
         with self.database.unit_of_work() as uow:
@@ -631,6 +643,14 @@ class NativeExecutorRuntimeService:
                 queue_entry_id=queue.id,
                 recovery_reason=("VERIFICATION_FAILED" if verification_state == "FAILED"
                                  else "; ".join(state.blocker_reasons) or None),
+                queue_condition=queue.condition, wait_reason=queue.wait_reason,
+                wait_age_seconds=max(0, int((self._now() - queue.enqueued_at).total_seconds())),
+                fairness_group=queue.fairness_group,
+                scheduling_policy_version=self.scheduler.policy_version,
+                scheduling=self._capacity_observation(
+                    queue, store.live_worker_registrations(self._now()),
+                    store.active_allocation_counts(), now=self._now(),
+                    unavailable_after=timedelta(seconds=5)),
             )
 
     def allocate(self, offer: WorkerOffer) -> ExecutionAllocationGrant | None:
@@ -639,6 +659,8 @@ class NativeExecutorRuntimeService:
             store = NativeExecutionStore(uow.session)
             registration = store.worker_registration(offer.worker_id, lock=True)
             if registration is not None and registration.status is WorkerStatus.DRAINING:
+                store.observe_worker_wait(offer.worker_id, "DRAINING", now=now)
+                uow.commit()
                 return None
             if registration is None or registration.expires_at <= now:
                 registration = store.register_worker(
@@ -646,11 +668,15 @@ class NativeExecutorRuntimeService:
                     expires_at=now + timedelta(seconds=offer.lease_seconds),
                 )
             if store.active_allocation_count(offer.worker_id) >= registration.capacity["max_concurrency"]:
+                store.observe_worker_wait(offer.worker_id, "CAPACITY_FULL", now=now)
+                uow.commit()
                 return None
-            entries = store.runnable_queue_locked(now)
             cursor, cursor_version = store.scheduler_cursor_locked(
                 self.scheduler_identity, self.scheduler.policy_version
             )
+            # Serialize fairness decisions before locking candidates. Otherwise
+            # another allocator's SKIP LOCKED rows can distort group rotation.
+            entries = store.runnable_queue_locked(now, limit=None)
             decision = self.scheduler.choose(
                 entries,
                 offer,
@@ -733,6 +759,13 @@ class NativeExecutorRuntimeService:
                     "allocation_id": str(allocation_id),
                     "worker_id": offer.worker_id,
                     "decision_reason": decision.reason,
+                    "policy_version": self.scheduler.policy_version,
+                    "work_id": str(selected.work_id), "pwu_id": str(selected.pwu_id),
+                    "fairness_group": selected.fairness_group, "priority": selected.priority,
+                    "queue_entry_id": str(selected.id), "enqueued_at": selected.enqueued_at.isoformat(),
+                    "required_capabilities": list(selected.required_capabilities),
+                    "lease_epoch": epoch, "lease_expires_at": deadline.isoformat(),
+                    "capacity_slot": store.active_allocation_count(offer.worker_id),
                 },
             )
             uow.commit()
@@ -758,20 +791,25 @@ class NativeExecutorRuntimeService:
         self,
         entry: ExecutionQueueEntryRecord,
         registrations,
-        occupied_worker_ids: set[str],
+        occupied_counts: dict[str, int],
         *,
         now: datetime,
         unavailable_after: timedelta,
     ) -> QueueCapacityObservation:
-        compatible = tuple(
+        matching = tuple(
             registration
             for registration in registrations
             if self._registration_matches(entry, registration)
         )
-        occupied = sum(
-            registration.worker_id in occupied_worker_ids
-            for registration in compatible
-        )
+        compatible = tuple(item for item in matching if item.status is not WorkerStatus.DRAINING)
+        occupied = sum(occupied_counts.get(item.worker_id, 0) > 0 for item in compatible)
+        slots = sum(item.capacity["max_concurrency"] for item in compatible)
+        used = sum(occupied_counts.get(item.worker_id, 0) for item in compatible)
+        available = sum(max(0, item.capacity["max_concurrency"] - occupied_counts.get(item.worker_id, 0))
+                        for item in compatible)
+        metrics = {"compatible_slots": slots, "occupied_slots": used,
+                   "available_slots": available,
+                   "draining_worker_count": len(matching) - len(compatible)}
         pending_conditions = {
             QueueCondition.QUEUED,
             QueueCondition.RETURNED_TO_QUEUE,
@@ -780,7 +818,7 @@ class NativeExecutorRuntimeService:
             entry.condition is QueueCondition.WAITING_RESOURCE
             and (entry.wait_reason or "").startswith(self.infrastructure_wait_prefix)
         )
-        if entry.condition not in pending_conditions and not infrastructure_wait:
+        if (entry.condition not in pending_conditions and not infrastructure_wait) or entry.available_at > now:
             return QueueCapacityObservation(
                 progression_state=QueueProgressionState.NOT_APPLICABLE,
                 reason=entry.wait_reason or "Queue allocation is not currently pending.",
@@ -788,8 +826,15 @@ class NativeExecutorRuntimeService:
                 compatible_worker_count=len(compatible),
                 occupied_worker_count=occupied,
                 observed_at=now,
+                **metrics,
             )
         if not compatible:
+            if matching:
+                return QueueCapacityObservation(
+                    progression_state=QueueProgressionState.CAPACITY_WAIT,
+                    reason="Compatible execution workers are draining; new allocations wait.",
+                    scheduler_alive=True, compatible_worker_count=0, occupied_worker_count=0,
+                    observed_at=now, **metrics)
             within_startup_grace = now - entry.enqueued_at < unavailable_after
             return QueueCapacityObservation(
                 progression_state=(
@@ -806,8 +851,9 @@ class NativeExecutorRuntimeService:
                 compatible_worker_count=0,
                 occupied_worker_count=0,
                 observed_at=now,
+                **metrics,
             )
-        if occupied >= len(compatible):
+        if available == 0:
             return QueueCapacityObservation(
                 progression_state=QueueProgressionState.CAPACITY_WAIT,
                 reason="All compatible execution slots are currently occupied.",
@@ -815,6 +861,7 @@ class NativeExecutorRuntimeService:
                 compatible_worker_count=len(compatible),
                 occupied_worker_count=occupied,
                 observed_at=now,
+                **metrics,
             )
         return QueueCapacityObservation(
             progression_state=QueueProgressionState.SCHEDULING,
@@ -823,6 +870,7 @@ class NativeExecutorRuntimeService:
             compatible_worker_count=len(compatible),
             occupied_worker_count=occupied,
             observed_at=now,
+            **metrics,
         )
 
     def list_queue_reality(
@@ -836,7 +884,7 @@ class NativeExecutorRuntimeService:
             store = NativeExecutionStore(uow.session)
             records = store.list_queue(work_id=work_id)
             registrations = store.live_worker_registrations(now)
-            occupied = store.active_allocation_worker_ids()
+            occupied = store.active_allocation_counts()
             return tuple(
                 (
                     record,
@@ -864,7 +912,7 @@ class NativeExecutorRuntimeService:
             store = NativeExecutionStore(uow.session)
             entries = store.runnable_queue_locked(now)
             registrations = store.live_worker_registrations(now)
-            occupied = store.active_allocation_worker_ids()
+            occupied = store.active_allocation_counts()
             for entry in entries:
                 infrastructure_wait = (
                     entry.condition is QueueCondition.WAITING_RESOURCE
@@ -900,6 +948,9 @@ class NativeExecutorRuntimeService:
                         available_at=now,
                     )
                     changed.append(entry.id)
+                    self._append_event(store, pwu_id=entry.pwu_id, attempt_id=entry.attempt_id,
+                        event_type="ExecutionCapacityUnavailable", payload={"reason": observation.reason,
+                            "queue_entry_id": str(entry.id)})
                 elif infrastructure_wait and observation.compatible_worker_count > 0:
                     store.set_queue_condition(
                         entry.id,
@@ -909,6 +960,19 @@ class NativeExecutorRuntimeService:
                         available_at=now,
                     )
                     changed.append(entry.id)
+                    self._append_event(store, pwu_id=entry.pwu_id, attempt_id=entry.attempt_id,
+                        event_type="ExecutionCapacityRestored", payload={"queue_entry_id": str(entry.id)})
+                elif entry.condition in {QueueCondition.QUEUED, QueueCondition.RETURNED_TO_QUEUE}:
+                    reason = observation.reason if observation.progression_state is QueueProgressionState.CAPACITY_WAIT else None
+                    if entry.wait_reason != reason:
+                        store.set_queue_condition(entry.id, expected_version=entry.version,
+                                                  condition=entry.condition, wait_reason=reason)
+                        changed.append(entry.id)
+                        self._append_event(store, pwu_id=entry.pwu_id, attempt_id=entry.attempt_id,
+                            event_type="ExecutionCapacityWait" if reason else "ExecutionCapacityRestored",
+                            payload={"queue_entry_id": str(entry.id), "reason": reason,
+                                     "available_slots": observation.available_slots,
+                                     "draining_worker_count": observation.draining_worker_count})
             uow.commit()
         return tuple(changed)
 
@@ -1046,6 +1110,10 @@ class NativeExecutorRuntimeService:
             else:
                 raise NativeExecutionConflict("worker returned an unsupported lifecycle mode")
             store.release_allocation(allocation.id)
+            self._append_event(store, pwu_id=queue.pwu_id, attempt_id=queue.attempt_id,
+                event_type="ExecutionCapacityReleased", payload={
+                    "allocation_id": str(allocation.id), "worker_id": allocation.worker_id,
+                    "lease_epoch": allocation.lease_epoch, "reason": result.runtime_mode.value})
             store.set_queue_condition(
                 queue.id,
                 expected_version=queue.version,

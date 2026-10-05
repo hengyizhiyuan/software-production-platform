@@ -452,7 +452,7 @@ def test_scheduler_is_round_robin_fifo_and_aging_prevents_starvation() -> None:
     fifo = scheduler.choose([a2, a1], _offer(), now=NOW + timedelta(minutes=3), last_fairness_group=None)
     assert fifo.selected_queue_entry_id == a1.id
     aged = scheduler.choose([b1, a1], _offer(), now=NOW + timedelta(minutes=20), last_fairness_group="user-a")
-    assert aged.selected_queue_entry_id == a1.id
+    assert aged.selected_queue_entry_id == b1.id  # aged groups also rotate
     assert "aging" in aged.reason
 
 

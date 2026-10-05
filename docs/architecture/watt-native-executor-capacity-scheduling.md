@@ -144,7 +144,7 @@ durable representation should identify:
 
 - queue-entry identity;
 - PWU and authorized Attempt/grant revision;
-- accountable user fairness group;
+- accountable fairness group (the Work in the current production adapter);
 - enqueue sequence and time;
 - required capability, provider, runtime profile, and resource envelope;
 - eligibility fingerprint needed to reject stale authority;
@@ -174,12 +174,14 @@ write-fencing rules. An expired or released allocation cannot be reused.
 
 The initial policy is intentionally simple and explainable:
 
-1. **Fair round-robin between users.** Each user with at least one eligible
-   runnable entry receives turns as capacity becomes available.
-2. **FIFO within each fairness group.** Within a user's eligible queue, the
-   earliest admitted runnable entry is considered first.
+1. **Fair round-robin between independent Works.** The current production
+   adapter admits `fairness_group=work:<work_id>`. Existing explicit groups
+   remain compatible; no speculative tenant model is added.
+2. **Priority then FIFO within each Work.** Explicit admitted priority is
+   preserved. Equal-priority entries use enqueue time and queue-entry ID.
 3. **Aging prevents starvation.** An entry waiting beyond an admitted threshold
-   gains temporary precedence over ordinary rotation. Aging changes service
+   gains temporary precedence over ordinary rotation. Aged Works also rotate;
+   within each aged Work the oldest eligible entry precedes priority. Aging changes service
    order only; it never bypasses eligibility, authority, resource constraints,
    or concurrency fences.
 4. **No commercial weighting yet.** Pricing, subscription tier, customer value,
@@ -298,7 +300,7 @@ The completed implementation and qualification evidence proves:
 
 - no execution without both production authority and allocation;
 - one active allocation/write owner for the applicable Attempt boundary;
-- fair user rotation, FIFO ordering, and bounded anti-starvation aging;
+- fair group rotation, priority/FIFO ordering, and bounded anti-starvation aging;
 - waiting entries consume no worker capacity;
 - checkpoint/requeue/resume preserve PWU and Attempt Reality;
 - Human-visible states are truthful projections;
@@ -308,6 +310,100 @@ These obligations are closed by the focused scheduling tests, the 100-round
 allocation race, prescribed continuity injections and final Q-case ledger.
 Future distributed/capacity evolution remains behind the same contracts and
 does not reopen the qualified local scheduling plane.
+
+## 12. Cloud Capacity Scheduling Runtime v1 (2026-10-05)
+
+This section records the current Cloud Worker implementation. Steering owns
+WHAT NEXT; Executor owns HOW; capacity scheduling only grants WHEN/WHERE.
+An Execution Request is the existing Attempt ID bound to Work, PWU contract,
+source vector and workspace. Requeues preserve this identity and its lineage.
+
+### Capacity, ordering and allocation
+
+`executor_worker_registrations.capacity.max_concurrency` is the admitted slot
+limit. `active_execution_count` counts persisted `ISSUED`/`ACTIVE` allocations;
+`available_slots` is the nonnegative remainder for live READY/BUSY workers.
+DRAINING and expired workers expose zero allocatable slots. Expired allocations
+still consume slots until the existing effect/lease reconciliation safely
+releases them. BUSY with spare slots remains eligible. API projections also
+return exact active Execution IDs and `safe_to_restart` for an empty drained
+worker; the UI never estimates occupancy.
+
+PostgreSQL locks the Worker identity, then the existing scheduler cursor before
+claiming candidates. One fairness decision therefore sees the complete
+currently runnable candidate set rather than only a 256-entry oldest backlog.
+The existing active-allocation uniqueness, live-lease uniqueness, token digest,
+start deadline and epoch fences remain authoritative. No new queue, broker or
+capacity lifecycle is added. Allocation evidence binds Work/PWU/Attempt,
+queue entry, required capabilities, priority, enqueue time, Worker, allocation
+ID, lease epoch/expiry and decision reason. A slot number in evidence denotes
+occupancy at grant time, not a persistent machine resource identity.
+
+Policy `fair-round-robin-v2` rotates lexicographically after the persisted last
+Work, even if that Work has left the runnable set. Within the selected Work,
+explicit priority precedes FIFO. After
+`SPG_NATIVE_EXECUTOR_SCHEDULING_AGING_SECONDS` (default 300), aged Work groups
+have precedence and rotate amongst themselves; their oldest eligible entry
+runs first. This bounds starvation by elapsed aging time plus turns of other
+aged Works, assuming compatible capacity makes progress and executions release
+their bounded leases. It cannot promise a start time when capacity or required
+resources never return. Product priority and task meaning are never rewritten.
+
+The known v1 policy record upgrades transactionally to v2, retaining its cursor;
+unknown policy mismatches fail closed. Queue times, cursor and allocation
+history already persist every required fact. No schema change or migration is
+needed; Alembic remains `20261005_67` with one canonical head.
+
+### Draining, waits, evidence and recovery
+
+DRAINING survives heartbeat expiry and re-registration until explicit undrain.
+It prevents new allocation while existing valid leases can finish and renew.
+At zero active allocations the worker is safe to restart. Idle heartbeat
+updates overwrite liveness; unchanged heartbeats do not append permanent
+events. Register/status/profile changes remain evidence. Repeated unchanged
+capacity waits and drain refusals are coalesced; allocation grant/release,
+capacity loss/return and changed waiting reasons remain auditable.
+
+Execution status remains canonical: QUEUED, ASSIGNED, RUNNING and existing
+verification/terminal/recovery states. Scheduling observation distinguishes
+SCHEDULING, CAPACITY_WAIT, INFRASTRUCTURE_UNAVAILABLE and waits for other
+conditions. Existing queue and Cloud Worker APIs expose compatible/occupied/free
+slots, draining count, wait reason/age, fairness group and policy. The existing
+four-quadrant Workspace renders ready, capacity waiting, maintenance waiting,
+assigned, executing and non-capacity waits in Product language.
+
+Lease expiry before start or at a settled frontier requeues the same Attempt
+with a new epoch. An unresolved effect still enters existing reconciliation;
+the scheduler cannot blindly replay it. Returning capacity resumes polling
+without Human admission. Restart does not create a result or duplicate lease.
+
+### Qualification and extension boundary
+
+`tests/integration/test_capacity_scheduling.py` covers multi-claim capacity,
+multi-slot occupancy, aged Work fairness, durable cursor upgrade, drain across
+expiry/re-registration, allocation loss before/during execution, and epoch
+fencing. Existing Cloud Worker/Production Execution regressions cover actual
+workspace changes, evidence, verification and unresolved-effect recovery.
+
+`tests/qualify_capacity_runtime.py` runs controlled NativeExecutionWorker kernels
+on the exact ECS in a dedicated PostgreSQL qualification database. It uses real
+admitted PWU contracts, queue, allocations and leases without model/tool effects
+or Product mutation. It qualifies one-slot contention, Work rotation, draining,
+two-slot controlled kernels and persistence/recovery across container restart.
+Qualification kernels stop explicitly; they do not claim software completion.
+The operational production Worker remains `max_concurrency=1`: arbitrary
+simultaneous model/tool production on this host is not claimed as qualified.
+
+Future pools reuse distinct Worker IDs, this PostgreSQL cursor and fenced
+allocations. Qualify per-host workspace access, tool routing, durable storage,
+multi-host failure and concurrent production processes before expanding real
+capacity. The current scheduler scans the eligible queue; large-pool indexing
+and policy tuning are deferred. No CPU/memory bin packing is implemented.
+
+Preserved findings: dual-target requests can form an empty work unit; an existing
+Work awaiting Human decision blocks the Workspace new-request path; filesystem
+hard workspace quota is absent; the temporary Web ingress uses HTTP. Existing
+unrelated historical test failures remain separate.
 
 ## Final status
 
