@@ -2815,6 +2815,14 @@ class WorkApplicationService:
                     continue
                 latest = max(attempts, key=lambda item:item.generation)
                 queue = native.queue_for_attempt(latest.id)
+                if queue is not None and queue.condition.value == 'COMPLETED':
+                    # Native may finish between terminal_result() and this
+                    # read. Its durable result still belongs to this dispatch;
+                    # let the next iteration collect it instead of declaring
+                    # NO_SAFE_PROGRESS at the asynchronous handoff boundary.
+                    facts = product.runtime_summary(binding.model_copy(update={"work_unit_id": unit.id}))
+                    if facts.observation_id is None:
+                        return True
                 if queue is not None and queue.condition.value in {
                     'QUEUED','RETURNED_TO_QUEUE','ALLOCATED','EXECUTING','CHECKPOINTED','WAITING_RESOURCE',
                 }:

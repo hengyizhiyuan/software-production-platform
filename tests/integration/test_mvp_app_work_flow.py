@@ -140,6 +140,61 @@ def test_multi_pwu_nonblocking_dispatch_keeps_two_root_authorities_across_restar
         assert not store.attempts_for_work_unit(store.work_unit_for_node(binding.plan_revision_id, 'pwu:join').id)
 
 
+def test_multi_pwu_terminal_queue_handoff_race_collects_existing_result(app_facts: "AppFacts", monkeypatch) -> None:
+    from types import SimpleNamespace
+    from spg.application.orchestration import ProductionOrchestrator, OrchestrationStopReason
+    from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+    submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
+    draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
+        code_exact_targets=("src/spg_example.py", "src/spg/web/app.js"),
+    ))
+    app_facts.service.approve_work(draft.work_id, authority_identity="human:multi-pwu")
+    class QueueHandoff:
+        def __init__(self): self.requests, self.polls = {}, {}
+        def submit(self, request): self.requests.setdefault(request.execution.attempt_id, request)
+        def ensure_submitted(self, request): self.submit(request)
+        def is_submitted(self, attempt_id): return attempt_id in self.requests
+        def terminal_result(self, attempt_id):
+            self.polls[attempt_id] = self.polls.get(attempt_id, 0) + 1
+            if self.polls[attempt_id] == 1:
+                # A terminal queue update arrives after the owner's result read.
+                return None
+            request = self.requests[attempt_id]
+            with app_facts.database.unit_of_work() as uow:
+                unit = RuntimeStore(uow.session).work_unit(request.execution.work_unit_id)
+            operations = []
+            for target in unit.completion_contract.change_contract.exact_targets:
+                content = (Path(request.execution.workspace.workspace_path) / target.path).read_text()
+                content += '\n' + ('#' if target.path.endswith('.py') else '//') + ' qualified change\n'
+                operations.append(DeterministicFileOperation(operation=DeterministicFileOperationType.MODIFY,
+                    repository_relative_path=target.path, content=content))
+            return DeterministicTestExecutor(DeterministicExecutionSpecification(
+                operations=tuple(operations), reported_outcome=ProviderReportedOutcome.SUCCESS)).dispatch(request)
+        def dispatch(self, request): raise AssertionError("Queued execution must stay asynchronous")
+    executor = QueueHandoff()
+    monkeypatch.setattr(NativeExecutionStore, "queue_for_attempt", lambda _store, attempt_id:
+        SimpleNamespace(condition=SimpleNamespace(value="COMPLETED"), wait_reason=None)
+        if attempt_id in executor.requests else None)
+    service = WorkApplicationService(app_facts.database, workspace_root=app_facts.workspace_root,
+        executor=executor, verifier=ContractDrivenRepositoryVerifier(app_facts.database))
+    owner = ProductionOrchestrator(service, max_automatic_transitions=20)
+    monkeypatch.setattr(owner._stopping, 'wait', lambda timeout: False)
+    outcome = owner.orchestrate(draft.work_id)
+    assert outcome.stop_reason is OrchestrationStopReason.HUMAN_OR_TERMINAL_BOUNDARY
+    assert service.get_work(draft.work_id).status is WorkStatus.NEEDS_ATTENTION
+    assert len(executor.requests) == 3
+    assert set(executor.polls.values()) == {2}
+    assert not service.waiting_for_native_execution(draft.work_id)
+    with app_facts.database.unit_of_work() as uow:
+        runtime = RuntimeStore(uow.session)
+        binding = ProductStore(uow.session).runtime_binding(draft.work_id)
+        for unit in runtime.work_units_for_plan(binding.plan_revision_id):
+            attempts = runtime.attempts_for_work_unit(unit.id)
+            assert len(attempts) == 1
+            dispatch = runtime.execution_dispatch_for_attempt(attempts[0].id)
+            assert runtime.repository_observation(dispatch.id) is not None
+
+
 def test_multi_pwu_replan_api_replaces_active_revision_without_widening_scope(app_facts: "AppFacts") -> None:
     submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
     draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(

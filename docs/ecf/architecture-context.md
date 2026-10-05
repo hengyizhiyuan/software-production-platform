@@ -75,3 +75,14 @@ result evidence with their timestamps and digests. It must distinguish a
 Worker result claim from a verified Work outcome, and treat missing/stale
 source, owner or verification evidence as unresolved. This adds no ECF endpoint
 or new ECF decision authority.
+
+The canonical [versioned Multi-PWU production source](../architecture/watt-ai-native-software-production-architecture.md#versioned-multi-pwu-production)
+defines Production Plan/PWU context within that existing boundary. For a PWU,
+preserve exact Work and Plan revision, scoped Task Contract, input source commit,
+protected Product intent/invariants/decisions, qualified predecessor PWU and
+Execution identities, output revisions, verification/artifact references, and
+the ECF package fingerprint. Assemble context when that PWU's input is ready;
+do not copy the entire Work context into every node or rewrite an executed
+Task Contract. Queue capacity and Worker placement remain scheduling facts,
+not ECF authority. Terminal Work Candidate lineage must cover the qualified
+required graph before Human acceptance.

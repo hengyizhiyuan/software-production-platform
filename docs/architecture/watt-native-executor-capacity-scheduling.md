@@ -406,6 +406,13 @@ Work awaiting Human decision blocks the Workspace new-request path; filesystem
 hard workspace quota is absent; the temporary Web ingress uses HTTP. Existing
 unrelated historical test failures remain separate.
 
+Follow-up: the Multi-PWU Production Planning Runtime v1 now rejects empty
+production units at admission and keeps a source change with its corresponding
+test as one coherent responsibility. See the canonical
+[versioned Multi-PWU implementation](watt-ai-native-software-production-architecture.md#versioned-multi-pwu-production).
+The finding above records the earlier Capacity qualification; its historical
+evidence remains unchanged. The other deferred findings remain open.
+
 ### Observed Cloud qualification
 
 Exact placement: `cn-wulanchabu / i-0jl386xnbauudq5j9jk0`.

@@ -366,6 +366,10 @@ queue without blocking the Work driver on the first PWU. Independent roots can
 all enter the queue; current operational Worker concurrency remains **1**.
 Restart resumes an existing dispatch/admission rather than creating another
 Execution. Only terminal Native evidence is observed as an execution result.
+The completion handoff also remains eligible while a terminal queue entry has
+not yet been collected into a repository observation. A Worker finishing
+between two owner reads must not become `NO_SAFE_PROGRESS`. Explicit Native
+cancellation remains cancellation; it cannot create another PWU Attempt.
 
 Before its first Attempt, each ready PWU receives a scoped Task Contract and
 fresh canonical ECF package against its exact input revision. Product Intent,
@@ -374,6 +378,20 @@ name PWU, Execution, output baseline/revision, verification records, artifacts
 and ECF fingerprint. A dependent source must be an active Plan input proven
 through verified lineage back to this Work's admitted source. Arbitrary new
 repository revisions remain unauthorized; the ECF freshness gate is unchanged.
+For clone workspaces, the accepted Work branch stays at its admitted revision.
+A successor fetches and checks out only its exact qualified predecessor commit,
+after the application proves this Work's active Plan lineage. This does not
+advance a repository ref or accept a Candidate on the Human's behalf.
+
+Decomposition reads the complete admitted objective, desired outcome and
+constraints, including dependencies that are absent from a short Steering
+title. Its current deterministic policy is conservative: shared responsibilities
+use serial baseline progression; independent exact surfaces use parallel roots
+and a verified Join. A source change and its corresponding test are one
+coherent obligation, including a sole HTML source and its Node navigation test.
+Root `index.html` has a meaningful capability identity, never an empty group.
+Unproven scopes and dependencies remain planning findings rather than runnable
+placeholders. This is bounded planning, not arbitrary model-authored topology.
 
 Replanning may reuse explicitly qualified old outputs; their history remains
 immutable and their baseline chain is preserved. Unfulfilled obligations must
@@ -382,7 +400,9 @@ optional production nodes are not inferred or silently skipped.
 
 The existing Workspace Reality quadrant shows each production unit as ready,
 waiting for capacity, assigned, running, dependency-blocked, verifying, verified
-or blocked. A Join is labeled as integration and verification. Its aggregate
+or blocked/cancelled. A required failed or cancelled unit keeps the Work blocked
+even when another unit has verified successfully. A Join is labeled as
+integration and verification. Its aggregate
 execution projection considers every current PWU rather than only the original
 binding's root. Candidate sealing still requires complete qualified graph
 lineage; Human acceptance remains a separate authority.
