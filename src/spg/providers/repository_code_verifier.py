@@ -97,7 +97,8 @@ class RepositoryCodeVerifier:
             )
             if (obligation.kind is CodeVerificationKind.PATH_SCOPE
                     and result is VerificationResultValue.PASS
-                    and request.protected_context_obligations and self.context_verifier is not None):
+                    and request.protected_context_obligations and self.context_verifier is not None
+                    and self.context_verifier.supports(contract)):
                 checks = self.context_verifier.verify(
                     request, work_unit.completion_contract.task_contract, contract,
                     dispatch.workspace.repository_path, source.repository_revision)

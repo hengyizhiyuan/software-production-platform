@@ -83,3 +83,24 @@ def test_wire_repair_is_bounded_and_preserves_a_contradiction(subject):
     assert payloads[1]['wire_feedback']=='PROTECTED_CONTEXT_WITNESS_NOT_OBSERVED'
     assert result[0]['disposition']=='CONTRADICTED'
     assert result[0]['coverage']=='UNVERIFIED'
+
+
+def test_static_context_adapter_does_not_replace_other_profile_verification(subject):
+    contract=subject[4]
+    assert StaticProtectedContextVerifier.supports(contract)
+    assert not StaticProtectedContextVerifier.supports(SimpleNamespace(allowed_areas=(),exact_targets=(SimpleNamespace(path='src/app.py'),)))
+    assert not StaticProtectedContextVerifier.supports(SimpleNamespace(allowed_areas=('src/**',),exact_targets=()))
+
+
+def test_wire_repair_cannot_upgrade_a_contradiction(subject):
+    repo,base,request,task,contract=subject
+    outputs=[{'checks':[check('CONTRADICTED',quote='not observed')]}, {'checks':[check('SATISFIED')]}]
+    calls=[]
+    def generate(**kwargs):
+        from spg.domain.model_runtime import ModelUsage
+        calls.append(kwargs)
+        return SimpleNamespace(output_text=json.dumps(outputs[len(calls)-1]),provider=SimpleNamespace(value='test'),effective_model='test',request_id='test',usage=ModelUsage())
+    runtime=SimpleNamespace(generate=generate,registry=SimpleNamespace(close=lambda:None))
+    with pytest.raises(ValueError,match='REPAIR_CHANGED_JUDGMENT'):
+        StaticProtectedContextVerifier(lambda:runtime).verify(request,task,contract,repo,base)
+    assert len(calls)==2

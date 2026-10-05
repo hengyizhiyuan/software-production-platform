@@ -63,14 +63,19 @@ class StaticProtectedContextVerifier:
             return WattModelRuntime(registry, PurposeProfileRouter({ModelPurpose.STEERING_SEMANTIC: profile}))
         return cls(runtime_factory)
 
+    @staticmethod
+    def supports(contract):
+        suffixes = {".html", ".css", ".js", ".json", ".svg", ".txt", ".md"}
+        return bool(not contract.allowed_areas and contract.exact_targets
+            and all(PurePosixPath(t.path).suffix in suffixes for t in contract.exact_targets))
+
     def verify(self, request, task, contract, repository, baseline):
         if (task is None or task.decision_context is None
                 or task.decision_context.package_fingerprint != request.decision_context_fingerprint
                 or tuple(task.decision_context.protected_obligations) != request.protected_context_obligations):
             raise ValueError("PROTECTED_CONTEXT_TASK_MISMATCH")
         suffixes = {".html", ".css", ".js", ".json", ".svg", ".txt", ".md"}
-        if contract.allowed_areas or not contract.exact_targets or any(
-                PurePosixPath(t.path).suffix not in suffixes for t in contract.exact_targets):
+        if not self.supports(contract):
             raise ValueError("PROTECTED_CONTEXT_PROFILE_NOT_SUPPORTED")
         revision = request.proposed_commit_identity
         if git(repository, "rev-parse", revision + "^{tree}").decode().strip() != request.tree_identity:
@@ -122,12 +127,21 @@ class StaticProtectedContextVerifier:
         from spg.providers.semantic_wire import _provider_strict_output_schema
         runtime = self.runtime_factory()
         expected = {(item.context_class, item.semantic_key): item for item in request.protected_context_obligations}
+        previous_checks = ()
+        model_attempts = []
         try:
             for attempt in range(2):
                 response = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
                     instructions=instructions, input_text=json.dumps(payload, ensure_ascii=False),
                     output_schema=_provider_strict_output_schema(ContextChecks.model_json_schema()))
+                model_attempts.append({"provider": response.provider.value,
+                    "effective_model": response.effective_model, "request_id": response.request_id,
+                    "usage": asdict(response.usage)})
                 observed = ContextChecks.model_validate_json(response.output_text)
+                if any(prior.disposition != "SATISFIED" and current.disposition == "SATISFIED"
+                        and (prior.context_class, prior.semantic_key) == (current.context_class, current.semantic_key)
+                        for prior in previous_checks for current in observed.checks):
+                    raise ValueError("PROTECTED_CONTEXT_REPAIR_CHANGED_JUDGMENT")
                 keys = [(c.context_class, c.semantic_key) for c in observed.checks]
                 failure = None
                 if len(keys) != len(expected) or set(keys) != set(expected):
@@ -141,6 +155,7 @@ class StaticProtectedContextVerifier:
                     break
                 if attempt:
                     raise ValueError(failure)
+                previous_checks = tuple(observed.checks)
                 payload = {**payload, "invalid_previous_checks": response.output_text,
                     "wire_feedback": failure,
                     "repair_instruction": "Repair only coverage identities and literal implementation quotes using exact candidate_sources. Preserve CONTRADICTED or UNVERIFIABLE judgments; never turn a contradiction into satisfaction to pass the check."}
@@ -158,6 +173,7 @@ class StaticProtectedContextVerifier:
                 "witnesses": [w.model_dump() for w in check.witnesses],
                 "candidate_revision": revision, "candidate_tree": request.tree_identity,
                 "observed_source_digests": {w.path: sha256(materials[w.path].encode()).hexdigest() for w in check.witnesses},
+                "model_attempts": model_attempts,
                 "model": {"provider": response.provider.value, "effective_model": response.effective_model,
                     "request_id": response.request_id, "usage": asdict(response.usage)}})
         return checks
