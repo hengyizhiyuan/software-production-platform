@@ -214,6 +214,7 @@ def test_typed_scope_constraints_answer_exact_pending_work_question():
         constraints=("Search exists",), requests=("Add search",),
         engineering_semantic_facts=()), active_production_binding_id=None,
         satisfaction_state=WorkSatisfactionState.IN_PROGRESS,
+        pending_human_question_decision_id=None,
         pending_human_question="Which domain and fields should search cover?")
     fact = EngineeringSemanticFact(id=uuid4(), subject="search.scope.domains",
         relation=SemanticRelation.SCOPE, value=["users"], scope="business-app",
@@ -253,6 +254,7 @@ def test_constraint_answer_linked_to_current_production_does_not_require_duplica
         requests=("Improve login",), engineering_semantic_facts=()),
         active_production_binding_id=None,
         satisfaction_state=WorkSatisfactionState.IN_PROGRESS,
+        pending_human_question_decision_id=None,
         pending_human_question="Which login control should change?")
     candidate = InteractionAssessmentCandidate(semantic_intent=semantic,
         candidate_constraints=(record.content,), current_requests=active.work_revision.requests,

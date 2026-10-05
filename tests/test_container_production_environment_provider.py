@@ -255,7 +255,7 @@ def test_native_tool_command_binds_workspace_python_imports() -> None:
         workspace_reference="production-workspace:test",
     )
     request = SimpleNamespace(
-        delivery_id=uuid4(),
+        delivery_id=uuid4(), max_log_bytes=1024 * 1024,
         proposal=SimpleNamespace(arguments={
             "cwd": ".",
             "argv": ["python", "-m", "pytest", "tests/test_mvp_ui_contracts.py", "-q"],
@@ -287,7 +287,7 @@ def test_native_test_command_rejects_unexpanded_targets_before_execution() -> No
         environment_reference="production-environment:test",
         workspace_reference="production-workspace:test",
     )
-    request = SimpleNamespace(delivery_id=uuid4(), proposal=SimpleNamespace(arguments={
+    request = SimpleNamespace(delivery_id=uuid4(), max_log_bytes=1024 * 1024, proposal=SimpleNamespace(arguments={
         "cwd": ".", "argv": ["node", "--test", "tests/*.cjs"],
     }))
     with pytest.raises(ValueError, match="direct argv does not expand shell globs"):

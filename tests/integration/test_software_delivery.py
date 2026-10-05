@@ -277,6 +277,11 @@ def test_required_guardian_static_review_precedes_explicit_acceptance(postgres_d
             if a.kind is AttentionKind.CANDIDATE_AUTHORIZATION)
         service.resolve_attention(authority.id, AttentionResolutionRequest(
             action=AttentionAction.AUTHORIZE, authority_identity='human:qualification'))
+        for _ in range(8):
+            service.advance_work(work_id)
+            if service.get_work_result(work_id).trusted_result:
+                break
+        assert service.get_work_result(work_id).trusted_result
         manifest = delivery.publish(work_id)
         assert manifest.repository_revision == context['repository_revision']
         assert delivery.view(work_id)['deliveries'][0]['acceptance'] is None

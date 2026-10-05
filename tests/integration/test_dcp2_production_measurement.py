@@ -316,7 +316,7 @@ def test_p1_q2_parallel_fan_in_economics_and_candidate_lineage(
     assert recovered["observed_provider_spend"]["unreported_attempt_count"] == 3
 
 
-def test_p1_q1_product_current_source_advances_from_authorized_runtime_commit(
+def test_runtime_commit_alone_does_not_accept_imported_product_source(
     postgres_database: Database,
 ) -> None:
     ids = _seed_measurement_reality(postgres_database)
@@ -352,9 +352,11 @@ def test_p1_q1_product_current_source_advances_from_authorized_runtime_commit(
             commit_fingerprint="d" * 64, committed_at=datetime.now(UTC)))
     observed = products.get(product_id, "human:owner")
     source = observed["current_sources"][0]
-    assert source["metadata"]["revision"] == "b" * 40
-    assert source["metadata"]["last_work_id"] == str(ids["work"])
-    assert source["metadata"]["revision_evidence_ref"].startswith("runtime-commit:")
+    # Repository integration is not Product Human Acceptance. This imported
+    # snapshot retains its declared baseline until explicit managed acceptance.
+    assert source["metadata"]["revision"] == "a" * 40
+    assert "last_work_id" not in source["metadata"]
+    assert "revision_evidence_ref" not in source["metadata"]
     assert any(item["kind"] == "SOURCE_COMMITTED" for item in
                products.history(product_id, "human:owner")["timeline"])
 

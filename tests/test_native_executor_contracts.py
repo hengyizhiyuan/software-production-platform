@@ -2128,7 +2128,7 @@ def test_openai_quota_response_is_typed_and_parked_without_retry(
 
 def test_native_queue_and_controls_are_human_visible_without_claiming_trust() -> None:
     root = Path(__file__).resolve().parents[1]
-    html = (root / "src" / "spg" / "web" / "index.html").read_text(encoding="utf-8")
+    html = (root / "src" / "spg" / "web" / "advanced.html").read_text(encoding="utf-8")
     javascript = (root / "src" / "spg" / "web" / "app.js").read_text(encoding="utf-8")
     for identity in (
         "execution-queue-state",
@@ -2152,6 +2152,11 @@ def test_native_queue_and_controls_are_human_visible_without_claiming_trust() ->
     ]
     assert "trusted_result" not in queue_projection
     assert "Verification" not in queue_projection
+    primary = (root / "src" / "spg" / "web" / "experience.js").read_text(encoding="utf-8")
+    assert "function executionCopy(execution)" in primary
+    assert "尚未进入 Worker 队列" in primary
+    assert "独立验证已通过" in primary
+    assert "机器验证已通过，质量检查尚未通过" in primary
 
 
 @requires_posix_process_group
@@ -2284,6 +2289,8 @@ def test_worker_releases_lease_when_provider_decision_is_not_admissible() -> Non
     )
 
     class Runtime:
+        # This seam exercises non-Product lease/retry behavior explicitly.
+        enforce_product_context = False
         result = None
 
         def allocate(self, offer):
@@ -2338,6 +2345,8 @@ def test_worker_retries_response_unknown_without_discarding_checkpoint() -> None
     )
 
     class Runtime:
+        # This seam exercises non-Product lease/retry behavior explicitly.
+        enforce_product_context = False
         result = None
 
         def allocate(self, offer):
@@ -2476,6 +2485,8 @@ def test_worker_rejects_incompatible_checkpoint_before_provider_or_tool_recovery
     )
 
     class Runtime:
+        # This seam exercises non-Product lease/retry behavior explicitly.
+        enforce_product_context = False
         result = None
 
         def allocate(self, offer):
@@ -2543,6 +2554,8 @@ def test_worker_parks_quota_failure_with_checkpoint_residual_work() -> None:
     )
 
     class Runtime:
+        # This seam exercises non-Product lease/retry behavior explicitly.
+        enforce_product_context = False
         result = None
 
         def allocate(self, offer):
