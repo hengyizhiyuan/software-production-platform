@@ -74,3 +74,58 @@ HTTP 200 alone is not proof that execution or external effects are healthy.
 - Separation into nodes requires a secure remote Tool Host/sandbox and
   workspace data path; the current Docker socket and local mounts cannot be
   copied unchanged to a multi-node deployment.
+
+## Bounded recovery qualification — 2026-10-06
+
+The current six-service test runtime additionally has an executable consistent
+cut and isolated restoration procedure:
+[`qualify_consistent_recovery.py`](../../deploy/cloud-worker/qualify_consistent_recovery.py),
+with read-only [SQL fingerprints](../../deploy/cloud-worker/qualification_state.py)
+and [restored lineage checks](../../deploy/cloud-worker/qualification_relationships.py).
+This is a qualification utility, not an installed backup scheduler or HA system.
+
+Run it only through the authorized exact test ECS operator at a recorded safe
+point, with durable source clean and pending/queued Work already persisted:
+
+```sh
+python3 /data/watt/runtime/source/deploy/cloud-worker/qualify_consistent_recovery.py \
+  /data/watt/qualifications/p0-p1-closure-v1/<new-unique-recovery-cut>
+```
+
+The procedure pauses Worker first, then API/Coordinator/Tool Host/Gitea. With
+all writers quiesced it captures a PostgreSQL custom-format dump and the
+minimum file-backed authoritative set: app/owner/Managed Source state, native
+executor state, tool receipts, isolated workspaces and Gitea data. It records
+all public SQL table counts/digests and original engineering file hashes.
+PostgreSQL also stops, proving interruption of all six services; canonical
+Compose then resumes with its existing images and persistent mounts.
+
+It restores into a fresh restricted directory and a temporary PostgreSQL
+container on an **internal network with no host port and no Worker**. Every
+SQL table and archived regular file must match the original cut. Exact accepted
+Gitea refs/trees, Candidate→PWU/Verification links, Task ECF fingerprints,
+Guardian request/result→Candidate/Task/Verification links and accepted-source
+Human Acceptance links are checked before declaring restored truth consistent.
+The live database, repositories and Candidate history are never overwritten.
+Temporary PostgreSQL/network are removed; restricted archives, restored files
+and the proof manifest remain.
+
+The archive excludes runtime `.env`, Gitea configuration and SSH/JWT private
+keys. Their restoration is by the protected deployment process, not Git or a
+plaintext source copy. Code, Compose and independent owner versions remain Git
+references. PostgreSQL and Gitea application data are private: destination
+0700, generated files 0600, and only a credential-free proof is reportable.
+
+Observed on this node: backup 40.808 s; Compose stop/start phase after backup
+27.582 s; isolated data reconstruction/check 21.754 s. The proof matched 119
+SQL tables/6897 rows, 3572 engineering files and three accepted repositories.
+At the quiesced cut there were no later acknowledged writes: observed cut RPO
+is zero. These are **qualification measurements, not an SLA or new-host RTO**.
+The restored Worker is deliberately not started against duplicate production
+authority. The live queued Multi-PWU Work resumes through existing leases and
+capacity; operational checks separately verify heartbeat, Search configuration,
+Web state and protected pending Candidates.
+
+Off-host storage, recurring backups, encryption/key custody and complete
+machine-loss restoration remain the earlier deferred operations decisions.
+A local archive on the same data disk does not survive loss of that disk.

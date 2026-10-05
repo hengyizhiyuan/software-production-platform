@@ -1,0 +1,800 @@
+{
+  "schema_version": "watt-p0-p1-closure-proof-v1",
+  "qualified_at_utc": "2026-10-05T17:48:09.363623+00:00",
+  "verdict": "P0/P1_CLOSURE_PASS",
+  "scope": "Current single-ECS default static software path; not a blanket Full-System Qualification, HA or new-host disaster recovery claim.",
+  "canonical_census": {
+    "old_main": "5fd6065f6633df2c5bb4dea1ff2bce62c8fcb44c",
+    "integrated_main": "1231484bfd09f145d88e6d8e6b0f543967e91b14",
+    "tree": "deb867db609c474c5a6e92e06ef5d04ebcbb5a84",
+    "mode": "FAST_FORWARD",
+    "source_changes": 0,
+    "main_unchanged_after_census": true
+  },
+  "qualified_code": {
+    "branch": "codex/p0-p1-system-closure",
+    "head": "52880f1eb0075a6ed3218abae672de08a2d0434e",
+    "tree": "24d2e506fbf9bca7573a5338be8d7dff5b864894",
+    "migration_head": "20261005_68",
+    "migration_heads": 1,
+    "owner_revisions": {
+      "ecf": "8b2c7b68d6e1752c32050c2042e168b654d8139f",
+      "guardian": "27bf5691e30104bf9a460df29a6f7dd4fb884a30",
+      "source": "read-only .owner-revision files in ECS mounted owner bundles"
+    }
+  },
+  "ecs": {
+    "region": "cn-wulanchabu",
+    "instance_id": "i-0jl386xnbauudq5j9jk0",
+    "url": "http://8.130.172.58:8080/",
+    "six_services_running": true,
+    "four_healthchecks_healthy": true,
+    "api_uid": 10001,
+    "worker": {
+      "worker_id": "cloud-worker-1",
+      "status": "READY",
+      "capacity": {
+        "max_concurrency": 1
+      },
+      "heartbeat_at": "2026-10-05 17:40:57.389821+00:00",
+      "expires_at": "2026-10-05 17:41:27.389821+00:00"
+    },
+    "duplicates": 0,
+    "git_sql_accepted_equal": {
+      "remote_gitea_accepted_revision": "b4280990d55ac9da36eaa0dd9644006df7e8762e",
+      "remote_gitea_accepted_tree": "330eb480e850ba9e0a57506db084d9a94ac59562",
+      "git_sql_equal": true
+    }
+  },
+  "findings": {
+    "SR-001": {
+      "severity": "P0",
+      "status": "CLOSED",
+      "evidence": "Default immutable static preview, required canonical Guardian, exact Human authorization and Acceptance, accepted Product v1/v2."
+    },
+    "SR-002": {
+      "severity": "P1",
+      "status": "CLOSED",
+      "evidence": "All required PWUs including JOIN have own Task/ECF and Verification lineage, three independent Guardian owner PASS results for one exact final Candidate."
+    },
+    "SR-003": {
+      "severity": "P1",
+      "status": "CLOSED",
+      "evidence": "Approved Aliyun configuration in ECS API; real governed research Turn, GitHub and explicit Fetch, restart continuity."
+    },
+    "SR-004": {
+      "severity": "P1",
+      "status": "CLOSED",
+      "evidence": "Actual same Workspace browser submission admitted independent B and Worker executed while A remained Human-pending; exact A row/Candidate/Plan/Guardian preserved."
+    },
+    "SR-005": {
+      "severity": "P1",
+      "status": "CLOSED",
+      "evidence": "Immutable Acceptance plus durable promotion intent before external Git; three Git/SQL process cuts and real Gitea-unavailable reconciliation/idempotency."
+    },
+    "SR-006": {
+      "severity": "P1",
+      "status": "CLOSED",
+      "evidence": "All six services stopped/restarted; consistent PostgreSQL/Gitea/referenced-file cut restored in isolated PostgreSQL and private path with no Worker or public port."
+    },
+    "SR-007": {
+      "severity": "P1",
+      "status": "CLOSED",
+      "evidence": "Ten obsolete unit fixtures/expectations and legacy RuntimeCommit-auto-accept assertion reconciled; current gates have no unexplained failure."
+    }
+  },
+  "remaining_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 6
+  },
+  "dedicated_product_id": "a9b9634f-f46a-4452-82d1-d2d4363bebc3",
+  "single_pwu": {
+    "interaction_id": "c63960a0-beb4-44a9-bbb9-dd0363c3cc18",
+    "turn_id": "3747f725-6a58-4515-a6df-f8c22371b613",
+    "work_id": "b11e4aac-001b-5c1f-9744-f27fcc93d1d1",
+    "pwu_id": "6fec50ed-3834-48a8-a7ec-310c79e3cf19",
+    "execution_id": "51ab8ac7-88f0-4a5d-99ae-5f270b9c68a5",
+    "candidate": {
+      "candidate_id": "c68fc33e-154e-50f9-be15-17b96396c574",
+      "candidate_fingerprint": "36cd3e4cfc958c9b392e64000e5f49a7e0412f17f8221853f3ca84a7e33b7989",
+      "repository_revision": "d4ad65db95fa1bb3ad7ec951ea844fd4939c2a3d",
+      "tree": "ab4a85cf36ffd2f902c1e85dbc89f8970c5e21e8",
+      "entrypoint": "index.html",
+      "preview_kind": "STATIC_WEB",
+      "artifacts": [
+        "index.html"
+      ],
+      "verification": [
+        "PATH_SCOPE: PASS",
+        "GIT_DIFF_CHECK: PASS"
+      ],
+      "authorization_pending": true
+    },
+    "guardian_result_refs": [
+      "guardian:assurance-result:7614d84a-82fd-5066-9027-2f467a9d40fd"
+    ],
+    "task_contract_ref": "task-contract:7b27fb24-1e6b-5e6b-b40d-56a2c5588e51",
+    "ecf_fingerprint": "796b8003b62484be81058e747fa7f98a9c425e69a191cdecbd0836252633c268",
+    "protected_classes_covered": [
+      "APPROVED_DECISION",
+      "PRODUCT_INTENT",
+      "PRODUCT_INVARIANT"
+    ],
+    "preview": {
+      "status": 200,
+      "revision": "d4ad65db95fa1bb3ad7ec951ea844fd4939c2a3d",
+      "tree": "ab4a85cf36ffd2f902c1e85dbc89f8970c5e21e8",
+      "sha256": "c404688841ca3a4aefb3deaef30297ed95b4501e35c2122d3727c7f7f333b121"
+    },
+    "accepted_version_before": 0,
+    "accepted_version_after": 1,
+    "human_acceptance": {
+      "manifest_fingerprint": "d2fde7e9bb1ab4e81eb7427ea204ed173f72cec819724b3eebef742530acb932",
+      "decision": "ACCEPT",
+      "authority_identity": "human:owner",
+      "rationale": "仅对专用资格 Candidate 明确验收：已检查真实首页、精确 revision/tree、独立 Verification 与 Guardian PASS；批准此精确成果成为专用 Product 基线。",
+      "id": "ec23a52d-a6a3-46fd-a63f-7dbe0feabc56",
+      "manifest_id": "e7460329-9759-54b1-a634-2e9d080be585",
+      "created_at": "2026-10-05T16:34:34.903943Z"
+    },
+    "manifest_id": "e7460329-9759-54b1-a634-2e9d080be585",
+    "runtime_commit_id": "0064cdc5-f149-5678-b24a-e5d16f8f1c6f"
+  },
+  "multi_pwu": {
+    "interaction_id": "076a905c-2422-4283-aa75-a35c826232f0",
+    "turn_id": "e66a522a-ca57-46b8-a75c-8bed5989884c",
+    "work_id": "3ee622b5-b816-5679-afdc-e5de51cd2702",
+    "plan": {
+      "plan_revision_id": "65e815a0-b75e-4198-8cdd-c8f8fbe68508",
+      "revision_number": 1,
+      "groups": [
+        {
+          "node_id": "group:services",
+          "objective": "Produce the services change surface",
+          "parent_id": null
+        },
+        {
+          "node_id": "group:news",
+          "objective": "Produce the news change surface",
+          "parent_id": null
+        }
+      ],
+      "pwus": [
+        {
+          "node_id": "pwu:1",
+          "pwu_id": "b394e64d-d7d3-5fab-abe3-3c5744497533",
+          "kind": "PWU",
+          "objective": "Produce and verify the services capability change",
+          "group_id": "group:services",
+          "dependency_ids": [],
+          "state": "VERIFIED",
+          "blocked_reason": null,
+          "conflict_count": 0,
+          "semantic_conflict_domain": null,
+          "autonomous_retry_available": false,
+          "input_baseline_id": "6417cfb5-69dc-4c6e-a9fd-be91253e967c",
+          "input_revision": "d4ad65db95fa1bb3ad7ec951ea844fd4939c2a3d",
+          "verified_output_baseline_id": "d4289319-dfcb-5dae-bb5c-4c3852aa795b",
+          "verified_output_revision": "8142ec650f4735b84f5bcce64398c36502539f51",
+          "workspace_attempt_id": "dea9d9c9-31c9-4feb-91bc-a5995c9edd2f",
+          "task_contract_id": "0be61c0c-a9ef-5dee-ba81-f685ac4e778c",
+          "ecf_context_fingerprint": "9965317b38bec79fe9342e79987859e7a422cedc15fadd47118474f97693e051",
+          "predecessor_output_baseline_ids": []
+        },
+        {
+          "node_id": "pwu:2",
+          "pwu_id": "9e15e2eb-6ff3-5311-a6db-144c6672774d",
+          "kind": "PWU",
+          "objective": "Produce and verify the news capability change",
+          "group_id": "group:news",
+          "dependency_ids": [],
+          "state": "VERIFIED",
+          "blocked_reason": null,
+          "conflict_count": 0,
+          "semantic_conflict_domain": null,
+          "autonomous_retry_available": false,
+          "input_baseline_id": "6417cfb5-69dc-4c6e-a9fd-be91253e967c",
+          "input_revision": "d4ad65db95fa1bb3ad7ec951ea844fd4939c2a3d",
+          "verified_output_baseline_id": "d4cd0b28-d6dc-57c2-af35-5c914eb14cce",
+          "verified_output_revision": "69cecbca7c32b0ae0ca6657e7c2027db47002943",
+          "workspace_attempt_id": "02559408-86c0-4d11-9869-23e000979120",
+          "task_contract_id": "655290e1-695c-5f4d-8eff-08a7011fedbd",
+          "ecf_context_fingerprint": "44ae358c6b66c41dc864e8c4a8adf5fb22ec5d404eddbb46ba75cb6da9b3107c",
+          "predecessor_output_baseline_ids": []
+        },
+        {
+          "node_id": "pwu:join",
+          "pwu_id": "55782a07-971a-5c41-b72b-3567324edb59",
+          "kind": "JOIN",
+          "objective": "Reconcile and verify the independently produced branch baselines",
+          "group_id": null,
+          "dependency_ids": [
+            "pwu:1",
+            "pwu:2"
+          ],
+          "state": "VERIFIED",
+          "blocked_reason": null,
+          "conflict_count": 0,
+          "semantic_conflict_domain": null,
+          "autonomous_retry_available": false,
+          "input_baseline_id": "6417cfb5-69dc-4c6e-a9fd-be91253e967c",
+          "input_revision": "d4ad65db95fa1bb3ad7ec951ea844fd4939c2a3d",
+          "verified_output_baseline_id": "f2e72a00-fcf2-5abd-bd85-0477e3318dd4",
+          "verified_output_revision": "b4280990d55ac9da36eaa0dd9644006df7e8762e",
+          "workspace_attempt_id": "429a1f4c-8b31-4355-a67b-f2be0c01785d",
+          "task_contract_id": "02312b9c-1df8-5ec3-a43b-f7e60f63c1e0",
+          "ecf_context_fingerprint": "963151089c1f04699d9b5907ff515dcd2277ba61a773d510f7cda44c23ef1c0b",
+          "predecessor_output_baseline_ids": [
+            "d4289319-dfcb-5dae-bb5c-4c3852aa795b",
+            "d4cd0b28-d6dc-57c2-af35-5c914eb14cce"
+          ]
+        }
+      ],
+      "integrated_baseline_id": "f2e72a00-fcf2-5abd-bd85-0477e3318dd4",
+      "integrated_revision": "b4280990d55ac9da36eaa0dd9644006df7e8762e"
+    },
+    "candidate": {
+      "candidate_id": "13c231ba-bc32-5f91-b391-aeeb930c91c4",
+      "candidate_fingerprint": "9208e9b2222f695c95e616a97f220a6cac00ec65718e9da7275f8a1ac21a7b00",
+      "repository_revision": "b4280990d55ac9da36eaa0dd9644006df7e8762e",
+      "tree": "330eb480e850ba9e0a57506db084d9a94ac59562",
+      "entrypoint": "index.html",
+      "preview_kind": "STATIC_WEB",
+      "artifacts": [
+        "news.html",
+        "services.html"
+      ],
+      "verification": [
+        "PATH_SCOPE: PASS",
+        "GIT_DIFF_CHECK: PASS"
+      ],
+      "authorization_pending": true
+    },
+    "guardian_result_refs": [
+      "guardian:assurance-result:aa47c28e-6b89-54d7-9244-5f80477d0ea2",
+      "guardian:assurance-result:a951230d-54a0-5083-91f9-8b37b5eb96f0",
+      "guardian:assurance-result:c5f9d271-3a30-519f-87f0-3ba3ef97b0d2"
+    ],
+    "per_pwu_assurance": [
+      {
+        "request_id": "a951230d-54a0-5083-91f9-8b37b5eb96f0",
+        "task_contract_ref": "task-contract:655290e1-695c-5f4d-8eff-08a7011fedbd",
+        "ecf_fingerprint": "44ae358c6b66c41dc864e8c4a8adf5fb22ec5d404eddbb46ba75cb6da9b3107c",
+        "protected_classes_covered": [
+          "APPROVED_DECISION",
+          "PRODUCT_INTENT",
+          "PRODUCT_INVARIANT"
+        ],
+        "lineage_refs": [
+          "artifact:news.html",
+          "artifact:services.html",
+          "production-plan:65e815a0-b75e-4198-8cdd-c8f8fbe68508:version:1",
+          "pwu:9e15e2eb-6ff3-5311-a6db-144c6672774d",
+          "source-baseline:6417cfb5-69dc-4c6e-a9fd-be91253e967c",
+          "task-contract:655290e1-695c-5f4d-8eff-08a7011fedbd",
+          "qualified-result:69cecbca7c32b0ae0ca6657e7c2027db47002943:tree:c07ec88851c9362ac345c9eaaf07971d219960e0",
+          "execution-attempt:02559408-86c0-4d11-9869-23e000979120",
+          "execution-dispatch:4fdf0093-73cc-46e6-b1b9-26f7b50be18d"
+        ],
+        "verification_refs": [
+          "verification:1a2fa34c-edda-558a-beaf-2e2f103f984b",
+          "verification:35b150ba-7742-5783-8b50-ce51481a88ae",
+          "verification:c1c4c2ef-a8fb-5c92-b83d-bd8900056ff5",
+          "verification:86d43a02-7267-507c-942a-86aa61d4c2c6"
+        ]
+      },
+      {
+        "request_id": "aa47c28e-6b89-54d7-9244-5f80477d0ea2",
+        "task_contract_ref": "task-contract:02312b9c-1df8-5ec3-a43b-f7e60f63c1e0",
+        "ecf_fingerprint": "963151089c1f04699d9b5907ff515dcd2277ba61a773d510f7cda44c23ef1c0b",
+        "protected_classes_covered": [
+          "APPROVED_DECISION",
+          "PRODUCT_INTENT",
+          "PRODUCT_INVARIANT"
+        ],
+        "lineage_refs": [
+          "artifact:news.html",
+          "artifact:services.html",
+          "production-plan:65e815a0-b75e-4198-8cdd-c8f8fbe68508:version:1",
+          "pwu:55782a07-971a-5c41-b72b-3567324edb59",
+          "source-baseline:6417cfb5-69dc-4c6e-a9fd-be91253e967c",
+          "task-contract:02312b9c-1df8-5ec3-a43b-f7e60f63c1e0",
+          "qualified-result:b4280990d55ac9da36eaa0dd9644006df7e8762e:tree:330eb480e850ba9e0a57506db084d9a94ac59562",
+          "parent-baseline:d4289319-dfcb-5dae-bb5c-4c3852aa795b",
+          "parent-baseline:d4cd0b28-d6dc-57c2-af35-5c914eb14cce",
+          "execution-attempt:429a1f4c-8b31-4355-a67b-f2be0c01785d",
+          "execution-dispatch:9c12aa18-a952-4e13-b332-d147507f8413",
+          "pwu-reconciliation:55782a07-971a-5c41-b72b-3567324edb59:51401c892b4e9a5cfb281c86977c3a74e5d20d38183b8f8b54234731f23633a1"
+        ],
+        "verification_refs": [
+          "verification:1a2fa34c-edda-558a-beaf-2e2f103f984b",
+          "verification:35b150ba-7742-5783-8b50-ce51481a88ae"
+        ]
+      },
+      {
+        "request_id": "c5f9d271-3a30-519f-87f0-3ba3ef97b0d2",
+        "task_contract_ref": "task-contract:0be61c0c-a9ef-5dee-ba81-f685ac4e778c",
+        "ecf_fingerprint": "9965317b38bec79fe9342e79987859e7a422cedc15fadd47118474f97693e051",
+        "protected_classes_covered": [
+          "APPROVED_DECISION",
+          "PRODUCT_INTENT",
+          "PRODUCT_INVARIANT"
+        ],
+        "lineage_refs": [
+          "artifact:news.html",
+          "artifact:services.html",
+          "production-plan:65e815a0-b75e-4198-8cdd-c8f8fbe68508:version:1",
+          "pwu:b394e64d-d7d3-5fab-abe3-3c5744497533",
+          "source-baseline:6417cfb5-69dc-4c6e-a9fd-be91253e967c",
+          "task-contract:0be61c0c-a9ef-5dee-ba81-f685ac4e778c",
+          "qualified-result:8142ec650f4735b84f5bcce64398c36502539f51:tree:36931b5ca4bf2b4f425b0ad89a59a012f6cd68f9",
+          "execution-attempt:dea9d9c9-31c9-4feb-91bc-a5995c9edd2f",
+          "execution-dispatch:e348d568-ab85-4061-b1d2-a4a9cdc8f91a"
+        ],
+        "verification_refs": [
+          "verification:1a2fa34c-edda-558a-beaf-2e2f103f984b",
+          "verification:35b150ba-7742-5783-8b50-ce51481a88ae",
+          "verification:54a6b0dd-7e72-55ab-956e-04cfd7059e1e",
+          "verification:97e10db5-530b-58af-9156-891c9f30ec2a"
+        ]
+      }
+    ],
+    "preview": [
+      {
+        "path": "index.html",
+        "http_status": 200,
+        "revision": "b4280990d55ac9da36eaa0dd9644006df7e8762e",
+        "tree": "330eb480e850ba9e0a57506db084d9a94ac59562",
+        "sha256": "c404688841ca3a4aefb3deaef30297ed95b4501e35c2122d3727c7f7f333b121"
+      },
+      {
+        "path": "services.html",
+        "http_status": 200,
+        "revision": "b4280990d55ac9da36eaa0dd9644006df7e8762e",
+        "tree": "330eb480e850ba9e0a57506db084d9a94ac59562",
+        "sha256": "61976fe9c3c09eaf09caad6bb9de5501c3d0cc486e4b7722e8fa8cf6b3dd6f1c"
+      },
+      {
+        "path": "news.html",
+        "http_status": 200,
+        "revision": "b4280990d55ac9da36eaa0dd9644006df7e8762e",
+        "tree": "330eb480e850ba9e0a57506db084d9a94ac59562",
+        "sha256": "3bc20b77f3e665d8ff599ed1a5a3205321ee70cd30385c6b6810ac6c223cba98"
+      }
+    ],
+    "accepted_version_before": 1,
+    "accepted_version_after": 2,
+    "human_acceptance": {
+      "id": "f1127996-a72c-45cf-9b94-ba8839ecf3a2",
+      "decision": "ACCEPT",
+      "rationale": "专用 P0/P1 资格：两份独立成果与 JOIN 已通过各自验证及 Guardian，精确 HTTP 预览通过，明确接受本 Candidate；验证中断晋升的恢复，不涉及原有待验收数据。",
+      "created_at": "2026-10-05T17:34:47.061884Z",
+      "manifest_id": "a783ea78-c02d-52c6-a094-8e7f9018f9e1",
+      "authority_identity": "human:owner",
+      "manifest_fingerprint": "449b9d0facc993c00bff0a696f8c475fbe8713597acc2f958d8566e50305811a"
+    },
+    "manifest_id": "a783ea78-c02d-52c6-a094-8e7f9018f9e1",
+    "runtime_commit_id": "625680fe-c8ac-524e-9be9-43398a3b6eb4"
+  },
+  "source_promotion": {
+    "interrupted_http": {
+      "status": "503",
+      "error": "503 {\"code\":\"PROVIDER_UNAVAILABLE\",\"message\":\"Managed source Git operation failed\"}"
+    },
+    "blocked_intent": {
+      "id": "622e1fc7-c096-5284-b045-aaf0affc12f1",
+      "product_id": "a9b9634f-f46a-4452-82d1-d2d4363bebc3",
+      "work_id": "3ee622b5-b816-5679-afdc-e5de51cd2702",
+      "candidate_id": "13c231ba-bc32-5f91-b391-aeeb930c91c4",
+      "acceptance_id": "f1127996-a72c-45cf-9b94-ba8839ecf3a2",
+      "state": "BLOCKED",
+      "expected_version": 1,
+      "expected_revision": "d4ad65db95fa1bb3ad7ec951ea844fd4939c2a3d",
+      "revision": "b4280990d55ac9da36eaa0dd9644006df7e8762e",
+      "tree": "330eb480e850ba9e0a57506db084d9a94ac59562",
+      "error_code": "PROVIDER_UNAVAILABLE"
+    },
+    "restored_intent": {
+      "id": "622e1fc7-c096-5284-b045-aaf0affc12f1",
+      "product_id": "a9b9634f-f46a-4452-82d1-d2d4363bebc3",
+      "work_id": "3ee622b5-b816-5679-afdc-e5de51cd2702",
+      "candidate_id": "13c231ba-bc32-5f91-b391-aeeb930c91c4",
+      "acceptance_id": "f1127996-a72c-45cf-9b94-ba8839ecf3a2",
+      "state": "COMPLETED",
+      "expected_version": 1,
+      "expected_revision": "d4ad65db95fa1bb3ad7ec951ea844fd4939c2a3d",
+      "revision": "b4280990d55ac9da36eaa0dd9644006df7e8762e",
+      "tree": "330eb480e850ba9e0a57506db084d9a94ac59562",
+      "error_code": null
+    },
+    "browser_retry": true,
+    "exact_decision_retries": [
+      "f1127996-a72c-45cf-9b94-ba8839ecf3a2",
+      "f1127996-a72c-45cf-9b94-ba8839ecf3a2",
+      "f1127996-a72c-45cf-9b94-ba8839ecf3a2"
+    ],
+    "source_versions": [
+      {
+        "id": "053588f8-4c5d-46cf-a845-ce986e839b50",
+        "version": 0,
+        "revision": "c1eae2665eb6f992d7da6b807b0c7babee636efd",
+        "tree": "7ff65e569bb49182994cc20faf4b5f1a5fdf00e5",
+        "work_id": null,
+        "candidate_id": null,
+        "acceptance_id": null
+      },
+      {
+        "id": "558b5570-dee8-5326-8a38-1c6ba3ebcf32",
+        "version": 1,
+        "revision": "d4ad65db95fa1bb3ad7ec951ea844fd4939c2a3d",
+        "tree": "ab4a85cf36ffd2f902c1e85dbc89f8970c5e21e8",
+        "work_id": "b11e4aac-001b-5c1f-9744-f27fcc93d1d1",
+        "candidate_id": "c68fc33e-154e-50f9-be15-17b96396c574",
+        "acceptance_id": "ec23a52d-a6a3-46fd-a63f-7dbe0feabc56"
+      },
+      {
+        "id": "8a3b313e-de53-54ee-84e3-c8c79b7cd38b",
+        "version": 2,
+        "revision": "b4280990d55ac9da36eaa0dd9644006df7e8762e",
+        "tree": "330eb480e850ba9e0a57506db084d9a94ac59562",
+        "work_id": "3ee622b5-b816-5679-afdc-e5de51cd2702",
+        "candidate_id": "13c231ba-bc32-5f91-b391-aeeb930c91c4",
+        "acceptance_id": "f1127996-a72c-45cf-9b94-ba8839ecf3a2"
+      }
+    ],
+    "remote_accepted": {
+      "remote_gitea_accepted_revision": "b4280990d55ac9da36eaa0dd9644006df7e8762e",
+      "remote_gitea_accepted_tree": "330eb480e850ba9e0a57506db084d9a94ac59562",
+      "git_sql_equal": true
+    },
+    "controlled_process_cuts": [
+      "BEFORE_GIT",
+      "AFTER_GIT",
+      "BEFORE_SQL_COMMIT"
+    ],
+    "controlled_tests_pass": 3,
+    "new_work_after_acceptance": "The live Multi-PWU roots consumed the exact version 1 promoted by single-PWU Acceptance; controlled real-Gitea/PG tests also bind subsequent Work after each cut."
+  },
+  "workspace_continuity": {
+    "a_work_id": "3ee622b5-b816-5679-afdc-e5de51cd2702",
+    "a_candidate": {
+      "candidate_id": "13c231ba-bc32-5f91-b391-aeeb930c91c4",
+      "candidate_fingerprint": "9208e9b2222f695c95e616a97f220a6cac00ec65718e9da7275f8a1ac21a7b00",
+      "repository_revision": "b4280990d55ac9da36eaa0dd9644006df7e8762e",
+      "tree": "330eb480e850ba9e0a57506db084d9a94ac59562",
+      "entrypoint": "index.html",
+      "preview_kind": "STATIC_WEB",
+      "artifacts": [
+        "news.html",
+        "services.html"
+      ],
+      "verification": [
+        "PATH_SCOPE: PASS",
+        "GIT_DIFF_CHECK: PASS"
+      ],
+      "authorization_pending": true
+    },
+    "a_guardian": {
+      "status": "PASS",
+      "gate": "PASS",
+      "candidate_id": "13c231ba-bc32-5f91-b391-aeeb930c91c4",
+      "request_id": "aa47c28e-6b89-54d7-9244-5f80477d0ea2",
+      "result_ref": "guardian:assurance-result:aa47c28e-6b89-54d7-9244-5f80477d0ea2",
+      "result_refs": [
+        "guardian:assurance-result:aa47c28e-6b89-54d7-9244-5f80477d0ea2",
+        "guardian:assurance-result:a951230d-54a0-5083-91f9-8b37b5eb96f0",
+        "guardian:assurance-result:c5f9d271-3a30-519f-87f0-3ba3ef97b0d2"
+      ],
+      "required_pwu_ids": [
+        "55782a07-971a-5c41-b72b-3567324edb59",
+        "9e15e2eb-6ff3-5311-a6db-144c6672774d",
+        "b394e64d-d7d3-5fab-abe3-3c5744497533"
+      ],
+      "finding_count": 0,
+      "finding_ids": [],
+      "summary": "",
+      "evidence_ref": "guardian:evidence:57e146cd-9d10-4c37-9060-2db0b0496279",
+      "required": true
+    },
+    "a_lineage_unchanged": true,
+    "a_authorization_pending": true,
+    "b_work_id": "c3819aa6-f464-59c3-a3dd-2949f038920a",
+    "b_focus": {
+      "title": "在既有演示官网上新增 faq.html 常见问题页面",
+      "status": "PRODUCE",
+      "reason": "EXECUTOR_DISPATCH_RECORDED",
+      "next": "Observe production Reality",
+      "human_action": false
+    },
+    "b_plan": null,
+    "b_execution": {
+      "execution_id": "689db78c-6ec6-45ff-8cf7-be743cbb1a78",
+      "work_id": "c3819aa6-f464-59c3-a3dd-2949f038920a",
+      "task_contract_reference": "f985f1a4-607e-58e8-86ac-9e4e24d90143",
+      "priority": 0,
+      "status": "RUNNING",
+      "created_at": "2026-10-05T17:26:14.326953Z",
+      "worker_id": "cloud-worker-1",
+      "lease_expire_at": "2026-10-05T17:26:54.657206Z",
+      "queue_entry_id": "8a08b4c7-a1ec-46a4-9e63-d19775f9f8b4",
+      "recovery_reason": null,
+      "queue_condition": "EXECUTING",
+      "wait_reason": null,
+      "wait_age_seconds": 14,
+      "fairness_group": "work:c3819aa6-f464-59c3-a3dd-2949f038920a",
+      "scheduling_policy_version": "fair-round-robin-v2",
+      "scheduling": {
+        "progression_state": "NOT_APPLICABLE",
+        "reason": "Queue allocation is not currently pending.",
+        "scheduler_alive": true,
+        "compatible_worker_count": 1,
+        "occupied_worker_count": 1,
+        "compatible_slots": 1,
+        "occupied_slots": 1,
+        "available_slots": 0,
+        "draining_worker_count": 0,
+        "observed_at": "2026-10-05T17:26:28.374999Z"
+      }
+    },
+    "actual_browser_submission": true,
+    "accepted_version": 1,
+    "a_complete_work_row_sha256": "36d1b5493792545001b77adebd04482efc14240fff965df4c4d92490e1a63140",
+    "same_row_hash_after_b": true,
+    "later_b_result": {
+      "execution_status": "FAILED",
+      "candidate_created": false,
+      "human_action": true,
+      "initial_write_tool_available": true,
+      "scope_limit": "B admission and actual Worker execution are qualified. The provider later made no source modification, exhausted bounded diagnostic rounds and failed; Steering retains a Human decision. B is not claimed as a successful software result. This is not absence of initial file.write capability."
+    }
+  },
+  "search": {
+    "interaction_id": "3debc48b-4ffb-40e1-9aa2-1610e2bc7f7e",
+    "turn_id": "611e23d2-aa6c-4f48-aa35-86e8412e6ecd",
+    "state": "COMPLETED",
+    "metrics": {
+      "providers": [
+        "aliyun-opensearch",
+        "github-rest-public",
+        "public-https-read"
+      ],
+      "latency_ms": 12335,
+      "sufficient": true,
+      "fetch_count": 3,
+      "query_count": 2,
+      "model_tokens": 3050,
+      "result_count": 13,
+      "search_types": [
+        "SEARCH_WEB",
+        "SEARCH_GITHUB_REPOSITORIES",
+        "FETCH_WEB_RESOURCE"
+      ],
+      "provider_cost": "UNREPORTED",
+      "refinement_count": 0,
+      "failure_categories": [
+        "FETCH_FAILED"
+      ]
+    },
+    "final_failures": [],
+    "explicit_fetch_url": "https://docs.python.org/3/library/asyncio.html",
+    "reference_roles": "Live external research is EXTERNAL_REFERENCE, not project acquisition. PROJECT_REPOSITORY routing retains explicit source authority and is covered by canonical typed-role regression."
+  },
+  "full_recovery": {
+    "manifest": {
+      "archives": {
+        "postgres.dump": {
+          "bytes": 2779446,
+          "sha256": "c1365d393834575b3c2c304605a5cc474f35ea7a1c5d8519aeb329852b160cf8"
+        },
+        "runtime.tar.gz": {
+          "bytes": 1432258,
+          "sha256": "5ae0a62b69503f12495481f4889abc2081a4e4538c20b6a75afb1b77c34f37e0"
+        }
+      },
+      "backup_seconds": 40.808,
+      "configuration_references": [
+        "/data/watt/runtime/.env",
+        "/data/watt/runtime/docker-compose.yml",
+        "protected Gitea config and SSH/JWT keys via deployment process",
+        "Git-pinned ECF/Guardian source"
+      ],
+      "consistent_cut_epoch": 1791218452.7652752,
+      "disk_used_after": 2856189952,
+      "disk_used_before": 2739134464,
+      "excluded_credentials": [
+        ".env",
+        "gitea/ssh",
+        "gitea/jwt",
+        "gitea configuration"
+      ],
+      "file_equal": true,
+      "full_stop_services": [
+        "api",
+        "native-worker",
+        "native-coordinator",
+        "native-tool-host",
+        "postgres",
+        "gitea"
+      ],
+      "git_equal": true,
+      "isolated_restore_seconds": 21.754,
+      "live_full_restart_seconds": 27.582,
+      "migration": "20261005_68",
+      "observed_rpo": "zero acknowledged writes after the quiesced cut; not an SLA",
+      "public_ports_added": 0,
+      "restore_worker_started": false,
+      "restored_file_count": 3572,
+      "restored_managed_sources": 3,
+      "restored_relationships": {
+        "accepted_source_human_links": 1,
+        "candidates": 10,
+        "ecf_fingerprints_equal": true,
+        "ecf_task_bindings": 33,
+        "guardian_results": 17,
+        "guardian_sql_lineage_equal": true,
+        "migration": "20261005_68",
+        "pwus": 34,
+        "verification_records": 61
+      },
+      "source_head": "3e3ca53d10ce715913319068a8791dddd6cfdefc",
+      "sql_equal": true,
+      "sql_rows": 6897,
+      "sql_table_count": 119
+    },
+    "manifest_location": "/data/watt/qualifications/p0-p1-closure-v1/recovery-20261006",
+    "queue_continuity": {
+      "original_queued_executions": [
+        {
+          "attempt_id": "db42b3e4-bdec-4663-9184-0d481973b925",
+          "condition": "COMPLETED"
+        },
+        {
+          "attempt_id": "65585b7c-040e-4b1f-a971-7a71c8ad21e7",
+          "condition": "COMPLETED"
+        }
+      ],
+      "completed_single_attempt_count": 1,
+      "duplicate_pwu_generations": 0,
+      "worker": [
+        "{'worker_id': 'cloud-worker-1', 'status': 'READY', 'capacity': {'max_concurrency': 1}}"
+      ]
+    },
+    "limits": "Quiesced single-ECS consistent restore; no off-host/new-ECS RTO or HA proof."
+  },
+  "protected_history": {
+    "before_snapshot_sha256": "8e51d5bef508421a0aab5e0a8c17118aeaf41c01912c87231b9002c91ace7b84",
+    "candidates": [
+      {
+        "fingerprint": "307be29c69d94a42ac4a07165538e503df2929b05dfec69ae62478261f747303",
+        "id": "0cf20ec4-5c49-5b40-bb22-a15273e00bd7"
+      },
+      {
+        "fingerprint": "a967c304cbfae90bc71d45302c642ee4f9271ca1fa9b9b5fc511ee6725b03b04",
+        "id": "5e78ff00-fa9f-5ede-a3a9-64de22ebbde8"
+      },
+      {
+        "fingerprint": "01f234c41c7148af473c86a4302462828665b5f3104ae24c36b2f157fa0beeab",
+        "id": "7f8b5f16-64ce-55a3-8ead-59f52ab6a29b"
+      },
+      {
+        "fingerprint": "3774692d9ac861c0f37d46f5070c8ef7b9600e85304a53e6f98493fdb6195799",
+        "id": "88a5341d-eba1-5e4c-93a0-afc7e2281391"
+      },
+      {
+        "fingerprint": "81e785716d9da13c1e85c2ef86dd698e115292bf227b3a49e37e95158d991a58",
+        "id": "c5d5d1c0-8d02-5050-afc6-eeacc19090a3"
+      },
+      {
+        "fingerprint": "dc80881e1bfa1d779bc60319715c1cecee1fc2c2c662494cbe8251812a55a229",
+        "id": "d94855f1-6053-50f3-a925-8bfb416a6f82"
+      },
+      {
+        "fingerprint": "d5fb53cb66a2f03de7ee4553b946252317df781ab033b956c0cff3fde0dc9db3",
+        "id": "da174ed1-2e22-5ef1-bf92-e15e32f70fb2"
+      },
+      {
+        "fingerprint": "88580c3bceaf78c3d7988aa19195c502b0c320b50c83f77ef84542ad4381ece6",
+        "id": "efe31c89-4e7b-5cb2-93f4-0f65049c214f"
+      }
+    ],
+    "full_candidate_rows_and_authorizations_equal": true,
+    "new_authorizations_for_original_eight": 0,
+    "qualification_hashes": {
+      "A.json": "3233a40e68e4030aa88f36f03d0438579889ff4f14d076777e837723a7fcc095",
+      "B.json": "048da5d5c30b48fdb500ce3752ef2a4d9ef08029f5b74ed27b91a5691ea6ef4d",
+      "C.json": "0f546e7b4b82595daf99268e57b7a1ee7e1fdfb140918bd82246153c3e85f12c",
+      "D-admission.json": "c113b0db6eb7b2235ec6951accec3dffb88e274a6903bc07ff8bd58c5f01037b",
+      "D.json": "576439cf43a2a6a1c3c462a288a88859452ad91388c8a6b1d8a77e57fbfc2a76",
+      "state.json": "b70d2af4ce371294b3a5227dc9ed470e0596c1f4e902206c7b0f220ef7c8b770"
+    },
+    "historical_files_equal": true,
+    "failed_qualification_turns_and_executions_retained": true
+  },
+  "tests": {
+    "unit": {
+      "tests": 1193,
+      "pass": 1190,
+      "fail": 0,
+      "skips": [
+        {
+          "test": "tests.test_brownfield_delivery_vertical_slice::test_real_repository_container_preview_delivery_and_reality_refresh",
+          "reason": "qualified local image is unavailable: watt-engineering-semantic-human-retest-app:latest"
+        },
+        {
+          "test": "tests.test_native_production_environment::test_native_executor_runs_tools_through_real_production_environment",
+          "reason": "qualified local image is unavailable: watt-engineering-semantic-human-retest-app:latest"
+        },
+        {
+          "test": "tests.test_release_evaluation_gate::test_p1_q7_versioned_release_evaluation_compares_qualified_baseline",
+          "reason": "SPG_TEST_DATABASE_URL is required"
+        }
+      ]
+    },
+    "integration_unique_pass": 108,
+    "integration_runs": [
+      {
+        "label": "canonical",
+        "module_counts": {
+          "tests.integration.test_multi_pwu_runtime": 6,
+          "tests.integration.test_capacity_scheduling": 5,
+          "tests.integration.test_native_executor_runtime": 66,
+          "tests.integration.test_decision_context_work_admission": 3,
+          "tests.integration.test_external_search_interaction": 5,
+          "tests.integration.test_product_experience_attention": 7
+        }
+      },
+      {
+        "label": "software_delivery",
+        "module_counts": {
+          "tests.integration.test_software_delivery": 8
+        }
+      },
+      {
+        "label": "promotion_crash",
+        "module_counts": {
+          "tests.integration.test_product_managed_source_gitea": 3
+        }
+      },
+      {
+        "label": "required_guardian_legacy",
+        "module_counts": {
+          "tests.integration.test_software_delivery": 1,
+          "tests.integration.test_dcp2_production_measurement": 1
+        }
+      },
+      {
+        "label": "workspace_current",
+        "module_counts": {
+          "tests.integration.test_workspace_independent_work": 4
+        }
+      }
+    ],
+    "ui_pass": 96,
+    "ui_fail": 0,
+    "four_quadrants": "PASS: Agenda top-left, Reality top-right, Actions bottom-left, Production bottom-right; actual browser and JS structural regression.",
+    "markdown_lint": "No existing configured lint command found; git diff --check and relative link/JSON consistency checks PASS.",
+    "unexplained_failures": 0
+  },
+  "disk": {
+    "total_bytes": 105088192512,
+    "before_used_bytes": 2681581568,
+    "after_used_bytes": 2966372352,
+    "used_percent": 3
+  },
+  "remaining_register": {
+    "SR-008": "Filesystem hard quota",
+    "SR-009": "Scheduled pin-aware cleanup/monitoring",
+    "SR-010": "HTTP/domain/HTTPS production ingress",
+    "SR-011": "Unrelated runbook/profile drift",
+    "SR-012": "Ancillary root-only compatibility summaries",
+    "SR-013": "Externally reachable authorized Git clone endpoint",
+    "deferred": [
+      "Cross-host Worker Pool/tool/workspace routing",
+      "Production concurrency above 1",
+      "Broad replanning/Multi-PWU v2",
+      "Admin/organization/tenancy/billing/Quality platform",
+      "Off-host backup custody/encryption/scheduling and complete machine-loss recovery"
+    ]
+  }
+}

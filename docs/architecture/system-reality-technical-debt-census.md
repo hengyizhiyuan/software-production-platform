@@ -1,6 +1,44 @@
 # Watt Systemic Reality / Technical Debt Census
 
-## Current census — 2026-10-05
+## Current P0/P1 closure — 2026-10-06
+
+**本轮 P0/P1 closure：PASS；SR-001…007 全部 CLOSED，剩余 P0=0、P1=0。**
+这是当前单 ECS、默认静态软件路径的有界资格结论，不等于已经执行全部 Full-System Qualification，也不宣称 HA / 新主机灾备。
+
+Census 的纯文档提交 `1231484bfd09f145d88e6d8e6b0f543967e91b14` 已从原 main `5fd6065f6633df2c5bb4dea1ff2bce62c8fcb44c` fast-forward 并推送。
+Closure 实现仅在 `codex/p0-p1-system-closure`；main 保持 Census 提交。ECS 资格代码为 `52880f1eb0075a6ed3218abae672de08a2d0434e`，tree `24d2e506fbf9bca7573a5338be8d7dff5b864894`；唯一迁移 head 为 `20261005_68`，直接继承 `20261005_67`。
+最终文档/资格收据提交不改变该已验证运行代码。以下 2026-10-05 Census 的“current”属于当时观察；原始历史 JSON 与失败记录保持原样。
+
+本轮精确 IDs、Task/ECF/Verification/Guardian 引用、Git/SQL 晋升、测试及恢复数据见 [closure evidence](../evidence/p0-p1-system-closure-20261006.json)。既有 [Census evidence](../evidence/systemic-reality-census-20261005.json) 未重写。
+
+| Finding | Status | 实现与真实资格 |
+| --- | --- | --- |
+| SR-001 / P0 | CLOSED | 默认 static Preview 服务 exact immutable Git commit/tree，自动 Guardian；单 PWU 与 Multi-PWU 均经明确 Human 授权、Delivery Acceptance、精确 Product 源晋升。关闭 Guardian、伪造 coverage 和 auto-accept 均未使用。 |
+| SR-002 / P1 | CLOSED | 全部 required PWU 的独立 Task/ECF、输入源、Execution、PASS Verification、qualified predecessor 与 JOIN reconciliation；最终同一 Candidate 有 3 个 canonical Guardian PASS，缺任一 owner 结果即阻塞。 |
+| SR-003 / P1 | CLOSED | 实际 ECS API 已配置 Aliyun `watt`；正常研究 Turn 返回 13 条来源，Web/GitHub/显式 Fetch 可追溯；部分额外 URL 的 FETCH_FAILED 指标保留。外部参考与项目源 authority 不混用，重启后配置仍有效。 |
+| SR-004 / P1 | CLOSED | A Guardian-qualified 且 Human-pending 时，在同一 Workspace 实际浏览器表单发起独立 B；B 获准并由 Worker RUNNING。A 的完整 Work 行哈希、Candidate、Plan、Guardian 与待决定状态保持；B 有独立精确 Work source/ref/Task。未来验收要求不再阻塞当前新 Work；Product 已接受源观察跨焦点切换保留。 |
+| SR-005 / P1 | CLOSED | Human ACCEPT 与 durable exact promotion intent 同一 SQL commit；隔离真实 Gitea/PG 的 BEFORE_GIT、AFTER_GIT、BEFORE_SQL_COMMIT 三个 cut PASS。ECS 实际 Gitea 不可用时 503 / PROVIDER_UNAVAILABLE、ACCEPT 保留、intent BLOCKED、版本不动；恢复后浏览器重试完成同一 intent。再重放 3 次仍同一 Acceptance、仅一个新版本。 |
+| SR-006 / P1 | CLOSED（本轮单 ECS 范围） | Worker/API/Coordinator/Tool Host/PostgreSQL/Gitea 全部停止与恢复；119 SQL tables / 6897 rows、3572 files、3 accepted Git repositories 的 quiesced cut 在隔离 PostgreSQL/路径重建且精确相等；无恢复 Worker、无新公网端口、未覆盖 live 数据。机器/数据盘损失恢复与 off-host backup 仍未资格。 |
+| SR-007 / P1 | CLOSED | 10 个 stale unit mock/expectation 已窄修；legacy integration 改为 RuntimeCommit 不能代表 Product Human Acceptance。Unit 1190 PASS / 3 intentional SKIP；当前唯一受影响 integration cases 108 PASS；UI 96 PASS；四象限与 exact authority 断言保留。无 unexplained failure。 |
+
+### 接受、恢复与资格边界
+
+- 专用单 PWU Work `b11e4aac-001b-5c1f-9744-f27fcc93d1d1`：Guardian PASS、HTTP 200、明确 Acceptance `ec23a52d-a6a3-46fd-a63f-7dbe0feabc56`，Product version 0→1，exact revision `d4ad65db95fa1bb3ad7ec951ea844fd4939c2a3d`。
+- 专用 Multi-PWU Work `3ee622b5-b816-5679-afdc-e5de51cd2702`：两个独立 root + JOIN 全部 VERIFIED；三个 own-ECF Guardian PASS；HTTP 三页面 exact revision/tree；明确 Acceptance `f1127996-a72c-45cf-9b94-ba8839ecf3a2`。Product version 1→2，exact revision `b4280990d55ac9da36eaa0dd9644006df7e8762e` / tree `330eb480e850ba9e0a57506db084d9a94ac59562`，远程 Gitea accepted ref 与 SQL 一致。
+- Guardian PASS 时 Product 基线不变；候选授权 / RuntimeCommit 与 Delivery Acceptance 不互相冒充。新 Work 使用明确接受的基线：本轮 Multi-PWU 已实际消费单 PWU 接受后的 version 1；隔离恢复测试还验证恢复后下一 Work 的精确 source binding。
+- 专用连续 Work B `c3819aa6-f464-59c3-a3dd-2949f038920a` 的资格目标是独立准入与真实进入 Worker；该目标已满足。后续模型在最初三个已提供 `file.write` 的回合未写源码，受 bounded no-progress/diagnostic 约束失败；Steering 保留 Human 决定。未把 B 冒充成功软件成果或改写失败证据；这不是初始工具能力缺失的证明。
+- 原八个 Human-pending Candidate 的完整行/指纹与原 authority 相等；未新增它们的授权、接受或拒绝。原 `multi-pwu-v1` 六个资格文件哈希不变。新单/Multi 接受仅作用于专用资格数据。
+- 恢复 queued identity 保留，已完成单 PWU 不重复，重复 PWU generation=0；最终 live lease=0、active allocation=0、未完成晋升 intent=0，Worker READY、max_concurrency=1。全恢复后的 Web 状态与 Search 配置可读。
+- 恢复实测：backup 40.808 s，既有 Compose 恢复阶段 27.582 s，隔离重建检查 21.754 s；quiesced cut 后无已确认写入，即该 cut 的 observed RPO=0。这不是 SLA、new-ECS RTO 或 off-host DR。
+- `/data` 本轮前 2,681,581,568 bytes、资格后 2,966,372,352 bytes 使用，105,088,192,512 bytes 总量，仍约 3%；没有清除历史资源以制造 clean。
+
+### 保留 P2 / Deferred
+
+SR-008 hard quota、SR-009 周期 cleanup/monitoring、SR-010 HTTP/域名/HTTPS、SR-011 无关 runbook/profile 漂移、SR-012 ancillary root-only summary、SR-013 外部 Git clone 可达性继续 OPEN（详见原 C2）。不扩入 Worker Pool、concurrency>1、广泛 replanning/Multi-PWU v2、Admin/组织/租户/计费/Quality 平台。Off-host 备份保管/加密/定时运行及完整机器损失恢复仍为未资格的操作能力。
+
+Protected context 的新增检查只用于有界 exact static targets，按真实源码 witness 和确切 ECF/package 做语义验证，失败/未知保持 fail closed；不是形式化证明或 Guardian 替代品。其他 profile 保留原 typed verification 与既有 protected-context gate。本轮只关闭具备上述实际证据的 findings。
+
+## Census baseline — 2026-10-05 (historical)
 
 本节是当前 canonical 事实基线，取代下方历史快照里的“current”结论；旧审计及原始历史证据原样保留。此任务只做盘点，没有实现修复。**Census 完成不等于 Full-System Qualification PASS。**
 

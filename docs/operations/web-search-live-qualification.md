@@ -159,3 +159,27 @@ authority/connector admission, live provider requests and provenance, raw SSE
 and persisted final response, bounded refinement history and convergence,
 and GC-EX-12 runtime/package evidence required above. Semantic-only recognition,
 deterministic providers and direct Fetch do not satisfy these live gates.
+
+## Actual ECS runtime configuration — 2026-10-06
+
+The canonical cloud Compose API now receives the existing Aliyun provider
+configuration and credential reference through its protected runtime env file.
+The exact dogfood runtime selects `aliyun-opensearch`, workspace `watt`, service
+`ops-web-search-001`; credentials remain outside Git and reports.
+
+A normal authenticated Human Turn on `cn-wulanchabu / i-0jl386xnbauudq5j9jk0`
+(`3debc48b-4ffb-40e1-9aa2-1610e2bc7f7e`, Turn
+`611e23d2-aa6c-4f48-aa35-86e8412e6ecd`) completed through IRK and the Search owner.
+Its persisted evidence contains 13 real results from Aliyun OpenSearch,
+GitHub REST public retrieval and public HTTPS read, with inspected GitHub
+content and the explicitly fetched Python asyncio document. Search query/rank/
+provider request ID/evidence identity and Fetch completeness stay distinct.
+One additional discovered-source Fetch failed; the owner recorded
+`FETCH_FAILED`, while the required explicit Fetch and research completed. This
+is retained partial-source reality, not a claim that every discovered URL worked.
+
+The direct documentation reference is typed `EXTERNAL_REFERENCE`; the Turn
+creates no production Work and does not acquire a project repository. Current
+`PROJECT_REPOSITORY` routing remains the canonical typed Engineering Semantic
+Truth path, covered separately by the affected source-role regression. The
+credential configuration survives the six-service restart by reference.

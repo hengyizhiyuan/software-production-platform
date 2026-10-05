@@ -834,3 +834,25 @@ synthesis refinement is a registered typed event through persistence and SSE.
 A failed first synthesis can therefore record its same-authority correction and
 settle the final browser response after revalidation, rather than failing the
 Turn while trying to publish its own refinement signal.
+
+
+## Independent Product Work with a pending Candidate (2026-10-06)
+
+A current governed ProductionIntent that explicitly declares new, bounded Work
+may move the Interaction focus to a separately persisted PRE_WORK while the
+previous Work awaits its Human decision. The production item's own confidence,
+unresolved arguments and blocking questions determine admission. A constraint
+requiring later explicit Candidate Acceptance does not demand a current focus
+confirmation. Operational requests or an explicit attention answer retain their
+existing owners. Ambiguous or current-Work intent does not silently start an
+unrelated Work.
+
+The new focus has a new basis and is governed again without the former Work's
+context, assessment, semantic history or engineering facts. Exact observed
+**Product accepted-source** facts remain authoritative across this change; old
+Work facts do not become the new Work's inputs. The transition records the
+current Human record/assessment and both Work identities. Normal Production
+Admission, Managed Source, ECF/Task Contract and queue owners then apply. The
+former Candidate, fingerprint, Plan, Verification, Guardian results and pending
+Human authority remain intact. A Product is long-lived; a pending Work does not
+block independent Product intent. The existing Workspace quadrants are unchanged.
