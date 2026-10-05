@@ -382,6 +382,11 @@ For clone workspaces, the accepted Work branch stays at its admitted revision.
 A successor fetches and checks out only its exact qualified predecessor commit,
 after the application proves this Work's active Plan lineage. This does not
 advance a repository ref or accept a Candidate on the Human's behalf.
+ECF freshness reassembles that same qualified input revision, rather than the
+accepted branch HEAD. The accepted source ref must still match the Work's
+admitted baseline, and the current Work intent and protected context must
+remain fresh; a changed authority, source ref or decision fingerprint still
+blocks dispatch.
 
 Decomposition reads the complete admitted objective, desired outcome and
 constraints, including dependencies that are absent from a short Steering

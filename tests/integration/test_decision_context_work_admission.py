@@ -28,8 +28,9 @@ ROOT = Path(__file__).resolve().parents[2]
 REMOTE = "git@github.com:hengyizhiyuan/software-production-platform.git"
 
 
+@pytest.mark.parametrize("qualified_input", [False, True])
 def test_managed_web_work_binds_exact_product_source_and_ecf(
-    postgres_database, tmp_path,
+    postgres_database, tmp_path, monkeypatch, qualified_input,
 ):
     from tests.qualification_owner_sources import owner_source_root
     owner = owner_source_root("ecf", ROOT.parent / "engineering-context-fabric" / "src")
@@ -55,6 +56,18 @@ def test_managed_web_work_binds_exact_product_source_and_ecf(
     tree = subprocess.check_output(
         ["git", "-C", str(repository), "rev-parse", "HEAD^{tree}"], text=True).strip()
     identity = f"watt://work-branches/{work_id}"
+    input_revision = revision
+    if qualified_input:
+        subprocess.run(["git", "-C", str(repository), "checkout", "--detach"], check=True, capture_output=True)
+        (repository / "team.html").write_text("<h1>Qualified team</h1>\n")
+        for args in (("add", "."), ("commit", "-m", "qualified predecessor")):
+            subprocess.run(["git", "-C", str(repository), *args], check=True, capture_output=True)
+        input_revision = subprocess.check_output(["git", "-C", str(repository), "rev-parse", "HEAD"], text=True).strip()
+        subprocess.run(["git", "-C", str(repository), "checkout", "work"], check=True, capture_output=True)
+        # Actual graph/verification proof is covered by Multi-PWU integration;
+        # here isolate the ECF consumer's use of that canonical owner's answer.
+        monkeypatch.setattr("spg.application.multi_pwu_lineage.work_consumes_revision",
+            lambda _session, wid, repo, rev: (wid, repo, rev) == (work_id, identity, input_revision))
     try:
         with postgres_database.unit_of_work() as uow:
             uow.session.execute(insert(software_products).values(
@@ -82,7 +95,7 @@ def test_managed_web_work_binds_exact_product_source_and_ecf(
             uow.commit()
         lineage = lineage_for_work_task(
             postgres_database, work_id=work_id, repository_identity=identity,
-            repository_path=repository, repository_revision=revision,
+            repository_path=repository, repository_revision=input_revision,
             target_paths=("index.html",))
         assert lineage is not None and lineage.surface == MANAGED_WEB_SURFACE
         task = default_task_contract_builder().build(TaskContractRequest(
@@ -94,6 +107,15 @@ def test_managed_web_work_binds_exact_product_source_and_ecf(
             decision_reference=f"work:{work_id}", governed_surface=lineage.surface,
             decision_context=lineage))
         assert_task_context_fresh(postgres_database, task)
+        if qualified_input:
+            monkeypatch.setattr("spg.application.multi_pwu_lineage.work_consumes_revision", lambda *_args: False)
+            with pytest.raises(DecisionContextChanged, match="authority-changed"):
+                assert_task_context_fresh(postgres_database, task)
+            monkeypatch.setattr("spg.application.multi_pwu_lineage.work_consumes_revision", lambda *_args: True)
+            subprocess.run(["git", "-C", str(repository), "update-ref", "refs/heads/work", input_revision],
+                check=True, capture_output=True)
+            with pytest.raises(DecisionContextChanged, match="source-basis-changed"):
+                assert_task_context_fresh(postgres_database, task)
     finally:
         with postgres_database.unit_of_work() as uow:
             uow.session.execute(delete(work_source_bases).where(

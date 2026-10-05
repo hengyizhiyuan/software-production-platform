@@ -128,6 +128,35 @@ def main():
             qualified = units
             if plan.graph is not None:
                 qualified, _ = completed_graph(runtime, run, plan, proposed)
+                by_node = {unit.node_id: unit for unit in qualified}
+                for node in plan.graph.nodes:
+                    if node.kind is ProductionNodeKind.GROUP:
+                        continue
+                    unit = by_node[node.node_id]
+                    task = unit.completion_contract.task_contract
+                    source = runtime.snapshot(unit.source_baseline_id)
+                    assert task.decision_context.repository_revision == source.repository_revision
+                    parents = [by_node[identity] for identity in node.dependency_ids]
+                    inputs = [json.loads(item.removeprefix("qualified-predecessor:"))
+                        for item in task.prerequisite_evidence if item.startswith("qualified-predecessor:")]
+                    assert {item['pwu_id'] for item in inputs} == {str(parent.id) for parent in parents}
+                    first_attempt = runtime.attempts_for_work_unit(unit.id)[0]
+                    for parent in parents:
+                        output = runtime.snapshot(parent.verified_output_baseline_id)
+                        proof = next(item for item in inputs if item['pwu_id'] == str(parent.id))
+                        assert proof['revision'] == output.repository_revision
+                        assert proof['baseline_id'] == str(output.id)
+                        assert proof['execution_id'] in {str(a.id) for a in runtime.attempts_for_work_unit(parent.id)}
+                        verified = [v for v in runtime.verification_records_for_work_unit(parent.id)
+                            if str(v.id) in proof['verification_ids']]
+                        assert verified and all(v.result.value == 'PASS' and
+                            v.proposed_commit_identity == output.repository_revision and
+                            v.created_at <= first_attempt.created_at for v in verified)
+                        assert proof['ecf_fingerprint'] == parent.completion_contract.task_contract.decision_context.package_fingerprint
+                    if node.kind is ProductionNodeKind.JOIN:
+                        assert unit.reconciliation_evidence['verification_state'] == 'RESOLVED_AND_VERIFIED'
+                    elif parents:
+                        assert unit.source_baseline_id == parents[0].verified_output_baseline_id
             assert set(candidate.satisfied_work_unit_ids) == {u.id for u in qualified}
             assert not runtime.human_authorizations_for_candidate(candidate.id)
             result["candidate"] = candidate.model_dump(mode="json")

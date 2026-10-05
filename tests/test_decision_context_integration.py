@@ -258,6 +258,28 @@ def test_superseded_source_invalidates_stale_task_before_execution(source_repo: 
     assert task(gateway.lineage(current, renewed)).decision_context.package_fingerprint == current.fingerprint
 
 
+def test_qualified_pwu_context_freshness_uses_exact_input_not_accepted_head(source_repo: Path):
+    gateway = WattDecisionContextGateway()
+    accepted = git(source_repo, "rev-parse", "HEAD")
+    (source_repo / "qualified-result.txt").write_text("Qualified predecessor output\n")
+    git(source_repo, "add", ".")
+    git(source_repo, "commit", "-m", "qualified internal PWU output")
+    req = requirement(source_repo, WORKSPACE_SURFACE)
+    qualified = req.repository_revision
+    lineage = gateway.lineage(gateway.require_ready(req,
+        work_statement="Change Workspace UI", work_revision="work-1"), req)
+    git(source_repo, "reset", "--hard", accepted)
+    # The accepted ref remains unchanged; the active PWU consumes a different
+    # exact qualified revision, which the application must independently prove.
+    with pytest.raises(DecisionContextChanged):
+        gateway.assert_fresh(lineage, work_statement="Change Workspace UI", work_revision="work-1")
+    gateway.assert_fresh(lineage, work_statement="Change Workspace UI", work_revision="work-1",
+                         repository_revision=qualified)
+    with pytest.raises(DecisionContextChanged):
+        gateway.assert_fresh(lineage, work_statement="Revised Work intent", work_revision="work-2",
+                             repository_revision=qualified)
+
+
 def test_closure_north_star_cannot_be_inferred_from_passing_verification(source_repo: Path):
     gateway = WattDecisionContextGateway()
     req = requirement(source_repo, MILESTONE_SURFACE)

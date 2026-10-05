@@ -327,6 +327,7 @@ def assert_task_context_fresh(database, task) -> None:
         work_source_bases,
     )
     from sqlalchemy import select
+    qualified_input_revision = None
     with database.unit_of_work() as unit_of_work:
         work = ProductStore(unit_of_work.session).work(UUID(lineage.work_id))
         current_product_id = unit_of_work.session.execute(
@@ -352,6 +353,15 @@ def assert_task_context_fresh(database, task) -> None:
                 from spg.application.multi_pwu_lineage import work_consumes_revision
                 if not work_consumes_revision(unit_of_work.session, UUID(lineage.work_id), lineage.repository_identity, lineage.repository_revision):
                     current_source_owner = None
+                else:
+                    resource_ref = unit_of_work.session.execute(
+                        select(engineering_resources.c.authoritative_ref)
+                        .join(work_source_bases, work_source_bases.c.resource_id == engineering_resources.c.id)
+                        .where(work_source_bases.c.work_id == UUID(lineage.work_id))
+                    ).scalar_one()
+                    if _git(Path(lineage.repository_path), "rev-parse", f"{resource_ref}^{{commit}}") != exact:
+                        raise DecisionContextChanged(lineage.package_fingerprint, "source-basis-changed")
+                    qualified_input_revision = lineage.repository_revision
         else:
             current_source_owner = unit_of_work.session.execute(
                 select(product_managed_sources.c.product_id).where(
@@ -366,6 +376,7 @@ def assert_task_context_fresh(database, task) -> None:
     statement, revision = _work_basis(work)
     WattDecisionContextGateway().assert_fresh(
         lineage, work_statement=statement, work_revision=revision,
+        repository_revision=qualified_input_revision,
     )
 
 
@@ -625,9 +636,10 @@ class WattDecisionContextGateway:
 
     def assert_fresh(self, lineage: DecisionContextLineage, *,
                      work_statement: str | None = None,
-                     work_revision: str | None = None) -> None:
+                     work_revision: str | None = None,
+                     repository_revision: str | None = None) -> None:
         repository = Path(lineage.repository_path)
-        current = _git(repository, "rev-parse", "HEAD")
+        current = _git(repository, "rev-parse", f"{repository_revision or 'HEAD'}^{{commit}}")
         requirement = DecisionContextRequirement(
             surface=lineage.surface, product_id=UUID(lineage.product_id),
             work_id=UUID(lineage.work_id) if lineage.work_id else None,
