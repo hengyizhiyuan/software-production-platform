@@ -15,8 +15,10 @@ from spg.domain.model_runtime import ModelProfile, ModelProvider, ModelPurpose
 from spg.infrastructure.model_runtime import DeepSeekResponsesModelAdapter, ModelProviderError
 from spg.infrastructure.persistence.product_schema import (
     product_works, software_products, product_managed_sources,
-    product_workspace_interactions,
+    product_workspace_interactions, work_runtime_bindings,
 )
+from spg.infrastructure.persistence.runtime_schema import execution_attempts
+from spg.domain.native_execution import NativeExecutionNotFound
 from spg.infrastructure.persistence.delivery_schema import (
     work_delivery_manifests, work_delivery_acceptances, work_delivery_runtimes,
 )
@@ -118,12 +120,38 @@ def _fingerprint(*rows) -> str:
 class ProductExperienceProjection:
     """Read-model composition; Product, Work, Guardian, Source and Delivery keep truth."""
 
-    def __init__(self, database, products, work, delivery, guardian=None):
+    def __init__(self, database, products, work, delivery, guardian=None,
+                 executor=None):
         self.database = database
         self.products = products
         self.work = work
         self.delivery = delivery
         self.guardian = guardian
+        self.executor = executor
+
+    def _current_execution(self, work) -> dict | None:
+        """Read the exact current Attempt through the Cloud Worker owner."""
+        if self.executor is None or work.current_production_run_id is None:
+            return None
+        with self.database.unit_of_work() as uow:
+            attempt_id = uow.session.execute(
+                select(execution_attempts.c.id).select_from(
+                    work_runtime_bindings.join(execution_attempts,
+                        work_runtime_bindings.c.work_unit_id ==
+                        execution_attempts.c.work_unit_id)
+                ).where(
+                    work_runtime_bindings.c.work_id == work.work_id,
+                    work_runtime_bindings.c.production_run_id ==
+                    work.current_production_run_id,
+                ).order_by(execution_attempts.c.generation.desc()).limit(1)
+            ).scalar_one_or_none()
+        if attempt_id is None:
+            return None
+        try:
+            return self.executor.execution_request(attempt_id).model_dump(mode="json")
+        except NativeExecutionNotFound:
+            # Preparation may have created the Attempt before queue admission.
+            return None
 
     def _attention_row(self, item, work: dict) -> dict:
         """Present canonical Human Attention without reclassifying it by buttons."""
@@ -300,8 +328,10 @@ class ProductExperienceProjection:
         candidate_view = None if candidate is None else {key: candidate.get(key) for key in
             ("candidate_id", "candidate_fingerprint", "repository_revision", "tree",
              "entrypoint", "preview_kind", "artifacts", "verification", "authorization_pending")}
+        execution = None if work is None else self._current_execution(work)
         return {"revision": _fingerprint(product["revision"], work_data, delivery,
-                                         candidate_view, guardian, attention, steps),
+                                         candidate_view, guardian, attention, steps,
+                                         execution),
                 "product": product, "work": work_data, "historical": bool(
                     work_id is not None and product["current_work"] is not None and
                     str(work_id) != product["current_work"]["id"]),
@@ -310,6 +340,7 @@ class ProductExperienceProjection:
                     "accepted_version": product["accepted_version"],
                     "accepted_revision": product["accepted_revision"],
                     "candidate": candidate_view,
+                    "execution": execution,
                     "guardian": guardian,
                     "deliveries": [] if delivery is None else delivery["deliveries"][:5],
                 }, "actions": attention}

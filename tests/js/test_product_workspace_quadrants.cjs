@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 
 const root = path.resolve(__dirname, '../..');
 const script = fs.readFileSync(path.join(root, 'src/spg/web/experience.js'), 'utf8');
@@ -42,4 +43,28 @@ test('canonical Product principle requires Human Governor approval for structura
   assert.match(principles, /## 11\. Workspace Four-Quadrant Invariant/);
   assert.match(principles, /WORKSPACE_FOUR_QUADRANT_LAYOUT_IMMUTABLE = TRUE/);
   assert.match(principles, /explicit\s+Human Governor approval/);
+});
+
+test('Workspace reports persisted Execution and verification without claiming early success', () => {
+  const source = script.slice(script.indexOf('  function executionCopy(execution) {'),
+    script.indexOf('  function actionText(raw) {'));
+  const {executionCopy, verificationCopy, focusCopy} = vm.runInNewContext(
+    `${source}; ({executionCopy, verificationCopy, focusCopy})`,
+    {humanStatus: status => status, guardianCopy: () => '质量检查尚未开始'},
+  );
+  const workspace = status => ({work:{status:'RUNNING'}, actions:[], reality:{
+    guardian:{status:'NOT_STARTED'}, deliveries:[], execution:{status},
+  }});
+  assert.equal(executionCopy({status:'QUEUED'}), '排队中');
+  assert.equal(focusCopy(workspace('RUNNING')).now, 'Worker 正在执行');
+  assert.equal(focusCopy(workspace('VERIFYING')).now, '正在独立验证');
+  assert.equal(focusCopy(workspace('FAILED')).now, '执行或验证失败');
+  assert.equal(verificationCopy(null, {status:'RUNNING'}), '尚无验证结果');
+  assert.equal(verificationCopy({verification:['PATH_SCOPE: PASS','GIT_DIFF_CHECK: PASS']},
+    {status:'COMPLETED'}), '独立验证已通过（2 项）');
+  assert.equal(verificationCopy(null, {status:'FAILED',
+    recovery_reason:'VERIFICATION_FAILED'}), '独立验证未通过');
+  const waitingForHuman = workspace('COMPLETED');
+  waitingForHuman.actions = [{id:'current-authority'}];
+  assert.equal(focusCopy(waitingForHuman).now, '等待你的决定');
 });

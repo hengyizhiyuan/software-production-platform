@@ -39,6 +39,12 @@ the queue, Worker, verification, or Candidate governance. The API service is
 the sole host-published container; Gitea, PostgreSQL, Coordinator, Worker, and
 Tool Host remain unexposed by Compose.
 
+The four-quadrant Workspace reads the current Attempt through the Cloud Worker
+execution projection. While Work is active it refreshes observed Product and
+Execution state, then stops at Human attention. Verification text comes from
+the sealed Candidate's recorded results. A queued or executing Attempt is not
+presented as verified merely because the Human Turn was accepted.
+
 ```text
 Single ECS / Docker Compose
   Browser ──TCP/8080──► Watt Web/API ──► PostgreSQL (persistent queue and product state)

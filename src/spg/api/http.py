@@ -472,7 +472,8 @@ def create_http_application(
     api.state.native_candidate_vectors = selected_native_vectors
     api.state.repository_asset_service = asset_service
     experience = ProductExperienceProjection(selected_database, software_products,
-        work_service, delivery_service, guardian_assurance_client)
+        work_service, delivery_service, guardian_assurance_client,
+        executor=selected_native_executor)
     experience_semantic = experience_compiler or SemanticExperienceCompiler(settings or Settings())
     api.state.product_experience = experience
     cloud_delivery = CloudDeliveryService(selected_database, delivery_service,
