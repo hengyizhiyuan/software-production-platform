@@ -29,8 +29,21 @@ fi
 install -m 0644 deploy/cloud-worker/docker-compose.yml "$runtime/docker-compose.yml"
 cd "$runtime"
 docker compose config --quiet
-docker compose build migrate
-docker compose up -d
+expected_lock="$(sha256sum "$source_dir/uv.lock" | cut -d' ' -f1)"
+installed_lock=""
+if docker image inspect watt-cloud-worker:local >/dev/null 2>&1; then
+  installed_lock="$(docker run --rm --network none --entrypoint sha256sum \
+    watt-cloud-worker:local /app/uv.lock | cut -d' ' -f1)"
+fi
+if [ "$expected_lock" = "$installed_lock" ]; then
+  base_image="watt-cloud-worker:locked-base-${expected_lock:0:12}"
+  docker tag watt-cloud-worker:local "$base_image"
+  docker build --network none -f "$source_dir/deploy/cloud-worker/Dockerfile.locked-overlay" \
+    --build-arg "BASE_IMAGE=$base_image" -t watt-cloud-worker:local "$source_dir"
+else
+  docker compose build migrate
+fi
+docker compose up -d --no-build
 if ! docker compose exec -T gitea gitea admin user list | grep -q 'watt-managed'; then
   WATT_GITEA_PASSWORD="$(sed -n 's/^WATT_GITEA_PASSWORD=//p' "$runtime/.env" | tail -1)"
   test -n "$WATT_GITEA_PASSWORD"

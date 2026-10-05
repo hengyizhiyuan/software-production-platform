@@ -1,0 +1,10 @@
+# Rebuild Watt code against an already qualified image with the same uv.lock.
+# update.sh verifies the exact lock digest before selecting this path.
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE} AS runtime
+USER root
+COPY pyproject.toml uv.lock README.md /app/
+COPY src /app/src
+COPY migrations /app/migrations
+RUN uv sync --locked --no-dev --no-editable --offline
+USER spg
