@@ -2798,6 +2798,29 @@ class WorkApplicationService:
             self.production_recorder.record_authorized_work(work_id)
         return self.get_work(work_id)
 
+    def waiting_for_native_execution(self, work_id: UUID) -> bool:
+        """An owner may wait for durable execution; capacity is not Human work."""
+        from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+        with self.database.unit_of_work() as uow:
+            product, runtime = ProductStore(uow.session), RuntimeStore(uow.session)
+            binding = self._runtime_binding_for_current_context(product, work_id)
+            if binding is None:
+                return False
+            native = NativeExecutionStore(uow.session)
+            for unit in runtime.work_units_for_plan(binding.plan_revision_id):
+                if unit.verified_output_baseline_id is not None:
+                    continue
+                attempts = runtime.attempts_for_work_unit(unit.id)
+                if not attempts:
+                    continue
+                latest = max(attempts, key=lambda item:item.generation)
+                queue = native.queue_for_attempt(latest.id)
+                if queue is not None and queue.condition.value in {
+                    'QUEUED','RETURNED_TO_QUEUE','ALLOCATED','EXECUTING','CHECKPOINTED','WAITING_RESOURCE',
+                }:
+                    return True
+        return False
+
     def _bind_multi_pwu_context(self, work_id: UUID, pwu_id: UUID, repository: Path) -> None:
         """Assemble exact PWU context before its first Attempt, never rewrite history."""
         with self.database.unit_of_work() as uow:
@@ -3807,7 +3830,7 @@ class WorkApplicationService:
                     else "Completion or Verification did not pass"
                 )
             elif facts.dispatch_id is not None and facts.observation_id is None:
-                state, reason = "RUNNING", None
+                state, reason = "PREPARING", "Waiting for execution admission or result collection"
                 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
                 native_queue = NativeExecutionStore(store.session).queue_for_attempt(facts.attempt_id)
                 if native_queue is not None:
@@ -3816,8 +3839,14 @@ class WorkApplicationService:
                         state, reason = "WAITING_CAPACITY", native_queue.wait_reason
                     elif condition == "ALLOCATED":
                         state = "ASSIGNED"
-                    elif condition in {"WAITING_RESOURCE", "WAITING_HUMAN"}:
+                    elif condition == "WAITING_RESOURCE":
+                        state, reason = "WAITING_RESOURCE", native_queue.wait_reason
+                    elif condition == "WAITING_HUMAN":
                         state, reason = "BLOCKED", native_queue.wait_reason
+                    elif condition in {"EXECUTING", "CHECKPOINTED"}:
+                        state, reason = "RUNNING", None
+                    elif condition == "COMPLETED":
+                        state, reason = "VERIFYING", None
             elif facts.observation_id is not None:
                 state, reason = "VERIFYING", None
             else:

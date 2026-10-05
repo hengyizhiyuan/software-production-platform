@@ -218,6 +218,14 @@ class ProductionOrchestrator:
                     OrchestrationStopReason.HUMAN_OR_TERMINAL_BOUNDARY,
                 )
             if self._fingerprint(work_id, after) == before_fingerprint:
+                waiting = getattr(self.work_service, "waiting_for_native_execution", None)
+                if callable(waiting) and waiting(work_id):
+                    # This is observation of the existing queue, not dispatch
+                    # or another scheduler. Idle capacity waits do not consume
+                    # the bounded deterministic production-transition budget.
+                    transitions -= 1
+                    self._stopping.wait(timeout=1.0)
+                    continue
                 return self._no_safe_progress(work_id, transitions, after)
 
         current = self.work_service.get_work(work_id)

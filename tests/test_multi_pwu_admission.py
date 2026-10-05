@@ -74,3 +74,27 @@ def test_material_graph_change_changes_proposal_identity():
     first = RuleBasedProductionPlanner().propose(request)
     second = RuleBasedProductionPlanner().propose(request.model_copy(update={'target_effort_seconds':{'src/alpha.py':100}}))
     assert first.proposal_id != second.proposal_id
+
+
+def test_async_capacity_wait_does_not_spend_production_transition_budget(monkeypatch):
+    from types import SimpleNamespace
+    from uuid import uuid4
+    from spg.application.orchestration import ProductionOrchestrator, OrchestrationStopReason
+    from spg.domain.product import WorkStatus
+    class Work:
+        def __init__(self): self.calls = 0
+        def get_work(self, _id):
+            return SimpleNamespace(status=WorkStatus.RUNNING if self.calls < 4 else WorkStatus.NEEDS_ATTENTION,
+                production_plan_runtime=None, steering_enabled=False,
+                current_production_step='PRODUCE', what_happens_next='Wait for Native',
+                most_recent_meaningful_event='QUEUED')
+        def advance_work(self, _id): self.calls += 1
+        def orchestration_reality_fingerprint(self, _id): return 'waiting' if self.calls < 4 else 'candidate'
+        def waiting_for_native_execution(self, _id): return self.calls < 4
+    owner = Work()
+    driver = ProductionOrchestrator(owner, max_automatic_transitions=1)
+    monkeypatch.setattr(driver._stopping, 'wait', lambda timeout:False)
+    result = driver.orchestrate(uuid4())
+    assert owner.calls == 4
+    assert result.transitions_executed == 1
+    assert result.stop_reason is OrchestrationStopReason.HUMAN_OR_TERMINAL_BOUNDARY

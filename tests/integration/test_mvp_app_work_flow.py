@@ -111,12 +111,21 @@ def test_multi_pwu_nonblocking_dispatch_keeps_two_root_authorities_across_restar
         def submit(self, request):
             self.requests.setdefault(request.execution.attempt_id, request.dispatch_id)
         def ensure_submitted(self, request): self.submit(request)
+        def is_submitted(self, attempt_id): return attempt_id in self.requests
         def terminal_result(self, attempt_id): return None
         def dispatch(self, request): raise AssertionError("Must not wait on first PWU")
     executor = QueueSeam()
     for _ in range(2):
         service = WorkApplicationService(app_facts.database, workspace_root=app_facts.workspace_root, executor=executor)
         for _ in range(8): service.advance_work(draft.work_id)
+        if _ == 7:
+            with app_facts.database.unit_of_work() as uow:
+                runtime = RuntimeStore(uow.session)
+                for attempt_id in executor.requests:
+                    preparation = runtime.attempt_preparation(attempt_id)
+                    unit = runtime.work_unit(runtime.attempt(attempt_id).work_unit_id)
+                    target = unit.completion_contract.change_contract.exact_targets[0].path
+                    (Path(preparation.workspace.workspace_path) / target).write_text('controlled execution output\n')
     assert len(executor.requests) == 2
     with app_facts.database.unit_of_work() as uow:
         store = RuntimeStore(uow.session)

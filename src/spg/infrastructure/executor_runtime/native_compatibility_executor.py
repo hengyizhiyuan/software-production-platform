@@ -119,15 +119,16 @@ class NativeQueuedExecutorCapability:
         return self.runtime.admit(self._admission(request))
 
     def ensure_submitted(self, request: ExecutorDispatchRequest) -> None:
+        if not self.is_submitted(request.execution.attempt_id):
+            self.submit(request)
+
+    def is_submitted(self, attempt_id: UUID) -> bool:
         with self.database.unit_of_work() as uow:
             try:
-                NativeExecutionStore(uow.session).attempt_binding(request.execution.attempt_id)
+                NativeExecutionStore(uow.session).attempt_binding(attempt_id)
             except NativeExecutionNotFound:
-                missing = True
-            else:
-                missing = False
-        if missing:
-            self.submit(request)
+                return False
+        return True
 
     def terminal_result(self, attempt_id: UUID) -> ExecutorDispatchResult | None:
         """Return a terminal native claim for restart reconciliation, if available."""

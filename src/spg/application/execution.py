@@ -90,6 +90,8 @@ class ExecutionService:
         """Persist one dispatch, then admit to Native's queue; no result is invented."""
         with self.database.unit_of_work() as uow:
             existing = RuntimeStore(uow.session).execution_dispatch_for_attempt(attempt_id)
+        if existing is not None and callable(getattr(executor, "is_submitted", None)) and executor.is_submitted(attempt_id):
+            return existing
         prepared = self.preparation.prepared_execution_request(attempt_id)
         dispatch = existing or self._persist_dispatch(prepared)
         request = ExecutorDispatchRequest(dispatch_id=dispatch.id, execution=prepared)
