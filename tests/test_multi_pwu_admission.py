@@ -9,7 +9,7 @@ from tests.test_multi_pwu_planning import _request
 
 
 def plan():
-    return RuleBasedProductionPlanner().propose(_request('index.html', 'tests/navigation.test.js'))
+    return RuleBasedProductionPlanner().propose(_request('index.html', 'contact.html'))
 
 
 @pytest.mark.parametrize('field,value,reason', [
@@ -24,19 +24,19 @@ def test_invalid_dual_target_node_cannot_materialize_pwu(field, value, reason):
                   for node in proposal.graph.nodes)
     invalid = proposal.model_copy(update={'graph':proposal.graph.model_copy(update={'nodes':nodes})})
     # Historical serialization is still readable; new admission rejects it.
-    contract = CompletionContract(required_outputs=('index.html', 'tests/navigation.test.js'),
-        required_changes=('index.html', 'tests/navigation.test.js'),
+    contract = CompletionContract(required_outputs=('index.html', 'contact.html'),
+        required_changes=('index.html', 'contact.html'),
         verification_obligations=('PATH_SCOPE',), production_plan=invalid)
     with pytest.raises(RuntimeInvariantViolation, match=reason):
         RuntimeService._validate_plan_admission(contract)
 
 
-def test_dual_target_source_and_navigation_test_never_have_empty_scoped_units():
+def test_independent_entrypoint_and_contact_never_have_empty_scoped_units():
     proposal = plan()
     assert all(node.node_id != "group:" for node in proposal.graph.nodes)
     assert "index" in next(node.objective for node in proposal.graph.nodes if node.node_id == "pwu:1")
-    contract = CompletionContract(required_outputs=('index.html', 'tests/navigation.test.js'),
-        required_changes=('index.html', 'tests/navigation.test.js'),
+    contract = CompletionContract(required_outputs=('index.html', 'contact.html'),
+        required_changes=('index.html', 'contact.html'),
         verification_obligations=('PATH_SCOPE',), production_plan=proposal)
     RuntimeService._validate_plan_admission(contract)
     for node in proposal.graph.nodes:
@@ -59,7 +59,7 @@ def test_cycle_or_missing_predecessor_is_rejected(dependencies, reason):
 
 
 def test_authority_boundary_refines_bad_provider_without_accepting_empty_node():
-    request = _request('index.html', 'tests/navigation.test.js')
+    request = _request('index.html', 'contact.html')
     valid = RuleBasedProductionPlanner().propose(request)
     nodes = tuple(node.model_copy(update={'writable_paths':()}) if node.node_id == 'pwu:2' else node
                   for node in valid.graph.nodes)
@@ -67,7 +67,7 @@ def test_authority_boundary_refines_bad_provider_without_accepting_empty_node():
         def propose(self, request):
             return valid.model_copy(update={'graph':valid.graph.model_copy(update={'nodes':nodes})})
     corrected = ProductionPlanningService(BadPlanner()).propose(request)
-    corrected.graph.validate_admission({'index.html', 'tests/navigation.test.js'})
+    corrected.graph.validate_admission({'index.html', 'contact.html'})
     assert all(node.writable_paths for node in corrected.graph.nodes if node.kind is ProductionNodeKind.PWU)
 
 

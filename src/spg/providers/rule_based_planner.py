@@ -194,10 +194,10 @@ class RuleBasedProductionPlanner:
                     language = "python" if pure.suffix == ".py" else "javascript" if pure.suffix in {".js", ".cjs", ".mjs"} else None
                     compatible = tuple(source for source in production_paths if (
                         (language == "python" and PurePosixPath(source).suffix == ".py")
-                        or (language == "javascript" and PurePosixPath(source).suffix in {".js", ".cjs", ".mjs"})
+                        or (language == "javascript" and PurePosixPath(source).suffix in {".js", ".cjs", ".mjs", ".html"})
                     ))
                     if len(compatible) == 1:
-                        return PurePosixPath(compatible[0]).stem
+                        return family(compatible[0])
             return (pure.parent.name or stem) if stem in {"__init__", "index"} else stem
 
         grouped: dict[str, list[str]] = {}

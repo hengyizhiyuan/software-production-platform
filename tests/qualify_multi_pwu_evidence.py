@@ -15,7 +15,7 @@ from spg.application.multi_pwu_lineage import completed_graph
 from spg.application.planning import ProductionPlanningService
 from spg.application.runtime import RuntimeService
 from spg.config import Settings
-from spg.domain.planning import ProductionNodeKind, ProductionPlanningRequest
+from spg.domain.planning import ProductionNodeKind, ProductionPlanGraph, ProductionPlanNode, ProductionPlanningRequest
 from spg.domain.runtime import InitialRunRequest, ProductionHorizon, RuntimeInvariantViolation
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.infrastructure.persistence import Database
@@ -39,10 +39,22 @@ def invalid_decomposition(db, work_id, contract):
         source_revision=proposal.source_revision,
     )
     valid = RuleBasedProductionPlanner().propose(request)
-    assert valid.graph is not None
+    graph = valid.graph
+    if graph is None:
+        paths = tuple(t.path for t in valid.change_contract.exact_targets)
+        assert len(paths) == 2
+        leaves = tuple(ProductionPlanNode(node_id=f"pwu:{i}", kind=ProductionNodeKind.PWU,
+            objective=f"Produce {path}", writable_paths=(path,), responsibility_boundary=path,
+            acceptance_criteria=(f"Qualified {path}",), verification_requirements=(request.verification_expectation,))
+            for i, path in enumerate(paths, start=1))
+        join = ProductionPlanNode(node_id="pwu:join", kind=ProductionNodeKind.JOIN,
+            objective="Integrate the two exact outputs", writable_paths=paths,
+            dependency_ids=("pwu:1", "pwu:2"), responsibility_boundary="Exact admitted outputs only",
+            acceptance_criteria=("Qualified integrated result",), verification_requirements=(request.verification_expectation,))
+        graph = ProductionPlanGraph(nodes=(*leaves, join), planning_rationale="Replay superseded dual-target decomposition")
     nodes = tuple(node.model_copy(update={"writable_paths": ()}) if node.node_id == "pwu:2" else node
-                  for node in valid.graph.nodes)
-    invalid = valid.model_copy(update={"graph": valid.graph.model_copy(update={"nodes": nodes})})
+                  for node in graph.nodes)
+    invalid = valid.model_copy(update={"graph": graph.model_copy(update={"nodes": nodes})})
     intent_ref = f"qualification:invalid-plan:{work_id}"
     runs = select(production_runs.c.id).where(production_runs.c.intent_ref == intent_ref)
     units = select(production_work_units.c.id).where(production_work_units.c.production_run_id.in_(runs))
@@ -71,8 +83,12 @@ def invalid_decomposition(db, work_id, contract):
     class FaultPlanner:
         def propose(self, request): return invalid
     corrected = ProductionPlanningService(FaultPlanner(), database=db).propose(request)
-    corrected.graph.validate_admission({p for node in valid.graph.nodes for p in node.writable_paths})
-    assert all(node.writable_paths for node in corrected.graph.nodes if node.kind is ProductionNodeKind.PWU)
+    if corrected.graph is not None:
+        corrected.graph.validate_admission({p for node in graph.nodes for p in node.writable_paths})
+        assert all(node.writable_paths for node in corrected.graph.nodes if node.kind is ProductionNodeKind.PWU)
+    else:
+        assert corrected.fit_classification.value == "ONE_PWU_FIT"
+        assert len(corrected.change_contract.exact_targets) == 2
     with db.unit_of_work() as uow:
         events = NativeExecutionStore(uow.session).self_refine_events_for_operation(valid.proposal_id)
         event = next(item for item in reversed(events) if item.affected_component == "planning/production-plan")
@@ -102,14 +118,16 @@ def main():
             result["units"].append({"unit": unit.model_dump(mode="json"),
                 "attempts": [a.model_dump(mode="json") for a in attempts],
                 "verification": [v.model_dump(mode="json") for v in rows]})
-        terminal_ids = {u.node_id for u in units} - {d for n in plan.graph.nodes for d in n.dependency_ids}
+        terminal_ids = {u.node_id for u in units} - {d for n in (() if plan.graph is None else plan.graph.nodes) for d in n.dependency_ids}
         terminal = next(u for u in units if u.node_id in terminal_ids)
         candidates = runtime.baseline_candidates_for_work_unit(terminal.id)
         result["candidate"] = None
         if candidates:
             candidate = candidates[-1]
             proposed = runtime.proposed_snapshot(candidate.proposed_snapshot_id)
-            qualified, _ = completed_graph(runtime, run, plan, proposed)
+            qualified = units
+            if plan.graph is not None:
+                qualified, _ = completed_graph(runtime, run, plan, proposed)
             assert set(candidate.satisfied_work_unit_ids) == {u.id for u in qualified}
             assert not runtime.human_authorizations_for_candidate(candidate.id)
             result["candidate"] = candidate.model_dump(mode="json")

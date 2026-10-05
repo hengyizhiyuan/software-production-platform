@@ -48,6 +48,13 @@ def test_one_web_feature_and_its_differently_named_test_remain_one_pwu():
     assert plan.graph is None
 
 
+def test_historical_html_navigation_and_node_test_are_one_nonempty_obligation():
+    plan = RuleBasedProductionPlanner().propose(_request("index.html", "tests/navigation.test.js"))
+    assert plan.fit_classification is OnePwuFitClassification.ONE_PWU_FIT
+    assert plan.graph is None
+    assert tuple(item.path for item in plan.artifact_targets) == ("index.html", "tests/navigation.test.js")
+
+
 def test_web_entrypoint_script_and_named_test_remain_one_coherent_pwu():
     plan = RuleBasedProductionPlanner().propose(_request(
         "index.html", "inventory.js", "tests/inventory.test.cjs",
