@@ -169,6 +169,8 @@ def test_multi_pwu_serial_context_consumes_only_this_works_verified_revision(app
     import json
     from spg.application.multi_pwu_lineage import work_consumes_revision
     from spg.domain.runtime import RuntimeInvariantViolation
+    from spg.application.preparation import PreparationService
+    from spg.infrastructure.git_workspace import GitCloneAttemptWorkspace
     submitted = app_facts.service.submit_work('Update shared comments across Python and web')
     draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
         code_exact_targets=('src/spg_example.py', 'src/spg/web/app.js'),
@@ -186,7 +188,8 @@ def test_multi_pwu_serial_context_consumes_only_this_works_verified_revision(app
                     repository_relative_path=target, content=content),),
                 reported_outcome=ProviderReportedOutcome.SUCCESS)).dispatch(request)
     service = WorkApplicationService(app_facts.database, workspace_root=app_facts.workspace_root,
-        executor=CommentExecutor(), verifier=ContractDrivenRepositoryVerifier(app_facts.database))
+        executor=CommentExecutor(), verifier=ContractDrivenRepositoryVerifier(app_facts.database),
+        preparation=PreparationService(app_facts.database, workspaces=GitCloneAttemptWorkspace()))
     for _ in range(40):
         projection = service.advance_work(draft.work_id)
         if projection.status is WorkStatus.NEEDS_ATTENTION: break

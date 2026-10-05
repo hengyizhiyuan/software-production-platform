@@ -210,9 +210,11 @@ class GitCloneAttemptWorkspace(GitAttemptWorkspace):
         repository_identity: str,
         source_revision: str,
         repository_ref: str | None = None,
+        expected_authoritative_revision: str | None = None,
     ) -> WorkspaceBinding:
         repository = GitExactReality._repository_root(repository_path)
-        branch = self._selected_branch(repository, repository_ref, source_revision)
+        branch = self._selected_branch(repository, repository_ref,
+            expected_authoritative_revision or source_revision)
         root = workspace_root.resolve()
         workspace = root / str(attempt_id)
         if workspace.exists():
@@ -238,6 +240,11 @@ class GitCloneAttemptWorkspace(GitAttemptWorkspace):
             str(repository),
             str(workspace),
         )
+        if expected_authoritative_revision is not None:
+            # Acquire only the owner's exact qualified internal result. The
+            # accepted branch remains unchanged until Human authorization.
+            GitExactReality._git(workspace, "fetch", "--no-tags", "--no-write-fetch-head",
+                str(repository), source_revision)
         GitExactReality._git(workspace, "checkout", "--detach", source_revision)
         binding = WorkspaceBinding(
             workspace_identity=f"attempt-clone:{attempt_id}",

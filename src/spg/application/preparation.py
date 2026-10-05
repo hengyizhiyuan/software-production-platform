@@ -24,7 +24,7 @@ from spg.domain.runtime import (
     RuntimeInvariantViolation,
     RuntimeRecordNotFound,
 )
-from spg.infrastructure.git_workspace import GitAttemptWorkspace, GitExactReality
+from spg.infrastructure.git_workspace import GitAttemptWorkspace, GitCloneAttemptWorkspace, GitExactReality
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 
@@ -199,6 +199,18 @@ class PreparationService:
             self.workspaces.validate(existing.workspace)
             return self._result(existing, package, attempt, work_unit, run)
 
+        qualified_source = {}
+        if isinstance(self.workspaces, GitCloneAttemptWorkspace) and snapshot.id != run.source_baseline_id:
+            from spg.application.multi_pwu_lineage import work_consumes_revision
+            from spg.infrastructure.persistence.product_store import ProductStore
+            with self.database.unit_of_work() as uow:
+                binding = ProductStore(uow.session).runtime_binding_for_work_unit(work_unit.id)
+                original = RuntimeStore(uow.session).snapshot(run.source_baseline_id)
+                if binding is None or original is None or not work_consumes_revision(
+                    uow.session, binding.work_id, snapshot.repository_identity, snapshot.repository_revision,
+                ):
+                    raise RuntimeInvariantViolation("PWU clone source lacks qualified Work lineage")
+                qualified_source["expected_authoritative_revision"] = original.repository_revision
         workspace = self.workspaces.prepare(
             repository_path=repository_path,
             workspace_root=workspace_root,
@@ -206,6 +218,7 @@ class PreparationService:
             repository_identity=snapshot.repository_identity,
             source_revision=snapshot.repository_revision,
             repository_ref=snapshot.repository_ref,
+            **qualified_source,
         )
 
         with self.database.unit_of_work() as unit_of_work:
