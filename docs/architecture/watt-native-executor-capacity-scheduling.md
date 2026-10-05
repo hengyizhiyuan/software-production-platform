@@ -1,6 +1,7 @@
 # Watt-native Executor Capacity Scheduling & Execution Queue
 
-Date: 2026-09-11. Final technical closure status updated 2026-09-13. Status:
+Date: 2026-09-11. Final technical closure status updated 2026-09-13;
+Cloud Capacity Runtime qualification added 2026-10-05. Status:
 **ARCHITECTURE AMENDMENT COMPLETE; IMPLEMENTED; TECHNICALLY QUALIFIED**.
 
 This document amends the [Watt-native Executor Blueprint](watt-native-executor-blueprint.md)
@@ -284,7 +285,7 @@ This amendment does not define or authorize:
 - a new message broker, Event Bus, or queue product;
 - a new PWU or Work lifecycle;
 - automatic priority decisions by a model;
-- implementation, schema, migration, API, or runtime changes.
+- production intent changes or a competing queue/allocation lifecycle.
 
 The initial direction remains compatible with the Blueprint's single-host,
 database-backed coordination model. Distributed scheduling is a future
@@ -336,8 +337,8 @@ The existing active-allocation uniqueness, live-lease uniqueness, token digest,
 start deadline and epoch fences remain authoritative. No new queue, broker or
 capacity lifecycle is added. Allocation evidence binds Work/PWU/Attempt,
 queue entry, required capabilities, priority, enqueue time, Worker, allocation
-ID, lease epoch/expiry and decision reason. A slot number in evidence denotes
-occupancy at grant time, not a persistent machine resource identity.
+ID, lease epoch/expiry and decision reason. Evidence records active occupancy
+at grant time; the unique allocation ID identifies the capacity permission.
 
 Policy `fair-round-robin-v2` rotates lexicographically after the persisted last
 Work, even if that Work has left the runnable set. Within the selected Work,
@@ -404,6 +405,31 @@ Preserved findings: dual-target requests can form an empty work unit; an existin
 Work awaiting Human decision blocks the Workspace new-request path; filesystem
 hard workspace quota is absent; the temporary Web ingress uses HTTP. Existing
 unrelated historical test failures remain separate.
+
+### Observed Cloud qualification
+
+Exact placement: `cn-wulanchabu / i-0jl386xnbauudq5j9jk0`.
+Run: `1a862e32-6316-40d9-b426-4c91a5f771a6`.
+Evidence remains in `spg_capacity_qualification` and
+`/data/watt/native-executor/capacity-qualification-v1/state.json`.
+
+- One-slot contention, independent Work fairness (A → B → A → A), draining,
+  controlled two-slot execution, capacity-loss recovery and container-restart
+  persistence: **REAL_PASS**. API, Worker and Coordinator were restarted.
+- The same pending Product Candidate
+  `7f8b5f16-64ce-55a3-8ead-59f52ab6a29b` remains sealed and awaiting Human
+  authorization, with unchanged fingerprint. The production Worker is READY,
+  `max_concurrency=1`, zero active allocations and one available slot.
+- Focused regressions: 84 unit cases, 17 PostgreSQL integration cases (including
+  the 100-round allocation race), and 87 Web/UI cases passed. Five previously
+  identified unrelated legacy assertions remain excluded and unchanged.
+- `/data` used bytes: `2387886080` before, `2427461632` after; 3% utilization,
+  `97275301888` available bytes. One cached offline image rebuild; no canonical
+  data, failed evidence or locked dependency cache was removed.
+
+The first qualifier attempt was rejected because its test manifest lacked a
+writable mount. The fixture was corrected to satisfy the existing Native
+contract; its prior records were retained. No Product authority was weakened.
 
 ## Final status
 

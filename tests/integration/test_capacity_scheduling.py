@@ -49,6 +49,10 @@ def test_multislot_race_truthful_capacity_draining_and_bounded_heartbeat(
         grants = [item for item in pool.map(claim, range(6)) if item is not None]
     assert len(grants) == 2
     assert len({item.allocation.attempt_id for item in grants}) == 2
+    counts = {event['payload']['active_execution_count_at_grant']
+              for grant in grants for event in service.execution_evidence(grant.allocation.attempt_id)
+              if event['event_type'] == 'ExecutionCapacityAllocated'}
+    assert counts == {1, 2}
     worker = service.list_workers()[0]
     assert (worker.active_execution_count, worker.available_slots) == (2, 0)
     waiting_id = next(item for item in ids if item not in {g.allocation.attempt_id for g in grants})

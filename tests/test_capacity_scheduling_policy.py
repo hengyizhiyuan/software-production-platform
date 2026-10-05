@@ -38,3 +38,12 @@ def test_incompatible_old_entry_never_bypasses_capability_authority():
     decision = FairCapacityScheduler().choose([old, runnable], _offer(),
         now=NOW + timedelta(hours=1), last_fairness_group=None)
     assert decision.selected_queue_entry_id == runnable.id
+
+
+def test_aging_overrides_service_order_without_rewriting_admitted_priority():
+    old_low = _queue('work:a', 0).model_copy(update={'priority':-100})
+    new_high = _queue('work:a', 2).model_copy(update={'priority':100})
+    decision = FairCapacityScheduler(aging_threshold=timedelta(minutes=2)).choose(
+        [new_high, old_low], _offer(), now=NOW + timedelta(minutes=3), last_fairness_group=None)
+    assert decision.selected_queue_entry_id == old_low.id
+    assert (old_low.priority, new_high.priority) == (-100, 100)

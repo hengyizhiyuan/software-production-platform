@@ -765,7 +765,7 @@ class NativeExecutorRuntimeService:
                     "queue_entry_id": str(selected.id), "enqueued_at": selected.enqueued_at.isoformat(),
                     "required_capabilities": list(selected.required_capabilities),
                     "lease_epoch": epoch, "lease_expires_at": deadline.isoformat(),
-                    "capacity_slot": store.active_allocation_count(offer.worker_id),
+                    "active_execution_count_at_grant": store.active_allocation_count(offer.worker_id),
                 },
             )
             uow.commit()
