@@ -165,6 +165,30 @@ def test_multi_pwu_replan_api_replaces_active_revision_without_widening_scope(ap
     assert len(actual["production_plan_runtime"]["pwus"]) == 3
 
 
+def test_multi_pwu_explicit_native_cancellation_never_becomes_a_retry(app_facts: "AppFacts", monkeypatch) -> None:
+    from types import SimpleNamespace
+    from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+    submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
+    draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
+        code_exact_targets=("src/spg_example.py", "src/spg/web/app.js"),
+    ))
+    app_facts.service.approve_work(draft.work_id, authority_identity="human:multi-pwu")
+    # The canonical Native control owner supplies a durable CANCELLED result;
+    # planning must not turn this explicit authority into an execution retry.
+    monkeypatch.setattr(NativeExecutionStore, "queue_for_attempt", lambda _store, _id:
+        SimpleNamespace(condition=SimpleNamespace(value="CANCELLED")))
+    for _ in range(8):
+        projection = app_facts.service.advance_work(draft.work_id)
+    assert projection.status is WorkStatus.BLOCKED
+    assert [u["state"] for u in projection.production_plan_runtime["pwus"]] == [
+        "CANCELLED", "CANCELLED", "DEPENDENCIES_PENDING"]
+    with app_facts.database.unit_of_work() as uow:
+        runtime = RuntimeStore(uow.session)
+        binding = ProductStore(uow.session).runtime_binding(draft.work_id)
+        attempts = [runtime.attempts_for_work_unit(unit.id) for unit in runtime.work_units_for_plan(binding.plan_revision_id)]
+        assert sorted(len(items) for items in attempts) == [0, 1, 1]
+
+
 def test_multi_pwu_serial_context_consumes_only_this_works_verified_revision(app_facts: "AppFacts") -> None:
     import json
     from spg.application.multi_pwu_lineage import work_consumes_revision

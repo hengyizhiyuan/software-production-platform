@@ -2903,6 +2903,7 @@ class WorkApplicationService:
 
     @staticmethod
     def _select_multi_pwu(product, runtime, binding, graph):
+        from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
         units = {item.node_id: item for item in runtime.work_units_for_plan(binding.plan_revision_id)}
         executable = tuple(node for node in graph.nodes if node.kind is not ProductionNodeKind.GROUP)
         if all(units[node.node_id].verified_output_baseline_id is not None for node in executable):
@@ -2914,6 +2915,9 @@ class WorkApplicationService:
             if unit.source_baseline_id is None or unit.verified_output_baseline_id is not None:
                 continue
             facts = product.runtime_summary(binding.model_copy(update={"work_unit_id": unit.id}))
+            queue = None if facts.attempt_id is None else NativeExecutionStore(product.session).queue_for_attempt(facts.attempt_id)
+            if queue is not None and queue.condition.value == "CANCELLED":
+                continue
             failed = facts.completion_outcome == "NOT_PRODUCED" or (
                 facts.admissibility_outcome is not None
                 and facts.admissibility_outcome != ProductionAdmissibilityOutcome.ADMISSIBLE.value
@@ -3702,7 +3706,7 @@ class WorkApplicationService:
             elif conflict_attention:
                 status = WorkStatus.NEEDS_ATTENTION
                 next_action = "Review the unresolved Join conflict and re-enter Steering if its meaning is ambiguous"
-            elif pwu_states and all(item in {"BLOCKED", "DEPENDENCIES_PENDING"} for item in pwu_states) and not any(
+            elif any(item in {"BLOCKED", "CANCELLED"} for item in pwu_states) and all(item in {"VERIFIED", "BLOCKED", "CANCELLED", "DEPENDENCIES_PENDING"} for item in pwu_states) and not any(
                 item.get("autonomous_retry_available", False) for item in multi_runtime["pwus"]
             ):
                 status = WorkStatus.BLOCKED
@@ -3814,8 +3818,12 @@ class WorkApplicationService:
                 and facts.admissibility_outcome != ProductionAdmissibilityOutcome.ADMISSIBLE.value
                 else None
             )
+            from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+            native_queue = None if facts.attempt_id is None else NativeExecutionStore(store.session).queue_for_attempt(facts.attempt_id)
             if unit.verified_output_baseline_id is not None:
                 state, reason = "VERIFIED", None
+            elif native_queue is not None and native_queue.condition.value == "CANCELLED":
+                state, reason = "CANCELLED", "Execution was explicitly cancelled; required production remains unresolved"
             elif unit.source_baseline_id is None:
                 state, reason = "DEPENDENCIES_PENDING", "Waiting for verified predecessor baselines"
             elif facts.completion_outcome == "NOT_PRODUCED" or (
@@ -3831,8 +3839,6 @@ class WorkApplicationService:
                 )
             elif facts.dispatch_id is not None and facts.observation_id is None:
                 state, reason = "PREPARING", "Waiting for execution admission or result collection"
-                from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
-                native_queue = NativeExecutionStore(store.session).queue_for_attempt(facts.attempt_id)
                 if native_queue is not None:
                     condition = native_queue.condition.value
                     if condition in {"QUEUED", "RETURNED_TO_QUEUE"}:

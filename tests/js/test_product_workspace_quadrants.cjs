@@ -89,12 +89,14 @@ test('multi-unit Reality preserves waiting, dependency and reconciliation meanin
       {objective:'page <A>',state:'WAITING_CAPACITY',kind:'PWU'},
       {objective:'page B',state:'VERIFIED',kind:'PWU'},
       {objective:'join',state:'DEPENDENCIES_PENDING',kind:'JOIN'},
+      {objective:'withdrawn',state:'CANCELLED',kind:'PWU'},
     ],
   }}},false,false,'work');
   assert.match(html, /生产计划 · 版本 2/);
   assert.match(html, /page &lt;A>.*等待执行容量/);
   assert.match(html, /page B.*已通过验证/);
   assert.match(html, /join.*等待前置成果验证.*成果整合与验证/);
+  assert.match(html, /withdrawn.*已取消，生产义务尚未完成/);
   assert.doesNotMatch(html, /正在执行/);
   assert.equal((html.match(/data-workspace-quadrant=/g) || []).length,1);
 });
