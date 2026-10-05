@@ -115,7 +115,7 @@ def main():
             result["artifact_contents"] = {path: subprocess.check_output(["git", "-C", repo, "show",
                 f"{candidate.proposed_commit_identity}:{path}"], text=True) for path in changed}
     if args.invalid_decomposition:
-        result["invalid_decomposition"] = invalid_decomposition(db, args.work_id, units[0].completion_contract)
+        result["invalid_decomposition"] = invalid_decomposition(db, args.work_id, terminal.completion_contract)
     target = Path(args.output)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(result, ensure_ascii=False, indent=2))
