@@ -53,6 +53,15 @@ def main():
         if work:
             projection = call('/api/works/'+work)
             state[args.scenario]['work'] = projection
+            plan = projection.get('production_plan_runtime')
+            if plan:
+                checkpoint = {'plan_revision_id': plan['plan_revision_id'],
+                    'units': [{key:unit.get(key) for key in ('pwu_id', 'state', 'dependency_ids',
+                        'input_revision', 'verified_output_revision', 'workspace_attempt_id')}
+                        for unit in plan['pwus']]}
+                history = state[args.scenario].setdefault('checkpoints', [])
+                if not history or history[-1] != checkpoint:
+                    history.append(checkpoint)
             print('work',json.dumps({key:projection.get(key) for key in ('work_id','status','current_production_step','what_happens_next','production_plan_runtime')}, ensure_ascii=False))
         path.write_text(json.dumps(state, ensure_ascii=False, indent=2))
 

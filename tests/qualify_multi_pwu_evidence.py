@@ -43,14 +43,21 @@ def invalid_decomposition(db, work_id, contract):
     nodes = tuple(node.model_copy(update={"writable_paths": ()}) if node.node_id == "pwu:2" else node
                   for node in valid.graph.nodes)
     invalid = valid.model_copy(update={"graph": valid.graph.model_copy(update={"nodes": nodes})})
-    tables = (production_runs, production_work_units, execution_attempts)
+    intent_ref = f"qualification:invalid-plan:{work_id}"
+    runs = select(production_runs.c.id).where(production_runs.c.intent_ref == intent_ref)
+    units = select(production_work_units.c.id).where(production_work_units.c.production_run_id.in_(runs))
+    statements = (
+        select(func.count()).select_from(production_runs).where(production_runs.c.intent_ref == intent_ref),
+        select(func.count()).select_from(production_work_units).where(production_work_units.c.production_run_id.in_(runs)),
+        select(func.count()).select_from(execution_attempts).where(execution_attempts.c.work_unit_id.in_(units)),
+    )
     def counts():
         with db.unit_of_work() as uow:
-            return [uow.session.scalar(select(func.count()).select_from(table)) for table in tables]
+            return [uow.session.scalar(statement) for statement in statements]
     before = counts()
     try:
         RuntimeService(db).create_initial_runtime_spine(InitialRunRequest(
-            source_baseline_id=valid.source_baseline_id, intent_ref=f"work:{work_id}",
+            source_baseline_id=valid.source_baseline_id, intent_ref=intent_ref,
             goal=valid.desired_outcome, initial_work_unit_objective=valid.objective,
             production_horizon=ProductionHorizon.CODE,
             completion_contract=contract.model_copy(update={"production_plan": invalid}),
