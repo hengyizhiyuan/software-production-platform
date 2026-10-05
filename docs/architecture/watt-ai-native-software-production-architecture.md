@@ -449,6 +449,68 @@ it cannot widen admitted paths or erase an in-flight Attempt. The Control Room
 projects current Plan revision, hierarchy, dependencies, PWU states and
 blockers, and Work integrated baseline.
 
+#### Observed ECS v1 qualification — 2026-10-05
+
+Placement: `cn-wulanchabu / i-0jl386xnbauudq5j9jk0`. Runtime implementation
+revision: `6b39ee2fbd27f47454460baafacf96553770d132`; migration remains the
+single canonical head `20261005_67`. All cases entered through the normal
+Product intent API, governed IRK WORK obligation, Work admission, Steering and
+existing Cloud Worker queue. Production Worker concurrency remained **1**.
+
+| Case | Work | Qualified topology | Result |
+| --- | --- | --- | --- |
+| A: independent FAQ/contact pages | `9fbf5fc6-a721-548a-bf1b-1896621c0525` | Two roots from the same exact accepted baseline, then verified Join | REAL_PASS; Candidate `0cf20ec4-5c49-5b40-bb22-a15273e00bd7` |
+| B: team page followed by dependent directory | `c2063d84-0ee0-587f-819f-f3d0cf0e9ef8` | Two serial PWUs; successor admitted only after predecessor verification | REAL_PASS; Candidate `5e78ff00-fa9f-5ede-a3a9-64de22ebbde8` |
+| C: independent services/news pages with fan-in | `c2e79817-624c-5413-929f-5252611c5153` | Two independently verified roots and explicit reconciled/verified Join | REAL_PASS; Candidate `efe31c89-4e7b-5cb2-93f4-0f65049c214f` |
+| D: navigation entry and its Node test | `5e0ad6b9-c1a9-55c5-b3e7-11c5df861dba` | One coherent source-and-test PWU; no empty production unit | REAL_PASS; Candidate `88a5341d-eba1-5e4c-93a0-afc7e2281391` |
+
+B's successor consumed exact qualified commit
+`e0a36fbb37de9604d5f8f7751b3b78e98580d7b0`, produced by Execution
+`ce10b05e-a9cd-452e-bc0a-3c32bb8964c3`. Its own Execution
+`4202c6b6-1c0e-42d0-8e2b-9d8d008c492a` produced final revision
+`95fd926795b32313ce8d39234a09c3d7b4a2a2fa`. Structured predecessor inputs
+retain verification IDs and ECF fingerprints; timestamp checks prove each
+parent qualified before a dependent Attempt existed. A/C Join evidence is
+`GIT_MERGE_TREE_WITH_VERIFICATION_REQUIRED`, `RESOLVED_AND_VERIFIED`, with no
+unresolved conflicts. Exact final files and page links were inspected. D's
+`NODE_TEST_TARGET:tests/navigation.test.js` passed in the real runtime.
+
+A was paused safely with its roots VERIFIED and Join WAITING_CAPACITY, Worker
+DRAINING and no active Execution. API, Worker and coordinator were restarted
+(Cloud Assistant invocation `t-wl06z4e6h834xz4`). Plan/PWU/baseline/Execution
+identities remained exactly unchanged; after undraining, the existing Join
+completed without repeating either root or creating duplicate Executions.
+
+The historical empty-target class was also injected at the real planning
+admission boundary for D: `PLANNING_EMPTY_PWU`, with **0 new Run/PWU/Attempt**.
+The canonical planning owner recorded bounded Self-Refine and reconstructed a
+valid coherent obligation. Prior failed qualification Works, cancelled
+obsolete Attempts and convergence incidents remain inspectable; budgets and
+historical results were not reset. All four final Candidates remain pending
+Human acceptance. The original Human-pending Candidate and its fingerprint
+were preserved.
+
+Durable evidence: PostgreSQL owner records and
+`/var/lib/spg/owner-runtime/qualifications/multi-pwu-v1/` in the API container,
+backed by `/data/watt/app/owner-runtime/qualifications/multi-pwu-v1/` on the
+ECS (`A.json`, `B.json`, `C.json`, `D.json`, `D-admission.json`, `state.json`).
+The repository qualification readers are
+`tests/qualify_multi_pwu_runtime.py` and `tests/qualify_multi_pwu_evidence.py`;
+neither accepts a Candidate or manufactures an execution result.
+
+Bounded regression: **74 unit, 34 PostgreSQL integration and 88 UI tests PASS**.
+The UI collection includes all five four-quadrant structural tests. Real
+browser checks observed the persisted 3/2/3-unit A/B/C results without changing
+quadrant placement. No schema or infrastructure dependency was added.
+
+Current limits remain explicit: conservative exact-surface decomposition;
+all current graph nodes required; replanning only at safe boundaries without
+rewriting in-flight Attempts;
+no broad interactive replanning UI. Production concurrency remains 1. The
+Workspace path blocked by an existing Human-pending Work, missing filesystem
+hard quota, HTTP ingress, unqualified cross-host routing and unrelated
+historical test failures remain separate deferred findings.
+
 ### Production Environment foundation
 
 The [Watt Production Environment Architecture](watt-production-environment-architecture.md)
