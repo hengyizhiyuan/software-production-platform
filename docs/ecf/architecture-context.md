@@ -61,3 +61,17 @@ Do not include `.env` values, credentials, raw secrets or account-wide cloud
 authority in the context package. ECF provides need-to-know engineering
 context; it does not grant need-to-act authority. Human authorization,
 Guardian assurance and runtime verification keep their existing owners.
+
+## Production Runtime Context source
+
+The [Production Execution Runtime](../architecture/production-execution-runtime.md)
+and [ADR-009](../architecture/adr/ADR-009-execution-context-binding.md),
+[ADR-010](../architecture/adr/ADR-010-workspace-isolation.md),
+[ADR-011](../architecture/adr/ADR-011-verification-before-completion.md)
+are canonical design sources. For an exact Work/Task decision, a future ECF
+Runtime Context may consume persisted IRK/Task/Execution linkage, queue and
+lease state, Workspace source revision, verification records and immutable
+result evidence with their timestamps and digests. It must distinguish a
+Worker result claim from a verified Work outcome, and treat missing/stale
+source, owner or verification evidence as unresolved. This adds no ECF endpoint
+or new ECF decision authority.

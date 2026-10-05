@@ -241,6 +241,7 @@ class NativeRetentionService:
                     )
                     .values(
                         condition=WorkspaceCondition.HIBERNATED.value,
+                        cleanup_status="ARCHIVED",
                         version=workspace["version"] + 1,
                         updated_at=now,
                     )
@@ -288,6 +289,7 @@ class NativeRetentionService:
                 )
                 .values(
                     condition=WorkspaceCondition.READY.value,
+                    cleanup_status="RETAINED",
                     version=version + 1,
                     updated_at=now,
                 )
@@ -551,6 +553,7 @@ class NativeRetentionService:
                 )
                 .values(
                     condition=WorkspaceCondition.DELETED.value,
+                    cleanup_status="CLEANED",
                     version=workspace["version"] + 1,
                     updated_at=now,
                 )

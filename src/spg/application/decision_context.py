@@ -24,6 +24,7 @@ from spg.domain.product import ProductInvariantViolation
 
 POLICY_VERSION = "watt-ecf-decision-context-v1"
 WORKSPACE_SURFACE = "WORKSPACE_PRODUCT_UI"
+MANAGED_WEB_SURFACE = "MANAGED_PRODUCT_WEB_UI"
 ECS_SURFACE = "ALIYUN_ECS_DELIVERY"
 MILESTONE_SURFACE = "GOVERNED_MILESTONE_CLOSURE"
 SESSION_SURFACE = "GOVERNED_SESSION_BOOTSTRAP"
@@ -239,14 +240,19 @@ def lineage_for_work_task(database, *, work_id: UUID,
         remote = _git(repository_path, "remote", "get-url", "origin")
     except ValueError:
         return None
-    if remote not in _WATT_SOURCE_REMOTES:
-        return None
-    surface = policy_for_targets(target_paths)
+    watt_source = remote in _WATT_SOURCE_REMOTES
+    surface = policy_for_targets(target_paths) if watt_source else None
+    if not watt_source and target_paths and all(
+        Path(path).suffix.lower() in {".html", ".css", ".js"}
+        for path in target_paths
+    ):
+        surface = MANAGED_WEB_SURFACE
     if surface is None:
         return None
     from sqlalchemy import select
     from spg.infrastructure.persistence.product_schema import (
-        product_managed_sources, product_works,
+        engineering_resources, product_managed_sources, product_works,
+        work_source_bases,
     )
     from spg.infrastructure.persistence.product_store import ProductStore
 
@@ -254,10 +260,23 @@ def lineage_for_work_task(database, *, work_id: UUID,
         product_id = unit_of_work.session.execute(
             select(product_works.c.product_id).where(product_works.c.id == work_id)
         ).scalar_one_or_none()
-        source_owner = unit_of_work.session.execute(
-            select(product_managed_sources.c.product_id).where(
-                product_managed_sources.c.repository_identity == repository_identity)
-        ).scalar_one_or_none()
+        if watt_source:
+            source_owner = unit_of_work.session.execute(
+                select(product_managed_sources.c.product_id).where(
+                    product_managed_sources.c.repository_identity == repository_identity)
+            ).scalar_one_or_none()
+        else:
+            source_owner = unit_of_work.session.execute(
+                select(work_source_bases.c.product_id)
+                .join(engineering_resources,
+                      engineering_resources.c.id == work_source_bases.c.resource_id)
+                .join(product_managed_sources,
+                      product_managed_sources.c.product_id == work_source_bases.c.product_id)
+                .where(work_source_bases.c.work_id == work_id,
+                       engineering_resources.c.repository_identity == repository_identity,
+                       work_source_bases.c.source_revision == repository_revision,
+                       product_managed_sources.c.provider_kind == "gitea")
+            ).scalar_one_or_none()
         work = ProductStore(unit_of_work.session).work(work_id)
     if product_id is None or work is None or source_owner != product_id:
         raise DecisionContextAuthorityMissing(
@@ -299,7 +318,8 @@ def assert_task_context_fresh(database, task) -> None:
         raise ValueError("Gated Task Contract requires exact Work")
     from spg.infrastructure.persistence.product_store import ProductStore
     from spg.infrastructure.persistence.product_schema import (
-        product_managed_sources, product_works,
+        engineering_resources, product_managed_sources, product_works,
+        work_source_bases,
     )
     from sqlalchemy import select
     with database.unit_of_work() as unit_of_work:
@@ -308,11 +328,25 @@ def assert_task_context_fresh(database, task) -> None:
             select(product_works.c.product_id).where(
                 product_works.c.id == UUID(lineage.work_id))
         ).scalar_one_or_none()
-        current_source_owner = (None if lineage.repository_identity is None else
-            unit_of_work.session.execute(
+        if lineage.repository_identity is None:
+            current_source_owner = None
+        elif lineage.surface == MANAGED_WEB_SURFACE:
+            current_source_owner = unit_of_work.session.execute(
+                select(work_source_bases.c.product_id)
+                .join(engineering_resources,
+                      engineering_resources.c.id == work_source_bases.c.resource_id)
+                .join(product_managed_sources,
+                      product_managed_sources.c.product_id == work_source_bases.c.product_id)
+                .where(work_source_bases.c.work_id == UUID(lineage.work_id),
+                       engineering_resources.c.repository_identity == lineage.repository_identity,
+                       work_source_bases.c.source_revision == lineage.repository_revision,
+                       product_managed_sources.c.provider_kind == "gitea")
+            ).scalar_one_or_none()
+        else:
+            current_source_owner = unit_of_work.session.execute(
                 select(product_managed_sources.c.product_id).where(
                     product_managed_sources.c.repository_identity == lineage.repository_identity)
-            ).scalar_one_or_none())
+            ).scalar_one_or_none()
     if work is None:
         raise DecisionContextChanged(lineage.package_fingerprint, "missing-work")
     if (current_product_id != UUID(lineage.product_id)
@@ -370,6 +404,8 @@ class WattDecisionContextGateway:
         policy = {
             WORKSPACE_SURFACE: (ecf.ConsumerRole.PRODUCT_DESIGN,
                                 ecf.DecisionType.PRODUCT_UI_CHANGE),
+            MANAGED_WEB_SURFACE: (ecf.ConsumerRole.PRODUCT_DESIGN,
+                                  ecf.DecisionType.PRODUCT_UI_CHANGE),
             ECS_SURFACE: (ecf.ConsumerRole.ARCHITECTURE_DESIGN,
                           ecf.DecisionType.DELIVERY_CAPABILITY_DESIGN),
             MILESTONE_SURFACE: (ecf.ConsumerRole.GOVERNANCE_CLOSURE,
@@ -447,6 +483,17 @@ class WattDecisionContextGateway:
                 "## 4. Workspace is a product projection",
                 ecf.ContextClass.APPROVED_CONSTRAINT, "workspace-boundary",
                 "constraint", owners.architecture_owner)
+        elif requirement.surface == MANAGED_WEB_SURFACE:
+            for heading, context_class, key, field, owner in (
+                ("## Product Intent", ecf.ContextClass.PRODUCT_INTENT,
+                 "managed-product-intent", "intent", owners.product_owner),
+                ("## Product Invariant", ecf.ContextClass.PRODUCT_INVARIANT,
+                 "managed-product-invariant", "invariant", owners.product_owner),
+                ("## Approved Decision", ecf.ContextClass.APPROVED_DECISION,
+                 "managed-product-decision", "decision", owners.governance_owner),
+            ):
+                document_record("README.md", heading, context_class, key,
+                                field, owner)
         elif requirement.surface == ECS_SURFACE:
             document_record(_ECS_DOC, "## Product Intent",
                 ecf.ContextClass.PRODUCT_INTENT, "ecs-automatic-delivery",

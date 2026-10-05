@@ -24,10 +24,12 @@ from spg.domain.native_execution import (
     AttemptTerminalOutcome,
     CapabilityGrant,
     ExecutionBindingV2,
+    ExecutionContextNotReady,
     ExecutionMode,
     NativeExecutionAdmission,
     NativeExecutionNotFound,
     PWUContractVersionRecord,
+    ProductionExecutionContext,
     ResourceEnvelope,
     SourceMember,
     SourceVector,
@@ -38,6 +40,7 @@ from spg.domain.native_execution import (
 from spg.domain.connectors import CapabilityRequirement, SideEffectLevel
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 
@@ -61,6 +64,7 @@ class NativeQueuedExecutorCapability:
         poll_seconds: float = 1.0,
         wait_seconds: float = 3600.0,
         production_environment: NativeProductionEnvironmentRuntime | None = None,
+        strict_production_context: bool = True,
     ) -> None:
         self.database = database
         self.runtime = runtime
@@ -70,6 +74,7 @@ class NativeQueuedExecutorCapability:
         self.poll_seconds = poll_seconds
         self.wait_seconds = wait_seconds
         self.production_environment = production_environment
+        self.strict_production_context = strict_production_context
 
     def dispatch(self, request: ExecutorDispatchRequest) -> ExecutorDispatchResult:
         started = datetime.now(UTC)
@@ -180,6 +185,21 @@ class NativeQueuedExecutorCapability:
                 None if product_binding is None
                 else product_store.current_work_reality_revision(product_binding.work_id)
             )
+            semantic_ir_id = None
+            if product_binding is not None:
+                revision = work_revision
+                while revision is not None:
+                    if revision.source_assessment_id is not None:
+                        assessment = InteractionStore(uow.session).assessment(
+                            revision.source_assessment_id
+                        )
+                        if assessment is not None and assessment.semantic_ir is not None:
+                            semantic_ir_id = assessment.semantic_ir.id
+                            break
+                    revision = (
+                        None if revision.previous_revision_id is None
+                        else product_store.work_reality_revision(revision.previous_revision_id)
+                    )
         if any(item is None for item in (work_unit, attempt, snapshot, package)):
             raise RuntimeError("native compatibility admission lineage is incomplete")
         work_id = (
@@ -242,6 +262,33 @@ class NativeQueuedExecutorCapability:
             )
         session_id = uuid5(NAMESPACE_URL, f"watt-native:session:{execution.work_unit_id}")
         workspace_id = uuid5(NAMESPACE_URL, f"watt-native:workspace:{execution.attempt_id}")
+        task_contract = work_unit.completion_contract.task_contract
+        production_context = None
+        if product_binding is not None and self.strict_production_context:
+            lineage = None if task_contract is None else task_contract.decision_context
+            requirements = work_unit.completion_contract.verification_obligations
+            if (
+                lineage is None or semantic_ir_id is None or work_revision is None
+                or not requirements or work_revision.repository_identity != execution.workspace.repository_identity
+                or work_revision.source_revision != commit
+                or lineage.work_id != str(work_id)
+                or lineage.repository_revision != commit
+                or lineage.repository_identity != execution.workspace.repository_identity
+            ):
+                raise ExecutionContextNotReady(
+                    "EXECUTION_CONTEXT_NOT_READY: exact IRK, ECF, Work, source or verification basis missing"
+                )
+            production_context = ProductionExecutionContext(
+                work_id=work_id,
+                task_contract_id=task_contract.task_contract_id,
+                ecf_context_fingerprint=lineage.package_fingerprint,
+                irk_semantic_ir_id=semantic_ir_id,
+                repository_identity=execution.workspace.repository_identity,
+                repository_revision=commit,
+                workspace_id=workspace_id,
+                verification_requirements=requirements,
+                work_reality_revision_id=work_revision.id,
+            )
         envelope = ResourceEnvelope(
             envelope_id=uuid5(NAMESPACE_URL, f"watt-native:envelope:{execution.attempt_id}"),
             policy_version="watt-native-mvp-v1",
@@ -408,6 +455,7 @@ class NativeQueuedExecutorCapability:
                 for identity in capability_ids
             ),
             resource_envelope=envelope,
+            production_context=production_context,
             stop_conditions=tuple(work_unit.completion_contract.blocking_conditions),
             obligation_references=tuple(
                 (

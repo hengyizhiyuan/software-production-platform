@@ -18,6 +18,7 @@ from spg.application.decision_context import (
     DecisionContextRequirement,
     ECS_SURFACE,
     MILESTONE_SURFACE,
+    MANAGED_WEB_SURFACE,
     WORKSPACE_SURFACE,
     WattDecisionContextGateway,
     MilestoneClosureContextService,
@@ -115,6 +116,49 @@ def test_exact_registry_keeps_unrelated_tasks_legacy():
             ecf_references=("repository:one",),
             decision_reference="work:one", governed_surface=WORKSPACE_SURFACE,
         ))
+
+
+def test_managed_web_change_requires_project_intent_invariant_and_decision(
+    tmp_path: Path,
+):
+    repository = tmp_path / "managed-web"
+    repository.mkdir()
+    git(repository, "init", "-b", "accepted")
+    git(repository, "config", "user.name", "ECF integration test")
+    git(repository, "config", "user.email", "ecf@example.invalid")
+    readme = repository / "README.md"
+    readme.write_text(
+        "# Company website\n\n## Product Intent\nPublic company identity.\n\n"
+        "## Product Invariant\nKeep the existing navigation available.\n\n"
+        "## Approved Decision\nAdd one bounded page entry.\n",
+        encoding="utf-8",
+    )
+    (repository / "index.html").write_text("<main>Home</main>\n")
+    git(repository, "add", ".")
+    git(repository, "commit", "-m", "managed website baseline")
+    req = DecisionContextRequirement(
+        MANAGED_WEB_SURFACE, uuid4(), uuid4(), "index.html",
+        repository, git(repository, "rev-parse", "HEAD"), "watt://web-test",
+    )
+    gateway = WattDecisionContextGateway()
+    package = gateway.require_ready(req, work_statement="Add a page entry",
+                                    work_revision="work-1")
+    lineage = gateway.lineage(package, req)
+    assert {item.context_class for item in lineage.protected_obligations} == {
+        "PRODUCT_INTENT", "PRODUCT_INVARIANT", "APPROVED_DECISION",
+    }
+    readme.write_text(readme.read_text().replace(
+        "## Product Invariant", "## Missing invariant"))
+    git(repository, "add", ".")
+    git(repository, "commit", "-m", "remove invariant")
+    changed = DecisionContextRequirement(
+        MANAGED_WEB_SURFACE, req.product_id, req.work_id, req.subject,
+        repository, git(repository, "rev-parse", "HEAD"), req.repository_identity,
+    )
+    with pytest.raises(DecisionContextNotReady) as error:
+        gateway.require_ready(changed, work_statement="Add a page entry",
+                              work_revision="work-1")
+    assert "PRODUCT_INVARIANT" in error.value.missing_classes
 
 
 def test_workspace_invariant_is_required_before_task_formation(source_repo: Path):

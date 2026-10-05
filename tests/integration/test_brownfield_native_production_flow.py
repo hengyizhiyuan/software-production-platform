@@ -243,7 +243,8 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
     )
     assert admitted.status is WorkStatus.READY
 
-    runtime = NativeExecutorRuntimeService(postgres_database)
+    # This historical qualification fixture predates the Product ECF execution gate.
+    runtime = NativeExecutorRuntimeService(postgres_database, enforce_product_context=False)
     provider = ContainerProductionEnvironmentProvider(DockerCliContainerRuntime())
     pe_store = JsonProductionEnvironmentStore(tmp_path / "production-environments")
     ECFRealityRuntime, JsonRealityStore, JsonAssuranceIntakeStore = load_runtime_owners()
@@ -269,6 +270,7 @@ def test_real_work_task_contract_pwu_native_pe_preview_and_authorization(
         poll_seconds=0.05,
         wait_seconds=90,
         production_environment=pe_runtime,
+        strict_production_context=False,
     )
     preparation = PreparationService(
         postgres_database,

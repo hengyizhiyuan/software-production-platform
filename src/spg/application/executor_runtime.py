@@ -33,6 +33,7 @@ from spg.domain.native_execution import (
     NativeAttemptStateRecord,
     NativeExecutionAdmission,
     NativeExecutionConflict,
+    ExecutionContextNotReady,
     NativeExecutionNotFound,
     NativeExecutionNotRunnable,
     ObservationConfidence,
@@ -64,6 +65,10 @@ from spg.domain.refinement_contract import (
 )
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.infrastructure.persistence import Database
+from spg.infrastructure.persistence.product_store import ProductStore
+from spg.infrastructure.persistence.runtime_store import RuntimeStore
+from spg.domain.production_intelligence import TaskContract
+from spg.domain.verification import VerificationResultValue
 
 
 def _utcnow() -> datetime:
@@ -150,6 +155,7 @@ class NativeExecutorRuntimeService:
         self_refine_time_budget_seconds: int = 300,
         self_refine_inference_budget: int = 12,
         self_refine_token_budget: int = 20000,
+        enforce_product_context: bool = True,
     ) -> None:
         if min(
             self_refine_attempt_budget, same_failure_threshold,
@@ -165,6 +171,7 @@ class NativeExecutorRuntimeService:
         self.self_refine_time_budget_seconds = self_refine_time_budget_seconds
         self.self_refine_inference_budget = self_refine_inference_budget
         self.self_refine_token_budget = self_refine_token_budget
+        self.enforce_product_context = enforce_product_context
 
     def admit(self, command: NativeExecutionAdmission) -> ExecutionQueueEntryRecord:
         binding = command.binding
@@ -178,11 +185,15 @@ class NativeExecutorRuntimeService:
             raise NativeExecutionConflict("PWU contract payload digest is invalid")
 
         binding_basis = binding.model_dump(mode="json")
+        if binding.production_context is None:
+            binding_basis.pop("production_context")
         envelope_basis = binding_basis["resource_envelope"]
         if binding.resource_envelope.max_log_bytes == 65536:
             envelope_basis.pop("max_log_bytes")
         if binding.resource_envelope.max_artifact_bytes == 67108864:
             envelope_basis.pop("max_artifact_bytes")
+        if binding.resource_envelope.max_workspace_bytes == 536870912:
+            envelope_basis.pop("max_workspace_bytes")
         digest_basis = {
             "actor_identity": command.actor_identity,
             "fairness_group": command.fairness_group,
@@ -217,6 +228,42 @@ class NativeExecutorRuntimeService:
         )
         with self.database.unit_of_work() as uow:
             store = NativeExecutionStore(uow.session)
+            product = ProductStore(uow.session)
+            product_binding = product.runtime_binding_for_work_unit(binding.pwu_id)
+            if product_binding is not None and self.enforce_product_context:
+                context = binding.production_context
+                payload = command.contract.contract_payload.get("completion_contract", {})
+                task_payload = payload.get("task_contract") if isinstance(payload, dict) else None
+                if context is None or not isinstance(task_payload, dict):
+                    raise ExecutionContextNotReady("EXECUTION_CONTEXT_NOT_READY: Product Task Context missing")
+                task = TaskContract.model_validate(task_payload)
+                lineage = task.decision_context
+                revision = product.current_work_reality_revision(product_binding.work_id)
+                if (
+                    lineage is None or revision is None
+                    or context.work_id != product_binding.work_id
+                    or context.work_reality_revision_id != revision.id
+                    or context.task_contract_id != task.task_contract_id
+                    or context.ecf_context_fingerprint != lineage.package_fingerprint
+                    or context.irk_semantic_ir_id is None
+                    or context.verification_requirements != tuple(
+                        payload.get("verification_obligations", ())
+                    )
+                ):
+                    raise ExecutionContextNotReady("EXECUTION_CONTEXT_NOT_READY: Product context changed")
+                irk_ids = set()
+                from spg.infrastructure.persistence.interaction_store import InteractionStore
+                interactions = InteractionStore(uow.session)
+                for source_revision in product.work_reality_revisions(product_binding.work_id):
+                    if source_revision.source_assessment_id is None:
+                        continue
+                    assessment = interactions.assessment(source_revision.source_assessment_id)
+                    if assessment is not None and assessment.semantic_ir is not None:
+                        irk_ids.add(assessment.semantic_ir.id)
+                if context.irk_semantic_ir_id not in irk_ids:
+                    raise ExecutionContextNotReady("EXECUTION_CONTEXT_NOT_READY: IRK identity is not Work lineage")
+                from spg.application.decision_context import assert_task_context_fresh
+                assert_task_context_fresh(self.database, task)
             try:
                 store.attempt_binding(binding.attempt_id)
             except NativeExecutionNotFound:
@@ -289,7 +336,16 @@ class NativeExecutorRuntimeService:
                     event_type="ExecutionRequestCreated",
                     payload={"execution_id": str(binding.attempt_id),
                              "task_contract_reference": str(binding.pwu_contract_version_id),
-                             "priority": command.priority},
+                             "priority": command.priority,
+                             **({} if binding.production_context is None else {
+                                 "irk_semantic_ir_id": str(binding.production_context.irk_semantic_ir_id),
+                                 "ecf_context_fingerprint": binding.production_context.ecf_context_fingerprint,
+                                 "task_contract_id": str(binding.production_context.task_contract_id),
+                                 "repository_identity": binding.production_context.repository_identity,
+                                 "repository_revision": binding.production_context.repository_revision,
+                                 "workspace_id": str(binding.production_context.workspace_id),
+                                 "verification_requirements": list(binding.production_context.verification_requirements),
+                             })},
                     causation_id=command.command_id,
                 )
                 self._append_event(
@@ -412,6 +468,30 @@ class NativeExecutorRuntimeService:
             )
             uow.commit()
 
+    def record_production_observation(
+        self, grant: ExecutionAllocationGrant, *, stage: str,
+        worker_version: str, change_request: str,
+        observation: dict[str, object],
+    ) -> None:
+        if stage not in {"WORKSPACE_PREPARED", "RESULT_OBSERVED"}:
+            raise ValueError("unsupported production observation stage")
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            state = store.attempt_state(grant.allocation.attempt_id, lock=True)
+            if state.worker_epoch != grant.allocation.lease_epoch:
+                raise NativeExecutionConflict("production evidence worker epoch was fenced")
+            self._append_event(
+                store, pwu_id=grant.allocation.pwu_id,
+                attempt_id=grant.allocation.attempt_id,
+                event_type=("ExecutionWorkspacePrepared" if stage == "WORKSPACE_PREPARED"
+                            else "ExecutionResultObserved"),
+                payload={"worker_id": grant.allocation.worker_id,
+                         "runtime_version": worker_version,
+                         "change_request": change_request,
+                         **observation},
+            )
+            uow.commit()
+
     def list_workers(self) -> tuple[WorkerRegistrationRecord, ...]:
         with self.database.unit_of_work() as uow:
             return tuple(NativeExecutionStore(uow.session).all_worker_registrations())
@@ -464,8 +544,37 @@ class NativeExecutorRuntimeService:
                             "payload": event.payload,
                         })
                 if len(batch) < 256:
+                    for record in self._attempt_verifications(
+                        RuntimeStore(uow.session), binding.pwu_id, execution_id
+                    ):
+                        evidence.append({
+                            "timestamp": record.created_at,
+                            "source": record.provider.provider_identity,
+                            "entity_id": execution_id,
+                            "event_type": (
+                                "ExecutionVerificationPassed"
+                                if record.result is VerificationResultValue.PASS
+                                else "ExecutionVerificationFailed"
+                                if record.result is VerificationResultValue.FAIL
+                                else "ExecutionVerificationUnknown"
+                            ),
+                            "payload_reference": f"sha256:{canonical_digest(record.model_dump(mode='json'))}",
+                            "payload": {
+                                "verification_record_id": str(record.id),
+                                "obligation": record.obligation,
+                                "result": record.result.value,
+                                "subject_commit": record.proposed_commit_identity,
+                            },
+                        })
                     return tuple(evidence)
                 cursor = batch[-1].sequence
+
+    @staticmethod
+    def _attempt_verifications(runtime: RuntimeStore, pwu_id: UUID, attempt_id: UUID):
+        records = runtime.verification_records_for_work_unit(pwu_id)
+        return tuple(record for record in records
+                     if (snapshot := runtime.proposed_snapshot(record.proposed_snapshot_id)) is not None
+                     and snapshot.attempt_id == attempt_id)
 
     def execution_request(self, execution_id: UUID) -> CloudExecutionRequest:
         with self.database.unit_of_work() as uow:
@@ -475,6 +584,18 @@ class NativeExecutorRuntimeService:
             state = store.attempt_state(execution_id)
             allocation = store.allocation_for_attempt(execution_id)
             lease = store.lease_for_attempt(execution_id)
+            context = binding.binding.production_context
+            verification_state = None
+            if context is not None:
+                records = self._attempt_verifications(
+                    RuntimeStore(uow.session), queue.pwu_id, execution_id
+                )
+                observed = {item.obligation: item.result for item in records}
+                if any(value is VerificationResultValue.FAIL for value in observed.values()):
+                    verification_state = "FAILED"
+                elif all(observed.get(item) is VerificationResultValue.PASS
+                         for item in context.verification_requirements):
+                    verification_state = "VERIFIED"
             if state.grant_state is AttemptGrantState.FENCED or state.runtime_mode is ExecutionMode.RECONCILING:
                 status = CloudExecutionStatus.RECOVERY_REQUIRED
             elif queue.condition is QueueCondition.ALLOCATED:
@@ -485,8 +606,13 @@ class NativeExecutorRuntimeService:
                 status = CloudExecutionStatus.CANCELLED
             elif queue.condition is QueueCondition.COMPLETED:
                 status = (
-                    CloudExecutionStatus.COMPLETED
+                    CloudExecutionStatus.FAILED
+                    if verification_state == "FAILED"
+                    else CloudExecutionStatus.COMPLETED
                     if store.work_unit_condition(queue.pwu_id) == "SATISFIED"
+                    and (context is None or verification_state == "VERIFIED")
+                    else CloudExecutionStatus.VERIFIED
+                    if verification_state == "VERIFIED"
                     else
                     CloudExecutionStatus.VERIFYING
                     if state.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
@@ -503,7 +629,8 @@ class NativeExecutorRuntimeService:
                 worker_id=allocation.worker_id if allocation else None,
                 lease_expire_at=lease.deadline if lease else None,
                 queue_entry_id=queue.id,
-                recovery_reason="; ".join(state.blocker_reasons) or None,
+                recovery_reason=("VERIFICATION_FAILED" if verification_state == "FAILED"
+                                 else "; ".join(state.blocker_reasons) or None),
             )
 
     def allocate(self, offer: WorkerOffer) -> ExecutionAllocationGrant | None:

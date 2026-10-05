@@ -47,6 +47,12 @@ class NativeExecutionNotRunnable(NativeExecutionError):
     """The requested execution cannot currently consume capacity."""
 
 
+class ExecutionContextNotReady(NativeExecutionError):
+    """A Product execution lacks its exact governed production context."""
+
+    code = "EXECUTION_CONTEXT_NOT_READY"
+
+
 class PWUDisposition(StrEnum):
     OPEN = "OPEN"
     SATISFIED = "SATISFIED"
@@ -343,6 +349,7 @@ class ResourceEnvelope(NativeRecord):
     max_active_seconds: int = Field(default=3600, ge=1)
     max_log_bytes: int = Field(default=65536, ge=1024)
     max_artifact_bytes: int = Field(default=67108864, ge=1024)
+    max_workspace_bytes: int = Field(default=536870912, ge=1048576)
     max_successor_recoveries: int = Field(default=3, ge=0)
     max_parallel_workers: int = Field(default=1, ge=1)
     max_cost_units: int | None = Field(default=None, ge=0)
@@ -358,6 +365,20 @@ class ResourceEnvelope(NativeRecord):
             raise ValueError("permitted provider profiles must be unique")
         object.__setattr__(self, "permitted_provider_profiles", profiles)
         return self
+
+
+class ProductionExecutionContext(NativeRecord):
+    """Immutable references admitted by Work and the ECF Decision Context owner."""
+
+    work_id: UUID
+    task_contract_id: UUID
+    ecf_context_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    irk_semantic_ir_id: UUID
+    repository_identity: str = Field(min_length=1)
+    repository_revision: str = Field(min_length=1)
+    workspace_id: UUID
+    verification_requirements: tuple[str, ...] = Field(min_length=1)
+    work_reality_revision_id: UUID
 
 
 class ExecutionBindingV2(NativeRecord):
@@ -379,6 +400,7 @@ class ExecutionBindingV2(NativeRecord):
     inference_profile: str = Field(min_length=1)
     capability_grants: Annotated[tuple[CapabilityGrant, ...], Field(min_length=1)]
     resource_envelope: ResourceEnvelope
+    production_context: ProductionExecutionContext | None = None
     stop_conditions: tuple[str, ...] = ()
     obligation_references: tuple[str, ...] = ()
 
@@ -395,6 +417,16 @@ class ExecutionBindingV2(NativeRecord):
         capabilities = [item.identity for item in self.capability_grants]
         if len(set(capabilities)) != len(capabilities):
             raise ValueError("capability grants must be unique")
+        context = self.production_context
+        if context is not None:
+            if context.work_id != self.work_id or context.workspace_id != self.workspace.workspace_id:
+                raise ValueError("production context Work/Workspace differs from execution")
+            if not any(
+                member.repository_identity == context.repository_identity
+                and member.source_commit_oid == context.repository_revision
+                for member in self.source_vector.members
+            ):
+                raise ValueError("production context repository differs from SourceVector")
         return self
 
 
@@ -791,6 +823,7 @@ class CloudExecutionStatus(StrEnum):
     RUNNING = "RUNNING"
     RECOVERY_REQUIRED = "RECOVERY_REQUIRED"
     VERIFYING = "VERIFYING"
+    VERIFIED = "VERIFIED"
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
     CANCELLED = "CANCELLED"

@@ -350,6 +350,9 @@ async def run_worker() -> None:
     worker = NativeExecutionWorker(
         runtime, kernel_factory,
         heartbeat_seconds=settings.native_executor_heartbeat_seconds,
+        production_evidence_store=ContentAddressedStorage(
+            settings.native_executor_storage_root / "production-evidence"
+        ),
     )
     offer = WorkerOffer(
         worker_id=settings.native_executor_worker_id,

@@ -88,11 +88,15 @@ services:
       SPG_DATABASE_URL: postgresql+psycopg://spg:spg-native-local@postgres:5432/spg_dev?sslmode=disable&connect_timeout=5
       SPG_NATIVE_EXECUTOR_ENABLED: "true"
       SPG_NATIVE_EXECUTOR_POLL_SECONDS: "1"
+      SPG_NATIVE_EXECUTOR_STORAGE_ROOT: /var/lib/spg/native-checkpoints
     init: true
     read_only: true
     tmpfs: [/tmp]
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
+    volumes:
+      - native-checkpoints:/var/lib/spg/native-checkpoints
+      - native-workspaces:/var/lib/spg/native-workspaces
     networks: [control]
 
   native-tool-host:

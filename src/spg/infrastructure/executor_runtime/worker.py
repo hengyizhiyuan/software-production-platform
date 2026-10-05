@@ -21,6 +21,10 @@ from spg.domain.native_execution import (
 from spg.executor.kernel import NativeExecutorKernel
 from spg.executor.context import NativeContextCapacityError
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+from spg.infrastructure.executor_runtime.local_storage import ContentAddressedStorage
+from spg.infrastructure.executor_runtime.production_evidence import (
+    ProductionWorkspaceVerificationFailed, observe_production_workspace,
+)
 from spg.infrastructure.executor_runtime.inference import (
     InferenceAdapterError,
     InferenceResourceUnavailable,
@@ -41,12 +45,14 @@ class NativeExecutionWorker:
         kernel_factory: KernelFactory,
         *,
         heartbeat_seconds: int = 10,
+        production_evidence_store: ContentAddressedStorage | None = None,
     ) -> None:
         if heartbeat_seconds < 1:
             raise ValueError("heartbeat interval must be positive")
         self.runtime = runtime
         self.kernel_factory = kernel_factory
         self.heartbeat_seconds = heartbeat_seconds
+        self.production_evidence_store = production_evidence_store
 
     async def run_once(self, offer: WorkerOffer) -> bool:
         grant = await asyncio.to_thread(self.runtime.allocate, offer)
@@ -56,6 +62,45 @@ class NativeExecutionWorker:
         binding_record, contract, checkpoint, session_step_frontier = await asyncio.to_thread(
             self._load_execution_reality, grant
         )
+        production_context = binding_record.binding.production_context
+        completion = contract.contract_payload.get("completion_contract", {})
+        if (self.runtime.enforce_product_context and isinstance(completion, dict)
+                and completion.get("task_contract") and production_context is None):
+            await asyncio.to_thread(self.runtime.finish_allocation, grant, KernelRunResult(
+                runtime_mode=ExecutionMode.FINISHED,
+                terminal_outcome=AttemptTerminalOutcome.UNABLE_TO_COMPLETE,
+                final_checkpoint_id=None, step_count=0, inference_submissions=0,
+                tool_effects=0, summary="EXECUTION_CONTEXT_NOT_READY: production binding missing",
+                failure_family="EXECUTION_CONTEXT_NOT_READY",
+            ))
+            return True
+        if production_context is not None:
+            if self.production_evidence_store is None:
+                failure = "EXECUTION_CONTEXT_NOT_READY: durable evidence storage missing"
+            else:
+                try:
+                    observation = await asyncio.to_thread(
+                        observe_production_workspace, binding_record.binding,
+                        self.production_evidence_store, require_change=False,
+                    )
+                    await asyncio.to_thread(
+                        self.runtime.record_production_observation, grant,
+                        stage="WORKSPACE_PREPARED", worker_version=offer.runtime_version,
+                        change_request=contract.objective, observation=observation,
+                    )
+                    failure = None
+                except ProductionWorkspaceVerificationFailed as error:
+                    failure = str(error)
+            if failure is not None:
+                await asyncio.to_thread(self.runtime.finish_allocation, grant, KernelRunResult(
+                    runtime_mode=ExecutionMode.FINISHED,
+                    terminal_outcome=AttemptTerminalOutcome.UNABLE_TO_COMPLETE,
+                    final_checkpoint_id=None, step_count=0, inference_submissions=0,
+                    tool_effects=0, summary=failure,
+                    failure_family=("EXECUTION_CONTEXT_NOT_READY" if failure.startswith("EXECUTION_CONTEXT_NOT_READY")
+                                    else "VERIFICATION_FAILED"),
+                ))
+                return True
         if (
             checkpoint is not None
             and checkpoint.schema_version not in SUPPORTED_CHECKPOINT_SCHEMA_VERSIONS
@@ -249,6 +294,32 @@ class NativeExecutionWorker:
                     residual_obligations=residual,
                     failure_family="INVALID_PROVIDER_RESPONSE",
                 )
+            if production_context is not None and result.terminal_outcome is AttemptTerminalOutcome.RESULT_READY:
+                assert self.production_evidence_store is not None
+                try:
+                    task_payload = completion.get("task_contract", {}) if isinstance(completion, dict) else {}
+                    scope = task_payload.get("scope", ()) if isinstance(task_payload, dict) else ()
+                    required_artifacts = tuple(
+                        item.split(":", 1)[1] for item in scope
+                        if isinstance(item, str) and item.startswith(("CREATE:", "UPDATE:"))
+                    )
+                    observation = await asyncio.to_thread(
+                        observe_production_workspace, binding_record.binding,
+                        self.production_evidence_store, require_change=True,
+                        required_artifacts=required_artifacts,
+                    )
+                    await asyncio.to_thread(
+                        self.runtime.record_production_observation, grant,
+                        stage="RESULT_OBSERVED", worker_version=offer.runtime_version,
+                        change_request=contract.objective, observation=observation,
+                    )
+                except ProductionWorkspaceVerificationFailed as error:
+                    result = result.model_copy(update={
+                        "terminal_outcome": AttemptTerminalOutcome.UNABLE_TO_COMPLETE,
+                        "result_claim": None,
+                        "summary": str(error),
+                        "failure_family": "VERIFICATION_FAILED",
+                    })
             await asyncio.to_thread(self.runtime.finish_allocation, grant, result)
             return True
         finally:
