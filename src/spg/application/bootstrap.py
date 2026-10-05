@@ -323,7 +323,12 @@ class Application:
                 ContractDrivenRepositoryVerifier,
             )
 
-            selected_verifier = ContractDrivenRepositoryVerifier(selected_database)
+            context_verifier = None
+            if self.settings.owner_runtime_mode == "REQUIRED":
+                from spg.providers.protected_context_verifier import StaticProtectedContextVerifier
+                context_verifier = StaticProtectedContextVerifier.from_settings(self.settings)
+            selected_verifier = ContractDrivenRepositoryVerifier(
+                selected_database, context_verifier=context_verifier)
         elif (
             selected_verifier is None
             and self.settings.verification_adapter == "mvp-e2e-markdown"

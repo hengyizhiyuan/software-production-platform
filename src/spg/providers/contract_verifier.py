@@ -14,13 +14,13 @@ from spg.providers.repository_markdown_verifier import RepositoryArtifactVerifie
 class ContractDrivenRepositoryVerifier:
     """Route one exact obligation from the admitted PWU contract type."""
 
-    def __init__(self, database: Database) -> None:
+    def __init__(self, database: Database, *, context_verifier=None) -> None:
         self.database = database
-        self.code = RepositoryCodeVerifier(database)
+        self.code = RepositoryCodeVerifier(database, context_verifier=context_verifier)
         self.documentation = RepositoryArtifactVerifier(database)
         self._binding = VerificationProviderBinding(
             provider_identity="provider:contract-driven-repository",
-            provider_version="v1",
+            provider_version="v2-protected-context" if context_verifier is not None else "v1",
         )
 
     @property

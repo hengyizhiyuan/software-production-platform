@@ -34,8 +34,9 @@ from spg.infrastructure.persistence.runtime_store import RuntimeStore
 class RepositoryCodeVerifier:
     """Execute only typed checks admitted by one exact Code Change Contract."""
 
-    def __init__(self, database: Database, *, timeout_seconds: float = 120.0) -> None:
+    def __init__(self, database: Database, *, timeout_seconds: float = 120.0, context_verifier=None) -> None:
         self.database = database
+        self.context_verifier = context_verifier
         self.timeout_seconds = timeout_seconds
         self._binding = VerificationProviderBinding(
             provider_identity="provider:repository-code-contract",
@@ -94,6 +95,16 @@ class RepositoryCodeVerifier:
                 contract=contract,
                 obligation=obligation,
             )
+            if (obligation.kind is CodeVerificationKind.PATH_SCOPE
+                    and result is VerificationResultValue.PASS
+                    and request.protected_context_obligations and self.context_verifier is not None):
+                checks = self.context_verifier.verify(
+                    request, work_unit.completion_contract.task_contract, contract,
+                    dispatch.workspace.repository_path, source.repository_revision)
+                metadata["protected_context_checks"] = checks
+                if any(item["coverage"] != "COVERED" for item in checks):
+                    result = VerificationResultValue.FAIL
+
         except Exception as error:
             result = VerificationResultValue.UNKNOWN
             metadata = {
