@@ -15,6 +15,7 @@ def main() -> None:
     runtime = application.native_executor_runtime(database)
     try:
         while True:
+            runtime.reconcile_worker_liveness()
             runtime.reconcile_expired_leases()
             runtime.reconcile_queue_ownership()
             time.sleep(application.settings.native_executor_poll_seconds)

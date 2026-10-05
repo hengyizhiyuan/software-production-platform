@@ -302,6 +302,8 @@ class NativeExecutorKernel:
                             proposal=proposal,
                             capability_grants=binding.capability_grants,
                             workspace=binding.workspace,
+                            max_log_bytes=binding.resource_envelope.max_log_bytes,
+                            max_artifact_bytes=binding.resource_envelope.max_artifact_bytes,
                         )
                     effect_id = await self.audit.begin_tool(inference_step_id, tool_request)
                     interrupted_by: ControlAction | None = None

@@ -44,6 +44,10 @@ class Settings(BaseSettings):
     owner_runtime_store_root: Path = Path(".watt/owner-runtime")
     native_executor_backend: Literal["watt-native"] = "watt-native"
     native_executor_worker_id: str = "native-worker-local-1"
+    native_executor_worker_name: str = "Watt Native Worker"
+    native_executor_max_concurrency: int = Field(default=1, ge=1, le=16)
+    native_executor_heartbeat_seconds: int = Field(default=10, ge=1, le=300)
+    native_executor_offline_seconds: int = Field(default=30, ge=5, le=900)
     native_executor_worker_profile: str = "local-container-v1"
     native_executor_resource_profile: str = "standard"
     native_executor_storage_root: Path = Path(".watt/native-executor")

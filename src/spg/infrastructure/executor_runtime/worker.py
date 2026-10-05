@@ -106,19 +106,30 @@ class NativeExecutionWorker:
         heartbeat_task = asyncio.create_task(self._heartbeat(grant, stop_heartbeat, offer))
         try:
             try:
-                result = await self.kernel_factory(grant).run(
-                    binding=binding_record.binding,
-                    contract=contract,
-                    worker_epoch=grant.allocation.lease_epoch,
-                    working_plan=working_plan,
-                    prior_checkpoint=checkpoint,
-                    session_step_frontier=session_step_frontier,
-                    recovered_results=recovered_results,
-                    control_probe=lambda: asyncio.to_thread(
-                        self._control_action, grant.allocation.attempt_id
-                    ),
-                )
+                async with asyncio.timeout(binding_record.binding.resource_envelope.max_active_seconds):
+                    result = await self.kernel_factory(grant).run(
+                        binding=binding_record.binding,
+                        contract=contract,
+                        worker_epoch=grant.allocation.lease_epoch,
+                        working_plan=working_plan,
+                        prior_checkpoint=checkpoint,
+                        session_step_frontier=session_step_frontier,
+                        recovered_results=recovered_results,
+                        control_probe=lambda: asyncio.to_thread(
+                            self._control_action, grant.allocation.attempt_id
+                        ),
+                    )
                 result = KernelRunResult.model_validate(result)
+            except TimeoutError:
+                # The effect journal may contain an in-flight Tool call. Never
+                # invent terminal success or release its lease here: stop
+                # heartbeat and let the coordinator reconcile the expired lease.
+                await asyncio.to_thread(
+                    self.runtime.record_runtime_limit,
+                    grant.allocation.attempt_id,
+                    binding_record.binding.resource_envelope.max_active_seconds,
+                )
+                return True
             except (ValidationError, TypeError):
                 latest = await asyncio.to_thread(
                     self._latest_checkpoint, grant.allocation.attempt_id)
@@ -257,7 +268,10 @@ class NativeExecutionWorker:
             except TimeoutError:
                 try:
                     keyword_arguments = {
-                        "lease_seconds": max(self.heartbeat_seconds * 3, 5)
+                        "lease_seconds": max(
+                            self.heartbeat_seconds * 3,
+                            offer.lease_seconds if offer is not None else 5,
+                        )
                     }
                     if offer is not None:
                         keyword_arguments["offer"] = offer

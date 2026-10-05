@@ -103,6 +103,8 @@ execution_resource_envelopes = Table(
     Column("max_inference_submissions", Integer, nullable=False),
     Column("max_tool_effects", Integer, nullable=False),
     Column("max_active_seconds", Integer, nullable=False),
+    Column("max_log_bytes", BigInteger, nullable=False, server_default="65536"),
+    Column("max_artifact_bytes", BigInteger, nullable=False, server_default="67108864"),
     Column("max_successor_recoveries", Integer, nullable=False),
     Column("max_parallel_workers", Integer, nullable=False),
     Column("max_cost_units", BigInteger, nullable=True),
@@ -276,6 +278,7 @@ executor_queue = Table(
     ),
     Column("grant_revision", Integer, nullable=False),
     Column("fairness_group", String(255), nullable=False),
+    Column("priority", Integer, nullable=False, server_default="0"),
     Column("condition", String(32), nullable=False),
     Column("required_capabilities", JSONB, nullable=False),
     Column("required_provider_profile", String(255), nullable=False),
@@ -740,6 +743,13 @@ executor_worker_registrations = Table(
     "executor_worker_registrations",
     metadata,
     Column("worker_id", String(255), primary_key=True),
+    Column("name", String(255), nullable=False, server_default="unidentified"),
+    Column("hostname", String(255), nullable=False, server_default="unknown"),
+    Column("runtime_version", String(128), nullable=False, server_default="legacy"),
+    Column("status", String(32), nullable=False, server_default="READY"),
+    Column("current_task_id", Uuid(as_uuid=True), nullable=True),
+    Column("capacity", JSONB, nullable=False, server_default=text("'{\"max_concurrency\": 1}'::jsonb")),
+    Column("registered_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
     Column("worker_profile", String(255), nullable=False),
     Column("provider_profiles", JSONB, nullable=False),
     Column("resource_profiles", JSONB, nullable=False),
@@ -750,6 +760,19 @@ executor_worker_registrations = Table(
 )
 
 Index("ix_executor_worker_registrations_expires", executor_worker_registrations.c.expires_at)
+
+executor_worker_events = Table(
+    "executor_worker_events",
+    metadata,
+    Column("id", Uuid(as_uuid=True), primary_key=True),
+    Column("worker_id", String(255), ForeignKey("executor_worker_registrations.worker_id"), nullable=False),
+    Column("event_type", String(64), nullable=False),
+    Column("source", String(128), nullable=False),
+    Column("payload_reference", String(80), nullable=False),
+    Column("payload", JSONB, nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+)
+Index("ix_executor_worker_events_worker_time", executor_worker_events.c.worker_id, executor_worker_events.c.created_at)
 
 native_candidate_vectors = Table(
     "native_candidate_vectors",
@@ -936,6 +959,7 @@ native_execution_tables = (
     event_outbox,
     executor_scheduler_state,
     executor_worker_registrations,
+    executor_worker_events,
     native_candidate_vectors,
     native_vector_verifications,
     native_candidate_vector_targets,

@@ -266,6 +266,8 @@ print(json.dumps(result, sort_keys=True))
         if isinstance(content, str):
             if old_text is not None or new_text is not None:
                 raise ValueError("file.write accepts either content or old_text/new_text")
+            if len(content.encode("utf-8")) > request.max_artifact_bytes:
+                raise ValueError("ARTIFACT_SIZE_LIMIT_EXCEEDED")
             encoded = base64.b64encode(content.encode("utf-8")).decode("ascii")
             script = (
                 "from pathlib import Path; import base64, os, sys; "
@@ -291,6 +293,8 @@ original.decode('utf-8')
 if original.count(old) != 1:
     raise ValueError('file.write old_text must match exactly once')
 updated = original.replace(old, new, 1)
+if len(updated) > int(sys.argv[5]):
+    raise ValueError('ARTIFACT_SIZE_LIMIT_EXCEEDED')
 temporary = path.with_name('.' + path.name + '.' + sys.argv[4] + '.tmp')
 temporary.write_bytes(updated)
 os.replace(temporary, path)
@@ -301,6 +305,7 @@ print(len(updated))
                 base64.b64encode(old_text.encode("utf-8")).decode("ascii"),
                 base64.b64encode(new_text.encode("utf-8")).decode("ascii"),
                 str(request.delivery_id),
+                str(request.max_artifact_bytes),
             )
         else:
             raise ValueError("file.write requires content or old_text/new_text")
@@ -595,6 +600,15 @@ print(len(updated))
             sort_keys=True,
             separators=(",", ":"),
         ).encode("utf-8")
+        if len(encoded) > request.max_log_bytes:
+            output = {
+                "code": "EXECUTION_LOG_LIMIT_EXCEEDED",
+                "observed_bytes": len(encoded),
+                "limit_bytes": request.max_log_bytes,
+                "discarded_output_digest": sha256(encoded).hexdigest(),
+            }
+            encoded = json.dumps(output, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            settled = False
         digest = sha256(encoded).hexdigest()
         command_digest = sha256(
             observation.result.command.model_dump_json().encode("utf-8")

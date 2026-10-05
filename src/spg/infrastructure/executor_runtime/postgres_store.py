@@ -50,6 +50,7 @@ from spg.domain.native_execution import (
     WorkerLeaseRecord,
     WorkerOffer,
     WorkerRegistrationRecord,
+    WorkerStatus,
     WorkspaceManifest,
     canonical_digest,
 )
@@ -79,6 +80,7 @@ from spg.infrastructure.persistence.native_execution_schema import (
     executor_queue,
     executor_scheduler_state,
     executor_worker_registrations,
+    executor_worker_events,
     native_attempt_bindings,
     native_attempt_states,
     pwu_contract_versions,
@@ -87,6 +89,7 @@ from spg.infrastructure.persistence.native_execution_schema import (
     work_convergence_observations,
     self_refine_events,
 )
+from spg.infrastructure.persistence.runtime_schema import production_work_units
 
 
 def _utcnow() -> datetime:
@@ -314,6 +317,14 @@ class NativeExecutionStore:
             raise NativeExecutionNotFound(f"queue entry not found: {entry_id}")
         return ExecutionQueueEntryRecord.model_validate(dict(row))
 
+    def latest_queue_for_attempt(self, attempt_id: UUID) -> ExecutionQueueEntryRecord:
+        row = self.session.execute(select(executor_queue).where(
+            executor_queue.c.attempt_id == attempt_id,
+        ).order_by(executor_queue.c.enqueued_at.desc(), executor_queue.c.id.desc()).limit(1)).mappings().one_or_none()
+        if row is None:
+            raise NativeExecutionNotFound(f"execution request not found: {attempt_id}")
+        return ExecutionQueueEntryRecord.model_validate(dict(row))
+
     def runnable_queue_locked(
         self,
         now: datetime,
@@ -414,9 +425,18 @@ class NativeExecutionStore:
         *,
         heartbeat_at: datetime,
         expires_at: datetime,
+        status: WorkerStatus = WorkerStatus.READY,
     ) -> WorkerRegistrationRecord:
+        previous = self.worker_registration(offer.worker_id, lock=True)
+        if previous is not None and previous.status is WorkerStatus.DRAINING:
+            status = WorkerStatus.DRAINING
         values = {
             "worker_id": offer.worker_id,
+            "name": offer.name,
+            "hostname": offer.hostname,
+            "runtime_version": offer.runtime_version,
+            "status": status.value,
+            "capacity": {"max_concurrency": offer.max_concurrency},
             "worker_profile": offer.worker_profile,
             "provider_profiles": list(offer.provider_profiles),
             "resource_profiles": list(offer.resource_profiles),
@@ -440,15 +460,104 @@ class NativeExecutionStore:
                 executor_worker_registrations.c.worker_id == offer.worker_id
             )
         ).mappings().one()
+        self.append_worker_event(
+            offer.worker_id,
+            "WorkerRegistered" if previous is None else "WorkerHeartbeat",
+            {"status": row["status"], "runtime_version": offer.runtime_version,
+             "capacity": offer.max_concurrency,
+             "current_task_id": str(row["current_task_id"]) if row["current_task_id"] else None,
+             "capabilities": list(offer.capability_identities)},
+            created_at=heartbeat_at,
+        )
         return WorkerRegistrationRecord.model_validate(dict(row))
+
+    def worker_registration(self, worker_id: str, *, lock: bool = False) -> WorkerRegistrationRecord | None:
+        statement = select(executor_worker_registrations).where(
+            executor_worker_registrations.c.worker_id == worker_id)
+        if lock:
+            statement = statement.with_for_update()
+        row = self.session.execute(statement).mappings().one_or_none()
+        return WorkerRegistrationRecord.model_validate(dict(row)) if row else None
+
+    def active_allocation_count(self, worker_id: str) -> int:
+        return int(self.session.scalar(
+            select(func.count()).select_from(execution_allocations).where(
+                execution_allocations.c.worker_id == worker_id,
+                execution_allocations.c.condition.in_((
+                    AllocationCondition.ISSUED.value, AllocationCondition.ACTIVE.value,
+                )),
+            )
+        ) or 0)
+
+    def set_worker_status(
+        self, worker_id: str, status: WorkerStatus, *,
+        current_task_id: UUID | None = None, now: datetime | None = None,
+    ) -> None:
+        previous = self.worker_registration(worker_id, lock=True)
+        if previous is None:
+            raise NativeExecutionNotFound(f"worker not registered: {worker_id}")
+        self.session.execute(update(executor_worker_registrations).where(
+            executor_worker_registrations.c.worker_id == worker_id).values(
+                status=status.value, current_task_id=current_task_id,
+                version=executor_worker_registrations.c.version + 1,
+            ))
+        if previous.status is not status or previous.current_task_id != current_task_id:
+            self.append_worker_event(worker_id, "WorkerStatusChanged", {
+                "from": previous.status.value, "to": status.value,
+                "execution_id": str(current_task_id) if current_task_id else None,
+            }, created_at=now or _utcnow())
+
+    def offline_expired_workers(self, now: datetime) -> tuple[str, ...]:
+        rows = self.session.execute(select(executor_worker_registrations).where(
+            executor_worker_registrations.c.expires_at < now,
+            executor_worker_registrations.c.status != WorkerStatus.OFFLINE.value,
+        ).with_for_update(skip_locked=True)).mappings().all()
+        for row in rows:
+            worker_id = str(row["worker_id"])
+            self.set_worker_status(worker_id, WorkerStatus.OFFLINE, now=now)
+            self.append_worker_event(worker_id, "WorkerOffline", {
+                "last_heartbeat_at": row["heartbeat_at"].isoformat(),
+                "expired_at": row["expires_at"].isoformat(),
+            }, created_at=now)
+        return tuple(str(row["worker_id"]) for row in rows)
+
+    def append_worker_event(self, worker_id: str, event_type: str,
+                            payload: dict[str, object], *, created_at: datetime) -> UUID:
+        event_id = uuid4()
+        self.session.execute(insert(executor_worker_events).values(
+            id=event_id, worker_id=worker_id, event_type=event_type,
+            source="watt-cloud-worker-runtime-v1",
+            payload_reference=f"sha256:{canonical_digest(payload)}",
+            payload=payload, created_at=created_at,
+        ))
+        return event_id
 
     def live_worker_registrations(self, now: datetime) -> list[WorkerRegistrationRecord]:
         rows = self.session.execute(
             select(executor_worker_registrations)
-            .where(executor_worker_registrations.c.expires_at > now)
+            .where(executor_worker_registrations.c.expires_at > now,
+                   executor_worker_registrations.c.status.in_((
+                       WorkerStatus.READY.value, WorkerStatus.BUSY.value,
+                   )))
             .order_by(executor_worker_registrations.c.worker_id)
         ).mappings()
         return [WorkerRegistrationRecord.model_validate(dict(row)) for row in rows]
+
+    def all_worker_registrations(self) -> list[WorkerRegistrationRecord]:
+        rows = self.session.execute(select(executor_worker_registrations).order_by(
+            executor_worker_registrations.c.worker_id)).mappings()
+        return [WorkerRegistrationRecord.model_validate(dict(row)) for row in rows]
+
+    def worker_events(self, worker_id: str, *, limit: int = 100) -> list[dict[str, object]]:
+        rows = self.session.execute(select(executor_worker_events).where(
+            executor_worker_events.c.worker_id == worker_id,
+        ).order_by(executor_worker_events.c.created_at.desc()).limit(limit)).mappings()
+        return [dict(row) for row in rows]
+
+    def work_unit_condition(self, pwu_id: UUID) -> str | None:
+        return self.session.scalar(select(production_work_units.c.condition).where(
+            production_work_units.c.id == pwu_id,
+        ))
 
     def active_allocation_worker_ids(self) -> set[str]:
         rows = self.session.scalars(
@@ -548,6 +657,7 @@ class NativeExecutionStore:
 
     def release_allocation(self, allocation_id: UUID, *, expired: bool = False) -> None:
         now = _utcnow()
+        allocation = self.allocation(allocation_id)
         condition = AllocationCondition.EXPIRED if expired else AllocationCondition.RELEASED
         self.session.execute(
             update(execution_allocations)
@@ -562,6 +672,26 @@ class NativeExecutionStore:
             )
             .values(released_at=now)
         )
+        registration = self.worker_registration(allocation.worker_id)
+        if registration is not None and registration.status is WorkerStatus.DRAINING:
+            if not self.active_allocation_count(allocation.worker_id):
+                self.set_worker_status(allocation.worker_id, WorkerStatus.DRAINING,
+                                       current_task_id=None, now=now)
+        if registration is not None and registration.status not in {
+            WorkerStatus.DRAINING, WorkerStatus.OFFLINE,
+        }:
+            remaining_attempt = self.session.scalar(select(execution_allocations.c.attempt_id).where(
+                execution_allocations.c.worker_id == allocation.worker_id,
+                execution_allocations.c.condition.in_((
+                    AllocationCondition.ISSUED.value, AllocationCondition.ACTIVE.value,
+                )),
+            ).order_by(execution_allocations.c.issued_at).limit(1))
+            self.set_worker_status(
+                allocation.worker_id,
+                WorkerStatus.BUSY if remaining_attempt else WorkerStatus.READY,
+                current_task_id=remaining_attempt,
+                now=now,
+            )
 
     def attempt_state(self, attempt_id: UUID, *, lock: bool = False) -> NativeAttemptStateRecord:
         statement = select(native_attempt_states).where(

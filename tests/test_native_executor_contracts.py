@@ -1419,6 +1419,27 @@ def test_tool_host_observes_missing_file_without_ambiguous_failure(tmp_path: Pat
     }
 
 
+def test_cloud_worker_artifact_limit_rejects_direct_write_before_effect(tmp_path: Path) -> None:
+    binding, _ = _binding()
+    workspace = binding.workspace.model_copy(update={
+        "host_storage_id": str(tmp_path),
+        "mounts": (binding.workspace.mounts[0].model_copy(
+            update={"host_path": str(tmp_path)}),),
+    })
+    request = ToolExecutionRequest(
+        delivery_id=uuid4(), attempt_id=binding.attempt_id, worker_epoch=1,
+        step_id=uuid4(),
+        proposal=ToolCallProposal(proposal_index=0, tool_identity="file.write",
+                                  arguments={"path": "src/large.txt", "content": "x" * 1025}),
+        capability_grants=(CapabilityGrant(identity="file.write", version="1",
+                                           scope={"paths": ["src/large.txt"]}),),
+        workspace=workspace, max_artifact_bytes=1024,
+    )
+    with pytest.raises(ValueError, match="ARTIFACT_SIZE_LIMIT_EXCEEDED"):
+        asyncio.run(LocalNativeToolHost(tmp_path).registry().execute(request))
+    assert not (tmp_path / "src" / "large.txt").exists()
+
+
 def test_tool_host_accepts_python3_pytest_recipe(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

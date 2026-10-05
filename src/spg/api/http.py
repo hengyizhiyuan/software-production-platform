@@ -36,6 +36,9 @@ from spg.api.dto import (
     InteractionWorkTransitionDecisionRequest,
     NativeExecutionControlRequest,
     NativeQueueEntryResponse,
+    CloudExecutionRequestResponse,
+    CloudWorkerResponse,
+    CloudWorkerDrainRequest,
     SharedUnderstandingResponse,
     RuntimeActivationResponse,
     SteeringPlanResponse,
@@ -1860,6 +1863,37 @@ def create_http_application(
             )
             for record, observation in reality
         ]
+
+    @api.get("/api/cloud-worker/workers", response_model=list[CloudWorkerResponse])
+    def cloud_worker_registry() -> list[CloudWorkerResponse]:
+        return [CloudWorkerResponse.from_record(item)
+                for item in selected_native_executor.list_workers()]
+
+    @api.post("/api/cloud-worker/workers/{worker_id}/drain", response_model=CloudWorkerResponse)
+    def cloud_worker_drain(worker_id: str, request: CloudWorkerDrainRequest) -> CloudWorkerResponse:
+        return CloudWorkerResponse.from_record(
+            selected_native_executor.set_worker_draining(worker_id, draining=request.draining))
+
+    @api.get("/api/cloud-worker/workers/{worker_id}/evidence")
+    def cloud_worker_evidence(worker_id: str) -> list[dict]:
+        return list(selected_native_executor.worker_evidence(worker_id))
+
+    @api.post("/api/cloud-worker/executions", response_model=CloudExecutionRequestResponse)
+    def create_cloud_execution(admission: NativeExecutionAdmission) -> CloudExecutionRequestResponse:
+        if not getattr(settings, "native_executor_enabled", False):
+            raise ProductHttpError(409, "NATIVE_EXECUTOR_DISABLED", "Cloud Worker Runtime is disabled")
+        selected_native_executor.admit(admission)
+        return CloudExecutionRequestResponse.from_record(
+            selected_native_executor.execution_request(admission.binding.attempt_id))
+
+    @api.get("/api/cloud-worker/executions/{execution_id}", response_model=CloudExecutionRequestResponse)
+    def cloud_execution_reality(execution_id: UUID) -> CloudExecutionRequestResponse:
+        return CloudExecutionRequestResponse.from_record(
+            selected_native_executor.execution_request(execution_id))
+
+    @api.get("/api/cloud-worker/executions/{execution_id}/evidence")
+    def cloud_execution_evidence(execution_id: UUID) -> list[dict]:
+        return list(selected_native_executor.execution_evidence(execution_id))
 
     @api.post(
         "/api/native-execution/admissions",

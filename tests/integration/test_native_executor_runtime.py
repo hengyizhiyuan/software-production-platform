@@ -93,6 +93,7 @@ from spg.application.native_vector import NativeCandidateVectorService
 from spg.application.native_retention import NativeRetentionService
 from spg.application.runtime import RuntimeService
 from spg.domain.native_execution import (
+    CloudExecutionStatus,
     AttemptGrantState,
     AttemptTerminalOutcome,
     BackendObservation,
@@ -129,6 +130,7 @@ from spg.domain.native_execution import (
     ToolExecutionResult,
     UsageCertainty,
     WorkerOffer,
+    WorkerStatus,
     WorkingPlan,
     WorkspaceManifest,
     WorkspaceMount,
@@ -2488,9 +2490,9 @@ def test_event_replay_uses_monotonic_pwu_sequence(
     with postgres_database.unit_of_work() as uow:
         store = NativeExecutionStore(uow.session)
         all_events = store.events_since(admission.binding.pwu_id)
-        assert [event.sequence for event in all_events] == [1]
+        assert [event.sequence for event in all_events] == [1, 2]
         assert store.events_since(
-            admission.binding.pwu_id, after_sequence=1
+            admission.binding.pwu_id, after_sequence=2
         ) == ()
 
 
@@ -2503,7 +2505,7 @@ def test_slow_subscriber_replay_is_bounded_and_loses_no_milestone(
     created_at = datetime.now(timezone.utc)
     with postgres_database.unit_of_work() as uow:
         store = NativeExecutionStore(uow.session)
-        for sequence in range(2, 602):
+        for sequence in range(3, 602):
             store.append_event(
                 ExecutionEventRecord(
                     id=uuid4(), pwu_id=admission.binding.pwu_id,
@@ -2543,9 +2545,9 @@ def test_outbox_replays_same_event_after_publish_before_ack_crash(
     with postgres_database.unit_of_work() as uow:
         store = NativeExecutionStore(uow.session)
         first = store.claim_outbox(now=now, lease_seconds=5)
-        assert len(first) == 1
-        event_id = first[0].id
-        assert store.event_sequence_window(admission.binding.pwu_id) == (1, 1)
+        assert len(first) == 2
+        event_ids = tuple(item.id for item in first)
+        assert store.event_sequence_window(admission.binding.pwu_id) == (1, 2)
         uow.commit()
 
     # Simulate relay death after publication and before durable acknowledgement.
@@ -2553,16 +2555,18 @@ def test_outbox_replays_same_event_after_publish_before_ack_crash(
         store = NativeExecutionStore(uow.session)
         assert store.claim_outbox(now=now + timedelta(seconds=4)) == ()
         replay = store.claim_outbox(now=now + timedelta(seconds=6))
-        assert tuple(item.id for item in replay) == (event_id,)
-        store.acknowledge_outbox(
-            event_id, published_at=now + timedelta(seconds=6)
-        )
+        assert tuple(item.id for item in replay) == event_ids
+        for event_id in event_ids:
+            store.acknowledge_outbox(
+                event_id, published_at=now + timedelta(seconds=6)
+            )
         uow.commit()
 
     with postgres_database.unit_of_work() as uow:
-        row = uow.session.execute(select(event_outbox)).mappings().one()
-        assert row["condition"] == "PUBLISHED"
-        assert row["attempt_count"] == 2
+        rows = uow.session.execute(select(event_outbox)).mappings().all()
+        assert len(rows) == 2
+        assert all(row["condition"] == "PUBLISHED" and row["attempt_count"] == 2
+                   for row in rows)
 
 
 def test_inference_resource_reservation_is_settled_with_durable_evidence(
@@ -3156,3 +3160,251 @@ def test_session_fork_binds_exact_checkpoint_and_close_does_not_complete_pwu(
         assert saved_child is not None and saved_child.condition.value == "CLOSED"
         assert before is not None and after is not None
         assert after.condition == before.condition
+
+
+def test_cloud_worker_registry_heartbeat_capacity_and_offline_are_durable(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    clock = [datetime.now(timezone.utc) + timedelta(seconds=1)]
+    service = NativeExecutorRuntimeService(postgres_database, now=lambda: clock[0])
+    offer = _offer().model_copy(update={
+        "worker_id": f"cloud-worker:{uuid4()}", "name": "Cloud Worker v1",
+        "hostname": "qualification-host", "runtime_version": "0.1.0",
+    })
+    registered = service.register_worker(offer)
+    assert registered.status is WorkerStatus.REGISTERING
+    assert registered.capacity == {"max_concurrency": 1}
+    ready = service.heartbeat_worker(offer)
+    assert ready.status is WorkerStatus.READY
+    assert ready.registered_at == registered.registered_at
+    assert ready.heartbeat_at == clock[0]
+
+    admission = _admission(postgres_database, git_repository).model_copy(
+        update={"available_at": clock[0]})
+    service.admit(admission)
+    targeted = offer.model_copy(update={"requested_attempt_id": admission.binding.attempt_id})
+    assert service.set_worker_draining(offer.worker_id, draining=True).status is WorkerStatus.DRAINING
+    assert service.allocate(targeted) is None
+    assert service.set_worker_draining(offer.worker_id, draining=False).status is WorkerStatus.READY
+    grant = service.allocate(targeted)
+    assert grant is not None
+    assert service.allocate(targeted) is None  # capacity and active-attempt fencing
+    assert next(item for item in service.list_workers() if item.worker_id == offer.worker_id).status is WorkerStatus.BUSY
+    service.activate_allocation(grant)
+    service.finish_allocation(grant, KernelRunResult(
+        runtime_mode=ExecutionMode.FINISHED,
+        terminal_outcome=AttemptTerminalOutcome.STOPPED,
+        final_checkpoint_id=None, step_count=0,
+        inference_submissions=0, tool_effects=0, summary="qualification complete",
+    ))
+    clock[0] += timedelta(seconds=offer.lease_seconds + 1)
+    assert offer.worker_id in service.reconcile_worker_liveness()
+    assert next(item for item in service.list_workers() if item.worker_id == offer.worker_id).status is WorkerStatus.OFFLINE
+    assert service.heartbeat_worker(offer).status is WorkerStatus.READY
+    events = service.worker_evidence(offer.worker_id)
+    assert {item["event_type"] for item in events} >= {
+        "WorkerRegistered", "WorkerHeartbeat", "WorkerOffline", "WorkerStatusChanged",
+    }
+    assert all(item["source"] == "watt-cloud-worker-runtime-v1" and item["payload_reference"].startswith("sha256:") for item in events)
+
+
+def test_cloud_worker_max_concurrency_is_enforced_per_registered_identity(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    service = NativeExecutorRuntimeService(postgres_database)
+    first = _admission(postgres_database, git_repository)
+    second = _admission(postgres_database, git_repository)
+    third = _admission(postgres_database, git_repository)
+    for item in (first, second, third):
+        service.admit(item)
+    offer = _offer().model_copy(update={
+        "worker_id": f"cloud-worker:capacity:{uuid4()}", "max_concurrency": 2,
+    })
+    service.register_worker(offer)
+    service.heartbeat_worker(offer)
+    grants = (service.allocate(offer), service.allocate(offer))
+    assert all(grant is not None for grant in grants)
+    assert len({grant.allocation.attempt_id for grant in grants if grant}) == 2
+    assert service.allocate(offer) is None
+    for grant in grants:
+        assert grant is not None
+        service.activate_allocation(grant)
+        service.finish_allocation(grant, KernelRunResult(
+            runtime_mode=ExecutionMode.FINISHED,
+            terminal_outcome=AttemptTerminalOutcome.STOPPED,
+            final_checkpoint_id=None, step_count=0,
+            inference_submissions=0, tool_effects=0, summary="slot released",
+        ))
+    assert service.allocate(offer) is not None
+
+
+def test_cloud_execution_request_lifecycle_reuses_native_queue_and_evidence(
+    postgres_database: Database, git_repository: Path, tmp_path: Path,
+) -> None:
+    service = NativeExecutorRuntimeService(postgres_database)
+    admission = _admission(postgres_database, git_repository).model_copy(update={"priority": 7})
+    service.admit(admission)
+    execution_id = admission.binding.attempt_id
+    created = service.execution_request(execution_id)
+    assert created.execution_id == execution_id
+    assert created.work_id == admission.binding.work_id
+    assert created.task_contract_reference == admission.contract.id
+    assert created.priority == 7
+    assert created.status is CloudExecutionStatus.QUEUED
+    offer = _offer().model_copy(update={
+        "worker_id": f"cloud-worker:{uuid4()}", "requested_attempt_id": execution_id,
+    })
+    service.register_worker(offer)
+    service.heartbeat_worker(offer)
+    grant = service.allocate(offer)
+    assert grant is not None
+    assert service.execution_request(execution_id).status is CloudExecutionStatus.ASSIGNED
+    service.activate_allocation(grant)
+    assert service.execution_request(execution_id).status is CloudExecutionStatus.RUNNING
+    checkpoint = asyncio.run(DurableCheckpointPort(
+        postgres_database, ContentAddressedStorage(tmp_path / "cloud-worker-checkpoints"),
+        attempt_id=execution_id, session_id=admission.binding.session_id,
+        worker_epoch=grant.allocation.lease_epoch,
+    ).commit(KernelCheckpoint(
+        step_sequence=1,
+        working_plan=WorkingPlan(version=1, objective_reference=str(admission.contract.id),
+                                 chosen_approach="qualified result", approach_rationale="bounded test"),
+        tool_results=(), source_vector_digest=admission.binding.source_vector.digest or "",
+        result_claim={"output_vector": {"files": ["README.md"]}, "evidence_ids": []},
+    )))
+    service.finish_allocation(grant, KernelRunResult(
+        runtime_mode=ExecutionMode.FINISHED,
+        terminal_outcome=AttemptTerminalOutcome.RESULT_READY,
+        final_checkpoint_id=checkpoint.id, step_count=1,
+        inference_submissions=1, tool_effects=0, summary="worker result ready",
+        result_claim={"output_vector": {"files": ["README.md"]}, "evidence_ids": []},
+    ))
+    final = service.execution_request(execution_id)
+    assert final.status is CloudExecutionStatus.VERIFYING
+    assert final.worker_id is None  # released allocation is historical evidence
+    kinds = {item["event_type"] for item in service.execution_evidence(execution_id)}
+    assert kinds >= {"ExecutionRequestCreated", "NativeExecutionQueued",
+                     "ExecutionCapacityAllocated", "NativeExecutionStarted",
+                     "ExecutionWorkerCompleted"}
+
+
+def test_cloud_worker_default_priority_preserves_preupgrade_command_digest(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    admission = _admission(postgres_database, git_repository)
+    legacy_binding = admission.binding.model_dump(mode="json")
+    legacy_binding["resource_envelope"].pop("max_log_bytes")
+    legacy_binding["resource_envelope"].pop("max_artifact_bytes")
+    expected = canonical_digest({
+        "actor_identity": admission.actor_identity,
+        "fairness_group": admission.fairness_group,
+        "binding": legacy_binding,
+        "required_resource_profile": admission.required_resource_profile,
+    })
+    service = NativeExecutorRuntimeService(postgres_database)
+    assert service.admit(admission).request_digest == expected
+
+
+def test_cloud_worker_crash_requeues_same_execution_after_lease_expiry(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    clock = [datetime.now(timezone.utc) + timedelta(seconds=1)]
+    service = NativeExecutorRuntimeService(postgres_database, now=lambda: clock[0])
+    admission = _admission(postgres_database, git_repository).model_copy(
+        update={"available_at": clock[0]})
+    service.admit(admission)
+    first = _offer(lease_seconds=5).model_copy(update={
+        "worker_id": f"cloud-worker:first:{uuid4()}",
+        "requested_attempt_id": admission.binding.attempt_id,
+    })
+    grant = service.allocate(first)
+    assert grant is not None
+    service.activate_allocation(grant)
+    clock[0] += timedelta(seconds=6)
+    assert service.reconcile_expired_leases() == (admission.binding.attempt_id,)
+    assert service.execution_request(admission.binding.attempt_id).status is CloudExecutionStatus.QUEUED
+    successor = _offer().model_copy(update={
+        "worker_id": f"cloud-worker:successor:{uuid4()}",
+        "requested_attempt_id": admission.binding.attempt_id,
+    })
+    next_grant = service.allocate(successor)
+    assert next_grant is not None
+    assert next_grant.allocation.lease_epoch == grant.allocation.lease_epoch + 1
+    kinds = {item["event_type"] for item in service.execution_evidence(admission.binding.attempt_id)}
+    assert "ExecutionRecoveryRequired" in kinds
+
+
+def test_cloud_worker_api_projects_registered_worker_and_exact_execution(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    service = NativeExecutorRuntimeService(postgres_database)
+    worker_id = f"cloud-worker:api:{uuid4()}"
+    offer = _offer().model_copy(update={"worker_id": worker_id})
+    service.register_worker(offer)
+    service.heartbeat_worker(offer)
+    admission = _admission(postgres_database, git_repository)
+    from spg.config import Settings
+    app = create_http_application(
+        application=SimpleNamespace(settings=Settings(native_executor_enabled=True)),
+        database=postgres_database,
+        work_service=SimpleNamespace(database=postgres_database,
+                                     configure_candidate_review=lambda *_args: None),
+        orchestrator=SimpleNamespace(shutdown=lambda: None),
+        steering_driver=SimpleNamespace(shutdown=lambda: None,
+                                        preview_outcome=lambda *_args: None),
+        runtime_activation=SimpleNamespace(project=lambda: None),
+        native_executor_runtime=service,
+    )
+    client = TestClient(app)
+    created = client.post("/api/cloud-worker/executions",
+                          json=admission.model_dump(mode="json"))
+    assert created.status_code == 200, created.text
+    assert created.json()["execution_id"] == str(admission.binding.attempt_id)
+    assert created.json()["status"] == "QUEUED"
+    observed = client.get(f"/api/cloud-worker/executions/{admission.binding.attempt_id}")
+    assert observed.status_code == 200
+    assert observed.json()["task_contract_reference"] == str(admission.contract.id)
+    workers = client.get("/api/cloud-worker/workers")
+    assert workers.status_code == 200
+    assert any(item["worker_id"] == worker_id and item["status"] == "READY"
+               for item in workers.json())
+    evidence = client.get(f"/api/cloud-worker/executions/{admission.binding.attempt_id}/evidence")
+    assert evidence.status_code == 200
+    assert {item["event_type"] for item in evidence.json()} >= {
+        "ExecutionRequestCreated", "NativeExecutionQueued",
+    }
+
+
+def test_cloud_worker_runtime_limit_records_evidence_and_reconciles_lease(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    service = NativeExecutorRuntimeService(postgres_database)
+    admission = _admission(postgres_database, git_repository)
+    bounded_envelope = admission.binding.resource_envelope.model_copy(
+        update={"max_active_seconds": 1})
+    admission = admission.model_copy(update={
+        "binding": admission.binding.model_copy(update={
+            "resource_envelope": bounded_envelope,
+        }),
+    })
+    service.admit(admission)
+
+    class SlowKernel:
+        async def run(self, **_kwargs):
+            await asyncio.sleep(30)
+
+    worker = NativeExecutionWorker(service, lambda _grant: SlowKernel(),
+                                   heartbeat_seconds=1)
+    offer = _offer(lease_seconds=5).model_copy(update={
+        "worker_id": f"cloud-worker:timeout:{uuid4()}",
+        "requested_attempt_id": admission.binding.attempt_id,
+    })
+    assert asyncio.run(worker.run_once(offer)) is True
+    assert "ExecutionRuntimeLimitExceeded" in {
+        item["event_type"] for item in service.execution_evidence(admission.binding.attempt_id)
+    }
+    assert service.execution_request(admission.binding.attempt_id).status is CloudExecutionStatus.RUNNING
+    import time
+    time.sleep(5.1)
+    assert service.reconcile_expired_leases() == (admission.binding.attempt_id,)
+    assert service.execution_request(admission.binding.attempt_id).status is CloudExecutionStatus.QUEUED

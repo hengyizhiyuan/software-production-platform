@@ -341,6 +341,8 @@ class ResourceEnvelope(NativeRecord):
     max_inference_submissions: int = Field(default=120, ge=1)
     max_tool_effects: int = Field(default=400, ge=1)
     max_active_seconds: int = Field(default=3600, ge=1)
+    max_log_bytes: int = Field(default=65536, ge=1024)
+    max_artifact_bytes: int = Field(default=67108864, ge=1024)
     max_successor_recoveries: int = Field(default=3, ge=0)
     max_parallel_workers: int = Field(default=1, ge=1)
     max_cost_units: int | None = Field(default=None, ge=0)
@@ -467,6 +469,7 @@ class ExecutionQueueEntryRecord(NativeRecord):
     attempt_id: UUID
     grant_revision: int = Field(ge=1)
     fairness_group: str = Field(min_length=1)
+    priority: int = Field(default=0, ge=-100, le=100)
     condition: QueueCondition
     required_capabilities: tuple[str, ...] = ()
     required_provider_profile: str = Field(min_length=1)
@@ -729,6 +732,7 @@ class NativeExecutionAdmission(NativeRecord):
     command_id: UUID
     actor_identity: str = Field(min_length=1)
     fairness_group: str = Field(min_length=1)
+    priority: int = Field(default=0, ge=-100, le=100)
     binding: ExecutionBindingV2
     contract: PWUContractVersionRecord
     materialization_path: str = Field(min_length=1)
@@ -740,6 +744,10 @@ class WorkerOffer(NativeRecord):
     """Ephemeral worker capacity advertised to the Capacity Scheduling Plane."""
 
     worker_id: str = Field(min_length=1)
+    name: str = Field(default="native-worker", min_length=1)
+    hostname: str = Field(default="unknown", min_length=1)
+    runtime_version: str = Field(default="legacy", min_length=1)
+    max_concurrency: int = Field(default=1, ge=1, le=64)
     worker_profile: str = Field(min_length=1)
     provider_profiles: tuple[str, ...]
     resource_profiles: tuple[str, ...]
@@ -748,10 +756,25 @@ class WorkerOffer(NativeRecord):
     lease_seconds: int = Field(default=30, ge=5, le=3600)
 
 
+class WorkerStatus(StrEnum):
+    REGISTERING = "REGISTERING"
+    READY = "READY"
+    BUSY = "BUSY"
+    OFFLINE = "OFFLINE"
+    DRAINING = "DRAINING"
+
+
 class WorkerRegistrationRecord(NativeRecord):
     """Durable, expiring evidence that one worker owns scheduler progression."""
 
     worker_id: str = Field(min_length=1)
+    name: str = Field(min_length=1)
+    hostname: str = Field(min_length=1)
+    runtime_version: str = Field(min_length=1)
+    status: WorkerStatus
+    current_task_id: UUID | None = None
+    capacity: dict[str, int]
+    registered_at: datetime
     worker_profile: str = Field(min_length=1)
     provider_profiles: tuple[str, ...]
     resource_profiles: tuple[str, ...]
@@ -759,6 +782,33 @@ class WorkerRegistrationRecord(NativeRecord):
     heartbeat_at: datetime
     expires_at: datetime
     version: int = Field(default=1, ge=1)
+
+
+class CloudExecutionStatus(StrEnum):
+    CREATED = "CREATED"
+    QUEUED = "QUEUED"
+    ASSIGNED = "ASSIGNED"
+    RUNNING = "RUNNING"
+    RECOVERY_REQUIRED = "RECOVERY_REQUIRED"
+    VERIFYING = "VERIFYING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
+
+
+class CloudExecutionRequest(NativeRecord):
+    """Read model over the canonical native queue, binding and Attempt state."""
+
+    execution_id: UUID
+    work_id: UUID
+    task_contract_reference: UUID
+    priority: int = Field(ge=-100, le=100)
+    status: CloudExecutionStatus
+    created_at: datetime
+    worker_id: str | None = None
+    lease_expire_at: datetime | None = None
+    queue_entry_id: UUID
+    recovery_reason: str | None = None
 
 
 class QueueProgressionState(StrEnum):
@@ -910,6 +960,8 @@ class ToolExecutionRequest(NativeRecord):
     proposal: ToolCallProposal
     capability_grants: tuple[CapabilityGrant, ...]
     workspace: WorkspaceManifest
+    max_log_bytes: int = Field(default=65536, ge=1024)
+    max_artifact_bytes: int = Field(default=67108864, ge=1024)
 
 
 class ToolExecutionResult(NativeRecord):

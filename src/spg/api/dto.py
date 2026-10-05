@@ -25,9 +25,11 @@ from spg.domain.planning import ProductionPlanGraph, ProductionPlanProposal
 from spg.domain.refinement import RepositoryChangeProposal
 from spg.domain.runtime_activation import RuntimeActivationProjection
 from spg.domain.native_execution import (
+    CloudExecutionRequest,
     ControlAction,
     ExecutionQueueEntryRecord,
     QueueCapacityObservation,
+    WorkerRegistrationRecord,
 )
 from spg.domain.steering import (
     RealityReference,
@@ -1487,6 +1489,52 @@ class NativeQueueEntryResponse(ApiDto):
             production_cycle_number=production_cycle_number,
             work_reality_revision_id=work_reality_revision_id,
         )
+
+
+class CloudExecutionRequestResponse(ApiDto):
+    execution_id: UUID
+    work_id: UUID
+    task_contract_reference: UUID
+    priority: int
+    status: str
+    created_at: datetime
+    worker_id: str | None
+    lease_expire_at: datetime | None
+    queue_entry_id: UUID
+    recovery_reason: str | None
+
+    @classmethod
+    def from_record(cls, record: CloudExecutionRequest) -> Self:
+        return cls(**record.model_dump(mode="python"))
+
+
+class CloudWorkerResponse(ApiDto):
+    worker_id: str
+    name: str
+    hostname: str
+    runtime_version: str
+    capabilities: tuple[str, ...]
+    status: str
+    last_heartbeat_at: datetime
+    registered_at: datetime
+    capacity: dict[str, int]
+    current_task_id: UUID | None
+    expires_at: datetime
+
+    @classmethod
+    def from_record(cls, record: WorkerRegistrationRecord) -> Self:
+        return cls(
+            worker_id=record.worker_id, name=record.name,
+            hostname=record.hostname, runtime_version=record.runtime_version,
+            capabilities=record.capability_identities, status=record.status.value,
+            last_heartbeat_at=record.heartbeat_at,
+            registered_at=record.registered_at, capacity=record.capacity,
+            current_task_id=record.current_task_id, expires_at=record.expires_at,
+        )
+
+
+class CloudWorkerDrainRequest(ApiDto):
+    draining: bool
 
 
 class NativeExecutionControlRequest(ApiDto):

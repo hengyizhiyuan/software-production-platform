@@ -53,6 +53,10 @@ from spg.domain.native_execution import (
     UsageCertainty,
     WorkerLeaseRecord,
     WorkerOffer,
+    WorkerRegistrationRecord,
+    WorkerStatus,
+    CloudExecutionRequest,
+    CloudExecutionStatus,
     canonical_digest,
 )
 from spg.domain.refinement_contract import (
@@ -111,7 +115,7 @@ class FairCapacityScheduler:
             selected_group = names[(names.index(last_fairness_group) + 1) % len(names)]
         else:
             selected_group = names[0]
-        selected = min(groups[selected_group], key=lambda item: (item.enqueued_at, str(item.id)))
+        selected = min(groups[selected_group], key=lambda item: (-item.priority, item.enqueued_at, str(item.id)))
         return SchedulingDecision(
             selected_queue_entry_id=selected.id,
             selected_fairness_group=selected_group,
@@ -173,14 +177,23 @@ class NativeExecutorRuntimeService:
         if canonical_digest(command.contract.contract_payload) != command.contract.contract_digest:
             raise NativeExecutionConflict("PWU contract payload digest is invalid")
 
-        request_digest = canonical_digest(
-            {
-                "actor_identity": command.actor_identity,
-                "fairness_group": command.fairness_group,
-                "binding": binding.model_dump(mode="json"),
-                "required_resource_profile": command.required_resource_profile,
-            }
-        )
+        binding_basis = binding.model_dump(mode="json")
+        envelope_basis = binding_basis["resource_envelope"]
+        if binding.resource_envelope.max_log_bytes == 65536:
+            envelope_basis.pop("max_log_bytes")
+        if binding.resource_envelope.max_artifact_bytes == 67108864:
+            envelope_basis.pop("max_artifact_bytes")
+        digest_basis = {
+            "actor_identity": command.actor_identity,
+            "fairness_group": command.fairness_group,
+            "binding": binding_basis,
+            "required_resource_profile": command.required_resource_profile,
+        }
+        # Preserve the pre-v1 digest for existing priority-zero commands so
+        # retries across an upgrade remain idempotent.
+        if command.priority:
+            digest_basis["priority"] = command.priority
+        request_digest = canonical_digest(digest_basis)
         entry = ExecutionQueueEntryRecord(
             id=uuid4(),
             command_id=command.command_id,
@@ -191,6 +204,7 @@ class NativeExecutorRuntimeService:
             attempt_id=binding.attempt_id,
             grant_revision=binding.generation,
             fairness_group=command.fairness_group,
+            priority=command.priority,
             condition=QueueCondition.QUEUED,
             required_capabilities=tuple(grant.identity for grant in binding.capability_grants),
             required_provider_profile=binding.resource_envelope.provider_profile,
@@ -271,6 +285,14 @@ class NativeExecutorRuntimeService:
                 raise NativeExecutionConflict("idempotent admission resolved to another Attempt")
             if persisted.id == entry.id:
                 self._append_event(
+                    store, pwu_id=binding.pwu_id, attempt_id=binding.attempt_id,
+                    event_type="ExecutionRequestCreated",
+                    payload={"execution_id": str(binding.attempt_id),
+                             "task_contract_reference": str(binding.pwu_contract_version_id),
+                             "priority": command.priority},
+                    causation_id=command.command_id,
+                )
+                self._append_event(
                     store,
                     pwu_id=binding.pwu_id,
                     attempt_id=binding.attempt_id,
@@ -340,15 +362,164 @@ class NativeExecutorRuntimeService:
                 }
             )
 
+    def register_worker(self, offer: WorkerOffer) -> WorkerRegistrationRecord:
+        now = self._now()
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            record = store.register_worker(
+                offer, heartbeat_at=now,
+                expires_at=now + timedelta(seconds=offer.lease_seconds),
+                status=WorkerStatus.REGISTERING,
+            )
+            uow.commit()
+            return record
+
+    def heartbeat_worker(self, offer: WorkerOffer) -> WorkerRegistrationRecord:
+        now = self._now()
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            existing = store.worker_registration(offer.worker_id, lock=True)
+            status = (
+                WorkerStatus.DRAINING
+                if existing and existing.status is WorkerStatus.DRAINING
+                else WorkerStatus.BUSY
+                if store.active_allocation_count(offer.worker_id)
+                else WorkerStatus.READY
+            )
+            record = store.register_worker(
+                offer, heartbeat_at=now,
+                expires_at=now + timedelta(seconds=offer.lease_seconds),
+                status=status,
+            )
+            uow.commit()
+            return record
+
+    def reconcile_worker_liveness(self) -> tuple[str, ...]:
+        with self.database.unit_of_work() as uow:
+            result = NativeExecutionStore(uow.session).offline_expired_workers(self._now())
+            uow.commit()
+            return result
+
+    def record_runtime_limit(self, attempt_id: UUID, limit_seconds: int) -> None:
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            binding = store.attempt_binding(attempt_id)
+            self._append_event(
+                store, pwu_id=binding.pwu_id, attempt_id=attempt_id,
+                event_type="ExecutionRuntimeLimitExceeded",
+                payload={"max_active_seconds": limit_seconds,
+                         "recovery": "lease expiry and effect reconciliation required"},
+            )
+            uow.commit()
+
+    def list_workers(self) -> tuple[WorkerRegistrationRecord, ...]:
+        with self.database.unit_of_work() as uow:
+            return tuple(NativeExecutionStore(uow.session).all_worker_registrations())
+
+    def set_worker_draining(self, worker_id: str, *, draining: bool) -> WorkerRegistrationRecord:
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            previous = store.worker_registration(worker_id, lock=True)
+            if previous is None:
+                raise NativeExecutionNotFound(f"worker not registered: {worker_id}")
+            if draining:
+                status = WorkerStatus.DRAINING
+            elif previous.expires_at <= self._now():
+                status = WorkerStatus.OFFLINE
+            elif store.active_allocation_count(worker_id):
+                status = WorkerStatus.BUSY
+            else:
+                status = WorkerStatus.READY
+            store.set_worker_status(worker_id, status,
+                                    current_task_id=previous.current_task_id if status in {
+                                        WorkerStatus.BUSY, WorkerStatus.DRAINING,
+                                    } else None,
+                                    now=self._now())
+            result = store.worker_registration(worker_id)
+            uow.commit()
+            assert result is not None
+            return result
+
+    def worker_evidence(self, worker_id: str) -> tuple[dict[str, object], ...]:
+        with self.database.unit_of_work() as uow:
+            return tuple(NativeExecutionStore(uow.session).worker_events(worker_id))
+
+    def execution_evidence(self, execution_id: UUID) -> tuple[dict[str, object], ...]:
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            binding = store.attempt_binding(execution_id)
+            evidence: list[dict[str, object]] = []
+            cursor = 0
+            while True:
+                batch = store.events_since(binding.pwu_id, after_sequence=cursor, limit=256)
+                for event in batch:
+                    if event.attempt_id == execution_id:
+                        evidence.append({
+                            "timestamp": event.created_at,
+                            "source": "watt-native-executor",
+                            "entity_id": execution_id,
+                            "sequence": event.sequence,
+                            "event_type": event.event_type,
+                            "payload_reference": f"sha256:{canonical_digest(event.payload)}",
+                            "payload": event.payload,
+                        })
+                if len(batch) < 256:
+                    return tuple(evidence)
+                cursor = batch[-1].sequence
+
+    def execution_request(self, execution_id: UUID) -> CloudExecutionRequest:
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            queue = store.latest_queue_for_attempt(execution_id)
+            binding = store.attempt_binding(execution_id)
+            state = store.attempt_state(execution_id)
+            allocation = store.allocation_for_attempt(execution_id)
+            lease = store.lease_for_attempt(execution_id)
+            if state.grant_state is AttemptGrantState.FENCED or state.runtime_mode is ExecutionMode.RECONCILING:
+                status = CloudExecutionStatus.RECOVERY_REQUIRED
+            elif queue.condition is QueueCondition.ALLOCATED:
+                status = CloudExecutionStatus.ASSIGNED
+            elif queue.condition in {QueueCondition.EXECUTING, QueueCondition.CHECKPOINTED}:
+                status = CloudExecutionStatus.RUNNING
+            elif queue.condition is QueueCondition.CANCELLED:
+                status = CloudExecutionStatus.CANCELLED
+            elif queue.condition is QueueCondition.COMPLETED:
+                status = (
+                    CloudExecutionStatus.COMPLETED
+                    if store.work_unit_condition(queue.pwu_id) == "SATISFIED"
+                    else
+                    CloudExecutionStatus.VERIFYING
+                    if state.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
+                    else CloudExecutionStatus.CANCELLED
+                    if state.terminal_outcome in {AttemptTerminalOutcome.CANCELLED, AttemptTerminalOutcome.STOPPED}
+                    else CloudExecutionStatus.FAILED
+                )
+            else:
+                status = CloudExecutionStatus.QUEUED
+            return CloudExecutionRequest(
+                execution_id=execution_id, work_id=queue.work_id,
+                task_contract_reference=binding.pwu_contract_version_id,
+                priority=queue.priority, status=status, created_at=queue.enqueued_at,
+                worker_id=allocation.worker_id if allocation else None,
+                lease_expire_at=lease.deadline if lease else None,
+                queue_entry_id=queue.id,
+                recovery_reason="; ".join(state.blocker_reasons) or None,
+            )
+
     def allocate(self, offer: WorkerOffer) -> ExecutionAllocationGrant | None:
         now = self._now()
         with self.database.unit_of_work() as uow:
             store = NativeExecutionStore(uow.session)
-            store.register_worker(
-                offer,
-                heartbeat_at=now,
-                expires_at=now + timedelta(seconds=offer.lease_seconds),
-            )
+            registration = store.worker_registration(offer.worker_id, lock=True)
+            if registration is not None and registration.status is WorkerStatus.DRAINING:
+                return None
+            if registration is None or registration.expires_at <= now:
+                registration = store.register_worker(
+                    offer, heartbeat_at=now,
+                    expires_at=now + timedelta(seconds=offer.lease_seconds),
+                )
+            if store.active_allocation_count(offer.worker_id) >= registration.capacity["max_concurrency"]:
+                return None
             entries = store.runnable_queue_locked(now)
             cursor, cursor_version = store.scheduler_cursor_locked(
                 self.scheduler_identity, self.scheduler.policy_version
@@ -406,6 +577,10 @@ class NativeExecutorRuntimeService:
                     deadline=deadline,
                     heartbeat_at=now,
                 ),
+            )
+            store.set_worker_status(
+                offer.worker_id, WorkerStatus.BUSY,
+                current_task_id=selected.attempt_id, now=now,
             )
             store.set_queue_condition(
                 selected.id,
@@ -625,6 +800,7 @@ class NativeExecutorRuntimeService:
                     offer,
                     heartbeat_at=now,
                     expires_at=now + timedelta(seconds=lease_seconds),
+                    status=WorkerStatus.BUSY,
                 )
             valid = store.heartbeat_lease(
                 grant.allocation.attempt_id,
@@ -829,6 +1005,19 @@ class NativeExecutorRuntimeService:
                     "observation_confidence": observation_confidence.value,
                 },
             )
+            if terminal is not None:
+                self._append_event(
+                    store, pwu_id=allocation.pwu_id, attempt_id=allocation.attempt_id,
+                    event_type=(
+                        "ExecutionWorkerCompleted"
+                        if terminal is AttemptTerminalOutcome.RESULT_READY
+                        else "ExecutionCancelled"
+                        if terminal is AttemptTerminalOutcome.CANCELLED
+                        else "ExecutionFailed"
+                    ),
+                    payload={"terminal_outcome": terminal.value,
+                             "verification_required": terminal is AttemptTerminalOutcome.RESULT_READY},
+                )
             uow.commit()
 
     def _record_self_refine(
@@ -1518,6 +1707,12 @@ class NativeExecutorRuntimeService:
                 if state.worker_epoch != lease.epoch:
                     store.release_allocation(allocation.id, expired=True)
                     continue
+                self._append_event(
+                    store, pwu_id=allocation.pwu_id, attempt_id=lease.attempt_id,
+                    event_type="ExecutionRecoveryRequired",
+                    payload={"worker_id": lease.worker_id, "lease_epoch": lease.epoch,
+                             "lease_deadline": lease.deadline.isoformat()},
+                )
                 effects = tuple(store.effects_for_attempt(lease.attempt_id))
                 steps = tuple(store.steps_for_attempt(lease.attempt_id))
                 checkpoint = store.latest_checkpoint(lease.attempt_id)

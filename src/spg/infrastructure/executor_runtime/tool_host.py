@@ -193,6 +193,8 @@ class LocalNativeToolHost:
             content = original.replace(old_text, new_text, 1)
         else:
             raise ValueError("file.write requires content or old_text/new_text")
+        if len(content.encode("utf-8")) > request.max_artifact_bytes:
+            raise ValueError("ARTIFACT_SIZE_LIMIT_EXCEEDED")
         await asyncio.to_thread(
             self._atomic_write_text,
             relative,

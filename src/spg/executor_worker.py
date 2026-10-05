@@ -6,6 +6,8 @@ import argparse
 import asyncio
 from collections.abc import Callable
 import json
+from importlib.metadata import version
+import socket
 from uuid import uuid4
 
 from spg.application.bootstrap import bootstrap
@@ -305,6 +307,8 @@ async def run_worker() -> None:
         raise RuntimeError("SPG_NATIVE_EXECUTOR_ENABLED must be true")
     if settings.native_executor_internal_token is None:
         raise RuntimeError("native Executor internal Tool Host token is required")
+    if settings.native_executor_offline_seconds < settings.native_executor_heartbeat_seconds * 2:
+        raise RuntimeError("worker offline timeout must be at least twice the heartbeat interval")
     database = application.persistence()
     runtime = application.native_executor_runtime(database)
     storage = ContentAddressedStorage(settings.native_executor_storage_root / "checkpoints")
@@ -343,23 +347,54 @@ async def run_worker() -> None:
             ),
         )
 
-    worker = NativeExecutionWorker(runtime, kernel_factory)
+    worker = NativeExecutionWorker(
+        runtime, kernel_factory,
+        heartbeat_seconds=settings.native_executor_heartbeat_seconds,
+    )
     offer = WorkerOffer(
         worker_id=settings.native_executor_worker_id,
+        name=settings.native_executor_worker_name,
+        hostname=socket.gethostname(),
+        runtime_version=version("spg-runtime"),
+        max_concurrency=settings.native_executor_max_concurrency,
         worker_profile=settings.native_executor_worker_profile,
         provider_profiles=(settings.native_executor_provider_profile,),
         resource_profiles=(settings.native_executor_resource_profile,),
         capability_identities=(
             "file.read", "file.write", "filesystem.operation", "process.run", "git.status", "git.diff", "git.operation",
             "test.run", "build.run", "dependency.sync", "preview.inspect",
+            "MODEL_EXECUTION", "TOOL_EXECUTION", "BUILD_EXECUTION",
         ),
+        lease_seconds=settings.native_executor_offline_seconds,
     )
+    runtime.register_worker(offer)
+    runtime.heartbeat_worker(offer)
+
+    async def idle_heartbeat() -> None:
+        while True:
+            await asyncio.sleep(settings.native_executor_heartbeat_seconds)
+            await asyncio.to_thread(runtime.heartbeat_worker, offer)
+
+    heartbeat_task = asyncio.create_task(idle_heartbeat())
+    active: set[asyncio.Task[bool]] = set()
     try:
         while True:
-            worked = await worker.run_once(offer)
-            if not worked:
-                await asyncio.sleep(settings.native_executor_poll_seconds)
+            if heartbeat_task.done():
+                heartbeat_task.result()
+            if len(active) < offer.max_concurrency:
+                active.add(asyncio.create_task(worker.run_once(offer)))
+            done, _ = await asyncio.wait(
+                active, timeout=settings.native_executor_poll_seconds,
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+            for task in done:
+                active.remove(task)
+                task.result()
     finally:
+        heartbeat_task.cancel()
+        for task in active:
+            task.cancel()
+        await asyncio.gather(heartbeat_task, *active, return_exceptions=True)
         database.dispose()
 
 

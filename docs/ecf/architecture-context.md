@@ -16,6 +16,7 @@ authority. See [the current ECF integration boundary](../context/ecf-integration
 | Deployment constraints | [target architecture](../architecture/production-target.md), [operations](../architecture/operations.md) | Boundary, isolation, persistence, recovery and upgrade conditions |
 | Scaling assumptions | [scaling strategy](../architecture/scaling-strategy.md) | Conditional stages and measurements, not a user-count entitlement |
 | Operational constraints | [data lifecycle](../architecture/data-lifecycle.md), [operations](../architecture/operations.md) | Retention, cleanup, backup/restore and unresolved decisions |
+| Cloud Worker Runtime Context source | [Cloud Worker Runtime](../architecture/cloud-worker-runtime.md), [ADR-005](../architecture/adr/ADR-005-worker-registry.md), [ADR-006](../architecture/adr/ADR-006-execution-lifecycle.md), [ADR-007](../architecture/adr/ADR-007-worker-lease-recovery.md), [ADR-008](../architecture/adr/ADR-008-resource-governance.md) | Worker identity/capacity, Execution lifecycle, lease/recovery and resource limits |
 
 The Git revision/tree of these files is the **document provenance**. A live
 runtime fact also needs an observation timestamp, exact Cloud Connection and
@@ -37,6 +38,8 @@ runtime_facts: target identity, observation time, evidence reference, freshness
 deployment_constraints: required placement/isolation/data conditions
 scaling_assumptions: stage, trigger evidence, unverified assumptions
 operational_constraints: backup/restore/retention/upgrade requirements
+runtime_context_entry: exact Worker and Execution IDs, observed status, lease epoch,
+  heartbeat/evidence references and freshness, only when decision scope needs them
 unresolved: explicit unknowns and decisions requiring an owner
 ```
 
@@ -46,6 +49,13 @@ request only the sources relevant to its decision, preserve their exact
 revision and distinguish `observed`, `accepted decision`, `proposed policy`
 and `unverified`. If a required source is missing, conflicting or stale, the
 consumer reports that state rather than guessing from an old session summary.
+
+Cloud Worker Runtime v1 supplies persisted source facts through Watt's
+authenticated `/api/cloud-worker/*` projection and database records. A future
+ECF Runtime Context consumer must bind exact Work/Task/Attempt, Worker ID,
+timestamp and evidence digest, and must treat expired heartbeat or unresolved
+lease as stale/uncertain. This entry is a source definition, not a new ECF
+service or a transfer of Worker scheduling authority to ECF.
 
 Do not include `.env` values, credentials, raw secrets or account-wide cloud
 authority in the context package. ECF provides need-to-know engineering
