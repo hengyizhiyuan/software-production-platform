@@ -6,7 +6,8 @@ root=/data/watt/owners
 install -d -m 0755 "$root"
 
 ensure_owner() {
-  local name="$1" url="$2" revision="$3" path="$root/$name"
+  local name="$1" url="$2" revision="$3" path
+  path="$root/$name"
   # A pinned, content-addressed owner source bundle can be pre-provisioned
   # through the existing Cloud Connection when this ECS cannot fetch private Git.
   if [ -f "$path/.owner-revision" ]; then
