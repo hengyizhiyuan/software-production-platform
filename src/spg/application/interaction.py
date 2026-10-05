@@ -2941,7 +2941,11 @@ class WorkInteractionService:
                             and not goal.unresolved_arguments and not goal.unresolved for goal in goals)
                     and not semantic_ir.operational_requests
                     and not latest_human_record.supporting_references
-                    and all(not item.requires_human and item.confidence >= .8 for item in semantic_ir.items)
+                    # A later Human Acceptance obligation is not an ambiguity
+                    # in the present production intent or a current focus choice.
+                    and all(not item.requires_human and item.confidence >= .8
+                            for item in semantic_ir.items
+                            if item.production is not None and item.production.current)
                     and not any(question.blocks_current_step for question in semantic_ir.questions)):
                 explicit_new_work_origin = active_context.work_revision.work_id
                 new_work_id = uuid5(NAMESPACE_URL, f'watt:independent-work:{latest_human_record.id}')

@@ -5,24 +5,33 @@ from sqlalchemy import select
 from spg.application.product_assets import ProductAssetService
 from spg.application.interaction import WorkInteractionService
 from spg.domain.interaction import WorkTransitionChoice, InteractionAssessmentCandidate
-from spg.domain.intent_realization import ProductionIntent
+from spg.domain.intent_realization import ProductionIntent, SemanticItem, SemanticKind, SemanticOrigin, SemanticProvenance
 from spg.infrastructure.persistence.product_schema import product_works
 from tests.irk_test_fixtures import semantic_candidate
 from tests.integration.test_wic_governed_work_admission import clean_schema, _services_for_resource
 
 class TypedIntent:
-    def __init__(self, new_work):
+    def __init__(self, new_work, future_acceptance=False):
         self.new_work = new_work
+        self.future_acceptance = future_acceptance
     def interpret(self, basis):
         return InteractionAssessmentCandidate(provider_identity='test:typed-independent',
             semantic_intent=semantic_candidate(basis.records[-1], production=ProductionIntent(
                 objective='Create an independent contact page' if self.new_work else 'Improve this current contact page',
                 primary_change='Create contact.html' if self.new_work else 'Improve contact.html',
-                current=True, new_work=self.new_work, bounded_change=True)),
+                current=True, new_work=self.new_work, bounded_change=True),
+                extra_items=() if not self.future_acceptance else (SemanticItem(
+                    item_id='future-acceptance', kind=SemanticKind.CONSTRAINT,
+                    statement='The completed Candidate must wait for explicit Human Acceptance',
+                    requires_human=True, confidence=.92, depends_on=('meaning',),
+                    provenance=(SemanticProvenance(origin=SemanticOrigin.HUMAN_EXPLICIT,
+                        source_record_id=basis.records[-1].id,
+                        source_text=basis.records[-1].content),)),)),
             natural_response='Current governed request recorded')
 
 @pytest.mark.parametrize('independent', [True, False])
-def test_typed_new_work_preserves_prior_product_work(postgres_database, tmp_path, independent):
+@pytest.mark.parametrize('future_acceptance', [True, False])
+def test_typed_new_work_preserves_prior_product_work(postgres_database, tmp_path, independent, future_acceptance):
     work, interactions = _services_for_resource(postgres_database, tmp_path, 'test://independent')
     p = ProductAssetService(postgres_database).create('human:test', 'Long-lived qualification Product', provision_source=False)
     interaction = interactions.create_interaction(human_identity='human:test', product_id=UUID(p['id']), start_work_context=False)
@@ -31,7 +40,7 @@ def test_typed_new_work_preserves_prior_product_work(postgres_database, tmp_path
         basis_fingerprint=first.latest_assessment.basis_fingerprint, authority_identity='human:test')
     with postgres_database.unit_of_work() as u:
         before = dict(u.session.execute(select(product_works).where(product_works.c.id == a.work_id)).mappings().one())
-    current = WorkInteractionService(postgres_database, capability=TypedIntent(independent))
+    current = WorkInteractionService(postgres_database, capability=TypedIntent(independent, future_acceptance))
     received = current.append_and_assess(interaction.id,
         'Start a distinct bounded Work' if independent else 'Change the current Work', human_identity='human:test')
     if independent:
