@@ -198,7 +198,7 @@ class RuleBasedProductionPlanner:
                     ))
                     if len(compatible) == 1:
                         return PurePosixPath(compatible[0]).stem
-            return pure.parent.name if stem in {"__init__", "index"} else stem
+            return (pure.parent.name or stem) if stem in {"__init__", "index"} else stem
 
         grouped: dict[str, list[str]] = {}
         for path in targets:

@@ -33,6 +33,8 @@ def test_invalid_dual_target_node_cannot_materialize_pwu(field, value, reason):
 
 def test_dual_target_source_and_navigation_test_never_have_empty_scoped_units():
     proposal = plan()
+    assert all(node.node_id != "group:" for node in proposal.graph.nodes)
+    assert "index" in next(node.objective for node in proposal.graph.nodes if node.node_id == "pwu:1")
     contract = CompletionContract(required_outputs=('index.html', 'tests/navigation.test.js'),
         required_changes=('index.html', 'tests/navigation.test.js'),
         verification_obligations=('PATH_SCOPE',), production_plan=proposal)
