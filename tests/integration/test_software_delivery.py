@@ -297,7 +297,23 @@ def test_required_guardian_static_review_precedes_explicit_acceptance(postgres_d
 def test_script_only_code_candidate_exposes_review_diff(postgres_database, tmp_path, monkeypatch):
     # A functional Preview can be based on the unchanged entrypoint. Review
     # availability must follow the Code Work Candidate, not changed HTML files.
+    unchanged_entrypoint = SOURCE['index.html']
     monkeypatch.delitem(SOURCE, 'index.html')
+    def asset_with_entrypoint(assets, title):
+        # Capture the entrypoint in the imported baseline before Work binding;
+        # it is intentionally absent from the produced change set.
+        source = tmp_path / 'imports' / 'static-baseline'
+        source.mkdir(parents=True)
+        for args in [('init', '-b', 'main'), ('config', 'user.name', 'Delivery Test'),
+                     ('config', 'user.email', 'delivery@example.invalid')]:
+            subprocess.run(['git', '-C', str(source), *args], check=True, capture_output=True)
+        (source / 'README.md').write_text('# Software\n')
+        (source / 'index.html').write_text(unchanged_entrypoint)
+        subprocess.run(['git', '-C', str(source), 'add', '.'], check=True, capture_output=True)
+        subprocess.run(['git', '-C', str(source), 'commit', '-m', 'Static baseline'], check=True, capture_output=True)
+        return assets.intake(RepositoryIntakeRequest(request_id=uuid4(), title=title,
+            description='Exact unchanged static entrypoint', source=str(source), authority_identity='human:test'))
+    monkeypatch.setattr(__import__(__name__, fromlist=['create_asset']), 'create_asset', asset_with_entrypoint)
     service, work_id, delivery, _ = produce(
         postgres_database, tmp_path, authorize_candidate=False, set_delivery_target=False)
     context = delivery.candidate_context(work_id)
