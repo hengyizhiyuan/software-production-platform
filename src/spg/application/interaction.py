@@ -2958,7 +2958,13 @@ class WorkInteractionService:
                 current_basis = interaction_basis_fingerprint(interaction, records, None)
                 semantic_basis = semantic_basis.model_copy(update={'interaction': interaction,
                     'active_work_context': None, 'basis_fingerprint': current_basis,
-                    'governed_semantic_history': (), 'observed_reality': ()})
+                    'governed_semantic_history': (),
+                    # Product accepted-source truth belongs to the long-lived
+                    # Product. Retain its actual observation while removing
+                    # prior Work facts from the independent production basis.
+                    'observed_reality': tuple(observation
+                        for observation in semantic_basis.observed_reality
+                        if observation.owner == 'product-managed-source')})
                 semantic_ir = IntentRealizationKernel().govern(candidate, semantic_basis)
                 # Prior Work context is not an engineering fact for the new unit.
                 prior_assessment = None
