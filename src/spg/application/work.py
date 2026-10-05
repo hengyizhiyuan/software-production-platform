@@ -2645,6 +2645,8 @@ class WorkApplicationService:
                 self.runtime.retry_attempt(summary.attempt_id)
             return self.get_work(work_id)
         if summary.attempt_id is None:
+            if plan_revision is not None and plan_revision.graph is not None:
+                self._bind_multi_pwu_context(work_id, work_unit.id, Path(resource.location_ref))
             self.runtime.create_initial_attempt(binding.work_unit_id)
             return self.get_work(work_id)
 
@@ -2692,10 +2694,15 @@ class WorkApplicationService:
                     self.runtime.reconcile_join_attempt(summary.attempt_id)
             if self.executor is None:
                 return self.get_work(work_id)
-            self.execution.dispatch_and_observe(summary.attempt_id, self.executor)
+            if callable(getattr(self.executor, "submit", None)):
+                self.execution.submit_queued_dispatch(summary.attempt_id, self.executor)
+            else:
+                self.execution.dispatch_and_observe(summary.attempt_id, self.executor)
             return self.get_work(work_id)
 
         if summary.observation_id is None:
+            if callable(getattr(self.executor, "submit", None)):
+                self.execution.submit_queued_dispatch(summary.attempt_id, self.executor)
             terminal_result = getattr(self.executor, "terminal_result", None)
             if callable(terminal_result) and summary.dispatch_id is not None:
                 provider_result = terminal_result(summary.attempt_id)
@@ -2790,6 +2797,69 @@ class WorkApplicationService:
         if self.production_recorder is not None:
             self.production_recorder.record_authorized_work(work_id)
         return self.get_work(work_id)
+
+    def _bind_multi_pwu_context(self, work_id: UUID, pwu_id: UUID, repository: Path) -> None:
+        """Assemble exact PWU context before its first Attempt, never rewrite history."""
+        with self.database.unit_of_work() as uow:
+            store = RuntimeStore(uow.session)
+            unit = store.work_unit(pwu_id)
+            plan = store.plan_revision(unit.plan_revision_id)
+            source = store.snapshot(unit.source_baseline_id)
+            node = next(item for item in plan.graph.nodes if item.node_id == unit.node_id)
+            prior = unit.completion_contract.task_contract
+            if prior is None:
+                raise ProductInvariantViolation("EXECUTION_CONTEXT_NOT_READY: PWU Task Contract missing")
+            predecessors = []
+            for identity in node.dependency_ids:
+                parent = store.work_unit_for_node(plan.id, identity)
+                output = store.snapshot(parent.verified_output_baseline_id)
+                records = store.verification_records_for_work_unit(parent.id)
+                binding = ProductStore(uow.session).runtime_binding_for_work_unit(parent.id)
+                execution_id = None
+                if binding is not None:
+                    facts = ProductStore(uow.session).runtime_summary(binding.model_copy(update={"work_unit_id": parent.id}))
+                    if facts.attempt_id is not None:
+                        execution_id = str(facts.attempt_id)
+                context = parent.completion_contract.task_contract
+                predecessors.append("qualified-predecessor:" + json.dumps({
+                    "pwu_id": str(parent.id), "execution_id": execution_id,
+                    "baseline_id": str(output.id), "revision": output.repository_revision,
+                    "outputs": list(parent.completion_contract.required_outputs),
+                    "verification_ids": [str(record.id) for record in records
+                        if record.proposed_commit_identity == output.repository_revision and record.result.value == "PASS"],
+                    "ecf_fingerprint": None if context is None or context.decision_context is None else context.decision_context.package_fingerprint,
+                }, sort_keys=True))
+            version = unit.version
+        lineage = lineage_for_work_task(self.database, work_id=work_id,
+            repository_identity=source.repository_identity, repository_path=repository,
+            repository_revision=source.repository_revision, target_paths=node.writable_paths)
+        if prior.decision_context is not None and lineage is None:
+            raise ProductInvariantViolation("EXECUTION_CONTEXT_NOT_READY: PWU ECF context unavailable")
+        task = default_task_contract_builder().build(TaskContractRequest(
+            activity=prior.activity, task_mode=prior.task_mode, objective=node.objective,
+            scope=prior.scope, constraints=prior.constraints,
+            required_capabilities=prior.required_capabilities,
+            acceptance_meaning=prior.acceptance_meaning, out_of_scope=prior.out_of_scope,
+            authority_lineage=(*prior.authority_lineage, f"plan-revision:{plan.id}", f"pwu:{pwu_id}"),
+            work_reality_references=(f"work:{work_id}", f"plan-revision:{plan.id}", f"pwu:{pwu_id}"),
+            ecf_references=(f"source-baseline:{source.id}@{source.repository_revision}", *node.context_references),
+            semantic_facts=prior.semantic_fact_references,
+            required_prerequisites=prior.required_prerequisites,
+            prerequisite_evidence=(*prior.prerequisite_evidence, *predecessors),
+            decision_reference=f"plan-revision:{plan.id}:node:{node.node_id}",
+            governed_surface=None if lineage is None else lineage.surface, decision_context=lineage,
+        ))
+        with self.database.unit_of_work() as uow:
+            store = RuntimeStore(uow.session)
+            current = store.work_unit(pwu_id, for_update=True)
+            if current.version != version:
+                raise ProductInvariantViolation("PWU context changed during assembly")
+            store.bind_pending_task_contract(current, current.completion_contract.model_copy(update={"task_contract": task}))
+            self.runtime._append_transition(store, entity_type="PRODUCTION_WORK_UNIT", entity_id=pwu_id,
+                from_condition=current.condition.value, to_condition=current.condition.value,
+                reason="PWU_SCOPED_CONTEXT_BOUND", actor="production-planning", correlation=plan.id,
+                timestamp=datetime.now(UTC))
+            uow.commit()
 
     @staticmethod
     def _join_human_decision_domain(runtime: RuntimeStore, facts: RuntimeFactSummary) -> str | None:
@@ -3738,6 +3808,16 @@ class WorkApplicationService:
                 )
             elif facts.dispatch_id is not None and facts.observation_id is None:
                 state, reason = "RUNNING", None
+                from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+                native_queue = NativeExecutionStore(store.session).queue_for_attempt(facts.attempt_id)
+                if native_queue is not None:
+                    condition = native_queue.condition.value
+                    if condition in {"QUEUED", "RETURNED_TO_QUEUE"}:
+                        state, reason = "WAITING_CAPACITY", native_queue.wait_reason
+                    elif condition == "ALLOCATED":
+                        state = "ASSIGNED"
+                    elif condition in {"WAITING_RESOURCE", "WAITING_HUMAN"}:
+                        state, reason = "BLOCKED", native_queue.wait_reason
             elif facts.observation_id is not None:
                 state, reason = "VERIFYING", None
             else:
@@ -3761,6 +3841,9 @@ class WorkApplicationService:
                 "verified_output_baseline_id": None if output is None else str(output.id),
                 "verified_output_revision": None if output is None else output.repository_revision,
                 "workspace_attempt_id": None if facts.attempt_id is None else str(facts.attempt_id),
+                "task_contract_id": None if unit.completion_contract.task_contract is None else str(unit.completion_contract.task_contract.task_contract_id),
+                "ecf_context_fingerprint": None if unit.completion_contract.task_contract is None or unit.completion_contract.task_contract.decision_context is None else unit.completion_contract.task_contract.decision_context.package_fingerprint,
+                "predecessor_output_baseline_ids": [str(identity) for identity in unit.parent_baseline_ids or ()],
             })
         integrated = runtime.snapshot(run.integrated_baseline_id or run.source_baseline_id)
         return {

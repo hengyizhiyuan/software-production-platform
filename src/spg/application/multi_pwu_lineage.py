@@ -5,6 +5,55 @@ from spg.domain.runtime import RuntimeInvariantViolation, SnapshotCondition, Wor
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 
 
+def work_consumes_revision(session, work_id, repository_identity, revision) -> bool:
+    """Prove an active PWU input is derived from this Work's admitted source."""
+    from spg.infrastructure.persistence.product_store import ProductStore
+    product, runtime = ProductStore(session), RuntimeStore(session)
+    work = product.work(work_id)
+    if work is None:
+        return False
+    for binding in product.runtime_bindings(work_id):
+        if work.current_work_reality_revision_id is not None and binding.work_reality_revision_id != work.current_work_reality_revision_id:
+            continue
+        run = runtime.run(binding.production_run_id)
+        plan = runtime.plan_revision(binding.plan_revision_id)
+        if run is None or plan is None or plan.graph is None or plan.condition.value != "ACTIVE" or run.current_plan_revision_id != plan.id:
+            continue
+        original = runtime.snapshot(run.source_baseline_id)
+        if original is None or original.repository_identity != repository_identity:
+            continue
+        units = {unit.node_id: unit for unit in runtime.work_units_for_plan(plan.id)}
+        for node in plan.graph.nodes:
+            unit = units.get(node.node_id)
+            if unit is None or unit.source_baseline_id is None:
+                continue
+            source = runtime.snapshot(unit.source_baseline_id)
+            if source is None or source.condition is not SnapshotCondition.TRUSTED or source.repository_revision != revision:
+                continue
+            if source.repository_identity != repository_identity or source.repository_ref != original.repository_ref:
+                continue
+            cursor, seen = source, set()
+            while cursor.id != original.id and cursor.id not in seen:
+                seen.add(cursor.id)
+                cursor = None if cursor.source_baseline_id is None else runtime.snapshot(cursor.source_baseline_id)
+                if cursor is None:
+                    break
+            if cursor is None or cursor.id != original.id:
+                continue
+            parents = tuple(units.get(identity) for identity in node.dependency_ids)
+            if any(parent is None or parent.condition is not WorkUnitCondition.SATISFIED or parent.verified_output_baseline_id is None for parent in parents):
+                continue
+            expected = tuple(parent.verified_output_baseline_id for parent in parents)
+            if node.dependency_ids and unit.parent_baseline_ids != expected:
+                continue
+            if node.kind is ProductionNodeKind.PWU and expected and source.id != expected[0]:
+                continue
+            if not expected and source.id != (plan.graph.starting_baseline_id or run.source_baseline_id):
+                continue
+            return True
+    return False
+
+
 def completed_graph(store: RuntimeStore, run, plan, proposed):
     """Return all units and the terminal PWU input, or reject stale graph evidence."""
 

@@ -110,7 +110,8 @@ def test_multi_pwu_plan_persists_three_units_and_blocks_join_before_parents(post
     with pytest.raises(RuntimeError, match="Cannot downgrade versioned multi-PWU"):
         command.downgrade(Config(Path(__file__).resolve().parents[2] / "alembic.ini"), "20260925_49")
     with postgres_database.engine.connect() as connection:
-        assert connection.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one() == "20260928_62"
+        from alembic.script import ScriptDirectory
+        assert connection.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one() == ScriptDirectory.from_config(Config(Path(__file__).resolve().parents[2] / "alembic.ini")).get_current_head()
 
 
 def test_serial_baseline_progression_and_replan_preserve_completed_history(postgres_database, tmp_path):
@@ -336,12 +337,14 @@ def test_join_conflict_requires_changed_verified_resolution_tree(postgres_databa
             objective=f"Produce {name} interpretation", writable_paths=(path,),
             responsibility_boundary=f"{name} interpretation only",
             acceptance_criteria=("Verify guide",),
+            verification_requirements=("Verify guide",),
         ) for name in ("a", "b")
     ) + (ProductionPlanNode(
         node_id="pwu:join", kind=ProductionNodeKind.JOIN,
         objective="Resolve shared guide", dependency_ids=("pwu:a", "pwu:b"),
         writable_paths=(path,), responsibility_boundary="Integrate both interpretations",
         acceptance_criteria=("Verify guide",),
+        verification_requirements=("Verify guide",),
     ),), planning_rationale="Explicit overlap and bounded Join reconciliation",
     parallel_overlap_policy="EXPLICIT_JOIN_RECONCILIATION")
     plan = base_plan.model_copy(update={

@@ -20,7 +20,13 @@ class ProductionPlanningService:
         self.database = database
 
     def propose(self, request: ProductionPlanningRequest) -> ProductionPlanProposal:
-        proposal = self.planner.propose(request)
+        try:
+            proposal = self.planner.propose(request)
+        except ValueError:
+            # Invalid provider structure grants no authority. Rebuild solely
+            # from the admitted Work facts through the existing bounded planner.
+            from spg.providers.rule_based_planner import RuleBasedProductionPlanner
+            proposal = RuleBasedProductionPlanner().propose(request)
         violations = self._authority_violations(request, proposal)
         if not violations:
             return proposal
@@ -123,6 +129,10 @@ class ProductionPlanningService:
                 paths.update(target.path for target in request.change_contract.exact_targets)
             if request.change_proposal is not None:
                 paths.update(target.path for target in request.change_proposal.required_targets)
+            try:
+                proposal.graph.validate_admission(paths)
+            except ValueError as error:
+                violations.append(str(error))
             units = tuple(node for node in proposal.graph.nodes
                 if node.kind is not ProductionNodeKind.GROUP)
             if sum(node.kind is ProductionNodeKind.PWU for node in units) > len(paths):

@@ -114,6 +114,21 @@ class NativeQueuedExecutorCapability:
             return_control=ExecutorReturnControl.EXECUTION_CONTINUITY_LOST,
         )
 
+    def submit(self, request: ExecutorDispatchRequest):
+        """Admit to the existing durable queue without waiting for capacity."""
+        return self.runtime.admit(self._admission(request))
+
+    def ensure_submitted(self, request: ExecutorDispatchRequest) -> None:
+        with self.database.unit_of_work() as uow:
+            try:
+                NativeExecutionStore(uow.session).attempt_binding(request.execution.attempt_id)
+            except NativeExecutionNotFound:
+                missing = True
+            else:
+                missing = False
+        if missing:
+            self.submit(request)
+
     def terminal_result(self, attempt_id: UUID) -> ExecutorDispatchResult | None:
         """Return a terminal native claim for restart reconciliation, if available."""
 
@@ -265,12 +280,18 @@ class NativeQueuedExecutorCapability:
         task_contract = work_unit.completion_contract.task_contract
         production_context = None
         if product_binding is not None and self.strict_production_context:
+            from spg.application.multi_pwu_lineage import work_consumes_revision
+            with self.database.unit_of_work() as uow:
+                exact_work_source = work_revision is not None and (
+                    work_revision.source_revision == commit
+                    or work_consumes_revision(uow.session, work_id, execution.workspace.repository_identity, commit)
+                )
             lineage = None if task_contract is None else task_contract.decision_context
             requirements = work_unit.completion_contract.verification_obligations
             if (
                 lineage is None or semantic_ir_id is None or work_revision is None
                 or not requirements or work_revision.repository_identity != execution.workspace.repository_identity
-                or work_revision.source_revision != commit
+                or not exact_work_source
                 or lineage.work_id != str(work_id)
                 or lineage.repository_revision != commit
                 or lineage.repository_identity != execution.workspace.repository_identity

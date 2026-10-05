@@ -171,6 +171,9 @@ class RuntimeService:
             baseline = self._required_snapshot(store, pointer.snapshot_id)
             if baseline.condition is not SnapshotCondition.TRUSTED:
                 raise RuntimeInvariantViolation("Current Baseline must be TRUSTED")
+            self._validate_plan_admission(contract)
+            if contract.production_plan is not None and contract.production_plan.source_revision != baseline.repository_revision:
+                raise RuntimeInvariantViolation("Production Plan source revision is not the exact Work baseline")
 
             store.insert_run(
                 {
@@ -271,6 +274,31 @@ class RuntimeService:
             return result
 
     @staticmethod
+    def _validate_plan_admission(contract: CompletionContract, *, qualified_paths: frozenset[str] = frozenset()) -> None:
+        plan = contract.production_plan
+        if plan is None or plan.graph is None:
+            return
+        paths = set(contract.required_outputs) | set(contract.required_changes)
+        if contract.change_contract is not None:
+            paths.update(target.path for target in contract.change_contract.exact_targets)
+        if contract.artifact_contract is not None:
+            paths.add(contract.artifact_contract.artifact_path)
+        try:
+            plan.graph.validate_admission(paths, qualified_paths=qualified_paths)
+            for node in plan.graph.nodes:
+                if node.kind is ProductionNodeKind.GROUP:
+                    continue
+                scoped = RuntimeService._scoped_contract(contract, node, plan.source_baseline_id, plan.source_revision)
+                if not scoped.verification_obligations or (
+                    node.kind is ProductionNodeKind.PWU and not scoped.requires_observed_production_result
+                ):
+                    raise ValueError("PLANNING_EMPTY_PWU: scoped contract has no production/verification obligation")
+                if scoped.change_contract is not None and node.kind is ProductionNodeKind.PWU and not scoped.change_contract.exact_targets:
+                    raise ValueError("PLANNING_EMPTY_PWU: scoped change target is empty")
+        except ValueError as error:
+            raise RuntimeInvariantViolation(str(error)) from error
+
+    @staticmethod
     def _scoped_contract(
         contract, node: ProductionPlanNode, baseline_id: UUID, source_revision: str,
     ):
@@ -301,8 +329,12 @@ class RuntimeService:
                 ContextSource.WORK_REALITY, ContextSource.SYSTEM_CAPABILITY_REALITY,
                 ContextSource.SEMANTIC_TRUTH, ContextSource.SOP,
             }
+            protected = set() if task.decision_context is None else {
+                item.source_ref for item in task.decision_context.protected_obligations
+            }
             scoped_context = tuple(item for item in task.relevant_context if (
                 item.source in essential_sources
+                or item.reference in protected
                 or item.reference in node.context_references
                 or any(path in item.reference for path in node.context_references)
             ))
@@ -405,6 +437,10 @@ class RuntimeService:
             if baseline is None or baseline.condition is not SnapshotCondition.TRUSTED:
                 raise RuntimeInvariantViolation("Work integrated baseline is not trusted")
             old_paths = {path for node in old.graph.nodes for path in node.writable_paths}
+            qualified_paths = frozenset(path for node in old.graph.nodes
+                if node.node_id in old_by_node and old_by_node[node.node_id].verified_output_baseline_id is not None
+                for path in node.writable_paths)
+            self._validate_plan_admission(contract, qualified_paths=qualified_paths)
             new_graph = contract.production_plan.graph
             new_paths = {path for node in new_graph.nodes for path in node.writable_paths}
             if not new_paths.issubset(old_paths):

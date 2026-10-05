@@ -133,6 +133,19 @@ class ProductExperienceProjection:
         """Read the exact current Attempt through the Cloud Worker owner."""
         if self.executor is None or work.current_production_run_id is None:
             return None
+        if work.production_plan_runtime is not None:
+            observed = []
+            for unit in work.production_plan_runtime.get("pwus", ()):
+                if unit.get("workspace_attempt_id") is None:
+                    continue
+                try:
+                    observed.append(self.executor.execution_request(UUID(unit["workspace_attempt_id"])).model_dump(mode="json"))
+                except NativeExecutionNotFound:
+                    continue
+            priority = {"RUNNING": 0, "ASSIGNED": 1, "VERIFYING": 2,
+                        "RECOVERY_REQUIRED": 3, "FAILED": 4, "QUEUED": 5, "CREATED": 6,
+                        "COMPLETED": 8, "CANCELLED": 9}
+            return min(observed, key=lambda item: (priority.get(item["status"], 7), item["execution_id"])) if observed else None
         with self.database.unit_of_work() as uow:
             attempt_id = uow.session.execute(
                 select(execution_attempts.c.id).select_from(
@@ -341,6 +354,7 @@ class ProductExperienceProjection:
                     "accepted_revision": product["accepted_revision"],
                     "candidate": candidate_view,
                     "execution": execution,
+                    "production_plan": None if work is None else work.production_plan_runtime,
                     "guardian": guardian,
                     "deliveries": [] if delivery is None else delivery["deliveries"][:5],
                 }, "actions": attention}

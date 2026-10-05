@@ -274,9 +274,14 @@ def lineage_for_work_task(database, *, work_id: UUID,
                       product_managed_sources.c.product_id == work_source_bases.c.product_id)
                 .where(work_source_bases.c.work_id == work_id,
                        engineering_resources.c.repository_identity == repository_identity,
-                       work_source_bases.c.source_revision == repository_revision,
                        product_managed_sources.c.provider_kind == "gitea")
             ).scalar_one_or_none()
+            exact = unit_of_work.session.execute(select(work_source_bases.c.source_revision).where(
+                work_source_bases.c.work_id == work_id)).scalar_one_or_none()
+            if exact != repository_revision:
+                from spg.application.multi_pwu_lineage import work_consumes_revision
+                if not work_consumes_revision(unit_of_work.session, work_id, repository_identity, repository_revision):
+                    source_owner = None
         work = ProductStore(unit_of_work.session).work(work_id)
     if product_id is None or work is None or source_owner != product_id:
         raise DecisionContextAuthorityMissing(
@@ -339,9 +344,14 @@ def assert_task_context_fresh(database, task) -> None:
                       product_managed_sources.c.product_id == work_source_bases.c.product_id)
                 .where(work_source_bases.c.work_id == UUID(lineage.work_id),
                        engineering_resources.c.repository_identity == lineage.repository_identity,
-                       work_source_bases.c.source_revision == lineage.repository_revision,
                        product_managed_sources.c.provider_kind == "gitea")
             ).scalar_one_or_none()
+            exact = unit_of_work.session.execute(select(work_source_bases.c.source_revision).where(
+                work_source_bases.c.work_id == UUID(lineage.work_id))).scalar_one_or_none()
+            if exact != lineage.repository_revision:
+                from spg.application.multi_pwu_lineage import work_consumes_revision
+                if not work_consumes_revision(unit_of_work.session, UUID(lineage.work_id), lineage.repository_identity, lineage.repository_revision):
+                    current_source_owner = None
         else:
             current_source_owner = unit_of_work.session.execute(
                 select(product_managed_sources.c.product_id).where(

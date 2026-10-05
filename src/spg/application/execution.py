@@ -86,6 +86,16 @@ class ExecutionService:
             work_products=work_products,
         )
 
+    def submit_queued_dispatch(self, attempt_id: UUID, executor) -> ExecutionDispatchRecord:
+        """Persist one dispatch, then admit to Native's queue; no result is invented."""
+        with self.database.unit_of_work() as uow:
+            existing = RuntimeStore(uow.session).execution_dispatch_for_attempt(attempt_id)
+        prepared = self.preparation.prepared_execution_request(attempt_id)
+        dispatch = existing or self._persist_dispatch(prepared)
+        request = ExecutorDispatchRequest(dispatch_id=dispatch.id, execution=prepared)
+        executor.ensure_submitted(request)
+        return dispatch
+
     def observe_dispatch(
         self,
         dispatch_id: UUID,

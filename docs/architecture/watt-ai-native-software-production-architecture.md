@@ -345,6 +345,48 @@ beyond admitted Work and current governance.
 
 ### Versioned multi-PWU production
 
+#### Cloud Production Planning Runtime v1
+
+The current Cloud runtime uses the existing `ProductionPlanProposal`, persisted
+`PlanRevisionRecord`, `ProductionPlanGraph` and `WorkUnitRecord`. It introduces
+no second PWU, queue or scheduler. Graph and source-input fields already exist
+in the canonical relational Plan/PWU tables; no migration is required beyond
+`20261005_67`.
+
+New admission validates the DAG, coverage of required Work targets, meaningful
+PWU objective/scope, and explicit verification. An empty target or scoped
+Completion Contract fails before any PWU/Attempt is admitted. Invalid provider
+plans can be rebuilt deterministically from the same admitted authority; no
+placeholder node or widened write scope is accepted. Historical plans remain
+readable. Proposal identity includes graph sizing, constraints and verification
+so material planning changes cannot reuse an unchanged proposal identity.
+
+Native dispatch now persists authority and submits to the existing PostgreSQL
+queue without blocking the Work driver on the first PWU. Independent roots can
+all enter the queue; current operational Worker concurrency remains **1**.
+Restart resumes an existing dispatch/admission rather than creating another
+Execution. Only terminal Native evidence is observed as an execution result.
+
+Before its first Attempt, each ready PWU receives a scoped Task Contract and
+fresh canonical ECF package against its exact input revision. Product Intent,
+invariants and approved decisions stay protected. Qualified predecessor inputs
+name PWU, Execution, output baseline/revision, verification records, artifacts
+and ECF fingerprint. A dependent source must be an active Plan input proven
+through verified lineage back to this Work's admitted source. Arbitrary new
+repository revisions remain unauthorized; the ECF freshness gate is unchanged.
+
+Replanning may reuse explicitly qualified old outputs; their history remains
+immutable and their baseline chain is preserved. Unfulfilled obligations must
+still be covered by the replacement graph. All current nodes are required;
+optional production nodes are not inferred or silently skipped.
+
+The existing Workspace Reality quadrant shows each production unit as ready,
+waiting for capacity, assigned, running, dependency-blocked, verifying, verified
+or blocked. A Join is labeled as integration and verification. Its aggregate
+execution projection considers every current PWU rather than only the original
+binding's root. Candidate sealing still requires complete qualified graph
+lineage; Human acceptance remains a separate authority.
+
 A PWU is a coherent production responsibility with its own objective, scoped
 write authority and context, Attempt lineage, acceptance criteria, and
 verification evidence. It is not a time slice of a larger Executor call. The

@@ -90,6 +90,33 @@ class ProductionPlanGraph(BaseModel):
     starting_baseline_id: UUID | None = None
     parallel_overlap_policy: Literal["FORBID", "EXPLICIT_JOIN_RECONCILIATION"] = "FORBID"
 
+    def validate_admission(self, admitted_paths: set[str], *, qualified_paths: frozenset[str] = frozenset()) -> None:
+        """Validate new authority without making old plan history unreadable."""
+        ProductionPlanGraph.model_validate(self.model_dump(mode="json"))
+        units = tuple(node for node in self.nodes if node.kind is not ProductionNodeKind.GROUP)
+        covered: set[str] = set()
+        signatures: set[tuple] = set()
+        for node in units:
+            if not node.objective.strip() or not (node.responsibility_boundary or "").strip():
+                raise ValueError("PLANNING_EMPTY_PWU: objective or responsibility is empty")
+            if not all(item.strip() for item in node.acceptance_criteria):
+                raise ValueError("PLANNING_EMPTY_PWU: acceptance obligation is empty")
+            if not node.verification_requirements or not all(item.strip() for item in node.verification_requirements):
+                raise ValueError("PLANNING_VERIFICATION_MISSING")
+            paths = set(node.writable_paths)
+            if paths - admitted_paths:
+                raise ValueError("PLANNING_SCOPE_NOT_ADMITTED")
+            if node.kind is ProductionNodeKind.PWU:
+                if not paths:
+                    raise ValueError("PLANNING_EMPTY_PWU: no admitted production target")
+                covered.update(paths)
+            signature = (node.kind, node.objective.strip(), tuple(sorted(paths)), node.dependency_ids)
+            if signature in signatures:
+                raise ValueError("PLANNING_DUPLICATE_PWU")
+            signatures.add(signature)
+        if admitted_paths - covered - qualified_paths:
+            raise ValueError("PLANNING_UNCOVERED_OBLIGATION")
+
     @model_validator(mode="after")
     def validate_graph(self) -> "ProductionPlanGraph":
         nodes = {node.node_id: node for node in self.nodes}

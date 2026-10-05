@@ -90,6 +90,9 @@ class RuleBasedProductionPlanner:
                     separators=(",", ":"),
                 ),
                 *instructions,
+                json.dumps(None if graph is None else graph.model_dump(mode="json"), sort_keys=True),
+                json.dumps(request.constraints),
+                request.verification_expectation,
             )
         )
         return ProductionPlanProposal(

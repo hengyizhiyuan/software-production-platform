@@ -514,6 +514,17 @@ class RuntimeStore:
                     "completion_contract": contract.model_dump(mode="json")},
         )
 
+    def bind_pending_task_contract(self, work_unit: WorkUnitRecord, contract: CompletionContract) -> int:
+        if work_unit.current_execution_generation or work_unit.condition is not WorkUnitCondition.PROPOSED:
+            raise RuntimeInvariantViolation("executed PWU context cannot be rewritten")
+        return update_versioned_row(
+            self.session, production_work_units,
+            identity={"id": work_unit.id, "condition": WorkUnitCondition.PROPOSED.value,
+                      "current_execution_generation": 0},
+            expected_version=work_unit.version,
+            values={"completion_contract": contract.model_dump(mode="json")},
+        )
+
     def set_verified_output(self, work_unit: WorkUnitRecord, baseline_id: UUID) -> int:
         if work_unit.condition is not WorkUnitCondition.SATISFIED:
             raise RuntimeInvariantViolation("only a satisfied PWU can publish verified output")

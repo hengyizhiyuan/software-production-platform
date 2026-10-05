@@ -100,6 +100,37 @@ def test_multi_pwu_work_automatically_starts_both_ready_roots(app_facts: "AppFac
     assert sum(item["state"] in {"READY", "RUNNING"} for item in projection.production_plan_runtime["pwus"]) >= 2
 
 
+def test_multi_pwu_nonblocking_dispatch_keeps_two_root_authorities_across_restart(app_facts: "AppFacts") -> None:
+    submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
+    draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
+        code_exact_targets=("src/spg_example.py", "src/spg/web/app.js"),
+    ))
+    app_facts.service.approve_work(draft.work_id, authority_identity="human:multi-pwu")
+    class QueueSeam:
+        def __init__(self): self.requests = {}
+        def submit(self, request):
+            self.requests.setdefault(request.execution.attempt_id, request.dispatch_id)
+        def ensure_submitted(self, request): self.submit(request)
+        def terminal_result(self, attempt_id): return None
+        def dispatch(self, request): raise AssertionError("Must not wait on first PWU")
+    executor = QueueSeam()
+    for _ in range(2):
+        service = WorkApplicationService(app_facts.database, workspace_root=app_facts.workspace_root, executor=executor)
+        for _ in range(8): service.advance_work(draft.work_id)
+    assert len(executor.requests) == 2
+    with app_facts.database.unit_of_work() as uow:
+        store = RuntimeStore(uow.session)
+        binding = ProductStore(uow.session).runtime_binding(draft.work_id)
+        roots = [unit for unit in store.work_units_for_plan(binding.plan_revision_id) if unit.node_id != 'pwu:join']
+        for unit in roots:
+            attempts = store.attempts_for_work_unit(unit.id)
+            assert len(attempts) == 1
+            dispatch = store.execution_dispatch_for_attempt(attempts[0].id)
+            assert executor.requests[attempts[0].id] == dispatch.id
+            assert store.repository_observation(dispatch.id) is None
+        assert not store.attempts_for_work_unit(store.work_unit_for_node(binding.plan_revision_id, 'pwu:join').id)
+
+
 def test_multi_pwu_replan_api_replaces_active_revision_without_widening_scope(app_facts: "AppFacts") -> None:
     submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
     draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
