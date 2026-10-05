@@ -30,7 +30,7 @@ from spg.domain.native_execution import (
     WorkspaceManifest, WorkspaceMount, canonical_digest,
 )
 from spg.domain.runtime import (AttemptRequest, BootstrapRequest, CompletionContract,
-    InitialRunRequest, ProductionHorizon)
+    InitialRunRequest, ProductionHorizon, BootstrapAlreadyInitialized)
 from spg.infrastructure.executor_runtime.worker import NativeExecutionWorker
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.native_execution_schema import executor_scheduler_state
@@ -57,13 +57,13 @@ def admission(database, repo, work):
         source_commit_oid=git(repo, 'rev-parse', 'HEAD'),
         source_tree_oid=git(repo, 'rev-parse', 'HEAD^{tree}'),
         container_path='/workspace/primary', read_scope=('README.md',),
-        write_scope=(), forbidden_paths=('.git',)),))
+        write_scope=('README.md',), forbidden_paths=('.git',)),))
     workspace = WorkspaceManifest(workspace_id=uuid4(), work_id=work,
         pwu_id=spine.work_unit.id, attempt_id=attempt.id,
         source_vector_digest=vector.digest or '', host_storage_id=str(repo),
         environment_profile_digest='b' * 64,
         mounts=(WorkspaceMount(mount_id='primary', host_path=str(repo),
-            container_path='/workspace/primary', writable=False, write_scope=(), forbidden_paths=('.git',)),),
+            container_path='/workspace/primary', writable=True, write_scope=('README.md',), forbidden_paths=('.git',)),),
         evidence_namespace='capacity-qualification', retention_policy='qualification')
     payload = {'objective': 'Controlled capacity scheduling; no external effects'}
     contract = PWUContractVersionRecord(id=uuid4(), pwu_id=spine.work_unit.id,
@@ -242,14 +242,20 @@ def main():
         assert not args.state.exists(), 'qualification state already exists; use a new exact run path'
         command.upgrade(Config('/app/alembic.ini'), 'head')
         args.state.parent.mkdir(parents=True, exist_ok=True)
-        repo = args.state.parent / 'source'; repo.mkdir()
-        git(repo, 'init', '-b', 'main'); git(repo, 'config', 'user.name', 'Watt Qualification')
-        git(repo, 'config', 'user.email', 'qualification@watt.invalid')
-        (repo / 'README.md').write_text('Controlled capacity qualification; no Product changes.\n')
-        git(repo, 'add', '.'); git(repo, 'commit', '-m', 'Qualification source baseline')
-        RuntimeService(database).bootstrap_trusted_baseline(BootstrapRequest(
-            repository_path=repo, repository_identity=str(repo), repository_ref='refs/heads/main',
-            authority_identity='qualification:ecs', scope={'qualification':'capacity-runtime'}))
+        repo = args.state.parent / 'source'; repo.mkdir(exist_ok=True)
+        if not (repo / '.git').exists():
+            git(repo, 'init', '-b', 'main'); git(repo, 'config', 'user.name', 'Watt Qualification')
+            git(repo, 'config', 'user.email', 'qualification@watt.invalid')
+            (repo / 'README.md').write_text('Controlled capacity qualification; no Product changes.\n')
+            git(repo, 'add', '.'); git(repo, 'commit', '-m', 'Qualification source baseline')
+        assert not git(repo, 'status', '--porcelain'), 'qualification source changed'
+        try:
+            RuntimeService(database).bootstrap_trusted_baseline(BootstrapRequest(
+                repository_path=repo, repository_identity=str(repo), repository_ref='refs/heads/main',
+                authority_identity='qualification:ecs', scope={'qualification':'capacity-runtime'}))
+        except BootstrapAlreadyInitialized:
+            # A failed qualifier may have initialized authority; preserve its records.
+            pass
         state = {'run_id':str(uuid4()),'database':'spg_capacity_qualification'}
         runtime = NativeExecutorRuntimeService(database)
         asyncio.run(contention(runtime, database, repo, state))
