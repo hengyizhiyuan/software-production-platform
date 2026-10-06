@@ -1814,7 +1814,7 @@ class WorkInteractionService:
             obligations = IntentRealizationStore(uow.session).obligations(turn_id)
         envelope = envelope.model_copy(update={"obligation_ledger": tuple(o.model_dump(mode="json") for o in obligations)})
         response_realizer = self.response_realizer
-        if branch_status_answer is not None:
+        if branch_status_answer is not None and envelope.production_admission_state != "WORK_CREATED":
             response_realizer = DeterministicGovernedResponseRealizer()
         pipeline_evidence = getattr(self.capability, "last_pipeline_evidence", None)
         if ((_provider_supplied_human_wording(pipeline_evidence) and
@@ -2491,19 +2491,6 @@ class WorkInteractionService:
                 question = assessment.progressive_semantics.selected_question if assessment.progressive_semantics else None
                 if question and independent_action_answer:
                     independent_action_answer += "\n" + question
-            if controlled and research_result is None:
-                (
-                    response_content,
-                    realization,
-                    reconciliation,
-                    delta_count,
-                    interaction_strategy,
-                ) = self._realize_controlled_response(
-                    turn_id,
-                    assessment,
-                    latest_human_input=request_record.content,
-                    observed_action_answer=independent_action_answer or branch_action_answer,
-                )
             if branch_action_answer is not None and research_result is None:
                 response_content = branch_action_answer
             if independent_action_answer is not None and research_result is None:
@@ -2556,6 +2543,22 @@ class WorkInteractionService:
                         "previous_basis_fingerprint": status_basis.basis_fingerprint,
                         "work_revision_id": str(final_response_basis.active_work_context.work_revision.id)},
                     only_while_processing=True)
+            # Owners settle their exact effects first. Their strings are expression
+            # input only: no owner status/answer may overwrite admitted WIC wording.
+            if controlled and research_result is None:
+                (
+                    response_content,
+                    realization,
+                    reconciliation,
+                    delta_count,
+                    interaction_strategy,
+                ) = self._realize_controlled_response(
+                    turn_id,
+                    assessment,
+                    latest_human_input=request_record.content,
+                    observed_action_answer=(response_content if independent_action_answer is not None
+                        or branch_action_answer is not None or status_answers or named_branch_answers else None),
+                )
             self._mark_turn_timing(turn_id, "final_persistence_started")
             completed_at = datetime.now(UTC)
             with self.database.unit_of_work() as uow:

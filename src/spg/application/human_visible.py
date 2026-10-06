@@ -112,7 +112,7 @@ def safe_wording(projection):
     activity = EXECUTION.get(state,phase)
     summary = f'{motive}。{STATUS.get(work.get("status"),"正在保留并理解这次请求")}；{activity}。'
     next_step = '按当前目标继续形成并验证改动；成果需要你明确审阅和接受。'
-    if work.get('status') in {'BLOCKED','NEEDS_REFINEMENT'}:
+    if work.get('status') in {'BLOCKED','NEEDS_REFINEMENT','NEEDS_ATTENTION'} and not projection.decision_needs:
         next_step='当前生产条件未满足，需先由负责的模块核对阻塞证据；尚未完成。'
     if projection.decision_needs:next_step='先处理下方的具体决定，再依据你的选择推进。'
     decisions=[]
@@ -174,10 +174,14 @@ def fact_wording(facts):
     cloud_text={'SUCCEEDED':'部署成功','FAILED':'部署失败','ROLLED_BACK':'已回滚','NEEDS_HUMAN_ATTENTION':'部署受阻',
         'PRECHECK':'检查环境','STAGING':'传送成果','PREPARING':'正在部署','VERIFYING':'正在验证'}.get(cloud.get('state'),'未部署')
     blocker=cloud.get('blocker')
-    blockers={'DEPLOYMENT_USER_NOT_FOUND':'历史尝试中缺少部署用户，部署尚未开始；新授权尝试会自动评估和准备支持的主机。',
+    blockers={'DEPLOYMENT_USER_NOT_FOUND':'历史尝试：目标 ECS 当时缺少部署用户 wattdeploy，部署尚未开始。Watt 现在会在新授权的部署尝试中自动评估并准备受支持的主机。',
         'PUBLIC_BUSINESS_VERIFICATION_REQUIRED':'目标机本地服务已启动，公网业务验证尚未通过。',
         'UNSUPPORTED_HOST_PROFILE':'目标系统不在当前自动部署支持范围内。',
-        'HOST_PROFILE_CONFLICT':'主机状态与受控部署环境冲突，已安全停止。'}
+        'HOST_PROFILE_CONFLICT':'这台 ECS 的现有主机状态与受控部署环境冲突，Watt 已安全停止。',
+        'BLOCKED_APPROVED_PACKAGE_SOURCE':'主机无法从受控软件源准备所需组件，已停止且没有部署交付物。',
+        'BLOCKED_APPROVED_PACKAGE_INSTALL':'主机所需组件未能安全安装，已停止且没有部署交付物。',
+        'BLOCKED_ROOTLESS_SETUP':'非 root 容器运行时未能安全完成准备，已停止且没有部署交付物。',
+        'BLOCKED_ROOTLESS_VERIFICATION':'非 root 容器运行时未能通过验证，已停止且没有部署交付物。'}
     return {'work':STATUS.get(work.get('status'),'尚无具体事项'),'execution':running,
         'verification':verification_text,'guardian':guardian_text,
         'candidate':acceptance_text if acceptance else '已形成，等待你授权' if candidate.get('authorization_pending') else '已形成，可查看' if candidate else '尚未形成',
@@ -216,3 +220,22 @@ class HumanVisibleRealizationService:
                 projection=projection.model_dump(mode='json'),realization=result).on_conflict_do_nothing())
             uow.commit()
         return result
+
+
+def cloud_presentation(deployment):
+    """Derived WIC wording for the same Cloud owner facts, including detail views."""
+    result=dict(deployment)
+    labels=fact_wording({'cloud_deployment':deployment})
+    result['human_visible']={'status':labels['cloud'],'blocker':labels['blocker']}
+    return result
+
+
+def cloud_error_wording(code):
+    return {
+        'CONNECTION_EXECUTION_GRANT_REQUIRED':'当前云连接缺少受控执行能力，请完成一次连接策略更新。',
+        'SECURITY_GROUP_DISCOVERY_FAILED':'无法读取目标安全组，云连接的受控网络能力尚未验证。',
+        'SECURITY_GROUP_RULE_READ_FAILED':'无法读取当前入站规则，尚未确认网络条件。',
+        'PUBLIC_INGRESS_CREATE_FAILED':'精确入站规则未能建立，公网业务尚未通过验证。',
+        'UNSUPPORTED_HOST_PROFILE':'目标系统不在当前自动部署支持范围内，请选择受支持的主机。',
+        'HOST_PROFILE_CONFLICT':'主机现有状态无法安全自动准备，请选择另一台主机。',
+    }.get(code,'本次云操作未能完成，请查看保留的证据；系统不会把它视为成功。')

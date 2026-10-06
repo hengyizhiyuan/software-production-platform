@@ -10,7 +10,7 @@
       headers:body===undefined?{}:{'Content-Type':'application/json'},
       ...(body===undefined?{}:{body:JSON.stringify(body)})});
     const value = await response.json();
-    if(!response.ok) throw new Error(value.message||value.code||'请求失败');
+    if(!response.ok) throw new Error(value.message||'请求失败');
     return value;
   }
   function box() { return document.getElementById('cloud-delivery-flow'); }
@@ -18,32 +18,18 @@
     const node=document.getElementById('cloud-delivery-message');
     if(node) {node.textContent=value;node.className=failure?'notice-error':'muted';}
   }
-  function errorCopy(code) {
-    if(code==='CONNECTION_EXECUTION_GRANT_REQUIRED')return '当前云连接缺少受控执行能力。请为这个连接完成一次连接策略更新；更换 ECS 不需要创建目标专用策略。';
-    if(['SECURITY_GROUP_DISCOVERY_FAILED','SECURITY_GROUP_RULE_READ_FAILED','PUBLIC_INGRESS_CREATE_FAILED'].includes(code))return '当前开发期云连接缺少受控网络暴露能力。完成一次连接策略迁移后，未来选择 ECS 不再需要修改 RAM。';
-    if(code==='UNSUPPORTED_HOST_PROFILE')return '这台 ECS 的系统不在当前自动准备范围内，请选择 Alibaba Cloud Linux 3 ECS。';
-    if(code==='HOST_PROFILE_CONFLICT')return '这台 ECS 的现有状态无法安全自动准备，请选择另一台 ECS。';
-    return code;
+  function errorCopy(message) {
+    return /\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/.test(message)?
+      '本次云操作未能完成，请查看保留的证据。':message;
   }
   function blockerCopy(deployment) {
     if(!deployment?.blocker)return '';
-    if(deployment.blocker==='DEPLOYMENT_USER_NOT_FOUND') {
-      const receipt=(deployment.operations||[]).find(item=>item.output_summary==='DEPLOYMENT_USER_NOT_FOUND');
-      const candidate=receipt?.deployment_user||deployment.deployment_user||'wattdeploy';
-      const username=/^[a-z_][a-z0-9_-]{0,31}$/.test(candidate)?candidate:'wattdeploy';
-      return `历史尝试：目标 ECS 当时缺少部署用户 ${username}，部署尚未开始。Watt 现在会在新授权的部署尝试中自动评估并准备受支持的主机。`;
-    }
-    if(deployment.blocker==='UNSUPPORTED_HOST_PROFILE')return '这台 ECS 的系统不在当前自动部署支持范围内。请选择 Alibaba Cloud Linux 3 ECS。';
-    if(deployment.blocker==='HOST_PROFILE_CONFLICT')return '这台 ECS 的现有主机状态与受控部署环境冲突，Watt 已安全停止。请选择另一台 ECS。';
-    if(['BLOCKED_APPROVED_PACKAGE_SOURCE','BLOCKED_APPROVED_PACKAGE_INSTALL'].includes(deployment.blocker))return '这台 ECS 无法从受控软件源准备所需组件，Watt 已停止且没有部署交付物。请选择另一台 ECS，或检查云侧软件源可达性。';
-    if(['BLOCKED_ROOTLESS_SETUP','BLOCKED_ROOTLESS_VERIFICATION'].includes(deployment.blocker))return '这台 ECS 的非 root 容器运行时未能安全完成准备，Watt 已停止且没有部署交付物。请选择另一台 ECS。';
-    if(deployment.blocker==='PUBLIC_BUSINESS_VERIFICATION_REQUIRED')return '目标机本地服务已启动，但公网 HTTP 验证尚未通过。可选择“公网部署”发起新的受控尝试；Watt 会检查并在授权范围内创建精确入站规则。';
-    return deployment.blocker;
+    return deployment.human_visible?.blocker||'部署条件未满足，尚未通过验证。';
   }
   async function renderFlow() {
     const node=box();if(!node||!state.open)return;
     const c=state.connection;
-    const choices=state.connections.map(item=>`<option value="${escape(item.id)}" ${c?.id===item.id?'selected':''}>${escape(item.target?.name||item.role_arn||'待授权的云连接')} · ${escape(item.state)}</option>`).join('');
+    const choices=state.connections.map(item=>`<option value="${escape(item.id)}" ${c?.id===item.id?'selected':''}>${escape(item.target?.name||item.role_arn||'待授权的云连接')} · ${escape(item.human_visible?.status||'云连接状态待确认')}</option>`).join('');
     const choose=state.connections.length?`<div class="field"><label for="cloud-connection-choice">已有云连接</label><select id="cloud-connection-choice">${choices}</select></div>`:'';
     const reselect=c?.target&&c.state!=='REVOKED'?`<div class="workspace-review"><p>当前目标：${escape(c.target.name)} · ${escape(c.target.region_id)} · ${escape(c.target.instance_id)}。更换目标会重新发现 ECS 并验证现有云连接；历史部署记录会保留。</p><button class="button secondary" type="button" data-cloud-reselect>重新选择 ECS</button></div>`:'';
     let step='';
@@ -86,7 +72,7 @@
     state.open=false;state.connection=null;state.deployIntent=false;
     const current=state.deployments[0];
     const panel=document.createElement('section');panel.className='detail-panel';
-    panel.innerHTML=`<h2>阿里云部署</h2><p>${current?`${escape({SUCCEEDED:'部署成功',NEEDS_HUMAN_ATTENTION:'需要你处理',ROLLED_BACK:'已回滚',FAILED:'部署失败'}[current.state]||'正在部署')} · ${escape(current.target.name)} · ${escape(current.target.region_id)} · ${escape(current.target.instance_id)}`:'这个已验收成果尚未部署到阿里云。'}</p>${current?.blocker?`<p class="muted">${escape(blockerCopy(current))}</p>`:''}${current?.connection_id?'<button class="button secondary" type="button" data-cloud-reselect>重新选择 ECS（不部署）</button>':''}<button class="button" type="button" data-cloud-open>查看云连接与目标</button><div id="cloud-delivery-flow"></div>`;
+    panel.innerHTML=`<h2>阿里云部署</h2><p>${current?`${escape(current.human_visible?.status||'部署状态待确认')} · ${escape(current.target.name)} · ${escape(current.target.region_id)} · ${escape(current.target.instance_id)}`:'这个已验收成果尚未部署到阿里云。'}</p>${current?.blocker?`<p class="muted">${escape(blockerCopy(current))}</p>`:''}${current?.connection_id?'<button class="button secondary" type="button" data-cloud-reselect>重新选择 ECS（不部署）</button>':''}<button class="button" type="button" data-cloud-open>查看云连接与目标</button><div id="cloud-delivery-flow"></div>`;
     document.getElementById('content')?.append(panel);
   }};
   document.addEventListener('click',async event=>{
@@ -155,7 +141,7 @@
         const result=await request(`/api/cloud-deliveries/${auth.id}/execute`,'POST');
         message(result.state==='SUCCEEDED'?(exposureMode==='PUBLIC'?
           '公网部署成功，运行及真实公网 HTTP 验证均已通过。':'内部部署成功，目标机运行验证已通过。'):
-          `部署状态：${result.state}。${blockerCopy(result)||'请查看证据。'}`,result.state!=='SUCCEEDED');
+          `部署状态：${result.human_visible?.status||'待确认'}。${blockerCopy(result)||'请查看证据。'}`,result.state!=='SUCCEEDED');
       }
     }catch(error){message(errorCopy(error.message),true);}finally{button.disabled=false;}
   });

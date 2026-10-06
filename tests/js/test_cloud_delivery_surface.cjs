@@ -58,6 +58,7 @@ test('historical missing deployment user leads to automatic host preparation',()
       fingerprint:'a'.repeat(64)},
     acceptance:{decision:'ACCEPT'},current:true,summary:{work_id:'work'},
     cloud_deployments:[{state:'FAILED',blocker:'DEPLOYMENT_USER_NOT_FOUND',
+      human_visible:{status:'部署失败',blocker:'历史尝试：目标 ECS 当时缺少部署用户 wattdeploy，部署尚未开始。Watt 现在会在新授权的部署尝试中自动评估并准备受支持的主机。'},
       target:{name:'新 ECS',region_id:'cn-hongkong',instance_id:'i-newtarget'},
       operations:[{output_summary:'DEPLOYMENT_USER_NOT_FOUND',
         deployment_user:'wattdeploy',provider_error_code:'AccountNotExists'}]}],
@@ -68,9 +69,9 @@ test('historical missing deployment user leads to automatic host preparation',()
   assert.match(html,/Watt 现在会在新授权的部署尝试中自动评估并准备受支持的主机/);
   assert.doesNotMatch(html,/SSH|手[动工](?:创建用户|安装 Docker|准备服务器)|需要你完成服务器前置条件/i);
   assert.doesNotMatch(html,/AccountNotExists|CLOUD_OPERATION_UNVERIFIED/);
-  assert.match(window.WattCloudDelivery.blockerCopy({blocker:'UNSUPPORTED_HOST_PROFILE'}),
+  assert.match(window.WattCloudDelivery.blockerCopy({blocker:'UNSUPPORTED_HOST_PROFILE',human_visible:{blocker:'不在当前自动部署支持范围内'}}),
     /不在当前自动部署支持范围内/);
-  assert.match(window.WattCloudDelivery.blockerCopy({blocker:'HOST_PROFILE_CONFLICT'}),
+  assert.match(window.WattCloudDelivery.blockerCopy({blocker:'HOST_PROFILE_CONFLICT',human_visible:{blocker:'Watt 已安全停止'}}),
     /Watt 已安全停止/);
 });
 
@@ -147,4 +148,11 @@ test('READY target presents exact governed Delivery authorization directly',asyn
   assert.doesNotMatch(flow.innerHTML,/我决定准备部署|前往阿里云授权此主机|目标授权已验证|data-cloud-show-deploy/);
   assert.doesNotMatch(flow.innerHTML,/SSH|手[动工](?:创建用户|安装 Docker|准备服务器)|需要你完成服务器前置条件/i);
   assert.ok(!calls.some(([,method])=>method==='POST'));
+});
+
+test('normal cloud blockers consume WIC wording and never expose unknown enums',()=>{
+  const {window}=surface();
+  assert.equal(window.WattCloudDelivery.blockerCopy({blocker:'FUTURE_RAW_OWNER_REASON',
+    human_visible:{blocker:'当前条件尚未满足，未完成部署。'}}),'当前条件尚未满足，未完成部署。');
+  assert.doesNotMatch(window.WattCloudDelivery.blockerCopy({blocker:'FUTURE_RAW_OWNER_REASON'}),/FUTURE_RAW_OWNER_REASON/);
 });

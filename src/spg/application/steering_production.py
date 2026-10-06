@@ -112,6 +112,9 @@ class SteeringProductionService:
         )
         guided_design = GuidedDesignApplicationService(self.database)
         guided = guided_design.get_optional(work_id)
+        requires_design_artifact = bool(guided and any(
+            issue.qualification is None or issue.qualification.blocking
+            for issue in guided.issues))
         approved_design_artifacts = (
             ()
             if guided is None
@@ -184,7 +187,7 @@ class SteeringProductionService:
                     ),
                 )
             else:
-                if guided is not None and not approved_design_artifacts:
+                if requires_design_artifact and not approved_design_artifacts:
                     raise ProductInvariantViolation(
                         "Implementation production requires an approved design artifact "
                         "from current Work Reality"
@@ -244,16 +247,16 @@ class SteeringProductionService:
                 verification_expectation=work.verification_expectation or "",
                 task_mode=(
                     TaskMode.DESIGN_ARTIFACT
-                    if guided is not None
+                    if requires_design_artifact
                     and plan.target_kind is ProductionTargetKind.DOCUMENTATION_WORK
                     else TaskMode.IMPLEMENTATION
-                    if guided is not None
+                    if requires_design_artifact
                     and plan.target_kind is ProductionTargetKind.CODE_WORK
                     else TaskMode.GENERAL
                 ),
                 required_prerequisites=(
                     ("APPROVED_DESIGN_ARTIFACT",)
-                    if guided is not None
+                    if requires_design_artifact
                     and plan.target_kind is ProductionTargetKind.CODE_WORK
                     else ()
                 ),

@@ -610,3 +610,10 @@ next governed meaning. The exact Human-stated alternatives are preserved.
 Permanent bounded regression identities: REG-HI-001 through REG-HI-005, REG-HI-P01
 and REG-HI-P02. Their reviewed recipes use the existing isolated Quality runner.
 Historical Pilot results remain immutable; new incident/repair runs append lineage.
+
+Owner effect settlement and freshness checks precede final chat realization.
+An owner answer is structured expression input and cannot overwrite the final WIC
+response. Non-blocking Guided Design records do not create a design-artifact
+prerequisite at production materialization. Cloud deployment detail views consume
+the same WIC fact wording as Workspace; unknown failures retain raw evidence in
+the owner record and receive a neutral failure explanation in normal UI.

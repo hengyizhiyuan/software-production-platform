@@ -12,12 +12,16 @@ TABLES = ("quality_campaign_runs", "quality_case_runs", "quality_run_members", "
     "pwu_contract_versions", "execution_attempts", "execution_dispatches", "execution_allocations",
     "executor_worker_registrations", "executor_queue", "production_snapshots", "proposed_repository_snapshots", "completion_evaluations", "verification_records",
     "baseline_candidates", "work_delivery_acceptances", "product_source_versions",
-    "product_source_promotion_intents")
+    "product_source_promotion_intents", "guided_design_processes", "guided_design_agenda_revisions",
+    "steering_plans", "steering_plan_revisions", "steering_steps", "steering_decisions",
+    "semantic_step_results", "wic_human_realizations")
 SAFE_COLUMNS = {"id", "run_id", "campaign_run_id", "parent_run_id", "case_version_id", "source_case_run_id", "disposition", "action", "work_id", "pwu_id", "work_unit_id", "task_contract_id", "attempt_id",
     "candidate_id", "worker_id", "condition", "status", "state", "generation", "lease_epoch",
     "source_revision", "source_tree", "revision", "tree", "source_baseline_id", "source_version",
     "package_fingerprint", "accepted_revision", "accepted_tree", "decision_id", "decision_version", "fingerprint", "contract_digest", "snapshot_id", "acceptance_id", "product_id", "version",
     "turn_id", "semantic_ir_id", "assessment_id", "basis_fingerprint",
+    "steering_plan_revision_id", "current_step_id", "source_assessment_id", "design_issue_key",
+    "human_required", "attention_reason", "steering_outcome", "next_step_type", "governed_semantic_ir_id",
     "context_ref", "content_fingerprint", "completion_contract_fingerprint",
     "context_package_content_fingerprint", "context_package_version", "input_fingerprint",
     "repository_revision", "repository_tree_identity", "context_package_id", "production_run_id", "plan_revision_id", "workspace_identity", "workspace_path", "workspace_id", "workspace_reference",

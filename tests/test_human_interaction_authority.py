@@ -180,3 +180,13 @@ def test_stream_leak_recovery_keeps_same_basis_and_never_emits_internal_clause(a
     assert envelope.model_dump()==original
     assert ''.join(emitted)==result.content and not language_leaks(result.content)
     assert realizer.inputs[1].expression_refinement['same_basis'] is True
+
+
+def test_cloud_detail_wording_preserves_owner_failure_without_raw_prose():
+    from spg.application.human_visible import cloud_presentation,cloud_error_wording
+    original={'state':'FAILED','blocker':'FUTURE_RAW_OWNER_REASON','operations':[{'output_summary':'raw debugging evidence'}]}
+    result=cloud_presentation(original)
+    assert {k:result[k] for k in original}==original
+    assert not language_leaks(result['human_visible']['blocker'])
+    assert result['human_visible']['status']=='部署失败'
+    assert not language_leaks(cloud_error_wording(original['blocker']))

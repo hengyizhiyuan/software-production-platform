@@ -4068,13 +4068,12 @@ def test_new_admitted_request_revises_stale_design_agenda_without_runtime_result
     assert semantic_input.production_proposal_required is True
     # Presence of a methodology record is not a current design-artifact obligation.
     assert semantic_input.required_intermediate_artifacts == ()
-    result = SemanticStepApplicationService(
-        postgres_database, _UnguidedSemanticCapability(), work_service=work,
-    ).execute(admitted.work_id)
-    assert result.completion_satisfied
-    assert result.proposed_production.target_kind is ProductionTargetKind.CODE_WORK
-    assert result.authority_assessment is SteeringAuthorityAssessment.WITHIN_AUTHORITY
-    # A semantic proposal still cannot itself create production execution.
+    # This fixture has no page target in repository Reality. Removing an
+    # invented design prerequisite must not remove executable-boundary checks.
+    with pytest.raises(SteeringInvariantViolation, match="no executable PWU boundary"):
+        SemanticStepApplicationService(
+            postgres_database, _UnguidedSemanticCapability(), work_service=work,
+        ).execute(admitted.work_id)
     assert work.get_work(admitted.work_id).production_plan is None
 
 
@@ -4648,6 +4647,30 @@ def _git(repository: Path, *args: str) -> str:
     ).stdout.strip()
 
 
+def _qualified_question_fixture(database, work_id, question, options):
+    from sqlalchemy import update
+    from spg.infrastructure.persistence.product_store import ProductStore
+    from spg.infrastructure.persistence.product_schema import interaction_assessments
+    from spg.application.human_attention import canonical_ir_for_work, boundary_decision
+    from spg.domain.steering import HumanDecisionEffect
+    from tests.irk_test_fixtures import question as declared_question
+    with database.unit_of_work() as u:
+        store=ProductStore(u.session)
+        revision=store.current_work_reality_revision(work_id)
+        ir=canonical_ir_for_work(u.session,work_id)
+        # A declared owner oracle, not a prose heuristic or a production bypass.
+        ir=ir.model_copy(update={'questions':(declared_question(question,blocking=True,human=True),)})
+        u.session.execute(update(interaction_assessments).where(
+            interaction_assessments.c.id==revision.source_assessment_id).values(semantic_ir=ir.model_dump(mode='json')))
+        u.commit()
+    frame=PlanFrameAssembler(database).assemble(work_id)
+    refs=tuple(item.reference for item in frame.basis.resolved_reality)
+    need=boundary_decision('当前产品的具体业务对象或范围',question,HumanDecisionEffect.PRODUCT_SCOPE,refs,
+        options,why_now='当前生产缺少明确的业务对象或权限范围，未决定前无法构成精确任务。',
+        impact='选择会改变实际业务目标、源文件范围和验收要求，不能由执行方替用户决定。')
+    return need.model_copy(update={'governed_semantic_ir_id':ir.id})
+
+
 def test_human_answer_to_current_design_question_admits_once_and_schedules(postgres_database, services):
     from spg.infrastructure.persistence.interaction_store import InteractionStore
     from spg.domain.steering import NextStepCandidate, SteeringAuthorityAssessment, SteeringAttentionReason
@@ -4656,11 +4679,16 @@ def test_human_answer_to_current_design_question_admits_once_and_schedules(postg
     admitted = _admit(work, ready)
     SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
     driver = PlanSteeringDriver(postgres_database, work, ProductionOrchestrator(work))
+    need=_qualified_question_fixture(postgres_database,admitted.work_id,
+        "Which existing user should the edit target?",
+        (("李四用户", "仅修改李四的资料，不变更其他用户数据或权限。"),
+         ("另一个明确用户", "需先明确另一个用户身份，再限定这次修改目标。")))
     frame = driver.frames.assemble(admitted.work_id)
     assert driver._convergence_basis(admitted.work_id)["human_intervention_count"] == 0
     decision = driver.decisions.admit(admitted.work_id, NextStepCandidate(
         type=SteeringStepType.HUMAN_DECISION, objective="Choose the target",
         reason="Which existing user should the edit target?", human_required=True,
+        human_decision_need=need,
         reality_refs=tuple(item.reference for item in frame.basis.resolved_reality),
         completion_condition="Human selects the user", proposed_outcome=SteeringOutcome.HUMAN_ATTENTION,
         basis_fingerprint=frame.basis.fingerprint,
@@ -4719,10 +4747,15 @@ def test_typed_scope_answer_to_current_question_revises_same_work_once(
     admitted = _admit(work, ready)
     SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
     driver = PlanSteeringDriver(postgres_database, work, ProductionOrchestrator(work))
+    need=_qualified_question_fixture(postgres_database,admitted.work_id,
+        "Which business domain should search cover?",
+        (("仅用户检索", "仅查询用户名称与邮箱，不增加订单数据范围。"),
+         ("用户与订单检索", "检索范围扩展到订单，改变业务边界与数据访问验证要求。")))
     frame = driver.frames.assemble(admitted.work_id)
     decision = driver.decisions.admit(admitted.work_id, NextStepCandidate(
         type=SteeringStepType.HUMAN_DECISION, objective="Choose search scope",
         reason="Which business domain should search cover?", human_required=True,
+        human_decision_need=need,
         reality_refs=tuple(item.reference for item in frame.basis.resolved_reality),
         completion_condition="Human specifies domain and fields",
         proposed_outcome=SteeringOutcome.HUMAN_ATTENTION,

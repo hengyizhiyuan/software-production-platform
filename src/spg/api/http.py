@@ -710,7 +710,8 @@ def create_http_application(
     @api.exception_handler(CloudArtifactError)
     async def cloud_delivery_error_handler(_request: Request, error: Exception) -> JSONResponse:
         code = getattr(error, "code", str(error))
-        return _error(409, code, code)
+        from spg.application.human_visible import cloud_error_wording
+        return _error(409, code, cloud_error_wording(code))
 
     @api.exception_handler(NativeExecutionError)
     async def native_execution_error_handler(
@@ -1470,7 +1471,8 @@ def create_http_application(
     def experience_deliverable(manifest_id: UUID, http_request: Request):
         actor = getattr(http_request.state, "actor_id", ACTOR_ID)
         result = experience.deliverable(actor, manifest_id)
-        result["cloud_deployments"] = cloud_delivery.deployments_for_manifest(actor, manifest_id)
+        from spg.application.human_visible import cloud_presentation
+        result["cloud_deployments"] = [cloud_presentation(d) for d in cloud_delivery.deployments_for_manifest(actor, manifest_id)]
         return result
 
     @api.get("/api/cloud-connections/aliyun")
@@ -1487,8 +1489,9 @@ def create_http_application(
 
     @api.get("/api/cloud-connections/aliyun/{connection_id}/deployments")
     def aliyun_connection_deployments(connection_id: UUID, http_request: Request):
-        return cloud_delivery.deployments_for_connection(
-            getattr(http_request.state, "actor_id", ACTOR_ID), connection_id)
+        from spg.application.human_visible import cloud_presentation
+        return [cloud_presentation(d) for d in cloud_delivery.deployments_for_connection(
+            getattr(http_request.state, "actor_id", ACTOR_ID), connection_id)]
 
     @api.post("/api/cloud-connections/aliyun/{connection_id}/role")
     def bind_aliyun_role(connection_id: UUID, request: CloudRoleRequest,
@@ -1528,13 +1531,15 @@ def create_http_application(
 
     @api.post("/api/cloud-deliveries/{authorization_id}/execute")
     def execute_cloud_delivery(authorization_id: UUID, http_request: Request):
-        return cloud_delivery.execute(getattr(http_request.state, "actor_id", ACTOR_ID),
-            authorization_id)
+        from spg.application.human_visible import cloud_presentation
+        return cloud_presentation(cloud_delivery.execute(getattr(http_request.state, "actor_id", ACTOR_ID),
+            authorization_id))
 
     @api.get("/api/cloud-deployments/{deployment_id}")
     def cloud_deployment(deployment_id: UUID, http_request: Request):
-        return cloud_delivery.deployment(getattr(http_request.state, "actor_id", ACTOR_ID),
-            deployment_id)
+        from spg.application.human_visible import cloud_presentation
+        return cloud_presentation(cloud_delivery.deployment(getattr(http_request.state, "actor_id", ACTOR_ID),
+            deployment_id))
 
     @api.get("/api/experience/interactions/{interaction_id}")
     def experience_interaction(interaction_id: UUID, http_request: Request):

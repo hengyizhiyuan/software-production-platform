@@ -18,7 +18,7 @@ def recipes():
         True,'qualification:human-interaction-authority-repair-v1') for identity,text,selector in CASES)
 
 def definitions():
-    return tuple(CaseDefinition(key=r.key,title=r.title,motive=r.title,runner_key=r.key,
+    return tuple(CaseDefinition(key="watt."+r.key,title=r.title,motive=r.title,runner_key=r.key,
         stage=r.stage,source='HISTORICAL_INCIDENT' if not r.key.startswith('REG-HI-P') else 'POSITIVE_GOVERNANCE',
         invariants=(r.invariant,),cohorts=(Cohort.REGRESSION,),
         provenance=(r.provenance,r.selector),context={'execution_environment':'ISOLATED_QUALIFICATION',

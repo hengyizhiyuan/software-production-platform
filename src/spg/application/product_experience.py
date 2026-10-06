@@ -410,8 +410,10 @@ class ProductExperienceProjection:
         guardian = ({"status": "NOT_STARTED", "finding_count": 0}
                     if self.guardian is None else
                     self.guardian.projection(UUID(summary["work_id"])))
+        from spg.application.human_visible import fact_wording
+        facts= fact_wording({"guardian":guardian,"deliveries":[exact]})
         return {"revision": _fingerprint(summary, exact, guardian),
-                "summary": summary, "manifest": exact["manifest"],
+                "human_visible":{"facts":facts},"summary": summary, "manifest": exact["manifest"],
                 "acceptance": exact["acceptance"], "current": exact["current"],
                 "guardian": guardian, "source_promotion": exact.get("source_promotion")}
 

@@ -130,9 +130,9 @@ def test_recipe_diagnostics_redact_credentials_and_sealed_answers(tmp_path,monke
 def test_human_interaction_incident_recipes_preserve_permanent_identity_and_exact_selector():
     from spg.evaluation.human_interaction_regressions import definitions as hi_definitions
     items=hi_definitions()
-    assert {d.key for d in items}=={*(f'REG-HI-{i:03}' for i in range(1,6)),'REG-HI-P01','REG-HI-P02'}
+    assert {d.key for d in items}=={*(f'watt.REG-HI-{i:03}' for i in range(1,6)),'watt.REG-HI-P01','watt.REG-HI-P02'}
     assert len(items)==7 and all(d.cohorts==(Cohort.REGRESSION,) for d in items)
     for d in items:
         recipe=recipes()[d.runner_key]
-        assert recipe.selector.endswith('['+d.key+']')
+        assert recipe.selector.endswith('['+d.aliases[0]+']')
         assert recipe.stage==Stage.STEERING and recipe.regression
