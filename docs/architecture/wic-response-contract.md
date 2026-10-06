@@ -624,3 +624,7 @@ cannot bounce an admitted PRODUCE step back to DESIGN. IRK reserved-choice
 provenance validation also runs within the existing compiler repair boundary;
 invalid literal option provenance triggers bounded same-basis repair before
 admission, while IRK independently retains the same fail-closed checks.
+
+Cached expressions are requalified by the current language gate. Rejected cached
+wording is replaced under the same presentation lock; owner facts, source
+references and historical conversations remain unchanged.

@@ -202,7 +202,12 @@ class HumanVisibleRealizationService:
             lock=int(projection.basis_fingerprint[:15],16)
             uow.session.execute(text('SELECT pg_advisory_xact_lock(:key)'),{'key':lock})
             old=uow.session.scalar(select(table.c.realization).where(table.c.basis_fingerprint==projection.basis_fingerprint))
-            if old is not None:return old
+            if old is not None:
+                try:
+                    validate_wording(projection, HumanVisibleWording.model_validate(old['wording']))
+                    return old
+                except ValueError:
+                    pass  # Disposable expression cache must satisfy the current gate.
             wording=None;finding=None
             generate=getattr(self.realizer,'realize_human_projection',None)
             if callable(generate):
@@ -217,7 +222,9 @@ class HumanVisibleRealizationService:
                 'owner_facts':projection.owner_facts,'facts':fact_wording(projection.owner_facts)}
             uow.session.execute(insert(table).values(basis_fingerprint=projection.basis_fingerprint,
                 work_id=(projection.owner_facts.get('work') or {}).get('work_id'),
-                projection=projection.model_dump(mode='json'),realization=result).on_conflict_do_nothing())
+                projection=projection.model_dump(mode='json'),realization=result).on_conflict_do_update(
+                    index_elements=[table.c.basis_fingerprint],set_={
+                        "projection":projection.model_dump(mode="json"),"realization":result}))
             uow.commit()
         return result
 

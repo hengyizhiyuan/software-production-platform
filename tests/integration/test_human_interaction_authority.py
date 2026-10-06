@@ -150,3 +150,26 @@ def test_persisted_nonblocking_design_allows_actual_production_cycle(postgres_da
             assert summary.extra.get('task_contract_mode')!='DESIGN_ARTIFACT'
         assert work.list_attention(work_id=admitted.work_id)==()
     finally:driver.shutdown()
+
+
+def test_cached_expression_is_requalified_without_changing_owner_basis(postgres_database):
+    from sqlalchemy import update
+    from tests.test_human_interaction_authority import declared_ir,presentation
+    ir,_=declared_ir(ROUTINE[0][1]);projection,_=presentation(ir)
+    first=HumanVisibleRealizationService(postgres_database).realize(projection)
+    invalid={**first,'wording':{**first['wording'],'summary':'继续推进 Steering'}}
+    with postgres_database.unit_of_work() as u:
+        u.session.execute(update(wic_human_realizations).where(
+            wic_human_realizations.c.basis_fingerprint==projection.basis_fingerprint).values(realization=invalid))
+        u.commit()
+    class Renderer:
+        calls=0
+        def realize_human_projection(self,p,feedback=None):
+            self.calls+=1
+            return safe_wording(p)
+    provider=Renderer();service=HumanVisibleRealizationService(postgres_database,provider)
+    corrected=service.realize(projection)
+    assert corrected['owner_facts']==first['owner_facts']
+    assert corrected['source_references']==first['source_references']
+    assert not language_leaks(corrected['wording']['summary'])
+    assert service.realize(projection)==corrected and provider.calls==1
