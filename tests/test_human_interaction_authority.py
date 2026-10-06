@@ -226,6 +226,9 @@ def test_actual_context_blocker_cannot_be_hidden_by_ready_work_or_autonomous_cop
     for claim in ('需要人工先解决这一关键决策。','由人工确认官网的业务定位和内容范围。','需由你补齐产品依据。'):
         with pytest.raises(ValueError,match='INVENTED_DECISION'):
             validate_wording(p,words.model_copy(update={'next_step':claim}))
+    for claim in ('根据获批的设计方案制作官网。','已完成：确定官网内容结构与视觉方向。'):
+        with pytest.raises(ValueError,match='UNSUPPORTED_DESIGN_RESULT'):
+            validate_wording(p,words.model_copy(update={'next_step':claim}))
     assert before==p.owner_facts and p.owner_facts['work']['status']=='READY'
 
 

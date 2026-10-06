@@ -105,6 +105,11 @@ def validate_wording(projection, wording):
             raise ValueError('HUMAN_REALIZATION_HIDDEN_ADMISSION_BLOCKER')
         if any(t in prose for t in ('正在生产','正在执行改动','会自动继续','将自动继续','按当前目标继续形成并验证改动')):
             raise ValueError('HUMAN_REALIZATION_FALSE_AUTONOMOUS_PROGRESS')
+        if 'APPROVED_DECISION' in projection.owner_facts['admission_context'].get('missing_classes', ()):
+            # A closed methodology step is not evidence of an approved design artifact.
+            all_prose = prose + ' ' + ' '.join(row.text for row in wording.agenda)
+            if re.search(r'(?:获批|已批准|批准的)[^。；;]{0,16}设计方案|已完成[^。；;]{0,30}(?:内容结构|视觉方向|设计方案)', all_prose):
+                raise ValueError('HUMAN_REALIZATION_UNSUPPORTED_DESIGN_RESULT')
     for claim, allowed in [('质量检查通过',guardian.get('gate')=='PASS'),
                            ('验证已通过',bool(candidate and candidate.get('verification') and all(v.endswith(': PASS') for v in candidate['verification']))),('已完成本次',work.get('work_complete') is True),
                            ('已经部署',projection.owner_facts.get('cloud_deployment',{}) and
