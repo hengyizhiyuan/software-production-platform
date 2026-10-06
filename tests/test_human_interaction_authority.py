@@ -141,6 +141,13 @@ def test_normal_language_rejects_internal_representation(raw):
     with pytest.raises(ValueError,match='HUMAN_LANGUAGE_LEAKAGE'):require_human_language(raw)
 
 
+@pytest.mark.parametrize('raw',[
+    '产出下一个从当前现实准入的精确变更','对照长期成果评估可信结果',
+    '完成已准入的长期工作','评估当前受治理的计划步骤','当前生产步骤为生产'])
+def test_translated_owner_templates_still_fail_normal_language_gate(raw):
+    with pytest.raises(ValueError,match='HUMAN_LANGUAGE_LEAKAGE'):require_human_language(raw)
+
+
 def test_realizer_cannot_change_typed_owner_outcomes_or_invent_success():
     ir,_=declared_ir(ROUTINE[0][1]);p,_=presentation(ir);before=deepcopy(p.model_dump())
     words=safe_wording(p)
