@@ -46,10 +46,22 @@ quality_campaign_runs = Table("quality_campaign_runs", metadata, identity(),
     Column("variant_key", String(80)), Column("watt_revision", String(64), nullable=False),
     Column("policy_fingerprint", String(64), nullable=False), Column("configuration", JSONB, nullable=False),
     Column("state", String(20), nullable=False), Column("authority_identity", String(255), nullable=False),
+    Column("parent_run_id", Uuid(), ForeignKey("quality_campaign_runs.id")),
     Column("lease_token", Uuid()), Column("lease_expires_at", DateTime(timezone=True)),
     Column("finished_at", DateTime(timezone=True)), created(),
-    CheckConstraint("state IN ('QUEUED','RUNNING','PASS','FAIL','BLOCKED')", name="ck_quality_run_state"))
+    CheckConstraint("state IN ('QUEUED','RUNNING','PAUSE_REQUESTED','PAUSED','STOPPING','STOPPED','PASS','FAIL','BLOCKED')", name="ck_quality_run_state"))
 Index("ix_quality_runs_queue", quality_campaign_runs.c.state, quality_campaign_runs.c.created_at)
+# Frozen Run membership carries selection and source provenance; results remain in case_runs.
+quality_run_members = Table("quality_run_members", metadata,
+    Column("run_id", Uuid(), ForeignKey("quality_campaign_runs.id"), primary_key=True),
+    Column("case_version_id", Uuid(), ForeignKey("quality_case_versions.id"), primary_key=True),
+    Column("ordinal", Integer(), nullable=False), Column("cohorts", JSONB, nullable=False),
+    Column("disposition", String(20), nullable=False), Column("source_case_run_id", Uuid(), ForeignKey("quality_case_runs.id")),
+    CheckConstraint("disposition IN ('ELIGIBLE','SKIPPED','NOT_RUN')", name="ck_quality_member_disposition"))
+quality_run_controls = Table("quality_run_controls", metadata, identity(),
+    Column("run_id", Uuid(), ForeignKey("quality_campaign_runs.id"), nullable=False),
+    Column("action", String(40), nullable=False), Column("authority_identity", String(255), nullable=False),
+    Column("record", JSONB, nullable=False), created())
 quality_case_runs = Table("quality_case_runs", metadata, identity(),
     Column("campaign_run_id", Uuid(), ForeignKey("quality_campaign_runs.id"), nullable=False),
     Column("case_version_id", Uuid(), ForeignKey("quality_case_versions.id"), nullable=False),
@@ -88,4 +100,4 @@ operations_metric_samples = Table("operations_metric_samples", metadata, identit
 Index("ix_operations_sample_time", operations_metric_samples.c.node_id, operations_metric_samples.c.created_at)
 quality_tables = (quality_cases, quality_case_versions, quality_campaigns, quality_campaign_members,
     quality_experiments, quality_campaign_runs, quality_case_runs, quality_evaluations, quality_findings,
-    quality_preferences, quality_learning_signals, quality_promotion_decisions, operations_metric_samples)
+    quality_preferences, quality_learning_signals, quality_promotion_decisions, operations_metric_samples, quality_run_members, quality_run_controls)

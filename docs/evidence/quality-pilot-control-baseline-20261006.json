@@ -1,0 +1,15 @@
+{
+  "revision": "d2466202a5fcf13af5494b3326d0b1d9fa407820",
+  "observed_paths": [
+    "/api/admin/runs",
+    "/api/admin/runs/{run_id}"
+  ],
+  "missing_required_paths": [
+    "/api/admin/runs/{run_id}/control",
+    "/api/admin/runs/{run_id}/rerun"
+  ],
+  "finding_code": "CAMPAIGN_CONTROL_SURFACE_MISSING",
+  "owner": "QUALITY_CONTROL",
+  "certainty": "OBSERVED",
+  "source": "authenticated-running-API-openapi"
+}

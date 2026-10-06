@@ -61,7 +61,7 @@ def recipe_result(settings, run, case, attempt_id):
     env = dict(os.environ, SPG_DATABASE_URL=settings.quality_test_database_url,
         SPG_TEST_DATABASE_URL=settings.quality_test_database_url,
         PYTHONPATH=str(root / "src") + os.pathsep + os.environ.get("PYTHONPATH", ""))
-    if r.key not in {"brownfield", "promotion-recovery"}:
+    if r.key not in {"brownfield", "promotion-recovery", "pilot-greenfield", "pilot-brownfield", "pilot-repository-only", "pilot-continuous-work"}:
         env["SPG_MANAGED_SOURCE_PROVIDER"] = "disabled"
     # Child test Applications are isolated and never start the Admin observer.
     env["SPG_ADMIN_ENABLED"] = "false"
@@ -73,6 +73,8 @@ def recipe_result(settings, run, case, attempt_id):
         case_file.chmod(0o600)
         env["WATT_QUALITY_CASE_FILE"] = str(case_file)
         env["WATT_QUALITY_LINEAGE_FILE"] = str(trace)
+        product_file = Path(directory) / "product-evidence.json"
+        env["WATT_QUALITY_PRODUCT_EVIDENCE_FILE"] = str(product_file)
         # Drain output with a hard cap; never retain provider credentials or
         # unbounded pytest output. Child process group is killed on quota/timeout.
         import selectors
@@ -121,12 +123,12 @@ def recipe_result(settings, run, case, attempt_id):
         details = {"oracle_id": r.key, "test_counts": counts, "exit_code": code,
             "isolated_database": True, "recipe_selector": selector,
             "managed_source_provider": env["SPG_MANAGED_SOURCE_PROVIDER"]}
-        result = Evaluation(evaluator=Evaluator.DETERMINISTIC, outcome="PASS" if passed else "FAIL",
+        result = Evaluation(evaluator=Evaluator.DETERMINISTIC, outcome="PASS" if passed else "BLOCKED" if counts["errors"] or forced or counts["skipped"] or not counts["tests"] else "FAIL",
             evidence_refs=(proof,), evaluator_version="watt-canonical-recipe-v1",
             # A failing multi-stage test proves its oracle failed, not which
             # earlier semantic component caused it. Do not label fake precision.
             stage=None if not passed else r.stage,
-            finding_code=None if passed else "RECIPE_ORACLE_FAILED", details=details)
+            finding_code=None if passed else "QUALIFICATION_INFRASTRUCTURE_BLOCKED" if counts["errors"] or forced or counts["skipped"] or not counts["tests"] else "RECIPE_ORACLE_FAILED", details=details)
         runtime = Evaluation(evaluator=Evaluator.RUNTIME,
             outcome="PASS" if not integration or lineage_present else "BLOCKED",
             evidence_refs=(proof,), evaluator_version="isolated-owner-lineage-v1",
@@ -139,9 +141,14 @@ def recipe_result(settings, run, case, attempt_id):
             "applied_experiment_variables": {} if variant is None else {"policy": {"case_timeout_seconds": timeout}},
             "model_observation": "configured WIC purpose profiles" if r.key == "sealed-live-intent" else "NOT_APPLICABLE",
             "provider_observation": settings.wic_provider_adapter if r.key == "sealed-live-intent" else "qualification-fixture"}
+        if product_file.exists() and product_file.stat().st_size <= 500_000:
+            lineage["product_evidence"] = json.loads(product_file.read_text())
+        if r.key == "pilot-live-search":
+            lineage["provider_observation"] = "aliyun-opensearch:live"
+            lineage["model_observation"] = settings.wic_provider_adapter + ":live-semantic-compiler-and-research"
         results = [result, runtime]
         guardian = [g for o in observed for g in o.get("guardian_results", [])]
-        if r.key == "guardian-acceptance":
+        if r.key in {"guardian-acceptance", "pilot-guardian"}:
             known_match = bool(guardian) and all(g["gate"] == "PASS" for g in guardian)
             results.append(Evaluation(evaluator=Evaluator.GUARDIAN,
                 outcome="PASS" if known_match else "FAIL" if guardian else "BLOCKED",
@@ -160,6 +167,8 @@ def run_once(service):
     if run is None:
         return None
     for case in service.run_members(run["id"]):
+        if not service.checkpoint(run):
+            return service.run_detail(run["id"])
         aid = service.begin_case(run, case["id"])
         if aid is None:
             continue
@@ -174,6 +183,8 @@ def run_once(service):
         service.finish_case(run, aid, results, lineage, elapsed)
         print(json.dumps({"campaign_run": str(run["id"]), "case": case["definition"]["title"],
             "observations": [e.outcome for e in results]}, ensure_ascii=False), flush=True)
+    if not service.checkpoint(run):
+        return service.run_detail(run["id"])
     return service.finish_run(run)
 
 

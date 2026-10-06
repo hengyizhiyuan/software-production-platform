@@ -15,7 +15,8 @@ from spg.infrastructure.persistence.quality_schema import (
     quality_campaign_members as members, quality_campaign_runs as runs, quality_case_runs as attempts,
     quality_evaluations as evaluations, quality_findings as findings, quality_experiments as experiments,
     quality_preferences as preferences, quality_learning_signals as signals,
-    quality_promotion_decisions as promotions)
+    quality_promotion_decisions as promotions, quality_run_members as run_members,
+    quality_run_controls as controls, operations_metric_samples as metrics)
 
 
 def now():
@@ -110,7 +111,7 @@ class QualityService:
         with self.database.unit_of_work() as u:
             selected = [self._one(u.session, versions, vid) for vid in case_version_ids]
             stages = {v["definition"]["stage"] for v in selected}
-            if not key.startswith("fresh-holdout-"):
+            if not self._bounded_pilot(key, selected):
                 # New relevant campaign versions cannot omit a promoted incident.
                 required = u.session.execute(select(cases).where(cases.c.lifecycle == "ACTIVE").order_by(cases.c.key)).mappings().all()
                 for c in required:
@@ -170,7 +171,7 @@ class QualityService:
                 members.c.campaign_id == campaign["id"])))
             selected = [self._one(u.session, versions, vid) for vid in selected_ids]
             stages = {v["definition"]["stage"] for v in selected}
-            if not campaign["key"].startswith("fresh-holdout-"):
+            if not self._bounded_pilot(campaign["key"], selected):
                 for c in u.session.execute(select(cases).where(cases.c.lifecycle == "ACTIVE")).mappings():
                     if Cohort.REGRESSION not in c["cohorts"]:
                         continue
@@ -192,21 +193,172 @@ class QualityService:
                 experiment_id=request.experiment_id, variant_key=request.variant_key,
                 watt_revision=self.settings.runtime_revision, policy_fingerprint=fingerprint(config),
                 configuration=config, state="QUEUED", authority_identity=actor))
+            frozen = u.session.execute(select(members).where(members.c.campaign_id == request.campaign_id)).mappings()
+            for m in frozen:
+                u.session.execute(insert(run_members).values(run_id=rid, case_version_id=m["case_version_id"],
+                    ordinal=m["ordinal"], cohorts=m["cohorts"], disposition="ELIGIBLE"))
+            self._control_event(u.session, rid, "START", actor, {"case_count": len(selected_ids)})
             u.commit()
             return self._one(u.session, runs, rid)
+
+    @staticmethod
+    def _bounded_pilot(key, selected):
+        if key.startswith("fresh-holdout-"):
+            return True
+        if key != "quality-evolution-pilot-v1":
+            return False
+        from spg.evaluation.pilot import PILOT_KEYS
+        if len(selected) != 10 or {v["definition"]["runner_key"] for v in selected} != set(PILOT_KEYS):
+            raise QualityError("PILOT_REQUIRES_EXACT_TEN_REVIEWED_CASES")
+        # Fixed ten-case pilot is separate from historical safety campaigns.
+        # The normal safety-set inclusion rule remains authoritative elsewhere.
+        return True
+
+    @staticmethod
+    def _control_event(session, rid, action, actor, record):
+        session.execute(insert(controls).values(id=uuid4(), run_id=rid,
+            action=action, authority_identity=actor, record=record))
+
+    def control_run(self, rid, action, actor):
+        with self.database.unit_of_work() as u:
+            r = self._one(u.session, runs, rid, lock=True)
+            before = r["state"]
+            active = u.session.scalar(select(func.count()).select_from(attempts).where(
+                attempts.c.campaign_run_id == rid, attempts.c.state == "RUNNING"))
+            if action == "PAUSE" and before in {"QUEUED", "RUNNING"}:
+                after = "PAUSE_REQUESTED" if active else "PAUSED"
+            elif action == "RESUME" and before == "PAUSED":
+                if r["watt_revision"] != self.settings.runtime_revision:
+                    raise QualityError("RESUME_REQUIRES_ORIGINAL_RUNTIME_REVISION")
+                after = "QUEUED"
+            elif action == "STOP" and before in {"QUEUED", "RUNNING", "PAUSE_REQUESTED", "PAUSED"}:
+                after = "STOPPING" if active else "STOPPED"
+            elif (action == "PAUSE" and before in {"PAUSED", "PAUSE_REQUESTED"}) or (
+                action == "STOP" and before in {"STOPPING", "STOPPED"}):
+                return r
+            else:
+                raise QualityError("INVALID_CAMPAIGN_CONTROL_TRANSITION")
+            values = {"state": after}
+            if after in {"PAUSED", "STOPPED"}:
+                values.update(lease_token=None, lease_expires_at=None)
+            if after == "STOPPED":
+                values["finished_at"] = now()
+                self._not_run(u.session, rid)
+            u.session.execute(update(runs).where(runs.c.id == rid).values(**values))
+            self._control_event(u.session, rid, action, actor, {"before": before, "after": after, "safe_boundary": not bool(active)})
+            u.commit()
+            return self._one(u.session, runs, rid)
+
+    @staticmethod
+    def _not_run(session, rid):
+        executed = select(attempts.c.case_version_id).where(attempts.c.campaign_run_id == rid,
+            attempts.c.state.in_(["PASS", "FAIL", "BLOCKED", "UNKNOWN"]))
+        session.execute(update(run_members).where(run_members.c.run_id == rid,
+            run_members.c.disposition == "ELIGIBLE", run_members.c.case_version_id.not_in(executed)).values(disposition="NOT_RUN"))
+
+    def skip_case(self, rid, vid, actor):
+        with self.database.unit_of_work() as u:
+            r = self._one(u.session, runs, rid, lock=True)
+            if r["state"] not in {"QUEUED", "RUNNING", "PAUSED", "PAUSE_REQUESTED"}:
+                raise QualityError("RUN_NOT_CONTROLLABLE")
+            if u.session.scalar(select(func.count()).select_from(attempts).where(
+                attempts.c.campaign_run_id == rid, attempts.c.case_version_id == vid)):
+                raise QualityError("ONLY_QUEUED_CASE_CAN_BE_SKIPPED")
+            result = u.session.execute(update(run_members).where(run_members.c.run_id == rid,
+                run_members.c.case_version_id == vid, run_members.c.disposition == "ELIGIBLE").values(disposition="SKIPPED"))
+            if result.rowcount != 1:
+                raise QualityError("CASE_NOT_QUEUED_IN_RUN")
+            self._control_event(u.session, rid, "SKIP", actor, {"case_version_id": str(vid)})
+            u.commit()
+        return self.run_detail(rid)
+
+    def rerun(self, rid, request, actor):
+        with self.database.unit_of_work() as u:
+            source = self._one(u.session, runs, rid, lock=True)
+            if source["state"] not in {"PASS", "FAIL", "BLOCKED", "STOPPED"}:
+                raise QualityError("RERUN_REQUIRES_FINISHED_SOURCE")
+            frozen = self._membership(u.session, source)
+            latest = {x["case_version_id"]: dict(x) for x in u.session.execute(select(attempts).where(
+                attempts.c.campaign_run_id == rid).order_by(attempts.c.attempt)).mappings()}
+            ids = {x["case_version_id"] for x in frozen}
+            if request.mode == "SELECTED":
+                wanted = set(request.case_version_ids)
+                if len(wanted) != len(request.case_version_ids) or not wanted or not wanted <= ids:
+                    raise QualityError("EXACT_RERUN_SELECTION_REQUIRED")
+            elif request.mode == "FAILED":
+                wanted = {vid for vid, a in latest.items() if a["state"] in {"FAIL", "BLOCKED", "UNKNOWN"}}
+            else:
+                wanted = ids
+            if not wanted:
+                raise QualityError("NO_FAILED_CASES_TO_RERUN")
+            if not self.settings.runtime_revision:
+                raise QualityError("WATT_VERSION_NOT_BOUND")
+            config = self.configuration()
+            if source["experiment_id"]:
+                config["experiment_variant"] = source["configuration"]["experiment_variant"]
+            new_id = uuid4()
+            u.session.execute(insert(runs).values(id=new_id, campaign_id=source["campaign_id"],
+                parent_run_id=rid, experiment_id=source["experiment_id"], variant_key=source["variant_key"],
+                watt_revision=self.settings.runtime_revision, policy_fingerprint=fingerprint(config),
+                configuration=config, state="QUEUED", authority_identity=actor))
+            for m in frozen:
+                vid = m["case_version_id"]
+                if vid in wanted:
+                    u.session.execute(insert(run_members).values(run_id=new_id, case_version_id=vid,
+                        ordinal=m["ordinal"], cohorts=m["cohorts"], disposition="ELIGIBLE",
+                        source_case_run_id=latest.get(vid, {}).get("id")))
+            self._control_event(u.session, new_id, "RERUN_" + request.mode, actor,
+                {"parent_run_id": str(rid), "case_version_ids": [str(m["case_version_id"]) for m in frozen if m["case_version_id"] in wanted]})
+            u.commit()
+            return self._one(u.session, runs, new_id)
+
+    @staticmethod
+    def _membership(session, run):
+        frozen = [dict(x) for x in session.execute(select(run_members).where(
+            run_members.c.run_id == run["id"]).order_by(run_members.c.ordinal)).mappings()]
+        if frozen:
+            return frozen
+        # Pre-migration immutable records retain their original campaign snapshot.
+        return [dict(x, disposition="ELIGIBLE", source_case_run_id=None) for x in session.execute(select(members).where(
+            members.c.campaign_id == run["campaign_id"]).order_by(members.c.ordinal)).mappings()]
+
+    def checkpoint(self, run):
+        with self.database.unit_of_work() as u:
+            r = self._one(u.session, runs, run["id"], lock=True)
+            if r["lease_token"] != run["lease_token"]:
+                if r["state"] in {"PAUSED", "STOPPED"}:
+                    return False
+                raise QualityError("QUALITY_LEASE_FENCED")
+            if r["state"] not in {"PAUSE_REQUESTED", "STOPPING"}:
+                return r["state"] == "RUNNING"
+            if u.session.scalar(select(func.count()).select_from(attempts).where(
+                attempts.c.campaign_run_id == run["id"], attempts.c.state == "RUNNING")):
+                raise QualityError("QUALITY_SAFE_BOUNDARY_NOT_REACHED")
+            state = "PAUSED" if r["state"] == "PAUSE_REQUESTED" else "STOPPED"
+            if state == "STOPPED":
+                self._not_run(u.session, run["id"])
+            u.session.execute(update(runs).where(runs.c.id == run["id"]).values(state=state,
+                lease_token=None, lease_expires_at=None, finished_at=now() if state == "STOPPED" else None))
+            self._control_event(u.session, run["id"], "SAFE_BOUNDARY", "system:quality",
+                {"before": r["state"], "after": state})
+            u.commit()
+            return False
 
     def claim_run(self):
         with self.database.unit_of_work() as u:
             # One isolated recipe database has one durable qualification slot.
             u.session.execute(select(func.pg_advisory_xact_lock(690106)))
             # A killed recipe may have partially written only its isolated test DB.
-            expired = u.session.execute(select(runs).where(runs.c.state == "RUNNING",
+            expired = u.session.execute(select(runs).where(runs.c.state.in_(["RUNNING", "PAUSE_REQUESTED", "STOPPING"]),
                 runs.c.lease_expires_at < now()).with_for_update(skip_locked=True)).mappings().all()
             for r in expired:
                 u.session.execute(update(attempts).where(attempts.c.campaign_run_id == r["id"],
                     attempts.c.state == "RUNNING").values(state="INTERRUPTED", finished_at=now()))
-                u.session.execute(update(runs).where(runs.c.id == r["id"]).values(state="QUEUED"))
-            if u.session.scalar(select(func.count()).select_from(runs).where(runs.c.state == "RUNNING")):
+                u.session.execute(update(runs).where(runs.c.id == r["id"]).values(state="QUEUED" if r["state"] == "RUNNING" else "PAUSED" if r["state"] == "PAUSE_REQUESTED" else "STOPPED", lease_token=None, lease_expires_at=None, finished_at=now() if r["state"] == "STOPPING" else None))
+                if r["state"] == "STOPPING":
+                    self._not_run(u.session, r["id"])
+                self._control_event(u.session, r["id"], "LEASE_RECOVERY", "system:quality", {"before": r["state"]})
+            if u.session.scalar(select(func.count()).select_from(runs).where(runs.c.state.in_(["RUNNING", "PAUSE_REQUESTED", "STOPPING"]))):
                 u.commit()
                 return None
             r = u.session.execute(select(runs).where(runs.c.state == "QUEUED")
@@ -227,18 +379,27 @@ class QualityService:
     def run_members(self, run_id):
         with self.database.unit_of_work() as u:
             r = self._one(u.session, runs, run_id)
-            return [dict(x) for x in u.session.execute(select(versions).join(members,
-                members.c.case_version_id == versions.c.id).where(
-                members.c.campaign_id == r["campaign_id"]).order_by(members.c.ordinal)).mappings()]
+            return [self._one(u.session, versions, m["case_version_id"]) for m in self._membership(u.session, r)
+                    if m["disposition"] == "ELIGIBLE"]
 
     def begin_case(self, run, version_id):
         with self.database.unit_of_work() as u:
             current = self._one(u.session, runs, run["id"], lock=True)
+            if current["state"] in {"PAUSE_REQUESTED", "PAUSED", "STOPPING", "STOPPED"}:
+                return None
             if current["lease_token"] != run["lease_token"] or current["state"] != "RUNNING":
                 raise QualityError("QUALITY_LEASE_FENCED")
+            membership = next((m for m in self._membership(u.session, current) if m["case_version_id"] == version_id), None)
+            if membership is None:
+                raise QualityError("CASE_NOT_IN_RUN")
+            if membership["disposition"] != "ELIGIBLE":
+                return None
+            if u.session.scalar(select(func.count()).select_from(attempts).where(
+                attempts.c.campaign_run_id == run["id"], attempts.c.state == "RUNNING")):
+                raise QualityError("QUALITY_CASE_ALREADY_IN_FLIGHT")
             previous = u.session.execute(select(attempts).where(attempts.c.campaign_run_id == run["id"],
                 attempts.c.case_version_id == version_id).order_by(attempts.c.attempt.desc()).limit(1)).mappings().first()
-            if previous and previous["state"] in {"PASS", "FAIL", "BLOCKED"}:
+            if previous and previous["state"] in {"PASS", "FAIL", "BLOCKED", "UNKNOWN"}:
                 return None
             aid = uuid4()
             number = 1 if previous is None else previous["attempt"] + 1
@@ -254,12 +415,10 @@ class QualityService:
     def finish_case(self, run, attempt_id, results, lineage, elapsed):
         results = tuple(Evaluation.model_validate(r) for r in results)
         verdict = objective_verdict(results)
-        if verdict == "UNKNOWN":
-            verdict = "BLOCKED"
         divergence = earliest_divergence(results)
         with self.database.unit_of_work() as u:
             current = self._one(u.session, runs, run["id"], lock=True)
-            if current["lease_token"] != run["lease_token"] or current["state"] != "RUNNING":
+            if current["lease_token"] != run["lease_token"] or current["state"] not in {"RUNNING", "PAUSE_REQUESTED", "STOPPING"}:
                 raise QualityError("QUALITY_LEASE_FENCED")
             a = self._one(u.session, attempts, attempt_id, lock=True)
             if a["campaign_run_id"] != run["id"] or a["state"] != "RUNNING":
@@ -279,15 +438,40 @@ class QualityService:
             u.session.execute(update(attempts).where(attempts.c.id == attempt_id).values(
                 state=verdict, lineage={**lineage, "divergence": divergence},
                 elapsed_seconds=elapsed, finished_at=now()))
+            self._stop_the_line(u.session, current)
             u.commit()
+
+    def _stop_the_line(self, session, run):
+        if run["state"] != "RUNNING":
+            return
+        recent = session.execute(select(attempts.c.id).where(attempts.c.campaign_run_id == run["id"],
+            attempts.c.state.in_(["PASS", "FAIL", "BLOCKED", "UNKNOWN"])).order_by(attempts.c.finished_at.desc()).limit(5)).scalars().all()
+        if len(recent) < 5:
+            return
+        counted = {}
+        for aid in recent:
+            for f in session.execute(select(findings).where(findings.c.case_run_id == aid,
+                    findings.c.certainty == "OBSERVED", findings.c.stage.is_not(None))).mappings():
+                # Require an explicit canonical invariant, not a generic error code.
+                es = session.scalars(select(evaluations.c.record).where(evaluations.c.case_run_id == aid)).all()
+                if not any(e.get("finding_code") == f["finding_code"] and e.get("details", {}).get("oracle_id") for e in es):
+                    continue
+                counted.setdefault(f["cluster_key"], set()).add(str(aid))
+        triggered = {k: sorted(v) for k, v in counted.items() if len(v) >= 4}
+        if triggered:
+            session.execute(update(runs).where(runs.c.id == run["id"]).values(state="PAUSE_REQUESTED"))
+            self._control_event(session, run["id"], "SYSTEM_STOP_THE_LINE", "system:quality",
+                {"policy": "four-of-last-five-exact-observed-invariant-v1", "clusters": triggered,
+                 "explicit_resume_required": True})
 
     def finish_run(self, run):
         with self.database.unit_of_work() as u:
             current = self._one(u.session, runs, run["id"], lock=True)
             if current["lease_token"] != run["lease_token"]:
                 raise QualityError("QUALITY_LEASE_FENCED")
-            expected = u.session.scalar(select(func.count()).select_from(members).where(
-                members.c.campaign_id == current["campaign_id"]))
+            if current["state"] != "RUNNING":
+                raise QualityError("RUN_NOT_AT_COMPLETION_BOUNDARY")
+            expected = len(self._membership(u.session, current))
             latest = u.session.execute(select(attempts).where(attempts.c.campaign_run_id == run["id"])
                 .distinct(attempts.c.case_version_id).order_by(attempts.c.case_version_id,
                     attempts.c.attempt.desc())).mappings().all()
@@ -313,7 +497,51 @@ class QualityService:
                 results.append({**dict(a), "case_key": row["key"], "title": c["definition"]["title"],
                     "evaluations": [{k: v for k, v in e.items() if not sealed or k != "details"} for e in es],
                     "lineage": {"sealed": True} if sealed else a["lineage"]})
-            return {**r, "cases": results}
+            latest = {x["case_version_id"]: x for x in results}
+            slots = []
+            for m in self._membership(u.session, r):
+                v = self._one(u.session, versions, m["case_version_id"])
+                sealed = Cohort.FRESH_HOLDOUT in m["cohorts"]
+                a = latest.get(v["id"])
+                fs = [] if a is None else [dict(x) for x in u.session.execute(select(findings).where(
+                    findings.c.case_run_id == a["id"])).mappings()]
+                attribution = [] if not fs else [dict(x) for x in u.session.execute(select(signals).where(
+                    signals.c.source_kind == "FINDING", signals.c.source_id.in_([f["id"] for f in fs]))).mappings()]
+                state = a["state"] if a else "NOT_RUN" if m["disposition"] in {"NOT_RUN", "SKIPPED"} else "QUEUED"
+                if state == "INTERRUPTED":
+                    state = "NOT_RUN" if r["state"] == "STOPPED" else "QUEUED"
+                slots.append({"case_version_id": v["id"], "case_id": v["case_id"], "version": v["version"],
+                    "fingerprint": v["fingerprint"], "title": v["definition"]["title"], "cohorts": m["cohorts"],
+                    "state": state, "disposition": m["disposition"], "source_case_run_id": m["source_case_run_id"],
+                    "definition": {"sealed": True} if sealed else {k: val for k, val in v["definition"].items() if k != "private_material"},
+                    "attempt": a, "findings": fs, "attribution": [] if sealed else attribution,
+                    "owner_references": [] if a is None else [o.get("owners", {}) for o in
+                        (self._one(u.session, attempts, a["id"])["lineage"].get("owner_observations", []))]})
+            counts = {key: sum(x["state"] == key for x in slots)
+                for key in ("QUEUED", "RUNNING", "PASS", "FAIL", "BLOCKED", "UNKNOWN", "NOT_RUN")}
+            counts.update(total=len(slots), completed=sum(counts[k] for k in ("PASS", "FAIL", "BLOCKED", "UNKNOWN")))
+            distribution = {}
+            for x in slots:
+                a = x["attempt"]
+                if a and x["state"] in {"FAIL", "BLOCKED", "UNKNOWN"}:
+                    stage = a["lineage"].get("divergence", {}).get("stage") or "UNKNOWN"
+                    distribution[stage] = distribution.get(stage, 0) + 1
+            current = next((x for x in slots if x["state"] == "RUNNING"), None)
+            control_records = [dict(x) for x in u.session.execute(select(controls).where(controls.c.run_id == rid).order_by(controls.c.created_at)).mappings()]
+            cluster_ids = sorted({f["cluster_key"] for x in slots for f in x["findings"]})
+            recurrence = sum(bool(x["findings"]) and Cohort.REGRESSION in x["cohorts"] for x in slots)
+            # Reuse operations samples, without creating a second metrics owner.
+            samples = [dict(x) for x in u.session.execute(select(metrics.c.id, metrics.c.created_at).where(
+                metrics.c.created_at >= r["created_at"], metrics.c.created_at <= (r["finished_at"] or now())).order_by(metrics.c.created_at)).mappings()]
+            return {**r, "cases": results, "members": slots, "progress": counts,
+                "lifecycle": "COMPLETED" if r["state"] in {"PASS", "FAIL", "BLOCKED"} else r["state"],
+                "current_case": None if current is None else {"title": current["title"], "case_version_id": current["case_version_id"]},
+                "elapsed_seconds": ((r["finished_at"] or now()) - r["created_at"]).total_seconds(),
+                "earliest_divergence_distribution": distribution, "regression_recurrences": recurrence,
+                "new_failure_clusters": sum(not bool(u.session.scalar(select(func.count()).select_from(findings).where(
+                    findings.c.cluster_key == key, findings.c.created_at < r["created_at"]))) for key in cluster_ids), "failure_cluster_keys": cluster_ids,
+                "fresh_holdout": [{"case_version_id": x["case_version_id"], "state": x["state"]} for x in slots if Cohort.FRESH_HOLDOUT in x["cohorts"]],
+                "controls": control_records, "operations_samples": samples}
 
     def recent_runs(self):
         with self.database.unit_of_work() as u:
@@ -330,7 +558,9 @@ class QualityService:
                 item = out.setdefault(f["cluster_key"], {"key": f["cluster_key"], "stage": f["stage"],
                     "finding_code": f["finding_code"], "first_seen": f["created_at"], "last_seen": f["created_at"],
                     "occurrence_count": 0, "affected_cases": [], "findings": [], "closure_state": "OPEN",
-                    "regression_status": "NOT_PROMOTED"})
+                    "regression_status": "NOT_PROMOTED", "probable_owner": f["stage"],
+                    "confidence": "OBSERVED_OWNER" if f["stage"] else "UNKNOWN",
+                    "severity": "REVIEW_REQUIRED", "representative_evidence": f["evidence_refs"]})
                 item["last_seen"] = f["created_at"]
                 item["occurrence_count"] += 1
                 item["affected_cases"] = sorted(set(item["affected_cases"]) | {str(v["case_id"])})

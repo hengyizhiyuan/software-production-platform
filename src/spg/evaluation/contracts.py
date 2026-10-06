@@ -38,6 +38,7 @@ class Stage(StrEnum):
     VERIFICATION = "VERIFICATION"
     GUARDIAN = "GUARDIAN"
     ACCEPTANCE_PROMOTION = "ACCEPTANCE_PROMOTION"
+    QUALITY_CONTROL = "QUALITY_CONTROL"
 
 
 class QualityError(ValueError):
@@ -116,6 +117,15 @@ class CampaignRequest(Record):
     campaign_id: UUID
     experiment_id: UUID | None = None
     variant_key: str | None = None
+
+
+class RunControlRequest(Record):
+    action: str = Field(pattern=r"^(PAUSE|RESUME|STOP)$")
+
+
+class RerunRequest(Record):
+    mode: str = Field(pattern=r"^(FAILED|SELECTED|ALL)$")
+    case_version_ids: tuple[UUID, ...] = ()
 
 
 class Variant(Record):

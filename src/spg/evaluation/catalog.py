@@ -73,8 +73,13 @@ def recipes():
     extra = (Recipe("sealed-live-intent", "新生成语义 Holdout", Stage.IRK,
         "tests/integration/test_quality_live_holdout.py::test_sealed_unseen_intent_uses_real_compiler_and_irk",
         "An unseen greenfield software intent remains governed production without an invented existing repository"),
+        Recipe("quality-control-regression", "Campaign 安全控制永久回归", Stage.QUALITY_CONTROL,
+            "tests/integration/test_quality_campaign_controls.py",
+            "Safe-boundary pause/stop, immutable selected reruns and conservative systemic stop preserve durable evidence", True,
+            "quality:pilot:baseline-control-gap"),
         Recipe("unqualified-scenario", "待配方资格的场景", Stage.WIC, "", "Unqualified scenario cannot claim PASS"))
-    return {r.key: r for r in (*CATALOG, *extra)}
+    from spg.evaluation.pilot import PILOT
+    return {r.key: r for r in (*CATALOG, *extra, *PILOT)}
 
 
 def definitions():

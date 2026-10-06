@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from spg.api.authority import ACTOR_ID
 from spg.evaluation.catalog import import_core, create_fresh_holdout
 from spg.evaluation.contracts import (CaseDefinition, CampaignRequest, ExperimentRequest,
-    PreferenceRequest, AttributionRequest, PromotionRequest, FindingClosureRequest, QualityError)
+    PreferenceRequest, AttributionRequest, PromotionRequest, FindingClosureRequest, RunControlRequest, RerunRequest, QualityError)
 from spg.evaluation.service import QualityService
 from spg.evaluation.operations import OperationsService
 
@@ -74,6 +74,28 @@ def install_admin(api, database, settings, runtime=None):
     @router.get("/runs/{run_id}")
     def run_detail(run_id: UUID):
         return quality.run_detail(run_id)
+
+    @router.post("/pilot/control-regression")
+    def control_regression():
+        from spg.evaluation.pilot import register_control_regression
+        return register_control_regression(quality)
+
+    @router.post("/pilot/register")
+    def pilot():
+        from spg.evaluation.pilot import register_pilot
+        return register_pilot(quality)
+
+    @router.post("/runs/{run_id}/control")
+    def control(run_id: UUID, request: RunControlRequest, http_request: Request):
+        return quality.control_run(run_id, request.action, getattr(http_request.state, "actor_id", ACTOR_ID))
+
+    @router.post("/runs/{run_id}/rerun")
+    def rerun(run_id: UUID, request: RerunRequest, http_request: Request):
+        return quality.rerun(run_id, request, getattr(http_request.state, "actor_id", ACTOR_ID))
+
+    @router.post("/runs/{run_id}/cases/{case_version_id}/skip")
+    def skip(run_id: UUID, case_version_id: UUID, http_request: Request):
+        return quality.skip_case(run_id, case_version_id, getattr(http_request.state, "actor_id", ACTOR_ID))
 
     @router.post("/case-runs/{case_run_id}/llm-evaluation")
     def llm_evaluation(case_run_id: UUID):

@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import create_engine, select
 from spg.infrastructure.persistence import metadata
 
-TABLES = ("product_works", "product_managed_sources", "work_source_bases", "production_work_units", "context_packages", "materialized_execution_inputs",
+TABLES = ("plan_revisions", "production_runs", "production_admissibility_records", "product_works", "product_managed_sources", "work_source_bases", "production_work_units", "context_packages", "materialized_execution_inputs",
     "interaction_assessments", "interaction_turns", "interaction_turn_realizations", "interaction_turn_obligations",
     "pwu_contract_versions", "execution_attempts", "execution_dispatches", "execution_allocations",
     "executor_worker_registrations", "executor_queue", "production_snapshots", "proposed_repository_snapshots", "completion_evaluations", "verification_records",
@@ -22,7 +22,8 @@ SAFE_COLUMNS = {"id", "work_id", "pwu_id", "work_unit_id", "task_contract_id", "
     "context_package_content_fingerprint", "context_package_version", "input_fingerprint",
     "repository_revision", "repository_tree_identity", "context_package_id", "production_run_id", "plan_revision_id", "workspace_identity", "workspace_path", "workspace_id", "workspace_reference",
     "ecf_context_fingerprint", "ecf_context_package_id", "decision_context_id", "contract_id",
-    "verified_output_baseline_id", "parent_baseline_ids", "contract_version_id", "contract_fingerprint"}
+    "verified_output_baseline_id", "parent_baseline_ids", "contract_version_id", "contract_fingerprint",
+    "result", "outcome", "node_id", "dependency_ids", "required", "kind", "revision_number", "obligation_fingerprint", "proposed_commit_identity", "tree_identity"}
 
 
 # Project only typed identity/fingerprint facts from owner envelopes. Do not
@@ -109,7 +110,7 @@ def pytest_runtest_makereport(item, call):
                 t = metadata.tables.get(name)
                 if t is None:
                     continue
-                envelopes = {"manifest", "completion_contract", "context_projection", "prepared_execution_request"}
+                envelopes = {"manifest", "completion_contract", "context_projection", "prepared_execution_request", "graph", "reconciliation_evidence"}
                 columns = [x for x in t.columns if x.name in SAFE_COLUMNS or x.name in envelopes]
                 if not columns:
                     continue

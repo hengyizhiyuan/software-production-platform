@@ -575,3 +575,42 @@ source SHA and WATT_NODE_ID/REGION/HOSTNAME from observed deployment facts. Migr
 Filesystem hard quotas, automated workspace/image cleanup, HTTPS, external Git
 access, cross-host Worker Pool and off-host DR remain separate. No Admin action
 resolves or silently closes those debts. The current Worker max_concurrency stays 1.
+
+## Quality Evolution Pilot v1：安全控制与资格边界
+
+Pilot 固定为十个已审查的功能 Case，使用既有 Case / version / Campaign 账本。
+登记操作幂等，不因重开页面生成新的 Holdout。历史 Core、Regression、Arena 和
+Holdout 记录不改写；相关历史安全集合在修复后独立重跑，不自动扩大 Pilot。
+
+迁移 `20261006_70` 添加 Run 的父 Run 引用、冻结的关系型 Run membership 及追加式
+control events。原有结果仍由 Case Run / Evaluation / Finding 持有，旧 Run 使用
+其原始 Campaign membership 快照。新的 membership 记录来源 Case Run、用途快照和
+`ELIGIBLE / SKIPPED / NOT_RUN` disposition，不复制生产 owner 状态。
+
+- Start 冻结版本、配置和源码 SHA，再进入唯一既有隔离资格槽。
+- Pause 为 `PAUSE_REQUESTED → PAUSED`，不终止当前 Case，安全边界是其 owner
+  effects、评估和血缘已持久化。Resume 沿用原 Run，租约重新 fencing，完成结果不重放。
+- Stop 为 `STOPPING → STOPPED`，保留在途完成结果，将其余 Case 标记 `NOT_RUN`。
+- Rerun Failed / Selected / All 建立新 Run，保留精确 Case version、父 Run 及来源
+  Case Run。新版代码重跑记录新的 revision/config；旧版暂停 Run 不允许在新版继续。
+- Skip 只允许尚未启动的 Case，不伪造评估 PASS。
+- 最近五个完成 Case 中，至少四个独立 Case 违反同一已观测 stage / typed code /
+  evaluator / explicit oracle 才触发系统暂停。泛化 pytest failure、未知归因及一次孤立
+  失败均不触发自动 Stop-the-Line。必须明确 Resume 或 Stop，系统不自行继续。
+- API、浏览器状态不拥有执行；独立 Quality runner 使用 PostgreSQL 租约。租约过期
+  恢复不会重放完成 Case，并保留中断尝试。控制请求在失联后仍以持久化状态为准。
+
+Admin Run URL `/admin/quality?run=<id>` 支持刷新、关闭后重开；展示冻结 membership、
+真实 queued/running/result 计数、Holdout 状态、偏离分布、Cluster、归因、控制历史和
+既有 Operations sample 引用。未启动 Case 无执行证据，不显示为运行中。
+
+Pilot 通过现有隔离 recipe database 和专用 Product / repository 调用 canonical
+Work、Managed Source、Planning、Queue、Lease、Verification、Candidate 与 Guardian
+owners。确定性修改 executor 是明确声明的资格 adapter，不能据此声称真实编码模型的
+质量已通过。Search Case 额外使用本轮真实语义模型及 Aliyun OpenSearch，并将 live
+来源带入实际产出。封存 repository-only Case 禁止优化接口读取输入和答案。
+预期 Verification FAIL 的 Case 仅在独立判据证明错误行为被阻止时才获 Case PASS，
+其 product outcome 仍为 `VERIFICATION_FAILED`。基础设施错误单独标记 BLOCKED。
+
+`quality-control-regression` 是本轮控制缺口的独立永久回归资产，覆盖状态安全边界、
+重跑不可变、控制 fencing、systemic pause 和恰好十个 Case；它不增加 Pilot 的成员数。

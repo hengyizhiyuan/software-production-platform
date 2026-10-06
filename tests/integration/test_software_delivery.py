@@ -85,16 +85,17 @@ class SoftwareDesign(_GuidedDesignSemanticCapability):
 
 def produce(database, tmp_path, *, failing=False, user_repository=True,
             authorize_candidate=True, set_delivery_target=True,
-            full_application_baseline=False):
+            full_application_baseline=False, human_requirement=None, product_id=None):
     interaction = WorkInteractionService(database, capability=SoftwareIntent())
-    item = interaction.create_interaction(human_identity='human:test')
+    item = interaction.create_interaction(human_identity='human:test', product_id=product_id)
     understanding = interaction.append_and_assess(item.id,
-        'Build an inventory application in these exact output files: ' + ', '.join(SOURCE),
+        human_requirement or 'Build an inventory application in these exact output files: ' + ', '.join(SOURCE),
         human_identity='human:test')
     service = WorkApplicationService(database, workspace_root=tmp_path/'workspaces')
     work = service.admit_interaction_work(item.id, assessment_id=understanding.latest_assessment.id,
         basis_fingerprint=understanding.latest_assessment.basis_fingerprint, authority_identity='human:test', use_default_resource=False)
-    assert work.engineering_scope.bindings == ()
+    if product_id is None:
+        assert work.engineering_scope.bindings == ()
     assets = RepositoryAssetService(database, tmp_path/'assets', tmp_path/'imports')
     if user_repository:
         if full_application_baseline:
