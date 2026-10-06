@@ -617,3 +617,10 @@ response. Non-blocking Guided Design records do not create a design-artifact
 prerequisite at production materialization. Cloud deployment detail views consume
 the same WIC fact wording as Workspace; unknown failures retain raw evidence in
 the owner record and receive a neutral failure explanation in normal UI.
+
+All production preflight, proposal admission and Task Contract materialization
+consume one effective design-prerequisite query. A methodology record alone
+cannot bounce an admitted PRODUCE step back to DESIGN. IRK reserved-choice
+provenance validation also runs within the existing compiler repair boundary;
+invalid literal option provenance triggers bounded same-basis repair before
+admission, while IRK independently retains the same fail-closed checks.

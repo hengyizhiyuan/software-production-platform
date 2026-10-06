@@ -237,7 +237,7 @@ class PlanSteeringDriver:
                 return self._revise_for_missing_production_plan(frame, before)
             if (
                 work.production_plan.target_kind is ProductionTargetKind.CODE_WORK
-                and self.guided_design.get_optional(work_id) is not None
+                and self.guided_design.requires_design_artifact(work_id)
                 and not self.guided_design.approved_design_artifact_references(work_id)
             ):
                 return self._revise_for_missing_production_plan(
@@ -1413,11 +1413,11 @@ class PlanSteeringDriver:
     def _admit_bounded_managed_proposal(
         self, work_id: UUID, result: SemanticStepResultRecord
     ) -> bool:
-        """Auto-admit only a safe prerequisite artifact or prerequisite-backed code.
+        """Admit exact bounded code within Work authority, or a required design artifact.
 
-        Initial Guided Design must materialize a reviewable artifact. Bounded
-        managed code remains eligible only after that artifact is Human-approved
-        and committed. External or broad changes retain exact proposal review.
+        Active blocking design obligations retain their reviewed prerequisite.
+        Methodology candidates alone cannot create it. External or broad changes
+        retain exact proposal review.
         """
         proposal = result.proposed_production
         if (
@@ -1435,10 +1435,7 @@ class PlanSteeringDriver:
         )
         bounded_code = (
             proposal.target_kind is ProductionTargetKind.CODE_WORK
-            and (bool(approved_design) or not any(
-                issue.qualification is None or issue.qualification.blocking
-                for issue in (self.guided_design.get_optional(work_id).issues
-                    if self.guided_design.get_optional(work_id) else ())))
+            and (bool(approved_design) or not self.guided_design.requires_design_artifact(work_id))
             and 1 <= len(proposal.code_targets) <= 4
         )
         if not design_artifact and not bounded_code:
@@ -1505,7 +1502,7 @@ class PlanSteeringDriver:
                     "rationale": (
                         "The exact bounded, reversible proposal either materializes "
                         "the required design-review artifact or implements against "
-                        "an already approved design artifact in admitted Work Reality."
+                        "exact admitted Work Reality, with any effective design prerequisite satisfied."
                     ),
                     "created_at": datetime.now(UTC),
                 })

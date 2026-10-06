@@ -92,7 +92,25 @@ def _validate_provenance(provenance, records, *, current_record=None):
             raise IntentRealizationViolation("ACTION_ARGUMENT_PROVENANCE_INVALID: an old request cannot authorize a new effect")
 
 
+def _validate_human_decision_boundaries(candidate, basis):
+    latest = next(r for r in reversed(basis.records) if str(r.actor) == "HUMAN")
+    records = {r.id:r for r in basis.records}
+    for decision in candidate.human_decisions:
+        if decision.authority_provenance.origin not in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}:
+            raise IntentRealizationViolation("HUMAN_DECISION_AUTHORITY_NOT_EXPLICIT")
+        _validate_provenance(decision.authority_provenance, records, current_record=latest)
+        if decision.authority_provenance.source_record_id != latest.id:
+            raise IntentRealizationViolation("HUMAN_DECISION_AUTHORITY_STALE")
+        for option in decision.options:
+            if option.provenance.origin not in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}:
+                raise IntentRealizationViolation("HUMAN_DECISION_OPTION_UNGROUNDED")
+            _validate_provenance(option.provenance, records, current_record=latest)
+            if option.value not in (option.provenance.source_text or ""):
+                raise IntentRealizationViolation("HUMAN_DECISION_OPTION_UNGROUNDED")
+
+
 def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tuple[SemanticItem, ...]:
+    _validate_human_decision_boundaries(candidate, basis)
     records = {r.id: r for r in basis.records}
     latest = next(r for r in reversed(basis.records) if str(r.actor) == "HUMAN")
     historical_items = {f"{prior.id}:{item.item_id}": item
@@ -644,19 +662,6 @@ class IntentRealizationKernel:
                     CanonicalOperation.REQUEST_PREVIEW, CanonicalOperation.ACCEPT_CANDIDATE}
                 and "candidate_revision" not in item.action.arguments else item for item in items)
         latest = next(r for r in reversed(basis.records) if str(r.actor) == "HUMAN")
-        records = {r.id:r for r in basis.records}
-        for decision in raw.human_decisions:
-            if decision.authority_provenance.origin not in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}:
-                raise IntentRealizationViolation("HUMAN_DECISION_AUTHORITY_NOT_EXPLICIT")
-            _validate_provenance(decision.authority_provenance, records, current_record=latest)
-            if decision.authority_provenance.source_record_id != latest.id:
-                raise IntentRealizationViolation("HUMAN_DECISION_AUTHORITY_STALE")
-            for option in decision.options:
-                if option.provenance.origin not in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}:
-                    raise IntentRealizationViolation("HUMAN_DECISION_OPTION_UNGROUNDED")
-                _validate_provenance(option.provenance, records, current_record=latest)
-                if option.value not in (option.provenance.source_text or ""):
-                    raise IntentRealizationViolation("HUMAN_DECISION_OPTION_UNGROUNDED")
         return GovernedSemanticIR(**raw.model_copy(update={"items": items}).model_dump(),
             id=uuid5(NAMESPACE_URL, f"watt:irk:{basis.interaction.id}:{basis.basis_fingerprint}"),
             interaction_id=basis.interaction.id, source_record_id=latest.id,

@@ -2,7 +2,7 @@
 import re
 
 _INTERNAL = re.compile(r'\b(?:[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+|DesignIssue|TaskContractRequest|'
-    r'ProductionPlanGraph|oracle_id|basis_fingerprint|SemanticStepResult|GovernedSemanticIR)\b|'
+    r'ProductionPlanGraph|oracle_id|basis_fingerprint|SemanticStepResult|GovernedSemanticIR|Steering|IRK|ECF|HumanDecisionNeed|TaskContract|GuidedDesign|Guided Design|Task Contract)\b|'
     r'Establish the Motive|Choose how to handle a material risk or cost|'
     r'Establish desired user value|Bound the product/system responsibility|'
     r'Shape the minimum capability model|Clarify Human/system responsibility|'

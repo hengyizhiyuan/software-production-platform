@@ -190,3 +190,8 @@ def test_cloud_detail_wording_preserves_owner_failure_without_raw_prose():
     assert not language_leaks(result['human_visible']['blocker'])
     assert result['human_visible']['status']=='部署失败'
     assert not language_leaks(cloud_error_wording(original['blocker']))
+
+
+@pytest.mark.parametrize('text',('接下来推进 Steering','依照 IRK 处理','先准备 Task Contract','完成 Guided Design'))
+def test_owner_component_names_do_not_leak_into_normal_collaboration(text):
+    assert language_leaks(text)

@@ -112,9 +112,7 @@ class SteeringProductionService:
         )
         guided_design = GuidedDesignApplicationService(self.database)
         guided = guided_design.get_optional(work_id)
-        requires_design_artifact = bool(guided and any(
-            issue.qualification is None or issue.qualification.blocking
-            for issue in guided.issues))
+        requires_design_artifact = guided_design.requires_design_artifact(work_id)
         approved_design_artifacts = (
             ()
             if guided is None

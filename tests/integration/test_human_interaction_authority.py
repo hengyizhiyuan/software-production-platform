@@ -23,7 +23,7 @@ pytestmark=pytest.mark.postgresql
 
 class DeclaredCompiler:
     """An oracle supplies typed meaning; production contains no phrase routing."""
-    def __init__(self,positive=None):self.positive=positive
+    def __init__(self,positive=None,paths=(),systemic=None):self.positive=positive;self.paths=paths;self.systemic=systemic
     def interpret(self,basis):
         record=basis.records[-1]
         source=SemanticProvenance(origin=SemanticOrigin.HUMAN_EXPLICIT,
@@ -33,7 +33,7 @@ class DeclaredCompiler:
                 statement='可逆的视觉细节可以稍后完善',confidence=.6,requires_human=False,
                 provenance=(SemanticProvenance(origin=SemanticOrigin.MODEL_CANDIDATE,evidence_reference='compiler:optional'),))
             raw=semantic_candidate(record,production=ProductionIntent(objective=record.content,
-                primary_change=record.content,current=True,new_work=True,bounded_change=record.content != ROUTINE[0][1],systemic_design=record.content == ROUTINE[0][1]),extra_items=(optional,),
+                primary_change=record.content,target_paths=tuple(SemanticArgument(value=p,provenance=source) for p in self.paths),current=True,new_work=True,bounded_change=not (self.systemic if self.systemic is not None else record.content == ROUTINE[0][1]),systemic_design=self.systemic if self.systemic is not None else record.content == ROUTINE[0][1]),extra_items=(optional,),
                 questions=(question('可逆内容细节',blocking=False,human=False,reversible=True),))
         else:
             effect,options=self.positive
@@ -113,3 +113,40 @@ def test_one_realization_per_basis_bounded_repair_never_changes_owner_facts(post
         row=u.session.execute(select(wic_human_realizations).where(
             wic_human_realizations.c.basis_fingerprint==projection.basis_fingerprint)).mappings().one()
         assert row['projection']['owner_facts']==before
+
+
+def test_persisted_nonblocking_design_allows_actual_production_cycle(postgres_database,tmp_path):
+    from tests.integration.test_wic_governed_work_admission import _UnguidedSemanticCapability,_SchedulingOrchestrator
+    from spg.application.steering_driver import PlanSteeringDriver
+    from spg.infrastructure.persistence.product_store import ProductStore
+    work,_=_services_for_resource(postgres_database,tmp_path,'watt://repositories/hi-production-gate')
+    interaction=WorkInteractionService(postgres_database,capability=DeclaredCompiler(paths=('index.html',),systemic=True))
+    origin=interaction.create_interaction(human_identity='human:test')
+    ready=interaction.append_and_assess(origin.id,'开发工律官网，创建 index.html 首页',human_identity='human:test')
+    admitted=_admit(work,ready)
+    SteeringBootstrapService(postgres_database).bootstrap(admitted.work_id)
+    governed=GuidedDesignApplicationService(postgres_database)
+    assert governed.get_optional(admitted.work_id) is not None
+    assert not governed.requires_design_artifact(admitted.work_id)
+    assert governed.approved_design_artifact_references(admitted.work_id)==()
+    class RoutineProposal(_UnguidedSemanticCapability):
+        def execute(self,input):
+            candidate=super().execute(input)
+            if candidate.proposed_production:
+                candidate=candidate.model_copy(update={'proposed_production':candidate.proposed_production.model_copy(update={
+                    'objective':input.desired_outcome,'code_targets':('index.html',),
+                    'verification_expectation':'Verify the exact admitted homepage exists and git diff --check passes'})})
+            return candidate
+    runtime=_SchedulingOrchestrator()
+    driver=PlanSteeringDriver(postgres_database,work,runtime,semantic_capability=RoutineProposal(),max_automatic_transitions=8)
+    try:
+        result=driver.activate(admitted.work_id)
+        assert result.stop_reason.value=='PRODUCTION_RUNNING'
+        assert runtime.scheduled==[admitted.work_id]
+        with postgres_database.unit_of_work() as u:
+            binding=ProductStore(u.session).runtime_binding(admitted.work_id)
+            assert binding is not None
+            summary=ProductStore(u.session).runtime_summary(binding)
+            assert summary.extra.get('task_contract_mode')!='DESIGN_ARTIFACT'
+        assert work.list_attention(work_id=admitted.work_id)==()
+    finally:driver.shutdown()

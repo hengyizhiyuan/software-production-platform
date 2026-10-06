@@ -719,3 +719,28 @@ def test_structural_expression_repair_cannot_rewrite_observed_complete_string():
     assert adapter.calls == 2
     assert result.content == ''.join(deltas) == content
     assert result.structural_repair_count == 1
+
+
+def test_reserved_human_choice_repairs_literal_option_grounding_before_irk_admission():
+    from spg.domain.intent_realization import HumanDecisionBoundary,SemanticArgument,SemanticProvenance,SemanticOrigin
+    from spg.application.intent_realization import IntentRealizationKernel
+    basis=_basis();record=basis.records[-1].model_copy(update={
+        'content':'官网第一版是只做品牌展示，还是同时加入登录和客户后台？请先分析差异，再让我决定。'})
+    basis=basis.model_copy(update={'records':(record,)})
+    source=SemanticProvenance(origin=SemanticOrigin.HUMAN_EXPLICIT,source_record_id=record.id,source_text=record.content)
+    boundary=HumanDecisionBoundary(subject='官网首版产品范围',question='首版选择哪种范围？',effect='PRODUCT_SCOPE',
+        options=tuple(SemanticArgument(value=o,provenance=source) for o in ('只做品牌展示','同时加入登录和客户后台')),
+        material_effects=('仅展示品牌内容，无账号或客户数据访问。','增加账号与客户数据权限，须补充验证与运维。'),
+        authority_provenance=source,required_before_production=True,why_now='用户明确保留选择权，生产前需要确定产品范围。')
+    raw=semantic_candidate(record,kind='ANALYSIS').model_copy(update={'human_decisions':(boundary,)})
+    invalid=raw.model_copy(update={'human_decisions':(boundary.model_copy(update={
+        'options':(boundary.options[0].model_copy(update={'value':'品牌展示型 MVP'}),boundary.options[1])}),)})
+    bad=json.loads(_semantics());bad['semantic_intent']=invalid.model_dump(mode='json')
+    good={**bad,'semantic_intent':raw.model_dump(mode='json')}
+    runtime,adapter=_runtime(_Adapter([json.dumps(bad,ensure_ascii=False),json.dumps(good,ensure_ascii=False)]))
+    capability=DeepSeekWorkInteractionCapability(runtime=runtime)
+    candidate=capability.interpret_controlled_stream_observed(basis,on_response_delta=None,on_pipeline_stage=None)
+    assert adapter.calls==2 and 'HUMAN_DECISION_OPTION_UNGROUNDED' in adapter.requests[1]['instructions']
+    assert 'Do not paraphrase options' in adapter.requests[1]['instructions']
+    ir=IntentRealizationKernel().govern(candidate,basis)
+    assert ir.human_decisions==(boundary,) and ir.current_production==()

@@ -425,6 +425,12 @@ class GuidedDesignApplicationService:
         self.database = database
         self.steering = SteeringApplicationService(database)
 
+    def requires_design_artifact(self, work_id: UUID) -> bool:
+        """Only effective blocking issues can impose the reviewed design prerequisite."""
+        guided = self.get_optional(work_id)
+        return bool(guided and any(issue.qualification is None or issue.qualification.blocking
+                                  for issue in guided.issues))
+
     def approved_design_artifact_references(self, work_id: UUID) -> tuple[str, ...]:
         """Return exact reviewed design outputs already committed to Work Reality."""
 

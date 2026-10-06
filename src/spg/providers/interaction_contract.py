@@ -60,7 +60,7 @@ def _safe_validation_summary(error: BaseException) -> str:
     """Expose schema locations/types without echoing Provider input or secrets."""
 
     if not isinstance(error, ValidationError):
-        if isinstance(error, ValueError) and str(error).startswith(('ACTION_', 'SEMANTIC_', 'PRIMARY_', 'EXPLICIT_', 'PRODUCTION_', 'EXPECTED_', 'RESPONSE_', 'TURN_')):
+        if isinstance(error, ValueError) and str(error).startswith(('ACTION_', 'SEMANTIC_', 'PRIMARY_', 'EXPLICIT_', 'PRODUCTION_', 'EXPECTED_', 'RESPONSE_', 'TURN_', 'HUMAN_DECISION_')):
             return str(error)[:300]
         return type(error).__name__
     issues = []
