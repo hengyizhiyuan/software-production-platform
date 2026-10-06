@@ -93,6 +93,18 @@ def test_canonical_compose_has_single_bounded_quality_tmpfs():
         DOCKER_GID='999',WATT_REVISION='d'*40,WATT_NODE_ID='i-fixture',WATT_NODE_REGION='cn-wulanchabu',WATT_NODE_HOSTNAME='fixture')
     out=subprocess.run(['docker','compose','-f','deploy/cloud-worker/docker-compose.yml','--profile','quality','config','--format','json'],env=env,capture_output=True,text=True,check=True)
     service=json.loads(out.stdout)['services']['quality-runner']
-    assert len(service['tmpfs'])==1 and service['tmpfs'][0].startswith('/tmp:') and 'size=' in service['tmpfs'][0]
+    assert len(service['tmpfs'])==1 and service['tmpfs'][0].startswith('/tmp:') and 'size=' in service['tmpfs'][0] and ':exec,' in service['tmpfs'][0]
     assert service['read_only'] and int(service['mem_limit'])<=1073741824
     assert not any(v.get('source')=='/var/run/docker.sock' for v in service['volumes'])
+
+
+def test_services_do_not_call_an_unconfigured_probe_healthy(monkeypatch):
+    from spg.evaluation import operations
+    def docker(args,timeout=8):
+        if args[1]=='ps':return 'abc api\n'
+        return '{"Status":"running"}'
+    monkeypatch.setattr(operations,'command',docker)
+    rows=operations.OperationsService(None,Settings(admin_node_id='i-exact')).services()['services']
+    api=next(r for r in rows if r['service']=='api')
+    assert api['state']=='running' and api['health']=='NOT_CONFIGURED'
+    assert next(r for r in rows if r['service']=='native-worker')['state']=='MISSING'

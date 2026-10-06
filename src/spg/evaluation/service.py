@@ -538,8 +538,11 @@ class QualityService:
             qualified = self._one(u.session, attempts, request.qualified_case_run_id)
             v = self._one(u.session, versions, qualified["case_version_id"])
             c = self._one(u.session, cases, v["case_id"])
-            if (f["regression_case_id"] != c["id"] or Cohort.REGRESSION not in c["cohorts"]
-                or qualified["state"] != "PASS" or qualified["created_at"] <= f["created_at"]):
+            failed = self._one(u.session, attempts, f["case_run_id"])
+            failed_version = self._one(u.session, versions, failed["case_version_id"])
+            eligible = ((f["regression_case_id"] == c["id"] and Cohort.REGRESSION in c["cohorts"])
+                or (Cohort.FRESH_HOLDOUT in c["cohorts"] and failed_version["case_id"] == c["id"]))
+            if (not eligible or qualified["state"] != "PASS" or qualified["created_at"] <= f["created_at"]):
                 raise QualityError("FINDING_CLOSURE_REQUIRES_LATER_QUALIFIED_REGRESSION")
             u.session.execute(update(findings).where(findings.c.id == fid).values(state="CLOSED",
                 closure={**json_record(request), "authority_identity": actor, "created_at": now().isoformat()}))

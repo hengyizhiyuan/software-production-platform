@@ -256,17 +256,21 @@ services:
       SPG_MANAGED_SOURCE_USERNAME: watt-managed
       SPG_MANAGED_SOURCE_PASSWORD: ${WATT_GITEA_PASSWORD:?Set dedicated managed-source credential}
       SPG_MANAGED_SOURCE_NAMESPACE: watt-managed
+      SPG_WORKSPACE_ROOT: /tmp/quality-workspaces
+      SPG_NATIVE_EXECUTOR_WORKSPACE_ROOT: /tmp/quality-native-workspaces
+      SPG_NATIVE_EXECUTOR_PRODUCTION_ENVIRONMENT_STORE_ROOT: /tmp/quality-production-environments
       SPG_OWNER_RUNTIME_STORE_ROOT: /tmp/quality-owner-runtime
       SPG_NATIVE_EXECUTOR_STORAGE_ROOT: /tmp/quality-native-executor
       SPG_MANAGED_SOURCE_WORKSPACE_ROOT: /tmp/quality-managed-source
       PYTHONPATH: /opt/watt-owners/ecf/src:/opt/watt-owners/guardian/src:/qualification/src:/qualification
     read_only: true
-    tmpfs: ["/tmp:size=1073741824,mode=1777"]
+    tmpfs: ["/tmp:exec,size=1073741824,mode=1777"]
     mem_limit: 1g
     cpus: 1
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     volumes:
+      - ${WATT_QUALITY_SOURCE:-./source}:/qualification:ro
       - /data/watt/owners/ecf:/opt/watt-owners/ecf:ro
       - /data/watt/owners/guardian:/opt/watt-owners/guardian:ro
     logging: *bounded-logging

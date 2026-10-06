@@ -37,6 +37,10 @@ def recipe_result(settings, run, case, attempt_id):
     if r.key == "unqualified-scenario":
         raise QualityError("SCENARIO_RECIPE_NOT_QUALIFIED")
     selector = r.selector
+    revision = subprocess.run(["git", "-C", str(root), "rev-parse", "HEAD"],
+        capture_output=True, text=True, timeout=10, check=False)
+    if revision.returncode or revision.stdout.strip() != run["watt_revision"]:
+        raise QualityError("QUALIFICATION_EXACT_SOURCE_UNAVAILABLE")
     test_path = root / selector.split("::", 1)[0]
     if not test_path.is_file():
         raise QualityError("QUALIFICATION_RECIPE_UNAVAILABLE")
@@ -57,6 +61,8 @@ def recipe_result(settings, run, case, attempt_id):
     env = dict(os.environ, SPG_DATABASE_URL=settings.quality_test_database_url,
         SPG_TEST_DATABASE_URL=settings.quality_test_database_url,
         PYTHONPATH=str(root / "src") + os.pathsep + os.environ.get("PYTHONPATH", ""))
+    if r.key not in {"brownfield", "promotion-recovery"}:
+        env["SPG_MANAGED_SOURCE_PROVIDER"] = "disabled"
     # Child test Applications are isolated and never start the Admin observer.
     env["SPG_ADMIN_ENABLED"] = "false"
     started = monotonic()
@@ -72,7 +78,7 @@ def recipe_result(settings, run, case, attempt_id):
         import selectors
         import signal
         process = subprocess.Popen([sys.executable, "-m", "pytest", selector, "-q",
-            "-p", "spg.evaluation.pytest_lineage", "--disable-warnings", "--junitxml=" + str(xml)],
+            "-p", "spg.evaluation.pytest_lineage", "-p", "no:cacheprovider", "--disable-warnings", "--junitxml=" + str(xml)],
             cwd=root, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
         emitted = 0
         forced = None
@@ -115,7 +121,8 @@ def recipe_result(settings, run, case, attempt_id):
             passed = False
         proof = "quality:case-run:" + str(attempt_id)
         details = {"oracle_id": r.key, "test_counts": counts, "exit_code": code,
-            "isolated_database": True, "recipe_selector": selector}
+            "isolated_database": True, "recipe_selector": selector,
+            "managed_source_provider": env["SPG_MANAGED_SOURCE_PROVIDER"]}
         result = Evaluation(evaluator=Evaluator.DETERMINISTIC, outcome="PASS" if passed else "FAIL",
             evidence_refs=(proof,), evaluator_version="watt-canonical-recipe-v1",
             # A failing multi-stage test proves its oracle failed, not which

@@ -174,3 +174,13 @@ def test_old_watt_revision_is_not_executed_under_new_runtime(quality):
     q=quality;c=import_core(q);q.request_run(CampaignRequest(campaign_id=c['id']),'human:owner')
     q.settings=Settings(runtime_revision='e'*40)
     assert q.claim_run() is None and q.recent_runs()[0]['state']=='BLOCKED'
+
+
+def test_sealed_holdout_finding_closes_without_entering_optimization(quality):
+    from uuid import UUID
+    q=quality;h=create_fresh_holdout(q);finish(q,h['campaign'],result='FAIL')
+    fid=UUID(q.clusters()[0]['findings'][0]);_,aids=finish(q,h['campaign'])
+    q.close_finding(fid,FindingClosureRequest(qualified_case_run_id=aids[0],rationale='bounded qualification infrastructure recovery'),'human:owner')
+    assert q.clusters()[0]['closure_state']=='CLOSED'
+    assert q.list_cases()[0]['cohorts']==['FRESH_HOLDOUT']
+    with pytest.raises(QualityError,match='HOLDOUT_CANNOT'):q.promote_regression(fid,'human:owner')

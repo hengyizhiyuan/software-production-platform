@@ -114,17 +114,14 @@ class OperationsService:
 
     def services(self):
         output = command(["docker", "ps", "-a", "--filter", "label=com.docker.compose.project=watt-cloud-worker",
-            "--format", "{{json .}}"])
+            '--format', '{{.ID}} {{.Label "com.docker.compose.service"}}'])
         if output is None:
             return {"state": "UNAVAILABLE", "services": [], "reason": "DOCKER_OBSERVATION_UNAVAILABLE"}
         rows = []
         for line in output.splitlines():
-            item = json.loads(line)
-            labels = dict(x.split("=", 1) for x in item.get("Labels", "").split(",") if "=" in x)
-            service = labels.get("com.docker.compose.service")
+            cid, service = line.split(maxsplit=1)
             if service == "migrate":
                 continue
-            cid = item["ID"]
             state = command(["docker", "inspect", "--format", "{{json .State}}", cid])
             s = json.loads(state) if state else {}
             health = s.get("Health", {}).get("Status")

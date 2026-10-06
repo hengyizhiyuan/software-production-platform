@@ -517,7 +517,8 @@ unobserved earlier stages passed. Ambiguous failures retain UNKNOWN attribution.
 Failure clusters use typed stage/code/evaluator/oracle evidence, not text similarity.
 A Human may promote a finding into Regression using the same Case identity. Closure
 requires a later qualified regression attempt and explicit authority/rationale;
-new occurrences remain OPEN. Case and failure history are retained.
+new occurrences remain OPEN. A sealed Holdout may close against a later PASS
+of the same sealed Case, without becoming Regression or optimization input. Case and failure history are retained.
 
 Arena experiments pin a Case version and declare the exact model/provider/policy
 differences. v1's executable strategy adapter compares bounded qualification timeout
@@ -561,7 +562,13 @@ Worker concurrency, changes runtime owners or administers an ECS.
 The canonical cloud-worker Compose exposes Admin through the existing Web entrypoint.
 `quality-runner` is an optional profile, built from the same exact source revision
 with the existing test dependency. Create `spg_admin_v1_quality_test` in the existing
-PostgreSQL service before enabling that profile. Set WATT_REVISION to the committed
+PostgreSQL service before enabling that profile. Run
+`deploy/cloud-worker/prepare_quality_source.py` from the accepted deployment
+workflow and set WATT_QUALITY_SOURCE to its exact immutable Git snapshot. The
+runner rejects a source revision that differs from the Campaign. Its private
+tmpfs allows reviewed Git authentication scripts to execute; all mutable runtime
+roots resolve inside that bounded tmpfs. Gitea is enabled only for reviewed Gitea
+recipes, and other fixed fixtures retain their declared source configuration. Set WATT_REVISION to the committed
 source SHA and WATT_NODE_ID/REGION/HOSTNAME from observed deployment facts. Migration
 `20261006_69` descends from `20261005_68` and adds only Quality ledger/metric tables.
 
