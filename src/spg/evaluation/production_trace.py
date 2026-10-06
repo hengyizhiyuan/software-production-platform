@@ -235,12 +235,13 @@ def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=
         req = s.get('request_payload', {})
         result = s.get('provider_response') or s.get('result_payload') or {}
         observation=result.get('provider_observation',{})
+        call_contexts=[c for c in _walk(req,'decision_context') if isinstance(c,dict)]
         model_calls.append({'sequence':s.get('sequence'), 'timestamp':_time(s), 'purpose':'推进当前已治理的生产单元', 'governed_objective':req.get('objective'),
             'provider':observation.get('provider_identity'),
             'model':observation.get('effective_model'), 'state':s.get('condition'),
             'duration_ms':observation.get('transport',{}).get('elapsed_ms'),'usage':observation.get('usage'),
-            'context_classes':sorted({x.get('context_class') for c in contexts for x in c.get('protected_obligations', []) if x.get('context_class')}),
-            'input_categories':['Task Contract','工程来源与恢复点'] if req else [],
+            'context_classes':sorted({x.get('context_class') for c in call_contexts for x in c.get('protected_obligations', []) if x.get('context_class')}),
+            'input_categories':(['Task Contract'] if list(_walk(req,'task_contract')) else [])+(['已绑定的执行上下文与恢复事实'] if req.get('context_facts') else []),
             'observable_result':{k:result[k] for k in ('action','summary','tool_calls','result_claim','actions','usage','output','status','content','final') if k in result},
             'source_ref':f"execution-step:{s['id']}"})
     tool_calls = [e for e in events if e['detail'].get('kind') == 'TOOL' or e['detail'].get('tool_identity') or e['detail'].get('payload',{}).get('type') == 'PRODUCTION_ENVIRONMENT_COMMAND']

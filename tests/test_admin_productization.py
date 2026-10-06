@@ -110,3 +110,12 @@ def test_trace_never_fabricates_unobserved_input_conversation_search_or_deployme
     p=project_trace({},scene='synthetic qualification',purpose='fixture motive',case={'state':'PASS'})
     assert p['first_human_input'] is None and not p['conversation'] and not p['deployment']
     assert '不能判断' in p['search_note'] and '不能宣称已上线' in p['deployment_note']
+
+
+def test_model_context_classes_come_from_that_exact_request_only():
+    t=trace_tables()
+    t['production_work_units'][0]['completion_contract']={'task_contract':{'decision_context':{'package_fingerprint':'unrelated','protected_obligations':[{'context_class':'APPROVED_DECISION','content':'not supplied to call'}]}}}
+    t['execution_steps'][0]['request_payload']['context_facts']=[{'payload':{'task_contract':{'decision_context':{'protected_obligations':[{'context_class':'PRODUCT_INTENT','content':'exact input'}]}}}}]
+    p=project_trace(t,scene='test',purpose='test')
+    assert p['model_calls'][0]['context_classes']==['PRODUCT_INTENT']
+    assert 'APPROVED_DECISION' not in p['model_calls'][0]['context_classes']
