@@ -355,7 +355,7 @@ class ProductExperienceProjection:
              "entrypoint", "preview_kind", "artifacts", "verification", "authorization_pending")}
         execution = None if work is None else self._current_execution(work)
         admission_context = None
-        if (work is not None and work.status.value == "READY"
+        if (work is not None and work.status.value in {"READY", "BLOCKED", "NEEDS_ATTENTION"}
                 and work.current_production_step == "PRODUCE"
                 and work.current_production_run_id is None and not attention):
             from spg.application.steering_production import SteeringProductionService

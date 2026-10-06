@@ -169,7 +169,7 @@ class SteeringApplicationService:
                 require_human_decision(request.human_decision_need, evidence=refs,
                     semantic_ir=canonical_ir_for_work(unit_of_work.session, work.id),
                     owner_boundary=owner_decision_boundary(unit_of_work.session, work.id, step.id,
-                                                          request.attention_reason))
+                                                          request.attention_reason, database=self.database))
             admitted_decision_id = store.insert_decision(
                 {
                     "id": decision_id,

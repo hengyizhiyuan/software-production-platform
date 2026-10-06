@@ -231,25 +231,74 @@ def test_production_owner_reads_exact_ecf_failure_without_admitting_or_synthesiz
     from spg.application.steering_production import SteeringProductionService
     from spg.application.decision_context import DecisionContextNotReady
     from spg.infrastructure.persistence.product_store import ProductStore
-    work_id,step_id,revision_id=uuid4(),uuid4(),uuid4()
-    request=SimpleNamespace(work_id=work_id,steering_step_id=step_id,
-        work_reality_revision_id=revision_id,repository_identity='watt://qualified-product',source_revision='d'*40)
+    from pathlib import Path
+    from spg.domain.change import ProductionTargetKind
+    work_id,revision_id=uuid4(),uuid4()
+    work=SimpleNamespace(current_work_reality_revision_id=revision_id,
+        production_plan=SimpleNamespace(target_kind=ProductionTargetKind.CODE_WORK,
+            change_contract=SimpleNamespace(exact_targets=(SimpleNamespace(path='index.html'),))))
+    resource=SimpleNamespace(location_ref='/exact/work/source',repository_identity='watt://qualified-product',authoritative_ref='refs/heads/work')
     @contextmanager
     def uow():yield SimpleNamespace(session=object())
     service=SteeringProductionService(SimpleNamespace(unit_of_work=uow))
-    monkeypatch.setattr(service,'materialize_request',lambda wid:request if wid==work_id else None)
-    monkeypatch.setattr(ProductStore,'resource_for_work',lambda self,wid:SimpleNamespace(location_ref='/exact/work/source'))
+    monkeypatch.setattr(service,'materialize_request',lambda *_:pytest.fail('Context read must remain possible while Attention stops admission'))
+    monkeypatch.setattr(ProductStore,'resource_for_work',lambda self,wid:resource)
+    monkeypatch.setattr(ProductStore,'work',lambda self,wid:work)
+    monkeypatch.setattr(service.runtime,'current_baseline',lambda **_:SimpleNamespace(repository_revision='d'*40))
     calls=[]
-    def context(req,*,repository_path):
-        calls.append((req,repository_path))
+    def context(database,**fields):
+        calls.append(fields)
         raise DecisionContextNotReady(SimpleNamespace(context_status=SimpleNamespace(value='NOT_READY'),
             missing_required_classes=tuple(SimpleNamespace(value=k) for k in
                 ('PRODUCT_INTENT','PRODUCT_INVARIANT','APPROVED_DECISION')),
             stale_context_risks=(),conflicts=(),fingerprint='c'*64))
-    monkeypatch.setattr(service,'_task_contract',context)
+    monkeypatch.setattr('spg.application.steering_production.lineage_for_work_task',context)
     monkeypatch.setattr(service,'admit_cycle',lambda *_:pytest.fail('Read projection must not admit production'))
     observed=service.context_readiness(work_id)
     assert observed['owner']=='ECF' and observed['status']=='NOT_READY'
     assert observed['missing_classes']==['PRODUCT_INTENT','PRODUCT_INVARIANT','APPROVED_DECISION']
     assert f'work-reality-revision:{revision_id}' in observed['source_references']
-    assert calls==[(request,'/exact/work/source')]
+    assert calls==[dict(work_id=work_id,repository_identity=resource.repository_identity,
+        repository_path=Path(resource.location_ref),repository_revision='d'*40,target_paths=('index.html',))]
+
+
+def test_missing_context_source_does_not_make_budget_halt_a_human_scope_choice(monkeypatch):
+    from spg.application.human_attention import owner_decision_boundary,boundary_decision
+    from spg.application.steering_production import SteeringProductionService
+    from spg.infrastructure.persistence.product_store import ProductStore
+    from spg.infrastructure.persistence.steering_store import SteeringStore
+    from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+    from spg.domain.steering import SteeringAttentionReason
+    ir,_=declared_ir(ROUTINE[0][1]);_,need=valid_need();history=[SimpleNamespace(condition='NON_CONVERGING')]
+    monkeypatch.setattr(ProductStore,'runtime_binding',lambda *_:None)
+    monkeypatch.setattr(SteeringStore,'latest_semantic_result_for_step',lambda *_:None)
+    monkeypatch.setattr(NativeExecutionStore,'work_convergence_history',lambda *_:history)
+    context={'status':'NOT_READY','owner':'ECF','missing_classes':['PRODUCT_INTENT']}
+    monkeypatch.setattr(SteeringProductionService,'context_readiness',lambda *_:context)
+    decision=boundary_decision('官网生产是否暂停或改变边界','你希望暂停，还是调整目标后继续？',
+        HumanDecisionEffect.COST_OR_RISK,need.evidence,
+        (('暂停这次生产','停止消耗执行资源，保留当前事实。'),('调整目标边界','通过新的明确要求调整目标。')),
+        why_now='现有收敛预算已用尽，保留真实失败记录。',impact='继续消耗执行资源需新授权，不能自动扩大成本。')
+    def boundary():return owner_decision_boundary(object(),uuid4(),uuid4(),
+        SteeringAttentionReason.MATERIAL_RISK_OR_COST_DECISION,database=SimpleNamespace())
+    assert boundary() is None
+    assert 'HUMAN_OWNERSHIP_NOT_ESTABLISHED' in qualify_human_decision(decision,evidence=need.evidence,semantic_ir=ir,owner_boundary=boundary())
+    context.update(status='READY')
+    assert boundary()=='CONVERGENCE_BUDGET_EXHAUSTED'
+    assert qualify_human_decision(decision,evidence=need.evidence,semantic_ir=ir,owner_boundary=boundary())==()
+    assert history[0].condition=='NON_CONVERGING'  # No reset or rewritten history.
+
+
+def test_missing_context_observation_stops_without_consuming_refinement_budget():
+    from spg.application.steering_driver import PlanSteeringDriver
+    from spg.application.decision_context import DecisionContextNotReady
+    package=SimpleNamespace(context_status=SimpleNamespace(value='INCOMPLETE'),
+        missing_required_classes=(SimpleNamespace(value='PRODUCT_INTENT'),),
+        stale_context_risks=(),conflicts=(),fingerprint='c'*64)
+    def iterate(_):raise DecisionContextNotReady(package)
+    driver=SimpleNamespace(_work_convergence_halted=lambda _:False,
+        _provider_failure_escalated=lambda _:False,_stopping=SimpleNamespace(is_set=lambda:False),
+        max_automatic_transitions=1,iterate=iterate,
+        _observe_convergence=lambda *a,**k:pytest.fail('Unchanged missing source must not consume retry budget'))
+    result=PlanSteeringDriver.activate(driver,uuid4())
+    assert result.stop_reason.value=='BLOCKED' and result.iterations_executed==0

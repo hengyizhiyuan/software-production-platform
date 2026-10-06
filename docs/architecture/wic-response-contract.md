@@ -636,3 +636,12 @@ staleness and source references remain owner facts; WIC presents the obstruction
 without inventing a Human decision or promising autonomous execution. No context
 record or approved decision is synthesized by this read path. Without a Candidate,
 the review surface cannot claim that quality conditions have already passed.
+
+Attention is requalified at projection as well as admission. An unchanged,
+missing context prerequisite cannot justify a pause-or-redefine-intent question
+merely because repeated startup retries exhausted convergence. The production
+owner's context query stays readable while admission is halted. The existing halt,
+budget, decisions and failure history remain intact; unqualified Attention stays
+in evidence rather than normal Human Actions. A new missing-context observation
+stops before consuming another refinement attempt. Genuine convergence authority
+boundaries, Candidate review and explicitly reserved Human choices remain gated.

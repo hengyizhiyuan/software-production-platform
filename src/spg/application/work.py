@@ -3116,6 +3116,17 @@ class WorkApplicationService:
                         )
                     )
                 )
+            if decision is not None and decision.human_decision_need is not None:
+                from spg.application.human_attention import (qualify_human_decision,
+                    canonical_ir_for_work, owner_decision_boundary)
+                with self.database.unit_of_work() as uow:
+                    failures = qualify_human_decision(decision.human_decision_need,
+                        evidence=decision.reality_refs,
+                        semantic_ir=canonical_ir_for_work(uow.session, projection.work_id),
+                        owner_boundary=owner_decision_boundary(uow.session, projection.work_id,
+                            decision.current_step_id, decision.attention_reason, database=self.database))
+                if failures:
+                    decision = None  # Presentation-only requalification; history stays intact.
             if (
                 decision is not None
                 and self._decision_matches_work_revision(decision, projection.current_work_reality_revision_id)

@@ -66,7 +66,7 @@ def require_human_decision(need, **basis):
         raise SteeringInvariantViolation("ATTENTION_NOT_QUALIFIED: " + ", ".join(failures))
 
 
-def owner_decision_boundary(session, work_id, step_id, reason):
+def owner_decision_boundary(session, work_id, step_id, reason, *, database=None):
     """Owner evidence, never a provider's claim of materiality."""
     from spg.infrastructure.persistence.steering_store import SteeringStore
     from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
@@ -82,6 +82,18 @@ def owner_decision_boundary(session, work_id, step_id, reason):
         return "EXACT_PROPOSAL_REVIEW"
     history = NativeExecutionStore(session).work_convergence_history(work_id)
     if reason is SteeringAttentionReason.MATERIAL_RISK_OR_COST_DECISION and history and history[-1].condition in {"NON_CONVERGING", "ESCALATED"}:
+        if database is not None and binding is None:
+            from spg.application.steering_production import SteeringProductionService
+            from spg.domain.product import ProductInvariantViolation
+            try:
+                context = SteeringProductionService(database).context_readiness(work_id)
+            except (ProductInvariantViolation, SteeringInvariantViolation):
+                context = None
+            if context and context.get('owner') == 'ECF' and context['status'] == 'NOT_READY':
+                # A missing software prerequisite is not evidence that the Human
+                # must pause or redefine their intent. Preserve the budget halt;
+                # the safe default is to stay stopped and expose the actual cause.
+                return None
         return "CONVERGENCE_BUDGET_EXHAUSTED"
     return None
 

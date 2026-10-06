@@ -20,6 +20,7 @@ from spg.application.assets import RepositoryAssetService
 from spg.application.repository_branch_authority import governed_branch_creation_target
 from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.human_attention import boundary_decision
+from spg.application.decision_context import DecisionContextNotReady
 from spg.application.steering import SteeringApplicationService
 from spg.application.semantic_steps import SemanticStepApplicationService, SemanticStepRefinementExhausted
 from spg.domain.refinement_contract import RefinementSignalKind, classify_refinement
@@ -574,6 +575,14 @@ class PlanSteeringDriver:
                 )
             try:
                 result = self.iterate(work_id)
+            except DecisionContextNotReady:
+                # Repeating an unchanged missing context source cannot refine it.
+                # Keep the gate stopped without turning a prerequisite observation
+                # into a Human cost/scope decision or resetting convergence history.
+                LOGGER.exception("Steering context prerequisite not ready Work=%s", work_id)
+                return SteeringActivationResult(work_id=work_id,
+                    iterations_executed=iterations, stop_reason=SteeringDriverStopReason.BLOCKED,
+                    last_action=last_action)
             except (SteeringInvariantViolation, ProductInvariantViolation) as error:
                 self._observe_convergence(work_id, failed=True,
                     owner_budget_exhausted=isinstance(error, SemanticStepRefinementExhausted),

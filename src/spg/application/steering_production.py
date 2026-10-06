@@ -82,17 +82,36 @@ class SteeringProductionService:
         This is an owner observation, not a WIC readiness decision. In particular
         absent ECF sources stay absent; no context or approval is synthesized.
         """
-        request = self.materialize_request(work_id)
         with self.database.unit_of_work() as uow:
-            resource = ProductStore(uow.session).resource_for_work(work_id)
-        if resource is None:
-            raise ProductInvariantViolation("Admitted Engineering Resource is missing")
-        refs = [f"work:{work_id}", f"steering-step:{request.steering_step_id}",
-                f"source:{request.repository_identity}@{request.source_revision}"]
-        if request.work_reality_revision_id is not None:
-            refs.append(f"work-reality-revision:{request.work_reality_revision_id}")
+            product = ProductStore(uow.session)
+            work = product.work(work_id)
+            resource = product.resource_for_work(work_id)
+        if work is None or resource is None or work.production_plan is None:
+            raise ProductInvariantViolation("Work source/context authority is incomplete")
+        # Context observation must remain readable even when a persisted Attention
+        # has stopped admission. It grants no authority to materialize/admit a cycle.
+        plan = work.production_plan
+        if plan.target_kind is ProductionTargetKind.DOCUMENTATION_WORK:
+            paths = tuple(target.path for target in plan.artifact_targets)
+        else:
+            contract = plan.change_contract
+            if contract is None and plan.change_proposal is not None:
+                contract = WorkApplicationService._admit_change_contract(plan.change_proposal,
+                    desired_outcome=work.desired_outcome or work.raw_user_requirement,
+                    constraints=work.constraints)
+            if contract is None:
+                raise ProductInvariantViolation("Work has no admitted context target")
+            paths = tuple(target.path for target in contract.exact_targets)
+        baseline = self.runtime.current_baseline(repository_identity=resource.repository_identity,
+                                                 repository_ref=resource.authoritative_ref)
+        refs = [f"work:{work_id}", f"source:{resource.repository_identity}@{baseline.repository_revision}"]
+        if work.current_work_reality_revision_id is not None:
+            refs.append(f"work-reality-revision:{work.current_work_reality_revision_id}")
         try:
-            self._task_contract(request, repository_path=resource.location_ref)
+            lineage_for_work_task(self.database, work_id=work_id,
+                repository_identity=resource.repository_identity,
+                repository_path=Path(resource.location_ref),
+                repository_revision=baseline.repository_revision, target_paths=paths)
         except DecisionContextNotReady as error:
             return {"status": "NOT_READY", "owner": "ECF",
                     "condition": "DECISION_CONTEXT_NOT_READY",
