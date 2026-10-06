@@ -143,7 +143,8 @@ def test_operations_unknown_topology_and_bounded_retention(quality,tmp_path,monk
     monkeypatch.setattr(o,'production',lambda:dict(workers=[],queue=[],queue_depth=4,active_executions=1))
     monkeypatch.setattr(o,'services',lambda:dict(services=[],state='UNAVAILABLE'))
     monkeypatch.setattr(o,'storage',lambda:dict(postgresql={'bytes':100,'method':'actual'}))
-    o.observe();snap=o.snapshot();assert snap['node']['cpu_percent'] is None and snap['production']['queue_depth']==4
+    o.observe();snap=o.snapshot();assert snap['state']=='CURRENT' and snap['service_observation_state']=='UNAVAILABLE'
+    assert snap['node']['cpu_percent'] is None and snap['production']['queue_depth']==4
     assert snap['topology']['nodes'][0]['id']=='i-current' and snap['topology']['storage_placements'][0]['storage_id']=='postgresql'
     with quality.database.engine.begin() as c:c.execute(update(operations_metric_samples).values(created_at=now()-timedelta(days=4)))
     assert o.latest()['state']=='STALE';o.observe();assert len(o.history())==1

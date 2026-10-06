@@ -131,6 +131,12 @@ class OperationsService:
             rows.append({"service": service, "container_id": cid, "state": s.get("Status", "UNKNOWN"),
                 "health": health or "NOT_CONFIGURED", "started_at": s.get("StartedAt"),
                 "node_id": self.settings.admin_node_id or "UNBOUND_NODE", "source": "Docker State/Health"})
+        present = {r["service"] for r in rows}
+        for required in ("api", "native-worker", "native-coordinator", "native-tool-host", "postgres", "gitea"):
+            if required not in present:
+                rows.append({"service": required, "container_id": None, "state": "MISSING",
+                    "health": "UNAVAILABLE", "started_at": None,
+                    "node_id": self.settings.admin_node_id or "UNBOUND_NODE", "source": "Docker project absence"})
         return {"state": "OBSERVED", "services": rows}
 
     def storage(self):
@@ -208,7 +214,8 @@ class OperationsService:
         production, services = self.production(), self.services()
         node = latest.get("node")
         storage = self.storage()
-        return {**latest, "production": production, **services, "storage": storage,
+        return {**latest, "production": production, "services": services["services"],
+            "service_observation_state": services["state"], "storage": storage,
             "topology": {"nodes": [] if node is None else [{"id": node["node_id"], "hostname": node["hostname"],
                 "region": node["region"], "observed_at": node["observed_at"]}],
                 "service_placements": services["services"], "workers": production["workers"],

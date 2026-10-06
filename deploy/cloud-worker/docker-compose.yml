@@ -261,7 +261,7 @@ services:
       SPG_MANAGED_SOURCE_WORKSPACE_ROOT: /tmp/quality-managed-source
       PYTHONPATH: /opt/watt-owners/ecf/src:/opt/watt-owners/guardian/src:/qualification/src:/qualification
     read_only: true
-    tmpfs: [/tmp:size=1073741824,mode=1777]
+    tmpfs: ["/tmp:size=1073741824,mode=1777"]
     mem_limit: 1g
     cpus: 1
     cap_drop: [ALL]

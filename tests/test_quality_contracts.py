@@ -83,3 +83,16 @@ def test_llm_judgment_records_exact_provider_without_objective_override():
     e=evaluate(Settings(),case_run_id=uuid4(),case_definition={'cohorts':['GOLDEN'],'motive':'x','invariants':['x']},observed_results=[],model_runtime=Model())
     assert e.evaluator==Evaluator.LLM and e.details['model']=='actual' and not e.details['objective_override']
     assert objective_verdict((e,))=='UNKNOWN'
+
+
+def test_canonical_compose_has_single_bounded_quality_tmpfs():
+    import os, json, shutil, subprocess
+    if not shutil.which('docker'):pytest.skip('Docker Compose is required for canonical deployment validation')
+    env=dict(os.environ,SPG_POSTGRES_PASSWORD='fixture-only',SPG_OPERATOR_TOKEN='fixture-only-owner-token-32-characters',
+        SPG_DEEPSEEK_API_KEY='fixture-only',SPG_NATIVE_EXECUTOR_INTERNAL_TOKEN='fixture-only',WATT_GITEA_PASSWORD='fixture-only',
+        DOCKER_GID='999',WATT_REVISION='d'*40,WATT_NODE_ID='i-fixture',WATT_NODE_REGION='cn-wulanchabu',WATT_NODE_HOSTNAME='fixture')
+    out=subprocess.run(['docker','compose','-f','deploy/cloud-worker/docker-compose.yml','--profile','quality','config','--format','json'],env=env,capture_output=True,text=True,check=True)
+    service=json.loads(out.stdout)['services']['quality-runner']
+    assert len(service['tmpfs'])==1 and service['tmpfs'][0].startswith('/tmp:') and 'size=' in service['tmpfs'][0]
+    assert service['read_only'] and service['mem_limit']<=1073741824
+    assert not any(v.get('source')=='/var/run/docker.sock' for v in service['volumes'])
