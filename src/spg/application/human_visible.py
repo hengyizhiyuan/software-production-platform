@@ -1,6 +1,7 @@
 """One WIC realization per exact owner Reality basis, shared by normal surfaces."""
 from hashlib import sha256
 import json
+import re
 from uuid import UUID
 from sqlalchemy import select, text
 from sqlalchemy.dialects.postgresql import insert
@@ -91,6 +92,10 @@ def validate_wording(projection, wording):
     # A Realizer never manufactures a request or a success absent from owner truth.
     prose = ' '.join((wording.summary,wording.current_activity,wording.next_step))
     if not projection.decision_needs and any(t in prose for t in ('请你决定','等待你的决定','请选择','请先确认','？','?')):
+        raise ValueError('HUMAN_REALIZATION_INVENTED_DECISION')
+    if not projection.decision_needs and re.search(
+        r'(?<!不)(?:需(?:要)?|须|先由|由|请|等待)[^。；;]{0,12}'
+        r'(?:人工|人类|用户|你)[^。；;]{0,12}(?:确认|决定|决策|解决|补齐|处理|选择|提供)',prose):
         raise ValueError('HUMAN_REALIZATION_INVENTED_DECISION')
     guardian = projection.owner_facts.get('guardian') or {}
     candidate = projection.owner_facts.get('candidate')
