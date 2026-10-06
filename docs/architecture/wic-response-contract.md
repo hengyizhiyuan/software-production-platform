@@ -578,3 +578,35 @@ STEERING_AUTHORITY = PRESERVED
 WIC_INTERACTION_INTELLIGENCE_HUMAN_ACCEPTANCE = PASS
 END_TO_END_PRODUCTION_HUMAN_ACCEPTANCE = NOT_EVALUATED
 ```
+
+## Ordinary owner-reality surfaces
+
+IRK owns governed meaning; engineering owners own status, results, evidence and
+permission. WIC owns ordinary Human wording. `HumanVisibleProjection` is derived
+read-only input, not another truth store. A version fingerprints the governed IR,
+Work/Execution/Verification/Guardian/Candidate facts, current plan, qualified decisions
+and source references. Heartbeat timestamps are excluded from presentation versioning.
+
+WIC produces one coherent expression for that version. A PostgreSQL advisory lock
+fences concurrent realizations; the derived `wic_human_realizations` cache supplies
+Agenda, Reality, Production and Actions. It is disposable presentation evidence.
+Expression fields cannot change owner status, readiness, actions or PASS/FAIL.
+WIC also realizes typed fact labels and uses a bounded safe projection if expression
+fails. Ordinary surfaces do not consume owner recommendations/templates directly;
+explicit evidence/debug views retain them.
+
+The language gate rejects raw enums, known internal type/schema/objective templates,
+UUIDs and fingerprints. Workspace realization gets one retry on the same projection;
+chat preserves valid streamed clauses, rejects the leaking clause before publication,
+and retries expression once without rerunning semantic governance or owner effects.
+A neutral WIC fallback conveys no success or new authority.
+
+An explicit pre-production product/architecture/authority choice is represented as a
+provenance-checked `HumanDecisionBoundary` in IRK. WIC consumes it for question/readiness
+and a concrete Action; it does not manufacture a Work or production authorization from
+an analysis-only request. Human selection in the existing conversation supplies the
+next governed meaning. The exact Human-stated alternatives are preserved.
+
+Permanent bounded regression identities: REG-HI-001 through REG-HI-005, REG-HI-P01
+and REG-HI-P02. Their reviewed recipes use the existing isolated Quality runner.
+Historical Pilot results remain immutable; new incident/repair runs append lineage.

@@ -137,6 +137,24 @@ class SemanticQuestion(FrozenContract):
         return self
 
 
+class HumanDecisionBoundary(FrozenContract):
+    """A Human-reserved choice compiled from explicit, exact clause evidence."""
+    subject: str = Field(min_length=5)
+    question: str = Field(min_length=8)
+    effect: Literal["PRODUCT_SCOPE", "ARCHITECTURE", "AUTHORITY", "COST_OR_RISK"]
+    options: tuple[SemanticArgument, ...] = Field(min_length=2, max_length=4)
+    material_effects: tuple[str, ...] = Field(min_length=2, max_length=4)
+    authority_provenance: SemanticProvenance
+    required_before_production: bool
+    why_now: str = Field(min_length=10)
+
+    @model_validator(mode="after")
+    def exact_options(self):
+        if len(self.options) != len(self.material_effects):
+            raise ValueError("Decision options require separate material consequences")
+        return self
+
+
 class TurnSemanticCandidate(FrozenContract):
     items: tuple[SemanticItem, ...] = Field(min_length=1)
     clauses: tuple[SemanticClause, ...] = Field(min_length=1)
@@ -144,6 +162,7 @@ class TurnSemanticCandidate(FrozenContract):
     human_abstraction_level: Literal["VISION", "DOMAIN", "SOLUTION", "IMPLEMENTATION"] = "DOMAIN"
     uncertain: bool = False
     questions: tuple[SemanticQuestion, ...] = ()
+    human_decisions: tuple[HumanDecisionBoundary, ...] = ()
 
 
 class GovernedSemanticIR(TurnSemanticCandidate):

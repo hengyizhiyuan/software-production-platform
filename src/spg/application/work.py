@@ -3121,6 +3121,7 @@ class WorkApplicationService:
                 and self._decision_matches_work_revision(decision, projection.current_work_reality_revision_id)
                 and decision.steering_outcome is SteeringOutcome.HUMAN_ATTENTION
                 and decision.attention_reason is not None
+                and decision.human_decision_need is not None
                 and not proposal_review_resolved
             ):
                 action_title, action_reason, action_recommendation, action_impact = (
@@ -3168,7 +3169,7 @@ class WorkApplicationService:
                             else AttentionKind.STEERING_DECISION_REQUIRED
                         ),
                         decision=(
-                            "Answer the current Work question"
+                            decision.human_decision_need.decision_subject
                             if conversation_prompt is not None
                             else action_title
                         ),
@@ -3202,8 +3203,9 @@ class WorkApplicationService:
                             and semantic_result.human_attention_recommendation
                             else action_recommendation
                         ),
-                        conversation_prompt=conversation_prompt,
-                        alternatives=(),
+                        human_decision_need=decision.human_decision_need.model_dump(mode="json"),
+                        conversation_prompt=decision.human_decision_need.question,
+                        alternatives=tuple(option.label for option in decision.human_decision_need.supported_options),
                         trade_offs=(),
                         expected_impact=action_impact,
                         reality_refs=decision.reality_refs,

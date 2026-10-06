@@ -19,6 +19,8 @@ from spg.domain.guided_design import (
     DesignAuthorityRelevance,
     DesignIssue,
     DesignIssueState,
+    DesignIssueDisposition,
+    DesignIssueQualification,
     DesignOutputClass,
     DesignProcessCondition,
     DesignReadiness,
@@ -344,6 +346,35 @@ def has_current_production_analysis_request(assessment) -> bool:
     return bool(current_dependent_analysis_requests(ir))
 
 
+def qualify_design_issues(issues, semantic_ir, refs) -> tuple[DesignIssue, ...]:
+    """No raw-prose routing or schema enum can establish a current blocker."""
+    goals = () if semantic_ir is None else semantic_ir.current_production
+    material = () if semantic_ir is None else (*tuple(q for q in semantic_ir.questions
+        if q.blocks_current_step and q.requires_human and not q.safe_reversible_assumption),
+        *tuple(d for d in semantic_ir.human_decisions if d.required_before_production))
+    # A real current product/authority choice belongs at the boundary check, not
+    # at every earlier methodology dimension. The owner's semantic execution
+    # must still produce and qualify the concrete decision before Attention.
+    decision_key = next((i.key for i in issues if i.authority_relevance
+                         is DesignAuthorityRelevance.AUTHORITY_BOUNDARY), issues[0].key)
+    qualified = []
+    for issue in issues:
+        blocking = bool(material and issue.key == decision_key)
+        supplied = bool(goals and issue.key in {"motive-users-problem", "outcomes-scenarios", "requirements"})
+        disposition = (DesignIssueDisposition.BLOCKING if blocking else
+            DesignIssueDisposition.SATISFIED_BY_EXISTING_REALITY if supplied else
+            DesignIssueDisposition.NON_BLOCKING if goals else DesignIssueDisposition.DEFERRED)
+        qualification = DesignIssueQualification(relevant=bool(goals or blocking),
+            unresolved=not supplied, material_to_current_step=blocking, blocking=blocking,
+            disposition=disposition, evidence_refs=refs,
+            rationale=("IRK retains an explicit unresolved Human-owned current-step choice."
+                       if blocking else "Admitted production intent supplies the bounded objective and outcome."
+                       if supplied else "No governed evidence makes this methodology dimension a current production blocker."))
+        qualified.append(issue.model_copy(update={"qualification": qualification,
+                                                 "provenance_refs": refs}))
+    return tuple(qualified)
+
+
 def guided_design_step_specs(
     issues: tuple[DesignIssue, ...],
 ) -> tuple[SteeringStepSpec, ...]:
@@ -351,6 +382,7 @@ def guided_design_step_specs(
         issue
         for issue in issues
         if issue.state in {DesignIssueState.OPEN, DesignIssueState.REOPENED}
+        and (issue.qualification is None or issue.qualification.blocking)
     )
     steps = tuple(
         SteeringStepSpec(
@@ -471,6 +503,44 @@ class GuidedDesignApplicationService:
                 }
             )
 
+    def qualified_issues(self, work: WorkRecord) -> tuple[DesignIssue, ...]:
+        """A schema supplies checks; IRK and current Work supply their applicability."""
+        with self.database.unit_of_work() as uow:
+            product = ProductStore(uow.session)
+            revision = product.current_work_reality_revision(work.id)
+            assessment = None
+            while revision is not None:
+                if revision.source_assessment_id is not None:
+                    assessment = InteractionStore(uow.session).assessment(revision.source_assessment_id)
+                    if assessment is not None and assessment.semantic_ir is not None:
+                        break
+                revision = (product.work_reality_revision(revision.previous_revision_id)
+                            if revision.previous_revision_id else None)
+        refs = (RealityReference(kind=RealityReferenceKind.WORK_REALITY_REVISION,
+                                 identity=work.current_work_reality_revision_id),)
+        # Compatibility with explicitly Human-admitted pre-IRK design-only Work.
+        # This is not reached by a canonical ProductionIntent or automatic admission.
+        ir = None if assessment is None else assessment.semantic_ir
+        existing = self.get_optional(work.id)
+        preserved_design = bool(existing and any(i.qualification and i.qualification.blocking
+                                                for i in existing.issues))
+        legacy_design = bool(ir is not None and ir.legacy_typed_projection
+                             and not ir.current_production and (work.constraints or preserved_design))
+        if legacy_design:
+            from spg.infrastructure.persistence.runtime_store import RuntimeStore
+            with self.database.unit_of_work() as uow:
+                legacy_design = any(r.decision_type == "ADMIT_LONG_LIVED_WORK"
+                    and r.authority_identity.startswith("human:")
+                    for r in RuntimeStore(uow.session).governance_for_subject(str(work.id)))
+        if legacy_design:
+            return tuple(i.model_copy(update={"qualification": DesignIssueQualification(
+                relevant=True,unresolved=True,material_to_current_step=True,blocking=True,
+                disposition=DesignIssueDisposition.BLOCKING,evidence_refs=refs,
+                rationale="Explicit historical design-only Work admission preserves its reviewed design obligation; this is not a canonical production-intent default.")})
+                for i in design_schema_for_work(work)[0].issues)
+        return qualify_design_issues(design_schema_for_work(work)[0].issues,
+                                     None if assessment is None else assessment.semantic_ir, refs)
+
     def bootstrap(
         self,
         work: WorkRecord,
@@ -500,9 +570,10 @@ class GuidedDesignApplicationService:
         }
         issues = tuple(
             issue.model_copy(update={"steering_step_id": steps_by_key.get(issue.key)})
-            for issue in schema.issues
+            for issue in self.qualified_issues(work)
         )
-        if any(issue.steering_step_id is None for issue in issues):
+        if any(issue.steering_step_id is None for issue in issues
+               if issue.qualification is None or issue.qualification.blocking):
             raise GuidedDesignInvariantViolation(
                 "Initial guided design agenda is not represented by Plan Steering Steps"
             )
@@ -1073,6 +1144,7 @@ class GuidedDesignApplicationService:
             f"{issue.key}: {issue.completion_condition}"
             for issue in issues
             if issue.critical
+            and (issue.qualification is None or issue.qualification.blocking)
             and issue.state not in {DesignIssueState.SATISFIED, DesignIssueState.SKIPPED}
         )
         refs = tuple(

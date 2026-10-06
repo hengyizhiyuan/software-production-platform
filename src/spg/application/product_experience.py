@@ -121,13 +121,15 @@ class ProductExperienceProjection:
     """Read-model composition; Product, Work, Guardian, Source and Delivery keep truth."""
 
     def __init__(self, database, products, work, delivery, guardian=None,
-                 executor=None):
+                 executor=None, response_realizer=None):
         self.database = database
         self.products = products
         self.work = work
         self.delivery = delivery
         self.guardian = guardian
         self.executor = executor
+        from spg.application.human_visible import HumanVisibleRealizationService
+        self.human_visible = HumanVisibleRealizationService(database,response_realizer)
 
     def _current_execution(self, work) -> dict | None:
         """Read the exact current Attempt through the Cloud Worker owner."""
@@ -176,10 +178,11 @@ class ProductExperienceProjection:
             interaction_id = (str(interaction.id) if interaction is not None and
                               interactions.product_context(interaction.id) ==
                               UUID(work["product_id"]) else None)
-        return {"id": str(item.id), "work_id": work["id"],
+        row = {"id": str(item.id), "work_id": work["id"],
             "product_id": work["product_id"], "product_name": work["product_name"],
             "work_title": work["title"], "kind": item.kind.value,
             "decision": item.decision, "reason": item.reason,
+            "human_decision_need": item.human_decision_need,
             "actions": [action.value for action in item.available_actions],
             "conversation_prompt": item.conversation_prompt,
             "recommended_action": None if item.recommended_action is None else
@@ -197,6 +200,14 @@ class ProductExperienceProjection:
                 else str(item.steering_plan_revision_id),
             "steering_step_id": None if item.steering_step_id is None else
                 str(item.steering_step_id)}
+        from spg.application.human_visible import safe_wording
+        from spg.domain.human_visible import HumanVisibleProjection
+        expression_input = HumanVisibleProjection(basis_fingerprint=_fingerprint(row),
+            governed_motive=work['title'], governed_semantic_ir=None, owner_facts={},
+            agenda=(), decision_needs=(row,),production_units=(),
+            source_references=(item.governed_subject_ref,))
+        row['human_visible'] = safe_wording(expression_input).decisions[0].model_dump(mode='json')
+        return row
 
     def collections(self, owner_id: str) -> dict:
         with self.database.unit_of_work() as uow:
@@ -299,7 +310,8 @@ class ProductExperienceProjection:
         return {**product, "revision": collections["revision"]}
 
     def workspace(self, owner_id: str, product_id: UUID,
-                  work_id: UUID | None = None) -> dict:
+                  work_id: UUID | None = None, interaction_id: UUID | None = None,
+                  realize: bool = True) -> dict:
         product = self.product(owner_id, product_id)
         selected = next((row for row in product["recent_works"]
                          if row["id"] == str(work_id)), None) if work_id else product["current_work"]
@@ -328,7 +340,7 @@ class ProductExperienceProjection:
                 plan = steering.plan_for_work(work.work_id)
                 revision = None if plan is None else steering.active_revision(plan.id)
                 if revision is not None:
-                    steps = [{"title": step.objective, "state": step.state.value.lower()}
+                    steps = [{"id": str(step.id), "type":step.type.value, "title": step.objective, "state": step.state.value.lower()}
                         for step in steering.steps(revision.id)
                         if step.state.value != "SUPERSEDED"][:8]
         focus = None if work is None else {
@@ -342,7 +354,7 @@ class ProductExperienceProjection:
             ("candidate_id", "candidate_fingerprint", "repository_revision", "tree",
              "entrypoint", "preview_kind", "artifacts", "verification", "authorization_pending")}
         execution = None if work is None else self._current_execution(work)
-        return {"revision": _fingerprint(product["revision"], work_data, delivery,
+        result = {"revision": _fingerprint(product["revision"], work_data, delivery,
                                          candidate_view, guardian, attention, steps,
                                          execution),
                 "product": product, "work": work_data, "historical": bool(
@@ -358,6 +370,33 @@ class ProductExperienceProjection:
                     "guardian": guardian,
                     "deliveries": [] if delivery is None else delivery["deliveries"][:5],
                 }, "actions": attention}
+        result['interaction_id'] = str(interaction_id) if interaction_id else self.latest_interaction(owner_id,product_id)
+        if work is None and result['interaction_id']:
+            from spg.application.human_attention import attention_from_semantic_decisions
+            with self.database.unit_of_work() as uow:
+                assessment = InteractionStore(uow.session).latest_assessment(UUID(result['interaction_id']))
+            result['actions'] = attention_from_semantic_decisions(
+                None if assessment is None else assessment.semantic_ir,
+                product_id=product_id,product_name=product['name'])
+        return self.realize_workspace(result) if realize else result
+
+    def realize_workspace(self, result):
+        from spg.application.human_visible import projection_for_workspace
+        realized = self.human_visible.realize(projection_for_workspace(self.database,result))
+        result['human_visible'] = realized
+        result['revision'] = realized['basis_fingerprint']
+        words = realized['wording']
+        titles = {row['id']:row['text'] for row in words['agenda']}
+        decisions = {row['id']:row for row in words['decisions']}
+        units = {row['id']:row['text'] for row in words['production_units']}
+        for step in result['agenda']:
+            step['human_visible'] = titles[step['id']]
+        for item in result['actions']:
+            item['human_visible'] = decisions[item['id']]
+        if result['reality']['production_plan']:
+            for unit in result['reality']['production_plan']['pwus']:
+                unit['human_visible'] = units[unit['pwu_id']]
+        return result
 
     def deliverable(self, owner_id: str, manifest_id: UUID) -> dict:
         collection = self.collections(owner_id)

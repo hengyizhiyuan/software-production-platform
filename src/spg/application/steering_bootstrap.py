@@ -184,7 +184,8 @@ class SteeringBootstrapService:
                         for step in reconstruction.active_revision.steps
                         if step.design_issue_key is not None
                     }
-                    required_keys = {issue.key for issue in schema.issues}
+                    qualified_issues = self.guided_design.qualified_issues(work)
+                    required_keys = {issue.key for issue in qualified_issues if issue.qualification.blocking}
                     if not required_keys.issubset(current_keys):
                         work_ref = RealityReference(
                             kind=(RealityReferenceKind.WORK_REALITY_REVISION
@@ -201,15 +202,16 @@ class SteeringBootstrapService:
                                     "guided design agenda for this Work Reality."
                                 ),
                                 reality_refs=(work_ref,),
-                                steps=guided_design_step_specs(schema.issues),
+                                steps=guided_design_step_specs(qualified_issues),
                             )
                         )
                 self.guided_design.bootstrap(work, reconstruction)
                 return reconstruction
             resource = product.resource_for_work(work_id)
             steps = (
-                guided_design_step_specs(design_schema_for_work(work)[0].issues)
-                if self.guided_design.eligible(work)
+                guided_design_step_specs(self.guided_design.qualified_issues(work))
+                if self.guided_design.eligible(work) and any(
+                    issue.qualification.blocking for issue in self.guided_design.qualified_issues(work))
                 else self.capability.form(work)
             )
 

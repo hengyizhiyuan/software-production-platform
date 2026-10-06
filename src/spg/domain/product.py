@@ -330,6 +330,7 @@ class AttentionItem(BaseModel):
     governed_subject_ref: str
     steering_reason: SteeringAttentionReason | None = None
     recommendation: str | None = None
+    human_decision_need: dict | None = None
     conversation_prompt: str | None = None
     alternatives: tuple[str, ...] = ()
     trade_offs: tuple[str, ...] = ()

@@ -30,6 +30,35 @@ class DesignIssueState(StrEnum):
     REOPENED = "REOPENED"
 
 
+class DesignIssueDisposition(StrEnum):
+    BLOCKING = "BLOCKING"
+    SATISFIED_BY_EXISTING_REALITY = "SATISFIED_BY_EXISTING_REALITY"
+    NON_BLOCKING = "NON_BLOCKING"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+    DEFERRED = "DEFERRED"
+
+
+class DesignIssueQualification(BaseModel):
+    """Current-step applicability, not completion of the whole design method."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    relevant: bool
+    unresolved: bool
+    material_to_current_step: bool
+    blocking: bool
+    disposition: DesignIssueDisposition
+    rationale: str = Field(min_length=1)
+    evidence_refs: tuple[RealityReference, ...] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def require_blocking_basis(self) -> Self:
+        if self.blocking != (self.relevant and self.unresolved and self.material_to_current_step):
+            raise ValueError("A blocking design issue requires relevant unresolved current-step evidence")
+        if self.blocking != (self.disposition is DesignIssueDisposition.BLOCKING):
+            raise ValueError("Design disposition must preserve the qualification")
+        return self
+
+
 class DesignAuthorityRelevance(StrEnum):
     ROUTINE = "ROUTINE"
     MATERIAL_HUMAN_DECISION = "MATERIAL_HUMAN_DECISION"
@@ -90,6 +119,7 @@ class DesignIssue(BaseModel):
     steering_step_id: UUID | None = None
     admitted_semantic_result_id: UUID | None = None
     provenance_refs: tuple[RealityReference, ...] = ()
+    qualification: DesignIssueQualification | None = None
 
     @field_validator("prerequisite_keys")
     @classmethod

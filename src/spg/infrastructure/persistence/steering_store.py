@@ -293,6 +293,10 @@ class SteeringStore:
             raise LookupError(f"Active Steering Plan Revision not found: {revision_id}")
 
     def reality_reference_exists(self, reference: RealityReference) -> bool:
+        if reference.kind is RealityReferenceKind.SEMANTIC_IR:
+            from .intent_realization_schema import turn_realizations as interaction_turn_realizations
+            return self.session.scalar(select(interaction_turn_realizations.c.semantic_ir_id).where(
+                interaction_turn_realizations.c.semantic_ir_id == reference.identity).limit(1)) is not None
         table = _REALITY_TABLES[reference.kind]
         return (
             self.session.execute(
@@ -307,10 +311,15 @@ class SteeringStore:
     ) -> ResolvedRealityReference | None:
         """Resolve an external fact without copying its payload into Steering truth."""
 
-        table = _REALITY_TABLES[reference.kind]
-        row = self.session.execute(
-            select(table).where(table.c.id == reference.identity)
-        ).mappings().one_or_none()
+        if reference.kind is RealityReferenceKind.SEMANTIC_IR:
+            from .intent_realization_schema import turn_realizations as interaction_turn_realizations
+            row = self.session.execute(select(interaction_turn_realizations).where(
+                interaction_turn_realizations.c.semantic_ir_id == reference.identity).limit(1)).mappings().one_or_none()
+        else:
+            table = _REALITY_TABLES[reference.kind]
+            row = self.session.execute(
+                select(table).where(table.c.id == reference.identity)
+            ).mappings().one_or_none()
         if row is None:
             return None
         canonical = json.dumps(
@@ -374,6 +383,7 @@ class SteeringStore:
             reason=row["reason"],
             reality_refs=cls._references(row["reality_refs"]),
             human_required=row["human_required"],
+            human_decision_need=row.get("human_decision_need"),
             completion_condition=row["completion_condition"],
             steering_outcome=SteeringOutcome(row["steering_outcome"]),
             basis_fingerprint=row["basis_fingerprint"],
@@ -413,6 +423,7 @@ class SteeringStore:
             derived_constraints=tuple(row["derived_constraints"]),
             evidence_refs=cls._references(row["evidence_refs"]),
             unresolved_questions=tuple(row["unresolved_questions"]),
+            human_decision_need=row.get("human_decision_need"),
             authority_assessment=SteeringAuthorityAssessment(
                 row["authority_assessment"]
             ),

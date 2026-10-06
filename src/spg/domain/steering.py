@@ -103,6 +103,7 @@ class RealityReferenceKind(StrEnum):
     INTEGRATION_EFFECT = "INTEGRATION_EFFECT"
     RUNTIME_COMMIT = "RUNTIME_COMMIT"
     RECOVERY_ASSESSMENT = "RECOVERY_ASSESSMENT"
+    SEMANTIC_IR = "SEMANTIC_IR"
     SEMANTIC_RESULT = "SEMANTIC_RESULT"
     DESIGN_PROCESS = "DESIGN_PROCESS"
     DESIGN_AGENDA_REVISION = "DESIGN_AGENDA_REVISION"
@@ -144,6 +145,38 @@ class RealityReference(BaseModel):
 
     kind: RealityReferenceKind
     identity: UUID
+
+
+class HumanDecisionEffect(StrEnum):
+    PRODUCT_SCOPE = "PRODUCT_SCOPE"
+    ARCHITECTURE = "ARCHITECTURE"
+    AUTHORITY = "AUTHORITY"
+    COST_OR_RISK = "COST_OR_RISK"
+    ACCEPTANCE = "ACCEPTANCE"
+
+
+class HumanDecisionOption(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    label: str = Field(min_length=2)
+    consequence: str = Field(min_length=5)
+    evidence: tuple[RealityReference, ...] = Field(min_length=1)
+
+
+class HumanDecisionNeed(BaseModel):
+    """An advisory concrete choice, independently qualified by the owning gate."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    decision_subject: str = Field(min_length=5)
+    question: str = Field(min_length=8)
+    why_human_owns_it: str = Field(min_length=10)
+    why_now: str = Field(min_length=10)
+    material_effect: str = Field(min_length=10)
+    effect: HumanDecisionEffect
+    supported_options: tuple[HumanDecisionOption, ...] = Field(min_length=2, max_length=4)
+    evidence: tuple[RealityReference, ...] = Field(min_length=1)
+    safe_default_possible: bool
+    blocking_reason: str = Field(min_length=10)
+    required_now: bool
+    governed_semantic_ir_id: UUID | None = None
 
 
 class ResolvedRealityReference(BaseModel):
@@ -276,6 +309,7 @@ class SemanticStepInput(BaseModel):
     governed_semantic_ir_id: UUID | None = None
     canonical_explicit_targets: tuple[str, ...] = ()
     canonical_allowed_areas: tuple[str, ...] = ()
+    governed_semantic_ir: dict | None = None
     steering_plan_revision_id: UUID
     step: "SteeringStepRecord"
     basis_fingerprint: str = Field(min_length=64, max_length=64)
@@ -329,6 +363,7 @@ class SemanticStepResultCandidate(BaseModel):
     unresolved_questions: tuple[str, ...] = ()
     authority_assessment: SteeringAuthorityAssessment
     human_attention_recommendation: str | None = None
+    human_decision_need: HumanDecisionNeed | None = None
     proposed_production: SemanticProductionProposal | None = None
     reasoning_provider_identity: str | None = None
     completion_claimed: bool
@@ -407,6 +442,7 @@ class SemanticStepResultRecord(BaseModel):
     unresolved_questions: tuple[str, ...]
     authority_assessment: SteeringAuthorityAssessment
     human_attention_recommendation: str | None
+    human_decision_need: HumanDecisionNeed | None = None
     proposed_production: SemanticProductionProposal | None
     reasoning_provider_identity: str | None
     completion_satisfied: bool
@@ -489,6 +525,7 @@ class SteeringDecisionRecord(BaseModel):
     basis_fingerprint: str = Field(min_length=64, max_length=64)
     reasoning_provider_identity: str | None
     attention_reason: SteeringAttentionReason | None = None
+    human_decision_need: HumanDecisionNeed | None = None
     recommendation: str | None = None
     alternatives: tuple[str, ...] = ()
     trade_offs: tuple[str, ...] = ()
@@ -584,6 +621,7 @@ class AdmitSteeringDecisionRequest(BaseModel):
     expected_basis_fingerprint: str = Field(min_length=64, max_length=64)
     reasoning_provider_identity: str | None = None
     attention_reason: SteeringAttentionReason | None = None
+    human_decision_need: HumanDecisionNeed | None = None
     recommendation: str | None = None
     alternatives: tuple[str, ...] = Field(default=(), max_length=3)
     trade_offs: tuple[str, ...] = Field(default=(), max_length=3)
@@ -783,6 +821,7 @@ class NextStepCandidate(BaseModel):
     authority_assessment: SteeringAuthorityAssessment
     proposed_engineering_scope_fingerprint: str | None = None
     attention_reason: SteeringAttentionReason | None = None
+    human_decision_need: HumanDecisionNeed | None = None
     recommendation: str | None = None
     alternatives: tuple[str, ...] = Field(default=(), max_length=3)
     trade_offs: tuple[str, ...] = Field(default=(), max_length=3)

@@ -481,7 +481,8 @@ def create_http_application(
     api.state.repository_asset_service = asset_service
     experience = ProductExperienceProjection(selected_database, software_products,
         work_service, delivery_service, guardian_assurance_client,
-        executor=selected_native_executor)
+        executor=selected_native_executor,
+        response_realizer=getattr(selected_interaction,"response_realizer",None))
     experience_semantic = experience_compiler or SemanticExperienceCompiler(settings or Settings())
     api.state.product_experience = experience
     cloud_delivery = CloudDeliveryService(selected_database, delivery_service,
@@ -1434,7 +1435,10 @@ def create_http_application(
     def experience_workspace(product_id: UUID, http_request: Request,
                              work: UUID | None = None, interaction: UUID | None = None):
         actor = getattr(http_request.state, "actor_id", ACTOR_ID)
-        result = experience.workspace(actor, product_id, work)
+        if interaction is not None and experience.interaction_product(actor, interaction) != str(product_id):
+            raise ProductHttpError(404, "INTERACTION_NOT_FOUND",
+                "Conversation is not in this Product Workspace")
+        result = experience.workspace(actor, product_id, work, interaction, realize=False)
         accepted = next((item for item in result["reality"]["deliveries"]
             if item["current"] and item["acceptance"] and
             item["acceptance"]["decision"] == "ACCEPT" and
@@ -1460,7 +1464,7 @@ def create_http_application(
                 result["actions"] if item["interaction_id"] is not None), None) or \
                 experience.latest_interaction(
                     getattr(http_request.state, "actor_id", ACTOR_ID), product_id)
-        return result
+        return experience.realize_workspace(result)
 
     @api.get("/api/experience/deliverables/{manifest_id}")
     def experience_deliverable(manifest_id: UUID, http_request: Request):

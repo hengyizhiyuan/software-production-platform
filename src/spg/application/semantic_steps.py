@@ -69,6 +69,7 @@ MAX_CONTEXT_FILES = 24
 MAX_CONTEXT_CHARS_PER_FILE = 8_000
 MAX_CONTEXT_CHARS_TOTAL = 64_000
 REFINABLE_ADMISSION_FEEDBACK = (
+    "ATTENTION_NOT_QUALIFIED",
     "Semantic result references Reality outside its governed input",
     "An intermediate guided design issue cannot form production",
     "Implementation-readiness design requires a reviewable production proposal",
@@ -197,6 +198,7 @@ class SemanticStepApplicationService:
         required_intermediate_artifacts = (
             ("APPROVED_DESIGN_ARTIFACT",)
             if guided_design is not None
+            and design_context is not None
             and step.type is SteeringStepType.DESIGN
             and next_step is not None
             and next_step.type is SteeringStepType.PRODUCE
@@ -242,6 +244,7 @@ class SemanticStepApplicationService:
             ),
             human_explicit_requests=human_records or (work.raw_user_requirement,),
             governed_semantic_ir_id=None if semantic_ir is None or semantic_ir.legacy_typed_projection else semantic_ir.id,
+            governed_semantic_ir=None if semantic_ir is None else semantic_ir.model_dump(mode="json"),
             canonical_explicit_targets=() if semantic_ir is None else tuple(arg.value for goal in semantic_ir.current_production for arg in goal.target_paths),
             canonical_allowed_areas=() if semantic_ir is None else tuple(arg.value for goal in semantic_ir.current_production for arg in goal.allowed_areas),
             steering_plan_revision_id=frame.reconstruction.active_revision.revision.id,
@@ -458,6 +461,12 @@ class SemanticStepApplicationService:
             raise SteeringInvariantViolation(
                 "Semantic result references Reality outside its governed input"
             )
+        if candidate.unresolved_questions:
+            from spg.application.human_attention import require_human_decision
+            from spg.domain.intent_realization import GovernedSemanticIR
+            require_human_decision(candidate.human_decision_need, evidence=fresh.reality_refs,
+                semantic_ir=(None if fresh.governed_semantic_ir is None else
+                             GovernedSemanticIR.model_validate(fresh.governed_semantic_ir)))
         if fresh.design_context is not None:
             production_transition_issue = bool(
                 fresh.design_context.get("production_transition_issue")
@@ -582,6 +591,7 @@ class SemanticStepApplicationService:
                         for item in candidate.evidence_refs
                     ],
                     "unresolved_questions": list(candidate.unresolved_questions),
+                    "human_decision_need": (None if candidate.human_decision_need is None else candidate.human_decision_need.model_dump(mode="json")),
                     "authority_assessment": candidate.authority_assessment.value,
                     "human_attention_recommendation": (
                         candidate.human_attention_recommendation

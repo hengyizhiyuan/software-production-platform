@@ -1264,8 +1264,12 @@ def test_engineering_semantic_truth_persists_and_explicit_correction_versions_wo
 
     class _SemanticProductionCapability(_GuidedDesignSemanticCapability):
         def execute(self, input: SemanticStepInput) -> SemanticStepResultCandidate:
-            candidate = super().execute(input)
-            if not input.design_context["production_transition_issue"]:
+            # A bounded schedule request has no unresolved methodology blocker.
+            # Preserve every semantic-fact/authority assertion below while using
+            # the ordinary production proposal path instead of forcing a schema.
+            candidate = (super().execute(input) if input.design_context is not None
+                         else _UnguidedSemanticCapability().execute(input))
+            if input.design_context is not None and not input.design_context["production_transition_issue"]:
                 return candidate
             return candidate.model_copy(
                 update={
@@ -4062,16 +4066,15 @@ def test_new_admitted_request_revises_stale_design_agenda_without_runtime_result
     ).assemble_input(admitted.work_id)
     assert semantic_input.design_context is None
     assert semantic_input.production_proposal_required is True
-    assert semantic_input.required_intermediate_artifacts == (
-        "APPROVED_DESIGN_ARTIFACT",
-    )
-    with pytest.raises(
-        SteeringInvariantViolation,
-        match="Implementation cannot be proposed before a design artifact",
-    ):
-        SemanticStepApplicationService(
-            postgres_database, _UnguidedSemanticCapability(), work_service=work,
-        ).execute(admitted.work_id)
+    # Presence of a methodology record is not a current design-artifact obligation.
+    assert semantic_input.required_intermediate_artifacts == ()
+    result = SemanticStepApplicationService(
+        postgres_database, _UnguidedSemanticCapability(), work_service=work,
+    ).execute(admitted.work_id)
+    assert result.completion_satisfied
+    assert result.proposed_production.target_kind is ProductionTargetKind.CODE_WORK
+    assert result.authority_assessment is SteeringAuthorityAssessment.WITHIN_AUTHORITY
+    # A semantic proposal still cannot itself create production execution.
     assert work.get_work(admitted.work_id).production_plan is None
 
 

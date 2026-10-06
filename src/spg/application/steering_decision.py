@@ -15,6 +15,7 @@ from spg.domain.engineering_semantics import (
 from spg.domain.steering import (
     AdmitSteeringDecisionRequest,
     NextStepCandidate,
+    HumanDecisionEffect,
     PlanFrame,
     PlanFrameBlocker,
     PlanFrameBlockerKind,
@@ -481,6 +482,16 @@ class DeterministicPlanSteeringCapability:
         impact: str,
         authority: SteeringAuthorityAssessment,
     ) -> NextStepCandidate:
+        from spg.application.human_attention import boundary_decision
+        need = None
+        if reason is SteeringAttentionReason.PRODUCT_ACCEPTANCE_REQUIRED and any(
+                ref.kind is RealityReferenceKind.CANDIDATE for ref in refs):
+            need = boundary_decision(plan_frame.work_objective,
+                "当前成果是否满足这次目标，还是需要修改后再审阅？",HumanDecisionEffect.ACCEPTANCE,refs,
+                (("接受当前成果","按明确授权纳入当前精确成果，保留验收证据。"),
+                 ("要求修改","保持现有正式版本，依据你的意见继续修订。")),
+                why_now="当前精确候选已形成；进入正式版本前需要你的明确审阅决定。",
+                impact="Human acceptance determines whether the exact qualified Candidate may advance the Product baseline.")
         return NextStepCandidate(
             type=SteeringStepType.HUMAN_DECISION,
             objective=objective,
@@ -492,6 +503,7 @@ class DeterministicPlanSteeringCapability:
             basis_fingerprint=plan_frame.basis.fingerprint,
             authority_assessment=authority,
             attention_reason=reason,
+            human_decision_need=need,
             recommendation=recommendation,
             expected_impact=impact,
         )
@@ -553,6 +565,7 @@ class SteeringDecisionApplicationService:
                 reason=candidate.reason,
                 reality_refs=candidate.reality_refs,
                 human_required=candidate.human_required,
+                human_decision_need=candidate.human_decision_need,
                 completion_condition=candidate.completion_condition,
                 steering_outcome=candidate.proposed_outcome,
                 expected_basis_fingerprint=candidate.basis_fingerprint,

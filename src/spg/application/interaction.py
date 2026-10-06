@@ -1817,7 +1817,8 @@ class WorkInteractionService:
         if branch_status_answer is not None:
             response_realizer = DeterministicGovernedResponseRealizer()
         pipeline_evidence = getattr(self.capability, "last_pipeline_evidence", None)
-        if (_provider_supplied_human_wording(pipeline_evidence)
+        if ((_provider_supplied_human_wording(pipeline_evidence) and
+                 envelope.production_admission_state != "WORK_CREATED")
                 or assessment.provider_identity == "watt-native:work-reality-query"
                 or (assessment.basis_work_revision_id is not None and assessment.semantic_ir is not None
                     and any(item.kind is SemanticKind.STATUS_QUERY and item.subject in {
@@ -1830,6 +1831,7 @@ class WorkInteractionService:
         if (
             envelope.governance_candidate
             == GovernanceCandidateKind.HUMAN_DECISION_REQUIRED.value
+            and not (assessment.semantic_ir and assessment.semantic_ir.human_decisions)
         ):
             # A replaceable language model may phrase admitted semantics, but it
             # must not invent a concrete value for a decision that still belongs
@@ -1896,31 +1898,12 @@ class WorkInteractionService:
                 )
             self._publish_turn_response_delta(turn_id, delta)
 
-        gate = GovernedDeltaGate(envelope, emit_admitted)
-
+        from spg.application.wic_response import realize_with_language_recovery
         def receive_raw(delta: str) -> None:
             self._mark_turn_timing(turn_id, "first_realizer_output_chunk")
-            raw_parts.append(delta)
-            gate.feed(delta)
-
-        realization = response_realizer.realize_stream(
-            envelope,
-            on_response_delta=receive_raw,
-        )
-        raw_content = "".join(raw_parts)
-        if realization.content.startswith(raw_content):
-            gate.feed(realization.content[len(raw_content) :])
-        elif realization.content != raw_content:
-            raise InteractionInvariantViolation(
-                "Governed response stream and settled realization diverged"
-            )
-        admitted_content = gate.finish()
-        if admitted_content != realization.content:
-            if not gate.suppressed:
-                raise InteractionInvariantViolation(
-                    "Governed response delta sequence does not reconstruct the result"
-                )
-            realization = realization.model_copy(update={"content": admitted_content})
+        realization = realize_with_language_recovery(response_realizer, envelope,
+            emit_admitted,on_raw=receive_raw)
+        admitted_content = realization.content
         if realization.structural_repair_count:
             self._record_response_event(
                 turn_id, WicResponseEventType.RESPONSE_REFINEMENT,
@@ -4404,7 +4387,7 @@ class WorkInteractionService:
             limitation = "重要限制：目前还没有可报告的生产或验证结果。"
         progress = (
             f"关键进展：目前处于「{phase}」；"
-            f"{current.objective if current else '尚未形成当前执行步骤'}。"
+            f"{'正在形成当前目标的可执行方案' if current else '尚未形成当前执行步骤'}。"
         )
         if (
             summary is not None

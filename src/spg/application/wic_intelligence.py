@@ -93,7 +93,9 @@ def build_progressive_semantics(
         signals.append(PatternSignal.NEW_LONG_LIVED_OBJECT)
     from spg.application.intent_realization import current_step_semantic_items
     current_items = current_step_semantic_items(semantic_ir)
-    human_owned = any(item.requires_human for item in current_items)
+    reserved = tuple(d for d in (() if semantic_ir is None else semantic_ir.human_decisions)
+                     if d.required_before_production)
+    human_owned = bool(reserved) or any(item.requires_human for item in current_items)
     # An independent Action retains its own Human dependency. Only decisions
     # on the production goal or its declared prerequisites block Work admission.
     work_dependencies: set[str] = set()
@@ -111,9 +113,9 @@ def build_progressive_semantics(
     # Reversibility never derives authority from a lexical phrase.
     safe_inference = bool(semantic_ir and any(q.safe_reversible_assumption
         for q in semantic_ir.questions)) and not human_owned
-    decisions = [item.statement for item in current_items if item.requires_human]
+    decisions = [item.statement for item in current_items if item.requires_human] + [d.question for d in reserved]
     work_decisions = [item.statement for item in current_items
-        if item.requires_human and (not production or item.item_id in work_dependencies)]
+        if item.requires_human and (not production or item.item_id in work_dependencies)] + [d.question for d in reserved]
     if human_owned:
         signals.append(PatternSignal.HIGH_IMPACT_AMBIGUITY)
         for decision in decisions:

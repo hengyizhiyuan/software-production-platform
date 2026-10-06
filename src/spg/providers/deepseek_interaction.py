@@ -464,6 +464,26 @@ class DeepSeekGovernedResponseRealizer:
         self.last_result: StructuredModelResult | None = None
         self.last_structured_repair_count = 0
 
+    def realize_human_projection(self, projection, *, feedback=None):
+        from spg.domain.human_visible import HumanVisibleWording
+        from spg.providers.semantic_wire import _provider_strict_output_schema
+        result = self.runtime.generate(purpose=ModelPurpose.CONVERSATION_RESPONSE,
+            instructions=("You are Watt's WIC Human-visible Response Realizer, the sole ordinary expression authority. "
+                "IRK governs meaning; owners govern facts. Express the supplied derived projection in natural Chinese. "
+                "Return a coherent wording set once for all Workspace surfaces. Never change status, outcome, "
+                "authority, Verification, Guardian, Candidate readiness or evidence. No new scope or Human decision. "
+                "Agenda uses exact supplied ids, describes actual step roles in this governed motive; never copies "
+                "owner objectives or methodology templates. Decisions uses exact supplied ids and grounded options; "
+                "when no decision_needs, decisions must be empty and do not ask for confirmation or implementation choices. "
+                "Explain only concrete blockers. No raw enums, class names, hashes, UUIDs, schema keys or internal English "
+                "templates in prose (ids only in id fields). If facts lack evidence, preserve uncertainty and do not claim success. "
+                "Return headline, summary, current_activity, next_step, agenda(id,text), decisions(id,title,question,why_now), "
+                "production_units(id,text). No independent factual or authority fields. "
+                + ("Previous wording was rejected: " + feedback if feedback else "")),
+            input_text=json.dumps(projection.model_dump(mode="json"), ensure_ascii=False),
+            output_schema=_provider_strict_output_schema(HumanVisibleWording.model_json_schema()))
+        return HumanVisibleWording.model_validate_json(_structured_json_text(result.output_text))
+
     def realize_stream(
         self,
         envelope: GovernedResponseEnvelope,
@@ -500,7 +520,7 @@ class DeepSeekGovernedResponseRealizer:
             "question-mark count as a hard expression constraint: use none when questions are "
             "disallowed and at most one when one question is allowed; fold any answer choices "
             "into that single sentence. "
-            "Never emit any forbidden_claim. Return JSON only with one natural_response "
+            "Never expose raw enums, internal object names, UUIDs, fingerprints, Guided Design objectives or Steering templates. Translate source-owned facts into natural Chinese without inventing decisions or success. Never emit any forbidden_claim. Return JSON only with one natural_response "
             "string.\n\nGoverned Response Envelope:\n"
             + response_contract_expression_guidance(envelope.response_contract)
             + json.dumps(
@@ -512,6 +532,8 @@ class DeepSeekGovernedResponseRealizer:
         )
         if envelope.response_contract is not None:
             instruction = governed_contract_realizer_instruction(envelope)
+        if envelope.expression_refinement:
+            instruction += "\nExpression-only correction; retain the exact governed basis, emit no raw internals and do not repeat admitted prefix:\n" + json.dumps(envelope.expression_refinement, ensure_ascii=False)
         result = self.runtime.generate(
             purpose=ModelPurpose.CONVERSATION_RESPONSE,
             instructions=instruction,

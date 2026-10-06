@@ -644,6 +644,19 @@ class IntentRealizationKernel:
                     CanonicalOperation.REQUEST_PREVIEW, CanonicalOperation.ACCEPT_CANDIDATE}
                 and "candidate_revision" not in item.action.arguments else item for item in items)
         latest = next(r for r in reversed(basis.records) if str(r.actor) == "HUMAN")
+        records = {r.id:r for r in basis.records}
+        for decision in raw.human_decisions:
+            if decision.authority_provenance.origin not in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}:
+                raise IntentRealizationViolation("HUMAN_DECISION_AUTHORITY_NOT_EXPLICIT")
+            _validate_provenance(decision.authority_provenance, records, current_record=latest)
+            if decision.authority_provenance.source_record_id != latest.id:
+                raise IntentRealizationViolation("HUMAN_DECISION_AUTHORITY_STALE")
+            for option in decision.options:
+                if option.provenance.origin not in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}:
+                    raise IntentRealizationViolation("HUMAN_DECISION_OPTION_UNGROUNDED")
+                _validate_provenance(option.provenance, records, current_record=latest)
+                if option.value not in (option.provenance.source_text or ""):
+                    raise IntentRealizationViolation("HUMAN_DECISION_OPTION_UNGROUNDED")
         return GovernedSemanticIR(**raw.model_copy(update={"items": items}).model_dump(),
             id=uuid5(NAMESPACE_URL, f"watt:irk:{basis.interaction.id}:{basis.basis_fingerprint}"),
             interaction_id=basis.interaction.id, source_record_id=latest.id,
@@ -682,6 +695,15 @@ class IntentRealizationKernel:
                     target=str(work_question_step_id),
                     parameters={"constraint": item.statement}),)
                 plane = ObligationPlane.WORK
+            elif (item.kind is SemanticKind.QUESTION and not item.requires_human
+                    and all(p.origin is SemanticOrigin.MODEL_CANDIDATE for p in item.provenance)
+                    and not any(c.modality == "QUESTION" and item.item_id in c.semantic_item_ids for c in ir.clauses)
+                    and ir.questions and all(not q.blocks_current_step and not q.requires_human
+                                             for q in ir.questions)):
+                # A compiler's optional discovery dimension is not a Human
+                # question or a debt requiring Human confirmation. Meaning is
+                # preserved in IRK; only real requested effects become obligations.
+                continue
             elif item.kind in {SemanticKind.QUESTION, SemanticKind.ANALYSIS, SemanticKind.STATUS_QUERY}:
                 effects = (ExpectedEffect(predicate=P.QUESTION_ANSWERED),)
                 plane = ObligationPlane.INTERACTION
@@ -942,7 +964,8 @@ def project_interaction_candidate(candidate, ir):
         "neutral_semantic_extractions": ir.neutral_semantic_extractions,
         "semantic_fact_candidates": ir.semantic_fact_candidates,
         "unresolved_material_questions": tuple(dict.fromkeys(
-            q.question for q in ir.questions if q.blocks_current_step and not q.safe_reversible_assumption))}
+            (*[q.question for q in ir.questions if q.blocks_current_step and not q.safe_reversible_assumption],
+             *[d.question for d in ir.human_decisions if d.required_before_production])))}
     current_request_ids = {item_id for clause in ir.clauses
         if clause.source_record_id == ir.source_record_id
         and clause.speech_act is ActionSpeechAct.EXPLICIT_REQUEST

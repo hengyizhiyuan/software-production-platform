@@ -40,7 +40,7 @@
   function openLogin(reason = '保存并继续这件事需要登录。') { sessionStorage.setItem(returnKey, `${location.pathname}${location.search}`); openDialog(`<h2 id="dialog-title">登录 Watt</h2><p class="muted">${esc(reason)}</p>${loginForm(true)}`); }
   async function submitLogin(form) { const button = $('button[type="submit"]',form); const error = $('[data-login-error]',form); button.disabled = true; button.textContent = '正在登录…'; error.textContent = ''; try { await api('/auth/session',{method:'POST',body:{token:form.elements.namedItem('token').value}}); form.elements.namedItem('token').value = ''; await auth(); closeDialog(); const pending = sessionStorage.getItem(pendingKey); if (pending) { sessionStorage.removeItem(pendingKey); navigate('/'); await sendHomeIntent(pending); return; } const next = sessionStorage.getItem(returnKey) || new URLSearchParams(location.search).get('next') || '/'; sessionStorage.removeItem(returnKey); const target = new URL(next, location.origin); navigate(target.origin === location.origin ? target.pathname + target.search : '/'); } catch (failure) { error.textContent = failure.status === 401 ? '登录凭证不正确，请重试。' : '暂时无法登录，请稍后再试。'; } finally { button.disabled = false; button.textContent = '登录'; } }
   function homeCard(title, empty, rows, make, allPath) { return `<section class="summary-list"><div class="section-title"><h2>${esc(title)}</h2>${link(allPath,'查看全部')}</div>${rows.length ? itemList(rows,make) : `<p class="empty">${esc(empty)}</p>`}</section>`; }
-  async function renderHome() { let projection = {recent_products:[],active_works:[],attention:[]}; if (state.authenticated) projection = await api('/api/experience/home'); content.innerHTML = `<section class="hero"><p class="eyebrow">你的软件生产入口</p><h1>告诉 Watt，你想继续做什么。</h1><p class="hero-copy">可以继续一个产品、提出新想法，或先问一个问题。Watt 会把需要生产的事带到对应工作区。</p><form class="intent-form" id="home-intent-form"><label for="home-intent">你现在想做什么？</label><textarea id="home-intent" name="intent" placeholder="例如：继续完善易决的小程序分享功能" required></textarea><div class="form-bottom"><span class="form-hint">先从你的话开始，不必填写流程表单。</span><button class="button" type="submit">发送给 Watt <span aria-hidden="true">→</span></button></div></form><div id="intent-result" aria-live="polite"></div></section><div class="home-grid">${homeCard('最近的产品','直接告诉 Watt 你想做什么。',projection.recent_products,p=>`<li>${link(productPath(p.id),p.name,'item-title')}<div class="item-meta">${esc(short(p.description || '持续建设中的产品'))}</div></li>`,'/products')}${homeCard('正在进行','还没有正在进行的具体改变。',projection.active_works,w=>`<li>${link(workspacePath(w.product_id,w.id),w.title,'item-title')}<div class="item-meta">${esc(w.product_name)} · ${esc(humanStatus(w.status))}</div></li>`,'/works')}${homeCard('需要你处理','当前没有需要你处理的事项。',projection.attention,a=>`<li>${link(workspacePath(a.product_id,a.work_id,a.interaction_id),a.work_title,'item-title')}<div class="item-meta">${esc(a.product_name)} · ${esc(short(a.reason))}</div></li>`,'/works')}</div>`; if (state.homeInteraction) await renderHomeConversation(state.homeInteraction); }
+  async function renderHome() { let projection = {recent_products:[],active_works:[],attention:[]}; if (state.authenticated) projection = await api('/api/experience/home'); content.innerHTML = `<section class="hero"><p class="eyebrow">你的软件生产入口</p><h1>告诉 Watt，你想继续做什么。</h1><p class="hero-copy">可以继续一个产品、提出新想法，或先问一个问题。Watt 会把需要生产的事带到对应工作区。</p><form class="intent-form" id="home-intent-form"><label for="home-intent">你现在想做什么？</label><textarea id="home-intent" name="intent" placeholder="例如：继续完善易决的小程序分享功能" required></textarea><div class="form-bottom"><span class="form-hint">先从你的话开始，不必填写流程表单。</span><button class="button" type="submit">发送给 Watt <span aria-hidden="true">→</span></button></div></form><div id="intent-result" aria-live="polite"></div></section><div class="home-grid">${homeCard('最近的产品','直接告诉 Watt 你想做什么。',projection.recent_products,p=>`<li>${link(productPath(p.id),p.name,'item-title')}<div class="item-meta">${esc(short(p.description || '持续建设中的产品'))}</div></li>`,'/products')}${homeCard('正在进行','还没有正在进行的具体改变。',projection.active_works,w=>`<li>${link(workspacePath(w.product_id,w.id),w.title,'item-title')}<div class="item-meta">${esc(w.product_name)} · ${esc(humanStatus(w.status))}</div></li>`,'/works')}${homeCard('需要你处理','当前没有需要你处理的事项。',projection.attention,a=>`<li>${link(workspacePath(a.product_id,a.work_id,a.interaction_id),a.work_title,'item-title')}<div class="item-meta">${esc(a.product_name)} · ${esc(short(a.human_visible?.why_now || '正在读取当前决定说明'))}</div></li>`,'/works')}</div>`; if (state.homeInteraction) await renderHomeConversation(state.homeInteraction); }
   async function sendHomeIntent(text, selectedProductId = null) { const result = $('#intent-result'); if (result) result.innerHTML = '<p class="muted" role="status">Watt 正在理解并保留这句话…</p>'; if (!state.authenticated) { sessionStorage.setItem(pendingKey,text); openLogin(); return; } try { const outcome = await api('/api/experience/intent',{method:'POST',body:{text,...(selectedProductId ? {selected_product_id:selectedProductId} : {})}}); if (outcome.kind === 'CLARIFY') { result.innerHTML = `<div class="detail-panel"><h2>${esc(outcome.question)}</h2><div class="link-row">${outcome.options.map(option=>`<button class="button secondary" type="button" data-choose-product="${esc(option.id)}">${esc(option.name)}</button>`).join('')}</div></div>`; result.dataset.pendingText = text; return; } if (outcome.kind === 'ADVISORY') { state.homeInteraction = outcome.interaction_id; await renderHomeConversation(outcome.interaction_id); return; } state.routeTransition = outcome.transition || `正在继续：${outcome.product.name}`; showNotice(state.routeTransition); setTimeout(()=>navigate(workspacePath(outcome.product.id,null,outcome.interaction_id)),650); } catch (failure) { if (failure.status === 401) { sessionStorage.setItem(pendingKey,text); openLogin(); } else { result.innerHTML = `<p class="notice-error" role="alert">${esc(failure.message)}。这句话仍在输入框中，可以稍后重试。</p>`; $('#home-intent').value = text; } } }
   async function renderHomeConversation(interactionId) { const box = $('#intent-result'); if (!box) return; const data = await api(`/api/experience/interactions/${interactionId}`); box.innerHTML = `<div class="detail-panel"><h2>Watt 的回答</h2>${renderMessages(data.messages)}${data.messages.some(message=>message.actor==='WATT') ? '' : '<p class="muted" role="status">正在根据当前信息回答…</p>'}</div>`; scheduleConversationPoll(interactionId, data, true); }
   function renderMessages(messages) { return `<div class="conversation-list">${messages.length ? messages.map(message=>`<div class="message ${message.actor === 'HUMAN' ? 'human' : 'watt'}"><span class="message-label">${message.actor === 'HUMAN' ? '你' : 'Watt'}</span>${esc(message.content)}</div>`).join('') : '<p class="empty">还没有对话。</p>'}</div>`; }
@@ -78,6 +78,7 @@
     return '尚无验证结果';
   }
   function focusCopy(ws) {
+    if (ws.human_visible?.wording) { const w=ws.human_visible.wording; return {now:w.current_activity,next:w.next_step,reason:w.summary}; }
     const status=ws.work?.status, guardian=ws.reality.guardian?.status,
       actions=ws.actions.length, execution=ws.reality.execution;
     if(!ws.work)return {now:'等待你描述想做的改变',next:'从对话开始明确当前目标',reason:'这个产品目前没有正在进行的事项。'};
@@ -85,7 +86,7 @@
     if(guardian==='REVERIFYING'||guardian==='RUNNING')return {now:'正在验证候选成果',next:'验证完成后更新结果',reason:guardianCopy(ws.reality.guardian)};
     if(actions)return {now:'等待你的决定',next:'请处理「待你处理」中的事项',reason:'当前事项有需要你回答或确认的问题。'};
     if(execution && ['QUEUED','ASSIGNED','RUNNING','VERIFYING','VERIFIED','RECOVERY_REQUIRED','FAILED'].includes(execution.status))
-      return {now:executionCopy(execution),next:execution.status==='FAILED'?'查看失败证据并处理阻塞':'Watt 将按当前执行事实继续',reason:execution.recovery_reason || '状态来自当前 Execution 的持久化队列和验证记录。'};
+      return {now:executionCopy(execution),next:execution.status==='FAILED'?'查看失败证据并处理阻塞':'Watt 将按当前执行事实继续',reason:'状态来自当前 Execution 的持久化队列和验证记录。'};
     if(status==='COMPLETED')return {now:'事项已完成',next:ws.reality.deliveries.some(item=>item.current&&!item.acceptance)?'可查看并验收新成果':'成果已记录到产品',reason:'事项已形成可信的生产结果。'};
     if(status==='BLOCKED')return {now:'生产暂时受阻',next:'Watt 将按当前事实继续排查',reason:'当前没有可执行的人工决定。'};
     return {now:humanStatus(status),next:'Watt 将根据当前事项状态继续',reason:'进展来自当前事项的正式生产记录。'};
@@ -99,7 +100,7 @@
     'Authorize exact sealed Candidate integration?': '是否授权将这次已验证的候选改动纳入产品正式版本？',
     'Repository integration requires exact Human Authority.': '正式纳入产品代码前，需要你授权当前候选改动。',
   };
-  function renderAttention(a) { const question=a.conversation_prompt||a.decision||a.reason; const detail=a.reason&&a.reason!==question?`<p class="muted">${esc(attentionLabels[a.reason]||a.reason)}</p>`:''; const controls=a.actions.length?a.actions.map(action=>`<button class="button secondary" type="button" data-attention="${esc(a.id)}" data-action="${esc(action)}">${esc(actionText(action))}</button>`).join(''):`<button class="button secondary" type="button" ${a.governed_subject_ref?.startsWith('steering-decision:')?`data-conversation-attention="${esc(a.id)}"`:'data-focus-composer'}>回答这个问题</button>`; return `<div class="action"><h3>${a.actions.length?'需要你决定':'需要你回答'}</h3><p>${esc(attentionLabels[question]||question)}</p>${detail}<div class="link-row">${controls}</div></div>`; }
+  function renderAttention(a) { const question=a.human_visible?.question || '正在读取当前决定的说明。'; const detail=a.human_visible?.why_now?`<p class="muted">${esc(a.human_visible.why_now)}</p>`:''; const controls=a.actions.length?a.actions.map(action=>`<button class="button secondary" type="button" data-attention="${esc(a.id)}" data-action="${esc(action)}">${esc(actionText(action))}</button>`).join(''):`<button class="button secondary" type="button" ${a.governed_subject_ref?.startsWith('steering-decision:')?`data-conversation-attention="${esc(a.id)}"`:'data-focus-composer'}>回答这个问题</button>`; return `<div class="action"><h3>${a.actions.length?'需要你决定':'需要你回答'}</h3><p>${esc(question)}</p>${detail}<div class="link-row">${controls}</div></div>`; }
   const agendaLabels = {
     'Reassess the latest admitted change against existing design and production Reality': '根据最新需求与现有成果重新确认方案',
     'Produce the next exact change admitted from the latest Work Reality': '完成当前确认的产品改动',
@@ -113,56 +114,57 @@
     'Complete the admitted long-lived Work': '完成本次事项',
   };
   function renderWorkspaceAgenda(ws) {
-    const outcome = ws.work?.desired_outcome;
+    const outcome = ws.human_visible?.wording?.headline;
     const steps = ws.agenda.map(step => {
       const state = step.state === 'closed' ? '已完成' : step.state === 'current' ? '正在推进' : '待推进';
       const mark = step.state === 'closed' ? '✓' : step.state === 'current' ? '•' : '○';
-      return `<li data-agenda-state="${esc(step.state)}"><span class="agenda-dot" aria-hidden="true">${mark}</span><div><span class="agenda-state">${state}</span><p>${esc(agendaLabels[step.title] || step.title)}</p></div></li>`;
+      return `<li data-agenda-state="${esc(step.state)}"><span class="agenda-dot" aria-hidden="true">${mark}</span><div><span class="agenda-state">${state}</span><p>${esc(step.human_visible || '正在读取当前计划说明')}</p></div></li>`;
     }).join('');
     return `<section class="workspace-quadrant" data-workspace-quadrant="agenda" aria-labelledby="workspace-agenda-title"><div class="quadrant-heading"><p class="eyebrow">01 / 方向</p><h2 id="workspace-agenda-title">计划</h2><p>接下来准备怎么推进？</p></div>${outcome ? `<p class="agenda-outcome"><span>本次目标</span>${esc(outcome)}</p>` : ''}${steps ? `<ol class="workspace-agenda-list">${steps}</ol>` : '<p class="quadrant-empty">Watt 尚未形成可展示的正式计划；确认后会在这里呈现下一步。</p>'}</section>`;
   }
   function acceptanceCopy(ws, acceptance) {
     if (!acceptance) return null;
+    if (ws.human_visible?.facts) return ws.human_visible.facts.acceptance;
     if (acceptance.decision !== 'ACCEPT') return '本次成果未被接受';
     const promotion = ws.reality.deliveries?.[0]?.source_promotion;
     if (!promotion || promotion.state === 'COMPLETED') return '已验收';
     return promotion.state === 'BLOCKED' ? '验收已记录；正式版本更新受阻，可重试同一决定' : '验收已记录；正在更新正式版本';
   }
   function renderWorkspaceReality(ws, reviewable, acceptance, workId) {
-    const p = ws.product, r = ws.reality, w = ws.work;
+    const p = ws.product, r = ws.reality, w = ws.work, text = ws.human_visible?.facts;
     const facts = [
-      ['当前事项', w ? humanStatus(w.status) : '尚无具体事项'],
+      ['当前事项', text?.work || (w ? humanStatus(w.status) : '尚无具体事项')],
       ['正式版本', p.accepted_version == null ? '尚未形成' : `版本 ${p.accepted_version}`],
-      ['执行', w ? executionCopy(r.execution) : '尚无执行'],
-      ['验证', verificationCopy(r.candidate, r.execution)],
-      ['候选成果', reviewable ? (acceptance ? acceptanceCopy(ws, acceptance) : r.candidate.authorization_pending ? '已形成，等待你授权' : '已形成，可查看') : '尚未形成'],
-      ['质量检查', guardianCopy(r.guardian)],
+      ['执行', text?.execution || (w ? executionCopy(r.execution) : '尚无执行')],
+      ['验证', text?.verification || verificationCopy(r.candidate, r.execution)],
+      ['候选成果', text?.candidate || (reviewable ? (acceptance ? acceptanceCopy(ws, acceptance) : r.candidate.authorization_pending ? '已形成，等待你授权' : '已形成，可查看') : '尚未形成')],
+      ['质量检查', text?.guardian || guardianCopy(r.guardian)],
       ['交付成果', r.deliveries.length ? `${r.deliveries.length} 项` : '尚无交付成果'],
     ];
     if (r.cloud_deliverable_id) facts.push(['阿里云部署', r.cloud_deployment ?
       ({SUCCEEDED:'部署成功',FAILED:'部署失败',ROLLED_BACK:'已回滚',NEEDS_HUMAN_ATTENTION:'需要你处理',
         PRECHECK:'检查环境',STAGING:'传送成果',PREPARING:'正在部署',VERIFYING:'正在验证'}[r.cloud_deployment.state] || '等待授权') : '未部署']);
     const plan = r.production_plan;
-    const units = plan ? `<div class="production-units"><h3>生产计划 · 版本 ${esc(plan.revision_number)}</h3><p>${plan.pwus.length} 个生产单元，按依赖与可用容量推进</p><ul>${plan.pwus.map(unit => `<li><strong>${esc(unit.objective)}</strong>：${esc(({WAITING_RESOURCE:'等待执行条件恢复',PREPARING:'正在准备执行',READY:'已就绪',WAITING_CAPACITY:'等待执行容量',ASSIGNED:'已领取',RUNNING:'正在执行',DEPENDENCIES_PENDING:'等待前置成果验证',VERIFYING:'正在验证',VERIFIED:'已通过验证',BLOCKED:'暂时受阻',CANCELLED:'已取消，生产义务尚未完成'}[unit.state] || '等待推进'))}${unit.kind === 'JOIN' ? ' · 成果整合与验证' : ''}${unit.blocked_reason ? `<p class="muted">${esc(unit.blocked_reason)}</p>` : ''}</li>`).join('')}</ul></div>` : '';
+    const units = plan ? `<div class="production-units"><h3>生产计划 · 版本 ${esc(plan.revision_number)}</h3><p>${plan.pwus.length} 个生产单元，按依赖与可用容量推进</p><ul>${plan.pwus.map(unit => `<li><strong>${esc(unit.human_visible || '正在读取生产单元说明')}</strong>${unit.kind === 'JOIN' ? ' · 成果整合与验证' : ''}</li>`).join('')}</ul></div>` : '';
     return `<section class="workspace-quadrant" data-workspace-quadrant="reality" aria-labelledby="workspace-reality-title"><div class="quadrant-heading"><p class="eyebrow">02 / 事实</p><h2 id="workspace-reality-title">现状</h2><p>现在已经成立的事实是什么？</p></div><dl class="workspace-reality-list">${facts.map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>${units}<details class="advanced-disclosure workspace-evidence"><summary>查看生产细节与历史证据</summary>${link(`/advanced${workId ? `?work=${workId}` : ''}`,'打开高级信息','button quiet')}</details></section>`;
   }
   function renderWorkspaceActions(ws, candidate, manifest, acceptance, workId, readOnly) {
     const assuranceReady = !ws.reality.guardian?.required || ws.reality.guardian?.gate === 'PASS';
     const attention = ws.actions.length ? `<div class="action-list">${ws.actions.map(renderAttention).join('')}</div>` : '';
-    const review = candidate?.candidate_fingerprint ? `<div class="workspace-review"><h3>${acceptance ? acceptanceCopy(ws, acceptance) : '查看新版本'}</h3><p>${acceptance ? acceptanceCopy(ws, acceptance) : assuranceReady ? '质量条件已满足；请查看预览与改动，再明确决定是否授权当前候选。' : '机器验证已通过，质量检查尚未通过；当前版本还不能授权或验收。'}</p><div class="candidate-actions"><button class="button" data-preview="${esc(workId)}" data-preview-manifest="${esc(manifest?.id || '')}" type="button">打开预览</button><button class="button secondary" data-diff="${esc(workId)}" data-fingerprint="${esc(candidate.candidate_fingerprint)}" type="button">查看改动</button>${manifest && !acceptance && !readOnly && assuranceReady ? `<button class="button secondary" data-accept="${esc(workId)}" data-manifest="${esc(manifest.id)}" data-manifest-fingerprint="${esc(manifest.fingerprint)}" type="button">验收结果</button>` : ''}${readOnly ? '' : '<button class="button quiet" data-focus-composer type="button">继续修改</button>'}</div>${!manifest && !acceptance ? '<p class="muted">交付物形成后可做正式验收。</p>' : ''}</div>` : '';
+    const review = candidate?.candidate_fingerprint ? `<div class="workspace-review"><h3>${acceptance ? acceptanceCopy(ws, acceptance) : '查看新版本'}</h3><p>${ws.human_visible?.facts?.review || (acceptance ? acceptanceCopy(ws, acceptance) : assuranceReady ? '质量条件已满足；请查看预览与改动，再明确决定是否授权当前候选。' : '机器验证已通过，质量检查尚未通过；当前版本还不能授权或验收。')}</p><div class="candidate-actions"><button class="button" data-preview="${esc(workId)}" data-preview-manifest="${esc(manifest?.id || '')}" type="button">打开预览</button><button class="button secondary" data-diff="${esc(workId)}" data-fingerprint="${esc(candidate.candidate_fingerprint)}" type="button">查看改动</button>${manifest && !acceptance && !readOnly && assuranceReady ? `<button class="button secondary" data-accept="${esc(workId)}" data-manifest="${esc(manifest.id)}" data-manifest-fingerprint="${esc(manifest.fingerprint)}" type="button">验收结果</button>` : ''}${readOnly ? '' : '<button class="button quiet" data-focus-composer type="button">继续修改</button>'}</div>${!manifest && !acceptance ? '<p class="muted">交付物形成后可做正式验收。</p>' : ''}</div>` : '';
     const promotion = ws.reality.deliveries?.[0]?.source_promotion;
     const retryPromotion = manifest && acceptance?.decision === 'ACCEPT' && promotion?.state !== 'COMPLETED' && promotion ?
       `<button class="button secondary" data-promotion-retry="${esc(workId)}" data-manifest="${esc(manifest.id)}" type="button">重试正式版本更新</button>` : '';
     const needsReview = Boolean(candidate?.candidate_fingerprint && !acceptance && !readOnly && assuranceReady);
     const cloudAction = ws.reality.cloud_deliverable_id && acceptance?.decision === 'ACCEPT' &&
       ws.reality.cloud_deployment?.state !== 'SUCCEEDED' ?
-      `<div class="workspace-review"><h3>阿里云部署</h3><p>${ws.reality.cloud_deployment?.blocker ? esc(window.WattCloudDelivery?.blockerCopy(ws.reality.cloud_deployment) || ws.reality.cloud_deployment.blocker) : '可查看当前部署事实，或为这个已验收版本选择目标 ECS。'}</p>${link(`/deliverables/${ws.reality.cloud_deliverable_id}`,'查看部署','button secondary')}</div>` : '';
+      `<div class="workspace-review"><h3>阿里云部署</h3><p>${ws.reality.cloud_deployment?.blocker ? esc(ws.human_visible?.facts?.blocker || '部署条件未满足，尚未通过验证。') : '可查看当前部署事实，或为这个已验收版本选择目标 ECS。'}</p>${link(`/deliverables/${ws.reality.cloud_deliverable_id}`,'查看部署','button secondary')}</div>` : '';
     return `<section class="workspace-quadrant" data-workspace-quadrant="actions" aria-labelledby="workspace-actions-title"><div class="quadrant-heading"><p class="eyebrow">03 / 决定</p><h2 id="workspace-actions-title">待你处理</h2><p>Watt 现在真正需要我做什么？</p></div>${attention}${!attention && !needsReview && !cloudAction ? '<p class="quadrant-empty">当前无需你操作</p>' : ''}${review}${retryPromotion}${cloudAction}</section>`;
   }
   function renderWorkspaceProduction(ws, focus, reviewable, acceptance) {
     const guardian = ws.reality.guardian?.status;
     const repairing = ['FINDINGS_PRESENT','REPAIR_IN_PROGRESS','REVERIFYING'].includes(guardian);
-    const result = reviewable ? `<p class="production-result">${esc(acceptance ? acceptanceCopy(ws, acceptance) : repairing ? 'Watt 正在修复这个版本' : ws.reality.guardian?.required && ws.reality.guardian?.gate !== 'PASS' ? '机器验证通过；质量检查尚未通过，暂不能接受。' : '候选成果已满足质量条件，等待你的明确决定。')}</p>` : '';
+    const result = reviewable ? `<p class="production-result">${esc(ws.human_visible?.facts?.production_result || (acceptance ? acceptanceCopy(ws, acceptance) : repairing ? 'Watt 正在修复这个版本' : ws.reality.guardian?.required && ws.reality.guardian?.gate !== 'PASS' ? '机器验证通过；质量检查尚未通过，暂不能接受。' : '候选成果已满足质量条件，等待你的明确决定。'))}</p>` : '';
     return `<section class="workspace-quadrant" data-workspace-quadrant="production" aria-labelledby="workspace-production-title"><div class="quadrant-heading"><p class="eyebrow">04 / 推进</p><h2 id="workspace-production-title">Watt 正在做</h2><p>Watt 当前正在做什么？</p></div><p class="production-current">${esc(focus.now)}</p><p class="production-explanation">${esc(focus.reason)}</p>${result}<div class="production-next"><span>接下来</span><strong>${esc(focus.next)}</strong></div></section>`;
   }
   async function renderWorkspace(id) {

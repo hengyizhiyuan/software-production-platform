@@ -230,6 +230,11 @@ class GovernedDeltaGate:
             raise GovernedResponsePolicyViolation(
                 "Realizer exposed internal Response Contract metadata"
             )
+        from spg.application.human_language import require_human_language
+        try:
+            require_human_language(clause)
+        except ValueError as error:
+            raise GovernedResponsePolicyViolation(str(error)) from error
         if (
             not self.emitted
             and strategy.demonstrate_understanding_without_restating
@@ -280,6 +285,48 @@ class GovernedDeltaGate:
         # whole-response buffering.
         for start in range(0, len(clause), 32):
             self.emit(clause[start : start + 32])
+
+
+def realize_with_language_recovery(realizer, envelope, emit, *, on_raw=None):
+    """Repair expression on the same immutable basis; never rerun semantic owners.
+
+    Valid clauses retain streaming latency. A rejected clause is never emitted.
+    Previously admitted clauses and question budget are retained across one retry.
+    """
+    prefix=[]
+    question_count=0
+    feedback=None
+    for attempt in range(2):
+        gate=GovernedDeltaGate(envelope,emit)
+        gate.emitted=list(prefix)
+        gate.question_count=question_count
+        raw=[]
+        def receive(delta):
+            if on_raw is not None:on_raw(delta)
+            raw.append(delta)
+            gate.feed(delta)
+        current=envelope if feedback is None else envelope.model_copy(update={
+            "expression_refinement":{"finding":feedback,"admitted_prefix":''.join(prefix),
+                                     "same_basis":True}})
+        try:
+            result=realizer.realize_stream(current,on_response_delta=receive)
+            streamed=''.join(raw)
+            if not result.content.startswith(streamed):
+                raise GovernedResponsePolicyViolation('Settled wording differs from streamed wording')
+            gate.feed(result.content[len(streamed):])
+            admitted=gate.finish()
+            return result.model_copy(update={"content":admitted,
+                "structural_repair_count":max(result.structural_repair_count,int(attempt>0))})
+        except GovernedResponsePolicyViolation as error:
+            prefix=list(gate.emitted)
+            question_count=gate.question_count
+            feedback=str(error)[:160]
+    # Only the WIC failsafe owns this neutral expression. It claims no outcome,
+    # new authority, readiness or decision and retains all valid earlier clauses.
+    fallback='当前说明暂时无法安全展示；已有记录、授权边界和验证条件保持有效，系统不会代替你做决定。'
+    emit(fallback)
+    return GovernedResponseRealization(content=''.join(prefix)+fallback,
+        provider_identity='watt:wic-expression-safety',structural_repair_count=1)
 
 
 class DeterministicGovernedResponseRealizer:

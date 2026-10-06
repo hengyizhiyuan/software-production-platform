@@ -19,6 +19,7 @@ from spg.application.orchestration import (
 from spg.application.assets import RepositoryAssetService
 from spg.application.repository_branch_authority import governed_branch_creation_target
 from spg.application.guided_design import GuidedDesignApplicationService
+from spg.application.human_attention import boundary_decision
 from spg.application.steering import SteeringApplicationService
 from spg.application.semantic_steps import SemanticStepApplicationService, SemanticStepRefinementExhausted
 from spg.domain.refinement_contract import RefinementSignalKind, classify_refinement
@@ -40,6 +41,7 @@ from spg.domain.interaction import InteractionActor, InterpretationMeaningKind
 from spg.domain.planning import OnePwuFitClassification
 from spg.domain.steering import (
     NextStepCandidate,
+    HumanDecisionEffect,
     PlanFrame,
     PlanFrameBlockerKind,
     PlanSteeringCapability,
@@ -754,6 +756,13 @@ class PlanSteeringDriver:
                     authority_assessment=SteeringAuthorityAssessment.WITHIN_AUTHORITY,
                     proposed_engineering_scope_fingerprint=fresh.engineering_scope_fingerprint,
                     attention_reason=SteeringAttentionReason.MATERIAL_RISK_OR_COST_DECISION,
+                    human_decision_need=boundary_decision(
+                        fresh.work_objective, "连续的自动尝试未能推进当前成果。你希望暂停，还是修改这次的目标或边界后继续？",
+                        HumanDecisionEffect.COST_OR_RISK,
+                        tuple(item.reference for item in fresh.basis.resolved_reality),
+                        (("暂停这次生产", "停止继续消耗执行资源，保留当前记录和已有成果。"),
+                         ("调整目标或边界", "通过新的明确指令修订当前生产边界，已有证据仍保留。")),
+                        why_now=reason, impact="The current unchanged Work has exhausted its bounded convergence budget; no further unchanged retries are authorized."),
                     recommendation="Review preserved boundary diagnostics; do not restart the unchanged Work as a repair.",
                     expected_impact="Automatic retries stop; no authority or delivery is granted."))
         return observation
@@ -1327,6 +1336,7 @@ class PlanSteeringDriver:
         fresh = self.frames.assemble(frame.work_id)
         if (
             design is not None
+            and guided_step_linked
             and design.readiness.state is DesignReadinessState.READY
             and result.proposed_production is not None
             and not self._production_proposal_reviewed(frame.work_id, result.id)
@@ -1363,6 +1373,13 @@ class PlanSteeringDriver:
                         attention_reason=(
                             SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
                         ),
+                        human_decision_need=boundary_decision(fresh.work_objective,
+                            "当前方案将进入具体生产。你选择按这份方案实施，还是先调整方案？",
+                            HumanDecisionEffect.AUTHORITY,refs,
+                            (("按当前方案实施","仅按精确方案和范围进入生产，不授予交付或验收权。"),
+                             ("先调整方案","保留当前方案及证据，先修订目标与边界。")),
+                            why_now="当前需审阅的明确方案已形成，接下来将跨入其生产授权边界。",
+                            impact="The exact reviewed proposal determines the admitted production scope; Candidate acceptance remains separate."),
                         recommendation="Review objective, scope, constraints, impact, and verification before admitting production",
                         expected_impact=(
                             "Approval permits existing Plan Steering and SPG admission; "
@@ -1418,7 +1435,10 @@ class PlanSteeringDriver:
         )
         bounded_code = (
             proposal.target_kind is ProductionTargetKind.CODE_WORK
-            and bool(approved_design)
+            and (bool(approved_design) or not any(
+                issue.qualification is None or issue.qualification.blocking
+                for issue in (self.guided_design.get_optional(work_id).issues
+                    if self.guided_design.get_optional(work_id) else ())))
             and 1 <= len(proposal.code_targets) <= 4
         )
         if not design_artifact and not bounded_code:
@@ -1527,6 +1547,7 @@ class PlanSteeringDriver:
                     fresh.engineering_scope_fingerprint
                 ),
                 attention_reason=reason,
+                human_decision_need=result.human_decision_need,
                 recommendation=result.human_attention_recommendation,
                 expected_impact=(
                     "No semantic Step transition or SPG production occurs before resolution"

@@ -163,6 +163,13 @@ class SteeringApplicationService:
                 request.next_step_type,
                 request.human_required,
             )
+            if request.steering_outcome is SteeringOutcome.HUMAN_ATTENTION:
+                from spg.application.human_attention import (require_human_decision,
+                    canonical_ir_for_work, owner_decision_boundary)
+                require_human_decision(request.human_decision_need, evidence=refs,
+                    semantic_ir=canonical_ir_for_work(unit_of_work.session, work.id),
+                    owner_boundary=owner_decision_boundary(unit_of_work.session, work.id, step.id,
+                                                          request.attention_reason))
             admitted_decision_id = store.insert_decision(
                 {
                     "id": decision_id,
@@ -173,6 +180,7 @@ class SteeringApplicationService:
                     "reason": request.reason,
                     "reality_refs": self._dump_refs(refs),
                     "human_required": request.human_required,
+                    "human_decision_need": (None if request.human_decision_need is None else request.human_decision_need.model_dump(mode="json")),
                     "completion_condition": request.completion_condition,
                     "steering_outcome": request.steering_outcome.value,
                     "basis_fingerprint": fingerprint,

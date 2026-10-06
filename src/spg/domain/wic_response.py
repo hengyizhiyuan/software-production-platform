@@ -128,6 +128,7 @@ class GovernedResponseEnvelope(BaseModel):
     execution_operation_reference: str | None = None
     semantic_ir: dict[str, Any] | None = None
     obligation_ledger: tuple[dict[str, Any], ...] = ()
+    expression_refinement: dict[str, Any] | None = None
 
 
 class GovernedResponseRealization(BaseModel):

@@ -86,10 +86,10 @@ test('multi-unit Reality preserves waiting, dependency and reconciliation meanin
   });
   const html = render({product:{},work:{status:'RUNNING'},reality:{deliveries:[],production_plan:{
     revision_number:2,pwus:[
-      {objective:'page <A>',state:'WAITING_CAPACITY',kind:'PWU'},
-      {objective:'page B',state:'VERIFIED',kind:'PWU'},
-      {objective:'join',state:'DEPENDENCIES_PENDING',kind:'JOIN'},
-      {objective:'withdrawn',state:'CANCELLED',kind:'PWU'},
+      {objective:'page <A>',human_visible:'page <A>：等待执行容量',state:'WAITING_CAPACITY',kind:'PWU'},
+      {objective:'page B',human_visible:'page B：已通过验证',state:'VERIFIED',kind:'PWU'},
+      {objective:'join',human_visible:'join：等待前置成果验证',state:'DEPENDENCIES_PENDING',kind:'JOIN'},
+      {objective:'withdrawn',human_visible:'withdrawn：已取消，生产义务尚未完成',state:'CANCELLED',kind:'PWU'},
     ],
   }}},false,false,'work');
   assert.match(html, /生产计划 · 版本 2/);
@@ -144,3 +144,36 @@ for (const [promotionState, copy] of [['PENDING', '正在更新正式版本'], [
     assert.equal((html.match(/data-workspace-quadrant=/g)||[]).length,1);
   });
 }
+
+test('normal quadrants use one WIC realization and never fall through to owner prose', () => {
+  const source = script.slice(script.indexOf('  function renderWorkspaceAgenda(ws)'),
+    script.indexOf('  function acceptanceCopy(ws,'));
+  const render = vm.runInNewContext(`${source}; renderWorkspaceAgenda`, {
+    esc: value => String(value ?? ''),
+  });
+  const html = render({human_visible:{wording:{headline:'完成官网首版'}},agenda:[{
+    id:'exact-step',type:'DESIGN',state:'current',
+    title:'Establish the Motive, relevant actors, and problem boundary',
+    human_visible:'准备官网首页的内容与页面结构',
+  }]});
+  assert.match(html,/准备官网首页的内容与页面结构/);
+  assert.match(html,/完成官网首版/);
+  assert.doesNotMatch(html,/Establish the Motive|DesignIssue|basis_fingerprint/);
+  assert.doesNotMatch(render({agenda:[{id:'step',state:'current',title:'MATERIAL_RISK_OR_COST_DECISION'}]}),/MATERIAL_RISK/);
+});
+
+test('qualified Actions render WIC questions while preserving exact authority controls', () => {
+  const source = script.slice(script.indexOf('  function renderAttention(a)'),
+    script.indexOf('  const agendaLabels ='));
+  const render = vm.runInNewContext(`${source}; renderAttention`, {
+    esc: value => String(value ?? ''),actionText: () => '授权',
+  });
+  const html = render({id:'exact-owner-action',actions:['AUTHORIZE'],
+    reason:'Choose how to handle a material risk or cost',
+    conversation_prompt:'STEERING_DECISION_REQUIRED',
+    human_visible:{question:'首版只展示品牌，还是加入登录和客户后台？',why_now:'这会改变产品范围与数据权限，需要由你决定。'}});
+  assert.match(html,/首版只展示品牌/);
+  assert.match(html,/exact-owner-action/);
+  assert.match(html,/AUTHORIZE/);
+  assert.doesNotMatch(html,/Choose how|STEERING_DECISION_REQUIRED/);
+});

@@ -349,6 +349,7 @@ class DeepSeekSemanticStepCapability:
             derived_constraints=_admitted_derived_constraints(payload, input),
             evidence_refs=input.reality_refs,
             unresolved_questions=payload.unresolved_questions,
+            human_decision_need=payload.human_decision_need,
             authority_assessment=payload.authority_assessment,
             human_attention_recommendation=(
                 payload.human_attention_recommendation

@@ -68,7 +68,7 @@ def test_catalog_is_bounded_and_all_selected_oracles_exist():
         if not r.selector:continue
         path,*functions=r.selector.split('::')
         assert (root/path).is_file()
-        if functions:assert 'def '+functions[0]+'(' in (root/path).read_text()
+        if functions:assert 'def '+functions[0].split('[',1)[0]+'(' in (root/path).read_text()
 
 
 def test_llm_judgment_records_exact_provider_without_objective_override():
@@ -125,3 +125,14 @@ def test_recipe_diagnostics_redact_credentials_and_sealed_answers(tmp_path,monke
     assert 'qualification-secret-only' not in record['message'] and 'abcdefg' not in record['message']
     sealed=failure_diagnostics(path,sealed=True)[0]
     assert sealed['message'] is None and sealed['sealed'] and len(sealed['diagnostic_fingerprint'])==64
+
+
+def test_human_interaction_incident_recipes_preserve_permanent_identity_and_exact_selector():
+    from spg.evaluation.human_interaction_regressions import definitions as hi_definitions
+    items=hi_definitions()
+    assert {d.key for d in items}=={*(f'REG-HI-{i:03}' for i in range(1,6)),'REG-HI-P01','REG-HI-P02'}
+    assert len(items)==7 and all(d.cohorts==(Cohort.REGRESSION,) for d in items)
+    for d in items:
+        recipe=recipes()[d.runner_key]
+        assert recipe.selector.endswith('['+d.key+']')
+        assert recipe.stage==Stage.STEERING and recipe.regression

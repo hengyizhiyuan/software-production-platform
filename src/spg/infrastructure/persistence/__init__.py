@@ -23,6 +23,7 @@ from spg.infrastructure.persistence.cloud_delivery_schema import (
 )
 from spg.infrastructure.persistence.control_room_schema import work_agreement_events
 from spg.infrastructure.persistence.evaluation_schema import evaluation_runs
+from spg.infrastructure.persistence.human_visible_schema import wic_human_realizations
 from spg.infrastructure.persistence.quality_schema import quality_tables
 from spg.infrastructure.persistence.connector_schema import (
     capability_gaps,

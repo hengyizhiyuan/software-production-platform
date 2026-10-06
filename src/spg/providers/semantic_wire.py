@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from spg.domain.planning import ProductionPlanArtifactTarget
 from spg.domain.steering import (
+    HumanDecisionNeed,
     SemanticBoundedRepositoryArea,
     SemanticProductionProposal,
     SemanticStepInput,
@@ -121,6 +122,7 @@ class _SemanticProviderPayload(BaseModel):
     decisions: tuple[str, ...]
     derived_constraints: tuple[str, ...]
     proposed_production: _SemanticProviderProductionProposal | None
+    human_decision_need: HumanDecisionNeed | None = None
     disposition: _SemanticProviderDisposition
 
     @property
@@ -317,6 +319,13 @@ class SemanticStepWireContract:
             "proposed_production "
             "(null, or a typed object with target_kind, objective, artifact_targets, "
             "code_targets, allowed_areas, forbidden_areas, verification_expectation); "
+            "human_decision_need (null for routine resolved work; otherwise a concrete HumanDecisionNeed "
+            "with supported options grounded in exact reality_refs, question, decision_subject, why_human_owns_it, "
+            "why_now, material_effect, typed effect, evidence, safe_default_possible, required_now, "
+            "blocking_reason and governed_semantic_ir_id from the supplied input). A reason enum or "
+            "methodology issue does not qualify a Human decision. If existing governed meaning permits "
+            "safe reversible progress, continue; do not fabricate a choice. When Human explicitly reserves "
+            "a material product/architecture/authority choice, compare the exact options and stop. "
             "disposition (exactly one schema-selected object). disposition RESOLVED "
             "requires authority_assessment WITHIN_AUTHORITY, unresolved_questions [], "
             "human_attention_recommendation null, and completion_claimed true. Completion here "

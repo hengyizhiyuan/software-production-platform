@@ -222,3 +222,20 @@ Focused evidence is recorded in
 Deterministic, PostgreSQL, restart, API/UI, affected production trust-boundary
 regressions and an isolated real Codex Provider proof pass. Human Product
 Acceptance of the experience is still pending.
+
+## Human-visible authority repair v1
+
+Schema issues are candidate checks. Their durable qualification records relevance,
+unresolved state, materiality to the current step, blocking disposition, rationale
+and exact owner references. Current IRK production intent satisfies motive/outcome
+checks. Optional discovery and routine implementation alternatives remain non-blocking.
+Only a real unresolved material boundary may enter active Steering. Explicit historical
+Human-admitted design obligations remain inspectable and are not silently converted
+into production permission.
+
+A Human Attention decision requires `HumanDecisionNeed`: a concrete subject/question,
+Human ownership, why it is needed now, material effect, distinct supported options,
+exact evidence, safe-default assessment and blocking reason. The deterministic gate
+rejects enum-only/template-only attention as `ATTENTION_NOT_QUALIFIED`. Semantic
+Self-Refine consumes this rejection; it does not transfer routine HOW back to Human.
+Candidate acceptance and actual convergence-budget exhaustion remain owner boundaries.

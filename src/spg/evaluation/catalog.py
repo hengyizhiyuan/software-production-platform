@@ -83,7 +83,8 @@ def recipes():
             "quality:case-run:bbe2be5f-e2c2-4bf5-b93e-effa3b5a9778"),
         Recipe("unqualified-scenario", "待配方资格的场景", Stage.WIC, "", "Unqualified scenario cannot claim PASS"))
     from spg.evaluation.pilot import PILOT
-    return {r.key: r for r in (*CATALOG, *extra, *PILOT)}
+    from spg.evaluation.human_interaction_regressions import recipes as human_recipes
+    return {r.key: r for r in (*CATALOG, *extra, *PILOT, *human_recipes())}
 
 
 def definitions():
