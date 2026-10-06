@@ -129,6 +129,10 @@ def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=
                 'state':row.get('result') if name=='verification_records' else row.get('to_condition'),
                 'pwu_id':row.get('pwu_id') or row.get('work_unit_id') or (row.get('id') if name=='production_work_units' else None),
                 'source_ref':f"{name}:{row.get('id') or row.get('work_id')}", 'detail':row})
+            if row.get('tool_identity'):
+                tool=row['tool_identity']
+                events[-1]['title']={'file.read':'读取仓库文件','file.write':'保存受控文件修改','file.list':'检查仓库文件','git.status':'检查 Git 状态','git.diff':'读取代码差异','git.commit':'记录精确代码修订','test.run':'运行测试','build.run':'构建产物','process.run':'执行受控命令','preview.inspect':'检查预览','web.search':'检索外部资料','search.query':'检索外部资料','web.fetch':'读取外部参考'}.get(tool,'执行已登记的工具')
+                events[-1]['tool']=tool
             if name=='execution_steps' and row.get('finished_at'):
                 events.append({'timestamp':row['finished_at'],'owner':'EXECUTION','title':'模型或工具返回结果',
                     'state':row.get('condition'),'pwu_id':row.get('pwu_id'),
@@ -204,7 +208,7 @@ def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=
             'objective':row.get('objective'), 'baseline':row.get('source_baseline_id'),
             'source_revision':exact_revision,
             'dependencies':node.get('dependency_ids',[]), 'parent_baselines':row.get('parent_baseline_ids') or [],
-            'scope':task.get('scope', []), 'allowed_paths':node.get('writable_paths',task.get('writable_paths',[])),
+            'scope':task.get('scope', []), 'allowed_paths':node.get('writable_paths',task.get('writable_paths',[]) or [v.split(':',1)[1] for v in task.get('scope',[]) if isinstance(v,str) and v.startswith(('CREATE:','MODIFY:','DELETE:'))]),
             'dependency_names':[n['objective'] for n in graph.get('nodes',[]) if n['node_id'] in node.get('dependency_ids',[])],
             'verification':contract.get('verification_obligations', task.get('verification_requirements', [])),
             'state':row.get('condition'), 'events':[e for e in events if str(e['pwu_id'])==str(row['id'])
@@ -232,6 +236,15 @@ def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=
             'source_ref':f"execution-step:{s['id']}"})
     tool_calls = [e for e in events if e['detail'].get('kind') == 'TOOL' or e['detail'].get('tool_identity') or e['detail'].get('payload',{}).get('type') == 'PRODUCTION_ENVIRONMENT_COMMAND']
     searches = [e for e in tool_calls if any(w in str(e['detail'].get('tool_identity') or e['detail'].get('payload',{}).get('tool_identity','')).lower() for w in ('search.query','web.search','repository.search'))]
+    for event in searches:
+        effect=event['detail'];args=effect.get('semantic_input',{})
+        event['query']=args.get('query') or args.get('intent')
+        receipt=next((r for r in tables.get('effect_receipts',[]) if str(r.get('effect_id'))==str(effect.get('id'))),{})
+        output=receipt.get('output',{})
+        event['provider']=output.get('provider') or output.get('provider_identity')
+        event['results_count']=len(output['results']) if isinstance(output.get('results'),list) else None
+        event['selected_references']=output.get('selected_references')
+        event['influence']='是否成为生产输入需查看精确上下文引用；不能凭搜索成功推断。'
     verifications = [{'obligation':v.get('obligation') or v.get('kind'), 'result':v.get('result'),
         'timestamp':_time(v), 'source_ref':f"verification:{v['id']}", 'evidence':v.get('evidence')}
         for v in tables.get('verification_records', [])]
