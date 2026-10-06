@@ -1010,7 +1010,9 @@ class PlanSteeringDriver:
         elif work.status is WorkStatus.BLOCKED:
             stop_reason = SteeringDriverStopReason.BLOCKED
         elif work.status is WorkStatus.NEEDS_ATTENTION:
-            stop_reason = SteeringDriverStopReason.HUMAN_ATTENTION
+            stop_reason = (SteeringDriverStopReason.HUMAN_ATTENTION
+                if self.work_service.list_attention(work_id=work_id)
+                else SteeringDriverStopReason.BLOCKED)
         return SteeringPlanProjection(
             work_id=work_id,
             work_objective=reconstruction.work_objective,

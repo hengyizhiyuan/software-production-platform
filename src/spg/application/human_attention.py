@@ -89,7 +89,9 @@ def owner_decision_boundary(session, work_id, step_id, reason, *, database=None)
                 context = SteeringProductionService(database).context_readiness(work_id)
             except (ProductInvariantViolation, SteeringInvariantViolation):
                 context = None
-            if context and context.get('owner') == 'ECF' and context['status'] == 'NOT_READY':
+            if (context and context.get('owner') == 'ECF' and context['status'] == 'NOT_READY'
+                    and context.get('failure_signature')
+                    and context['failure_signature'] == history[-1].failure_signature):
                 # A missing software prerequisite is not evidence that the Human
                 # must pause or redefine their intent. Preserve the budget halt;
                 # the safe default is to stay stopped and expose the actual cause.

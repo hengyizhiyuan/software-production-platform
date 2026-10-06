@@ -113,6 +113,7 @@ class SteeringProductionService:
                 repository_path=Path(resource.location_ref),
                 repository_revision=baseline.repository_revision, target_paths=paths)
         except DecisionContextNotReady as error:
+            from spg.domain.native_execution import canonical_digest
             return {"status": "NOT_READY", "owner": "ECF",
                     "condition": "DECISION_CONTEXT_NOT_READY",
                     "context_status": error.status,
@@ -120,6 +121,8 @@ class SteeringProductionService:
                     "stale_risks": list(error.stale_risks),
                     "conflict_references": list(error.conflict_references),
                     "package_fingerprint": error.package_fingerprint,
+                    "failure_signature": canonical_digest({"boundary": "STEERING",
+                        "error_type": type(error).__name__, "reason": str(error)}),
                     "source_references": refs}
         return {"status": "READY", "source_references": refs}
 
@@ -321,11 +324,11 @@ class SteeringProductionService:
         expected = self.materialize_request(request.work_id)
         violations = self._authority_violations(expected, request)
         if violations:
-            decision = self._record_authority_attention(request.work_id, violations)
-            return SteeringProductionAdmission(
-                request=request,
-                attention_decision_id=decision.id,
-            )
+            # Reject a software-generated expansion. Keeping the admitted Work
+            # boundary is a safe default; this is not an invitation to ask Human
+            # to approve an Executor/adapter authority violation.
+            raise SteeringInvariantViolation("STEERING_PRODUCTION_AUTHORITY_MISMATCH: "
+                                             + "; ".join(violations))
 
         with self.database.unit_of_work() as unit_of_work:
             product = ProductStore(unit_of_work.session)

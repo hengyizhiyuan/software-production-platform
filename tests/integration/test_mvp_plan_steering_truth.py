@@ -399,6 +399,22 @@ def test_steer_truth_03_through_14_and_reconstruction(
         current.id,
         (work_ref,),
     )
+    from spg.application.human_attention import boundary_decision
+    from spg.domain.steering import HumanDecisionEffect
+    from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+    # A real durable budget boundary, rather than a reason/template alone.
+    with postgres_database.unit_of_work() as uow:
+        for index in range(3):
+            NativeExecutionStore(uow.session).observe_work_convergence(
+                work_id=work.work_id,intent_identity="a"*64,boundary="STEERING",
+                reality_identity=str(index).zfill(64),failed=True,
+                missing_acceptance=("SOURCE_VERIFIED",))
+        uow.commit()
+    need=boundary_decision("当前事项是否暂停，或明确修订后继续", "自动尝试预算已用尽。暂停当前事项，还是通过新要求修订范围？",
+        HumanDecisionEffect.COST_OR_RISK,(work_ref,),
+        (("暂停当前事项","停止资源消耗并保留已有记录。"),("明确修订范围","通过新的明确要求修订后再检查执行条件。")),
+        why_now="三次失败已触发持久化预算保护，不能按原样继续尝试。",
+        impact="继续改变本次范围或资源授权必须由 Human 决定。")
     attention = service.admit_decision(
         AdmitSteeringDecisionRequest(
             steering_plan_revision_id=revision_id,
@@ -411,6 +427,10 @@ def test_steer_truth_03_through_14_and_reconstruction(
             completion_condition="A governed Human decision is recorded",
             steering_outcome=SteeringOutcome.HUMAN_ATTENTION,
             expected_basis_fingerprint=attention_fingerprint,
+            attention_reason=SteeringAttentionReason.MATERIAL_RISK_OR_COST_DECISION,
+            human_decision_need=need,
+            recommendation="Review the preserved budget evidence before changing authority.",
+            expected_impact="No unchanged retry is authorized; Human may pause or explicitly revise.",
         )
     )
     assert attention.steering_outcome is SteeringOutcome.HUMAN_ATTENTION
@@ -726,7 +746,7 @@ def test_steer_dec_07_stale_candidate_after_material_revision_is_rejected(
 
 
 @pytest.mark.parametrize("attention_reason", tuple(SteeringAttentionReason))
-def test_steer_dec_10_through_14_human_attention_is_typed_and_projected(
+def test_steer_dec_10_through_14_reason_alone_cannot_create_human_attention(
     postgres_database: Database,
     admitted_work,
     attention_reason: SteeringAttentionReason,
@@ -762,33 +782,14 @@ def test_steer_dec_10_through_14_human_attention_is_typed_and_projected(
         expected_impact="The decision controls subsequent Steering",
         reasoning_provider_identity="fake:semantic-steering",
     )
-    decision = SteeringDecisionApplicationService(
-        postgres_database,
-        DeterministicPlanSteeringCapability(),
-    ).admit(work.work_id, candidate)
-    assert decision.attention_reason is attention_reason
-    assert decision.authority_assessment is candidate.authority_assessment
-
-    attention = works.list_attention(work_id=work.work_id)
-    assert len(attention) == 1
-    assert attention[0].kind is (
-        AttentionKind.PRODUCTION_PROPOSAL_REVIEW
-        if attention_reason
-        is SteeringAttentionReason.PRODUCTION_PROPOSAL_REVIEW_REQUIRED
-        else AttentionKind.STEERING_DECISION_REQUIRED
-    )
-    assert attention[0].steering_reason is attention_reason
-    assert attention[0].decision != candidate.objective
-    assert attention[0].reason != candidate.reason
-    assert attention[0].recommendation != candidate.recommendation
-    assert attention[0].expected_impact != candidate.expected_impact
-    assert decision.reason == candidate.reason
-    assert decision.recommendation == candidate.recommendation
-    assert attention[0].governed_subject_ref == f"steering-decision:{decision.id}"
-    assert attention[0].kind is not AttentionKind.CANDIDATE_AUTHORIZATION
+    with pytest.raises(SteeringInvariantViolation,match="ATTENTION_NOT_QUALIFIED: DECISION_OBJECT_MISSING"):
+        SteeringDecisionApplicationService(postgres_database,
+            DeterministicPlanSteeringCapability()).admit(work.work_id,candidate)
+    assert works.list_attention(work_id=work.work_id)==()
+    assert SteeringApplicationService(postgres_database).reconstruct(work.work_id).latest_decision is None
 
 
-def test_admitted_semantic_question_is_the_actionable_steering_prompt(
+def test_ungrounded_semantic_question_cannot_become_a_human_prompt(
     postgres_database: Database,
     admitted_work,
 ) -> None:
@@ -814,39 +815,10 @@ def test_admitted_semantic_question_is_the_actionable_steering_prompt(
                 completion_claimed=False,
             )
 
-    result = SemanticStepApplicationService(
-        postgres_database, QuestionCapability()
-    ).execute(work.work_id)
-    frame = PlanFrameAssembler(postgres_database).assemble(work.work_id)
-    refs = tuple(item.reference for item in frame.basis.resolved_reality)
-    SteeringDecisionApplicationService(
-        postgres_database, DeterministicPlanSteeringCapability()
-    ).admit(
-        work.work_id,
-        NextStepCandidate(
-            type=SteeringStepType.HUMAN_DECISION,
-            objective="Resolve the current product question",
-            reason=result.bounded_summary,
-            reality_refs=refs,
-            human_required=True,
-            completion_condition="Human supplies the product direction",
-            proposed_outcome=SteeringOutcome.HUMAN_ATTENTION,
-            basis_fingerprint=frame.basis.fingerprint,
-            authority_assessment=SteeringAuthorityAssessment.UNCERTAIN,
-            proposed_engineering_scope_fingerprint=frame.engineering_scope_fingerprint,
-            attention_reason=SteeringAttentionReason.MAJOR_PRODUCT_OR_ARCHITECTURE_DECISION,
-            recommendation="Ask the Human for the missing product direction.",
-            expected_impact="Production waits for the Human's answer.",
-        ),
-    )
-
-    attention = works.list_attention(work_id=work.work_id)
-    assert len(attention) == 1
-    assert attention[0].kind is AttentionKind.STEERING_DECISION_REQUIRED
-    assert attention[0].reason == question
-    assert attention[0].conversation_prompt == question
-    assert attention[0].recommendation == "State the feature and the problem it addresses."
-    assert attention[0].available_actions == ()
+    with pytest.raises(SteeringInvariantViolation,match="ATTENTION_NOT_QUALIFIED: DECISION_OBJECT_MISSING"):
+        SemanticStepApplicationService(postgres_database,QuestionCapability()).execute(work.work_id)
+    assert works.list_attention(work_id=work.work_id)==()
+    assert SteeringApplicationService(postgres_database).reconstruct(work.work_id).latest_decision is None
 
 
 def test_steer_dec_09_bounded_defect_does_not_ask_human_to_continue(
@@ -1223,9 +1195,8 @@ def test_steer_spg_authority_expansion_stops_before_runtime_creation(
             )
         }
     )
-    stopped = bridge.admit_cycle(expanded)
-    assert stopped.binding is None
-    assert stopped.attention_decision_id is not None
+    with pytest.raises(SteeringInvariantViolation,match="STEERING_PRODUCTION_AUTHORITY_MISMATCH"):
+        bridge.admit_cycle(expanded)
     with postgres_database.unit_of_work() as unit_of_work:
         after = unit_of_work.session.scalar(select(func.count()).select_from(production_runs))
         assert after == before
@@ -1233,7 +1204,7 @@ def test_steer_spg_authority_expansion_stops_before_runtime_creation(
             request.steering_step_id
         ) is None
     attention = _works.list_attention(work_id=work.work_id)
-    assert attention[0].steering_reason is SteeringAttentionReason.SCOPE_OR_AUTHORITY_EXPANSION
+    assert attention==()  # Software expansion is refused, not delegated for Human approval.
 
 
 def test_steer_spg_failed_second_cycle_stays_open_without_retry(
@@ -1653,7 +1624,7 @@ def test_steer_loop_auto_continues_two_cycles_across_restart_and_projects_api(
         orchestrator_b.shutdown()
 
 
-def test_steer_loop_human_attention_stops_then_plan_revision_reenables(
+def test_steer_loop_unqualified_human_step_blocks_then_plan_revision_reenables(
     postgres_database: Database,
     admitted_work,
 ) -> None:
@@ -1689,8 +1660,8 @@ def test_steer_loop_human_attention_stops_then_plan_revision_reenables(
     )
     try:
         stopped = driver.activate(work.work_id)
-        assert stopped.stop_reason is SteeringDriverStopReason.HUMAN_ATTENTION
-        assert stopped.iterations_executed == 3
+        assert stopped.stop_reason is SteeringDriverStopReason.BLOCKED
+        assert stopped.iterations_executed == 2
         reconstruction = SteeringApplicationService(postgres_database).reconstruct(
             work.work_id
         )
@@ -1698,8 +1669,9 @@ def test_steer_loop_human_attention_stops_then_plan_revision_reenables(
         assert reconstruction.current_step.type is SteeringStepType.HUMAN_DECISION
         assert reconstruction.next_step is not None
         assert reconstruction.next_step.type is SteeringStepType.PRODUCE
-        assert works.get_work(work.work_id).status is WorkStatus.NEEDS_ATTENTION
-        assert driver.resume_safely_eligible_works() == ()
+        assert works.get_work(work.work_id).status is WorkStatus.READY
+        assert works.list_attention(work_id=work.work_id)==()
+        assert not driver.is_active(work.work_id)
         with postgres_database.unit_of_work() as unit_of_work:
             bindings = ProductStore(unit_of_work.session).runtime_bindings(work.work_id)
             assert len(bindings) == 1
@@ -1760,7 +1732,7 @@ def test_steer_loop_human_attention_stops_then_plan_revision_reenables(
         orchestrator.shutdown()
 
 
-def test_steer_loop_verify_accept_without_evidence_requests_product_acceptance(
+def test_steer_loop_verify_accept_without_evidence_cannot_request_acceptance(
     postgres_database: Database,
     admitted_work,
 ) -> None:
@@ -1786,18 +1758,15 @@ def test_steer_loop_verify_accept_without_evidence_requests_product_acceptance(
     driver = PlanSteeringDriver(postgres_database, works, orchestrator)
     try:
         outcome = driver.activate(work.work_id)
-        assert outcome.stop_reason is SteeringDriverStopReason.HUMAN_ATTENTION
+        assert outcome.stop_reason is SteeringDriverStopReason.BLOCKED
         reconstruction = SteeringApplicationService(postgres_database).reconstruct(
             work.work_id
         )
         assert reconstruction.current_step is not None
         assert reconstruction.current_step.type is SteeringStepType.VERIFY_ACCEPT
-        assert reconstruction.latest_decision is not None
-        assert (
-            reconstruction.latest_decision.attention_reason
-            is SteeringAttentionReason.PRODUCT_ACCEPTANCE_REQUIRED
-        )
-        assert works.get_work(work.work_id).status is WorkStatus.NEEDS_ATTENTION
+        assert reconstruction.latest_decision is None
+        assert works.list_attention(work_id=work.work_id)==()
+        assert works.get_work(work.work_id).status is WorkStatus.READY
         assert orchestrator.last_outcome(work.work_id) is None
     finally:
         driver.shutdown()

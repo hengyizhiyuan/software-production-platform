@@ -269,11 +269,11 @@ def test_missing_context_source_does_not_make_budget_halt_a_human_scope_choice(m
     from spg.infrastructure.persistence.steering_store import SteeringStore
     from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
     from spg.domain.steering import SteeringAttentionReason
-    ir,_=declared_ir(ROUTINE[0][1]);_,need=valid_need();history=[SimpleNamespace(condition='NON_CONVERGING')]
+    ir,_=declared_ir(ROUTINE[0][1]);_,need=valid_need();history=[SimpleNamespace(condition='NON_CONVERGING',failure_signature='d'*64)]
     monkeypatch.setattr(ProductStore,'runtime_binding',lambda *_:None)
     monkeypatch.setattr(SteeringStore,'latest_semantic_result_for_step',lambda *_:None)
     monkeypatch.setattr(NativeExecutionStore,'work_convergence_history',lambda *_:history)
-    context={'status':'NOT_READY','owner':'ECF','missing_classes':['PRODUCT_INTENT']}
+    context={'status':'NOT_READY','owner':'ECF','missing_classes':['PRODUCT_INTENT'],'failure_signature':'d'*64}
     monkeypatch.setattr(SteeringProductionService,'context_readiness',lambda *_:context)
     decision=boundary_decision('官网生产是否暂停或改变边界','你希望暂停，还是调整目标后继续？',
         HumanDecisionEffect.COST_OR_RISK,need.evidence,
@@ -286,6 +286,8 @@ def test_missing_context_source_does_not_make_budget_halt_a_human_scope_choice(m
     context.update(status='READY')
     assert boundary()=='CONVERGENCE_BUDGET_EXHAUSTED'
     assert qualify_human_decision(decision,evidence=need.evidence,semantic_ir=ir,owner_boundary=boundary())==()
+    context.update(status='NOT_READY',failure_signature='e'*64)
+    assert boundary()=='CONVERGENCE_BUDGET_EXHAUSTED'  # An unrelated possible future gate is not the observed failure.
     assert history[0].condition=='NON_CONVERGING'  # No reset or rewritten history.
 
 
