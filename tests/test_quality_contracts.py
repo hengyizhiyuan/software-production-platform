@@ -108,3 +108,9 @@ def test_services_do_not_call_an_unconfigured_probe_healthy(monkeypatch):
     api=next(r for r in rows if r['service']=='api')
     assert api['state']=='running' and api['health']=='NOT_CONFIGURED'
     assert next(r for r in rows if r['service']=='native-worker')['state']=='MISSING'
+
+
+def test_owner_lineage_filters_content_credentials_and_preserves_context_fingerprint():
+    from spg.evaluation.pytest_lineage import typed_references
+    result=typed_references({'decision_context':{'work_id':'exact-work','package_fingerprint':'f'*64,'source_text':'private input','password':'secret'},'rationale':'private prose'})
+    assert result=={'/decision_context/work_id':'exact-work','/decision_context/package_fingerprint':'f'*64}

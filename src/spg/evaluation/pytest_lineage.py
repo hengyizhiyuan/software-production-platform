@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import create_engine, select
 from spg.infrastructure.persistence import metadata
 
-TABLES = ("product_works", "work_source_bases", "production_work_units", "context_packages", "materialized_execution_inputs",
+TABLES = ("product_works", "product_managed_sources", "work_source_bases", "production_work_units", "context_packages", "materialized_execution_inputs",
     "interaction_assessments", "interaction_turns", "interaction_turn_realizations", "interaction_turn_obligations",
     "pwu_contract_versions", "execution_attempts", "execution_dispatches", "execution_allocations",
     "executor_worker_registrations", "executor_queue", "production_snapshots", "proposed_repository_snapshots", "completion_evaluations", "verification_records",
@@ -16,7 +16,7 @@ TABLES = ("product_works", "work_source_bases", "production_work_units", "contex
 SAFE_COLUMNS = {"id", "work_id", "pwu_id", "work_unit_id", "task_contract_id", "attempt_id",
     "candidate_id", "worker_id", "condition", "status", "state", "generation", "lease_epoch",
     "source_revision", "source_tree", "revision", "tree", "source_baseline_id", "source_version",
-    "fingerprint", "contract_digest", "snapshot_id", "acceptance_id", "product_id", "version",
+    "package_fingerprint", "accepted_revision", "accepted_tree", "decision_id", "decision_version", "fingerprint", "contract_digest", "snapshot_id", "acceptance_id", "product_id", "version",
     "turn_id", "semantic_ir_id", "assessment_id", "basis_fingerprint",
     "context_ref", "content_fingerprint", "completion_contract_fingerprint",
     "context_package_content_fingerprint", "context_package_version", "input_fingerprint",
@@ -43,6 +43,37 @@ def typed_references(value, path=""):
 
 
 @pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_call(item):
+    # Some canonical tests deliberately delete their owner rows in a function
+    # finally block. Observe typed returned owner receipts before that cleanup;
+    # do not change owner code, assertions, inputs or returned results.
+    import sys
+    previous = sys.getprofile()
+    receipts = []
+    def observe(frame, event, value):
+        if event != "return" or value is None or len(receipts) >= 40:
+            return
+        owner = frame.f_globals.get("__name__")
+        name = frame.f_code.co_name
+        if not ((owner == "spg.application.decision_context" and name == "lineage_for_work_task")
+            or (owner == "spg.application.production_intelligence" and name == "build")):
+            return
+        if hasattr(value, "model_dump"):
+            refs = typed_references(value.model_dump(mode="json"))
+            if refs:
+                receipts.append({"owner_function": owner + "." + name, "typed_references": refs})
+    active = bool(os.environ.get("WATT_QUALITY_LINEAGE_FILE"))
+    if active:
+        sys.setprofile(observe)
+    try:
+        yield
+    finally:
+        if active:
+            sys.setprofile(previous)
+        item._quality_owner_receipts = receipts
+
+
+@pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     result = yield
     report = result.get_result()
@@ -53,6 +84,9 @@ def pytest_runtest_makereport(item, call):
     if not destination or not url:
         return
     evidence = {"nodeid": item.nodeid, "outcome": report.outcome, "owners": {}}
+    receipts = getattr(item, "_quality_owner_receipts", [])
+    if receipts:
+        evidence["owners"]["canonical_context_receipts"] = receipts
     tmp = item.funcargs.get("tmp_path")
     if tmp is not None:
         guardian = []

@@ -11,7 +11,7 @@ import subprocess
 
 
 def git(source, *args):
-    return subprocess.check_output(['git', '-C', str(source)] + list(args)).decode().strip()
+    return subprocess.check_output(['git', '-c', 'safe.directory=' + str(source), '-C', str(source)] + list(args)).decode().strip()
 
 
 def prepare(source, output_base, uid=10001):
