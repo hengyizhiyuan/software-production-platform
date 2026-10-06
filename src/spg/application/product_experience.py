@@ -354,6 +354,21 @@ class ProductExperienceProjection:
             ("candidate_id", "candidate_fingerprint", "repository_revision", "tree",
              "entrypoint", "preview_kind", "artifacts", "verification", "authorization_pending")}
         execution = None if work is None else self._current_execution(work)
+        admission_context = None
+        if (work is not None and work.status.value == "READY"
+                and work.current_production_step == "PRODUCE"
+                and work.current_production_run_id is None and not attention):
+            from spg.application.steering_production import SteeringProductionService
+            from spg.domain.steering import SteeringInvariantViolation
+            try:
+                admission_context = SteeringProductionService(self.database).context_readiness(work.work_id)
+            except (ProductInvariantViolation, SteeringInvariantViolation) as error:
+                # Preserve an unknown owner obstruction, without exposing raw prose
+                # or inventing a Human decision. Evidence drill-down retains it.
+                admission_context = {"status": "NOT_READY", "owner": "PRODUCTION",
+                                     "condition": "PRODUCTION_ADMISSION_BLOCKED",
+                                     "error_type": type(error).__name__,
+                                     "source_references": [f"work:{work.work_id}"]}
         result = {"revision": _fingerprint(product["revision"], work_data, delivery,
                                          candidate_view, guardian, attention, steps,
                                          execution),
@@ -366,6 +381,7 @@ class ProductExperienceProjection:
                     "accepted_revision": product["accepted_revision"],
                     "candidate": candidate_view,
                     "execution": execution,
+                    "admission_context": admission_context,
                     "production_plan": None if work is None else work.production_plan_runtime,
                     "guardian": guardian,
                     "deliveries": [] if delivery is None else delivery["deliveries"][:5],

@@ -141,6 +141,7 @@
       ['质量检查', text?.guardian || guardianCopy(r.guardian)],
       ['交付成果', r.deliveries.length ? `${r.deliveries.length} 项` : '尚无交付成果'],
     ];
+    if (r.admission_context?.status === 'NOT_READY' && text?.blocker) facts.push(['生产条件', text.blocker]);
     if (r.cloud_deliverable_id) facts.push(['阿里云部署', r.cloud_deployment ?
       ({SUCCEEDED:'部署成功',FAILED:'部署失败',ROLLED_BACK:'已回滚',NEEDS_HUMAN_ATTENTION:'需要你处理',
         PRECHECK:'检查环境',STAGING:'传送成果',PREPARING:'正在部署',VERIFYING:'正在验证'}[r.cloud_deployment.state] || '等待授权') : '未部署']);

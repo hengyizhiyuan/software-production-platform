@@ -177,3 +177,22 @@ test('qualified Actions render WIC questions while preserving exact authority co
   assert.match(html,/AUTHORIZE/);
   assert.doesNotMatch(html,/Choose how|STEERING_DECISION_REQUIRED/);
 });
+
+test('READY Work still exposes an actual admission blocker through WIC owner facts', () => {
+  const source=script.slice(script.indexOf('  function renderWorkspaceReality(ws,'),
+    script.indexOf('  function renderWorkspaceActions(ws,'));
+  const render=vm.runInNewContext(`${source}; renderWorkspaceReality`,{
+    esc:value=>String(value??''),link:()=>'',humanStatus:()=> '准备中',
+    executionCopy:()=> '尚未进入执行队列',verificationCopy:()=> '尚无验证结果',
+    guardianCopy:()=> '尚未开始质量检查'});
+  const ws={product:{accepted_version:0},work:{status:'READY'},reality:{
+    candidate:null,execution:null,guardian:{},deliveries:[],
+    admission_context:{status:'NOT_READY',condition:'DECISION_CONTEXT_NOT_READY',
+      missing_classes:['PRODUCT_INTENT','PRODUCT_INVARIANT','APPROVED_DECISION']}},
+    human_visible:{facts:{blocker:'生产准备受阻：缺少已批准决定的依据，尚未进入执行。'}}};
+  const html=render(ws,false,null,'exact-work');
+  assert.match(html,/生产条件/);
+  assert.match(html,/缺少已批准决定的依据/);
+  assert.doesNotMatch(html,/DECISION_CONTEXT_NOT_READY|PRODUCT_INVARIANT|会自动继续/);
+  assert.equal((html.match(/data-workspace-quadrant=/g)||[]).length,1);
+});

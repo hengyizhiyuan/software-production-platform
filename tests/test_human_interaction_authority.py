@@ -195,3 +195,54 @@ def test_cloud_detail_wording_preserves_owner_failure_without_raw_prose():
 @pytest.mark.parametrize('text',('接下来推进 Steering','依照 IRK 处理','先准备 Task Contract','完成 Guided Design'))
 def test_owner_component_names_do_not_leak_into_normal_collaboration(text):
     assert language_leaks(text)
+
+
+def test_actual_context_blocker_cannot_be_hidden_by_ready_work_or_autonomous_copy():
+    from spg.application.human_visible import fact_wording
+    ir,_=declared_ir(ROUTINE[0][1]);p,_=presentation(ir)
+    context={'status':'NOT_READY','owner':'ECF','condition':'DECISION_CONTEXT_NOT_READY',
+             'missing_classes':['PRODUCT_INTENT','PRODUCT_INVARIANT','APPROVED_DECISION'],
+             'package_fingerprint':'c'*64}
+    facts={**p.owner_facts,'admission_context':context}
+    p=p.model_copy(update={'owner_facts':facts})
+    before=deepcopy(p.owner_facts)
+    words=validate_wording(p,safe_wording(p))
+    assert '生产准备受阻' in words.summary and '尚未进入执行' in words.current_activity
+    assert '先核对' in words.next_step and not p.decision_needs
+    assert '已批准决定的依据' in fact_wording(facts)['blocker']
+    assert fact_wording(facts)['review']=='尚未形成候选成果，不能授权或验收。'
+    assert not language_leaks(words.summary)
+    with pytest.raises(ValueError,match='HIDDEN_ADMISSION_BLOCKER'):
+        validate_wording(p,words.model_copy(update={'summary':'需求明确，正在准备官网。'}))
+    with pytest.raises(ValueError,match='FALSE_AUTONOMOUS_PROGRESS'):
+        validate_wording(p,words.model_copy(update={'next_step':'系统会自动继续。'}))
+    assert before==p.owner_facts and p.owner_facts['work']['status']=='READY'
+
+
+def test_production_owner_reads_exact_ecf_failure_without_admitting_or_synthesizing(monkeypatch):
+    from contextlib import contextmanager
+    from spg.application.steering_production import SteeringProductionService
+    from spg.application.decision_context import DecisionContextNotReady
+    from spg.infrastructure.persistence.product_store import ProductStore
+    work_id,step_id,revision_id=uuid4(),uuid4(),uuid4()
+    request=SimpleNamespace(work_id=work_id,steering_step_id=step_id,
+        work_reality_revision_id=revision_id,repository_identity='watt://qualified-product',source_revision='d'*40)
+    @contextmanager
+    def uow():yield SimpleNamespace(session=object())
+    service=SteeringProductionService(SimpleNamespace(unit_of_work=uow))
+    monkeypatch.setattr(service,'materialize_request',lambda wid:request if wid==work_id else None)
+    monkeypatch.setattr(ProductStore,'resource_for_work',lambda self,wid:SimpleNamespace(location_ref='/exact/work/source'))
+    calls=[]
+    def context(req,*,repository_path):
+        calls.append((req,repository_path))
+        raise DecisionContextNotReady(SimpleNamespace(context_status=SimpleNamespace(value='NOT_READY'),
+            missing_required_classes=tuple(SimpleNamespace(value=k) for k in
+                ('PRODUCT_INTENT','PRODUCT_INVARIANT','APPROVED_DECISION')),
+            stale_context_risks=(),conflicts=(),fingerprint='c'*64))
+    monkeypatch.setattr(service,'_task_contract',context)
+    monkeypatch.setattr(service,'admit_cycle',lambda *_:pytest.fail('Read projection must not admit production'))
+    observed=service.context_readiness(work_id)
+    assert observed['owner']=='ECF' and observed['status']=='NOT_READY'
+    assert observed['missing_classes']==['PRODUCT_INTENT','PRODUCT_INVARIANT','APPROVED_DECISION']
+    assert f'work-reality-revision:{revision_id}' in observed['source_references']
+    assert calls==[(request,'/exact/work/source')]

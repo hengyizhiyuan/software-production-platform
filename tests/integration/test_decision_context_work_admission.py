@@ -6,7 +6,7 @@ import sys
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import delete, insert, update
+from sqlalchemy import delete, insert, select, update
 
 from spg.application.decision_context import (
     DecisionContextAuthorityMissing, DecisionContextChanged,
@@ -29,8 +29,9 @@ REMOTE = "git@github.com:hengyizhiyuan/software-production-platform.git"
 
 
 @pytest.mark.parametrize("qualified_input", [False, True])
+@pytest.mark.parametrize("missing_context", [False, True])
 def test_managed_web_work_binds_exact_product_source_and_ecf(
-    postgres_database, tmp_path, monkeypatch, qualified_input,
+    postgres_database, tmp_path, monkeypatch, qualified_input, missing_context,
 ):
     from tests.qualification_owner_sources import owner_source_root
     owner = owner_source_root("ecf", ROOT.parent / "engineering-context-fabric" / "src")
@@ -48,6 +49,8 @@ def test_managed_web_work_binds_exact_product_source_and_ecf(
         "## Product Invariant\nKeep navigation.\n\n"
         "## Approved Decision\nAdd an entry.\n", encoding="utf-8")
     (repository / "index.html").write_text("<main>Home</main>\n")
+    if missing_context:
+        (repository / "README.md").write_text("# Newly managed website\n",encoding="utf-8")
     for args in (("add", "."), ("commit", "-m", "baseline")):
         subprocess.run(["git", "-C", str(repository), *args], check=True,
                        capture_output=True)
@@ -93,6 +96,17 @@ def test_managed_web_work_binds_exact_product_source_and_ecf(
                 source_version=0, source_revision=revision, source_tree=tree,
                 work_ref="refs/heads/work"))
             uow.commit()
+        if missing_context:
+            from spg.application.decision_context import DecisionContextNotReady
+            with pytest.raises(DecisionContextNotReady) as error:
+                lineage_for_work_task(postgres_database,work_id=work_id,
+                    repository_identity=identity,repository_path=repository,
+                    repository_revision=input_revision,target_paths=("index.html",))
+            assert set(error.value.missing_classes)=={'PRODUCT_INTENT','PRODUCT_INVARIANT','APPROVED_DECISION'}
+            with postgres_database.unit_of_work() as uow:
+                assert uow.session.execute(select(product_works.c.condition).where(
+                    product_works.c.id==work_id)).scalar_one()=='READY'
+            return
         lineage = lineage_for_work_task(
             postgres_database, work_id=work_id, repository_identity=identity,
             repository_path=repository, repository_revision=input_revision,

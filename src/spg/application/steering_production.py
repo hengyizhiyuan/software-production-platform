@@ -13,7 +13,7 @@ from spg.application.production_intelligence import (
     TaskContractRequest,
     default_task_contract_builder,
 )
-from spg.application.decision_context import lineage_for_work_task
+from spg.application.decision_context import DecisionContextNotReady, lineage_for_work_task
 from spg.application.runtime import RuntimeService
 from spg.application.steering import SteeringApplicationService
 from spg.application.steering_decision import (
@@ -75,6 +75,34 @@ class SteeringProductionService:
         self.database = database
         self.runtime = RuntimeService(database)
         self.planning = ProductionPlanningService(RuleBasedProductionPlanner(), database=database)
+
+    def context_readiness(self, work_id: UUID) -> dict:
+        """Read the actual pre-admission context gate without admitting a cycle.
+
+        This is an owner observation, not a WIC readiness decision. In particular
+        absent ECF sources stay absent; no context or approval is synthesized.
+        """
+        request = self.materialize_request(work_id)
+        with self.database.unit_of_work() as uow:
+            resource = ProductStore(uow.session).resource_for_work(work_id)
+        if resource is None:
+            raise ProductInvariantViolation("Admitted Engineering Resource is missing")
+        refs = [f"work:{work_id}", f"steering-step:{request.steering_step_id}",
+                f"source:{request.repository_identity}@{request.source_revision}"]
+        if request.work_reality_revision_id is not None:
+            refs.append(f"work-reality-revision:{request.work_reality_revision_id}")
+        try:
+            self._task_contract(request, repository_path=resource.location_ref)
+        except DecisionContextNotReady as error:
+            return {"status": "NOT_READY", "owner": "ECF",
+                    "condition": "DECISION_CONTEXT_NOT_READY",
+                    "context_status": error.status,
+                    "missing_classes": list(error.missing_classes),
+                    "stale_risks": list(error.stale_risks),
+                    "conflict_references": list(error.conflict_references),
+                    "package_fingerprint": error.package_fingerprint,
+                    "source_references": refs}
+        return {"status": "READY", "source_references": refs}
 
     def materialize_request(self, work_id: UUID) -> SteeringProductionRequest:
         reconstruction = SteeringApplicationService(self.database).reconstruct(work_id)

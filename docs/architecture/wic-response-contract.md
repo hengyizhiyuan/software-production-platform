@@ -628,3 +628,11 @@ admission, while IRK independently retains the same fail-closed checks.
 Cached expressions are requalified by the current language gate. Rejected cached
 wording is replaced under the same presentation lock; owner facts, source
 references and historical conversations remain unchanged.
+
+At a READY Work's unexecuted PRODUCE step, the production owner exposes the exact
+Task Contract context readiness observation through a read-only query. A Work's
+READY status does not prove its context is ready. Missing ECF classes, conflicts,
+staleness and source references remain owner facts; WIC presents the obstruction
+without inventing a Human decision or promising autonomous execution. No context
+record or approved decision is synthesized by this read path. Without a Candidate,
+the review surface cannot claim that quality conditions have already passed.

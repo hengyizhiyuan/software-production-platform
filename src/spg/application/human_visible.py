@@ -52,6 +52,7 @@ def projection_for_workspace(database, workspace):
         'execution':execution_fact,'scheduling':None if execution is None else {k:(execution.get('scheduling') or {}).get(k) for k in ('progression_state','compatible_slots','draining_worker_count')},'candidate':candidate,'guardian':reality.get('guardian'),
         'accepted_version':reality.get('accepted_version'),
         'accepted_revision':reality.get('accepted_revision'),
+        'admission_context':reality.get('admission_context'),
         'deliveries':reality.get('deliveries',()),'cloud_deployment':reality.get('cloud_deployment')}
     agenda = tuple(workspace['agenda'])
     decisions = tuple({k:a.get(k) for k in ('id','kind','human_decision_need','actions','governed_subject_ref',
@@ -64,7 +65,8 @@ def projection_for_workspace(database, workspace):
     refs = tuple(filter(None, (f"product:{workspace['product']['id']}",
         None if work_id is None else f'work:{work_id}',
         None if ir is None else f'semantic-ir:{ir.id}',
-        *((a.get('governed_subject_ref')) for a in workspace['actions']))))
+        *((a.get('governed_subject_ref')) for a in workspace['actions']),
+        *((reality.get('admission_context') or {}).get('source_references',())))))
     basis = {'motive':motive,'ir':None if ir is None else ir.model_dump(mode='json'),
              'facts':facts,'agenda':agenda,'decisions':decisions,'units':units,'refs':refs}
     return HumanVisibleProjection(basis_fingerprint=_digest(basis), governed_motive=motive,
@@ -93,6 +95,11 @@ def validate_wording(projection, wording):
     guardian = projection.owner_facts.get('guardian') or {}
     candidate = projection.owner_facts.get('candidate')
     work = projection.owner_facts.get('work') or {}
+    if (projection.owner_facts.get('admission_context') or {}).get('status') == 'NOT_READY':
+        if not any(t in wording.summary for t in ('受阻','暂停','停止','尚未','无法','未满足','缺少','缺失','未齐','不足','未就绪','未准备')):
+            raise ValueError('HUMAN_REALIZATION_HIDDEN_ADMISSION_BLOCKER')
+        if any(t in prose for t in ('正在生产','正在执行改动','会自动继续','将自动继续','按当前目标继续形成并验证改动')):
+            raise ValueError('HUMAN_REALIZATION_FALSE_AUTONOMOUS_PROGRESS')
     for claim, allowed in [('质量检查通过',guardian.get('gate')=='PASS'),
                            ('验证已通过',bool(candidate and candidate.get('verification') and all(v.endswith(': PASS') for v in candidate['verification']))),('已完成本次',work.get('work_complete') is True),
                            ('已经部署',projection.owner_facts.get('cloud_deployment',{}) and
@@ -112,6 +119,11 @@ def safe_wording(projection):
     activity = EXECUTION.get(state,phase)
     summary = f'{motive}。{STATUS.get(work.get("status"),"正在保留并理解这次请求")}；{activity}。'
     next_step = '按当前目标继续形成并验证改动；成果需要你明确审阅和接受。'
+    context_blocker = admission_context_wording(projection.owner_facts.get('admission_context'))
+    if context_blocker:
+        activity='生产准备受阻，尚未进入执行'
+        summary=f'{motive}。{context_blocker}'
+        next_step='先核对并补齐已有授权的生产依据，再重新检查准入；不会代替你批准缺失的决定。'
     if work.get('status') in {'BLOCKED','NEEDS_REFINEMENT','NEEDS_ATTENTION'} and not projection.decision_needs:
         next_step='当前生产条件未满足，需先由负责的模块核对阻塞证据；尚未完成。'
     if projection.decision_needs:next_step='先处理下方的具体决定，再依据你的选择推进。'
@@ -132,6 +144,23 @@ def safe_wording(projection):
         decisions=tuple(decisions),production_units=tuple({'id':u['pwu_id'], 'text':
             f'第 {index+1} 个生产单元：'+UNIT.get(u['state'],'等待推进')}
             for index,u in enumerate(projection.production_units)))
+
+
+def admission_context_wording(context):
+    """WIC vocabulary for a source-owned admission observation."""
+    if not context or context.get('status') != 'NOT_READY':
+        return ''
+    labels={'PRODUCT_INTENT':'产品意图依据','PRODUCT_INVARIANT':'产品不变量依据',
+            'APPROVED_DECISION':'已批准决定的依据','APPROVED_CONSTRAINT':'已批准约束的依据'}
+    missing=context.get('missing_classes') or ()
+    if missing:
+        detail='、'.join(labels.get(c,'必要的生产依据') for c in missing)
+        return f'生产准备受阻：当前缺少{detail}，尚未进入执行。'
+    if context.get('conflict_references'):
+        return '生产准备受阻：当前生产依据存在冲突，尚未进入执行。'
+    if context.get('stale_risks'):
+        return '生产准备受阻：当前生产依据需要重新核对，尚未进入执行。'
+    return '生产准入条件尚未满足；已停止推进，尚未进入执行。'
 
 
 def fact_wording(facts):
@@ -167,7 +196,9 @@ def fact_wording(facts):
         '验收已记录；正在更新正式版本' if acceptance and promotion and promotion.get('state')!='COMPLETED' else
         '已验收' if acceptance else '尚待你明确决定')
     ready=not guardian.get('required') or guardian.get('gate')=='PASS'
-    review=('机器验证已通过，质量检查尚未通过；当前版本还不能授权或验收。' if verified and not ready else
+    review=('尚未形成候选成果，不能授权或验收。' if not candidate else
+        '候选成果尚未通过独立验证，不能授权或验收。' if not verified else
+        '机器验证已通过，质量检查尚未通过；当前版本还不能授权或验收。' if verified and not ready else
         '质量检查尚未通过；当前版本还不能授权或验收。' if not ready else
         '质量条件已满足；请查看预览与改动，再明确决定是否授权当前候选。')
     cloud=facts.get('cloud_deployment') or {}
@@ -186,7 +217,7 @@ def fact_wording(facts):
         'verification':verification_text,'guardian':guardian_text,
         'candidate':acceptance_text if acceptance else '已形成，等待你授权' if candidate.get('authorization_pending') else '已形成，可查看' if candidate else '尚未形成',
         'acceptance':acceptance_text,'review':review,'cloud':cloud_text,
-        'blocker':blockers.get(blocker,'部署条件未满足，尚未通过验证。') if blocker else '',
+        'blocker':admission_context_wording(facts.get('admission_context')) or (blockers.get(blocker,'部署条件未满足，尚未通过验证。') if blocker else ''),
         'production_result':acceptance_text if acceptance else '机器验证通过；质量检查尚未通过，暂不能接受。' if verified and not ready else '候选成果已满足质量条件，等待你的明确决定。' if verified and ready else '当前成果仍需独立验证，尚未完成。'}
 
 
