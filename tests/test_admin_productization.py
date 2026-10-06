@@ -42,6 +42,7 @@ def test_later_pass_does_not_close_historical_issue():
            last_seen='2026-10-06',occurrence_count=8,closure_state='OPEN',regression_status='PERMANENT_CASE')
     i=issue_projection(c,[observation()])
     assert i['closure_state']=='OPEN' and i['requalified_case_runs']==['case-run']
+    assert '新建官网' in i['title']
     assert '仍待治理关闭' in i['repair_label'] and '8 次观测' in i['observation_label']
     assert cockpit_projection(overview(clusters=[c]),[observation()])['attention_count']==1
 

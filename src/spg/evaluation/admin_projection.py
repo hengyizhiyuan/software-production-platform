@@ -12,6 +12,10 @@ FINDING_NAMES = {
     'CANONICAL_INVARIANT_BROKEN':'已治理的生产约束未得到满足',
     'ORACLE_ASSERTION_FAILED':'行为与已批准的场景预期不一致',
     'QUALIFICATION_FAILED':'场景验证未通过',
+    'RECIPE_ORACLE_FAILED':'资格验证未满足已批准判据',
+    'OWNER_LINEAGE_UNAVAILABLE':'缺少可追溯的生产 owner 证据',
+    'OPTIONAL_DISCOVERY_REQUIRES_HUMAN':'可逆设计问题被误判为必需人工决定',
+    'UNQUALIFIED_TEMPLATE_ATTENTION':'模板检查项产生了未经授权的人工关注',
     'UNATTRIBUTED_FAILURE':'发现问题，尚缺足够证据确定原因',
 }
 
@@ -20,7 +24,9 @@ def issue_projection(cluster, later_results=()):
     """A later PASS is requalification evidence, not permission to close a finding."""
     code = cluster.get('finding_code')
     owner = OWNER_NAMES.get(cluster.get('stage'), '尚未确定的环节')
+    observed_titles=list(dict.fromkeys(r['title'] for r in later_results if str(r.get('case_id')) in cluster.get('affected_cases',[]) and r.get('title')))
     title = FINDING_NAMES.get(code, owner + '未符合场景预期')
+    if observed_titles: title += '：'+'、'.join(observed_titles[:2])
     qualified = [r for r in later_results if str(r.get('case_id')) in cluster.get('affected_cases', [])
         and r.get('state') == 'PASS' and str(r.get('created_at')) > str(cluster.get('last_seen'))]
     return {**cluster, 'title':title, 'owner_label':owner,
