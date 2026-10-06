@@ -125,6 +125,16 @@ def pytest_runtest_makereport(item, call):
                 if rows:
                     evidence["owners"][name] = [{k: (typed_references(v, k) if k in envelopes else v)
                         for k, v in dict(r).items()} for r in rows]
+                if name == "verification_records":
+                    checks = []
+                    for r in c.execute(select(t.c.id, t.c.result, t.c.evidence).limit(200)).mappings():
+                        facts = r["evidence"].get("metadata", {})
+                        checks.append({"id": str(r["id"]), "result": r["result"],
+                            "facts": {k: facts[k] for k in ("kind", "target", "unauthorized_paths",
+                                "operation_mismatches", "returncode", "exit_code", "failure_type") if k in facts}})
+                    # Outside public Holdout owner references; its complete
+                    # lineage remains sealed, including these check details.
+                    evidence["verification_checks"] = checks
         p = Path(destination)
         previous = json.loads(p.read_text()) if p.exists() else []
         previous.append(evidence)

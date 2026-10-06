@@ -123,6 +123,13 @@ def test_pilot_live_search(postgres_database, tmp_path, monkeypatch):
         versions=re.findall(r'Python (3\.\d+\.\d+)\b',fetched.inspected_content)
         assert versions, 'Official fetched reference must provide actual version evidence'
         version=max(versions,key=lambda v:tuple(map(int,v.split('.'))))
+        # Persist research provenance even when subsequent production fails.
+        research_evidence=dict(interaction_id=item.id,turn_id=turn.id,semantic_ir_id=ir.id,
+            reference_role='EXTERNAL_REFERENCE',provider='aliyun-opensearch',official_version=version,
+            fetched_reference_fingerprint=__import__('hashlib').sha256(fetched.inspected_content.encode()).hexdigest(),
+            sources=[{'url':e.url,'title':e.title,'provider_request_id':e.metadata.get('provider_request_id')} for e in observed],
+            semantic_provider=s.wic_provider_adapter,executor='reviewed-deterministic')
+        receipt(product_outcome='RESEARCH_QUALIFIED',expected_outcome='LIVE_REFERENCES_IN_QUALIFIED_WEB_CANDIDATE',**research_evidence)
         sources={'index.html':'<!doctype html><html><body><h1>Python 官方版本信息 '+version+'</h1><a href="'+html.escape(official.url,quote=True)+'">'+html.escape(official.title)+'</a><p>'+html.escape(official.snippet)+'</p></body></html>\n',
             'tests/reference.test.cjs':'const {test}=require("node:test");const assert=require("node:assert/strict");const fs=require("node:fs");test("observed official release reference",()=>{const page=fs.readFileSync("index.html","utf8");assert(page.includes('+json.dumps(html.escape(official.url,quote=True))+'));assert(page.includes('+json.dumps(version)+'));});\n'}
         monkeypatch.setattr(software,'SOURCE',sources)
@@ -141,6 +148,9 @@ def test_pilot_live_search(postgres_database, tmp_path, monkeypatch):
             human_requirement='依据已检索的官方 Python 发布信息生成 index.html，显示真实来源链接：'+official.url+'；只读外部参考，不获取为项目仓库。',
             intent_capability=ReferenceIntent(),design_capability=ReferenceDesign(),
             design_content='# Official release reference page\n\nUse exact observed URL '+official.url+' and version '+version+'. Verify page content with Node.\n')
+        result=service.get_work_result(wid)
+        receipt(product_outcome=result.status.value,trusted_result=result.trusted_result,work_id=wid,
+            expected_outcome='LIVE_REFERENCES_IN_QUALIFIED_WEB_CANDIDATE',**research_evidence)
         assert service.get_work_result(wid).trusted_result
         manifest=delivery.publish(wid)
         assert manifest.repository_revision
