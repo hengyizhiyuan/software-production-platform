@@ -114,3 +114,14 @@ def test_owner_lineage_filters_content_credentials_and_preserves_context_fingerp
     from spg.evaluation.pytest_lineage import typed_references
     result=typed_references({'decision_context':{'work_id':'exact-work','package_fingerprint':'f'*64,'source_text':'private input','password':'secret'},'rationale':'private prose'})
     assert result=={'/decision_context/work_id':'exact-work','/decision_context/package_fingerprint':'f'*64}
+
+
+def test_recipe_diagnostics_redact_credentials_and_sealed_answers(tmp_path,monkeypatch):
+    from spg.evaluation.campaign_worker import failure_diagnostics
+    monkeypatch.setenv('SPG_ALIYUN_OPENSEARCH_API_KEY','qualification-secret-only')
+    path=tmp_path/'oracle.xml'
+    path.write_text('<testsuites><testcase name="invariant"><failure type="AssertionError" message="qualification-secret-only Bearer abcdefg expected company-private-answer"/></testcase></testsuites>')
+    record=failure_diagnostics(path)[0]
+    assert 'qualification-secret-only' not in record['message'] and 'abcdefg' not in record['message']
+    sealed=failure_diagnostics(path,sealed=True)[0]
+    assert sealed['message'] is None and sealed['sealed'] and len(sealed['diagnostic_fingerprint'])==64

@@ -30,6 +30,28 @@ def assert_isolated_database(settings):
         raise QualityError("QUALITY_TEST_DATABASE_NOT_EXPLICIT")
 
 
+def failure_diagnostics(xml, *, sealed=False):
+    """Retain bounded oracle diagnostics, never raw logs, secrets or sealed answers."""
+    import re
+    from hashlib import sha256
+    if not xml.exists() or xml.stat().st_size > 2_000_000:
+        return []
+    out=[]
+    for case in ElementTree.parse(xml).iter('testcase'):
+        for error in list(case.findall('failure')) + list(case.findall('error')):
+            raw=error.get('message', '')
+            message=raw
+            for key,value in os.environ.items():
+                if value and len(value)>=6 and any(word in key.upper() for word in ('PASSWORD','SECRET','TOKEN','API_KEY')):
+                    message=message.replace(value,'[REDACTED]')
+            message=re.sub(r'(?i)bearer\s+[^\s,;]+','Bearer [REDACTED]',message)
+            message=re.sub(r'(https?://)[^ /:@]+:[^/@]+@',r'\1[REDACTED]@',message)
+            out.append({'test':case.get('name'),'type':error.get('type'),
+                'message':None if sealed else message[:600],
+                'diagnostic_fingerprint':sha256(raw.encode()).hexdigest(), 'sealed':sealed})
+    return out[:10]
+
+
 def recipe_result(settings, run, case, attempt_id):
     assert_isolated_database(settings)
     root = settings.quality_recipe_root
@@ -122,7 +144,8 @@ def recipe_result(settings, run, case, attempt_id):
         proof = "quality:case-run:" + str(attempt_id)
         details = {"oracle_id": r.key, "test_counts": counts, "exit_code": code,
             "isolated_database": True, "recipe_selector": selector,
-            "managed_source_provider": env["SPG_MANAGED_SOURCE_PROVIDER"]}
+            "managed_source_provider": env["SPG_MANAGED_SOURCE_PROVIDER"],
+            "failure_diagnostics": failure_diagnostics(xml, sealed="FRESH_HOLDOUT" in case["definition"]["cohorts"])}
         result = Evaluation(evaluator=Evaluator.DETERMINISTIC, outcome="PASS" if passed else "BLOCKED" if counts["errors"] or forced or counts["skipped"] or not counts["tests"] else "FAIL",
             evidence_refs=(proof,), evaluator_version="watt-canonical-recipe-v1",
             # A failing multi-stage test proves its oracle failed, not which
