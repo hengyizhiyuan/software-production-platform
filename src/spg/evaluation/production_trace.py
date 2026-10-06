@@ -215,13 +215,22 @@ def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=
                 or str(e['detail'].get('attempt_id')) in {str(s.get('attempt_id')) for s in steps}
                 or (e['owner']=='EXECUTION' and e['detail'].get('session_id') in {s.get('session_id') for s in steps})],
             'metrics':metrics, 'source_ref':f"production-work-unit:{row['id']}"})
+    for g in guardian:
+        c=next((c for c in tables.get('baseline_candidates',[]) if str(c['id'])==g.get('candidate_id') and c.get('fingerprint')==g.get('candidate_fingerprint')),None)
+        if c:
+            for uid in c.get('satisfied_work_unit_ids',[]):
+                e={'timestamp':g.get('assessed_at'),'owner':'GUARDIAN','title':'独立保证已评估精确候选','state':g.get('gate'),'pwu_id':uid,'source_ref':'guardian:'+str(g.get('request_id')),'detail':g}
+                events.append(e)
+                for unit in units:
+                    if str(unit['id'])==str(uid):unit['events'].append(e)
+    events.sort(key=lambda e:(str(e['timestamp'] or ''),e['source_ref']))
     # Recovery belongs to the owning Work; attach it to units only where a saved
     # exact baseline proves the relation, rather than every unit of that Work.
     for unit in units:
         unit['events'] += [e for e in events if e['source_ref'].startswith('self_refine_events:') and 'source-baseline:'+str(unit['baseline']) in e['detail'].get('evidence_references',[])]
         unit['events'].sort(key=lambda e:(str(e['timestamp'] or ''),e['source_ref']))
     model_calls = []
-    for s in tables.get('execution_steps', []):
+    for s in sorted(tables.get('execution_steps', []),key=lambda s:(str(_time(s) or ''),s.get('sequence',0))):
         if s.get('kind') != 'INFERENCE':continue
         req = s.get('request_payload', {})
         result = s.get('provider_response') or s.get('result_payload') or {}
