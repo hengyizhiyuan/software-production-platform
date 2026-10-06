@@ -94,5 +94,5 @@ def test_canonical_compose_has_single_bounded_quality_tmpfs():
     out=subprocess.run(['docker','compose','-f','deploy/cloud-worker/docker-compose.yml','--profile','quality','config','--format','json'],env=env,capture_output=True,text=True,check=True)
     service=json.loads(out.stdout)['services']['quality-runner']
     assert len(service['tmpfs'])==1 and service['tmpfs'][0].startswith('/tmp:') and 'size=' in service['tmpfs'][0]
-    assert service['read_only'] and service['mem_limit']<=1073741824
+    assert service['read_only'] and int(service['mem_limit'])<=1073741824
     assert not any(v.get('source')=='/var/run/docker.sock' for v in service['volumes'])
