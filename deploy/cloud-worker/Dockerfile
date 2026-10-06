@@ -30,5 +30,20 @@ RUN useradd --create-home --uid 10001 spg \
         /var/lib/spg/native-tool-receipts \
     && chown -R spg:spg /var/lib/spg
 
+ARG WATT_REVISION
+ENV SPG_RUNTIME_REVISION=${WATT_REVISION}
+
 USER spg
 EXPOSE 8000
+
+# Optional isolated Quality recipe runner; production image does not ship tests.
+FROM runtime AS quality-runner
+USER root
+RUN uv sync --locked --no-dev --no-editable --extra test
+COPY tests /qualification/tests
+COPY src /qualification/src
+COPY migrations /qualification/migrations
+COPY alembic.ini pyproject.toml /qualification/
+USER spg
+WORKDIR /qualification
+CMD ["python", "-m", "spg.evaluation.campaign_worker"]

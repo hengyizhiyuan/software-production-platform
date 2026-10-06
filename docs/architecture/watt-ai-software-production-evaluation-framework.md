@@ -2,7 +2,7 @@
 
 Date: 2026-09-21
 
-Status: **ARCHITECTURE BASELINE / VERSIONED EXECUTABLE EVALUATION / GENERAL PLATFORM PENDING**. This document
+Status: **ARCHITECTURE BASELINE / VERSIONED EXECUTABLE EVALUATION / BOUNDED ADMIN QUALITY OWNER v1**. This document
 defines the evaluation dimensions, evidence boundaries, corpus strategy, and
 improvement loop for Watt as an AI-native software production system. It does
 not implement a benchmark platform, leaderboard, public ranking, or a general
@@ -459,3 +459,112 @@ Future
 The framework is an architecture baseline now. An Evaluation Platform remains
 future work and requires separate objective, authority, data, privacy,
 operational, and implementation design.
+
+
+## Watt Admin v1 implementation (2026-10-06)
+
+The dedicated `/admin` surface shares Watt authentication and static assets. It
+reads canonical owners and invokes Quality commands. Workspace quadrants and
+Human Acceptance authority remain unchanged. Quality owns its Cases, Campaigns,
+measurements and feedback; it does not own Worker, Product, Context or Guardian
+Reality. There is no separate Admin operational database or commercial RBAC.
+
+### Canonical cases and repeatable qualification
+
+`spg.evaluation.catalog` contains the reviewed Core Production Qualification
+recipes. Each canonical `watt.<recipe>` Case has a stable UUID derived from its
+key, immutable material versions, provenance, legacy corpus aliases and multiple
+cohorts. Cohort changes do not copy Cases or rewrite previous attempts. Historical
+owner evaluation records are linked through aliases rather than recreated.
+Unreviewed generated/production-derived scenarios can be registered using the
+`unqualified-scenario` recipe, but remain BLOCKED until a reproducible oracle is
+reviewed in source. A scenario cannot borrow another recipe's invariants to pass.
+
+Campaign versions pin exact Case versions. Later versions include relevant
+permanent regression Cases automatically; requesting an obsolete collection that
+omits their current version fails closed. Each run pins the source revision,
+nonsecret configuration, policy fingerprint and optional exact experiment variant.
+Run and Case attempt histories are durable. One fenced qualification slot prevents
+concurrent recipes sharing the isolated test database. Expired leases mark unfinished
+attempts INTERRUPTED, reuse the run identity and skip already completed Cases.
+The runner has a two-attempt recovery budget, bounded time/output, a read-only
+container, bounded tmpfs and memory/CPU limits. It is separate from the production
+Execution Queue and only orchestrates reviewed qualification recipes; it does not
+provide another production execution stack.
+
+Recipes exercise existing Work/Managed Source/PWU/Queue/Worker/Verification/
+Guardian/Acceptance owners, using an explicitly isolated `_quality_test` database
+inside the existing PostgreSQL service. Production tables and pending Candidates
+are never test fixtures. Owner identities, exact revisions, dispatch workspace,
+context/contract fingerprints and verification references are captured before test
+cleanup. Prompts, credentials and unstructured tool logs are excluded. Some recipes
+use deterministic compiler/executor/provider seams; the UI and run records describe
+that scope and do not claim a live model or live external search from those seams.
+The separate generated Holdout exercises the configured real semantic compiler/IRK.
+
+### Evaluation and learning boundaries
+
+Deterministic oracle, Runtime, Guardian, LLM and Human records remain separate.
+Objective PASS needs a deterministic oracle, and any failing/blocking objective
+owner prevents PASS. LLM/Human opinions never overwrite objective state. An optional
+LLM evaluation uses Watt's existing purpose-scoped model runtime and stores exact
+model/provider/request provenance. Guardian observations are compared with an
+independent known-case oracle, with explicit coverage and potential false-positive/
+negative fields; Guardian is never its sole oracle.
+
+Earliest divergence means earliest **observed** failing stage. It does not prove
+unobserved earlier stages passed. Ambiguous failures retain UNKNOWN attribution.
+Failure clusters use typed stage/code/evaluator/oracle evidence, not text similarity.
+A Human may promote a finding into Regression using the same Case identity. Closure
+requires a later qualified regression attempt and explicit authority/rationale;
+new occurrences remain OPEN. Case and failure history are retained.
+
+Arena experiments pin a Case version and declare the exact model/provider/policy
+differences. v1's executable strategy adapter compares bounded qualification timeout
+policies. Other model, prompt or planning strategies can be represented but fail
+closed as unqualified until an actual application adapter exists. This avoids
+claiming that metadata alone changed a production strategy. Human preference stores
+ranking, acceptability, confidence, reason tags, rationale and each variant's exact
+Case run, Watt/configuration and owner evidence. Owner attribution creates only
+HYPOTHESIS learning signals with source lineage; it never changes production.
+
+Fresh Holdout inputs/answers are generated after a revision is pinned, stored in
+sealed Case material, passed privately to the recipe, and redacted from all Admin
+optimization/history/evaluation APIs. Holdout Cases cannot enter Arena, attribution,
+regression promotion or LLM opinion. Promotion requires exact PASS runs of the same
+experiment/variant/revision/configuration covering Golden, Regression and a Holdout
+created after the experiment. Human explicitly selects evidence and gives a
+rationale. The decision approves a subsequent governed change, **not** an automatic
+runtime policy mutation, source modification or model fine-tune.
+
+### Operations and topology
+
+Operations reads Worker Registry, native queue and fenced allocation truth directly.
+Docker calls are fixed read-only queries. Node CPU uses host tick deltas; memory uses
+MemTotal minus MemAvailable; `/data` uses statvfs; uptime uses host proc. Networking
+uses a separate read-only mount of host PID 1's network namespace proc directory,
+not container `/proc/self/net`. Interfaces are reported separately to avoid double
+counting bridges/veths. Missing measurements are UNKNOWN, not zero/healthy.
+Service process state and configured health probes remain distinct. Storage
+breakdowns state their measurement scope and may overlap; they are not summed.
+
+The topology contract exposes node IDs, service placements, Workers, storage
+placements and configured runtime relationships. Only the current single ECS is
+qualified. Host samples record timestamps, queue depth and active executions every
+60 seconds with 72-hour retention (bounded configuration and display count). Stale
+samples are explicit. Overview surfaces failures, capacity starvation, unhealthy
+services, low disk and missing/stale observations. Observation never increases
+Worker concurrency, changes runtime owners or administers an ECS.
+
+### Deployment and deferred work
+
+The canonical cloud-worker Compose exposes Admin through the existing Web entrypoint.
+`quality-runner` is an optional profile, built from the same exact source revision
+with the existing test dependency. Create `spg_admin_v1_quality_test` in the existing
+PostgreSQL service before enabling that profile. Set WATT_REVISION to the committed
+source SHA and WATT_NODE_ID/REGION/HOSTNAME from observed deployment facts. Migration
+`20261006_69` descends from `20261005_68` and adds only Quality ledger/metric tables.
+
+Filesystem hard quotas, automated workspace/image cleanup, HTTPS, external Git
+access, cross-host Worker Pool and off-host DR remain separate. No Admin action
+resolves or silently closes those debts. The current Worker max_concurrency stays 1.

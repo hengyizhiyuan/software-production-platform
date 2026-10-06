@@ -18,6 +18,18 @@ class Settings(BaseSettings):
 
     application_name: str = "SPG Runtime"
     runtime_profile: str = Field(default="local-fvs", min_length=1)
+    runtime_revision: str | None = Field(default=None, pattern=r"^[0-9a-f]{40}$")
+    admin_enabled: bool = False
+    admin_node_id: str | None = None
+    admin_region: str | None = None
+    admin_host_name: str | None = None
+    admin_host_proc: Path = Path("/host/proc")
+    admin_host_network: Path = Path("/host/network")
+    admin_host_data: Path = Path("/host/data")
+    admin_metrics_interval_seconds: int = Field(default=60, ge=15, le=600)
+    admin_metrics_retention_hours: int = Field(default=72, ge=1, le=168)
+    quality_recipe_root: Path = Path("/qualification")
+    quality_test_database_url: str | None = None
     auth_mode: Literal["required", "test-only-disabled"] = "required"
     operator_token: SecretStr | None = None
     repository_path: Path = Field(default_factory=Path.cwd)

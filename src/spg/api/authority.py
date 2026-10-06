@@ -125,7 +125,7 @@ def install_authority_boundary(api: FastAPI, *, database, settings) -> None:
         public_pages = (path in {"/", "/app", "/login", "/register",
                                 "/products", "/works", "/deliverables",
                                 "/user", "/settings"}
-            or path.startswith(("/products/", "/deliverables/")))
+            or path == "/admin" or path.startswith(("/products/", "/deliverables/", "/admin/")))
         if path == "/health" or path.startswith("/assets/") or (
             public_pages and request.method in {"GET", "HEAD"}
         ) or (

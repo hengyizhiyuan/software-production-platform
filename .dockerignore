@@ -13,4 +13,4 @@ __pycache__
 htmlcov
 build
 dist
-tests
+# Tests are copied only into the optional quality-runner target.

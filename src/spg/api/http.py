@@ -419,6 +419,8 @@ def create_http_application(
 
     @asynccontextmanager
     async def lifespan(_application: FastAPI):
+        if getattr(settings, "admin_enabled", False):
+            admin_operations.start()
         restore_repository_actions = getattr(asset_service, "restore_interaction_actions", None)
         if selected_interaction is not None and callable(restore_repository_actions):
             restore_repository_actions()
@@ -447,6 +449,8 @@ def create_http_application(
         try:
             yield
         finally:
+            if getattr(settings, "admin_enabled", False):
+                admin_operations.shutdown()
             software_runtime.shutdown()
             if candidate_runtime_preview is not None:
                 candidate_runtime_preview.shutdown()
@@ -486,6 +490,8 @@ def create_http_application(
     api.state.cloud_delivery = cloud_delivery
     web_root = Path(str(files("spg.web")))
     api.mount("/assets", StaticFiles(directory=web_root), name="assets")
+    from spg.api.admin import install_admin
+    admin_operations = install_admin(api, selected_database, settings or Settings(), selected_native_executor)
 
     def work_response(projection: WorkProjection) -> WorkResponse:
         response = WorkResponse.from_projection(projection)

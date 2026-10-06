@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; form-action 'self'; base-uri 'self'">
+  <title>Watt Admin · 质量与运行管理</title>
+  <link rel="stylesheet" href="/assets/experience.css"><link rel="stylesheet" href="/assets/admin.css">
+  <script src="/assets/admin.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#admin-content">跳到正文</a>
+  <header class="site-header"><a class="brand" href="/admin"><span class="brand-symbol">W</span><span>Watt Admin<span class="brand-sub">质量与运行管理</span></span></a><a href="/">返回 Watt 工作区</a><button id="admin-refresh" class="button secondary" type="button">刷新</button></header>
+  <div class="admin-shell"><nav class="admin-nav" aria-label="管理导航">
+    <a href="/admin" data-admin-route="overview">总览</a><a href="/admin/quality" data-admin-route="quality">质量资格</a><a href="/admin/arena" data-admin-route="arena">偏好与实验</a><a href="/admin/assurance" data-admin-route="assurance">保证与门禁</a><a href="/admin/operations" data-admin-route="operations">运行状态</a><a href="/admin/infrastructure" data-admin-route="infrastructure">基础设施</a>
+    <p>当前为单一拥有者管理环境。</p>
+  </nav><main id="admin-content" tabindex="-1" aria-live="polite"><p>正在读取当前状态…</p></main></div>
+  <div id="admin-notice" class="admin-notice" role="status" hidden></div>
+</body>
+</html>

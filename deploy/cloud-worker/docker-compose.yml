@@ -66,6 +66,8 @@ services:
       context: ./source
       dockerfile: deploy/cloud-worker/Dockerfile
       target: runtime
+      args:
+        WATT_REVISION: ${WATT_REVISION:?Set exact source revision}
     command: ["python", "-m", "alembic", "upgrade", "head"]
     restart: "no"
     depends_on:
@@ -90,6 +92,10 @@ services:
     environment:
       <<: [*database-url, *runtime-state]
       SPG_APPLICATION_NAME: Watt Cloud Worker Runtime
+      SPG_ADMIN_ENABLED: "true"
+      SPG_ADMIN_NODE_ID: ${WATT_NODE_ID:?Set exact instance identity}
+      SPG_ADMIN_REGION: ${WATT_NODE_REGION:?Set exact region}
+      SPG_ADMIN_HOST_NAME: ${WATT_NODE_HOSTNAME:?Set observed hostname}
       SPG_OPERATOR_TOKEN: ${SPG_OPERATOR_TOKEN:?Set SPG_OPERATOR_TOKEN}
       SPG_DEEPSEEK_API_KEY: ${SPG_DEEPSEEK_API_KEY:?Set SPG_DEEPSEEK_API_KEY}
       SPG_EXECUTOR_ADAPTER: watt-native
@@ -130,6 +136,9 @@ services:
       start_period: 20s
     volumes:
       - /data/watt/app:/var/lib/spg
+      - /proc:/host/proc:ro
+      - /proc/1/net:/host/network:ro
+      - /data:/host/data:ro
       - /data/watt/native-executor:/var/lib/spg/native-executor
       - /data/watt/owners/ecf:/opt/watt-owners/ecf:ro
       - /data/watt/owners/guardian:/opt/watt-owners/guardian:ro
@@ -219,6 +228,49 @@ services:
       - /data/watt/native-executor:/var/lib/spg/native-executor
     logging: *bounded-logging
     networks: [control, executor]
+
+  quality-runner:
+    profiles: [quality]
+    image: watt-quality-runner:local
+    build:
+      context: ./source
+      dockerfile: deploy/cloud-worker/Dockerfile
+      target: quality-runner
+      args:
+        WATT_REVISION: ${WATT_REVISION:?Set exact source revision}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      <<: *database-url
+      SPG_QUALITY_TEST_DATABASE_URL: postgresql+psycopg://spg:${SPG_POSTGRES_PASSWORD:?Set SPG_POSTGRES_PASSWORD}@postgres:5432/spg_admin_v1_quality_test?sslmode=disable&connect_timeout=5
+      SPG_ADMIN_ENABLED: "false"
+      SPG_RUNTIME_PROFILE: cloud-worker-quality-v1
+      SPG_DEEPSEEK_API_KEY: ${SPG_DEEPSEEK_API_KEY:?Set SPG_DEEPSEEK_API_KEY}
+      SPG_WIC_PROVIDER_ADAPTER: deepseek
+      SPG_WIC_PROVIDER_MODEL: ${SPG_NATIVE_EXECUTOR_INFERENCE_MODEL:-deepseek-flash}
+      SPG_MANAGED_SOURCE_PROVIDER: gitea
+      SPG_MANAGED_SOURCE_ENDPOINT: http://gitea:3000
+      SPG_MANAGED_SOURCE_PUBLIC_ENDPOINT: http://gitea:3000
+      SPG_MANAGED_SOURCE_USERNAME: watt-managed
+      SPG_MANAGED_SOURCE_PASSWORD: ${WATT_GITEA_PASSWORD:?Set dedicated managed-source credential}
+      SPG_MANAGED_SOURCE_NAMESPACE: watt-managed
+      SPG_OWNER_RUNTIME_STORE_ROOT: /tmp/quality-owner-runtime
+      SPG_NATIVE_EXECUTOR_STORAGE_ROOT: /tmp/quality-native-executor
+      SPG_MANAGED_SOURCE_WORKSPACE_ROOT: /tmp/quality-managed-source
+      PYTHONPATH: /opt/watt-owners/ecf/src:/opt/watt-owners/guardian/src:/qualification/src:/qualification
+    read_only: true
+    tmpfs: [/tmp:size=1073741824,mode=1777]
+    mem_limit: 1g
+    cpus: 1
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - /data/watt/owners/ecf:/opt/watt-owners/ecf:ro
+      - /data/watt/owners/guardian:/opt/watt-owners/guardian:ro
+    logging: *bounded-logging
+    networks: [control]
 
 networks:
   control:
