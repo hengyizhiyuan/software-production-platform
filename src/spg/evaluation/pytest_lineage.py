@@ -85,6 +85,13 @@ def pytest_runtest_makereport(item, call):
     if not destination or not url:
         return
     evidence = {"nodeid": item.nodeid, "outcome": report.outcome, "owners": {}}
+    if call.excinfo is not None:
+        # Location/type only: sealed input, expected answer and exception text
+        # remain unavailable to optimization and public Holdout projections.
+        entry = call.excinfo.traceback[-1]
+        evidence["failure_location"] = {"exception_type": call.excinfo.type.__name__,
+            "file": Path(str(entry.path)).name, "function": entry.name,
+            "line": entry.lineno + 1}
     receipts = getattr(item, "_quality_owner_receipts", [])
     if receipts:
         evidence["owners"]["canonical_context_receipts"] = receipts

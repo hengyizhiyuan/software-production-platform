@@ -85,8 +85,9 @@ class SoftwareDesign(_GuidedDesignSemanticCapability):
 
 def produce(database, tmp_path, *, failing=False, user_repository=True,
             authorize_candidate=True, set_delivery_target=True,
-            full_application_baseline=False, human_requirement=None, product_id=None):
-    interaction = WorkInteractionService(database, capability=SoftwareIntent())
+            full_application_baseline=False, human_requirement=None, product_id=None,
+            intent_capability=None, design_capability=None, design_content=None):
+    interaction = WorkInteractionService(database, capability=intent_capability or SoftwareIntent())
     item = interaction.create_interaction(human_identity='human:test', product_id=product_id)
     understanding = interaction.append_and_assess(item.id,
         human_requirement or 'Build an inventory application in these exact output files: ' + ', '.join(SOURCE),
@@ -129,7 +130,7 @@ def produce(database, tmp_path, *, failing=False, user_repository=True,
         operations=(DeterministicFileOperation(
             operation=DeterministicFileOperationType.CREATE,
             repository_relative_path='docs/design.md',
-            content='# Inventory application design\n\nImplement a tested low-stock boundary.\n',
+            content=design_content or '# Inventory application design\n\nImplement a tested low-stock boundary.\n',
         ),),
         reported_outcome=ProviderReportedOutcome.SUCCESS,
     ))
@@ -140,7 +141,7 @@ def produce(database, tmp_path, *, failing=False, user_repository=True,
     SteeringBootstrapService(database).bootstrap(work.work_id)
     design_driver = PlanSteeringDriver(
         database, design_service, _SchedulingOrchestrator(),
-        semantic_capability=SoftwareDesign(), max_automatic_transitions=32,
+        semantic_capability=design_capability or SoftwareDesign(), max_automatic_transitions=32,
     )
     design_driver.activate(work.work_id)
     for attention in design_service.list_attention(work_id=work.work_id):
@@ -165,7 +166,7 @@ def produce(database, tmp_path, *, failing=False, user_repository=True,
         DeterministicFileOperation(operation=DeterministicFileOperationType.CREATE, repository_relative_path=path, content=content)
         for path, content in sources.items()), reported_outcome=ProviderReportedOutcome.SUCCESS))
     service = WorkApplicationService(database, workspace_root=tmp_path/'workspaces', executor=executor, verifier=ContractDrivenRepositoryVerifier(database))
-    driver = PlanSteeringDriver(database, service, _SchedulingOrchestrator(), semantic_capability=SoftwareDesign(), max_automatic_transitions=32)
+    driver = PlanSteeringDriver(database, service, _SchedulingOrchestrator(), semantic_capability=design_capability or SoftwareDesign(), max_automatic_transitions=32)
     initial_activation = driver.activate(work.work_id)
     assert initial_activation.stop_reason.value in {'PRODUCTION_RUNNING', 'HUMAN_ATTENTION'}, [item.reason for item in service.list_attention(work_id=work.work_id)]
     production_reviews = tuple(

@@ -63,6 +63,39 @@ def _wait(service, turn_id: UUID):
     raise AssertionError("Interaction Turn did not settle")
 
 
+def test_gzip_fetch_content_survives_canonical_turn_jsonb_persistence(postgres_database, monkeypatch):
+    """Wire gzip cannot be treated as text and poison the response-event JSONB."""
+    import gzip
+    import io
+    from spg.providers.external_search import inspect_web_resource
+    monkeypatch.setenv("SPG_DATABASE_URL", os.environ["SPG_TEST_DATABASE_URL"])
+    command.upgrade(Config("alembic.ini"), "head")
+    monkeypatch.setattr(BoundedPublicHttp, "_check_url", staticmethod(lambda _: None))
+    class Response(io.BytesIO):
+        headers = {"Content-Type":"text/html", "Content-Encoding":"gzip"}
+    http = BoundedPublicHttp()
+    http.opener = SimpleNamespace(open=lambda *a, **k: Response(gzip.compress(b'<main>Exact compressed reference</main>')))
+    class GitHub(_GitHub):
+        def inspect_result(self, item):
+            return inspect_web_resource(http, item)
+    research = GovernedExternalResearch(ConnectorResolver(postgres_database),
+        github=GitHub(((_evidence("compressed"),),)), web=_Web(), http=http)
+    service = WorkInteractionService(postgres_database, capability=_Semantic(),
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED, external_research=research)
+    try:
+        item = service.create_interaction(human_identity="human:gzip-regression")
+        turn = service.submit_turn(item.id, "检索并核查公开来源", human_identity="human:gzip-regression")
+        settled = _wait(service, turn.id)
+        assert settled.status is InteractionTurnStatus.COMPLETED, settled.failure_message
+        events = service.response_events(turn.id)
+        inspected = [e.metadata for e in events if e.event_type.value == "SEARCH_EVIDENCE"]
+        assert any(e.get("inspected_content") == "Exact compressed reference" for e in inspected)
+        assert all("\x00" not in json.dumps(e) for e in inspected)
+        assert service.get_shared_understanding(item.id).conversation_messages[-1].content
+    finally:
+        service.shutdown()
+
+
 def test_explicit_search_uses_connector_and_persists_source_evidence(postgres_database, monkeypatch):
     monkeypatch.setenv("SPG_DATABASE_URL", os.environ["SPG_TEST_DATABASE_URL"])
     command.upgrade(Config("alembic.ini"), "head")

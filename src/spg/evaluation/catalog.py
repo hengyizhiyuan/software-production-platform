@@ -77,6 +77,10 @@ def recipes():
             "tests/integration/test_quality_campaign_controls.py",
             "Safe-boundary pause/stop, immutable selected reruns and conservative systemic stop preserve durable evidence", True,
             "quality:pilot:baseline-control-gap"),
+        Recipe("fetch-encoding-regression", "压缩 Fetch 边界与事件持久化永久回归", Stage.SEARCH,
+            "tests/test_public_http_encoding.py",
+            "Public HTTP decodes bounded compressed responses; binary NUL and malformed or oversized expansions fail closed before evidence persistence", True,
+            "quality:case-run:bbe2be5f-e2c2-4bf5-b93e-effa3b5a9778"),
         Recipe("unqualified-scenario", "待配方资格的场景", Stage.WIC, "", "Unqualified scenario cannot claim PASS"))
     from spg.evaluation.pilot import PILOT
     return {r.key: r for r in (*CATALOG, *extra, *PILOT)}

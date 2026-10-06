@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import base64
+import gzip
+from io import BytesIO
 from datetime import UTC, datetime
 from hashlib import sha256
 from html.parser import HTMLParser
@@ -13,6 +15,7 @@ from typing import Protocol
 from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qsl, quote, urlencode, urljoin, urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
+import zlib
 
 from spg.domain.external_search import SearchEvidence, SearchFailure, SearchProviderError
 
@@ -44,6 +47,31 @@ class BoundedPublicHttp:
         ):
             raise SearchProviderError(SearchFailure.FETCH_FAILED, "Private or non-public addresses cannot be fetched")
 
+    def _read_response(self, response, failure: SearchFailure) -> bytes:
+        """Bound both transfer bytes and expanded bytes before text/JSON parsing."""
+        body = response.read(self.max_bytes + 1)
+        if len(body) > self.max_bytes:
+            raise SearchProviderError(failure, "Source exceeds bounded fetch size")
+        encoding = response.headers.get("Content-Encoding", "identity").strip().lower()
+        try:
+            if encoding in {"", "identity"}:
+                decoded = body
+            elif encoding in {"gzip", "x-gzip"}:
+                with gzip.GzipFile(fileobj=BytesIO(body)) as stream:
+                    decoded = stream.read(self.max_bytes + 1)
+            elif encoding == "deflate":
+                stream = zlib.decompressobj()
+                decoded = stream.decompress(body, self.max_bytes + 1)
+                if len(decoded) <= self.max_bytes and (not stream.eof or stream.unused_data):
+                    raise ValueError("Incomplete or trailing compressed response")
+            else:
+                raise ValueError("Unsupported content encoding")
+        except (OSError, EOFError, ValueError, zlib.error):
+            raise SearchProviderError(failure, "Source content encoding could not be decoded safely") from None
+        if len(decoded) > self.max_bytes:
+            raise SearchProviderError(failure, "Source exceeds bounded fetch size after decoding")
+        return decoded
+
     def get(self, url: str, *, headers: dict[str, str] | None = None) -> tuple[bytes, str]:
         for _ in range(3):
             self._check_url(url)
@@ -55,9 +83,7 @@ class BoundedPublicHttp:
             try:
                 with self.opener.open(request, timeout=self.timeout) as response:
                     content_type = response.headers.get("Content-Type", "")
-                    body = response.read(self.max_bytes + 1)
-                    if len(body) > self.max_bytes:
-                        raise SearchProviderError(SearchFailure.FETCH_FAILED, "Source exceeds bounded fetch size")
+                    body = self._read_response(response, SearchFailure.FETCH_FAILED)
                     return body, content_type
             except HTTPError as error:
                 if error.code in {301, 302, 303, 307, 308}:
@@ -92,10 +118,7 @@ class BoundedPublicHttp:
             method="POST")
         try:
             with self.opener.open(request, timeout=self.timeout) as response:
-                body = response.read(self.max_bytes + 1)
-                if len(body) > self.max_bytes:
-                    raise SearchProviderError(SearchFailure.PROVIDER_PROTOCOL_ERROR,
-                        "Web provider response exceeds bounded size")
+                body = self._read_response(response, SearchFailure.PROVIDER_PROTOCOL_ERROR)
                 return body
         except HTTPError as error:
             category = (SearchFailure.AUTHENTICATION_FAILED if error.code in {401, 403}
@@ -562,11 +585,15 @@ def inspect_web_resource(http: BoundedPublicHttp, evidence: SearchEvidence) -> S
     if not any(item in content_type for item in ("text/html", "text/plain")):
         raise SearchProviderError(SearchFailure.FETCH_FAILED, "Source is not inspectable public text")
     source = body.decode("utf-8", errors="replace")
+    if "\x00" in source:
+        raise SearchProviderError(SearchFailure.FETCH_FAILED, "Source contains non-text NUL bytes")
     if "text/html" in content_type:
         parser = _PublicText()
         parser.feed(source)
         source = " ".join(parser.parts)
     content = " ".join(source.split())[:9000]
+    if "\x00" in content:
+        raise SearchProviderError(SearchFailure.FETCH_FAILED, "Source contains non-text NUL characters")
     if not content:
         raise SearchProviderError(SearchFailure.FETCH_FAILED, "Source page has no readable text")
     return evidence.model_copy(update={
