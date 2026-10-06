@@ -60,6 +60,37 @@ consumer yet, so session summaries do not become governed decision sources.
 The independent runtime mounts ECF and Guardian checkouts. In `REQUIRED` mode,
 Watt startup validates canonical ECF v0.1 and the owner Reality runtime.
 
+### First Managed Greenfield production
+
+The `MANAGED_PRODUCT_WEB_UI` consumer has a bounded first-production seam.
+It is selected only for an exact Gitea Work source at Product source version 0,
+without an imported origin, with an admitted greenfield IRK Production Intent
+and an attributable immutable Work Reality / Governance revision. Existing
+repository-owned Product UI context continues to use `PRODUCT_UI_CHANGE`.
+
+The independent ECF v0.1 owner provides `MANAGED_GREENFIELD_PRODUCTION`:
+Product Intent, Repository Reality and Work Reality remain mandatory.
+Invariant, Approved Decision and approved Work restrictions are applicable
+only where actual admitted owner facts establish them. The request may promote
+registered optional classes to required; it cannot remove a base requirement.
+ECF still owns completeness, source selection, conflicts and fingerprinting.
+
+Product Intent is projected from the admitted IRK goal and Work Reality, with
+exact Product/Work, semantic fingerprint, Work revision and Governance provenance.
+There is no duplicate Product Intent table or README bootstrap. Ordinary Work
+restrictions stay constraints. Only an explicitly Human-declared, IRK-typed
+`CONSTRAINT` with subject `product_invariant`, present in admitted Work constraints,
+enters Product Invariant. A real Human product choice is a `FACT` with subject
+`approved_product_decision`; a production request is never a product approval.
+Unresolved reserved decisions remain missing required context and fail closed.
+
+Absence of a non-applicable invariant or decision is recorded as non-blocking,
+not as a fabricated record. Available applicable records become protected Task
+obligations. Every formation and pre-execution check rereads current owner facts;
+changed source, intent, constraint or decision changes the package fingerprint
+and fences the old Task. Previous incomplete packages and Quality Runs remain
+historical evidence. Guardian, Verification and Human Acceptance are unchanged.
+
 ## Governed Execution Context Boundary
 
 The [SPG Lite Runtime Implementation Contract](../architecture/spg-lite-runtime-implementation-contract.md)
@@ -73,3 +104,8 @@ provenance, audit evidence, or interaction history, but it must not be inserted
 as task Authority or become a direct execution dependency.
 
 Every Execution Attempt must remain traceable to the exact governed Context Package used.
+
+Owner dependency for this closure: ECF `codex/managed-greenfield-context-closure-v1`,
+revision `5aa4f8833c359c15bd059eda5972aa3915bcc18c`
+(tree `878d39d9c259272bb05f2e02bdf9d60c22fad460`). The ECS owner export must
+match this committed revision; its previous export remains preserved.

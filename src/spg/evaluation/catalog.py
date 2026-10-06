@@ -84,7 +84,8 @@ def recipes():
         Recipe("unqualified-scenario", "待配方资格的场景", Stage.WIC, "", "Unqualified scenario cannot claim PASS"))
     from spg.evaluation.pilot import PILOT
     from spg.evaluation.human_interaction_regressions import recipes as human_recipes
-    return {r.key: r for r in (*CATALOG, *extra, *PILOT, *human_recipes())}
+    from spg.evaluation.managed_greenfield_regressions import recipes as greenfield_recipes
+    return {r.key: r for r in (*CATALOG, *extra, *PILOT, *human_recipes(), *greenfield_recipes())}
 
 
 def definitions():

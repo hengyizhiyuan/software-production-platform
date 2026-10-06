@@ -283,6 +283,11 @@ def lineage_for_work_task(database, *, work_id: UUID,
                 if not work_consumes_revision(unit_of_work.session, work_id, repository_identity, repository_revision):
                     source_owner = None
         work = ProductStore(unit_of_work.session).work(work_id)
+        managed_context = None
+        if surface == MANAGED_WEB_SURFACE and work is not None and product_id is not None and source_owner == product_id:
+            from spg.application.managed_greenfield_context import read_managed_greenfield_context
+            managed_context = read_managed_greenfield_context(unit_of_work.session,
+                work=work, product_id=product_id, repository_identity=repository_identity)
     if product_id is None or work is None or source_owner != product_id:
         raise DecisionContextAuthorityMissing(
             "DECISION_CONTEXT_NOT_READY: exact Product/Work source authority missing"
@@ -298,7 +303,8 @@ def lineage_for_work_task(database, *, work_id: UUID,
     gateway = WattDecisionContextGateway()
     package = gateway.require_ready(requirement,
                                     work_statement=work_statement,
-                                    work_revision=revision)
+                                    work_revision=revision,
+                                    managed_context=managed_context)
     return gateway.lineage(package, requirement)
 
 
@@ -328,6 +334,7 @@ def assert_task_context_fresh(database, task) -> None:
     )
     from sqlalchemy import select
     qualified_input_revision = None
+    managed_context = None
     with database.unit_of_work() as unit_of_work:
         work = ProductStore(unit_of_work.session).work(UUID(lineage.work_id))
         current_product_id = unit_of_work.session.execute(
@@ -362,6 +369,10 @@ def assert_task_context_fresh(database, task) -> None:
                     if _git(Path(lineage.repository_path), "rev-parse", f"{resource_ref}^{{commit}}") != exact:
                         raise DecisionContextChanged(lineage.package_fingerprint, "source-basis-changed")
                     qualified_input_revision = lineage.repository_revision
+            if work is not None and current_source_owner == current_product_id:
+                from spg.application.managed_greenfield_context import read_managed_greenfield_context
+                managed_context = read_managed_greenfield_context(unit_of_work.session,
+                    work=work, product_id=current_product_id, repository_identity=lineage.repository_identity)
         else:
             current_source_owner = unit_of_work.session.execute(
                 select(product_managed_sources.c.product_id).where(
@@ -377,6 +388,7 @@ def assert_task_context_fresh(database, task) -> None:
     WattDecisionContextGateway().assert_fresh(
         lineage, work_statement=statement, work_revision=revision,
         repository_revision=qualified_input_revision,
+        managed_context=managed_context,
     )
 
 
@@ -416,11 +428,24 @@ class WattDecisionContextGateway:
             raise RuntimeError("ECF Decision Context owner version is incompatible")
         return ecf
 
+    @staticmethod
+    def _managed_repository_records(document_record, ecf, owners):
+        for heading, context_class, key, field, owner in (
+            ("## Product Intent", ecf.ContextClass.PRODUCT_INTENT,
+             "managed-product-intent", "intent", owners.product_owner),
+            ("## Product Invariant", ecf.ContextClass.PRODUCT_INVARIANT,
+             "managed-product-invariant", "invariant", owners.product_owner),
+            ("## Approved Decision", ecf.ContextClass.APPROVED_DECISION,
+             "managed-product-decision", "decision", owners.governance_owner),
+        ):
+            document_record("README.md", heading, context_class, key, field, owner)
+
     def assemble(self, requirement: DecisionContextRequirement, *,
                  work_statement: str | None = None,
                  work_revision: str | None = None,
                  verification_statement: str | None = None,
-                 open_gap_statement: str | None = None):
+                 open_gap_statement: str | None = None,
+                 managed_context=None):
         ecf = self._ecf()
         policy = {
             WORKSPACE_SURFACE: (ecf.ConsumerRole.PRODUCT_DESIGN,
@@ -436,6 +461,14 @@ class WattDecisionContextGateway:
         }.get(requirement.surface)
         if policy is None:
             raise ValueError("Unregistered Decision Context surface")
+        if managed_context is not None:
+            from spg.application.managed_greenfield_context import ManagedGreenfieldContext
+            if (not isinstance(managed_context, ManagedGreenfieldContext) or
+                    requirement.surface != MANAGED_WEB_SURFACE or
+                    managed_context.product_id != requirement.product_id or
+                    managed_context.work_id != requirement.work_id):
+                raise DecisionContextAuthorityMissing('MANAGED_GREENFIELD_CONTEXT_AUTHORITY_MISMATCH')
+            policy = (ecf.ConsumerRole.PRODUCT_DESIGN, ecf.DecisionType.MANAGED_GREENFIELD_PRODUCTION)
         scope = ecf.DecisionScope(
             project_id="watt", product_id=str(requirement.product_id),
             work_id=str(requirement.work_id) if requirement.work_id else None,
@@ -456,6 +489,7 @@ class WattDecisionContextGateway:
                        f"{requirement.subject}",
             consumer_role=policy[0], decision_type=policy[1],
             scope=scope, authority_context=owners, as_of=date.today(),
+            **({'required_context_classes':tuple(ecf.ContextClass(c) for c in managed_context.required_classes)} if managed_context is not None else {}),
         )
         records = []
         product_scope = ecf.DecisionScope("watt", str(requirement.product_id))
@@ -505,16 +539,18 @@ class WattDecisionContextGateway:
                 ecf.ContextClass.APPROVED_CONSTRAINT, "workspace-boundary",
                 "constraint", owners.architecture_owner)
         elif requirement.surface == MANAGED_WEB_SURFACE:
-            for heading, context_class, key, field, owner in (
-                ("## Product Intent", ecf.ContextClass.PRODUCT_INTENT,
-                 "managed-product-intent", "intent", owners.product_owner),
-                ("## Product Invariant", ecf.ContextClass.PRODUCT_INVARIANT,
-                 "managed-product-invariant", "invariant", owners.product_owner),
-                ("## Approved Decision", ecf.ContextClass.APPROVED_DECISION,
-                 "managed-product-decision", "decision", owners.governance_owner),
-            ):
-                document_record("README.md", heading, context_class, key,
-                                field, owner)
+            if managed_context is not None:
+                for cls,key,field,value in (
+                    (ecf.ContextClass.PRODUCT_INTENT,'greenfield-product-intent','intent',managed_context.intent),
+                    *((ecf.ContextClass.PRODUCT_INVARIANT,'greenfield-invariant:'+key,'invariant',value) for key,value in managed_context.invariants),
+                    *((ecf.ContextClass.APPROVED_DECISION,'greenfield-decision:'+key,'decision',value) for key,value in managed_context.decisions),
+                    *((ecf.ContextClass.APPROVED_CONSTRAINT,'greenfield-constraint:'+str(i),'constraint',value) for i,value in enumerate(managed_context.constraints)),
+                ):
+                    add(f'{requirement.product_id}:{key}',cls,key,product_scope,
+                        f'work-reality:{requirement.work_id}:{key}',managed_context.source_revision,
+                        owners.owner_for(cls),{field:value},managed_context.provenance)
+            else:
+                self._managed_repository_records(document_record,ecf,owners)
         elif requirement.surface == ECS_SURFACE:
             document_record(_ECS_DOC, "## Product Intent",
                 ecf.ContextClass.PRODUCT_INTENT, "ecs-automatic-delivery",
@@ -634,10 +670,18 @@ class WattDecisionContextGateway:
             protected_obligations=tuple(obligations),
         )
 
+    @staticmethod
+    def applicability(package):
+        return {item.value:("REQUIRED_AND_PRESENT" if item in package.contract.required else "PRESENT_AND_APPLICABLE")
+            if item.value in package.grouped_context_classes else
+            ("REQUIRED_AND_MISSING" if item in package.contract.required else "NOT_YET_ESTABLISHED_BUT_NON_BLOCKING")
+            for item in (*package.contract.required,*package.contract.optional)}
+
     def assert_fresh(self, lineage: DecisionContextLineage, *,
                      work_statement: str | None = None,
                      work_revision: str | None = None,
-                     repository_revision: str | None = None) -> None:
+                     repository_revision: str | None = None,
+                     managed_context=None) -> None:
         repository = Path(lineage.repository_path)
         current = _git(repository, "rev-parse", f"{repository_revision or 'HEAD'}^{{commit}}")
         requirement = DecisionContextRequirement(
@@ -648,7 +692,7 @@ class WattDecisionContextGateway:
             repository_identity=lineage.repository_identity,
         )
         package = self.assemble(requirement, work_statement=work_statement,
-                                work_revision=work_revision)
+                                work_revision=work_revision, managed_context=managed_context)
         if package.context_status.value != "READY" or package.fingerprint != lineage.package_fingerprint:
             raise DecisionContextChanged(lineage.package_fingerprint,
                                          package.fingerprint)
