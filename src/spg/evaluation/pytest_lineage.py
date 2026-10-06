@@ -7,13 +7,13 @@ import pytest
 from sqlalchemy import create_engine, select
 from spg.infrastructure.persistence import metadata
 
-TABLES = ("plan_revisions", "production_runs", "production_admissibility_records", "product_works", "product_managed_sources", "work_source_bases", "production_work_units", "context_packages", "materialized_execution_inputs",
+TABLES = ("quality_campaign_runs", "quality_case_runs", "quality_run_members", "quality_run_controls", "plan_revisions", "production_runs", "production_admissibility_records", "product_works", "product_managed_sources", "work_source_bases", "production_work_units", "context_packages", "materialized_execution_inputs",
     "interaction_assessments", "interaction_turns", "interaction_turn_realizations", "interaction_turn_obligations",
     "pwu_contract_versions", "execution_attempts", "execution_dispatches", "execution_allocations",
     "executor_worker_registrations", "executor_queue", "production_snapshots", "proposed_repository_snapshots", "completion_evaluations", "verification_records",
     "baseline_candidates", "work_delivery_acceptances", "product_source_versions",
     "product_source_promotion_intents")
-SAFE_COLUMNS = {"id", "work_id", "pwu_id", "work_unit_id", "task_contract_id", "attempt_id",
+SAFE_COLUMNS = {"id", "run_id", "campaign_run_id", "parent_run_id", "case_version_id", "source_case_run_id", "disposition", "action", "work_id", "pwu_id", "work_unit_id", "task_contract_id", "attempt_id",
     "candidate_id", "worker_id", "condition", "status", "state", "generation", "lease_epoch",
     "source_revision", "source_tree", "revision", "tree", "source_baseline_id", "source_version",
     "package_fingerprint", "accepted_revision", "accepted_tree", "decision_id", "decision_version", "fingerprint", "contract_digest", "snapshot_id", "acceptance_id", "product_id", "version",
