@@ -11,11 +11,14 @@ from spg.evaluation.contracts import (CaseDefinition, CampaignRequest, Experimen
     PreferenceRequest, AttributionRequest, PromotionRequest, FindingClosureRequest, RunControlRequest, RerunRequest, QualityError)
 from spg.evaluation.service import QualityService
 from spg.evaluation.operations import OperationsService
+from spg.evaluation.production_trace import ProductionTraceService
+from spg.evaluation.admin_projection import cockpit_projection, outcome_projection
 
 
 def install_admin(api, database, settings, runtime=None):
     quality = QualityService(database, settings)
     operations = OperationsService(database, settings, runtime)
+    traces = ProductionTraceService(database, settings, quality)
     api.state.quality_owner = quality
     api.state.operations_observer = operations
     router = APIRouter(prefix="/api/admin")
@@ -31,10 +34,31 @@ def install_admin(api, database, settings, runtime=None):
 
     @router.get("/overview")
     def overview():
-        return {"quality": {"campaigns": quality.campaigns(), "runs": quality.recent_runs(),
+        result = {"quality": {"campaigns": quality.campaigns(), "runs": quality.recent_runs(),
             "clusters": quality.clusters(), "cases": quality.list_cases()},
             "assurance": {**operations.assurance(), "quality_evaluations": quality.guardian_evaluations()}, "operations": operations.snapshot(),
             "watt_revision": settings.runtime_revision, "admin_enabled": settings.admin_enabled}
+        from sqlalchemy import text
+        with database.unit_of_work() as u:
+            ledger = [dict(r) for r in u.session.execute(text("""
+                SELECT a.id,a.state,a.created_at,a.case_version_id,v.case_id,
+                    v.definition->>'title' AS title,r.watt_revision,r.policy_fingerprint,r.experiment_id,
+                    m.cohorts FROM quality_case_runs a
+                JOIN quality_case_versions v ON v.id=a.case_version_id
+                JOIN quality_campaign_runs r ON r.id=a.campaign_run_id
+                JOIN quality_run_members m ON m.run_id=r.id AND m.case_version_id=v.id
+                ORDER BY a.created_at DESC LIMIT 500
+            """)).mappings()]
+        result['cockpit'] = cockpit_projection(result, ledger)
+        return result
+
+    @router.get('/case-runs/{case_run_id}/trace')
+    def case_trace(case_run_id: UUID):
+        return traces.case_trace(case_run_id)
+
+    @router.get('/traces/{kind}/{entity_id}')
+    def entity_trace(kind: str, entity_id: UUID):
+        return traces.entity_trace(kind, entity_id)
 
     @router.get("/cases")
     def case_list():
@@ -73,7 +97,10 @@ def install_admin(api, database, settings, runtime=None):
 
     @router.get("/runs/{run_id}")
     def run_detail(run_id: UUID):
-        return quality.run_detail(run_id)
+        result = quality.run_detail(run_id)
+        for case in result['cases']:
+            case['human_outcome'] = outcome_projection(case)
+        return result
 
     @router.post("/pilot/control-regression")
     def control_regression():

@@ -615,6 +615,13 @@ class QualityService:
             if (len(request.ranking) != len(set(request.ranking)) or set(request.ranking) != keys
                 or set(request.acceptability) != keys or set(request.case_run_ids) != keys):
                 raise QualityError("EXACT_ARENA_CANDIDATES_REQUIRED")
+            if request.strength is not None:
+                variants = [v['key'] for v in e['definition']['variants']]
+                if len(variants) != 2:
+                    raise QualityError('PAIRWISE_PREFERENCE_REQUIRED')
+                expected = variants[1] if request.strength.endswith('_B') else variants[0]
+                if request.strength != 'TIE' and request.ranking[0] != expected:
+                    raise QualityError('PREFERENCE_STRENGTH_MISMATCH')
             provenance = {}
             for key, aid in request.case_run_ids.items():
                 a = self._one(u.session, attempts, aid)
@@ -627,15 +634,18 @@ class QualityService:
                     "configuration": r["configuration"], "lineage": a["lineage"], "objective_state": a["state"]}
             pid = uuid4()
             record = {**json_record(request), "candidate_provenance": provenance,
-                "objective_override": False, "winner": request.ranking[0]}
+                "objective_override": False, "winner": None if request.strength == 'TIE' else request.ranking[0]}
+            if request.strength == 'TIE':
+                record['ranking_is_total_order'] = False
             u.session.execute(insert(preferences).values(id=pid, experiment_id=e["id"],
                 case_id=e["case_id"], record=record, authority_identity=actor))
             for key, aid in request.case_run_ids.items():
                 judgment = Evaluation(evaluator=Evaluator.HUMAN,
-                    outcome="PREFERRED" if key == request.ranking[0] else "REJECTED",
+                    outcome="PREFERRED" if request.strength == 'TIE' or key == request.ranking[0] else "REJECTED",
                     evidence_refs=("quality:preference:" + str(pid),), evaluator_version="human-preference-v1",
                     details={"confidence": request.confidence, "acceptable": request.acceptability[key],
-                        "authority_identity": actor, "objective_override": False})
+                        "authority_identity": actor, "objective_override": False,
+                        "strength":request.strength, "tie":request.strength == 'TIE'})
                 u.session.execute(insert(evaluations).values(id=uuid4(), case_run_id=aid,
                     evaluator=judgment.evaluator, outcome=judgment.outcome, record=json_record(judgment)))
             u.commit()

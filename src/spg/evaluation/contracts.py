@@ -167,6 +167,7 @@ class PreferenceRequest(Record):
     confidence: float = Field(ge=0, le=1)
     reason_tags: tuple[str, ...] = Field(min_length=1, max_length=12)
     rationale: str = Field(min_length=1, max_length=4000)
+    strength: str | None = Field(default=None, pattern=r'^(CLEAR_A|SLIGHT_A|TIE|SLIGHT_B|CLEAR_B)$')
 
 
 class AttributionRequest(Record):

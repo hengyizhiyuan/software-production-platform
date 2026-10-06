@@ -101,9 +101,12 @@ class OperationsService:
         workers = [] if self.runtime is None else [w.model_dump(mode="json") for w in self.runtime.list_workers()]
         with self.database.unit_of_work() as u:
             queue = [dict(r) for r in u.session.execute(text("""
-                SELECT q.attempt_id, q.condition, q.wait_reason, q.enqueued_at,
+                SELECT q.attempt_id, q.work_id, q.pwu_id, q.condition, q.wait_reason, q.enqueued_at,
+                       w.refined_title AS work_title, p.objective,
                        EXTRACT(EPOCH FROM now()-q.enqueued_at)::integer AS elapsed_seconds
-                FROM executor_queue q WHERE q.condition NOT IN ('COMPLETED','FAILED','CANCELLED')
+                FROM executor_queue q LEFT JOIN product_works w ON w.id=q.work_id
+                LEFT JOIN production_work_units p ON p.id=q.pwu_id
+                WHERE q.condition NOT IN ('COMPLETED','FAILED','CANCELLED')
                 ORDER BY q.enqueued_at LIMIT 100
             """)).mappings()]
             total = u.session.execute(text("SELECT count(*) FROM executor_queue WHERE condition NOT IN ('COMPLETED','FAILED','CANCELLED')")).scalar_one()
