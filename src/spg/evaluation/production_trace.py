@@ -371,7 +371,8 @@ class ProductionTraceService:
                 tables['steering_steps']=workspace.get('agenda', [])
             context=workspace.get('reality', {}).get('admission_context')
             if context: tables.setdefault('production_work_units', [])
-        return project_trace(tables,scene=member['title'],purpose=member['definition'].get('motive', member['title']),
+        purpose='验证已治理的意图保持精确，只有实际由 Human 保留的决定才能阻止推进，普通生产事实由 Watt 负责表达。' if member['definition'].get('runner_key','').startswith('REG-HI-') else '验证本场景满足已批准义务：'+'；'.join(member['definition'].get('invariants',[]))
+        return project_trace(tables,scene=member['title'],purpose=purpose,
             first_input=lineage.get('input'),case=case,browser=browser,guardian=guardian,owner_refs=refs,
             basis={'mode':'HISTORICAL_QUALIFICATION','at':a['finished_at'],'watt_revision':run['watt_revision'],
                 'case_version':member['version'],'case_fingerprint':member['fingerprint'],
