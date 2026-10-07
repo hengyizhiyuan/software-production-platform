@@ -86,7 +86,7 @@ class ProductStore:
         self.session = session
         self._projection_reads = projection_reads
         self._read_results = {}
-        self._summary_data = session.info.get("watt_projection_rows")
+        self._summary_data = getattr(session, 'info', {}).get("watt_projection_rows")
 
     def insert_goal(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(product_goals).values(**values))

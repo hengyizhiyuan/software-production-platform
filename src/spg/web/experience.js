@@ -195,7 +195,8 @@
     }
     const conversation = ws.interaction_id ? await renderWorkspaceConversation(ws.interaction_id) : null;
     if (!conversation?.turns.some(turn => turn.status === 'RECEIVED' || turn.status === 'PROCESSING') &&
-        !ws.actions.length && ['READY','RUNNING'].includes(w?.status)) {
+        (ws.human_visible?.expression_state === 'PENDING' ||
+         (!ws.actions.length && ['READY','RUNNING'].includes(w?.status)))) {
       const epoch = state.routeEpoch, route = `${location.pathname}${location.search}`;
       state.timer = setTimeout(() => {
         if (epoch === state.routeEpoch && route === `${location.pathname}${location.search}`)

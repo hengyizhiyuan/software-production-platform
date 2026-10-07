@@ -3,6 +3,9 @@ from hashlib import sha256
 import json
 import re
 from uuid import UUID
+from concurrent.futures import ThreadPoolExecutor
+from threading import RLock
+from spg.infrastructure.performance import observed_background
 from sqlalchemy import select, text
 from sqlalchemy.dialects.postgresql import insert
 from spg.application.human_attention import canonical_ir_for_work
@@ -235,6 +238,59 @@ class HumanVisibleRealizationService:
     """WIC owns expression; owner records are copied read-only and never updated."""
     def __init__(self,database,realizer=None):
         self.database=database;self.realizer=realizer
+        self._wording_executor = ThreadPoolExecutor(max_workers=2,
+            thread_name_prefix='watt-workspace-wording')
+        self._pending = {}
+        self._pending_lock = RLock()
+
+    def read(self, projection):
+        """Return current WIC-qualified owner facts without waiting for prose.
+
+        Only replaceable expression is deferred. Every provisional wording uses
+        the same validation gate and exact current basis; no older basis is used.
+        The existing fenced, durable realization remains the final expression.
+        """
+        with self.database.unit_of_work() as uow:
+            old = uow.session.scalar(select(wic_human_realizations.c.realization).where(
+                wic_human_realizations.c.basis_fingerprint == projection.basis_fingerprint))
+        if old is not None:
+            try:
+                validate_wording(projection, HumanVisibleWording.model_validate(old['wording']))
+                if (old['owner_facts'] == projection.owner_facts
+                        and old['source_references'] == list(projection.source_references)):
+                    return {**old, 'expression_state': 'READY'}
+            except ValueError:
+                pass
+        if not callable(getattr(self.realizer, 'realize_human_projection', None)):
+            return {**self.realize(projection), 'expression_state': 'READY'}
+        wording = validate_wording(projection, safe_wording(projection))
+        result = {'basis_fingerprint': projection.basis_fingerprint,
+            'source_references': list(projection.source_references),
+            'wording': wording.model_dump(mode='json'), 'expression_finding': None,
+            'owner_facts': projection.owner_facts, 'facts': fact_wording(projection.owner_facts)}
+        fingerprint = projection.basis_fingerprint
+        with self._pending_lock:
+            if fingerprint not in self._pending and len(self._pending) < 32:
+                future = self._wording_executor.submit(self._realize_background, projection)
+                self._pending[fingerprint] = future
+                future.add_done_callback(lambda done: self._forget_wording(fingerprint, done))
+            result['expression_state'] = 'PENDING' if fingerprint in self._pending else 'QUALIFIED_FACTS'
+        return result
+
+    @observed_background('WORKSPACE_WORDING')
+    def _realize_background(self, projection):
+        return self.realize(projection)
+
+    def _forget_wording(self, fingerprint, future):
+        with self._pending_lock:
+            self._pending.pop(fingerprint, None)
+        if future.exception() is not None:
+            import logging
+            logging.getLogger('spg.performance').warning('工作区表述未完成：%s',
+                type(future.exception()).__name__)
+
+    def shutdown(self):
+        self._wording_executor.shutdown(wait=True)
 
     def realize(self,projection):
         table=wic_human_realizations

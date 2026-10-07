@@ -449,6 +449,7 @@ def create_http_application(
         try:
             yield
         finally:
+            experience.human_visible.shutdown()
             if getattr(settings, "admin_enabled", False):
                 admin_operations.shutdown()
             software_runtime.shutdown()

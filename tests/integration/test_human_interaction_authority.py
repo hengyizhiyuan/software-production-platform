@@ -13,7 +13,7 @@ from spg.application.guided_design import GuidedDesignApplicationService
 from spg.application.human_attention import attention_from_semantic_decisions
 from spg.application.human_visible import HumanVisibleRealizationService, validate_wording, safe_wording
 from spg.application.human_language import language_leaks
-from spg.domain.human_visible import HumanVisibleProjection
+from spg.domain.human_visible import HumanVisibleProjection, HumanVisibleWording
 from spg.domain.interaction import InteractionAssessmentCandidate
 from spg.domain.intent_realization import (SemanticKind,ProductionIntent,HumanDecisionBoundary,
     SemanticArgument,SemanticProvenance,SemanticOrigin,SemanticItem)
@@ -173,3 +173,37 @@ def test_cached_expression_is_requalified_without_changing_owner_basis(postgres_
     assert corrected['source_references']==first['source_references']
     assert not language_leaks(corrected['wording']['summary'])
     assert service.realize(projection)==corrected and provider.calls==1
+
+
+def test_workspace_read_never_waits_for_wording_or_uses_an_old_owner_basis(postgres_database):
+    from threading import Event
+    from tests.test_human_interaction_authority import declared_ir, presentation
+    ir,_=declared_ir(ROUTINE[0][1]);projection,_=presentation(ir)
+    started=Event();release=Event()
+    class SlowWording:
+        def realize_human_projection(self,p,feedback=None):
+            started.set()
+            assert release.wait(10), 'test did not release background wording'
+            return safe_wording(p)
+    service=HumanVisibleRealizationService(postgres_database,SlowWording())
+    try:
+        first=service.read(projection)
+        assert not release.is_set() and started.wait(2)
+        assert first['expression_state']=='PENDING'
+        assert first['owner_facts']==projection.owner_facts
+        assert first['basis_fingerprint']==projection.basis_fingerprint
+        validate_wording(projection,HumanVisibleWording.model_validate(first['wording']))
+        # A new exact basis must render its current blocker while the older
+        # expression remains in flight. It must never borrow the older wording.
+        changed=projection.model_copy(update={'basis_fingerprint':'f'*64,
+            'owner_facts':{'work':{'status':'BLOCKED','current_production_step':'PRODUCE'},
+                'admission_context':{'status':'NOT_READY','missing_classes':['PRODUCT_INTENT']}}})
+        second=service.read(changed)
+        assert second['owner_facts']==changed.owner_facts
+        assert second['basis_fingerprint']=='f'*64
+        assert '生产准备受阻' in second['wording']['summary']
+        validate_wording(changed,HumanVisibleWording.model_validate(second['wording']))
+    finally:
+        release.set();service.shutdown()
+    final=service.read(changed)
+    assert final['expression_state']=='READY' and final['owner_facts']==second['owner_facts']

@@ -414,7 +414,7 @@ class ProductExperienceProjection:
 
     def realize_workspace(self, result):
         from spg.application.human_visible import projection_for_workspace
-        realized = self.human_visible.realize(projection_for_workspace(self.database,result))
+        realized = self.human_visible.read(projection_for_workspace(self.database,result))
         result['human_visible'] = realized
         result['revision'] = realized['basis_fingerprint']
         words = realized['wording']
