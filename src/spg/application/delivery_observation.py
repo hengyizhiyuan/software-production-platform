@@ -60,14 +60,20 @@ def archive_inventory(data, canonical_artifacts=None, software=False):
 class DeliveryObservationService:
     def __init__(self, database): self.database=database
 
-    def lineage(self, work_id, revision=None):
+    def lineage(self, work_id, revision=None, *, candidate_id=None):
         if work_id is None: return {}
         with self.database.unit_of_work() as u:
-            p=ProductStore(u.session);binding=p.runtime_binding(work_id)
-            if binding is None:return {'work_id':str(work_id)}
-            summary=p.runtime_summary(binding);r=RuntimeStore(u.session)
-            commit=r.runtime_commit(summary.runtime_commit_id) if summary.runtime_commit_id else None
-            if commit is None or revision is not None and revision!=commit.repository_revision:
+            p=ProductStore(u.session);r=RuntimeStore(u.session)
+            if candidate_id is not None:
+                # Explicit source history follows its immutable Candidate, never today's binding.
+                commit=r.runtime_commit_for_candidate(candidate_id)
+                binding=next((b for b in p.runtime_bindings(work_id)
+                    if commit is not None and b.production_run_id==commit.production_run_id),None)
+            else:
+                binding=p.runtime_binding(work_id)
+                summary=None if binding is None else p.runtime_summary(binding)
+                commit=r.runtime_commit(summary.runtime_commit_id) if summary and summary.runtime_commit_id else None
+            if binding is None or commit is None or revision is not None and revision!=commit.repository_revision:
                 return {'work_id':str(work_id)}
             return {'work_id':str(work_id),'source_resource_id':str(binding.resource_id),'candidate_id':str(commit.candidate_id),
                 'candidate_fingerprint':commit.candidate_fingerprint,'runtime_commit_id':str(commit.id),

@@ -1429,7 +1429,7 @@ def create_http_application(
                   'provider_kind':details['provider_kind'],'source_identity':details['repository_identity'],
                   'artifact_identity':'product:'+str(product_id)+':source:'+exact}
         if candidate:
-            selected.update(delivery_observations.lineage(UUID(candidate['work_id']),exact))
+            selected.update(delivery_observations.lineage(UUID(candidate['work_id']),exact,candidate_id=UUID(candidate['candidate_id'])))
             selected['candidate_id']=candidate['candidate_id']
         semantic=observation.data['action_semantic']
         expected={'product_id':str(product_id),'revision':exact}
@@ -1437,9 +1437,6 @@ def create_http_application(
             expected['revision']=exact if exact in versions else details['accepted']['revision']
         elif semantic==DeliveryAction.CANDIDATE_SOURCE:
             expected['revision']=(candidate or details['current_candidate'] or {}).get('revision')
-            if observation.data['work_id']:
-                expected={**delivery_observations.lineage(UUID(observation.data['work_id'])),
-                          'product_id':str(product_id)}
         elif semantic==DeliveryAction.AUTHORIZED:
             expected={**(delivery_observations.lineage(UUID(observation.data['work_id'])) if observation.data['work_id'] else {}),
                       'product_id':str(product_id)}
@@ -1447,10 +1444,21 @@ def create_http_application(
             policy='ACCEPTED_PRODUCT_BASELINE' if exact in versions else 'EXACT_PRODUCT_CANDIDATE',
             basis='Explicit admitted Product revision' if revision else 'Default accepted Product baseline at resolver time')
         data,returned=service.export_archive(product_id,getattr(http_request.state,'actor_id',ACTOR_ID),exact)
-        if returned!=exact:raise ProductInvariantViolation('Source resolver changed its exact revision')
+        if returned!=exact:
+            # Observe the owner's actual result; do not repair or replace it.
+            actual={'product_id':str(product_id),'revision':returned,
+                    'source_version':versions.get(returned,{}).get('version'),
+                    'artifact_identity':'product:'+str(product_id)+':source:'+returned}
+            actual_candidate=next((c for c in details['candidates'] if c['revision']==returned),None)
+            if actual_candidate:
+                actual.update(delivery_observations.lineage(UUID(actual_candidate['work_id']),returned,
+                    candidate_id=UUID(actual_candidate['candidate_id'])))
+            observation.resolve(expected=expected,selected=actual,
+                policy='ACCEPTED_PRODUCT_BASELINE' if returned in versions else 'OWNER_RETURNED_SOURCE_REVISION',
+                basis='Export owner returned a different revision from the initial resolution; both observations are retained')
         observation.inventory(archive_inventory(data))
         return Response(data,media_type='application/zip',headers={
-            'Content-Disposition':f'attachment; filename="product-source-{exact}.zip"','X-Watt-Source-Revision':exact})
+            'Content-Disposition':f'attachment; filename="product-source-{returned}.zip"','X-Watt-Source-Revision':returned})
 
     @api.get("/api/products/{product_id}/economics")
     def product_economics(product_id: UUID, http_request: Request):
