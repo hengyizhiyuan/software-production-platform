@@ -676,6 +676,16 @@ def _explicit_new_object(text: str) -> str | None:
     return None if match is None else match.group(1).strip("，,。 ")
 
 
+def production_guidance_content(ir, *, question=None, chinese=True):
+    """WIC wording from typed preparation facts, never an owner's blocker dump."""
+    sufficient = ir.production_sufficiency
+    motive = '；'.join(goal.objective for goal in ir.current_production)
+    selected = question or sufficient.question
+    if chinese:
+        return f"你想{motive}。我建议：{sufficient.proposal}\n{sufficient.proposal_basis}\n{selected}"
+    return f"The goal is {motive}. I recommend {sufficient.proposal}.\n{sufficient.proposal_basis}\n{selected}"
+
+
 def policy_governed_response(
     candidate: InteractionAssessmentCandidate,
     semantics: ProgressiveSemanticStructure,
@@ -690,10 +700,7 @@ def policy_governed_response(
     ir = candidate.semantic_intent
     sufficiency = None if ir is None else ir.production_sufficiency
     if sufficiency is not None and sufficiency.status == "GUIDANCE_REQUIRED":
-        return (f"我理解你的目标是：{semantics.working_motive}。建议先做：{sufficiency.proposal}。"
-            f"理由是：{sufficiency.proposal_basis}。{semantics.selected_question or sufficiency.question}"
-            if chinese else f"I understand the goal: {semantics.working_motive}. I recommend {sufficiency.proposal}. "
-            f"Because {sufficiency.proposal_basis}. {semantics.selected_question or sufficiency.question}")
+        return production_guidance_content(ir,question=semantics.selected_question,chinese=chinese)
     human_owned = any(
         delta.category is SemanticCategory.HUMAN_DECISION
         and delta.authority is SemanticAuthority.HUMAN_OWNED

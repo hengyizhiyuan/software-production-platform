@@ -87,3 +87,20 @@ def test_specific_request_does_not_reopen_definition(postgres_database,tmp_path)
     assert projection.readiness.status.value=='READY'
     assert projection.latest_assessment.progressive_semantics.selected_question is None
     assert _admit(work,projection).work_id
+
+
+def test_actual_controlled_chat_keeps_proposal_instead_of_owner_blocker_dump(postgres_database):
+    from spg.domain.interaction import WicRuntimeMode
+    from tests.integration.test_wic_response_contract import _terminal
+    service=WorkInteractionService(postgres_database,capability=Compiler(),runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED)
+    try:
+        origin=service.create_interaction(human_identity='human:test')
+        turn=service.submit_turn(origin.id,'我要开发一个工律的官网',human_identity='human:test')
+        assert _terminal(service,turn.id).status.value=='COMPLETED'
+        projection=service.get_shared_understanding(origin.id)
+        message=next(m.content for m in projection.conversation_messages if m.actor.value=='WATT')
+        assert PROPOSAL in message and QUESTION in message
+        assert message.count('？')==1
+        assert '尚未完成：' not in message and '需要确认）' not in message
+        assert projection.governed_work_id is None
+    finally:service.shutdown()

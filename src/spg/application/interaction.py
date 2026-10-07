@@ -1728,6 +1728,15 @@ class WorkInteractionService:
         branch_status_answer = observed_action_answer
         if branch_status_answer is not None:
             deep_content = branch_status_answer
+        definition = None if assessment.semantic_ir is None else assessment.semantic_ir.production_sufficiency
+        if (definition is not None and definition.status == 'GUIDANCE_REQUIRED'
+                and not assessment.semantic_ir.operational_requests):
+            # The pending Work obligation explains the stop; its fallback owner
+            # prose cannot replace WIC's proposal and exact outcome question.
+            from spg.application.wic_response import production_guidance_content
+            deep_content = production_guidance_content(assessment.semantic_ir,
+                question=assessment.progressive_semantics.selected_question,
+                chinese=bool(re.search(r'[\u4e00-\u9fff]',latest_human_input)))
         events = self.response_events(turn_id)
         provisional_event = next(
             (
