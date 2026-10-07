@@ -28,3 +28,8 @@ test('observed Trace stays compact, exposes divergence and unknown client truth'
  for(const text of ['交付偏离','new','old','request','payload-sha','历史点击未记录','NOT_RECORDED','不能证明客户端接收或保存'])assert.ok(out.includes(text));
  const none=fn({});assert.match(none,/不能据 Manifest 推断用户已下载/);assert.doesNotMatch(none,/用户已成功保存/);
 });
+test('HTTP ingress generates a UUID without secure-context randomUUID and leaves ordinary links untouched',()=>{
+ let click;const context={window:{},URL,Uint8Array,document:{addEventListener:(_,fn)=>click=fn},location:{origin:'http://watt.test'},crypto:{getRandomValues:a=>{a.fill(7);return a}}};vm.runInNewContext(script,context);
+ const anchor={href:'http://watt.test/api/works/w/deliveries/m/download',dataset:{}};click({target:{closest:()=>anchor},defaultPrevented:false});const id=new URL(anchor.href).searchParams.get('initiating_action_id');assert.match(id,/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+ const plain={href:'http://watt.test/products',dataset:{}};context.crypto.getRandomValues=()=>{throw Error('ordinary read must not create action')};click({target:{closest:()=>plain},defaultPrevented:false});assert.equal(plain.href,'http://watt.test/products');
+});
