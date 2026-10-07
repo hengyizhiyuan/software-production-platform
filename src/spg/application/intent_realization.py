@@ -132,6 +132,16 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
             if not goals or not any(goal.objective in {g.objective for g in previous.current_production}
                     and previous.production_sufficiency.proposal in goal.scope for goal in goals):
                 raise IntentRealizationViolation("PRODUCTION_RECOMMENDATION_SCOPE_NOT_BOUND")
+            for goal in goals:
+                original=next((g for g in previous.current_production if g.objective==goal.objective),None)
+                if original is None:continue
+                explicit_source=bool(goal.repository_reference and goal.repository_reference.provenance.origin in {
+                    SemanticOrigin.HUMAN_EXPLICIT,SemanticOrigin.HUMAN_CORRECTION}
+                    and goal.repository_reference.provenance.source_record_id==latest.id)
+                if not explicit_source and (goal.repository_required != original.repository_required
+                        or (None if goal.repository_reference is None else goal.repository_reference.value)
+                        != (None if original.repository_reference is None else original.repository_reference.value)):
+                    raise IntentRealizationViolation("PRODUCTION_RECOMMENDATION_SOURCE_MEANING_CHANGED")
     historical_items = {f"{prior.id}:{item.item_id}": item
         for prior in getattr(basis, "governed_semantic_history", ())
         for item in prior.items}

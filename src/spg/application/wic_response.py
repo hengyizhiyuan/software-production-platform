@@ -10,6 +10,7 @@ from spg.domain.interaction import (
     InteractionAssessment,
     InteractionAssessmentCandidate,
 )
+from spg.domain.intent_realization import SemanticKind
 from spg.domain.engineering_semantics import (
     SemanticEpistemicStatus,
     current_semantic_facts,
@@ -681,9 +682,12 @@ def production_guidance_content(ir, *, question=None, chinese=True):
     sufficient = ir.production_sufficiency
     motive = '；'.join(goal.objective for goal in ir.current_production)
     selected = question or sufficient.question
+    analysis = '\n'.join(item.answer for item in ir.items
+        if item.kind is SemanticKind.ANALYSIS and item.answer)
     if chinese:
-        return f"你想{motive}。我建议：{sufficient.proposal}\n{sufficient.proposal_basis}\n{selected}"
-    return f"The goal is {motive}. I recommend {sufficient.proposal}.\n{sufficient.proposal_basis}\n{selected}"
+        return '\n'.join(filter(None,(f"你想{motive}。我建议：{sufficient.proposal}",
+            analysis,sufficient.proposal_basis,selected)))
+    return '\n'.join(filter(None,(f"The goal is {motive}. I recommend {sufficient.proposal}.",analysis,sufficient.proposal_basis,selected)))
 
 
 def policy_governed_response(

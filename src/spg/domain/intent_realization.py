@@ -67,8 +67,10 @@ class ProductionIntent(FrozenContract):
     bounded_change: bool
     systemic_design: bool = False
     new_work: bool = False
-    repository_reference: SemanticArgument | None = None
-    repository_required: bool = False
+    repository_reference: SemanticArgument | None = Field(default=None,
+        description="Existing project source selected by the Human intent, not a Watt-created greenfield bootstrap repository")
+    repository_required: bool = Field(default=False,
+        description="The Human intent requires existing project source; false for a new build even when Watt has provisioned its managed bootstrap source")
     preview_required: bool = False
     acceptance_required: bool = True
     delivery_authorized: bool = False

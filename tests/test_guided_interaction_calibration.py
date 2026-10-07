@@ -140,6 +140,34 @@ def test_acceptance_cannot_be_fabricated_or_detached_from_recommendation(problem
         govern(meaning(answer, sufficient, scope=() if problem == 'scope-lost' else (PROPOSAL,)), answer, history=(prior,))
 
 
+def test_accepting_recommendation_does_not_turn_greenfield_into_existing_source_requirement():
+    first=_record('我要开发一个工律的官网');prior=govern(meaning(first,guidance()),first)
+    answer=_record('按你的建议来',identity=2,sequence=2)
+    accepted=ProductionSufficiency(status='READY',reason='当前 Human 只接受首版建议，没有另行选择既有项目源码',
+        recommendation_acceptance=SemanticArgument(value=str(prior.id),provenance=SemanticProvenance(
+            origin=SemanticOrigin.HUMAN_EXPLICIT,source_record_id=answer.id,source_text=answer.content)))
+    raw=meaning(answer,accepted,scope=(PROPOSAL,))
+    raw=raw.model_copy(update={'items':(raw.items[0].model_copy(update={'production':
+        raw.items[0].production.model_copy(update={'repository_required':True})}),)})
+    with pytest.raises(IntentRealizationViolation,match='SOURCE_MEANING_CHANGED'):
+        govern(raw,answer,history=(prior,))
+
+
+def test_guidance_preserves_requested_comparison_analysis():
+    from spg.domain.intent_realization import SemanticItem,SemanticKind
+    from spg.application.wic_response import production_guidance_content
+    record=_record('先分析品牌展示与客户后台的差异，再让我决定')
+    raw=meaning(record,guidance())
+    comparison='品牌展示只覆盖信息页；客户后台需要身份认证、客户数据和权限验证。'
+    item=SemanticItem(item_id='comparison',kind=SemanticKind.ANALYSIS,statement='比较两个首版范围',
+        answer=comparison,confidence=1,provenance=raw.items[0].provenance)
+    raw=raw.model_copy(update={'items':(*raw.items,item),'clauses':(raw.clauses[0].model_copy(
+        update={'semantic_item_ids':(raw.items[0].item_id,item.item_id)}),)})
+    ir=govern(raw,record)
+    text=production_guidance_content(ir)
+    assert comparison in text and PROPOSAL in text and text.count('？')==1
+
+
 def test_unsupported_context_cannot_be_quoted_as_known_product_context():
     record = _record('开发官网')
     with pytest.raises(IntentRealizationViolation, match='CONTEXT_UNGROUNDED'):

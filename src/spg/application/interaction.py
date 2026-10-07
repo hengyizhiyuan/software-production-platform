@@ -2034,7 +2034,9 @@ class WorkInteractionService:
                     "accepted_ref": managed_source["accepted_ref"],
                     "accepted_revision": managed_source["accepted_revision"],
                     "accepted_tree": managed_source["accepted_tree"],
-                    "version": managed_source["version"]}))
+                    "version": managed_source["version"],
+                    "bootstrap_only": managed_source["version"] == 0 and not managed_source["origin"],
+                    "has_external_origin": bool(managed_source["origin"])}))
         if revision is not None:
             observations.append(ObservedEffect(owner="work-reality",
                 evidence_references=(f"work-reality-revision:{revision.id}",),
