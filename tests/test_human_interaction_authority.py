@@ -87,6 +87,24 @@ def test_routine_regression(identity,text):
     assert obligations[0].state.value=='PENDING'
 
 
+@pytest.mark.parametrize('work',[
+    None,
+    {'status':'BLOCKED','current_production_step':'PRODUCE'},
+    {'status':'COMPLETED','current_production_step':'COMPLETE'},
+    {'status':'CANCELLED','current_production_step':'PRODUCE'},
+])
+def test_immediate_fact_expression_does_not_invent_execution(work):
+    ir,_=declared_ir(ROUTINE[0][1])
+    projection,_=presentation(ir)
+    projection=projection.model_copy(update={'owner_facts':{
+        **projection.owner_facts,'work':work,'execution':None}})
+    words=validate_wording(projection,safe_wording(projection))
+    assert '准备与执行当前改动' not in words.current_activity
+    assert '按当前目标继续形成并验证改动' not in words.next_step
+    assert words.decisions==()
+    assert words.headline==ir.items[0].statement
+
+
 @pytest.mark.parametrize('identity,text,effect,options',POSITIVE,ids=[r[0] for r in POSITIVE])
 def test_reserved_human_decision(identity,text,effect,options):
     ir,_=declared_ir(text,positive=(effect,options))

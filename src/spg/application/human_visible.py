@@ -122,7 +122,7 @@ def validate_wording(projection, wording):
 
 
 def safe_wording(projection):
-    """WIC safe expression if a replaceable model fails. No owner prose passthrough."""
+    """Qualified WIC fact expression while model wording is pending or unavailable."""
     motive = projection.governed_motive
     if language_leaks(motive):motive='当前产品目标'
     work = projection.owner_facts.get('work') or {}
@@ -132,13 +132,24 @@ def safe_wording(projection):
     activity = EXECUTION.get(state,phase)
     summary = f'{motive}。{STATUS.get(work.get("status"),"正在保留并理解这次请求")}；{activity}。'
     next_step = '按当前目标继续形成并验证改动；成果需要你明确审阅和接受。'
+    if not work:
+        activity='尚未形成具体生产事项'
+        summary=f'{motive}。{activity}。'
+        next_step='当前尚无正在执行的事项；可通过对话说明下一步目标。'
+    elif work.get('status') in {'BLOCKED','NEEDS_REFINEMENT','NEEDS_ATTENTION'}:
+        if state not in {'RUNNING','VERIFYING'}:
+            activity=EXECUTION.get(state,'当前生产条件未满足，尚未进入执行')
+        summary=f'{motive}。{STATUS[work["status"]]}；{activity}。'
+        next_step='当前生产条件未满足，需先由负责的模块核对阻塞证据；尚未完成。'
+    elif work.get('status') in {'COMPLETED','CANCELLED','DISCARDED'}:
+        activity=EXECUTION.get(state,'本次事项已结束')
+        summary=f'{motive}。{STATUS[work["status"]]}；{activity}。'
+        next_step='可查看本次事项保留的成果与记录；新的执行需要新的生产依据。'
     context_blocker = admission_context_wording(projection.owner_facts.get('admission_context'))
     if context_blocker:
         activity='生产准备受阻，尚未进入执行'
         summary=f'{motive}。{context_blocker}'
         next_step='先核对并补齐已有授权的生产依据，再重新检查准入；不会代替你批准缺失的决定。'
-    if work.get('status') in {'BLOCKED','NEEDS_REFINEMENT','NEEDS_ATTENTION'} and not projection.decision_needs:
-        next_step='当前生产条件未满足，需先由负责的模块核对阻塞证据；尚未完成。'
     if projection.decision_needs:next_step='先处理下方的具体决定，再依据你的选择推进。'
     decisions=[]
     for item in projection.decision_needs:
