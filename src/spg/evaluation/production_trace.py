@@ -55,7 +55,7 @@ EVENT_LABELS.update({'ExecutionRequestCreated':'形成执行请求','NativeExecu
     'ExecutionCapacityAllocated':'获得执行容量','NativeExecutionStarted':'开始执行',
     'ExecutionWorkspacePrepared':'准备独立工作区','ExecutionResultObserved':'观测执行产物',
     'ExecutionCapacityReleased':'释放执行容量','NativeExecutionWorkerReturned':'Worker 返回结果',
-    'ExecutionWorkerCompleted':'执行完成','NativeExecutionPaused':'暂停执行',
+    'ExecutionFailed':'执行失败','ExecutionWorkerCompleted':'执行完成','NativeExecutionPaused':'暂停执行',
     'NativeExecutionResumed':'恢复执行','NativeExecutionCancelled':'取消执行',
     'ExecutionRecoveryRequired':'需要恢复','ExecutionRequeued':'恢复后重新排队'})
 
@@ -163,6 +163,7 @@ def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=
             record_labels={'executor_queue':'进入队列','execution_allocations':'获得执行容量',
                 'production_work_units':'建立生产单元','baseline_candidates':'封存候选成果',
                 'execution_attempts':'建立执行尝试','self_refine_events':'自修复记录',
+                'provider_execution_reports':'执行器报告生产结果','completion_evaluations':'核对生产义务',
                 'steering_steps':'登记推进步骤','interaction_messages':'Human 可见交流',
                 'interaction_records':'保存交流记录','work_source_bases':'绑定精确来源'}
             events.append({'timestamp':_time(row), 'owner':TABLE_OWNERS[name],
@@ -171,7 +172,10 @@ def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=
                     'plan_revisions':'形成生产计划','interaction_turn_realizations':'意图已治理',
                     'execution_allocations':'分配执行容量','human_authorizations':'Human 授权',
                     'work_delivery_acceptances':'Human 验收'}.get(name, OWNER_NAMES.get(TABLE_OWNERS[name], '生产')+'记录'))),
-                'state':row.get('result') if name=='verification_records' else row.get('to_condition'),
+                'state':('FAIL' if kind=='ExecutionFailed' else
+                    {'SUCCESS':'PASS','FAILURE':'FAIL','NOT_PRODUCED':'BLOCKED'}.get(row.get('outcome'),row.get('outcome'))
+                    if name in {'provider_execution_reports','completion_evaluations'} else
+                    row.get('result') if name=='verification_records' else row.get('to_condition')),
                 'pwu_id':row.get('pwu_id') or row.get('work_unit_id') or (row.get('id') if name=='production_work_units' else None),
                 'source_ref':f"{name}:{row.get('id') or row.get('work_id')}", 'detail':row})
             if row.get('tool_identity'):
@@ -323,7 +327,7 @@ def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=
             event['detail'] = {key:value for key,value in event['detail'].items() if key in {
                 'id','attempt_id','session_id','condition','status','kind','event_type','reason',
                 'work_id','pwu_id','tool_identity','semantic_input','output_summary','result',
-                'candidate_id','candidate_fingerprint','source_revision','source_tree'}}
+                'candidate_id','candidate_fingerprint','source_revision','source_tree','outcome'}}
     return safe({'schema_version':'production-trace-v1','scene':scene,'purpose':purpose,
         'elapsed_seconds':case.get('elapsed_seconds') if case else None,
         'first_human_input':first_input,'basis':basis,'source_references':list(owner_refs),

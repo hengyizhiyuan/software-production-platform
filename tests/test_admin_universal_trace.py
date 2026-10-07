@@ -29,3 +29,16 @@ def test_unknown_quality_is_not_zero_or_pass_and_deployment_failure_remains_visi
     r=work_summary(row)
     assert r['state_label']=='准备生产' and r['open_finding_count'] is None
     assert '部署 FAILED' in r['issue_hint'] and 'PASS' not in r['result_label']
+
+
+def test_failed_production_does_not_become_success_from_completed_queue():
+    from spg.evaluation.production_trace import project_trace
+    tables={'executor_queue':[{'id':'q','condition':'COMPLETED'}],
+        'provider_execution_reports':[{'id':'r','outcome':'FAILURE'}],
+        'execution_events':[{'id':'e','event_type':'ExecutionFailed','pwu_id':'u'}]}
+    t=project_trace(tables,scene='失败 Work',purpose='失败证据',detail=False)
+    assert not t['candidate']
+    report=next(e for e in t['timeline'] if e['source_ref']=='provider_execution_reports:r')
+    assert report['state']=='FAIL' and report['detail']['outcome']=='FAILURE'
+    failure=next(e for e in t['timeline'] if e['source_ref']=='execution_events:e')
+    assert failure['title']=='执行失败' and failure['state']=='FAIL'

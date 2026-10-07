@@ -55,3 +55,9 @@ test('Ordinary incomplete Work reuses Trace modes and does not claim Quality PAS
  assert.match(s.nodes['#admin-content'].innerHTML,/Preview \/ 交付 owner 记录/);
 });
 test('Unauthenticated Work list never retrieves owner records',async()=>{const s=surface('/admin/works',false);await s.ready();assert.equal(s.calls.length,1);assert.match(s.nodes['#admin-content'].innerHTML,/登录 Watt Admin/)});
+
+
+test('Failed owner execution is visible even when the transport queue completed without Candidate',async()=>{
+ const t=traceFixture();t.candidate=[];t.timeline=[{owner:'EXECUTION',title:'执行失败',state:'FAIL',source_ref:'execution_events:failure',timestamp:'2026-10-07T01:00:00Z',detail:{event_type:'ExecutionFailed'}},{owner:'EXECUTION',title:'执行器报告生产结果',state:'FAIL',source_ref:'provider_execution_reports:report',detail:{outcome:'FAILURE'}}];
+ const s=surface('/admin/trace',true,null,t);await s.ready();await s.listeners.click({target:{closest:()=>({dataset:{traceTab:'execution'}})}});const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/执行失败/);assert.match(h,/执行器报告生产结果/);assert.match(h,/data-kind="bad">失败/);
+});
