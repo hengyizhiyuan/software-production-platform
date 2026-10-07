@@ -574,7 +574,7 @@ class QualityService:
             for f in rows:
                 item = out.setdefault(f["cluster_key"], {"key": f["cluster_key"], "stage": f["stage"],
                     "finding_code": f["finding_code"], "first_seen": f["created_at"], "last_seen": f["created_at"],
-                    "occurrence_count": 0, "affected_cases": [], "findings": [], "closure_state": "OPEN",
+                    "occurrence_count": 0, "affected_cases": [], "findings": [], "findings_case_runs": [], "closure_state": "OPEN",
                     "regression_status": "NOT_PROMOTED", "probable_owner": f["stage"],
                     "confidence": "OBSERVED_OWNER" if f["stage"] else "UNKNOWN",
                     "severity": "REVIEW_REQUIRED", "representative_evidence": f["evidence_refs"]})
@@ -582,6 +582,11 @@ class QualityService:
                 item["occurrence_count"] += 1
                 item["affected_cases"] = sorted(set(item["affected_cases"]) | {str(f["affected_case_id"])})
                 item["findings"].append(str(f["id"]))
+                item["findings_case_runs"].append(str(f["case_run_id"]))
+                item.setdefault("occurrences", []).append({"id": str(f["id"]),
+                    "case_run_id": str(f["case_run_id"]), "case_id": str(f["affected_case_id"]),
+                    "state": f["state"], "created_at": f["created_at"],
+                    "regression_case_id": None if not f["regression_case_id"] else str(f["regression_case_id"])})
                 if f["state"] == "CLOSED":
                     item["closed_occurrences"] = item.get("closed_occurrences", 0) + 1
                 if f["regression_case_id"]:

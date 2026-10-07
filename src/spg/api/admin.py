@@ -41,8 +41,8 @@ def install_admin(api, database, settings, runtime=None):
         from sqlalchemy import text
         with database.unit_of_work() as u:
             ledger = [dict(r) for r in u.session.execute(text("""
-                SELECT a.id,a.state,a.created_at,a.case_version_id,v.case_id,
-                    v.definition->>'title' AS title,r.watt_revision,r.policy_fingerprint,r.experiment_id,
+                SELECT a.id,a.state,a.created_at,a.case_version_id,a.campaign_run_id,v.case_id,
+                    v.definition->>'title' AS title,a.lineage->'divergence'->>'stage' AS divergence_stage,r.watt_revision,r.policy_fingerprint,r.experiment_id,
                     m.cohorts FROM quality_case_runs a
                 JOIN quality_case_versions v ON v.id=a.case_version_id
                 JOIN quality_campaign_runs r ON r.id=a.campaign_run_id
@@ -50,7 +50,36 @@ def install_admin(api, database, settings, runtime=None):
                 ORDER BY a.created_at DESC LIMIT 500
             """)).mappings()]
         result['cockpit'] = cockpit_projection(result, ledger)
+        from spg.evaluation.admin_projection import run_summaries, assurance_summary
+        result['assurance']['summary'] = assurance_summary(database, result['assurance'])
+        result['quality']['runs'] = run_summaries(database, result['quality']['runs'], result['quality']['campaigns'], ledger)
+        active_ids = {r['id'] for r in result['cockpit']['active_runs']}
+        result['cockpit']['active_runs'] = [r for r in result['quality']['runs'] if r['id'] in active_ids]
         return result
+
+    @router.get('/dashboard')
+    def dashboard(period: str = 'TODAY'):
+        from spg.evaluation.admin_dashboard import dashboard
+        return dashboard(database, settings, period)
+
+    @router.get('/dashboard/work-outcomes')
+    def work_outcomes(period: str = 'TODAY'):
+        from datetime import datetime, timezone
+        from sqlalchemy import text
+        from spg.evaluation.admin_dashboard import period_start
+        from spg.infrastructure.performance import projection_scope
+        until = datetime.now(timezone.utc)
+        since = period_start(period, until)
+        @projection_scope
+        def read():
+            with database.unit_of_work() as u:
+                ids = list(u.session.scalars(text("SELECT id FROM product_works WHERE created_at BETWEEN :since AND :until AND condition<>'DISCARDED' ORDER BY created_at LIMIT 501"), {'since': since, 'until': until}))
+            if len(ids) > 500:
+                return {'completed': None, 'scope': '超过当前有界读范围，不能以部分记录计全量'}
+            works = api.state.work_service.get_works(ids)
+            return {'completed': sum(w.work_complete for w in works), 'observed': len(works),
+                'scope': '本期创建且未丢弃的 Work，按当前规范投影检查；不是本期完成事件统计'}
+        return read()
 
     @router.get('/case-runs/{case_run_id}/trace')
     def case_trace(case_run_id: UUID, view: str = "full"):

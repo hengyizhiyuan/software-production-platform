@@ -20,7 +20,7 @@ FINDING_NAMES = {
 }
 
 
-def issue_projection(cluster, later_results=()):
+def issue_projection(cluster, later_results=(), cases=()):
     """A later PASS is requalification evidence, not permission to close a finding."""
     code = cluster.get('finding_code')
     owner = OWNER_NAMES.get(cluster.get('stage'), '尚未确定的环节')
@@ -29,7 +29,23 @@ def issue_projection(cluster, later_results=()):
     if observed_titles: title += '：'+'、'.join(observed_titles[:2])
     qualified = [r for r in later_results if str(r.get('case_id')) in cluster.get('affected_cases', [])
         and r.get('state') == 'PASS' and str(r.get('created_at')) > str(cluster.get('last_seen'))]
-    return {**cluster, 'title':title, 'owner_label':owner,
+    catalog = {str(c['id']): c for c in cases}
+    closures = []
+    for occurrence in cluster.get('occurrences', ()):
+        if occurrence['state'] == 'CLOSED':
+            continue
+        for row in later_results:
+            case = catalog.get(str(row.get('case_id')), {})
+            cohorts = case.get('cohorts', ())
+            eligible = (occurrence.get('regression_case_id') == str(row.get('case_id')) and 'REGRESSION' in cohorts
+                or occurrence.get('case_id') == str(row.get('case_id')) and 'FRESH_HOLDOUT' in cohorts)
+            if eligible and row.get('state') == 'PASS' and str(row['created_at']) > str(occurrence['created_at']):
+                closures.append({'finding_id': occurrence['id'], 'case_run_id': str(row['id']), 'title': row.get('title')})
+                break
+    divergence = next((r.get('divergence_stage') for r in later_results
+        if str(r['id']) in cluster.get('findings_case_runs', ()) and r.get('divergence_stage')), None)
+    return {**cluster, 'earliest_divergence_label': OWNER_NAMES.get(divergence, '尚无独立最早偏离证据'), 'case_titles': [catalog[c]['definition']['title'] for c in cluster.get('affected_cases', ()) if c in catalog],
+        'eligible_closures': closures, 'title':title, 'owner_label':owner,
         'severity_label':'需要审查（尚未评定严重程度）',
         'repair_label': '已治理关闭' if cluster.get('closure_state') == 'CLOSED' else
             '后续验证通过，历史问题记录仍待治理关闭' if qualified else '尚无后续通过证据',
@@ -83,7 +99,7 @@ def cockpit_projection(overview, ledger):
     current = latest(basis)
     previous_revision = next((v for v in revisions if v != basis), None)
     changes = version_comparison(current, latest(previous_revision))
-    issues = [issue_projection(c, ledger) for c in overview['quality']['clusters']]
+    issues = [issue_projection(c, ledger, overview['quality'].get('cases', ())) for c in overview['quality']['clusters']]
     opened = [i for i in issues if i['closure_state'] != 'CLOSED']
     regressions = [c for c in changes if c['kind'] == 'REGRESSION']
     qualified = sum(r['state'] == 'PASS' for r in current)
@@ -103,3 +119,77 @@ def cockpit_projection(overview, ledger):
         'qualified':qualified, 'observed':len(current), 'cohort_counts':dict(counts), 'version_changes':changes,
         'active_runs':active, 'coverage_note':'按精确场景版本和策略比较；缺少记录不代表通过。账本展示最近 500 次非实验场景观测。',
         'regression_count':len(regressions)}
+
+
+def run_summaries(database, runs, campaigns, ledger):
+    """Read-only human summaries; exact case version/policy comparison is retained."""
+    from sqlalchemy import text
+    if not runs:
+        return []
+    catalog = {str(c['id']): c for c in campaigns}
+    with database.unit_of_work() as u:
+        rows = u.session.execute(text("""
+          SELECT m.run_id, v.definition->>'title' AS title, m.cohorts, m.disposition,
+            a.state FROM quality_run_members m JOIN quality_case_versions v ON v.id=m.case_version_id
+          LEFT JOIN LATERAL (SELECT state FROM quality_case_runs WHERE campaign_run_id=m.run_id
+            AND case_version_id=m.case_version_id ORDER BY attempt DESC LIMIT 1) a ON true
+          WHERE m.run_id=ANY(CAST(:ids AS uuid[])) ORDER BY m.run_id,m.ordinal
+        """), {'ids': [str(r['id']) for r in runs]}).mappings().all()
+    out = []
+    for run in runs:
+        members = [m for m in rows if m['run_id'] == run['id']]
+        def latest(observations):
+            unique = {}
+            for row in sorted(observations, key=lambda r: str(r['created_at']), reverse=True):
+                unique.setdefault((str(row['case_version_id']), row.get('policy_fingerprint')), row)
+            return list(unique.values())
+        current = latest(r for r in ledger if str(r.get('campaign_run_id')) == str(run['id']))
+        previous = latest(r for r in ledger if not r.get('experiment_id')
+            and str(r['created_at']) < str(run['created_at']))
+        changes = version_comparison(current, previous)
+        comparable = not run.get('experiment_id') and any(
+            (str(r['case_version_id']), r.get('policy_fingerprint')) ==
+            (str(p['case_version_id']), p.get('policy_fingerprint')) for r in current for p in previous)
+        if run.get('experiment_id'):
+            changes = []
+        campaign = catalog.get(str(run.get('campaign_id')), {})
+        definition = campaign.get('definition') or {}
+        out.append({**run, 'human_summary': {
+            'title': campaign.get('name') or definition.get('name') or '已保存的资格验证',
+            'why': '重跑既有验证的选定范围' if run.get('parent_run_id') else '比较候选策略' if run.get('experiment_id') else definition.get('rationale') or '受治理的质量资格验证',
+            'coverage_count': len(members), 'coverage': [m['title'] for m in members],
+            'cohorts': sorted({c for m in members for c in m['cohorts']}),
+            'passed': sum(m['state'] == 'PASS' for m in members),
+            'attention': sum(m['state'] in ('FAIL','BLOCKED','UNKNOWN') for m in members),
+            'changes': changes, 'comparison_available': comparable, 'comparison_scope': '最近 500 份账本、相同 Case 版本与策略；没有依据不判断改善'}})
+    return out
+
+
+def assurance_summary(database, assurance):
+    """Summarize exact stored candidates; acceptance remains in the Product flow."""
+    from sqlalchemy import text
+    with database.unit_of_work() as u:
+        rows = u.session.execute(text('''SELECT c.id,c.fingerprint,c.sealed_at,
+          EXISTS(SELECT 1 FROM human_authorizations a WHERE a.candidate_id=c.id
+            AND a.candidate_fingerprint=c.fingerprint) AS authorized,
+          jsonb_array_length(c.verification_record_ids) AS required_verifications,
+          (SELECT count(*) FROM jsonb_array_elements_text(c.verification_record_ids) ref(id)
+            JOIN verification_records v ON v.id::text=ref.id WHERE v.result='PASS') AS passed_verifications,
+          (SELECT count(*) FROM jsonb_array_elements_text(c.verification_record_ids) ref(id)
+            JOIN verification_records v ON v.id::text=ref.id WHERE v.result='FAIL') AS failed_verifications
+          FROM baseline_candidates c WHERE c.condition='SEALED' ORDER BY c.sealed_at DESC LIMIT 100''')).mappings().all()
+    latest = {}
+    for record in sorted(assurance['results'], key=lambda r: str(r.get('assessed_at') or ''), reverse=True):
+        latest.setdefault((str(record['candidate_id']), record.get('candidate_fingerprint')), record)
+    pending = []
+    for row in rows:
+        result = latest.get((str(row['id']), row['fingerprint']))
+        if (result and result.get('gate') == 'PASS' and not row['authorized']
+                and row['required_verifications'] > 0 and row['required_verifications'] == row['passed_verifications']):
+            pending.append({'candidate_id': str(row['id']), 'sealed_at': row['sealed_at'], 'guardian': result,
+                'verification_count': row['passed_verifications'], 'state_label': '待你审阅与授权；交付后再正式验收'})
+    return {'verification_blocked_candidates': sum(row['failed_verifications'] > 0 for row in rows),
+        'pending_review': pending, 'blocked_candidates': sum(r.get('gate') in ('FAIL', 'FAIL_REPAIRABLE', 'BLOCKED') for r in latest.values()),
+        'unknown_candidates': sum(r.get('gate') not in ('PASS', 'FAIL', 'FAIL_REPAIRABLE', 'BLOCKED') for r in latest.values()),
+        'observation_count': len(latest), 'scope': '最近可读取的 20 份 Guardian 结果及 100 个封存候选；不冒充全量拦截统计',
+        'false_positive': None, 'health_note': '结果存储可读取不等于 owner 实时健康；独立质量评价另列。'}

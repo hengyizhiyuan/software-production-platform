@@ -322,6 +322,7 @@ def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=
                 'work_id','pwu_id','tool_identity','semantic_input','output_summary','result',
                 'candidate_id','candidate_fingerprint','source_revision','source_tree'}}
     return safe({'schema_version':'production-trace-v1','scene':scene,'purpose':purpose,
+        'elapsed_seconds':case.get('elapsed_seconds') if case else None,
         'first_human_input':first_input,'basis':basis,'source_references':list(owner_refs),
         'conversation':conversation,'semantic':semantic,'contexts':contexts,
         'steering':tables.get('steering_steps', []),'plan_history':tables.get('steering_history_events', [])+tables.get('plan_revisions', []),

@@ -182,8 +182,9 @@ class OperationsService:
                         continue
                     r = json.loads(p.read_text())
                     if isinstance(r, dict) and "gate" in r and "request_id" in r:
-                        results.append({k: r.get(k) for k in ("request_id", "result_id", "candidate_id",
-                            "candidate_fingerprint", "source_revision", "source_tree", "gate", "assessed_at")})
+                        from spg.evaluation.production_trace import safe
+                        results.append(safe({k: r.get(k) for k in ("request_id", "result_id", "candidate_id",
+                            "candidate_fingerprint", "source_revision", "source_tree", "gate", "assessed_at", "summary", "findings")}))
                 except (OSError, ValueError):
                     continue
         return {"owner": "Guardian", "mode": self.settings.owner_runtime_mode,
