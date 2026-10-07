@@ -106,6 +106,24 @@ def test_accept_recommendation_binds_exact_previous_scope_and_proceeds():
     assert not current.current_production[0].delivery_authorized
 
 
+def test_accepting_design_recommendation_can_activate_previously_noncurrent_intent():
+    first=_record('官网首版先比较品牌展示和客户后台，再让我决定')
+    raw=meaning(first,guidance())
+    raw=raw.model_copy(update={'items':(raw.items[0].model_copy(update={'production':
+        raw.items[0].production.model_copy(update={'current':False,'new_work':False})}),)})
+    prior=govern(raw,first)
+    assert not prior.current_production
+    assert not any(o.plane.value=='WORK' for o in IntentRealizationKernel().obligations(prior,uuid4()))
+    answer=_record('按你的建议来',identity=2,sequence=2)
+    accepted=ProductionSufficiency(status='READY',reason='Human 现在批准上一轮明确的有限方向，开始当前生产',
+        recommendation_acceptance=SemanticArgument(value=str(prior.id),provenance=SemanticProvenance(
+            origin=SemanticOrigin.HUMAN_EXPLICIT,source_record_id=answer.id,source_text=answer.content)))
+    current=govern(meaning(answer,accepted,scope=(PROPOSAL,)),answer,history=(prior,))
+    _,_,readiness=projected(current,answer)
+    assert readiness.status.value=='READY'
+    assert IntentRealizationKernel().obligations(current,uuid4())[0].plane.value=='WORK'
+
+
 def test_default_recommendation_is_not_specific_to_websites():
     record=_record('我想做一个团队排班工具，先给我一个能开始的版本建议')
     proposal='建议首版只录入团队成员和每日班次并展示排班表，不加入薪资和外部账号连接'

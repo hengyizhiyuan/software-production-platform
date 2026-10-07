@@ -129,11 +129,14 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
             if previous is None or previous.production_sufficiency.status != "GUIDANCE_REQUIRED" or acceptance.value != str(previous.id):
                 raise IntentRealizationViolation("PRODUCTION_RECOMMENDATION_ACCEPTANCE_STALE")
             goals = tuple(i.production for i in candidate.items if i.production and i.production.current)
-            if not goals or not any(goal.objective in {g.objective for g in previous.current_production}
+            # A design-only Turn can propose a declared future goal. Only the
+            # current Human acceptance may make that exact goal executable.
+            proposed_goals = tuple(i.production for i in previous.items if i.production)
+            if not goals or not any(goal.objective in {g.objective for g in proposed_goals}
                     and previous.production_sufficiency.proposal in goal.scope for goal in goals):
                 raise IntentRealizationViolation("PRODUCTION_RECOMMENDATION_SCOPE_NOT_BOUND")
             for goal in goals:
-                original=next((g for g in previous.current_production if g.objective==goal.objective),None)
+                original=next((g for g in proposed_goals if g.objective==goal.objective),None)
                 if original is None:continue
                 explicit_source=bool(goal.repository_reference and goal.repository_reference.provenance.origin in {
                     SemanticOrigin.HUMAN_EXPLICIT,SemanticOrigin.HUMAN_CORRECTION}
