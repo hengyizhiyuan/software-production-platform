@@ -2606,7 +2606,7 @@ def create_http_application(
         selected={**(expected if candidate_fingerprint==expected['candidate_fingerprint'] else {'work_id':str(work_id)}),
                   'candidate_fingerprint':candidate_fingerprint if re.fullmatch('[a-f0-9]{64}',candidate_fingerprint) else None,
                   'artifact_identity':candidate_fingerprint+':'+path if context and candidate_fingerprint==expected['candidate_fingerprint']
-                    and any(a['path']==path for a in context.get('artifacts',[])) else None}
+                    and path in context.get('artifacts',[]) else None}
         observation.resolve(expected=expected,selected=selected,policy='EXACT_SEALED_CANDIDATE',basis='Exact requested Candidate fingerprint and path; candidate-download gate verifies current lineage')
         filename = quote(PurePosixPath(path).name)
         return Response(delivery_service.candidate_download(work_id, candidate_fingerprint, path),
