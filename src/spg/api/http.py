@@ -5,6 +5,7 @@ from datetime import timedelta
 import asyncio
 from importlib.resources import files
 import json
+import re
 from pathlib import Path, PurePosixPath
 from typing import Annotated
 from urllib.parse import quote
@@ -1409,6 +1410,7 @@ def create_http_application(
         if artifact_path:
             item=next((a for a in manifest.artifacts if a.path==artifact_path),None)
             if item:expected['payload_sha256']=item.sha256
+            else:selected['artifact_identity']=None
         observation.resolve(expected=expected,selected=selected,policy='AUTHORIZED_RUNTIME_DELIVERY',
             basis='Exact requested immutable Manifest; current Work Runtime Commit and authorization; Task 2 integrity gate remains authoritative')
         return observation,manifest
@@ -2602,7 +2604,9 @@ def create_http_application(
         if context:
             expected.update(product_id=observation.data['product_id'],candidate_id=context['candidate_id'],tree=context.get('tree'))
         selected={**(expected if candidate_fingerprint==expected['candidate_fingerprint'] else {'work_id':str(work_id)}),
-                  'candidate_fingerprint':candidate_fingerprint,'artifact_identity':candidate_fingerprint+':'+path}
+                  'candidate_fingerprint':candidate_fingerprint if re.fullmatch('[a-f0-9]{64}',candidate_fingerprint) else None,
+                  'artifact_identity':candidate_fingerprint+':'+path if context and candidate_fingerprint==expected['candidate_fingerprint']
+                    and any(a['path']==path for a in context.get('artifacts',[])) else None}
         observation.resolve(expected=expected,selected=selected,policy='EXACT_SEALED_CANDIDATE',basis='Exact requested Candidate fingerprint and path; candidate-download gate verifies current lineage')
         filename = quote(PurePosixPath(path).name)
         return Response(delivery_service.candidate_download(work_id, candidate_fingerprint, path),
@@ -2673,8 +2677,10 @@ def create_http_application(
     @api.get("/api/works/{work_id}/deliveries/{manifest_id}/artifact")
     def delivery_artifact(work_id: UUID, manifest_id: UUID, path: str, http_request: Request):
         observation,manifest=manifest_observation(http_request,work_id,manifest_id,artifact_path=path)
-        observation.inventory({'files':[a.model_dump(mode='json') for a in manifest.artifacts if a.path==path]})
-        return Response(delivery_service.artifact(work_id, manifest_id, path), media_type="text/plain; charset=utf-8",
+        data=delivery_service.artifact(work_id, manifest_id, path)
+        observation.inventory({'files':[a.model_dump(mode='json') for a in manifest.artifacts if a.path==path],
+                               'basis':'OWNER_GATE_VALIDATED_ARTIFACT'})
+        return Response(data, media_type="text/plain; charset=utf-8",
             headers={"X-Content-Type-Options": "nosniff", "Content-Security-Policy": "default-src 'none'"})
 
     @api.get("/api/works/{work_id}/deliveries/{manifest_id}/download")

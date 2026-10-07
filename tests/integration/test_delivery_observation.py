@@ -81,6 +81,10 @@ def test_current_delivery_response_lineage_repeat_failures_and_trace_read_only(p
     ma=action(db,wid,missing);assert_response(ma,missing)
     assert ma['phases']==['USER_ACTION_INITIATED','SERVER_NOT_SERVED']
     assert ma['classification']=='NOT_SERVED' and ma['response']['error_code']=='NOT_FOUND'
+    bad_path=c.get(base+'/artifact',params={'path':'password=private-path-secret'})
+    assert bad_path.status_code==404
+    bad_action=action(db,wid,bad_path);assert bad_action['selected']['artifact_identity'] is None
+    assert 'private-path-secret' not in str(bad_action)
     bad_candidate=c.get(f'/api/works/{wid}/candidate-download/'+('0'*64)+'/index.html')
     assert bad_candidate.status_code==409 and action(db,wid,bad_candidate)['classification']=='NOT_SERVED'
     table=metadata.tables['work_delivery_manifests'];original=manifest.model_dump(mode='json')
@@ -92,6 +96,11 @@ def test_current_delivery_response_lineage_repeat_failures_and_trace_read_only(p
         rejected=c.get(base+'/download');assert rejected.status_code==409,rejected.text
         ra=action(db,wid,rejected);assert_response(ra,rejected)
         assert ra['classification']=='NOT_SERVED' and ra['phases'][-1]=='SERVER_NOT_SERVED'
+        if corrupt['artifacts'][0]['sha256']=='0'*64:
+            file_rejected=c.get(base+'/artifact',params={'path':corrupt['artifacts'][0]['path']})
+            assert file_rejected.status_code==409
+            fa=action(db,wid,file_rejected);assert fa['classification']=='NOT_SERVED'
+            assert 'inventory' not in fa, 'Rejected artifact must not claim a served file inventory'
     with db.engine.begin() as conn:conn.execute(update(table).where(table.c.id==manifest.id).values(payload=original))
     def forbidden(*a,**k):raise AssertionError('ordinary Trace must not build or hash packages')
     monkeypatch.setattr(DeliveryApplicationService,'package',forbidden)
