@@ -1387,14 +1387,68 @@ def create_http_application(
         return ProductManagedSourceService(selected_database, settings or Settings()).inspect_file(
             product_id, getattr(http_request.state, "actor_id", ACTOR_ID), path, revision)
 
+    from spg.application.delivery_observation import (DeliveryObservationService, DeliveryAction, archive_inventory)
+    delivery_observations = DeliveryObservationService(selected_database)
+
+    def manifest_observation(http_request, work_id, manifest_id, *, artifact_path=None):
+        observation=delivery_observations.begin(http_request,
+            operation="DELIVERY_ARTIFACT" if artifact_path else "DELIVERY_PACKAGE",
+            semantic=DeliveryAction.ARTIFACT if artifact_path else DeliveryAction.AUTHORIZED,work_id=work_id)
+        expected={**delivery_observations.lineage(work_id),'product_id':observation.data['product_id'],
+                  'manifest_id':str(manifest_id)}
+        manifest=delivery_service.manifest(work_id,manifest_id)
+        with selected_database.unit_of_work() as u:
+            commit=RuntimeStore(u.session).runtime_commit(manifest.runtime_commit_id)
+        selected={'product_id':observation.data['product_id'],'work_id':str(work_id),
+            'manifest_id':str(manifest.id),'manifest_fingerprint':manifest.fingerprint,
+            'target_id':str(manifest.target_id),'runtime_commit_id':str(manifest.runtime_commit_id),
+            'revision':manifest.repository_revision,'tree':commit.repository_tree_identity if commit else None,'candidate_id':str(commit.candidate_id) if commit else None,
+            'candidate_fingerprint':commit.candidate_fingerprint if commit else None,
+            'authorization_id':str(commit.human_authorization_id) if commit else None,
+            'artifact_identity':str(manifest.id)+(':'+artifact_path if artifact_path else '')}
+        if artifact_path:
+            item=next((a for a in manifest.artifacts if a.path==artifact_path),None)
+            if item:expected['payload_sha256']=item.sha256
+        observation.resolve(expected=expected,selected=selected,policy='AUTHORIZED_RUNTIME_DELIVERY',
+            basis='Exact requested immutable Manifest; current Work Runtime Commit and authorization; Task 2 integrity gate remains authoritative')
+        return observation,manifest
+
     @api.get("/api/products/{product_id}/code-assets/export")
     def export_product_code(product_id: UUID, http_request: Request, revision: str | None = None):
         from spg.application.product_managed_source import ProductManagedSourceService
-        data, exact = ProductManagedSourceService(selected_database, settings or Settings()).export_archive(
-            product_id, getattr(http_request.state, "actor_id", ACTOR_ID), revision)
-        return Response(data, media_type="application/zip", headers={
-            "Content-Disposition": f'attachment; filename="product-source-{exact}.zip"',
-            "X-Watt-Source-Revision": exact})
+        observation=delivery_observations.begin(http_request,operation='PRODUCT_SOURCE_EXPORT',
+            semantic=DeliveryAction.OFFICIAL if revision is None else DeliveryAction.SOURCE_REVISION,product_id=product_id)
+        service=ProductManagedSourceService(selected_database,settings or Settings())
+        details=service.describe(product_id,getattr(http_request.state,'actor_id',ACTOR_ID))
+        exact=revision or details['accepted']['revision']
+        versions={v['revision']:v for v in details['versions']}
+        candidate=next((c for c in details['candidates'] if c['revision']==exact),None)
+        selected={'product_id':str(product_id),'revision':exact,'source_version':versions.get(exact,{}).get('version'),
+                  'provider_kind':details['provider_kind'],'source_identity':details['repository_identity'],
+                  'artifact_identity':'product:'+str(product_id)+':source:'+exact}
+        if candidate:
+            selected.update(delivery_observations.lineage(UUID(candidate['work_id']),exact))
+            selected['candidate_id']=candidate['candidate_id']
+        semantic=observation.data['action_semantic']
+        expected={'product_id':str(product_id),'revision':exact}
+        if semantic==DeliveryAction.OFFICIAL:
+            expected['revision']=exact if exact in versions else details['accepted']['revision']
+        elif semantic==DeliveryAction.CANDIDATE_SOURCE:
+            expected['revision']=(candidate or details['current_candidate'] or {}).get('revision')
+            if observation.data['work_id']:
+                expected={**delivery_observations.lineage(UUID(observation.data['work_id'])),
+                          'product_id':str(product_id)}
+        elif semantic==DeliveryAction.AUTHORIZED:
+            expected={**(delivery_observations.lineage(UUID(observation.data['work_id'])) if observation.data['work_id'] else {}),
+                      'product_id':str(product_id)}
+        observation.resolve(expected=expected,selected=selected,
+            policy='ACCEPTED_PRODUCT_BASELINE' if exact in versions else 'EXACT_PRODUCT_CANDIDATE',
+            basis='Explicit admitted Product revision' if revision else 'Default accepted Product baseline at resolver time')
+        data,returned=service.export_archive(product_id,getattr(http_request.state,'actor_id',ACTOR_ID),exact)
+        if returned!=exact:raise ProductInvariantViolation('Source resolver changed its exact revision')
+        observation.inventory(archive_inventory(data))
+        return Response(data,media_type='application/zip',headers={
+            'Content-Disposition':f'attachment; filename="product-source-{exact}.zip"','X-Watt-Source-Revision':exact})
 
     @api.get("/api/products/{product_id}/economics")
     def product_economics(product_id: UUID, http_request: Request):
@@ -2539,7 +2593,17 @@ def create_http_application(
                 "X-Candidate-Tree": context["tree"]})
 
     @api.get("/api/works/{work_id}/candidate-download/{candidate_fingerprint}/{path:path}")
-    def candidate_download_artifact(work_id: UUID, candidate_fingerprint: str, path: str):
+    def candidate_download_artifact(work_id: UUID, candidate_fingerprint: str, path: str, http_request: Request):
+        observation=delivery_observations.begin(http_request,operation='CANDIDATE_ARTIFACT',
+            semantic=DeliveryAction.CANDIDATE_ARTIFACT,work_id=work_id)
+        context=delivery_service.candidate_context(work_id)
+        expected={'work_id':str(work_id),'revision':None if context is None else context['repository_revision'],
+                  'candidate_fingerprint':None if context is None else context['candidate_fingerprint']}
+        if context:
+            expected.update(product_id=observation.data['product_id'],candidate_id=context['candidate_id'],tree=context.get('tree'))
+        selected={**(expected if candidate_fingerprint==expected['candidate_fingerprint'] else {'work_id':str(work_id)}),
+                  'candidate_fingerprint':candidate_fingerprint,'artifact_identity':candidate_fingerprint+':'+path}
+        observation.resolve(expected=expected,selected=selected,policy='EXACT_SEALED_CANDIDATE',basis='Exact requested Candidate fingerprint and path; candidate-download gate verifies current lineage')
         filename = quote(PurePosixPath(path).name)
         return Response(delivery_service.candidate_download(work_id, candidate_fingerprint, path),
             media_type=artifact_media_type(path), headers={"X-Content-Type-Options": "nosniff",
@@ -2607,13 +2671,18 @@ def create_http_application(
         return software_runtime.view(work_id, manifest_id)
 
     @api.get("/api/works/{work_id}/deliveries/{manifest_id}/artifact")
-    def delivery_artifact(work_id: UUID, manifest_id: UUID, path: str):
+    def delivery_artifact(work_id: UUID, manifest_id: UUID, path: str, http_request: Request):
+        observation,manifest=manifest_observation(http_request,work_id,manifest_id,artifact_path=path)
+        observation.inventory({'files':[a.model_dump(mode='json') for a in manifest.artifacts if a.path==path]})
         return Response(delivery_service.artifact(work_id, manifest_id, path), media_type="text/plain; charset=utf-8",
             headers={"X-Content-Type-Options": "nosniff", "Content-Security-Policy": "default-src 'none'"})
 
     @api.get("/api/works/{work_id}/deliveries/{manifest_id}/download")
-    def delivery_download(work_id: UUID, manifest_id: UUID):
-        return Response(delivery_service.package(work_id, manifest_id), media_type="application/zip",
+    def delivery_download(work_id: UUID, manifest_id: UUID, http_request: Request):
+        observation,manifest=manifest_observation(http_request,work_id,manifest_id)
+        data=delivery_service.package(work_id,manifest_id)
+        observation.inventory(archive_inventory(data,manifest.artifacts,manifest.software is not None))
+        return Response(data, media_type="application/zip",
             headers={"Content-Disposition": f'attachment; filename="delivery-{manifest_id}.zip"', "X-Content-Type-Options": "nosniff"})
 
     @api.post("/api/works/{work_id}/deliveries/{manifest_id}/acceptance")
@@ -2642,5 +2711,7 @@ def create_http_application(
     from spg.infrastructure.performance import ReadConcurrencyMiddleware
     api.add_middleware(ReadConcurrencyMiddleware,
         limit=getattr(container, "settings", Settings()).http_read_concurrency)
+    from spg.api.delivery_observation import DeliveryObservationMiddleware
+    api.add_middleware(DeliveryObservationMiddleware)
     api.add_middleware(PerformanceMiddleware)
     return api

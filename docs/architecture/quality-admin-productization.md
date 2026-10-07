@@ -27,3 +27,33 @@ Start、Pause、Resume、Stop、Failed/Selected/All rerun 继续调用既有 Qua
 运行资源读取既有 Operations samples、服务探测、Worker registry 和 allocation。PWU tokens 与模型时间来自实际 provider receipts；排队与运行时间来自精确生命周期事件。CPU、内存、磁盘变化、网络、工具或验证时间未逐单元测量时展示“未采集”，不替换为零。当前不实现计费、分布式 tracing 或跨主机 Worker Pool。
 
 旧资格缺少某阶段时只展示已保存事实与缺口。暂时不能从未见过的工程证据自动归因严重程度，不能把晚于资格观测的产品状态包装为历史。当某节点没有显式 DAG（旧单 PWU）时展示无已记录前序依赖，不能推断虚构依赖。
+
+### User-observed Delivery Trace v1
+
+Universal Work Trace separates produced Candidate/Preview, authorized Runtime
+Commit/Manifest, and the response actually served by a delivery or source export.
+Delivery requests append `USER_ACTION_INITIATED`, `SERVER_RESOLVED`, then
+`SERVER_SERVED` or `SERVER_NOT_SERVED` in the existing `connector_audit_events`
+ledger (`subject_kind=DELIVERY_ACTION`). Work/Product lookup is indexed and
+bounded to the latest 50 actions. Trace reads do not package, publish or hash
+artifacts. No response blobs, credentials, IPs or browser histories are stored.
+
+Each server-owned action records the authenticated actor, request ID, resolver
+policy and basis, expected/selected exact lineage, and actual response status,
+filename, byte count and SHA-256. Client-generated initiating IDs, surface and
+semantic hints are explicitly declarations; they confer no authority. Canonical
+manifest hashes supply per-file evidence; ZIP inventory reads central-directory
+metadata without decompressing/re-hashing artifacts. Response SHA-256 is computed
+once over bytes sent at the ASGI serving boundary.
+
+Classification follows the action meaning: exporting an accepted official
+version can legitimately differ from an unaccepted Candidate. Requesting current
+authorized delivery while selecting an older baseline is
+`OBSERVED_DELIVERY_DIVERGENCE`. Missing lineage stays `UNAVAILABLE`; failed or
+incomplete responses stay `NOT_SERVED`. Existing manifest/source integrity gates
+still reject invalid lineage or bytes. Observation never accepts, authorizes,
+promotes, repairs, or rewrites historical objects.
+
+`ASGI_SEND_COMPLETED` proves server sending only. `CLIENT_RECEIVED` and
+`CLIENT_SAVED` remain `UNAVAILABLE`. Original pre-observer incident clicks remain
+`NOT_RECORDED`; present reproductions never substitute for those missing facts.

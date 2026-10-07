@@ -16,6 +16,11 @@ from sqlalchemy import event
 _current = ContextVar('watt_request_performance', default=None)
 
 
+def current_request_id():
+    observation = _current.get()
+    return None if observation is None else observation.request_id
+
+
 @dataclass
 class Observation:
     request_id: str = field(default_factory=lambda: str(uuid4()))

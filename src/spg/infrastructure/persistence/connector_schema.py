@@ -1,6 +1,6 @@
 """Work/User executable capability overlays and resumable capability gaps."""
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, String, Table, Text, Uuid, UniqueConstraint
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, String, Table, Text, Uuid, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import JSONB
 
 from spg.infrastructure.persistence.metadata import metadata
@@ -73,3 +73,9 @@ connector_audit_events = Table(
     Column("created_at", DateTime(timezone=True), nullable=False),
 )
 Index("ix_connector_audit_subject", connector_audit_events.c.subject_kind, connector_audit_events.c.subject_id)
+
+# Delivery observations reuse the canonical ledger; bounded Work/Product lookup.
+for scope in ("work_id", "product_id"):
+    Index("ix_delivery_audit_" + scope, connector_audit_events.c.detail[scope].astext,
+          connector_audit_events.c.created_at,
+          postgresql_where=text("subject_kind = 'DELIVERY_ACTION'"))

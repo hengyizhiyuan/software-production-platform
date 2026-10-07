@@ -533,6 +533,14 @@ class ProductionTraceService:
             result['manifests']=tables.get('work_delivery_manifests',[])
             result['delivery_integrity'] = work_delivery_qualification(
                 self.settings, entity_id, tables.get('baseline_candidates', []))
+            from spg.application.delivery_observation import DeliveryObservationService
+            result['served_delivery'] = {
+                'actions': DeliveryObservationService(self.database).for_work(entity_id, work.get('product_id')),
+                'historical_action_identity': 'NOT_RECORDED',
+                'historical_note': '审计启用前的原始点击未记录；当前动作不能补作历史点击。',
+                'client_received': 'UNAVAILABLE', 'client_saved': 'UNAVAILABLE',
+                'completion_basis': 'ASGI_SEND_COMPLETED proves server send only',
+            }
             result['acceptance']=tables.get('work_delivery_acceptances',[])
             end=('已保存交付 Manifest；验收及部署见 owner 记录' if tables.get('work_delivery_manifests') else
                 '已形成 Candidate，尚无交付 Manifest；不能宣称已完整交付' if result['candidate'] else
