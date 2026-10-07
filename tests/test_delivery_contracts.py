@@ -119,3 +119,24 @@ def test_full_application_delivery_packages_exact_supported_runtime_tree(
     assert software.runtime_recipe.adapter == "FULL_APPLICATION_RUNTIME"
     assert any(item["path"] == "src/app.py" for item in software.changed_files)
     assert any("isolated PostgreSQL" in step for step in software.reproduction)
+
+
+def test_governed_static_software_target_uses_exact_tree_even_when_summary_is_document_only(tmp_path):
+    repository=tmp_path/'site';repository.mkdir()
+    def git(*args):
+        return subprocess.run(['git','-C',str(repository),*args],check=True,capture_output=True,text=True).stdout.strip()
+    git('init','-b','main');git('config','user.name','Delivery Test');git('config','user.email','delivery@example.invalid')
+    for name,content in {'README.md':'# Site','index.html':'<h1>Company</h1>','site.css':'h1 { color: navy; }'}.items():
+        (repository/name).write_text(content)
+    git('add','.');git('commit','-m','exact software')
+    revision=git('rev-parse','HEAD')
+    work=SimpleNamespace(production_plan=SimpleNamespace(target_kind=SimpleNamespace(value='CODE_WORK')),
+        refined_title='Company site',desired_outcome='Produce the approved Company website',constraints=())
+    summary=SimpleNamespace(artifact_paths=('README.md',))
+    result=DeliveryApplicationService._derived_target(work,summary,
+        SimpleNamespace(repository_revision=revision),SimpleNamespace(location_ref=str(repository)))
+    assert result.kind.value=='SOFTWARE_ARTIFACT'
+    assert result.runtime_recipe.entrypoint=='index.html'
+    work.production_plan.target_kind.value='DOCUMENT_WORK'
+    assert DeliveryApplicationService._derived_target(work,summary,
+        SimpleNamespace(repository_revision=revision),SimpleNamespace(location_ref=str(repository))) is None

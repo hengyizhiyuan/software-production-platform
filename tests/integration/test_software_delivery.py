@@ -31,7 +31,7 @@ from spg.domain.change import ProductionTargetKind
 from spg.domain.planning import PlannedArtifactOperation
 from spg.domain.delivery import DeliveryTargetRequest, HumanAcceptanceRequest
 from spg.domain.steering import SemanticProductionProposal
-from spg.domain.product import AttentionAction, AttentionKind, AttentionResolutionRequest, ProductInvariantViolation
+from spg.domain.product import AttentionAction, AttentionKind, AttentionResolutionRequest, ProductInvariantViolation, ProductRecordNotFound
 from spg.domain.execution import ProviderReportedOutcome
 from spg.providers.contract_verifier import ContractDrivenRepositoryVerifier
 from spg.providers.deterministic_executor import (DeterministicTestExecutor, DeterministicExecutionSpecification,
@@ -478,3 +478,79 @@ def test_software_blob_reader_rejects_links_and_traversal(tmp_path):
     git('-c','user.name=Test','-c','user.email=test@localhost','commit','-m','link fixture')
     with pytest.raises(ProductInvariantViolation,match='regular Git blob'):
         read_artifact(str(repo),git('rev-parse','HEAD'),'linked.html',software=True)
+
+
+def test_preview_package_exact_lineage_and_invalid_delivery_fail_closed(postgres_database, tmp_path):
+    """Software packaging must use the joined exact tree, not summary document paths."""
+    from spg.domain.delivery import DeliveryPublicationRequest
+    from spg.infrastructure.persistence.delivery_schema import work_delivery_manifests
+    from sqlalchemy import update
+    from uuid import uuid4
+    service, work_id, delivery, assets = produce(postgres_database, tmp_path, set_delivery_target=False)
+    context = delivery.candidate_context(work_id)
+    basis = DeliveryPublicationRequest(candidate_fingerprint=context['candidate_fingerprint'],
+        repository_revision=context['repository_revision'])
+    with pytest.raises(ProductInvariantViolation, match='stale'):
+        delivery.publish(work_id, basis.model_copy(update={'repository_revision':'0'*40}))
+    manifest = delivery.publish(work_id, basis)
+    assert manifest.software.runtime_recipe.adapter == 'STATIC_WEB'
+    assert manifest.repository_revision == context['repository_revision']
+    assert manifest.software.runtime_recipe.entrypoint == context['entrypoint']
+    assert {'index.html', 'inventory.js', 'tests/inventory.test.cjs'} <= {a.path for a in manifest.artifacts}
+    from unittest.mock import patch
+    with patch.object(delivery, 'package', side_effect=AssertionError('read must not package')), patch.object(delivery, 'publish', side_effect=AssertionError('read must not publish')):
+        assert delivery.view(work_id)['deliveries'][0]['manifest']['id'] == str(manifest.id)
+        assert delivery.context(work_id)['trusted']
+    bundle = delivery.package(work_id, manifest.id)
+    with ZipFile(BytesIO(bundle)) as archive:
+        assert json.loads(archive.read('delivery-manifest.json'))['repository_revision'] == context['repository_revision']
+        assert json.loads(archive.read('delivery-target.json'))['kind'] == 'SOFTWARE_ARTIFACT'
+        assert sorted(n for n in archive.namelist() if n.startswith('source/')) == sorted('source/'+a.path for a in manifest.artifacts)
+        for artifact in manifest.artifacts:
+            data = archive.read('source/'+artifact.path)
+            assert len(data) == artifact.size_bytes
+            assert sha256(data).hexdigest() == artifact.sha256
+        assert archive.read('source/index.html') == delivery.candidate_artifact(work_id, context['candidate_fingerprint'], 'index.html')
+    # Durable exact Git/manifest packaging is independent of the application process.
+    restored = DeliveryApplicationService(postgres_database)
+    assert restored.package(work_id, manifest.id) == bundle
+    with pytest.raises(ProductInvariantViolation, match='stale'):
+        restored.candidate_download(work_id, '0'*64, 'index.html')
+    with pytest.raises(ProductRecordNotFound, match='manifest not found'):
+        restored.package(uuid4(), manifest.id)
+    def replace(payload):
+        with postgres_database.unit_of_work() as u:
+            u.session.execute(update(work_delivery_manifests).where(work_delivery_manifests.c.id==manifest.id).values(payload=payload))
+            u.commit()
+    original = manifest.model_dump(mode='json')
+    corrupt = dict(original, repository_revision='0'*40)
+    replace(corrupt)
+    with pytest.raises(ProductInvariantViolation, match='lineage'):
+        restored.package(work_id, manifest.id)
+    from spg.application.delivery import fingerprint
+    corrupt = manifest.model_dump(mode='json')
+    corrupt['artifacts'][0]['sha256']='0'*64
+    corrupt['fingerprint']=fingerprint({k:v for k,v in corrupt.items() if k not in {'id','fingerprint','created_at'}})
+    replace(corrupt)
+    with pytest.raises(ProductInvariantViolation, match='bytes differ'):
+        restored.package(work_id, manifest.id)
+    corrupt = manifest.model_dump(mode='json')
+    corrupt['artifacts']=[a for a in corrupt['artifacts'] if a['path']!='index.html']
+    corrupt['fingerprint']=fingerprint({k:v for k,v in corrupt.items() if k not in {'id','fingerprint','created_at'}})
+    replace(corrupt)
+    with pytest.raises(ProductInvariantViolation, match='source tree'):
+        restored.package(work_id, manifest.id)
+    replace(original)
+    assert restored.package(work_id, manifest.id)==bundle
+
+
+def test_historical_document_target_cannot_silently_publish_a_governed_site(postgres_database, tmp_path):
+    service, work_id, delivery, assets = produce(postgres_database, tmp_path, set_delivery_target=False)
+    target = delivery.set_target(work_id, DeliveryTargetRequest(kind='DOCUMENT_PACKAGE',
+        title='Early document target', acceptance_criteria=('Read documentation',),authority_identity='human:test'))
+    with pytest.raises(ProductInvariantViolation, match='conflicts with governed software'):
+        delivery.publish(work_id)
+    view=delivery.view(work_id)
+    assert view['target']['id']==str(target.id)
+    assert view['target']['kind']=='DOCUMENT_PACKAGE'
+    assert view['deliveries']==[]

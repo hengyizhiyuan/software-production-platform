@@ -95,6 +95,13 @@ class DeliveryTarget(DeliveryTargetRequest):
     created_at: datetime
 
 
+class DeliveryPublicationRequest(BaseModel):
+    """Bind a Product publication action to the Candidate the Human inspected."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    candidate_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    repository_revision: str = Field(pattern=r"^[0-9a-f]{40,64}$")
+
+
 class DeliveryArtifact(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     path: str

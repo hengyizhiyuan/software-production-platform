@@ -203,6 +203,10 @@ def test_design_to_trusted_delivery_and_explicit_acceptance(postgres_database, t
     assert b"Operations platform" in content
     with ZipFile(BytesIO(delivery.package(projection.work_id, manifest.id))) as archive:
         assert archive.read("artifacts/" + target_path) == content
+        assert manifest.software is None
+        assert all(item.path.endswith('.md') for item in manifest.artifacts)
+        assert not any(name.startswith('source/') for name in archive.namelist())
+        assert sorted(name for name in archive.namelist() if name.startswith('artifacts/')) == ['artifacts/'+target_path]
     with pytest.raises(ProductInvariantViolation, match="fingerprint"):
         delivery.decide(projection.work_id, manifest.id, HumanAcceptanceRequest(manifest_fingerprint="0"*64,
             decision=HumanAcceptanceDecision.ACCEPT, authority_identity="human:test", rationale="Reviewed"))

@@ -104,7 +104,7 @@ test('multi-unit Reality preserves waiting, dependency and reconciliation meanin
 for (const [status, gate] of [['NOT_STARTED', null], ['RUNNING', null],
   ['FINDINGS_PRESENT', 'FAIL_REPAIRABLE'], ['BLOCKED', 'BLOCKED'], ['PASS', 'PASS']]) {
   test(`required Guardian ${status} controls Human acceptance without changing quadrants`, () => {
-    const source = script.slice(script.indexOf('  function renderWorkspaceActions(ws,'),
+    const source = script.slice(script.indexOf('  function deliverySummary('),
       script.indexOf('  async function renderWorkspace(id) {'));
     const {renderWorkspaceActions, renderWorkspaceProduction} = vm.runInNewContext(
       `${source}; ({renderWorkspaceActions, renderWorkspaceProduction})`, {

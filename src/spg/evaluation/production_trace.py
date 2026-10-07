@@ -118,6 +118,30 @@ def qualification_artifact(settings, reference):
         return None
 
 
+def work_delivery_qualification(settings, work_id, candidates):
+    """Read an indexed, checksum-bound incident qualification, never a directory scan."""
+    path = settings.owner_runtime_store_root / 'qualifications/work-references' / (str(work_id) + '.json')
+    try:
+        if path.stat().st_size > 16_000:
+            return []
+        references = json.loads(path.read_text()).get('delivery_integrity', [])
+        if not isinstance(references, list) or len(references) > 8:
+            return []
+        allowed = {(str(c['id']), c['fingerprint']) for c in candidates}
+        observations = []
+        for reference in references:
+            found = qualification_artifact(settings, reference)
+            if found is None:
+                continue
+            _, observation = found
+            if (isinstance(observation, dict) and observation.get('work_id') == str(work_id)
+                    and (observation.get('candidate_id'), observation.get('candidate_fingerprint')) in allowed):
+                observations.append({**observation, 'evidence_reference': reference})
+        return observations
+    except (OSError, ValueError, TypeError):
+        return []
+
+
 def compact_trace_tables(tables):
     """Summary keeps identities, chronology and owner outcomes, omits raw bodies.
 
@@ -507,6 +531,8 @@ class ProductionTraceService:
             result['preview_observation_error']=preview_error
             result['guardian']=guardian
             result['manifests']=tables.get('work_delivery_manifests',[])
+            result['delivery_integrity'] = work_delivery_qualification(
+                self.settings, entity_id, tables.get('baseline_candidates', []))
             result['acceptance']=tables.get('work_delivery_acceptances',[])
             end=('已保存交付 Manifest；验收及部署见 owner 记录' if tables.get('work_delivery_manifests') else
                 '已形成 Candidate，尚无交付 Manifest；不能宣称已完整交付' if result['candidate'] else

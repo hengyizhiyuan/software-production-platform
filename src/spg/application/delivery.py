@@ -366,6 +366,21 @@ class DeliveryApplicationService:
         return work, binding, summary, commit, resource
 
     @staticmethod
+    def _authorized_lineage(runtime, commit):
+        candidate = runtime.baseline_candidate(commit.candidate_id)
+        authorization = runtime.human_authorization(commit.human_authorization_id)
+        if (candidate is None or authorization is None
+                or candidate.fingerprint != commit.candidate_fingerprint
+                or authorization.candidate_id != candidate.id
+                or authorization.candidate_fingerprint != candidate.fingerprint
+                or authorization.proposed_repository_revision != commit.repository_revision
+                or authorization.repository_identity != commit.repository_identity
+                or candidate.proposed_commit_identity != commit.repository_revision
+                or candidate.proposed_tree_identity != commit.repository_tree_identity):
+            raise ProductInvariantViolation("Delivery requires exact authorized Candidate lineage")
+        return candidate
+
+    @staticmethod
     def _software_basis(session, target, binding, commit, resource):
         from spg.domain.verification import VerificationResultValue
         runtime = RuntimeStore(session)
@@ -449,13 +464,22 @@ class DeliveryApplicationService:
             reproduction=reproduction,
         ), sorted(paths)
 
-    def publish(self, work_id: UUID) -> DeliveryManifest:
+    def publish(self, work_id: UUID, expected_basis=None) -> DeliveryManifest:
         with self.database.unit_of_work() as uow:
             self._work(uow.session, work_id)
             target = self._target(uow.session, work_id)
             work, binding, summary, commit, resource = self._trusted_basis(uow.session, work_id)
+            self._authorized_lineage(RuntimeStore(uow.session), commit)
+            if expected_basis is not None and (
+                    expected_basis.candidate_fingerprint != commit.candidate_fingerprint
+                    or expected_basis.repository_revision != commit.repository_revision):
+                raise ProductInvariantViolation("Delivery publication is stale against the inspected Candidate")
+            derived = self._derived_target(work, summary, commit, resource)
+            if (target is not None and target.kind is DeliveryTargetKind.DOCUMENT_PACKAGE
+                    and derived is not None and derived.kind is DeliveryTargetKind.SOFTWARE_ARTIFACT):
+                raise ProductInvariantViolation("Recorded document target conflicts with governed software Reality; historical target is preserved")
             if target is None:
-                request = self._derived_target(work, summary, commit, resource)
+                request = derived
                 if request is None:
                     raise ProductInvariantViolation("No single supported current delivery target can be derived")
                 target = DeliveryTarget(**request.model_dump(), id=uuid4(), work_id=work_id, created_at=datetime.now(UTC))
@@ -543,6 +567,37 @@ class DeliveryApplicationService:
         with self.database.unit_of_work() as uow:
             manifest = self._manifest(uow.session, work_id, manifest_id)
             target = self._target(uow.session, work_id)
+            runtime, product = RuntimeStore(uow.session), ProductStore(uow.session)
+            commit = runtime.runtime_commit(manifest.runtime_commit_id)
+            candidate = None if commit is None else self._authorized_lineage(runtime, commit)
+            binding = next((item for item in product.runtime_bindings(work_id)
+                            if item.id == manifest.runtime_binding_id), None)
+            resource = None if binding is None else product.resource(binding.resource_id)
+            payload = manifest.model_dump(mode="json", exclude={"id", "fingerprint", "created_at"})
+            if manifest.software is None:
+                payload.pop("software", None)
+            if (target is None or target.id != manifest.target_id or commit is None
+                    or candidate is None or binding is None or resource is None
+                    or binding.production_run_id != commit.production_run_id
+                    or commit.repository_identity != manifest.repository_identity
+                    or resource.repository_identity != commit.repository_identity
+                    or commit.repository_revision != manifest.repository_revision
+                    or candidate.proposed_commit_identity != commit.repository_revision
+                    or candidate.proposed_tree_identity != commit.repository_tree_identity
+                    or candidate.fingerprint != commit.candidate_fingerprint
+                    or commit.verification_record_ids != manifest.verification_record_ids
+                    or fingerprint(payload) != manifest.fingerprint):
+                raise ProductInvariantViolation("Delivery manifest differs from its exact authorized Candidate lineage")
+            if bool(manifest.software) != (target.kind is DeliveryTargetKind.SOFTWARE_ARTIFACT):
+                raise ProductInvariantViolation("Delivery descriptor differs from its immutable target")
+            if manifest.software:
+                descriptor, paths = self._software_basis(uow.session, target, binding, commit, resource)
+                if descriptor != manifest.software or paths != [a.path for a in manifest.artifacts]:
+                    raise ProductInvariantViolation("Software manifest omits or changes the exact supported source tree")
+            if len({a.path for a in manifest.artifacts}) != len(manifest.artifacts):
+                raise ProductInvariantViolation("Delivery manifest contains duplicate artifacts")
+            if sum(a.size_bytes for a in manifest.artifacts) > MAX_PACKAGE_BYTES:
+                raise ProductInvariantViolation("Delivery package exceeds the 10 MiB inspection limit")
         output = BytesIO()
         with ZipFile(output, "w", ZIP_DEFLATED) as archive:
             def write(path, data):

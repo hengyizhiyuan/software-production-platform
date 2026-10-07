@@ -100,7 +100,7 @@ from spg.domain.assets import (
     RepositoryIntakeRequest,
 )
 from spg.domain.change import ProductionTargetKind
-from spg.domain.delivery import DeliveryTargetRequest, HumanAcceptanceRequest
+from spg.domain.delivery import DeliveryTargetRequest, HumanAcceptanceRequest, DeliveryPublicationRequest
 from spg.domain.product import (
     AttentionAction,
     AttentionKind,
@@ -2552,8 +2552,8 @@ def create_http_application(
         return delivery_service.set_target(work_id, request)
 
     @api.post("/api/works/{work_id}/deliveries")
-    def publish_delivery(work_id: UUID):
-        return delivery_service.publish(work_id)
+    def publish_delivery(work_id: UUID, request: DeliveryPublicationRequest | None = None):
+        return delivery_service.publish(work_id, expected_basis=request)
 
     def full_application_basis(work_id: UUID, manifest_id: UUID):
         manifest = delivery_service.manifest(work_id, manifest_id)
