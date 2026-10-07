@@ -559,6 +559,8 @@ class SteeringApplicationService:
 
     def reconstruct(self, work_id: UUID) -> SteeringPlanReconstruction:
         with self.database.unit_of_work() as unit_of_work:
+            from spg.infrastructure.performance import bind_projection_rows
+            bind_projection_rows(self.database, unit_of_work.session, (work_id,))
             product = ProductStore(unit_of_work.session)
             store = SteeringStore(unit_of_work.session)
             work = product.work(work_id)

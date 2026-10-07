@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     application_name: str = "SPG Runtime"
     runtime_profile: str = Field(default="local-fvs", min_length=1)
     runtime_revision: str | None = Field(default=None, pattern=r"^[0-9a-f]{40}$")
+    http_read_concurrency: int = Field(default=8, ge=1, le=8)
     admin_enabled: bool = False
     admin_node_id: str | None = None
     admin_region: str | None = None

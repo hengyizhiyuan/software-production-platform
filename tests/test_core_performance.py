@@ -105,3 +105,37 @@ def test_read_set_order_preserves_postgresql_null_and_mixed_tie_order():
         {'id':'b','version':1},{'id':'a','version':1},{'id':'n','version':None}]}})
     rows=rows_for(session,table,{},order=('version',),descending=True,ascending_ties=('id',))
     assert [r['id'] for r in rows]==['n','a','b']
+
+
+def test_read_budget_bounds_composition_and_releases_after_failure():
+    from spg.infrastructure.performance import ReadConcurrencyMiddleware
+    async def run():
+        active = peak = 0
+        started = asyncio.Event()
+        release = asyncio.Event()
+        bypassed = []
+        async def app(scope, receive, send):
+            nonlocal active, peak
+            if scope['method'] == 'POST' or scope['path'] == '/health':
+                bypassed.append(scope['path'])
+                return
+            active += 1
+            peak = max(peak, active)
+            started.set()
+            try:
+                await release.wait()
+                if scope.get('fail'):raise ValueError('read failed')
+            finally:
+                active -= 1
+        middleware = ReadConcurrencyMiddleware(app, limit=1)
+        scope = {'type':'http','method':'GET','path':'/api/experience/home'}
+        first = asyncio.create_task(middleware({**scope,'fail':True},None,None))
+        await started.wait()
+        second = asyncio.create_task(middleware(scope,None,None))
+        await middleware({**scope,'method':'POST'},None,None)
+        await middleware({**scope,'path':'/health'},None,None)
+        release.set()
+        results = await asyncio.gather(first,second,return_exceptions=True)
+        assert isinstance(results[0],ValueError) and results[1] is None
+        assert peak == 1 and len(bypassed) == 2 and middleware.budget._value == 1
+    asyncio.run(run())

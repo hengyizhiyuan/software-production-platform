@@ -180,3 +180,25 @@ def test_latest_interaction_checks_owner_without_assembling_product(experience_r
     assert projection.latest_interaction('human:owner',product_id)==str(interaction_id)
     with pytest.raises(Exception,match='unavailable'):
         projection.latest_interaction('another:owner',product_id)
+
+
+def test_canonical_work_batch_does_not_grow_queries_per_selected_work(experience_reality):
+    from sqlalchemy import event
+    projection,_,product_id,work_id,_=experience_reality
+    ids=[work_id]
+    for _ in range(24):
+        interaction=WorkInteractionService(projection.database,capability=_ReadyCapability()).create_interaction(
+            human_identity='human:owner',product_id=product_id,start_work_context=True)
+        ids.append(interaction.current_work_id)
+    queries=[]
+    def counted(*args):queries.append(1)
+    event.listen(projection.database.engine,'after_cursor_execute',counted)
+    try:batch=projection.work.get_works(ids)
+    finally:event.remove(projection.database.engine,'after_cursor_execute',counted)
+    assert {work.work_id for work in batch}==set(ids)
+    assert len(queries)<=45, 'query explosion across canonical Work projections'
+    with projection.database.unit_of_work() as uow:
+        from spg.infrastructure.persistence.product_store import ProductStore
+        store=ProductStore(uow.session)
+        normal=projection.work._projection(store,store.work(work_id))
+    assert next(work for work in batch if work.work_id==work_id)==normal

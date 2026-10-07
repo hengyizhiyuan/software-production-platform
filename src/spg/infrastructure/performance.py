@@ -115,6 +115,34 @@ class PerformanceMiddleware:
             _current.reset(token)
 
 
+class ReadConcurrencyMiddleware:
+    """Backpressure for expensive pure reads; no cached truth or dropped checks.
+
+    Leaves commands, health and streaming endpoints outside this read budget.
+    A bounded number of compositions reserves pool headroom for nested owner
+    observations and prevents all connections being held by outer reads.
+    """
+    def __init__(self, app, limit=8):
+        import asyncio
+        self.app = app
+        self.budget = asyncio.Semaphore(limit)
+
+    async def __call__(self, scope, receive, send):
+        path = scope.get('path', '')
+        bounded = scope['type'] == 'http' and scope.get('method') == 'GET' and (
+            path.startswith(('/api/experience/', '/api/admin/'))
+            or path == '/api/attention' or path == '/api/works'
+            or (path.startswith('/api/works/') and path.count('/') == 3))
+        if bounded:
+            with span('read_admission_wait'):
+                await self.budget.acquire()
+            try:
+                return await self.app(scope, receive, send)
+            finally:
+                self.budget.release()
+        return await self.app(scope, receive, send)
+
+
 from fastapi.responses import JSONResponse
 
 

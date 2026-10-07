@@ -469,8 +469,7 @@ def create_http_application(
         redoc_url=None,
         lifespan=lifespan,
     )
-    from spg.infrastructure.performance import PerformanceMiddleware
-    api.add_middleware(PerformanceMiddleware)
+    from spg.infrastructure.performance import PerformanceMiddleware, projection_scope
     api.state.application = container
     api.state.database = selected_database
     api.state.work_service = work_service
@@ -507,7 +506,7 @@ def create_http_application(
             ).scalar_one_or_none()
 
         def with_control_state(candidate: WorkResponse) -> WorkResponse:
-            attention = work_service.list_attention(work_id=projection.work_id)
+            attention = work_service.list_attention(projections=(projection,))
             action_count = sum(
                 len(item.available_actions)
                 + int(
@@ -1715,6 +1714,7 @@ def create_http_application(
         )
 
     @api.get("/api/works", response_model=list[WorkResponse])
+    @projection_scope
     def list_works(
         goal_id: UUID | None = None,
         status_filter: Annotated[WorkStatus | None, Query(alias="status")] = None,
@@ -1727,6 +1727,7 @@ def create_http_application(
         return [work_response(work) for work in projections]
 
     @api.get("/api/works/{work_id}", response_model=WorkResponse)
+    @projection_scope
     def get_work(work_id: UUID) -> WorkResponse:
         return work_response(work_service.get_work(work_id))
 
@@ -2637,4 +2638,8 @@ def create_http_application(
 
     install_authority_boundary(api, database=selected_database,
         settings=getattr(container, "settings", Settings()))
+    from spg.infrastructure.performance import ReadConcurrencyMiddleware
+    api.add_middleware(ReadConcurrencyMiddleware,
+        limit=getattr(container, "settings", Settings()).http_read_concurrency)
+    api.add_middleware(PerformanceMiddleware)
     return api

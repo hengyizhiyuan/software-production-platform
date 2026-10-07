@@ -19,6 +19,7 @@ from uuid import UUID
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy import select
+from starlette.concurrency import run_in_threadpool
 
 from spg.infrastructure.persistence.auth_schema import (
     authority_memberships, authority_resource_access,
@@ -144,17 +145,22 @@ def install_authority_boundary(api: FastAPI, *, database, settings) -> None:
         if cookie_valid and not bearer_valid and request.method not in {"GET", "HEAD", "OPTIONS"}:
             if request.headers.get("origin") != str(request.base_url).rstrip("/"):
                 return JSONResponse({"code": "INVALID_ORIGIN"}, status_code=403)
-        with database.unit_of_work() as uow:
-            owner = uow.session.execute(select(authority_memberships.c.role).where(
-                authority_memberships.c.organization_id == ORGANIZATION_ID,
-                authority_memberships.c.actor_id == ACTOR_ID)).scalar_one_or_none()
-            resource = _resource_in_path(path)
-            access = None if resource is None else uow.session.execute(
-                select(authority_resource_access.c.role).where(
-                    authority_resource_access.c.resource_kind == resource[0],
-                    authority_resource_access.c.resource_id == resource[1],
-                    authority_resource_access.c.actor_id == ACTOR_ID,
-                )).scalar_one_or_none()
+        resource = _resource_in_path(path)
+        def read_authority():
+            # Synchronous PostgreSQL work must not block the ASGI event loop,
+            # particularly while other requests are waiting for pooled sessions.
+            with database.unit_of_work() as uow:
+                owner = uow.session.execute(select(authority_memberships.c.role).where(
+                    authority_memberships.c.organization_id == ORGANIZATION_ID,
+                    authority_memberships.c.actor_id == ACTOR_ID)).scalar_one_or_none()
+                access = None if resource is None else uow.session.execute(
+                    select(authority_resource_access.c.role).where(
+                        authority_resource_access.c.resource_kind == resource[0],
+                        authority_resource_access.c.resource_id == resource[1],
+                        authority_resource_access.c.actor_id == ACTOR_ID,
+                    )).scalar_one_or_none()
+                return owner, access
+        owner, access = await run_in_threadpool(read_authority)
         if owner != "OWNER" or (resource is not None and access != "OWNER"):
             return JSONResponse({"code": "ACCESS_DENIED"}, status_code=403)
         request.state.actor_id = ACTOR_ID

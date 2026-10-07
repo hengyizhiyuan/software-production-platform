@@ -1,5 +1,5 @@
 """Goal-centric MVP application flow composed over governed Runtime services."""
-from spg.infrastructure.performance import projection_scope, bind_projection_rows, share_projection_rows, cached_work_projection
+from spg.infrastructure.performance import projection_scope, bind_projection_rows, share_projection_rows, cached_work_projection, timed
 
 from datetime import UTC, datetime
 from hashlib import sha256
@@ -2315,7 +2315,11 @@ class WorkApplicationService:
             store = ProductStore(unit_of_work.session, projection_reads=True)
             work = self._required_work(store, work_id)
             store.prepare_projection_summaries((work_id,))
-            return self._projection(store, work)
+            share_projection_rows(self.database, unit_of_work.session,
+                unit_of_work.session.info['watt_projection_rows'])
+            projection = self._projection(store, work)
+            cached_work_projection(self.database, work_id, projection)
+            return projection
 
     def retry_failed_production(
         self,
@@ -2983,6 +2987,7 @@ class WorkApplicationService:
         return min(candidates, key=lambda item: (item[0], item[1]))[2]
 
     @projection_scope
+    @timed("projection")
     def list_attention(
         self,
         *,
@@ -3624,6 +3629,7 @@ class WorkApplicationService:
             for ref in decision.reality_refs
         )
 
+    @timed("projection")
     def _projection(
         self,
         store: ProductStore,
