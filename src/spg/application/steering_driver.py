@@ -979,6 +979,19 @@ class PlanSteeringDriver:
             and bool({"requests", "constraints"} & set(revision.change_set))
         )
 
+    def read_progression_observations(self) -> dict[str, dict]:
+        """Lightweight Admin read of this owner's live observations, without hydration.
+
+        Restart loses these observations; absence is not evidence of a stop.
+        Durable history remains in the existing Steering/runtime owners.
+        """
+        with self._condition:
+            ids = set(self._last_outcomes) | self._active_work_ids
+            return {str(wid): {"active": wid in self._active_work_ids,
+                "stop_reason": (None if wid not in self._last_outcomes
+                    or self._last_outcomes[wid].stop_reason is None
+                    else self._last_outcomes[wid].stop_reason.value)} for wid in ids}
+
     def project(self, work_id: UUID) -> SteeringPlanProjection:
         reconstruction = self.steering.reconstruct(work_id)
         work = self.work_service.get_work(work_id)

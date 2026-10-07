@@ -2,7 +2,7 @@
 from importlib.resources import files
 from uuid import UUID
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Query
 from fastapi.responses import FileResponse, JSONResponse
 
 from spg.api.authority import ACTOR_ID
@@ -81,6 +81,18 @@ def install_admin(api, database, settings, runtime=None):
                 'scope': '本期创建且未丢弃的 Work，按当前规范投影检查；不是本期完成事件统计'}
         return read()
 
+    def work_observations():
+        owner = getattr(api.state, 'plan_steering_driver', None)
+        read = getattr(owner, 'read_progression_observations', None)
+        return {} if read is None else read()
+
+    @router.get('/works')
+    def work_registry(http_request: Request, filter: str='ALL', product_id: UUID | None=None,
+                      limit: int=Query(50,ge=1,le=100), offset: int=Query(0,ge=0)):
+        from spg.evaluation.work_registry import WorkRegistryService
+        return WorkRegistryService(database).list(getattr(http_request.state,'actor_id',ACTOR_ID),
+            filter=filter,product=product_id,limit=limit,offset=offset,pulses=work_observations())
+
     @router.get('/case-runs/{case_run_id}/trace')
     def case_trace(case_run_id: UUID, view: str = "full"):
         if view not in {"full", "summary"}:
@@ -88,8 +100,14 @@ def install_admin(api, database, settings, runtime=None):
         return traces.case_trace(case_run_id, detail=view == "full")
 
     @router.get('/traces/{kind}/{entity_id}')
-    def entity_trace(kind: str, entity_id: UUID):
-        return traces.entity_trace(kind, entity_id)
+    def entity_trace(kind: str, entity_id: UUID, http_request: Request, view: str="full"):
+        if view not in {"full","summary"}:raise QualityError("TRACE_VIEW_NOT_SUPPORTED")
+        work = None
+        if kind=='work':
+            from spg.evaluation.work_registry import WorkRegistryService
+            work=WorkRegistryService(database).get(getattr(http_request.state,'actor_id',ACTOR_ID),
+                entity_id,pulses=work_observations())
+        return traces.entity_trace(kind, entity_id, detail=view=='full', work=work)
 
     @router.get("/cases")
     def case_list():

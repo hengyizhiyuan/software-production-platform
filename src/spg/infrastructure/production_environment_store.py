@@ -41,9 +41,10 @@ class ProductionEnvironmentStoreConflict(ProductionEnvironmentError):
 
 
 class JsonProductionEnvironmentStore:
-    def __init__(self, root: Path) -> None:
+    def __init__(self, root: Path, *, create_root: bool = True) -> None:
         self.root = root.resolve()
-        self.root.mkdir(parents=True, exist_ok=True)
+        if create_root:
+            self.root.mkdir(parents=True, exist_ok=True)
         self._lock = RLock()
 
     @contextmanager

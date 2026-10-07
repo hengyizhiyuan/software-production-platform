@@ -24,6 +24,9 @@ PRIVATE_KEYS = {'reasoning', 'reasoning_content', 'chain_of_thought', 'thinking'
     'access_token', 'refresh_token', 'api_key', 'secret', 'password', 'authorization',
     'security_token', 'credential', 'credentials', 'operator_token', 'lease_token'}
 TABLE_OWNERS = {
+    'product_works':'WORK', 'execution_dispatches':'EXECUTION', 'provider_execution_reports':'EXECUTION',
+    'completion_evaluations':'VERIFICATION', 'production_admissibility_records':'VERIFICATION',
+    'proposed_repository_snapshots':'CANDIDATE', 'repository_integration_effects':'GOVERNANCE', 'interaction_assessments':'WIC', 'semantic_step_results':'STEERING',
     'interaction_messages':'WIC', 'interaction_records':'WIC', 'interaction_turns':'WIC',
     'interaction_response_events':'WIC', 'interaction_turn_realizations':'IRK',
     'interaction_turn_obligations':'IRK', 'work_reality_revisions':'WORK',
@@ -127,7 +130,7 @@ def compact_trace_tables(tables):
     for name, rows in tables.items():
         result[name] = []
         for row in rows:
-            if name in {'interaction_turn_realizations','interaction_messages','production_work_units','pwu_contract_versions','plan_revisions'}:
+            if name in {'interaction_turn_realizations','interaction_records','interaction_messages','production_work_units','pwu_contract_versions','plan_revisions'}:
                 compact = dict(row)
             else:
                 compact = {k:v for k,v in row.items() if k not in bulky}
@@ -430,7 +433,7 @@ class ProductionTraceService:
                 'case_version':member['version'],'case_fingerprint':member['fingerprint'],
                 'complete_execution_observation':bool(tables.get('execution_steps'))})
 
-    def entity_trace(self, kind, entity_id):
+    def entity_trace(self, kind, entity_id, *, detail=True, work=None):
         roots={'work':'product_works','product':'software_products','interaction':'product_interactions',
             'pwu':'production_work_units','candidate':'baseline_candidates','deployment':'cloud_deployments'}
         if kind not in roots:raise QualityError('TRACE_IDENTIFIER_NOT_SUPPORTED')
@@ -441,8 +444,10 @@ class ProductionTraceService:
             found=u.session.execute(select(metadata.tables[root]).where(metadata.tables[root].c.id==entity_id)).mappings().first()
             if found is None:raise QualityError('TRACE_SOURCE_NOT_FOUND')
             tables[root]=[dict(found)]
-            # Exact engineering identity relations, never arbitrary SQL or a global ledger walk.
-            for _ in range(10):
+            if kind == 'work':
+                tables = self._work_tables(u.session, entity_id)
+            # Other entity entrypoints retain their existing lookup semantics.
+            for _ in range(0 if kind == 'work' else 10):
                 before=len(ids)
                 for name in allowed:
                     t=metadata.tables.get(name)
@@ -459,7 +464,7 @@ class ProductionTraceService:
                             if isinstance(r[c.name], UUID):ids.add(r[c.name])
                 if len(ids)==before:break
             baselines={r['source_baseline_id'] for r in tables.get('production_work_units',[]) if r.get('source_baseline_id')}
-            if baselines:
+            if baselines and kind != 'work':
                 t=metadata.tables['production_snapshots']
                 tables['production_snapshots']=[dict(r) for r in u.session.execute(select(t).where(t.c.id.in_(baselines))).mappings()]
         guardian=[]
@@ -471,7 +476,99 @@ class ProductionTraceService:
                     g=json.loads(p.read_text())
                     if g.get('candidate_id')==str(r['id']) and g.get('candidate_fingerprint')==r['fingerprint']:guardian.append(g)
                 except (ValueError,OSError):continue
-        return project_trace(tables,scene=next((w.get('refined_title') or w.get('desired_outcome') for w in tables.get('product_works',[])), '生产历程'),
-            purpose='查看指定生产对象的 owner 记录。当前查询与历史资格快照明确区分。',guardian=guardian,
+        result = project_trace(tables,scene=next((w.get('refined_title') or w.get('desired_outcome') for w in tables.get('product_works',[])), '生产历程'),
+            purpose=(work or {}).get('desired_outcome') or (work or {}).get('raw_user_requirement') or '查看指定生产对象的 owner 记录。当前查询与历史资格快照明确区分。',guardian=guardian,detail=detail,
             owner_refs=[f'{kind}:{entity_id}'],basis={'mode':'LIVE_ENTITY_LOOKUP','at':datetime.now(UTC).isoformat(),
                 'complete_execution_observation':bool(tables.get('execution_steps'))})
+        if kind == 'work':
+            if work is None:
+                from spg.evaluation.work_registry import WorkRegistryService
+                owner=next((p['owner_id'] for p in tables.get('software_products',[])), 'human:owner')
+                work=WorkRegistryService(self.database).get(owner,entity_id)
+            result['work']=work
+            # Selected Trace reuses the owner reader without creating state.
+            from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
+            store=JsonProductionEnvironmentStore(self.settings.native_executor_production_environment_store_root,create_root=False)
+            preview=None;preview_error=None
+            try:
+                current=store.current_candidate_preview(entity_id)
+                if current is not None and current.work_id==entity_id:
+                    preview=current.model_dump(mode='json')
+                    projection=store.guardian_projection(current.id)
+                    if projection and projection.get('candidate_id')==str(current.candidate_id) and projection.get('candidate_fingerprint',current.candidate_fingerprint)==current.candidate_fingerprint:
+                        guardian.append(projection)
+            except (ValueError,OSError,KeyError) as error:
+                preview_error=type(error).__name__
+            result['preview']=preview
+            result['preview_observation_error']=preview_error
+            result['guardian']=guardian
+            result['manifests']=tables.get('work_delivery_manifests',[])
+            result['acceptance']=tables.get('work_delivery_acceptances',[])
+            end=('已保存交付 Manifest；验收及部署见 owner 记录' if tables.get('work_delivery_manifests') else
+                '已形成 Candidate，尚无交付 Manifest；不能宣称已完整交付' if result['candidate'] else
+                '已进入执行，尚未形成 Candidate' if tables.get('execution_attempts') else
+                '尚未进入执行；已保存的交流、意图和推进记录如下')
+            if guardian and any(g.get('gate') in {'BLOCKED','FAIL','FAIL_REPAIRABLE'} and g.get('candidate_id')==str(work.get('candidate_id')) and g.get('candidate_fingerprint')==work.get('candidate_fingerprint') for g in guardian):
+                work={**work,'state':'BLOCKED','state_label':'受阻','bucket':'PROBLEM'};result['work']=work
+            result['diagnosis'].update(quality_label=work['state_label'],production_result=end)
+            result['story']={'current_state':work['state_label'],'flow_ended':end,'latest_event':work['latest_event'],
+                'latest_activity_at':work['latest_activity_at'],'product_name':work['product_name'],
+                'original_input':result['first_human_input'],'candidate_ids':[str(c['id']) for c in tables.get('baseline_candidates',[])],
+                'manifest_ids':[str(m['id']) for m in tables.get('work_delivery_manifests',[])]}
+            result['missing_note']='未发生或未记录的后续阶段保持缺失；普通 Work 不依赖 Quality Case 或 Candidate。'
+            result['deployment_note']='部署事实见精确目标与操作记录。' if result['deployment'] else '尚无部署记录；不代表已上线。'
+            if result['candidate'] and not tables.get('work_delivery_manifests'):result['deployment_note']='已生成候选源码；尚无 Delivery Manifest，不能将源码下载等同于完整交付。'
+        return safe(result)
+
+    def _work_tables(self,session,work_id):
+        """Directional exact lineage. Shared Interaction never pulls sibling Works."""
+        tables={}
+        def read(name,condition):
+            t=metadata.tables[name];rows=[dict(r) for r in session.execute(select(t).where(condition)).mappings()]
+            tables[name]=rows;return rows
+        def ids(name):return {r['id'] for r in tables.get(name,[]) if r.get('id')}
+        w=metadata.tables['product_works'];work=read('product_works',w.c.id==work_id)[0]
+        if work['product_id']:
+            t=metadata.tables['software_products'];read('software_products',t.c.id==work['product_id'])
+        t=metadata.tables['work_reality_revisions'];revisions=read('work_reality_revisions',t.c.work_id==work_id)
+        iids={r['source_interaction_id'] for r in revisions if r.get('source_interaction_id')}
+        t=metadata.tables['product_interactions'];iids|={r['id'] for r in read('product_interactions',t.c.current_work_id==work_id)}
+        if iids:read('product_interactions',t.c.id.in_(iids))
+        record_ids={UUID(str(v)) for r in revisions for v in r.get('source_record_ids',[])}
+        first=min((r['created_at'] for r in revisions),default=work['created_at'])
+        t=metadata.tables['interaction_records'];read('interaction_records',or_(t.c.work_focus_id==work_id,t.c.id.in_(record_ids),
+            (t.c.interaction_id.in_(iids)) & (t.c.work_focus_id.is_(None)) & (t.c.created_at<=first)))
+        t=metadata.tables['interaction_turns'];read('interaction_turns',t.c.request_record_id.in_(ids('interaction_records')))
+        tids=ids('interaction_turns');aids={r['assessment_id'] for r in tables['interaction_turns'] if r.get('assessment_id')}
+        for name,col,values in [('interaction_messages','turn_id',tids),('interaction_response_events','turn_id',tids),
+            ('interaction_turn_realizations','turn_id',tids),('interaction_turn_obligations','turn_id',tids),('interaction_assessments','id',aids)]:
+            t=metadata.tables[name];read(name,t.c[col].in_(values))
+        for name in ('work_source_bases','work_runtime_bindings','steering_plans','steering_plan_revisions','semantic_step_results','self_refine_events','work_delivery_manifests'):
+            t=metadata.tables[name];read(name,t.c.work_id==work_id)
+        run_ids={r['production_run_id'] for r in tables['work_runtime_bindings']}
+        t=metadata.tables['production_runs'];read('production_runs',t.c.id.in_(run_ids))
+        t=metadata.tables['production_work_units'];read('production_work_units',t.c.production_run_id.in_(run_ids))
+        t=metadata.tables['execution_attempts'];read('execution_attempts',t.c.work_unit_id.in_(ids('production_work_units')))
+        t=metadata.tables['execution_sessions'];read('execution_sessions',t.c.pwu_id.in_(ids('production_work_units')))
+        t=metadata.tables['execution_steps'];read('execution_steps',t.c.attempt_id.in_(ids('execution_attempts')))
+        t=metadata.tables['execution_effects'];read('execution_effects',t.c.step_id.in_(ids('execution_steps')))
+        t=metadata.tables['baseline_candidates'];read('baseline_candidates',t.c.production_run_id.in_(run_ids))
+        t=metadata.tables['execution_dispatches'];read('execution_dispatches',t.c.attempt_id.in_(ids('execution_attempts')))
+        t=metadata.tables['completion_evaluations'];read('completion_evaluations',t.c.attempt_id.in_(ids('execution_attempts')))
+        t=metadata.tables['proposed_repository_snapshots'];read('proposed_repository_snapshots',or_(t.c.completion_evaluation_id.in_(ids('completion_evaluations')),t.c.id.in_({r['proposed_snapshot_id'] for r in tables['baseline_candidates']})))
+        t=metadata.tables['cloud_deployments'];read('cloud_deployments',t.c.manifest_id.in_(ids('work_delivery_manifests')))
+        domains={'work_id':{work_id},'production_run_id':run_ids,'plan_revision_id':{r['plan_revision_id'] for r in tables['work_runtime_bindings']},
+            'steering_plan_id':ids('steering_plans'),'steering_plan_revision_id':ids('steering_plan_revisions'),
+            'pwu_id':ids('production_work_units'),'work_unit_id':ids('production_work_units'),'attempt_id':ids('execution_attempts'),
+            'dispatch_id':ids('execution_dispatches'),'completion_evaluation_id':ids('completion_evaluations'),'proposed_snapshot_id':ids('proposed_repository_snapshots'),
+            'session_id':ids('execution_sessions'),'step_id':ids('execution_steps'),'effect_id':ids('execution_effects'),
+            'candidate_id':ids('baseline_candidates'),'manifest_id':ids('work_delivery_manifests'),'deployment_id':ids('cloud_deployments')}
+        for name in set(TABLE_OWNERS)|{'runtime_commits','execution_workspaces'}:
+            if name in tables or name not in metadata.tables:continue
+            t=metadata.tables[name];cols=[(c,values) for c,values in domains.items() if c in t.c and values]
+            if cols:read(name,or_(*(t.c[c].in_(values) for c,values in cols)))
+        t=metadata.tables['governance_records'];read('governance_records',t.c.subject_identity.in_([str(work_id),*[str(c) for c in ids('baseline_candidates')]]))
+        snapshots={r['source_baseline_id'] for r in tables['production_work_units'] if r.get('source_baseline_id')}
+        snapshots|={r['verified_output_baseline_id'] for r in tables['production_work_units'] if r.get('verified_output_baseline_id')}
+        t=metadata.tables['production_snapshots'];read('production_snapshots',t.c.id.in_(snapshots))
+        return tables
