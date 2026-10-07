@@ -7,6 +7,7 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import func, insert, select, update
+from spg.infrastructure.persistence.projection_reads import first_for
 from sqlalchemy.orm import Session
 
 from spg.domain.interaction_actions import InteractionActionCandidate
@@ -103,13 +104,14 @@ class InteractionStore:
         return tuple(self._interaction(row) for row in rows)
 
     def interaction_for_work(self, work_id: UUID) -> Interaction | None:
-        row = self.session.execute(
+        row = first_for(self.session, product_interactions, {'current_work_id':work_id}, order=('updated_at',), descending=True)
+        if row is None: row = self.session.execute(
             select(product_interactions)
             .where(product_interactions.c.current_work_id == work_id)
             .order_by(product_interactions.c.updated_at.desc())
             .limit(1)
         ).mappings().first()
-        return None if row is None else self._interaction(row)
+        return None if not row else self._interaction(row)
 
     def next_sequence(self, interaction_id: UUID) -> int:
         value = self.session.execute(
@@ -501,7 +503,8 @@ class InteractionStore:
         return None if row is None else self._assessment(row)
 
     def latest_assessment(self, interaction_id: UUID) -> InteractionAssessment | None:
-        row = self.session.execute(
+        row = first_for(self.session, interaction_assessments, {'interaction_id':interaction_id}, order=('basis_last_sequence','created_at'), descending=True, ascending_ties=('id',))
+        if row is None: row = self.session.execute(
             select(interaction_assessments)
             .where(interaction_assessments.c.interaction_id == interaction_id)
             .order_by(
@@ -511,7 +514,7 @@ class InteractionStore:
             )
             .limit(1)
         ).mappings().first()
-        return None if row is None else self._assessment(row)
+        return None if not row else self._assessment(row)
 
     def assessment(self, assessment_id: UUID) -> InteractionAssessment | None:
         row = self.session.execute(

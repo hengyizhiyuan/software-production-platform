@@ -157,8 +157,9 @@ class ProductStore:
         statement = select(product_works).where(product_works.c.id == work_id)
         if for_update:
             statement = statement.with_for_update()
-        row = self.session.execute(statement).mappings().first()
-        return None if row is None else self._work(row)
+        row = None if for_update else first_for(self.session, product_works, {'id':work_id})
+        if row is None: row = self.session.execute(statement).mappings().first()
+        return None if not row else self._work(row)
 
     def list_works(self, goal_id: UUID | None = None) -> tuple[WorkRecord, ...]:
         statement = select(product_works).where(
@@ -221,20 +222,16 @@ class ProductStore:
     def work_reality_revision(
         self, revision_id: UUID
     ) -> WorkRealityRevision | None:
-        row = self._one(
-            work_reality_revisions,
-            work_reality_revisions.c.id == revision_id,
-        )
-        return None if row is None else self._work_reality_revision(row)
+        row = first_for(self.session, work_reality_revisions, {'id':revision_id})
+        if row is None: row = self._one(work_reality_revisions, work_reality_revisions.c.id == revision_id)
+        return None if not row else self._work_reality_revision(row)
 
     def work_reality_revision_for_assessment(
         self, assessment_id: UUID
     ) -> WorkRealityRevision | None:
-        row = self._one(
-            work_reality_revisions,
-            work_reality_revisions.c.source_assessment_id == assessment_id,
-        )
-        return None if row is None else self._work_reality_revision(row)
+        row = first_for(self.session, work_reality_revisions, {'source_assessment_id':assessment_id})
+        if row is None: row = self._one(work_reality_revisions, work_reality_revisions.c.source_assessment_id == assessment_id)
+        return None if not row else self._work_reality_revision(row)
 
     def work_reality_revisions(
         self, work_id: UUID
@@ -249,11 +246,8 @@ class ProductStore:
     def current_work_reality_revision(
         self, work_id: UUID
     ) -> WorkRealityRevision | None:
-        revision_id = self.session.execute(
-            select(product_works.c.current_work_reality_revision_id).where(
-                product_works.c.id == work_id
-            )
-        ).scalar_one_or_none()
+        row = first_for(self.session, product_works, {'id':work_id})
+        revision_id = row.get('current_work_reality_revision_id') if row is not None else self.session.execute(select(product_works.c.current_work_reality_revision_id).where(product_works.c.id == work_id)).scalar_one_or_none()
         return None if revision_id is None else self.work_reality_revision(revision_id)
 
     def set_scope_condition(
@@ -506,6 +500,13 @@ class ProductStore:
         steps = load(steering_steps, steering_steps.c.steering_plan_revision_id, {r['id'] for r in revisions})
         load(steering_decisions, steering_decisions.c.steering_plan_revision_id, {r['id'] for r in revisions})
         load(semantic_step_results, semantic_step_results.c.step_id, {r['id'] for r in steps})
+        from spg.infrastructure.persistence.product_schema import product_interactions, interaction_assessments
+        from spg.infrastructure.persistence.runtime_schema import governance_records
+        interactions = load(product_interactions, product_interactions.c.current_work_id, work_ids)
+        assessments = load(interaction_assessments, interaction_assessments.c.interaction_id, {r['id'] for r in interactions})
+        load(work_reality_revisions, work_reality_revisions.c.work_id, work_ids)
+        load(governance_records, governance_records.c.subject_identity, {str(w) for w in work_ids} |
+            {'interaction-assessment:'+str(a['id']) for a in assessments})
         self._summary_data = data
         self.session.info['watt_projection_rows'] = data
 

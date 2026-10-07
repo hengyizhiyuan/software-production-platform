@@ -161,3 +161,18 @@ def projection_memo(fn):
             cache[key] = fn(*args, **kwargs)
         return cache[key]
     return call
+
+
+def share_projection_rows(database, session, rows):
+    cache = _projection_scope.get()
+    if cache is not None:
+        cache[('rows', id(database))] = rows
+
+
+def bind_projection_rows(database, session, work_ids):
+    cache = _projection_scope.get()
+    rows = None if cache is None else cache.get(('rows', id(database)))
+    if rows is None or not set(work_ids) <= {r['id'] for r in rows.get('product_works', [])}:
+        return False
+    session.info['watt_projection_rows'] = rows
+    return True

@@ -1,5 +1,5 @@
 """Goal-centric MVP application flow composed over governed Runtime services."""
-from spg.infrastructure.performance import projection_scope
+from spg.infrastructure.performance import projection_scope, bind_projection_rows, share_projection_rows
 
 from datetime import UTC, datetime
 from hashlib import sha256
@@ -2494,6 +2494,7 @@ class WorkApplicationService:
             rows = uow.session.execute(select(product_works).where(
                 product_works.c.id.in_(work_ids))).mappings().all()
             store.prepare_projection_summaries(work_ids)
+            share_projection_rows(self.database, uow.session, uow.session.info['watt_projection_rows'])
             return tuple(self._projection(store, store._work(row)) for row in rows)
 
     def list_works(self, goal_id: UUID | None = None) -> tuple[WorkProjection, ...]:
@@ -2501,6 +2502,7 @@ class WorkApplicationService:
             store = ProductStore(unit_of_work.session, projection_reads=True)
             works = store.list_works(goal_id=goal_id)
             store.prepare_projection_summaries([work.id for work in works])
+            share_projection_rows(self.database, unit_of_work.session, unit_of_work.session.info['watt_projection_rows'])
             return tuple(self._projection(store, work) for work in works)
 
     def discard_pre_work(
@@ -2987,8 +2989,11 @@ class WorkApplicationService:
             else self.list_works()
         )
         with self.database.unit_of_work() as uow:
-            projection_store = ProductStore(uow.session, projection_reads=True)
-            projection_store.prepare_projection_summaries([p.work_id for p in projections])
+            ids = [p.work_id for p in projections]
+            if not bind_projection_rows(self.database, uow.session, ids):
+                projection_store = ProductStore(uow.session, projection_reads=True)
+                projection_store.prepare_projection_summaries(ids)
+                share_projection_rows(self.database, uow.session, uow.session.info['watt_projection_rows'])
             read_rows = uow.session.info['watt_projection_rows']
         items: list[AttentionItem] = []
         for projection in projections:

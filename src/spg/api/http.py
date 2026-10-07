@@ -1419,7 +1419,7 @@ def create_http_application(
         else:
             try:
                 intent = experience_semantic.query(request.text, request.kind,
-                    experience.collections(getattr(http_request.state, "actor_id", ACTOR_ID))["products"])
+                    experience.catalog(getattr(http_request.state, "actor_id", ACTOR_ID)))
             except (ValueError, ModelProviderError) as error:
                 raise ProductHttpError(503, "SEMANTIC_QUERY_UNAVAILABLE",
                     "Watt cannot interpret this collection query right now") from error
@@ -1566,7 +1566,7 @@ def create_http_application(
     @api.post("/api/experience/intent")
     def experience_intent(request: ExperienceIntentRequest, http_request: Request):
         actor = getattr(http_request.state, "actor_id", ACTOR_ID)
-        catalog = experience.collections(actor)["products"]
+        catalog = experience.catalog(actor)
         if request.selected_product_id is not None:
             if str(request.selected_product_id) not in {item["id"] for item in catalog}:
                 raise ProductHttpError(404, "PRODUCT_NOT_FOUND",

@@ -210,6 +210,14 @@ class ProductExperienceProjection:
         row['human_visible'] = safe_wording(expression_input).decisions[0].model_dump(mode='json')
         return row
 
+    def catalog(self, owner_id: str) -> list[dict]:
+        """Compiler's exact existing input fields; no Work projection required."""
+        with self.database.unit_of_work() as uow:
+            rows = uow.session.execute(select(software_products.c.id, software_products.c.name,
+                software_products.c.description).where(software_products.c.owner_id == owner_id)
+                .order_by(software_products.c.updated_at.desc()).limit(100)).mappings().all()
+        return [{**row, 'id': str(row['id'])} for row in rows]
+
     @projection_scope
     @timed("projection")
     def collections(self, owner_id: str, *, product_id: UUID | None = None) -> dict:

@@ -411,7 +411,8 @@ class RuntimeStore:
         return SnapshotRecord.model_validate(values)
 
     def governance_for_subject(self, subject_identity: str) -> list[GovernanceRecord]:
-        rows = self.session.execute(
+        rows = rows_for(self.session, governance_records, {'subject_identity':subject_identity}, order=('created_at','id'))
+        if rows is None: rows = self.session.execute(
             select(governance_records)
             .where(governance_records.c.subject_identity == subject_identity)
             .order_by(governance_records.c.created_at, governance_records.c.id)
@@ -466,8 +467,9 @@ class RuntimeStore:
         )
         if for_update:
             statement = statement.with_for_update()
-        row = self.session.execute(statement).mappings().one_or_none()
-        if row is None:
+        row = None if for_update else first_for(self.session, production_work_units, {'id':work_unit_id})
+        if row is None: row = self.session.execute(statement).mappings().one_or_none()
+        if not row:
             return None
         return self._work_unit_record(row)
 
@@ -499,7 +501,7 @@ class RuntimeStore:
                 production_work_units.c.node_id == node_id,
             )
         ).mappings().one_or_none()
-        return None if row is None else self._work_unit_record(row)
+        return None if not row else self._work_unit_record(row)
 
     def bind_work_unit_input(
         self, work_unit: WorkUnitRecord, baseline_id: UUID,
@@ -683,7 +685,8 @@ class RuntimeStore:
         )
 
     def execution_dispatch(self, dispatch_id: UUID) -> ExecutionDispatchRecord | None:
-        row = self._one(execution_dispatches, execution_dispatches.c.id == dispatch_id)
+        row = first_for(self.session, execution_dispatches, {'id':dispatch_id})
+        if row is None: row = self._one(execution_dispatches, execution_dispatches.c.id == dispatch_id)
         if row is None:
             return None
         return self._execution_dispatch_record(row)
@@ -899,7 +902,8 @@ class RuntimeStore:
         return self._production_admissibility_record(row)
 
     def baseline_candidate(self, candidate_id: UUID) -> BaselineCandidateRecord | None:
-        row = self._one(baseline_candidates, baseline_candidates.c.id == candidate_id)
+        row = first_for(self.session, baseline_candidates, {'id':candidate_id})
+        if row is None: row = self._one(baseline_candidates, baseline_candidates.c.id == candidate_id)
         if row is None:
             return None
         return self._baseline_candidate_record(row)

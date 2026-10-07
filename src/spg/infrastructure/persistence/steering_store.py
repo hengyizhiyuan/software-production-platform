@@ -198,7 +198,8 @@ class SteeringStore:
         self,
         step_id: UUID,
     ) -> SemanticStepResultRecord | None:
-        row = self.session.execute(
+        row = first_for(self.session, semantic_step_results, {'step_id':step_id}, order=('created_at','id'), descending=True)
+        if row is None: row = self.session.execute(
             select(semantic_step_results)
             .where(semantic_step_results.c.step_id == step_id)
             .order_by(
@@ -207,7 +208,7 @@ class SteeringStore:
             )
             .limit(1)
         ).mappings().first()
-        return None if row is None else self._semantic_result(row)
+        return None if not row else self._semantic_result(row)
 
     def semantic_results_for_plan(
         self,

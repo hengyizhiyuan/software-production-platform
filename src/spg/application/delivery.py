@@ -1,5 +1,5 @@
 """Inspectable delivery from exact governed Runtime Commit evidence."""
-from spg.infrastructure.performance import projection_memo
+from spg.infrastructure.performance import projection_memo, bind_projection_rows
 from datetime import UTC, datetime
 from hashlib import sha256
 from io import BytesIO
@@ -144,6 +144,7 @@ class DeliveryApplicationService:
     def candidate_context(self, work_id: UUID) -> dict | None:
         """Read the current sealed, verified result without granting integration authority."""
         with self.database.unit_of_work() as uow:
+            bind_projection_rows(self.database, uow.session, (work_id,))
             product, runtime = ProductStore(uow.session), RuntimeStore(uow.session)
             work = product.work(work_id)
             if work is None:
