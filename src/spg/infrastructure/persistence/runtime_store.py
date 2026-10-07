@@ -5,6 +5,7 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import func, insert, select
+from spg.infrastructure.persistence.projection_reads import first_for, rows_for
 from sqlalchemy.orm import Session
 
 from spg.domain.completion import (
@@ -401,8 +402,9 @@ class RuntimeStore:
         return BaselinePointerRecord.model_validate({key: rows[0][key] for key in ("snapshot_id", "version", "updated_at")})
 
     def snapshot(self, snapshot_id: UUID) -> SnapshotRecord | None:
-        row = self._one(production_snapshots, production_snapshots.c.id == snapshot_id)
-        if row is None:
+        row = first_for(self.session, production_snapshots, {'id':snapshot_id})
+        if row is None: row = self._one(production_snapshots, production_snapshots.c.id == snapshot_id)
+        if not row:
             return None
         values = dict(row)
         values["condition"] = SnapshotCondition(values["condition"])
@@ -425,8 +427,9 @@ class RuntimeStore:
         statement = select(production_runs).where(production_runs.c.id == run_id)
         if for_update:
             statement = statement.with_for_update()
-        row = self.session.execute(statement).mappings().one_or_none()
-        if row is None or row["current_plan_revision_id"] is None:
+        row = None if for_update else first_for(self.session, production_runs, {'id':run_id})
+        if row is None: row = self.session.execute(statement).mappings().one_or_none()
+        if not row or row["current_plan_revision_id"] is None:
             return None
         values = dict(row)
         values["production_horizon"] = ProductionHorizon(
@@ -444,8 +447,9 @@ class RuntimeStore:
         statement = select(plan_revisions).where(plan_revisions.c.id == plan_id)
         if for_update:
             statement = statement.with_for_update()
-        row = self.session.execute(statement).mappings().one_or_none()
-        if row is None:
+        row = None if for_update else first_for(self.session, plan_revisions, {'id':plan_id})
+        if row is None: row = self.session.execute(statement).mappings().one_or_none()
+        if not row:
             return None
         values = dict(row)
         values["condition"] = PlanCondition(values["condition"])
@@ -483,11 +487,9 @@ class RuntimeStore:
         return self._work_unit_record(row)
 
     def work_units_for_plan(self, plan_id: UUID) -> tuple[WorkUnitRecord, ...]:
-        rows = self.session.execute(
-            select(production_work_units)
-            .where(production_work_units.c.plan_revision_id == plan_id)
-            .order_by(production_work_units.c.created_at, production_work_units.c.id)
-        ).mappings()
+        rows = rows_for(self.session, production_work_units, {'plan_revision_id':plan_id}, order=('created_at','id'))
+        if rows is None:
+            rows = self.session.execute(select(production_work_units).where(production_work_units.c.plan_revision_id == plan_id).order_by(production_work_units.c.created_at,production_work_units.c.id)).mappings()
         return tuple(self._work_unit_record(row) for row in rows)
 
     def work_unit_for_node(self, plan_id: UUID, node_id: str) -> WorkUnitRecord | None:
@@ -579,8 +581,9 @@ class RuntimeStore:
         )
 
     def attempt(self, attempt_id: UUID) -> ExecutionAttemptRecord | None:
-        row = self._one(execution_attempts, execution_attempts.c.id == attempt_id)
-        if row is None:
+        row = first_for(self.session, execution_attempts, {'id':attempt_id})
+        if row is None: row = self._one(execution_attempts, execution_attempts.c.id == attempt_id)
+        if not row:
             return None
         values = dict(row)
         values["condition"] = AttemptCondition(values["condition"])
@@ -660,7 +663,7 @@ class RuntimeStore:
             attempt_preparations,
             attempt_preparations.c.attempt_id == attempt_id,
         )
-        if row is None:
+        if not row:
             return None
         values = dict(row)
         executor_binding = ExecutorBinding.model_validate(values.pop("executor_binding"))
@@ -705,7 +708,7 @@ class RuntimeStore:
             provider_execution_reports,
             provider_execution_reports.c.dispatch_id == dispatch_id,
         )
-        if row is None:
+        if not row:
             return None
         values = dict(row)
         values["executor_binding"] = ExecutorBinding.model_validate(

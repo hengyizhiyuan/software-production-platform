@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from spg.infrastructure.performance import projection_memo
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 import subprocess
@@ -108,6 +109,7 @@ class CandidatePreviewApplicationService:
         }:
             self.request(work_id)
 
+    @projection_memo
     def review_ready(self, work_id: UUID, candidate_id: UUID) -> bool:
         """Read persisted readiness; authority still performs a fresh probe.
 

@@ -9,6 +9,7 @@ from math import ceil
 from typing import Any
 from uuid import UUID, uuid4
 
+from spg.infrastructure.persistence.projection_reads import first_for
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
@@ -1577,7 +1578,8 @@ class NativeExecutionStore:
         )
 
     def queue_for_attempt(self, attempt_id: UUID) -> ExecutionQueueEntryRecord | None:
-        row = self.session.execute(
+        row = first_for(self.session, executor_queue, {"attempt_id":attempt_id}, order=("enqueued_at",), descending=True)
+        if row is None: row = self.session.execute(
             select(executor_queue)
             .where(executor_queue.c.attempt_id == attempt_id)
             .order_by(executor_queue.c.enqueued_at.desc())

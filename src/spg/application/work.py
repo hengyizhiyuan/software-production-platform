@@ -1,4 +1,5 @@
 """Goal-centric MVP application flow composed over governed Runtime services."""
+from spg.infrastructure.performance import projection_scope
 
 from datetime import UTC, datetime
 from hashlib import sha256
@@ -2973,6 +2974,7 @@ class WorkApplicationService:
             return None
         return min(candidates, key=lambda item: (item[0], item[1]))[2]
 
+    @projection_scope
     def list_attention(
         self,
         *,
@@ -2984,6 +2986,10 @@ class WorkApplicationService:
             if work_id is not None
             else self.list_works()
         )
+        with self.database.unit_of_work() as uow:
+            projection_store = ProductStore(uow.session, projection_reads=True)
+            projection_store.prepare_projection_summaries([p.work_id for p in projections])
+            read_rows = uow.session.info['watt_projection_rows']
         items: list[AttentionItem] = []
         for projection in projections:
             if projection.status is WorkStatus.NEEDS_REFINEMENT:
@@ -3033,6 +3039,7 @@ class WorkApplicationService:
                 )
                 continue
             with self.database.unit_of_work() as unit_of_work:
+                unit_of_work.session.info["watt_projection_rows"] = read_rows
                 interaction_store = InteractionStore(unit_of_work.session)
                 product_store = ProductStore(unit_of_work.session)
                 runtime_store = RuntimeStore(unit_of_work.session)
@@ -3098,6 +3105,7 @@ class WorkApplicationService:
                 )
                 continue
             with self.database.unit_of_work() as unit_of_work:
+                unit_of_work.session.info["watt_projection_rows"] = read_rows
                 steering = SteeringStore(unit_of_work.session)
                 runtime = RuntimeStore(unit_of_work.session)
                 plan = steering.plan_for_work(projection.work_id)
@@ -3134,6 +3142,7 @@ class WorkApplicationService:
                 from spg.application.human_attention import (qualify_human_decision,
                     canonical_ir_for_work, owner_decision_boundary)
                 with self.database.unit_of_work() as uow:
+                    uow.session.info["watt_projection_rows"] = read_rows
                     failures = qualify_human_decision(decision.human_decision_need,
                         evidence=decision.reality_refs,
                         semantic_ir=canonical_ir_for_work(uow.session, projection.work_id),
@@ -3274,6 +3283,7 @@ class WorkApplicationService:
                 ))
                 continue
             with self.database.unit_of_work() as unit_of_work:
+                unit_of_work.session.info["watt_projection_rows"] = read_rows
                 store = ProductStore(unit_of_work.session)
                 binding = self._runtime_binding_for_current_context(
                     store, projection.work_id

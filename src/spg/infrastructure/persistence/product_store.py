@@ -6,6 +6,7 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import delete, insert, select, update
+from spg.infrastructure.persistence.projection_reads import rows_for, first_for
 from sqlalchemy.orm import Session
 
 from spg.domain.product import (
@@ -85,7 +86,7 @@ class ProductStore:
         self.session = session
         self._projection_reads = projection_reads
         self._read_results = {}
-        self._summary_data = None
+        self._summary_data = session.info.get("watt_projection_rows")
 
     def insert_goal(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(product_goals).values(**values))
@@ -275,29 +276,27 @@ class ProductStore:
 
     @projection_read
     def scope_for_work(self, work_id: UUID) -> EngineeringScopeRecord | None:
-        current_scope_id = self.session.execute(
+        prefetched = first_for(self.session, product_works, {'id': work_id})
+        current_scope_id = (prefetched.get('current_engineering_scope_id') if prefetched is not None else self.session.execute(
             select(product_works.c.current_engineering_scope_id).where(
                 product_works.c.id == work_id
             )
-        ).scalar_one_or_none()
+        ).scalar_one_or_none())
         statement = select(engineering_scopes).where(
             engineering_scopes.c.work_id == work_id
         )
         if current_scope_id is not None:
             statement = statement.where(engineering_scopes.c.id == current_scope_id)
-        row = self.session.execute(
-            statement.order_by(
-                engineering_scopes.c.created_at.desc(),
-                engineering_scopes.c.id.desc(),
-            ).limit(1)
-        ).mappings().first()
+        filters = {'work_id': work_id}
+        if current_scope_id is not None: filters['id'] = current_scope_id
+        row = first_for(self.session, engineering_scopes, filters, order=('created_at','id'), descending=True)
         if row is None:
+            row = self.session.execute(statement.order_by(engineering_scopes.c.created_at.desc(), engineering_scopes.c.id.desc()).limit(1)).mappings().first()
+        if not row:
             return None
-        bindings = self.session.execute(
-            select(engineering_resource_bindings)
-            .where(engineering_resource_bindings.c.engineering_scope_id == row["id"])
-            .order_by(engineering_resource_bindings.c.created_at, engineering_resource_bindings.c.id)
-        ).mappings()
+        bindings = rows_for(self.session, engineering_resource_bindings, {'engineering_scope_id':row['id']}, order=('created_at','id'))
+        if bindings is None:
+            bindings = self.session.execute(select(engineering_resource_bindings).where(engineering_resource_bindings.c.engineering_scope_id == row["id"]).order_by(engineering_resource_bindings.c.created_at, engineering_resource_bindings.c.id)).mappings()
         return EngineeringScopeRecord(
             id=row["id"],
             work_id=row["work_id"],
@@ -360,40 +359,26 @@ class ProductStore:
 
     @projection_read
     def runtime_binding(self, work_id: UUID) -> WorkRuntimeBindingRecord | None:
-        row = self.session.execute(
-            select(work_runtime_bindings)
-            .where(work_runtime_bindings.c.work_id == work_id)
-            .order_by(
-                work_runtime_bindings.c.cycle_number.desc(),
-                work_runtime_bindings.c.created_at.desc(),
-            )
-            .limit(1)
-        ).mappings().first()
+        row = first_for(self.session, work_runtime_bindings, {'work_id': work_id}, order=('cycle_number','created_at'), descending=True)
         if row is None:
-            return None
-        return self._runtime_binding(row)
+            row = self.session.execute(select(work_runtime_bindings).where(work_runtime_bindings.c.work_id == work_id).order_by(work_runtime_bindings.c.cycle_number.desc(),work_runtime_bindings.c.created_at.desc()).limit(1)).mappings().first()
+        return None if not row else self._runtime_binding(row)
 
     @projection_read
     def runtime_bindings(self, work_id: UUID) -> tuple[WorkRuntimeBindingRecord, ...]:
-        rows = self.session.execute(
-            select(work_runtime_bindings)
-            .where(work_runtime_bindings.c.work_id == work_id)
-            .order_by(
-                work_runtime_bindings.c.cycle_number,
-                work_runtime_bindings.c.created_at,
-            )
-        ).mappings()
+        rows = rows_for(self.session, work_runtime_bindings, {'work_id':work_id}, order=('cycle_number','created_at'))
+        if rows is None:
+            rows = self.session.execute(select(work_runtime_bindings).where(work_runtime_bindings.c.work_id == work_id).order_by(work_runtime_bindings.c.cycle_number,work_runtime_bindings.c.created_at)).mappings()
         return tuple(self._runtime_binding(row) for row in rows)
 
     def runtime_binding_for_step(
         self,
         steering_step_id: UUID,
     ) -> WorkRuntimeBindingRecord | None:
-        row = self._one(
-            work_runtime_bindings,
-            work_runtime_bindings.c.steering_step_id == steering_step_id,
-        )
-        return None if row is None else self._runtime_binding(row)
+        row = first_for(self.session, work_runtime_bindings, {'steering_step_id':steering_step_id})
+        if row is None:
+            row = self._one(work_runtime_bindings, work_runtime_bindings.c.steering_step_id == steering_step_id)
+        return None if not row else self._runtime_binding(row)
 
     def runtime_binding_for_work_unit(
         self,
@@ -504,7 +489,25 @@ class ProductStore:
         load(work_product_references, work_product_references.c.attempt_id, attempt_ids)
         load(transition_history, transition_history.c.correlation_identity,
             {str(x) for x in run_ids | attempt_ids | {r['id'] for r in units}} | {''})
+        from spg.infrastructure.persistence.runtime_schema import production_runs, plan_revisions, production_snapshots
+        from spg.infrastructure.persistence.steering_schema import steering_plans, steering_plan_revisions, steering_steps, steering_decisions, semantic_step_results
+        from spg.infrastructure.persistence.native_execution_schema import executor_queue
+        load(product_works, product_works.c.id, work_ids)
+        scopes = load(engineering_scopes, engineering_scopes.c.work_id, work_ids)
+        load(engineering_resource_bindings, engineering_resource_bindings.c.engineering_scope_id, {r['id'] for r in scopes})
+        runs = load(production_runs, production_runs.c.id, run_ids)
+        load(plan_revisions, plan_revisions.c.id, {r['plan_revision_id'] for r in bindings} | {r['current_plan_revision_id'] for r in runs if r['current_plan_revision_id']})
+        snapshot_ids = {r['source_baseline_id'] for r in units if r['source_baseline_id']} | {r['verified_output_baseline_id'] for r in units if r['verified_output_baseline_id']}
+        snapshot_ids |= {r['source_baseline_id'] for r in runs} | {r['integrated_baseline_id'] for r in runs if r['integrated_baseline_id']}
+        load(production_snapshots, production_snapshots.c.id, snapshot_ids)
+        load(executor_queue, executor_queue.c.attempt_id, attempt_ids)
+        plans = load(steering_plans, steering_plans.c.work_id, work_ids)
+        revisions = load(steering_plan_revisions, steering_plan_revisions.c.steering_plan_id, {r['id'] for r in plans})
+        steps = load(steering_steps, steering_steps.c.steering_plan_revision_id, {r['id'] for r in revisions})
+        load(steering_decisions, steering_decisions.c.steering_plan_revision_id, {r['id'] for r in revisions})
+        load(semantic_step_results, semantic_step_results.c.step_id, {r['id'] for r in steps})
         self._summary_data = data
+        self.session.info['watt_projection_rows'] = data
 
     def _summary_rows(self, table, column, values, *, order=(), descending=False):
         if self._summary_data is None:
@@ -513,7 +516,7 @@ class ProductStore:
                 query = query.order_by(*[getattr(table.c, key).desc() if descending else getattr(table.c, key) for key in order])
             return list(self.session.execute(query).mappings())
         rows = [r for r in self._summary_data[table.name] if r[column.name] in values]
-        return sorted(rows, key=lambda r: tuple(r[k] for k in order), reverse=descending) if order else rows
+        return sorted(rows, key=lambda r: tuple((r[k] is None, r[k] if r[k] is not None else 0) for k in order), reverse=descending) if order else rows
 
     def _summary_first(self, table, column, value, *, order=(), descending=False):
         rows = self._summary_rows(table, column, (value,), order=order, descending=descending)

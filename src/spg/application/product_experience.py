@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from spg.infrastructure.performance import timed
+from spg.infrastructure.performance import timed, projection_scope
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 import json
@@ -210,6 +210,7 @@ class ProductExperienceProjection:
         row['human_visible'] = safe_wording(expression_input).decisions[0].model_dump(mode='json')
         return row
 
+    @projection_scope
     @timed("projection")
     def collections(self, owner_id: str, *, product_id: UUID | None = None) -> dict:
         with self.database.unit_of_work() as uow:
@@ -314,6 +315,7 @@ class ProductExperienceProjection:
             raise ProductInvariantViolation("Product is unavailable to this owner")
         return {**product, "revision": collections["revision"]}
 
+    @projection_scope
     @timed("projection")
     def workspace(self, owner_id: str, product_id: UUID,
                   work_id: UUID | None = None, interaction_id: UUID | None = None,

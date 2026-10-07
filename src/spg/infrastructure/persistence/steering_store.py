@@ -9,6 +9,7 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import insert, select, update
+from spg.infrastructure.persistence.projection_reads import rows_for, first_for
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
@@ -124,11 +125,12 @@ class SteeringStore:
 
     def plan(self, plan_id: UUID) -> SteeringPlanRecord | None:
         row = self._one(steering_plans, steering_plans.c.id == plan_id)
-        return None if row is None else self._plan(row)
+        return None if not row else self._plan(row)
 
     def plan_for_work(self, work_id: UUID) -> SteeringPlanRecord | None:
-        row = self._one(steering_plans, steering_plans.c.work_id == work_id)
-        return None if row is None else self._plan(row)
+        row = first_for(self.session, steering_plans, {'work_id':work_id})
+        if row is None: row = self._one(steering_plans, steering_plans.c.work_id == work_id)
+        return None if not row else self._plan(row)
 
     def revision(self, revision_id: UUID) -> SteeringPlanRevisionRecord | None:
         row = self._one(
@@ -138,15 +140,10 @@ class SteeringStore:
         return None if row is None else self._revision(row)
 
     def active_revision(self, plan_id: UUID) -> SteeringPlanRevisionRecord | None:
-        row = self._one(
-            steering_plan_revisions,
-            (steering_plan_revisions.c.steering_plan_id == plan_id)
-            & (
-                steering_plan_revisions.c.condition
-                == SteeringPlanRevisionCondition.ACTIVE.value
-            ),
-        )
-        return None if row is None else self._revision(row)
+        row = first_for(self.session, steering_plan_revisions, {'steering_plan_id':plan_id,'condition':SteeringPlanRevisionCondition.ACTIVE.value})
+        if row is None:
+            row = self._one(steering_plan_revisions, (steering_plan_revisions.c.steering_plan_id == plan_id) & (steering_plan_revisions.c.condition == SteeringPlanRevisionCondition.ACTIVE.value))
+        return None if not row else self._revision(row)
 
     def revisions(self, plan_id: UUID) -> tuple[SteeringPlanRevisionRecord, ...]:
         rows = self.session.execute(
@@ -161,11 +158,9 @@ class SteeringStore:
         return None if row is None else self._step(row)
 
     def steps(self, revision_id: UUID) -> tuple[SteeringStepRecord, ...]:
-        rows = self.session.execute(
-            select(steering_steps)
-            .where(steering_steps.c.steering_plan_revision_id == revision_id)
-            .order_by(steering_steps.c.position, steering_steps.c.created_at, steering_steps.c.id)
-        ).mappings()
+        rows = rows_for(self.session, steering_steps, {'steering_plan_revision_id':revision_id}, order=('position','created_at','id'))
+        if rows is None:
+            rows = self.session.execute(select(steering_steps).where(steering_steps.c.steering_plan_revision_id == revision_id).order_by(steering_steps.c.position,steering_steps.c.created_at,steering_steps.c.id)).mappings()
         return tuple(self._step(row) for row in rows)
 
     def decision(self, decision_id: UUID) -> SteeringDecisionRecord | None:
@@ -173,15 +168,10 @@ class SteeringStore:
         return None if row is None else self._decision(row)
 
     def latest_decision(self, revision_id: UUID) -> SteeringDecisionRecord | None:
-        row = self.session.execute(
-            select(steering_decisions)
-            .where(
-                steering_decisions.c.steering_plan_revision_id == revision_id
-            )
-            .order_by(steering_decisions.c.created_at.desc(), steering_decisions.c.id.desc())
-            .limit(1)
-        ).mappings().first()
-        return None if row is None else self._decision(row)
+        row = first_for(self.session, steering_decisions, {'steering_plan_revision_id':revision_id}, order=('created_at','id'), descending=True)
+        if row is None:
+            row = self.session.execute(select(steering_decisions).where(steering_decisions.c.steering_plan_revision_id == revision_id).order_by(steering_decisions.c.created_at.desc(),steering_decisions.c.id.desc()).limit(1)).mappings().first()
+        return None if not row else self._decision(row)
 
     def latest_decision_for_plan(self, plan_id: UUID) -> SteeringDecisionRecord | None:
         row = self.session.execute(

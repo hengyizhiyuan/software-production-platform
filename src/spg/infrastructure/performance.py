@@ -128,3 +128,36 @@ class TimedJSONResponse(JSONResponse):
 def run_process(*args, **kwargs):
     import subprocess
     return subprocess.run(*args, **kwargs)
+
+
+_projection_scope = ContextVar('watt_projection_scope', default=None)
+
+
+def projection_scope(fn):
+    """Share reads only within one explicitly read-only composition call.
+
+    No cache survives its return; commands/authorization are never decorated.
+    """
+    @wraps(fn)
+    def call(*args, **kwargs):
+        if _projection_scope.get() is not None:
+            return fn(*args, **kwargs)
+        token = _projection_scope.set({})
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            _projection_scope.reset(token)
+    return call
+
+
+def projection_memo(fn):
+    @wraps(fn)
+    def call(*args, **kwargs):
+        cache = _projection_scope.get()
+        if cache is None:
+            return fn(*args, **kwargs)
+        key = (fn, id(args[0]), repr(args[1:]), repr(sorted(kwargs.items())))
+        if key not in cache:
+            cache[key] = fn(*args, **kwargs)
+        return cache[key]
+    return call
