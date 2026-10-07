@@ -1747,6 +1747,8 @@ def test_guardian_finding_drives_watt_candidate_repair_and_reverification(
     from spg.application.steering_driver import PlanSteeringDriver
     from spg.domain.production_environment import CandidatePreviewMode, PreviewRuntimeStatus
     from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
+    from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+    from sqlalchemy import text
 
     submitted = app_facts.service.submit_work(
         "Modify src/spg_example.py and tests/test_spg_example.py")
@@ -1905,6 +1907,35 @@ def test_guardian_finding_drives_watt_candidate_repair_and_reverification(
             time.sleep(0.05)
         raise AssertionError(f"Guardian did not reach {gate}: {client.projection(work_id)}")
 
+    def repair_state():
+        # Observe only committed owner facts. Polling must not admit/schedule repair.
+        with app_facts.database.unit_of_work() as uow:
+            uow.session.execute(text("SET TRANSACTION READ ONLY"))
+            runtime = RuntimeStore(uow.session)
+            bindings = ProductStore(uow.session).runtime_bindings(work_id)
+            admissions = tuple(record for record in runtime.governance_for_subject(str(work_id))
+                if record.decision_type == "GUARDIAN_ARTIFACT_REPAIR_CYCLE")
+            refinements = NativeExecutionStore(uow.session).list_self_refine_events(
+                work_id=work_id, component="guardian/artifact")
+        session = preview_store.current_candidate_preview(work_id)
+        return {"bindings": bindings, "admissions": admissions, "refinements": refinements,
+            "scheduled": tuple(scheduled.works),
+            "feedback_error": preview_store.guardian_feedback_error(session.id) if session else None}
+
+    def wait_for_repair_state(label, ready):
+        until = time.monotonic() + 10
+        while True:
+            state = repair_state()
+            assert not state["feedback_error"], f"{label}: {state}"
+            assert len(state["admissions"]) <= 1, f"Duplicate repair admission: {state}"
+            assert len(state["bindings"]) <= 2, f"Duplicate repair binding: {state}"
+            assert len(state["scheduled"]) <= 1, f"Duplicate repair scheduling: {state}"
+            if ready(state):
+                return state
+            if time.monotonic() >= until:
+                raise AssertionError(f"{label} did not complete: {state}; Guardian={client.projection(work_id)}")
+            time.sleep(0.05)  # Poll the domain condition; elapsed time never means completion.
+
     try:
         for _ in range(25):
             service.advance_work(work_id)
@@ -1915,19 +1946,38 @@ def test_guardian_finding_drives_watt_candidate_repair_and_reverification(
             raise AssertionError("Watt did not seal initial Candidate")
         failed_candidate = context["candidate_id"]
         failed_revision = context["repository_revision"]
+        failed_tree = context["tree"]
         failed = wait_for_projection("FAIL_REPAIRABLE")
         assert failed["finding_count"] == 1
         assert not client.passed(work_id, UUID(failed_candidate))
         assert not service.list_attention(work_id=work_id)
-        with app_facts.database.unit_of_work() as uow:
-            bindings = ProductStore(uow.session).runtime_bindings(work_id)
+        def repair_admitted_and_scheduled(state):
+            return (len(state["bindings"]) == 2 and len(state["admissions"]) == 1
+                and state["admissions"][0].scope["failed_candidate_id"] == failed_candidate
+                and state["admissions"][0].scope["guardian_result_ref"] == failed["result_ref"]
+                and state["admissions"][0].scope["successor_run_id"] == str(state["bindings"][1].production_run_id)
+                and any(event.operation_id == UUID(failed_candidate)
+                    and failed["result_ref"] in event.evidence_references
+                    and event.diagnostic_evidence.get("repair_owner") == "WATT_WORK_RECOVERY"
+                    for event in state["refinements"])
+                and state["scheduled"] == (work_id,))
+
+        # FAIL_REPAIRABLE is published before the background listener commits
+        # successor admission, feedback evidence and scheduler acceptance.
+        admitted = wait_for_repair_state("Exact Guardian repair admission/schedule", repair_admitted_and_scheduled)
+        bindings = admitted["bindings"]
         assert len(bindings) == 2
+        assert [binding.cycle_number for binding in bindings] == [1, 2]
+        assert all(binding.work_id == work_id for binding in bindings)
+        assert len({binding.production_run_id for binding in bindings}) == 2
+        assert len({binding.work_unit_id for binding in bindings}) == 2
+        assert bindings[1].governance_record_id == admitted["admissions"][0].id
         assert bindings[0].work_reality_revision_id == bindings[1].work_reality_revision_id
         assert bindings[0].engineering_scope_id == bindings[1].engineering_scope_id
-        until = time.monotonic() + 10
-        while not scheduled.works and time.monotonic() < until:
-            time.sleep(0.05)
         assert scheduled.works == [work_id]
+        # Repeated waiting/observation creates neither repair nor execution.
+        assert wait_for_repair_state("Observe admitted repair again", repair_admitted_and_scheduled) == admitted
+        assert repair_state() == admitted
         for _ in range(25):
             service.advance_work(work_id)
             context = delivery.candidate_context(work_id)
@@ -1938,16 +1988,59 @@ def test_guardian_finding_drives_watt_candidate_repair_and_reverification(
         assert context["repository_revision"] != failed_revision
         passed = wait_for_projection("PASS")
         assert passed["candidate_id"] == context["candidate_id"]
+        final_state = wait_for_repair_state("Exact repaired Candidate feedback", lambda state: any(
+            event.operation_id == UUID(context["candidate_id"])
+            and event.status == "VERIFIED" and event.final_result == "LOCAL_OBLIGATION_RECOVERED"
+            and passed["result_ref"] in event.evidence_references
+            and event.diagnostic_evidence.get("new_candidate_id") == context["candidate_id"]
+            for event in state["refinements"]))
+        assert final_state["bindings"] == bindings
+        assert final_state["admissions"] == admitted["admissions"]
+        assert final_state["scheduled"] == (work_id,)
+        assert len(final_state["refinements"]) == 2
+        assert {event.operation_id for event in final_state["refinements"]} == {
+            UUID(failed_candidate), UUID(context["candidate_id"])}
+        assert repair_state() == final_state
         assert client.passed(work_id, UUID(context["candidate_id"]))
         original = guardian.get_result(UUID(failed["request_id"]))
         repaired = guardian.get_result(UUID(passed["request_id"]))
         assert original.gate is Gate.FAIL_REPAIRABLE
         assert repaired.gate is Gate.PASS
+        assert original.source_revision == failed_revision and original.source_tree == failed_tree
+        assert repaired.candidate_id == UUID(context["candidate_id"])
+        assert repaired.source_revision == context["repository_revision"]
+        assert repaired.source_tree == context["tree"]
+        assert repaired.candidate_fingerprint == context["candidate_fingerprint"]
+        assert repaired.request_id != original.request_id
         assert tuple(original.findings[0].finding_id for _ in (1,)) == repaired.supersedes_finding_ids
         assert executor.calls == 2
         assert any(item.kind is AttentionKind.CANDIDATE_AUTHORIZATION
             for item in service.list_attention(work_id=work_id))
         with app_facts.database.unit_of_work() as uow:
+            runtime = RuntimeStore(uow.session)
+            original_run = runtime.run(bindings[0].production_run_id)
+            repair_run = runtime.run(bindings[1].production_run_id)
+            assert original_run is not None and repair_run is not None
+            assert repair_run.source_baseline_id == original_run.source_baseline_id
+            assert repair_run.intent_ref == f"work:{work_id}:guardian-repair:{failed_candidate}"
+            assert uow.session.scalar(select(func.count()).select_from(production_runs)) == 2
+            assert uow.session.scalar(select(func.count()).select_from(plan_revisions)) == 2
+            assert uow.session.scalar(select(func.count()).select_from(production_work_units)) == 2
+            assert uow.session.scalar(select(func.count()).select_from(execution_attempts)) == 2
+            for binding, revision, tree in (
+                (bindings[0], failed_revision, failed_tree),
+                (bindings[1], context["repository_revision"], context["tree"]),
+            ):
+                units = runtime.work_units_for_plan(binding.plan_revision_id)
+                assert [unit.id for unit in units] == [binding.work_unit_id]
+                assert units[0].production_run_id == binding.production_run_id
+                assert len(runtime.attempts_for_work_unit(binding.work_unit_id)) == 1
+                candidates = runtime.baseline_candidates_for_work_unit(binding.work_unit_id)
+                assert len(candidates) == 1
+                verification = runtime.verification_records_for_work_unit(binding.work_unit_id)
+                assert verification and all(record.result is VerificationResultValue.PASS
+                    and record.proposed_commit_identity == revision and record.tree_identity == tree
+                    for record in verification)
             summary = ProductStore(uow.session).runtime_summary(bindings[1])
         assert summary.authorization_id is None
         assert summary.runtime_commit_id is None
