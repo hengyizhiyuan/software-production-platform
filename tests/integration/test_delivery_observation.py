@@ -184,6 +184,21 @@ def test_gc_official_old_baseline_is_legitimate_but_authorized_stale_export_dive
     assert 'api_key=private' not in str(DeliveryObservationService(db).for_work(wid,pid))
     assert c.get(url,params={'context_work_id':str(uuid4())}).status_code==409
     assert c.get(url,params={'action_semantic':'DOWNLOAD_DELIVERY_ARTIFACT'}).status_code==409
+    # Fault injection still reads real admitted Git bytes. Trace observes an owner
+    # choosing the wrong source; it must not turn itself into a new repair gate.
+    from spg.application.product_managed_source import ProductManagedSourceService
+    original_export=ProductManagedSourceService.export_archive
+    def changed_owner(self,product_id,owner_id,revision=None):
+        return original_export(self,product_id,owner_id,baseline)
+    monkeypatch.setattr(ProductManagedSourceService,'export_archive',changed_owner)
+    shifted=c.get(url,params={'revision':manifest.repository_revision,'action_semantic':'DOWNLOAD_CANDIDATE_SOURCE','context_work_id':str(wid)})
+    assert shifted.status_code==200
+    sa=action(db,wid,shifted);assert_response(sa,shifted)
+    assert sa['classification']=='OBSERVED_DELIVERY_DIVERGENCE'
+    assert sa['expected']['runtime_commit_id']==str(manifest.runtime_commit_id)
+    assert sa['selected']['revision']==shifted.headers['x-watt-source-revision']==baseline
+    assert sa['phases'].count('SERVER_RESOLVED')==2
+    with ZipFile(BytesIO(shifted.content)) as z:assert z.namelist()==['README.md']
     c.close()
 
 

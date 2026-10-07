@@ -1436,7 +1436,11 @@ def create_http_application(
         if semantic==DeliveryAction.OFFICIAL:
             expected['revision']=exact if exact in versions else details['accepted']['revision']
         elif semantic==DeliveryAction.CANDIDATE_SOURCE:
-            expected['revision']=(candidate or details['current_candidate'] or {}).get('revision')
+            wanted=candidate or details['current_candidate']
+            expected={'product_id':str(product_id),'revision':None if wanted is None else wanted['revision']}
+            if wanted:
+                expected.update(delivery_observations.lineage(UUID(wanted['work_id']),wanted['revision'],
+                    candidate_id=UUID(wanted['candidate_id'])))
         elif semantic==DeliveryAction.AUTHORIZED:
             expected={**(delivery_observations.lineage(UUID(observation.data['work_id'])) if observation.data['work_id'] else {}),
                       'product_id':str(product_id)}
