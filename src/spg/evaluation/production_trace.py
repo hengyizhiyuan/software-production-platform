@@ -515,6 +515,7 @@ class ProductionTraceService:
                 'latest_activity_at':work['latest_activity_at'],'product_name':work['product_name'],
                 'original_input':result['first_human_input'],'candidate_ids':[str(c['id']) for c in tables.get('baseline_candidates',[])],
                 'manifest_ids':[str(m['id']) for m in tables.get('work_delivery_manifests',[])]}
+            result['search_note']='已记录外部搜索，来源与查询见下方。' if result['search'] else '已保存的 Work 记录未发现外部搜索；未记录阶段不能判定。'
             result['missing_note']='未发生或未记录的后续阶段保持缺失；普通 Work 不依赖 Quality Case 或 Candidate。'
             result['deployment_note']='部署事实见精确目标与操作记录。' if result['deployment'] else '尚无部署记录；不代表已上线。'
             if result['candidate'] and not tables.get('work_delivery_manifests'):result['deployment_note']='已生成候选源码；尚无 Delivery Manifest，不能将源码下载等同于完整交付。'
