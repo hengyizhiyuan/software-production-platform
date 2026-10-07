@@ -106,6 +106,27 @@ def test_accept_recommendation_binds_exact_previous_scope_and_proceeds():
     assert not current.current_production[0].delivery_authorized
 
 
+def test_default_recommendation_is_not_specific_to_websites():
+    record=_record('我想做一个团队排班工具，先给我一个能开始的版本建议')
+    proposal='建议首版只录入团队成员和每日班次并展示排班表，不加入薪资和外部账号连接'
+    definition=guidance(proposal=proposal,proposal_basis='先覆盖可核对的排班闭环，避免默认扩大到财务与外部数据权限',
+        question='首版先按这个有限排班方案做，还是需要不同的主要目标？')
+    raw=meaning(record,definition)
+    raw=raw.model_copy(update={'items':(raw.items[0].model_copy(update={'production':raw.items[0].production.model_copy(
+        update={'objective':'创建团队排班工具','primary_change':'形成有限排班首版'})}),)})
+    prior=govern(raw,record); _,semantics,readiness=projected(prior,record)
+    assert semantics.selected_question==definition.question and readiness.status.value=='NOT_READY'
+    answer=_record('按你的建议来',identity=2,sequence=2)
+    accepted=ProductionSufficiency(status='READY',reason='Human 明确选择有限排班首版，其他功能保持排除',
+        recommendation_acceptance=SemanticArgument(value=str(prior.id),provenance=SemanticProvenance(
+            origin=SemanticOrigin.HUMAN_EXPLICIT,source_record_id=answer.id,source_text=answer.content)))
+    current=meaning(answer,accepted,scope=(proposal,))
+    current=current.model_copy(update={'items':(current.items[0].model_copy(update={'production':current.items[0].production.model_copy(
+        update={'objective':'创建团队排班工具','primary_change':'形成有限排班首版'})}),)})
+    _,_,ready=projected(govern(current,answer,history=(prior,)),answer)
+    assert ready.status.value=='READY'
+
+
 @pytest.mark.parametrize('problem', ['old-human', 'model', 'wrong-reference', 'scope-lost'])
 def test_acceptance_cannot_be_fabricated_or_detached_from_recommendation(problem):
     first = _record('我要开发一个工律的官网'); prior = govern(meaning(first, guidance()), first)
