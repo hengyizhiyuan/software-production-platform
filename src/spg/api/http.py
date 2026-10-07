@@ -2598,18 +2598,19 @@ def create_http_application(
     def candidate_download_artifact(work_id: UUID, candidate_fingerprint: str, path: str, http_request: Request):
         observation=delivery_observations.begin(http_request,operation='CANDIDATE_ARTIFACT',
             semantic=DeliveryAction.CANDIDATE_ARTIFACT,work_id=work_id)
-        context=delivery_service.candidate_context(work_id)
-        expected={'work_id':str(work_id),'revision':None if context is None else context['repository_revision'],
-                  'candidate_fingerprint':None if context is None else context['candidate_fingerprint']}
-        if context:
-            expected.update(product_id=observation.data['product_id'],candidate_id=context['candidate_id'],tree=context.get('tree'))
-        selected={**(expected if candidate_fingerprint==expected['candidate_fingerprint'] else {'work_id':str(work_id)}),
-                  'candidate_fingerprint':candidate_fingerprint if re.fullmatch('[a-f0-9]{64}',candidate_fingerprint) else None,
-                  'artifact_identity':candidate_fingerprint+':'+path if context and candidate_fingerprint==expected['candidate_fingerprint']
-                    and path in context.get('artifacts',[]) else None}
-        observation.resolve(expected=expected,selected=selected,policy='EXACT_SEALED_CANDIDATE',basis='Exact requested Candidate fingerprint and path; candidate-download gate verifies current lineage')
+        def resolved(context):
+            expected={'work_id':str(work_id),'revision':None if context is None else context['repository_revision'],
+                      'candidate_fingerprint':None if context is None else context['candidate_fingerprint']}
+            if context:
+                expected.update(product_id=observation.data['product_id'],candidate_id=context['candidate_id'],tree=context.get('tree'))
+            selected={**(expected if candidate_fingerprint==expected['candidate_fingerprint'] else {'work_id':str(work_id)}),
+                      'candidate_fingerprint':candidate_fingerprint if re.fullmatch('[a-f0-9]{64}',candidate_fingerprint) else None,
+                      'artifact_identity':candidate_fingerprint+':'+path if context and candidate_fingerprint==expected['candidate_fingerprint']
+                        and path in context.get('artifacts',[]) else None}
+            observation.resolve(expected=expected,selected=selected,policy='EXACT_SEALED_CANDIDATE',basis='Exact requested Candidate fingerprint and path; candidate-download gate verifies current lineage')
+        data=delivery_service.candidate_download(work_id,candidate_fingerprint,path,on_resolution=resolved)
         filename = quote(PurePosixPath(path).name)
-        return Response(delivery_service.candidate_download(work_id, candidate_fingerprint, path),
+        return Response(data,
             media_type=artifact_media_type(path), headers={"X-Content-Type-Options": "nosniff",
                 "Cache-Control": "no-store",
                 "Content-Disposition": f"attachment; filename*=UTF-8''{filename}",

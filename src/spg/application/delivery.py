@@ -299,9 +299,12 @@ class DeliveryApplicationService:
             tuple(context["artifacts"]),
         )
 
-    def candidate_download(self, work_id: UUID, candidate_fingerprint: str, path: str) -> bytes:
+    def candidate_download(self, work_id: UUID, candidate_fingerprint: str, path: str, *, on_resolution=None) -> bytes:
         """Download a declared produced artifact from the same immutable Candidate binding."""
         context = self.candidate_context(work_id)
+        if on_resolution is not None:
+            from copy import deepcopy
+            on_resolution(deepcopy(context))
         if context is None or context["candidate_fingerprint"] != candidate_fingerprint:
             raise ProductInvariantViolation("Candidate download is stale against current Work Reality")
         if path not in context["artifacts"] or path not in context["paths"]:

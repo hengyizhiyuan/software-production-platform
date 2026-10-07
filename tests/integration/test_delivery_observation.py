@@ -73,7 +73,16 @@ def test_current_delivery_response_lineage_repeat_failures_and_trace_read_only(p
     ia=action(db,wid,item);assert_response(ia,item)
     assert ia['expected']['payload_sha256']==sha256(item.content).hexdigest()
     candidate=delivery.candidate_context(wid)
+    def change_observation_only(context):context['candidate_fingerprint']='0'*64
+    assert delivery.candidate_download(wid,candidate['candidate_fingerprint'],'index.html',on_resolution=change_observation_only)==item.content
+    resolutions=[]
+    original_context=DeliveryApplicationService.candidate_context
+    def one_resolution(self,work_id):
+        resolutions.append(work_id);return original_context(self,work_id)
+    monkeypatch.setattr(DeliveryApplicationService,'candidate_context',one_resolution)
     cr=c.get(f"/api/works/{wid}/candidate-download/{candidate['candidate_fingerprint']}/index.html")
+    assert resolutions==[wid], 'Observation must reuse the owner resolution instead of inspecting source twice'
+    monkeypatch.setattr(DeliveryApplicationService,'candidate_context',original_context)
     assert cr.status_code==200 and cr.content==item.content
     ca=action(db,wid,cr);assert_response(ca,cr);assert ca['selected']['candidate_id']==candidate['candidate_id']
     missing=c.get(f'/api/works/{wid}/deliveries/{uuid4()}/download')
