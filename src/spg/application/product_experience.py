@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from spg.infrastructure.performance import timed
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 import json
@@ -209,11 +210,13 @@ class ProductExperienceProjection:
         row['human_visible'] = safe_wording(expression_input).decisions[0].model_dump(mode='json')
         return row
 
-    def collections(self, owner_id: str) -> dict:
+    @timed("projection")
+    def collections(self, owner_id: str, *, product_id: UUID | None = None) -> dict:
         with self.database.unit_of_work() as uow:
             session = uow.session
             products = session.execute(select(software_products).where(
-                software_products.c.owner_id == owner_id).order_by(
+                software_products.c.owner_id == owner_id,
+                *([] if product_id is None else [software_products.c.id == product_id])).order_by(
                 software_products.c.updated_at.desc()).limit(100)).mappings().all()
             product_ids = [row["id"] for row in products]
             works = [] if not product_ids else session.execute(select(product_works).where(
@@ -239,11 +242,13 @@ class ProductExperienceProjection:
         runtime_by_manifest = {row["manifest_id"]: row for row in runtimes}
         product_by_id = {row["id"]: row for row in products}
         work_by_id = {row["id"]: row for row in works}
+        projections = self.work.get_works(work_ids)
+        projection_by_id = {item.work_id: item for item in projections}
         work_rows = [{"id": str(row["id"]), "product_id": str(row["product_id"]),
                       "product_name": product_by_id[row["product_id"]]["name"],
                       "title": row["refined_title"] or row["raw_user_requirement"] or "待明确的事项",
                       "requirement": row["raw_user_requirement"],
-                      "status": self.work.get_work(row["id"]).status.value,
+                      "status": projection_by_id[row["id"]].status.value,
                       "created_at": _iso(row["created_at"]),
                       "updated_at": _iso(row["updated_at"]),
                       "reality_revision_id": str(row["current_work_reality_revision_id"])
@@ -282,7 +287,7 @@ class ProductExperienceProjection:
                 "work_count": len(associated), "deliverable_count": len(associated_delivery)})
         attention = []
         work_index = {row["id"]: row for row in work_rows}
-        for item in self.work.list_attention():
+        for item in self.work.list_attention(projections=projections):
             work = work_index.get(str(item.work_id))
             if work is None:
                 continue
@@ -302,13 +307,14 @@ class ProductExperienceProjection:
                 "attention": collections["attention"][:5]}
 
     def product(self, owner_id: str, product_id: UUID) -> dict:
-        collections = self.collections(owner_id)
+        collections = self.collections(owner_id, product_id=product_id)
         product = next((row for row in collections["products"]
                         if row["id"] == str(product_id)), None)
         if product is None:
             raise ProductInvariantViolation("Product is unavailable to this owner")
         return {**product, "revision": collections["revision"]}
 
+    @timed("projection")
     def workspace(self, owner_id: str, product_id: UUID,
                   work_id: UUID | None = None, interaction_id: UUID | None = None,
                   realize: bool = True) -> dict:
@@ -332,7 +338,7 @@ class ProductExperienceProjection:
         attention = [] if work is None else [self._attention_row(item, {
             "id": str(work.work_id), "product_id": str(product_id),
             "product_name": product["name"], "title": work.title or work.raw_user_requirement,
-        }) for item in self.work.list_attention(work_id=work.work_id)]
+        }) for item in self.work.list_attention(projections=(work,))]
         steps = []
         if work is not None:
             with self.database.unit_of_work() as uow:
@@ -443,8 +449,11 @@ class ProductExperienceProjection:
         return None if product_id is None else str(product_id)
 
     def latest_interaction(self, owner_id: str, product_id: UUID) -> str | None:
-        self.product(owner_id, product_id)
         with self.database.unit_of_work() as uow:
+            owned = uow.session.scalar(select(software_products.c.id).where(
+                software_products.c.id == product_id, software_products.c.owner_id == owner_id))
+            if owned is None:
+                raise ProductInvariantViolation("Product is unavailable to this owner")
             value = uow.session.execute(select(
                 product_workspace_interactions.c.interaction_id).where(
                 product_workspace_interactions.c.product_id == product_id).order_by(

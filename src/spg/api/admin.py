@@ -53,8 +53,10 @@ def install_admin(api, database, settings, runtime=None):
         return result
 
     @router.get('/case-runs/{case_run_id}/trace')
-    def case_trace(case_run_id: UUID):
-        return traces.case_trace(case_run_id)
+    def case_trace(case_run_id: UUID, view: str = "full"):
+        if view not in {"full", "summary"}:
+            raise QualityError("TRACE_VIEW_NOT_SUPPORTED")
+        return traces.case_trace(case_run_id, detail=view == "full")
 
     @router.get('/traces/{kind}/{entity_id}')
     def entity_trace(kind: str, entity_id: UUID):

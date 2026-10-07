@@ -12,6 +12,7 @@ from time import monotonic, sleep
 from typing import Any
 
 import httpx2
+from spg.infrastructure.performance import timed
 
 from spg.domain.model_runtime import (
     ModelCapabilities,
@@ -136,6 +137,7 @@ class ResponsesModelAdapter:
         if self._owns_client:
             self._client.close()
 
+    @timed("model_provider")
     def generate(
         self,
         *,

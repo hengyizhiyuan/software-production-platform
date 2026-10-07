@@ -50,6 +50,8 @@ class Database:
     @classmethod
     def from_settings(cls, settings: Settings) -> "Database":
         engine = create_engine(configured_database_url(settings), pool_pre_ping=True)
+        from spg.infrastructure.performance import observe_engine
+        observe_engine(engine)
         factory = sessionmaker(
             bind=engine,
             class_=Session,

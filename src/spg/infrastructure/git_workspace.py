@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import subprocess
+from spg.infrastructure.performance import timed, run_process
 from uuid import UUID
 
 from spg.domain.preparation import WorkspaceBinding
@@ -40,7 +41,7 @@ class GitExactReality:
         """Apply Git's path-aware clean filters and return exact blob identity."""
 
         repository = self._repository_root(repository_path)
-        result = subprocess.run(
+        result = run_process(
             [
                 "git",
                 "-C",
@@ -70,16 +71,18 @@ class GitExactReality:
         return repository
 
     @staticmethod
+    @timed("git")
     def _git(repository: Path, *arguments: str) -> str:
         return GitExactReality._run(repository, *arguments).stdout.decode().strip()
 
     @staticmethod
+    @timed("git")
     def _git_bytes(repository: Path, *arguments: str) -> bytes:
         return GitExactReality._run(repository, *arguments).stdout
 
     @staticmethod
     def _run(repository: Path, *arguments: str) -> subprocess.CompletedProcess[bytes]:
-        result = subprocess.run(
+        result = run_process(
             ["git", "-C", str(repository), *arguments],
             check=False,
             capture_output=True,
@@ -288,7 +291,7 @@ class GitCloneAttemptWorkspace(GitAttemptWorkspace):
             repository, "symbolic-ref", "--short", "HEAD"
         )
         branch = selected_ref.removeprefix("refs/heads/")
-        check = subprocess.run(
+        check = run_process(
             ["git", "check-ref-format", "--branch", branch],
             check=False,
             capture_output=True,

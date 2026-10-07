@@ -102,7 +102,7 @@ def test_services_do_not_call_an_unconfigured_probe_healthy(monkeypatch):
     from spg.evaluation import operations
     def docker(args,timeout=8):
         if args[1]=='ps':return 'abc api\n'
-        return '{"Status":"running"}'
+        return 'abc {"Status":"running"}'
     monkeypatch.setattr(operations,'command',docker)
     rows=operations.OperationsService(None,Settings(admin_node_id='i-exact')).services()['services']
     api=next(r for r in rows if r['service']=='api')

@@ -91,9 +91,10 @@ class QualityService:
         with self.database.unit_of_work() as u:
             rows = u.session.execute(select(cases).order_by(cases.c.key)).mappings().all()
             out = []
+            latest = {v["case_id"]: v for v in u.session.execute(select(versions).distinct(versions.c.case_id)
+                .order_by(versions.c.case_id, versions.c.version.desc())).mappings()}
             for r in rows:
-                v = u.session.execute(select(versions).where(versions.c.case_id == r["id"])
-                    .order_by(versions.c.version.desc()).limit(1)).mappings().one()
+                v = latest[r["id"]]
                 d = dict(v["definition"])
                 d.pop("private_material", None)
                 if Cohort.FRESH_HOLDOUT in r["cohorts"]:
@@ -145,10 +146,11 @@ class QualityService:
     def campaigns(self):
         with self.database.unit_of_work() as u:
             out = []
+            grouped = {}
+            for member in u.session.execute(select(members).order_by(members.c.ordinal)).mappings():
+                grouped.setdefault(member["campaign_id"], []).append(member["case_version_id"])
             for c in u.session.execute(select(campaigns).order_by(campaigns.c.created_at.desc())).mappings():
-                ids = u.session.scalars(select(members.c.case_version_id).where(
-                    members.c.campaign_id == c["id"]).order_by(members.c.ordinal)).all()
-                out.append({**dict(c), "case_version_ids": ids})
+                out.append({**dict(c), "case_version_ids": grouped.get(c["id"], [])})
             return out
 
     def configuration(self):
@@ -487,26 +489,39 @@ class QualityService:
         with self.database.unit_of_work() as u:
             r = self._one(u.session, runs, rid)
             results = []
-            for a in u.session.execute(select(attempts).where(attempts.c.campaign_run_id == rid)
-                    .order_by(attempts.c.created_at)).mappings():
-                c = self._one(u.session, versions, a["case_version_id"])
-                row = self._one(u.session, cases, c["case_id"])
-                es = u.session.scalars(select(evaluations.c.record).where(
-                    evaluations.c.case_run_id == a["id"])).all()
+            attempt_rows = u.session.execute(select(attempts).where(attempts.c.campaign_run_id == rid)
+                .order_by(attempts.c.created_at)).mappings().all()
+            membership = self._membership(u.session, r)
+            version_ids = {m["case_version_id"] for m in membership} | {a["case_version_id"] for a in attempt_rows}
+            version_map = {v["id"]: v for v in u.session.execute(select(versions).where(versions.c.id.in_(version_ids))).mappings()}
+            case_map = {c["id"]: c for c in u.session.execute(select(cases).where(cases.c.id.in_({v["case_id"] for v in version_map.values()}))).mappings()}
+            attempt_ids = {a["id"] for a in attempt_rows}
+            evaluated = {}
+            for e in u.session.execute(select(evaluations).where(evaluations.c.case_run_id.in_(attempt_ids))).mappings():
+                evaluated.setdefault(e["case_run_id"], []).append(e["record"])
+            found = {}
+            for f in u.session.execute(select(findings).where(findings.c.case_run_id.in_(attempt_ids))).mappings():
+                found.setdefault(f["case_run_id"], []).append(dict(f))
+            attributed = {}
+            finding_ids = {f["id"] for rows in found.values() for f in rows}
+            for signal in u.session.execute(select(signals).where(signals.c.source_kind == "FINDING", signals.c.source_id.in_(finding_ids))).mappings():
+                attributed.setdefault(signal["source_id"], []).append(dict(signal))
+            for a in attempt_rows:
+                c = version_map[a["case_version_id"]]
+                row = case_map[c["case_id"]]
+                es = evaluated.get(a["id"], [])
                 sealed = Cohort.FRESH_HOLDOUT in row["cohorts"]
                 results.append({**dict(a), "case_key": row["key"], "title": c["definition"]["title"],
                     "evaluations": [{k: v for k, v in e.items() if not sealed or k != "details"} for e in es],
                     "lineage": {"sealed": True} if sealed else a["lineage"]})
             latest = {x["case_version_id"]: x for x in results}
             slots = []
-            for m in self._membership(u.session, r):
-                v = self._one(u.session, versions, m["case_version_id"])
+            for m in membership:
+                v = version_map[m["case_version_id"]]
                 sealed = Cohort.FRESH_HOLDOUT in m["cohorts"]
                 a = latest.get(v["id"])
-                fs = [] if a is None else [dict(x) for x in u.session.execute(select(findings).where(
-                    findings.c.case_run_id == a["id"])).mappings()]
-                attribution = [] if not fs else [dict(x) for x in u.session.execute(select(signals).where(
-                    signals.c.source_kind == "FINDING", signals.c.source_id.in_([f["id"] for f in fs]))).mappings()]
+                fs = [] if a is None else found.get(a["id"], [])
+                attribution = [signal for f in fs for signal in attributed.get(f["id"], [])]
                 state = a["state"] if a else "NOT_RUN" if m["disposition"] in {"NOT_RUN", "SKIPPED"} else "QUEUED"
                 if state == "INTERRUPTED":
                     state = "NOT_RUN" if r["state"] == "STOPPED" else "QUEUED"
@@ -516,7 +531,7 @@ class QualityService:
                     "definition": {"sealed": True} if sealed else {k: val for k, val in v["definition"].items() if k != "private_material"},
                     "attempt": a, "findings": fs, "attribution": [] if sealed else attribution,
                     "owner_references": [] if a is None else [o.get("owners", {}) for o in
-                        (self._one(u.session, attempts, a["id"])["lineage"].get("owner_observations", []))]})
+                        (a["lineage"].get("owner_observations", []))]})
             counts = {key: sum(x["state"] == key for x in slots)
                 for key in ("QUEUED", "RUNNING", "PASS", "FAIL", "BLOCKED", "UNKNOWN", "NOT_RUN")}
             counts.update(total=len(slots), completed=sum(counts[k] for k in ("PASS", "FAIL", "BLOCKED", "UNKNOWN")))
@@ -533,13 +548,14 @@ class QualityService:
             # Reuse operations samples, without creating a second metrics owner.
             samples = [dict(x) for x in u.session.execute(select(metrics.c.id, metrics.c.created_at).where(
                 metrics.c.created_at >= r["created_at"], metrics.c.created_at <= (r["finished_at"] or now())).order_by(metrics.c.created_at)).mappings()]
+            older_clusters = set(u.session.scalars(select(findings.c.cluster_key).distinct().where(
+                findings.c.cluster_key.in_(cluster_ids), findings.c.created_at < r["created_at"])))
             return {**r, "cases": results, "members": slots, "progress": counts,
                 "lifecycle": "COMPLETED" if r["state"] in {"PASS", "FAIL", "BLOCKED"} else r["state"],
                 "current_case": None if current is None else {"title": current["title"], "case_version_id": current["case_version_id"]},
                 "elapsed_seconds": ((r["finished_at"] or now()) - r["created_at"]).total_seconds(),
                 "earliest_divergence_distribution": distribution, "regression_recurrences": recurrence,
-                "new_failure_clusters": sum(not bool(u.session.scalar(select(func.count()).select_from(findings).where(
-                    findings.c.cluster_key == key, findings.c.created_at < r["created_at"]))) for key in cluster_ids), "failure_cluster_keys": cluster_ids,
+                "new_failure_clusters": sum(key not in older_clusters for key in cluster_ids), "failure_cluster_keys": cluster_ids,
                 "fresh_holdout": [{"case_version_id": x["case_version_id"], "state": x["state"]} for x in slots if Cohort.FRESH_HOLDOUT in x["cohorts"]],
                 "controls": control_records, "operations_samples": samples}
 
@@ -550,11 +566,12 @@ class QualityService:
 
     def clusters(self):
         with self.database.unit_of_work() as u:
-            rows = u.session.execute(select(findings).order_by(findings.c.created_at)).mappings().all()
+            rows = u.session.execute(select(findings, versions.c.case_id.label("affected_case_id"))
+                .join(attempts, attempts.c.id == findings.c.case_run_id)
+                .join(versions, versions.c.id == attempts.c.case_version_id)
+                .order_by(findings.c.created_at)).mappings().all()
             out = {}
             for f in rows:
-                a = self._one(u.session, attempts, f["case_run_id"])
-                v = self._one(u.session, versions, a["case_version_id"])
                 item = out.setdefault(f["cluster_key"], {"key": f["cluster_key"], "stage": f["stage"],
                     "finding_code": f["finding_code"], "first_seen": f["created_at"], "last_seen": f["created_at"],
                     "occurrence_count": 0, "affected_cases": [], "findings": [], "closure_state": "OPEN",
@@ -563,7 +580,7 @@ class QualityService:
                     "severity": "REVIEW_REQUIRED", "representative_evidence": f["evidence_refs"]})
                 item["last_seen"] = f["created_at"]
                 item["occurrence_count"] += 1
-                item["affected_cases"] = sorted(set(item["affected_cases"]) | {str(v["case_id"])})
+                item["affected_cases"] = sorted(set(item["affected_cases"]) | {str(f["affected_case_id"])})
                 item["findings"].append(str(f["id"]))
                 if f["state"] == "CLOSED":
                     item["closed_occurrences"] = item.get("closed_occurrences", 0) + 1

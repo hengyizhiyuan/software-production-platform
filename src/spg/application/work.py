@@ -2308,8 +2308,9 @@ class WorkApplicationService:
 
     def get_work(self, work_id: UUID) -> WorkProjection:
         with self.database.unit_of_work() as unit_of_work:
-            store = ProductStore(unit_of_work.session)
+            store = ProductStore(unit_of_work.session, projection_reads=True)
             work = self._required_work(store, work_id)
+            store.prepare_projection_summaries((work_id,))
             return self._projection(store, work)
 
     def retry_failed_production(
@@ -2481,13 +2482,25 @@ class WorkApplicationService:
             }
         )
 
+    def get_works(self, work_ids) -> tuple[WorkProjection, ...]:
+        """Exact selected Works, through the canonical projection in one session."""
+        if not work_ids:
+            return ()
+        from sqlalchemy import select
+        from spg.infrastructure.persistence.product_schema import product_works
+        with self.database.unit_of_work() as uow:
+            store = ProductStore(uow.session, projection_reads=True)
+            rows = uow.session.execute(select(product_works).where(
+                product_works.c.id.in_(work_ids))).mappings().all()
+            store.prepare_projection_summaries(work_ids)
+            return tuple(self._projection(store, store._work(row)) for row in rows)
+
     def list_works(self, goal_id: UUID | None = None) -> tuple[WorkProjection, ...]:
         with self.database.unit_of_work() as unit_of_work:
-            store = ProductStore(unit_of_work.session)
-            return tuple(
-                self._projection(store, work)
-                for work in store.list_works(goal_id=goal_id)
-            )
+            store = ProductStore(unit_of_work.session, projection_reads=True)
+            works = store.list_works(goal_id=goal_id)
+            store.prepare_projection_summaries([work.id for work in works])
+            return tuple(self._projection(store, work) for work in works)
 
     def discard_pre_work(
         self,
@@ -2964,8 +2977,9 @@ class WorkApplicationService:
         self,
         *,
         work_id: UUID | None = None,
+        projections: tuple[WorkProjection, ...] | None = None,
     ) -> tuple[AttentionItem, ...]:
-        projections = (
+        projections = projections if projections is not None else (
             (self.get_work(work_id),)
             if work_id is not None
             else self.list_works()

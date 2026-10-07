@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     admin_host_network: Path = Path("/host/network")
     admin_host_data: Path = Path("/host/data")
     admin_metrics_interval_seconds: int = Field(default=60, ge=15, le=600)
+    admin_services_interval_seconds: int = Field(default=30, ge=15, le=600)
+    admin_storage_interval_seconds: int = Field(default=900, ge=60, le=3600)
     admin_metrics_retention_hours: int = Field(default=72, ge=1, le=168)
     quality_recipe_root: Path = Path("/qualification")
     quality_test_database_url: str | None = None

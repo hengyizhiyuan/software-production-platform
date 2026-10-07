@@ -13,6 +13,7 @@ import re
 from uuid import UUID
 
 from sqlalchemy import select, or_
+from spg.infrastructure.performance import timed
 from fastapi.encoders import jsonable_encoder
 
 from spg.infrastructure.persistence import metadata
@@ -56,13 +57,21 @@ EVENT_LABELS.update({'ExecutionRequestCreated':'形成执行请求','NativeExecu
     'ExecutionRecoveryRequired':'需要恢复','ExecutionRequeued':'恢复后重新排队'})
 
 
-def safe(value):
+def safe(value, _memo=None):
     """Do not expose credentials or hidden model reasoning, even in diagnostic mode."""
+    if _memo is None:
+        _memo = {}
+    if isinstance(value, (dict, list, tuple)) and id(value) in _memo:
+        return _memo[id(value)]
     if isinstance(value, dict):
-        return {k:safe(v) for k,v in value.items() if str(k).lower() not in PRIVATE_KEYS
+        result = {k:safe(v, _memo) for k,v in value.items() if str(k).lower() not in PRIVATE_KEYS
             and not any(s in str(k).lower() for s in ('chain_of_thought', 'secret_key', 'accesskeysecret'))}
+        _memo[id(value)] = result
+        return result
     if isinstance(value, (list, tuple)):
-        return [safe(v) for v in value]
+        result = [safe(v, _memo) for v in value]
+        _memo[id(value)] = result
+        return result
     if isinstance(value, str):
         value = re.sub(r'(?i)(Bearer\s+)[A-Za-z0-9._\-]+', r'\1[已脱敏]', value)
         value = re.sub(r'(?i)((?:password|api[_-]?key|access[_-]?token|secret|credential)\s*[=:]\s*)[^\s,;]+', r'\1[已脱敏]', value)
@@ -85,6 +94,7 @@ def _walk(value, key):
             yield from _walk(v, key)
 
 
+@timed("filesystem")
 def qualification_artifact(settings, reference):
     """Only checksum-bound qualification JSON beneath the configured owner root."""
     match = re.fullmatch(r'evidence:(.+):sha256:([a-f0-9]{64})', reference)
@@ -105,10 +115,42 @@ def qualification_artifact(settings, reference):
         return None
 
 
+def compact_trace_tables(tables):
+    """Summary keeps identities, chronology and owner outcomes, omits raw bodies.
+
+    Full governed evidence remains available via explicit retrieval. This never
+    changes the stored snapshot or fills missing historical facts.
+    """
+    result = {}
+    bulky = {'request_payload','result_payload','provider_response','payload','evidence',
+        'context_facts','diagnostic_evidence','request','response','output','files', 'content'}
+    for name, rows in tables.items():
+        result[name] = []
+        for row in rows:
+            if name in {'interaction_turn_realizations','interaction_messages','production_work_units','pwu_contract_versions','plan_revisions'}:
+                compact = dict(row)
+            else:
+                compact = {k:v for k,v in row.items() if k not in bulky}
+            if name == 'execution_steps':
+                request = row.get('request_payload') or {}
+                compact['request_payload'] = {'objective':request.get('objective')}
+                contexts = list(_walk(request, 'decision_context'))
+                if contexts:
+                    compact['request_payload']['decision_context'] = {'protected_obligations':[
+                        {'context_class':o.get('context_class')} for c in contexts if isinstance(c,dict)
+                        for o in c.get('protected_obligations',[])]}
+                response = row.get('provider_response') or row.get('result_payload') or {}
+                compact['result_payload'] = {k:v for k,v in response.items() if k in
+                    {'provider_observation','usage','action','summary','status'}}
+            result[name].append(compact)
+    return result
+
+
+@timed("projection")
 def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=None,
-                  owner_refs=(), guardian=(), browser=None):
+                  owner_refs=(), guardian=(), browser=None, detail=True):
     """Both story and diagnostic modes consume this same historical fact set."""
-    tables = safe(tables)
+    tables = safe(tables if detail else compact_trace_tables(tables))
     events = []
     for name, rows in tables.items():
         if name not in TABLE_OWNERS:
@@ -286,7 +328,8 @@ def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=
         'diagnosis':diagnosis,'diagnostic_owners':[{'owner':o,'label':OWNER_NAMES.get(o,o),
             'events':[e for e in events if e['owner']==o]} for o in
             ('WIC','IRK','ECF','SEARCH','STEERING','PLANNING','PWU','EXECUTION','VERIFICATION','GUARDIAN','CANDIDATE','GOVERNANCE','DEPLOYMENT')],
-        'advanced':{'case':case,'owners':tables},
+        'advanced':{'case':case,'owners':tables} if detail else {},
+        'detail_level':'full' if detail else 'summary',
         'missing_note':'历史测试未采集的对话、时间或资源显示为未采集；不会用当前状态填补历史。'})
 
 
@@ -294,7 +337,7 @@ class ProductionTraceService:
     def __init__(self, database, settings, quality):
         self.database, self.settings, self.quality = database, settings, quality
 
-    def case_trace(self, case_run_id):
+    def case_trace(self, case_run_id, *, detail=True):
         from spg.infrastructure.persistence.quality_schema import quality_case_runs, quality_case_versions
         with self.database.unit_of_work() as u:
             a = self.quality._one(u.session, quality_case_runs, case_run_id)
@@ -372,7 +415,7 @@ class ProductionTraceService:
             context=workspace.get('reality', {}).get('admission_context')
             if context: tables.setdefault('production_work_units', [])
         purpose='验证已治理的意图保持精确，只有实际由 Human 保留的决定才能阻止推进，普通生产事实由 Watt 负责表达。' if member['definition'].get('runner_key','').startswith('REG-HI-') else '验证本场景满足已批准义务：'+'；'.join(member['definition'].get('invariants',[]))
-        return project_trace(tables,scene=member['title'],purpose=purpose,
+        return project_trace(tables,scene=member['title'],purpose=purpose,detail=detail,
             first_input=lineage.get('input'),case=case,browser=browser,guardian=guardian,owner_refs=refs,
             basis={'mode':'HISTORICAL_QUALIFICATION','at':a['finished_at'],'watt_revision':run['watt_revision'],
                 'case_version':member['version'],'case_fingerprint':member['fingerprint'],

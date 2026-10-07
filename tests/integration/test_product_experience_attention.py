@@ -49,7 +49,7 @@ def experience_reality(postgres_database, monkeypatch):
     work = WorkApplicationService(postgres_database)
     attention = []
 
-    def canonical_attention(*, work_id=None):
+    def canonical_attention(*, work_id=None, projections=None):
         return tuple(item for item in attention if work_id is None or item.work_id == work_id)
 
     monkeypatch.setattr(work, "list_attention", canonical_attention)
@@ -131,9 +131,9 @@ def test_blocked_work_without_canonical_attention_does_not_enter_human_queue(
 
 def test_collection_status_uses_canonical_work_projection(experience_reality, monkeypatch):
     projection, _, product_id, _, _ = experience_reality
-    get_work = projection.work.get_work
-    monkeypatch.setattr(projection.work, "get_work", lambda work_id:
-        get_work(work_id).model_copy(update={"status": WorkStatus.COMPLETED}))
+    get_works = projection.work.get_works
+    monkeypatch.setattr(projection.work, "get_works", lambda work_ids:
+        tuple(w.model_copy(update={"status": WorkStatus.COMPLETED}) for w in get_works(work_ids)))
     collection = projection.collections("human:owner")
     assert collection["works"][0]["status"] == "COMPLETED"
     assert next(item for item in collection["products"]
@@ -156,3 +156,27 @@ def test_empty_attention_remains_truthful(experience_reality):
     workspace = projection.workspace("human:owner", product_id)
     assert workspace["actions"] == []
     assert workspace["focus"]["human_action"] is False
+
+
+def test_exact_product_reads_ignore_global_collection_limit_and_foreign_work(experience_reality, monkeypatch):
+    projection, _, product_id, work_id, _ = experience_reality
+    products = ProductAssetService(projection.database)
+    # A keyed Product must remain available even when collection ordering excludes it.
+    for index in range(101):
+        products.create('another:owner', 'unrelated '+str(index), provision_source=False)
+    seen=[];read=projection.work.get_works
+    monkeypatch.setattr(projection.work,'get_works',lambda ids:(seen.append(tuple(ids)) or read(ids)))
+    selected=projection.product('human:owner',product_id)
+    assert selected['id']==str(product_id)
+    assert seen==[(work_id,)]
+    with pytest.raises(Exception,match='unavailable'):
+        projection.product('another:owner',product_id)
+
+
+def test_latest_interaction_checks_owner_without_assembling_product(experience_reality, monkeypatch):
+    projection,_,product_id,_,interaction_id=experience_reality
+    def forbidden(*args,**kwargs):raise AssertionError('global projection in exact interaction lookup')
+    monkeypatch.setattr(projection,'product',forbidden)
+    assert projection.latest_interaction('human:owner',product_id)==str(interaction_id)
+    with pytest.raises(Exception,match='unavailable'):
+        projection.latest_interaction('another:owner',product_id)

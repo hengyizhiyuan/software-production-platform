@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 import subprocess
+from spg.infrastructure.performance import timed, run_process
 
 from spg.domain.runtime import RepositoryRealityError
 
@@ -124,7 +125,7 @@ class GitTrustedCheckoutSynchronizer:
 
     @staticmethod
     def _run(repository: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(
+        return run_process(
             ["git", "-C", str(repository), *arguments],
             check=False,
             capture_output=True,
@@ -132,6 +133,7 @@ class GitTrustedCheckoutSynchronizer:
         )
 
     @classmethod
+    @timed("git")
     def _git(cls, repository: Path, *arguments: str) -> str:
         result = cls._run(repository, *arguments)
         if result.returncode != 0:

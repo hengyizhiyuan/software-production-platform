@@ -8,12 +8,14 @@ import shutil
 import subprocess
 from threading import Event, Thread
 
-from sqlalchemy import select, text, insert, delete
+from sqlalchemy import select, text, insert, delete, or_
+from spg.infrastructure.performance import timed
 from uuid import uuid4
 
 from spg.infrastructure.persistence.quality_schema import operations_metric_samples as samples
 
 
+@timed("subprocess")
 def command(args, timeout=8):
     try:
         r = subprocess.run(args, capture_output=True, text=True, timeout=timeout, check=False)
@@ -22,6 +24,7 @@ def command(args, timeout=8):
         return None
 
 
+@timed("filesystem")
 def read(path):
     try:
         return Path(path).read_text()[:1_000_000]
@@ -96,6 +99,7 @@ class OperationsService:
         self.database, self.settings, self.runtime = database, settings, runtime
         self.stop = Event()
         self.thread = None
+        self.resource_threads = []
 
     def production(self):
         workers = [] if self.runtime is None else [w.model_dump(mode="json") for w in self.runtime.list_workers()]
@@ -121,12 +125,17 @@ class OperationsService:
         if output is None:
             return {"state": "UNAVAILABLE", "services": [], "reason": "DOCKER_OBSERVATION_UNAVAILABLE"}
         rows = []
+        selected = [line.split(maxsplit=1) for line in output.splitlines() if len(line.split(maxsplit=1)) == 2]
+        raw = command(["docker", "inspect", "--format", "{{.Id}} {{json .State}}", *[cid for cid, service in selected]]) if selected else None
+        inspected = {}
+        for line in (raw or '').splitlines():
+            identity, state = line.split(maxsplit=1)
+            inspected[identity] = json.loads(state)
         for line in output.splitlines():
             cid, service = line.split(maxsplit=1)
             if service == "migrate":
                 continue
-            state = command(["docker", "inspect", "--format", "{{json .State}}", cid])
-            s = json.loads(state) if state else {}
+            s = next((state for identity, state in inspected.items() if identity.startswith(cid)), {})
             health = s.get("Health", {}).get("Status")
             rows.append({"service": service, "container_id": cid, "state": s.get("Status", "UNKNOWN"),
                 "health": health or "NOT_CONFIGURED", "started_at": s.get("StartedAt"),
@@ -182,12 +191,37 @@ class OperationsService:
 
     def latest(self):
         with self.database.unit_of_work() as u:
-            r = u.session.execute(select(samples).where(samples.c.node_id == (self.settings.admin_node_id or "UNBOUND_NODE"))
+            r = u.session.execute(select(samples).where(samples.c.node_id == (self.settings.admin_node_id or "UNBOUND_NODE"),
+                    samples.c.record["observation_kind"].astext.is_(None))
                 .order_by(samples.c.created_at.desc()).limit(1)).mappings().first()
             if r is None:
                 return {"state": "NOT_SAMPLED", "node": None}
             stale = datetime.now(UTC) - r["created_at"] > timedelta(seconds=3 * self.settings.admin_metrics_interval_seconds)
             return {"state": "STALE" if stale else "CURRENT", "node": r["record"]}
+
+    def _resource_latest(self, kind, interval):
+        with self.database.unit_of_work() as u:
+            row = u.session.execute(select(samples).where(
+                samples.c.node_id == (self.settings.admin_node_id or "UNBOUND_NODE"),
+                samples.c.record["observation_kind"].astext == kind
+            ).order_by(samples.c.created_at.desc()).limit(1)).mappings().first()
+        if row is None:
+            return {"state": "NOT_SAMPLED", "observed_at": None, "value": None}
+        age = (datetime.now(UTC) - row["created_at"]).total_seconds()
+        return {"state": "STALE" if age > 3*interval else "CURRENT",
+            "observed_at": row["record"]["observed_at"], "age_seconds": round(age, 1),
+            "sampling_interval_seconds": interval, "value": row["record"]["value"]}
+
+    def observe_resource(self, kind):
+        """Only the background sampler runs infrastructure commands."""
+        value = self.services() if kind == "SERVICES" else self.storage()
+        record = {"observation_kind": kind, "value": value,
+            "observed_at": datetime.now(UTC).isoformat()}
+        with self.database.unit_of_work() as u:
+            u.session.execute(insert(samples).values(id=uuid4(),
+                node_id=self.settings.admin_node_id or "UNBOUND_NODE", record=record))
+            u.commit()
+        return record
 
     def observe(self):
         previous = self.latest().get("node")
@@ -203,7 +237,7 @@ class OperationsService:
 
     def history(self):
         with self.database.unit_of_work() as u:
-            rows = u.session.execute(select(samples).order_by(samples.c.created_at.desc()).limit(720)).mappings().all()
+            rows = u.session.execute(select(samples).where(samples.c.record["observation_kind"].astext.is_(None)).order_by(samples.c.created_at.desc()).limit(720)).mappings().all()
             return [{"observed_at": r["record"]["observed_at"], "node_id": r["node_id"],
                 "cpu_percent": r["record"].get("cpu_percent"), "memory": r["record"].get("memory"),
                 "disk": r["record"].get("disk"), "queue_depth": r["record"].get("queue_depth"),
@@ -211,10 +245,16 @@ class OperationsService:
 
     def snapshot(self):
         latest = self.latest()
-        production, services = self.production(), self.services()
+        production = self.production()
+        service_sample = self._resource_latest("SERVICES", self.settings.admin_services_interval_seconds)
+        storage_sample = self._resource_latest("STORAGE", self.settings.admin_storage_interval_seconds)
+        services = service_sample["value"] or {"state": "NOT_SAMPLED", "services": []}
         node = latest.get("node")
-        storage = self.storage()
+        storage = storage_sample["value"] or {"postgresql": {"bytes": None, "method": "not sampled"},
+            "docker": {"categories": [], "state": "NOT_SAMPLED"}, "note": "Storage has not yet been sampled."}
         return {**latest, "production": production, "services": services["services"],
+            "resource_freshness": {"services": {k:v for k,v in service_sample.items() if k != "value"},
+                "storage": {k:v for k,v in storage_sample.items() if k != "value"}},
             "service_observation_state": services["state"], "storage": storage,
             "topology": {"nodes": [] if node is None else [{"id": node["node_id"], "hostname": node["hostname"],
                 "region": node["region"], "observed_at": node["observed_at"]}],
@@ -239,8 +279,24 @@ class OperationsService:
                 self.stop.wait(self.settings.admin_metrics_interval_seconds)
         self.thread = Thread(target=sample_loop, name="watt-operations-observer", daemon=True)
         self.thread.start()
+        def resource_loop(kind, interval):
+            while not self.stop.is_set():
+                try:
+                    self.observe_resource(kind)
+                except Exception:
+                    import logging
+                    logging.getLogger(__name__).warning("Admin %s 后台观测失败；保留上次观测与真实时效", kind)
+                self.stop.wait(interval)
+        for kind, interval in (("SERVICES", self.settings.admin_services_interval_seconds),
+                ("STORAGE", self.settings.admin_storage_interval_seconds)):
+            thread = Thread(target=resource_loop, args=(kind, interval),
+                name="watt-observer-"+kind.lower(), daemon=True)
+            self.resource_threads.append(thread)
+            thread.start()
 
     def shutdown(self):
         self.stop.set()
         if self.thread:
             self.thread.join(timeout=10)
+        for thread in self.resource_threads:
+            thread.join(timeout=10)

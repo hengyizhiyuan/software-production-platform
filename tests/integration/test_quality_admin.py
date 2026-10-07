@@ -143,7 +143,7 @@ def test_operations_unknown_topology_and_bounded_retention(quality,tmp_path,monk
     monkeypatch.setattr(o,'production',lambda:dict(workers=[],queue=[],queue_depth=4,active_executions=1))
     monkeypatch.setattr(o,'services',lambda:dict(services=[],state='UNAVAILABLE'))
     monkeypatch.setattr(o,'storage',lambda:dict(postgresql={'bytes':100,'method':'actual'}))
-    o.observe();snap=o.snapshot();assert snap['state']=='CURRENT' and snap['service_observation_state']=='UNAVAILABLE'
+    o.observe();o.observe_resource('SERVICES');o.observe_resource('STORAGE');snap=o.snapshot();assert snap['state']=='CURRENT' and snap['service_observation_state']=='UNAVAILABLE'
     assert snap['node']['cpu_percent'] is None and snap['production']['queue_depth']==4
     assert snap['topology']['nodes'][0]['id']=='i-current' and snap['topology']['storage_placements'][0]['storage_id']=='postgresql'
     with quality.database.engine.begin() as c:c.execute(update(operations_metric_samples).values(created_at=now()-timedelta(days=4)))
@@ -184,3 +184,30 @@ def test_sealed_holdout_finding_closes_without_entering_optimization(quality):
     assert q.clusters()[0]['closure_state']=='CLOSED'
     assert q.list_cases()[0]['cohorts']==['FRESH_HOLDOUT']
     with pytest.raises(QualityError,match='HOLDOUT_CANNOT'):q.promote_regression(fid,'human:owner')
+
+
+def test_normal_admin_snapshot_never_executes_infrastructure_probes(quality, tmp_path, monkeypatch):
+    from spg.evaluation.operations import OperationsService
+    operations=OperationsService(quality.database,Settings(admin_node_id='i-exact'))
+    def forbidden():raise AssertionError('read HTTP path performed a host census')
+    monkeypatch.setattr(operations,'services',forbidden)
+    monkeypatch.setattr(operations,'storage',forbidden)
+    snapshot=operations.snapshot()
+    assert snapshot['resource_freshness']['services']['state']=='NOT_SAMPLED'
+    assert snapshot['resource_freshness']['storage']['state']=='NOT_SAMPLED'
+    assert snapshot['storage']['postgresql']['bytes'] is None
+
+
+def test_operations_sample_freshness_and_retention_are_separate_from_host(quality, monkeypatch):
+    from spg.evaluation.operations import OperationsService
+    o=OperationsService(quality.database,Settings(admin_node_id='i-exact',admin_storage_interval_seconds=60))
+    monkeypatch.setattr(o,'services',lambda:dict(state='OBSERVED',services=[]))
+    monkeypatch.setattr(o,'storage',lambda:dict(postgresql={'bytes':42},docker={'categories':[]}))
+    o.observe_resource('SERVICES');o.observe_resource('STORAGE')
+    assert o.latest()['state']=='NOT_SAMPLED'
+    with quality.database.engine.begin() as c:
+        c.execute(update(operations_metric_samples).values(created_at=now()-timedelta(seconds=181)))
+    snapshot=o.snapshot()
+    assert snapshot['resource_freshness']['storage']['state']=='STALE'
+    assert snapshot['storage']['postgresql']['bytes']==42
+    assert snapshot['node'] is None

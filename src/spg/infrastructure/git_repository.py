@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import subprocess
+from spg.infrastructure.performance import timed, run_process
 
 from spg.domain.runtime import RepositoryReality, RepositoryRealityError
 
@@ -40,8 +41,9 @@ class GitRepositoryObserver:
         )
 
     @staticmethod
+    @timed("git")
     def _git(path: Path, *arguments: str) -> str:
-        result = subprocess.run(
+        result = run_process(
             ["git", "-C", str(path), *arguments],
             check=False,
             capture_output=True,

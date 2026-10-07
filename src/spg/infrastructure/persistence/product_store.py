@@ -60,11 +60,32 @@ from spg.infrastructure.persistence.runtime_schema import (
 )
 
 
+def projection_read(fn):
+    """Memoize repeated canonical reads only inside an explicit read projection.
+
+    Never enabled in command stores; lifetime is one read-only UoW. No TTL or
+    cross-request owner truth cache is introduced.
+    """
+    from functools import wraps
+    @wraps(fn)
+    def call(self, *args, **kwargs):
+        if not self._projection_reads:
+            return fn(self, *args, **kwargs)
+        key = (fn.__name__, repr(args), repr(sorted(kwargs.items())))
+        if key not in self._read_results:
+            self._read_results[key] = fn(self, *args, **kwargs)
+        return self._read_results[key]
+    return call
+
+
 class ProductStore:
     """Own product facts and read Runtime facts without changing their authority."""
 
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, *, projection_reads=False) -> None:
         self.session = session
+        self._projection_reads = projection_reads
+        self._read_results = {}
+        self._summary_data = None
 
     def insert_goal(self, values: Mapping[str, Any]) -> None:
         self.session.execute(insert(product_goals).values(**values))
@@ -252,6 +273,7 @@ class ProductStore:
             .values(condition=ResourceBindingCondition.ACTIVE.value)
         )
 
+    @projection_read
     def scope_for_work(self, work_id: UUID) -> EngineeringScopeRecord | None:
         current_scope_id = self.session.execute(
             select(product_works.c.current_engineering_scope_id).where(
@@ -336,6 +358,7 @@ class ProductStore:
         if result.rowcount != 1:
             raise LookupError(f"Production cycle binding not found: {binding_id}")
 
+    @projection_read
     def runtime_binding(self, work_id: UUID) -> WorkRuntimeBindingRecord | None:
         row = self.session.execute(
             select(work_runtime_bindings)
@@ -350,6 +373,7 @@ class ProductStore:
             return None
         return self._runtime_binding(row)
 
+    @projection_read
     def runtime_bindings(self, work_id: UUID) -> tuple[WorkRuntimeBindingRecord, ...]:
         rows = self.session.execute(
             select(work_runtime_bindings)
@@ -444,135 +468,79 @@ class ProductStore:
             created_at=row["created_at"],
         )
 
+    def prepare_projection_summaries(self, work_ids):
+        """Batch the exact runtime lineage needed by these read-only Works.
+
+        The same RuntimeFactSummary mapping is used in command and projection
+        paths. No Product condition substitutes for runtime/verification truth.
+        """
+        if not self._projection_reads:
+            raise ValueError("runtime prefetch requires a read-only projection store")
+        data = {}
+        def load(table, column, values):
+            data[table.name] = ([] if not values else list(self.session.execute(
+                select(table).where(column.in_(values))).mappings()))
+            return data[table.name]
+        bindings = load(work_runtime_bindings, work_runtime_bindings.c.work_id, work_ids)
+        run_ids = {r['production_run_id'] for r in bindings}
+        units = load(production_work_units, production_work_units.c.production_run_id, run_ids)
+        attempts = load(execution_attempts, execution_attempts.c.work_unit_id, {r['id'] for r in units})
+        attempt_ids = {r['id'] for r in attempts}
+        dispatches = load(execution_dispatches, execution_dispatches.c.attempt_id, attempt_ids)
+        dispatch_ids = {r['id'] for r in dispatches}
+        load(provider_execution_reports, provider_execution_reports.c.dispatch_id, dispatch_ids)
+        load(repository_observations, repository_observations.c.dispatch_id, dispatch_ids)
+        completions = load(completion_evaluations, completion_evaluations.c.attempt_id, attempt_ids)
+        proposed = load(proposed_repository_snapshots, proposed_repository_snapshots.c.completion_evaluation_id,
+            {r['id'] for r in completions})
+        proposed_ids = {r['id'] for r in proposed}
+        load(verification_records, verification_records.c.proposed_snapshot_id, proposed_ids)
+        load(production_admissibility_records, production_admissibility_records.c.proposed_snapshot_id, proposed_ids)
+        candidates = load(baseline_candidates, baseline_candidates.c.production_run_id, run_ids)
+        candidate_ids = {r['id'] for r in candidates}
+        load(human_authorizations, human_authorizations.c.candidate_id, candidate_ids)
+        load(repository_integration_effects, repository_integration_effects.c.candidate_id, candidate_ids)
+        load(runtime_commits, runtime_commits.c.candidate_id, candidate_ids)
+        load(work_product_references, work_product_references.c.attempt_id, attempt_ids)
+        load(transition_history, transition_history.c.correlation_identity,
+            {str(x) for x in run_ids | attempt_ids | {r['id'] for r in units}} | {''})
+        self._summary_data = data
+
+    def _summary_rows(self, table, column, values, *, order=(), descending=False):
+        if self._summary_data is None:
+            query = select(table).where(column.in_(values))
+            if order:
+                query = query.order_by(*[getattr(table.c, key).desc() if descending else getattr(table.c, key) for key in order])
+            return list(self.session.execute(query).mappings())
+        rows = [r for r in self._summary_data[table.name] if r[column.name] in values]
+        return sorted(rows, key=lambda r: tuple(r[k] for k in order), reverse=descending) if order else rows
+
+    def _summary_first(self, table, column, value, *, order=(), descending=False):
+        rows = self._summary_rows(table, column, (value,), order=order, descending=descending)
+        return rows[0] if rows else None
+
+    @projection_read
     def runtime_summary(self, binding: WorkRuntimeBindingRecord) -> RuntimeFactSummary:
-        raw_completion_contract = self.session.execute(
-            select(production_work_units.c.completion_contract).where(
-                production_work_units.c.id == binding.work_unit_id
-            )
-        ).scalar_one_or_none()
-        completion_contract = (
-            None
-            if raw_completion_contract is None
-            else CompletionContract.model_validate(raw_completion_contract)
-        )
-        attempt = self.session.execute(
-            select(execution_attempts)
-            .where(execution_attempts.c.work_unit_id == binding.work_unit_id)
-            .order_by(execution_attempts.c.generation.desc())
-            .limit(1)
-        ).mappings().first()
-        dispatch = None
-        report = None
-        observation = None
-        if attempt is not None:
-            dispatch = self.session.execute(
-                select(execution_dispatches).where(
-                    execution_dispatches.c.attempt_id == attempt["id"]
-                )
-            ).mappings().first()
-        if dispatch is not None:
-            report = self.session.execute(
-                select(provider_execution_reports).where(
-                    provider_execution_reports.c.dispatch_id == dispatch["id"]
-                )
-            ).mappings().first()
-            observation = self.session.execute(
-                select(repository_observations).where(
-                    repository_observations.c.dispatch_id == dispatch["id"]
-                )
-            ).mappings().first()
-
-        completion = None
-        if attempt is not None:
-            completion = self.session.execute(
-                select(completion_evaluations)
-                .where(completion_evaluations.c.attempt_id == attempt["id"])
-                .order_by(completion_evaluations.c.created_at.desc())
-                .limit(1)
-            ).mappings().first()
-        proposed = None
-        if completion is not None:
-            proposed = self.session.execute(
-                select(proposed_repository_snapshots).where(
-                    proposed_repository_snapshots.c.completion_evaluation_id
-                    == completion["id"]
-                )
-            ).mappings().first()
-
-        verification_rows: tuple[Mapping[str, Any], ...] = ()
-        admissibility = None
-        if proposed is not None:
-            verification_rows = tuple(
-                self.session.execute(
-                    select(verification_records)
-                    .where(
-                        verification_records.c.proposed_snapshot_id == proposed["id"]
-                    )
-                    .order_by(verification_records.c.created_at, verification_records.c.id)
-                ).mappings()
-            )
-            admissibility = self.session.execute(
-                select(production_admissibility_records).where(
-                    production_admissibility_records.c.proposed_snapshot_id
-                    == proposed["id"]
-                )
-            ).mappings().first()
-
-        candidate = self.session.execute(
-            select(baseline_candidates)
-            .where(baseline_candidates.c.production_run_id == binding.production_run_id)
-            .order_by(baseline_candidates.c.sealed_at.desc())
-            .limit(1)
-        ).mappings().first()
-        authorization = None
-        effect = None
-        runtime_commit = None
-        if candidate is not None:
-            authorization = self.session.execute(
-                select(human_authorizations)
-                .where(human_authorizations.c.candidate_id == candidate["id"])
-                .order_by(human_authorizations.c.authorized_at.desc())
-                .limit(1)
-            ).mappings().first()
-            effect = self.session.execute(
-                select(repository_integration_effects)
-                .where(repository_integration_effects.c.candidate_id == candidate["id"])
-                .order_by(repository_integration_effects.c.prepared_at.desc())
-                .limit(1)
-            ).mappings().first()
-            runtime_commit = self.session.execute(
-                select(runtime_commits)
-                .where(runtime_commits.c.candidate_id == candidate["id"])
-                .order_by(runtime_commits.c.committed_at.desc())
-                .limit(1)
-            ).mappings().first()
-
-        artifacts = (
-            ()
-            if attempt is None
-            else tuple(
-                row["artifact_path"]
-                for row in self.session.execute(
-                    select(work_product_references.c.artifact_path)
-                    .where(work_product_references.c.attempt_id == attempt["id"])
-                    .order_by(work_product_references.c.artifact_path)
-                ).mappings()
-            )
-        )
-        event = self.session.execute(
-            select(transition_history.c.reason)
-            .where(
-                transition_history.c.correlation_identity.in_(
-                    (
-                        str(binding.production_run_id),
-                        str(binding.work_unit_id),
-                        str(attempt["id"]) if attempt is not None else "",
-                    )
-                )
-            )
-            .order_by(transition_history.c.created_at.desc(), transition_history.c.id.desc())
-            .limit(1)
-        ).scalar_one_or_none()
+        unit = self._summary_first(production_work_units, production_work_units.c.id, binding.work_unit_id)
+        raw_completion_contract = None if unit is None else unit['completion_contract']
+        completion_contract = None if raw_completion_contract is None else CompletionContract.model_validate(raw_completion_contract)
+        attempt = self._summary_first(execution_attempts, execution_attempts.c.work_unit_id, binding.work_unit_id,
+            order=('generation',), descending=True)
+        dispatch = None if attempt is None else self._summary_first(execution_dispatches, execution_dispatches.c.attempt_id, attempt['id'])
+        report = None if dispatch is None else self._summary_first(provider_execution_reports, provider_execution_reports.c.dispatch_id, dispatch['id'])
+        observation = None if dispatch is None else self._summary_first(repository_observations, repository_observations.c.dispatch_id, dispatch['id'])
+        completion = None if attempt is None else self._summary_first(completion_evaluations, completion_evaluations.c.attempt_id, attempt['id'], order=('created_at',), descending=True)
+        proposed = None if completion is None else self._summary_first(proposed_repository_snapshots, proposed_repository_snapshots.c.completion_evaluation_id, completion['id'])
+        verification_rows = () if proposed is None else self._summary_rows(verification_records, verification_records.c.proposed_snapshot_id, (proposed['id'],), order=('created_at','id'))
+        admissibility = None if proposed is None else self._summary_first(production_admissibility_records, production_admissibility_records.c.proposed_snapshot_id, proposed['id'])
+        candidate = self._summary_first(baseline_candidates, baseline_candidates.c.production_run_id, binding.production_run_id, order=('sealed_at',), descending=True)
+        authorization = None if candidate is None else self._summary_first(human_authorizations, human_authorizations.c.candidate_id, candidate['id'], order=('authorized_at',), descending=True)
+        effect = None if candidate is None else self._summary_first(repository_integration_effects, repository_integration_effects.c.candidate_id, candidate['id'], order=('prepared_at',), descending=True)
+        runtime_commit = None if candidate is None else self._summary_first(runtime_commits, runtime_commits.c.candidate_id, candidate['id'], order=('committed_at',), descending=True)
+        artifacts = () if attempt is None else tuple(r['artifact_path'] for r in self._summary_rows(work_product_references, work_product_references.c.attempt_id, (attempt['id'],), order=('artifact_path',)))
+        events = self._summary_rows(transition_history, transition_history.c.correlation_identity,
+            (str(binding.production_run_id),str(binding.work_unit_id),str(attempt['id']) if attempt else ''), order=('created_at','id'), descending=True)
+        event = None if not events else events[0]['reason']
         return RuntimeFactSummary(
             attempt_id=None if attempt is None else attempt["id"],
             dispatch_id=None if dispatch is None else dispatch["id"],

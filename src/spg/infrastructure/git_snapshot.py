@@ -5,6 +5,7 @@ from datetime import datetime
 import os
 from pathlib import Path
 import subprocess
+from spg.infrastructure.performance import timed, run_process
 import tempfile
 
 from spg.domain.execution import ArtifactChangeType, ObservedArtifactChange
@@ -124,7 +125,7 @@ class GitProposedSnapshotBuilder:
         cross this boundary; delivery authorization still owns every ref move.
         """
 
-        probe = subprocess.run(
+        probe = run_process(
             [
                 "git",
                 "-C",
@@ -250,7 +251,7 @@ class GitProposedSnapshotBuilder:
         env: dict[str, str] | None = None,
         input_data: bytes | None = None,
     ) -> subprocess.CompletedProcess[bytes]:
-        result = subprocess.run(
+        result = run_process(
             ["git", "-C", str(repository), *arguments],
             check=False,
             capture_output=True,

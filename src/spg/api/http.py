@@ -461,13 +461,16 @@ def create_http_application(
                 if callable(shutdown_interaction):
                     shutdown_interaction()
 
-    api = FastAPI(
+    from spg.infrastructure.performance import TimedJSONResponse
+    api = FastAPI(default_response_class=TimedJSONResponse,
         title="SPG Product API",
         version="0.1.0",
         docs_url="/docs",
         redoc_url=None,
         lifespan=lifespan,
     )
+    from spg.infrastructure.performance import PerformanceMiddleware
+    api.add_middleware(PerformanceMiddleware)
     api.state.application = container
     api.state.database = selected_database
     api.state.work_service = work_service
