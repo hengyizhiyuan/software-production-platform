@@ -5,6 +5,32 @@ by the [Intent Realization Kernel](intent-realization-kernel/README.md). Earlier
 raw-language routing descriptions are historical; WIC, Work/Steering governance,
 Semantic Truth, production execution and Human authority retain their ownership.
 
+## Production definition sufficiency
+
+Clear IRK Production Intent does not establish a sufficiently defined first
+production outcome. Fresh semantic compiler responses must supply a bounded
+`production_sufficiency` assessment alongside the preserved intention.
+`GUIDANCE_REQUIRED` carries material outcome gaps, a provisional bounded
+recommendation, its concise basis and one highest-value question. `READY`
+cannot retain material outcome gaps. Reversible defaults and routine execution
+mechanics remain Watt-owned and do not introduce Human questions.
+
+The IRK payload persists this assessment using the existing immutable semantic
+history. WIC consumes it without reinterpreting prose, leads with the proposal,
+and selects at most one question. Work admission and the automatic production
+trigger both retain the gate. No PWU is created for the pending definition.
+The Workspace exposes the specific question as a conversation action; it is
+not a generic risk/cost or server-administration authorization.
+
+A Human may accept the recommendation or supply another direction. Acceptance
+binds the exact latest pending IR identity, current Human provenance and the
+exact proposed scope. Historical Product descriptions and source context may
+inform recommendations, but cannot silently approve a new outcome. Delivery,
+Candidate authorization and Human acceptance remain separate owner gates.
+Persisted historical IR without this additive field remains readable; fresh
+provider contracts require the assessment for every current production intent.
+No database migration or parallel interaction/execution subsystem is introduced.
+
 ## 1. Status and scope
 
 ```text

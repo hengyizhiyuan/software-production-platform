@@ -10,7 +10,7 @@ import json
 from time import monotonic
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, ValidationError, model_validator
 
 from spg.application.conversation import (
     ConversationResponseComposer,
@@ -19,7 +19,7 @@ from spg.application.conversation import (
 )
 from spg.application.guided_design import design_schema_by_identity, design_schema_registry
 from spg.domain.interaction_actions import InteractionActionCandidate, CanonicalOperation
-from spg.domain.intent_realization import TurnSemanticCandidate
+from spg.domain.intent_realization import TurnSemanticCandidate, ProductionSufficiency
 from spg.domain.response_contract import ResponseIntent
 from spg.application.production_intelligence import default_system_capability_reality
 from spg.application.response_contract_expression import (
@@ -145,6 +145,18 @@ class _StructuredCollaborationProviderPayload(StructuredCollaborationResult):
     policy_hints: tuple[ConversationPolicyHint, ...]
 
 
+class _TurnSemanticProviderPayload(TurnSemanticCandidate):
+    # Historical persisted IR remains readable; every fresh compiler result
+    # explicitly assesses production definition instead of equating it to intent.
+    production_sufficiency: ProductionSufficiency | None
+
+    @model_validator(mode="after")
+    def production_requires_sufficiency(self):
+        if any(i.production and i.production.current for i in self.items) and self.production_sufficiency is None:
+            raise ValueError("PRODUCTION_DEFINITION_INCOMPLETE: current production requires a sufficiency assessment")
+        return self
+
+
 class _InteractionSemanticProviderPayload(BaseModel):
     """WIC semantic wire result; deliberately contains no Human-facing prose."""
 
@@ -158,7 +170,7 @@ class _InteractionSemanticProviderPayload(BaseModel):
     current_requests: tuple[str, ...]
     unresolved_material_questions: tuple[str, ...]
     action_candidates: tuple[InteractionActionCandidate, ...] = ()
-    semantic_intent: TurnSemanticCandidate | None = None
+    semantic_intent: _TurnSemanticProviderPayload | None = None
     neutral_semantic_extractions: tuple[NeutralSemanticExtractionCandidate, ...] = ()
     semantic_fact_candidates: tuple[EngineeringSemanticFactCandidate, ...] = ()
     meanings: tuple[_InteractionProviderMeaning, ...]
@@ -267,6 +279,7 @@ def _compact_interaction_basis(
     payload = basis.model_dump(mode="json")
     payload["governed_semantic_history"] = [
         {"ir_id": prior["id"], "source_record_id": prior["source_record_id"],
+         "production_sufficiency": prior.get("production_sufficiency"),
          "items": [{"identity": f"{prior['id']}:{item['item_id']}",
                     "kind": item["kind"], "statement": item["statement"],
                     "action": None if item.get("action") is None else {
@@ -539,6 +552,30 @@ class InteractionSemanticContract:
             "production prerequisites, not material questions blocking pre-Work admission. "
             "Evaluate sufficiency for the NEXT safe governed step, not completeness of the "
             "whole Work. "
+            "Intent clarity and production definition sufficiency are separate. For every current "
+            "ProductionIntent populate semantic_intent.production_sufficiency. Preserve the real "
+            "production intention and its confidence; do not mark it uncertain just because the "
+            "first-version outcome needs direction. READY means a bounded outcome is sufficiently "
+            "defined for actual code production. GUIDANCE_REQUIRED means an outcome-defining "
+            "Product choice remains unresolved even though preparatory Work would be safe. "
+            "Classify gaps as MATERIAL_OUTCOME, SAFE_DEFAULT or ROUTINE_HOW. Only MATERIAL_OUTCOME "
+            "blocks execution. Framework, file layout, ordinary implementation and reversible "
+            "styling are ROUTINE_HOW/SAFE_DEFAULT, never reasons to interrogate Human. A broad "
+            "request to create a product surface does not select its first-version purpose or "
+            "choose between a bounded informational surface and account/customer workflows. "
+            "If these change the actual outcome and are not settled, provide a concrete bounded "
+            "proposal, concise proposal_basis and ONE highest-value question. No generic risk/cost "
+            "question. Use exact available product-context/work-reality facts, citing their "
+            "context_references; don't ask already known positioning or users. Historical context "
+            "informs a recommendation but cannot approve a new Product scope. State suggestions "
+            "as suggestions. For a clear bounded modification, use READY without extra ceremony. "
+            "On Human acceptance of a pending recommendation (including '按你的建议来'), retain "
+            "the prior exact production objective, include its exact proposal in ProductionIntent.scope, "
+            "set READY if material gaps are resolved, and set recommendation_acceptance.value to "
+            "the exact prior ir_id with current HUMAN_EXPLICIT source evidence. Do not infer acceptance "
+            "from history or a status/question turn. For a different chosen direction, compile that "
+            "actual direction and reassess, never replay a pending old question. The recommendation "
+            "does not authorize delivery, data access or final Candidate acceptance. "
             "Repository-observable fields, existing API/storage, stack and current routes "
             "must first be discovered by the governed repository preparation path. Lack "
             "of source contents in this pre-Work input does not make them Human decisions. "

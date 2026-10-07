@@ -687,6 +687,13 @@ def policy_governed_response(
 
     chinese = bool(re.search(r"[\u4e00-\u9fff]", latest_human_input))
     signals = set(semantics.pattern_signals)
+    ir = candidate.semantic_intent
+    sufficiency = None if ir is None else ir.production_sufficiency
+    if sufficiency is not None and sufficiency.status == "GUIDANCE_REQUIRED":
+        return (f"我理解你的目标是：{semantics.working_motive}。建议先做：{sufficiency.proposal}。"
+            f"理由是：{sufficiency.proposal_basis}。{semantics.selected_question or sufficiency.question}"
+            if chinese else f"I understand the goal: {semantics.working_motive}. I recommend {sufficiency.proposal}. "
+            f"Because {sufficiency.proposal_basis}. {semantics.selected_question or sufficiency.question}")
     human_owned = any(
         delta.category is SemanticCategory.HUMAN_DECISION
         and delta.authority is SemanticAuthority.HUMAN_OWNED

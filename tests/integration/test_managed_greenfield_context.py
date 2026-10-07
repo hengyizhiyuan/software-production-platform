@@ -33,14 +33,17 @@ class Compiler(DeclaredCompiler):
 
 
 @pytest.mark.parametrize('role,text,expected',[
-    (None,None,{'PRODUCT_INTENT'}),
+    (None,None,{'PRODUCT_INTENT','APPROVED_CONSTRAINT'}),
     ('product_invariant','产品不变量：官网所有页面必须使用中文。',{'PRODUCT_INTENT','PRODUCT_INVARIANT'}),
     ('approved_product_decision','我决定第一版只做品牌展示，不加入登录和客户后台。',{'PRODUCT_INTENT','APPROVED_DECISION'})],ids=['minimal','explicit-invariant','explicit-approved-decision'])
 def test_persisted_greenfield_owner_context_binds_task_and_freshness(postgres_database,tmp_path,role,text,expected):
     identity='watt://qualification/'+str(uuid4());work,_=_services_for_resource(postgres_database,tmp_path,identity)
     interaction=WorkInteractionService(postgres_database,capability=Compiler(role,text));origin=interaction.create_interaction(human_identity='human:test')
     content='我要开发一个工律的官网'+('；'+text if text else '')
-    ready=interaction.append_and_assess(origin.id,content,human_identity='human:test');admitted=_admit(work,ready)
+    ready=interaction.append_and_assess(origin.id,content,human_identity='human:test')
+    if ready.readiness.status.value=='NOT_READY' and ready.latest_assessment.semantic_ir.production_sufficiency:
+        ready=interaction.append_and_assess(origin.id,'按你的建议来',human_identity='human:test')
+    admitted=_admit(work,ready)
     pid=uuid4()
     with postgres_database.unit_of_work() as u:
         store=ProductStore(u.session);resource=store.resource_for_work(admitted.work_id);record=store.work(admitted.work_id);revision=store.current_work_reality_revision(admitted.work_id)
@@ -53,6 +56,9 @@ def test_persisted_greenfield_owner_context_binds_task_and_freshness(postgres_da
     lineage=lineage_for_work_task(postgres_database,work_id=record.id,repository_identity=identity,repository_path=repo,repository_revision=sha,target_paths=('index.html',))
     assert lineage.contract_id=='MANAGED_GREENFIELD_PRODUCTION'
     assert {o.context_class for o in lineage.protected_obligations}==expected
+    if role is None:
+        from tests.test_guided_interaction_calibration import PROPOSAL
+        assert next(o for o in lineage.protected_obligations if o.context_class=='APPROVED_CONSTRAINT').content==PROPOSAL
     assert any(str(revision.id) in t.provenance for t in lineage.generated_from)
     if text:assert next(o for o in lineage.protected_obligations if o.context_class!='PRODUCT_INTENT').content==text
     task=default_task_contract_builder().build(TaskContractRequest(objective=content,scope=('CREATE:index.html',),acceptance_meaning=('Verify homepage',),out_of_scope=('Unrelated files',),authority_lineage=(f'work:{record.id}',),work_reality_references=(f'work:{record.id}',),ecf_references=(f'repository:{identity}',),decision_reference=f'work:{record.id}',governed_surface=lineage.surface,decision_context=lineage))

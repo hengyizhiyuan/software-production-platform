@@ -154,7 +154,11 @@ def safe_wording(projection):
     decisions=[]
     for item in projection.decision_needs:
         need=item.get('human_decision_need')
-        if need:
+        sufficiency=(projection.governed_semantic_ir or {}).get('production_sufficiency')
+        if item['kind']=='PRODUCTION_DEFINITION_REQUIRED' and sufficiency and sufficiency['status']=='GUIDANCE_REQUIRED':
+            title='确定首版成果方向';question=sufficiency['question']
+            why=sufficiency['proposal']+'；'+sufficiency['proposal_basis']
+        elif need:
             question=need['question'];why=need['why_now']+'；'+'；'.join(o['label']+'：'+o['consequence'] for o in need['supported_options']);title=need['decision_subject']
             if any(language_leaks(v) for v in (question,why,title)):
                 question='当前决定的说明暂时无法安全展示，请稍后重新读取。';why='授权边界仍保留，系统不会代替你做决定。';title='待处理的明确决定'

@@ -129,7 +129,7 @@ from spg.infrastructure.model_runtime import ModelFailureKind, ModelProviderErro
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.interaction_store import InteractionStore
 from spg.infrastructure.persistence.product_store import ProductStore
-from spg.infrastructure.persistence.product_schema import product_managed_sources
+from spg.infrastructure.persistence.product_schema import product_managed_sources, software_products
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.steering_store import SteeringStore
 
@@ -1993,6 +1993,9 @@ class WorkInteractionService:
             interaction_store = InteractionStore(uow.session)
             interaction = interaction_store.interaction(interaction_id)
             product_id = interaction_store.product_context(interaction_id)
+            product_context = (None if product_id is None else uow.session.execute(
+                select(software_products).where(software_products.c.id == product_id)
+            ).mappings().one_or_none())
             managed_source = (None if product_id is None else uow.session.execute(
                 select(product_managed_sources).where(
                     product_managed_sources.c.product_id == product_id)
@@ -2007,6 +2010,13 @@ class WorkInteractionService:
                                 "semantic_item_id":obligation.semantic_item_id,"version":obligation.version}))
             revision = None if interaction is None or interaction.current_work_id is None else (
                 ProductStore(uow.session).current_work_reality_revision(interaction.current_work_id))
+        if product_context is not None:
+            observations.append(ObservedEffect(owner="product-context",
+                evidence_references=(f"product-context:{product_id}:{product_context['updated_at'].isoformat()}",),
+                facts={"product_id": str(product_id), "name": product_context["name"],
+                    "description": product_context["description"],
+                    "lifecycle": product_context["lifecycle"],
+                    "authority": "EXISTING_PRODUCT_CONTEXT_NOT_NEW_SCOPE_APPROVAL"}))
         if managed_source is not None:
             observations.append(ObservedEffect(owner="product-managed-source",
                 evidence_references=(f"product-source:{product_id}:{managed_source['version']}",),
@@ -4220,6 +4230,11 @@ class WorkInteractionService:
                 *(evaluation.question for evaluation in progressive_semantics.questions
                   if evaluation.blocks_next_governed_step and evaluation.question not in questions),
             )))
+        ir = candidate.semantic_intent
+        sufficiency = None if ir is None else ir.production_sufficiency
+        if sufficiency is not None and sufficiency.status == "GUIDANCE_REQUIRED":
+            questions = tuple(dict.fromkeys((*questions, sufficiency.question)))
+            missing.append("PRODUCTION_DEFINITION")
         ready = not missing and not questions
         reasons = (
             ("Motive and desired outcome are clear enough to form governed Work.",)

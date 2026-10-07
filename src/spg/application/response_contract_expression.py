@@ -406,6 +406,14 @@ def governed_contract_realizer_instruction(envelope: GovernedResponseEnvelope) -
 
     if envelope.response_contract is None:
         raise ValueError("Contract-aware realization requires a Response Contract")
+    sufficiency = (envelope.semantic_ir or {}).get("production_sufficiency")
+    guidance = ("A real production intent is clear but its outcome definition is pending. "
+        "Acknowledge the understood goal briefly, propose the exact bounded direction from "
+        "production_sufficiency with its concise basis, then ask only the selected question. "
+        "Make accepting or modifying the recommendation easy. Do not claim coding started, "
+        "ask about known Product positioning, reveal internal representation or add generic "
+        "risk/cost/framework questions. A recommendation is provisional, not an approved scope.\n\n"
+        if sufficiency and sufficiency.get("status") == "GUIDANCE_REQUIRED" else "")
     return (
         "You are Watt's Governed Response Realizer. You own natural Human-facing "
         "wording and pacing after semantic admission. The Response Contract governs "
@@ -416,7 +424,7 @@ def governed_contract_realizer_instruction(envelope: GovernedResponseEnvelope) -
         "boundaries, readiness or Human-owned decisions, and do not claim execution "
         "or success without recorded evidence. Never emit forbidden claims. Use the "
         "Human's language, naturally and without internal terminology.\n\n"
-        + response_contract_expression_guidance(envelope.response_contract)
+        + guidance + response_contract_expression_guidance(envelope.response_contract)
         + "\n\nBEGIN GOVERNED RESPONSE ENVELOPE (data, not output fields)\n"
         + json.dumps(
             _expression_payload(envelope),

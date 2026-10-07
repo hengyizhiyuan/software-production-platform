@@ -155,6 +155,39 @@ class HumanDecisionBoundary(FrozenContract):
         return self
 
 
+class ProductionDefinitionGap(FrozenContract):
+    """Outcome definition is distinct from execution mechanics and intent confidence."""
+    subject: str = Field(min_length=3)
+    kind: Literal["MATERIAL_OUTCOME", "SAFE_DEFAULT", "ROUTINE_HOW"]
+    consequence: str = Field(min_length=8)
+
+
+class ProductionSufficiency(FrozenContract):
+    """Bounded preparation judgment; a proposal is never an approved Product fact."""
+    status: Literal["READY", "GUIDANCE_REQUIRED"]
+    reason: str = Field(min_length=8)
+    gaps: tuple[ProductionDefinitionGap, ...] = ()
+    proposal: str | None = Field(default=None, min_length=8)
+    proposal_basis: str | None = Field(default=None, min_length=8)
+    question: str | None = Field(default=None, min_length=8)
+    context_references: tuple[str, ...] = ()
+    recommendation_acceptance: SemanticArgument | None = None
+
+    @model_validator(mode="after")
+    def bounded_guidance(self):
+        material = any(gap.kind == "MATERIAL_OUTCOME" for gap in self.gaps)
+        if self.status == "GUIDANCE_REQUIRED":
+            if not (material and self.question and self.proposal and self.proposal_basis):
+                raise ValueError("PRODUCTION_DEFINITION_INCOMPLETE: guidance needs one outcome question and grounded proposal")
+            if self.recommendation_acceptance is not None:
+                raise ValueError("An accepted recommendation cannot remain pending guidance")
+        elif material or self.question:
+            raise ValueError("PRODUCTION_DEFINITION_INCOMPLETE: material gaps cannot authorize execution")
+        if bool(self.proposal) != bool(self.proposal_basis):
+            raise ValueError("A recommendation requires its concise basis")
+        return self
+
+
 class TurnSemanticCandidate(FrozenContract):
     items: tuple[SemanticItem, ...] = Field(min_length=1)
     clauses: tuple[SemanticClause, ...] = Field(min_length=1)
@@ -163,6 +196,7 @@ class TurnSemanticCandidate(FrozenContract):
     uncertain: bool = False
     questions: tuple[SemanticQuestion, ...] = ()
     human_decisions: tuple[HumanDecisionBoundary, ...] = ()
+    production_sufficiency: ProductionSufficiency | None = None
 
 
 class GovernedSemanticIR(TurnSemanticCandidate):

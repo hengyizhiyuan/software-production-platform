@@ -134,4 +134,15 @@ def attention_from_semantic_decisions(ir, *, product_id, product_name):
             'human_decision_need':need.model_dump(mode='json'),'actions':[],
             'conversation_prompt':decision.question,'governed_subject_ref':f'semantic-ir:{ir.id}',
             'interaction_id':str(ir.interaction_id)})
+    sufficiency = ir.production_sufficiency
+    if not items and ir.current_production and sufficiency is not None and sufficiency.status == 'GUIDANCE_REQUIRED':
+        # This is a concrete Product outcome question, not a new authorization
+        # or a claim that Human explicitly reserved an architecture decision.
+        items.append({'id':str(uuid5(ir.id,'production-definition')),'work_id':None,
+            'product_id':str(product_id),'product_name':product_name,
+            'work_title':ir.current_production[0].objective,
+            'kind':'PRODUCTION_DEFINITION_REQUIRED','decision':next(g.subject for g in sufficiency.gaps if g.kind=='MATERIAL_OUTCOME'),
+            'reason':sufficiency.reason,'human_decision_need':None,'actions':[],
+            'conversation_prompt':sufficiency.question,'recommendation':sufficiency.proposal,
+            'governed_subject_ref':f'semantic-ir:{ir.id}','interaction_id':str(ir.interaction_id)})
     return items

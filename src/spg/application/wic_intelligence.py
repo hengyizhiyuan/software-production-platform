@@ -124,19 +124,23 @@ def build_progressive_semantics(
                 rationale="The governed semantic item retains an unresolved Human-owned decision."))
     questions: list[QuestionEvaluation] = []
     typed_questions = {} if semantic_ir is None else {q.question: q for q in semantic_ir.questions}
+    sufficiency = None if semantic_ir is None else semantic_ir.production_sufficiency
+    guidance_question = (sufficiency.question if production and sufficiency is not None
+        and sufficiency.status == "GUIDANCE_REQUIRED" else None)
     for question in tuple(dict.fromkeys((*candidate.unresolved_material_questions,
             *typed_questions, *decisions))):
         typed = typed_questions.get(question)
-        reversible = bool(typed and typed.safe_reversible_assumption) and not human_owned
+        guidance = question == guidance_question
+        reversible = bool(typed and typed.safe_reversible_assumption) and not human_owned and not guidance
         if question in decisions and production:
             blocking = question in work_decisions
         else:
-            blocking = True if typed is None else typed.blocks_current_step and not reversible
+            blocking = guidance or (True if typed is None else typed.blocks_current_step and not reversible)
         human_decision = question in decisions or bool(typed and typed.requires_human)
         questions.append(QuestionEvaluation(question=question, affected_dimensions=("SCOPE", "AUTHORITY"),
             answer_already_available=False, safe_reversible_assumption_available=reversible,
             watt_authorized_to_choose=reversible, blocks_next_governed_step=blocking,
-            cognitive_cost="LOW", decision_value=100 if human_decision else 70 if typed is None else typed.decision_value,
+            cognitive_cost="LOW", decision_value=100 if human_decision else 95 if guidance else 70 if typed is None else typed.decision_value,
             disposition=QuestionDisposition.INFER_REVERSIBLY if reversible else QuestionDisposition.DEFER_UNTIL_RELEVANT,
             rationale="Consume the compiler's structured question boundary; inference never grants operational authority."))
     for item in items:

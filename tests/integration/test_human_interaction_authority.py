@@ -16,7 +16,7 @@ from spg.application.human_language import language_leaks
 from spg.domain.human_visible import HumanVisibleProjection, HumanVisibleWording
 from spg.domain.interaction import InteractionAssessmentCandidate
 from spg.domain.intent_realization import (SemanticKind,ProductionIntent,HumanDecisionBoundary,
-    SemanticArgument,SemanticProvenance,SemanticOrigin,SemanticItem)
+    SemanticArgument,SemanticProvenance,SemanticOrigin,SemanticItem,ProductionSufficiency)
 from spg.infrastructure.persistence.human_visible_schema import wic_human_realizations
 
 pytestmark=pytest.mark.postgresql
@@ -43,6 +43,18 @@ class DeclaredCompiler:
                     material_effects=('保持当前最小范围，保留可逆的实施路径。','扩展能力或数据权限，需要额外验证和运维责任。'),
                     authority_provenance=source,required_before_production=True,
                     why_now='用户明确保留最终选择，未作选择前不得确定生产范围。'),)})
+        if self.positive is None and record.content == ROUTINE[0][1]:
+            from tests.test_guided_interaction_calibration import guidance
+            raw=raw.model_copy(update={'production_sufficiency':guidance()})
+        elif self.positive is None and basis.governed_semantic_history and basis.governed_semantic_history[-1].production_sufficiency:
+            previous=basis.governed_semantic_history[-1]
+            raw=raw.model_copy(update={'items':(raw.items[0].model_copy(update={'production':
+                raw.items[0].production.model_copy(update={'objective':previous.current_production[0].objective,
+                    'primary_change':previous.current_production[0].primary_change,
+                    'scope':(previous.production_sufficiency.proposal,)})}),*raw.items[1:]),
+                'production_sufficiency':ProductionSufficiency(status='READY',
+                    reason='当前 Human 明确接受上一轮有界建议，首版范围已足够确定',
+                    recommendation_acceptance=SemanticArgument(value=str(previous.id),provenance=source))})
         return InteractionAssessmentCandidate(interpreted_motive=record.content,desired_outcome=record.content,
             semantic_intent=raw,natural_response='将依据已明确的目标推进，并保留真实授权边界。',
             provider_identity='test:declared-human-interaction')
@@ -54,6 +66,13 @@ def test_persisted_routine_advances_without_schema_attention(postgres_database,t
     interaction=WorkInteractionService(postgres_database,capability=DeclaredCompiler())
     origin=interaction.create_interaction(human_identity='human:test')
     ready=interaction.append_and_assess(origin.id,text,human_identity='human:test')
+    if identity=='REG-HI-001':
+        assert ready.readiness.status.value=='NOT_READY'
+        assert ready.latest_assessment.progressive_semantics.selected_question
+        assert ready.latest_assessment.semantic_ir.current_production[0].objective==text
+        # Preserve the original invariant (no generic design/risk gate), while
+        # accepting one concrete outcome recommendation before production.
+        ready=interaction.append_and_assess(origin.id,'按你的建议来',human_identity='human:test')
     admitted=_admit(work,ready)
     rebuilt=interaction.get_shared_understanding(origin.id)
     ir=rebuilt.latest_assessment.semantic_ir

@@ -421,6 +421,8 @@ class ProductionAdmissionTrigger:
         assessment: InteractionAssessment, request_record: InteractionRecord) -> str | None:
         """Realize current Work decisions without replaying Action obligations."""
         ir = assessment.semantic_ir
+        if ir is not None and ir.production_sufficiency is not None and ir.production_sufficiency.status == "GUIDANCE_REQUIRED":
+            return None
         explicit_goals = () if ir is None else ir.current_production
         if (explicit_goals and assessment.candidate_change is not None
                 and assessment.basis_work_revision_id is not None
@@ -604,6 +606,10 @@ class ProductionAdmissionTrigger:
 
         from spg.application.intent_realization import production_evidence, executable_semantic_actions
         evidence = production_evidence(assessment.semantic_ir)
+        if (assessment.semantic_ir is not None and assessment.semantic_ir.production_sufficiency is not None
+                and assessment.semantic_ir.production_sufficiency.status == "GUIDANCE_REQUIRED"):
+            self.interactions.clear_production_admission_progress(interaction_id)
+            return
         projection = self.interactions.get_shared_understanding(interaction_id)
         if projection.governed_work_id is not None:
             if self._has_product_source_basis(projection.governed_work_id):

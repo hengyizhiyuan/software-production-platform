@@ -113,6 +113,25 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
     _validate_human_decision_boundaries(candidate, basis)
     records = {r.id: r for r in basis.records}
     latest = next(r for r in reversed(basis.records) if str(r.actor) == "HUMAN")
+    sufficiency = candidate.production_sufficiency
+    if sufficiency is not None:
+        available = {ref for observation in getattr(basis, "observed_reality", ())
+            for ref in observation.evidence_references}
+        if not set(sufficiency.context_references) <= available:
+            raise IntentRealizationViolation("PRODUCTION_DEFINITION_CONTEXT_UNGROUNDED")
+        acceptance = sufficiency.recommendation_acceptance
+        if acceptance is not None:
+            if acceptance.provenance.origin not in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}:
+                raise IntentRealizationViolation("PRODUCTION_RECOMMENDATION_ACCEPTANCE_NOT_EXPLICIT")
+            _validate_provenance(acceptance.provenance, records, current_record=latest)
+            history = getattr(basis, "governed_semantic_history", ())
+            previous = next((ir for ir in reversed(history) if ir.production_sufficiency), None)
+            if previous is None or previous.production_sufficiency.status != "GUIDANCE_REQUIRED" or acceptance.value != str(previous.id):
+                raise IntentRealizationViolation("PRODUCTION_RECOMMENDATION_ACCEPTANCE_STALE")
+            goals = tuple(i.production for i in candidate.items if i.production and i.production.current)
+            if not goals or not any(goal.objective in {g.objective for g in previous.current_production}
+                    and previous.production_sufficiency.proposal in goal.scope for goal in goals):
+                raise IntentRealizationViolation("PRODUCTION_RECOMMENDATION_SCOPE_NOT_BOUND")
     historical_items = {f"{prior.id}:{item.item_id}": item
         for prior in getattr(basis, "governed_semantic_history", ())
         for item in prior.items}
@@ -719,7 +738,9 @@ class IntentRealizationKernel:
                 continue
             needs_human = item.requires_human or item.confidence < .8 or unresolved_dependency(item) or bool(
                 item.action and (item.action.conditional or blocking_action_arguments(item.action))) or bool(
-                item.production and item.production.current and item.production.unresolved_arguments)
+                item.production and item.production.current and item.production.unresolved_arguments) or bool(
+                item.production and item.production.current and ir.production_sufficiency
+                and ir.production_sufficiency.status == "GUIDANCE_REQUIRED")
             obligations.append(TurnObligation(id=identities[item.item_id], turn_id=turn_id,
                 semantic_ir_id=ir.id, semantic_item_id=item.item_id, plane=plane,
                 operation=operation, expected_effects=effects,
@@ -970,7 +991,9 @@ def project_interaction_candidate(candidate, ir):
         "semantic_fact_candidates": ir.semantic_fact_candidates,
         "unresolved_material_questions": tuple(dict.fromkeys(
             (*[q.question for q in ir.questions if q.blocks_current_step and not q.safe_reversible_assumption],
-             *[d.question for d in ir.human_decisions if d.required_before_production])))}
+             *[d.question for d in ir.human_decisions if d.required_before_production],
+             *((ir.production_sufficiency.question,) if ir.current_production and ir.production_sufficiency
+                and ir.production_sufficiency.status == "GUIDANCE_REQUIRED" else ()))))}
     current_request_ids = {item_id for clause in ir.clauses
         if clause.source_record_id == ir.source_record_id
         and clause.speech_act is ActionSpeechAct.EXPLICIT_REQUEST

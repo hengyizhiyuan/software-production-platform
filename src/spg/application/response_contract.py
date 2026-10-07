@@ -460,6 +460,12 @@ def build_response_contract(
             "non-promotional production-path connection."
         )
 
+    ir = getattr(assessment, "semantic_ir", None)
+    sufficiency = None if ir is None else ir.production_sufficiency
+    if sufficiency is not None and sufficiency.status == "GUIDANCE_REQUIRED" and ir.current_production:
+        # Production meaning remains BUILD; this turn's collaboration shapes
+        # the missing outcome rather than pretending to execute it.
+        mode = Mode.DESIGN
     question = None
     if semantics and semantics.selected_question and mode not in {Mode.STATUS, Mode.ANSWER}:
         candidate = next((item for item in semantics.questions if item.question == semantics.selected_question), None)
@@ -487,6 +493,13 @@ def build_response_contract(
         if mode is Mode.EXECUTE:
             obligation, opening = Obligation.CLARIFY_BLOCKER, Opening.CLARIFICATION_FIRST
         reasons.append("One existing admitted question materially blocks progress and has no available answer or reversible assumption.")
+        ir = getattr(assessment, "semantic_ir", None)
+        sufficiency = None if ir is None else ir.production_sufficiency
+        if sufficiency is not None and sufficiency.status == "GUIDANCE_REQUIRED" and question == sufficiency.question:
+            obligation, opening = Obligation.PROPOSE, Opening.RECOMMENDATION_FIRST
+            moves = (Move.RECOMMENDATION, Move.EVIDENCE, Move.CLARIFY_BLOCKER)
+            budget = Budget.MINIMUM_SUFFICIENT
+            reasons.append("Clear production intent still needs one outcome-defining choice; propose a bounded direction before the single question.")
     elif mode is Mode.EXECUTE and not human_boundary:
         # This expresses the desired next move, never claims it already happened.
         if assessment.basis_active_runtime_binding_id is not None:
