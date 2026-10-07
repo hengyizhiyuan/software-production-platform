@@ -173,7 +173,10 @@ def install_admin(api, database, settings, runtime=None):
 
     @router.get("/arena")
     def arena():
-        return quality.arena()
+        from spg.evaluation.admin_projection import experiment_comparisons
+        result = quality.arena()
+        result['comparison_pairs'] = experiment_comparisons(database, result['experiments'])
+        return result
 
     @router.post("/experiments")
     def experiment(request: ExperimentRequest, http_request: Request):

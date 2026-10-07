@@ -61,3 +61,17 @@ def test_guardian_failure_and_unobserved_result_are_distinct(quality):
     result=assurance_summary(quality.database,{'results':records})
     assert result['blocked_candidates']==1 and result['unknown_candidates']==1
     assert result['false_positive'] is None and not result['pending_review']
+
+
+def test_comparison_pairs_ignore_newer_promotion_holdout_and_preserve_exact_version(quality):
+    from spg.evaluation.admin_projection import experiment_comparisons
+    from spg.evaluation.catalog import create_fresh_holdout
+    from tests.integration.test_quality_admin import experiment
+    q=quality;e=experiment(q);campaign=q.campaigns()[0]
+    a,aa=finish(q,campaign,e['id'],'a');b,bb=finish(q,campaign,e['id'],'b')
+    h=create_fresh_holdout(q);finish(q,h['campaign'],e['id'],'b')
+    pairs=experiment_comparisons(q.database,[e])[str(e['id'])]
+    assert pairs['a']['case_run_id']==str(aa[0]) and pairs['b']['case_run_id']==str(bb[0])
+    assert pairs['b']['run_id']==str(b['id']) and pairs['b']['case_version_id']==str(e['case_version_id'])
+    with q.database.engine.connect() as c:
+        assert c.scalar(text('SELECT count(*) FROM quality_preferences'))==0

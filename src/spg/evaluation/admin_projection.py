@@ -193,3 +193,26 @@ def assurance_summary(database, assurance):
         'unknown_candidates': sum(r.get('gate') not in ('PASS', 'FAIL', 'FAIL_REPAIRABLE', 'BLOCKED') for r in latest.values()),
         'observation_count': len(latest), 'scope': '最近可读取的 20 份 Guardian 结果及 100 个封存候选；不冒充全量拦截统计',
         'false_positive': None, 'health_note': '结果存储可读取不等于 owner 实时健康；独立质量评价另列。'}
+
+
+def experiment_comparisons(database, experiments):
+    """Pick exact comparison evidence, excluding promotion-only Holdout runs."""
+    from sqlalchemy import text
+    if not experiments:
+        return {}
+    with database.unit_of_work() as u:
+        rows = u.session.execute(text('''
+          SELECT DISTINCT ON (r.experiment_id,r.variant_key)
+            r.experiment_id,r.variant_key,r.id AS run_id,a.id AS case_run_id,a.case_version_id
+          FROM quality_campaign_runs r JOIN quality_experiments e ON e.id=r.experiment_id
+          JOIN quality_cases c ON c.id=e.case_id
+          JOIN quality_case_runs a ON a.campaign_run_id=r.id AND a.case_version_id=e.case_version_id
+          WHERE e.id=ANY(CAST(:ids AS uuid[])) AND NOT(c.cohorts @> '["FRESH_HOLDOUT"]'::jsonb)
+            AND r.state IN ('PASS','FAIL','BLOCKED') AND a.state IN ('PASS','FAIL','BLOCKED')
+          ORDER BY r.experiment_id,r.variant_key,a.created_at DESC,a.attempt DESC,a.id
+        '''), {'ids': [str(e['id']) for e in experiments]}).mappings().all()
+    result = {}
+    for row in rows:
+        result.setdefault(str(row['experiment_id']), {})[row['variant_key']] = {
+            key: str(row[key]) for key in ('run_id','case_run_id','case_version_id')}
+    return result
