@@ -1,5 +1,5 @@
 """Inspectable delivery from exact governed Runtime Commit evidence."""
-from spg.infrastructure.performance import projection_memo, bind_projection_rows
+from spg.infrastructure.performance import projection_memo, bind_projection_rows, timed, run_process
 from datetime import UTC, datetime
 from hashlib import sha256
 from io import BytesIO
@@ -45,9 +45,10 @@ def read_artifact(repository: str, revision: str, path: str, *, software: bool =
             or any(ord(char) < 32 for char in path)
             or (not software and not path.endswith(".md"))):
         raise ProductInvariantViolation("Delivery artifact path or exact revision is invalid")
+    @timed('git')
     def git(*args):
         try:
-            return subprocess.run(
+            return run_process(
                 ["git", "--no-replace-objects", "-C", str(Path(repository).resolve()), *args],
                 check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=20,
             ).stdout
@@ -76,9 +77,10 @@ def artifact_media_type(path: str) -> str:
         ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon"}.get(PurePosixPath(path).suffix, "application/octet-stream")
 
 
+@timed('git')
 def git_bytes(repository: str, *args: str) -> bytes:
     try:
-        return subprocess.run(["git", "--no-replace-objects", "-C", str(repository), *args], check=True, capture_output=True, timeout=20).stdout
+        return run_process(["git", "--no-replace-objects", "-C", str(repository), *args], check=True, capture_output=True, timeout=20).stdout
     except (OSError, subprocess.SubprocessError) as exc:
         raise ProductInvariantViolation("Exact software repository evidence is unavailable") from exc
 

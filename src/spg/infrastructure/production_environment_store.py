@@ -17,6 +17,7 @@ from threading import RLock
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel
+from spg.infrastructure.performance import timed
 
 from spg.domain.brownfield_delivery import BrownfieldReviewSessionV1
 from spg.domain.production_environment import (
@@ -191,6 +192,7 @@ class JsonProductionEnvironmentStore:
             self._replace_atomic(pointer, preview.model_dump_json(include={"id", "work_id"}))
         return preview
 
+    @timed('filesystem')
     def current_candidate_preview(self, work_id: UUID) -> CandidatePreviewSessionV1 | None:
         pointer = self.root / "candidate-previews" / "by-work" / f"{work_id}.json"
         if not pointer.exists():
