@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from spg.infrastructure.performance import observed_background
 from collections import OrderedDict
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
@@ -932,6 +933,7 @@ class WorkInteractionService:
             )
         return True
 
+    @observed_background("WORK_ADMISSION")
     def _execute_prepared_production_admission(
         self,
         interaction_id: UUID,
@@ -2264,6 +2266,7 @@ class WorkInteractionService:
             self._close_owner_obligation(obligation, observed,
                 blocker=f"interaction-response-event:{blocker_event.id}" if blocker_event is not None else None)
 
+    @observed_background("WIC_IRK_TURN")
     def _process_turn(self, turn_id: UUID) -> None:
         now = datetime.now(UTC)
         with self.database.unit_of_work() as uow:

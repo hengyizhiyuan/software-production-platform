@@ -71,3 +71,37 @@ def test_trace_summary_preserves_qualified_candidate_and_unknown_metrics():
     assert trace['candidate'][0]['fingerprint']=='exact'
     assert trace['advanced']=={} and trace['detail_level']=='summary'
     assert trace['units']==[]
+
+
+def test_projection_memo_expires_before_authority_command():
+    from spg.infrastructure.performance import projection_memo, projection_scope
+    calls=[]
+    class Owner:
+        @projection_memo
+        def read(self, identity):calls.append(identity);return len(calls)
+    owner=Owner()
+    @projection_scope
+    def view():return owner.read('exact'),owner.read('exact')
+    assert view()==(1,1)
+    assert owner.read('exact')==2
+    assert view()==(3,3)
+
+
+def test_read_sets_do_not_replace_unknown_tables_or_command_reads():
+    from types import SimpleNamespace
+    from spg.infrastructure.persistence.projection_reads import rows_for,first_for
+    table=SimpleNamespace(name='exact');session=SimpleNamespace(info={})
+    assert rows_for(session,table,{'id':'x'}) is None
+    session.info['watt_projection_rows']={'exact':[{'id':'x','state':'READY'}]}
+    assert first_for(session,table,{'id':'x'})['state']=='READY'
+    assert first_for(session,table,{'id':'absent'})=={}
+    assert rows_for(session,SimpleNamespace(name='other'),{}) is None
+
+
+def test_read_set_order_preserves_postgresql_null_and_mixed_tie_order():
+    from types import SimpleNamespace
+    from spg.infrastructure.persistence.projection_reads import rows_for
+    table=SimpleNamespace(name='versions');session=SimpleNamespace(info={'watt_projection_rows':{'versions':[
+        {'id':'b','version':1},{'id':'a','version':1},{'id':'n','version':None}]}})
+    rows=rows_for(session,table,{},order=('version',),descending=True,ascending_ties=('id',))
+    assert [r['id'] for r in rows]==['n','a','b']

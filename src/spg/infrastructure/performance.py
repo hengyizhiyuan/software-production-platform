@@ -176,3 +176,38 @@ def bind_projection_rows(database, session, work_ids):
         return False
     session.info['watt_projection_rows'] = rows
     return True
+
+
+def observed_background(owner):
+    """Acknowledge HTTP separately from asynchronous provider/owner work."""
+    def decorate(fn):
+        @wraps(fn)
+        def call(*args, **kwargs):
+            observation = Observation()
+            token = _current.set(observation)
+            start = perf_counter();status=200
+            try:
+                return fn(*args, **kwargs)
+            except BaseException:
+                status=500
+                raise
+            finally:
+                import json
+                from uuid import UUID
+                entity = next((str(v) for v in (*args[1:], *kwargs.values()) if isinstance(v,UUID)), None)
+                record = observation.record(route=owner,method='BACKGROUND',status=status,
+                    total=perf_counter()-start,size=None)
+                record['entity_id']=entity
+                logging.getLogger('spg.performance').info('后台性能 %s',json.dumps(record,ensure_ascii=False))
+                _current.reset(token)
+        return call
+    return decorate
+
+
+def cached_work_projection(database, work_id, value=None):
+    cache = _projection_scope.get()
+    if cache is None:
+        return None
+    key=('work_projection', id(database), work_id)
+    if value is not None:cache[key]=value
+    return cache.get(key)

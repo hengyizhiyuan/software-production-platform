@@ -687,7 +687,7 @@ class RuntimeStore:
     def execution_dispatch(self, dispatch_id: UUID) -> ExecutionDispatchRecord | None:
         row = first_for(self.session, execution_dispatches, {'id':dispatch_id})
         if row is None: row = self._one(execution_dispatches, execution_dispatches.c.id == dispatch_id)
-        if row is None:
+        if not row:
             return None
         return self._execution_dispatch_record(row)
 
@@ -736,11 +736,9 @@ class RuntimeStore:
         self,
         observation_id: UUID,
     ) -> RepositoryObservationRecord | None:
-        row = self._one(
-            repository_observations,
-            repository_observations.c.id == observation_id,
-        )
-        if row is None:
+        row = first_for(self.session, repository_observations, {'id':observation_id})
+        if row is None: row = self._one(repository_observations, repository_observations.c.id == observation_id)
+        if not row:
             return None
         return self._repository_observation_record(row)
 
@@ -815,11 +813,9 @@ class RuntimeStore:
         self,
         snapshot_id: UUID,
     ) -> ProposedRepositorySnapshotRecord | None:
-        row = self._one(
-            proposed_repository_snapshots,
-            proposed_repository_snapshots.c.id == snapshot_id,
-        )
-        if row is None:
+        row = first_for(self.session, proposed_repository_snapshots, {'id':snapshot_id})
+        if row is None: row = self._one(proposed_repository_snapshots, proposed_repository_snapshots.c.id == snapshot_id)
+        if not row:
             return None
         return ProposedRepositorySnapshotRecord.model_validate(dict(row))
 
@@ -836,8 +832,9 @@ class RuntimeStore:
         return self._verification_record(row)
 
     def verification_record(self, record_id: UUID) -> VerificationRecord | None:
-        row = self._one(verification_records, verification_records.c.id == record_id)
-        if row is None:
+        row = first_for(self.session, verification_records, {'id':record_id})
+        if row is None: row = self._one(verification_records, verification_records.c.id == record_id)
+        if not row:
             return None
         return self._verification_record(row)
 
@@ -904,7 +901,7 @@ class RuntimeStore:
     def baseline_candidate(self, candidate_id: UUID) -> BaselineCandidateRecord | None:
         row = first_for(self.session, baseline_candidates, {'id':candidate_id})
         if row is None: row = self._one(baseline_candidates, baseline_candidates.c.id == candidate_id)
-        if row is None:
+        if not row:
             return None
         return self._baseline_candidate_record(row)
 

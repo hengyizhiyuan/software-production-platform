@@ -120,8 +120,8 @@
     if (node.id === 'admin-refresh') {await render();return;}
     if(node.dataset.traceEntity){await showTrace(node.dataset.traceEntity,node.dataset.traceKind);return;}
     if(node.dataset.trace){await showTrace(node.dataset.trace);return;}
-    if(node.hasAttribute('data-trace-details')){try{traceData=await api(tracePath);tracePage('story');}catch(e){notice('执行详情读取失败：'+e.message);}return;}
     if(node.dataset.traceMode){tracePage(node.dataset.traceMode);return;}
+    if(node.hasAttribute?.('data-trace-details')){try{traceData=await api(tracePath);tracePage('story');}catch(e){notice('执行详情读取失败：'+e.message);}return;}
     if (node.dataset.run) {await showRun(node.dataset.run);return;}
     if (node.hasAttribute('data-back-quality')) {navigate('quality');return;}
     if (node.hasAttribute('data-register-pilot')) {node.disabled = true;await api('/api/admin/pilot/register',{method:'POST'});notice('恰好 10 个 Pilot 场景已登记。');await render();return;}

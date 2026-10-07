@@ -313,6 +313,14 @@ def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=
         safety='存在独立验证或 Guardian 证据' if verifications or guardian else '未采集到完整保护证据')
     if repairs and diagnosis['divergence_label']=='尚未观测到可归因偏离':
         diagnosis['divergence_label']='受治理生产范围：自修复 owner 记录首次候选与准入义务不一致' if any(r.get('diagnostic_evidence',{}).get('signal')=='SCOPE_INFLATION' for r in repairs) else '恢复 owner 观测到局部义务未满足；更早的归因未采集'
+    if not detail:
+        # Event cards need chronology and owner outcome; task/context bodies are
+        # already represented once above and remain retrievable as full evidence.
+        for event in events:
+            event['detail'] = {key:value for key,value in event['detail'].items() if key in {
+                'id','attempt_id','session_id','condition','status','kind','event_type','reason',
+                'work_id','pwu_id','tool_identity','semantic_input','output_summary','result',
+                'candidate_id','candidate_fingerprint','source_revision','source_tree'}}
     return safe({'schema_version':'production-trace-v1','scene':scene,'purpose':purpose,
         'first_human_input':first_input,'basis':basis,'source_references':list(owner_refs),
         'conversation':conversation,'semantic':semantic,'contexts':contexts,

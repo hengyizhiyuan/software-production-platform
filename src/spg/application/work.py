@@ -1,5 +1,5 @@
 """Goal-centric MVP application flow composed over governed Runtime services."""
-from spg.infrastructure.performance import projection_scope, bind_projection_rows, share_projection_rows
+from spg.infrastructure.performance import projection_scope, bind_projection_rows, share_projection_rows, cached_work_projection
 
 from datetime import UTC, datetime
 from hashlib import sha256
@@ -2308,6 +2308,9 @@ class WorkApplicationService:
     request_refinement = request_work_refinement
 
     def get_work(self, work_id: UUID) -> WorkProjection:
+        cached = cached_work_projection(self.database, work_id)
+        if cached is not None:
+            return cached
         with self.database.unit_of_work() as unit_of_work:
             store = ProductStore(unit_of_work.session, projection_reads=True)
             work = self._required_work(store, work_id)
@@ -2495,7 +2498,10 @@ class WorkApplicationService:
                 product_works.c.id.in_(work_ids))).mappings().all()
             store.prepare_projection_summaries(work_ids)
             share_projection_rows(self.database, uow.session, uow.session.info['watt_projection_rows'])
-            return tuple(self._projection(store, store._work(row)) for row in rows)
+            projections = tuple(self._projection(store, store._work(row)) for row in rows)
+            for projection in projections:
+                cached_work_projection(self.database, projection.work_id, projection)
+            return projections
 
     def list_works(self, goal_id: UUID | None = None) -> tuple[WorkProjection, ...]:
         with self.database.unit_of_work() as unit_of_work:
