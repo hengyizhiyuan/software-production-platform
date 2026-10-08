@@ -318,23 +318,29 @@ class TaskContractBuilder:
             for index, reference in enumerate(request.ecf_references, start=1)
         )
         if request.decision_context is not None:
-            candidates.extend(
-                ContextCandidate(
-                    candidate_id=f"protected-context:{index}:{obligation.context_class}",
-                    source=ContextSource.ECF_REALITY,
-                    content=obligation.content,
-                    source_reference=obligation.source_ref,
-                    authority=obligation.authority,
-                    provenance=(obligation.source_ref, obligation.source_revision,
-                                request.decision_context.package_fingerprint),
-                    priority=100,
-                    authoritative=True,
-                    required=True,
+            # The ECF package already carries each obligation with its exact source,
+            # authority, content and digest. Count their lossless envelope as one
+            # selection item; per-source item quotas must not discard a protected
+            # fact. The character budget still counts every byte of the envelope.
+            obligations = request.decision_context.protected_obligations
+            if obligations:
+                candidates.append(
+                    ContextCandidate(
+                        candidate_id="protected-context:exact-ecf-package",
+                        source=ContextSource.ECF_REALITY,
+                        content=json.dumps(
+                            [item.model_dump(mode="json") for item in obligations],
+                            ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+                        ),
+                        source_reference=("ecf-protected-package:"
+                                          + request.decision_context.package_fingerprint),
+                        authority="ECF_SELECTED_CONTEXT_ENVELOPE",
+                        provenance=tuple(item.source_ref for item in obligations),
+                        priority=100,
+                        authoritative=True,
+                        required=True,
+                    )
                 )
-                for index, obligation in enumerate(
-                    request.decision_context.protected_obligations, start=1
-                )
-            )
         candidates.extend(
             ContextCandidate(
                 candidate_id=f"semantic-fact:{fact.fact_id}",
@@ -461,6 +467,14 @@ class TaskContractBuilder:
                     authority=item.authority,
                 )
                 for item in package.items
+            ) + tuple(
+                TaskContextReference(
+                    source=ContextSource.ECF_REALITY,
+                    reference=item.source_ref,
+                    authority=item.authority,
+                )
+                for item in (request.decision_context.protected_obligations
+                             if request.decision_context is not None else ())
             ),
             scope=request.scope,
             constraints=request.constraints,

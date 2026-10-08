@@ -14,7 +14,9 @@ from tests.test_decision_context_integration import git
 
 def owner_basis(extra=None,pending=False):
     ir,_=declared_ir(ROUTINE[0][1]);work=SimpleNamespace(id=uuid4());pid=uuid4();rev=SimpleNamespace(id=uuid4(),work_id=work.id,revision_fingerprint='a'*64,desired_outcome='制作工律官网',constraints=(),governance_record_id=uuid4())
-    gov={'id':rev.governance_record_id,'subject_identity':str(work.id),'authority_identity':'human:qualification','scope':{'work_reality_revision_id':str(rev.id)}}
+    gov={'id':rev.governance_record_id,'decision_type':'ADMIT_LONG_LIVED_WORK',
+         'subject_type':'PRODUCT_WORK','subject_identity':str(work.id),
+         'authority_identity':'human:qualification','scope':{'work_reality_revision_id':str(rev.id)}}
     if extra:
         subject,kind,text=extra;p=SemanticProvenance(origin=SemanticOrigin.HUMAN_EXPLICIT,source_record_id=ir.source_record_id,source_text=text)
         item=SemanticItem(item_id='explicit',kind=kind,subject=subject,statement=text,provenance=(p,),confidence=1)
@@ -110,3 +112,32 @@ def test_ordinary_work_restriction_does_not_become_product_invariant():
     source=project_greenfield_context(**b)
     assert source.constraints==b['revision'].constraints and not source.invariants and not source.decisions
     assert source.required_classes==('APPROVED_CONSTRAINT','PRODUCT_INTENT')
+
+
+def test_admitted_revision_uses_its_own_governance_basis():
+    basis=owner_basis();revision=basis['revision'];previous=revision.id
+    revision.id=uuid4();revision.previous_revision_id=previous
+    revision.source_assessment_id=uuid4();revision.governance_record_id=uuid4()
+    basis['governance']={
+        'id':revision.governance_record_id,'decision_type':'ADMIT_WORK_REALITY_REVISION',
+        'subject_type':'WORK_REALITY_REVISION_CANDIDATE',
+        'subject_identity':f'interaction-assessment:{revision.source_assessment_id}',
+        'authority_identity':'human:qualification',
+        'scope':{'work_id':str(basis['work'].id),
+                 'assessment_id':str(revision.source_assessment_id),
+                 'previous_revision_id':str(previous)},
+    }
+    assert project_greenfield_context(**basis).work_id==basis['work'].id
+    basis['governance']['scope']['previous_revision_id']=str(uuid4())
+    with pytest.raises(DecisionContextAuthorityMissing):
+        project_greenfield_context(**basis)
+
+
+def test_existing_product_first_bounded_work_can_use_managed_genesis():
+    basis=owner_basis();ir=basis['ir']
+    items=tuple(item.model_copy(update={'production':item.production.model_copy(update={'new_work':False})})
+                if item.production is not None else item for item in ir.items)
+    basis['ir']=ir.model_copy(update={'items':items})
+    source=project_greenfield_context(**basis)
+    assert source is not None and source.intent
+    assert source.work_id==basis['work'].id

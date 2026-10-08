@@ -1,0 +1,73 @@
+{
+  "name": "N1 cross-case reality failure matrix",
+  "captured_at_utc": "2026-10-08T03:13:02Z",
+  "status": "FORENSICS_IN_PROGRESS",
+  "evidence_grades": {
+    "E1": "direct ECS persisted fact",
+    "E2": "earlier persisted report with missing raw receipt",
+    "E3": "current-code behavior or read-only reproduction, never a historical event",
+    "UNKNOWN": "not established"
+  },
+  "cases": [
+    {
+      "case": "A_DOCUMENT",
+      "work_id": "8ad0b7e5-591c-53d4-bec4-75dc11d57e5d",
+      "human_intent": "Only docs/design.md with goal, scope, and acceptance sections; E1 interaction_records:2864319f-231a-4c63-b265-57c046d5b198",
+      "identity_and_version": "Work revision 1fba253b-3174-5acf-a471-fe66f648004b; E1",
+      "context_owner": "Human Interaction/IRK for intent, Work for revision/source, Task Contract for execution obligation; no ECF registered document surface in current code (E3)",
+      "source_basis": "Persisted Work revision and production source binding; exact repository source selected by historical attempt needs independent extraction",
+      "required_context": "Exact Human document target, admitted Work revision, IRK identity, repository/workspace source, verification obligations; E3 contract requirement",
+      "first_bad_transition": "An attempt and dispatch were persisted but no queue/allocation/execution event; E1. Exact failing predicate UNKNOWN",
+      "observed_failure": "E1 self_refine_events:b2cea9bf-4a03-41b4-89ac-207affd3f8b3 records ExecutionContextNotReady and INFRASTRUCTURE_ERROR",
+      "recovery_failure": "E1 same event records no safe replay; exact alternative repair opportunity UNKNOWN",
+      "convergence": "E1 work_convergence_observations:bb26336a-f619-427a-a7af-182dd06ded49 NON_CONVERGING; steering_decisions:06d23453-a457-4a6a-a7e2-262cb5c4dd8a Human attention",
+      "root_cause": "UNKNOWN historically; E3 strict native product execution currently requires ECF lineage absent from document Task Contract",
+      "repair_boundary": "Typed document Work execution context and source freshness in existing Task/PWU/native execution contract, subject to isolated reproduction"
+    },
+    {
+      "case": "B_REVISED",
+      "work_id": "99e6357b-91d0-50ce-ac0b-3ad7376b79bb",
+      "human_intent": "Revise the same Work to exact site/index.html; E1 interaction_records:c5bce8a8-0afe-4f7f-91c9-cfb1e9bb695a",
+      "identity_and_version": "Revisions a43de41d-912f-5b50-8779-40b06482f4a5 and 54829eae-923c-5841-a378-2eed2c2ea98c; no first Candidate (E1)",
+      "context_owner": "IRK/Human assessment and Work revision governance; managed source version 0; ECF consumes their admitted facts",
+      "source_basis": "E1 governance_records:61d8c4d4-378e-5b72-8bba-f4ca748ab92b admits an assessment-scoped revision with work_id and previous_revision_id",
+      "required_context": "Current admitted revision, prior revision link, managed source version 0, exact Human declarations, ECF protected obligations",
+      "first_bad_transition": "E1 WIC latest realization recorded DecisionContextAuthorityMissing before runtime binding; E3 read-only reproduction returns MANAGED_GREENFIELD_CONTEXT_OWNER_BASIS_MISSING",
+      "observed_failure": "No runtime binding or Candidate (E1); E2 delivery report names managed greenfield owner basis missing",
+      "recovery_failure": "E2 local scope recovery does not establish full Work repair; exact historical repair trajectory UNKNOWN",
+      "convergence": "E1 work_convergence_observations:82abf7dd-25ba-4b23-afb5-6fe9853aca9a NON_CONVERGING",
+      "root_cause": "E3 current adapter accepts only initial Work-governance shape, not the persisted legitimate revision-governance shape; historical exact call stack UNKNOWN",
+      "repair_boundary": "Consumer-side managed source projection keyed to exact admitted Work revision governance; separately qualify successful-first-version successor case"
+    },
+    {
+      "case": "C_BOUNDED_NON_NEW",
+      "work_id": "be245aab-a1d4-55b8-a342-46f0797778cf",
+      "human_intent": "Bounded two-file homepage in an existing qualification Product; E1 interaction_records:74c0a0d7-85a3-4c6b-a3be-78343be88f18",
+      "identity_and_version": "IR production item new_work=false; Work revision c7afbaef-7b9e-5157-8f03-c4e37dde0527; managed Product source version 0 (E1)",
+      "context_owner": "IRK/Work classification, Product managed source, ECF decision context",
+      "source_basis": "E1 accepted managed Gitea source version 0; not a new invented repository",
+      "required_context": "Bounded Work scope with existing Product source and ECF owner facts",
+      "first_bad_transition": "E1 WIC realization at 2026-10-07 09:29:38 UTC: ECF INCOMPLETE, missing PRODUCT_INTENT, PRODUCT_INVARIANT, APPROVED_DECISION",
+      "observed_failure": "No runtime binding or Candidate (E1); E2 report says bounded/non-new classification missing greenfield ECF context",
+      "recovery_failure": "E2 local scope recovery does not establish full Work repair; exact historical repair trajectory UNKNOWN",
+      "convergence": "No qualified production; complete historical no-progress interpretation UNKNOWN",
+      "root_cause": "E3 current managed source projection requires new_work=true even though Product accepted source is version 0; historical exact branch UNKNOWN",
+      "repair_boundary": "Source-owner projection based on accepted managed source and exact Work governance, not new_work flag alone"
+    },
+    {
+      "case": "D_PROTECTED_BUDGET",
+      "work_id": "40e992b0-976b-5e30-9f80-0b7a119cdd53",
+      "human_intent": "One index.html output; E1 interaction_records:e66fb0be-2319-4cf4-80cc-830a00e6b41b",
+      "identity_and_version": "Work revision e3e8058e-972e-57ef-9365-7c3b6c3c2cb2; no runtime binding or Candidate (E1)",
+      "context_owner": "ECF selects protected source obligations; Watt Task Contract assembles bounded context",
+      "source_basis": "Current Work and ECF package; historical complete package UNKNOWN",
+      "required_context": "All protected ECF obligations, Work reality, semantic facts and decision authority; no silent trim",
+      "first_bad_transition": "UNKNOWN historically; E3 read-only current-code assembly rejects 25 required items (17 ECF, 2128 total characters) against 24 total and 12 per-source limits",
+      "observed_failure": "E1 WIC realization READY and two NOT_YET_CONVERGED observations, no Candidate; E2 earlier report says 12000 characters exceeded but raw receipt missing",
+      "recovery_failure": "UNKNOWN historically",
+      "convergence": "E1 observations 4bd2c089-c2b5-48f6-945c-a8c983aab359 and 1b34ec75-ab5c-4ba3-a283-159ee47b10d9 are NOT_YET_CONVERGED, not PASS",
+      "root_cause": "UNKNOWN historically; E3 current per-source/item counting treats each exact protected obligation as an independent selection item and fails before character budget",
+      "repair_boundary": "Lossless grouping of ECF-selected obligations within existing 12000-character limit, with every exact source reference retained; block truthfully if full content still exceeds budget"
+    }
+  ]
+}

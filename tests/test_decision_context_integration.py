@@ -356,6 +356,31 @@ def test_required_protected_context_cannot_be_budget_trimmed(source_repo: Path):
         task(oversized)
 
 
+def test_many_protected_sources_fit_without_losing_exact_lineage(source_repo: Path):
+    gateway = WattDecisionContextGateway()
+    req = requirement(source_repo, WORKSPACE_SURFACE)
+    lineage = gateway.lineage(gateway.require_ready(
+        req, work_statement="UI change", work_revision="work-1"), req)
+    exemplar = lineage.protected_obligations[0]
+    obligations = tuple(
+        exemplar.model_copy(update={
+            "source_ref": f"{exemplar.source_ref}#case-{index}",
+            "content": f"Protected source assertion {index}",
+            "content_digest": sha256(
+                f"Protected source assertion {index}".encode()).hexdigest(),
+        })
+        for index in range(14)
+    )
+    expanded = lineage.model_copy(update={"protected_obligations": obligations})
+    formed = task(expanded)
+    assert len(formed.decision_context.protected_obligations) == 14
+    assert {item.source_ref for item in obligations}.issubset(
+        {item.reference for item in formed.relevant_context}
+    )
+    assert all(item.content_digest == sha256(item.content.encode()).hexdigest()
+               for item in formed.decision_context.protected_obligations)
+
+
 def test_required_owner_mode_fails_truthfully_without_canonical_ecf():
     environment = dict(os.environ)
     environment["PYTHONPATH"] = str(ROOT / "src")

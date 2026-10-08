@@ -39,13 +39,31 @@ def project_greenfield_context(*, product_id, work, revision, ir, governance, se
     if (revision is None or ir is None or not isinstance(ir,GovernedSemanticIR)
             or revision.work_id!=work.id or governance is None
             or str(governance['id'])!=str(revision.governance_record_id)
-            or not governance['authority_identity']
-            or str(governance['subject_identity'])!=str(work.id)
-            or str(governance['scope'].get('work_reality_revision_id'))!=str(revision.id)):
+            or not governance['authority_identity']):
+        raise DecisionContextAuthorityMissing('MANAGED_GREENFIELD_CONTEXT_OWNER_BASIS_MISSING')
+    scope=governance.get('scope') or {}
+    assessment_id=getattr(revision,'source_assessment_id',None)
+    previous_revision_id=getattr(revision,'previous_revision_id',None)
+    initial_admission=(
+        governance.get('decision_type')=='ADMIT_LONG_LIVED_WORK'
+        and governance.get('subject_type')=='PRODUCT_WORK'
+        and str(governance['subject_identity'])==str(work.id)
+        and str(scope.get('work_reality_revision_id'))==str(revision.id)
+    )
+    revision_admission=(
+        governance.get('decision_type')=='ADMIT_WORK_REALITY_REVISION'
+        and governance.get('subject_type')=='WORK_REALITY_REVISION_CANDIDATE'
+        and str(scope.get('work_id'))==str(work.id)
+        and assessment_id is not None and previous_revision_id is not None
+        and str(scope.get('assessment_id'))==str(assessment_id)
+        and str(scope.get('previous_revision_id'))==str(previous_revision_id)
+        and str(governance['subject_identity'])==f'interaction-assessment:{assessment_id}'
+    )
+    if not (initial_admission or revision_admission):
         raise DecisionContextAuthorityMissing('MANAGED_GREENFIELD_CONTEXT_OWNER_BASIS_MISSING')
     history=tuple(dict((value.id,value) for value in (ir,*semantic_history)).values())
     goals=next((value.current_production for value in history if value.current_production),())
-    initial_greenfield=any(g.current and g.new_work and not g.repository_required and g.repository_reference is None
+    initial_greenfield=any(g.current and not g.repository_required and g.repository_reference is None
                           for value in history for g in value.current_production)
     if not goals or not initial_greenfield or any(g.repository_required or g.repository_reference is not None for g in goals):
         return None
