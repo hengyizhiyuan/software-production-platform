@@ -68,6 +68,31 @@ def test_exact_tree_cannot_be_substituted(subject):
         invoke((repo,base,request.model_copy(update={'tree_identity':'0'*40}),task,contract),[check()])
 
 
+def test_managed_context_routes_without_claiming_source_or_guardian_coverage(subject):
+    from spg.application.decision_context import MANAGED_WEB_SURFACE
+    from spg.application.guardian_assurance import _protected_context_for_guardian
+    repo,base,request,task,contract=subject
+    task.decision_context.surface=MANAGED_WEB_SURFACE
+    checks=StaticProtectedContextVerifier(lambda: (_ for _ in ()).throw(
+        AssertionError('source model must not judge governance'))).verify(
+            request,task,contract,repo,base)
+    assert len(checks)==1
+    assert checks[0]['coverage']=='UNVERIFIED'
+    assert checks[0]['disposition']=='OWNER_PENDING'
+    assert checks[0]['source_ref']==request.protected_context_obligations[0].source_ref
+    assert checks[0]['witnesses']==[]
+    result=VerificationCapabilityResult(result=VerificationResultValue.PASS,
+        evidence=VerificationEvidence(obligation='PATH_SCOPE',
+            subject_commit_identity=request.proposed_commit_identity,
+            subject_tree_identity=request.tree_identity,expected='code checks',observed='PASS',
+            metadata={'protected_context_checks':checks}))
+    projection=_project_decision_context_evidence(request,result)['metadata']['decision_context']
+    assert projection['protected_obligations'][0]['coverage']=='UNVERIFIED'
+    record=SimpleNamespace(id=uuid4(),result=VerificationResultValue.PASS,
+        evidence=SimpleNamespace(metadata={'decision_context':projection}))
+    assert _protected_context_for_guardian(task,(record,))[0].coverage=='GUARDIAN_REQUIRED'
+
+
 def test_wire_repair_is_bounded_and_preserves_a_contradiction(subject):
     repo,base,request,task,contract=subject
     outputs=[{'checks':[check('CONTRADICTED',quote='not an observed quote')]},

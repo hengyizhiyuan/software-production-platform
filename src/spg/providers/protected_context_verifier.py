@@ -80,6 +80,18 @@ class StaticProtectedContextVerifier:
         revision = request.proposed_commit_identity
         if git(repository, "rev-parse", revision + "^{tree}").decode().strip() != request.tree_identity:
             raise ValueError("PROTECTED_CONTEXT_TREE_MISMATCH")
+        from spg.application.decision_context import MANAGED_WEB_SURFACE
+        if getattr(task.decision_context, "surface", None) == MANAGED_WEB_SURFACE:
+            # ECF selection stays intact. Static Fact checks own the exact code
+            # obligations; Guardian/Human gates retain every remaining ECF
+            # obligation. A source quote cannot prove a lifecycle decision.
+            return tuple({**item.model_dump(mode="json"),
+                "coverage": "UNVERIFIED", "disposition": "OWNER_PENDING",
+                "verification_stage": "DOWNSTREAM_ASSURANCE",
+                "reason": "Protected ECF obligation retained for its independent assurance owner",
+                "witnesses": [], "candidate_revision": revision,
+                "candidate_tree": request.tree_identity}
+                for item in request.protected_context_obligations)
         # Read the exact bounded static repository, never execute it. No env,
         # credentials, symlinks, submodules or truncated-source success.
         materials = {}

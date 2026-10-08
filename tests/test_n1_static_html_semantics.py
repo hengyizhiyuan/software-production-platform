@@ -868,6 +868,49 @@ def test_unmaterialized_fact_is_visible_and_never_silently_passes(tmp_path: Path
     assert checks[0]["reason"] == "UNVERIFIABLE_FACT_PLAN"
 
 
+def test_exact_new_file_count_and_lifecycle_owner_are_distinct(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS)
+    revision = uuid4()
+    count_id, guard_id = uuid4(), uuid4()
+    count = EngineeringSemanticFact(
+        id=count_id, subject="new.static.asset", relation=SemanticRelation.CARDINALITY,
+        value=1, scope="new file in accepted source", qualifiers={},
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+        epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+        provenance=SemanticFactProvenance(source_record_ids=(uuid4(),),
+            source_text="Create exactly one new static file index.html",
+            role_origin=SemanticRoleOrigin.EXPLICIT),
+        admitted_work_revision_id=revision)
+    guard = EngineeringSemanticFact(
+        id=guard_id, subject="release.boundary", relation=SemanticRelation.EQUALITY,
+        value=False, scope="index.html", qualifiers={},
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+        epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+        provenance=SemanticFactProvenance(source_record_ids=(uuid4(),),
+            source_text="Do not deploy or publish.",
+            role_origin=SemanticRoleOrigin.EXPLICIT),
+        admitted_work_revision_id=revision)
+    from spg.domain.engineering_semantics import semantic_fact_reference
+    refs = tuple(semantic_fact_reference(item, work_revision_id=revision)
+                 for item in (count, guard))
+    checks = verify_static_html_semantic_facts(
+        repository, candidate, contract, refs,
+        admitted_facts={str(item.id): item for item in (count, guard)})
+    assert checks[0]["passed"] is True
+    assert checks[0]["reason"] == "EXACT_NEW_FILE_COUNT"
+    assert checks[1]["passed"] is None
+    assert checks[1]["disposition"] == "OWNER_PENDING"
+    assert checks[1]["materialization"]["fact_id"] == str(guard_id)
+    unknown = guard.model_copy(update={"value": "make the page blue"})
+    unknown_ref = semantic_fact_reference(unknown, work_revision_id=revision)
+    check = verify_static_html_semantic_facts(
+        repository, candidate, contract, (unknown_ref,),
+        admitted_facts={str(guard_id): unknown})[0]
+    assert check["passed"] is False
+    assert check["disposition"] == "UNVERIFIABLE_CURRENT"
+
+
 def test_page_assertion_rejects_value_count_and_scope_drift(tmp_path: Path) -> None:
     repository, contract = _fixture(tmp_path)
     candidate = _candidate(repository, ITEMS)

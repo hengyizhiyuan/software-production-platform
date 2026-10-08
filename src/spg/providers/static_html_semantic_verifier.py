@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
-from spg.domain.change import CodeChangeContract
+from spg.domain.change import ChangeOperation, CodeChangeContract
 from spg.domain.engineering_semantics import (
     EngineeringSemanticFact, SemanticFactReference, SemanticRelation,
     semantic_fact_reference,
@@ -435,6 +435,21 @@ def _read_exact_html(repository: Path, revision: str, path: str) -> _HTMLFacts |
         return None
 
 
+def _deferred_owner(fact: SemanticFactReference) -> str | None:
+    """Route only typed lifecycle controls; unknown source meanings still fail."""
+    if fact.relation is SemanticRelation.EQUALITY and fact.value is False:
+        return "GOVERNED_EXECUTION_AND_HUMAN_DECISION"
+    if (fact.relation is SemanticRelation.SCOPE and fact.qualifiers
+            and set(fact.qualifiers) <= {"deploy", "publish"}
+            and all(value is False for value in fact.qualifiers.values())):
+        return "GOVERNED_EXECUTION_AND_HUMAN_DECISION"
+    if (fact.relation is SemanticRelation.ACCEPTANCE_ASSERTION
+            and fact.qualifiers.get("delivery") == "not_authorized"
+            and fact.qualifiers.get("deploy_or_publish") == "excluded"):
+        return "CANDIDATE_LIFECYCLE_AND_HUMAN_DECISION"
+    return None
+
+
 def _ordered_labels_match(qualifier: str, values: tuple[str, ...]) -> bool:
     """Accept an admitted 'as listed A01..A14' order only for that exact tuple."""
     match = re.fullmatch(r"as listed ([A-Za-z]+)(\d+)\.\.([A-Za-z]+)(\d+)",
@@ -558,6 +573,12 @@ def _materialize_fact_check(
     if (fact.relation is SemanticRelation.EQUALITY and isinstance(fact.value, str)
             and fact.value in targets and (fact.scope is None or path == fact.value)):
         path, method = fact.value, "EXACT_TARGET_FILE"
+    elif (fact.relation is SemanticRelation.CARDINALITY and fact.value == 1
+          and admitted_fact is not None and len(targets) == 1
+          and (target := next(iter(targets))) in admitted_fact.provenance.source_text
+          and any(item.path == target and item.operation is ChangeOperation.CREATE
+                  for item in contract.exact_targets)):
+        path, method = target, "EXACT_NEW_FILE_COUNT"
     elif path is not None and fact.relation is SemanticRelation.EQUALITY and isinstance(fact.value, str):
         element = fact.qualifiers.get("element")
         if element == "h1" or fact.qualifiers.get("heading_level") == 1:
@@ -604,8 +625,11 @@ def _materialize_fact_check(
 
     repair_trace = None
     if (method is None and path is not None and admitted_fact is not None
-            and plan_repair is not None and fact.relation in {
-                SemanticRelation.EQUALITY, SemanticRelation.ORDERED_COMPONENT}):
+            and plan_repair is not None and _deferred_owner(fact) is None
+            and ((fact.relation is SemanticRelation.EQUALITY
+                  and isinstance(fact.value, str))
+                 or (fact.relation is SemanticRelation.ORDERED_COMPONENT
+                     and isinstance(fact.value, tuple)))):
         method, repair_trace = plan_repair.repair(fact, admitted_fact, path)
 
     plan = {"fact_id": str(fact.fact_id), "work_reality_revision_id": str(fact.source_work_revision_id),
@@ -619,8 +643,28 @@ def _materialize_fact_check(
             "repair_attempts": 0 if repair_trace is None else len(repair_trace["attempts"]),
             "model_repair": repair_trace}
     if method is None or path not in targets:
+        owner = _deferred_owner(fact) if admitted_fact is not None else None
+        if owner is not None:
+            return {"fact_id": str(fact.fact_id), "subject": fact.subject,
+                    "scope": fact.scope, "passed": None,
+                    "reason": "PENDING_AUTHORITY_OWNER",
+                    "disposition": "OWNER_PENDING", "required_owner": owner,
+                    "materialization": plan}
         return {"fact_id": str(fact.fact_id), "subject": fact.subject,
                 "scope": fact.scope, "passed": False, "reason": "UNVERIFIABLE_FACT_PLAN",
+                "disposition": "UNVERIFIABLE_CURRENT",
+                "materialization": plan}
+    if method == "EXACT_NEW_FILE_COUNT":
+        changed = subprocess.run(
+            ["git", "-C", str(repository), "diff", "--name-status",
+             contract.source_revision, revision, "--"],
+            check=False, capture_output=True, timeout=15, text=True)
+        passed = changed.returncode == 0 and changed.stdout.splitlines() == [f"A\t{path}"]
+        reason = "EXACT_NEW_FILE_COUNT"
+        return {"fact_id": str(fact.fact_id), "subject": fact.subject,
+                "scope": path, "passed": passed,
+                "reason": reason if passed else reason + "_MISMATCH",
+                "disposition": "VERIFIED_CURRENT" if passed else "FAILED_CURRENT",
                 "materialization": plan}
     parser = _read_exact_html(repository, revision, path)
     if parser is None:
@@ -652,6 +696,7 @@ def _materialize_fact_check(
         reason = "QUALIFIED_PAGE_ASSERTION"
     return {"fact_id": str(fact.fact_id), "subject": fact.subject, "scope": path,
             "passed": passed, "reason": reason if passed else reason + "_MISMATCH",
+            "disposition": "VERIFIED_CURRENT" if passed else "FAILED_CURRENT",
             "materialization": plan}
 
 
@@ -670,7 +715,9 @@ def verify_static_html_semantic_facts(
         existing = by_id.get(str(fact.fact_id))
         if existing is not None and existing["reason"] not in {
                 "SEMANTIC_FACT_PROFILE_UNSUPPORTED", "FACT_SCOPE_OUTSIDE_EXACT_HTML_TARGET"}:
-            checks.append({**existing, "materialization": {
+            checks.append({**existing,
+                "disposition": "VERIFIED_CURRENT" if existing["passed"] else "FAILED_CURRENT",
+                "materialization": {
                 "fact_id": str(fact.fact_id),
                 "work_reality_revision_id": str(fact.source_work_revision_id),
                 "relation": fact.relation.value, "value_digest": _fact_digest(fact.value),
