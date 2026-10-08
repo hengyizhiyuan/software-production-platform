@@ -86,7 +86,8 @@ def verify_static_html_semantic_facts(
                                           "work.modifiable_files", "work.change_scope",
                                           "work.new_file_count", "deliverable.page",
                                           "artifact.target_file", "change.allowed_paths",
-                                          "acceptance.verification"}
+                                          "acceptance.verification",
+                                          "repository.change_scope_file_count"}
                       or fact.subject.startswith("acceptance.ordered_list")
                       or fact.subject == "repository.changed_files")
     if not supported:
@@ -118,7 +119,8 @@ def verify_static_html_semantic_facts(
         if fact.subject in {"repository.changed_files", "repository.change_scope",
                             "change.file_scope", "work.modifiable_files",
                             "work.change_scope", "artifact.target_file",
-                            "change.allowed_paths", "artifact.file.change_scope"}:
+                            "change.allowed_paths", "artifact.file.change_scope",
+                            "repository.change_scope_file_count"}:
             result = subprocess.run(
                 ["git", "-C", str(repository), "diff", "--name-only",
                  contract.source_revision, proposed_revision, "--"],
@@ -139,7 +141,9 @@ def verify_static_html_semantic_facts(
                         and isinstance(fact.value, str)
                         and fact.value in html_targets else
                         ("index.html",) if fact.subject == "repository.change_scope"
-                        and fact.value == "index.html only" else ())
+                        and fact.value == "index.html only" else
+                        ("index.html",) if fact.subject == "repository.change_scope_file_count"
+                        and fact.value == "only index.html is created or changed" else ())
             actual = tuple(result.stdout.splitlines()) if result.returncode == 0 else ()
             passed = (fact.relation is (SemanticRelation.EQUALITY
                        if fact.subject == "artifact.target_file" else SemanticRelation.SCOPE)
@@ -149,6 +153,7 @@ def verify_static_html_semantic_facts(
                                                "work.modifiable_files",
                                                "change.file_scope",
                                                "artifact.file.change_scope",
+                                               "repository.change_scope_file_count",
                                                "work.change_scope",
                                                "artifact.target_file",
                                                "change.allowed_paths"})
@@ -210,6 +215,7 @@ def verify_static_html_semantic_facts(
             elif (fact.subject in {"page.heading.text", "page.heading_text",
                                    "page.h1.text", "page.h1_text",
                                    "artifact.file.h1_text",
+                                   "index_html.h1_text",
                                    f"{path}.h1.text", "index.h1_text",
                                    f"{path}.h1_text",
                                    f"{page_aliases[path]}.h1_text",
@@ -219,6 +225,7 @@ def verify_static_html_semantic_facts(
                     and (fact.subject in {"page.h1.text", "page.h1_text",
                                          "page.heading_text",
                                          "page.heading.text", "artifact.file.h1_text",
+                                         "index_html.h1_text",
                                          f"{path}.h1.text",
                                          "index.h1_text", f"{path}.h1_text",
                                          f"{page_aliases[path]}.h1_text",
@@ -269,11 +276,15 @@ def verify_static_html_semantic_facts(
                     and fact.relation is SemanticRelation.EQUALITY):
                 passed = fact.value == path
                 reason = "EXACT_ENTRY_FILE" if passed else "ENTRY_FILE_MISMATCH"
-            elif (fact.subject in {"index.ordered_list_items", "page.list.item_count"}
+            elif (fact.subject in {"index.ordered_list_items", "page.list.item_count",
+                                   "index_html.ordered_list_count",
+                                   "index_html.list_item_acceptance_count"}
                     and fact.relation is SemanticRelation.CARDINALITY):
                 passed = (path in ordered_scopes
                           and len(parser.ordered_lists) == 1
-                          and len(parser.ordered_lists[0]) == fact.value)
+                          and (len(parser.ordered_lists[0]) == fact.value
+                               if fact.subject != "index_html.ordered_list_count"
+                               else fact.value == 1))
                 reason = "BOUND_EXACT_LIST_COUNT" if passed else "ORDERED_VALUES_OR_COUNT_MISMATCH"
             elif (fact.subject == f"{file_aliases[path]}.ordered_list.item_count"
                     and fact.relation is SemanticRelation.CARDINALITY):
@@ -298,6 +309,14 @@ def verify_static_html_semantic_facts(
                 passed = (path in ordered_scopes and fact.value == 1
                           and len(parser.ordered_lists) == 1)
                 reason = "BOUND_TO_ORDERED_FACT" if passed else "ORDERED_FACT_MISSING_OR_OCCURRENCE_MISMATCH"
+            elif (fact.subject == "index_html.list_item_occurrence"
+                    and fact.relation is SemanticRelation.ACCEPTANCE_ASSERTION):
+                passed = (path in ordered_scopes
+                          and fact.value ==
+                          "each of the fourteen texts appears exactly once, in order"
+                          and len(parser.ordered_lists) == 1
+                          and len(parser.ordered_lists[0]) == 14)
+                reason = "BOUND_TO_ORDERED_FACT" if passed else "ORDERED_FACT_MISSING"
             elif (fact.subject in {"page.ordered_list.items",
                                    "acceptance.ordered_list_texts"}
                     and fact.relation is SemanticRelation.ACCEPTANCE_ASSERTION):
@@ -324,6 +343,9 @@ def verify_static_html_semantic_facts(
                                   "acceptance.ordered_list_texts",
                                   "page.list.item_count",
                                   "index.ordered_list_items",
+                                  "index_html.ordered_list_count",
+                                  "index_html.list_item_acceptance_count",
+                                  "index_html.list_item_occurrence",
                                   *(f"{alias}.ordered_list.item_count"
                                     for alias in file_aliases.values())}
                 or (check["subject"] == "page.ordered_list.items"

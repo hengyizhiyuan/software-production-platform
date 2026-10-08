@@ -95,6 +95,43 @@ def test_observed_g3_artifact_file_profile_requires_exact_blob(tmp_path: Path) -
                 "artifact.file.paragraph_text")["passed"] is False
 
 
+def test_observed_g4_index_html_profile_binds_each_item(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    common = dict(scope="index.html",
+                  authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4())
+    facts = tuple(SemanticFactReference(
+        fact_id=uuid4(), subject=subject, relation=relation, value=value,
+        qualifiers=qualifiers, **common)
+        for subject, relation, value, qualifiers in (
+            ("index_html.h1_text", SemanticRelation.EQUALITY, "N1 Budget",
+             {"element": "h1", "exactness": "exact"}),
+            ("index_html.ordered_list_count", SemanticRelation.CARDINALITY,
+             1, {}),
+            ("page.ordered_list.items", SemanticRelation.ORDERED_COMPONENT,
+             ITEMS, {"count": 14}),
+            ("index_html.list_item_acceptance_count",
+             SemanticRelation.CARDINALITY, 14,
+             {"role": "mandatory acceptance constraints"}),
+            ("index_html.list_item_occurrence",
+             SemanticRelation.ACCEPTANCE_ASSERTION,
+             "each of the fourteen texts appears exactly once, in order",
+             {"verification": "all fourteen exact texts verified"}),
+            ("repository.change_scope_file_count", SemanticRelation.SCOPE,
+             "only index.html is created or changed",
+             {"verification": "no other file changes"})))
+    good = _candidate(repository, ITEMS)
+    checks = verify_static_html_semantic_facts(repository, good, contract, facts)
+    assert len(checks) == 6 and all(check["passed"] for check in checks)
+    bad = _candidate(repository, tuple(item for item in ITEMS if not
+                                       item.startswith("F07:")))
+    checks = verify_static_html_semantic_facts(repository, bad, contract, facts)
+    assert {check["subject"] for check in checks if not check["passed"]} >= {
+        "page.ordered_list.items", "index_html.list_item_acceptance_count",
+        "index_html.list_item_occurrence"}
+
+
 def _git(repository: Path, *args: str) -> str:
     return subprocess.run(["git", "-C", str(repository), *args], check=True,
                           capture_output=True, text=True).stdout.strip()
