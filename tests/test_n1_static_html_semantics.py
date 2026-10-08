@@ -377,3 +377,62 @@ def test_g3_observed_aliases_bind_exact_new_file_and_text(tmp_path: Path) -> Non
     candidate = _git(repository, "rev-parse", "HEAD")
     checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
     assert not checks[1]["passed"]
+
+
+def test_g0_semantic_markup_and_exact_deliverable_are_checked(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    (repository / "index.html").write_text(
+        "<!doctype html><html><body><h1>N1 Software Control</h1>"
+        "<p>Isolated qualification only</p></body></html>", encoding="utf-8")
+    _git(repository, "add", "index.html")
+    _git(repository, "commit", "-m", "semantic page")
+    candidate = _git(repository, "rev-parse", "HEAD")
+    common = dict(authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4())
+    facts = (
+        SemanticFactReference(fact_id=uuid4(), subject="deliverable.page",
+                              relation=SemanticRelation.CARDINALITY, value=1,
+                              qualifiers={"path": "index.html"}, **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.markup",
+                              relation=SemanticRelation.BEHAVIOR,
+                              value="semantic HTML", **common),
+    )
+    assert all(check["passed"] for check in verify_static_html_semantic_facts(
+        repository, candidate, contract, facts))
+    (repository / "index.html").write_text(
+        "<h1>N1 Software Control</h1><p>Isolated qualification only</p>",
+        encoding="utf-8")
+    _git(repository, "add", "index.html")
+    _git(repository, "commit", "-m", "remove semantic structure")
+    candidate = _git(repository, "rev-parse", "HEAD")
+    assert not verify_static_html_semantic_facts(
+        repository, candidate, contract, facts)[1]["passed"]
+
+
+def test_fourth_observed_g4_profile_binds_count_to_exact_values(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS)
+    common = dict(authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4())
+    facts = (
+        SemanticFactReference(fact_id=uuid4(), subject="index_html.heading_text",
+                              relation=SemanticRelation.EQUALITY, value="N1 Budget",
+                              scope="index.html semantic HTML page", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="index_html.ordered_list.item_count",
+                              relation=SemanticRelation.CARDINALITY, value=14,
+                              scope="the single ordered list in index.html", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="change.file_scope",
+                              relation=SemanticRelation.SCOPE, value="index.html",
+                              scope="files changed by this production", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.ordered_list.items",
+                              relation=SemanticRelation.ORDERED_COMPONENT,
+                              value=ITEMS, scope="index.html",
+                              qualifiers={"count": 14}, **common),
+    )
+    checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
+    assert len(checks) == 4 and all(check["passed"] for check in checks)
+    candidate = _candidate(repository, ITEMS[:6] + ITEMS[7:])
+    checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
+    assert not checks[1]["passed"] and not checks[3]["passed"]

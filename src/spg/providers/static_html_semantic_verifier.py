@@ -15,6 +15,7 @@ class _HTMLFacts(HTMLParser):
         self.paragraphs: list[str] = []
         self.ordered_lists: list[list[str]] = []
         self.outside_list_text: list[str] = []
+        self.tags: list[str] = []
         self._heading: list[str] | None = None
         self._paragraph: list[str] | None = None
         self._list_stack: list[int] = []
@@ -22,6 +23,7 @@ class _HTMLFacts(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs) -> None:
         del attrs
+        self.tags.append(tag)
         if tag == "h1":
             self._heading = []
         elif tag == "p":
@@ -72,13 +74,16 @@ def verify_static_html_semantic_facts(
                     if target.path.endswith(".html")}
     page_aliases = {path: Path(path).stem.replace("-", "_") + "_page"
                     for path in html_targets}
+    file_aliases = {path: Path(path).name.replace(".", "_")
+                    for path in html_targets}
     supported = tuple(fact for fact in facts if fact.subject.startswith("page.")
                       or any(fact.subject.startswith(f"{path}.") for path in html_targets)
                       or any(fact.subject.startswith(f"{alias}.")
-                             for alias in page_aliases.values())
+                             for alias in (*page_aliases.values(), *file_aliases.values()))
                       or fact.subject in {"index.h1_text", "index.ordered_list_items",
                                           "repository.change_scope", "change.file_scope",
-                                          "work.modifiable_files", "work.new_file_count"}
+                                          "work.modifiable_files", "work.new_file_count",
+                                          "deliverable.page"}
                       or fact.subject.startswith("acceptance.ordered_list")
                       or fact.subject == "repository.changed_files")
     if not supported:
@@ -99,6 +104,12 @@ def verify_static_html_semantic_facts(
         if (fact.subject == "index.ordered_list_items"
                 and fact.scope == "index.html ordered list"):
             path = "index.html"
+        if len(html_targets) == 1 and path not in html_targets:
+            only_path = next(iter(html_targets))
+            if (fact.subject.startswith(file_aliases[only_path] + ".")
+                    and fact.scope in {f"{only_path} semantic HTML page",
+                                       f"the single ordered list in {only_path}"}):
+                path = only_path
         if fact.subject in {"repository.changed_files", "repository.change_scope",
                             "change.file_scope", "work.modifiable_files"}:
             result = subprocess.run(
@@ -107,6 +118,8 @@ def verify_static_html_semantic_facts(
                 check=False, capture_output=True, timeout=15, text=True,
             )
             expected = (tuple(fact.value) if isinstance(fact.value, tuple) else
+                        (fact.value,) if fact.subject == "change.file_scope"
+                        and isinstance(fact.value, str) and fact.value in html_targets else
                         ("index.html",) if fact.subject == "repository.change_scope"
                         and fact.value == "index.html only" else ())
             actual = tuple(result.stdout.splitlines()) if result.returncode == 0 else ()
@@ -114,9 +127,22 @@ def verify_static_html_semantic_facts(
                       and (fact.qualifiers.get("exclusive") == "true"
                            or fact.qualifiers.get("only") is True
                            or fact.subject in {"repository.change_scope",
-                                               "work.modifiable_files"})
+                                               "work.modifiable_files",
+                                               "change.file_scope"})
                       and bool(expected) and actual == expected)
             reason = "EXACT_CHANGED_FILES" if passed else "CHANGED_FILE_SCOPE_MISMATCH"
+        elif fact.subject == "deliverable.page":
+            tree = subprocess.run(
+                ["git", "-C", str(repository), "ls-tree", "-r", "--name-only",
+                 proposed_revision], check=False, capture_output=True,
+                timeout=15, text=True)
+            pages = tuple(name for name in tree.stdout.splitlines()
+                          if name.endswith(".html")) if tree.returncode == 0 else ()
+            passed = (fact.relation is SemanticRelation.CARDINALITY
+                      and fact.value == 1 and len(html_targets) == 1
+                      and pages == (fact.qualifiers.get("path"),)
+                      and pages[0] in html_targets)
+            reason = "EXACT_DELIVERABLE_PAGE" if passed else "DELIVERABLE_PAGE_MISMATCH"
         elif fact.subject == "work.new_file_count":
             result = subprocess.run(
                 ["git", "-C", str(repository), "diff", "--name-status",
@@ -152,12 +178,14 @@ def verify_static_html_semantic_facts(
             elif (fact.subject in {"page.heading.text", "page.h1.text",
                                    f"{path}.h1.text", "index.h1_text",
                                    f"{path}.h1_text",
-                                   f"{page_aliases[path]}.h1_text"}
+                                   f"{page_aliases[path]}.h1_text",
+                                   f"{file_aliases[path]}.heading_text"}
                     and fact.relation is SemanticRelation.EQUALITY
                     and isinstance(fact.value, str)
                     and (fact.subject in {"page.h1.text", f"{path}.h1.text",
                                          "index.h1_text", f"{path}.h1_text",
-                                         f"{page_aliases[path]}.h1_text"}
+                                         f"{page_aliases[path]}.h1_text",
+                                         f"{file_aliases[path]}.heading_text"}
                          or fact.qualifiers.get("heading_level") == 1
                          or fact.qualifiers.get("exact") is True)):
                 passed = parser.headings == [fact.value]
@@ -187,7 +215,18 @@ def verify_static_html_semantic_facts(
                               if name.endswith(".html")) if tree.returncode == 0 else ()
                 passed = pages == (path,) and fact.value == 1
                 reason = "EXACT_PAGE_COUNT" if passed else "PAGE_COUNT_MISMATCH"
+            elif (fact.subject == "page.markup"
+                    and fact.relation is SemanticRelation.BEHAVIOR
+                    and fact.value == "semantic HTML"):
+                passed = all(tag in parser.tags for tag in ("html", "body", "h1", "p"))
+                reason = "SEMANTIC_HTML_STRUCTURE" if passed else "SEMANTIC_HTML_STRUCTURE_MISSING"
             elif (fact.subject in {"index.ordered_list_items", "page.list.item_count"}
+                    and fact.relation is SemanticRelation.CARDINALITY):
+                passed = (path in ordered_scopes
+                          and len(parser.ordered_lists) == 1
+                          and len(parser.ordered_lists[0]) == fact.value)
+                reason = "BOUND_EXACT_LIST_COUNT" if passed else "ORDERED_VALUES_OR_COUNT_MISMATCH"
+            elif (fact.subject == f"{file_aliases[path]}.ordered_list.item_count"
                     and fact.relation is SemanticRelation.CARDINALITY):
                 passed = (path in ordered_scopes
                           and len(parser.ordered_lists) == 1
@@ -235,7 +274,9 @@ def verify_static_html_semantic_facts(
         if (check["subject"] in {"page.ordered_list.item_occurrence",
                                   "acceptance.ordered_list_texts",
                                   "page.list.item_count",
-                                  "index.ordered_list_items"}
+                                  "index.ordered_list_items",
+                                  *(f"{alias}.ordered_list.item_count"
+                                    for alias in file_aliases.values())}
                 or (check["subject"] == "page.ordered_list.items"
                     and check["reason"] == "BOUND_TO_ORDERED_FACT")) \
                 and check["scope"] in failed_ordered_scopes:
