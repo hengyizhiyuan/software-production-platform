@@ -135,18 +135,7 @@ class RepositoryCodeVerifier:
                 )
                 if semantic_checks:
                     metadata["static_html_semantic_checks"] = semantic_checks
-                    pending = tuple(check["fact_id"] for check in semantic_checks
-                        if check["passed"] is None)
-                    metadata["semantic_fact_owner_pending"] = pending
-                    from spg.application.decision_context import MANAGED_WEB_SURFACE
-                    managed_lineage = (work_unit.completion_contract.task_contract is not None
-                        and work_unit.completion_contract.task_contract.decision_context is not None
-                        and work_unit.completion_contract.task_contract.decision_context.surface
-                        == MANAGED_WEB_SURFACE)
-                    if (any(check["passed"] is False for check in semantic_checks)
-                            or pending and not (managed_lineage
-                                and request.protected_context_obligations
-                                and self.context_verifier is not None)):
+                    if any(check["passed"] is not True for check in semantic_checks):
                         result = VerificationResultValue.FAIL
             if (obligation.kind is CodeVerificationKind.PATH_SCOPE
                     and result is VerificationResultValue.PASS
@@ -156,9 +145,7 @@ class RepositoryCodeVerifier:
                     request, work_unit.completion_contract.task_contract, contract,
                     dispatch.workspace.repository_path, source.repository_revision)
                 metadata["protected_context_checks"] = checks
-                if any(item["coverage"] != "COVERED"
-                       and item.get("verification_stage") != "DOWNSTREAM_ASSURANCE"
-                       for item in checks):
+                if any(item["coverage"] != "COVERED" for item in checks):
                     result = VerificationResultValue.FAIL
 
         except Exception as error:

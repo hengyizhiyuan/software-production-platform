@@ -435,21 +435,6 @@ def _read_exact_html(repository: Path, revision: str, path: str) -> _HTMLFacts |
         return None
 
 
-def _deferred_owner(fact: SemanticFactReference) -> str | None:
-    """Route only typed lifecycle controls; unknown source meanings still fail."""
-    if fact.relation is SemanticRelation.EQUALITY and fact.value is False:
-        return "GOVERNED_EXECUTION_AND_HUMAN_DECISION"
-    if (fact.relation is SemanticRelation.SCOPE and fact.qualifiers
-            and set(fact.qualifiers) <= {"deploy", "publish"}
-            and all(value is False for value in fact.qualifiers.values())):
-        return "GOVERNED_EXECUTION_AND_HUMAN_DECISION"
-    if (fact.relation is SemanticRelation.ACCEPTANCE_ASSERTION
-            and fact.qualifiers.get("delivery") == "not_authorized"
-            and fact.qualifiers.get("deploy_or_publish") == "excluded"):
-        return "CANDIDATE_LIFECYCLE_AND_HUMAN_DECISION"
-    return None
-
-
 def _ordered_labels_match(qualifier: str, values: tuple[str, ...]) -> bool:
     """Accept an admitted 'as listed A01..A14' order only for that exact tuple."""
     match = re.fullmatch(r"as listed ([A-Za-z]+)(\d+)\.\.([A-Za-z]+)(\d+)",
@@ -625,7 +610,7 @@ def _materialize_fact_check(
 
     repair_trace = None
     if (method is None and path is not None and admitted_fact is not None
-            and plan_repair is not None and _deferred_owner(fact) is None
+            and plan_repair is not None
             and ((fact.relation is SemanticRelation.EQUALITY
                   and isinstance(fact.value, str))
                  or (fact.relation is SemanticRelation.ORDERED_COMPONENT
@@ -643,13 +628,6 @@ def _materialize_fact_check(
             "repair_attempts": 0 if repair_trace is None else len(repair_trace["attempts"]),
             "model_repair": repair_trace}
     if method is None or path not in targets:
-        owner = _deferred_owner(fact) if admitted_fact is not None else None
-        if owner is not None:
-            return {"fact_id": str(fact.fact_id), "subject": fact.subject,
-                    "scope": fact.scope, "passed": None,
-                    "reason": "PENDING_AUTHORITY_OWNER",
-                    "disposition": "OWNER_PENDING", "required_owner": owner,
-                    "materialization": plan}
         return {"fact_id": str(fact.fact_id), "subject": fact.subject,
                 "scope": fact.scope, "passed": False, "reason": "UNVERIFIABLE_FACT_PLAN",
                 "disposition": "UNVERIFIABLE_CURRENT",

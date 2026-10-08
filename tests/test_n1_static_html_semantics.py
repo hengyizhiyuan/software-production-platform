@@ -899,14 +899,26 @@ def test_exact_new_file_count_and_lifecycle_owner_are_distinct(tmp_path: Path) -
         admitted_facts={str(item.id): item for item in (count, guard)})
     assert checks[0]["passed"] is True
     assert checks[0]["reason"] == "EXACT_NEW_FILE_COUNT"
-    assert checks[1]["passed"] is None
-    assert checks[1]["disposition"] == "OWNER_PENDING"
+    assert checks[1]["passed"] is False
+    assert checks[1]["disposition"] == "UNVERIFIABLE_CURRENT"
     assert checks[1]["materialization"]["fact_id"] == str(guard_id)
     unknown = guard.model_copy(update={"value": "make the page blue"})
     unknown_ref = semantic_fact_reference(unknown, work_revision_id=revision)
     check = verify_static_html_semantic_facts(
         repository, candidate, contract, (unknown_ref,),
         admitted_facts={str(guard_id): unknown})[0]
+    assert check["passed"] is False
+    assert check["disposition"] == "UNVERIFIABLE_CURRENT"
+
+    # Relation/value alone cannot prove which owner or lifecycle gate owns a
+    # negative statement. A content absence must never inherit delivery proof.
+    unrelated = guard.model_copy(update={"subject": "page.has_footer",
+                                        "provenance": guard.provenance.model_copy(
+                                            update={"source_text": "The page must have no footer."})})
+    unrelated_ref = semantic_fact_reference(unrelated, work_revision_id=revision)
+    check = verify_static_html_semantic_facts(
+        repository, candidate, contract, (unrelated_ref,),
+        admitted_facts={str(guard_id): unrelated})[0]
     assert check["passed"] is False
     assert check["disposition"] == "UNVERIFIABLE_CURRENT"
 
