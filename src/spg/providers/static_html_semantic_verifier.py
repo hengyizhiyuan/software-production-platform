@@ -82,8 +82,9 @@ def verify_static_html_semantic_facts(
                              for alias in (*page_aliases.values(), *file_aliases.values()))
                       or fact.subject in {"index.h1_text", "index.ordered_list_items",
                                           "repository.change_scope", "change.file_scope",
-                                          "work.modifiable_files", "work.new_file_count",
-                                          "deliverable.page"}
+                                          "work.modifiable_files", "work.change_scope",
+                                          "work.new_file_count", "deliverable.page",
+                                          "artifact.target_file"}
                       or fact.subject.startswith("acceptance.ordered_list")
                       or fact.subject == "repository.changed_files")
     if not supported:
@@ -111,7 +112,8 @@ def verify_static_html_semantic_facts(
                                        f"the single ordered list in {only_path}"}):
                 path = only_path
         if fact.subject in {"repository.changed_files", "repository.change_scope",
-                            "change.file_scope", "work.modifiable_files"}:
+                            "change.file_scope", "work.modifiable_files",
+                            "work.change_scope", "artifact.target_file"}:
             result = subprocess.run(
                 ["git", "-C", str(repository), "diff", "--name-only",
                  contract.source_revision, proposed_revision, "--"],
@@ -120,15 +122,25 @@ def verify_static_html_semantic_facts(
             expected = (tuple(fact.value) if isinstance(fact.value, tuple) else
                         (fact.value,) if fact.subject == "change.file_scope"
                         and isinstance(fact.value, str) and fact.value in html_targets else
+                        (fact.value[:-5],) if fact.subject == "work.change_scope"
+                        and isinstance(fact.value, str)
+                        and fact.value.endswith(" only")
+                        and fact.value[:-5] in html_targets else
+                        (fact.value,) if fact.subject == "artifact.target_file"
+                        and isinstance(fact.value, str)
+                        and fact.value in html_targets else
                         ("index.html",) if fact.subject == "repository.change_scope"
                         and fact.value == "index.html only" else ())
             actual = tuple(result.stdout.splitlines()) if result.returncode == 0 else ()
-            passed = (fact.relation is SemanticRelation.SCOPE
+            passed = (fact.relation is (SemanticRelation.EQUALITY
+                       if fact.subject == "artifact.target_file" else SemanticRelation.SCOPE)
                       and (fact.qualifiers.get("exclusive") == "true"
                            or fact.qualifiers.get("only") is True
                            or fact.subject in {"repository.change_scope",
                                                "work.modifiable_files",
-                                               "change.file_scope"})
+                                               "change.file_scope",
+                                               "work.change_scope",
+                                               "artifact.target_file"})
                       and bool(expected) and actual == expected)
             reason = "EXACT_CHANGED_FILES" if passed else "CHANGED_FILE_SCOPE_MISMATCH"
         elif fact.subject == "deliverable.page":
@@ -175,14 +187,16 @@ def verify_static_html_semantic_facts(
             parser = observed[path]
             if parser is None:
                 passed, reason = False, "EXACT_HTML_BLOB_UNREADABLE"
-            elif (fact.subject in {"page.heading.text", "page.h1.text",
+            elif (fact.subject in {"page.heading.text", "page.heading_text",
+                                   "page.h1.text",
                                    f"{path}.h1.text", "index.h1_text",
                                    f"{path}.h1_text",
                                    f"{page_aliases[path]}.h1_text",
                                    f"{file_aliases[path]}.heading_text"}
                     and fact.relation is SemanticRelation.EQUALITY
                     and isinstance(fact.value, str)
-                    and (fact.subject in {"page.h1.text", f"{path}.h1.text",
+                    and (fact.subject in {"page.h1.text", "page.heading_text",
+                                         f"{path}.h1.text",
                                          "index.h1_text", f"{path}.h1_text",
                                          f"{page_aliases[path]}.h1_text",
                                          f"{file_aliases[path]}.heading_text"}
@@ -190,7 +204,8 @@ def verify_static_html_semantic_facts(
                          or fact.qualifiers.get("exact") is True)):
                 passed = parser.headings == [fact.value]
                 reason = "EXACT_H1" if passed else "H1_TEXT_OR_COUNT_MISMATCH"
-            elif (fact.subject in {"page.paragraph.text", f"{path}.paragraph.text",
+            elif (fact.subject in {"page.paragraph.text", "page.paragraph_text",
+                                   f"{path}.paragraph.text",
                                    f"{path}.paragraph_text",
                                    f"{page_aliases[path]}.paragraph_text"}
                     and fact.relation is SemanticRelation.EQUALITY

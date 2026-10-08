@@ -382,6 +382,23 @@ def test_g3_observed_aliases_bind_exact_new_file_and_text(tmp_path: Path) -> Non
     )
     checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
     assert len(checks) == 4 and all(check["passed"] for check in checks)
+    alternate = (
+        SemanticFactReference(fact_id=uuid4(), subject="artifact.target_file",
+                              relation=SemanticRelation.EQUALITY,
+                              value="status-v0.html", scope="interaction", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.heading_text",
+                              relation=SemanticRelation.EQUALITY, value="N1 Status",
+                              scope="status-v0.html", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.paragraph_text",
+                              relation=SemanticRelation.EQUALITY,
+                              value="Existing Product bounded Work",
+                              scope="status-v0.html", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="work.change_scope",
+                              relation=SemanticRelation.SCOPE,
+                              value="status-v0.html only", scope="interaction", **common),
+    )
+    assert all(check["passed"] for check in verify_static_html_semantic_facts(
+        repository, candidate, contract, alternate))
     (repository / "status-v0.html").write_text(
         "<!doctype html><h1>N1 Status</h1><p>Wrong</p>", encoding="utf-8")
     _git(repository, "add", "status-v0.html")
