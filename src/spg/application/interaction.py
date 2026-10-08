@@ -2939,6 +2939,8 @@ class WorkInteractionService:
                 active_work_context=active_context, basis_fingerprint=current_basis,
                 observed_reality=(*self._semantic_owner_observations(interaction_id),
                     *(observation for provider in self._intent_observation_providers for observation in provider(interaction_id))))
+            candidate = self._preserve_explicit_ordered_page_items(
+                candidate, latest_human_record)
             semantic_ir = IntentRealizationKernel().govern(candidate, semantic_basis)
             explicit_new_work_origin = None
             # A current, unambiguous typed Human request to start an independent
@@ -4266,6 +4268,51 @@ class WorkInteractionService:
             reasons=reasons,
             basis_fingerprint=basis_fingerprint,
         )
+
+    @staticmethod
+    def _preserve_explicit_ordered_page_items(
+        candidate: InteractionAssessmentCandidate,
+        latest: InteractionRecord,
+    ) -> InteractionAssessmentCandidate:
+        """Keep an exact Human list when WIC reduces it to a cardinality.
+
+        This narrow page-list grammar has an explicit file, ordered-list shape,
+        and exact occurrence/order acceptance. The Human record supplies every
+        value; no value is inferred from a Candidate or current source.
+        """
+        source = latest.content
+        if "index.html" not in source or "ordered list" not in source.lower():
+            return candidate
+        match = re.search(
+            r"\bevery one must appear exactly once, in order:\s*(.+?)(?:\.\s*Verify\b)",
+            source, re.IGNORECASE | re.DOTALL)
+        if match is None:
+            return candidate
+        items = tuple(part.strip() for part in match.group(1).split(";"))
+        labels = tuple(re.fullmatch(r"F(\d{2}):\s*\S.*", item) for item in items)
+        if len(items) < 2 or any(label is None for label in labels) or tuple(
+                int(label.group(1)) for label in labels if label is not None
+        ) != tuple(range(1, len(items) + 1)):
+            raise InteractionInvariantViolation(
+                "Explicit ordered page constraints are incomplete or ambiguous")
+        existing = tuple(fact for fact in candidate.semantic_fact_candidates
+                         if fact.subject == "page.ordered_list.items"
+                         and fact.relation is SemanticRelation.ORDERED_COMPONENT
+                         and fact.scope == "index.html" and fact.value == items)
+        if existing:
+            return candidate
+        fact = EngineeringSemanticFactCandidate(
+            candidate_id="human-ordered-page-items",
+            subject="page.ordered_list.items",
+            relation=SemanticRelation.ORDERED_COMPONENT,
+            value=items, scope="index.html", qualifiers={"count": len(items)},
+            authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+            epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+            source_record_ids=(latest.id,), source_text=source,
+            role_origin=SemanticRoleOrigin.EXPLICIT,
+        )
+        return candidate.model_copy(update={"semantic_fact_candidates": (
+            *candidate.semantic_fact_candidates, fact)})
 
     @staticmethod
     def _canonicalize_explicit_branch_facts(

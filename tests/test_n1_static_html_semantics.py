@@ -1,6 +1,8 @@
 """N1 G4: every admitted ordered item is checked against an exact Candidate blob."""
 
 from pathlib import Path
+from datetime import UTC, datetime
+from hashlib import sha256
 import subprocess
 from uuid import uuid4
 
@@ -15,6 +17,11 @@ from spg.domain.engineering_semantics import (
     SemanticRelation,
 )
 from spg.providers.static_html_semantic_verifier import verify_static_html_semantic_facts
+from spg.application.interaction import WorkInteractionService
+from spg.domain.interaction import (
+    InteractionActor, InteractionAssessmentCandidate, InteractionInvariantViolation,
+    InteractionRecord,
+)
 
 
 ITEMS = tuple(f"F{index:02d}: N1 protected fact {index:02d}" for index in range(1, 15))
@@ -209,3 +216,82 @@ def test_existing_g0_g3_heading_and_paragraph_shapes_are_mechanical(tmp_path: Pa
     candidate = _git(repository, "rev-parse", "HEAD")
     checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
     assert not checks[2]["passed"] and not checks[3]["passed"]
+
+
+def test_explicit_fourteen_items_survive_wic_count_only_candidate() -> None:
+    source = (
+        "Create index.html with one ordered list. The following fourteen list-item "
+        "texts are separate mandatory acceptance constraints; every one must "
+        "appear exactly once, in order: " + "; ".join(ITEMS) +
+        ". Verify all fourteen exact texts."
+    )
+    record = InteractionRecord(
+        id=uuid4(), interaction_id=uuid4(), sequence=1,
+        actor=InteractionActor.HUMAN, source="human:test", content=source,
+        content_fingerprint=sha256(source.encode()).hexdigest(),
+        created_at=datetime.now(UTC))
+    candidate = InteractionAssessmentCandidate(
+        natural_response="I will produce the page.", provider_identity="test")
+    preserved = WorkInteractionService._preserve_explicit_ordered_page_items(
+        candidate, record)
+    assert len(preserved.semantic_fact_candidates) == 1
+    fact = preserved.semantic_fact_candidates[0]
+    assert fact.value == ITEMS and fact.scope == "index.html"
+    assert fact.source_record_ids == (record.id,) and fact.source_text == source
+    assert fact.qualifiers["count"] == 14
+
+    malformed = record.model_copy(update={"content": source.replace("F07:", "F08:")})
+    with pytest.raises(InteractionInvariantViolation):
+        WorkInteractionService._preserve_explicit_ordered_page_items(candidate, malformed)
+
+
+def test_count_only_g4_fact_cannot_pass_without_exact_ordered_values(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS)
+    common = dict(authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4())
+    count = SemanticFactReference(
+        fact_id=uuid4(), subject="index.ordered_list_items",
+        relation=SemanticRelation.CARDINALITY, value=14,
+        scope="index.html ordered list", **common)
+    assert not verify_static_html_semantic_facts(
+        repository, candidate, contract, (count,))[0]["passed"]
+    exact = SemanticFactReference(
+        fact_id=uuid4(), subject="page.ordered_list.items",
+        relation=SemanticRelation.ORDERED_COMPONENT, value=ITEMS,
+        scope="index.html", qualifiers={"count": 14}, **common)
+    checks = verify_static_html_semantic_facts(
+        repository, candidate, contract, (count, exact))
+    assert len(checks) == 2 and all(check["passed"] for check in checks)
+
+
+def test_g0_page_count_and_g3_wic_text_aliases(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    (repository / "index.html").write_text(
+        "<!doctype html><h1>N1 Software Control</h1>"
+        "<p>Isolated qualification only</p>", encoding="utf-8")
+    _git(repository, "add", "index.html")
+    _git(repository, "commit", "-m", "page")
+    candidate = _git(repository, "rev-parse", "HEAD")
+    common = dict(scope="index.html", authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4())
+    facts = (
+        SemanticFactReference(fact_id=uuid4(), subject="page.count",
+                              relation=SemanticRelation.CARDINALITY, value=1, **common),
+        SemanticFactReference(fact_id=uuid4(), subject="index.html.h1_text",
+                              relation=SemanticRelation.EQUALITY,
+                              value="N1 Software Control", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="index.html.paragraph_text",
+                              relation=SemanticRelation.EQUALITY,
+                              value="Isolated qualification only", **common),
+    )
+    assert all(check["passed"] for check in verify_static_html_semantic_facts(
+        repository, candidate, contract, facts))
+    (repository / "other.html").write_text("<!doctype html><p>Extra</p>", encoding="utf-8")
+    _git(repository, "add", "other.html")
+    _git(repository, "commit", "-m", "extra page")
+    candidate = _git(repository, "rev-parse", "HEAD")
+    assert not verify_static_html_semantic_facts(
+        repository, candidate, contract, facts)[0]["passed"]

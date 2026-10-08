@@ -72,6 +72,8 @@ def verify_static_html_semantic_facts(
                     if target.path.endswith(".html")}
     supported = tuple(fact for fact in facts if fact.subject.startswith("page.")
                       or any(fact.subject.startswith(f"{path}.") for path in html_targets)
+                      or fact.subject in {"index.h1_text", "index.ordered_list_items",
+                                          "repository.change_scope"}
                       or fact.subject.startswith("acceptance.ordered_list")
                       or fact.subject == "repository.changed_files")
     if not supported:
@@ -88,16 +90,22 @@ def verify_static_html_semantic_facts(
                 ordered_scopes.update(html_targets)
     for fact in supported:
         path = fact.scope or (next(iter(html_targets)) if len(html_targets) == 1 else "")
-        if fact.subject == "repository.changed_files":
+        if (fact.subject == "index.ordered_list_items"
+                and fact.scope == "index.html ordered list"):
+            path = "index.html"
+        if fact.subject in {"repository.changed_files", "repository.change_scope"}:
             result = subprocess.run(
                 ["git", "-C", str(repository), "diff", "--name-only",
                  contract.source_revision, proposed_revision, "--"],
                 check=False, capture_output=True, timeout=15, text=True,
             )
-            expected = tuple(fact.value) if isinstance(fact.value, tuple) else ()
+            expected = (tuple(fact.value) if isinstance(fact.value, tuple) else
+                        ("index.html",) if fact.subject == "repository.change_scope"
+                        and fact.value == "index.html only" else ())
             actual = tuple(result.stdout.splitlines()) if result.returncode == 0 else ()
             passed = (fact.relation is SemanticRelation.SCOPE
-                      and fact.qualifiers.get("exclusive") == "true"
+                      and (fact.qualifiers.get("exclusive") == "true"
+                           or fact.subject == "repository.change_scope")
                       and bool(expected) and actual == expected)
             reason = "EXACT_CHANGED_FILES" if passed else "CHANGED_FILE_SCOPE_MISMATCH"
         elif path not in html_targets:
@@ -122,14 +130,17 @@ def verify_static_html_semantic_facts(
             if parser is None:
                 passed, reason = False, "EXACT_HTML_BLOB_UNREADABLE"
             elif (fact.subject in {"page.heading.text", "page.h1.text",
-                                   f"{path}.h1.text"}
+                                   f"{path}.h1.text", "index.h1_text",
+                                   f"{path}.h1_text"}
                     and fact.relation is SemanticRelation.EQUALITY
                     and isinstance(fact.value, str)
-                    and (fact.subject in {"page.h1.text", f"{path}.h1.text"}
+                    and (fact.subject in {"page.h1.text", f"{path}.h1.text",
+                                         "index.h1_text", f"{path}.h1_text"}
                          or fact.qualifiers.get("heading_level") == 1)):
                 passed = parser.headings == [fact.value]
                 reason = "EXACT_H1" if passed else "H1_TEXT_OR_COUNT_MISMATCH"
-            elif (fact.subject in {"page.paragraph.text", f"{path}.paragraph.text"}
+            elif (fact.subject in {"page.paragraph.text", f"{path}.paragraph.text",
+                                   f"{path}.paragraph_text"}
                     and fact.relation is SemanticRelation.EQUALITY
                     and isinstance(fact.value, str)):
                 passed = parser.paragraphs == [fact.value]
@@ -142,6 +153,22 @@ def verify_static_html_semantic_facts(
                     and fact.relation is SemanticRelation.CARDINALITY):
                 passed = len(parser.paragraphs) == fact.value
                 reason = "EXACT_PARAGRAPH_COUNT" if passed else "PARAGRAPH_COUNT_MISMATCH"
+            elif (fact.subject == "page.count"
+                    and fact.relation is SemanticRelation.CARDINALITY):
+                tree = subprocess.run(
+                    ["git", "-C", str(repository), "ls-tree", "-r", "--name-only",
+                     proposed_revision], check=False, capture_output=True,
+                    timeout=15, text=True)
+                pages = tuple(name for name in tree.stdout.splitlines()
+                              if name.endswith(".html")) if tree.returncode == 0 else ()
+                passed = pages == (path,) and fact.value == 1
+                reason = "EXACT_PAGE_COUNT" if passed else "PAGE_COUNT_MISMATCH"
+            elif (fact.subject == "index.ordered_list_items"
+                    and fact.relation is SemanticRelation.CARDINALITY):
+                passed = (path in ordered_scopes
+                          and len(parser.ordered_lists) == 1
+                          and len(parser.ordered_lists[0]) == fact.value)
+                reason = "BOUND_EXACT_LIST_COUNT" if passed else "ORDERED_VALUES_OR_COUNT_MISMATCH"
             elif (fact.subject in ordered_subjects
                     and fact.relation is SemanticRelation.ORDERED_COMPONENT
                     and isinstance(fact.value, tuple)
