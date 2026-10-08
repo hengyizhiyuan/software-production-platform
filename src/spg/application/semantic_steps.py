@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from hashlib import sha256
 from pathlib import Path
+import re
 import subprocess
 from time import monotonic
 from uuid import UUID, uuid4
@@ -62,6 +63,25 @@ from spg.providers.repository_change_proposal import (
     RepositoryAwareChangeProposalProvider,
 )
 from spg.providers.rule_based_planner import RuleBasedProductionPlanner
+
+
+def bind_exact_human_document_identifiers(
+    objective: str, verification: str, human_request: str,
+) -> tuple[str, str]:
+    """Carry literal Human document identifiers into the admitted Work contract."""
+    wording = human_request.casefold()
+    if not ("identifier" in wording and ("literal" in wording or "exact" in wording)):
+        return objective, verification
+    markers = tuple(dict.fromkeys(re.findall(
+        r"(?<![0-9a-fA-F])(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-"
+        r"[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|"
+        r"[0-9a-fA-F]{40})(?![0-9a-fA-F])", human_request)))
+    if not markers:
+        return objective, verification
+    objective += " Exact Human-supplied lineage identifiers: " + "; ".join(markers) + "."
+    verification += (" Verify that all exact lineage identifiers in the admitted "
+                     "Work objective appear verbatim in the document.")
+    return objective, verification
 
 
 MAX_TREE_PATHS = 1_000
@@ -773,6 +793,14 @@ class SemanticStepApplicationService:
             if proposal.target_kind is ProductionTargetKind.CODE_WORK
             else proposal.verification_expectation
         )
+        if (proposal.target_kind is ProductionTargetKind.DOCUMENTATION_WORK
+                and semantic_input.human_explicit_requests):
+            production_objective, verification_expectation = (
+                bind_exact_human_document_identifiers(
+                    production_objective, verification_expectation,
+                    semantic_input.human_explicit_requests[-1],
+                )
+            )
         plan = self.planning.propose(
             ProductionPlanningRequest(
                 work_id=semantic_input.work_id,

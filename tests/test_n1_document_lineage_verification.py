@@ -8,6 +8,7 @@ from uuid import uuid4
 import pytest
 
 from spg.application.steering_production import SteeringProductionService
+from spg.application.semantic_steps import bind_exact_human_document_identifiers
 from spg.domain.product import ProductInvariantViolation
 from spg.domain.runtime import ArtifactContract, ArtifactOperation
 from spg.providers.repository_markdown_verifier import evaluate_repository_artifact
@@ -24,6 +25,23 @@ OBJECTIVE = (
     "d9299264976c0a381a9fecc4158524bed5e065a2)."
 )
 EXPECTATION = "Confirm the exact source and Work lineage identifiers appear in the document."
+
+
+def test_literal_human_document_ids_survive_admission_without_invention() -> None:
+    human = ("Document these literal historical identifiers: Work "
+             "ae8530f0-1f28-55f7-aea6-e79b13c7fabd; Semantic IR "
+             "9a88e343-6c62-5b30-af81-83594b03e171; source "
+             "409e2f94098af4a86295c64621970cc95c34c14b.")
+    objective, verification = bind_exact_human_document_identifiers(
+        "Create the document", "Check its sections", human)
+    markers = SteeringProductionService._exact_document_lineage_markers(
+        SimpleNamespace(verification_expectation=verification),
+        admitted_objective=objective)
+    assert markers == ("ae8530f0-1f28-55f7-aea6-e79b13c7fabd",
+                       "9a88e343-6c62-5b30-af81-83594b03e171",
+                       "409e2f94098af4a86295c64621970cc95c34c14b")
+    assert bind_exact_human_document_identifiers(
+        "Create", "Check", "No identifiers were given") == ("Create", "Check")
 
 
 def _git(repository: Path, *args: str) -> str:

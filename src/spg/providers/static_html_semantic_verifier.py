@@ -135,6 +135,9 @@ def verify_static_html_semantic_facts(
                         and isinstance(fact.value, str)
                         and fact.value.endswith(" only")
                         and fact.value[:-5] in html_targets else
+                        (fact.value,) if fact.subject == "work.change_scope"
+                        and isinstance(fact.value, str)
+                        and fact.value in html_targets else
                         (fact.value,) if fact.subject == "artifact.target_file"
                         and isinstance(fact.value, str)
                         and fact.value in html_targets else
@@ -219,17 +222,18 @@ def verify_static_html_semantic_facts(
             elif (fact.subject in {"page.heading.text", "page.heading_text",
                                    "page.h1.text", "page.h1_text",
                                    "artifact.file.h1_text",
-                                   "index_html.h1_text",
+                                   "index_html.h1_text", "index_html.h1.text",
                                    f"{path}.h1.text", "index.h1_text",
                                    f"{path}.h1_text",
                                    f"{page_aliases[path]}.h1_text",
                                    f"{file_aliases[path]}.heading_text"}
-                    and fact.relation is SemanticRelation.EQUALITY
+                    and fact.relation in {SemanticRelation.EQUALITY,
+                                          SemanticRelation.ACCEPTANCE_ASSERTION}
                     and isinstance(fact.value, str)
                     and (fact.subject in {"page.h1.text", "page.h1_text",
                                          "page.heading_text",
                                          "page.heading.text", "artifact.file.h1_text",
-                                         "index_html.h1_text",
+                                         "index_html.h1_text", "index_html.h1.text",
                                          f"{path}.h1.text",
                                          "index.h1_text", f"{path}.h1_text",
                                          f"{page_aliases[path]}.h1_text",
@@ -242,10 +246,12 @@ def verify_static_html_semantic_facts(
                 reason = "EXACT_H1" if passed else "H1_TEXT_OR_COUNT_MISMATCH"
             elif (fact.subject in {"page.paragraph.text", "page.paragraph_text",
                                    "artifact.file.paragraph_text",
+                                   "index_html.paragraph.text",
                                    f"{path}.paragraph.text",
                                    f"{path}.paragraph_text",
                                    f"{page_aliases[path]}.paragraph_text"}
-                    and fact.relation is SemanticRelation.EQUALITY
+                    and fact.relation in {SemanticRelation.EQUALITY,
+                                          SemanticRelation.ACCEPTANCE_ASSERTION}
                     and isinstance(fact.value, str)):
                 passed = parser.paragraphs == [fact.value]
                 reason = "EXACT_PARAGRAPH" if passed else "PARAGRAPH_TEXT_OR_COUNT_MISMATCH"
@@ -261,7 +267,7 @@ def verify_static_html_semantic_facts(
                     and fact.relation is SemanticRelation.CARDINALITY):
                 passed = len(parser.paragraphs) == fact.value
                 reason = "EXACT_PARAGRAPH_COUNT" if passed else "PARAGRAPH_COUNT_MISMATCH"
-            elif (fact.subject == "page.count"
+            elif (fact.subject in {"page.count", "index_html.page_count"}
                     and fact.relation is SemanticRelation.CARDINALITY):
                 tree = subprocess.run(
                     ["git", "-C", str(repository), "ls-tree", "-r", "--name-only",
@@ -271,7 +277,7 @@ def verify_static_html_semantic_facts(
                               if name.endswith(".html")) if tree.returncode == 0 else ()
                 passed = pages == (path,) and fact.value == 1
                 reason = "EXACT_PAGE_COUNT" if passed else "PAGE_COUNT_MISMATCH"
-            elif (fact.subject == "page.markup"
+            elif (fact.subject in {"page.markup", "index_html.markup.semantics"}
                     and fact.relation is SemanticRelation.BEHAVIOR
                     and fact.value == "semantic HTML"):
                 passed = all(tag in parser.tags for tag in ("html", "body", "h1", "p"))

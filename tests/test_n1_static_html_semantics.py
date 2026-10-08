@@ -134,6 +134,44 @@ def test_observed_g4_index_html_profile_binds_each_item(tmp_path: Path) -> None:
         "index_html.list_item_occurrence"}
 
 
+def test_observed_g0_index_html_assertions_are_exact(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    (repository / "index.html").write_text(
+        "<html><body><h1>N1 Software Control</h1>"
+        "<p>Isolated qualification only</p></body></html>", encoding="utf-8")
+    _git(repository, "add", "index.html")
+    _git(repository, "commit", "-m", "candidate")
+    common = dict(authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4(), qualifiers={})
+    facts = tuple(SemanticFactReference(
+        fact_id=uuid4(), subject=subject, relation=relation, value=value,
+        scope=scope, **common)
+        for subject, relation, value, scope in (
+            ("index_html.page_count", SemanticRelation.CARDINALITY,
+             1, "index.html"),
+            ("index_html.h1.text", SemanticRelation.ACCEPTANCE_ASSERTION,
+             "N1 Software Control", "index.html"),
+            ("index_html.paragraph.text", SemanticRelation.ACCEPTANCE_ASSERTION,
+             "Isolated qualification only", "index.html"),
+            ("work.change_scope", SemanticRelation.SCOPE,
+             "index.html", "current Work revision"),
+            ("index_html.markup.semantics", SemanticRelation.BEHAVIOR,
+             "semantic HTML", "index.html")))
+    good = _git(repository, "rev-parse", "HEAD")
+    checks = verify_static_html_semantic_facts(repository, good, contract, facts)
+    assert len(checks) == 5 and all(check["passed"] for check in checks)
+    (repository / "index.html").write_text(
+        "<html><body><h1>N1 Software Control</h1><p>Wrong</p></body></html>",
+        encoding="utf-8")
+    _git(repository, "add", "index.html")
+    _git(repository, "commit", "-m", "wrong paragraph")
+    bad = _git(repository, "rev-parse", "HEAD")
+    checks = verify_static_html_semantic_facts(repository, bad, contract, facts)
+    assert next(check for check in checks if check["subject"] ==
+                "index_html.paragraph.text")["passed"] is False
+
+
 def _git(repository: Path, *args: str) -> str:
     return subprocess.run(["git", "-C", str(repository), *args], check=True,
                           capture_output=True, text=True).stdout.strip()
