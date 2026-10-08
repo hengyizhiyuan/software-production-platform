@@ -254,7 +254,6 @@ def verify_static_html_semantic_facts(
                                          "page.heading.text", "artifact.file.h1_text",
                                          "index_html.h1_text", "index_html.h1.text",
                                          "page.index_html.h1.text",
-                                         f"{path}.heading.text",
                                          f"{path}.h1.text",
                                          "index.h1_text", f"{path}.h1_text",
                                          f"{page_aliases[path]}.h1_text",
