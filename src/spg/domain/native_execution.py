@@ -7,7 +7,7 @@ from enum import StrEnum
 from hashlib import sha256
 import json
 from pathlib import PurePosixPath
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -368,17 +368,28 @@ class ResourceEnvelope(NativeRecord):
 
 
 class ProductionExecutionContext(NativeRecord):
-    """Immutable references admitted by Work and the ECF Decision Context owner."""
+    """Immutable references admitted by Work and the applicable context owner."""
 
     work_id: UUID
     task_contract_id: UUID
-    ecf_context_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    basis_kind: Literal["ECF_DECISION_CONTEXT", "DOCUMENT_WORK_CONTEXT"] = "ECF_DECISION_CONTEXT"
+    ecf_context_fingerprint: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    document_work_context_fingerprint: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     irk_semantic_ir_id: UUID
     repository_identity: str = Field(min_length=1)
     repository_revision: str = Field(min_length=1)
     workspace_id: UUID
     verification_requirements: tuple[str, ...] = Field(min_length=1)
     work_reality_revision_id: UUID
+
+    @model_validator(mode="after")
+    def exact_context_owner(self) -> "ProductionExecutionContext":
+        if self.basis_kind == "ECF_DECISION_CONTEXT":
+            if self.ecf_context_fingerprint is None or self.document_work_context_fingerprint is not None:
+                raise ValueError("ECF execution requires only an exact ECF context fingerprint")
+        elif self.document_work_context_fingerprint is None or self.ecf_context_fingerprint is not None:
+            raise ValueError("Document execution requires only an exact Work Task Context fingerprint")
+        return self
 
 
 class ExecutionBindingV2(NativeRecord):

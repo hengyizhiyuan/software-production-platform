@@ -546,9 +546,20 @@ class WattDecisionContextGateway:
                     *((ecf.ContextClass.APPROVED_DECISION,'greenfield-decision:'+key,'decision',value) for key,value in managed_context.decisions),
                     *((ecf.ContextClass.APPROVED_CONSTRAINT,'greenfield-constraint:'+str(i),'constraint',value) for i,value in enumerate(managed_context.constraints)),
                 ):
+                    accepted_product_fact=(managed_context.accepted_source_version_id is not None
+                                           and cls is not ecf.ContextClass.APPROVED_CONSTRAINT)
+                    source_ref=(
+                        f'product-source-version:{managed_context.accepted_source_version_id}:{key}'
+                        if accepted_product_fact else
+                        f'work-reality:{requirement.work_id}:{key}'
+                    )
                     add(f'{requirement.product_id}:{key}',cls,key,product_scope,
-                        f'work-reality:{requirement.work_id}:{key}',managed_context.source_revision,
-                        owners.owner_for(cls),{field:value},managed_context.provenance)
+                        source_ref,
+                        (managed_context.accepted_source_revision if accepted_product_fact
+                         else managed_context.source_revision),
+                        owners.owner_for(cls),{field:value},
+                        (managed_context.accepted_source_provenance if accepted_product_fact
+                         else managed_context.provenance))
             else:
                 self._managed_repository_records(document_record,ecf,owners)
         elif requirement.surface == ECS_SURFACE:

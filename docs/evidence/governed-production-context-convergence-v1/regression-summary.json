@@ -1,0 +1,14 @@
+{
+  "captured_at_utc": "2026-10-08T04:07:48Z",
+  "source_under_test": "candidate branch snapshot copied to /tmp/watt-n1-20261008-source; production /data/watt/runtime/source unchanged",
+  "execution_location": "ECS isolated watt-n1-pytest:20261008 containers",
+  "runs": [
+    {"scope": "Managed context, ECF decision-context, Task Contract budget, production execution context unit tests", "result": "PASS", "count": 44, "dependencies": "canonical ECF and Guardian source read-only mounts; no production DB"},
+    {"scope": "Managed greenfield persisted owner/context integration", "result": "PASS", "count": 3, "dependencies": "isolated PostgreSQL spg_n1_qualification_20261008; canonical ECF source"},
+    {"scope": "Native Worker evidence, unbound task fencing, and pre-upgrade command digest", "result": "PASS", "count": 3, "dependencies": "isolated PostgreSQL and disposable source/workspace"},
+    {"scope": "Accepted V1 Product source to new Work and ECF context using real Gitea", "result": "PASS", "count": 1, "dependencies": "isolated PostgreSQL, unique Gitea qualification repository, deterministic executor"},
+    {"scope": "Existing full managed-source restart/head isolation regression", "result": "INCOMPLETE", "count": 1, "dependencies": "first acceptance and next Work source assertions passed; test then attempted Docker Compose force-recreate of Gitea, which isolated test container cannot perform; no Gitea restart occurred"}
+  ],
+  "not_yet_run": ["full Document and Software Delivery regressions", "Steering/Self-Refine/no-progress suite", "F26 Guardian repair suite", "Multi-PWU A/B/C/D suite", "Workspace JS/UI", "performance P0", "real controlled-model Worker qualification", "restart/recovery qualification"],
+  "pass_claim_limit": "Focused tests only; N1 closure gates remain open"
+}

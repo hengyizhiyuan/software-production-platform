@@ -63,6 +63,7 @@ from spg.domain.native_execution import (
 from spg.domain.refinement_contract import (
     RefinementClass, RefinementSignalKind, classify_refinement,
 )
+from spg.domain.change import ProductionTargetKind
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
@@ -236,16 +237,47 @@ class NativeExecutorRuntimeService:
                 task = TaskContract.model_validate(task_payload)
                 lineage = task.decision_context
                 revision = product.current_work_reality_revision(product_binding.work_id)
+                plan_payload = payload.get("production_plan")
+                document_work = (isinstance(plan_payload, dict) and
+                                 plan_payload.get("target_kind") ==
+                                 ProductionTargetKind.DOCUMENTATION_WORK.value)
+                artifact_payload = payload.get("artifact_contract")
+                source_matches = False
+                if document_work and revision is not None:
+                    source_matches = (
+                        revision.repository_identity == context.repository_identity
+                        and revision.source_revision == context.repository_revision
+                    )
+                    if not source_matches:
+                        from spg.application.multi_pwu_lineage import work_consumes_revision
+                        source_matches = work_consumes_revision(
+                            uow.session, product_binding.work_id,
+                            context.repository_identity, context.repository_revision,
+                        )
                 if (
-                    lineage is None or revision is None
-                    or context.work_id != product_binding.work_id
+                    revision is None or context.work_id != product_binding.work_id
                     or context.work_reality_revision_id != revision.id
                     or context.task_contract_id != task.task_contract_id
-                    or context.ecf_context_fingerprint != lineage.package_fingerprint
                     or context.irk_semantic_ir_id is None
                     or context.verification_requirements != tuple(
                         payload.get("verification_obligations", ())
                     )
+                    or (document_work and (
+                        context.basis_kind != "DOCUMENT_WORK_CONTEXT"
+                        or lineage is not None
+                        or context.document_work_context_fingerprint != task.content_fingerprint
+                        or not source_matches
+                        or not isinstance(artifact_payload, dict)
+                        or artifact_payload.get("repository_identity") != context.repository_identity
+                        or artifact_payload.get("source_revision") != context.repository_revision
+                        or artifact_payload.get("artifact_path") not in payload.get("required_outputs", ())
+                        or payload.get("change_contract") is not None
+                    ))
+                    or (not document_work and (
+                        context.basis_kind != "ECF_DECISION_CONTEXT"
+                        or lineage is None
+                        or context.ecf_context_fingerprint != lineage.package_fingerprint
+                    ))
                 ):
                     raise ExecutionContextNotReady("EXECUTION_CONTEXT_NOT_READY: Product context changed")
                 irk_ids = set()
@@ -259,8 +291,9 @@ class NativeExecutorRuntimeService:
                         irk_ids.add(assessment.semantic_ir.id)
                 if context.irk_semantic_ir_id not in irk_ids:
                     raise ExecutionContextNotReady("EXECUTION_CONTEXT_NOT_READY: IRK identity is not Work lineage")
-                from spg.application.decision_context import assert_task_context_fresh
-                assert_task_context_fresh(self.database, task)
+                if not document_work:
+                    from spg.application.decision_context import assert_task_context_fresh
+                    assert_task_context_fresh(self.database, task)
             try:
                 store.attempt_binding(binding.attempt_id)
             except NativeExecutionNotFound:
@@ -336,7 +369,9 @@ class NativeExecutorRuntimeService:
                              "priority": command.priority,
                              **({} if binding.production_context is None else {
                                  "irk_semantic_ir_id": str(binding.production_context.irk_semantic_ir_id),
+                                 "context_basis_kind": binding.production_context.basis_kind,
                                  "ecf_context_fingerprint": binding.production_context.ecf_context_fingerprint,
+                                 "document_work_context_fingerprint": binding.production_context.document_work_context_fingerprint,
                                  "task_contract_id": str(binding.production_context.task_contract_id),
                                  "repository_identity": binding.production_context.repository_identity,
                                  "repository_revision": binding.production_context.repository_revision,

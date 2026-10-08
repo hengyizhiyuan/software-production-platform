@@ -50,7 +50,7 @@ def test_persisted_greenfield_owner_context_binds_task_and_freshness(postgres_da
         repo=Path(resource.location_ref);git(repo,'remote','add','origin','http://gitea.invalid/qualification.git');sha=git(repo,'rev-parse','HEAD');tree=git(repo,'rev-parse','HEAD^{tree}')
         u.session.execute(insert(software_products).values(id=pid,owner_id='human:test',name='Greenfield seam',lifecycle='ACTIVE',description='explicit isolated source attachment'))
         u.session.execute(update(product_works).where(product_works.c.id==record.id).values(product_id=pid))
-        u.session.execute(insert(product_managed_sources).values(product_id=pid,repository_identity='watt://products/'+str(pid),provider_kind='gitea',provider_reference='qualification',accepted_ref='refs/heads/main',accepted_revision=sha,accepted_tree=tree,origin={},version=0))
+        u.session.execute(insert(product_managed_sources).values(product_id=pid,repository_identity=identity,provider_kind='gitea',provider_reference='qualification',accepted_ref='refs/heads/main',accepted_revision=sha,accepted_tree=tree,origin={},version=0))
         u.session.execute(insert(work_source_bases).values(work_id=record.id,product_id=pid,resource_id=resource.id,source_version=0,source_revision=sha,source_tree=tree,work_ref='refs/heads/main'))
         u.commit()
     lineage=lineage_for_work_task(postgres_database,work_id=record.id,repository_identity=identity,repository_path=repo,repository_revision=sha,target_paths=('index.html',))

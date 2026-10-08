@@ -23,6 +23,9 @@ class ManagedGreenfieldContext:
     decisions: tuple[tuple[str, str], ...] = ()
     constraints: tuple[str, ...] = ()
     required_classes: tuple[str, ...] = ()
+    accepted_source_version_id: UUID | None = None
+    accepted_source_revision: str | None = None
+    accepted_source_provenance: str | None = None
 
     @property
     def applicability(self):
@@ -34,8 +37,7 @@ class ManagedGreenfieldContext:
                 for key,value in present.items()}
 
 
-def project_greenfield_context(*, product_id, work, revision, ir, governance, semantic_history=()):
-    """Project only a source-owned admitted revision, never compiler candidates."""
+def _assert_admitted_revision(work, revision, ir, governance):
     if (revision is None or ir is None or not isinstance(ir,GovernedSemanticIR)
             or revision.work_id!=work.id or governance is None
             or str(governance['id'])!=str(revision.governance_record_id)
@@ -61,6 +63,11 @@ def project_greenfield_context(*, product_id, work, revision, ir, governance, se
     )
     if not (initial_admission or revision_admission):
         raise DecisionContextAuthorityMissing('MANAGED_GREENFIELD_CONTEXT_OWNER_BASIS_MISSING')
+
+
+def project_greenfield_context(*, product_id, work, revision, ir, governance, semantic_history=()):
+    """Project only a source-owned admitted revision, never compiler candidates."""
+    _assert_admitted_revision(work, revision, ir, governance)
     history=tuple(dict((value.id,value) for value in (ir,*semantic_history)).values())
     goals=next((value.current_production for value in history if value.current_production),())
     initial_greenfield=any(g.current and not g.repository_required and g.repository_reference is None
@@ -103,17 +110,64 @@ def project_greenfield_context(*, product_id, work, revision, ir, governance, se
                                     tuple(invariants),tuple(decisions),constraints,tuple(sorted(required)))
 
 
-def read_managed_greenfield_context(session, *, work, product_id, repository_identity):
+def project_accepted_successor_context(*, product_id, work, revision, ir,
+                                       governance, accepted_version, inherited):
+    """Carry only accepted Product facts into a new Work's exact source basis."""
+    _assert_admitted_revision(work, revision, ir, governance)
+    if (accepted_version['product_id'] != product_id
+            or accepted_version['version'] < 1
+            or not all(accepted_version.get(key) for key in
+                       ('work_id','candidate_id','acceptance_id','revision','tree'))
+            or inherited.product_id != product_id):
+        raise DecisionContextAuthorityMissing('MANAGED_ACCEPTED_SOURCE_BASIS_MISSING')
+    # A new explicit Product policy declaration needs its own governed projection;
+    # this continuity path may not silently discard or auto-approve it.
+    if any(item.subject in {'product_invariant','approved_product_decision'}
+           for item in ir.items):
+        raise DecisionContextAuthorityMissing('MANAGED_PRODUCT_POLICY_CHANGE_REQUIRES_GOVERNANCE')
+    constraints=tuple(revision.constraints)
+    required=set(inherited.required_classes)-{'APPROVED_CONSTRAINT'}
+    if constraints: required.add('APPROVED_CONSTRAINT')
+    payload={'accepted_source_version_id':str(accepted_version['id']),
+             'accepted_revision':accepted_version['revision'],
+             'accepted_tree':accepted_version['tree'],
+             'acceptance_id':str(accepted_version['acceptance_id']),
+             'inherited_context_revision':inherited.source_revision,
+             'current_work_revision':revision.revision_fingerprint,
+             'current_governance_id':str(revision.governance_record_id)}
+    source_revision=sha256(json.dumps(payload,sort_keys=True).encode()).hexdigest()
+    provenance=(f"product-source-version:{accepted_version['id']}@{accepted_version['revision']};"
+                f"human-acceptance:{accepted_version['acceptance_id']};"
+                f"inherited:{inherited.provenance};"
+                f"work-reality:{revision.id}@{revision.revision_fingerprint};"
+                f"governance:{revision.governance_record_id}")
+    return ManagedGreenfieldContext(
+        product_id,work.id,source_revision,provenance,inherited.intent,
+        inherited.invariants,inherited.decisions,constraints,tuple(sorted(required)),
+        accepted_version['id'],accepted_version['revision'],provenance,
+    )
+
+
+def read_managed_greenfield_context(session, *, work, product_id, repository_identity,
+                                    _historical=False, _pinned_revision_id=None):
     from sqlalchemy import select
-    from spg.infrastructure.persistence.product_schema import product_managed_sources,work_source_bases
-    from spg.infrastructure.persistence.runtime_schema import governance_records
+    from spg.infrastructure.persistence.product_schema import (product_managed_sources,
+        product_source_versions,work_source_bases,work_runtime_bindings)
+    from spg.infrastructure.persistence.runtime_schema import governance_records,baseline_candidates
     from spg.infrastructure.persistence.product_store import ProductStore
     from spg.application.human_attention import canonical_ir_for_work
     source=session.execute(select(product_managed_sources).where(product_managed_sources.c.product_id==product_id)).mappings().one_or_none()
     basis=session.execute(select(work_source_bases).where(work_source_bases.c.work_id==work.id)).mappings().one_or_none()
-    if source is None or basis is None or source['provider_kind']!='gitea' or source['origin'] or basis['source_version']!=0:
+    if (source is None or basis is None or source['provider_kind']!='gitea'
+            or source['origin'] or source['repository_identity']!=repository_identity
+            or basis['product_id']!=product_id):
         return None
-    store=ProductStore(session);revision=store.current_work_reality_revision(work.id)
+    if not _historical and (source['version'],source['accepted_revision'],source['accepted_tree']) != (
+            basis['source_version'],basis['source_revision'],basis['source_tree']):
+        raise DecisionContextAuthorityMissing('MANAGED_ACCEPTED_SOURCE_CHANGED')
+    store=ProductStore(session)
+    revision=(store.work_reality_revision(_pinned_revision_id) if _pinned_revision_id
+              else store.current_work_reality_revision(work.id))
     if revision is None:return None
     governance=session.execute(select(governance_records).where(governance_records.c.id==revision.governance_record_id)).mappings().one_or_none()
     from spg.infrastructure.persistence.interaction_store import InteractionStore
@@ -123,5 +177,37 @@ def read_managed_greenfield_context(session, *, work, product_id, repository_ide
         assessment=InteractionStore(session).assessment(prior.source_assessment_id) if prior.source_assessment_id else None
         if assessment is not None and assessment.semantic_ir is not None:history.append(assessment.semantic_ir)
         prior=store.work_reality_revision(prior.previous_revision_id) if prior.previous_revision_id else None
-    return project_greenfield_context(product_id=product_id,work=work,revision=revision,
-                                      ir=canonical_ir_for_work(session,work.id),governance=governance,semantic_history=history)
+    ir=(next(iter(history),None) if _pinned_revision_id else
+        canonical_ir_for_work(session,work.id))
+    if basis['source_version']==0:
+        return project_greenfield_context(product_id=product_id,work=work,revision=revision,
+                                          ir=ir,governance=governance,semantic_history=history)
+    accepted=session.execute(select(product_source_versions).where(
+        product_source_versions.c.product_id==product_id,
+        product_source_versions.c.version==basis['source_version'])).mappings().one_or_none()
+    if (accepted is None or accepted['revision']!=basis['source_revision']
+            or accepted['tree']!=basis['source_tree'] or accepted['work_id']==work.id):
+        raise DecisionContextAuthorityMissing('MANAGED_ACCEPTED_SOURCE_BASIS_MISSING')
+    candidate=session.execute(select(baseline_candidates).where(
+        baseline_candidates.c.id==accepted['candidate_id'])).mappings().one_or_none()
+    binding=(None if candidate is None else session.execute(select(work_runtime_bindings).where(
+        work_runtime_bindings.c.work_id==accepted['work_id'],
+        work_runtime_bindings.c.production_run_id==candidate['production_run_id']
+    )).mappings().one_or_none())
+    if (candidate is None or binding is None
+            or candidate['proposed_commit_identity']!=accepted['revision']
+            or binding['work_reality_revision_id'] is None):
+        raise DecisionContextAuthorityMissing('MANAGED_ACCEPTED_SOURCE_LINEAGE_MISSING')
+    parent=store.work(accepted['work_id']) if accepted['work_id'] else None
+    if parent is None:
+        raise DecisionContextAuthorityMissing('MANAGED_ACCEPTED_SOURCE_BASIS_MISSING')
+    inherited=read_managed_greenfield_context(session,work=parent,product_id=product_id,
+        repository_identity=repository_identity,_historical=True,
+        _pinned_revision_id=binding['work_reality_revision_id'])
+    if inherited is None:
+        # Imported/declared Product source may instead carry ECF classes in
+        # README.md. Let the ordinary repository policy validate those facts.
+        return None
+    return project_accepted_successor_context(product_id=product_id,work=work,
+        revision=revision,ir=ir,governance=governance,accepted_version=accepted,
+        inherited=inherited)

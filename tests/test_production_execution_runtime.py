@@ -87,6 +87,26 @@ def test_production_context_rejects_wrong_work_and_workspace(tmp_path: Path) -> 
         ExecutionBindingV2.model_validate(payload)
 
 
+def test_document_context_has_separate_exact_work_basis(tmp_path: Path) -> None:
+    binding, _workspace = _binding(tmp_path)
+    historical = binding.production_context.model_dump(mode="python")
+    historical.pop("basis_kind")
+    historical.pop("document_work_context_fingerprint")
+    assert ProductionExecutionContext.model_validate(historical).basis_kind == "ECF_DECISION_CONTEXT"
+    payload = binding.production_context.model_dump(mode="python")
+    payload.update(basis_kind="DOCUMENT_WORK_CONTEXT",
+                   ecf_context_fingerprint=None,
+                   document_work_context_fingerprint="d" * 64)
+    document = ProductionExecutionContext.model_validate(payload)
+    assert document.document_work_context_fingerprint == "d" * 64
+    assert ExecutionBindingV2.model_validate(
+        binding.model_dump(mode="python") | {"production_context": document}
+    ).production_context.basis_kind == "DOCUMENT_WORK_CONTEXT"
+    payload["ecf_context_fingerprint"] = "a" * 64
+    with pytest.raises(ValidationError, match="only an exact Work Task Context"):
+        ProductionExecutionContext.model_validate(payload)
+
+
 def test_workspace_result_records_bounded_change_and_diff(tmp_path: Path) -> None:
     binding, workspace = _binding(tmp_path)
     store = ContentAddressedStorage(tmp_path / "evidence")

@@ -1,0 +1,19 @@
+{
+  "captured_at_utc": "2026-10-08T04:07:48Z",
+  "production_database": "spg_dev",
+  "production_read_mode": "All investigative SQL used BEGIN READ ONLY; one-off API reads set default_transaction_read_only=on",
+  "original_works": [
+    {"work_id": "8ad0b7e5-591c-53d4-bec4-75dc11d57e5d", "condition": "READY", "runtime_bindings": 1, "candidates": 0},
+    {"work_id": "99e6357b-91d0-50ce-ac0b-3ad7376b79bb", "condition": "READY", "runtime_bindings": 0, "candidates": 0},
+    {"work_id": "be245aab-a1d4-55b8-a342-46f0797778cf", "condition": "READY", "runtime_bindings": 0, "candidates": 0},
+    {"work_id": "40e992b0-976b-5e30-9f80-0b7a119cdd53", "condition": "READY", "runtime_bindings": 0, "candidates": 0}
+  ],
+  "original_work_mutations_performed": false,
+  "qualification_database": "spg_n1_qualification_20261008 (new database; fixtures truncate only this database)",
+  "new_gitea_test_repositories": ["product-3287fa89e6c94babb396be66bba1950b", "product-e8e76049eda84ee2a09d175ad3d0d214"],
+  "gitea_restart_performed": false,
+  "production_source_revision": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+  "main_modified": false,
+  "historical_qualification_files_cleaned": false,
+  "note": "No original Candidate, Runtime Commit, Manifest, Human Decision or Quality Ledger row was rewritten by this N1 investigation. New isolated test rows were cleaned by test fixtures; Gitea qualification repos are retained as new test effects."
+}

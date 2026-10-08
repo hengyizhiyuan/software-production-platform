@@ -4,7 +4,9 @@ from types import SimpleNamespace
 from uuid import uuid4
 from pathlib import Path
 import pytest
-from spg.application.managed_greenfield_context import project_greenfield_context
+from spg.application.managed_greenfield_context import (
+    project_greenfield_context, project_accepted_successor_context,
+)
 from spg.application.decision_context import WattDecisionContextGateway,DecisionContextRequirement,MANAGED_WEB_SURFACE,DecisionContextNotReady,DecisionContextChanged,DecisionContextAuthorityMissing
 from spg.domain.intent_realization import SemanticItem,SemanticKind,SemanticClause
 from spg.domain.semantic_provenance import SemanticProvenance,SemanticOrigin
@@ -141,3 +143,36 @@ def test_existing_product_first_bounded_work_can_use_managed_genesis():
     source=project_greenfield_context(**basis)
     assert source is not None and source.intent
     assert source.work_id==basis['work'].id
+
+
+def test_successor_uses_accepted_source_proof_and_keeps_work_scope_separate(tmp_path):
+    first=owner_basis();gateway,first_request,inherited=package(tmp_path,first)
+    successor=owner_basis();successor['product_id']=first['product_id']
+    successor['revision'].constraints=('Only site/index.html',)
+    accepted={'id':uuid4(),'product_id':first['product_id'],'version':1,
+              'work_id':first['work'].id,'candidate_id':uuid4(),
+              'acceptance_id':uuid4(),
+              'revision':first_request.repository_revision,
+              'tree':git(first_request.repository_path,'rev-parse','HEAD^{tree}')}
+    projected=project_accepted_successor_context(**successor,
+        accepted_version=accepted,inherited=inherited)
+    assert projected.intent==inherited.intent
+    assert projected.work_id==successor['work'].id
+    assert projected.accepted_source_version_id==accepted['id']
+    assert projected.constraints==('Only site/index.html',)
+    assert 'APPROVED_CONSTRAINT' in projected.required_classes
+    assert str(accepted['acceptance_id']) in projected.provenance
+    next_request=DecisionContextRequirement(MANAGED_WEB_SURFACE,first['product_id'],
+        successor['work'].id,'site/index.html',first_request.repository_path,
+        first_request.repository_revision,'watt://qualified')
+    lineage=gateway.lineage(gateway.require_ready(next_request,
+        managed_context=projected,work_statement='Revise the accepted site',
+        work_revision=str(successor['revision'].id)),next_request)
+    refs={item.context_class:item.source_ref for item in lineage.protected_obligations}
+    assert refs['PRODUCT_INTENT'].startswith(f"product-source-version:{accepted['id']}")
+    assert refs['APPROVED_CONSTRAINT'].startswith(
+        f"work-reality:{successor['work'].id}")
+    accepted['acceptance_id']=None
+    with pytest.raises(DecisionContextAuthorityMissing):
+        project_accepted_successor_context(**successor,
+            accepted_version=accepted,inherited=inherited)

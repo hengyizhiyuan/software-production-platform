@@ -1,17 +1,27 @@
 {
   "report_name": "N1 Governed Production Context Reality Evidence",
-  "report_version": "20261008-forensics-1",
+  "report_version": "20261008-forensics-2",
   "status": "FORENSICS_IN_PROGRESS",
-  "qualification_result": "NOT_RUN",
+  "qualification_result": "PARTIAL_EVIDENCE_ONLY",
   "captured_at_utc": "2026-10-08T03:13:02Z",
   "target": {"region": "cn-wulanchabu", "instance_id": "i-0jl386xnbauudq5j9jk0", "ecs_source_revision": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3", "migration": "20261007_72"},
   "evidence_grades": {"E1": "direct persisted row/object", "E2": "contemporaneous report with unavailable raw attachment", "E3": "current-code mechanism or new reproduction, never historical fact", "UNKNOWN": "not established"},
   "historical_cases": [
-    {"case": "A_DOCUMENT", "work_id": "8ad0b7e5-591c-53d4-bec4-75dc11d57e5d", "grade": "E1", "source_records": ["interaction_records:2864319f-231a-4c63-b265-57c046d5b198", "work_reality_revisions:1fba253b-3174-5acf-a471-fe66f648004b", "work_runtime_bindings:c5e80fe2-cc56-4866-93a9-0b9c1ac2c30e", "execution_dispatches:7367a5f5-df75-4637-ae45-15425675370d", "self_refine_events:b2cea9bf-4a03-41b4-89ac-207affd3f8b3", "work_convergence_observations:bb26336a-f619-427a-a7af-182dd06ded49"], "first_failure": "ExecutionContextNotReady after dispatch; exact historical predicate UNKNOWN", "root_cause": "UNKNOWN", "candidate_count": 0},
+    {"case": "A_DOCUMENT", "work_id": "8ad0b7e5-591c-53d4-bec4-75dc11d57e5d", "grade": "E1+E3", "source_records": ["interaction_records:2864319f-231a-4c63-b265-57c046d5b198", "work_reality_revisions:1fba253b-3174-5acf-a471-fe66f648004b", "work_runtime_bindings:c5e80fe2-cc56-4866-93a9-0b9c1ac2c30e", "execution_dispatches:7367a5f5-df75-4637-ae45-15425675370d", "self_refine_events:b2cea9bf-4a03-41b4-89ac-207affd3f8b3", "work_convergence_observations:bb26336a-f619-427a-a7af-182dd06ded49"], "first_failure": "ExecutionContextNotReady after dispatch; exact historical predicate UNKNOWN", "root_cause": "Independent read-only reconstruction on exact persisted input and canonical ee5bd86 reproduces strict native ECF-lineage requirement on document Task Contract; historical process branch UNKNOWN", "candidate_count": 0},
     {"case": "B_WORK_REVISION", "work_id": "99e6357b-91d0-50ce-ac0b-3ad7376b79bb", "grade": "E1+E2", "source_records": ["interaction_records:c5bce8a8-0afe-4f7f-91c9-cfb1e9bb695a", "work_reality_revisions:a43de41d-912f-5b50-8779-40b06482f4a5", "work_reality_revisions:54829eae-923c-5841-a378-2eed2c2ea98c", "governance_records:61d8c4d4-378e-5b72-8bba-f4ca748ab92b", "work_convergence_observations:82abf7dd-25ba-4b23-afb5-6fe9853aca9a"], "first_failure": "DecisionContextAuthorityMissing after admitted revision", "root_cause": "UNKNOWN pending independent reproduction", "candidate_count": 0, "historical_limit": "First Work revision did not produce a Candidate; this is not a successful-first-version successor case"},
     {"case": "C_BOUNDED_NON_NEW", "work_id": "be245aab-a1d4-55b8-a342-46f0797778cf", "grade": "E1+E2", "source_records": ["interaction_records:74c0a0d7-85a3-4c6b-a3be-78343be88f18", "work_reality_revisions:c7afbaef-7b9e-5157-8f03-c4e37dde0527", "work_convergence_observations:40dbbe6c-77d6-4905-a96f-594f762a5582"], "first_failure": "ECF Decision Context INCOMPLETE: PRODUCT_INTENT, PRODUCT_INVARIANT, APPROVED_DECISION", "root_cause": "UNKNOWN pending independent reproduction", "candidate_count": 0},
     {"case": "D_PROTECTED_BUDGET", "work_id": "40e992b0-976b-5e30-9f80-0b7a119cdd53", "grade": "E1+E2+E3", "source_records": ["interaction_records:e66fb0be-2319-4cf4-80cc-830a00e6b41b", "work_reality_revisions:e3e8058e-972e-57ef-9365-7c3b6c3c2cb2", "work_convergence_observations:1b34ec75-ab5c-4ba3-a283-159ee47b10d9"], "reported_failure": "earlier report says required governed context exceeds 12000 characters; raw receipt unavailable", "first_failure": "UNKNOWN", "root_cause": "UNKNOWN historically; present-day read-only contract assembly exceeds 24-item or 12-per-source limit with 25 required items and 2128 characters", "candidate_count": 0}
   ],
   "historical_state_modified": false,
-  "cross_computer_recovery": {"git_path": "docs/evidence/governed-production-context-convergence-v1/", "ecs_persistent_path": "/data/watt/app/owner-runtime/qualifications/governed-production-context-convergence-v1/", "git_push_status": "PENDING"}
+  "read_only_candidate_reproductions": {
+    "B": "context readiness READY with candidate source; original Work not advanced",
+    "C": "context readiness READY with candidate source; original Work not advanced",
+    "D": "Task Contract formed with 14/14 protected source references; original Work not advanced",
+    "A": "original persisted attempt workspace no longer matches its exact source baseline; no replay was performed"
+  },
+  "qualification_database": "spg_n1_qualification_20261008",
+  "case_matrix": "case-qualification-matrix.json",
+  "regression_summary": "regression-summary.json",
+  "state_protection": "state-protection.json",
+  "cross_computer_recovery": {"git_path": "docs/evidence/governed-production-context-convergence-v1/", "ecs_persistent_path": "/data/watt/app/owner-runtime/qualifications/governed-production-context-convergence-v1/", "git_push_status": "INITIAL_FORENSICS_COMMIT_PUSHED", "pushed_commit": "6365347f289d95d46f83ca062db55330010adc7d", "current_candidate_changes": "UNCOMMITTED_AT_REPORT_CAPTURE"}
 }

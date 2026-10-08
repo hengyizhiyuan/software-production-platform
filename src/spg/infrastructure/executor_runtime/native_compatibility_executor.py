@@ -38,6 +38,7 @@ from spg.domain.native_execution import (
     canonical_digest,
 )
 from spg.domain.connectors import CapabilityRequirement, SideEffectLevel
+from spg.domain.change import ProductionTargetKind
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.interaction_store import InteractionStore
@@ -289,21 +290,38 @@ class NativeQueuedExecutorCapability:
                 )
             lineage = None if task_contract is None else task_contract.decision_context
             requirements = work_unit.completion_contract.verification_obligations
+            plan = work_unit.completion_contract.production_plan
+            document_work = (plan is not None and
+                             plan.target_kind is ProductionTargetKind.DOCUMENTATION_WORK)
+            artifact = work_unit.completion_contract.artifact_contract
             if (
-                lineage is None or semantic_ir_id is None or work_revision is None
+                task_contract is None or semantic_ir_id is None or work_revision is None
                 or not requirements or work_revision.repository_identity != execution.workspace.repository_identity
                 or not exact_work_source
-                or lineage.work_id != str(work_id)
-                or lineage.repository_revision != commit
-                or lineage.repository_identity != execution.workspace.repository_identity
+                or (document_work and (
+                    lineage is not None or artifact is None
+                    or work_unit.completion_contract.change_contract is not None
+                    or artifact.artifact_path not in work_unit.completion_contract.required_outputs
+                    or artifact.artifact_path not in write_paths
+                    or artifact.repository_identity != execution.workspace.repository_identity
+                    or artifact.source_revision != commit
+                ))
+                or (not document_work and (
+                    lineage is None or lineage.work_id != str(work_id)
+                    or lineage.repository_revision != commit
+                    or lineage.repository_identity != execution.workspace.repository_identity
+                ))
             ):
                 raise ExecutionContextNotReady(
-                    "EXECUTION_CONTEXT_NOT_READY: exact IRK, ECF, Work, source or verification basis missing"
+                    "EXECUTION_CONTEXT_NOT_READY: exact IRK, context owner, Work, source or verification basis missing"
                 )
             production_context = ProductionExecutionContext(
                 work_id=work_id,
                 task_contract_id=task_contract.task_contract_id,
-                ecf_context_fingerprint=lineage.package_fingerprint,
+                basis_kind=("DOCUMENT_WORK_CONTEXT" if document_work else "ECF_DECISION_CONTEXT"),
+                ecf_context_fingerprint=(None if document_work else lineage.package_fingerprint),
+                document_work_context_fingerprint=(task_contract.content_fingerprint
+                                                   if document_work else None),
                 irk_semantic_ir_id=semantic_ir_id,
                 repository_identity=execution.workspace.repository_identity,
                 repository_revision=commit,

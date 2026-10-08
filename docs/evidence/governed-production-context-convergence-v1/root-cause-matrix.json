@@ -21,7 +21,7 @@
       "observed_failure": "E1 self_refine_events:b2cea9bf-4a03-41b4-89ac-207affd3f8b3 records ExecutionContextNotReady and INFRASTRUCTURE_ERROR",
       "recovery_failure": "E1 same event records no safe replay; exact alternative repair opportunity UNKNOWN",
       "convergence": "E1 work_convergence_observations:bb26336a-f619-427a-a7af-182dd06ded49 NON_CONVERGING; steering_decisions:06d23453-a457-4a6a-a7e2-262cb5c4dd8a Human attention",
-      "root_cause": "UNKNOWN historically; E3 strict native product execution currently requires ECF lineage absent from document Task Contract",
+      "root_cause": "E3 independent read-only reconstruction on exact persisted Attempt input and canonical ee5bd86 reproduces ExecutionContextNotReady because strict native product execution requires ECF lineage absent from document Task Contract; the historical process's exact branch remains UNKNOWN",
       "repair_boundary": "Typed document Work execution context and source freshness in existing Task/PWU/native execution contract, subject to isolated reproduction"
     },
     {

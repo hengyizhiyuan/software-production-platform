@@ -20,6 +20,7 @@ from spg.application.delivery import DeliveryApplicationService
 from spg.application.product_assets import ProductAssetService
 from spg.application.assets import RepositoryAssetService
 from spg.application.product_managed_source import ProductManagedSourceService, _git
+from spg.application.decision_context import lineage_for_work_task
 from spg.application.work import WorkApplicationService
 from spg.application.interaction import WorkInteractionService
 from spg.application.production_admission import ProductionAdmissionTrigger
@@ -39,6 +40,7 @@ from spg.infrastructure.persistence import product_tables, runtime_tables
 from spg.infrastructure.persistence.github_delivery_schema import remote_delivery_authorizations, remote_delivery_receipts
 from spg.infrastructure.persistence.product_schema import product_works, work_source_bases
 from spg.infrastructure.persistence.product_schema import product_workspace_interactions
+from spg.infrastructure.persistence.product_store import ProductStore
 from spg.domain.interaction import WorkTransitionChoice, WorkFocusClassification, WorkImpactDisposition
 from tests.integration.test_wic_governed_work_admission import (
     _ReadyCapability, _ActiveCapability, _DeclaredRepositoryIntent,
@@ -315,6 +317,39 @@ def _run_and_accept(database, product_id, content, tmp_path):
     assert after["accepted"]["revision"] == manifest.repository_revision
     assert after["versions"][-1]["acceptance_id"] == str(acceptance.id)
     return submitted.work_id, basis, manifest, after
+
+
+def test_accepted_v1_new_work_uses_exact_product_source_and_ecf(postgres_database, tmp_path):
+    product = ProductAssetService(postgres_database).create(
+        "human:owner", "N1 accepted-source qualification")
+    product_id = UUID(product["id"])
+    first_work, _basis_v0, manifest, accepted = _run_and_accept(
+        postgres_database, product_id,
+        "# N1 source\n\n## Product Intent\nA bounded public site.\n\n"
+        "## Product Invariant\nKeep the page accessible.\n\n"
+        "## Approved Decision\nProduce one reviewed landing page.\n", tmp_path)
+    assert accepted["accepted"]["version"] == 1
+    assert accepted["versions"][-1]["work_id"] == str(first_work)
+    submitted = WorkApplicationService(postgres_database).submit_work(
+        "Revise the accepted Product with one landing page", product_id=product_id)
+    following = _basis(postgres_database, submitted.work_id)
+    assert following["source_version"] == 1
+    assert following["source_revision"] == manifest.repository_revision
+    work = WorkApplicationService(postgres_database)
+    work.refine_work(submitted.work_id,
+        WorkRefinementRequest(code_exact_targets=("index.html",)))
+    assert work.approve_work(submitted.work_id,
+        authority_identity="human:owner").status is WorkStatus.READY
+    with postgres_database.unit_of_work() as uow:
+        resource = ProductStore(uow.session).resource_for_work(submitted.work_id)
+    lineage = lineage_for_work_task(postgres_database, work_id=submitted.work_id,
+        repository_identity=resource.repository_identity,
+        repository_path=Path(resource.location_ref),
+        repository_revision=following["source_revision"],
+        target_paths=("index.html",))
+    assert lineage.contract_id == "PRODUCT_UI_CHANGE"
+    assert {item.context_class for item in lineage.protected_obligations} == {
+        "PRODUCT_INTENT", "PRODUCT_INVARIANT", "APPROVED_DECISION"}
 
 
 def test_new_product_lineage_restart_head_isolation_export_and_authority(postgres_database, tmp_path):
