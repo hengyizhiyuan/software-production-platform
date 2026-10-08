@@ -20,6 +20,7 @@ from spg.domain.change import (
     python_module_paths,
 )
 from spg.domain.execution import ArtifactChangeType
+from spg.domain.engineering_semantics import semantic_fact_reference
 from spg.domain.verification import (
     VerificationCapabilityRequest,
     VerificationCapabilityResult,
@@ -29,7 +30,10 @@ from spg.domain.verification import (
 )
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
-from spg.providers.static_html_semantic_verifier import verify_static_html_semantic_facts
+from spg.infrastructure.persistence.product_store import ProductStore
+from spg.providers.static_html_semantic_verifier import (
+    StaticHTMLPlanRepair, verify_static_html_semantic_facts,
+)
 
 
 class RepositoryCodeVerifier:
@@ -38,6 +42,8 @@ class RepositoryCodeVerifier:
     def __init__(self, database: Database, *, timeout_seconds: float = 120.0, context_verifier=None) -> None:
         self.database = database
         self.context_verifier = context_verifier
+        self.plan_repair = (None if context_verifier is None else
+                            StaticHTMLPlanRepair(context_verifier.runtime_factory))
         self.timeout_seconds = timeout_seconds
         self._binding = VerificationProviderBinding(
             provider_identity="provider:repository-code-contract",
@@ -62,6 +68,24 @@ class RepositoryCodeVerifier:
                 source = store.snapshot(request.source_baseline_id)
                 dispatch = store.execution_dispatch_for_attempt(proposed.attempt_id)
                 work_unit = store.work_unit(proposed.work_unit_id)
+                run = None if work_unit is None else store.run(work_unit.production_run_id)
+                admitted_facts = {}
+                if request.semantic_fact_obligations and run is None:
+                    raise RuntimeError("Semantic Fact production run is unavailable")
+                if work_unit is not None and run is not None:
+                    product = ProductStore(unit_of_work.session)
+                    for reference in request.semantic_fact_obligations:
+                        revision = product.work_reality_revision(reference.source_work_revision_id)
+                        if (revision is None or not (
+                                run.intent_ref == f"work:{revision.work_id}"
+                                or run.intent_ref.startswith(f"work:{revision.work_id}:"))):
+                            raise RuntimeError("Semantic Fact has no exact Work Reality lineage")
+                        admitted = next((item for item in revision.engineering_semantic_facts
+                                         if item.id == reference.fact_id), None)
+                        if (admitted is None or semantic_fact_reference(
+                                admitted, work_revision_id=revision.id) != reference):
+                            raise RuntimeError("Semantic Fact differs from admitted Work Reality")
+                        admitted_facts[str(reference.fact_id)] = admitted
             if source is None or dispatch is None or work_unit is None:
                 raise RuntimeError("code Verification repository lineage unavailable")
             if (
@@ -106,6 +130,8 @@ class RepositoryCodeVerifier:
                     request.proposed_commit_identity,
                     contract,
                     work_unit.completion_contract.semantic_fact_obligations,
+                    admitted_facts=admitted_facts,
+                    plan_repair=self.plan_repair,
                 )
                 if semantic_checks:
                     metadata["static_html_semantic_checks"] = semantic_checks

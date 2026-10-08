@@ -1,6 +1,7 @@
 """N1 G4: every admitted ordered item is checked against an exact Candidate blob."""
 
 from pathlib import Path
+from types import SimpleNamespace
 from datetime import UTC, datetime
 from hashlib import sha256
 import subprocess
@@ -13,11 +14,14 @@ from spg.domain.change import (
     CodeVerificationKind, CodeVerificationObligation,
 )
 from spg.domain.engineering_semantics import (
-    EngineeringSemanticFactCandidate, SemanticEpistemicStatus,
+    EngineeringSemanticFact, EngineeringSemanticFactCandidate,
+    SemanticFactProvenance, SemanticEpistemicStatus,
     SemanticFactAuthority, SemanticFactReference, SemanticRelation,
     SemanticRoleOrigin,
 )
-from spg.providers.static_html_semantic_verifier import verify_static_html_semantic_facts
+from spg.providers.static_html_semantic_verifier import (
+    StaticHTMLPlanRepair, verify_static_html_semantic_facts,
+)
 from spg.application.interaction import WorkInteractionService
 from spg.domain.interaction import (
     InteractionActor, InteractionAssessmentCandidate, InteractionInvariantViolation,
@@ -759,3 +763,227 @@ def test_fourth_observed_g4_profile_binds_count_to_exact_values(tmp_path: Path) 
     candidate = _candidate(repository, ITEMS[:6] + ITEMS[7:])
     checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
     assert not checks[1]["passed"] and not checks[3]["passed"]
+
+
+def test_unlisted_file_expressions_materialize_without_subject_aliases(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS)
+    revision = uuid4()
+    facts = tuple(SemanticFactReference(
+        fact_id=uuid4(), subject=subject, relation=SemanticRelation.EQUALITY,
+        value="index.html", scope=scope, qualifiers={},
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+        epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+        source_work_revision_id=revision,
+    ) for subject, scope in (
+        ("landing.asset.location", "index.html"),
+        ("product.output.entry", "the index.html page"),
+        ("site.root.document", "page index.html"),
+    ))
+    original = tuple(fact.model_dump(mode="json") for fact in facts)
+    checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
+    assert len(checks) == 3 and all(check["passed"] for check in checks)
+    assert all(check["materialization"]["method"] == "EXACT_TARGET_FILE"
+               and check["materialization"]["repair_attempts"] == 0
+               and check["materialization"]["work_reality_revision_id"] == str(revision)
+               for check in checks)
+    assert tuple(fact.model_dump(mode="json") for fact in facts) == original
+    wrong_file = facts[0].model_copy(update={"scope": "other.html"})
+    assert verify_static_html_semantic_facts(
+        repository, candidate, contract, (wrong_file,))[0]["reason"] == "UNVERIFIABLE_FACT_PLAN"
+
+
+def test_unlisted_paragraph_qualifier_checks_exact_blob(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS, extra="<p>Existing Product bounded Work</p>")
+    fact = SemanticFactReference(
+        fact_id=uuid4(), subject="copy.body.line",
+        relation=SemanticRelation.EQUALITY,
+        value="Existing Product bounded Work", scope="index.html",
+        qualifiers={"element": "paragraph"},
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+        epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+        source_work_revision_id=uuid4())
+    check = verify_static_html_semantic_facts(
+        repository, candidate, contract, (fact,))[0]
+    assert check["passed"] is True
+    assert check["materialization"]["method"] == "EXACT_PARAGRAPH"
+    wrong = fact.model_copy(update={"value": "different copy"})
+    assert verify_static_html_semantic_facts(
+        repository, candidate, contract, (wrong,))[0]["passed"] is False
+
+
+def test_unlisted_ordered_assertion_binds_exact_fact_and_rejects_drift(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS)
+    common = dict(authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4())
+    ordered = SemanticFactReference(
+        fact_id=uuid4(), subject="product.mandatory.sequence",
+        relation=SemanticRelation.ORDERED_COMPONENT, value=ITEMS,
+        scope="index.html", qualifiers={"element": "ol", "count": 14}, **common)
+    assertion = SemanticFactReference(
+        fact_id=uuid4(), subject="quality.sequence.conformance",
+        relation=SemanticRelation.ACCEPTANCE_ASSERTION, value=True,
+        scope="the ordered list in index.html",
+        qualifiers={"cardinality": 14, "occurrences_each": 1,
+                    "order": "as listed F01..F14"}, **common)
+    checks = verify_static_html_semantic_facts(repository, candidate, contract,
+                                               (ordered, assertion))
+    assert all(check["passed"] for check in checks)
+    assert checks[1]["materialization"]["linked_fact_id"] == str(ordered.fact_id)
+    candidate = _candidate(repository, ITEMS[:6] + (ITEMS[7], ITEMS[6]) + ITEMS[8:])
+    checks = verify_static_html_semantic_facts(repository, candidate, contract,
+                                               (ordered, assertion))
+    assert not checks[0]["passed"] and not checks[1]["passed"]
+    candidate = _candidate(repository, ITEMS[:6] + ("F07: wrong value",) + ITEMS[7:])
+    checks = verify_static_html_semantic_facts(repository, candidate, contract,
+                                               (ordered, assertion))
+    assert not checks[0]["passed"] and not checks[1]["passed"]
+    wrong_scope = assertion.model_copy(update={"scope": "other.html ordered list"})
+    checks = verify_static_html_semantic_facts(repository, _git(repository, "rev-parse", "HEAD"),
+                                               contract, (ordered, wrong_scope))
+    assert checks[1]["reason"] == "UNVERIFIABLE_FACT_PLAN"
+    wrong_order = assertion.model_copy(update={"qualifiers": {
+        **assertion.qualifiers, "order": "as listed F14..F01"}})
+    checks = verify_static_html_semantic_facts(repository, candidate, contract,
+                                               (ordered, wrong_order))
+    assert checks[1]["reason"] == "UNVERIFIABLE_FACT_PLAN"
+
+
+def test_unmaterialized_fact_is_visible_and_never_silently_passes(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS)
+    unknown = SemanticFactReference(
+        fact_id=uuid4(), subject="product.unrelated.future_effect",
+        relation=SemanticRelation.BEHAVIOR, value="must be observed",
+        scope="external service", qualifiers={},
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+        epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+        source_work_revision_id=uuid4())
+    checks = verify_static_html_semantic_facts(repository, candidate, contract, (unknown,))
+    assert len(checks) == 1
+    assert checks[0]["passed"] is False
+    assert checks[0]["reason"] == "UNVERIFIABLE_FACT_PLAN"
+
+
+def test_page_assertion_rejects_value_count_and_scope_drift(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS)
+    fact = SemanticFactReference(
+        fact_id=uuid4(), subject="product.page.acceptance",
+        relation=SemanticRelation.ACCEPTANCE_ASSERTION,
+        value="h1 contains exactly 'N1 Budget'; one ordered list with 14 items",
+        scope="index.html", qualifiers={"page_count": 1,
+            "heading_text": "N1 Budget", "ordered_list_count": 1,
+            "ordered_list_item_count": 14},
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+        epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+        source_work_revision_id=uuid4())
+    assert verify_static_html_semantic_facts(
+        repository, candidate, contract, (fact,))[0]["passed"] is True
+    variants = (
+        fact.model_copy(update={"value": "h1 contains exactly 'Wrong'; one ordered list with 14 items"}),
+        fact.model_copy(update={"value": "h1 contains exactly 'N1 Budget'; one ordered list with 13 items"}),
+        fact.model_copy(update={"scope": "other.html"}),
+        fact.model_copy(update={"qualifiers": {**fact.qualifiers, "ordered_list_item_count": 13}}),
+    )
+    for variant in variants:
+        check = verify_static_html_semantic_facts(
+            repository, candidate, contract, (variant,))[0]
+        assert check["passed"] is False
+        assert check["reason"] == "UNVERIFIABLE_FACT_PLAN"
+
+
+def test_model_repairs_only_derived_method_against_exact_human_source(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS)
+    revision, fact_id, record_id = uuid4(), uuid4(), uuid4()
+    provenance = SemanticFactProvenance(
+        source_record_ids=(record_id,),
+        source_text="The h1 must read exactly N1 Budget on index.html.",
+        role_origin=SemanticRoleOrigin.EXPLICIT)
+    admitted = EngineeringSemanticFact(
+        id=fact_id, subject="marketing.lead", relation=SemanticRelation.EQUALITY,
+        value="N1 Budget", scope="index.html", qualifiers={},
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+        epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+        provenance=provenance, admitted_work_revision_id=revision)
+    reference = SemanticFactReference(
+        fact_id=fact_id, subject=admitted.subject, relation=admitted.relation,
+        value=admitted.value, scope=admitted.scope, qualifiers={},
+        authority=admitted.authority, epistemic_status=admitted.epistemic_status,
+        source_work_revision_id=revision)
+    outputs = [
+        '{"method":"EXACT_H1","target_path":"other.html","source_quote":"The h1 must read exactly N1 Budget"}',
+        '{"method":"EXACT_H1","target_path":"index.html","source_quote":"The h1 must read exactly N1 Budget"}',
+    ]
+    calls = []
+    def generate(**kwargs):
+        calls.append(kwargs)
+        return SimpleNamespace(output_text=outputs[len(calls) - 1],
+                               request_id=f"plan-{len(calls)}")
+    runtime = SimpleNamespace(generate=generate,
+                              registry=SimpleNamespace(close=lambda: None))
+    checks = verify_static_html_semantic_facts(
+        repository, candidate, contract, (reference,),
+        admitted_facts={str(fact_id): admitted},
+        plan_repair=StaticHTMLPlanRepair(lambda: runtime))
+    assert checks[0]["passed"] is True
+    plan = checks[0]["materialization"]
+    assert plan["method"] == "EXACT_H1"
+    assert plan["repair_attempts"] == 2
+    assert plan["provenance_checked"] is True
+    assert plan["source_record_ids"] == [str(record_id)]
+    assert calls[1]["input_text"].find("target path differs") >= 0
+    assert reference.value == "N1 Budget" and reference.scope == "index.html"
+    with pytest.raises(ValueError, match="differs from admitted fact"):
+        verify_static_html_semantic_facts(
+            repository, candidate, contract,
+            (reference.model_copy(update={"value": "fabricated value"}),),
+            admitted_facts={str(fact_id): admitted})
+    candidate = _candidate(repository, ITEMS, extra="<h2>Unexpected</h2>")
+    calls.clear()
+    checks = verify_static_html_semantic_facts(
+        repository, candidate, contract, (reference,),
+        admitted_facts={str(fact_id): admitted},
+        plan_repair=StaticHTMLPlanRepair(lambda: runtime))
+    assert checks[0]["passed"] is False
+    assert checks[0]["reason"] == "EXACT_H1_MISMATCH"
+
+
+def test_model_plan_exhaustion_cannot_invent_source_or_pass(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS)
+    fact_id, revision = uuid4(), uuid4()
+    admitted = EngineeringSemanticFact(
+        id=fact_id, subject="marketing.lead", relation=SemanticRelation.EQUALITY,
+        value="N1 Budget", scope="index.html", qualifiers={},
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+        epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+        provenance=SemanticFactProvenance(source_record_ids=(uuid4(),),
+            source_text="The h1 must read exactly N1 Budget on index.html.",
+            role_origin=SemanticRoleOrigin.EXPLICIT),
+        admitted_work_revision_id=revision)
+    reference = SemanticFactReference(
+        fact_id=fact_id, subject=admitted.subject, relation=admitted.relation,
+        value=admitted.value, scope=admitted.scope, qualifiers={},
+        authority=admitted.authority, epistemic_status=admitted.epistemic_status,
+        source_work_revision_id=revision)
+    calls = []
+    def generate(**kwargs):
+        calls.append(kwargs)
+        return SimpleNamespace(output_text=(
+            '{"method":"EXACT_H1","target_path":"index.html",'
+            '"source_quote":"invented Human approval"}'),
+            request_id=f"invalid-{len(calls)}")
+    runtime = SimpleNamespace(generate=generate,
+                              registry=SimpleNamespace(close=lambda: None))
+    checks = verify_static_html_semantic_facts(
+        repository, candidate, contract, (reference,),
+        admitted_facts={str(fact_id): admitted},
+        plan_repair=StaticHTMLPlanRepair(lambda: runtime))
+    assert len(calls) == 2
+    assert checks[0]["reason"] == "UNVERIFIABLE_FACT_PLAN"
+    assert checks[0]["materialization"]["model_repair"]["converged"] is False
