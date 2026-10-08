@@ -4296,27 +4296,25 @@ class WorkInteractionService:
             raise InteractionInvariantViolation(
                 "Explicit ordered page constraints are incomplete or ambiguous")
         existing = tuple(fact for fact in candidate.semantic_fact_candidates
-                         if fact.subject in {"page.ordered_list.items",
-                                             "page.ordered_list.item_texts",
-                                             "page.list.item_text",
-                                             "index.html.ordered_list.item_texts"}
-                         and fact.relation is SemanticRelation.ORDERED_COMPONENT
+                         if fact.relation is SemanticRelation.ORDERED_COMPONENT
                          and fact.scope in {None, "index.html"})
         if existing:
             if len(existing) != 1 or not isinstance(existing[0].value, tuple):
                 raise InteractionInvariantViolation(
                     "WIC ordered page values differ from exact Human constraints")
             observed = existing[0]
-            if observed.value == items:
-                return candidate
             unlabelled = tuple(re.sub(r"^F\d{2}:\s*", "", item)
                                for item in items)
-            if observed.value != unlabelled:
+            if observed.value not in {items, unlabelled}:
                 raise InteractionInvariantViolation(
                     "WIC ordered page values differ from exact Human constraints")
-            # The Provider retained order and text but dropped the Human's Fxx
-            # identifiers. Correct this one typed proposal in place, preserving
-            # the cited Human source and avoiding duplicate protected context.
+            if (observed.subject == "page.ordered_list.items"
+                    and observed.value == items and observed.scope == "index.html"
+                    and observed.qualifiers.get("count") == len(items)):
+                return candidate
+            # Canonicalize the single exact Human list in place. Providers may
+            # vary the subject vocabulary or drop Fxx labels; neither variation
+            # may duplicate or weaken the protected ordered values.
             corrected = observed.model_copy(update={
                 "subject": "page.ordered_list.items", "value": items,
                 "scope": "index.html", "qualifiers": {"count": len(items)},

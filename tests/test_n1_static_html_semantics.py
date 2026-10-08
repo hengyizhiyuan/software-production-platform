@@ -251,7 +251,17 @@ def test_explicit_fourteen_items_survive_wic_count_only_candidate() -> None:
             role_origin=SemanticRoleOrigin.EXPLICIT),)})
     preserved_exact = WorkInteractionService._preserve_explicit_ordered_page_items(
         already_exact, record)
-    assert preserved_exact.semantic_fact_candidates == already_exact.semantic_fact_candidates
+    assert len(preserved_exact.semantic_fact_candidates) == 1
+    assert preserved_exact.semantic_fact_candidates[0].subject == "page.ordered_list.items"
+    assert preserved_exact.semantic_fact_candidates[0].value == ITEMS
+
+    document_shape = already_exact.semantic_fact_candidates[0].model_copy(update={
+        "subject": "document.ordered_list.items.text"})
+    preserved_document = WorkInteractionService._preserve_explicit_ordered_page_items(
+        candidate.model_copy(update={"semantic_fact_candidates": (document_shape,)}),
+        record)
+    assert len(preserved_document.semantic_fact_candidates) == 1
+    assert preserved_document.semantic_fact_candidates[0].subject == "page.ordered_list.items"
 
     stripped = already_exact.semantic_fact_candidates[0].model_copy(update={
         "subject": "index.html.ordered_list.item_texts",
