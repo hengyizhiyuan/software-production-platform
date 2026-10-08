@@ -87,3 +87,27 @@ Invariant or Approved Decision was expressed. See g0-root-cause-review-20261008.
 The exact G1 Candidate has a material contract mismatch despite Verification
 PASS; see g1-human-authorization-review-20261008.md. It remains unapproved,
 unintegrated and without Manifest. N1 remains PARTIAL.
+
+ADDENDUM — 2026-10-08 07:05 UTC
+The current exact application image is 285e49aeb4fc3da85db3ab9b13fa31b4e1e9bb50;
+its image SHA256 is 008de4fcdfb683c2110ce3593bcb258269678020db0aefd6d7b55eccc8e46750.
+See checkpoint-285e49a-20261008.md and case-qualification-matrix.json for
+current case status. The 05:01 regression paragraph above is historical
+checkpoint text: the empty-Work failure was a stale synchronous BLOCKED
+expectation, not asynchronous timing; its corrected test passed. The full
+managed-source restart test passed after restarting only the dedicated
+watt-n1-gitea-20261008; production Gitea was not restarted. Exact-source
+accepted-V1/new-Work and four truthful-stop boundary tests passed as scoped
+fixture regressions, not Work PASS.
+
+G0 now has a valid managed Greenfield verified Candidate and required Guardian
+PASS without invented Approved Decision or Invariant; Human integration and
+complete Work delivery remain pending. G1's exact Candidate omits three
+lineage IDs required by its admitted Work Contract; do not authorize it on
+current evidence. G3's fresh 285e49a Work has no Runtime binding; its source
+clarification produced NO_GOVERNED_CHANGE. G4's fresh Candidate contains
+F01-F14 correctly, but only nine Work constraints were admitted, so 14
+independently protected facts are unproven. G2, G5 and G6 remain PARTIAL.
+All original failed Works remain unchanged; G0/G1/G4 have zero Human
+authorizations, Runtime Commits, Manifests and Delivery Acceptances. N1
+remains PARTIAL and open.

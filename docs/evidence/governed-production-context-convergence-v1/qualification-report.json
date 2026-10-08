@@ -1,9 +1,9 @@
 {
   "report_name": "N1 Governed Production Context Reality Evidence",
-  "report_version": "20261008-forensics-and-live-qualification-5",
+  "report_version": "20261008-forensics-and-live-qualification-6",
   "status": "REAL_QUALIFICATION_IN_PROGRESS",
   "qualification_result": "PARTIAL_EVIDENCE_ONLY",
-  "captured_at_utc": "2026-10-08T05:01:34Z",
+  "captured_at_utc": "2026-10-08T07:05:11Z",
   "target": {"region": "cn-wulanchabu", "instance_id": "i-0jl386xnbauudq5j9jk0", "ecs_source_revision": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3", "migration": "20261007_72"},
   "evidence_grades": {"E1": "direct persisted row/object", "E2": "contemporaneous report with unavailable raw attachment", "E3": "current-code mechanism or new reproduction, never historical fact", "UNKNOWN": "not established"},
   "historical_cases": [
@@ -24,11 +24,12 @@
     "G0_first_new_attempt": "New Product 31fd07a2-6f7b-4271-827c-7795a8ddc1dc and Work f8088a58-b7f9-5456-b04c-82136460d3fa stopped with ExecutionContextNotReady and Human Steering attention f44d1da3-a713-5fc2-a984-ac52a23e2b36; no Candidate. Subsequent source-basis audit found the isolated stack omitted SPG_MANAGED_SOURCE_PROVIDER=gitea, so this is an invalid managed-source qualification setup, not historical proof of a mixed-target root cause. Failed trial retained.",
     "G0_second_trial": "New Product ed52c0bc-e746-4abf-89c0-1bea5bd61c90 has exact managed Gitea source V0. Its new Work eaae7b07-38ed-50f4-8322-167da879596d truthfully stopped before production because ECF lacked PRODUCT_INTENT, PRODUCT_INVARIANT, APPROVED_DECISION; no facts were fabricated and no Candidate exists. This is not a positive G0 PASS. IDs and counts in g0-live-trials-20261008.json.",
     "managed_web_companion_test": "Consumer-side managed web context now admits exactly a root README.md companion to web targets; real Gitea plus isolated PostgreSQL accepted-source integration test passed with server.py negative control. This is independent bounded coverage, not proof that either live G0 trial qualifies.",
-    "restart_recovery": "Four isolated N1 containers restarted onto exact a595303 image and corrected managed-source configuration; G1 Work retained the same sealed Candidate, Verification and pending Human attention with no duplicate observed. Production containers were not restarted."
+    "restart_recovery": "Four isolated N1 containers subsequently restarted onto exact 285e49a image. G0, G1 and G4 each retain one sealed Candidate; their Verification counts are 2, 1 and 2. Dedicated isolated Gitea restart/head-isolation regression passed. Production Gitea and other production containers were not restarted.",
+    "current_checkpoint": "See checkpoint-285e49a-20261008.md and case-qualification-matrix.json. G0 valid managed Greenfield reaches verified Candidate/Guardian PASS without invented Approved Facts, pending Human integration and Delivery. G1 exact Candidate has material lineage mismatch and must not be authorized on present evidence. G3 fresh 285e49a Work has zero Runtime bindings. G4 artifact contains F01-F14 but only nine Work constraints were admitted. G2 accepted-V1 and G6 truthful-stop regressions pass only as fixtures; no complete G0-G6 Work PASS."
   },
   "qualification_database": "spg_n1_qualification_20261008",
   "case_matrix": "case-qualification-matrix.json",
   "regression_summary": "regression-summary.json",
   "state_protection": "state-protection.json",
-  "cross_computer_recovery": {"git_path": "docs/evidence/governed-production-context-convergence-v1/", "ecs_persistent_path": "/data/watt/app/owner-runtime/qualifications/governed-production-context-convergence-v1/", "isolated_live_qualification_path": "/data/watt/n1-qualification-20261008/app/owner-runtime/qualifications/governed-production-context-convergence-v1/", "git_push_status": "SOURCE_AND_FIRST_LIVE_EVIDENCE_COMMIT_a595303_PUSHED; THIS_REPORT_CAPTURE_PRECEDES_NEXT_EVIDENCE_COMMIT", "pushed_source_commit_at_capture": "a595303a9339ebc200f6f20429bdf5f3ab3a356b", "current_evidence_changes": "UNCOMMITTED_AT_REPORT_CAPTURE"}
+  "cross_computer_recovery": {"git_path": "docs/evidence/governed-production-context-convergence-v1/", "ecs_persistent_path": "/data/watt/app/owner-runtime/qualifications/governed-production-context-convergence-v1/", "isolated_live_qualification_path": "/data/watt/n1-qualification-20261008/app/owner-runtime/qualifications/governed-production-context-convergence-v1/", "git_push_status": "FEATURE_SOURCE_285e49a_AND_EVIDENCE_THROUGH_e4cd4a8_PUSHED_AT_CAPTURE; THIS_REPORT_UPDATE_PENDING_NEXT_COMMIT", "pushed_source_commit_at_capture": "285e49aeb4fc3da85db3ab9b13fa31b4e1e9bb50", "current_evidence_changes": "THIS_REPORT_UPDATE_NOT_YET_COMMITTED_AT_CAPTURE"}
 }
