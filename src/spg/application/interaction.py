@@ -4298,16 +4298,36 @@ class WorkInteractionService:
         existing = tuple(fact for fact in candidate.semantic_fact_candidates
                          if fact.subject in {"page.ordered_list.items",
                                              "page.ordered_list.item_texts",
-                                             "page.list.item_text"}
+                                             "page.list.item_text",
+                                             "index.html.ordered_list.item_texts"}
                          and fact.relation is SemanticRelation.ORDERED_COMPONENT
                          and fact.scope in {None, "index.html"})
         if existing:
-            if any(tuple(fact.value) != items for fact in existing
-                   if isinstance(fact.value, tuple)) or any(
-                       not isinstance(fact.value, tuple) for fact in existing):
+            if len(existing) != 1 or not isinstance(existing[0].value, tuple):
                 raise InteractionInvariantViolation(
                     "WIC ordered page values differ from exact Human constraints")
-            return candidate
+            observed = existing[0]
+            if observed.value == items:
+                return candidate
+            unlabelled = tuple(re.sub(r"^F\d{2}:\s*", "", item)
+                               for item in items)
+            if observed.value != unlabelled:
+                raise InteractionInvariantViolation(
+                    "WIC ordered page values differ from exact Human constraints")
+            # The Provider retained order and text but dropped the Human's Fxx
+            # identifiers. Correct this one typed proposal in place, preserving
+            # the cited Human source and avoiding duplicate protected context.
+            corrected = observed.model_copy(update={
+                "subject": "page.ordered_list.items", "value": items,
+                "scope": "index.html", "qualifiers": {"count": len(items)},
+                "source_record_ids": (latest.id,), "source_text": source,
+                "authority": SemanticFactAuthority.HUMAN_EXPLICIT,
+                "epistemic_status": SemanticEpistemicStatus.CONFIRMED,
+                "role_origin": SemanticRoleOrigin.EXPLICIT,
+            })
+            return candidate.model_copy(update={"semantic_fact_candidates": tuple(
+                corrected if fact is observed else fact
+                for fact in candidate.semantic_fact_candidates)})
         fact = EngineeringSemanticFactCandidate(
             candidate_id="human-ordered-page-items",
             subject="page.ordered_list.items",

@@ -253,6 +253,18 @@ def test_explicit_fourteen_items_survive_wic_count_only_candidate() -> None:
         already_exact, record)
     assert preserved_exact.semantic_fact_candidates == already_exact.semantic_fact_candidates
 
+    stripped = already_exact.semantic_fact_candidates[0].model_copy(update={
+        "subject": "index.html.ordered_list.item_texts",
+        "value": tuple(item.split(": ", 1)[1] for item in ITEMS),
+    })
+    stripped_candidate = candidate.model_copy(update={
+        "semantic_fact_candidates": (stripped,)})
+    corrected = WorkInteractionService._preserve_explicit_ordered_page_items(
+        stripped_candidate, record)
+    assert len(corrected.semantic_fact_candidates) == 1
+    assert corrected.semantic_fact_candidates[0].value == ITEMS
+    assert corrected.semantic_fact_candidates[0].subject == "page.ordered_list.items"
+
     malformed = record.model_copy(update={"content": source.replace("F07:", "F08:")})
     with pytest.raises(InteractionInvariantViolation):
         WorkInteractionService._preserve_explicit_ordered_page_items(candidate, malformed)
@@ -397,6 +409,12 @@ def test_g0_semantic_markup_and_exact_deliverable_are_checked(tmp_path: Path) ->
         SemanticFactReference(fact_id=uuid4(), subject="page.markup",
                               relation=SemanticRelation.BEHAVIOR,
                               value="semantic HTML", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.h1.count",
+                              relation=SemanticRelation.CARDINALITY, value=1,
+                              scope="index.html", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.paragraph.count",
+                              relation=SemanticRelation.CARDINALITY, value=1,
+                              scope="index.html", **common),
     )
     assert all(check["passed"] for check in verify_static_html_semantic_facts(
         repository, candidate, contract, facts))

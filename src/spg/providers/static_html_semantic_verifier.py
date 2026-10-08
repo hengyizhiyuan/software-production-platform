@@ -197,11 +197,11 @@ def verify_static_html_semantic_facts(
                     and isinstance(fact.value, str)):
                 passed = parser.paragraphs == [fact.value]
                 reason = "EXACT_PARAGRAPH" if passed else "PARAGRAPH_TEXT_OR_COUNT_MISMATCH"
-            elif (fact.subject == f"{path}.h1.count"
+            elif (fact.subject in {f"{path}.h1.count", "page.h1.count"}
                     and fact.relation is SemanticRelation.CARDINALITY):
                 passed = len(parser.headings) == fact.value
                 reason = "EXACT_H1_COUNT" if passed else "H1_COUNT_MISMATCH"
-            elif (fact.subject == f"{path}.paragraph.count"
+            elif (fact.subject in {f"{path}.paragraph.count", "page.paragraph.count"}
                     and fact.relation is SemanticRelation.CARDINALITY):
                 passed = len(parser.paragraphs) == fact.value
                 reason = "EXACT_PARAGRAPH_COUNT" if passed else "PARAGRAPH_COUNT_MISMATCH"
