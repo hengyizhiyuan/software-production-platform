@@ -101,22 +101,31 @@ def _bind_typed_accepted_product_source(items, basis):
             continue
         evidence = f"product-source:{facts.get('product_id')}:{facts.get('version')}"
         if (facts.get("repository_identity") and facts.get("accepted_revision")
+                and facts.get("accepted_tree")
                 and evidence in observation.evidence_references):
             sources.append((facts, evidence))
     bound = []
     for item in items:
         production = item.production
         reference = None if production is None else production.repository_reference
-        match = (None if reference is None or not production.repository_required
-                 or reference.provenance.origin not in {
-                     SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}
-                 else pattern.fullmatch(" ".join(reference.value.split())))
-        if match is None:
+        if reference is None or not production.repository_required:
             bound.append(item)
             continue
-        requested_version = match.group("version")
-        matches = [(facts, evidence) for facts, evidence in sources
-                   if requested_version is None or str(facts["version"]) == requested_version]
+        provenance = reference.provenance
+        natural = (pattern.fullmatch(" ".join(reference.value.split()))
+                   if provenance.origin in {SemanticOrigin.HUMAN_EXPLICIT,
+                                            SemanticOrigin.HUMAN_CORRECTION}
+                   else None)
+        observed_exact = (provenance.origin is SemanticOrigin.SYSTEM_INFERRED
+                          and provenance.evidence_reference is not None)
+        if natural is None and not observed_exact:
+            bound.append(item)
+            continue
+        matches = [(facts, evidence) for facts, evidence in sources if (
+            (natural is not None and (natural.group("version") is None or
+                                      str(facts["version"]) == natural.group("version")))
+            or (observed_exact and reference.value == facts["repository_identity"]
+                and provenance.evidence_reference == evidence))]
         if len(matches) == 1:
             facts, evidence = matches[0]
             production = production.model_copy(update={

@@ -182,6 +182,32 @@ def test_natural_accepted_product_v0_reference_binds_one_persisted_source():
     basis['ir']=ir.model_copy(update={'items':resolved})
     assert project_greenfield_context(**basis,managed_source_identity=identity).intent
 
+    # A compiler may already replace the Human phrase with the exact Product
+    # identity, while labelling the argument SYSTEM_INFERRED. Recheck its
+    # evidence against Product Reality before granting observed provenance.
+    inferred=SemanticArgument(value=identity,provenance=SemanticProvenance(
+        origin=SemanticOrigin.SYSTEM_INFERRED,
+        evidence_reference=f'product-source:{pid}:0'))
+    inferred_items=tuple(item.model_copy(update={'production':
+        item.production.model_copy(update={'repository_reference':inferred})})
+        if item.production is not None else item for item in items)
+    observed=_bind_typed_accepted_product_source(
+        inferred_items,SimpleNamespace(observed_reality=(observation,)))
+    observed_goal=next(item.production for item in observed
+        if item.production is not None)
+    assert observed_goal.repository_reference.provenance.origin is SemanticOrigin.REPOSITORY_OBSERVED
+    assert project_greenfield_context(**{**basis,'ir':ir.model_copy(update={'items':observed})},
+                                      managed_source_identity=identity).intent
+    wrong_evidence=inferred.model_copy(update={'provenance':
+        inferred.provenance.model_copy(update={'evidence_reference':'product-source:wrong:0'})})
+    wrong_items=tuple(item.model_copy(update={'production':
+        item.production.model_copy(update={'repository_reference':wrong_evidence})})
+        if item.production is not None else item for item in items)
+    wrong=_bind_typed_accepted_product_source(
+        wrong_items,SimpleNamespace(observed_reality=(observation,)))
+    assert 'repository_reference' in next(item.production for item in wrong
+        if item.production is not None).unresolved_arguments
+
     # No observed Product source or two candidates must request source selection.
     unresolved=_bind_typed_accepted_product_source(items,SimpleNamespace(observed_reality=()))
     assert 'repository_reference' in next(item.production for item in unresolved
