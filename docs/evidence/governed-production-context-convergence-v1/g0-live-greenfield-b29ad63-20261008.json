@@ -1,0 +1,61 @@
+{
+  "report_name": "N1 G0 fresh managed Greenfield real Worker qualification",
+  "captured_at_utc": "2026-10-08T06:33:02Z",
+  "evidence_grade": "E1 isolated ECS PostgreSQL, Git, API/Worker/Guardian/Verification records; not a historical A/B/C/D receipt",
+  "fixture_authority": "Agent-authored isolated qualification prompt under the user's explicit N1 qualification instruction; not a Human-approved Product Invariant, Decision, integration or acceptance",
+  "environment": {
+    "ecs_instance_id": "i-0jl386xnbauudq5j9jk0",
+    "database": "spg_n1_qualification_20261008",
+    "image": "watt-n1-candidate:b29ad63",
+    "image_sha256": "183e2a977f49cd2efb143207cc88b476bc5febc9167ad56630a6811d33658455",
+    "source_commit": "b29ad63c4fc5f6cb60a6250bce2766ab548284ff",
+    "production_service_restarted": false
+  },
+  "product_id": "6fa33e3c-bbf6-4d2a-b6e7-5488b74cbe81",
+  "managed_source_version": 0,
+  "managed_source_revision": "ceccd50bf1a9371f027420cfb069a752ffb2cb1a",
+  "managed_source_tree": "a61f938ddd0e9ff452d97adf472cdc140366fb74",
+  "interaction_id": "d93adc24-5227-465d-9ba5-b46717572b49",
+  "turn_id": "20c69da1-81f6-4ec3-a500-9f8e4a5d2b77",
+  "input_record_id": "c7a403a4-866c-4a9b-81b5-868e6cff184c",
+  "assessment_id": "fab9d847-2947-4a2a-aa6e-7fb71c2b4283",
+  "semantic_ir_id": "84a96c1b-9a71-528f-83e4-f85c1cca3d82",
+  "work_id": "62baedc4-7eae-5492-a537-a72b909de006",
+  "work_reality_revision_id": "9fed3397-3809-5b29-a2cb-16a8af650496",
+  "admission_governance_id": "bcac3b31-5f98-5af4-9f3d-82396d4707bc",
+  "runtime_binding_id": "0f132c8e-e616-4c9a-ad06-9aedf36ca64c",
+  "production_run_id": "ea1d3514-7dea-4aa1-9b05-a777cc4ba0bc",
+  "work_unit_id": "70b5ba04-53a6-4a87-bf04-e29641292804",
+  "decision_context": {
+    "contract_id": "MANAGED_GREENFIELD_PRODUCTION",
+    "package_fingerprint": "66add7e1fa2b548a3bf86af2db7bfd4c4a9454f8de6f2c91fd377e3c656f365a",
+    "protected_classes": ["PRODUCT_INTENT", "APPROVED_CONSTRAINT"],
+    "product_invariant_present": false,
+    "approved_decision_present": false,
+    "protected_facts_dropped": false
+  },
+  "candidate": {
+    "id": "be5f31b2-462d-51bd-9aa7-d9c84807f664",
+    "condition": "SEALED",
+    "fingerprint": "41c077e09bf1bce5bd8f7c71f95440f7c57da8c2cb3dd4b3dbd3526d71f8f73f",
+    "repository_revision": "8b30666e381e8a8a9745ac3ec9f2bb32fee9b626",
+    "tree": "4fd3f0cbf7e88c130e614c0160c96ba9f8241031",
+    "exact_diff": ["A index.html"],
+    "artifact_sha256": "7e2cf70b7f4d93672b1a9a0dc9df97b9d4393a72679a2d0703a770067206d1f5"
+  },
+  "verification": {
+    "path_scope_id": "87feb33b-9d8c-520b-8caf-290158451080",
+    "path_scope_result": "PASS",
+    "git_diff_id": "86e0f2f4-6899-57e3-a44e-c36b91c7be0f",
+    "git_diff_result": "PASS",
+    "guardian_status": "PASS",
+    "guardian_required": true,
+    "guardian_result_ref": "guardian:assurance-result:538b64b9-0e1b-506d-bf59-3f106e67ef95"
+  },
+  "human_candidate_attention_id": "e19fe717-627b-5ce7-854d-9f4f3f146b91",
+  "authorization_count": 0,
+  "runtime_commit_count": 0,
+  "manifest_count": 0,
+  "delivery_acceptance_count": 0,
+  "qualification_result": "GREENFIELD_PRODUCTION_TO_VERIFIED_REVIEWABLE_CANDIDATE_PASS; full Work G0 PASS awaits explicit exact Candidate integration and Delivery Acceptance"
+}

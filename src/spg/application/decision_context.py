@@ -171,7 +171,7 @@ class MilestoneClosureContextService:
         """Read the current Product/Work/source/evidence; never mutate closure."""
         from sqlalchemy import select
         from spg.infrastructure.persistence.product_schema import (
-            product_managed_sources, product_works,
+            product_managed_sources, product_works, work_source_bases,
         )
         from spg.infrastructure.persistence.product_store import ProductStore
         from spg.infrastructure.persistence.runtime_store import RuntimeStore
@@ -188,10 +188,16 @@ class MilestoneClosureContextService:
                     "DECISION_CONTEXT_NOT_READY: exact Product/Work/Repository missing"
                 )
             accepted = unit_of_work.session.execute(
-                select(product_managed_sources).where(
+                select(product_managed_sources).join(
+                    work_source_bases,
+                    work_source_bases.c.product_id == product_managed_sources.c.product_id,
+                ).where(
                     product_managed_sources.c.product_id == product_id,
-                    product_managed_sources.c.repository_identity ==
-                        resource.repository_identity,
+                    work_source_bases.c.work_id == work_id,
+                    work_source_bases.c.resource_id == resource.id,
+                    work_source_bases.c.source_version == product_managed_sources.c.version,
+                    work_source_bases.c.source_revision == product_managed_sources.c.accepted_revision,
+                    work_source_bases.c.source_tree == product_managed_sources.c.accepted_tree,
                 )
             ).mappings().first()
             if accepted is None:

@@ -392,8 +392,13 @@ def test_new_product_lineage_restart_head_isolation_export_and_authority(postgre
     # A container is replaced while its independent named volumes remain mounted.
     env = {**os.environ, "SPG_OPERATOR_TOKEN": "qualification-only-operator-token-0001",
            "WATT_GITEA_PASSWORD": settings.managed_source_password.get_secret_value()}
-    subprocess.run(["docker", "compose", "-f", "compose.yaml", "-f",
-        "compose.managed-source.yaml", "up", "-d", "--force-recreate", "gitea"],
+    isolated_restart = os.environ.get("SPG_TEST_GITEA_RESTART_CONTAINER")
+    if isolated_restart is not None:
+        assert isolated_restart.startswith("watt-n1-gitea-")
+    restart_command = (["docker", "restart", isolated_restart] if isolated_restart
+        else ["docker", "compose", "-f", "compose.yaml", "-f",
+              "compose.managed-source.yaml", "up", "-d", "--force-recreate", "gitea"])
+    subprocess.run(restart_command,
         cwd=ROOT, env=env, check=True, capture_output=True, timeout=120)
     for _ in range(30):
         try:
@@ -448,7 +453,7 @@ def test_new_product_lineage_restart_head_isolation_export_and_authority(postgre
     exported = client.get(f"/api/products/{product_id}/code-assets/export")
     assert exported.status_code == 200 and exported.headers["x-watt-source-revision"] == exact
     assert client.get(f"/api/products/{product_id}/code-assets/export?revision={ambient}").status_code == 409
-    assert "Code Assets" in (ROOT / "src/spg/web/index.html").read_text()
+    assert "Code Assets" in (ROOT / "src/spg/web/advanced.html").read_text()
     assert "inspectCodeVersion" in (ROOT / "src/spg/web/p1-readiness.js").read_text()
 
 

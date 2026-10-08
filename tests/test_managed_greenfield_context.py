@@ -9,7 +9,7 @@ from spg.application.managed_greenfield_context import (
 )
 from spg.application.decision_context import WattDecisionContextGateway,DecisionContextRequirement,MANAGED_WEB_SURFACE,DecisionContextNotReady,DecisionContextChanged,DecisionContextAuthorityMissing
 from spg.domain.intent_realization import SemanticItem,SemanticKind,SemanticClause
-from spg.domain.semantic_provenance import SemanticProvenance,SemanticOrigin
+from spg.domain.semantic_provenance import SemanticProvenance,SemanticOrigin,SemanticArgument
 from tests.test_human_interaction_authority import declared_ir,ROUTINE,POSITIVE
 from tests.test_decision_context_integration import git
 
@@ -143,6 +143,20 @@ def test_existing_product_first_bounded_work_can_use_managed_genesis():
     source=project_greenfield_context(**basis)
     assert source is not None and source.intent
     assert source.work_id==basis['work'].id
+
+
+def test_existing_product_v0_reference_must_name_exact_observed_managed_source():
+    basis=owner_basis();ir=basis['ir'];identity=f'watt://repositories/products/{basis["product_id"]}'
+    argument=SemanticArgument(value=identity,provenance=SemanticProvenance(
+        origin=SemanticOrigin.REPOSITORY_OBSERVED,
+        evidence_reference=f'product-source:{basis["product_id"]}:0'))
+    items=tuple(item.model_copy(update={'production':item.production.model_copy(update={
+        'new_work':True,'repository_required':True,'repository_reference':argument})})
+        if item.production is not None else item for item in ir.items)
+    basis['ir']=ir.model_copy(update={'items':items})
+    assert project_greenfield_context(**basis) is None
+    assert project_greenfield_context(**basis,managed_source_identity=identity).intent
+    assert project_greenfield_context(**basis,managed_source_identity=identity+'-wrong') is None
 
 
 def test_successor_uses_accepted_source_proof_and_keeps_work_scope_separate(tmp_path):

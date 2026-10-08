@@ -13,7 +13,7 @@ from spg.domain.intent_realization import SemanticItem,SemanticKind,SemanticClau
 from spg.domain.semantic_provenance import SemanticProvenance,SemanticOrigin
 from spg.infrastructure.persistence.product_schema import software_products,product_works,product_managed_sources,work_source_bases,engineering_resources
 from spg.infrastructure.persistence.product_store import ProductStore
-from spg.application.decision_context import lineage_for_work_task,assert_task_context_fresh,DecisionContextChanged,WattDecisionContextGateway
+from spg.application.decision_context import lineage_for_work_task,assert_task_context_fresh,DecisionContextChanged,WattDecisionContextGateway,MilestoneClosureContextService
 from spg.application.production_intelligence import default_task_contract_builder,TaskContractRequest
 from tests.test_decision_context_integration import git
 
@@ -56,6 +56,10 @@ def test_persisted_greenfield_owner_context_binds_task_and_freshness(postgres_da
         u.commit()
     lineage=lineage_for_work_task(postgres_database,work_id=record.id,repository_identity=identity,repository_path=repo,repository_revision=sha,target_paths=('index.html',))
     assert lineage.contract_id=='MANAGED_GREENFIELD_PRODUCTION'
+    # The Product source and Work branch have separate identities at milestone
+    # evaluation too; only their exact admitted source version/tree may join.
+    closure=MilestoneClosureContextService(postgres_database).assess_work_milestone(record.id)
+    assert closure.context_status in {'READY','INCOMPLETE'}
     assert {o.context_class for o in lineage.protected_obligations}==expected
     if role is None:
         from tests.test_guided_interaction_calibration import PROPOSAL

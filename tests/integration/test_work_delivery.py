@@ -25,6 +25,7 @@ from spg.domain.delivery import DeliveryTargetKind, DeliveryTargetRequest, Human
 from spg.domain.execution import ProviderReportedOutcome
 from spg.domain.product import AttentionAction, AttentionKind, AttentionResolutionRequest, ProductInvariantViolation
 from spg.domain.runtime import RuntimeInvariantViolation
+from spg.domain.steering import SteeringDriverStopReason
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.product_store import ProductStore
 from spg.providers.deterministic_executor import DeterministicTestExecutor, DeterministicExecutionSpecification, DeterministicFileOperation, DeterministicFileOperationType
@@ -81,8 +82,11 @@ def test_empty_work_then_two_repository_namespaces(postgres_database, tmp_path):
                 "human_attention_recommendation": "Select the repository for this Work",
             })
     driver = PlanSteeringDriver(postgres_database, work, _SchedulingOrchestrator(), semantic_capability=NeedsClarification())
-    driver.activate(projection.work_id)
-    assert work.list_attention(work_id=projection.work_id)
+    outcome = driver.activate(projection.work_id)
+    # Admission already recorded a terminal convergence stop for this unbound
+    # Work; a second activation must not manufacture a Human question.
+    assert outcome.stop_reason is SteeringDriverStopReason.BLOCKED
+    assert not work.list_attention(work_id=projection.work_id)
     driver.shutdown()
     assets = RepositoryAssetService(postgres_database, tmp_path / "assets", tmp_path / "imports")
     a, b = create_asset(assets, "A"), create_asset(assets, "B")

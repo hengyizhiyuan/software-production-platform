@@ -65,14 +65,23 @@ def _assert_admitted_revision(work, revision, ir, governance):
         raise DecisionContextAuthorityMissing('MANAGED_GREENFIELD_CONTEXT_OWNER_BASIS_MISSING')
 
 
-def project_greenfield_context(*, product_id, work, revision, ir, governance, semantic_history=()):
+def project_greenfield_context(*, product_id, work, revision, ir, governance,
+                               semantic_history=(), managed_source_identity=None):
     """Project only a source-owned admitted revision, never compiler candidates."""
     _assert_admitted_revision(work, revision, ir, governance)
     history=tuple(dict((value.id,value) for value in (ir,*semantic_history)).values())
     goals=next((value.current_production for value in history if value.current_production),())
-    initial_greenfield=any(g.current and not g.repository_required and g.repository_reference is None
+    def uses_exact_managed_genesis(goal):
+        if not goal.repository_required and goal.repository_reference is None:
+            return True
+        reference=goal.repository_reference
+        return bool(managed_source_identity and goal.repository_required and reference
+            and reference.value==managed_source_identity
+            and reference.provenance.origin is SemanticOrigin.REPOSITORY_OBSERVED
+            and reference.provenance.evidence_reference==f'product-source:{product_id}:0')
+    initial_greenfield=any(uses_exact_managed_genesis(g)
                           for value in history for g in value.current_production)
-    if not goals or not initial_greenfield or any(g.repository_required or g.repository_reference is not None for g in goals):
+    if not goals or not initial_greenfield or any(not uses_exact_managed_genesis(g) for g in goals):
         return None
     intent=json.dumps({'desired_outcome':revision.desired_outcome,
                       'governed_production_intents':[g.model_dump(mode='json') for g in goals]},ensure_ascii=False,sort_keys=True)
@@ -184,7 +193,8 @@ def read_managed_greenfield_context(session, *, work, product_id, repository_ide
         canonical_ir_for_work(session,work.id))
     if basis['source_version']==0:
         return project_greenfield_context(product_id=product_id,work=work,revision=revision,
-                                          ir=ir,governance=governance,semantic_history=history)
+                                          ir=ir,governance=governance,semantic_history=history,
+                                          managed_source_identity=source['repository_identity'])
     accepted=session.execute(select(product_source_versions).where(
         product_source_versions.c.product_id==product_id,
         product_source_versions.c.version==basis['source_version'])).mappings().one_or_none()

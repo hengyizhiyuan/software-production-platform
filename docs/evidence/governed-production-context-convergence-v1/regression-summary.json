@@ -1,5 +1,5 @@
 {
-  "captured_at_utc": "2026-10-08T04:56:34Z",
+  "captured_at_utc": "2026-10-08T06:43:27Z",
   "source_under_test": "candidate branch snapshot copied to /tmp/watt-n1-20261008-source; production /data/watt/runtime/source unchanged",
   "execution_location": "ECS isolated watt-n1-pytest:20261008 containers",
   "runs": [
@@ -7,10 +7,10 @@
     {"scope": "Managed greenfield persisted owner/context integration", "result": "PASS", "count": 3, "dependencies": "isolated PostgreSQL spg_n1_qualification_20261008; canonical ECF source"},
     {"scope": "Native Worker evidence, unbound task fencing, and pre-upgrade command digest", "result": "PASS", "count": 3, "dependencies": "isolated PostgreSQL and disposable source/workspace"},
     {"scope": "Accepted V1 Product source to new Work and ECF context using real Gitea", "result": "PASS", "count": 1, "dependencies": "isolated PostgreSQL, unique Gitea qualification repository, deterministic executor"},
-    {"scope": "Existing full managed-source restart/head isolation regression", "result": "INCOMPLETE", "count": 1, "dependencies": "first acceptance and next Work source assertions passed; test then attempted Docker Compose force-recreate of Gitea, which isolated test container cannot perform; no Gitea restart occurred"},
+    {"scope": "Existing full managed-source restart/head isolation regression", "result": "PASS_IN_ISOLATED_GITEA", "count": 1, "dependencies": "dedicated watt-n1-gitea-20261008 container and independent data/config volumes; isolated test credential and regression PostgreSQL. The test override restarted only that container. Synthetic fixture acceptance is not real Human Acceptance; production Gitea was not restarted. Stale UI location assertion corrected to advanced.html"},
     {"scope": "Managed web source index.html plus exact root README.md companion, with server.py negative control", "result": "PASS", "count": 1, "dependencies": "new isolated PostgreSQL spg_n1_regression_20261008_b, real Gitea and canonical ECF; new real Worker qualification still pending"},
     {"scope": "Work Delivery excluding existing asynchronous attention timing case", "result": "PASS", "count": 4, "dependencies": "isolated PostgreSQL and disposable test source"},
-    {"scope": "Existing empty Work then two repository namespaces", "result": "FAILED_ON_CANDIDATE_AND_CANONICAL", "count": 1, "dependencies": "test reads attention immediately after asynchronous activation; no unrelated fix or PASS claim"},
+    {"scope": "Existing empty Work then two repository namespaces", "result": "PASS_AFTER_TEST_CONTRACT_CORRECTION", "count": 1, "dependencies": "isolated PostgreSQL. This was not async timing: prior admission had recorded terminal convergence BLOCKED, so manual activate returned BLOCKED with zero iterations and no Human Attention. Assertion now matches that truth; independent namespace pointer checks passed"},
     {"scope": "Guardian F26 and Multi-PWU selected regression", "result": "PASS", "count": 11, "dependencies": "isolated PostgreSQL and canonical Guardian source"},
     {"scope": "Guardian assurance adapter, core performance, native executor contract unit tests", "result": "PASS", "count": 91, "dependencies": "isolated test image; no production DB"},
     {"scope": "Work convergence, Software Delivery and full native executor integration files", "result": "PASS", "count": null, "dependencies": "isolated PostgreSQL and disposable writable source; exact collected test count not retained in console receipt"},
@@ -21,6 +21,6 @@
   ],
   "not_yet_run": ["full Steering/Self-Refine/no-progress suite", "historical Multi-PWU A/B/C/D receipt-level comparison", "controlled performance P0 threshold qualification", "real revised/non-new Worker qualification", "full stack restart/recovery and no-duplicate qualification"],
   "performance_sample": "ECS localhost sequential 30x health and two Work reads in performance-sample-20261008.json; no canonical comparator or P0 threshold PASS claim",
-  "live_qualification": "G1 new real model/Worker verified Candidate. First G0 trial was invalid provider configuration; second correctly bound Gitea source but truthfully stopped for absent Human-approved ECF classes. Neither G0 attempt is PASS. G1 remains pending Human Candidate authorization and Delivery.",
+  "live_qualification": "G0 third, fresh Work on b29ad63 reached real model/Worker, MANAGED_GREENFIELD_PRODUCTION, two Verification PASS and required Guardian PASS to sealed Candidate; Human integration/Delivery remain pending. G1 Candidate has a material exact-lineage contract mismatch despite generic Verification PASS and remains unapproved. G3 separate existing Product V0 Work exposed another narrow consumer mismatch; branch repair is read-only replayed, fresh live Work pending.",
   "pass_claim_limit": "Partial qualification only; N1 closure gates remain open"
 }
