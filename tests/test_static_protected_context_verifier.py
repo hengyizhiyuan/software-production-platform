@@ -8,6 +8,7 @@ from spg.providers.protected_context_verifier import StaticProtectedContextVerif
 from spg.domain.production_intelligence import ProtectedContextObligation
 from spg.domain.verification import VerificationCapabilityRequest, VerificationCapabilityResult, VerificationEvidence, VerificationResultValue
 from spg.application.verification import _project_decision_context_evidence
+from spg.providers.repository_code_verifier import _exact_protected_context_coverage
 from hashlib import sha256
 
 
@@ -66,6 +67,18 @@ def test_exact_tree_cannot_be_substituted(subject):
     repo,base,request,task,contract=subject
     with pytest.raises(ValueError,match='TREE_MISMATCH'):
         invoke((repo,base,request.model_copy(update={'tree_identity':'0'*40}),task,contract),[check()])
+
+
+def test_protected_coverage_must_match_every_exact_obligation_and_candidate(subject):
+    request=subject[2]
+    checks=invoke(subject,[check()])
+    assert _exact_protected_context_coverage(request,checks)
+    assert not _exact_protected_context_coverage(request,())
+    assert not _exact_protected_context_coverage(request,(*checks,*checks))
+    for key,value in [('source_revision','wrong'),('candidate_tree','0'*40),
+                      ('coverage','UNVERIFIED')]:
+        assert not _exact_protected_context_coverage(
+            request,({**checks[0],key:value},))
 
 
 def test_managed_context_cannot_blanket_defer_source_obligations(subject):

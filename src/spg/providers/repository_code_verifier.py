@@ -36,6 +36,22 @@ from spg.providers.static_html_semantic_verifier import (
 )
 
 
+def _exact_protected_context_coverage(request: VerificationCapabilityRequest,
+                                      checks) -> bool:
+    """Reject missing, duplicate or substituted ECF coverage on this Candidate."""
+    identity = ("context_class", "semantic_key", "source_ref", "source_revision",
+                "authority", "content_digest", "package_fingerprint")
+    expected = tuple(tuple(getattr(item, key) for key in identity)
+                     for item in request.protected_context_obligations)
+    observed = tuple(tuple(item.get(key) for key in identity) for item in checks)
+    return (bool(expected) and len(set(expected)) == len(expected)
+            and len(observed) == len(expected) and set(observed) == set(expected)
+            and all(item.get("coverage") == "COVERED"
+                    and item.get("candidate_revision") == request.proposed_commit_identity
+                    and item.get("candidate_tree") == request.tree_identity
+                    for item in checks))
+
+
 class RepositoryCodeVerifier:
     """Execute only typed checks admitted by one exact Code Change Contract."""
 
@@ -139,14 +155,18 @@ class RepositoryCodeVerifier:
                         result = VerificationResultValue.FAIL
             if (obligation.kind is CodeVerificationKind.PATH_SCOPE
                     and result is VerificationResultValue.PASS
-                    and request.protected_context_obligations and self.context_verifier is not None
-                    and self.context_verifier.supports(contract)):
-                checks = self.context_verifier.verify(
-                    request, work_unit.completion_contract.task_contract, contract,
-                    dispatch.workspace.repository_path, source.repository_revision)
-                metadata["protected_context_checks"] = checks
-                if any(item["coverage"] != "COVERED" for item in checks):
+                    and request.protected_context_obligations):
+                if self.context_verifier is None or not self.context_verifier.supports(contract):
+                    metadata["protected_context_failure"] = "PROTECTED_CONTEXT_CONSUMER_UNAVAILABLE"
                     result = VerificationResultValue.FAIL
+                else:
+                    checks = self.context_verifier.verify(
+                        request, work_unit.completion_contract.task_contract, contract,
+                        dispatch.workspace.repository_path, source.repository_revision)
+                    metadata["protected_context_checks"] = checks
+                    if not _exact_protected_context_coverage(request, checks):
+                        metadata["protected_context_failure"] = "PROTECTED_CONTEXT_COVERAGE_INCOMPLETE"
+                        result = VerificationResultValue.FAIL
 
         except Exception as error:
             result = VerificationResultValue.UNKNOWN
