@@ -1,0 +1,31 @@
+# N1 Architecture Finding — Guardian governance evidence contract
+
+Captured 2026-10-08 15:06 UTC. **Open for Architecture Lead / Guardian owner.** This finding does not authorize a Guardian or ECF contract change, a Human decision, or a PASS. It follows the approved post-admission materialization direction and records the next cross-owner boundary exposed by that bounded implementation.
+
+## Exact inspected reality
+
+- Watt task branch code revision `c1193324f8e661ddc9ca5ad7817bb968260507d9`; prior tested application revision `0d4835353dbdb38abd6abfc19127b84eb5544475`, isolated image `sha256:64289d0a086ecf03efb2dae24ab036bd83906905e00fd71fa30fc51feb160709`. The new code has no runtime image or live Work result.
+- Guardian owner export `/data/watt/owners/guardian`, recorded revision `27bf5691e30104bf9a460df29a6f7dd4fb884a30`; this is an exported source tree, not a checked-out authoritative Git branch. `src/guardian/contracts/software_assurance.py` SHA256 `7fbaef1372e26ff5961b2940fc880ef3e5617c228e797e1cc219b28b4cc74747`; `src/guardian/runtime.py` SHA256 `3f63caa1f5283eb448176df1490f1f018d1ddc385538978e9f8efd48ee564e53`. These files were read only.
+- ECF owner export `/data/watt/owners/ecf` recorded revision `5aa4f8833c359c15bd059eda5972aa3915bcc18c`, tree `878d39d9c259272bb05f2e02bdf9d60c22fad460`. Watt's `docs/context/ecf-integration.md` describes ECF as context selection/assembly owner. No ECF source was edited.
+- Isolated G0 Verification `ca50583d-a863-5fee-94cf-f03467d5e921` retained release prohibition Facts `3c32bf63-d00a-541f-9b14-8a9ea572d7a1` and `a1300ef0-de89-519b-bc6c-8ba71629abff`. G4 Verification `2c650693-cbe6-50b4-a0a5-ab6019a57eff` retained `delivery.authorization` Fact `7d6616a7-b652-5986-88f8-a35e2178779c`. Read-only post-admission replay materialized their content companions but returned `UNVERIFIABLE_FACT_PLAN` for these lifecycle/authority Facts. Original Verification results stayed FAIL.
+
+## Contract mismatch
+
+Watt `src/spg/providers/protected_context_verifier.py` currently requires a literal quote from an implementation file for **every** ECF protected obligation, including lifecycle exclusions and a future reviewable Candidate. It can repair coverage identity or invalid quotes at most twice, but a source quote cannot establish whether a Human authorized integration, a Candidate was left for review, a Product source was accepted, or a deployment/publication effect did or did not occur. Its current prompt correctly prohibits inventing future Human decisions; the evidence type is still insufficient.
+
+Watt `src/spg/application/verification.py` projects protected coverage only from a PASS Verification. `src/spg/application/guardian_assurance.py` maps unmatched obligations to `GUARDIAN_REQUIRED`. Guardian's exact `ProtectedContextEvidence` contract accepts only `COVERED`, `GUARDIAN_REQUIRED`, or `UNVERIFIED` plus Verification references. Guardian's runtime can close `GUARDIAN_REQUIRED` only through a matching required runtime effect without a Finding. The defined effects are HTTP route, browser link, API persistence, and unavailable dependency. Neither the contract nor runtime accepts an independently validated persisted governance decision/effect/audit source for lifecycle or Product-source provenance. `acceptance_state=PENDING` and `delivery_authorization_state=NOT_AUTHORIZED` are pre-Acceptance intake constraints; they are not proof that a historical forbidden action never occurred. Absence of a log entry is likewise insufficient without audit completeness.
+
+Thus making Watt's static HTML checker PASS for G0/G4 would still leave legitimate protected lifecycle obligations without an authoritative evidence route. Treating Candidate source text as lifecycle proof would violate the approved Owner split. Auto-setting `COVERED` from a Work constraint would create false assurance. The current fail-closed result is correct until the contract can consume and validate actual governance evidence.
+
+## Minimum cross-repository decision requested
+
+Guardian owner should decide a bounded contract addition for protected obligations whose evidence owner is persisted Product/Work/governance reality, including:
+
+1. A typed reference to the original ECF obligation, exact Work/Task/Candidate or Product revision, and the accountable governance Owner's persisted decision/effect/audit record.
+2. Independent validation of reference identity, stage, authority, and audit coverage. A negative claim such as “no deployment” requires complete relevant effect/audit coverage or must remain UNKNOWN/BLOCKED.
+3. Separation between pre-Candidate obligations, Candidate readiness, and post-Human acceptance/delivery. A future reviewable Candidate must not be reported as already created during pre-Candidate Verification.
+4. A fail-closed finding when evidence is missing, stale, mismatched, or outside the accepted scope. Guardian retains the Assurance Decision; neither a model nor Watt Executor may promote a plan to PASS.
+
+Likely Guardian touch points, subject to owner review: `src/guardian/contracts/software_assurance.py` for typed governed evidence and `src/guardian/runtime.py` for independent validation and coverage accounting. Watt touch points after that contract is approved: `src/spg/providers/protected_context_verifier.py` to stop asking implementation quotes for governance-only obligations; `src/spg/application/verification.py` to project only source-checkable coverage at Verification stage; `src/spg/application/guardian_assurance.py` to supply exact persisted governance/effect records and preserve the Guardian gate. ECF's selected facts, source references and package fingerprint should remain authoritative; no ECF code change is proposed on current evidence. The Guardian owner must confirm its authoritative repository/branch and compatibility plan before any cross-repository edit.
+
+This is a new cross-owner contract capability, beyond the bounded Watt static HTML check-plan repair. Per the N1 stop condition, no speculative Guardian/ECF rewrite, production change, or full live G0–G6 qualification is attempted on `c119332`. N1 stays **PARTIAL**. The prior [static consumer finding](architecture-finding-static-context-consumer-20261008.md) and [Self-Refine review](self-refine-boundary-review-20261008.md) remain historical evidence.
