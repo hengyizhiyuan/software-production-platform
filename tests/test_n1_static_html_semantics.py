@@ -13,8 +13,9 @@ from spg.domain.change import (
     CodeVerificationKind, CodeVerificationObligation,
 )
 from spg.domain.engineering_semantics import (
-    SemanticEpistemicStatus, SemanticFactAuthority, SemanticFactReference,
-    SemanticRelation,
+    EngineeringSemanticFactCandidate, SemanticEpistemicStatus,
+    SemanticFactAuthority, SemanticFactReference, SemanticRelation,
+    SemanticRoleOrigin,
 )
 from spg.providers.static_html_semantic_verifier import verify_static_html_semantic_facts
 from spg.application.interaction import WorkInteractionService
@@ -240,6 +241,18 @@ def test_explicit_fourteen_items_survive_wic_count_only_candidate() -> None:
     assert fact.source_record_ids == (record.id,) and fact.source_text == source
     assert fact.qualifiers["count"] == 14
 
+    already_exact = candidate.model_copy(update={"semantic_fact_candidates": (
+        EngineeringSemanticFactCandidate(
+            candidate_id="wic-exact-list", subject="page.list.item_text",
+            relation=SemanticRelation.ORDERED_COMPONENT, value=ITEMS,
+            scope="index.html", authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+            epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+            source_record_ids=(record.id,), source_text=source,
+            role_origin=SemanticRoleOrigin.EXPLICIT),)})
+    preserved_exact = WorkInteractionService._preserve_explicit_ordered_page_items(
+        already_exact, record)
+    assert preserved_exact.semantic_fact_candidates == already_exact.semantic_fact_candidates
+
     malformed = record.model_copy(update={"content": source.replace("F07:", "F08:")})
     with pytest.raises(InteractionInvariantViolation):
         WorkInteractionService._preserve_explicit_ordered_page_items(candidate, malformed)
@@ -264,6 +277,36 @@ def test_count_only_g4_fact_cannot_pass_without_exact_ordered_values(tmp_path: P
     checks = verify_static_html_semantic_facts(
         repository, candidate, contract, (count, exact))
     assert len(checks) == 2 and all(check["passed"] for check in checks)
+
+
+def test_third_observed_g4_wic_profile_checks_every_exact_item(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS)
+    common = dict(scope="index.html", authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4())
+    facts = (
+        SemanticFactReference(fact_id=uuid4(), subject="page.heading.text",
+                              relation=SemanticRelation.EQUALITY, value="N1 Budget",
+                              qualifiers={"exact": True}, **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.list.item_text",
+                              relation=SemanticRelation.ORDERED_COMPONENT, value=ITEMS,
+                              qualifiers={"ordered": True, "exactly_once_each": True}, **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.list.item_count",
+                              relation=SemanticRelation.CARDINALITY, value=14, **common),
+        SemanticFactReference(fact_id=uuid4(), subject="change.file_scope",
+                              relation=SemanticRelation.SCOPE, value=("index.html",),
+                              scope="managed product source", qualifiers={"only": True},
+                              authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                              epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                              source_work_revision_id=uuid4()),
+    )
+    checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
+    assert len(checks) == 4 and all(check["passed"] for check in checks)
+    swapped = ITEMS[:6] + (ITEMS[7], ITEMS[6]) + ITEMS[8:]
+    candidate = _candidate(repository, swapped)
+    checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
+    assert not checks[1]["passed"] and not checks[2]["passed"]
 
 
 def test_g0_page_count_and_g3_wic_text_aliases(tmp_path: Path) -> None:
@@ -295,3 +338,42 @@ def test_g0_page_count_and_g3_wic_text_aliases(tmp_path: Path) -> None:
     candidate = _git(repository, "rev-parse", "HEAD")
     assert not verify_static_html_semantic_facts(
         repository, candidate, contract, facts)[0]["passed"]
+
+
+def test_g3_observed_aliases_bind_exact_new_file_and_text(tmp_path: Path) -> None:
+    repository, original = _fixture(tmp_path)
+    contract = original.model_copy(update={"exact_targets": (
+        CodeChangeTarget(path="status-v0.html", operation=ChangeOperation.CREATE),)})
+    (repository / "status-v0.html").write_text(
+        "<!doctype html><h1>N1 Status</h1>"
+        "<p>Existing Product bounded Work</p>", encoding="utf-8")
+    _git(repository, "add", "status-v0.html")
+    _git(repository, "commit", "-m", "status page")
+    candidate = _git(repository, "rev-parse", "HEAD")
+    common = dict(authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4())
+    facts = (
+        SemanticFactReference(fact_id=uuid4(), subject="status_v0_page.h1_text",
+                              relation=SemanticRelation.EQUALITY, value="N1 Status",
+                              scope="status-v0.html", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="status_v0_page.paragraph_text",
+                              relation=SemanticRelation.EQUALITY,
+                              value="Existing Product bounded Work",
+                              scope="status-v0.html", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="work.modifiable_files",
+                              relation=SemanticRelation.SCOPE,
+                              value=("status-v0.html",), scope=None, **common),
+        SemanticFactReference(fact_id=uuid4(), subject="work.new_file_count",
+                              relation=SemanticRelation.CARDINALITY,
+                              value=1, scope=None, **common),
+    )
+    checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
+    assert len(checks) == 4 and all(check["passed"] for check in checks)
+    (repository / "status-v0.html").write_text(
+        "<!doctype html><h1>N1 Status</h1><p>Wrong</p>", encoding="utf-8")
+    _git(repository, "add", "status-v0.html")
+    _git(repository, "commit", "-m", "wrong paragraph")
+    candidate = _git(repository, "rev-parse", "HEAD")
+    checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
+    assert not checks[1]["passed"]

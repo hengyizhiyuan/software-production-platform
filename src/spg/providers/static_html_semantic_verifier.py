@@ -70,17 +70,23 @@ def verify_static_html_semantic_facts(
     """
     html_targets = {target.path for target in contract.exact_targets
                     if target.path.endswith(".html")}
+    page_aliases = {path: Path(path).stem.replace("-", "_") + "_page"
+                    for path in html_targets}
     supported = tuple(fact for fact in facts if fact.subject.startswith("page.")
                       or any(fact.subject.startswith(f"{path}.") for path in html_targets)
+                      or any(fact.subject.startswith(f"{alias}.")
+                             for alias in page_aliases.values())
                       or fact.subject in {"index.h1_text", "index.ordered_list_items",
-                                          "repository.change_scope"}
+                                          "repository.change_scope", "change.file_scope",
+                                          "work.modifiable_files", "work.new_file_count"}
                       or fact.subject.startswith("acceptance.ordered_list")
                       or fact.subject == "repository.changed_files")
     if not supported:
         return ()
     observed: dict[str, _HTMLFacts | None] = {}
     checks: list[dict[str, object]] = []
-    ordered_subjects = {"page.ordered_list.items", "page.ordered_list.item_texts"}
+    ordered_subjects = {"page.ordered_list.items", "page.ordered_list.item_texts",
+                        "page.list.item_text"}
     ordered_scopes = set()
     for fact in supported:
         if fact.subject in ordered_subjects and fact.relation is SemanticRelation.ORDERED_COMPONENT:
@@ -93,7 +99,8 @@ def verify_static_html_semantic_facts(
         if (fact.subject == "index.ordered_list_items"
                 and fact.scope == "index.html ordered list"):
             path = "index.html"
-        if fact.subject in {"repository.changed_files", "repository.change_scope"}:
+        if fact.subject in {"repository.changed_files", "repository.change_scope",
+                            "change.file_scope", "work.modifiable_files"}:
             result = subprocess.run(
                 ["git", "-C", str(repository), "diff", "--name-only",
                  contract.source_revision, proposed_revision, "--"],
@@ -105,9 +112,22 @@ def verify_static_html_semantic_facts(
             actual = tuple(result.stdout.splitlines()) if result.returncode == 0 else ()
             passed = (fact.relation is SemanticRelation.SCOPE
                       and (fact.qualifiers.get("exclusive") == "true"
-                           or fact.subject == "repository.change_scope")
+                           or fact.qualifiers.get("only") is True
+                           or fact.subject in {"repository.change_scope",
+                                               "work.modifiable_files"})
                       and bool(expected) and actual == expected)
             reason = "EXACT_CHANGED_FILES" if passed else "CHANGED_FILE_SCOPE_MISMATCH"
+        elif fact.subject == "work.new_file_count":
+            result = subprocess.run(
+                ["git", "-C", str(repository), "diff", "--name-status",
+                 contract.source_revision, proposed_revision, "--"],
+                check=False, capture_output=True, timeout=15, text=True)
+            added = tuple(line.split("\t", 1)[1] for line in result.stdout.splitlines()
+                          if line.startswith("A\t")) if result.returncode == 0 else ()
+            passed = (fact.relation is SemanticRelation.CARDINALITY
+                      and len(added) == fact.value
+                      and all(path in html_targets for path in added))
+            reason = "EXACT_NEW_FILE_COUNT" if passed else "NEW_FILE_COUNT_MISMATCH"
         elif path not in html_targets:
             passed = False
             reason = "FACT_SCOPE_OUTSIDE_EXACT_HTML_TARGET"
@@ -131,16 +151,20 @@ def verify_static_html_semantic_facts(
                 passed, reason = False, "EXACT_HTML_BLOB_UNREADABLE"
             elif (fact.subject in {"page.heading.text", "page.h1.text",
                                    f"{path}.h1.text", "index.h1_text",
-                                   f"{path}.h1_text"}
+                                   f"{path}.h1_text",
+                                   f"{page_aliases[path]}.h1_text"}
                     and fact.relation is SemanticRelation.EQUALITY
                     and isinstance(fact.value, str)
                     and (fact.subject in {"page.h1.text", f"{path}.h1.text",
-                                         "index.h1_text", f"{path}.h1_text"}
-                         or fact.qualifiers.get("heading_level") == 1)):
+                                         "index.h1_text", f"{path}.h1_text",
+                                         f"{page_aliases[path]}.h1_text"}
+                         or fact.qualifiers.get("heading_level") == 1
+                         or fact.qualifiers.get("exact") is True)):
                 passed = parser.headings == [fact.value]
                 reason = "EXACT_H1" if passed else "H1_TEXT_OR_COUNT_MISMATCH"
             elif (fact.subject in {"page.paragraph.text", f"{path}.paragraph.text",
-                                   f"{path}.paragraph_text"}
+                                   f"{path}.paragraph_text",
+                                   f"{page_aliases[path]}.paragraph_text"}
                     and fact.relation is SemanticRelation.EQUALITY
                     and isinstance(fact.value, str)):
                 passed = parser.paragraphs == [fact.value]
@@ -163,7 +187,7 @@ def verify_static_html_semantic_facts(
                               if name.endswith(".html")) if tree.returncode == 0 else ()
                 passed = pages == (path,) and fact.value == 1
                 reason = "EXACT_PAGE_COUNT" if passed else "PAGE_COUNT_MISMATCH"
-            elif (fact.subject == "index.ordered_list_items"
+            elif (fact.subject in {"index.ordered_list_items", "page.list.item_count"}
                     and fact.relation is SemanticRelation.CARDINALITY):
                 passed = (path in ordered_scopes
                           and len(parser.ordered_lists) == 1

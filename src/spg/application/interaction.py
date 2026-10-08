@@ -4296,10 +4296,17 @@ class WorkInteractionService:
             raise InteractionInvariantViolation(
                 "Explicit ordered page constraints are incomplete or ambiguous")
         existing = tuple(fact for fact in candidate.semantic_fact_candidates
-                         if fact.subject == "page.ordered_list.items"
+                         if fact.subject in {"page.ordered_list.items",
+                                             "page.ordered_list.item_texts",
+                                             "page.list.item_text"}
                          and fact.relation is SemanticRelation.ORDERED_COMPONENT
-                         and fact.scope == "index.html" and fact.value == items)
+                         and fact.scope in {None, "index.html"})
         if existing:
+            if any(tuple(fact.value) != items for fact in existing
+                   if isinstance(fact.value, tuple)) or any(
+                       not isinstance(fact.value, tuple) for fact in existing):
+                raise InteractionInvariantViolation(
+                    "WIC ordered page values differ from exact Human constraints")
             return candidate
         fact = EngineeringSemanticFactCandidate(
             candidate_id="human-ordered-page-items",
