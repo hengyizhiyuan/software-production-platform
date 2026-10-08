@@ -120,10 +120,12 @@ def test_observed_g4_index_html_profile_binds_each_item(tmp_path: Path) -> None:
              {"verification": "all fourteen exact texts verified"}),
             ("repository.change_scope_file_count", SemanticRelation.SCOPE,
              "only index.html is created or changed",
-             {"verification": "no other file changes"})))
+             {"verification": "no other file changes"}),
+            ("index_html.file_scope", SemanticRelation.SCOPE,
+             "index.html only", {"no_other_file_changes": True})))
     good = _candidate(repository, ITEMS)
     checks = verify_static_html_semantic_facts(repository, good, contract, facts)
-    assert len(checks) == 6 and all(check["passed"] for check in checks)
+    assert len(checks) == 7 and all(check["passed"] for check in checks)
     bad = _candidate(repository, tuple(item for item in ITEMS if not
                                        item.startswith("F07:")))
     checks = verify_static_html_semantic_facts(repository, bad, contract, facts)
@@ -366,6 +368,19 @@ def test_explicit_fourteen_items_survive_wic_count_only_candidate() -> None:
         record)
     assert len(preserved_document.semantic_fact_candidates) == 1
     assert preserved_document.semantic_fact_candidates[0].subject == "page.ordered_list.items"
+
+    scoped_wic = already_exact.semantic_fact_candidates[0].model_copy(update={
+        "subject": "index_html.list_item_texts",
+        "scope": "index.html ordered list",
+        "qualifiers": {"ordering": "in order", "uniqueness": "exactly once",
+                       "cardinality": 14},
+    })
+    preserved_scoped = WorkInteractionService._preserve_explicit_ordered_page_items(
+        candidate.model_copy(update={"semantic_fact_candidates": (scoped_wic,)}),
+        record)
+    assert len(preserved_scoped.semantic_fact_candidates) == 1
+    assert preserved_scoped.semantic_fact_candidates[0].subject == "page.ordered_list.items"
+    assert preserved_scoped.semantic_fact_candidates[0].value == ITEMS
 
     stripped = already_exact.semantic_fact_candidates[0].model_copy(update={
         "subject": "index.html.ordered_list.item_texts",

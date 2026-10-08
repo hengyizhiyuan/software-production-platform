@@ -4297,7 +4297,8 @@ class WorkInteractionService:
                 "Explicit ordered page constraints are incomplete or ambiguous")
         existing = tuple(fact for fact in candidate.semantic_fact_candidates
                          if fact.relation is SemanticRelation.ORDERED_COMPONENT
-                         and fact.scope in {None, "index.html"})
+                         and fact.scope in {None, "index.html",
+                                            "index.html ordered list"})
         if existing:
             if len(existing) != 1 or not isinstance(existing[0].value, tuple):
                 raise InteractionInvariantViolation(

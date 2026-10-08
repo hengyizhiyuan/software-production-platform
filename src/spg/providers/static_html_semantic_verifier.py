@@ -120,7 +120,8 @@ def verify_static_html_semantic_facts(
                             "change.file_scope", "work.modifiable_files",
                             "work.change_scope", "artifact.target_file",
                             "change.allowed_paths", "artifact.file.change_scope",
-                            "repository.change_scope_file_count"}:
+                            "repository.change_scope_file_count",
+                            "index_html.file_scope"}:
             result = subprocess.run(
                 ["git", "-C", str(repository), "diff", "--name-only",
                  contract.source_revision, proposed_revision, "--"],
@@ -143,7 +144,9 @@ def verify_static_html_semantic_facts(
                         ("index.html",) if fact.subject == "repository.change_scope"
                         and fact.value == "index.html only" else
                         ("index.html",) if fact.subject == "repository.change_scope_file_count"
-                        and fact.value == "only index.html is created or changed" else ())
+                        and fact.value == "only index.html is created or changed" else
+                        ("index.html",) if fact.subject == "index_html.file_scope"
+                        and fact.value == "index.html only" else ())
             actual = tuple(result.stdout.splitlines()) if result.returncode == 0 else ()
             passed = (fact.relation is (SemanticRelation.EQUALITY
                        if fact.subject == "artifact.target_file" else SemanticRelation.SCOPE)
@@ -154,6 +157,7 @@ def verify_static_html_semantic_facts(
                                                "change.file_scope",
                                                "artifact.file.change_scope",
                                                "repository.change_scope_file_count",
+                                               "index_html.file_scope",
                                                "work.change_scope",
                                                "artifact.target_file",
                                                "change.allowed_paths"})
