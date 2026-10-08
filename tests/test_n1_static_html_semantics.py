@@ -445,6 +445,50 @@ def test_g0_semantic_markup_and_exact_deliverable_are_checked(tmp_path: Path) ->
         repository, candidate, contract, facts)[1]["passed"]
 
 
+def test_g0_observed_underscore_profile_and_bound_assertion(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    (repository / "index.html").write_text(
+        "<!doctype html><html><body><h1>N1 Software Control</h1>"
+        "<p>Isolated qualification only</p></body></html>", encoding="utf-8")
+    _git(repository, "add", "index.html")
+    _git(repository, "commit", "-m", "page")
+    candidate = _git(repository, "rev-parse", "HEAD")
+    common = dict(scope="index.html", authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4())
+    facts = (
+        SemanticFactReference(fact_id=uuid4(), subject="page.entry_file",
+                              relation=SemanticRelation.EQUALITY,
+                              value="index.html", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.h1_count",
+                              relation=SemanticRelation.CARDINALITY, value=1, **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.h1_text",
+                              relation=SemanticRelation.EQUALITY,
+                              value="N1 Software Control", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.paragraph_count",
+                              relation=SemanticRelation.CARDINALITY, value=1, **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.paragraph_text",
+                              relation=SemanticRelation.EQUALITY,
+                              value="Isolated qualification only", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="change.allowed_paths",
+                              relation=SemanticRelation.SCOPE,
+                              value="index.html", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="acceptance.verification",
+                              relation=SemanticRelation.ACCEPTANCE_ASSERTION,
+                              value="exact heading and paragraph verified", **common),
+    )
+    checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
+    assert len(checks) == 7 and all(check["passed"] for check in checks)
+    (repository / "index.html").write_text(
+        "<!doctype html><html><body><h1>Wrong</h1>"
+        "<p>Isolated qualification only</p></body></html>", encoding="utf-8")
+    _git(repository, "add", "index.html")
+    _git(repository, "commit", "-m", "wrong heading")
+    candidate = _git(repository, "rev-parse", "HEAD")
+    checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
+    assert not checks[2]["passed"] and not checks[6]["passed"]
+
+
 def test_fourth_observed_g4_profile_binds_count_to_exact_values(tmp_path: Path) -> None:
     repository, contract = _fixture(tmp_path)
     candidate = _candidate(repository, ITEMS)
