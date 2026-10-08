@@ -233,7 +233,9 @@ def verify_static_html_semantic_facts(
                              and not check["passed"]}
     for check in checks:
         if (check["subject"] in {"page.ordered_list.item_occurrence",
-                                  "acceptance.ordered_list_texts"}
+                                  "acceptance.ordered_list_texts",
+                                  "page.list.item_count",
+                                  "index.ordered_list_items"}
                 or (check["subject"] == "page.ordered_list.items"
                     and check["reason"] == "BOUND_TO_ORDERED_FACT")) \
                 and check["scope"] in failed_ordered_scopes:
