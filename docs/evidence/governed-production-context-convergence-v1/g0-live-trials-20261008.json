@@ -1,0 +1,45 @@
+{
+  "report_name": "N1 isolated G0 live trials and corrected diagnosis",
+  "captured_at_utc": "2026-10-08T04:56:34Z",
+  "evidence_grade": "E1 new isolated ECS PostgreSQL, Gitea and Work Trace; neither trial is historical A/B/C/D evidence",
+  "execution_location": "ECS i-0jl386xnbauudq5j9jk0, isolated database spg_n1_qualification_20261008",
+  "trials": [
+    {
+      "trial": "G0-setup-invalid-1",
+      "source_revision_under_test": "8ee4693d1902d4444fa9f0595713637a0e3f1772",
+      "product_id": "31fd07a2-6f7b-4271-827c-7795a8ddc1dc",
+      "interaction_id": "1b0500fe-6f47-48e0-8461-03e467ad10b9",
+      "turn_id": "bfa02aa8-fd76-431d-98de-4fd3834cef7c",
+      "work_id": "f8088a58-b7f9-5456-b04c-82136460d3fa",
+      "production_run_id": "f649c781-351e-4fe0-9fdf-0a8d2baabbf0",
+      "observed_failure": "ExecutionContextNotReady before Native Worker; Steering attention f44d1da3-a713-5fc2-a984-ac52a23e2b36",
+      "setup_audit": "Isolated runtime env omitted SPG_MANAGED_SOURCE_PROVIDER=gitea; Product managed_source=null and work_source_bases count=0. It was not a valid managed-source qualification setup.",
+      "candidate_count": 0,
+      "manifest_count": 0,
+      "qualification_result": "INVALID_SETUP; retained, not PASS and not evidence of a mixed-target ECF failure"
+    },
+    {
+      "trial": "G0-valid-source-missing-approved-facts-2",
+      "source_revision_under_test": "a595303a9339ebc200f6f20429bdf5f3ab3a356b",
+      "product_id": "ed52c0bc-e746-4abf-89c0-1bea5bd61c90",
+      "interaction_id": "ececc2b5-2a77-4084-a732-047c07c01855",
+      "turn_id": "cf8525e1-d4e7-4249-93eb-be3f72b47f6e",
+      "work_id": "eaae7b07-38ed-50f4-8322-167da879596d",
+      "managed_source_version": 0,
+      "managed_source_revision": "84fd89663c56cef2ebbb8c7457d6077c4daaadbe",
+      "work_source_basis_count": 1,
+      "observed_failure": "DecisionContextNotReady before production run: PRODUCT_INTENT, PRODUCT_INVARIANT, APPROVED_DECISION missing",
+      "source_baseline_id": "4b09555f-eafb-430c-91e7-ac817e57d44c",
+      "self_refine_id": "44dc5368-e23f-4fd4-ae13-227e533c4760",
+      "self_refine_scope": "LOCAL_OBLIGATION_RECOVERED for semantic scope only; Work did not progress to production",
+      "work_condition": "READY",
+      "steering_state": "STOPPED/BLOCKED",
+      "runtime_binding_count": 0,
+      "candidate_count": 0,
+      "manifest_count": 0,
+      "qualification_result": "TRUTHFUL_CONTEXT_BLOCK_PARTIAL; no fabricated ECF facts; G0 positive control remains open"
+    }
+  ],
+  "mixed_target_coverage": "A separate Gitea/PostgreSQL integration test verifies managed web index.html plus exact root README.md can select ECF, while index.html plus server.py cannot. This does not retroactively explain either live trial.",
+  "original_failed_works_modified": false
+}

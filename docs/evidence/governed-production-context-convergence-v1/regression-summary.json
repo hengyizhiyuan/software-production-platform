@@ -1,5 +1,5 @@
 {
-  "captured_at_utc": "2026-10-08T04:45:18Z",
+  "captured_at_utc": "2026-10-08T04:56:34Z",
   "source_under_test": "candidate branch snapshot copied to /tmp/watt-n1-20261008-source; production /data/watt/runtime/source unchanged",
   "execution_location": "ECS isolated watt-n1-pytest:20261008 containers",
   "runs": [
@@ -13,9 +13,14 @@
     {"scope": "Existing empty Work then two repository namespaces", "result": "FAILED_ON_CANDIDATE_AND_CANONICAL", "count": 1, "dependencies": "test reads attention immediately after asynchronous activation; no unrelated fix or PASS claim"},
     {"scope": "Guardian F26 and Multi-PWU selected regression", "result": "PASS", "count": 11, "dependencies": "isolated PostgreSQL and canonical Guardian source"},
     {"scope": "Guardian assurance adapter, core performance, native executor contract unit tests", "result": "PASS", "count": 91, "dependencies": "isolated test image; no production DB"},
-    {"scope": "Work convergence, Software Delivery and full native executor integration files", "result": "PASS", "count": null, "dependencies": "isolated PostgreSQL and disposable writable source; exact collected test count not retained in console receipt"}
+    {"scope": "Work convergence, Software Delivery and full native executor integration files", "result": "PASS", "count": null, "dependencies": "isolated PostgreSQL and disposable writable source; exact collected test count not retained in console receipt"},
+    {"scope": "Document-only HTTP Delivery and Human acceptance boundary regression", "result": "PASS", "count": 1, "dependencies": "separate isolated regression PostgreSQL spg_n1_regression_20261008_b"},
+    {"scope": "Steering/no-progress/semantic nonconvergence and refinement contract selected regressions", "result": "PASS", "count": 7, "dependencies": "separate isolated regression PostgreSQL"},
+    {"scope": "Multi-PWU runtime integration", "result": "PASS", "count": 6, "dependencies": "separate isolated regression PostgreSQL"},
+    {"scope": "All repository JS/UI tests", "result": "PASS", "count": 133, "dependencies": "ECS isolated Node container and candidate source snapshot"}
   ],
-  "not_yet_run": ["full Document Delivery regression", "full Steering/Self-Refine/no-progress suite", "complete Multi-PWU A/B/C/D qualification", "Workspace JS/UI", "controlled performance P0 sampling", "real revised/non-new Worker qualification", "full stack restart/recovery qualification"],
-  "live_qualification": "G1 new real model/Worker verified Candidate. First G0 Product trial stopped before Worker because isolated stack omitted the managed-source provider setting; it is retained as invalid setup evidence, not qualified failure or PASS. Both remain below full N1 closure",
+  "not_yet_run": ["full Steering/Self-Refine/no-progress suite", "historical Multi-PWU A/B/C/D receipt-level comparison", "controlled performance P0 threshold qualification", "real revised/non-new Worker qualification", "full stack restart/recovery and no-duplicate qualification"],
+  "performance_sample": "ECS localhost sequential 30x health and two Work reads in performance-sample-20261008.json; no canonical comparator or P0 threshold PASS claim",
+  "live_qualification": "G1 new real model/Worker verified Candidate. First G0 trial was invalid provider configuration; second correctly bound Gitea source but truthfully stopped for absent Human-approved ECF classes. Neither G0 attempt is PASS. G1 remains pending Human Candidate authorization and Delivery.",
   "pass_claim_limit": "Partial qualification only; N1 closure gates remain open"
 }

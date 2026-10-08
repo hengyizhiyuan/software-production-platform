@@ -1,0 +1,18 @@
+{
+  "report_name": "N1 isolated runtime restart and G1 persistence observation",
+  "captured_at_utc": "2026-10-08T04:56:34Z",
+  "evidence_grade": "E1: Docker inspect, isolated PostgreSQL counts and authenticated candidate API projection",
+  "scope": "Only four watt-n1-* isolated containers were stopped, removed and recreated. The production watt-cloud-worker containers and source were not restarted or modified.",
+  "new_api_container_id": "0a593dbd9b21461acaf2f04e6b706312cd53373a9e1a54c62c2c0f01981039b5",
+  "new_api_created_at_utc": "2026-10-08T04:51:01.588527499Z",
+  "candidate_image_sha256": "55fd48f69febcd1b1f483466d6b42b611d02806867edd16bbeb509ac2345711c",
+  "runtime_revision": "a595303a9339ebc200f6f20429bdf5f3ab3a356b",
+  "database": "spg_n1_qualification_20261008",
+  "g1_work_id": "ae8530f0-1f28-55f7-aea6-e79b13c7fabd",
+  "g1_candidate_id_before_and_after": "7d410081-4319-5529-a12e-ce844f9d9ac2",
+  "g1_verification_id_before_and_after": "b10a6b32-faad-5982-8b29-cdd89940c116",
+  "g1_human_attention_id_before_and_after": "6bce0222-41f9-5b66-acb0-2f55889cec15",
+  "post_restart_counts": {"runtime_bindings": 1, "execution_attempts": 1, "candidates": 1, "verification_records": 1, "delivery_manifests": 0},
+  "post_restart_work_state": "NEEDS_ATTENTION; Human Candidate authorization still pending",
+  "claim_limit": "A single isolated stack restart/persistence check passed; full post-Human Delivery restart qualification remains open."
+}

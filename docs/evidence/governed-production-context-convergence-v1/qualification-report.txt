@@ -1,12 +1,12 @@
 N1 Governed Production Context & Convergence Closure v1
-Reality qualification checkpoint — 2026-10-08 04:48 UTC
+Reality qualification checkpoint — 2026-10-08 04:56 UTC
 
 STATUS: PARTIAL. N1 Closure Conditions remain open. This is a new report from the
 company computer/ECS investigation, not the missing 2026-10-07 receipt.
 
 BASELINE
 Canonical local/remote main and ECS production source: ee5bd86a53891f9391785c91d0ccef81ad2d56c3.
-Production migration: 20261007_72. Candidate source at this checkpoint: 8ee4693d1902d4444fa9f0595713637a0e3f1772 plus the bounded managed-web README companion edit pending commit.
+Production migration: 20261007_72. Candidate source at this checkpoint: a595303a9339ebc200f6f20429bdf5f3ab3a356b (pushed).
 The production source, original four Works and their historical data were not changed.
 
 HISTORICAL REALITY
@@ -37,7 +37,16 @@ audit found the isolated stack omitted SPG_MANAGED_SOURCE_PROVIDER=gitea, so
 that trial lacked a managed source. It is retained as INVALID SETUP, neither
 G0 PASS nor proof of a source-classification root cause. A separate exact
 index.html + root README.md consumer-side ECF integration test passed against
-real Gitea and isolated PostgreSQL. Fresh real qualification is required.
+real Gitea and isolated PostgreSQL. A second new G0 Product
+ed52c0bc-e746-4abf-89c0-1bea5bd61c90 correctly bound Gitea source V0,
+but Work eaae7b07-38ed-50f4-8322-167da879596d stopped before production:
+ECF required PRODUCT_INTENT, PRODUCT_INVARIANT and APPROVED_DECISION, which
+were absent. It remains a truthful blocked trial with no Candidate. Neither
+trial is G0 PASS. Full event data is in g0-live-trials-20261008.json.
+
+The four N1 isolated containers restarted onto the pushed a595303 image.
+The same G1 Candidate, Verification and Human attention survived; no duplicate
+execution was observed. The production containers were not restarted.
 
 REGRESSION
 Focused context, native, Work Delivery, Software Delivery, Guardian F26,
@@ -46,6 +55,10 @@ regression-summary.json. An existing asynchronous Work Delivery attention
 timing case fails on both canonical and candidate source. The managed-source
 restart test stopped at its Docker Compose Gitea restart step in an isolated
 container; no Gitea restart occurred and it is not counted PASS.
+Additional focused checks passed: document-only HTTP Delivery (1), selected
+Steering/no-progress (7), Multi-PWU runtime integration (6), and all JS/UI
+tests (133). ECS loopback latency samples are in performance-sample-20261008.json;
+they are not a P0 threshold qualification.
 
 OPEN GATES
 G0 real control; G1 explicit Candidate integration and Document Delivery;

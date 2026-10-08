@@ -1,16 +1,16 @@
 {
-  "captured_at_utc": "2026-10-08T04:45:18Z",
+  "captured_at_utc": "2026-10-08T04:56:34Z",
   "overall_status": "OPEN_NOT_QUALIFIED",
   "qualification_database": "spg_n1_qualification_20261008",
   "qualification_location": "ECS i-0jl386xnbauudq5j9jk0, isolated PostgreSQL database, Gitea test repositories and candidate API/Coordinator/Worker/Tool Host containers",
   "cases": [
-    {"case": "G0", "status": "INVALID_SETUP_TRIAL_RETAINED", "evidence": "New isolated Product 31fd07a2-6f7b-4271-827c-7795a8ddc1dc / Work f8088a58-b7f9-5456-b04c-82136460d3fa stopped at ExecutionContextNotReady before Worker/Candidate. Source-basis audit found isolated runtime omitted SPG_MANAGED_SOURCE_PROVIDER=gitea, so no managed source was provisioned. This trial cannot qualify G0 or prove the mixed-target hypothesis. Separate exact README companion ECF integration passed; new real qualification required", "candidate_id": null},
+    {"case": "G0", "status": "NOT_PASSED_TWO_TRIALS_RETAINED", "evidence": "First trial Product 31fd07a2-6f7b-4271-827c-7795a8ddc1dc / Work f8088a58-b7f9-5456-b04c-82136460d3fa was invalid setup: managed-source provider omitted. Corrected-stack second trial Product ed52c0bc-e746-4abf-89c0-1bea5bd61c90 / Work eaae7b07-38ed-50f4-8322-167da879596d bound Gitea V0 but stopped before production because Human-approved PRODUCT_INTENT, PRODUCT_INVARIANT, APPROVED_DECISION were absent. No Candidate. Awaiting explicit qualification fixture approval for a fresh positive G0", "candidate_id": null},
     {"case": "G1", "status": "PARTIAL_HUMAN_AUTHORITY_PENDING", "evidence": "New isolated real DeepSeek/Worker Document Work ae8530f0-1f28-55f7-aea6-e79b13c7fabd produced verified sealed Candidate and bounded local tool repair. Human Candidate authorization pending; no Runtime Commit, Manifest or Human Delivery Acceptance. Exact IDs in g1-live-qualification-20261008.json", "candidate_id": "7d410081-4319-5529-a12e-ce844f9d9ac2"},
     {"case": "G2", "status": "PARTIAL", "evidence": "Isolated PostgreSQL/Gitea test formed and Human-accepted a V1 Candidate, then a new Work bound exact accepted V1 revision and produced READY ECF context from accepted repository facts. The test used a deterministic executor and cleaned its test DB rows; no real Worker successor Candidate", "candidate_id": null},
     {"case": "G3", "status": "PARTIAL", "evidence": "Original C read-only context readiness is READY with candidate code; no new isolated bounded Work has reached Worker/Candidate", "candidate_id": null},
     {"case": "G4", "status": "PARTIAL", "evidence": "Original D read-only candidate-code Task Contract formed with all 14 protected source refs and 8,732-character lossless envelope under existing 12,000-character limit; no production completion", "candidate_id": null},
     {"case": "G5", "status": "PARTIAL", "evidence": "G1 real Worker rejected unallowlisted ls with effect_observed=false; Self-Refine 1f1e751b-ac1b-4366-bfbd-6dfd2fb72c2f VERIFIED LOCAL_OBLIGATION_RECOVERED and resumed to verified Candidate. Work completion still awaits Human authority and Delivery", "candidate_id": "7d410081-4319-5529-a12e-ce844f9d9ac2"},
-    {"case": "G6", "status": "PARTIAL", "evidence": "Misconfigured new G0 trial stopped with zero automatic replay budget and Human Steering attention, no Candidate. It demonstrates a truthful stop but is not a valid standalone G6 qualification", "candidate_id": null}
+    {"case": "G6", "status": "PARTIAL", "evidence": "Corrected-stack Work eaae7b07-38ed-50f4-8322-167da879596d truthfully stopped with missing ECF classes and no Candidate, Runtime Commit or automatic fabricated facts. Steering projection remains READY with STOPPED/BLOCKED; full user-visible truthful-stop and restart/no-retry proof remain open", "candidate_id": null}
   ],
   "historical_work_pass_claimed": false,
   "real_ecs_qualification_pass_claimed": false
