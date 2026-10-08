@@ -28,6 +28,73 @@ from spg.domain.interaction import (
 ITEMS = tuple(f"F{index:02d}: N1 protected fact {index:02d}" for index in range(1, 15))
 
 
+def test_observed_g0_page_profile_checks_exact_heading_and_path(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    (repository / "index.html").write_text(
+        "<html><body><h1>N1 Software Control</h1>"
+        "<p>Isolated qualification only</p></body></html>", encoding="utf-8")
+    _git(repository, "add", "index.html")
+    _git(repository, "commit", "-m", "candidate")
+    revision = _git(repository, "rev-parse", "HEAD")
+    common = dict(scope=None, authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4(), qualifiers={})
+    facts = tuple(SemanticFactReference(fact_id=uuid4(), subject=subject,
+                                        relation=relation, value=value, **common)
+                  for subject, relation, value in (
+                      ("page.path", SemanticRelation.EQUALITY, "index.html"),
+                      ("page.heading.count", SemanticRelation.CARDINALITY, 1),
+                      ("page.heading.text", SemanticRelation.EQUALITY,
+                       "N1 Software Control"),
+                      ("page.paragraph.text", SemanticRelation.EQUALITY,
+                       "Isolated qualification only")))
+    checks = verify_static_html_semantic_facts(repository, revision, contract, facts)
+    assert len(checks) == 4 and all(check["passed"] for check in checks)
+    (repository / "index.html").write_text(
+        "<html><body><h1>N1 Software Control</h1><h2>Extra</h2>"
+        "<p>Isolated qualification only</p></body></html>", encoding="utf-8")
+    _git(repository, "add", "index.html")
+    _git(repository, "commit", "-m", "extra heading")
+    checks = verify_static_html_semantic_facts(
+        repository, _git(repository, "rev-parse", "HEAD"), contract, facts)
+    assert {check["subject"] for check in checks if not check["passed"]} == {
+        "page.heading.count", "page.heading.text"}
+
+
+def test_observed_g3_artifact_file_profile_requires_exact_blob(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    (repository / "index.html").write_text(
+        "<html><body><h1>N1 Status</h1>"
+        "<p>Existing Product bounded Work</p></body></html>", encoding="utf-8")
+    _git(repository, "add", "index.html")
+    _git(repository, "commit", "-m", "candidate")
+    common = dict(scope="work", authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4(), qualifiers={})
+    facts = tuple(SemanticFactReference(fact_id=uuid4(), subject=subject,
+                                        relation=relation, value=value, **common)
+                  for subject, relation, value in (
+                      ("artifact.file.change_scope", SemanticRelation.SCOPE,
+                       "index.html"),
+                      ("artifact.file.count", SemanticRelation.CARDINALITY, 1),
+                      ("artifact.file.h1_text", SemanticRelation.EQUALITY,
+                       "N1 Status"),
+                      ("artifact.file.paragraph_text", SemanticRelation.EQUALITY,
+                       "Existing Product bounded Work")))
+    checks = verify_static_html_semantic_facts(
+        repository, _git(repository, "rev-parse", "HEAD"), contract, facts)
+    assert len(checks) == 4 and all(check["passed"] for check in checks)
+    (repository / "index.html").write_text(
+        "<html><body><h1>N1 Status</h1><p>Wrong</p></body></html>",
+        encoding="utf-8")
+    _git(repository, "add", "index.html")
+    _git(repository, "commit", "-m", "wrong paragraph")
+    checks = verify_static_html_semantic_facts(
+        repository, _git(repository, "rev-parse", "HEAD"), contract, facts)
+    assert next(check for check in checks if check["subject"] ==
+                "artifact.file.paragraph_text")["passed"] is False
+
+
 def _git(repository: Path, *args: str) -> str:
     return subprocess.run(["git", "-C", str(repository), *args], check=True,
                           capture_output=True, text=True).stdout.strip()
