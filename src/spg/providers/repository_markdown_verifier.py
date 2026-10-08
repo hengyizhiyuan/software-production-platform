@@ -229,7 +229,7 @@ def evaluate_repository_artifact(
         and tuple(title for level, title in headings if level in levels) == wanted
     )
     identifier = re.compile(
-        r"(?:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|[0-9a-f]{40})"
+        r"(?:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|[0-9a-f]{7,40})"
     )
     def present(marker: str) -> bool:
         if identifier.fullmatch(marker.casefold()):

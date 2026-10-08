@@ -559,21 +559,30 @@ class SteeringProductionService:
     ) -> tuple[str, ...]:
         """Bind literal admitted lineage IDs when the Work requires their appearance.
 
-        The verification wording is authority for *requiring* visibility; the
-        admitted objective supplies exact values. No model-derived or current
-        repository identity is substituted for an absent literal.
+        The verification wording is authority for *requiring* visibility. Exact
+        values may be recorded in either admitted Work objective or admitted
+        Verification Expectation; neither is inferred from current repository
+        state or a model's eventual Candidate.
         """
         wording = request.verification_expectation.casefold()
         if not ("exact" in wording and "lineage" in wording
                 and "identifier" in wording and any(
                     verb in wording for verb in ("appear", "include", "contain", "visible"))):
             return ()
+        admitted_text = admitted_objective + " " + request.verification_expectation
         identifiers = tuple(dict.fromkeys(re.findall(
             r"(?<![0-9a-fA-F])(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-"
             r"[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|"
             r"[0-9a-fA-F]{40})(?![0-9a-fA-F])",
-            admitted_objective,
+            admitted_text,
         )))
+        short_lineage = re.search(
+            r"source lineage identifier\s+([0-9a-f]{7,39})(?![0-9a-f])",
+            request.verification_expectation, re.IGNORECASE,
+        )
+        if short_lineage:
+            identifiers = tuple(dict.fromkeys(
+                (*identifiers, short_lineage.group(1))))
         if not identifiers:
             raise ProductInvariantViolation(
                 "Exact document lineage verification requires admitted literal identifiers"

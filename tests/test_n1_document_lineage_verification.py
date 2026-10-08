@@ -73,6 +73,21 @@ def test_exact_admitted_lineage_becomes_nonempty_verification_markers() -> None:
             admitted_objective="Write a document")
 
 
+def test_exact_identifiers_in_admitted_verification_expectation_are_consumed() -> None:
+    expectation = (
+        "Confirm the exact source and Work lineage identifiers appear in the "
+        "document (source lineage identifier 17fa255, source revision "
+        "7513e0a634d8d7148da27ac028d28b8525d3b97b, Work id "
+        "d1c7515c-9ff2-585c-80d2-c086968f258b)."
+    )
+    markers = SteeringProductionService._exact_document_lineage_markers(
+        SimpleNamespace(verification_expectation=expectation),
+        admitted_objective="Produce the document with exact lineage identifiers")
+    assert markers == (
+        "7513e0a634d8d7148da27ac028d28b8525d3b97b",
+        "d1c7515c-9ff2-585c-80d2-c086968f258b", "17fa255")
+
+
 def test_new_candidate_missing_one_lineage_id_fails_verification(tmp_path: Path) -> None:
     repository, source, artifact = _fixture(tmp_path)
     markers = SteeringProductionService._exact_document_lineage_markers(
