@@ -577,7 +577,8 @@ class SteeringProductionService:
             admitted_text,
         )))
         short_lineage = re.search(
-            r"source lineage identifier\s+([0-9a-f]{7,39})(?![0-9a-f])",
+            r"(?:source lineage identifier|scope marker)\s+"
+            r"([0-9a-f]{7,39})(?![0-9a-f])",
             request.verification_expectation, re.IGNORECASE,
         )
         if short_lineage:
