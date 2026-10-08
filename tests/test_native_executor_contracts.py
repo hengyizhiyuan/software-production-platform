@@ -1137,6 +1137,27 @@ def test_rejected_process_recipe_can_be_corrected_without_human(tool, message) -
     assert "no effect" in basis
 
 
+def test_missing_preview_is_bounded_repair_only_when_read_failure_is_certain() -> None:
+    binding, _ = _binding()
+    missing = {"error_type": "ValueError", "effect_observed": False,
+               "message": "preview artifact is unavailable"}
+
+    def classify(condition, output):
+        return DurableKernelAudit._classify_repairability(
+            {}, binding=binding, tool="preview.inspect",
+            condition=condition, output=output)[0]
+
+    assert classify(EffectCondition.FAILED, missing) is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
+    assert classify(EffectCondition.UNKNOWN, missing) is RepairabilityClassification.UNSAFE_TO_AUTOREPAIR
+    assert classify(EffectCondition.FAILED, {**missing, "effect_observed": True}) is RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE
+    assert classify(EffectCondition.FAILED, {**missing, "message": "unrelated failure"}) is RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE
+    no_write_grant = binding.model_copy(update={"capability_grants": ()})
+    assert DurableKernelAudit._classify_repairability(
+        {}, binding=no_write_grant, tool="preview.inspect",
+        condition=EffectCondition.FAILED, output=missing,
+    )[0] is RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE
+
+
 @pytest.mark.parametrize("failure_code", ["CAPABILITY_PATH_INVALID", "TOOL_GRANT_MISMATCH", "CAPABILITY_UNAVAILABLE"])
 def test_no_effect_capability_failure_preserves_bounded_repair(failure_code) -> None:
     binding, _ = _binding()

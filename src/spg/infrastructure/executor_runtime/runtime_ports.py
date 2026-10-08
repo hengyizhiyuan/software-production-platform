@@ -694,6 +694,20 @@ class DurableKernelAudit:
             return (RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE,
                 "Collect-only produced no assertion evidence; run the admitted test recipe")
         if (
+            tool == "preview.inspect"
+            and condition is EffectCondition.FAILED
+            and output.get("effect_observed") is False
+            and output.get("error_type") == "ValueError"
+            and output.get("message") == "preview artifact is unavailable"
+            and "file.write" in grants
+            and any(mount.writable and mount.write_scope for mount in binding.workspace.mounts)
+        ):
+            # Inspect is read-only. A missing artifact is a settled observation,
+            # so the worker can produce it within its existing grants before
+            # inspecting again; this grants no new write scope or retry budget.
+            return (RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE,
+                "preview target was absent; use the admitted production path before inspection")
+        if (
             condition is EffectCondition.FAILED
             and output.get("effect_observed") is False
             and output.get("error_type") == "ValueError"
