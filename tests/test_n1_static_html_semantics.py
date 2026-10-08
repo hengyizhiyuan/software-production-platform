@@ -123,15 +123,29 @@ def test_observed_g4_index_html_profile_binds_each_item(tmp_path: Path) -> None:
              {"verification": "no other file changes"}),
             ("index_html.file_scope", SemanticRelation.SCOPE,
              "index.html only", {"no_other_file_changes": True})))
+    facts += (
+        SemanticFactReference(fact_id=uuid4(),
+                              subject="acceptance.index_html.list_constraints",
+                              relation=SemanticRelation.ACCEPTANCE_ASSERTION,
+                              value="each_text_appears_exactly_once_in_order",
+                              scope="index.html", qualifiers={},
+                              **{k: v for k, v in common.items() if k != "scope"}),
+        SemanticFactReference(fact_id=uuid4(), subject="workspace.changed_files",
+                              relation=SemanticRelation.SCOPE,
+                              value=("index.html",), scope="managed product source",
+                              qualifiers={},
+                              **{k: v for k, v in common.items() if k != "scope"}),
+    )
     good = _candidate(repository, ITEMS)
     checks = verify_static_html_semantic_facts(repository, good, contract, facts)
-    assert len(checks) == 7 and all(check["passed"] for check in checks)
+    assert len(checks) == 9 and all(check["passed"] for check in checks)
     bad = _candidate(repository, tuple(item for item in ITEMS if not
                                        item.startswith("F07:")))
     checks = verify_static_html_semantic_facts(repository, bad, contract, facts)
     assert {check["subject"] for check in checks if not check["passed"]} >= {
         "page.ordered_list.items", "index_html.list_item_acceptance_count",
-        "index_html.list_item_occurrence"}
+        "index_html.list_item_occurrence",
+        "acceptance.index_html.list_constraints"}
 
 
 def test_observed_g0_index_html_assertions_are_exact(tmp_path: Path) -> None:

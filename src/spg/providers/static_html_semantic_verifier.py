@@ -89,7 +89,9 @@ def verify_static_html_semantic_facts(
                                           "acceptance.verification",
                                           "repository.change_scope_file_count",
                                           "artifact.change_scope",
-                                          "acceptance.artifact_content"}
+                                          "acceptance.artifact_content",
+                                          "acceptance.index_html.list_constraints",
+                                          "workspace.changed_files"}
                       or fact.subject.startswith("acceptance.ordered_list")
                       or fact.subject == "repository.changed_files")
     if not supported:
@@ -127,7 +129,8 @@ def verify_static_html_semantic_facts(
                             "work.change_scope", "artifact.target_file",
                             "change.allowed_paths", "artifact.file.change_scope",
                             "repository.change_scope_file_count",
-                            "index_html.file_scope", "artifact.change_scope"}:
+                            "index_html.file_scope", "artifact.change_scope",
+                            "workspace.changed_files"}:
             result = subprocess.run(
                 ["git", "-C", str(repository), "diff", "--name-only",
                  contract.source_revision, proposed_revision, "--"],
@@ -171,6 +174,7 @@ def verify_static_html_semantic_facts(
                                                "repository.change_scope_file_count",
                                                "index_html.file_scope",
                                                "artifact.change_scope",
+                                               "workspace.changed_files",
                                                "work.change_scope",
                                                "artifact.target_file",
                                                "change.allowed_paths"})
@@ -335,6 +339,12 @@ def verify_static_html_semantic_facts(
                 passed = (path in ordered_scopes and fact.value == 1
                           and len(parser.ordered_lists) == 1)
                 reason = "BOUND_TO_ORDERED_FACT" if passed else "ORDERED_FACT_MISSING_OR_OCCURRENCE_MISMATCH"
+            elif (fact.subject == "acceptance.index_html.list_constraints"
+                    and fact.relation is SemanticRelation.ACCEPTANCE_ASSERTION):
+                passed = (path in ordered_scopes
+                          and fact.value == "each_text_appears_exactly_once_in_order"
+                          and len(parser.ordered_lists) == 1)
+                reason = "BOUND_TO_ORDERED_FACT" if passed else "ORDERED_FACT_MISSING"
             elif (fact.subject == "index_html.list_item_occurrence"
                     and fact.relation is SemanticRelation.ACCEPTANCE_ASSERTION):
                 passed = (path in ordered_scopes
@@ -372,6 +382,7 @@ def verify_static_html_semantic_facts(
                                   "index_html.ordered_list_count",
                                   "index_html.list_item_acceptance_count",
                                   "index_html.list_item_occurrence",
+                                  "acceptance.index_html.list_constraints",
                                   *(f"{alias}.ordered_list.item_count"
                                     for alias in file_aliases.values())}
                 or (check["subject"] == "page.ordered_list.items"
