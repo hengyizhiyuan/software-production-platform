@@ -7,8 +7,9 @@ import pytest
 from spg.application.managed_greenfield_context import (
     project_greenfield_context, project_accepted_successor_context,
 )
+from spg.application.intent_realization import _bind_typed_accepted_product_source
 from spg.application.decision_context import WattDecisionContextGateway,DecisionContextRequirement,MANAGED_WEB_SURFACE,DecisionContextNotReady,DecisionContextChanged,DecisionContextAuthorityMissing
-from spg.domain.intent_realization import SemanticItem,SemanticKind,SemanticClause
+from spg.domain.intent_realization import SemanticItem,SemanticKind,SemanticClause,ObservedEffect
 from spg.domain.semantic_provenance import SemanticProvenance,SemanticOrigin,SemanticArgument
 from tests.test_human_interaction_authority import declared_ir,ROUTINE,POSITIVE
 from tests.test_decision_context_integration import git
@@ -157,6 +158,54 @@ def test_existing_product_v0_reference_must_name_exact_observed_managed_source()
     assert project_greenfield_context(**basis) is None
     assert project_greenfield_context(**basis,managed_source_identity=identity).intent
     assert project_greenfield_context(**basis,managed_source_identity=identity+'-wrong') is None
+
+
+def test_natural_accepted_product_v0_reference_binds_one_persisted_source():
+    basis=owner_basis();ir=basis['ir'];pid=basis['product_id']
+    identity=f'watt://repositories/products/{pid}'
+    phrase='the currently accepted Product V0 source'
+    reference=SemanticArgument(value=phrase,provenance=SemanticProvenance(
+        origin=SemanticOrigin.HUMAN_EXPLICIT,source_record_id=ir.source_record_id,
+        source_text=phrase))
+    items=tuple(item.model_copy(update={'production':item.production.model_copy(update={
+        'new_work':True,'repository_required':True,'repository_reference':reference})})
+        if item.production is not None else item for item in ir.items)
+    observation=ObservedEffect(owner='product-managed-source',
+        evidence_references=(f'product-source:{pid}:0',),facts={
+            'product_id':str(pid),'version':0,'repository_identity':identity,
+            'accepted_revision':'a'*40,'accepted_tree':'b'*40})
+    resolved=_bind_typed_accepted_product_source(items,SimpleNamespace(observed_reality=(observation,)))
+    goal=next(item.production for item in resolved if item.production is not None)
+    assert goal.repository_reference.value==identity
+    assert goal.repository_reference.provenance.origin is SemanticOrigin.REPOSITORY_OBSERVED
+    assert goal.repository_reference.provenance.evidence_reference==f'product-source:{pid}:0'
+    basis['ir']=ir.model_copy(update={'items':resolved})
+    assert project_greenfield_context(**basis,managed_source_identity=identity).intent
+
+    # No observed Product source or two candidates must request source selection.
+    unresolved=_bind_typed_accepted_product_source(items,SimpleNamespace(observed_reality=()))
+    assert 'repository_reference' in next(item.production for item in unresolved
+        if item.production is not None).unresolved_arguments
+    second_id=uuid4()
+    second=observation.model_copy(update={'facts':{
+        **observation.facts,'product_id':str(second_id),
+        'repository_identity':'watt://repositories/products/other'},
+        'evidence_references':(f'product-source:{second_id}:0',)})
+    ambiguous=_bind_typed_accepted_product_source(items,SimpleNamespace(
+        observed_reality=(observation,second)))
+    assert 'repository_reference' in next(item.production for item in ambiguous
+        if item.production is not None).unresolved_arguments
+
+    external=SemanticArgument(value='https://example.invalid/other.git',
+        provenance=reference.provenance.model_copy(update={
+            'source_text':'https://example.invalid/other.git'}))
+    external_items=tuple(item.model_copy(update={'production':item.production.model_copy(update={
+        'repository_reference':external})}) if item.production is not None else item
+        for item in items)
+    untouched=_bind_typed_accepted_product_source(external_items,SimpleNamespace(
+        observed_reality=(observation,)))
+    assert next(item.production for item in untouched
+        if item.production is not None).repository_reference.value==external.value
 
 
 def test_successor_uses_accepted_source_proof_and_keeps_work_scope_separate(tmp_path):

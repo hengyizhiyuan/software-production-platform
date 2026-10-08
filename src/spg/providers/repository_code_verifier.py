@@ -29,6 +29,7 @@ from spg.domain.verification import (
 )
 from spg.infrastructure.persistence import Database
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
+from spg.providers.static_html_semantic_verifier import verify_static_html_semantic_facts
 
 
 class RepositoryCodeVerifier:
@@ -87,6 +88,9 @@ class RepositoryCodeVerifier:
             )
             if obligation is None:
                 raise RuntimeError("requested check is not present in the admitted contract")
+            if (request.semantic_fact_obligations
+                    != work_unit.completion_contract.semantic_fact_obligations):
+                raise RuntimeError("Code semantic obligations differ from admitted contract")
             target = obligation.target
             result, metadata = self._evaluate(
                 repository=dispatch.workspace.repository_path,
@@ -95,6 +99,18 @@ class RepositoryCodeVerifier:
                 contract=contract,
                 obligation=obligation,
             )
+            if (obligation.kind is CodeVerificationKind.PATH_SCOPE
+                    and result is VerificationResultValue.PASS):
+                semantic_checks = verify_static_html_semantic_facts(
+                    dispatch.workspace.repository_path,
+                    request.proposed_commit_identity,
+                    contract,
+                    work_unit.completion_contract.semantic_fact_obligations,
+                )
+                if semantic_checks:
+                    metadata["static_html_semantic_checks"] = semantic_checks
+                    if any(not check["passed"] for check in semantic_checks):
+                        result = VerificationResultValue.FAIL
             if (obligation.kind is CodeVerificationKind.PATH_SCOPE
                     and result is VerificationResultValue.PASS
                     and request.protected_context_obligations and self.context_verifier is not None

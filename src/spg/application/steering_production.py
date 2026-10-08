@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from pathlib import Path
+import re
 import subprocess
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
@@ -516,6 +517,11 @@ class SteeringProductionService:
             completion = CompletionContract(
                 required_outputs=(target.path,),
                 required_changes=(target.path,),
+                required_markers=self._exact_document_lineage_markers(
+                    request, admitted_objective=(
+                        work.production_objective or request.production_objective
+                    ),
+                ),
                 verification_obligations=(request.verification_expectation,),
                 semantic_fact_obligations=request.engineering_semantic_facts,
                 task_contract=task_contract,
@@ -546,6 +552,33 @@ class SteeringProductionService:
             ProductionHorizon.CODE,
             WorkApplicationService._code_change_objective(contract),
         )
+
+    @staticmethod
+    def _exact_document_lineage_markers(
+        request: SteeringProductionRequest, *, admitted_objective: str,
+    ) -> tuple[str, ...]:
+        """Bind literal admitted lineage IDs when the Work requires their appearance.
+
+        The verification wording is authority for *requiring* visibility; the
+        admitted objective supplies exact values. No model-derived or current
+        repository identity is substituted for an absent literal.
+        """
+        wording = request.verification_expectation.casefold()
+        if not ("exact" in wording and "lineage" in wording
+                and "identifier" in wording and any(
+                    verb in wording for verb in ("appear", "include", "contain", "visible"))):
+            return ()
+        identifiers = tuple(dict.fromkeys(re.findall(
+            r"(?<![0-9a-fA-F])(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-"
+            r"[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|"
+            r"[0-9a-fA-F]{40})(?![0-9a-fA-F])",
+            admitted_objective,
+        )))
+        if not identifiers:
+            raise ProductInvariantViolation(
+                "Exact document lineage verification requires admitted literal identifiers"
+            )
+        return identifiers
 
     def _task_contract(self, request: SteeringProductionRequest, *,
                        repository_path: str) -> TaskContract:

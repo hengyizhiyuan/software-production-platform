@@ -82,6 +82,64 @@ def _effect_span_covers_clause(effect_span: str, clause_span: str) -> bool:
     return bool(core) and (effect_span in clause_span or core in effect_span)
 
 
+def _bind_typed_accepted_product_source(items, basis):
+    """Resolve a typed Product-source reference against exact observed owner Reality.
+
+    The compiler has already identified the Human span as a repository source.
+    Only its explicit accepted-Product role is resolved here; external addresses
+    and generic "existing source" wording are never redirected to Watt storage.
+    """
+    pattern = re.compile(
+        r"(?:the\s+)?(?:currently\s+|current\s+)?accepted\s+product"
+        r"(?:\s+v(?P<version>\d+))?\s+(?:source|repository|codebase)",
+        re.IGNORECASE,
+    )
+    sources = []
+    for observation in getattr(basis, "observed_reality", ()):
+        facts = observation.facts
+        if observation.owner != "product-managed-source":
+            continue
+        evidence = f"product-source:{facts.get('product_id')}:{facts.get('version')}"
+        if (facts.get("repository_identity") and facts.get("accepted_revision")
+                and evidence in observation.evidence_references):
+            sources.append((facts, evidence))
+    bound = []
+    for item in items:
+        production = item.production
+        reference = None if production is None else production.repository_reference
+        match = (None if reference is None or not production.repository_required
+                 or reference.provenance.origin not in {
+                     SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}
+                 else pattern.fullmatch(" ".join(reference.value.split())))
+        if match is None:
+            bound.append(item)
+            continue
+        requested_version = match.group("version")
+        matches = [(facts, evidence) for facts, evidence in sources
+                   if requested_version is None or str(facts["version"]) == requested_version]
+        if len(matches) == 1:
+            facts, evidence = matches[0]
+            production = production.model_copy(update={
+                "repository_reference": SemanticArgument(
+                    value=facts["repository_identity"],
+                    provenance=SemanticProvenance(
+                        origin=SemanticOrigin.REPOSITORY_OBSERVED,
+                        evidence_reference=evidence,
+                    ),
+                ),
+            })
+        else:
+            production = production.model_copy(update={
+                "unresolved_arguments": tuple(dict.fromkeys(
+                    (*production.unresolved_arguments, "repository_reference"))),
+            })
+        bound.append(item.model_copy(update={
+            "production": production,
+            "requires_human": item.requires_human or len(matches) != 1,
+        }))
+    return tuple(bound)
+
+
 def _validate_provenance(provenance, records, *, current_record=None):
     if provenance.origin in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}:
         record = records.get(provenance.source_record_id)
@@ -629,7 +687,9 @@ class IntentRealizationKernel:
         raw = candidate.semantic_intent
         legacy = raw is None
         raw = legacy_typed_candidate(candidate, basis) if legacy else raw
-        items = validate_semantic_candidate(raw, basis)
+        items = _bind_typed_accepted_product_source(
+            validate_semantic_candidate(raw, basis), basis,
+        )
         # A read-only Work Reality question has a single owner even when the
         # semantic compiler calls it QUESTION instead of STATUS_QUERY. Route it
         # through the persisted Work/Runtime projection, not a model answer.

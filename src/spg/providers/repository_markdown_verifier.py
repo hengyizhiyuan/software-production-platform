@@ -2,8 +2,10 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+import re
 import subprocess
 
+from spg.domain.engineering_semantics import SemanticFactAuthority, SemanticRelation
 from spg.domain.runtime import ArtifactContract, ArtifactOperation
 from spg.domain.verification import (
     VerificationCapabilityRequest,
@@ -22,6 +24,7 @@ class ArtifactVerificationFacts:
     operation_matches: bool
     readable_non_empty: bool
     required_markers_present: bool
+    section_order_matches: bool
     diff_valid: bool
 
     @property
@@ -32,6 +35,7 @@ class ArtifactVerificationFacts:
                 self.operation_matches,
                 self.readable_non_empty,
                 self.required_markers_present,
+                self.section_order_matches,
                 self.diff_valid,
             )
         )
@@ -82,13 +86,31 @@ class RepositoryArtifactVerifier:
                 or artifact.verification_obligation != request.obligation
             ):
                 raise RuntimeError("Artifact Contract lineage is incoherent")
+            if (request.semantic_fact_obligations
+                    != work_unit.completion_contract.semantic_fact_obligations):
+                raise RuntimeError("Artifact semantic obligations differ from admitted contract")
             target_path = artifact.artifact_path
+            section_facts = tuple(
+                item for item in work_unit.completion_contract.semantic_fact_obligations
+                if item.subject == "document.sections"
+                and item.relation is SemanticRelation.ORDERED_COMPONENT
+                and item.authority is SemanticFactAuthority.HUMAN_EXPLICIT
+                and item.scope in {None, target_path, Path(target_path).stem}
+            )
+            if len(section_facts) > 1:
+                raise RuntimeError("Conflicting admitted document section obligations")
+            required_sections = (
+                tuple(str(value) for value in section_facts[0].value)
+                if section_facts and isinstance(section_facts[0].value, tuple)
+                else ()
+            )
             facts = evaluate_repository_artifact(
                 dispatch.workspace.repository_path,
                 source.repository_revision,
                 request.proposed_commit_identity,
                 artifact,
                 required_markers=work_unit.completion_contract.required_markers,
+                required_sections=required_sections,
             )
             result = (
                 VerificationResultValue.PASS
@@ -103,6 +125,7 @@ class RepositoryArtifactVerifier:
                 "operation_matches": facts.operation_matches,
                 "readable_non_empty": facts.readable_non_empty,
                 "required_markers_present": facts.required_markers_present,
+                "section_order_matches": facts.section_order_matches,
                 "diff_valid": facts.diff_valid,
             }
         except Exception as error:
@@ -139,6 +162,7 @@ def evaluate_repository_artifact(
     artifact: ArtifactContract,
     *,
     required_markers: tuple[str, ...] = (),
+    required_sections: tuple[str, ...] = (),
 ) -> ArtifactVerificationFacts:
     """Evaluate the contract-selected path on one immutable Git subject."""
 
@@ -194,13 +218,32 @@ def evaluate_repository_artifact(
         except UnicodeDecodeError:
             readable = False
     normalized = " ".join(content.split()).casefold()
+    headings = tuple(
+        (len(match.group(1)), match.group(2).strip().casefold())
+        for match in re.finditer(r"(?m)^(#{1,6})\s+(.+?)\s*#*\s*$", content)
+    )
+    wanted = tuple(section.casefold() for section in required_sections)
+    levels = {level for level, title in headings if title in wanted}
+    section_order_matches = not wanted or (
+        len(levels) == 1
+        and tuple(title for level, title in headings if level in levels) == wanted
+    )
+    identifier = re.compile(
+        r"(?:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|[0-9a-f]{40})"
+    )
+    def present(marker: str) -> bool:
+        if identifier.fullmatch(marker.casefold()):
+            return re.search(r"(?<![0-9a-f])" + re.escape(marker.casefold())
+                             + r"(?![0-9a-f])", normalized) is not None
+        return marker.casefold() in normalized
     return ArtifactVerificationFacts(
         exact_path_only=exact_path_only,
         operation_matches=operation_matches,
         readable_non_empty=readable,
         required_markers_present=all(
-            marker.casefold() in normalized for marker in required_markers
+            present(marker) for marker in required_markers
         ),
+        section_order_matches=section_order_matches,
         diff_valid=diff_check.returncode == 0,
     )
 
