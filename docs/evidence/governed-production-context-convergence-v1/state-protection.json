@@ -14,6 +14,7 @@
   "new_gitea_live_qualification_repositories": ["product-ed52c0bce7464abf89c01bea5bd61c90"],
   "isolated_live_database": "spg_n1_qualification_20261008; new G1 Work ae8530f0-1f28-55f7-aea6-e79b13c7fabd has sealed Candidate 7d410081-4319-5529-a12e-ce844f9d9ac2 pending explicit Human authority; failed setup Work f8088a58-b7f9-5456-b04c-82136460d3fa and missing-approved-facts Work eaae7b07-38ed-50f4-8322-167da879596d retained with zero Candidates",
   "isolated_runtime_restart": "Only watt-n1-* API, Coordinator, Worker and Tool Host containers were restarted onto a595303 after G1 Candidate; same Candidate, Verification and pending Human attention recovered, no production service restart",
+  "g1_delivery_target": "ad03a189-5fc5-4d18-bb74-1e94198fcdbb, DOCUMENT_PACKAGE; target configuration only, not Manifest publication or Human acceptance",
   "isolated_regression_database": "spg_n1_regression_20261008_b; managed-source integration fixture cleaned its PostgreSQL rows; Gitea repository retained",
   "isolated_state_root": "/data/watt/n1-qualification-20261008/",
   "gitea_restart_performed": false,

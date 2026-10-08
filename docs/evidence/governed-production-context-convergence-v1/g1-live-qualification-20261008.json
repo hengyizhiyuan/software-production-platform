@@ -43,5 +43,14 @@
   "runtime_commit_at_capture": false,
   "delivery_manifest_count_at_capture": 0,
   "human_acceptance_at_capture": false,
+  "subsequent_target_observation": {
+    "observed_at_utc": "2026-10-08T04:59:28Z",
+    "delivery_target_id": "ad03a189-5fc5-4d18-bb74-1e94198fcdbb",
+    "delivery_target_kind": "DOCUMENT_PACKAGE",
+    "guardian_assurance_required": false,
+    "candidate_authorization_pending": true,
+    "manifest_count": 0,
+    "human_delivery_acceptance": false
+  },
   "pass_claim_limit": "G1 reached real Worker, verified Candidate and bounded local repair. It has not reached Human-authorized integration or Document Delivery; G1 is not PASS."
 }
