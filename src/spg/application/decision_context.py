@@ -242,10 +242,16 @@ def lineage_for_work_task(database, *, work_id: UUID,
         return None
     watt_source = remote in _WATT_SOURCE_REMOTES
     surface = policy_for_targets(target_paths) if watt_source else None
-    if not watt_source and target_paths and all(
-        Path(path).suffix.lower() in {".html", ".css", ".js"}
+    # A managed web change may update the root README as its source-bearing
+    # companion. Keep other non-web targets outside this ECF surface.
+    managed_web_paths = tuple(
+        path for path in target_paths
+        if Path(path).suffix.lower() in {".html", ".css", ".js"}
+    )
+    if (not watt_source and managed_web_paths and all(
+        path in managed_web_paths or path == "README.md"
         for path in target_paths
-    ):
+    )):
         surface = MANAGED_WEB_SURFACE
     if surface is None:
         return None

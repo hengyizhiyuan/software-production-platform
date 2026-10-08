@@ -1,9 +1,9 @@
 {
   "report_name": "N1 Governed Production Context Reality Evidence",
-  "report_version": "20261008-forensics-2",
-  "status": "FORENSICS_IN_PROGRESS",
+  "report_version": "20261008-forensics-and-live-qualification-3",
+  "status": "REAL_QUALIFICATION_IN_PROGRESS",
   "qualification_result": "PARTIAL_EVIDENCE_ONLY",
-  "captured_at_utc": "2026-10-08T03:13:02Z",
+  "captured_at_utc": "2026-10-08T04:45:18Z",
   "target": {"region": "cn-wulanchabu", "instance_id": "i-0jl386xnbauudq5j9jk0", "ecs_source_revision": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3", "migration": "20261007_72"},
   "evidence_grades": {"E1": "direct persisted row/object", "E2": "contemporaneous report with unavailable raw attachment", "E3": "current-code mechanism or new reproduction, never historical fact", "UNKNOWN": "not established"},
   "historical_cases": [
@@ -17,11 +17,16 @@
     "B": "context readiness READY with candidate source; original Work not advanced",
     "C": "context readiness READY with candidate source; original Work not advanced",
     "D": "Task Contract formed with 14/14 protected source references; original Work not advanced",
-    "A": "original persisted attempt workspace no longer matches its exact source baseline; no replay was performed"
+    "A": "original persisted attempt workspace no longer matches its exact source baseline; in-memory exact persisted input independently reproduced canonical ExecutionContextNotReady and candidate document context readiness; no replay or mutation was performed"
+  },
+  "new_qualification_events": {
+    "G1": "Isolated real model and Worker produced verified sealed document Candidate 7d410081-4319-5529-a12e-ce844f9d9ac2 for new Work ae8530f0-1f28-55f7-aea6-e79b13c7fabd. Self-Refine 1f1e751b-ac1b-4366-bfbd-6dfd2fb72c2f recovered one rejected no-effect tool operation. Human Candidate authorization 6bce0222-41f9-5b66-acb0-2f55889cec15 remains pending; no Runtime Commit or Manifest. Exact IDs and artifact hash in g1-live-qualification-20261008.json.",
+    "G0_first_new_attempt": "New Product 31fd07a2-6f7b-4271-827c-7795a8ddc1dc and Work f8088a58-b7f9-5456-b04c-82136460d3fa stopped with ExecutionContextNotReady and Human Steering attention f44d1da3-a713-5fc2-a984-ac52a23e2b36; no Candidate. Subsequent source-basis audit found the isolated stack omitted SPG_MANAGED_SOURCE_PROVIDER=gitea, so this is an invalid managed-source qualification setup, not historical proof of a mixed-target root cause. Failed trial retained.",
+    "managed_web_companion_test": "Consumer-side managed web context now admits exactly a root README.md companion to web targets; real Gitea plus isolated PostgreSQL accepted-source integration test passed. This is independent bounded coverage, not proof that the misconfigured first live G0 trial is repaired. New real Work verification pending."
   },
   "qualification_database": "spg_n1_qualification_20261008",
   "case_matrix": "case-qualification-matrix.json",
   "regression_summary": "regression-summary.json",
   "state_protection": "state-protection.json",
-  "cross_computer_recovery": {"git_path": "docs/evidence/governed-production-context-convergence-v1/", "ecs_persistent_path": "/data/watt/app/owner-runtime/qualifications/governed-production-context-convergence-v1/", "git_push_status": "INITIAL_FORENSICS_COMMIT_PUSHED", "pushed_commit": "6365347f289d95d46f83ca062db55330010adc7d", "current_candidate_changes": "UNCOMMITTED_AT_REPORT_CAPTURE"}
+  "cross_computer_recovery": {"git_path": "docs/evidence/governed-production-context-convergence-v1/", "ecs_persistent_path": "/data/watt/app/owner-runtime/qualifications/governed-production-context-convergence-v1/", "isolated_live_qualification_path": "/data/watt/n1-qualification-20261008/app/owner-runtime/qualifications/governed-production-context-convergence-v1/", "git_push_status": "SOURCE_COMMIT_8ee4693_PUSHED; THIS_REPORT_CAPTURE_PRECEDES_NEXT_EVIDENCE_COMMIT", "pushed_source_commit_at_capture": "8ee4693d1902d4444fa9f0595713637a0e3f1772", "current_evidence_changes": "UNCOMMITTED_AT_REPORT_CAPTURE"}
 }

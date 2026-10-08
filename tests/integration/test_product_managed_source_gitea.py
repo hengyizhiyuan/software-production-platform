@@ -350,6 +350,19 @@ def test_accepted_v1_new_work_uses_exact_product_source_and_ecf(postgres_databas
     assert lineage.contract_id == "PRODUCT_UI_CHANGE"
     assert {item.context_class for item in lineage.protected_obligations} == {
         "PRODUCT_INTENT", "PRODUCT_INVARIANT", "APPROVED_DECISION"}
+    mixed_lineage = lineage_for_work_task(postgres_database, work_id=submitted.work_id,
+        repository_identity=resource.repository_identity,
+        repository_path=Path(resource.location_ref),
+        repository_revision=following["source_revision"],
+        target_paths=("index.html", "README.md"))
+    assert mixed_lineage.contract_id == "PRODUCT_UI_CHANGE"
+    assert {item.context_class for item in mixed_lineage.protected_obligations} == {
+        "PRODUCT_INTENT", "PRODUCT_INVARIANT", "APPROVED_DECISION"}
+    assert lineage_for_work_task(postgres_database, work_id=submitted.work_id,
+        repository_identity=resource.repository_identity,
+        repository_path=Path(resource.location_ref),
+        repository_revision=following["source_revision"],
+        target_paths=("index.html", "server.py")) is None
 
 
 def test_new_product_lineage_restart_head_isolation_export_and_authority(postgres_database, tmp_path):

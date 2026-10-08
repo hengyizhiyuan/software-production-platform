@@ -1,5 +1,5 @@
 {
-  "captured_at_utc": "2026-10-08T04:07:48Z",
+  "captured_at_utc": "2026-10-08T04:45:18Z",
   "source_under_test": "candidate branch snapshot copied to /tmp/watt-n1-20261008-source; production /data/watt/runtime/source unchanged",
   "execution_location": "ECS isolated watt-n1-pytest:20261008 containers",
   "runs": [
@@ -7,8 +7,15 @@
     {"scope": "Managed greenfield persisted owner/context integration", "result": "PASS", "count": 3, "dependencies": "isolated PostgreSQL spg_n1_qualification_20261008; canonical ECF source"},
     {"scope": "Native Worker evidence, unbound task fencing, and pre-upgrade command digest", "result": "PASS", "count": 3, "dependencies": "isolated PostgreSQL and disposable source/workspace"},
     {"scope": "Accepted V1 Product source to new Work and ECF context using real Gitea", "result": "PASS", "count": 1, "dependencies": "isolated PostgreSQL, unique Gitea qualification repository, deterministic executor"},
-    {"scope": "Existing full managed-source restart/head isolation regression", "result": "INCOMPLETE", "count": 1, "dependencies": "first acceptance and next Work source assertions passed; test then attempted Docker Compose force-recreate of Gitea, which isolated test container cannot perform; no Gitea restart occurred"}
+    {"scope": "Existing full managed-source restart/head isolation regression", "result": "INCOMPLETE", "count": 1, "dependencies": "first acceptance and next Work source assertions passed; test then attempted Docker Compose force-recreate of Gitea, which isolated test container cannot perform; no Gitea restart occurred"},
+    {"scope": "Managed web source index.html plus exact root README.md companion, with server.py negative control", "result": "PASS", "count": 1, "dependencies": "new isolated PostgreSQL spg_n1_regression_20261008_b, real Gitea and canonical ECF; new real Worker qualification still pending"},
+    {"scope": "Work Delivery excluding existing asynchronous attention timing case", "result": "PASS", "count": 4, "dependencies": "isolated PostgreSQL and disposable test source"},
+    {"scope": "Existing empty Work then two repository namespaces", "result": "FAILED_ON_CANDIDATE_AND_CANONICAL", "count": 1, "dependencies": "test reads attention immediately after asynchronous activation; no unrelated fix or PASS claim"},
+    {"scope": "Guardian F26 and Multi-PWU selected regression", "result": "PASS", "count": 11, "dependencies": "isolated PostgreSQL and canonical Guardian source"},
+    {"scope": "Guardian assurance adapter, core performance, native executor contract unit tests", "result": "PASS", "count": 91, "dependencies": "isolated test image; no production DB"},
+    {"scope": "Work convergence, Software Delivery and full native executor integration files", "result": "PASS", "count": null, "dependencies": "isolated PostgreSQL and disposable writable source; exact collected test count not retained in console receipt"}
   ],
-  "not_yet_run": ["full Document and Software Delivery regressions", "Steering/Self-Refine/no-progress suite", "F26 Guardian repair suite", "Multi-PWU A/B/C/D suite", "Workspace JS/UI", "performance P0", "real controlled-model Worker qualification", "restart/recovery qualification"],
-  "pass_claim_limit": "Focused tests only; N1 closure gates remain open"
+  "not_yet_run": ["full Document Delivery regression", "full Steering/Self-Refine/no-progress suite", "complete Multi-PWU A/B/C/D qualification", "Workspace JS/UI", "controlled performance P0 sampling", "real revised/non-new Worker qualification", "full stack restart/recovery qualification"],
+  "live_qualification": "G1 new real model/Worker verified Candidate. First G0 Product trial stopped before Worker because isolated stack omitted the managed-source provider setting; it is retained as invalid setup evidence, not qualified failure or PASS. Both remain below full N1 closure",
+  "pass_claim_limit": "Partial qualification only; N1 closure gates remain open"
 }

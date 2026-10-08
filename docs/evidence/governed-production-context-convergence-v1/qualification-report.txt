@@ -1,0 +1,64 @@
+N1 Governed Production Context & Convergence Closure v1
+Reality qualification checkpoint — 2026-10-08 04:48 UTC
+
+STATUS: PARTIAL. N1 Closure Conditions remain open. This is a new report from the
+company computer/ECS investigation, not the missing 2026-10-07 receipt.
+
+BASELINE
+Canonical local/remote main and ECS production source: ee5bd86a53891f9391785c91d0ccef81ad2d56c3.
+Production migration: 20261007_72. Candidate source at this checkpoint: 8ee4693d1902d4444fa9f0595713637a0e3f1772 plus the bounded managed-web README companion edit pending commit.
+The production source, original four Works and their historical data were not changed.
+
+HISTORICAL REALITY
+The original A/B/C/D Works are reconstructed from persisted ECS PostgreSQL, Git,
+Work Trace, event records, and surviving reports. Historical facts and UNKNOWN
+limits are listed in reality-evidence-20261008.md, root-cause-matrix.json and
+qualification-report.json. Missing old local receipts are not claimed recovered.
+
+NEW ISOLATED REALITY
+Database: spg_n1_qualification_20261008. State root:
+/data/watt/n1-qualification-20261008/. No production service was restarted.
+
+G1 document Work ae8530f0-1f28-55f7-aea6-e79b13c7fabd passed real WIC/model,
+Task/PWU, native Worker and Verification to sealed Candidate
+7d410081-4319-5529-a12e-ce844f9d9ac2 (fingerprint
+f2fa919001abb1b5af8dc14a34a9991fc25d725ec5164b16bdae89433879c7d5).
+Verification record b10a6b32-faad-5982-8b29-cdd89940c116 is PASS. One rejected
+no-effect tool action was repaired within bounded Self-Refine event
+1f1e751b-ac1b-4366-bfbd-6dfd2fb72c2f. LOCAL_OBLIGATION_RECOVERED is not
+Work completion. Candidate Human authorization attention
+6bce0222-41f9-5b66-acb0-2f55889cec15 is pending; Runtime Commit and Document
+Delivery Manifest are absent. The exact Candidate document and its SHA are in
+g1-candidate-document.md and g1-live-qualification-20261008.json.
+
+The first new G0 Product/Work (31fd07a2-6f7b-4271-827c-7795a8ddc1dc /
+f8088a58-b7f9-5456-b04c-82136460d3fa) stopped before Worker/Candidate. An
+audit found the isolated stack omitted SPG_MANAGED_SOURCE_PROVIDER=gitea, so
+that trial lacked a managed source. It is retained as INVALID SETUP, neither
+G0 PASS nor proof of a source-classification root cause. A separate exact
+index.html + root README.md consumer-side ECF integration test passed against
+real Gitea and isolated PostgreSQL. Fresh real qualification is required.
+
+REGRESSION
+Focused context, native, Work Delivery, Software Delivery, Guardian F26,
+Multi-PWU, and performance unit/integration paths passed as scoped in
+regression-summary.json. An existing asynchronous Work Delivery attention
+timing case fails on both canonical and candidate source. The managed-source
+restart test stopped at its Docker Compose Gitea restart step in an isolated
+container; no Gitea restart occurred and it is not counted PASS.
+
+OPEN GATES
+G0 real control; G1 explicit Candidate integration and Document Delivery;
+G2/G3 real revised/non-new qualification; G4 production continuation;
+G5 complete Work convergence; G6 dedicated irreparable case; restart/recovery;
+remaining affected regressions and P0 sampling. No PASS/CLOSED claim.
+
+CROSS-COMPUTER RECOVERY
+Tracked source/report path:
+docs/evidence/governed-production-context-convergence-v1/
+Persistent ECS qualification copy:
+/data/watt/app/owner-runtime/qualifications/governed-production-context-convergence-v1/
+Isolated live state and Candidate document:
+/data/watt/n1-qualification-20261008/app/owner-runtime/qualifications/governed-production-context-convergence-v1/
+The Git branch is codex/governed-production-context-convergence-v1. Report
+copy and push status must be confirmed after this checkpoint is committed.

@@ -1,5 +1,5 @@
 {
-  "captured_at_utc": "2026-10-08T04:07:48Z",
+  "captured_at_utc": "2026-10-08T04:45:18Z",
   "production_database": "spg_dev",
   "production_read_mode": "All investigative SQL used BEGIN READ ONLY; one-off API reads set default_transaction_read_only=on",
   "original_works": [
@@ -10,10 +10,13 @@
   ],
   "original_work_mutations_performed": false,
   "qualification_database": "spg_n1_qualification_20261008 (new database; fixtures truncate only this database)",
-  "new_gitea_test_repositories": ["product-3287fa89e6c94babb396be66bba1950b", "product-e8e76049eda84ee2a09d175ad3d0d214"],
+  "new_gitea_test_repositories": ["product-3287fa89e6c94babb396be66bba1950b", "product-e8e76049eda84ee2a09d175ad3d0d214", "product-4280091b900c418d952645a31ecd4cc3", "product-2d2aafa6644d4204b9e5cf3ed9165b45"],
+  "isolated_live_database": "spg_n1_qualification_20261008; new G1 Work ae8530f0-1f28-55f7-aea6-e79b13c7fabd has sealed Candidate 7d410081-4319-5529-a12e-ce844f9d9ac2 pending explicit Human authority; failed setup G0 Work f8088a58-b7f9-5456-b04c-82136460d3fa retained with zero Candidates",
+  "isolated_regression_database": "spg_n1_regression_20261008_b; managed-source integration fixture cleaned its PostgreSQL rows; Gitea repository retained",
+  "isolated_state_root": "/data/watt/n1-qualification-20261008/",
   "gitea_restart_performed": false,
   "production_source_revision": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
   "main_modified": false,
   "historical_qualification_files_cleaned": false,
-  "note": "No original Candidate, Runtime Commit, Manifest, Human Decision or Quality Ledger row was rewritten by this N1 investigation. New isolated test rows were cleaned by test fixtures; Gitea qualification repos are retained as new test effects."
+  "note": "No original Candidate, Runtime Commit, Manifest, Human Decision or Quality Ledger row was rewritten by this N1 investigation. Regression fixture rows were cleaned only in their isolated database. New live qualification rows and Gitea repositories are deliberately retained as distinct effects; no Human Candidate or Delivery acceptance was automated."
 }
