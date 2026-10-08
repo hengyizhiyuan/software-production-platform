@@ -241,6 +241,7 @@ def verify_static_html_semantic_facts(
                                    "artifact.file.h1_text",
                                    "index_html.h1_text", "index_html.h1.text",
                                    "page.index_html.h1.text",
+                                   f"{path}.heading.text",
                                    f"{path}.h1.text", "index.h1_text",
                                    f"{path}.h1_text",
                                    f"{page_aliases[path]}.h1_text",
@@ -253,11 +254,15 @@ def verify_static_html_semantic_facts(
                                          "page.heading.text", "artifact.file.h1_text",
                                          "index_html.h1_text", "index_html.h1.text",
                                          "page.index_html.h1.text",
+                                         f"{path}.heading.text",
                                          f"{path}.h1.text",
                                          "index.h1_text", f"{path}.h1_text",
                                          f"{page_aliases[path]}.h1_text",
                                          f"{file_aliases[path]}.heading_text"}
                          or fact.qualifiers.get("heading_level") == 1
+                         or (fact.subject == f"{path}.heading.text"
+                             and fact.qualifiers.get("element") == "h1"
+                             and fact.qualifiers.get("count") == 1)
                          or fact.qualifiers.get("exact") is True)):
                 passed = (parser.headings == [fact.value]
                           and not any(tag in parser.tags for tag in

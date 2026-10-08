@@ -186,6 +186,30 @@ def test_observed_g0_index_html_assertions_are_exact(tmp_path: Path) -> None:
                 "index_html.paragraph.text")["passed"] is False
 
 
+def test_observed_g0_path_heading_requires_exact_h1_qualifiers(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    (repository / "index.html").write_text(
+        "<html><body><h1>N1 Software Control</h1></body></html>",
+        encoding="utf-8")
+    _git(repository, "add", "index.html")
+    _git(repository, "commit", "-m", "candidate")
+    candidate = _git(repository, "rev-parse", "HEAD")
+    common = dict(authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4(), scope="index.html")
+    fact = SemanticFactReference(
+        fact_id=uuid4(), subject="index.html.heading.text",
+        relation=SemanticRelation.EQUALITY, value="N1 Software Control",
+        qualifiers={"element": "h1", "count": 1}, **common)
+    checks = verify_static_html_semantic_facts(repository, candidate, contract,
+                                                (fact,))
+    assert len(checks) == 1 and checks[0]["passed"]
+    unsafe = fact.model_copy(update={"qualifiers": {"element": "h2", "count": 1}})
+    checks = verify_static_html_semantic_facts(repository, candidate, contract,
+                                                (unsafe,))
+    assert not checks[0]["passed"]
+
+
 def test_observed_g0_page_index_profile_binds_full_assertion(tmp_path: Path) -> None:
     repository, contract = _fixture(tmp_path)
     (repository / "index.html").write_text(
