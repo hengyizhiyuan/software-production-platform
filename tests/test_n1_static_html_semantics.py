@@ -65,6 +65,32 @@ def _facts() -> tuple[SemanticFactReference, ...]:
     )
 
 
+def _alternate_facts() -> tuple[SemanticFactReference, ...]:
+    """The second WIC shape observed in isolated G4 Work f00999f9."""
+    common = dict(authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4())
+    return (
+        SemanticFactReference(fact_id=uuid4(), subject="page.h1.text",
+                              relation=SemanticRelation.EQUALITY, value="N1 Budget",
+                              scope="index.html", qualifiers={"exact":"true"}, **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.ordered_list.item_texts",
+                              relation=SemanticRelation.ORDERED_COMPONENT, value=ITEMS,
+                              scope=None, qualifiers={"ordered":"true"}, **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.ordered_list.item_occurrence",
+                              relation=SemanticRelation.CARDINALITY, value=1,
+                              scope="index.html", qualifiers={"exact":"true"}, **common),
+        SemanticFactReference(fact_id=uuid4(), subject="repository.changed_files",
+                              relation=SemanticRelation.SCOPE, value=("index.html",),
+                              scope=None, qualifiers={"exclusive":"true"}, **common),
+        SemanticFactReference(fact_id=uuid4(), subject="acceptance.ordered_list_texts",
+                              relation=SemanticRelation.ACCEPTANCE_ASSERTION, value=True,
+                              scope="index.html",
+                              qualifiers={"count":14,"order":"fixed","occurrence":"once"},
+                              **common),
+    )
+
+
 def _candidate(repository: Path, items: tuple[str, ...], *, extra: str = "") -> str:
     content = "<!doctype html><html><body><h1>N1 Budget</h1><ol>" + "".join(
         f"<li>{item}</li>" for item in items
@@ -108,3 +134,78 @@ def test_assertion_without_ordered_source_fact_cannot_pass(tmp_path: Path) -> No
         repository, candidate, contract, (heading, assertion))
     assert not checks[-1]["passed"]
     assert checks[-1]["reason"] == "ORDERED_FACT_MISSING"
+
+
+def test_alternate_wic_fact_shape_consumes_all_five_obligations(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS)
+    checks = verify_static_html_semantic_facts(repository, candidate, contract,
+                                               _alternate_facts())
+    assert len(checks) == 5
+    assert all(check["passed"] for check in checks)
+
+
+@pytest.mark.parametrize("items", [ITEMS[:6] + ITEMS[7:],
+                                      ITEMS[:6] + (ITEMS[7], ITEMS[6]) + ITEMS[8:]])
+def test_alternate_wic_missing_or_swapped_item_fails_all_bound_assertions(
+    tmp_path: Path, items: tuple[str, ...],
+) -> None:
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, items)
+    checks = verify_static_html_semantic_facts(repository, candidate, contract,
+                                               _alternate_facts())
+    assert not checks[1]["passed"]
+    assert not checks[2]["passed"]
+    assert not checks[4]["passed"]
+
+
+def test_alternate_wic_changed_file_scope_and_unknown_page_fact_fail(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS)
+    (repository / "other.txt").write_text("unexpected\n", encoding="utf-8")
+    _git(repository, "add", "other.txt")
+    _git(repository, "commit", "-m", "unexpected file")
+    candidate = _git(repository, "rev-parse", "HEAD")
+    facts = (*_alternate_facts(), SemanticFactReference(
+        fact_id=uuid4(), subject="page.unsupported.required",
+        relation=SemanticRelation.EQUALITY, value="must exist", scope="index.html",
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+        epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+        source_work_revision_id=uuid4()))
+    checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
+    assert not checks[3]["passed"]
+    assert not checks[5]["passed"]
+
+
+def test_existing_g0_g3_heading_and_paragraph_shapes_are_mechanical(tmp_path: Path) -> None:
+    repository, contract = _fixture(tmp_path)
+    (repository / "index.html").write_text(
+        "<!doctype html><h1>N1 Budget</h1><p>Existing Product bounded Work</p>",
+        encoding="utf-8")
+    _git(repository, "add", "index.html")
+    _git(repository, "commit", "-m", "simple candidate")
+    candidate = _git(repository, "rev-parse", "HEAD")
+    common = dict(scope="index.html", authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+                  epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+                  source_work_revision_id=uuid4())
+    facts = (
+        SemanticFactReference(fact_id=uuid4(), subject="index.html.h1.text",
+                              relation=SemanticRelation.EQUALITY, value="N1 Budget", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="index.html.h1.count",
+                              relation=SemanticRelation.CARDINALITY, value=1, **common),
+        SemanticFactReference(fact_id=uuid4(), subject="page.paragraph.text",
+                              relation=SemanticRelation.EQUALITY,
+                              value="Existing Product bounded Work", **common),
+        SemanticFactReference(fact_id=uuid4(), subject="index.html.paragraph.count",
+                              relation=SemanticRelation.CARDINALITY, value=1, **common),
+    )
+    assert all(item["passed"] for item in verify_static_html_semantic_facts(
+        repository, candidate, contract, facts))
+    (repository / "index.html").write_text(
+        "<!doctype html><h1>N1 Budget</h1><p>Existing Product bounded Work</p>"
+        "<p>Unexpected duplicate</p>", encoding="utf-8")
+    _git(repository, "add", "index.html")
+    _git(repository, "commit", "-m", "duplicate paragraph")
+    candidate = _git(repository, "rev-parse", "HEAD")
+    checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
+    assert not checks[2]["passed"] and not checks[3]["passed"]
