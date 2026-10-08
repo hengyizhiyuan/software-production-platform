@@ -77,3 +77,13 @@ Isolated live state and Candidate document:
 /data/watt/n1-qualification-20261008/app/owner-runtime/qualifications/governed-production-context-convergence-v1/
 The Git branch is codex/governed-production-context-convergence-v1. Report
 copy and push status must be confirmed after this checkpoint is committed.
+
+ADDENDUM — 2026-10-08 06:18 UTC
+The 05:01 inference that the valid-source G0 trial required Human approval of
+three abstract ECF facts has been superseded. A Product-source / Work-branch
+identity mismatch in the context adapter caused fallback to PRODUCT_UI_CHANGE.
+The admitted Human IRK goal already supports PRODUCT_INTENT; no Product
+Invariant or Approved Decision was expressed. See g0-root-cause-review-20261008.md.
+The exact G1 Candidate has a material contract mismatch despite Verification
+PASS; see g1-human-authorization-review-20261008.md. It remains unapproved,
+unintegrated and without Manifest. N1 remains PARTIAL.

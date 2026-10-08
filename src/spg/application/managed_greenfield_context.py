@@ -152,14 +152,17 @@ def read_managed_greenfield_context(session, *, work, product_id, repository_ide
                                     _historical=False, _pinned_revision_id=None):
     from sqlalchemy import select
     from spg.infrastructure.persistence.product_schema import (product_managed_sources,
-        product_source_versions,work_source_bases,work_runtime_bindings)
+        product_source_versions,work_source_bases,work_runtime_bindings,engineering_resources)
     from spg.infrastructure.persistence.runtime_schema import governance_records,baseline_candidates
     from spg.infrastructure.persistence.product_store import ProductStore
     from spg.application.human_attention import canonical_ir_for_work
     source=session.execute(select(product_managed_sources).where(product_managed_sources.c.product_id==product_id)).mappings().one_or_none()
     basis=session.execute(select(work_source_bases).where(work_source_bases.c.work_id==work.id)).mappings().one_or_none()
+    resource_identity=(None if basis is None else session.execute(
+        select(engineering_resources.c.repository_identity).where(
+            engineering_resources.c.id==basis['resource_id'])).scalar_one_or_none())
     if (source is None or basis is None or source['provider_kind']!='gitea'
-            or source['origin'] or source['repository_identity']!=repository_identity
+            or source['origin'] or resource_identity!=repository_identity
             or basis['product_id']!=product_id):
         return None
     if not _historical and (source['version'],source['accepted_revision'],source['accepted_tree']) != (
@@ -201,8 +204,13 @@ def read_managed_greenfield_context(session, *, work, product_id, repository_ide
     parent=store.work(accepted['work_id']) if accepted['work_id'] else None
     if parent is None:
         raise DecisionContextAuthorityMissing('MANAGED_ACCEPTED_SOURCE_BASIS_MISSING')
+    parent_identity=session.execute(select(engineering_resources.c.repository_identity)
+        .join(work_source_bases,work_source_bases.c.resource_id==engineering_resources.c.id)
+        .where(work_source_bases.c.work_id==parent.id)).scalar_one_or_none()
+    if parent_identity is None:
+        raise DecisionContextAuthorityMissing('MANAGED_ACCEPTED_SOURCE_LINEAGE_MISSING')
     inherited=read_managed_greenfield_context(session,work=parent,product_id=product_id,
-        repository_identity=repository_identity,_historical=True,
+        repository_identity=parent_identity,_historical=True,
         _pinned_revision_id=binding['work_reality_revision_id'])
     if inherited is None:
         # Imported/declared Product source may instead carry ECF classes in
