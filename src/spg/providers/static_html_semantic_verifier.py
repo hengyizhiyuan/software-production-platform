@@ -87,7 +87,9 @@ def verify_static_html_semantic_facts(
                                           "work.new_file_count", "deliverable.page",
                                           "artifact.target_file", "change.allowed_paths",
                                           "acceptance.verification",
-                                          "repository.change_scope_file_count"}
+                                          "repository.change_scope_file_count",
+                                          "artifact.change_scope",
+                                          "acceptance.artifact_content"}
                       or fact.subject.startswith("acceptance.ordered_list")
                       or fact.subject == "repository.changed_files")
     if not supported:
@@ -110,6 +112,10 @@ def verify_static_html_semantic_facts(
             path = "index.html"
         if len(html_targets) == 1 and path not in html_targets:
             only_path = next(iter(html_targets))
+            if (fact.subject in {"page.count", "acceptance.artifact_content"}
+                    and fact.scope in {"managed Product repository",
+                                       "N1 qualification work"}):
+                path = only_path
             if (fact.subject.startswith(file_aliases[only_path] + ".")
                     and fact.scope in {f"{only_path} semantic HTML page",
                                        f"the single ordered list in {only_path}"}):
@@ -121,7 +127,7 @@ def verify_static_html_semantic_facts(
                             "work.change_scope", "artifact.target_file",
                             "change.allowed_paths", "artifact.file.change_scope",
                             "repository.change_scope_file_count",
-                            "index_html.file_scope"}:
+                            "index_html.file_scope", "artifact.change_scope"}:
             result = subprocess.run(
                 ["git", "-C", str(repository), "diff", "--name-only",
                  contract.source_revision, proposed_revision, "--"],
@@ -136,6 +142,9 @@ def verify_static_html_semantic_facts(
                         and fact.value.endswith(" only")
                         and fact.value[:-5] in html_targets else
                         (fact.value,) if fact.subject == "work.change_scope"
+                        and isinstance(fact.value, str)
+                        and fact.value in html_targets else
+                        (fact.value,) if fact.subject == "artifact.change_scope"
                         and isinstance(fact.value, str)
                         and fact.value in html_targets else
                         (fact.value,) if fact.subject == "artifact.target_file"
@@ -161,6 +170,7 @@ def verify_static_html_semantic_facts(
                                                "artifact.file.change_scope",
                                                "repository.change_scope_file_count",
                                                "index_html.file_scope",
+                                               "artifact.change_scope",
                                                "work.change_scope",
                                                "artifact.target_file",
                                                "change.allowed_paths"})
@@ -178,11 +188,14 @@ def verify_static_html_semantic_facts(
                       and pages == (fact.qualifiers.get("path"),)
                       and pages[0] in html_targets)
             reason = "EXACT_DELIVERABLE_PAGE" if passed else "DELIVERABLE_PAGE_MISMATCH"
-        elif fact.subject == "acceptance.verification":
+        elif fact.subject in {"acceptance.verification",
+                                   "acceptance.artifact_content"}:
             bound = tuple(check for check in checks if check["scope"] == path
                           and check["reason"] in {"EXACT_H1", "EXACT_PARAGRAPH"})
             passed = (fact.relation is SemanticRelation.ACCEPTANCE_ASSERTION
-                      and fact.value == "exact heading and paragraph verified"
+                      and fact.value in {
+                          "exact heading and paragraph verified",
+                          "exact heading and paragraph verified and reviewable Candidate left"}
                       and {check["reason"] for check in bound}
                       == {"EXACT_H1", "EXACT_PARAGRAPH"}
                       and all(check["passed"] for check in bound))
@@ -223,6 +236,7 @@ def verify_static_html_semantic_facts(
                                    "page.h1.text", "page.h1_text",
                                    "artifact.file.h1_text",
                                    "index_html.h1_text", "index_html.h1.text",
+                                   "page.index_html.h1.text",
                                    f"{path}.h1.text", "index.h1_text",
                                    f"{path}.h1_text",
                                    f"{page_aliases[path]}.h1_text",
@@ -234,6 +248,7 @@ def verify_static_html_semantic_facts(
                                          "page.heading_text",
                                          "page.heading.text", "artifact.file.h1_text",
                                          "index_html.h1_text", "index_html.h1.text",
+                                         "page.index_html.h1.text",
                                          f"{path}.h1.text",
                                          "index.h1_text", f"{path}.h1_text",
                                          f"{page_aliases[path]}.h1_text",
@@ -247,6 +262,7 @@ def verify_static_html_semantic_facts(
             elif (fact.subject in {"page.paragraph.text", "page.paragraph_text",
                                    "artifact.file.paragraph_text",
                                    "index_html.paragraph.text",
+                                   "page.index_html.paragraph.text",
                                    f"{path}.paragraph.text",
                                    f"{path}.paragraph_text",
                                    f"{page_aliases[path]}.paragraph_text"}
