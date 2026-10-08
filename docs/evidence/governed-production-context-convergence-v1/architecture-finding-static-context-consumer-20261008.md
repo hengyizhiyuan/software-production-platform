@@ -1,0 +1,23 @@
+# N1 Architecture Finding — static Context consumer boundary
+
+Captured 2026-10-08 11:36 UTC from the isolated ECS qualification database, immutable Work Git commits, and Verification records. Status: **open for Architecture Lead**. This finding does not grant a PASS or change a governance gate.
+
+## Observed failure
+
+On runtime source `eee4adbb92a239fcf1d5c46c2f3a842dab3fd182`, G4 Work `f3886280-8520-5378-a09e-d2db80010ccf` preserved the complete ordered `F01`–`F14` tuple in Work Reality revision `90be6b77-6752-5c19-8d4a-8a237378baec`, Task Contract, and PWU `b04e5917-14b0-44b0-a021-6ffcad9fca63`. The exact Candidate blob at `936293d7e1f9bf7de6e510ba1e3ec9180a172fe7` passed the mechanical `page.ordered_list.items` check. `PATH_SCOPE` Verification `4e3f3ee4-09a4-5956-a6dc-3b53b65281eb` nevertheless returned **FAIL**: four protected constraints and Product Intent were `UNVERIFIABLE` in the separate ECF protected-context consumer. The remaining WIC facts `artifact.filename`, `artifact.count`, `list.item_count`, `change_scope.files`, and `delivery.deployment_authorized` were not all consumed by the bounded static semantic verifier. The fact that the Candidate contained all 14 items does not prove every protected obligation.
+
+G3 Work `0a86615e-1161-5db4-9cdf-9dd7fe03637c` resolved the unique accepted Product V0 source to exact revision `c9c810221e770ae374c52e043cbde05774c65eab` and `REPOSITORY_OBSERVED` provenance, but its `PATH_SCOPE` Verification `644e3d6c-4689-52f6-ab01-5d836e490ad0` returned **UNKNOWN** with `PROTECTED_CONTEXT_WITNESS_NOT_OBSERVED`. Its WIC facts used `artifact.path`, `artifact.h1.text`, `artifact.paragraph.text`, `artifact.change_scope`, and `delivery.excluded_effects`; this vocabulary did not reach the exact static semantic checker. G4 on the prior `4f649c2` image also stopped with `PROTECTED_CONTEXT_WITNESS_NOT_OBSERVED`. These are repeatable consumer-boundary failures, not proof that Human Intent lacked the required facts.
+
+## Ownership question
+
+WIC emits semantically similar Human facts under varying free-form subjects. IRK carries the exact ordered tuple, but the static semantic verifier has a bounded subject profile, and the ECF protected-context verifier independently asks a model for source quotes for every protected obligation, including lifecycle exclusions. The independent consumers can disagree or fail to cite exact source even when a mechanical check passes. A durable contract between semantic fact producer and consumers, with explicit evidence for source-checkable facts and separate governance evidence for lifecycle exclusions, appears needed. Its design extends beyond the bounded N1 aliases and should be decided by Architecture Lead. No Context Budget increase, Protected Fact deletion, fabricated Approved Fact, or verification override is proposed here.
+
+N1 remains **PARTIAL**. The existing mechanical checks are scoped evidence only; they do not substitute for full Work Verification or Human Acceptance.
+
+## Final-image confirmation
+
+The same boundary remained visible on exact application source `0d4835353dbdb38abd6abfc19127b84eb5544475`, image `sha256:64289d0a086ecf03efb2dae24ab036bd83906905e00fd71fa30fc51feb160709`:
+
+- G4 Work `c616ab6b-d985-5b35-a2c4-47d9b79ad4e7`, PWU `26d38fa0-0f11-41a8-8c87-52f100a4f388`, retained the exact 14-value ordered fact `7b610ed7-bb57-54fb-88cc-4a4b10bdc6cb` in Work Reality, Task and CompletionContract. Verification `2c650693-cbe6-50b4-a0a5-ab6019a57eff` failed `acceptance.ordered_list_items` because its WIC scope `index.html ordered list` was not recognized as the exact `index.html` target. The separate ordered-value blob check passed. Other Human facts `index.html` and `delivery.authorization` were outside that bounded checker. The Candidate was not sealed.
+- G0 Work `6899ad34-73f1-5180-8323-f1559dd9cc8f` produced one exact HTML change, yet Verification `ca50583d-a863-5fee-94cf-f03467d5e921` failed the previously unseen `page.index_file` fact as `SEMANTIC_FACT_PROFILE_UNSUPPORTED`; its exact H1, paragraph and changed-file checks passed. A different G0 Work `290e71df-bb46-5298-9a27-77e0091ba440` stopped after a `preview.inspect` tool-effect `ValueError` and created no Candidate. Repeating observed subject aliases indefinitely would conceal the producer/consumer contract issue rather than close it.
+- G3 Work `e50a9566-155c-5843-93fd-9b7ec800df7d` reached a sealed Candidate with `PATH_SCOPE` and Git diff PASS after exact accepted V0 source resolution. Its static checker consumed the changed-file fact, while ECF protected-context source witness checks supplied the remaining scoped result. This is a **case-specific** positive result, not evidence that every WIC fact shape is consumed mechanically.
