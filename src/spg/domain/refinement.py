@@ -131,15 +131,63 @@ class RepositoryTargetNecessityProof(BaseModel):
     """Read-only witness of a minimum change surface, not model authority."""
     model_config = ConfigDict(extra="forbid", frozen=True)
     path: str = Field(min_length=1)
-    source_path: str = Field(min_length=1)
-    repository_quote: str = Field(min_length=5, max_length=2000)
+    # Legacy existing-source witnesses retain their original strict contract.
+    evidence_kind: Literal["EXISTING_IMPLEMENTATION", "NEW_TARGET"] = "EXISTING_IMPLEMENTATION"
+    source_path: str | None = Field(default=None, min_length=1)
+    repository_quote: str | None = Field(default=None, min_length=5, max_length=2000)
+    source_revision: str | None = Field(default=None, pattern=r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+    source_tree: str | None = Field(default=None, pattern=r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
     human_clause: str = Field(min_length=3, max_length=2000)
     necessity: str = Field(min_length=10, max_length=2000)
 
     @field_validator("path", "source_path")
     @classmethod
-    def normalize_witness_path(cls, value: str) -> str:
-        return safe_repository_path(value)
+    def normalize_witness_path(cls, value: str | None) -> str | None:
+        return None if value is None else safe_repository_path(value)
+
+    @model_validator(mode="after")
+    def require_exact_evidence_basis(self) -> "RepositoryTargetNecessityProof":
+        if self.evidence_kind == "NEW_TARGET":
+            if (self.source_revision is None or self.source_tree is None
+                    or self.source_path is not None or self.repository_quote is not None):
+                raise ValueError("New target proof requires exact revision/tree and no invented existing-source witness")
+        elif self.source_path is None or self.repository_quote is None:
+            raise ValueError("Existing implementation proof requires an exact source path and repository quote")
+        return self
+
+
+def scope_target_proof_issues(proof: RepositoryTargetNecessityProof, *,
+        candidate_paths: tuple[str, ...], tree_paths: tuple[str, ...],
+        source_revision: str, source_tree: str,
+        human_authority_text: str, observed_sources: dict[str, str],
+        refined_code_intent: str | None = None) -> tuple[str, ...]:
+    """Identity/provenance checks for a derived necessity judgment, not authority."""
+    # Consumer proof cannot rely on a producer's previously validated instance:
+    # Pydantic model_copy or a stored projection may bypass shape validation.
+    try:
+        proof = RepositoryTargetNecessityProof.model_validate(proof.model_dump())
+    except ValueError:
+        return ("Scope necessity proof evidence contract is invalid",)
+    issues = []
+    if proof.path not in candidate_paths:
+        issues.append("Scope necessity proof is outside observed candidate Reality")
+    if (proof.human_clause not in human_authority_text
+            or (refined_code_intent is not None and proof.human_clause not in refined_code_intent)):
+        issues.append("Scope necessity proof has no exact repository/Human witness")
+    if proof.source_revision is not None and proof.source_revision != source_revision:
+        issues.append("Scope necessity proof has stale source revision")
+    if proof.source_tree is not None and proof.source_tree != source_tree:
+        issues.append("Scope necessity proof has stale source tree")
+    if proof.evidence_kind == "NEW_TARGET":
+        # Use the complete exact Git tree, never absence from a sampled context.
+        if (proof.path in tree_paths
+                or any(proof.path.startswith(path + "/") or path.startswith(proof.path + "/")
+                       for path in tree_paths)):
+            issues.append("New target proof conflicts with an existing exact-tree file or directory")
+    elif (proof.source_path not in tree_paths or proof.repository_quote is None
+            or proof.repository_quote not in observed_sources.get(proof.source_path, "")):
+        issues.append("Scope necessity proof has no exact repository/Human witness")
+    return tuple(issues)
 
 
 class ScopeRequirementCoverage(BaseModel):

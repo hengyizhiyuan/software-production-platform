@@ -7,6 +7,7 @@ from copy import deepcopy
 from datetime import UTC, datetime
 from enum import StrEnum
 import json
+import re
 from threading import Lock
 from time import monotonic, sleep
 from typing import Any
@@ -51,6 +52,8 @@ class ModelProviderError(RuntimeError):
         termination_reason: str | None = None,
         request_id: str | None = None,
         occurred_at: datetime | None = None,
+        observed_usage: ModelUsage | None = None,
+        transport_retry_count: int | None = None,
     ) -> None:
         super().__init__(message)
         self.kind = kind
@@ -61,6 +64,8 @@ class ModelProviderError(RuntimeError):
         self.termination_reason = termination_reason
         self.request_id = request_id
         self.occurred_at = occurred_at or datetime.now(UTC)
+        self.observed_usage = observed_usage
+        self.transport_retry_count = transport_retry_count
 
 
 class ResponsesModelAdapter:
@@ -278,6 +283,7 @@ class ResponsesModelAdapter:
                 usage_unknown=True,
                 retryable=False,
             )
+        observed_usage = self._usage(final_payload)
         status = final_payload.get("status")
         if status != "completed":
             normalized_status = status if isinstance(status, str) else "unknown"
@@ -302,7 +308,9 @@ class ResponsesModelAdapter:
                 ),
                 f"{self.provider.value} response status was {normalized_status}",
                 request_sent=True,
-                usage_unknown=self._usage(final_payload).unknown,
+                usage_unknown=observed_usage.unknown,
+                observed_usage=observed_usage,
+                transport_retry_count=retry_count,
                 retryable=incomplete,
                 provider_status=normalized_status,
                 termination_reason=termination_reason,
@@ -315,7 +323,9 @@ class ResponsesModelAdapter:
                 ModelFailureKind.MALFORMED_RESPONSE,
                 f"{self.provider.value} response contained no output text",
                 request_sent=True,
-                usage_unknown=self._usage(final_payload).unknown,
+                usage_unknown=observed_usage.unknown,
+                observed_usage=observed_usage,
+                transport_retry_count=retry_count,
                 retryable=False,
             )
         return StructuredModelResult(
@@ -414,12 +424,34 @@ class ResponsesModelAdapter:
         else:
             kind = ModelFailureKind.PROTOCOL_OR_SCHEMA
             retryable = False
+        # Keep actual rejection metadata in the existing typed failure contract.
+        # Provider prose remains outside receipt fields. These are observations,
+        # not permission, completion or retry-budget changes.
+        def machine(value: object, limit: int) -> str | None:
+            if (not isinstance(value, str) or key in value
+                    or re.fullmatch(r"[A-Za-z0-9_.:-]{1," + str(limit) + "}", value) is None):
+                return None
+            return value
+
+        code = None
+        try:
+            payload = json.loads(detail)
+            error_payload = payload.get("error") if isinstance(payload, dict) else None
+            if isinstance(error_payload, dict):
+                code = machine(error_payload.get("code"), 120)
+        except (ValueError, TypeError):
+            pass
+        request_id = machine(response.headers.get("x-request-id")
+            or response.headers.get("request-id"), 200)
         raise ModelProviderError(
             kind,
             f"{self.provider.value} request failed with HTTP {status}: {detail}",
             request_sent=True,
             usage_unknown=status >= 500,
             retryable=retryable,
+            provider_status=str(status),
+            termination_reason=code,
+            request_id=request_id,
         )
 
     @staticmethod

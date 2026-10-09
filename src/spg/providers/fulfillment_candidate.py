@@ -19,8 +19,8 @@ from spg.domain.model_runtime import ModelPurpose
 def provider_failure_observation(error):
     """Project only normalized typed failure metadata, never exception prose.
 
-    The error has no numeric usage or HTTP replay count. Its usage_unknown flag
-    remains a Provider observation; it cannot supply the missing numeric usage.
+    Only typed observed numeric usage and actual replay count are preserved.
+    Legacy errors remain UNKNOWN; eligibility never implies actual retries.
     """
     from spg.infrastructure.model_runtime import ModelFailureKind, ModelProviderError
     from spg.domain.model_runtime import ModelUsage
@@ -45,8 +45,21 @@ def provider_failure_observation(error):
         "occurred_at": occurred_at.astimezone(UTC).isoformat()
             if isinstance(occurred_at, datetime) and occurred_at.tzinfo is not None else None,
     }
-    return {"provider_failure": failure, "usage": asdict(ModelUsage(unknown=True)),
-        "transport_retry_count": None}
+    observed = error.observed_usage
+    usage = asdict(ModelUsage(unknown=True))
+    if isinstance(observed, ModelUsage):
+        invalid_numeric = False
+        for field in ("input_tokens", "output_tokens", "cached_tokens", "reasoning_tokens", "total_tokens"):
+            value = getattr(observed, field)
+            valid = type(value) is int and value >= 0
+            usage[field] = value if valid else None
+            invalid_numeric |= value is not None and not valid
+        usage["unknown"] = (type(observed.unknown) is not bool or observed.unknown
+            or invalid_numeric or any(usage[field] is None for field in
+                ("input_tokens", "output_tokens", "total_tokens")))
+    retries = error.transport_retry_count
+    return {"provider_failure": failure, "usage": usage,
+        "transport_retry_count": retries if type(retries) is int and retries >= 0 else None}
 
 
 class ModelFulfillmentCandidateProvider:

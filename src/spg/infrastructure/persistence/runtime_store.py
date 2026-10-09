@@ -2,7 +2,7 @@
 
 from collections.abc import Mapping
 from typing import Any
-from uuid import UUID
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 from sqlalchemy import func, insert, select
 from spg.infrastructure.persistence.projection_reads import first_for, rows_for
@@ -418,6 +418,83 @@ class RuntimeStore:
             .order_by(governance_records.c.created_at, governance_records.c.id)
         ).mappings()
         return [GovernanceRecord.model_validate(dict(row)) for row in rows]
+
+    def fulfillment_stop_for_current_context(
+        self, *, work_id: UUID, work_reality_revision_id: UUID,
+        steering_step_id: UUID, repository_identity: str, repository_ref: str,
+    ) -> GovernanceRecord | None:
+        """Read an exact derived stop; it never admits facts, effects or authority.
+
+        A stop for an older step, Work revision or source is only history. Both
+        the carrier identity and the existing Source Owner must still agree.
+        """
+        from spg.domain.governed_obligation import canonical_fingerprint
+
+        rows = self.session.execute(select(governance_records).where(
+            governance_records.c.decision_type == "WORK_FULFILLMENT_STOP_OBSERVATION",
+            governance_records.c.authority_identity == "work-governance:derived-candidate-observation",
+            governance_records.c.subject_type == "WORK_FULFILLMENT_STOP_BASIS",
+            governance_records.c.scope["work_id"].astext == str(work_id),
+            governance_records.c.scope["work_reality_revision_id"].astext == str(work_reality_revision_id),
+            governance_records.c.scope["steering_step_id"].astext == str(steering_step_id),
+        ).order_by(governance_records.c.created_at.desc(), governance_records.c.id.desc())).mappings()
+        expected_keys = {"schema", "owner", "work_id", "work_reality_revision_id",
+            "steering_step_id", "source_baseline_id", "source_revision",
+            "inventory_fingerprint", "source_refs", "unresolved_source_refs",
+            "formation_receipt_refs", "terminal_reason", "condition",
+            "candidate_is_authority", "runtime_admitted"}
+        source = None
+        for row in rows:
+            try:
+                record = GovernanceRecord.model_validate(dict(row))
+            except (ValueError, TypeError):
+                continue
+            scope = record.scope
+            if (record.decision_type != "WORK_FULFILLMENT_STOP_OBSERVATION"
+                    or record.authority_identity != "work-governance:derived-candidate-observation"
+                    or record.subject_type != "WORK_FULFILLMENT_STOP_BASIS"
+                    or set(scope) != expected_keys
+                    or scope.get("schema") != "work-fulfillment-stop-observation-v1"
+                    or scope.get("owner") != "WORK_FULFILLMENT_PROJECTION"
+                    or scope.get("work_id") != str(work_id)
+                    or scope.get("work_reality_revision_id") != str(work_reality_revision_id)
+                    or scope.get("steering_step_id") != str(steering_step_id)
+                    or scope.get("condition") != "OBLIGATION_PROJECTION_UNRESOLVED"
+                    or scope.get("candidate_is_authority") is not False
+                    or scope.get("runtime_admitted") is not False):
+                continue
+            refs, unresolved = scope.get("source_refs"), scope.get("unresolved_source_refs")
+            receipt_refs = scope.get("formation_receipt_refs")
+            inventory = scope.get("inventory_fingerprint")
+            if (not isinstance(refs, list) or not refs
+                    or not all(isinstance(ref, str) and ref for ref in refs)
+                    or not isinstance(unresolved, list) or not unresolved
+                    or not all(isinstance(ref, str) and ref for ref in unresolved)
+                    or len(set(refs)) != len(refs) or len(set(unresolved)) != len(unresolved)
+                    or not set(unresolved).issubset(refs)
+                    or not isinstance(receipt_refs, list)
+                    or not all(isinstance(ref, str) and ref for ref in receipt_refs)
+                    or (inventory is not None and (
+                        not isinstance(inventory, str) or len(inventory) != 64
+                        or any(character not in "0123456789abcdef" for character in inventory)))):
+                continue
+            fingerprint = canonical_fingerprint(scope)
+            if (record.subject_identity != fingerprint or record.id != uuid5(
+                    NAMESPACE_URL, f"spg:work-fulfillment-stop:{fingerprint}")):
+                continue
+            if source is None:
+                pointer = self.current_pointer(repository_identity=repository_identity,
+                                               repository_ref=repository_ref)
+                if pointer is None:
+                    return None
+                source = self.snapshot(pointer.snapshot_id)
+            if (source is not None and source.condition is SnapshotCondition.TRUSTED
+                    and source.repository_identity == repository_identity
+                    and source.repository_ref == repository_ref
+                    and scope.get("source_baseline_id") == str(source.id)
+                    and scope.get("source_revision") == source.repository_revision):
+                return record
+        return None
 
     def fulfillment_observations_for_receipt(self, receipt_id: UUID) -> list[GovernanceRecord]:
         """Exact read from the existing Work governance observation carrier."""

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from hashlib import sha256
+import json
 from pathlib import Path
 import re
 import subprocess
@@ -100,6 +101,60 @@ REFINABLE_ADMISSION_FEEDBACK = (
     "Semantic production proposal has no executable PWU boundary",
     "Task Contract candidate failed validation",
 )
+
+
+def _semantic_feedback(value: str) -> str:
+    """Retain the exact bounded feedback sent to repair, excluding secrets."""
+    from spg.providers.verification_receipts import _safe_value
+    return _safe_value(value)[:2000]
+
+
+def _semantic_failure(error: Exception | None) -> dict[str, object] | None:
+    """Classify owner failure without serializing arbitrary exception prose."""
+    if error is None:
+        return None
+    from spg.providers.fulfillment_candidate import provider_failure_observation
+    provider = provider_failure_observation(error)
+    result = {"error_type": type(error).__name__, "code": "SEMANTIC_REFINEMENT_FAILED"}
+    if provider is not None:
+        result.update(code="SEMANTIC_PROVIDER_FAILURE", provider=provider)
+        return result
+    validation = error if isinstance(error, ValidationError) else error.__cause__
+    if isinstance(validation, ValidationError):
+        result.update(code="SEMANTIC_CANDIDATE_SCHEMA_REJECTED", field_issues=[{
+            "location": _semantic_feedback(".".join(str(part) for part in issue["loc"])),
+            "type": _semantic_feedback(issue["type"]),
+        } for issue in validation.errors(include_input=False, include_context=False)[:32]])
+        return result
+    if isinstance(error, StaleSemanticStepCandidate):
+        result["code"] = "SEMANTIC_BASIS_CHANGED"
+        return result
+    if isinstance(error, (SteeringInvariantViolation, ValueError)):
+        result["code"] = "SEMANTIC_ADMISSION_REJECTED" if isinstance(error, SteeringInvariantViolation) else "SEMANTIC_CANDIDATE_VALUE_REJECTED"
+        text = str(error)
+        machine = re.match(r"([A-Z][A-Z0-9_]{1,79})(?::|$)", text)
+        if machine is not None:
+            result["validator_code"] = _semantic_feedback(machine.group(1))
+            result["safe_reason"] = _semantic_feedback(text)
+        elif text.startswith(REFINABLE_ADMISSION_FEEDBACK):
+            result["safe_reason"] = _semantic_feedback(text)
+    return result
+
+
+def _semantic_candidate_identity(candidate: SemanticStepResultCandidate | None):
+    if candidate is None:
+        return None
+    payload = candidate.model_dump(mode="json")
+    return {"candidate_fingerprint": sha256(json.dumps(payload, sort_keys=True,
+        ensure_ascii=False, separators=(",", ":")).encode("utf-8")).hexdigest(),
+        "work_id": str(candidate.work_id), "steering_plan_revision_id": str(candidate.steering_plan_revision_id),
+        "step_id": str(candidate.step_id), "step_type": candidate.step_type.value,
+        "basis_fingerprint": candidate.basis_fingerprint}
+
+
+def _semantic_failure_message(error: Exception) -> str:
+    diagnosis = _semantic_failure(error)
+    return str(diagnosis.get("safe_reason") or diagnosis["code"])
 
 
 class SemanticStepRefinementExhausted(SteeringInvariantViolation):
@@ -326,6 +381,7 @@ class SemanticStepApplicationService:
                 "No Semantic Step capability is configured for DESIGN/REFINE"
             )
         started = monotonic()
+        candidate = None
         try:
             candidate = self.capability.execute(semantic_input)
         except SteeringInvariantViolation as error:
@@ -337,28 +393,35 @@ class SemanticStepApplicationService:
                 raise
             feedback = "Semantic provider candidate failed strict schema or repository path validation: " + str(error)
             if isinstance(error.__cause__, ValidationError):
-                # Return only typed field locations and validation messages to the
-                # same-basis repair. Raw provider values may contain untrusted text.
-                issues = error.__cause__.errors(include_input=False)
+                issues = error.__cause__.errors(include_input=False, include_context=False)
                 feedback += "; " + "; ".join(
-                    f"{'.'.join(str(part) for part in issue['loc'])}: {issue['msg']}"
+                    f"{'.'.join(str(part) for part in issue['loc'])}: {issue['type']}"
                     for issue in issues
                 )
+            feedback = _semantic_feedback(feedback)
             first_usage = getattr(self.capability, "last_usage", None)
+            first_observations = tuple(getattr(self.capability, "last_semantic_observations", ()))
+            revised = None
+            stage = "REVISED_PROVIDER_CANDIDATE"
             try:
                 revised = refine(semantic_input, validation_feedback=feedback)
+                stage = "REVISED_ADMISSION"
                 admitted = self.admit(semantic_input, revised)
             except Exception as second_error:
                 self._record_semantic_refinement(semantic_input, feedback, started,
-                    first_usage, converged=False, second_error=second_error)
-                raise SemanticStepRefinementExhausted(str(second_error)) from second_error
+                    first_usage, converged=False, second_error=second_error,
+                    first_error=error, first_stage="INITIAL_PROVIDER_VALIDATION", second_stage=stage,
+                    first_observations=first_observations, first_candidate=None, second_candidate=revised)
+                raise SemanticStepRefinementExhausted(_semantic_failure_message(second_error)) from second_error
             self._record_semantic_refinement(semantic_input, feedback, started,
-                first_usage, converged=True)
+                first_usage, converged=True, first_error=error,
+                first_stage="INITIAL_PROVIDER_VALIDATION", second_stage="ADMITTED",
+                first_observations=first_observations, first_candidate=None, second_candidate=revised)
             return admitted
-        first_usage = getattr(self.capability, "last_usage", None)
         try:
             return self.admit(semantic_input, candidate)
         except (SteeringInvariantViolation, ValueError) as error:
+            first_error = error
             if isinstance(error, ValueError):
                 error = SteeringInvariantViolation(f"Task Contract candidate failed validation: {error}")
             if isinstance(error, StaleSemanticStepCandidate) or not str(error).startswith(
@@ -368,23 +431,32 @@ class SemanticStepApplicationService:
             refine = getattr(self.capability, "refine", None)
             if not callable(refine):
                 raise
+            feedback = _semantic_feedback(str(error))
+            first_usage = getattr(self.capability, "last_usage", None)
+            first_observations = tuple(getattr(self.capability, "last_semantic_observations", ()))
+            revised = None
+            stage = "REVISED_PROVIDER_CANDIDATE"
             try:
-                revised = refine(semantic_input, validation_feedback=str(error))
+                revised = refine(semantic_input, validation_feedback=feedback)
+                stage = "REVISED_ADMISSION"
                 admitted = self.admit(semantic_input, revised)
             except Exception as second_error:
                 self._record_semantic_refinement(
-                    semantic_input, str(error), started, first_usage,
+                    semantic_input, feedback, started, first_usage,
                     converged=False, second_error=second_error,
                     superseded=isinstance(second_error, StaleSemanticStepCandidate),
+                    first_error=first_error, first_stage="INITIAL_ADMISSION", second_stage=stage,
+                    first_observations=first_observations, first_candidate=candidate, second_candidate=revised,
                 )
                 if isinstance(second_error, StaleSemanticStepCandidate):
                     raise
                 if isinstance(second_error, (SteeringInvariantViolation, ValueError)):
-                    raise SemanticStepRefinementExhausted(str(second_error)) from second_error
+                    raise SemanticStepRefinementExhausted(_semantic_failure_message(second_error)) from second_error
                 raise
             self._record_semantic_refinement(
-                semantic_input, str(error), started, first_usage,
-                converged=True,
+                semantic_input, feedback, started, first_usage,
+                converged=True, first_error=first_error, first_stage="INITIAL_ADMISSION", second_stage="ADMITTED",
+                first_observations=first_observations, first_candidate=candidate, second_candidate=revised,
             )
             return admitted
 
@@ -393,16 +465,54 @@ class SemanticStepApplicationService:
         started: float, first_usage: object, *, converged: bool,
         second_error: Exception | None = None,
         superseded: bool = False,
+        first_error: Exception | None = None, first_stage: str = "INITIAL_ADMISSION",
+        second_stage: str = "REVISED_ADMISSION", first_observations: tuple = (),
+        first_candidate: SemanticStepResultCandidate | None = None,
+        second_candidate: SemanticStepResultCandidate | None = None,
     ) -> None:
+        from spg.providers.verification_receipts import _safe_value
         second_usage = getattr(self.capability, "last_usage", None)
-        usages = (
-            (first_usage,) if second_usage is first_usage
-            else (first_usage, second_usage)
-        )
-        total_tokens = sum(
-            int(usage.get("total_tokens") or 0)
-            for usage in usages if isinstance(usage, dict)
-        )
+        usages = ((first_usage,) if second_usage is first_usage else (first_usage, second_usage))
+        usage_known = bool(usages) and all(isinstance(usage, dict) and not usage.get("unknown", False)
+            and type(usage.get("total_tokens")) is int and usage["total_tokens"] >= 0 for usage in usages)
+        for error in (first_error, second_error):
+            provider_failure = (_semantic_failure(error) or {}).get("provider")
+            if provider_failure is not None:
+                failure_usage = provider_failure.get("usage")
+                # Only an observed complete total can keep the failed call's
+                # aggregate known. Legacy failures still expose no such total.
+                if not isinstance(failure_usage, dict) or failure_usage.get("unknown", True) or (
+                    type(failure_usage.get("total_tokens")) is not int or failure_usage["total_tokens"] < 0
+                ):
+                    usage_known = False
+        total_tokens = sum(usage["total_tokens"] for usage in usages) if usage_known else None
+        first_identity, second_identity = map(_semantic_candidate_identity, (first_candidate, second_candidate))
+        second_observations = tuple(getattr(self.capability, "last_semantic_observations", ()))
+        # Providers without the optional observation contract contribute no
+        # invented request, response, token or transport counts.
+        if second_observations is first_observations:
+            second_observations = ()
+        diagnostics = _safe_value({
+            "schema": "semantic-step-refinement-diagnostic-v1",
+            "work_id": str(semantic_input.work_id), "step_id": str(semantic_input.step.id),
+            "steering_plan_revision_id": str(semantic_input.steering_plan_revision_id),
+            "basis_fingerprint": semantic_input.basis_fingerprint,
+            "first_validation_feedback": feedback,
+            "first_failure": _semantic_failure(first_error),
+            "second_error_type": None if second_error is None else type(second_error).__name__,
+            "second_failure": _semantic_failure(second_error),
+            "failure_stage": None if converged else second_stage,
+            "candidate_lineage": [
+                {"attempt": 1, "candidate": first_identity, "parent_candidate_fingerprint": None,
+                 "stage": first_stage, "provider_observations": list(first_observations)},
+                {"attempt": 2, "candidate": second_identity,
+                 "parent_candidate_fingerprint": None if first_identity is None else first_identity["candidate_fingerprint"],
+                 "stage": second_stage, "provider_observations": list(second_observations)},
+            ],
+            "budget": {"candidate_attempt_count": 2, "candidate_attempt_limit": 2,
+                "feedback_attempt_count": 1, "feedback_attempt_limit": 1,
+                "observation_is_authority": False},
+        })
         with self.database.unit_of_work() as uow:
             NativeExecutionStore(uow.session).record_bounded_refinement(
                 work_id=semantic_input.work_id,
@@ -416,14 +526,8 @@ class SemanticStepApplicationService:
                 evidence_references=(f"steering-step:{semantic_input.step.id}",),
                 converged=converged, attempt_count=2,
                 elapsed_seconds=int(monotonic() - started),
-                model_token_usage={"total_tokens": total_tokens} if total_tokens else {},
-                diagnostic_evidence=(
-                    {
-                        "basis_fingerprint": semantic_input.basis_fingerprint,
-                        "first_validation_feedback": feedback,
-                        "second_error_type": type(second_error).__name__,
-                    } if second_error is not None else None
-                ),
+                model_token_usage={"total_tokens": total_tokens, "unknown": not usage_known},
+                diagnostic_evidence=diagnostics,
                 superseded=superseded,
             )
             uow.commit()

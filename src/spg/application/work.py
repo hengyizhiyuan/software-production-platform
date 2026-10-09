@@ -3760,6 +3760,28 @@ class WorkApplicationService:
             )
         if current_steering_step is not None:
             step = current_steering_step.type.value
+        if (status is WorkStatus.READY and work.condition is WorkCondition.READY
+                and not steering_attention and not steering_complete
+                and current_steering_step is not None
+                and current_steering_step.type.value == "PRODUCE"
+                and work.current_work_reality_revision_id is not None
+                and binding is None and summary.attempt_id is None):
+            resource = store.resource_for_work(work.id)
+            if resource is not None:
+                stop = RuntimeStore(store.session).fulfillment_stop_for_current_context(
+                    work_id=work.id,
+                    work_reality_revision_id=work.current_work_reality_revision_id,
+                    steering_step_id=current_steering_step.id,
+                    repository_identity=resource.repository_identity,
+                    repository_ref=resource.authoritative_ref,
+                )
+                if stop is not None:
+                    status = WorkStatus.BLOCKED
+                    event = "OBLIGATION_PROJECTION_UNRESOLVED"
+                    next_action = (
+                        "Work Fulfillment Owner must resolve the preserved obligation projection "
+                        f"stop observation {stop.id}; no unchanged retry or Human authority is granted"
+                    )
         multi_runtime = None
         if binding is not None and not revision_reassessment_pending:
             multi_runtime = self._multi_pwu_projection(store, binding)

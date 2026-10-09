@@ -18,6 +18,7 @@ from spg.domain.refinement import (
     RepositoryChangeProposalRequest,
     RepositoryChangeProposalTarget,
     RepositoryProposalProvenance,
+    scope_target_proof_issues,
 )
 
 
@@ -69,22 +70,32 @@ class RepositoryAwareChangeProposalProvider:
         ]
         unresolved: list[str] = []
 
+        source_tree = (self._tree_identity(repository, request.source_revision)
+                       if request.necessity_proofs else None)
+        if len({proof.path for proof in request.necessity_proofs}) != len(request.necessity_proofs):
+            raise ValueError("Scope necessity proofs contain duplicate candidate paths")
         for proof in request.necessity_proofs:
+            observed = {}
+            if proof.source_path in path_set:
+                observed[proof.source_path] = subprocess.run(
+                    ["git", "-C", str(repository), "show", f"{request.source_revision}:{proof.source_path}"],
+                    capture_output=True, text=True, timeout=15, check=True).stdout
+            issues = scope_target_proof_issues(proof,
+                candidate_paths=tuple(dict.fromkeys((*request.candidate_targets, *explicit))),
+                tree_paths=paths, source_revision=request.source_revision, source_tree=source_tree,
+                human_authority_text=request.human_authority_text or "", observed_sources=observed,
+                refined_code_intent=request.refined_code_intent if request.governed_semantic_ir_id is None else None)
+            if issues:
+                raise ValueError("; ".join(issues))
             if proof.path in explicit:
                 continue
-            if proof.path not in request.candidate_targets or proof.source_path not in path_set:
-                raise ValueError("Scope necessity proof is outside observed candidate Reality")
-            source = subprocess.run(["git", "-C", str(repository), "show",
-                f"{request.source_revision}:{proof.source_path}"], capture_output=True,
-                text=True, timeout=15, check=True).stdout
-            if (proof.repository_quote not in source or (request.governed_semantic_ir_id is None
-                    and proof.human_clause not in request.refined_code_intent)
-                    or proof.human_clause not in (request.human_authority_text or "")):
-                raise ValueError("Scope necessity proof has no exact repository/Human witness")
+            evidence = (f"Exact {request.source_revision} tree {source_tree}: target {proof.path} is absent; "
+                        "necessity judged against the governed requested behavior."
+                        if proof.evidence_kind == "NEW_TARGET" else
+                        f"Exact {request.source_revision}:{proof.source_path} witness: {proof.repository_quote}")
             targets.append(self._target(path=proof.path, paths=path_set,
                 disposition=ProposalTargetDisposition.REQUIRED,
-                rationale=proof.necessity,
-                evidence=f"Exact {request.source_revision}:{proof.source_path} witness: {proof.repository_quote}",
+                rationale=proof.necessity, evidence=evidence,
                 confidence=ProposalConfidence.HIGH))
 
         if not targets and not request.explicit_allowed_areas and request.governed_semantic_ir_id is None:
@@ -403,16 +414,26 @@ class RepositoryAwareChangeProposalProvider:
             raise RuntimeError("exact Source Baseline revision is unavailable")
 
     @staticmethod
+    def _tree_identity(repository: Path, revision: str) -> str:
+        completed = subprocess.run(
+            ["git", "-C", str(repository), "rev-parse", "--verify", f"{revision}^{{tree}}"],
+            check=False, capture_output=True, text=True, timeout=15,
+        )
+        if completed.returncode != 0:
+            raise RuntimeError("exact Source Baseline tree identity is unavailable")
+        return completed.stdout.strip()
+
+    @staticmethod
     def _tree_paths(repository: Path, revision: str) -> tuple[str, ...]:
         completed = subprocess.run(
-            ["git", "-C", str(repository), "ls-tree", "-r", "--name-only", revision],
+            ["git", "-C", str(repository), "ls-tree", "-r", "--name-only", "-z", revision],
             check=False,
             capture_output=True,
             text=True,
         )
         if completed.returncode != 0:
             raise RuntimeError("exact Source Baseline tree cannot be inspected")
-        return tuple(line for line in completed.stdout.splitlines() if line)
+        return tuple(path for path in completed.stdout.split("\0") if path)
 
     @staticmethod
     def _grep_paths(repository: Path, revision: str, term: str) -> tuple[str, ...]:
