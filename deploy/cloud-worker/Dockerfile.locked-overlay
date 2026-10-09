@@ -2,6 +2,8 @@
 # update.sh verifies the exact lock digest before selecting this path.
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE} AS runtime
+ARG WATT_REVISION
+ENV SPG_RUNTIME_REVISION=${WATT_REVISION}
 USER root
 COPY pyproject.toml uv.lock README.md /app/
 COPY src /app/src

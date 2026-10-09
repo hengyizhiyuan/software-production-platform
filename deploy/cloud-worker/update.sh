@@ -39,7 +39,9 @@ if [ "$expected_lock" = "$installed_lock" ]; then
   base_image="watt-cloud-worker:locked-base-${expected_lock:0:12}"
   docker tag watt-cloud-worker:local "$base_image"
   docker build --network none -f "$source_dir/deploy/cloud-worker/Dockerfile.locked-overlay" \
-    --build-arg "BASE_IMAGE=$base_image" -t watt-cloud-worker:local "$source_dir"
+    --build-arg "BASE_IMAGE=$base_image" \
+    --build-arg "WATT_REVISION=$(git rev-parse HEAD)" \
+    -t watt-cloud-worker:local "$source_dir"
 else
   docker compose build migrate
 fi
