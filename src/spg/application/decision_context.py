@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from hashlib import sha256
+import inspect
 import json
 from pathlib import Path
 import subprocess
@@ -427,6 +428,13 @@ def _section(document: str, heading: str) -> str | None:
     return "\n".join(lines[start:end]).strip()
 
 
+class DecisionContextOwnerIncompatible(RuntimeError):
+    """The loaded Owner cannot fulfill the consumer's actual typed contract."""
+
+    def __init__(self, missing: str) -> None:
+        super().__init__(f"ECF_MANAGED_CONTRACT_INCOMPATIBLE: {missing}")
+
+
 class WattDecisionContextGateway:
     """Project current Watt-owned sources and call the independent ECF owner."""
 
@@ -436,9 +444,49 @@ class WattDecisionContextGateway:
             import ecf.decision_context as ecf
         except ImportError as error:
             raise RuntimeError("ECF v0.1 owner unavailable for required decision") from error
-        if ecf.VERSION != "0.1":
+        if getattr(ecf, "VERSION", None) != "0.1":
             raise RuntimeError("ECF Decision Context owner version is incompatible")
         return ecf
+
+    @staticmethod
+    def _require_managed_api(ecf) -> None:
+        """Validate the requested capability, rather than its nominal version."""
+        missing = []
+        if getattr(getattr(ecf, "DecisionType", None),
+                   "MANAGED_GREENFIELD_PRODUCTION", None) is None:
+            missing.append("DecisionType.MANAGED_GREENFIELD_PRODUCTION")
+        try:
+            parameters = inspect.signature(ecf.DecisionContextRequest).parameters
+        except (AttributeError, TypeError, ValueError):
+            parameters = {}
+        if "required_context_classes" not in parameters:
+            missing.append("DecisionContextRequest.required_context_classes")
+        if not callable(getattr(ecf, "contract_for", None)):
+            missing.append("contract_for")
+        if missing:
+            raise DecisionContextOwnerIncompatible(", ".join(missing))
+
+    @staticmethod
+    def _require_managed_contract(ecf, request) -> None:
+        """Keep the Owner's base requirements and explicit applicability intact."""
+        try:
+            contract = ecf.contract_for(request)
+        except (AttributeError, TypeError, ValueError) as error:
+            raise DecisionContextOwnerIncompatible(
+                "registered MANAGED_GREENFIELD_PRODUCTION contract") from error
+        base = {ecf.ContextClass.PRODUCT_INTENT,
+                ecf.ContextClass.REPOSITORY_REALITY, ecf.ContextClass.WORK_REALITY}
+        applicable = {ecf.ContextClass.PRODUCT_INVARIANT,
+                      ecf.ContextClass.APPROVED_DECISION,
+                      ecf.ContextClass.APPROVED_CONSTRAINT,
+                      ecf.ContextClass.VERIFICATION_EVIDENCE}
+        required = base | set(request.required_context_classes)
+        if (contract.contract_id != "MANAGED_GREENFIELD_PRODUCTION"
+                or contract.version != ecf.VERSION
+                or set(contract.required) != required
+                or set(contract.optional) != applicable - required):
+            raise DecisionContextOwnerIncompatible(
+                "MANAGED_GREENFIELD_PRODUCTION base/applicability contract")
 
     @staticmethod
     def _managed_repository_records(document_record, ecf, owners):
@@ -480,6 +528,7 @@ class WattDecisionContextGateway:
                     managed_context.product_id != requirement.product_id or
                     managed_context.work_id != requirement.work_id):
                 raise DecisionContextAuthorityMissing('MANAGED_GREENFIELD_CONTEXT_AUTHORITY_MISMATCH')
+            self._require_managed_api(ecf)
             policy = (ecf.ConsumerRole.PRODUCT_DESIGN, ecf.DecisionType.MANAGED_GREENFIELD_PRODUCTION)
         scope = ecf.DecisionScope(
             project_id="watt", product_id=str(requirement.product_id),
@@ -503,6 +552,8 @@ class WattDecisionContextGateway:
             scope=scope, authority_context=owners, as_of=date.today(),
             **({'required_context_classes':tuple(ecf.ContextClass(c) for c in managed_context.required_classes)} if managed_context is not None else {}),
         )
+        if managed_context is not None:
+            self._require_managed_contract(ecf, request)
         records = []
         product_scope = ecf.DecisionScope("watt", str(requirement.product_id))
         repo_scope = ecf.DecisionScope("watt", str(requirement.product_id))

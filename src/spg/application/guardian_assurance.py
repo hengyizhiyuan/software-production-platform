@@ -101,10 +101,19 @@ class GuardianAssuranceClient:
                 record = runtime.baseline_candidate(record_id)
                 if record is None:
                     return None
-                return {"id": str(record.id), "condition": record.condition.value,
-                    "fingerprint": record.fingerprint,
+                return {**record.model_dump(mode="json"),
+                    # Preserve the v1 projection while v2 consumes canonical lineage.
                     "repository_revision": record.proposed_commit_identity,
                     "repository_tree_identity": record.proposed_tree_identity}
+            if kind == "source-baseline":
+                record = runtime.snapshot(record_id)
+                return None if record is None else record.model_dump(mode="json")
+            if kind == "proposed-snapshot":
+                record = runtime.proposed_snapshot(record_id)
+                return None if record is None else record.model_dump(mode="json")
+            if kind == "pwu":
+                record = runtime.work_unit(record_id)
+                return None if record is None else record.model_dump(mode="json")
             if kind == "native-attempt":
                 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
                 try:
@@ -112,7 +121,8 @@ class GuardianAssuranceClient:
                 except Exception:
                     return None
                 members = record.binding.source_vector.members
-                return {"attempt_id": str(record.attempt_id),
+                return {**record.model_dump(mode="json"),
+                    "attempt_id": str(record.attempt_id),
                     "binding_digest": record.binding_digest,
                     "source_revision": members[0].source_commit_oid if len(members) == 1 else None,
                     "capability_grants": [grant.identity for grant in
@@ -257,7 +267,7 @@ class GuardianAssuranceClient:
         for unit, task, records, refs in unit_evidence or [(None, None, verification_records, ())]:
             lineage = None if task is None else task.decision_context
             evidence_version = (
-                "governed-obligation-v1"
+                "governed-obligation-v2"
                 if getattr(lineage, "surface", None) == "MANAGED_PRODUCT_WEB_UI"
                 else "legacy-v1"
             )
@@ -270,8 +280,23 @@ class GuardianAssuranceClient:
             request_id = uuid5(NAMESPACE_URL, "watt:guardian-assurance:" + sha256(
                 json.dumps(basis, sort_keys=True).encode()).hexdigest())
             protected_context = _protected_context_for_guardian(task, records)
+            production_lineage = None
+            if evidence_version == "governed-obligation-v2":
+                from guardian.contracts.software_assurance import ProductionEvidenceLineage
+                baseline = self._resolve_owner_evidence(f"source-baseline:{unit.source_baseline_id}")
+                if (baseline is None or not baseline.get("repository_tree_identity")
+                        or work.current_work_reality_revision_id is None or not records):
+                    raise ProductInvariantViolation("Guardian production lineage evidence is incomplete")
+                production_lineage = ProductionEvidenceLineage(
+                    work_reality_revision_id=work.current_work_reality_revision_id,
+                    pwu_id=unit.id, source_baseline_id=unit.source_baseline_id,
+                    source_baseline_revision=baseline["repository_revision"],
+                    source_baseline_tree=baseline["repository_tree_identity"],
+                    qualified_output_revision=records[0].proposed_commit_identity,
+                    qualified_output_tree=records[0].tree_identity)
             request = AssuranceRequest(request_id=request_id,
             evidence_contract_version=evidence_version,
+            **({"production_lineage": production_lineage} if production_lineage is not None else {}),
             product_ref=f"product:{product_id}" if product_id else f"work-product:{session.work_id}",
             work_ref=f"work:{session.work_id}",
             governed_intent_ref=governed["governed_basis_ref"],

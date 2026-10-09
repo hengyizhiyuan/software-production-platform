@@ -109,3 +109,25 @@ Owner dependency for this closure: ECF `codex/managed-greenfield-context-closure
 revision `5aa4f8833c359c15bd059eda5972aa3915bcc18c`
 (tree `878d39d9c259272bb05f2e02bdf9d60c22fad460`). The ECS owner export must
 match this committed revision; its previous export remains preserved.
+
+### C1 managed API compatibility boundary
+
+Nominal Decision Context `VERSION = "0.1"` is not sufficient for managed
+production compatibility. The actual Watt gateway requires the managed
+DecisionType, the typed `required_context_classes` Request argument, and the
+registered contract's unchanged base requirements and explicit applicability.
+It rejects a missing or incompatible capability with
+`ECF_MANAGED_CONTRACT_INCOMPATIBLE` before source assembly; it never falls back
+to `PRODUCT_UI_CHANGE` for a supplied managed context. Existing repository
+context, completeness, authority and freshness checks remain in force.
+
+The selected Owner combination for this C1 qualification uses ECF commit
+`5aa4f8833c359c15bd059eda5972aa3915bcc18c`, tree
+`878d39d9c259272bb05f2e02bdf9d60c22fad460`. ECF current main
+`c6b568d006022e39b95daebedfecfb55e562ebe5` lacks that managed enum and Request
+field despite the same nominal version; managed consumption is unsupported.
+Its existing repository contracts remain separate valid interfaces. This
+capability check does not fabricate an Owner revision, rewrite historical
+Source Identity, or qualify a new application image or real production Work.
+Exact application/test identities and results belong to the C1 qualification
+receipt; no ECF source or context orchestrator is changed by this repair.

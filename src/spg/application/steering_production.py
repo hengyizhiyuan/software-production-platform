@@ -472,8 +472,18 @@ class SteeringProductionService:
             work = product.work(request.work_id)
             scope = product.scope_for_work(request.work_id)
             resource = product.resource(request.engineering_resource_id)
+            revision = product.current_work_reality_revision(request.work_id)
+            from spg.infrastructure.persistence.interaction_store import InteractionStore
+            assessment = (None if revision is None or revision.source_assessment_id is None
+                          else InteractionStore(unit_of_work.session).assessment(
+                              revision.source_assessment_id))
         if work is None or scope is None or resource is None:
             raise ProductInvariantViolation("Work authority envelope disappeared")
+        if (work.current_work_reality_revision_id != request.work_reality_revision_id
+                or (revision is not None and revision.id != request.work_reality_revision_id)):
+            raise ProductInvariantViolation("Steering production Work Reality changed")
+        from spg.application.governed_obligations import admitted_fulfillment_bindings
+        fulfillment_bindings = admitted_fulfillment_bindings(revision, assessment)
         plan = self.planning.propose(
             ProductionPlanningRequest(
                 work_id=work.id,
@@ -524,6 +534,7 @@ class SteeringProductionService:
                 ),
                 verification_obligations=(request.verification_expectation,),
                 semantic_fact_obligations=request.engineering_semantic_facts,
+                fulfillment_bindings=fulfillment_bindings,
                 task_contract=task_contract,
                 artifact_contract=artifact,
                 production_plan=plan,
@@ -542,6 +553,7 @@ class SteeringProductionService:
             required_changes=paths,
             verification_obligations=contract.verification_identities,
             semantic_fact_obligations=request.engineering_semantic_facts,
+            fulfillment_bindings=fulfillment_bindings,
             task_contract=task_contract,
             change_contract=contract,
             production_plan=plan,

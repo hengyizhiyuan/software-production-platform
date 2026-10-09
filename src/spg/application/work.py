@@ -1787,11 +1787,9 @@ class WorkApplicationService:
                 )
             )
         )
-        from spg.application.governed_obligations import materialize_continuous_gates
-        fulfillment_bindings = (() if work_revision is None else
-            materialize_continuous_gates(
-                work_revision,
-                None if source_assessment is None else source_assessment.semantic_ir))
+        from spg.application.governed_obligations import admitted_fulfillment_bindings
+        fulfillment_bindings = admitted_fulfillment_bindings(
+            work_revision, source_assessment)
         work_reality_references = [f"work:{work.id}"]
         if work_revision is not None:
             work_reality_references.append(

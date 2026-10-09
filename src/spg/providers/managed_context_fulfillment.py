@@ -48,6 +48,30 @@ def _result(obligation, request, *, coverage, method, evidence_refs=(),
         "candidate_tree": request.tree_identity}
 
 
+def _check_source_ref(check, revision):
+    """Reference the actual authority kind, never manufacture a Fact identity."""
+    from uuid import UUID
+    from spg.domain.governed_obligation import FulfillmentSourceKind
+
+    try:
+        kind = FulfillmentSourceKind(check.get("source_kind", "FACT"))
+    except ValueError as error:
+        raise ValueError("OBLIGATION_CHECK_SOURCE_KIND_INVALID") from error
+    if kind is FulfillmentSourceKind.FACT:
+        if check.get("constraint_item_id") or check.get("constraint_clause_id"):
+            raise ValueError("OBLIGATION_CHECK_SOURCE_IDENTITY_MISMATCH")
+        try:
+            return f"semantic-fact:{UUID(str(check['fact_id']))}"
+        except (ValueError, KeyError) as error:
+            raise ValueError("OBLIGATION_CHECK_FACT_IDENTITY_MISSING") from error
+    if (check.get("fact_id") is not None
+            or check.get("work_reality_revision_id") != str(revision.id)
+            or not check.get("constraint_item_id")
+            or not check.get("constraint_clause_id")):
+        raise ValueError("OBLIGATION_CHECK_CONSTRAINT_IDENTITY_MISMATCH")
+    return f"ir-constraint:{check['constraint_item_id']}:{check['constraint_clause_id']}"
+
+
 def verify_managed_context(*, request, task, contract, repository, baseline,
                            revision, ir, semantic_checks, static_verifier):
     """Return one exact result per protected item; no unmentioned deferral."""
@@ -71,18 +95,31 @@ def verify_managed_context(*, request, task, contract, repository, baseline,
         raise ValueError("OBLIGATION_CONTEXT_NOT_ADMITTED_WORK")
     if any(item["passed"] is not True for item in semantic_checks):
         raise ValueError("OBLIGATION_ADMITTED_FACT_UNVERIFIED")
+    check_sources = tuple(_check_source_ref(check, revision)
+                          for check in semantic_checks)
     changed = _checked_paths(repository, baseline, request.proposed_commit_identity)
     targets = tuple(target.path for target in contract.exact_targets)
     if not changed or set(changed) - set(targets):
         raise ValueError("OBLIGATION_CHANGED_PATH_OUTSIDE_CONTRACT")
     gate_refs = {}
-    for check in semantic_checks:
+    for check, source_ref in zip(semantic_checks, check_sources):
         if check["disposition"] != "GATED_CONTINUOUS":
             continue
         for binding in check.get("fulfillment_bindings", ()):
+            if check.get("source_kind") == "IR_CONSTRAINT":
+                from spg.domain.governed_obligation import FulfillmentBinding
+                typed = FulfillmentBinding.model_validate(binding)
+                if (typed.source_kind.value != "IR_CONSTRAINT"
+                        or typed.work_reality_revision_id != revision.id
+                        or typed.constraint_item_id != check["constraint_item_id"]
+                        or typed.constraint_clause_id != check["constraint_clause_id"]
+                        or typed.source_revision != baseline):
+                    raise ValueError("OBLIGATION_CHECK_BINDING_IDENTITY_MISMATCH")
+            digest = check["gate_evidence"].get("native_binding_digest")
+            if not digest or len(digest) != 64:
+                raise ValueError("OBLIGATION_NATIVE_GATE_EVIDENCE_MISSING")
             gate_refs.setdefault(binding["component"], []).append(
-                (check["fact_id"], binding["gate_ref"],
-                 check["gate_evidence"]["native_binding_digest"]))
+                (source_ref, binding["gate_ref"], digest))
     results = {}
     content_items = []
     for index in range(len(revision.constraints)):
@@ -98,8 +135,8 @@ def verify_managed_context(*, request, task, contract, repository, baseline,
             results[(item.context_class, item.semantic_key)] = _result(
                 item, request, coverage="COVERED", method="EXACT_CONTINUOUS_PERMISSION_GATES",
                 owner="EXECUTION_AND_DELIVERY_GATES",
-                evidence_refs=tuple(f"semantic-fact:{fact_id}:gate:{gate}:binding:{digest}"
-                                    for effect in effects for fact_id, gate, digest in gate_refs[effect]))
+                evidence_refs=tuple(f"{source_ref}:gate:{gate}:binding:{digest}"
+                                    for effect in effects for source_ref, gate, digest in gate_refs[effect]))
             continue
         if effects and (content.casefold().startswith("excluded from this work:")
                         or re.search(r"\b(not authorized|do not|no deployment|no publishing)\b",
@@ -147,8 +184,7 @@ def verify_managed_context(*, request, task, contract, repository, baseline,
             results[(item.context_class, item.semantic_key)] = _result(
                 item, request, coverage="COVERED",
                 method="ALL_ADMITTED_FACT_CHECKS_AND_EXACT_DIFF",
-                evidence_refs=tuple(f"semantic-fact:{check['fact_id']}"
-                                    for check in semantic_checks))
+                evidence_refs=check_sources)
             continue
         content_items.append(item)
     if content_items:
@@ -162,8 +198,7 @@ def verify_managed_context(*, request, task, contract, repository, baseline,
                 raise ValueError("OBLIGATION_CONTENT_DUPLICATE")
             results[key] = {**item, "evidence_owner": "VERIFICATION",
                             "evidence_method": "EXACT_CANDIDATE_SOURCE_WITNESS",
-                            "evidence_refs": [f"semantic-fact:{check['fact_id']}"
-                                              for check in semantic_checks]}
+                            "evidence_refs": list(check_sources)}
     intents = tuple(item for item in obligations if item.context_class == "PRODUCT_INTENT")
     if len(intents) != 1:
         raise ValueError("OBLIGATION_PRODUCT_INTENT_IDENTITY_MISSING")

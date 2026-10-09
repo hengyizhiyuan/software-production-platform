@@ -105,6 +105,17 @@ def materialize_continuous_gates(revision, ir) -> tuple[FulfillmentBinding, ...]
     return tuple(bindings)
 
 
+def admitted_fulfillment_bindings(revision, assessment):
+    """Use the same persisted authority basis at every production entry point."""
+    if revision is None or revision.source_assessment_id is None:
+        # Preserve the existing no-local-assessment path and downstream gates.
+        # This does not qualify revisions that inherit IR from an earlier basis.
+        return ()
+    if assessment is None or assessment.id != revision.source_assessment_id:
+        raise ValueError("OBLIGATION_ADMITTED_SOURCE_UNAVAILABLE")
+    return materialize_continuous_gates(revision, assessment.semantic_ir)
+
+
 def validate_continuous_gates(bindings, revision, ir) -> None:
     """Reject stale or injected routes before dispatch and Verification."""
     expected = materialize_continuous_gates(revision, ir)
@@ -200,6 +211,8 @@ def evaluate_constraint_routes(bindings, native_record, *, source_revision: str,
                          {"remote.publish", "remote.delivery", "github.publish"})
             passed = exact and grants.isdisjoint(forbidden)
         results.append({
+            "source_kind": item.source_kind.value,
+            "work_reality_revision_id": str(item.work_reality_revision_id),
             "constraint_item_id": item.constraint_item_id,
             "constraint_clause_id": item.constraint_clause_id,
             "component": item.component, "passed": passed,
