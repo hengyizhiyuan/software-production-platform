@@ -1,0 +1,24 @@
+{
+  "schema": "c3-pre-fix-projection-counterexample-v1",
+  "started_at_utc": "2026-10-09T14:52:46.203794+00:00",
+  "ended_at_utc": "2026-10-09T14:52:53.927365+00:00",
+  "wall_seconds": 7.723649638006464,
+  "exit_code": 1,
+  "counts": {
+    "tests": 1,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0
+  },
+  "node": "tests/test_c3_fulfillment_stop_projection.py::test_fresh_projection_consumes_current_durable_fulfillment_stop",
+  "actual_image_id": "sha256:51c0b8be88969720cb3a3cfc4e047edc7f229aa22348a95a89cbb4bf83a18e39",
+  "actual_container_id": "c7cc74e3d64f01209c7db52f77b3e5d644562f639cfcb0a0f90fc91cba388d28",
+  "source_revision": "d8ea0642f0c360794e69c366e8f15fa369eeed0b",
+  "test_sha256": "37453ae076f22833377c9ff80e89593e1a07085988c3c58bf993f7bc06d4a6a5",
+  "source_overlay": false,
+  "test_overlay": true,
+  "live_model_calls": 0,
+  "business_database_access": false,
+  "real_work_created_or_modified": false,
+  "claim": "CONTROLLED_COUNTEREXAMPLE_NOT_WORK_FAILURE_OR_PASS"
+}

@@ -1,0 +1,11 @@
+[
+  "tests/test_c3_greenfield_target_proof.py",
+  "tests/test_c3_semantic_failure_continuity.py",
+  "tests/test_c3_provider_http_metadata.py",
+  "tests/test_model_runtime.py",
+  "tests/test_deepseek_semantic_provider.py",
+  "tests/test_intent_repository_scope.py",
+  "tests/test_dogfood_repository_scope.py",
+  "tests/test_c3_fulfillment_provider_failures.py",
+  "tests/test_c3_fulfillment_admission_stop.py"
+]

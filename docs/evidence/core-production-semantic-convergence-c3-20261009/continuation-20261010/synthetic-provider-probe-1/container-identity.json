@@ -1,0 +1,33 @@
+{
+  "schema": "c3-synthetic-provider-container-v1",
+  "recorded_at_utc": "2026-10-09T14:44:16.724445+00:00",
+  "exit_code": 0,
+  "actual_container_id": "3db16ea4aa705595de1838a7fccd5e99f6bf1c1aeeecd967b05f2ff9b521bf25",
+  "actual_image_id": "sha256:51c0b8be88969720cb3a3cfc4e047edc7f229aa22348a95a89cbb4bf83a18e39",
+  "user": "10001:10001",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/p0_synthetic_probe.py",
+      "Destination": "/probe.py",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/continuation-20261010/synthetic-provider-probe-1/evidence",
+      "Destination": "/c3-evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "source_revision": "d8ea0642f0c360794e69c366e8f15fa369eeed0b",
+  "controller_sha256": "3ac7b8c73293660e94cd4712c69fe75518ecb9e93a748c49e5fa53fcec630a65",
+  "probe_sha256": "8565579927f265044e98b0c58cbf552b9b2844de8cab9c6fb3ea3dd4b20b4cf2",
+  "historical_data_mounted_or_sent": false,
+  "business_database_access": false,
+  "new_work_created": false,
+  "existing_services_started": false
+}

@@ -1,0 +1,18 @@
+{
+  "schema": "c3-continuation-closure-delta-v1",
+  "captured_at_utc": "2026-10-09T15:31:02.822982+00:00",
+  "status": "C3 PARTIAL \u2014 Exact Engineering Blocker",
+  "source_revision": "e8e04b296b31d776a13dda728fa19469681cbaab",
+  "source_tree": "a349e40ea0c328ad55574dc668e884a137a19944",
+  "image_id": "sha256:4d3c64b1e3543a3574cd69b435d6f703fad6edc23b9db7d54d799dc1a652bf6e",
+  "final_installed_tests": 321,
+  "final_pg_tests": 5,
+  "real_G0": "NOT_ATTEMPTED_WITHOUT_EFFECTIVE_PROVIDER_FIX",
+  "holdout": "SEALED_UNREAD_UNQUALIFIED",
+  "historical_C3_provider_cause": "UNKNOWN",
+  "historical_Work408_second_ValueError": "UNKNOWN",
+  "current_failure_kind": "INCOMPLETE_RESPONSE",
+  "current_termination_reason": "max_output_tokens",
+  "R4": "HANDOFF_ONLY",
+  "main_merge_or_deploy": false
+}

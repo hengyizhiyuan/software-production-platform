@@ -1,0 +1,11 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______ test_fresh_projection_consumes_current_durable_fulfillment_stop ________
+tests/test_c3_fulfillment_stop_projection.py:106: in test_fresh_projection_consumes_current_durable_fulfillment_stop
+    assert projection.status is WorkStatus.BLOCKED
+E   AssertionError: assert <WorkStatus.READY: 'READY'> is <WorkStatus.BLOCKED: 'BLOCKED'>
+E    +  where <WorkStatus.READY: 'READY'> = WorkProjection(work_id=UUID('f8bd0e1b-fe4f-4ab2-8587-08670d912541'), goal_id=None, mode=<WorkMode.LONG_LIVED_STEERING:...uction_run_id=None, current_production_cycle_trusted=False, latest_trusted_runtime_commit_id=None, work_complete=False).status
+E    +  and   <WorkStatus.BLOCKED: 'BLOCKED'> = WorkStatus.BLOCKED
+=========================== short test summary info ============================
+FAILED tests/test_c3_fulfillment_stop_projection.py::test_fresh_projection_consumes_current_durable_fulfillment_stop
+1 failed in 3.49s

@@ -1,0 +1,35 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /qualification
+plugins: anyio-4.14.2
+collected 75 items
+
+tests/test_c3_greenfield_target_proof.py ...............F.....F          [ 29%]
+tests/test_c3_semantic_failure_continuity.py ...........                 [ 44%]
+tests/test_c3_provider_http_metadata.py .........                        [ 56%]
+tests/test_model_runtime.py ....                                         [ 61%]
+tests/test_deepseek_semantic_provider.py ......                          [ 69%]
+tests/test_intent_repository_scope.py ..                                 [ 72%]
+tests/test_dogfood_repository_scope.py ........                          [ 82%]
+tests/test_c3_fulfillment_provider_failures.py .........                 [ 94%]
+tests/test_c3_fulfillment_admission_stop.py ....                         [100%]
+
+=================================== FAILURES ===================================
+_ test_complete_new_target_scope_reaches_existing_plan_change_and_task_contract _
+tests/test_c3_greenfield_target_proof.py:176: in test_complete_new_target_scope_reaches_existing_plan_change_and_task_contract
+    task = default_task_contract_builder().build(TaskContractRequest(
+src/spg/application/production_intelligence.py:290: in build
+    raise ValueError("Production Task Contracts require an exact ECF source basis")
+E   ValueError: Production Task Contracts require an exact ECF source basis
+______ test_proposal_independently_revalidates_new_target_identity_shape _______
+tests/test_c3_greenfield_target_proof.py:254: in test_proposal_independently_revalidates_new_target_identity_shape
+    with pytest.raises(ValueError, match="evidence contract is invalid"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'evidence contract is invalid'
+E     Actual message: "1 validation error for RepositoryChangeProposalRequest\nnecessity_proofs.0\n  Value error, New target proof requires exact revision/tree and no invented existing-source witness [type=value_error, input_value=RepositoryTargetNecessity...mplementation surface.'), input_type=RepositoryTargetNecessityProof]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+----------------- generated xml file: /c3-evidence/result.xml ------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_greenfield_target_proof.py::test_complete_new_target_scope_reaches_existing_plan_change_and_task_contract
+FAILED tests/test_c3_greenfield_target_proof.py::test_proposal_independently_revalidates_new_target_identity_shape
+========================= 2 failed, 73 passed in 7.49s =========================

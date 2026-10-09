@@ -1,0 +1,55 @@
+{
+  "schema": "c3-semantic-owner-pg-regression-v1",
+  "started_at_utc": "2026-10-09T15:23:56.385464+00:00",
+  "ended_at_utc": "2026-10-09T15:24:18.528401+00:00",
+  "wall_seconds": 22.142895269964356,
+  "counts": {
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 5
+  },
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "e8e04b296b31d776a13dda728fa19469681cbaab",
+      "tree": "a349e40ea0c328ad55574dc668e884a137a19944"
+    },
+    "guardian": {
+      "revision": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+      "tree": "4f75d9137bebc7bf956fe4466cbae93f88c5c03b"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:4d3c64b1e3543a3574cd69b435d6f703fad6edc23b9db7d54d799dc1a652bf6e",
+  "actual_container_id": "c76b296cea5badd91982279ed9b13ec0201a679842fd19f6de0c03102dd26dca",
+  "actual_postgres_image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+  "actual_postgres_container_id": "ca023fe390ca6a2c3190cb861cc1df00d816869f371fb8578077b015fddff3ec",
+  "database_name": "spg_c3_continuation_fixture",
+  "migration_head": "20261007_72",
+  "network_internal": true,
+  "nodes": [
+    "tests/integration/test_mvp_semantic_step_execution.py::test_semantic_admission_conflict_refines_once_on_same_basis_and_records_routine",
+    "tests/integration/test_mvp_semantic_step_execution.py::test_invalid_provider_path_is_refined_on_same_governed_step",
+    "tests/integration/test_mvp_semantic_step_execution.py::test_semantic_nonconvergence_stops_after_one_feedback_and_retains_diagnostics",
+    "tests/integration/test_product_experience_attention.py::test_collection_status_uses_canonical_work_projection",
+    "tests/integration/test_product_experience_attention.py::test_blocked_work_without_canonical_attention_does_not_enter_human_queue"
+  ],
+  "source_or_test_overlay": false,
+  "credentials_independently_generated": true,
+  "live_model_calls": 0,
+  "actual_ai_work_created": 0,
+  "fixture_only": true,
+  "original_database_access": false,
+  "existing_services_started": false,
+  "controller_sha256": "cbb5928f8ed3e670f065a20fd6c2bae83f39c2b935917549cdcddce683408d8c",
+  "claim": "ISOLATED_PG_OWNER_PERSISTENCE_AND_STATE_REGRESSION_NOT_REAL_G0"
+}

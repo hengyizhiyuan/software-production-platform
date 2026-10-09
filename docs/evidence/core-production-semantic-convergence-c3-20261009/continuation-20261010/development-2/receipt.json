@@ -1,0 +1,34 @@
+{
+  "schema": "c3-development-regression-v1",
+  "started_at_utc": "2026-10-09T15:19:11.743871+00:00",
+  "ended_at_utc": "2026-10-09T15:19:24.497700+00:00",
+  "wall_seconds": 12.753875614027493,
+  "actual_image_id": "sha256:51c0b8be88969720cb3a3cfc4e047edc7f229aa22348a95a89cbb4bf83a18e39",
+  "actual_container_id": "efe7221e4367e76b855757be1a3017808068c4942c23bc9def24be54d07370b9",
+  "source_snapshot_sha256": "8363560a9a9c10e7c8976c7d0fdc670fc7b4cecb1c5b419180091abeb05707fe",
+  "source_overlay": true,
+  "counts": {
+    "tests": 118,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 118
+  },
+  "exit_code": 0,
+  "nodes": [
+    "tests/test_c3_greenfield_target_proof.py",
+    "tests/test_c3_semantic_failure_continuity.py",
+    "tests/test_c3_provider_http_metadata.py",
+    "tests/test_model_runtime.py",
+    "tests/test_deepseek_semantic_provider.py",
+    "tests/test_intent_repository_scope.py",
+    "tests/test_dogfood_repository_scope.py",
+    "tests/test_c3_fulfillment_provider_failures.py",
+    "tests/test_c3_fulfillment_admission_stop.py",
+    "tests/test_c3_fulfillment_stop_projection.py"
+  ],
+  "live_model_calls": 0,
+  "real_work_created_or_modified": false,
+  "business_database_access": false,
+  "claim": "DEVELOPMENT_ONLY_NOT_FINAL_IMAGE_QUALIFICATION"
+}

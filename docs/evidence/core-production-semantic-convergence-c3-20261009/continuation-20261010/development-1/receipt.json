@@ -1,0 +1,33 @@
+{
+  "schema": "c3-development-regression-v1",
+  "started_at_utc": "2026-10-09T15:08:06.962995+00:00",
+  "ended_at_utc": "2026-10-09T15:08:19.095086+00:00",
+  "wall_seconds": 12.132068784034345,
+  "actual_image_id": "sha256:51c0b8be88969720cb3a3cfc4e047edc7f229aa22348a95a89cbb4bf83a18e39",
+  "actual_container_id": "09e0c3a7bfb9f3bd9e600c2965b056603b5f083dc6630bfebf3509d52184784f",
+  "source_snapshot_sha256": "6de6190e06c1b7cf3422c303e247edeaf87e9a7a2c8fda8a8756d77b96a6c4fc",
+  "source_overlay": true,
+  "counts": {
+    "tests": 75,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 73
+  },
+  "exit_code": 1,
+  "nodes": [
+    "tests/test_c3_greenfield_target_proof.py",
+    "tests/test_c3_semantic_failure_continuity.py",
+    "tests/test_c3_provider_http_metadata.py",
+    "tests/test_model_runtime.py",
+    "tests/test_deepseek_semantic_provider.py",
+    "tests/test_intent_repository_scope.py",
+    "tests/test_dogfood_repository_scope.py",
+    "tests/test_c3_fulfillment_provider_failures.py",
+    "tests/test_c3_fulfillment_admission_stop.py"
+  ],
+  "live_model_calls": 0,
+  "real_work_created_or_modified": false,
+  "business_database_access": false,
+  "claim": "DEVELOPMENT_ONLY_NOT_FINAL_IMAGE_QUALIFICATION"
+}

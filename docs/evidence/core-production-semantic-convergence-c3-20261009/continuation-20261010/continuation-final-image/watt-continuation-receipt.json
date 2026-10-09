@@ -1,0 +1,73 @@
+{
+  "schema": "c3-continuation-exact-image-regression-v1",
+  "started_at_utc": "2026-10-09T15:22:36.121876+00:00",
+  "ended_at_utc": "2026-10-09T15:22:58.007267+00:00",
+  "wall_seconds": 21.88538214098662,
+  "sources": {
+    "watt": {
+      "revision": "e8e04b296b31d776a13dda728fa19469681cbaab",
+      "tree": "a349e40ea0c328ad55574dc668e884a137a19944"
+    },
+    "guardian": {
+      "revision": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+      "tree": "4f75d9137bebc7bf956fe4466cbae93f88c5c03b"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "image_id": "sha256:4d3c64b1e3543a3574cd69b435d6f703fad6edc23b9db7d54d799dc1a652bf6e",
+  "actual_container_id": "af274991f1ada14f00f5896162e4cda66684b3e091d96217aa4cd984c11691e6",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "junit_family=legacy",
+    "tests/test_guardian_assurance_adapter.py",
+    "tests/test_c3_admitted_source_facets.py",
+    "tests/test_fulfillment_projection.py",
+    "tests/test_c3_fulfillment_components.py",
+    "tests/test_c3_evidence_projection.py",
+    "tests/test_c3_verification_receipts.py",
+    "tests/test_static_protected_context_verifier.py",
+    "tests/test_n1_static_html_semantics.py",
+    "tests/test_governed_obligation_fulfillment.py",
+    "tests/test_container_production_environment_provider.py",
+    "tests/test_c2_workspace_preflight.py",
+    "tests/test_c3_fulfillment_provider_failures.py",
+    "tests/test_c3_fulfillment_admission_stop.py",
+    "tests/test_c3_greenfield_target_proof.py",
+    "tests/test_c3_semantic_failure_continuity.py",
+    "tests/test_c3_provider_http_metadata.py",
+    "tests/test_model_runtime.py",
+    "tests/test_deepseek_semantic_provider.py",
+    "tests/test_intent_repository_scope.py",
+    "tests/test_dogfood_repository_scope.py",
+    "tests/test_c3_fulfillment_stop_projection.py",
+    "-m",
+    "not real_container",
+    "--tb=short",
+    "--junitxml=/c3-evidence/watt-continuation.xml"
+  ],
+  "counts": {
+    "tests": 321,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 321
+  },
+  "exit_code": 0,
+  "source_overlay": false,
+  "live_model_calls": 0,
+  "real_ai_work_created": 0,
+  "business_database_access": false,
+  "proof_boundary": "Deterministic isolated regressions only; not real G0, Provider recovery, Guardian live Assurance, Holdout or Human Acceptance"
+}

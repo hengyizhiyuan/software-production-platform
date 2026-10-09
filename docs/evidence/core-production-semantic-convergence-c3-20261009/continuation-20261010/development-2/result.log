@@ -1,0 +1,20 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /qualification
+plugins: anyio-4.14.2
+collected 118 items
+
+tests/test_c3_greenfield_target_proof.py ......................          [ 18%]
+tests/test_c3_semantic_failure_continuity.py .............               [ 29%]
+tests/test_c3_provider_http_metadata.py ............                     [ 39%]
+tests/test_model_runtime.py ....                                         [ 43%]
+tests/test_deepseek_semantic_provider.py ......                          [ 48%]
+tests/test_intent_repository_scope.py ..                                 [ 50%]
+tests/test_dogfood_repository_scope.py ........                          [ 56%]
+tests/test_c3_fulfillment_provider_failures.py .........                 [ 64%]
+tests/test_c3_fulfillment_admission_stop.py ....                         [ 67%]
+tests/test_c3_fulfillment_stop_projection.py ........................... [ 90%]
+...........                                                              [100%]
+
+----------------- generated xml file: /c3-evidence/result.xml ------------------
+============================= 118 passed in 8.10s ==============================

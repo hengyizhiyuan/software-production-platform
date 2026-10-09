@@ -1,0 +1,57 @@
+{
+  "schema": "c3-exact-image-build-v1",
+  "started_at_utc": "2026-10-09T15:22:09.204243+00:00",
+  "ended_at_utc": "2026-10-09T15:22:32.831430+00:00",
+  "wall_seconds": 23.627284236019477,
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "e8e04b296b31d776a13dda728fa19469681cbaab",
+      "tree": "a349e40ea0c328ad55574dc668e884a137a19944"
+    },
+    "guardian": {
+      "revision": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+      "tree": "4f75d9137bebc7bf956fe4466cbae93f88c5c03b"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "command": [
+    "docker",
+    "build",
+    "--network=none",
+    "--build-arg",
+    "BASE_IMAGE=watt-c3-continuation-dependency-base:6c1f48e-20261009",
+    "--build-arg",
+    "WATT_REVISION=e8e04b296b31d776a13dda728fa19469681cbaab",
+    "--build-arg",
+    "WATT_TREE=a349e40ea0c328ad55574dc668e884a137a19944",
+    "--build-arg",
+    "GUARDIAN_REVISION=d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+    "--build-arg",
+    "GUARDIAN_TREE=4f75d9137bebc7bf956fe4466cbae93f88c5c03b",
+    "--build-arg",
+    "ECF_REVISION=5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "--build-arg",
+    "ECF_TREE=878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "-f",
+    "/data/watt/c3-semantic-convergence-20261009/continuation-20261010/continuation-final-image/context/watt/docs/evidence/core-production-semantic-convergence-c3-20261009/Dockerfile.c3",
+    "-t",
+    "watt-c3-continuation:e8e04b2",
+    "/data/watt/c3-semantic-convergence-20261009/continuation-20261010/continuation-final-image/context"
+  ],
+  "source_overlay": false,
+  "real_model_calls": 0,
+  "scope": "Bounded R1 target proof, R2 failure continuity, P0 safe metadata and R3 exact stop projection; not real G0 or Holdout",
+  "image": {
+    "Id": "sha256:4d3c64b1e3543a3574cd69b435d6f703fad6edc23b9db7d54d799dc1a652bf6e",
+    "RepoDigests": [],
+    "Created": "2026-10-09T23:22:23.799182506+08:00"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "evidence_scope": "existing user-authorized read-only diagnostic export; not new runtime qualification",
+  "zip_sha256": "1d62a35bfe0fce16581cbff6058d59e1ba3a5f7d2392c537a8beb2d192310e61",
+  "source_revision": null,
+  "source_tree": null,
+  "capture_timestamp": "2026-10-09T12:16:54.669213+00:00",
+  "work_id": "408e408a-fab8-5a34-b101-b922043cb6fd",
+  "self_refine_event_id": "88b26b47-7310-4460-8cde-72a76338718b",
+  "operation_id": "bd21eead-5e53-4c0d-aa88-c6acb9c47e9d",
+  "event_created_at": "2026-10-09T09:15:34.463951+00:00",
+  "first_feedback_code": "INTENT_COMPLETENESS_MISMATCH",
+  "second_error_type": "ValueError",
+  "retained_diagnostic_keys": [
+    "basis_fingerprint",
+    "first_validation_feedback",
+    "second_error_type"
+  ],
+  "budget": {
+    "attempt_count": 2,
+    "bounded": true,
+    "human_escalated": false
+  },
+  "semantic_step_results_count": 0,
+  "second_error_reason": "UNKNOWN",
+  "second_failure_stage": "UNKNOWN",
+  "second_candidate_identity": "UNKNOWN",
+  "numeric_model_usage": "NOT_AVAILABLE_IN_THIS_REDACTED_EXPORT",
+  "continuation_qualification": {
+    "application_revision": "e8e04b296b31d776a13dda728fa19469681cbaab",
+    "image_id": "sha256:4d3c64b1e3543a3574cd69b435d6f703fad6edc23b9db7d54d799dc1a652bf6e",
+    "semantic_failure_cases": 13,
+    "installed_image_regression": "continuation-20261010/continuation-final-image/watt-continuation-receipt.json",
+    "actual_pg_regression": "continuation-20261010/semantic-owner-pg/receipt.json",
+    "historical_second_ValueError": "UNKNOWN",
+    "real_G0_qualified": false
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "schema": "c3-continuation-image-recovery-v1",
+  "started_at_utc": "2026-10-09T15:26:29.144217+00:00",
+  "ended_at_utc": "2026-10-09T15:27:10.796941+00:00",
+  "wall_seconds": 41.65271283098264,
+  "actual_image_id": "sha256:4d3c64b1e3543a3574cd69b435d6f703fad6edc23b9db7d54d799dc1a652bf6e",
+  "sources": {
+    "watt": {
+      "revision": "e8e04b296b31d776a13dda728fa19469681cbaab",
+      "tree": "a349e40ea0c328ad55574dc668e884a137a19944"
+    },
+    "guardian": {
+      "revision": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+      "tree": "4f75d9137bebc7bf956fe4466cbae93f88c5c03b"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "archive_path": "/data/watt/c3-semantic-convergence-20261009/continuation-20261010/image-recovery/exact-image.tar.gz",
+  "archive_sha256": "04cd43b67227e7aa70c3c8b47e6cd3c379564d1f78631abf6a8c85c1f3b260ae",
+  "archive_bytes": 336433522,
+  "archive_permissions": "0600",
+  "owner": "root",
+  "services_started": false,
+  "business_database_mutations": false,
+  "restore_exercise_performed": false,
+  "offsite_copy_proven": false,
+  "controller_sha256": "bbfe850f01f7cb9e241d98e8cde471f6c8a216bdb7b68981e7178daa50750499",
+  "scope": "New qualification image only; old checkpoints untouched; restore requires identity verification and isolation"
+}
