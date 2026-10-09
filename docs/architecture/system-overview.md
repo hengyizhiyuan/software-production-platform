@@ -21,6 +21,13 @@ Assurance
 The platform target is a **Governed AI Engineering Loop** in which human governance, AI design and planning, execution, verification, and assurance are connected through explicit responsibilities and evidence.
 
 
+## Program architecture constraint
+
+[Program ADR-0002 and Watt applicability](program-architecture-decisions.md#stochastic-native-engineering--program-adr-0002)
+govern stochastic model participation within the existing Role / Authority /
+Artifact / Gate boundaries. This reference adds no layer or runtime capability
+and does not change the responsibility relationships below.
+
 ## Long-term Role Relationship
 
 The long-term system keeps three responsibilities distinct:

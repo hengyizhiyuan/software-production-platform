@@ -2,6 +2,17 @@
 
 This is a living architecture document. It records long-term directions and explicitly labeled Current Architecture Principles. The [closed State Foundation](spg-state-foundation.md) confirms logical governance semantics under Architecture Baseline v0.1, not implementation or physical-service design. The [Work-centric Production Model](work-centric-production-model.md) establishes Work, not Project, as the primary production entity and treats repositories and other resources as Work Assets. No section expands the current MVP.
 
+## Program invariant: stochastic-native engineering
+
+**Reuse Determinism, Harness Stochasticity** is the Human Governor Accepted
+Program invariant. Its sole authoritative definition is the fixed
+[Program ADR-0002](https://github.com/hengyizhiyuan/software-production-system/blob/1e2c1fdf37d9252c0a9bd480fc2ff15c88d0fee1/docs/04-decisions/ADR-0002-STOCHASTIC-NATIVE-ENGINEERING.md).
+[Watt applicability](program-architecture-decisions.md#stochastic-native-engineering--program-adr-0002)
+retains existing production, Verification, Guardian and ECF ownership.
+[Mission review](ai-native-development-execution-principles.md#stochastic-native-capability-review)
+and [qualification governance](watt-regression-protection-and-golden-journey-governance.md#stochastic-native-capability-qualification)
+apply without certifying any existing implementation by this document change.
+
 ## AI-Native Software Production System
 
 The platform is not an AI coding tool. It solves how humans and AI can continuously produce trustworthy software through a governed production loop.

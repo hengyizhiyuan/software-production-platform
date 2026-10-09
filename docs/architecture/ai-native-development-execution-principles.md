@@ -183,6 +183,25 @@ repo-grounded Executor. At minimum it should make explicit:
 This is a semantic development contract. It is not a newly authorized Watt
 domain object, database table, API, or Runtime lifecycle.
 
+### Stochastic-native capability review
+
+For a new or materially changed model-mediated capability, the existing
+Mission Contract and Evidence / Reality review must answer the
+[Program ADR-0002 review requirement](https://github.com/hengyizhiyuan/software-production-system/blob/1e2c1fdf37d9252c0a9bd480fc2ff15c88d0fee1/docs/06-governance/GOVERNED_AI_ENGINEERING_LOOP.md#stochastic-native-capability-review):
+
+- Where are stochastic reasoning and equivalent candidate variations allowed?
+- Which authoritative facts, source/version/provenance, permissions and gates remain strict?
+- Which existing Owner validates candidates, provides bounded repair feedback and truthfully terminates?
+- Could keywords, enumeration, aliases or fixed cases substitute for intelligent judgment?
+- Which non-prelisted variants, real Work evidence and negative checks demonstrate generality?
+
+Before adding a layer, state machine or Owner, check existing SOT and justify
+necessity. Reuse existing convergence budgets and authority; missing permissions
+or independent evidence require recovery, waiting or termination. This is a
+development review requirement, not a Runtime Compliance Engine. Existing
+implementation concerns enter a subsequent Reality Audit and gain no PASS
+from documentation adoption.
+
 ### 5.3 Autonomous implementation
 
 The Executor should receive enough context and authority to complete the stable

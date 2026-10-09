@@ -13,6 +13,20 @@ scheduler progression, Provider and Executor recovery, and UI consistency. The
 system must absorb those failures without adopting a policy of one permanent
 browser journey for every bug.
 
+## Stochastic-native capability qualification
+
+Under [Program ADR-0002](program-architecture-decisions.md#stochastic-native-engineering--program-adr-0002),
+qualification of a new or materially changed generic model capability must include
+non-prelisted expressions, semantic-equivalence variants, a real end-to-end Work
+and applicable negative evidence. Validate intent, constraints, effects, evidence
+and authority equivalence rather than identical reasoning, steps or code.
+
+Deterministic fixtures and focused regression checks remain useful at their
+existing layers. A single Case PASS does not establish generality. Bind real
+qualification to exact source/runtime identity and preserve independent Guardian
+evidence and Human authority. This design requirement adds no test framework
+and does not rewrite prior Golden results or prove existing code compliant.
+
 ## Governing principle
 
 > A historical bug should normally be converted into a durable system invariant,

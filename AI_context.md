@@ -26,6 +26,17 @@ This repository is the Source of Truth for the AI-Native Software Production Pla
 
 The platform is an AI-native Software Production System, not an AI Coding tool, ChatGPT replacement, or Coding Agent integration platform. Its objective is to build an AI-native Software Production Loop in which AI can use goals, engineering context, and governance constraints to drive planning, execution coordination, verification, feedback analysis, iteration adjustment, and baseline evolution.
 
+## Program Architecture Invariant
+
+The Human Governor Accepted
+[Program ADR-0002 — Stochastic-native Engineering](https://github.com/hengyizhiyuan/software-production-system/blob/1e2c1fdf37d9252c0a9bd480fc2ff15c88d0fee1/docs/04-decisions/ADR-0002-STOCHASTIC-NATIVE-ENGINEERING.md)
+owns the highest Program invariant: **Reuse Determinism, Harness Stochasticity**.
+Watt's [applicability and publication reference](docs/architecture/program-architecture-decisions.md#stochastic-native-engineering--program-adr-0002)
+preserves stochastic candidates, bounded convergence, existing Owner boundaries,
+effect authority and real Work qualification. Model-capability changes use the
+[Mission Contract review](docs/architecture/ai-native-development-execution-principles.md#stochastic-native-capability-review).
+This documentation adoption does not establish Runtime conformance or N1 Closure.
+
 ## Current Stage
 
 **2026-09-27 — Lifecycle/action admission hardening — CODE-OWNED QUALIFICATION PASS.**
