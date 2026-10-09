@@ -1,10 +1,10 @@
 """Local exact Git archive producer. Does not change branches or remote resources."""
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from datetime import datetime, timezone
 from hashlib import sha256
 import argparse, json, subprocess, tarfile
 
-ROOT = Path("/data/watt/c3-semantic-convergence-20261009")
+ROOT = PurePosixPath("/data/watt/c3-semantic-convergence-20261009")
 E_REL = Path("docs/evidence/core-production-semantic-convergence-c3-20261009")
 WATT_INPUTS = ("src", "tests", "migrations", "docker", "pyproject.toml", "uv.lock", "alembic.ini", "README.md",
     (E_REL/"Dockerfile.c3").as_posix(), (E_REL/"attest_c3_image.py").as_posix())
@@ -16,10 +16,14 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--watt-revision",required=True)
     parser.add_argument("--guardian-revision",required=True)
+    parser.add_argument("--control-revision")
+    parser.add_argument("--build-attempt-id",type=int,default=1)
     args=parser.parse_args()
     repo=Path.cwd(); guardian=Path("D:/hy/c3-open-obligation-convergence/guardian")
     ecf=Path("D:/hy/engineering-context-fabric")
-    output=repo/".c3-development-inputs/frozen"; assert not output.exists(); output.mkdir()
+    assert args.build_attempt_id >= 1
+    control_revision=args.control_revision or git(repo,"rev-parse","HEAD")
+    output=repo/(".c3-development-inputs/frozen-attempt-"+str(args.build_attempt_id)); assert not output.exists(); output.mkdir()
     source_specs=(("watt",repo,args.watt_revision,WATT_INPUTS),
         ("guardian",guardian,args.guardian_revision,("src","tests")),
         ("ecf",ecf,"5aa4f8833c359c15bd059eda5972aa3915bcc18c",("src",)),
@@ -29,7 +33,8 @@ def main():
         commit=git(checkout,"rev-parse",revision+"^{commit}")
         assert commit==revision
         tree=git(checkout,"rev-parse",revision+"^{tree}")
-        if owner in {"watt","guardian"}: assert git(checkout,"rev-parse","HEAD")==commit
+        if owner=="guardian": assert git(checkout,"rev-parse","HEAD")==commit
+        if owner=="watt": assert not git(checkout,"diff","--name-only",commit,"HEAD","--",*WATT_INPUTS), "Baked application inputs changed after code freeze"
         if owner=="guardian": assert not git(checkout,"status","--porcelain")
         name=owner+"-"+commit[:7]+"-frozen.tar";path=output/name
         subprocess.check_call(["git","-C",str(checkout),"archive","--format=tar","--output",str(path),commit,"--",*paths])
@@ -52,13 +57,14 @@ def main():
         if path.name not in active and not path.name.startswith(("c3_export", "freeze_c3", "capture_c3", "persist_c3", "quiesce_c3", "export_c3", "verify_c3")):
             continue
         relative=path.relative_to(repo).as_posix()
-        body=subprocess.check_output(["git","-C",str(repo),"show",args.watt_revision+":"+relative])
+        body=subprocess.check_output(["git","-C",str(repo),"show",control_revision+":"+relative])
         assert body==path.read_bytes(),("uncommitted control harness",relative)
         controls[path.name]=sha256(body).hexdigest()
     result={"schema":"c3-frozen-inputs-v1","captured_at_utc":datetime.now(timezone.utc).isoformat(),
         "sources":sources,"archives":archives,"control_harness_sha256":controls,
         "watt_archive_scope":"Only explicit Docker COPY source/test/migration/metadata inputs; not full repository",
         "application_commit":args.watt_revision,"application_tree":sources["watt"]["tree"],
+        "control_harness_revision":control_revision,"build_attempt_id":args.build_attempt_id,
         "external_control_harness_is_baked_application":False,
         "canonical_ecs_main_preserved":"ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
         "model_credential_scope":"HUMAN_AUTHORIZED_SHARED_TEST","actual_image_identity":"NOT_BUILT",

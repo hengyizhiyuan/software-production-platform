@@ -7,7 +7,8 @@ ROOT=Path('/data/watt/c3-semantic-convergence-20261009');E=ROOT/'evidence'
 freeze=json.loads((ROOT/'frozen-inputs.json').read_text())
 for name,expected in freeze['control_harness_sha256'].items():
     assert sha256((ROOT/name).read_bytes()).hexdigest()==expected, ('control harness identity mismatch',name)
-BUILD=ROOT/('build-'+freeze['sources']['watt']['revision'][:7]);assert not BUILD.exists()
+attempt=freeze.get('build_attempt_id',1);assert isinstance(attempt,int) and not isinstance(attempt,bool) and attempt>=1
+BUILD=ROOT/('build-'+freeze['sources']['watt']['revision'][:7]+('' if attempt==1 else '-attempt-'+str(attempt)));assert not BUILD.exists()
 BUILD.mkdir(mode=0o750);CONTEXT=BUILD/'context';CONTEXT.mkdir(mode=0o755)
 ARCHIVES=BUILD/'archives';ARCHIVES.mkdir(mode=0o750)
 archive_hashes={}
@@ -59,6 +60,7 @@ with (E/'build.log').open('x') as stream:result=subprocess.run(args,stdout=strea
 receipt={'schema':'c3-exact-image-build-v1','started_at_utc':started,
     'ended_at_utc':datetime.now(timezone.utc).isoformat(),'wall_seconds':time.monotonic()-begin,
     'exit_code':result.returncode,'command':args,'sources':freeze['sources'],
+    'build_directory':str(BUILD),'build_attempt_id':attempt,'control_harness_revision':freeze['control_harness_revision'],
     'source_identity_sha256':sha256((CONTEXT/'c3-source-identity.json').read_bytes()).hexdigest(),
     'real_model_calls':0,'source_overlay':False}
 if result.returncode==0:

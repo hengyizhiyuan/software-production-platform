@@ -18,7 +18,9 @@ assert not any(image_env.get(key) for key in ("SPG_DEEPSEEK_API_KEY","SPG_NATIVE
 # Root prepares Guardian tests from the immutable freeze Git archive; this
 # path carries tests only and never src. Import search extends tests only.
 revision=build["sources"]["watt"]["revision"]
-guardian_tests=ROOT/("build-"+revision[:7])/"test-inputs"/"guardian"
+build_directory=Path(build["build_directory"])
+assert build_directory.parent==ROOT and build_directory.name.startswith("build-"+revision[:7])
+guardian_tests=build_directory/"test-inputs"/"guardian"
 assert guardian_tests.is_dir() and (guardian_tests/"tests").is_dir()
 assert not (guardian_tests/"src").exists(), "Guardian input must contain tests only"
 guardian_test_hashes={path.relative_to(guardian_tests).as_posix():sha256(path.read_bytes()).hexdigest()

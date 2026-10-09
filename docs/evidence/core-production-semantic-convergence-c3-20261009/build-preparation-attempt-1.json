@@ -1,0 +1,14 @@
+{
+  "schema": "c3-build-preparation-failure-v1",
+  "captured_at_utc": "2026-10-09T11:17:46.889111+00:00",
+  "application_revision": "390fa22ec24cbab33f7feeeef96f0dfec9ce22f2",
+  "stage": "archive input copy before Docker build",
+  "error_type": "FileNotFoundError",
+  "root_cause": "Windows Path serialized the Linux archive path with backslashes",
+  "preserved_directory": "/data/watt/c3-semantic-convergence-20261009/build-390fa22",
+  "docker_build_started": false,
+  "image_created": false,
+  "model_calls": 0,
+  "real_work_created": 0,
+  "historical_trace": "exact tool stderr retained; start time not separately observed"
+}
