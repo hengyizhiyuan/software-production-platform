@@ -29,7 +29,9 @@ from spg.application.steering_decision import (
     PlanFrameAssembler,
     SteeringDecisionApplicationService,
 )
-from spg.application.steering_production import SteeringProductionService
+from spg.application.steering_production import (
+    FulfillmentProjectionNotReady, SteeringProductionService,
+)
 from spg.application.work import WorkApplicationService
 from spg.domain.product import (
     ProductInvariantViolation,
@@ -576,6 +578,15 @@ class PlanSteeringDriver:
                 )
             try:
                 result = self.iterate(work_id)
+            except FulfillmentProjectionNotReady as error:
+                # The formation Owner already ended this exact basis. A stop
+                # observation is neither a new refinement attempt nor a Provider
+                # retry/permission decision, and cannot consume/reset its budget.
+                LOGGER.warning("Steering fulfillment admission blocked Work=%s observation=%s",
+                               work_id, error.observation_id)
+                return SteeringActivationResult(work_id=work_id,
+                    iterations_executed=iterations, stop_reason=SteeringDriverStopReason.BLOCKED,
+                    last_action=last_action)
             except DecisionContextNotReady:
                 # Repeating an unchanged missing context source cannot refine it.
                 # Keep the gate stopped without turning a prerequisite observation

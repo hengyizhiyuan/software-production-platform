@@ -1117,6 +1117,8 @@ class FulfillmentFormationReceipts:
             "exact_target_paths": self.inventory["exact_target_paths"],
             "recorded_at_utc": datetime.now(UTC).isoformat(), "budget_limit": 2,
             "candidate_is_authority": False, **_safe_value(values)}
+        if row.get("terminal") and not row.get("validation_passed"):
+            row["unresolved_source_refs"] = [source["source_ref"] for source in self.inventory["sources"]]
         if len(json.dumps(row, ensure_ascii=False, default=str).encode()) > 131072:
             row = {key: value for key, value in row.items() if key not in {"candidate", "candidate_output", "feedback"}}
             row.update(terminal=True, validation_passed=False, terminal_reason="OBLIGATION_FORMATION_RECEIPT_LIMIT")
@@ -1286,6 +1288,7 @@ def form_fulfillment_projection(revision, ir, *, provider, database=None,
             "attempt_count": sum(row["stage"] == "MODEL_REQUEST_PENDING" for row in rows),
             "receipt_refs": [f"work-plan-receipt:{row['receipt_id']}" for row in rows],
             "candidate_attempts": list(rows), "terminal_reason": reason,
+            "unresolved_source_refs": [] if passed else [source["source_ref"] for source in inventory["sources"]],
             "elapsed_seconds": monotonic() - started,
             "meaning": "derived binding only; no evidence PASS, authority or effect"}
         if not passed or candidate is None:
@@ -1309,6 +1312,7 @@ def form_fulfillment_projection(revision, ir, *, provider, database=None,
     for attempt in range(next_attempt, 3):
         candidate = None
         semantic_review = None
+        failure_stage = "MODEL_REQUEST"
         try:
             observed_row = next((row for row in reversed(recorder.records()) if row["attempt"] == attempt and row["stage"] == "MODEL_RESPONSE_OBSERVED"), None)
             if observed_row is not None:
@@ -1345,6 +1349,7 @@ def form_fulfillment_projection(revision, ir, *, provider, database=None,
                 elif any(prior_location.get(key) != value for key, value in located.items()):
                     raise ValueError("OBLIGATION_COMPONENT_LOCATOR_RECEIPT_DRIFT")
             validate_projection_candidate(candidate, revision, ir, inventory, allow_review_pending=True)
+            failure_stage = "SEMANTIC_REVIEW"
             semantic_review = _review_fulfillment_candidate(provider, candidate, inventory, recorder, attempt, capabilities)
             bindings = validate_projection_candidate(candidate, revision, ir, inventory, semantic_review=semantic_review)
             passed = not any(binding.state == "UNRESOLVED" for binding in bindings)
@@ -1359,9 +1364,11 @@ def form_fulfillment_projection(revision, ir, *, provider, database=None,
                 continue
         except Exception as error:
             # Transport/unknown failures cannot justify a probability retry.
+            from spg.providers.fulfillment_candidate import provider_failure_observation
             reason = f"OBLIGATION_FORMATION_TRANSPORT_{type(error).__name__}"
             recorder.append("CANDIDATE_VALIDATED", attempt, candidate=None, failed_predicate=reason,
-                terminal=True, validation_passed=False, terminal_reason=reason)
+                terminal=True, validation_passed=False, terminal_reason=reason,
+                failure_stage=failure_stage, model=provider_failure_observation(error))
             return finish(None, reason, False)
         else:
             recorder.append("CANDIDATE_VALIDATED", attempt, candidate=candidate.model_dump(mode="json"),

@@ -6,12 +6,47 @@ satisfaction, modify facts, supply evidence or authorize an effect.
 from __future__ import annotations
 
 from dataclasses import asdict
+from datetime import UTC, datetime
 from hashlib import sha256
 import json
+import re
 
 from spg.domain.governed_obligation import (FulfillmentProjectionCandidate, FulfillmentSemanticReviewCandidate,
     fulfillment_candidate_fingerprint, fulfillment_components_fingerprint)
 from spg.domain.model_runtime import ModelPurpose
+
+
+def provider_failure_observation(error):
+    """Project only normalized typed failure metadata, never exception prose.
+
+    The error has no numeric usage or HTTP replay count. Its usage_unknown flag
+    remains a Provider observation; it cannot supply the missing numeric usage.
+    """
+    from spg.infrastructure.model_runtime import ModelFailureKind, ModelProviderError
+    from spg.domain.model_runtime import ModelUsage
+    from spg.providers.verification_receipts import _safe_value
+    if not isinstance(error, ModelProviderError):
+        return None
+
+    def machine_field(value, limit):
+        if not isinstance(value, str) or re.fullmatch(r"[A-Za-z0-9_.:-]{1," + str(limit) + "}", value) is None:
+            return None
+        return value if _safe_value(value) == value else None
+
+    occurred_at = error.occurred_at
+    failure = {
+        "kind": error.kind.value if isinstance(error.kind, ModelFailureKind) else None,
+        "request_sent": error.request_sent if type(error.request_sent) is bool else None,
+        "usage_unknown": error.usage_unknown if type(error.usage_unknown) is bool else None,
+        "retryable": error.retryable if type(error.retryable) is bool else None,
+        "provider_status": machine_field(error.provider_status, 64),
+        "termination_reason": machine_field(error.termination_reason, 120),
+        "request_id": machine_field(error.request_id, 200),
+        "occurred_at": occurred_at.astimezone(UTC).isoformat()
+            if isinstance(occurred_at, datetime) and occurred_at.tzinfo is not None else None,
+    }
+    return {"provider_failure": failure, "usage": asdict(ModelUsage(unknown=True)),
+        "transport_retry_count": None}
 
 
 class ModelFulfillmentCandidateProvider:
@@ -41,8 +76,8 @@ class ModelFulfillmentCandidateProvider:
 
     def form(self, inventory, capabilities, *, validation_feedback=None, receipt_callback=None):
         from spg.providers.semantic_wire import _provider_strict_output_schema
-        runtime = self.runtime_factory()
         self.last_observation = None
+        runtime = self.runtime_factory()
         try:
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
                 instructions=(
@@ -93,6 +128,11 @@ class ModelFulfillmentCandidateProvider:
             if safe_output is None:
                 raise ValueError("OBLIGATION_FORMATION_RECEIPT_LIMIT")
             return FulfillmentProjectionCandidate.model_validate_json(safe_output)
+        except Exception as error:
+            failure = provider_failure_observation(error)
+            if failure is not None:
+                self.last_observation = failure
+            raise
         finally:
             runtime.close()
 
@@ -101,8 +141,8 @@ class ModelFulfillmentCandidateProvider:
         """One independent semantic review; no review retry or authority verdict."""
         from spg.providers.semantic_wire import _provider_strict_output_schema
         from spg.providers.verification_receipts import _safe_output
-        runtime = self.runtime_factory()
         self.last_observation = None
+        runtime = self.runtime_factory()
         try:
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
                 instructions=("Independently validate a derived fulfillment candidate against the immutable admitted "
@@ -138,5 +178,10 @@ class ModelFulfillmentCandidateProvider:
             if output is None:
                 raise ValueError("OBLIGATION_SEMANTIC_REVIEW_RECEIPT_LIMIT")
             return FulfillmentSemanticReviewCandidate.model_validate_json(output)
+        except Exception as error:
+            failure = provider_failure_observation(error)
+            if failure is not None:
+                self.last_observation = failure
+            raise
         finally:
             runtime.close()

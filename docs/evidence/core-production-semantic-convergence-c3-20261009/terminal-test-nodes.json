@@ -1,0 +1,6 @@
+[
+  "tests/test_c3_fulfillment_provider_failures.py",
+  "tests/test_c3_fulfillment_admission_stop.py",
+  "tests/test_fulfillment_projection.py::test_pending_unknown_and_transport_failure_do_not_blindly_retry",
+  "tests/test_c3_fulfillment_components.py::test_review_pending_outcome_unknown_is_not_repeated_after_resume"
+]

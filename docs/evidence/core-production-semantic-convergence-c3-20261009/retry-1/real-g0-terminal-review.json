@@ -1,0 +1,122 @@
+{
+  "schema": "c3-real-g0-terminal-review-v1",
+  "recorded_at_utc": "2026-10-09T13:18:30.676075+00:00",
+  "evidence_level": "E1_SCOPED_OWNER_OBSERVATIONS_WITH_SEPARATE_E3_CODE_REVIEW",
+  "result": "C3_PARTIAL_NOT_REAL_G0_PASS",
+  "source_revision": "91f5dbc9906d1f857113736981517c1091ec52ae",
+  "source_tree": "50c6b8fad3f321638135fbec8afcba060b3fb2bc",
+  "guardian_revision": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+  "ecf_revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "actual_role_image_id": "sha256:6f8d9b3a27e7e2452097a77427115df6e09b9a03276eb72d0170a66160e0578f",
+  "database": "spg_c3_retry1_qualification_20261009",
+  "migration": "20261007_72",
+  "product_id": "b2f46852-a9cd-4d0f-bcb4-ec2a3b0d7587",
+  "interaction_id": "8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6",
+  "work_id": "048189aa-0613-5307-b6f4-c430e7977f93",
+  "work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+  "human_turn_id": "1344304c-db26-42d1-a883-1991ace8bf30",
+  "source_baseline_id": "b8db4164-a1ef-49a9-b697-e331222ef4c5",
+  "human_input_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "formation": [
+    {
+      "state": "MODEL_REQUEST_PENDING",
+      "receipt_id": "2f5111b7-c478-42bb-b670-31d624d61568",
+      "governance_row_id": "caf78970-ee71-4aaf-8ab9-cf86ca2d955a",
+      "occurred_at_utc": "2026-10-09T12:57:11.104Z"
+    },
+    {
+      "state": "CANDIDATE_VALIDATED",
+      "receipt_id": "804b22c0-dcff-4a98-a870-0b7bd6905b29",
+      "governance_row_id": "4e19be73-3163-499e-b7a2-92517cb17a4f",
+      "occurred_at_utc": "2026-10-09T12:58:10.182524Z",
+      "failure": "OBLIGATION_FORMATION_TRANSPORT_ModelProviderError",
+      "all_bindings": "UNRESOLVED",
+      "model_response_observed": false,
+      "semantic_review_observed": false
+    }
+  ],
+  "failure_chain": [
+    {
+      "kind": "FORMATION_PROVIDER_FAILURE",
+      "actual_predicate": "ModelProviderError",
+      "specific_provider_kind": "UNKNOWN",
+      "status": "UNKNOWN",
+      "request_id": "UNKNOWN",
+      "transport_retry_count": "UNKNOWN",
+      "numeric_usage": "UNKNOWN",
+      "interpretation": "Elapsed time does not prove a timeout. Existing safe error metadata was not persisted."
+    },
+    {
+      "kind": "UPSTREAM_UNRESOLVED_CONSUMPTION_DEFECT",
+      "evidence_grade": "E1_EVENTS_PLUS_E3_EXACT_CODE",
+      "interpretation": "Known unresolved formation still entered runtime creation, preparation and dispatch."
+    },
+    {
+      "kind": "STRICT_NATIVE_REJECTION",
+      "actual_predicate": "OBLIGATION_PROJECTION_UNRESOLVED",
+      "interpretation": "Correct existing Native guard blocked before Native binding or queue; must not be weakened."
+    },
+    {
+      "kind": "ORCHESTRATION_CLASSIFICATION_DEFECT",
+      "actual_classification": "INFRASTRUCTURE_ERROR",
+      "interpretation": "An unresolved fulfillment outcome was converted to generic execution failure; no qualified automatic replay was permitted."
+    }
+  ],
+  "runtime_records_created": {
+    "production_run_id": "f9f06c0a-b5fd-41c4-8e09-594cb91ea029",
+    "pwu_id": "395f75c3-6bbb-4028-8565-7a227f4adf04",
+    "attempt_id": "f5026ead-1f51-4795-935a-85d4045547d4",
+    "task_contract_id": "890557b8-83f1-5321-9ae6-77b9b28ac0aa",
+    "dispatch_id": "106b2585-8205-4244-a736-89f10906e486"
+  },
+  "not_reached": [
+    "Native Binding",
+    "Queue",
+    "Actual Worker",
+    "Native Execution",
+    "Production Environment container",
+    "Verification",
+    "Candidate Seal",
+    "Guardian"
+  ],
+  "production_environment_actual_image": "NOT_REACHED_CURRENT_WORK; C2_REMOVED_CONTAINER_REMAINS_UNKNOWN",
+  "actual_scope_recovery": {
+    "self_refine_id": "8259d87d-7d0a-4fd4-b074-ea7bdbc55fc3",
+    "candidate_attempts": 2,
+    "status": "VERIFIED",
+    "resolution": "LOCAL_OBLIGATION_RECOVERED",
+    "resume": "RESUMED",
+    "input_tokens": 12892,
+    "output_tokens": 2874,
+    "reasoning_tokens": 452,
+    "cached_input_tokens": 1024,
+    "total_tokens": 15766,
+    "unknown": false,
+    "boundary": "Design scope recovery only; not whole Work or formation success."
+  },
+  "final_work": {
+    "status": "NEEDS_ATTENTION",
+    "automatic_state": "STOPPED",
+    "work_complete": false,
+    "candidate_exists": false,
+    "human_authorization_written": false,
+    "boundary": "Not a Candidate-ready Human Integration review."
+  },
+  "authority_query_boundary": "No scoped identities existed for Human Authorization/RuntimeCommit/Acceptance; collector reported NO_SCOPED_IDENTITIES_NOT_QUERIED. This is not a complete side-effect audit.",
+  "full_effect_audit_claim": false,
+  "original_work_resumed_or_reset": false,
+  "qualification_claim": "OBSERVATION_ONLY_NOT_WORK_PASS",
+  "evidence": [
+    {
+      "path": "retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json",
+      "sha256": "9b013274f1a6daafc776297a302c52c8247cd2fd5ec9c5b99a83279fd2ee8e2c"
+    },
+    {
+      "path": "retry-1/g0-owner-2/stop-log-observation.json",
+      "sha256": "1095a2ce83a7a15b056fba2bf66b4ec1d19c92bf0bb44828e7da345ffd34f577"
+    }
+  ],
+  "next_boundary": "Fix safe Provider failure receipts and consume unresolved formation before runtime creation using existing BLOCKED. This does not recover the historical Provider cause or prove transport restored. No blind new Work attempt.",
+  "holdout": "SEALED_NOT_READ_OR_EXECUTED_PENDING_EXPLICIT_HUMAN_UNSEAL_AUTHORIZATION_AFTER_AUTOMATIC_REVIEW_REJECTION"
+}

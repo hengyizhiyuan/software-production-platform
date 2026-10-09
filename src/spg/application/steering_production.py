@@ -69,6 +69,15 @@ from spg.infrastructure.persistence.steering_store import SteeringStore
 from spg.providers.rule_based_planner import RuleBasedProductionPlanner
 
 
+class FulfillmentProjectionNotReady(ProductInvariantViolation):
+    """Existing Work-governance evidence stopped admission before Runtime facts."""
+
+    def __init__(self, observation_id: UUID, scope: dict) -> None:
+        super().__init__("OBLIGATION_PROJECTION_UNRESOLVED")
+        self.observation_id = observation_id
+        self.scope = scope
+
+
 class SteeringProductionService:
     """Admit the Step's versioned production plan without deciding WHAT NEXT."""
 
@@ -492,6 +501,8 @@ class SteeringProductionService:
             source_revision=baseline.repository_revision,
             exact_target_paths=tuple(target.path for target in request.change_contract.exact_targets)
                 if request.change_contract is not None else tuple(target.path for target in request.artifact_targets))
+        if any(binding.state == "UNRESOLVED" for binding in fulfillment_bindings):
+            self._stop_unresolved_fulfillment(request, baseline, fulfillment_bindings)
         plan = self.planning.propose(
             ProductionPlanningRequest(
                 work_id=work.id,
@@ -575,6 +586,56 @@ class SteeringProductionService:
             ProductionHorizon.CODE,
             WorkApplicationService._code_change_objective(contract),
         )
+
+    def _stop_unresolved_fulfillment(self, request, baseline, bindings) -> None:
+        """Record an idempotent stop observation, never a repair or authority grant."""
+        from spg.domain.governed_obligation import canonical_fingerprint, fulfillment_source_ref
+        from spg.providers.verification_receipts import _safe_value
+
+        receipt = next((binding.formation_receipt for binding in bindings
+                        if binding.formation_receipt is not None), {})
+        scope = _safe_value({
+            "schema": "work-fulfillment-stop-observation-v1",
+            "owner": "WORK_FULFILLMENT_PROJECTION",
+            "work_id": str(request.work_id),
+            "work_reality_revision_id": str(request.work_reality_revision_id),
+            "steering_step_id": str(request.steering_step_id),
+            "source_baseline_id": str(baseline.id),
+            "source_revision": baseline.repository_revision,
+            "inventory_fingerprint": next((binding.projection_inventory_fingerprint
+                for binding in bindings if binding.projection_inventory_fingerprint is not None), None),
+            "source_refs": list(dict.fromkeys(fulfillment_source_ref(binding) for binding in bindings)),
+            "unresolved_source_refs": list(dict.fromkeys(fulfillment_source_ref(binding)
+                for binding in bindings if binding.state == "UNRESOLVED")),
+            "formation_receipt_refs": receipt.get("receipt_refs", []),
+            "terminal_reason": receipt.get("terminal_reason"),
+            "condition": "OBLIGATION_PROJECTION_UNRESOLVED",
+            "candidate_is_authority": False,
+            "runtime_admitted": False,
+        })
+        basis = canonical_fingerprint(scope)
+        observation_id = uuid5(NAMESPACE_URL, f"spg:work-fulfillment-stop:{basis}")
+        with self.database.unit_of_work() as uow:
+            product = ProductStore(uow.session)
+            work = product.work(request.work_id, for_update=True)
+            if (work is None or work.current_work_reality_revision_id != request.work_reality_revision_id):
+                raise ProductInvariantViolation("Work Reality changed before fulfillment stop observation")
+            runtime = RuntimeStore(uow.session)
+            prior = next((row for row in runtime.governance_for_subject(basis)
+                          if row.id == observation_id), None)
+            if prior is None:
+                runtime.insert_governance({
+                    "id": observation_id,
+                    "decision_type": "WORK_FULFILLMENT_STOP_OBSERVATION",
+                    "authority_identity": "work-governance:derived-candidate-observation",
+                    "subject_type": "WORK_FULFILLMENT_STOP_BASIS",
+                    "subject_identity": basis,
+                    "scope": scope,
+                    "rationale": "Unresolved fulfillment stopped before Runtime admission; no repair, PASS, Human authority or effect was granted.",
+                    "created_at": datetime.now(UTC),
+                })
+                uow.commit()
+        raise FulfillmentProjectionNotReady(observation_id, scope)
 
     @staticmethod
     def _exact_document_lineage_markers(
