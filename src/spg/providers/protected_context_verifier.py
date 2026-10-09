@@ -69,7 +69,7 @@ class StaticProtectedContextVerifier:
         return bool(not contract.allowed_areas and contract.exact_targets
             and all(PurePosixPath(t.path).suffix in suffixes for t in contract.exact_targets))
 
-    def verify(self, request, task, contract, repository, baseline):
+    def verify(self, request, task, contract, repository, baseline, *, obligations=None):
         if (task is None or task.decision_context is None
                 or task.decision_context.package_fingerprint != request.decision_context_fingerprint
                 or tuple(task.decision_context.protected_obligations) != request.protected_context_obligations):
@@ -77,6 +77,13 @@ class StaticProtectedContextVerifier:
         suffixes = {".html", ".css", ".js", ".json", ".svg", ".txt", ".md"}
         if not self.supports(contract):
             raise ValueError("PROTECTED_CONTEXT_PROFILE_NOT_SUPPORTED")
+        selected = (request.protected_context_obligations if obligations is None
+                    else tuple(obligations))
+        selected_ids = [(item.context_class, item.semantic_key, item.source_ref,
+                         item.source_revision, item.content_digest) for item in selected]
+        if (not selected or len(set(selected_ids)) != len(selected_ids)
+                or any(item not in request.protected_context_obligations for item in selected)):
+            raise ValueError("PROTECTED_CONTEXT_SUBSET_IDENTITY_MISMATCH")
         revision = request.proposed_commit_identity
         if git(repository, "rev-parse", revision + "^{tree}").decode().strip() != request.tree_identity:
             raise ValueError("PROTECTED_CONTEXT_TREE_MISMATCH")
@@ -106,7 +113,7 @@ class StaticProtectedContextVerifier:
                    "scope": task.scope, "constraints": task.constraints, "out_of_scope": task.out_of_scope},
             "exact_candidate_revision": revision, "exact_candidate_tree": request.tree_identity,
             "baseline_revision": baseline, "changed_paths": changed,
-            "protected_obligations": [item.model_dump(mode="json") for item in request.protected_context_obligations],
+            "protected_obligations": [item.model_dump(mode="json") for item in selected],
             "candidate_sources": materials,
             "governance_boundary": "This Verification authorizes no Candidate or Product baseline. Guardian runtime checks and explicit Human decisions are separate downstream owners."}
         instructions = (
@@ -126,7 +133,7 @@ class StaticProtectedContextVerifier:
             "and a nonempty exact quote from candidate_sources[path]. Do not create or run tests, code or shell commands.")
         from spg.providers.semantic_wire import _provider_strict_output_schema
         runtime = self.runtime_factory()
-        expected = {(item.context_class, item.semantic_key): item for item in request.protected_context_obligations}
+        expected = {(item.context_class, item.semantic_key): item for item in selected}
         previous_checks = ()
         model_attempts = []
         try:

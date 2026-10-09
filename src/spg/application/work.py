@@ -1749,6 +1749,10 @@ class WorkApplicationService:
             store = ProductStore(unit_of_work.session)
             work = self._required_work(store, work_id)
             work_revision = store.current_work_reality_revision(work_id)
+            source_assessment = (None if work_revision is None or
+                work_revision.source_assessment_id is None else
+                InteractionStore(unit_of_work.session).assessment(
+                    work_revision.source_assessment_id))
             existing = store.runtime_binding(work_id)
             if existing is not None:
                 return self._projection(store, work)
@@ -1783,6 +1787,11 @@ class WorkApplicationService:
                 )
             )
         )
+        from spg.application.governed_obligations import materialize_continuous_gates
+        fulfillment_bindings = (() if work_revision is None else
+            materialize_continuous_gates(
+                work_revision,
+                None if source_assessment is None else source_assessment.semantic_ir))
         work_reality_references = [f"work:{work.id}"]
         if work_revision is not None:
             work_reality_references.append(
@@ -1977,6 +1986,7 @@ class WorkApplicationService:
                 required_changes=(artifact.path,),
                 verification_obligations=(verification_obligation,),
                 semantic_fact_obligations=semantic_facts,
+                fulfillment_bindings=fulfillment_bindings,
                 task_contract=task_contract,
                 artifact_contract=artifact_contract,
                 production_plan=plan,
@@ -2018,6 +2028,7 @@ class WorkApplicationService:
                 required_changes=exact_paths,
                 verification_obligations=change_contract.verification_identities,
                 semantic_fact_obligations=semantic_facts,
+                fulfillment_bindings=fulfillment_bindings,
                 task_contract=task_contract,
                 change_contract=change_contract,
                 production_plan=plan,

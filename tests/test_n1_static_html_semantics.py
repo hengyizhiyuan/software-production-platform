@@ -241,7 +241,10 @@ def test_observed_g0_page_index_profile_binds_full_assertion(tmp_path: Path) -> 
              "N1 qualification work")))
     candidate = _git(repository, "rev-parse", "HEAD")
     checks = verify_static_html_semantic_facts(repository, candidate, contract, facts)
-    assert len(checks) == 5 and all(check["passed"] for check in checks)
+    assert len(checks) == 5 and all(check["passed"] for check in checks[:4])
+    assert checks[4]["disposition"] == "UNVERIFIABLE_CURRENT"
+    # A future reviewable Candidate cannot be proved by an HTML blob before
+    # the Candidate Owner seals one after current Verification.
     (repository / "index.html").write_text(
         "<html><body><h1>N1 Software Control</h1><p>Wrong</p></body></html>",
         encoding="utf-8")

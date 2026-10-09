@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from spg.domain.change import CodeChangeContract
 from spg.domain.engineering_semantics import SemanticFactReference
+from spg.domain.governed_obligation import FulfillmentBinding
 from spg.domain.production_intelligence import TaskContract
 from spg.domain.planning import ProductionPlanGraph, ProductionPlanProposal
 
@@ -88,6 +89,7 @@ class CompletionContract(BaseModel):
     forbidden_changes: tuple[str, ...] = ()
     verification_obligations: tuple[str, ...] = ()
     semantic_fact_obligations: tuple[SemanticFactReference, ...] = ()
+    fulfillment_bindings: tuple[FulfillmentBinding, ...] = ()
     task_contract: TaskContract | None = None
     blocking_conditions: tuple[str, ...] = ()
     artifact_contract: ArtifactContract | None = None

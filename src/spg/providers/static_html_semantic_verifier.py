@@ -208,13 +208,14 @@ def _verify_profiled_static_html_semantic_facts(
             bound = tuple(check for check in checks if check["scope"] == path
                           and check["reason"] in {"EXACT_H1", "EXACT_PARAGRAPH"})
             passed = (fact.relation is SemanticRelation.ACCEPTANCE_ASSERTION
-                      and fact.value in {
-                          "exact heading and paragraph verified",
-                          "exact heading and paragraph verified and reviewable Candidate left"}
+                      and fact.value == "exact heading and paragraph verified"
                       and {check["reason"] for check in bound}
                       == {"EXACT_H1", "EXACT_PARAGRAPH"}
                       and all(check["passed"] for check in bound))
-            reason = "BOUND_EXACT_TEXT_VERIFICATION" if passed else "EXACT_TEXT_VERIFICATION_MISSING"
+            reason = ("SEMANTIC_FACT_PROFILE_UNSUPPORTED"
+                      if isinstance(fact.value, str) and "Candidate" in fact.value
+                      else "BOUND_EXACT_TEXT_VERIFICATION" if passed
+                      else "EXACT_TEXT_VERIFICATION_MISSING")
         elif fact.subject in {"work.new_file_count", "artifact.file.count"}:
             result = subprocess.run(
                 ["git", "-C", str(repository), "diff", "--name-status",

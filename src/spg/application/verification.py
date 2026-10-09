@@ -771,19 +771,21 @@ def _project_decision_context_evidence(request, result) -> dict:
             {
                 **item.model_dump(mode="json"),
                 "coverage": (
-                    "COVERED" if result.result is VerificationResultValue.PASS
-                    and any(check.get("context_class") == item.context_class
+                    next((check.get("coverage") for check in
+                    metadata.get("protected_context_checks", ())
+                    if result.result is VerificationResultValue.PASS
+                    and check.get("context_class") == item.context_class
                         and check.get("semantic_key") == item.semantic_key
                         and check.get("source_ref") == item.source_ref
                         and check.get("source_revision") == item.source_revision
                         and check.get("package_fingerprint") == request.decision_context_fingerprint
-                        and check.get("coverage") == "COVERED"
-                        for check in metadata.get("protected_context_checks", ()))
-                    else "COVERED" if item.verification_ref is not None
-                    and result.result is VerificationResultValue.PASS
-                    and metadata.get("kind") == "NODE_TEST_TARGET"
-                    and metadata.get("target") == item.verification_ref
-                    else "UNVERIFIED"
+                        and check.get("coverage") in {"COVERED", "PENDING_CANDIDATE_GATE"}),
+                         None)
+                    or ("COVERED" if item.verification_ref is not None
+                        and result.result is VerificationResultValue.PASS
+                        and metadata.get("kind") == "NODE_TEST_TARGET"
+                        and metadata.get("target") == item.verification_ref
+                        else "UNVERIFIED")
                 ),
             }
             for item in request.protected_context_obligations

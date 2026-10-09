@@ -203,6 +203,7 @@ class NativeQueuedExecutorCapability:
                 else product_store.current_work_reality_revision(product_binding.work_id)
             )
             semantic_ir_id = None
+            semantic_ir = None
             if product_binding is not None:
                 revision = work_revision
                 while revision is not None:
@@ -212,6 +213,7 @@ class NativeQueuedExecutorCapability:
                         )
                         if assessment is not None and assessment.semantic_ir is not None:
                             semantic_ir_id = assessment.semantic_ir.id
+                            semantic_ir = assessment.semantic_ir
                             break
                     revision = (
                         None if revision.previous_revision_id is None
@@ -219,6 +221,11 @@ class NativeQueuedExecutorCapability:
                     )
         if any(item is None for item in (work_unit, attempt, snapshot, package)):
             raise RuntimeError("native compatibility admission lineage is incomplete")
+        if work_revision is not None:
+            from spg.application.governed_obligations import validate_continuous_gates
+            validate_continuous_gates(
+                work_unit.completion_contract.fulfillment_bindings,
+                work_revision, semantic_ir)
         work_id = (
             product_binding.work_id
             if product_binding is not None
@@ -386,6 +393,10 @@ class NativeQueuedExecutorCapability:
             "file.read", "file.write", "process.run", "git.status", "git.diff",
             "test.run", "build.run", "dependency.sync", "preview.inspect",
         )
+        from spg.application.governed_obligations import denied_execution_capabilities
+        denied = denied_execution_capabilities(
+            work_unit.completion_contract.fulfillment_bindings)
+        capability_ids = tuple(item for item in capability_ids if item not in denied)
         task_contract = work_unit.completion_contract.task_contract
         required_capabilities = tuple(
             () if task_contract is None else task_contract.required_capabilities

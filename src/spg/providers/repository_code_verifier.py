@@ -46,7 +46,9 @@ def _exact_protected_context_coverage(request: VerificationCapabilityRequest,
     observed = tuple(tuple(item.get(key) for key in identity) for item in checks)
     return (bool(expected) and len(set(expected)) == len(expected)
             and len(observed) == len(expected) and set(observed) == set(expected)
-            and all(item.get("coverage") == "COVERED"
+            and all(item.get("coverage") in {"COVERED", "PENDING_CANDIDATE_GATE"}
+                    and (item.get("coverage") != "PENDING_CANDIDATE_GATE"
+                         or item.get("evidence_method") == "EXACT_CANDIDATE_SEAL_REQUIRED")
                     and item.get("candidate_revision") == request.proposed_commit_identity
                     and item.get("candidate_tree") == request.tree_identity
                     for item in checks))
@@ -86,6 +88,7 @@ class RepositoryCodeVerifier:
                 work_unit = store.work_unit(proposed.work_unit_id)
                 run = None if work_unit is None else store.run(work_unit.production_run_id)
                 admitted_facts = {}
+                admitted_revisions = {}
                 if request.semantic_fact_obligations and run is None:
                     raise RuntimeError("Semantic Fact production run is unavailable")
                 if work_unit is not None and run is not None:
@@ -102,6 +105,51 @@ class RepositoryCodeVerifier:
                                 admitted, work_revision_id=revision.id) != reference):
                             raise RuntimeError("Semantic Fact differs from admitted Work Reality")
                         admitted_facts[str(reference.fact_id)] = admitted
+                        admitted_revisions[str(revision.id)] = revision
+                gate_bindings = work_unit.completion_contract.fulfillment_bindings if work_unit else ()
+                native_binding = None
+                admitted_revision = None
+                admitted_ir = None
+                task_context = (None if work_unit is None or
+                    work_unit.completion_contract.task_contract is None else
+                    work_unit.completion_contract.task_contract.decision_context)
+                if (not admitted_revisions and task_context is not None
+                        and task_context.surface == "MANAGED_PRODUCT_WEB_UI"):
+                    from uuid import UUID
+                    if (run is None or task_context.work_id is None
+                            or not run.intent_ref.startswith(f"work:{task_context.work_id}")):
+                        raise ValueError("OBLIGATION_MANAGED_WORK_LINEAGE_MISSING")
+                    revision = ProductStore(unit_of_work.session).current_work_reality_revision(
+                        UUID(task_context.work_id))
+                    if revision is not None:
+                        admitted_revisions[str(revision.id)] = revision
+                if admitted_revisions:
+                    from spg.infrastructure.persistence.interaction_store import InteractionStore
+                    if len(admitted_revisions) != 1:
+                        raise ValueError("OBLIGATION_WORK_REVISION_AMBIGUOUS")
+                    admitted_revision = next(iter(admitted_revisions.values()))
+                    if task_context is not None and task_context.surface == "MANAGED_PRODUCT_WEB_UI":
+                        from spg.domain.engineering_semantics import current_semantic_facts
+                        expected_facts = tuple(semantic_fact_reference(
+                            fact, work_revision_id=admitted_revision.id)
+                            for fact in current_semantic_facts(
+                                admitted_revision.engineering_semantic_facts))
+                        if expected_facts != request.semantic_fact_obligations:
+                            raise ValueError("OBLIGATION_ADMITTED_FACT_COVERAGE_MISMATCH")
+                        task = work_unit.completion_contract.task_contract
+                        if task is None or task.semantic_fact_references != expected_facts:
+                            raise ValueError("OBLIGATION_TASK_FACT_COVERAGE_MISMATCH")
+                    assessment = (None if admitted_revision.source_assessment_id is None else
+                        InteractionStore(unit_of_work.session).assessment(
+                            admitted_revision.source_assessment_id))
+                    admitted_ir = None if assessment is None else assessment.semantic_ir
+                if gate_bindings and proposed is not None:
+                    from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+                    from spg.application.governed_obligations import validate_continuous_gates
+                    validate_continuous_gates(gate_bindings, admitted_revision,
+                        admitted_ir)
+                    native_binding = NativeExecutionStore(unit_of_work.session).attempt_binding(
+                        proposed.attempt_id)
             if source is None or dispatch is None or work_unit is None:
                 raise RuntimeError("code Verification repository lineage unavailable")
             if (
@@ -149,6 +197,19 @@ class RepositoryCodeVerifier:
                     admitted_facts=admitted_facts,
                     plan_repair=self.plan_repair,
                 )
+                if gate_bindings:
+                    from spg.application.governed_obligations import evaluate_continuous_gates
+                    semantic_checks = evaluate_continuous_gates(
+                        semantic_checks, gate_bindings, native_binding,
+                        source_revision=contract.source_revision)
+                if admitted_facts:
+                    from spg.application.governed_obligations import evaluate_candidate_handoffs
+                    semantic_checks = evaluate_candidate_handoffs(
+                        semantic_checks,
+                        references=request.semantic_fact_obligations,
+                        admitted_facts=admitted_facts, ir=admitted_ir,
+                        source_revision=contract.source_revision,
+                        exact_target_paths=tuple(target.path for target in contract.exact_targets))
                 if semantic_checks:
                     metadata["static_html_semantic_checks"] = semantic_checks
                     if any(check["passed"] is not True for check in semantic_checks):
@@ -160,9 +221,25 @@ class RepositoryCodeVerifier:
                     metadata["protected_context_failure"] = "PROTECTED_CONTEXT_CONSUMER_UNAVAILABLE"
                     result = VerificationResultValue.FAIL
                 else:
-                    checks = self.context_verifier.verify(
-                        request, work_unit.completion_contract.task_contract, contract,
-                        dispatch.workspace.repository_path, source.repository_revision)
+                    task = work_unit.completion_contract.task_contract
+                    if (task is not None and task.decision_context is not None
+                            and task.decision_context.surface == "MANAGED_PRODUCT_WEB_UI"):
+                        if admitted_revision is None or admitted_ir is None:
+                            raise ValueError("OBLIGATION_MANAGED_SOURCE_BASIS_MISSING")
+                        from spg.application.decision_context import assert_task_context_fresh
+                        from spg.providers.managed_context_fulfillment import verify_managed_context
+                        assert_task_context_fresh(self.database, task)
+                        checks = verify_managed_context(
+                            request=request, task=task, contract=contract,
+                            repository=dispatch.workspace.repository_path,
+                            baseline=source.repository_revision,
+                            revision=admitted_revision, ir=admitted_ir,
+                            semantic_checks=metadata.get("static_html_semantic_checks", ()),
+                            static_verifier=self.context_verifier)
+                    else:
+                        checks = self.context_verifier.verify(
+                            request, task, contract,
+                            dispatch.workspace.repository_path, source.repository_revision)
                     metadata["protected_context_checks"] = checks
                     if not _exact_protected_context_coverage(request, checks):
                         metadata["protected_context_failure"] = "PROTECTED_CONTEXT_COVERAGE_INCOMPLETE"

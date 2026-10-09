@@ -32,6 +32,7 @@ def _protected_context_for_guardian(task, verification_records) -> tuple:
     projected = []
     for obligation in lineage.protected_obligations:
         matching_refs = []
+        pending_refs = []
         for record in verification_records:
             if record is None or record.result.value != "PASS":
                 continue
@@ -47,14 +48,26 @@ def _protected_context_for_guardian(task, verification_records) -> tuple:
                 for item in context.get("protected_obligations", ())
             ):
                 matching_refs.append(f"verification:{record.id}")
+            if any(
+                item.get("context_class") == obligation.context_class
+                and item.get("semantic_key") == obligation.semantic_key
+                and item.get("source_ref") == obligation.source_ref
+                and item.get("source_revision") == obligation.source_revision
+                and item.get("coverage") == "PENDING_CANDIDATE_GATE"
+                for item in context.get("protected_obligations", ())
+            ):
+                pending_refs.append(f"verification:{record.id}")
         projected.append(ProtectedContextEvidence(
             context_class=obligation.context_class,
             semantic_key=obligation.semantic_key,
             source_ref=obligation.source_ref,
             source_revision=obligation.source_revision,
+            authority=obligation.authority,
+            content_digest=obligation.content_digest,
             package_fingerprint=lineage.package_fingerprint,
-            coverage="COVERED" if matching_refs else "GUARDIAN_REQUIRED",
-            verification_refs=tuple(matching_refs),
+            coverage=("COVERED" if matching_refs else
+                      "PENDING_CANDIDATE_GATE" if pending_refs else "GUARDIAN_REQUIRED"),
+            verification_refs=tuple(matching_refs or pending_refs),
         ))
     return tuple(projected)
 
@@ -67,6 +80,44 @@ class GuardianAssuranceClient:
         self.delivery = delivery
         self.preview_store = preview_store
         self.guardian_store = guardian_store
+        if hasattr(guardian_store, "owner_evidence_resolver"):
+            guardian_store.owner_evidence_resolver = self._resolve_owner_evidence
+
+    def _resolve_owner_evidence(self, reference: str) -> dict | None:
+        """Read only exact Owner records for Guardian's independent checks."""
+        kind, separator, identity = reference.partition(":")
+        if not separator:
+            return None
+        try:
+            record_id = UUID(identity)
+        except ValueError:
+            return None
+        with self.delivery.database.unit_of_work() as uow:
+            runtime = RuntimeStore(uow.session)
+            if kind == "verification":
+                record = runtime.verification_record(record_id)
+                return None if record is None else record.model_dump(mode="json")
+            if kind == "candidate":
+                record = runtime.baseline_candidate(record_id)
+                if record is None:
+                    return None
+                return {"id": str(record.id), "condition": record.condition.value,
+                    "fingerprint": record.fingerprint,
+                    "repository_revision": record.proposed_commit_identity,
+                    "repository_tree_identity": record.proposed_tree_identity}
+            if kind == "native-attempt":
+                from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+                try:
+                    record = NativeExecutionStore(uow.session).attempt_binding(record_id)
+                except Exception:
+                    return None
+                members = record.binding.source_vector.members
+                return {"attempt_id": str(record.attempt_id),
+                    "binding_digest": record.binding_digest,
+                    "source_revision": members[0].source_commit_oid if len(members) == 1 else None,
+                    "capability_grants": [grant.identity for grant in
+                                          record.binding.capability_grants]}
+        return None
 
     def bind_requirements(self, work_id: UUID, effects: list[dict], *,
         authority_identity: str) -> dict:
@@ -207,6 +258,8 @@ class GuardianAssuranceClient:
             lineage = None if task is None else task.decision_context
             basis = {"preview_id": str(session.id), "candidate_id": str(session.candidate_id),
                 "candidate_fingerprint": session.candidate_fingerprint, "requirements": governed,
+                "evidence_contract_version": ("governed-obligation-v1" if lineage is not None
+                    and lineage.surface == "MANAGED_PRODUCT_WEB_UI" else "legacy-v1"),
                 "pwu_id": None if unit is None else str(unit.id), "lineage_refs": refs,
                 "verification_ids": [str(record.id) for record in records],
                 "task_fingerprint": None if task is None else task.content_fingerprint}
@@ -214,6 +267,8 @@ class GuardianAssuranceClient:
                 json.dumps(basis, sort_keys=True).encode()).hexdigest())
             protected_context = _protected_context_for_guardian(task, records)
             request = AssuranceRequest(request_id=request_id,
+            evidence_contract_version=("governed-obligation-v1" if lineage is not None
+                and lineage.surface == "MANAGED_PRODUCT_WEB_UI" else "legacy-v1"),
             product_ref=f"product:{product_id}" if product_id else f"work-product:{session.work_id}",
             work_ref=f"work:{session.work_id}",
             governed_intent_ref=governed["governed_basis_ref"],
