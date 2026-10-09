@@ -288,3 +288,30 @@ This decision record:
 - Does not make future architecture a current capability
 
 All concrete provider integrations, including YiJue integration, unified Decision Intelligence reuse, and Intelligence Fabric composition remain Future Architecture Directions / Not Implemented. A lightweight bootstrap provider remains an allowed validation option rather than a committed MVP deliverable.
+
+## Stochastic-native Engineering — Program ADR-0002
+
+- **Authority / Owner:** Human Governor Accepted; Software Production System Program owns the invariant.
+- **Fixed source:** [ADR-0002 at 1e2c1fdf37d9252c0a9bd480fc2ff15c88d0fee1](https://github.com/hengyizhiyuan/software-production-system/blob/1e2c1fdf37d9252c0a9bd480fc2ff15c88d0fee1/docs/04-decisions/ADR-0002-STOCHASTIC-NATIVE-ENGINEERING.md).
+- **Program publication:** [PR #1](https://github.com/hengyizhiyuan/software-production-system/pull/1), merged to authoritative main on 2026-10-09, publication commit ef06e26d3865bdcbba1a112ce6b25a2ebd24577b.
+- **Local adoption:** Architecture / Decision / Governance / Context Entry documentation. The containing commit's membership in Watt's authoritative default branch determines its local publication; a task branch alone does not.
+- **Implementation / qualification:** Not established by this adoption.
+
+Watt applies the Program invariant at the existing WIC/IRK, Engineering Semantic
+Truth, SPG lifecycle, Context, planning, Executor, Verification and Human Gate
+boundaries. Accepted facts, Source Identity, versions, provenance, effect permits
+and authority remain strict. Model reasoning, plans, implementation strategies
+and candidate check representations may vary; the responsible existing Owner
+validates candidates and uses bounded Self-Refine / Self-Converge or truthful
+termination. No new coordinator or parallel lifecycle is created.
+
+Content and Git Diff verification remain with their existing verification
+capabilities. Guardian retains independent evidence and Assurance judgment;
+ECF retains authority-aware context discovery, versioning and projection. Watt
+does not replace their decisions with its own declaration or weaken their gates.
+
+Future implementation follows the
+[Mission Contract capability review](ai-native-development-execution-principles.md#stochastic-native-capability-review)
+and existing exact-revision qualification. Existing code, N1/GOF evidence,
+Candidates, Decisions and Quality Ledger remain historical facts; this record
+neither reclassifies their outcomes nor declares conformance.

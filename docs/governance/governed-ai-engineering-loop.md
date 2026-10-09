@@ -52,4 +52,11 @@ As the platform matures, lower-value manual checks may be assisted or replaced b
 
 The governed loop uses Controlled Autonomy. AI coordinates understanding, planning, decomposition, execution, feedback analysis, and adjustment. The Human Governor retains Goal Authority, Strategic Direction, Major Trade-off, Risk Acceptance, and Final Governance.
 
+## Program invariant and model capability review
 
+The fixed [Program ADR-0002](../architecture/program-architecture-decisions.md#stochastic-native-engineering--program-adr-0002)
+is the authoritative stochastic-native engineering constraint. New or materially
+changed model capabilities use the existing
+[Mission Contract review](../architecture/ai-native-development-execution-principles.md#stochastic-native-capability-review).
+Role ownership, independent Assurance and Acceptance Authority remain unchanged.
+Documentation adoption is separate from Runtime conformance qualification.

@@ -68,6 +68,14 @@ runtime, alternate executor or hidden fallback. Provider/model identity and a
 secret reference travel through infrastructure configuration; raw API keys do
 not enter prompts, Work Reality, Production Records or Self-Refine evidence.
 
+The existing Owner-specific convergence design is subject to the fixed
+[Program ADR-0002](program-architecture-decisions.md#stochastic-native-engineering--program-adr-0002).
+Reuse its deterministic identity, contract, evidence and authority checks while
+allowing legitimate candidate variation. Do not replace semantic intelligence
+with growing expression aliases, case branches or weakened expectations.
+This reference preserves the current Self-Refine / Self-Converge design and its
+historical qualification scope; it does not certify broader Runtime conformance.
+
 Self-Refine is **governed iterative convergence for stochastic model-mediated
 production**. Generation produces a candidate; its owning boundary validates
 that candidate against the exact current intent, Reality, contract and
