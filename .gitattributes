@@ -8,3 +8,6 @@ docs/evidence/lifecycle/verification-logs/*.xml -whitespace
 docs/evidence/action-generalization/**/*.log -whitespace
 docs/evidence/action-generalization/**/*.xml -whitespace
 docs/evidence/action-generalization/**/*.sse -whitespace
+# Export sample hashes are calculated from LF bytes inside the adjacent ZIPs.
+docs/evidence/admin-work-diagnostic-export-v1/samples/**/*.md text eol=lf
+docs/evidence/admin-work-diagnostic-export-v1/samples/**/*.json text eol=lf

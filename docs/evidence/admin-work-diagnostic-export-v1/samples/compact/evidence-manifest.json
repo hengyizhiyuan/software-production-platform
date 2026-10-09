@@ -1,0 +1,44 @@
+{
+  "capture_consistency": "NON_ATOMIC_ACROSS_OWNERS",
+  "capture_timestamp": "2026-10-09T10:42:54.319898+00:00",
+  "capture_warnings": [
+    "Live Work/Registry, owner database rows and Preview/Guardian files were read at separate instants; no global atomic snapshot."
+  ],
+  "evidence_scope": "selected authorized Work only",
+  "evidence_source": "ProductionTraceService + WorkRegistryService (existing owners)",
+  "export_mode": "compact",
+  "exported_files": {
+    "diagnosis-context.md": {
+      "bytes": 892,
+      "sha256": "b5fe16f149c25eafcc3d62c93099cf812856b3197d79ecc66bdc5102a2d4d2e2"
+    },
+    "report.md": {
+      "bytes": 3293,
+      "sha256": "7342f784ecc5b74607c77a490728fc9a74c18b0851ca5985ef75c3f97a9d12fa"
+    },
+    "trace.json": {
+      "bytes": 2365,
+      "sha256": "a08886fc0803df214a1e55e519d5e93418e0acd50b028b413095ce04e1502d71"
+    }
+  },
+  "individual_download_consistency": "Each file request is a new live capture; hashes in this manifest apply only to files from the same ZIP capture.",
+  "manifest_hash_strategy": "Manifest lists only other files; it does not hash itself.",
+  "missing_evidence": [
+    "IRK: NOT_OBSERVED_OR_NOT_REACHED",
+    "PWU: NOT_OBSERVED_OR_NOT_REACHED",
+    "Candidate: NOT_OBSERVED_OR_NOT_REACHED",
+    "Guardian: NOT_OBSERVED_OR_NOT_REACHED"
+  ],
+  "qualification_scope": "Export only; no Work or Quality PASS claim",
+  "redaction_summary": {
+    "policy": "field suppression + free-text credentials, URL, personal data redaction",
+    "redacted_values": 5,
+    "shortened_texts": 0
+  },
+  "runtime_owner_identity": "LIVE_ENTITY_LOOKUP; per-event Owner/source_ref in trace.json",
+  "schema_version": "watt-work-diagnostic-v1",
+  "source_revision": null,
+  "source_tree": null,
+  "truncated_records": {},
+  "work_id": "00000000-0000-4000-8000-000000000001"
+}
