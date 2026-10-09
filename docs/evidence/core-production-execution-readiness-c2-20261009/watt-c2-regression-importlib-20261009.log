@@ -1,0 +1,721 @@
+.............................EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE [ 91%]
+EEEEEEE                                                                  [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_both_actual_admission_paths_reach_independent_guardian[work] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 476
+  def test_both_actual_admission_paths_reach_independent_guardian(chain, record_property):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_both_actual_admission_paths_reach_independent_guardian[steering] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 476
+  def test_both_actual_admission_paths_reach_independent_guardian(chain, record_property):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_native_rejects_binding_loss_drift_and_injection[work-missing] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 518
+  @pytest.mark.parametrize("corruption", ("missing", "stale", "injected", "constraint_identity"))
+  def test_native_rejects_binding_loss_drift_and_injection(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_native_rejects_binding_loss_drift_and_injection[work-stale] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 518
+  @pytest.mark.parametrize("corruption", ("missing", "stale", "injected", "constraint_identity"))
+  def test_native_rejects_binding_loss_drift_and_injection(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_native_rejects_binding_loss_drift_and_injection[work-injected] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 518
+  @pytest.mark.parametrize("corruption", ("missing", "stale", "injected", "constraint_identity"))
+  def test_native_rejects_binding_loss_drift_and_injection(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_native_rejects_binding_loss_drift_and_injection[work-constraint_identity] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 518
+  @pytest.mark.parametrize("corruption", ("missing", "stale", "injected", "constraint_identity"))
+  def test_native_rejects_binding_loss_drift_and_injection(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_native_rejects_binding_loss_drift_and_injection[steering-missing] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 518
+  @pytest.mark.parametrize("corruption", ("missing", "stale", "injected", "constraint_identity"))
+  def test_native_rejects_binding_loss_drift_and_injection(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_native_rejects_binding_loss_drift_and_injection[steering-stale] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 518
+  @pytest.mark.parametrize("corruption", ("missing", "stale", "injected", "constraint_identity"))
+  def test_native_rejects_binding_loss_drift_and_injection(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_native_rejects_binding_loss_drift_and_injection[steering-injected] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 518
+  @pytest.mark.parametrize("corruption", ("missing", "stale", "injected", "constraint_identity"))
+  def test_native_rejects_binding_loss_drift_and_injection(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_native_rejects_binding_loss_drift_and_injection[steering-constraint_identity] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 518
+  @pytest.mark.parametrize("corruption", ("missing", "stale", "injected", "constraint_identity"))
+  def test_native_rejects_binding_loss_drift_and_injection(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_actual_repository_verification_rejects_source_identity_drift[work-fact_identity] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 544
+  @pytest.mark.parametrize("corruption", ("fact_identity", "work_revision", "candidate_revision", "candidate_tree"))
+  def test_actual_repository_verification_rejects_source_identity_drift(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_actual_repository_verification_rejects_source_identity_drift[work-work_revision] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 544
+  @pytest.mark.parametrize("corruption", ("fact_identity", "work_revision", "candidate_revision", "candidate_tree"))
+  def test_actual_repository_verification_rejects_source_identity_drift(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_actual_repository_verification_rejects_source_identity_drift[work-candidate_revision] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 544
+  @pytest.mark.parametrize("corruption", ("fact_identity", "work_revision", "candidate_revision", "candidate_tree"))
+  def test_actual_repository_verification_rejects_source_identity_drift(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_actual_repository_verification_rejects_source_identity_drift[work-candidate_tree] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 544
+  @pytest.mark.parametrize("corruption", ("fact_identity", "work_revision", "candidate_revision", "candidate_tree"))
+  def test_actual_repository_verification_rejects_source_identity_drift(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_actual_repository_verification_rejects_source_identity_drift[steering-fact_identity] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 544
+  @pytest.mark.parametrize("corruption", ("fact_identity", "work_revision", "candidate_revision", "candidate_tree"))
+  def test_actual_repository_verification_rejects_source_identity_drift(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_actual_repository_verification_rejects_source_identity_drift[steering-work_revision] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 544
+  @pytest.mark.parametrize("corruption", ("fact_identity", "work_revision", "candidate_revision", "candidate_tree"))
+  def test_actual_repository_verification_rejects_source_identity_drift(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_revision] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 544
+  @pytest.mark.parametrize("corruption", ("fact_identity", "work_revision", "candidate_revision", "candidate_tree"))
+  def test_actual_repository_verification_rejects_source_identity_drift(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_tree] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 544
+  @pytest.mark.parametrize("corruption", ("fact_identity", "work_revision", "candidate_revision", "candidate_tree"))
+  def test_actual_repository_verification_rejects_source_identity_drift(chain, corruption):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_revision] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 582
+  @pytest.mark.parametrize("field", (
+      "source_baseline_revision", "source_baseline_tree", "work_reality_revision_id", "pwu_id",
+      "qualified_output_revision", "qualified_output_tree",
+  ))
+  def test_guardian_independently_rejects_input_output_and_work_lineage_drift(chain, field):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_tree] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 582
+  @pytest.mark.parametrize("field", (
+      "source_baseline_revision", "source_baseline_tree", "work_reality_revision_id", "pwu_id",
+      "qualified_output_revision", "qualified_output_tree",
+  ))
+  def test_guardian_independently_rejects_input_output_and_work_lineage_drift(chain, field):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-work_reality_revision_id] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 582
+  @pytest.mark.parametrize("field", (
+      "source_baseline_revision", "source_baseline_tree", "work_reality_revision_id", "pwu_id",
+      "qualified_output_revision", "qualified_output_tree",
+  ))
+  def test_guardian_independently_rejects_input_output_and_work_lineage_drift(chain, field):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-pwu_id] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 582
+  @pytest.mark.parametrize("field", (
+      "source_baseline_revision", "source_baseline_tree", "work_reality_revision_id", "pwu_id",
+      "qualified_output_revision", "qualified_output_tree",
+  ))
+  def test_guardian_independently_rejects_input_output_and_work_lineage_drift(chain, field):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_revision] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 582
+  @pytest.mark.parametrize("field", (
+      "source_baseline_revision", "source_baseline_tree", "work_reality_revision_id", "pwu_id",
+      "qualified_output_revision", "qualified_output_tree",
+  ))
+  def test_guardian_independently_rejects_input_output_and_work_lineage_drift(chain, field):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_tree] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 582
+  @pytest.mark.parametrize("field", (
+      "source_baseline_revision", "source_baseline_tree", "work_reality_revision_id", "pwu_id",
+      "qualified_output_revision", "qualified_output_tree",
+  ))
+  def test_guardian_independently_rejects_input_output_and_work_lineage_drift(chain, field):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_revision] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 582
+  @pytest.mark.parametrize("field", (
+      "source_baseline_revision", "source_baseline_tree", "work_reality_revision_id", "pwu_id",
+      "qualified_output_revision", "qualified_output_tree",
+  ))
+  def test_guardian_independently_rejects_input_output_and_work_lineage_drift(chain, field):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_tree] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 582
+  @pytest.mark.parametrize("field", (
+      "source_baseline_revision", "source_baseline_tree", "work_reality_revision_id", "pwu_id",
+      "qualified_output_revision", "qualified_output_tree",
+  ))
+  def test_guardian_independently_rejects_input_output_and_work_lineage_drift(chain, field):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-work_reality_revision_id] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 582
+  @pytest.mark.parametrize("field", (
+      "source_baseline_revision", "source_baseline_tree", "work_reality_revision_id", "pwu_id",
+      "qualified_output_revision", "qualified_output_tree",
+  ))
+  def test_guardian_independently_rejects_input_output_and_work_lineage_drift(chain, field):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-pwu_id] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 582
+  @pytest.mark.parametrize("field", (
+      "source_baseline_revision", "source_baseline_tree", "work_reality_revision_id", "pwu_id",
+      "qualified_output_revision", "qualified_output_tree",
+  ))
+  def test_guardian_independently_rejects_input_output_and_work_lineage_drift(chain, field):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_revision] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 582
+  @pytest.mark.parametrize("field", (
+      "source_baseline_revision", "source_baseline_tree", "work_reality_revision_id", "pwu_id",
+      "qualified_output_revision", "qualified_output_tree",
+  ))
+  def test_guardian_independently_rejects_input_output_and_work_lineage_drift(chain, field):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_tree] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 582
+  @pytest.mark.parametrize("field", (
+      "source_baseline_revision", "source_baseline_tree", "work_reality_revision_id", "pwu_id",
+      "qualified_output_revision", "qualified_output_tree",
+  ))
+  def test_guardian_independently_rejects_input_output_and_work_lineage_drift(chain, field):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_rejects_missing_independent_owner_records[work-verification] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 596
+  @pytest.mark.parametrize("missing_kind", (
+      "verification", "candidate", "native-attempt", "source-baseline", "proposed-snapshot", "pwu",
+  ))
+  def test_guardian_rejects_missing_independent_owner_records(chain, missing_kind):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_rejects_missing_independent_owner_records[work-candidate] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 596
+  @pytest.mark.parametrize("missing_kind", (
+      "verification", "candidate", "native-attempt", "source-baseline", "proposed-snapshot", "pwu",
+  ))
+  def test_guardian_rejects_missing_independent_owner_records(chain, missing_kind):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_rejects_missing_independent_owner_records[work-native-attempt] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 596
+  @pytest.mark.parametrize("missing_kind", (
+      "verification", "candidate", "native-attempt", "source-baseline", "proposed-snapshot", "pwu",
+  ))
+  def test_guardian_rejects_missing_independent_owner_records(chain, missing_kind):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_rejects_missing_independent_owner_records[work-source-baseline] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 596
+  @pytest.mark.parametrize("missing_kind", (
+      "verification", "candidate", "native-attempt", "source-baseline", "proposed-snapshot", "pwu",
+  ))
+  def test_guardian_rejects_missing_independent_owner_records(chain, missing_kind):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_rejects_missing_independent_owner_records[work-proposed-snapshot] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 596
+  @pytest.mark.parametrize("missing_kind", (
+      "verification", "candidate", "native-attempt", "source-baseline", "proposed-snapshot", "pwu",
+  ))
+  def test_guardian_rejects_missing_independent_owner_records(chain, missing_kind):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_rejects_missing_independent_owner_records[work-pwu] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 596
+  @pytest.mark.parametrize("missing_kind", (
+      "verification", "candidate", "native-attempt", "source-baseline", "proposed-snapshot", "pwu",
+  ))
+  def test_guardian_rejects_missing_independent_owner_records(chain, missing_kind):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_rejects_missing_independent_owner_records[steering-verification] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 596
+  @pytest.mark.parametrize("missing_kind", (
+      "verification", "candidate", "native-attempt", "source-baseline", "proposed-snapshot", "pwu",
+  ))
+  def test_guardian_rejects_missing_independent_owner_records(chain, missing_kind):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_rejects_missing_independent_owner_records[steering-candidate] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 596
+  @pytest.mark.parametrize("missing_kind", (
+      "verification", "candidate", "native-attempt", "source-baseline", "proposed-snapshot", "pwu",
+  ))
+  def test_guardian_rejects_missing_independent_owner_records(chain, missing_kind):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_rejects_missing_independent_owner_records[steering-native-attempt] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 596
+  @pytest.mark.parametrize("missing_kind", (
+      "verification", "candidate", "native-attempt", "source-baseline", "proposed-snapshot", "pwu",
+  ))
+  def test_guardian_rejects_missing_independent_owner_records(chain, missing_kind):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_rejects_missing_independent_owner_records[steering-source-baseline] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 596
+  @pytest.mark.parametrize("missing_kind", (
+      "verification", "candidate", "native-attempt", "source-baseline", "proposed-snapshot", "pwu",
+  ))
+  def test_guardian_rejects_missing_independent_owner_records(chain, missing_kind):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_rejects_missing_independent_owner_records[steering-proposed-snapshot] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 596
+  @pytest.mark.parametrize("missing_kind", (
+      "verification", "candidate", "native-attempt", "source-baseline", "proposed-snapshot", "pwu",
+  ))
+  def test_guardian_rejects_missing_independent_owner_records(chain, missing_kind):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_rejects_missing_independent_owner_records[steering-pwu] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 596
+  @pytest.mark.parametrize("missing_kind", (
+      "verification", "candidate", "native-attempt", "source-baseline", "proposed-snapshot", "pwu",
+  ))
+  def test_guardian_rejects_missing_independent_owner_records(chain, missing_kind):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-deploy] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 614
+  @pytest.mark.parametrize("component", ("deploy", "publish"))
+  def test_real_delivery_authorization_entrypoints_deny_prohibited_effects(chain, component, tmp_path):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-publish] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 614
+  @pytest.mark.parametrize("component", ("deploy", "publish"))
+  def test_real_delivery_authorization_entrypoints_deny_prohibited_effects(chain, component, tmp_path):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-deploy] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 614
+  @pytest.mark.parametrize("component", ("deploy", "publish"))
+  def test_real_delivery_authorization_entrypoints_deny_prohibited_effects(chain, component, tmp_path):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-publish] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 614
+  @pytest.mark.parametrize("component", ("deploy", "publish"))
+  def test_real_delivery_authorization_entrypoints_deny_prohibited_effects(chain, component, tmp_path):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_contract_rejects_fabricated_future_human_authority[work-acceptance_state-ACCEPTED] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 636
+  @pytest.mark.parametrize("field,value", (
+      ("acceptance_state", "ACCEPTED"), ("delivery_authorization_state", "AUTHORIZED"),
+  ))
+  def test_guardian_contract_rejects_fabricated_future_human_authority(chain, field, value):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_contract_rejects_fabricated_future_human_authority[work-delivery_authorization_state-AUTHORIZED] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 636
+  @pytest.mark.parametrize("field,value", (
+      ("acceptance_state", "ACCEPTED"), ("delivery_authorization_state", "AUTHORIZED"),
+  ))
+  def test_guardian_contract_rejects_fabricated_future_human_authority(chain, field, value):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_contract_rejects_fabricated_future_human_authority[steering-acceptance_state-ACCEPTED] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 636
+  @pytest.mark.parametrize("field,value", (
+      ("acceptance_state", "ACCEPTED"), ("delivery_authorization_state", "AUTHORIZED"),
+  ))
+  def test_guardian_contract_rejects_fabricated_future_human_authority(chain, field, value):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+_ ERROR at setup of test_guardian_contract_rejects_fabricated_future_human_authority[steering-delivery_authorization_state-AUTHORIZED] _
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 636
+  @pytest.mark.parametrize("field,value", (
+      ("acceptance_state", "ACCEPTED"), ("delivery_authorization_state", "AUTHORIZED"),
+  ))
+  def test_guardian_contract_rejects_fabricated_future_human_authority(chain, field, value):
+file /qualification/tests/integration/test_c1_contract_continuity.py, line 103
+  @pytest.fixture(autouse=True)
+  def c1_schema(postgres_database, monkeypatch):
+E       fixture 'postgres_database' not found
+>       available fixtures: _legacy_test_auth_mode, admitted_contract, anyio_backend, anyio_backend_name, anyio_backend_options, c1_schema, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, chain, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/qualification/tests/integration/test_c1_contract_continuity.py:103
+=========================== short test summary info ============================
+ERROR tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian[work]
+ERROR tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian[steering]
+ERROR tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-missing]
+ERROR tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-stale]
+ERROR tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-injected]
+ERROR tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-constraint_identity]
+ERROR tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-missing]
+ERROR tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-stale]
+ERROR tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-injected]
+ERROR tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-constraint_identity]
+ERROR tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-fact_identity]
+ERROR tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-work_revision]
+ERROR tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-candidate_revision]
+ERROR tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-candidate_tree]
+ERROR tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-fact_identity]
+ERROR tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-work_revision]
+ERROR tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_revision]
+ERROR tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_tree]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_revision]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_tree]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-work_reality_revision_id]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-pwu_id]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_revision]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_tree]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_revision]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_tree]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-work_reality_revision_id]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-pwu_id]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_revision]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_tree]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-verification]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-candidate]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-native-attempt]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-source-baseline]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-proposed-snapshot]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-pwu]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-verification]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-candidate]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-native-attempt]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-source-baseline]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-proposed-snapshot]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-pwu]
+ERROR tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-deploy]
+ERROR tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-publish]
+ERROR tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-deploy]
+ERROR tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-publish]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[work-acceptance_state-ACCEPTED]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[work-delivery_authorization_state-AUTHORIZED]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[steering-acceptance_state-ACCEPTED]
+ERROR tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[steering-delivery_authorization_state-AUTHORIZED]
+29 passed, 50 errors in 29.02s

@@ -1,0 +1,22 @@
+{
+  "captured_at_utc": "2026-10-09T07:52:00.752646+00:00",
+  "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+  "pwu_id": "f918050c-4937-40b4-b60f-1b59aad2dba0",
+  "attempt_id": "74ba6435-c067-4277-9d2d-2d0bae4a87a5",
+  "workspace_id": "c2d92a24-cf95-5a23-8e50-7edfd5cde42e",
+  "native_workspace": "/var/lib/spg/native-workspaces/74ba6435-c067-4277-9d2d-2d0bae4a87a5",
+  "native_head_at_freeze": "a52e2d39683642c2ecb5c89bbf1761411cc715a9",
+  "snapshot_object_repository": "/var/lib/spg/managed-source/works/b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+  "source_revision": "a52e2d39683642c2ecb5c89bbf1761411cc715a9",
+  "source_tree": "3bc248484b72b997aa0c1189b4fec38d4da3d018",
+  "output_revision": "7fcaeb4498b6f0bc2ca4d153414384308cb70cd9",
+  "output_tree": "95b94416d825a3e87e85d2244eaa18300d390a6d",
+  "changed_paths": [
+    "A\tindex.html"
+  ],
+  "artifact_sha256": "4f70e4b6b34b02b77a40f838643a8889fe3a2415a336c0efad14e84ac411839c",
+  "pack_sha256": "0fa66cccdcf02876fe205016eec847a7e281934c423fe48dfb01b2a64dcfc2f1",
+  "snapshot_owner": "proposed_repository_snapshots",
+  "candidate_sealed": false,
+  "qualification_scope": "read-only Git object observation; not Verification PASS or Human Acceptance"
+}

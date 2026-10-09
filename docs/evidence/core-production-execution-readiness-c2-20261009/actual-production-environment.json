@@ -1,0 +1,8 @@
+{
+  "container_id": "40a95832d05f210b3c40cb497742cda759286f4da371fbc6be0ffa49ce4415e9",
+  "currently_inspectable": false,
+  "current_docker_image_observation": "UNKNOWN",
+  "scope": "Container absent at freeze; use original persistent WHERE Owner binding and transitions, never a replacement container",
+  "requested_immutable_image_id": "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+  "captured_at_utc": "2026-10-09T07:51:59.759395+00:00"
+}

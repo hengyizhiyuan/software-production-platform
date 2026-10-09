@@ -1,0 +1,14 @@
+{
+  "qualification": "C2",
+  "isolated": true,
+  "api_service": "watt-c2-api-20261009",
+  "api_base_url": "http://watt-c2-api-20261009:8000",
+  "source_revision": "88f1d9805d3ed1aa779ed3c78902b193fae240f8",
+  "image_id": "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+  "database_name": "spg_c2_qualification_20261009",
+  "captured_at_utc": "2026-10-09T07:27:32.350645+00:00",
+  "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+  "provider_ready": true,
+  "provider_readiness_scope": "configuration only; no Provider request yet",
+  "deployment_receipt": "runtime-role-preparation.json"
+}

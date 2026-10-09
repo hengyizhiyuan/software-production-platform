@@ -1,0 +1,53 @@
+{
+  "completed_at_utc": "2026-10-09T07:32:25.017223Z",
+  "http_status": 200,
+  "input_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+  "method": "GET",
+  "path": "/api/works/b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+  "projection": {
+    "automatic_progression_state": "WAITING_PRODUCTION",
+    "control_state_valid": true,
+    "current_production_cycle_number": 1,
+    "current_production_cycle_trusted": false,
+    "current_production_run_id": "3577f872-af8d-48c7-b1da-b036589351a6",
+    "current_production_step": "PRODUCE",
+    "current_steering_step_id": "3775550a-dc06-484f-bab7-04c9a1688d19",
+    "current_steering_step_type": "PRODUCE",
+    "current_work_reality_revision_id": "f9473edd-7b80-58df-ab5b-129e4dd5ec59",
+    "execution_progress": {
+      "started_at": "2026-10-09T07:31:20.120344Z",
+      "updated_at": "2026-10-09T07:31:46.039796Z"
+    },
+    "human_attention_required": false,
+    "last_stop_reason": "PRODUCTION_RUNNING",
+    "latest_trusted_runtime_commit_id": null,
+    "mode": "LONG_LIVED_STEERING",
+    "next_owner": "EXECUTOR",
+    "product_id": "f31b1b12-36e3-48f2-966c-d8574f23999c",
+    "status": "RUNNING",
+    "steering_enabled": true,
+    "target_kind": "CODE_WORK",
+    "work_complete": false,
+    "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3"
+  },
+  "qualification_claim": "OBSERVATION_ONLY_NOT_WORK_PASS",
+  "request_body_sha256": null,
+  "response_body_sha256": "d48e6549543a152beb65b0a1eb1382c46b97d1b65a99b18f4b06b7cc410a2d56",
+  "response_bytes_observed": 6913,
+  "response_json_valid": true,
+  "run_id": "6cc07c85-be58-4c15-8c78-57187146a32a",
+  "runtime_identity": {
+    "api_base_url": "http://watt-c2-api-20261009:8000",
+    "api_service": "watt-c2-api-20261009",
+    "captured_at_utc": "2026-10-09T07:27:32.350645+00:00",
+    "database_name": "spg_c2_qualification_20261009",
+    "image_id": "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+    "isolated": true,
+    "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+    "provider_ready": true,
+    "qualification": "C2",
+    "source_revision": "88f1d9805d3ed1aa779ed3c78902b193fae240f8"
+  },
+  "schema": "c2-normal-entry-api-observation-v1",
+  "started_at_utc": "2026-10-09T07:32:24.824897Z"
+}

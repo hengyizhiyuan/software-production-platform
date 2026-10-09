@@ -1,0 +1,31 @@
+{
+  "completed_at_utc": "2026-10-09T07:30:11.359871Z",
+  "http_status": 201,
+  "input_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+  "method": "POST",
+  "path": "/api/products",
+  "projection": {
+    "id": "f31b1b12-36e3-48f2-966c-d8574f23999c",
+    "managed_source": {}
+  },
+  "qualification_claim": "OBSERVATION_ONLY_NOT_WORK_PASS",
+  "request_body_sha256": "fbc134d700882321bb912ddf078d56ea34bcb0ce42968828c3f1efc399f789c2",
+  "response_body_sha256": "abe5c7d7eefc0eb0d0cdfa2862c13e51a2281d283bd233d7b0aeb7ed29f35e30",
+  "response_bytes_observed": 1342,
+  "response_json_valid": true,
+  "run_id": "6cc07c85-be58-4c15-8c78-57187146a32a",
+  "runtime_identity": {
+    "api_base_url": "http://watt-c2-api-20261009:8000",
+    "api_service": "watt-c2-api-20261009",
+    "captured_at_utc": "2026-10-09T07:27:32.350645+00:00",
+    "database_name": "spg_c2_qualification_20261009",
+    "image_id": "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+    "isolated": true,
+    "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+    "provider_ready": true,
+    "qualification": "C2",
+    "source_revision": "88f1d9805d3ed1aa779ed3c78902b193fae240f8"
+  },
+  "schema": "c2-normal-entry-api-observation-v1",
+  "started_at_utc": "2026-10-09T07:30:08.440075Z"
+}

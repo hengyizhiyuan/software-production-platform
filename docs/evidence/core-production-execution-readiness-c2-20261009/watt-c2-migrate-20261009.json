@@ -1,0 +1,32 @@
+{
+  "name": "watt-c2-migrate-20261009",
+  "container_id": "448079f70deb0fb32964e29913dcc9c8c611c0b3823ab822faac9d43e2996939",
+  "image_id": "sha256:6ecaf8f204d7503278671270919d2b5331ea437a016133f3c2c4b56821834b45",
+  "actual_user": "10001:10001",
+  "started_at": "2026-10-09T07:17:43.582096+00:00",
+  "finished_at": "2026-10-09T07:17:51.985511+00:00",
+  "elapsed_seconds": 8.403419372974895,
+  "exit_code": 0,
+  "command": [
+    "python",
+    "-m",
+    "alembic",
+    "upgrade",
+    "head"
+  ],
+  "network_mode": "container:4168bf0bddac673e5475b04a1490a2143fddabf3370a7525962aaa326967c7b3",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c2-execution-readiness-20261009/evidence",
+      "Destination": "/c2-evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "database_name": "spg_c2_qualification_20261009",
+  "model_calls": 0,
+  "source_overlay": false,
+  "docker_socket": false
+}

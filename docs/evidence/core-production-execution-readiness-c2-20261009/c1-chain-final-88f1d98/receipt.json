@@ -1,0 +1,141 @@
+{
+  "artifacts": [
+    {
+      "path": "c1-chain.xml",
+      "redaction_count": 0,
+      "sha256": "8c6ba0247458fdd2b58a1a838c78f605adecf761fff0c0621e8035158d0efeff"
+    },
+    {
+      "path": "c1-owner-records/immediate_production-12e47abc-b2b4-4e4a-95fa-0cd3ea49d9de.json",
+      "redaction_count": 0,
+      "sha256": "ac8492ae799623957ab7e218c5dde7dcabf019bfe9111c8e4c5cfc08e995939f"
+    },
+    {
+      "path": "c1-owner-records/long_lived_steering-9aba6f9d-19c5-5cc6-b8d7-1f976fdbd38e.json",
+      "redaction_count": 0,
+      "sha256": "610744439901517d2d3ec202bce7a17eaac307a556fd7cd6c803f3b70e6cbac0"
+    },
+    {
+      "path": "console.txt",
+      "redaction_count": 0,
+      "sha256": "2644e440f248bed4414a6fc95726a9fd1344e637410354b35d7cea18357498cd"
+    }
+  ],
+  "controlled_fixture_work_records_created": true,
+  "credential_redaction_count": 0,
+  "docker_identity": {
+    "configured_user": "10001:10001",
+    "container_id": "c4051f44f52f846df4e3cbf5eeb3fd9a3c7cb651a05e432b8729b53f958cb60c",
+    "container_name": "c2-c1-chain-20261009",
+    "image_id": "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+    "labels": {
+      "org.opencontainers.image.revision": "88f1d9805d3ed1aa779ed3c78902b193fae240f8",
+      "watt.c2.base-image-id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+      "watt.c2.ecf-revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "watt.c2.ecf-tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+      "watt.c2.ecf-unsupported-revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "watt.c2.guardian-revision": "6b974748df22d84b88f6908ea8ee90a9752fd183",
+      "watt.c2.guardian-tree": "c9a1bf4e102d8365a1ce27c9cced88f8ab0cd129",
+      "watt.c2.purpose": "c1-chain-regression",
+      "watt.c2.source-tree": "69a35717087bfb46c18f5cfc9616a7a2a0acbdf7",
+      "watt.qualification.phase": "C2"
+    },
+    "mounts": [
+      {
+        "Destination": "/c2-raw",
+        "RW": true,
+        "Source": "/data/watt/c2-execution-readiness-20261009/private/raw/c1-chain-final-88f1d98",
+        "Type": "bind"
+      },
+      {
+        "Destination": "/c2-evidence",
+        "RW": true,
+        "Source": "/data/watt/c2-execution-readiness-20261009/evidence/c1-chain-final-88f1d98",
+        "Type": "bind"
+      }
+    ],
+    "network_mode": "container:4168bf0bddac673e5475b04a1490a2143fddabf3370a7525962aaa326967c7b3",
+    "read_only": true
+  },
+  "ended_at_utc": "2026-10-09T07:37:18.671394+00:00",
+  "exit_code": 0,
+  "image_id": "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+  "junit": {
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "50",
+    "time": "246.083",
+    "timestamp": "2026-10-09T07:33:10.303930+00:00"
+  },
+  "live_model_calls": false,
+  "normal_user_production_work_started": false,
+  "own_runner_removed": true,
+  "prior_setup_errors_preserved": true,
+  "public_path": "/data/watt/c2-execution-readiness-20261009/evidence/c1-chain-final-88f1d98",
+  "qualification_scope": "controlled-C1-contract-regression-only",
+  "raw_private_path": "/data/watt/c2-execution-readiness-20261009/private/raw/c1-chain-final-88f1d98",
+  "resource_sample_scope": "sampled CPU/memory snapshots; not cumulative CPU or full cost",
+  "resource_samples": [
+    {
+      "cpu_percent": "89.70%",
+      "elapsed_seconds": 1.857,
+      "memory_percent": "1.72%",
+      "memory_usage": "17.62MiB / 1GiB",
+      "pids": "1"
+    },
+    {
+      "cpu_percent": "64.51%",
+      "elapsed_seconds": 33.992,
+      "memory_percent": "13.23%",
+      "memory_usage": "135.5MiB / 1GiB",
+      "pids": "1"
+    },
+    {
+      "cpu_percent": "41.61%",
+      "elapsed_seconds": 66.232,
+      "memory_percent": "13.34%",
+      "memory_usage": "136.6MiB / 1GiB",
+      "pids": "1"
+    },
+    {
+      "cpu_percent": "48.66%",
+      "elapsed_seconds": 98.334,
+      "memory_percent": "13.76%",
+      "memory_usage": "140.9MiB / 1GiB",
+      "pids": "2"
+    },
+    {
+      "cpu_percent": "52.80%",
+      "elapsed_seconds": 130.443,
+      "memory_percent": "13.94%",
+      "memory_usage": "142.7MiB / 1GiB",
+      "pids": "2"
+    },
+    {
+      "cpu_percent": "38.23%",
+      "elapsed_seconds": 162.623,
+      "memory_percent": "14.04%",
+      "memory_usage": "143.8MiB / 1GiB",
+      "pids": "1"
+    },
+    {
+      "cpu_percent": "18.39%",
+      "elapsed_seconds": 194.697,
+      "memory_percent": "14.14%",
+      "memory_usage": "144.8MiB / 1GiB",
+      "pids": "1"
+    },
+    {
+      "cpu_percent": "51.07%",
+      "elapsed_seconds": 226.753,
+      "memory_percent": "14.27%",
+      "memory_usage": "146.1MiB / 1GiB",
+      "pids": "1"
+    }
+  ],
+  "schema": "c2-c1-chain-regression-v1",
+  "source_revision": "88f1d9805d3ed1aa779ed3c78902b193fae240f8",
+  "started_at_utc": "2026-10-09T07:33:02.743627+00:00",
+  "wall_seconds": 255.928
+}

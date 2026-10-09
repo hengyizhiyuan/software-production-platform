@@ -1,0 +1,2522 @@
+{
+  "schema": "c2-verification-test-summary-v1",
+  "generated_at_utc": "2026-10-09T08:07:29.187397+00:00",
+  "method": "Offline parsing of retained local JUnit XML and runner receipts; no test execution or service access.",
+  "case_identity_format": "JUnit file attribute + :: + full testcase name, including parametrization; classname retained separately.",
+  "source_identity": {
+    "watt_revision": "88f1d9805d3ed1aa779ed3c78902b193fae240f8",
+    "guardian_revision": "6b974748df22d84b88f6908ea8ee90a9752fd183",
+    "ecf_revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "image_id": "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+    "identity_basis": "Independent-process runner receipts use the same exact image; source/owner revisions are its retained labels in c1-chain-final-88f1d98/receipt.json."
+  },
+  "processes": [
+    {
+      "process_id": "mixed-default",
+      "junit_file": "final-c2-regression-default.xml",
+      "junit_sha256": "7d1564de81ed4a0da47041361e771d9a7b5ec481a0f37b0d44c50674dc5fff25",
+      "runner_receipt_file": "watt-c2-regression-final-20261009.json",
+      "runner_receipt_sha256": "188e35a95ec5296cb0cce5d356cd9b6579caca1787389315d0b256f0ae745b94",
+      "container_id": "6246e14ea964f14a3ad31de886eeac3a22d1334e9ae9ef3536fb633216e1eaed",
+      "image_id": "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+      "exit_code": 1,
+      "started_at_utc": "2026-10-09T07:22:12.185512+00:00",
+      "ended_at_utc": "2026-10-09T07:22:45.800374+00:00",
+      "wall_seconds": 33.614878135034814,
+      "collected_cases": 79,
+      "counts": {
+        "PASS": 29,
+        "FAIL": 0,
+        "ERROR": 50,
+        "SKIP": 0
+      },
+      "duplicate_case_ids": [],
+      "junit_suites": [
+        {
+          "name": "pytest",
+          "declared": {
+            "tests": 79,
+            "errors": 50,
+            "failures": 0,
+            "skipped": 0
+          },
+          "seconds": 26.923,
+          "timestamp": "2026-10-09T07:22:17.009622+00:00"
+        }
+      ],
+      "cases": [
+        {
+          "case_id": "tests/test_c2_workspace_preflight.py::test_exact_host_workspace_observation_is_durable_and_mount_scoped",
+          "classname": "tests.test_c2_workspace_preflight",
+          "file": "tests/test_c2_workspace_preflight.py",
+          "name": "test_exact_host_workspace_observation_is_durable_and_mount_scoped",
+          "status": "PASS",
+          "junit_seconds": 0.107
+        },
+        {
+          "case_id": "tests/test_c2_workspace_preflight.py::test_unavailable_workspace_identifies_the_exact_directory_predicate[missing]",
+          "classname": "tests.test_c2_workspace_preflight",
+          "file": "tests/test_c2_workspace_preflight.py",
+          "name": "test_unavailable_workspace_identifies_the_exact_directory_predicate[missing]",
+          "status": "PASS",
+          "junit_seconds": 2.071
+        },
+        {
+          "case_id": "tests/test_c2_workspace_preflight.py::test_unavailable_workspace_identifies_the_exact_directory_predicate[file]",
+          "classname": "tests.test_c2_workspace_preflight",
+          "file": "tests/test_c2_workspace_preflight.py",
+          "name": "test_unavailable_workspace_identifies_the_exact_directory_predicate[file]",
+          "status": "PASS",
+          "junit_seconds": 2.066
+        },
+        {
+          "case_id": "tests/test_c2_workspace_preflight.py::test_root_symlink_rejection_does_not_acquire_another_workspace",
+          "classname": "tests.test_c2_workspace_preflight",
+          "file": "tests/test_c2_workspace_preflight.py",
+          "name": "test_root_symlink_rejection_does_not_acquire_another_workspace",
+          "status": "PASS",
+          "junit_seconds": 0.078
+        },
+        {
+          "case_id": "tests/test_c2_workspace_preflight.py::test_nested_symlink_remains_rejected",
+          "classname": "tests.test_c2_workspace_preflight",
+          "file": "tests/test_c2_workspace_preflight.py",
+          "name": "test_nested_symlink_remains_rejected",
+          "status": "PASS",
+          "junit_seconds": 0.083
+        },
+        {
+          "case_id": "tests/test_c2_workspace_preflight.py::test_out_of_scope_change_is_rejected_before_effects",
+          "classname": "tests.test_c2_workspace_preflight",
+          "file": "tests/test_c2_workspace_preflight.py",
+          "name": "test_out_of_scope_change_is_rejected_before_effects",
+          "status": "PASS",
+          "junit_seconds": 0.086
+        },
+        {
+          "case_id": "tests/test_c2_workspace_preflight.py::test_changed_head_rejects_exact_source_revision_and_retains_both_identities",
+          "classname": "tests.test_c2_workspace_preflight",
+          "file": "tests/test_c2_workspace_preflight.py",
+          "name": "test_changed_head_rejects_exact_source_revision_and_retains_both_identities",
+          "status": "PASS",
+          "junit_seconds": 0.08
+        },
+        {
+          "case_id": "tests/test_c2_workspace_preflight.py::test_preflight_rejects_nonwritable_directory_for_actual_nonroot_worker",
+          "classname": "tests.test_c2_workspace_preflight",
+          "file": "tests/test_c2_workspace_preflight.py",
+          "name": "test_preflight_rejects_nonwritable_directory_for_actual_nonroot_worker",
+          "status": "PASS",
+          "junit_seconds": 0.063
+        },
+        {
+          "case_id": "tests/test_c2_workspace_preflight.py::test_declared_source_tree_must_match_exact_git_head_tree",
+          "classname": "tests.test_c2_workspace_preflight",
+          "file": "tests/test_c2_workspace_preflight.py",
+          "name": "test_declared_source_tree_must_match_exact_git_head_tree",
+          "status": "PASS",
+          "junit_seconds": 0.075
+        },
+        {
+          "case_id": "tests/test_c2_workspace_preflight.py::test_missing_required_artifact_diagnosis_names_actual_check_target",
+          "classname": "tests.test_c2_workspace_preflight",
+          "file": "tests/test_c2_workspace_preflight.py",
+          "name": "test_missing_required_artifact_diagnosis_names_actual_check_target",
+          "status": "PASS",
+          "junit_seconds": 0.083
+        },
+        {
+          "case_id": "tests/test_production_execution_runtime.py::test_production_context_rejects_wrong_work_and_workspace",
+          "classname": "tests.test_production_execution_runtime",
+          "file": "tests/test_production_execution_runtime.py",
+          "name": "test_production_context_rejects_wrong_work_and_workspace",
+          "status": "PASS",
+          "junit_seconds": 0.071
+        },
+        {
+          "case_id": "tests/test_production_execution_runtime.py::test_document_context_has_separate_exact_work_basis",
+          "classname": "tests.test_production_execution_runtime",
+          "file": "tests/test_production_execution_runtime.py",
+          "name": "test_document_context_has_separate_exact_work_basis",
+          "status": "PASS",
+          "junit_seconds": 0.098
+        },
+        {
+          "case_id": "tests/test_production_execution_runtime.py::test_workspace_result_records_bounded_change_and_diff",
+          "classname": "tests.test_production_execution_runtime",
+          "file": "tests/test_production_execution_runtime.py",
+          "name": "test_workspace_result_records_bounded_change_and_diff",
+          "status": "PASS",
+          "junit_seconds": 0.14
+        },
+        {
+          "case_id": "tests/test_production_execution_runtime.py::test_workspace_verification_rejects_missing_artifact_scope_and_size",
+          "classname": "tests.test_production_execution_runtime",
+          "file": "tests/test_production_execution_runtime.py",
+          "name": "test_workspace_verification_rejects_missing_artifact_scope_and_size",
+          "status": "PASS",
+          "junit_seconds": 0.17
+        },
+        {
+          "case_id": "tests/test_production_execution_runtime.py::test_preflight_waits_boundedly_for_same_exact_workspace",
+          "classname": "tests.test_production_execution_runtime",
+          "file": "tests/test_production_execution_runtime.py",
+          "name": "test_preflight_waits_boundedly_for_same_exact_workspace",
+          "status": "PASS",
+          "junit_seconds": 0.338
+        },
+        {
+          "case_id": "tests/test_production_execution_runtime.py::test_preflight_rejects_symlink_without_waiting_for_other_workspace",
+          "classname": "tests.test_production_execution_runtime",
+          "file": "tests/test_production_execution_runtime.py",
+          "name": "test_preflight_rejects_symlink_without_waiting_for_other_workspace",
+          "status": "PASS",
+          "junit_seconds": 0.063
+        },
+        {
+          "case_id": "tests/integration/test_c2_workspace_preflight_events.py::test_missing_workspace_rejection_persists_exact_diagnosis_before_terminal",
+          "classname": "tests.integration.test_c2_workspace_preflight_events",
+          "file": "tests/integration/test_c2_workspace_preflight_events.py",
+          "name": "test_missing_workspace_rejection_persists_exact_diagnosis_before_terminal",
+          "status": "PASS",
+          "junit_seconds": 4.483
+        },
+        {
+          "case_id": "tests/integration/test_c2_workspace_preflight_events.py::test_preflight_event_rejects_unbound_and_arbitrary_metadata",
+          "classname": "tests.integration.test_c2_workspace_preflight_events",
+          "file": "tests/integration/test_c2_workspace_preflight_events.py",
+          "name": "test_preflight_event_rejects_unbound_and_arbitrary_metadata",
+          "status": "PASS",
+          "junit_seconds": 1.914
+        },
+        {
+          "case_id": "tests/integration/test_native_executor_runtime.py::test_production_worker_records_isolated_change_and_diff_evidence",
+          "classname": "tests.integration.test_native_executor_runtime",
+          "file": "tests/integration/test_native_executor_runtime.py",
+          "name": "test_production_worker_records_isolated_change_and_diff_evidence",
+          "status": "PASS",
+          "junit_seconds": 2.098
+        },
+        {
+          "case_id": "tests/integration/test_native_executor_runtime.py::test_production_worker_verification_failure_cannot_claim_result_ready",
+          "classname": "tests.integration.test_native_executor_runtime",
+          "file": "tests/integration/test_native_executor_runtime.py",
+          "name": "test_production_worker_verification_failure_cannot_claim_result_ready",
+          "status": "PASS",
+          "junit_seconds": 1.987
+        },
+        {
+          "case_id": "tests/integration/test_native_executor_runtime.py::test_production_preflight_failure_keeps_exact_diagnostic_before_terminal",
+          "classname": "tests.integration.test_native_executor_runtime",
+          "file": "tests/integration/test_native_executor_runtime.py",
+          "name": "test_production_preflight_failure_keeps_exact_diagnostic_before_terminal",
+          "status": "PASS",
+          "junit_seconds": 4.0
+        },
+        {
+          "case_id": "tests/test_c1_ecf_contract_compatibility.py::test_selected_owner_managed_request_calls_registered_applicability_contract",
+          "classname": "tests.test_c1_ecf_contract_compatibility",
+          "file": "tests/test_c1_ecf_contract_compatibility.py",
+          "name": "test_selected_owner_managed_request_calls_registered_applicability_contract",
+          "status": "PASS",
+          "junit_seconds": 0.076
+        },
+        {
+          "case_id": "tests/test_c1_ecf_contract_compatibility.py::test_actual_current_main_same_version_rejects_managed_api_explicitly",
+          "classname": "tests.test_c1_ecf_contract_compatibility",
+          "file": "tests/test_c1_ecf_contract_compatibility.py",
+          "name": "test_actual_current_main_same_version_rejects_managed_api_explicitly",
+          "status": "PASS",
+          "junit_seconds": 0.066
+        },
+        {
+          "case_id": "tests/test_c1_ecf_contract_compatibility.py::test_actual_current_main_retains_its_existing_repository_contract",
+          "classname": "tests.test_c1_ecf_contract_compatibility",
+          "file": "tests/test_c1_ecf_contract_compatibility.py",
+          "name": "test_actual_current_main_retains_its_existing_repository_contract",
+          "status": "PASS",
+          "junit_seconds": 0.087
+        },
+        {
+          "case_id": "tests/test_c1_ecf_contract_compatibility.py::test_managed_registration_cannot_drop_base_or_required_applicability[REPOSITORY_REALITY]",
+          "classname": "tests.test_c1_ecf_contract_compatibility",
+          "file": "tests/test_c1_ecf_contract_compatibility.py",
+          "name": "test_managed_registration_cannot_drop_base_or_required_applicability[REPOSITORY_REALITY]",
+          "status": "PASS",
+          "junit_seconds": 0.038
+        },
+        {
+          "case_id": "tests/test_c1_ecf_contract_compatibility.py::test_managed_registration_cannot_drop_base_or_required_applicability[APPROVED_CONSTRAINT]",
+          "classname": "tests.test_c1_ecf_contract_compatibility",
+          "file": "tests/test_c1_ecf_contract_compatibility.py",
+          "name": "test_managed_registration_cannot_drop_base_or_required_applicability[APPROVED_CONSTRAINT]",
+          "status": "PASS",
+          "junit_seconds": 0.033
+        },
+        {
+          "case_id": "tests/test_guardian_assurance_adapter.py::test_watt_binds_governed_effect_and_consumes_exact_guardian_pass",
+          "classname": "tests.test_guardian_assurance_adapter",
+          "file": "tests/test_guardian_assurance_adapter.py",
+          "name": "test_watt_binds_governed_effect_and_consumes_exact_guardian_pass",
+          "status": "PASS",
+          "junit_seconds": 0.067
+        },
+        {
+          "case_id": "tests/test_guardian_assurance_adapter.py::test_missing_scope_and_candidate_change_fail_closed",
+          "classname": "tests.test_guardian_assurance_adapter",
+          "file": "tests/test_guardian_assurance_adapter.py",
+          "name": "test_missing_scope_and_candidate_change_fail_closed",
+          "status": "PASS",
+          "junit_seconds": 0.004
+        },
+        {
+          "case_id": "tests/test_guardian_assurance_adapter.py::test_preview_readiness_requires_guardian_pass",
+          "classname": "tests.test_guardian_assurance_adapter",
+          "file": "tests/test_guardian_assurance_adapter.py",
+          "name": "test_preview_readiness_requires_guardian_pass",
+          "status": "PASS",
+          "junit_seconds": 0.003
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian[work]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_both_actual_admission_paths_reach_independent_guardian[work]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian[steering]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_both_actual_admission_paths_reach_independent_guardian[steering]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-missing]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[work-missing]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-stale]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[work-stale]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-injected]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[work-injected]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-constraint_identity]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[work-constraint_identity]",
+          "status": "ERROR",
+          "junit_seconds": 0.002,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-missing]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[steering-missing]",
+          "status": "ERROR",
+          "junit_seconds": 0.002,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-stale]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[steering-stale]",
+          "status": "ERROR",
+          "junit_seconds": 0.002,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-injected]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[steering-injected]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-constraint_identity]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[steering-constraint_identity]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-fact_identity]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[work-fact_identity]",
+          "status": "ERROR",
+          "junit_seconds": 0.002,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-work_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[work-work_revision]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-candidate_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[work-candidate_revision]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-candidate_tree]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[work-candidate_tree]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-fact_identity]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[steering-fact_identity]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-work_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[steering-work_revision]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_revision]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_tree]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_tree]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_revision]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_tree]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_tree]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-work_reality_revision_id]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-work_reality_revision_id]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-pwu_id]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-pwu_id]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_revision]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_tree]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_tree]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_revision]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_tree]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_tree]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-work_reality_revision_id]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-work_reality_revision_id]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-pwu_id]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-pwu_id]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_revision]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_tree]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_tree]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-verification]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[work-verification]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-candidate]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[work-candidate]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-native-attempt]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[work-native-attempt]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-source-baseline]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[work-source-baseline]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-proposed-snapshot]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[work-proposed-snapshot]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-pwu]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[work-pwu]",
+          "status": "ERROR",
+          "junit_seconds": 0.002,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-verification]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[steering-verification]",
+          "status": "ERROR",
+          "junit_seconds": 0.002,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-candidate]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[steering-candidate]",
+          "status": "ERROR",
+          "junit_seconds": 0.002,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-native-attempt]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[steering-native-attempt]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-source-baseline]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[steering-source-baseline]",
+          "status": "ERROR",
+          "junit_seconds": 0.002,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-proposed-snapshot]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[steering-proposed-snapshot]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-pwu]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[steering-pwu]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-deploy]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-deploy]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-publish]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-publish]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-deploy]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-deploy]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-publish]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-publish]",
+          "status": "ERROR",
+          "junit_seconds": 0.002,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[work-acceptance_state-ACCEPTED]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_contract_rejects_fabricated_future_human_authority[work-acceptance_state-ACCEPTED]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[work-delivery_authorization_state-AUTHORIZED]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_contract_rejects_fabricated_future_human_authority[work-delivery_authorization_state-AUTHORIZED]",
+          "status": "ERROR",
+          "junit_seconds": 0.002,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[steering-acceptance_state-ACCEPTED]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_contract_rejects_fabricated_future_human_authority[steering-acceptance_state-ACCEPTED]",
+          "status": "ERROR",
+          "junit_seconds": 0.001,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[steering-delivery_authorization_state-AUTHORIZED]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_contract_rejects_fabricated_future_human_authority[steering-delivery_authorization_state-AUTHORIZED]",
+          "status": "ERROR",
+          "junit_seconds": 0.013,
+          "stage": "SETUP",
+          "error_signature": "fixture 'postgres_database' not found",
+          "case_body_pass_claimed": false
+        }
+      ]
+    },
+    {
+      "process_id": "c1-independent",
+      "junit_file": "c1-chain-final-88f1d98/c1-chain.xml",
+      "junit_sha256": "8c6ba0247458fdd2b58a1a838c78f605adecf761fff0c0621e8035158d0efeff",
+      "runner_receipt_file": "c1-chain-final-88f1d98/receipt.json",
+      "runner_receipt_sha256": "f2ba62a401d9a967de97c40be1ed16eebe8675cd4a1561c8ffd5f7f49702da91",
+      "container_id": "c4051f44f52f846df4e3cbf5eeb3fd9a3c7cb651a05e432b8729b53f958cb60c",
+      "image_id": "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+      "exit_code": 0,
+      "started_at_utc": "2026-10-09T07:33:02.743627+00:00",
+      "ended_at_utc": "2026-10-09T07:37:18.671394+00:00",
+      "wall_seconds": 255.928,
+      "collected_cases": 50,
+      "counts": {
+        "PASS": 50,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "duplicate_case_ids": [],
+      "junit_suites": [
+        {
+          "name": "pytest",
+          "declared": {
+            "tests": 50,
+            "errors": 0,
+            "failures": 0,
+            "skipped": 0
+          },
+          "seconds": 246.083,
+          "timestamp": "2026-10-09T07:33:10.303930+00:00"
+        }
+      ],
+      "cases": [
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian[work]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_both_actual_admission_paths_reach_independent_guardian[work]",
+          "status": "PASS",
+          "junit_seconds": 6.025
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian[steering]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_both_actual_admission_paths_reach_independent_guardian[steering]",
+          "status": "PASS",
+          "junit_seconds": 4.805
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-missing]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[work-missing]",
+          "status": "PASS",
+          "junit_seconds": 4.49
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-stale]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[work-stale]",
+          "status": "PASS",
+          "junit_seconds": 4.364
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-injected]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[work-injected]",
+          "status": "PASS",
+          "junit_seconds": 3.942
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-constraint_identity]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[work-constraint_identity]",
+          "status": "PASS",
+          "junit_seconds": 4.124
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-missing]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[steering-missing]",
+          "status": "PASS",
+          "junit_seconds": 4.37
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-stale]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[steering-stale]",
+          "status": "PASS",
+          "junit_seconds": 4.231
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-injected]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[steering-injected]",
+          "status": "PASS",
+          "junit_seconds": 4.297
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-constraint_identity]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_native_rejects_binding_loss_drift_and_injection[steering-constraint_identity]",
+          "status": "PASS",
+          "junit_seconds": 4.542
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-fact_identity]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[work-fact_identity]",
+          "status": "PASS",
+          "junit_seconds": 4.448
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-work_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[work-work_revision]",
+          "status": "PASS",
+          "junit_seconds": 3.968
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-candidate_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[work-candidate_revision]",
+          "status": "PASS",
+          "junit_seconds": 4.232
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-candidate_tree]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[work-candidate_tree]",
+          "status": "PASS",
+          "junit_seconds": 4.12
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-fact_identity]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[steering-fact_identity]",
+          "status": "PASS",
+          "junit_seconds": 4.009
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-work_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[steering-work_revision]",
+          "status": "PASS",
+          "junit_seconds": 4.125
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_revision]",
+          "status": "PASS",
+          "junit_seconds": 4.369
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_tree]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_tree]",
+          "status": "PASS",
+          "junit_seconds": 3.927
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_revision]",
+          "status": "PASS",
+          "junit_seconds": 4.924
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_tree]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_tree]",
+          "status": "PASS",
+          "junit_seconds": 5.239
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-work_reality_revision_id]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-work_reality_revision_id]",
+          "status": "PASS",
+          "junit_seconds": 5.364
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-pwu_id]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-pwu_id]",
+          "status": "PASS",
+          "junit_seconds": 5.37
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_revision]",
+          "status": "PASS",
+          "junit_seconds": 5.282
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_tree]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_tree]",
+          "status": "PASS",
+          "junit_seconds": 5.673
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_revision]",
+          "status": "PASS",
+          "junit_seconds": 5.183
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_tree]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_tree]",
+          "status": "PASS",
+          "junit_seconds": 5.221
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-work_reality_revision_id]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-work_reality_revision_id]",
+          "status": "PASS",
+          "junit_seconds": 5.051
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-pwu_id]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-pwu_id]",
+          "status": "PASS",
+          "junit_seconds": 5.279
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_revision]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_revision]",
+          "status": "PASS",
+          "junit_seconds": 5.365
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_tree]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_tree]",
+          "status": "PASS",
+          "junit_seconds": 5.527
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-verification]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[work-verification]",
+          "status": "PASS",
+          "junit_seconds": 4.936
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-candidate]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[work-candidate]",
+          "status": "PASS",
+          "junit_seconds": 5.263
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-native-attempt]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[work-native-attempt]",
+          "status": "PASS",
+          "junit_seconds": 5.544
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-source-baseline]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[work-source-baseline]",
+          "status": "PASS",
+          "junit_seconds": 5.2
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-proposed-snapshot]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[work-proposed-snapshot]",
+          "status": "PASS",
+          "junit_seconds": 5.046
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-pwu]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[work-pwu]",
+          "status": "PASS",
+          "junit_seconds": 5.164
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-verification]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[steering-verification]",
+          "status": "PASS",
+          "junit_seconds": 5.336
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-candidate]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[steering-candidate]",
+          "status": "PASS",
+          "junit_seconds": 5.294
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-native-attempt]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[steering-native-attempt]",
+          "status": "PASS",
+          "junit_seconds": 5.565
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-source-baseline]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[steering-source-baseline]",
+          "status": "PASS",
+          "junit_seconds": 5.682
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-proposed-snapshot]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[steering-proposed-snapshot]",
+          "status": "PASS",
+          "junit_seconds": 5.532
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-pwu]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_rejects_missing_independent_owner_records[steering-pwu]",
+          "status": "PASS",
+          "junit_seconds": 5.517
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-deploy]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-deploy]",
+          "status": "PASS",
+          "junit_seconds": 3.879
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-publish]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-publish]",
+          "status": "PASS",
+          "junit_seconds": 3.85
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-deploy]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-deploy]",
+          "status": "PASS",
+          "junit_seconds": 4.828
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-publish]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-publish]",
+          "status": "PASS",
+          "junit_seconds": 4.264
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[work-acceptance_state-ACCEPTED]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_contract_rejects_fabricated_future_human_authority[work-acceptance_state-ACCEPTED]",
+          "status": "PASS",
+          "junit_seconds": 4.648
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[work-delivery_authorization_state-AUTHORIZED]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_contract_rejects_fabricated_future_human_authority[work-delivery_authorization_state-AUTHORIZED]",
+          "status": "PASS",
+          "junit_seconds": 4.599
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[steering-acceptance_state-ACCEPTED]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_contract_rejects_fabricated_future_human_authority[steering-acceptance_state-ACCEPTED]",
+          "status": "PASS",
+          "junit_seconds": 5.18
+        },
+        {
+          "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[steering-delivery_authorization_state-AUTHORIZED]",
+          "classname": "tests.integration.test_c1_contract_continuity",
+          "file": "tests/integration/test_c1_contract_continuity.py",
+          "name": "test_guardian_contract_rejects_fabricated_future_human_authority[steering-delivery_authorization_state-AUTHORIZED]",
+          "status": "PASS",
+          "junit_seconds": 5.041
+        }
+      ]
+    }
+  ],
+  "reconciliation": {
+    "independent_process_count": 2,
+    "total_case_executions": 129,
+    "distinct_case_ids": 79,
+    "distinct_case_ids_with_PASS": 79,
+    "successful_case_sets_overlap": false,
+    "cross_process_repeated_case_ids": 50,
+    "setup_ERROR_case_ids_exactly_equal_independent_C1_PASS_case_ids": true,
+    "historical_setup_ERROR_count_preserved": 50,
+    "historical_setup_ERROR_ids": [
+      "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_revision]",
+      "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_tree]",
+      "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-fact_identity]",
+      "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-work_revision]",
+      "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-candidate_revision]",
+      "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-candidate_tree]",
+      "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-fact_identity]",
+      "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-work_revision]",
+      "tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian[steering]",
+      "tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian[work]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[steering-acceptance_state-ACCEPTED]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[steering-delivery_authorization_state-AUTHORIZED]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[work-acceptance_state-ACCEPTED]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[work-delivery_authorization_state-AUTHORIZED]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-pwu_id]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_revision]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_tree]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_revision]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_tree]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-work_reality_revision_id]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-pwu_id]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_revision]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_tree]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_revision]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_tree]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-work_reality_revision_id]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-candidate]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-native-attempt]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-proposed-snapshot]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-pwu]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-source-baseline]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-verification]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-candidate]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-native-attempt]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-proposed-snapshot]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-pwu]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-source-baseline]",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-verification]",
+      "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-constraint_identity]",
+      "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-injected]",
+      "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-missing]",
+      "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-stale]",
+      "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-constraint_identity]",
+      "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-injected]",
+      "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-missing]",
+      "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-stale]",
+      "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-deploy]",
+      "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-publish]",
+      "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-deploy]",
+      "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-publish]"
+    ],
+    "unresolved_case_ids": [],
+    "single_process_79_PASS_claimed": false,
+    "mixed_default_process_success_claimed": false,
+    "passing_coverage_statement": "79 unique selected cases have PASS evidence across two independent processes: 29 PASS from the mixed default process, then 50 PASS from the C1-only process. The mixed default process remains exit 1 with 50 setup ERROR.",
+    "per_file_unique_passed_counts": [
+      {
+        "file": "tests/integration/test_c1_contract_continuity.py",
+        "unique_passed_cases": 50,
+        "successful_process_ids": [
+          "c1-independent"
+        ]
+      },
+      {
+        "file": "tests/integration/test_c2_workspace_preflight_events.py",
+        "unique_passed_cases": 2,
+        "successful_process_ids": [
+          "mixed-default"
+        ]
+      },
+      {
+        "file": "tests/integration/test_native_executor_runtime.py",
+        "unique_passed_cases": 3,
+        "successful_process_ids": [
+          "mixed-default"
+        ]
+      },
+      {
+        "file": "tests/test_c1_ecf_contract_compatibility.py",
+        "unique_passed_cases": 5,
+        "successful_process_ids": [
+          "mixed-default"
+        ]
+      },
+      {
+        "file": "tests/test_c2_workspace_preflight.py",
+        "unique_passed_cases": 10,
+        "successful_process_ids": [
+          "mixed-default"
+        ]
+      },
+      {
+        "file": "tests/test_guardian_assurance_adapter.py",
+        "unique_passed_cases": 3,
+        "successful_process_ids": [
+          "mixed-default"
+        ]
+      },
+      {
+        "file": "tests/test_production_execution_runtime.py",
+        "unique_passed_cases": 6,
+        "successful_process_ids": [
+          "mixed-default"
+        ]
+      }
+    ],
+    "case_history": [
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_revision]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_tree]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-fact_identity]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[steering-work_revision]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-candidate_revision]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-candidate_tree]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-fact_identity]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift[work-work_revision]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian[steering]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian[work]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[steering-acceptance_state-ACCEPTED]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[steering-delivery_authorization_state-AUTHORIZED]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[work-acceptance_state-ACCEPTED]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority[work-delivery_authorization_state-AUTHORIZED]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-pwu_id]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_revision]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_tree]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_revision]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_tree]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-work_reality_revision_id]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-pwu_id]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_revision]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_tree]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_revision]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_tree]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-work_reality_revision_id]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-candidate]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-native-attempt]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-proposed-snapshot]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-pwu]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-source-baseline]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[steering-verification]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-candidate]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-native-attempt]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-proposed-snapshot]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-pwu]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-source-baseline]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records[work-verification]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-constraint_identity]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-injected]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-missing]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-stale]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-constraint_identity]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-injected]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-missing]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-stale]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-deploy]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-publish]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-deploy]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-publish]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "ERROR",
+            "junit_file": "final-c2-regression-default.xml"
+          },
+          {
+            "process_id": "c1-independent",
+            "status": "PASS",
+            "junit_file": "c1-chain-final-88f1d98/c1-chain.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c2_workspace_preflight_events.py::test_missing_workspace_rejection_persists_exact_diagnosis_before_terminal",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_c2_workspace_preflight_events.py::test_preflight_event_rejects_unbound_and_arbitrary_metadata",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_native_executor_runtime.py::test_production_preflight_failure_keeps_exact_diagnostic_before_terminal",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_native_executor_runtime.py::test_production_worker_records_isolated_change_and_diff_evidence",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/integration/test_native_executor_runtime.py::test_production_worker_verification_failure_cannot_claim_result_ready",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c1_ecf_contract_compatibility.py::test_actual_current_main_retains_its_existing_repository_contract",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c1_ecf_contract_compatibility.py::test_actual_current_main_same_version_rejects_managed_api_explicitly",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c1_ecf_contract_compatibility.py::test_managed_registration_cannot_drop_base_or_required_applicability[APPROVED_CONSTRAINT]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c1_ecf_contract_compatibility.py::test_managed_registration_cannot_drop_base_or_required_applicability[REPOSITORY_REALITY]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c1_ecf_contract_compatibility.py::test_selected_owner_managed_request_calls_registered_applicability_contract",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c2_workspace_preflight.py::test_changed_head_rejects_exact_source_revision_and_retains_both_identities",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c2_workspace_preflight.py::test_declared_source_tree_must_match_exact_git_head_tree",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c2_workspace_preflight.py::test_exact_host_workspace_observation_is_durable_and_mount_scoped",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c2_workspace_preflight.py::test_missing_required_artifact_diagnosis_names_actual_check_target",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c2_workspace_preflight.py::test_nested_symlink_remains_rejected",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c2_workspace_preflight.py::test_out_of_scope_change_is_rejected_before_effects",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c2_workspace_preflight.py::test_preflight_rejects_nonwritable_directory_for_actual_nonroot_worker",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c2_workspace_preflight.py::test_root_symlink_rejection_does_not_acquire_another_workspace",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c2_workspace_preflight.py::test_unavailable_workspace_identifies_the_exact_directory_predicate[file]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_c2_workspace_preflight.py::test_unavailable_workspace_identifies_the_exact_directory_predicate[missing]",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_guardian_assurance_adapter.py::test_missing_scope_and_candidate_change_fail_closed",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_guardian_assurance_adapter.py::test_preview_readiness_requires_guardian_pass",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_guardian_assurance_adapter.py::test_watt_binds_governed_effect_and_consumes_exact_guardian_pass",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_production_execution_runtime.py::test_document_context_has_separate_exact_work_basis",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_production_execution_runtime.py::test_preflight_rejects_symlink_without_waiting_for_other_workspace",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_production_execution_runtime.py::test_preflight_waits_boundedly_for_same_exact_workspace",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_production_execution_runtime.py::test_production_context_rejects_wrong_work_and_workspace",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_production_execution_runtime.py::test_workspace_result_records_bounded_change_and_diff",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      },
+      {
+        "case_id": "tests/test_production_execution_runtime.py::test_workspace_verification_rejects_missing_artifact_scope_and_size",
+        "has_PASS_evidence": true,
+        "attempts": [
+          {
+            "process_id": "mixed-default",
+            "status": "PASS",
+            "junit_file": "final-c2-regression-default.xml"
+          }
+        ]
+      }
+    ]
+  },
+  "qualification_boundaries": {
+    "controlled_regression_only": true,
+    "live_model_or_normal_user_production_work_qualification_claimed": false,
+    "C1_controlled_fixture_Work_records_created": true,
+    "G0_PASS_claimed": false,
+    "N1_Closure_claimed": false,
+    "Guardian_73_case_suite_rerun_in_this_C2_summary_claimed": false,
+    "historical_artifacts_modified": false,
+    "notes": [
+      "The 50 initial errors were setup failures; they were not PASS and did not establish their case bodies succeeded.",
+      "The independent C1 process supplies the missing 50 PASS outcomes; it does not rewrite the mixed process outcome.",
+      "This summary covers only the two listed final-image JUnit files, not earlier importlib/default attempts or the separate historical C1 172-item qualification.",
+      "The fixture availability diagnosis is preserved in existing investigation evidence; XML alone confirms the missing-fixture setup signature and subsequent successful isolated process, not an independently reconstructed causal trace."
+    ]
+  }
+}

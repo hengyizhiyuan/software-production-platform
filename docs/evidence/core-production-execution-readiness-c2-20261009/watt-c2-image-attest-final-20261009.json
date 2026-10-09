@@ -1,0 +1,33 @@
+{
+  "name": "watt-c2-image-attest-final-20261009",
+  "container_id": "24c7bb0320bc7bdb5103ec101da35ae7f443a4d28d571a71d33fcacf82bee68b",
+  "image_id": "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+  "actual_user": "10001:10001",
+  "started_at": "2026-10-09T07:22:08.927056+00:00",
+  "finished_at": "2026-10-09T07:22:12.107287+00:00",
+  "elapsed_seconds": 3.1802347940392792,
+  "exit_code": 0,
+  "command": [
+    "python",
+    "/opt/c2-build/attest_c2_image.py",
+    "--image-id",
+    "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+    "--output",
+    "/c2-evidence/runtime-image-attestation-final.json"
+  ],
+  "network_mode": "container:4168bf0bddac673e5475b04a1490a2143fddabf3370a7525962aaa326967c7b3",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c2-execution-readiness-20261009/evidence",
+      "Destination": "/c2-evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "database_name": "spg_c2_qualification_20261009",
+  "model_calls": 0,
+  "source_overlay": false,
+  "docker_socket": false
+}

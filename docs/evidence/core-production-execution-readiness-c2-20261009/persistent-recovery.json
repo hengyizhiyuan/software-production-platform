@@ -1,0 +1,26 @@
+{
+  "captured_at_utc": "2026-10-09T07:52:02.370131+00:00",
+  "qualification_root": "/data/watt/c2-execution-readiness-20261009",
+  "private_backups": [
+    {
+      "path": "/data/watt/c2-execution-readiness-20261009/private/spg_c2_qualification_20261009.dump",
+      "size_bytes": 542022,
+      "sha256": "4a7ce19bf2863051a88a31a9e9cf54e137da5a7b3d232fad79ea402dd5ad73ce",
+      "mode": "0o600",
+      "scope": "restricted C2 database/runtime data; not Git/public artifact"
+    },
+    {
+      "path": "/data/watt/c2-execution-readiness-20261009/private/runtime-data-20261009.tar.gz",
+      "size_bytes": 103766,
+      "sha256": "22a81bd83896caaaace4fa58965c492df7fc1be0d5e62d9c00bd52727b8d311d",
+      "mode": "0o600",
+      "scope": "restricted C2 database/runtime data; not Git/public artifact"
+    }
+  ],
+  "public_git_witness": "git-witness/manifest.json",
+  "credentials_location": "/data/watt/c2-execution-readiness-20261009/private (root-only; never Git)",
+  "image_recovery": "image-recovery.json",
+  "production_data_copied": false,
+  "new_work_preserved": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+  "restore_policy": "Restore into a fresh isolated DB/root after checksum verification; do not replace source canonical or overwrite existing failed Work; new independent control credentials may be established separately."
+}

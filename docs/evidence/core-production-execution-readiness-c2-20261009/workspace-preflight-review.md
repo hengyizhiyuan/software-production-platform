@@ -149,3 +149,7 @@ python -m pytest tests/test_c2_workspace_preflight.py tests/test_production_exec
 The final report must attach actual test exit/result and exact source/image/
 database identities. This note supplies neither a G0 PASS nor historical cause
 resolution.
+
+## Final execution pointer
+
+The command above was the initial planned input. The integration module was renamed to test_c2_workspace_preflight_events.py at exact revision 88f1d98. Final actual commands, grouped results and fixture errors are retained in recovery.md, verification-test-summary.json and report.md. Do not reuse the obsolete initial module path as an executed final receipt.

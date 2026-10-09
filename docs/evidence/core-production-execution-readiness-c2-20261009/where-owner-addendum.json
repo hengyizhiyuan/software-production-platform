@@ -1,0 +1,317 @@
+{
+  "completed_at_utc": "2026-10-09T07:50:03.228083+00:00",
+  "consistency": "FILESYSTEM_AFTER_PREVIOUS_DB_SNAPSHOT_NOT_ATOMIC",
+  "files": [
+    {
+      "payload": {
+        "attempt_id": "74ba6435-c067-4277-9d2d-2d0bae4a87a5",
+        "created_at": "2026-10-09T07:31:22.601809Z",
+        "environment": {
+          "artifact_references": [],
+          "created_at": "2026-10-09T07:31:21.916466Z",
+          "evidence_references": [],
+          "id": "06bd8517-0f6f-42de-969d-3a7e005d5780",
+          "lifecycle_state": "ACTIVE",
+          "provider_reference": "container-v1:40a95832d05f210b3c40cb497742cda759286f4da371fbc6be0ffa49ce4415e9",
+          "runtime_state": "READY",
+          "schema_version": 1,
+          "updated_at": "2026-10-09T07:31:22.599458Z",
+          "version": 3,
+          "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+          "workspace_id": "f31c92c6-0715-4d48-8b3f-6a7d18b7edca"
+        },
+        "prepared_workspace": {
+          "prepared_at": "2026-10-09T07:31:21.916466Z",
+          "repository_mounts": [
+            {
+              "container_path": "/workspace/primary",
+              "host_path": "/var/lib/spg/native-workspaces/74ba6435-c067-4277-9d2d-2d0bae4a87a5",
+              "repository_identity": "watt://work-branches/b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+              "source_revision": "a52e2d39683642c2ecb5c89bbf1761411cc715a9",
+              "writable": true
+            }
+          ],
+          "root_path": "/var/lib/spg/native-workspaces",
+          "schema_version": 1,
+          "workspace_id": "f31c92c6-0715-4d48-8b3f-6a7d18b7edca"
+        },
+        "provider_handle": {
+          "environment_id": "06bd8517-0f6f-42de-969d-3a7e005d5780",
+          "opaque_reference": "40a95832d05f210b3c40cb497742cda759286f4da371fbc6be0ffa49ce4415e9",
+          "provider_identity": "container-v1"
+        },
+        "pwu_id": "f918050c-4937-40b4-b60f-1b59aad2dba0",
+        "schema_version": 1,
+        "task_contract_reference": "task-contract:ed1f17a1-00a5-5182-b031-319df4b9c91f",
+        "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+        "workspace": {
+          "created_at": "2026-10-09T07:31:21.916466Z",
+          "environment_configuration": {
+            "dependency_profile_reference": "native-executor:task-contract",
+            "lifecycle_policy_references": [
+              "watt:production-environment:structural-lifecycle:v1"
+            ],
+            "provider_profile": "container-v1",
+            "toolchain_references": []
+          },
+          "generated_roots": [],
+          "id": "f31c92c6-0715-4d48-8b3f-6a7d18b7edca",
+          "repository_assets": [
+            {
+              "acquisition_policy": {
+                "branch_selection": "REPOSITORY_DEFAULT",
+                "history": "FULL_HISTORY",
+                "ref_scope": "SINGLE_BRANCH"
+              },
+              "asset_id": "c0eb8bb2-7358-4e87-beeb-aa29bc7fb07a",
+              "branch": "work-b9c67d912cc15f91bf618d7939b45cc3",
+              "default_branch": "work-b9c67d912cc15f91bf618d7939b45cc3",
+              "mount_path": "/workspace/primary",
+              "provenance_reference": "source-baseline:505aefa6-ed3f-4766-af26-b67cac6790a5",
+              "repository_identity": "watt://work-branches/b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+              "requested_branch": null,
+              "source": "/var/lib/spg/managed-source/works/b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+              "source_revision": "a52e2d39683642c2ecb5c89bbf1761411cc715a9",
+              "source_tree_identity": "3bc248484b72b997aa0c1189b4fec38d4da3d018",
+              "writable": true
+            }
+          ],
+          "runtime_configuration": {
+            "network_policy_reference": "network:none",
+            "preview_enabled": true,
+            "resource_policy_reference": "native-resource-envelope",
+            "runtime_profile": "watt-native-executor-v2"
+          },
+          "schema_version": 1,
+          "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3"
+        }
+      },
+      "relative_path": "native-execution-bindings/74ba6435-c067-4277-9d2d-2d0bae4a87a5.json",
+      "sha256": "f44533ff6d6ab54957c35368bd991d54c3008bb71cc31124694b3c0e55b12b28"
+    },
+    {
+      "payload": {
+        "created_at": "2026-10-09T07:31:21.916466Z",
+        "environment_configuration": {
+          "dependency_profile_reference": "native-executor:task-contract",
+          "lifecycle_policy_references": [
+            "watt:production-environment:structural-lifecycle:v1"
+          ],
+          "provider_profile": "container-v1",
+          "toolchain_references": []
+        },
+        "generated_roots": [],
+        "id": "f31c92c6-0715-4d48-8b3f-6a7d18b7edca",
+        "repository_assets": [
+          {
+            "acquisition_policy": {
+              "branch_selection": "REPOSITORY_DEFAULT",
+              "history": "FULL_HISTORY",
+              "ref_scope": "SINGLE_BRANCH"
+            },
+            "asset_id": "c0eb8bb2-7358-4e87-beeb-aa29bc7fb07a",
+            "branch": "work-b9c67d912cc15f91bf618d7939b45cc3",
+            "default_branch": "work-b9c67d912cc15f91bf618d7939b45cc3",
+            "mount_path": "/workspace/primary",
+            "provenance_reference": "source-baseline:505aefa6-ed3f-4766-af26-b67cac6790a5",
+            "repository_identity": "watt://work-branches/b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+            "requested_branch": null,
+            "source": "/var/lib/spg/managed-source/works/b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+            "source_revision": "a52e2d39683642c2ecb5c89bbf1761411cc715a9",
+            "source_tree_identity": "3bc248484b72b997aa0c1189b4fec38d4da3d018",
+            "writable": true
+          }
+        ],
+        "runtime_configuration": {
+          "network_policy_reference": "network:none",
+          "preview_enabled": true,
+          "resource_policy_reference": "native-resource-envelope",
+          "runtime_profile": "watt-native-executor-v2"
+        },
+        "schema_version": 1,
+        "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3"
+      },
+      "relative_path": "workspaces/f31c92c6-0715-4d48-8b3f-6a7d18b7edca.json",
+      "sha256": "7af0722263477c45899b88403880b4fb0f3d3a8600d91e683158d967d2f3158d"
+    },
+    {
+      "payload": {
+        "artifact_references": [],
+        "created_at": "2026-10-09T07:31:21.916466Z",
+        "evidence_references": [
+          "native-attempt:74ba6435-c067-4277-9d2d-2d0bae4a87a5",
+          "native-checkpoint:b0587d47-ecee-4fdf-becf-99f7d3822f4b",
+          "native-evidence:075eace7-16b1-4ca9-82ff-16da47428118:68bc653222304185a9e4e8d91ad0f7fc8dfd2ff5e11224ce0544d46686fd001b",
+          "native-evidence:fcc2999b-7d40-4cab-b019-1661d949fc05:ae5dec7c8a58e38a40c1a6d4907559820325013614f6499a336143e54d8007c4",
+          "native-evidence:e885f108-e673-47e1-bd3e-950260166d5b:3f347f82f6f554f1e4e82bc16294478e282eef875bbf10ddf11c3b86fb27dae9",
+          "native-evidence:8a62c5bc-25ef-4412-872c-c832d2a59cfa:b0fe8c8f42d486a8d2d533d604c6c45e8ff78159a84517ae6ae4537b94dbd867",
+          "native-evidence:62e48ff8-2e43-42cb-8a0d-73d186290b39:6e49b2c92b9c4f9b139830248cdcdfdb9ef3c039b9ec51238c2606b2b449d515",
+          "native-evidence:d678127d-6caa-4a04-af23-93d8e4a46a04:b0fe8c8f42d486a8d2d533d604c6c45e8ff78159a84517ae6ae4537b94dbd867",
+          "native-evidence:b954da1c-7f87-4cdf-b72d-a0121b57b059:ae5dec7c8a58e38a40c1a6d4907559820325013614f6499a336143e54d8007c4"
+        ],
+        "id": "06bd8517-0f6f-42de-969d-3a7e005d5780",
+        "lifecycle_state": "SUSPENDED",
+        "provider_reference": "container-v1:40a95832d05f210b3c40cb497742cda759286f4da371fbc6be0ffa49ce4415e9",
+        "runtime_state": "STOPPED",
+        "schema_version": 1,
+        "updated_at": "2026-10-09T07:31:44.013794Z",
+        "version": 4,
+        "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+        "workspace_id": "f31c92c6-0715-4d48-8b3f-6a7d18b7edca"
+      },
+      "relative_path": "environments/06bd8517-0f6f-42de-969d-3a7e005d5780/current.json",
+      "sha256": "e14895d39988bc65cfbaeb77ae935ee0a912539d0c1b87c67e91f968702a3554"
+    },
+    {
+      "payload": {
+        "artifact_references": [],
+        "created_at": "2026-10-09T07:31:21.916466Z",
+        "evidence_references": [],
+        "id": "06bd8517-0f6f-42de-969d-3a7e005d5780",
+        "lifecycle_state": "CREATED",
+        "provider_reference": null,
+        "runtime_state": "NOT_PROVISIONED",
+        "schema_version": 1,
+        "updated_at": "2026-10-09T07:31:21.916466Z",
+        "version": 1,
+        "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+        "workspace_id": "f31c92c6-0715-4d48-8b3f-6a7d18b7edca"
+      },
+      "relative_path": "environments/06bd8517-0f6f-42de-969d-3a7e005d5780/versions/1.json",
+      "sha256": "bd41e5f6638cd7c484106b21dfa8a6e12d6c9a878bd40e366830472fefb44372"
+    },
+    {
+      "payload": {
+        "artifact_references": [],
+        "created_at": "2026-10-09T07:31:21.916466Z",
+        "evidence_references": [],
+        "id": "06bd8517-0f6f-42de-969d-3a7e005d5780",
+        "lifecycle_state": "INITIALIZING",
+        "provider_reference": null,
+        "runtime_state": "PREPARING",
+        "schema_version": 1,
+        "updated_at": "2026-10-09T07:31:21.923331Z",
+        "version": 2,
+        "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+        "workspace_id": "f31c92c6-0715-4d48-8b3f-6a7d18b7edca"
+      },
+      "relative_path": "environments/06bd8517-0f6f-42de-969d-3a7e005d5780/versions/2.json",
+      "sha256": "d4af36655f6305edec3c244566be0fbe8157ecb2e52d16960d3676556bfa73e1"
+    },
+    {
+      "payload": {
+        "artifact_references": [],
+        "created_at": "2026-10-09T07:31:21.916466Z",
+        "evidence_references": [],
+        "id": "06bd8517-0f6f-42de-969d-3a7e005d5780",
+        "lifecycle_state": "ACTIVE",
+        "provider_reference": "container-v1:40a95832d05f210b3c40cb497742cda759286f4da371fbc6be0ffa49ce4415e9",
+        "runtime_state": "READY",
+        "schema_version": 1,
+        "updated_at": "2026-10-09T07:31:22.599458Z",
+        "version": 3,
+        "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+        "workspace_id": "f31c92c6-0715-4d48-8b3f-6a7d18b7edca"
+      },
+      "relative_path": "environments/06bd8517-0f6f-42de-969d-3a7e005d5780/versions/3.json",
+      "sha256": "9f80e4d4c380898ee0d732ed6af0a4ddeb578d7ba4d9fce7a537cc300964b4d1"
+    },
+    {
+      "payload": {
+        "artifact_references": [],
+        "created_at": "2026-10-09T07:31:21.916466Z",
+        "evidence_references": [
+          "native-attempt:74ba6435-c067-4277-9d2d-2d0bae4a87a5",
+          "native-checkpoint:b0587d47-ecee-4fdf-becf-99f7d3822f4b",
+          "native-evidence:075eace7-16b1-4ca9-82ff-16da47428118:68bc653222304185a9e4e8d91ad0f7fc8dfd2ff5e11224ce0544d46686fd001b",
+          "native-evidence:fcc2999b-7d40-4cab-b019-1661d949fc05:ae5dec7c8a58e38a40c1a6d4907559820325013614f6499a336143e54d8007c4",
+          "native-evidence:e885f108-e673-47e1-bd3e-950260166d5b:3f347f82f6f554f1e4e82bc16294478e282eef875bbf10ddf11c3b86fb27dae9",
+          "native-evidence:8a62c5bc-25ef-4412-872c-c832d2a59cfa:b0fe8c8f42d486a8d2d533d604c6c45e8ff78159a84517ae6ae4537b94dbd867",
+          "native-evidence:62e48ff8-2e43-42cb-8a0d-73d186290b39:6e49b2c92b9c4f9b139830248cdcdfdb9ef3c039b9ec51238c2606b2b449d515",
+          "native-evidence:d678127d-6caa-4a04-af23-93d8e4a46a04:b0fe8c8f42d486a8d2d533d604c6c45e8ff78159a84517ae6ae4537b94dbd867",
+          "native-evidence:b954da1c-7f87-4cdf-b72d-a0121b57b059:ae5dec7c8a58e38a40c1a6d4907559820325013614f6499a336143e54d8007c4"
+        ],
+        "id": "06bd8517-0f6f-42de-969d-3a7e005d5780",
+        "lifecycle_state": "SUSPENDED",
+        "provider_reference": "container-v1:40a95832d05f210b3c40cb497742cda759286f4da371fbc6be0ffa49ce4415e9",
+        "runtime_state": "STOPPED",
+        "schema_version": 1,
+        "updated_at": "2026-10-09T07:31:44.013794Z",
+        "version": 4,
+        "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3",
+        "workspace_id": "f31c92c6-0715-4d48-8b3f-6a7d18b7edca"
+      },
+      "relative_path": "environments/06bd8517-0f6f-42de-969d-3a7e005d5780/versions/4.json",
+      "sha256": "e14895d39988bc65cfbaeb77ae935ee0a912539d0c1b87c67e91f968702a3554"
+    },
+    {
+      "payload": {
+        "actor_reference": "watt:native-executor-production-environment:v1",
+        "decided_at": "2026-10-09T07:31:22.599458Z",
+        "environment_id": "06bd8517-0f6f-42de-969d-3a7e005d5780",
+        "from_state": "INITIALIZING",
+        "id": "12f10ec2-bd43-4218-8bec-d740b5cba986",
+        "policy_reference": "watt:production-environment:structural-lifecycle:v1",
+        "reason": "Native Executor runtime is ready",
+        "to_state": "ACTIVE"
+      },
+      "relative_path": "environments/06bd8517-0f6f-42de-969d-3a7e005d5780/transitions/12f10ec2-bd43-4218-8bec-d740b5cba986.json",
+      "sha256": "60aca5364560998743ff5dfd78a1e4d565d941ce30c4d96b7486c03a02c14ea1"
+    },
+    {
+      "payload": {
+        "actor_reference": "watt:native-executor-production-environment:v1",
+        "decided_at": "2026-10-09T07:31:44.013794Z",
+        "environment_id": "06bd8517-0f6f-42de-969d-3a7e005d5780",
+        "from_state": "ACTIVE",
+        "id": "8d59c0be-199c-4eba-907c-44d295de535a",
+        "policy_reference": "watt:production-environment:structural-lifecycle:v1",
+        "reason": "Native Executor returned control and container runtime stopped",
+        "to_state": "SUSPENDED"
+      },
+      "relative_path": "environments/06bd8517-0f6f-42de-969d-3a7e005d5780/transitions/8d59c0be-199c-4eba-907c-44d295de535a.json",
+      "sha256": "7333e19af29030277eba498f1495d2d077801308a88da496545f805752bcf6d6"
+    },
+    {
+      "payload": {
+        "actor_reference": "watt:native-executor-production-environment:v1",
+        "decided_at": "2026-10-09T07:31:21.923331Z",
+        "environment_id": "06bd8517-0f6f-42de-969d-3a7e005d5780",
+        "from_state": "CREATED",
+        "id": "bd9d79f6-ec25-42be-aa27-3b2554ec03f4",
+        "policy_reference": "watt:production-environment:structural-lifecycle:v1",
+        "reason": "prepare Production Environment for Native Executor Attempt",
+        "to_state": "INITIALIZING"
+      },
+      "relative_path": "environments/06bd8517-0f6f-42de-969d-3a7e005d5780/transitions/bd9d79f6-ec25-42be-aa27-3b2554ec03f4.json",
+      "sha256": "6c273a8b667d83082918990b044ff2b706cd98cc77aac041d9bd517659d37cbf"
+    }
+  ],
+  "missing_at_observation": [],
+  "public_release": {
+    "known_credential_redactions": 0,
+    "scope": "persistent WHERE Owner records; no deleted container image observation is fabricated"
+  },
+  "schema": "c2-where-owner-private-addendum-v1",
+  "source_canonical_snapshot_sha256": "272da6816f731303c157fca1580ae9e7b502f7da8c2a3c60f78799ae619382d9",
+  "source_database_snapshot": {
+    "captured_at_utc": "2026-10-09 07:44:37.855621+00:00",
+    "database_name": "spg_c2_qualification_20261009",
+    "read_only": "on",
+    "transaction_snapshot": "69318:69318:"
+  },
+  "source_runtime_identity": {
+    "api_base_url": "http://watt-c2-api-20261009:8000",
+    "api_service": "watt-c2-api-20261009",
+    "captured_at_utc": "2026-10-09T07:27:32.350645+00:00",
+    "database_name": "spg_c2_qualification_20261009",
+    "image_id": "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+    "isolated": true,
+    "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+    "provider_ready": true,
+    "qualification": "C2",
+    "source_revision": "88f1d9805d3ed1aa779ed3c78902b193fae240f8"
+  },
+  "started_at_utc": "2026-10-09T07:50:03.205799+00:00",
+  "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3"
+}

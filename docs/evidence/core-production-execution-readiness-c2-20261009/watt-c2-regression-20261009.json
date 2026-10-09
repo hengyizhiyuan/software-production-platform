@@ -1,0 +1,45 @@
+{
+  "name": "watt-c2-regression-20261009",
+  "container_id": "e330979e6a0b968f2cd15037e2b15e3c833330669344c09c2f538ea54ab09ed6",
+  "image_id": "sha256:6ecaf8f204d7503278671270919d2b5331ea437a016133f3c2c4b56821834b45",
+  "actual_user": "10001:10001",
+  "started_at": "2026-10-09T07:17:52.165300+00:00",
+  "finished_at": "2026-10-09T07:18:03.791031+00:00",
+  "elapsed_seconds": 11.625744412012864,
+  "exit_code": 2,
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "junit_family=legacy",
+    "tests/test_c2_workspace_preflight.py",
+    "tests/test_production_execution_runtime.py",
+    "tests/integration/test_c2_workspace_preflight.py",
+    "tests/integration/test_native_executor_runtime.py::test_production_worker_records_isolated_change_and_diff_evidence",
+    "tests/integration/test_native_executor_runtime.py::test_production_worker_verification_failure_cannot_claim_result_ready",
+    "tests/integration/test_native_executor_runtime.py::test_production_preflight_failure_keeps_exact_diagnostic_before_terminal",
+    "tests/test_c1_ecf_contract_compatibility.py",
+    "tests/test_guardian_assurance_adapter.py",
+    "tests/integration/test_c1_contract_continuity.py",
+    "--tb=short",
+    "--junitxml=/c2-evidence/final-c2-regression.xml"
+  ],
+  "network_mode": "container:4168bf0bddac673e5475b04a1490a2143fddabf3370a7525962aaa326967c7b3",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c2-execution-readiness-20261009/evidence",
+      "Destination": "/c2-evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "database_name": "c1_contract_continuity",
+  "model_calls": 0,
+  "source_overlay": false,
+  "docker_socket": false
+}

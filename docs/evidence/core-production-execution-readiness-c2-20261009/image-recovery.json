@@ -1,0 +1,10 @@
+{
+  "captured_at_utc": "2026-10-09T07:33:00.068076+00:00",
+  "archive_path": "/data/watt/c2-execution-readiness-20261009/image-88f1d98.tar.gz",
+  "size_bytes": 335972932,
+  "sha256": "8f90a08ba814838161e8b281060733a9728fd92a83366cf110f7b56c510cdf16",
+  "image_id": "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+  "source_revision": "88f1d9805d3ed1aa779ed3c78902b193fae240f8",
+  "runtime_credentials_included": false,
+  "restore": "gzip -dc image-88f1d98.tar.gz | docker image load; verify image ID, then attest"
+}

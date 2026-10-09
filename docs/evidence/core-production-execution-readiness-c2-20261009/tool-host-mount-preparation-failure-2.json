@@ -1,0 +1,20 @@
+{
+  "captured_at_utc": "2026-10-09T07:27:12.960403+00:00",
+  "container_id": "bd792b7b67ff14ae25eb44644399c9090e3d410eb20ad01bd76e89725fcff4d9",
+  "name": "watt-c2-tool-host-20261009",
+  "state": {
+    "Status": "created",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 128,
+    "Error": "failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: error mounting \"/data/docker/volumes/watt-c2-workspaces-20261009/_data\" to rootfs at \"/var/lib/spg/native-workspaces\": mkdir /data/docker/overlay2/f7965ddf4253212a099783db20f1435b31dbaf6e971a6d33a9a195bcb111c3b5/merged/var/lib/spg/native-workspaces: read-only file system: unknown",
+    "StartedAt": "0001-01-01T00:00:00Z",
+    "FinishedAt": "0001-01-01T00:00:00Z"
+  },
+  "root_cause": "Missing mountpoint below readonly app mount; no Work or model execution",
+  "correction": "Prepare exact new native-tool-receipts mountpoint and start same container"
+}

@@ -1,0 +1,13 @@
+
+==================================== ERRORS ====================================
+______ ERROR collecting tests/integration/test_c2_workspace_preflight.py _______
+import file mismatch:
+imported module 'test_c2_workspace_preflight' has this __file__ attribute:
+  /qualification/tests/test_c2_workspace_preflight.py
+which is not the same as the test file we want to collect:
+  /qualification/tests/integration/test_c2_workspace_preflight.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+=========================== short test summary info ============================
+ERROR tests/integration/test_c2_workspace_preflight.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 5.23s

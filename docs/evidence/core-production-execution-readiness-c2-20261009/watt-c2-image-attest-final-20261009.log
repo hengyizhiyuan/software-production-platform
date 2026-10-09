@@ -1,0 +1,1 @@
+{"actual_package_counts": {"ecf": 5, "guardian": 5, "pytest": null, "spg": 276}, "build_input_count": 1081, "receipt_path": "/c2-evidence/runtime-image-attestation-final.json", "scope": "actual-installed-imports", "status": "PASS"}

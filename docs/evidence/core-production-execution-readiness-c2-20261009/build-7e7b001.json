@@ -1,0 +1,40 @@
+{
+  "started_at": "2026-10-09T07:13:35.795602+00:00",
+  "finished_at": "2026-10-09T07:14:06.294214+00:00",
+  "command": [
+    "docker",
+    "build",
+    "--network=none",
+    "--build-arg",
+    "BASE_IMAGE=watt-c2-dependency-base:6c1f48e-20261009",
+    "--build-arg",
+    "WATT_REVISION=7e7b001dc15d00a7f65327d8dadbc5b75e4b3a48",
+    "--build-arg",
+    "WATT_TREE=9af1a28c8f459f31635a247f0298621c6b7c2372",
+    "-f",
+    "/data/watt/c2-execution-readiness-20261009/build-7e7b001/context/watt/docs/evidence/core-production-execution-readiness-c2-20261009/Dockerfile.c2",
+    "-t",
+    "watt-c2:7e7b001",
+    "/data/watt/c2-execution-readiness-20261009/build-7e7b001/context"
+  ],
+  "exit_code": 1,
+  "sources": {
+    "watt": {
+      "revision": "7e7b001dc15d00a7f65327d8dadbc5b75e4b3a48",
+      "tree": "9af1a28c8f459f31635a247f0298621c6b7c2372"
+    },
+    "guardian": {
+      "revision": "6b974748df22d84b88f6908ea8ee90a9752fd183",
+      "tree": "c9a1bf4e102d8365a1ce27c9cced88f8ab0cd129"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "build_input_identity_sha256": "50c623e977ae3b65ead2fbde017114be1f5d37d6e594d3ac89645bca2a85c694"
+}

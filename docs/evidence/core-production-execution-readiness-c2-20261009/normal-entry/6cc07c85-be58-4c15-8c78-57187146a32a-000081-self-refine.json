@@ -1,0 +1,72 @@
+{
+  "completed_at_utc": "2026-10-09T07:31:30.367032Z",
+  "http_status": 200,
+  "input_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+  "method": "GET",
+  "path": "/api/works/b9c67d91-2cc1-5f91-bf61-8d7939b45cc3/self-refine",
+  "projection": {
+    "count": 2,
+    "events": [
+      {
+        "created_at": "2026-10-09T07:31:18.419431Z",
+        "id": "29dc0010-eee9-40da-a0ba-f1e5d30ff2d6",
+        "status": "VERIFIED",
+        "updated_at": "2026-10-09T07:31:18.419431Z",
+        "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3"
+      },
+      {
+        "created_at": "2026-10-09T07:31:18.360672Z",
+        "id": "b3281f8e-17fa-450e-91e4-5fa11363bb13",
+        "status": "VERIFIED",
+        "updated_at": "2026-10-09T07:31:18.360672Z",
+        "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3"
+      }
+    ],
+    "metrics": {
+      "failed": 0
+    },
+    "work_convergence": [
+      {
+        "condition": "NOT_YET_CONVERGED",
+        "created_at": "2026-10-09T07:31:18.554909Z",
+        "id": "8ec0cf18-3802-4960-976e-2aae86645885",
+        "sequence": 1,
+        "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3"
+      },
+      {
+        "condition": "NOT_YET_CONVERGED",
+        "created_at": "2026-10-09T07:31:19.434912Z",
+        "id": "6969078b-41c4-4886-baa4-04408313cf74",
+        "sequence": 2,
+        "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3"
+      },
+      {
+        "condition": "NOT_YET_CONVERGED",
+        "created_at": "2026-10-09T07:31:20.364421Z",
+        "id": "3803bc3e-f36b-4a49-89de-16faae094a43",
+        "sequence": 3,
+        "work_id": "b9c67d91-2cc1-5f91-bf61-8d7939b45cc3"
+      }
+    ]
+  },
+  "qualification_claim": "OBSERVATION_ONLY_NOT_WORK_PASS",
+  "request_body_sha256": null,
+  "response_body_sha256": "fdb9f83b08045fe5f612cff73f165a651cf8f53bf8bc2fee7636f988ac73bef2",
+  "response_bytes_observed": 7401,
+  "response_json_valid": true,
+  "run_id": "6cc07c85-be58-4c15-8c78-57187146a32a",
+  "runtime_identity": {
+    "api_base_url": "http://watt-c2-api-20261009:8000",
+    "api_service": "watt-c2-api-20261009",
+    "captured_at_utc": "2026-10-09T07:27:32.350645+00:00",
+    "database_name": "spg_c2_qualification_20261009",
+    "image_id": "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+    "isolated": true,
+    "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+    "provider_ready": true,
+    "qualification": "C2",
+    "source_revision": "88f1d9805d3ed1aa779ed3c78902b193fae240f8"
+  },
+  "schema": "c2-normal-entry-api-observation-v1",
+  "started_at_utc": "2026-10-09T07:31:30.244625Z"
+}

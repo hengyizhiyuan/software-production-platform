@@ -1,0 +1,13 @@
+{
+  "schema": "c2-final-publication-check-v1",
+  "captured_at_utc": "2026-10-09T08:14:42.139117+00:00",
+  "scanned_public_files": 303,
+  "known_credential_matches": 0,
+  "input_archive_sha256": "72deb71df421a2b074263d06b1067a2b5c8807ef9f6bda72ddd220f9ad290c3f",
+  "input_archive_size_bytes": 6622720,
+  "private_directory_excluded": true,
+  "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+  "model_key_changed_or_rotated": false,
+  "scope": "Exact known private credential values only; includes final reports, harness and public Owner evidence; not a universal secret detector.",
+  "qualification_status": "C2 PARTIAL — Exact Engineering Blocker"
+}

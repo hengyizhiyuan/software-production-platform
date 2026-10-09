@@ -25,3 +25,9 @@ Candidate seal and assurance are not Human Integration/Acceptance/Delivery. Do n
 ## Completion and stop
 
 Deliver exact source/tree/image/Owner/migration/runtime identities, Workspace diagnostics and regressions, real G0 source/event/Worker/Candidate/Verification/Guardian lineage or exact blocker, real Self-Refine trajectories, C1 regression comparison and recovery location. Status only `C2 CLOSED — Real G0 Production Qualified` or `C2 PARTIAL — Exact Engineering Blocker`. On C2 success stop; on out-of-scope semantic/recovery or missing authority stop that branch and continue independent authorized work.
+
+## 2026-10-09 Human amendment and outcome
+
+After this initial preflight was recorded, Human explicitly authorized reusing the existing test DeepSeek credential. The executed scope is HUMAN_AUTHORIZED_SHARED_TEST; the initial independent-provider precondition above is superseded by that authorization. New database, Operator, Tool Host and Gitea credentials remain independently generated; original credentials/configuration are unchanged. No sensitive value is published.
+
+The single normal-entry G0 reached real Native Worker, artifact and Completion, but PATH_SCOPE Verification is UNKNOWN / PROTECTED_CONTEXT_WITNESS_NOT_OBSERVED. No Candidate/Guardian/Human authority was fabricated. See report.md for exact identities, source/typed-binding evidence, PE image UNKNOWN and C2 PARTIAL exit.

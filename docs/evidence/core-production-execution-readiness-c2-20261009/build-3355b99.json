@@ -1,0 +1,59 @@
+{
+  "started_at": "2026-10-09T07:15:11.825227+00:00",
+  "finished_at": "2026-10-09T07:15:36.642915+00:00",
+  "command": [
+    "docker",
+    "build",
+    "--network=none",
+    "--build-arg",
+    "BASE_IMAGE=watt-c2-dependency-base:6c1f48e-20261009",
+    "--build-arg",
+    "WATT_REVISION=3355b992e291da8188ec1ac9431332b32865322d",
+    "--build-arg",
+    "WATT_TREE=480577cfe118486c82d70d7ad5ccfb09dc0fdc6d",
+    "-f",
+    "/data/watt/c2-execution-readiness-20261009/build-3355b99/context/watt/docs/evidence/core-production-execution-readiness-c2-20261009/Dockerfile.c2",
+    "-t",
+    "watt-c2:3355b99",
+    "/data/watt/c2-execution-readiness-20261009/build-3355b99/context"
+  ],
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "3355b992e291da8188ec1ac9431332b32865322d",
+      "tree": "480577cfe118486c82d70d7ad5ccfb09dc0fdc6d"
+    },
+    "guardian": {
+      "revision": "6b974748df22d84b88f6908ea8ee90a9752fd183",
+      "tree": "c9a1bf4e102d8365a1ce27c9cced88f8ab0cd129"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "build_input_identity_sha256": "fd3ac40c297c024e48f883648971c9e190952ad3ac3689a4654393dc2f940c43",
+  "image": {
+    "Id": "sha256:6ecaf8f204d7503278671270919d2b5331ea437a016133f3c2c4b56821834b45",
+    "RepoTags": [
+      "watt-c2:3355b99"
+    ],
+    "RepoDigests": [],
+    "Created": "2026-10-09T15:15:26.114414138+08:00",
+    "labels": {
+      "org.opencontainers.image.revision": "3355b992e291da8188ec1ac9431332b32865322d",
+      "watt.c2.base-image-id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+      "watt.c2.ecf-revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "watt.c2.ecf-tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+      "watt.c2.ecf-unsupported-revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "watt.c2.guardian-revision": "6b974748df22d84b88f6908ea8ee90a9752fd183",
+      "watt.c2.guardian-tree": "c9a1bf4e102d8365a1ce27c9cced88f8ab0cd129",
+      "watt.c2.source-tree": "480577cfe118486c82d70d7ad5ccfb09dc0fdc6d"
+    },
+    "user": "spg"
+  }
+}

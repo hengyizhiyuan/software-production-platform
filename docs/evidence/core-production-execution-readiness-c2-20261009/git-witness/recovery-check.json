@@ -1,0 +1,12 @@
+{
+  "captured_at_utc": "2026-10-09T07:58:50.646646+00:00",
+  "recovered_in_fresh_bare_repository": "/data/watt/c2-execution-readiness-20261009/recovered-git-witness.git",
+  "source_output_trees": {
+    "source_tree": "3bc248484b72b997aa0c1189b4fec38d4da3d018",
+    "output_tree": "95b94416d825a3e87e85d2244eaa18300d390a6d"
+  },
+  "artifact_sha256": "4f70e4b6b34b02b77a40f838643a8889fe3a2415a336c0efad14e84ac411839c",
+  "pack_valid": true,
+  "source_restored_without_reexecution": true,
+  "qualification_claim": "Git evidence recovery only; no Work/Verification/Human PASS"
+}
