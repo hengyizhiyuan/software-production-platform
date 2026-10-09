@@ -62,8 +62,8 @@ def _protected_context_for_guardian(task, verification_records) -> tuple:
             semantic_key=obligation.semantic_key,
             source_ref=obligation.source_ref,
             source_revision=obligation.source_revision,
-            authority=obligation.authority,
-            content_digest=obligation.content_digest,
+            authority=getattr(obligation, "authority", None),
+            content_digest=getattr(obligation, "content_digest", None),
             package_fingerprint=lineage.package_fingerprint,
             coverage=("COVERED" if matching_refs else
                       "PENDING_CANDIDATE_GATE" if pending_refs else "GUARDIAN_REQUIRED"),
@@ -256,10 +256,14 @@ class GuardianAssuranceClient:
         results = []
         for unit, task, records, refs in unit_evidence or [(None, None, verification_records, ())]:
             lineage = None if task is None else task.decision_context
+            evidence_version = (
+                "governed-obligation-v1"
+                if getattr(lineage, "surface", None) == "MANAGED_PRODUCT_WEB_UI"
+                else "legacy-v1"
+            )
             basis = {"preview_id": str(session.id), "candidate_id": str(session.candidate_id),
                 "candidate_fingerprint": session.candidate_fingerprint, "requirements": governed,
-                "evidence_contract_version": ("governed-obligation-v1" if lineage is not None
-                    and lineage.surface == "MANAGED_PRODUCT_WEB_UI" else "legacy-v1"),
+                "evidence_contract_version": evidence_version,
                 "pwu_id": None if unit is None else str(unit.id), "lineage_refs": refs,
                 "verification_ids": [str(record.id) for record in records],
                 "task_fingerprint": None if task is None else task.content_fingerprint}
@@ -267,8 +271,7 @@ class GuardianAssuranceClient:
                 json.dumps(basis, sort_keys=True).encode()).hexdigest())
             protected_context = _protected_context_for_guardian(task, records)
             request = AssuranceRequest(request_id=request_id,
-            evidence_contract_version=("governed-obligation-v1" if lineage is not None
-                and lineage.surface == "MANAGED_PRODUCT_WEB_UI" else "legacy-v1"),
+            evidence_contract_version=evidence_version,
             product_ref=f"product:{product_id}" if product_id else f"work-product:{session.work_id}",
             work_ref=f"work:{session.work_id}",
             governed_intent_ref=governed["governed_basis_ref"],

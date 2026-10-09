@@ -1,5 +1,7 @@
 from pathlib import Path
 import subprocess
+import threading
+import time
 from uuid import uuid4
 
 import pytest
@@ -138,3 +140,37 @@ def test_workspace_verification_rejects_missing_artifact_scope_and_size(tmp_path
     (workspace / "about.html").write_text("x" * 2048)
     with pytest.raises(ProductionWorkspaceVerificationFailed, match="artifact size limit"):
         observe_production_workspace(binding, store, require_change=True)
+
+
+def test_preflight_waits_boundedly_for_same_exact_workspace(tmp_path: Path) -> None:
+    binding, workspace = _binding(tmp_path)
+    hidden = workspace.with_name("temporarily-hidden")
+    workspace.rename(hidden)
+
+    def restore() -> None:
+        time.sleep(0.2)
+        hidden.rename(workspace)
+
+    restoring = threading.Thread(target=restore)
+    restoring.start()
+    try:
+        observed = observe_production_workspace(
+            binding, ContentAddressedStorage(tmp_path / "evidence"), require_change=False)
+    finally:
+        restoring.join(timeout=5)
+    assert observed["repository_revision"] == binding.production_context.repository_revision
+    assert observed["workspace_availability_wait_ms"] >= 100
+
+
+def test_preflight_rejects_symlink_without_waiting_for_other_workspace(tmp_path: Path) -> None:
+    binding, workspace = _binding(tmp_path)
+    hidden = workspace.with_name("hidden-source")
+    workspace.rename(hidden)
+    workspace.symlink_to(hidden, target_is_directory=True)
+    try:
+        with pytest.raises(ProductionWorkspaceVerificationFailed, match="workspace unavailable"):
+            observe_production_workspace(
+                binding, ContentAddressedStorage(tmp_path / "evidence"), require_change=False)
+    finally:
+        workspace.unlink()
+        hidden.rename(workspace)

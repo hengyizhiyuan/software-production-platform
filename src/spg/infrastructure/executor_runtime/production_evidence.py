@@ -6,6 +6,7 @@ from hashlib import sha256
 import os
 from pathlib import Path, PurePosixPath
 import subprocess
+import time
 
 from spg.domain.native_execution import ExecutionBindingV2
 from spg.infrastructure.executor_runtime.local_storage import ContentAddressedStorage
@@ -46,8 +47,19 @@ def observe_production_workspace(
         raise ProductionWorkspaceVerificationFailed("VERIFICATION_FAILED: writable mount missing")
     raw_workspace = Path(mount.host_path)
     workspace = raw_workspace.resolve()
-    if raw_workspace.is_symlink() or not workspace.is_dir():
+    if raw_workspace.is_symlink():
         raise ProductionWorkspaceVerificationFailed("VERIFICATION_FAILED: workspace unavailable")
+    # A prepared workspace may briefly be invisible to a separately mounted
+    # Worker. Wait only before the first effect; every exact Git/source check
+    # below still runs and a persistently absent workspace remains a failure.
+    availability_started = time.monotonic()
+    if not require_change:
+        while not raw_workspace.is_dir() and time.monotonic() - availability_started < 2:
+            time.sleep(0.1)
+    if not raw_workspace.is_dir() or raw_workspace.is_symlink():
+        raise ProductionWorkspaceVerificationFailed("VERIFICATION_FAILED: workspace unavailable")
+    workspace = raw_workspace.resolve()
+    availability_wait_ms = int((time.monotonic() - availability_started) * 1000)
     top = _git(workspace, "rev-parse", "--show-toplevel").decode().strip()
     baseline = _git(workspace, "rev-parse", "--verify", "HEAD^{commit}").decode().strip()
     if Path(top).resolve() != workspace or baseline != context.repository_revision:
@@ -111,6 +123,7 @@ def observe_production_workspace(
         "repository_revision": context.repository_revision,
         "files_changed": list(changed),
         "workspace_bytes": total_bytes,
+        "workspace_availability_wait_ms": availability_wait_ms,
         "tracked_diff": diff.decode("utf-8", errors="replace"),
         "artifacts": artifacts,
     }
@@ -118,4 +131,5 @@ def observe_production_workspace(
     return {"workspace_id": str(binding.workspace.workspace_id),
             "repository_revision": context.repository_revision,
             "files_changed": list(changed), "workspace_bytes": total_bytes,
+            "workspace_availability_wait_ms": availability_wait_ms,
             "diff_reference": f"sha256:{digest}", "artifacts": artifacts}
