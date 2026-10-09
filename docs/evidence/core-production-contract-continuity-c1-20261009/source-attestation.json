@@ -1,0 +1,44 @@
+{
+  "captured_at_utc": "2026-10-09T06:19:19.777283+00:00",
+  "source_checks": {
+    "watt": {
+      "revision": "00e2a77e6b80ea79185d74a12db2cec8eeb9445e",
+      "tree": "5d9c8f9714d698c695484efc1091bc092862f6bd",
+      "archive_sha256": "3723df8a574a63ed0b53c18a28d5253ca07fcec79d613650793c54a4fbcb0a26",
+      "verified_file_count": 1921
+    },
+    "guardian": {
+      "revision": "6b974748df22d84b88f6908ea8ee90a9752fd183",
+      "tree": "c9a1bf4e102d8365a1ce27c9cced88f8ab0cd129",
+      "archive_sha256": "f2cbee8ea23ad217b9307d9288c88c4a95673f97d8a218ebff8b74f9f894d915",
+      "verified_file_count": 27
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+      "archive_sha256": "24ba8fedcd9555a6d08d90bc6aaf9206ac2b5f74d5c6f81061d99c89306b033c",
+      "verified_file_count": 42
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5",
+      "archive_sha256": "0c21dafb428769a77ce1eb04d557f7ac7b06372c0365232b51f5011759b9fa16",
+      "verified_file_count": 41
+    }
+  },
+  "python": "3.13.16 (main, Oct  1 2026, 21:42:43) [GCC 12.2.0]",
+  "imports": {
+    "spg": "/c1/watt/src/spg/__init__.py",
+    "guardian": "/c1/guardian/src/guardian/__init__.py",
+    "ecf": "/c1/ecf/src/ecf/__init__.py",
+    "pytest": "/c1/test-deps/pytest/__init__.py"
+  },
+  "package_versions": {
+    "pytest": "9.1.1",
+    "sqlalchemy": "2.0.52",
+    "psycopg": "3.3.4",
+    "pydantic": "2.13.4",
+    "alembic": "1.19.1",
+    "httpx": "UNKNOWN: distribution metadata unavailable"
+  }
+}

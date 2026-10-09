@@ -1,0 +1,33 @@
+{
+  "captured_at_utc": "2026-10-09T06:32:25.7071988Z",
+  "protected_workspaces": [
+    {
+      "path": "D:\\hy\\software-production-platform",
+      "branch": "feature/production-environment-foundation",
+      "head": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+      "dirty": []
+    },
+    {
+      "path": "C:\\Users\\yuchunbo\\.codex\\worktrees\\governed-context-convergence\\software-production-platform",
+      "branch": "codex/governed-production-context-convergence-v1",
+      "head": "5fd2579f8ab67db12f6ea122048613184276175f",
+      "dirty": []
+    },
+    {
+      "path": "D:\\hy\\guardian-governed-obligations",
+      "branch": "codex/governed-obligation-evidence",
+      "head": "7cdd58540b59767d9a68a5d16038c06f89059a5d",
+      "dirty": []
+    },
+    {
+      "path": "D:\\hy\\core-production-audit\\watt",
+      "branch": "codex/core-production-convergence-phase-b-audit",
+      "head": "f6f078bc665cb2415c1992f3d697127543bf478f",
+      "dirty": []
+    }
+  ],
+  "ecs_production_receipt": "cleanup-receipt.json",
+  "ecf_selected_remote_branch": "codex/managed-greenfield-context-closure-v1",
+  "ecf_selected_remote_head": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "historical_records_not_modified_by_c1": true
+}

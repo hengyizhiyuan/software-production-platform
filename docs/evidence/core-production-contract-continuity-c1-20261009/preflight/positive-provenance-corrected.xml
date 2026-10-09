@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="6.751" timestamp="2026-10-09T05:52:23.782802+00:00" hostname="cf39d07e1b6a"><testcase classname="tests.integration.test_c1_contract_continuity" name="test_both_actual_admission_paths_reach_independent_guardian[work]" time="1.934"><error message="failed on setup with &quot;spg.application.decision_context.DecisionContextNotReady: 决策上下文尚未就绪；缺少 PRODUCT_INTENT, PRODUCT_INVARIANT, APPROVED_DECISION&quot;">tests/integration/test_c1_contract_continuity.py:358: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:330: in _admit_c1
+    works.approve_work(draft.work_id, authority_identity="fixture:human:c1")
+src/spg/application/work.py:1937: in approve_work
+    decision_context = lineage_for_work_task(
+src/spg/application/decision_context.py:317: in lineage_for_work_task
+    package = gateway.require_ready(requirement,
+src/spg/application/decision_context.py:689: in require_ready
+    self.ensure_ready(package)
+src/spg/application/decision_context.py:695: in ensure_ready
+    raise DecisionContextNotReady(package)
+E   spg.application.decision_context.DecisionContextNotReady: 决策上下文尚未就绪；缺少 PRODUCT_INTENT, PRODUCT_INVARIANT, APPROVED_DECISION</error></testcase></testsuite></testsuites>

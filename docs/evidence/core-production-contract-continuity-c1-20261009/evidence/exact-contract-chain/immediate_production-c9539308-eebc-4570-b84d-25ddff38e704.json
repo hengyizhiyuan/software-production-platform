@@ -1,0 +1,2700 @@
+{
+  "kind": "C1_CONTROLLED_CONTRACT_INTEGRATION",
+  "evidence_level": "E2",
+  "captured_at_utc": "2026-10-09T06:06:56.723637+00:00",
+  "application_revision": "00e2a77e6b80ea79185d74a12db2cec8eeb9445e",
+  "guardian_revision": "6b974748df22d84b88f6908ea8ee90a9752fd183",
+  "ecf_revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "admission_path": "WorkApplicationService.approve_work",
+  "fixture_lifecycle_selection": "IMMEDIATE_PRODUCTION",
+  "source_fixture": "Controlled managed genesis V0; no accepted V1 or Human acceptance",
+  "authority_fixture": "SyntheticAuthorityFixture",
+  "fixture_admission_boundary": "actual submit/refine; controlled typed authority WorkReality; actual approve",
+  "live_model_production": false,
+  "human_integration_authorized": false,
+  "human_delivery_accepted": false,
+  "semantic_ir": {
+    "items": [
+      {
+        "item_id": "meaning",
+        "kind": "PRODUCTION_INTENT",
+        "statement": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+        "subject": null,
+        "answer": null,
+        "observed_facts": {},
+        "provenance": [
+          {
+            "origin": "HUMAN_EXPLICIT",
+            "source_record_id": "d848e978-d0d8-4392-8f6f-f581e49e7320",
+            "source_text": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+            "evidence_reference": null
+          }
+        ],
+        "action": null,
+        "production": {
+          "objective": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+          "primary_change": "Create index.html",
+          "scope": [],
+          "exclusions": [
+            "deployment",
+            "publishing"
+          ],
+          "target_paths": [
+            {
+              "value": "index.html",
+              "provenance": {
+                "origin": "HUMAN_EXPLICIT",
+                "source_record_id": "d848e978-d0d8-4392-8f6f-f581e49e7320",
+                "source_text": "Create index.html",
+                "evidence_reference": null
+              }
+            }
+          ],
+          "allowed_areas": [],
+          "current": true,
+          "bounded_change": true,
+          "systemic_design": false,
+          "new_work": true,
+          "repository_reference": null,
+          "repository_required": false,
+          "preview_required": false,
+          "acceptance_required": true,
+          "delivery_authorized": false,
+          "unresolved": [],
+          "unresolved_arguments": []
+        },
+        "design_frame": null,
+        "depends_on": [],
+        "supersedes": [],
+        "confidence": 1.0,
+        "requires_human": false
+      },
+      {
+        "item_id": "change-scope",
+        "kind": "CONSTRAINT",
+        "statement": "index.html changes alone",
+        "subject": "repository-change-boundary",
+        "answer": null,
+        "observed_facts": {},
+        "provenance": [
+          {
+            "origin": "HUMAN_EXPLICIT",
+            "source_record_id": "d848e978-d0d8-4392-8f6f-f581e49e7320",
+            "source_text": "index.html changes alone",
+            "evidence_reference": null
+          }
+        ],
+        "action": null,
+        "production": null,
+        "design_frame": null,
+        "depends_on": [],
+        "supersedes": [],
+        "confidence": 1.0,
+        "requires_human": false
+      },
+      {
+        "item_id": "external-boundary",
+        "kind": "CONSTRAINT",
+        "statement": "Excluded from this Work: deployment, publishing",
+        "subject": "release-boundary",
+        "answer": null,
+        "observed_facts": {},
+        "provenance": [
+          {
+            "origin": "HUMAN_EXPLICIT",
+            "source_record_id": "d848e978-d0d8-4392-8f6f-f581e49e7320",
+            "source_text": "Excluded from this Work: deployment, publishing",
+            "evidence_reference": null
+          }
+        ],
+        "action": null,
+        "production": null,
+        "design_frame": null,
+        "depends_on": [],
+        "supersedes": [],
+        "confidence": 1.0,
+        "requires_human": false
+      },
+      {
+        "item_id": "candidate-handoff",
+        "kind": "CONSTRAINT",
+        "statement": "A reviewable Candidate is left for Human acceptance",
+        "subject": "review-handoff",
+        "answer": null,
+        "observed_facts": {},
+        "provenance": [
+          {
+            "origin": "HUMAN_EXPLICIT",
+            "source_record_id": "d848e978-d0d8-4392-8f6f-f581e49e7320",
+            "source_text": "A reviewable Candidate is left for Human acceptance",
+            "evidence_reference": null
+          }
+        ],
+        "action": null,
+        "production": null,
+        "design_frame": null,
+        "depends_on": [],
+        "supersedes": [],
+        "confidence": 1.0,
+        "requires_human": false
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "current-source",
+        "source_record_id": "d848e978-d0d8-4392-8f6f-f581e49e7320",
+        "source_text": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+        "semantic_item_ids": [
+          "meaning"
+        ],
+        "speech_act": null,
+        "polarity": "UNRESOLVED",
+        "modality": "UNRESOLVED",
+        "temporal_scope": "UNRESOLVED",
+        "requested_effects": [],
+        "refers_to": [],
+        "supersedes": []
+      },
+      {
+        "clause_id": "change-scope",
+        "source_record_id": "d848e978-d0d8-4392-8f6f-f581e49e7320",
+        "source_text": "index.html changes alone",
+        "semantic_item_ids": [
+          "change-scope"
+        ],
+        "speech_act": null,
+        "polarity": "AFFIRMATIVE",
+        "modality": "ASSERTION",
+        "temporal_scope": "CURRENT",
+        "requested_effects": [
+          "RESTRICT_CHANGE_SCOPE"
+        ],
+        "refers_to": [],
+        "supersedes": []
+      },
+      {
+        "clause_id": "external-boundary",
+        "source_record_id": "d848e978-d0d8-4392-8f6f-f581e49e7320",
+        "source_text": "Excluded from this Work: deployment, publishing",
+        "semantic_item_ids": [
+          "external-boundary"
+        ],
+        "speech_act": null,
+        "polarity": "NEGATED",
+        "modality": "ASSERTION",
+        "temporal_scope": "CURRENT",
+        "requested_effects": [
+          "PROHIBIT_DEPLOY",
+          "PROHIBIT_PUBLISH"
+        ],
+        "refers_to": [],
+        "supersedes": []
+      },
+      {
+        "clause_id": "candidate-handoff",
+        "source_record_id": "d848e978-d0d8-4392-8f6f-f581e49e7320",
+        "source_text": "A reviewable Candidate is left for Human acceptance",
+        "semantic_item_ids": [
+          "candidate-handoff"
+        ],
+        "speech_act": null,
+        "polarity": "AFFIRMATIVE",
+        "modality": "ASSERTION",
+        "temporal_scope": "CURRENT",
+        "requested_effects": [],
+        "refers_to": [],
+        "supersedes": []
+      }
+    ],
+    "unresolved": [],
+    "human_abstraction_level": "DOMAIN",
+    "uncertain": false,
+    "questions": [],
+    "human_decisions": [],
+    "production_sufficiency": null,
+    "schema_version": "irk-semantic-ir-v1",
+    "id": "44e03ce6-e4cf-561b-b3f2-fa62f7f9a644",
+    "interaction_id": "bc7bf3a5-e97a-4345-b7a8-8eb58b91efa4",
+    "source_record_id": "d848e978-d0d8-4392-8f6f-f581e49e7320",
+    "basis_fingerprint": "52c9c8a098fa5a8e82f7bfbdb16b68a5ce4e94f1c6db51f750d893142fb289c4",
+    "engineering_fact_ids": [
+      "74d3ea2b-2a70-5689-b649-19dcb807baa5"
+    ],
+    "neutral_semantic_extractions": [],
+    "semantic_fact_candidates": [
+      {
+        "candidate_id": "heading",
+        "operation": "UPSERT",
+        "subject": "page.h1",
+        "relation": "EQUALITY",
+        "reference_role": null,
+        "value": "C1 continuity",
+        "unit": null,
+        "scope": "index.html",
+        "qualifiers": {
+          "element": "h1"
+        },
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "source_record_ids": [
+          "d848e978-d0d8-4392-8f6f-f581e49e7320"
+        ],
+        "source_text": "h1 text in index.html equals C1 continuity",
+        "source_extraction_ids": [],
+        "role_origin": "EXPLICIT",
+        "supersedes_fact_ids": []
+      }
+    ],
+    "compiler_reference": "fixture:c1-declared-meaning",
+    "legacy_typed_projection": false,
+    "work_question_step_id": null
+  },
+  "work_reality_revision": {
+    "id": "6acf54b1-7444-4a2f-9724-046e0ae54d79",
+    "work_id": "c9539308-eebc-4570-b84d-25ddff38e704",
+    "revision_number": 1,
+    "previous_revision_id": null,
+    "basis_fingerprint": "52c9c8a098fa5a8e82f7bfbdb16b68a5ce4e94f1c6db51f750d893142fb289c4",
+    "revision_fingerprint": "1da6d9e06c07bff3bca65dba74efe43ec83cc8a24e84e138703ebcc1ad293de8",
+    "source_interaction_id": "bc7bf3a5-e97a-4345-b7a8-8eb58b91efa4",
+    "source_kind": "INTERACTION_ASSESSMENT",
+    "source_assessment_id": "47540c57-203b-49f3-8c89-9e20550361d7",
+    "source_record_ids": [
+      "d848e978-d0d8-4392-8f6f-f581e49e7320"
+    ],
+    "motive": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+    "desired_outcome": "Create index.html",
+    "context_facts": [],
+    "constraints": [
+      "index.html changes alone",
+      "Excluded from this Work: deployment, publishing",
+      "A reviewable Candidate is left for Human acceptance",
+      "Excluded from this Work: deployment",
+      "Excluded from this Work: publishing"
+    ],
+    "requests": [
+      "Create index.html"
+    ],
+    "engineering_semantic_facts": [
+      {
+        "id": "74d3ea2b-2a70-5689-b649-19dcb807baa5",
+        "subject": "page.h1",
+        "relation": "EQUALITY",
+        "reference_role": null,
+        "value": "C1 continuity",
+        "unit": null,
+        "scope": "index.html",
+        "qualifiers": {
+          "element": "h1"
+        },
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "d848e978-d0d8-4392-8f6f-f581e49e7320"
+          ],
+          "source_text": "h1 text in index.html equals C1 continuity",
+          "source_extraction_ids": [],
+          "role_origin": "EXPLICIT",
+          "semantic_ir_id": "44e03ce6-e4cf-561b-b3f2-fa62f7f9a644",
+          "governed_provenance": [
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_record_id": "d848e978-d0d8-4392-8f6f-f581e49e7320",
+              "source_text": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+              "evidence_reference": null
+            },
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_record_id": "d848e978-d0d8-4392-8f6f-f581e49e7320",
+              "source_text": "index.html changes alone",
+              "evidence_reference": null
+            },
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_record_id": "d848e978-d0d8-4392-8f6f-f581e49e7320",
+              "source_text": "Excluded from this Work: deployment, publishing",
+              "evidence_reference": null
+            },
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_record_id": "d848e978-d0d8-4392-8f6f-f581e49e7320",
+              "source_text": "A reviewable Candidate is left for Human acceptance",
+              "evidence_reference": null
+            }
+          ]
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79"
+      }
+    ],
+    "engineering_scope_id": "42af7a1c-c3b3-4b94-b16d-9ca9a51bb8f1",
+    "engineering_resource_id": "637baebb-a68f-4444-9428-f93bb37c5ec0",
+    "scope_basis_fingerprint": "68048899f620f53b3e50e4b479abbbfb157ae07a7002fdc2aaf6840d9cfeddd0",
+    "repository_identity": "test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+    "repository_ref": "refs/heads/main",
+    "source_baseline_id": "70b13638-265b-4856-9381-2cbe91c5388e",
+    "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+    "governance_record_id": "7b2984b1-2e3c-4af3-9b1f-8b7bf42c2edc",
+    "supporting_references": [
+      "INTERACTION_RECORD:d848e978-d0d8-4392-8f6f-f581e49e7320"
+    ],
+    "change_set": [],
+    "rationale": "SyntheticAuthorityFixture: controlled C1 typed authority for immediate constructor",
+    "admitted_by": "fixture:human:c1",
+    "schema_version": "wic-work-reality-v3",
+    "created_at": "2026-10-09T06:06:54.093899Z"
+  },
+  "source_baseline": {
+    "id": "70b13638-265b-4856-9381-2cbe91c5388e",
+    "condition": "TRUSTED",
+    "repository_identity": "test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+    "repository_ref": "refs/heads/main",
+    "repository_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+    "repository_tree_identity": "6ed77f11ba8456ba3c1342af247884809be1498e",
+    "source_baseline_id": null,
+    "created_at": "2026-10-09T06:06:53.619916Z"
+  },
+  "runtime_binding": {
+    "id": "a27b78c7-4c6f-4aa2-b0ac-0145a40aba8b",
+    "work_id": "c9539308-eebc-4570-b84d-25ddff38e704",
+    "cycle_number": 1,
+    "steering_step_id": null,
+    "steering_decision_id": null,
+    "condition": "ADMITTED",
+    "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79",
+    "engineering_scope_id": "42af7a1c-c3b3-4b94-b16d-9ca9a51bb8f1",
+    "resource_id": "637baebb-a68f-4444-9428-f93bb37c5ec0",
+    "production_run_id": "afbde75b-49a8-42ce-b47b-227c7061c472",
+    "plan_revision_id": "3f01a0b8-354a-4511-8241-f0e321800d83",
+    "work_unit_id": "7aafcd5d-8721-403b-9928-ae3a8c92f26f",
+    "governance_record_id": "ba002a77-f686-5fce-95e7-24260391f92d",
+    "admitted_by": "fixture:human:c1",
+    "created_at": "2026-10-09T06:06:54.313959Z"
+  },
+  "task_and_completion_contract": {
+    "required_outputs": [
+      "index.html"
+    ],
+    "required_changes": [
+      "index.html"
+    ],
+    "required_markers": [],
+    "forbidden_changes": [],
+    "verification_obligations": [
+      "PATH_SCOPE",
+      "GIT_DIFF_CHECK"
+    ],
+    "semantic_fact_obligations": [
+      {
+        "fact_id": "74d3ea2b-2a70-5689-b649-19dcb807baa5",
+        "subject": "page.h1",
+        "relation": "EQUALITY",
+        "reference_role": null,
+        "value": "C1 continuity",
+        "unit": null,
+        "scope": "index.html",
+        "qualifiers": {
+          "element": "h1"
+        },
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "source_work_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79"
+      }
+    ],
+    "fulfillment_bindings": [
+      {
+        "fact_id": null,
+        "source_kind": "IR_CONSTRAINT",
+        "constraint_item_id": "change-scope",
+        "constraint_clause_id": "change-scope",
+        "constraint_fingerprint": "ca1b2980b52a05ef47107c2d3a385921bf980b6386274a55339a49f40d1a237e",
+        "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79",
+        "fact_fingerprint": null,
+        "provenance_fingerprint": "f685d2129bb333650a4feb5d859d315346b4b0699a4e00974cf958e7de3eaf9f",
+        "source_record_ids": [
+          "d848e978-d0d8-4392-8f6f-f581e49e7320"
+        ],
+        "component": "git-diff-scope",
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+        "gate_ref": "code-verification:path-scope",
+        "source_quote": "index.html changes alone",
+        "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+        "target_paths": [
+          "index.html"
+        ],
+        "state": "BOUND_PENDING_EVIDENCE"
+      },
+      {
+        "fact_id": null,
+        "source_kind": "IR_CONSTRAINT",
+        "constraint_item_id": "external-boundary",
+        "constraint_clause_id": "external-boundary",
+        "constraint_fingerprint": "d492650764dfe35770cef3a5793f8075cc6fb89bf07a1a97baf1e05d86e06dc5",
+        "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79",
+        "fact_fingerprint": null,
+        "provenance_fingerprint": "f5ad1e0e18823bd43cae72e8c4c7de9a8f54e3428b8d94e9302be8a8794c7237",
+        "source_record_ids": [
+          "d848e978-d0d8-4392-8f6f-f581e49e7320"
+        ],
+        "component": "deploy",
+        "owner": "DELIVERY_GATE",
+        "phase": "CONTINUOUS_FROM_ADMISSION",
+        "evidence_method": "EXACT_PERMISSION_GATE",
+        "gate_ref": "cloud-delivery:human-authorization-required",
+        "source_quote": "Excluded from this Work: deployment, publishing",
+        "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+        "target_paths": [],
+        "state": "BOUND_PENDING_EVIDENCE"
+      },
+      {
+        "fact_id": null,
+        "source_kind": "IR_CONSTRAINT",
+        "constraint_item_id": "external-boundary",
+        "constraint_clause_id": "external-boundary",
+        "constraint_fingerprint": "d492650764dfe35770cef3a5793f8075cc6fb89bf07a1a97baf1e05d86e06dc5",
+        "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79",
+        "fact_fingerprint": null,
+        "provenance_fingerprint": "f5ad1e0e18823bd43cae72e8c4c7de9a8f54e3428b8d94e9302be8a8794c7237",
+        "source_record_ids": [
+          "d848e978-d0d8-4392-8f6f-f581e49e7320"
+        ],
+        "component": "publish",
+        "owner": "DELIVERY_GATE",
+        "phase": "CONTINUOUS_FROM_ADMISSION",
+        "evidence_method": "EXACT_PERMISSION_GATE",
+        "gate_ref": "remote-delivery:human-authorization-required",
+        "source_quote": "Excluded from this Work: deployment, publishing",
+        "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+        "target_paths": [],
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    ],
+    "task_contract": {
+      "task_contract_id": "baaa838f-23ca-5a06-842a-ee3880e73bd7",
+      "activity": "FEATURE_DELIVERY",
+      "task_mode": "GENERAL",
+      "objective": "Produce the admitted code change.\nDesired outcome: Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance\nAdmitted constraints:\n- index.html changes alone\n- Excluded from this Work: deployment, publishing\n- A reviewable Candidate is left for Human acceptance\n- Excluded from this Work: deployment\n- Excluded from this Work: publishing\nExact targets:\n- CREATE index.html\nBounded areas:\n- None.",
+      "relevant_context": [
+        {
+          "source": "SEMANTIC_TRUTH",
+          "reference": "semantic-fact:74d3ea2b-2a70-5689-b649-19dcb807baa5",
+          "authority": "HUMAN_EXPLICIT"
+        },
+        {
+          "source": "ECF_REALITY",
+          "reference": "ecf-protected-package:34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+          "authority": "ECF_SELECTED_CONTEXT_ENVELOPE"
+        },
+        {
+          "source": "WORK_REALITY",
+          "reference": "work:c9539308-eebc-4570-b84d-25ddff38e704",
+          "authority": "WORK_REALITY"
+        },
+        {
+          "source": "WORK_REALITY",
+          "reference": "work-reality-revision:6acf54b1-7444-4a2f-9724-046e0ae54d79",
+          "authority": "WORK_REALITY"
+        },
+        {
+          "source": "DECISION_MEMORY",
+          "reference": "work-admission:c9539308-eebc-4570-b84d-25ddff38e704:fixture:human:c1",
+          "authority": "STEERING_OR_WORK_ADMISSION"
+        },
+        {
+          "source": "ECF_REALITY",
+          "reference": "engineering-resource:637baebb-a68f-4444-9428-f93bb37c5ec0",
+          "authority": "SOURCE_REALITY"
+        },
+        {
+          "source": "ECF_REALITY",
+          "reference": "repository:test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+          "authority": "SOURCE_REALITY"
+        },
+        {
+          "source": "ECF_REALITY",
+          "reference": "source-baseline:70b13638-265b-4856-9381-2cbe91c5388e@9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+          "authority": "SOURCE_REALITY"
+        },
+        {
+          "source": "SOP",
+          "reference": "sop:watt-software-production:1:FEATURE_DELIVERY",
+          "authority": "GUIDANCE_ONLY"
+        },
+        {
+          "source": "DOMAIN_PATTERN",
+          "reference": "pattern:bounded-change-and-evidence:1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "source": "DOMAIN_PATTERN",
+          "reference": "pattern:governed-meaning-preservation:1",
+          "authority": "ADVISORY_ONLY"
+        },
+        {
+          "source": "ECF_REALITY",
+          "reference": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:0",
+          "authority": "WATT_ARCHITECTURE_GOVERNOR"
+        },
+        {
+          "source": "ECF_REALITY",
+          "reference": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:1",
+          "authority": "WATT_ARCHITECTURE_GOVERNOR"
+        },
+        {
+          "source": "ECF_REALITY",
+          "reference": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:2",
+          "authority": "WATT_ARCHITECTURE_GOVERNOR"
+        },
+        {
+          "source": "ECF_REALITY",
+          "reference": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:3",
+          "authority": "WATT_ARCHITECTURE_GOVERNOR"
+        },
+        {
+          "source": "ECF_REALITY",
+          "reference": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:4",
+          "authority": "WATT_ARCHITECTURE_GOVERNOR"
+        },
+        {
+          "source": "ECF_REALITY",
+          "reference": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-product-intent",
+          "authority": "WATT_PRODUCT_GOVERNOR"
+        }
+      ],
+      "scope": [
+        "CREATE:index.html"
+      ],
+      "constraints": [
+        "index.html changes alone",
+        "Excluded from this Work: deployment, publishing",
+        "A reviewable Candidate is left for Human acceptance",
+        "Excluded from this Work: deployment",
+        "Excluded from this Work: publishing"
+      ],
+      "required_capabilities": [],
+      "acceptance_meaning": [
+        "PATH_SCOPE",
+        "GIT_DIFF_CHECK"
+      ],
+      "evidence_requirements": [
+        {
+          "expectation_id": "feature-delivery-basis-evidence",
+          "category": "ENGINEERING",
+          "statement": "Current Work, source, scope, and decision lineage are identifiable before acting.",
+          "owner_boundary": "Work/ECF/Steering retain their own authority."
+        },
+        {
+          "expectation_id": "feature-delivery-outcome-evidence",
+          "category": "ASSURANCE",
+          "statement": "Outcome claims are evaluated against the admitted acceptance meaning and exact produced subject.",
+          "owner_boundary": "Guardian/Verification owns assurance results."
+        },
+        {
+          "expectation_id": "task-acceptance-1",
+          "category": "ASSURANCE",
+          "statement": "PATH_SCOPE",
+          "owner_boundary": "Guardian/Verification owns the assurance result."
+        },
+        {
+          "expectation_id": "task-acceptance-2",
+          "category": "ASSURANCE",
+          "statement": "GIT_DIFF_CHECK",
+          "owner_boundary": "Guardian/Verification owns the assurance result."
+        }
+      ],
+      "out_of_scope": [
+        "Any repository path outside the admitted exact targets or bounded areas"
+      ],
+      "authority_lineage": [
+        "work:c9539308-eebc-4570-b84d-25ddff38e704",
+        "work-reality-revision:6acf54b1-7444-4a2f-9724-046e0ae54d79",
+        "engineering-scope:42af7a1c-c3b3-4b94-b16d-9ca9a51bb8f1",
+        "engineering-resource:637baebb-a68f-4444-9428-f93bb37c5ec0",
+        "human-authority:fixture:human:c1"
+      ],
+      "required_prerequisites": [],
+      "prerequisite_evidence": [],
+      "semantic_fact_references": [
+        {
+          "fact_id": "74d3ea2b-2a70-5689-b649-19dcb807baa5",
+          "subject": "page.h1",
+          "relation": "EQUALITY",
+          "reference_role": null,
+          "value": "C1 continuity",
+          "unit": null,
+          "scope": "index.html",
+          "qualifiers": {
+            "element": "h1"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "source_work_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79"
+        }
+      ],
+      "sop_reference": "sop:watt-software-production:1:FEATURE_DELIVERY",
+      "reasoning_summary": {
+        "summary": "Use the admitted task boundary and source Reality, preserve governed meaning, and require independent evidence before acceptance.",
+        "considered_factors": [
+          "Current governed objective and scope",
+          "Current Semantic Truth without reinterpretation",
+          "Exact engineering source basis",
+          "Independent evidence required for acceptance",
+          "Pattern guidance governed-meaning-preservation:1",
+          "Pattern guidance bounded-change-and-evidence:1"
+        ],
+        "uncertainty": [],
+        "raw_chain_of_thought_stored": false
+      },
+      "decision_trace": {
+        "decision_id": "352246df-b447-58db-ad7b-6dd110f09bf6",
+        "context_reference": "work-admission:c9539308-eebc-4570-b84d-25ddff38e704:fixture:human:c1",
+        "considered_options": [
+          "Execute within the admitted scope and governed meaning",
+          "Return to Steering or Human authority before widening the boundary"
+        ],
+        "selected_direction": "Execute the bounded task: Produce the admitted code change.\nDesired outcome: Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance\nAdmitted constraints:\n- index.html changes alone\n- Excluded from this Work: deployment, publishing\n- A reviewable Candidate is left for Human acceptance\n- Excluded from this Work: deployment\n- Excluded from this Work: publishing\nExact targets:\n- CREATE index.html\nBounded areas:\n- None.",
+        "rationale": "The selected direction preserves current Work Reality, semantic facts, source baseline, and independent verification obligations.",
+        "authority_reference": "human-authority:fixture:human:c1",
+        "evidence_references": [
+          {
+            "category": "HUMAN",
+            "source_reference": "work-reality-revision:6acf54b1-7444-4a2f-9724-046e0ae54d79",
+            "subject_reference": "semantic-fact:74d3ea2b-2a70-5689-b649-19dcb807baa5",
+            "basis_reference": "semantic-fact:74d3ea2b-2a70-5689-b649-19dcb807baa5",
+            "assertion": "page.h1 equality C1 continuity within index.html",
+            "authority_domain": "ENGINEERING_SEMANTIC_TRUTH"
+          },
+          {
+            "category": "ENGINEERING",
+            "source_reference": "source-baseline:70b13638-265b-4856-9381-2cbe91c5388e@9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+            "subject_reference": "task-scope",
+            "basis_reference": "source-baseline:70b13638-265b-4856-9381-2cbe91c5388e@9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+            "assertion": "The task is bound to the admitted engineering source basis.",
+            "authority_domain": "ECF/SOURCE_REALITY"
+          }
+        ],
+        "status": "ADMITTED"
+      },
+      "evidence_lineage": [
+        {
+          "category": "HUMAN",
+          "source_reference": "work-reality-revision:6acf54b1-7444-4a2f-9724-046e0ae54d79",
+          "subject_reference": "semantic-fact:74d3ea2b-2a70-5689-b649-19dcb807baa5",
+          "basis_reference": "semantic-fact:74d3ea2b-2a70-5689-b649-19dcb807baa5",
+          "assertion": "page.h1 equality C1 continuity within index.html",
+          "authority_domain": "ENGINEERING_SEMANTIC_TRUTH"
+        },
+        {
+          "category": "ENGINEERING",
+          "source_reference": "source-baseline:70b13638-265b-4856-9381-2cbe91c5388e@9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+          "subject_reference": "task-scope",
+          "basis_reference": "source-baseline:70b13638-265b-4856-9381-2cbe91c5388e@9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+          "assertion": "The task is bound to the admitted engineering source basis.",
+          "authority_domain": "ECF/SOURCE_REALITY"
+        }
+      ],
+      "decision_context": {
+        "version": "0.1",
+        "contract_id": "MANAGED_GREENFIELD_PRODUCTION",
+        "request_id": "watt-ecf-decision-context-v1:MANAGED_PRODUCT_WEB_UI:a898bd4f-bc12-4fa2-a33b-c09f5068af57:c9539308-eebc-4570-b84d-25ddff38e704:index.html",
+        "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+        "surface": "MANAGED_PRODUCT_WEB_UI",
+        "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+        "work_id": "c9539308-eebc-4570-b84d-25ddff38e704",
+        "subject": "index.html",
+        "repository_path": "/tmp/pytest-of-root/pytest-9/test_both_actual_admission_pat0/wic-admission-repository",
+        "repository_identity": "test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+        "repository_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+        "source_references": [
+          "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:0@63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+          "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:1@63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+          "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:2@63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+          "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:3@63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+          "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:4@63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+          "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-product-intent@63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+          "git:repository:/tmp/pytest-of-root/pytest-9/test_both_actual_admission_pat0/wic-admission-repository@9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+          "work:c9539308-eebc-4570-b84d-25ddff38e704@6acf54b1-7444-4a2f-9724-046e0ae54d79"
+        ],
+        "generated_from": [
+          {
+            "context_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57:greenfield-constraint:0",
+            "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:0",
+            "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "authority_ref": "governed:work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:0",
+            "provenance": "product:a898bd4f-bc12-4fa2-a33b-c09f5068af57;work:c9539308-eebc-4570-b84d-25ddff38e704;work-reality:6acf54b1-7444-4a2f-9724-046e0ae54d79@1da6d9e06c07bff3bca65dba74efe43ec83cc8a24e84e138703ebcc1ad293de8;semantic-ir:44e03ce6-e4cf-561b-b3f2-fa62f7f9a644@52c9c8a098fa5a8e82f7bfbdb16b68a5ce4e94f1c6db51f750d893142fb289c4;governance:7b2984b1-2e3c-4af3-9b1f-8b7bf42c2edc",
+            "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+            "work_id": null,
+            "subject": null
+          },
+          {
+            "context_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57:greenfield-constraint:1",
+            "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:1",
+            "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "authority_ref": "governed:work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:1",
+            "provenance": "product:a898bd4f-bc12-4fa2-a33b-c09f5068af57;work:c9539308-eebc-4570-b84d-25ddff38e704;work-reality:6acf54b1-7444-4a2f-9724-046e0ae54d79@1da6d9e06c07bff3bca65dba74efe43ec83cc8a24e84e138703ebcc1ad293de8;semantic-ir:44e03ce6-e4cf-561b-b3f2-fa62f7f9a644@52c9c8a098fa5a8e82f7bfbdb16b68a5ce4e94f1c6db51f750d893142fb289c4;governance:7b2984b1-2e3c-4af3-9b1f-8b7bf42c2edc",
+            "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+            "work_id": null,
+            "subject": null
+          },
+          {
+            "context_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57:greenfield-constraint:2",
+            "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:2",
+            "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "authority_ref": "governed:work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:2",
+            "provenance": "product:a898bd4f-bc12-4fa2-a33b-c09f5068af57;work:c9539308-eebc-4570-b84d-25ddff38e704;work-reality:6acf54b1-7444-4a2f-9724-046e0ae54d79@1da6d9e06c07bff3bca65dba74efe43ec83cc8a24e84e138703ebcc1ad293de8;semantic-ir:44e03ce6-e4cf-561b-b3f2-fa62f7f9a644@52c9c8a098fa5a8e82f7bfbdb16b68a5ce4e94f1c6db51f750d893142fb289c4;governance:7b2984b1-2e3c-4af3-9b1f-8b7bf42c2edc",
+            "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+            "work_id": null,
+            "subject": null
+          },
+          {
+            "context_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57:greenfield-constraint:3",
+            "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:3",
+            "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "authority_ref": "governed:work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:3",
+            "provenance": "product:a898bd4f-bc12-4fa2-a33b-c09f5068af57;work:c9539308-eebc-4570-b84d-25ddff38e704;work-reality:6acf54b1-7444-4a2f-9724-046e0ae54d79@1da6d9e06c07bff3bca65dba74efe43ec83cc8a24e84e138703ebcc1ad293de8;semantic-ir:44e03ce6-e4cf-561b-b3f2-fa62f7f9a644@52c9c8a098fa5a8e82f7bfbdb16b68a5ce4e94f1c6db51f750d893142fb289c4;governance:7b2984b1-2e3c-4af3-9b1f-8b7bf42c2edc",
+            "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+            "work_id": null,
+            "subject": null
+          },
+          {
+            "context_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57:greenfield-constraint:4",
+            "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:4",
+            "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "authority_ref": "governed:work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:4",
+            "provenance": "product:a898bd4f-bc12-4fa2-a33b-c09f5068af57;work:c9539308-eebc-4570-b84d-25ddff38e704;work-reality:6acf54b1-7444-4a2f-9724-046e0ae54d79@1da6d9e06c07bff3bca65dba74efe43ec83cc8a24e84e138703ebcc1ad293de8;semantic-ir:44e03ce6-e4cf-561b-b3f2-fa62f7f9a644@52c9c8a098fa5a8e82f7bfbdb16b68a5ce4e94f1c6db51f750d893142fb289c4;governance:7b2984b1-2e3c-4af3-9b1f-8b7bf42c2edc",
+            "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+            "work_id": null,
+            "subject": null
+          },
+          {
+            "context_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57:greenfield-product-intent",
+            "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-product-intent",
+            "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "authority": "WATT_PRODUCT_GOVERNOR",
+            "authority_ref": "governed:work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-product-intent",
+            "provenance": "product:a898bd4f-bc12-4fa2-a33b-c09f5068af57;work:c9539308-eebc-4570-b84d-25ddff38e704;work-reality:6acf54b1-7444-4a2f-9724-046e0ae54d79@1da6d9e06c07bff3bca65dba74efe43ec83cc8a24e84e138703ebcc1ad293de8;semantic-ir:44e03ce6-e4cf-561b-b3f2-fa62f7f9a644@52c9c8a098fa5a8e82f7bfbdb16b68a5ce4e94f1c6db51f750d893142fb289c4;governance:7b2984b1-2e3c-4af3-9b1f-8b7bf42c2edc",
+            "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+            "work_id": null,
+            "subject": null
+          },
+          {
+            "context_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57:repository:index.html",
+            "source_ref": "git:repository:/tmp/pytest-of-root/pytest-9/test_both_actual_admission_pat0/wic-admission-repository",
+            "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+            "authority": "WATT_REPOSITORY",
+            "authority_ref": "governed:git:repository:/tmp/pytest-of-root/pytest-9/test_both_actual_admission_pat0/wic-admission-repository",
+            "provenance": "git:9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+            "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+            "work_id": null,
+            "subject": null
+          },
+          {
+            "context_id": "c9539308-eebc-4570-b84d-25ddff38e704:work-reality",
+            "source_ref": "work:c9539308-eebc-4570-b84d-25ddff38e704",
+            "source_revision": "6acf54b1-7444-4a2f-9724-046e0ae54d79",
+            "authority": "WATT_WORK",
+            "authority_ref": "governed:work:c9539308-eebc-4570-b84d-25ddff38e704",
+            "provenance": "work-reality:6acf54b1-7444-4a2f-9724-046e0ae54d79",
+            "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+            "work_id": "c9539308-eebc-4570-b84d-25ddff38e704",
+            "subject": null
+          }
+        ],
+        "protected_obligations": [
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:0",
+            "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:0",
+            "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "6efc3ee6307872c9f50d945ac6f4c69c06abb2c1b5ca0117c009329674740a12",
+            "content": "index.html changes alone",
+            "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+            "verification_ref": null
+          },
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:1",
+            "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:1",
+            "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "dd2cfe25578eb3dc067cb581f09269920e139280391d883d9b65d1a067d5dd17",
+            "content": "Excluded from this Work: deployment, publishing",
+            "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+            "verification_ref": null
+          },
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:2",
+            "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:2",
+            "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "e2a293cc9ee7c6c2eb4e2bb5907c0fe0731f36e0c304c287a60451f91ea6e5f0",
+            "content": "A reviewable Candidate is left for Human acceptance",
+            "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+            "verification_ref": null
+          },
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:3",
+            "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:3",
+            "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "2daa60a268ab4beae79a2e77d1a2803019414734a9a52e3991ba4ef7c2765531",
+            "content": "Excluded from this Work: deployment",
+            "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+            "verification_ref": null
+          },
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:4",
+            "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:4",
+            "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "cb74abbf0b5db8207fbad70bdf5566ee63bcfe893ca144da10543198b2c3f4e9",
+            "content": "Excluded from this Work: publishing",
+            "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+            "verification_ref": null
+          },
+          {
+            "context_class": "PRODUCT_INTENT",
+            "semantic_key": "greenfield-product-intent",
+            "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-product-intent",
+            "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "authority": "WATT_PRODUCT_GOVERNOR",
+            "content_digest": "a160bdfdc15ed9b7c8981821c883ac7271de5f80e9f3d8a1219115497de28294",
+            "content": "{\"desired_outcome\": \"Create index.html\", \"governed_production_intents\": [{\"acceptance_required\": true, \"allowed_areas\": [], \"bounded_change\": true, \"current\": true, \"delivery_authorized\": false, \"exclusions\": [\"deployment\", \"publishing\"], \"new_work\": true, \"objective\": \"Create index.html\\nh1 text in index.html equals C1 continuity\\nindex.html changes alone\\nExcluded from this Work: deployment, publishing\\nA reviewable Candidate is left for Human acceptance\", \"preview_required\": false, \"primary_change\": \"Create index.html\", \"repository_reference\": null, \"repository_required\": false, \"scope\": [], \"systemic_design\": false, \"target_paths\": [{\"provenance\": {\"evidence_reference\": null, \"origin\": \"HUMAN_EXPLICIT\", \"source_record_id\": \"d848e978-d0d8-4392-8f6f-f581e49e7320\", \"source_text\": \"Create index.html\"}, \"value\": \"index.html\"}], \"unresolved\": [], \"unresolved_arguments\": []}]}",
+            "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+            "verification_ref": null
+          }
+        ]
+      }
+    },
+    "blocking_conditions": [],
+    "artifact_contract": null,
+    "change_contract": {
+      "target_kind": "CODE_WORK",
+      "target_shape": "EXACT_TARGET_SET",
+      "engineering_resource_id": "637baebb-a68f-4444-9428-f93bb37c5ec0",
+      "repository_identity": "test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+      "source_baseline_id": "70b13638-265b-4856-9381-2cbe91c5388e",
+      "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+      "desired_outcome": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+      "constraints": [
+        "index.html changes alone",
+        "Excluded from this Work: deployment, publishing",
+        "A reviewable Candidate is left for Human acceptance",
+        "Excluded from this Work: deployment",
+        "Excluded from this Work: publishing"
+      ],
+      "exact_targets": [
+        {
+          "path": "index.html",
+          "operation": "CREATE"
+        }
+      ],
+      "allowed_areas": [],
+      "forbidden_areas": [],
+      "verification_obligations": [
+        {
+          "kind": "PATH_SCOPE",
+          "target": null
+        },
+        {
+          "kind": "GIT_DIFF_CHECK",
+          "target": null
+        }
+      ],
+      "source_proposal_id": "b87eed1f-fbd1-5c68-970c-247b9b1bb363",
+      "source_proposal_fingerprint": "d76bb63d39c0a49ab252da1674cdac7c9d34ffb3881f56dc597fbc5fa13b6ba6"
+    },
+    "production_plan": {
+      "proposal_id": "160bd655-ebeb-554f-b3ee-7d4ab7e02efe",
+      "target_kind": "CODE_WORK",
+      "objective": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+      "desired_outcome": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+      "ordered_steps": [
+        {
+          "position": 1,
+          "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+        },
+        {
+          "position": 2,
+          "instruction": "Modify only the admitted exact code targets: index.html."
+        },
+        {
+          "position": 3,
+          "instruction": "Run the admitted targeted verification and report the resulting evidence."
+        }
+      ],
+      "graph": null,
+      "artifact_targets": [],
+      "change_proposal": null,
+      "change_contract": {
+        "target_kind": "CODE_WORK",
+        "target_shape": "EXACT_TARGET_SET",
+        "engineering_resource_id": "637baebb-a68f-4444-9428-f93bb37c5ec0",
+        "repository_identity": "test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+        "source_baseline_id": "70b13638-265b-4856-9381-2cbe91c5388e",
+        "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+        "desired_outcome": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+        "constraints": [
+          "index.html changes alone",
+          "Excluded from this Work: deployment, publishing",
+          "A reviewable Candidate is left for Human acceptance",
+          "Excluded from this Work: deployment",
+          "Excluded from this Work: publishing"
+        ],
+        "exact_targets": [
+          {
+            "path": "index.html",
+            "operation": "CREATE"
+          }
+        ],
+        "allowed_areas": [],
+        "forbidden_areas": [],
+        "verification_obligations": [
+          {
+            "kind": "PATH_SCOPE",
+            "target": null
+          },
+          {
+            "kind": "GIT_DIFF_CHECK",
+            "target": null
+          }
+        ],
+        "source_proposal_id": "b87eed1f-fbd1-5c68-970c-247b9b1bb363",
+        "source_proposal_fingerprint": "d76bb63d39c0a49ab252da1674cdac7c9d34ffb3881f56dc597fbc5fa13b6ba6"
+      },
+      "inherited_constraints": [
+        "index.html changes alone",
+        "Excluded from this Work: deployment, publishing",
+        "A reviewable Candidate is left for Human acceptance",
+        "Excluded from this Work: deployment",
+        "Excluded from this Work: publishing"
+      ],
+      "verification_approach": "Proposed typed checks: PATH_SCOPE, GIT_DIFF_CHECK",
+      "assumptions": [
+        "The admitted Work can be executed through one governed PWU and Attempt lineage."
+      ],
+      "unresolved_questions": [],
+      "fit_classification": "ONE_PWU_FIT",
+      "engineering_resource_id": "637baebb-a68f-4444-9428-f93bb37c5ec0",
+      "repository_identity": "test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+      "source_baseline_id": "70b13638-265b-4856-9381-2cbe91c5388e",
+      "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe"
+    }
+  },
+  "pwu": {
+    "id": "7aafcd5d-8721-403b-9928-ae3a8c92f26f",
+    "production_run_id": "afbde75b-49a8-42ce-b47b-227c7061c472",
+    "plan_revision_id": "3f01a0b8-354a-4511-8241-f0e321800d83",
+    "source_baseline_id": "70b13638-265b-4856-9381-2cbe91c5388e",
+    "node_id": null,
+    "parent_baseline_ids": [],
+    "verified_output_baseline_id": null,
+    "reconciliation_evidence": null,
+    "objective": "Produce the admitted code change.\nDesired outcome: Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance\nAdmitted constraints:\n- index.html changes alone\n- Excluded from this Work: deployment, publishing\n- A reviewable Candidate is left for Human acceptance\n- Excluded from this Work: deployment\n- Excluded from this Work: publishing\nExact targets:\n- CREATE index.html\nBounded areas:\n- None.",
+    "completion_contract": {
+      "required_outputs": [
+        "index.html"
+      ],
+      "required_changes": [
+        "index.html"
+      ],
+      "required_markers": [],
+      "forbidden_changes": [],
+      "verification_obligations": [
+        "PATH_SCOPE",
+        "GIT_DIFF_CHECK"
+      ],
+      "semantic_fact_obligations": [
+        {
+          "fact_id": "74d3ea2b-2a70-5689-b649-19dcb807baa5",
+          "subject": "page.h1",
+          "relation": "EQUALITY",
+          "reference_role": null,
+          "value": "C1 continuity",
+          "unit": null,
+          "scope": "index.html",
+          "qualifiers": {
+            "element": "h1"
+          },
+          "authority": "HUMAN_EXPLICIT",
+          "epistemic_status": "CONFIRMED",
+          "source_work_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79"
+        }
+      ],
+      "fulfillment_bindings": [
+        {
+          "fact_id": null,
+          "source_kind": "IR_CONSTRAINT",
+          "constraint_item_id": "change-scope",
+          "constraint_clause_id": "change-scope",
+          "constraint_fingerprint": "ca1b2980b52a05ef47107c2d3a385921bf980b6386274a55339a49f40d1a237e",
+          "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79",
+          "fact_fingerprint": null,
+          "provenance_fingerprint": "f685d2129bb333650a4feb5d859d315346b4b0699a4e00974cf958e7de3eaf9f",
+          "source_record_ids": [
+            "d848e978-d0d8-4392-8f6f-f581e49e7320"
+          ],
+          "component": "git-diff-scope",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+          "gate_ref": "code-verification:path-scope",
+          "source_quote": "index.html changes alone",
+          "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+          "target_paths": [
+            "index.html"
+          ],
+          "state": "BOUND_PENDING_EVIDENCE"
+        },
+        {
+          "fact_id": null,
+          "source_kind": "IR_CONSTRAINT",
+          "constraint_item_id": "external-boundary",
+          "constraint_clause_id": "external-boundary",
+          "constraint_fingerprint": "d492650764dfe35770cef3a5793f8075cc6fb89bf07a1a97baf1e05d86e06dc5",
+          "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79",
+          "fact_fingerprint": null,
+          "provenance_fingerprint": "f5ad1e0e18823bd43cae72e8c4c7de9a8f54e3428b8d94e9302be8a8794c7237",
+          "source_record_ids": [
+            "d848e978-d0d8-4392-8f6f-f581e49e7320"
+          ],
+          "component": "deploy",
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "evidence_method": "EXACT_PERMISSION_GATE",
+          "gate_ref": "cloud-delivery:human-authorization-required",
+          "source_quote": "Excluded from this Work: deployment, publishing",
+          "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+          "target_paths": [],
+          "state": "BOUND_PENDING_EVIDENCE"
+        },
+        {
+          "fact_id": null,
+          "source_kind": "IR_CONSTRAINT",
+          "constraint_item_id": "external-boundary",
+          "constraint_clause_id": "external-boundary",
+          "constraint_fingerprint": "d492650764dfe35770cef3a5793f8075cc6fb89bf07a1a97baf1e05d86e06dc5",
+          "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79",
+          "fact_fingerprint": null,
+          "provenance_fingerprint": "f5ad1e0e18823bd43cae72e8c4c7de9a8f54e3428b8d94e9302be8a8794c7237",
+          "source_record_ids": [
+            "d848e978-d0d8-4392-8f6f-f581e49e7320"
+          ],
+          "component": "publish",
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "evidence_method": "EXACT_PERMISSION_GATE",
+          "gate_ref": "remote-delivery:human-authorization-required",
+          "source_quote": "Excluded from this Work: deployment, publishing",
+          "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+          "target_paths": [],
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ],
+      "task_contract": {
+        "task_contract_id": "baaa838f-23ca-5a06-842a-ee3880e73bd7",
+        "activity": "FEATURE_DELIVERY",
+        "task_mode": "GENERAL",
+        "objective": "Produce the admitted code change.\nDesired outcome: Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance\nAdmitted constraints:\n- index.html changes alone\n- Excluded from this Work: deployment, publishing\n- A reviewable Candidate is left for Human acceptance\n- Excluded from this Work: deployment\n- Excluded from this Work: publishing\nExact targets:\n- CREATE index.html\nBounded areas:\n- None.",
+        "relevant_context": [
+          {
+            "source": "SEMANTIC_TRUTH",
+            "reference": "semantic-fact:74d3ea2b-2a70-5689-b649-19dcb807baa5",
+            "authority": "HUMAN_EXPLICIT"
+          },
+          {
+            "source": "ECF_REALITY",
+            "reference": "ecf-protected-package:34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+            "authority": "ECF_SELECTED_CONTEXT_ENVELOPE"
+          },
+          {
+            "source": "WORK_REALITY",
+            "reference": "work:c9539308-eebc-4570-b84d-25ddff38e704",
+            "authority": "WORK_REALITY"
+          },
+          {
+            "source": "WORK_REALITY",
+            "reference": "work-reality-revision:6acf54b1-7444-4a2f-9724-046e0ae54d79",
+            "authority": "WORK_REALITY"
+          },
+          {
+            "source": "DECISION_MEMORY",
+            "reference": "work-admission:c9539308-eebc-4570-b84d-25ddff38e704:fixture:human:c1",
+            "authority": "STEERING_OR_WORK_ADMISSION"
+          },
+          {
+            "source": "ECF_REALITY",
+            "reference": "engineering-resource:637baebb-a68f-4444-9428-f93bb37c5ec0",
+            "authority": "SOURCE_REALITY"
+          },
+          {
+            "source": "ECF_REALITY",
+            "reference": "repository:test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+            "authority": "SOURCE_REALITY"
+          },
+          {
+            "source": "ECF_REALITY",
+            "reference": "source-baseline:70b13638-265b-4856-9381-2cbe91c5388e@9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+            "authority": "SOURCE_REALITY"
+          },
+          {
+            "source": "SOP",
+            "reference": "sop:watt-software-production:1:FEATURE_DELIVERY",
+            "authority": "GUIDANCE_ONLY"
+          },
+          {
+            "source": "DOMAIN_PATTERN",
+            "reference": "pattern:bounded-change-and-evidence:1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "source": "DOMAIN_PATTERN",
+            "reference": "pattern:governed-meaning-preservation:1",
+            "authority": "ADVISORY_ONLY"
+          },
+          {
+            "source": "ECF_REALITY",
+            "reference": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:0",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR"
+          },
+          {
+            "source": "ECF_REALITY",
+            "reference": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:1",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR"
+          },
+          {
+            "source": "ECF_REALITY",
+            "reference": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:2",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR"
+          },
+          {
+            "source": "ECF_REALITY",
+            "reference": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:3",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR"
+          },
+          {
+            "source": "ECF_REALITY",
+            "reference": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:4",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR"
+          },
+          {
+            "source": "ECF_REALITY",
+            "reference": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-product-intent",
+            "authority": "WATT_PRODUCT_GOVERNOR"
+          }
+        ],
+        "scope": [
+          "CREATE:index.html"
+        ],
+        "constraints": [
+          "index.html changes alone",
+          "Excluded from this Work: deployment, publishing",
+          "A reviewable Candidate is left for Human acceptance",
+          "Excluded from this Work: deployment",
+          "Excluded from this Work: publishing"
+        ],
+        "required_capabilities": [],
+        "acceptance_meaning": [
+          "PATH_SCOPE",
+          "GIT_DIFF_CHECK"
+        ],
+        "evidence_requirements": [
+          {
+            "expectation_id": "feature-delivery-basis-evidence",
+            "category": "ENGINEERING",
+            "statement": "Current Work, source, scope, and decision lineage are identifiable before acting.",
+            "owner_boundary": "Work/ECF/Steering retain their own authority."
+          },
+          {
+            "expectation_id": "feature-delivery-outcome-evidence",
+            "category": "ASSURANCE",
+            "statement": "Outcome claims are evaluated against the admitted acceptance meaning and exact produced subject.",
+            "owner_boundary": "Guardian/Verification owns assurance results."
+          },
+          {
+            "expectation_id": "task-acceptance-1",
+            "category": "ASSURANCE",
+            "statement": "PATH_SCOPE",
+            "owner_boundary": "Guardian/Verification owns the assurance result."
+          },
+          {
+            "expectation_id": "task-acceptance-2",
+            "category": "ASSURANCE",
+            "statement": "GIT_DIFF_CHECK",
+            "owner_boundary": "Guardian/Verification owns the assurance result."
+          }
+        ],
+        "out_of_scope": [
+          "Any repository path outside the admitted exact targets or bounded areas"
+        ],
+        "authority_lineage": [
+          "work:c9539308-eebc-4570-b84d-25ddff38e704",
+          "work-reality-revision:6acf54b1-7444-4a2f-9724-046e0ae54d79",
+          "engineering-scope:42af7a1c-c3b3-4b94-b16d-9ca9a51bb8f1",
+          "engineering-resource:637baebb-a68f-4444-9428-f93bb37c5ec0",
+          "human-authority:fixture:human:c1"
+        ],
+        "required_prerequisites": [],
+        "prerequisite_evidence": [],
+        "semantic_fact_references": [
+          {
+            "fact_id": "74d3ea2b-2a70-5689-b649-19dcb807baa5",
+            "subject": "page.h1",
+            "relation": "EQUALITY",
+            "reference_role": null,
+            "value": "C1 continuity",
+            "unit": null,
+            "scope": "index.html",
+            "qualifiers": {
+              "element": "h1"
+            },
+            "authority": "HUMAN_EXPLICIT",
+            "epistemic_status": "CONFIRMED",
+            "source_work_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79"
+          }
+        ],
+        "sop_reference": "sop:watt-software-production:1:FEATURE_DELIVERY",
+        "reasoning_summary": {
+          "summary": "Use the admitted task boundary and source Reality, preserve governed meaning, and require independent evidence before acceptance.",
+          "considered_factors": [
+            "Current governed objective and scope",
+            "Current Semantic Truth without reinterpretation",
+            "Exact engineering source basis",
+            "Independent evidence required for acceptance",
+            "Pattern guidance governed-meaning-preservation:1",
+            "Pattern guidance bounded-change-and-evidence:1"
+          ],
+          "uncertainty": [],
+          "raw_chain_of_thought_stored": false
+        },
+        "decision_trace": {
+          "decision_id": "352246df-b447-58db-ad7b-6dd110f09bf6",
+          "context_reference": "work-admission:c9539308-eebc-4570-b84d-25ddff38e704:fixture:human:c1",
+          "considered_options": [
+            "Execute within the admitted scope and governed meaning",
+            "Return to Steering or Human authority before widening the boundary"
+          ],
+          "selected_direction": "Execute the bounded task: Produce the admitted code change.\nDesired outcome: Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance\nAdmitted constraints:\n- index.html changes alone\n- Excluded from this Work: deployment, publishing\n- A reviewable Candidate is left for Human acceptance\n- Excluded from this Work: deployment\n- Excluded from this Work: publishing\nExact targets:\n- CREATE index.html\nBounded areas:\n- None.",
+          "rationale": "The selected direction preserves current Work Reality, semantic facts, source baseline, and independent verification obligations.",
+          "authority_reference": "human-authority:fixture:human:c1",
+          "evidence_references": [
+            {
+              "category": "HUMAN",
+              "source_reference": "work-reality-revision:6acf54b1-7444-4a2f-9724-046e0ae54d79",
+              "subject_reference": "semantic-fact:74d3ea2b-2a70-5689-b649-19dcb807baa5",
+              "basis_reference": "semantic-fact:74d3ea2b-2a70-5689-b649-19dcb807baa5",
+              "assertion": "page.h1 equality C1 continuity within index.html",
+              "authority_domain": "ENGINEERING_SEMANTIC_TRUTH"
+            },
+            {
+              "category": "ENGINEERING",
+              "source_reference": "source-baseline:70b13638-265b-4856-9381-2cbe91c5388e@9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+              "subject_reference": "task-scope",
+              "basis_reference": "source-baseline:70b13638-265b-4856-9381-2cbe91c5388e@9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+              "assertion": "The task is bound to the admitted engineering source basis.",
+              "authority_domain": "ECF/SOURCE_REALITY"
+            }
+          ],
+          "status": "ADMITTED"
+        },
+        "evidence_lineage": [
+          {
+            "category": "HUMAN",
+            "source_reference": "work-reality-revision:6acf54b1-7444-4a2f-9724-046e0ae54d79",
+            "subject_reference": "semantic-fact:74d3ea2b-2a70-5689-b649-19dcb807baa5",
+            "basis_reference": "semantic-fact:74d3ea2b-2a70-5689-b649-19dcb807baa5",
+            "assertion": "page.h1 equality C1 continuity within index.html",
+            "authority_domain": "ENGINEERING_SEMANTIC_TRUTH"
+          },
+          {
+            "category": "ENGINEERING",
+            "source_reference": "source-baseline:70b13638-265b-4856-9381-2cbe91c5388e@9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+            "subject_reference": "task-scope",
+            "basis_reference": "source-baseline:70b13638-265b-4856-9381-2cbe91c5388e@9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+            "assertion": "The task is bound to the admitted engineering source basis.",
+            "authority_domain": "ECF/SOURCE_REALITY"
+          }
+        ],
+        "decision_context": {
+          "version": "0.1",
+          "contract_id": "MANAGED_GREENFIELD_PRODUCTION",
+          "request_id": "watt-ecf-decision-context-v1:MANAGED_PRODUCT_WEB_UI:a898bd4f-bc12-4fa2-a33b-c09f5068af57:c9539308-eebc-4570-b84d-25ddff38e704:index.html",
+          "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+          "surface": "MANAGED_PRODUCT_WEB_UI",
+          "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+          "work_id": "c9539308-eebc-4570-b84d-25ddff38e704",
+          "subject": "index.html",
+          "repository_path": "/tmp/pytest-of-root/pytest-9/test_both_actual_admission_pat0/wic-admission-repository",
+          "repository_identity": "test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+          "repository_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+          "source_references": [
+            "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:0@63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:1@63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:2@63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:3@63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:4@63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-product-intent@63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+            "git:repository:/tmp/pytest-of-root/pytest-9/test_both_actual_admission_pat0/wic-admission-repository@9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+            "work:c9539308-eebc-4570-b84d-25ddff38e704@6acf54b1-7444-4a2f-9724-046e0ae54d79"
+          ],
+          "generated_from": [
+            {
+              "context_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57:greenfield-constraint:0",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:0",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "authority_ref": "governed:work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:0",
+              "provenance": "product:a898bd4f-bc12-4fa2-a33b-c09f5068af57;work:c9539308-eebc-4570-b84d-25ddff38e704;work-reality:6acf54b1-7444-4a2f-9724-046e0ae54d79@1da6d9e06c07bff3bca65dba74efe43ec83cc8a24e84e138703ebcc1ad293de8;semantic-ir:44e03ce6-e4cf-561b-b3f2-fa62f7f9a644@52c9c8a098fa5a8e82f7bfbdb16b68a5ce4e94f1c6db51f750d893142fb289c4;governance:7b2984b1-2e3c-4af3-9b1f-8b7bf42c2edc",
+              "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+              "work_id": null,
+              "subject": null
+            },
+            {
+              "context_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57:greenfield-constraint:1",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:1",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "authority_ref": "governed:work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:1",
+              "provenance": "product:a898bd4f-bc12-4fa2-a33b-c09f5068af57;work:c9539308-eebc-4570-b84d-25ddff38e704;work-reality:6acf54b1-7444-4a2f-9724-046e0ae54d79@1da6d9e06c07bff3bca65dba74efe43ec83cc8a24e84e138703ebcc1ad293de8;semantic-ir:44e03ce6-e4cf-561b-b3f2-fa62f7f9a644@52c9c8a098fa5a8e82f7bfbdb16b68a5ce4e94f1c6db51f750d893142fb289c4;governance:7b2984b1-2e3c-4af3-9b1f-8b7bf42c2edc",
+              "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+              "work_id": null,
+              "subject": null
+            },
+            {
+              "context_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57:greenfield-constraint:2",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:2",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "authority_ref": "governed:work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:2",
+              "provenance": "product:a898bd4f-bc12-4fa2-a33b-c09f5068af57;work:c9539308-eebc-4570-b84d-25ddff38e704;work-reality:6acf54b1-7444-4a2f-9724-046e0ae54d79@1da6d9e06c07bff3bca65dba74efe43ec83cc8a24e84e138703ebcc1ad293de8;semantic-ir:44e03ce6-e4cf-561b-b3f2-fa62f7f9a644@52c9c8a098fa5a8e82f7bfbdb16b68a5ce4e94f1c6db51f750d893142fb289c4;governance:7b2984b1-2e3c-4af3-9b1f-8b7bf42c2edc",
+              "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+              "work_id": null,
+              "subject": null
+            },
+            {
+              "context_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57:greenfield-constraint:3",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:3",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "authority_ref": "governed:work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:3",
+              "provenance": "product:a898bd4f-bc12-4fa2-a33b-c09f5068af57;work:c9539308-eebc-4570-b84d-25ddff38e704;work-reality:6acf54b1-7444-4a2f-9724-046e0ae54d79@1da6d9e06c07bff3bca65dba74efe43ec83cc8a24e84e138703ebcc1ad293de8;semantic-ir:44e03ce6-e4cf-561b-b3f2-fa62f7f9a644@52c9c8a098fa5a8e82f7bfbdb16b68a5ce4e94f1c6db51f750d893142fb289c4;governance:7b2984b1-2e3c-4af3-9b1f-8b7bf42c2edc",
+              "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+              "work_id": null,
+              "subject": null
+            },
+            {
+              "context_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57:greenfield-constraint:4",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:4",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "authority_ref": "governed:work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:4",
+              "provenance": "product:a898bd4f-bc12-4fa2-a33b-c09f5068af57;work:c9539308-eebc-4570-b84d-25ddff38e704;work-reality:6acf54b1-7444-4a2f-9724-046e0ae54d79@1da6d9e06c07bff3bca65dba74efe43ec83cc8a24e84e138703ebcc1ad293de8;semantic-ir:44e03ce6-e4cf-561b-b3f2-fa62f7f9a644@52c9c8a098fa5a8e82f7bfbdb16b68a5ce4e94f1c6db51f750d893142fb289c4;governance:7b2984b1-2e3c-4af3-9b1f-8b7bf42c2edc",
+              "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+              "work_id": null,
+              "subject": null
+            },
+            {
+              "context_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57:greenfield-product-intent",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-product-intent",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "authority": "WATT_PRODUCT_GOVERNOR",
+              "authority_ref": "governed:work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-product-intent",
+              "provenance": "product:a898bd4f-bc12-4fa2-a33b-c09f5068af57;work:c9539308-eebc-4570-b84d-25ddff38e704;work-reality:6acf54b1-7444-4a2f-9724-046e0ae54d79@1da6d9e06c07bff3bca65dba74efe43ec83cc8a24e84e138703ebcc1ad293de8;semantic-ir:44e03ce6-e4cf-561b-b3f2-fa62f7f9a644@52c9c8a098fa5a8e82f7bfbdb16b68a5ce4e94f1c6db51f750d893142fb289c4;governance:7b2984b1-2e3c-4af3-9b1f-8b7bf42c2edc",
+              "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+              "work_id": null,
+              "subject": null
+            },
+            {
+              "context_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57:repository:index.html",
+              "source_ref": "git:repository:/tmp/pytest-of-root/pytest-9/test_both_actual_admission_pat0/wic-admission-repository",
+              "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+              "authority": "WATT_REPOSITORY",
+              "authority_ref": "governed:git:repository:/tmp/pytest-of-root/pytest-9/test_both_actual_admission_pat0/wic-admission-repository",
+              "provenance": "git:9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+              "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+              "work_id": null,
+              "subject": null
+            },
+            {
+              "context_id": "c9539308-eebc-4570-b84d-25ddff38e704:work-reality",
+              "source_ref": "work:c9539308-eebc-4570-b84d-25ddff38e704",
+              "source_revision": "6acf54b1-7444-4a2f-9724-046e0ae54d79",
+              "authority": "WATT_WORK",
+              "authority_ref": "governed:work:c9539308-eebc-4570-b84d-25ddff38e704",
+              "provenance": "work-reality:6acf54b1-7444-4a2f-9724-046e0ae54d79",
+              "product_id": "a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+              "work_id": "c9539308-eebc-4570-b84d-25ddff38e704",
+              "subject": null
+            }
+          ],
+          "protected_obligations": [
+            {
+              "context_class": "APPROVED_CONSTRAINT",
+              "semantic_key": "greenfield-constraint:0",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:0",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "content_digest": "6efc3ee6307872c9f50d945ac6f4c69c06abb2c1b5ca0117c009329674740a12",
+              "content": "index.html changes alone",
+              "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+              "verification_ref": null
+            },
+            {
+              "context_class": "APPROVED_CONSTRAINT",
+              "semantic_key": "greenfield-constraint:1",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:1",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "content_digest": "dd2cfe25578eb3dc067cb581f09269920e139280391d883d9b65d1a067d5dd17",
+              "content": "Excluded from this Work: deployment, publishing",
+              "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+              "verification_ref": null
+            },
+            {
+              "context_class": "APPROVED_CONSTRAINT",
+              "semantic_key": "greenfield-constraint:2",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:2",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "content_digest": "e2a293cc9ee7c6c2eb4e2bb5907c0fe0731f36e0c304c287a60451f91ea6e5f0",
+              "content": "A reviewable Candidate is left for Human acceptance",
+              "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+              "verification_ref": null
+            },
+            {
+              "context_class": "APPROVED_CONSTRAINT",
+              "semantic_key": "greenfield-constraint:3",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:3",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "content_digest": "2daa60a268ab4beae79a2e77d1a2803019414734a9a52e3991ba4ef7c2765531",
+              "content": "Excluded from this Work: deployment",
+              "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+              "verification_ref": null
+            },
+            {
+              "context_class": "APPROVED_CONSTRAINT",
+              "semantic_key": "greenfield-constraint:4",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:4",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "content_digest": "cb74abbf0b5db8207fbad70bdf5566ee63bcfe893ca144da10543198b2c3f4e9",
+              "content": "Excluded from this Work: publishing",
+              "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+              "verification_ref": null
+            },
+            {
+              "context_class": "PRODUCT_INTENT",
+              "semantic_key": "greenfield-product-intent",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-product-intent",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "authority": "WATT_PRODUCT_GOVERNOR",
+              "content_digest": "a160bdfdc15ed9b7c8981821c883ac7271de5f80e9f3d8a1219115497de28294",
+              "content": "{\"desired_outcome\": \"Create index.html\", \"governed_production_intents\": [{\"acceptance_required\": true, \"allowed_areas\": [], \"bounded_change\": true, \"current\": true, \"delivery_authorized\": false, \"exclusions\": [\"deployment\", \"publishing\"], \"new_work\": true, \"objective\": \"Create index.html\\nh1 text in index.html equals C1 continuity\\nindex.html changes alone\\nExcluded from this Work: deployment, publishing\\nA reviewable Candidate is left for Human acceptance\", \"preview_required\": false, \"primary_change\": \"Create index.html\", \"repository_reference\": null, \"repository_required\": false, \"scope\": [], \"systemic_design\": false, \"target_paths\": [{\"provenance\": {\"evidence_reference\": null, \"origin\": \"HUMAN_EXPLICIT\", \"source_record_id\": \"d848e978-d0d8-4392-8f6f-f581e49e7320\", \"source_text\": \"Create index.html\"}, \"value\": \"index.html\"}], \"unresolved\": [], \"unresolved_arguments\": []}]}",
+              "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+              "verification_ref": null
+            }
+          ]
+        }
+      },
+      "blocking_conditions": [],
+      "artifact_contract": null,
+      "change_contract": {
+        "target_kind": "CODE_WORK",
+        "target_shape": "EXACT_TARGET_SET",
+        "engineering_resource_id": "637baebb-a68f-4444-9428-f93bb37c5ec0",
+        "repository_identity": "test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+        "source_baseline_id": "70b13638-265b-4856-9381-2cbe91c5388e",
+        "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+        "desired_outcome": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+        "constraints": [
+          "index.html changes alone",
+          "Excluded from this Work: deployment, publishing",
+          "A reviewable Candidate is left for Human acceptance",
+          "Excluded from this Work: deployment",
+          "Excluded from this Work: publishing"
+        ],
+        "exact_targets": [
+          {
+            "path": "index.html",
+            "operation": "CREATE"
+          }
+        ],
+        "allowed_areas": [],
+        "forbidden_areas": [],
+        "verification_obligations": [
+          {
+            "kind": "PATH_SCOPE",
+            "target": null
+          },
+          {
+            "kind": "GIT_DIFF_CHECK",
+            "target": null
+          }
+        ],
+        "source_proposal_id": "b87eed1f-fbd1-5c68-970c-247b9b1bb363",
+        "source_proposal_fingerprint": "d76bb63d39c0a49ab252da1674cdac7c9d34ffb3881f56dc597fbc5fa13b6ba6"
+      },
+      "production_plan": {
+        "proposal_id": "160bd655-ebeb-554f-b3ee-7d4ab7e02efe",
+        "target_kind": "CODE_WORK",
+        "objective": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+        "desired_outcome": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+        "ordered_steps": [
+          {
+            "position": 1,
+            "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+          },
+          {
+            "position": 2,
+            "instruction": "Modify only the admitted exact code targets: index.html."
+          },
+          {
+            "position": 3,
+            "instruction": "Run the admitted targeted verification and report the resulting evidence."
+          }
+        ],
+        "graph": null,
+        "artifact_targets": [],
+        "change_proposal": null,
+        "change_contract": {
+          "target_kind": "CODE_WORK",
+          "target_shape": "EXACT_TARGET_SET",
+          "engineering_resource_id": "637baebb-a68f-4444-9428-f93bb37c5ec0",
+          "repository_identity": "test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+          "source_baseline_id": "70b13638-265b-4856-9381-2cbe91c5388e",
+          "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+          "desired_outcome": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+          "constraints": [
+            "index.html changes alone",
+            "Excluded from this Work: deployment, publishing",
+            "A reviewable Candidate is left for Human acceptance",
+            "Excluded from this Work: deployment",
+            "Excluded from this Work: publishing"
+          ],
+          "exact_targets": [
+            {
+              "path": "index.html",
+              "operation": "CREATE"
+            }
+          ],
+          "allowed_areas": [],
+          "forbidden_areas": [],
+          "verification_obligations": [
+            {
+              "kind": "PATH_SCOPE",
+              "target": null
+            },
+            {
+              "kind": "GIT_DIFF_CHECK",
+              "target": null
+            }
+          ],
+          "source_proposal_id": "b87eed1f-fbd1-5c68-970c-247b9b1bb363",
+          "source_proposal_fingerprint": "d76bb63d39c0a49ab252da1674cdac7c9d34ffb3881f56dc597fbc5fa13b6ba6"
+        },
+        "inherited_constraints": [
+          "index.html changes alone",
+          "Excluded from this Work: deployment, publishing",
+          "A reviewable Candidate is left for Human acceptance",
+          "Excluded from this Work: deployment",
+          "Excluded from this Work: publishing"
+        ],
+        "verification_approach": "Proposed typed checks: PATH_SCOPE, GIT_DIFF_CHECK",
+        "assumptions": [
+          "The admitted Work can be executed through one governed PWU and Attempt lineage."
+        ],
+        "unresolved_questions": [],
+        "fit_classification": "ONE_PWU_FIT",
+        "engineering_resource_id": "637baebb-a68f-4444-9428-f93bb37c5ec0",
+        "repository_identity": "test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+        "source_baseline_id": "70b13638-265b-4856-9381-2cbe91c5388e",
+        "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe"
+      }
+    },
+    "condition": "SATISFIED",
+    "version": 3,
+    "current_execution_generation": 1,
+    "created_at": "2026-10-09T06:06:54.254645Z"
+  },
+  "native_binding": {
+    "attempt_id": "ad1a9ae8-2626-4651-9a03-7a790c3bdd5e",
+    "pwu_id": "7aafcd5d-8721-403b-9928-ae3a8c92f26f",
+    "session_id": "9d561ce4-6eff-5469-9c98-4acdbee440ec",
+    "pwu_contract_version_id": "b89aea18-69ad-5356-8357-71fa5dcbd9e8",
+    "source_vector_id": "44488243-fe44-403f-ba10-1e083a94b69d",
+    "workspace_id": "9bb0e7ef-d015-5465-a159-d4f8cbc823a2",
+    "resource_envelope_id": "48ade439-d19b-5016-9c6d-6952fa2eeb2b",
+    "binding": {
+      "schema_version": 2,
+      "work_id": "c9539308-eebc-4570-b84d-25ddff38e704",
+      "steering_decision_id": "3f01a0b8-354a-4511-8241-f0e321800d83",
+      "pwu_id": "7aafcd5d-8721-403b-9928-ae3a8c92f26f",
+      "pwu_contract_version_id": "b89aea18-69ad-5356-8357-71fa5dcbd9e8",
+      "pwu_contract_digest": "31b7efa794c789257d25e02ca971b9d6fa127694e850a8b8b88083392967c59e",
+      "attempt_id": "ad1a9ae8-2626-4651-9a03-7a790c3bdd5e",
+      "generation": 1,
+      "session_id": "9d561ce4-6eff-5469-9c98-4acdbee440ec",
+      "source_vector": {
+        "schema_version": 1,
+        "members": [
+          {
+            "mount_id": "primary",
+            "asset_id": null,
+            "repository_identity": "test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+            "source_baseline_ref": "refs/heads/main",
+            "source_commit_oid": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+            "source_tree_oid": "6ed77f11ba8456ba3c1342af247884809be1498e",
+            "git_object_format": "sha1",
+            "container_path": "/workspace/primary",
+            "read_scope": [],
+            "write_scope": [
+              "index.html"
+            ],
+            "forbidden_paths": [
+              ".git"
+            ],
+            "integration_target": "refs/heads/main"
+          }
+        ],
+        "non_repository_assets": [],
+        "digest": "d063257060176cb82caef8921cf9555be6be04e75699115d3dcdd9eed0972bed"
+      },
+      "workspace": {
+        "schema_version": 1,
+        "workspace_id": "9bb0e7ef-d015-5465-a159-d4f8cbc823a2",
+        "work_id": "c9539308-eebc-4570-b84d-25ddff38e704",
+        "pwu_id": "7aafcd5d-8721-403b-9928-ae3a8c92f26f",
+        "attempt_id": "ad1a9ae8-2626-4651-9a03-7a790c3bdd5e",
+        "source_vector_digest": "d063257060176cb82caef8921cf9555be6be04e75699115d3dcdd9eed0972bed",
+        "host_storage_id": "/tmp/pytest-of-root/pytest-9/test_both_actual_admission_pat0/attempt-workspaces/ad1a9ae8-2626-4651-9a03-7a790c3bdd5e",
+        "environment_profile_digest": "48ebcd3abfffdd8c21c975e7b31b696f48329c224ff39aad8d8f00f9bd977013",
+        "mounts": [
+          {
+            "mount_id": "primary",
+            "host_path": "/tmp/pytest-of-root/pytest-9/test_both_actual_admission_pat0/attempt-workspaces/ad1a9ae8-2626-4651-9a03-7a790c3bdd5e",
+            "container_path": "/workspace/primary",
+            "writable": true,
+            "write_scope": [
+              "index.html"
+            ],
+            "forbidden_paths": [
+              ".git"
+            ]
+          }
+        ],
+        "generated_roots": [],
+        "service_resources": [],
+        "evidence_namespace": "native:ad1a9ae8-2626-4651-9a03-7a790c3bdd5e",
+        "retention_policy": "native-hot-30d"
+      },
+      "context_package_ref": "context-package:d57cdafc-530d-42ac-9dbc-24ebbdb5dcc8",
+      "materialized_input_digest": "ae16cb14cbb11c8404715d786ed27a2e344f9ea5771a26ddaac9cbc197911851",
+      "backend_implementation": "watt-native",
+      "backend_version": "1",
+      "inference_profile": "fixture:c1",
+      "capability_grants": [
+        {
+          "identity": "file.read",
+          "version": "1",
+          "scope": {
+            "paths": [],
+            "permissions": [],
+            "capabilities": [],
+            "forbidden_paths": [
+              ".git"
+            ]
+          }
+        },
+        {
+          "identity": "file.write",
+          "version": "1",
+          "scope": {
+            "paths": [
+              "index.html"
+            ],
+            "permissions": [],
+            "capabilities": [],
+            "forbidden_paths": [
+              ".git"
+            ]
+          }
+        },
+        {
+          "identity": "process.run",
+          "version": "1",
+          "scope": {
+            "paths": [
+              "index.html"
+            ],
+            "permissions": [],
+            "capabilities": [],
+            "forbidden_paths": [
+              ".git"
+            ]
+          }
+        },
+        {
+          "identity": "git.status",
+          "version": "1",
+          "scope": {
+            "paths": [
+              "index.html"
+            ],
+            "permissions": [],
+            "capabilities": [],
+            "forbidden_paths": [
+              ".git"
+            ]
+          }
+        },
+        {
+          "identity": "git.diff",
+          "version": "1",
+          "scope": {
+            "paths": [
+              "index.html"
+            ],
+            "permissions": [],
+            "capabilities": [],
+            "forbidden_paths": [
+              ".git"
+            ]
+          }
+        },
+        {
+          "identity": "test.run",
+          "version": "1",
+          "scope": {
+            "paths": [
+              "index.html"
+            ],
+            "permissions": [],
+            "capabilities": [],
+            "forbidden_paths": [
+              ".git"
+            ]
+          }
+        },
+        {
+          "identity": "build.run",
+          "version": "1",
+          "scope": {
+            "paths": [
+              "index.html"
+            ],
+            "permissions": [],
+            "capabilities": [],
+            "forbidden_paths": [
+              ".git"
+            ]
+          }
+        },
+        {
+          "identity": "dependency.sync",
+          "version": "1",
+          "scope": {
+            "paths": [
+              "index.html"
+            ],
+            "permissions": [],
+            "capabilities": [],
+            "forbidden_paths": [
+              ".git"
+            ]
+          }
+        },
+        {
+          "identity": "preview.inspect",
+          "version": "1",
+          "scope": {
+            "paths": [
+              "index.html"
+            ],
+            "permissions": [],
+            "capabilities": [],
+            "forbidden_paths": [
+              ".git"
+            ]
+          }
+        }
+      ],
+      "resource_envelope": {
+        "schema_version": 1,
+        "envelope_id": "48ade439-d19b-5016-9c6d-6952fa2eeb2b",
+        "policy_version": "watt-native-mvp-v1",
+        "max_inference_submissions": 120,
+        "max_tool_effects": 400,
+        "max_active_seconds": 3600,
+        "max_log_bytes": 65536,
+        "max_artifact_bytes": 67108864,
+        "max_workspace_bytes": 536870912,
+        "max_successor_recoveries": 3,
+        "max_parallel_workers": 1,
+        "max_cost_units": null,
+        "provider_profile": "fixture:c1",
+        "permitted_provider_profiles": [
+          "fixture:c1"
+        ]
+      },
+      "production_context": {
+        "work_id": "c9539308-eebc-4570-b84d-25ddff38e704",
+        "task_contract_id": "baaa838f-23ca-5a06-842a-ee3880e73bd7",
+        "basis_kind": "ECF_DECISION_CONTEXT",
+        "ecf_context_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+        "document_work_context_fingerprint": null,
+        "irk_semantic_ir_id": "44e03ce6-e4cf-561b-b3f2-fa62f7f9a644",
+        "repository_identity": "test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+        "repository_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+        "workspace_id": "9bb0e7ef-d015-5465-a159-d4f8cbc823a2",
+        "verification_requirements": [
+          "PATH_SCOPE",
+          "GIT_DIFF_CHECK"
+        ],
+        "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79"
+      },
+      "stop_conditions": [],
+      "obligation_references": [
+        "task-contract:baaa838f-23ca-5a06-842a-ee3880e73bd7",
+        "PATH_SCOPE",
+        "GIT_DIFF_CHECK",
+        "semantic-fact:74d3ea2b-2a70-5689-b649-19dcb807baa5",
+        "ir-constraint:change-scope:change-scope",
+        "ir-constraint:external-boundary:external-boundary",
+        "ir-constraint:external-boundary:external-boundary"
+      ]
+    },
+    "binding_digest": "af9d7589c10bb2ee2e768ce4889564a93fb871bb0355fe6ed3da5c4b35bf1814",
+    "created_at": "2026-10-09T06:06:55.066485Z"
+  },
+  "proposed_snapshot": {
+    "id": "79a109a3-6bb6-5313-8c1b-fe8e1c136bc6",
+    "production_run_id": "afbde75b-49a8-42ce-b47b-227c7061c472",
+    "work_unit_id": "7aafcd5d-8721-403b-9928-ae3a8c92f26f",
+    "plan_revision_id": "3f01a0b8-354a-4511-8241-f0e321800d83",
+    "source_baseline_id": "70b13638-265b-4856-9381-2cbe91c5388e",
+    "attempt_id": "ad1a9ae8-2626-4651-9a03-7a790c3bdd5e",
+    "generation": 1,
+    "completion_evaluation_id": "a9e12b43-48ba-531d-9948-705d5c6a3c71",
+    "repository_observation_id": "a71993ef-8c21-4f81-b6f8-464bc2a60cdc",
+    "repository_identity": "test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+    "repository_ref": "refs/heads/main",
+    "authoritative_ref_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+    "proposed_commit_identity": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+    "tree_identity": "29e2294feabcae289b268559f8037d7e487789c1",
+    "basis_fingerprint": "9911c7dd75e1b0a4a55a3d657d592cf3cb0f56dbe2d4a4e97ff71443071e9222",
+    "created_at": "2026-10-09T06:06:55.391190Z"
+  },
+  "completion_evaluation": {
+    "id": "a9e12b43-48ba-531d-9948-705d5c6a3c71",
+    "production_run_id": "afbde75b-49a8-42ce-b47b-227c7061c472",
+    "work_unit_id": "7aafcd5d-8721-403b-9928-ae3a8c92f26f",
+    "plan_revision_id": "3f01a0b8-354a-4511-8241-f0e321800d83",
+    "source_baseline_id": "70b13638-265b-4856-9381-2cbe91c5388e",
+    "attempt_id": "ad1a9ae8-2626-4651-9a03-7a790c3bdd5e",
+    "generation": 1,
+    "completion_contract_fingerprint": "0b7105818620f08d0086c6989c77f55e161f4e73bf82bfce5e9a2dcc8cd6a998",
+    "repository_observation_id": "a71993ef-8c21-4f81-b6f8-464bc2a60cdc",
+    "repository_observation_fingerprint": "da75ab773ce369ad3b00e2fbc747c3245bc91f96b80af756e712a0470f102d19",
+    "work_product_lineage": [
+      {
+        "reference_id": "1b3a68c2-4a5b-5cfa-8a18-9824f6e535d5",
+        "artifact_path": "index.html",
+        "change_type": "ADDED",
+        "source_fingerprint": null,
+        "observed_fingerprint": "9ad5cdcb01546c8386c67fbb6793248907194f41"
+      }
+    ],
+    "work_product_set_fingerprint": "ed55355f54aeb50823fd6c82ecaff82beec96a4be96acbbe39e225a11ddb32ec",
+    "basis_fingerprint": "5ac1a4c77855d7319daf010e152bf2c3aea20299479638145dc5d1ce198d15cc",
+    "outcome": "PRODUCED",
+    "obligation_results": [
+      {
+        "obligation_type": "REQUIRED_ARTIFACT",
+        "subject": "index.html",
+        "expected": "artifact exists in exact observed repository Reality",
+        "observed": "present",
+        "result": "PASS",
+        "reason": "required artifact exists"
+      },
+      {
+        "obligation_type": "REQUIRED_CHANGE",
+        "subject": "index.html",
+        "expected": "path appears with the admitted change operation in the exact observed change manifest",
+        "observed": "ADDED",
+        "result": "PASS",
+        "reason": "required change and operation were independently observed"
+      }
+    ],
+    "created_at": "2026-10-09T06:06:55.250672Z"
+  },
+  "verification_records": [
+    {
+      "id": "3a1f6ac7-9b32-5695-888b-1d89425fdd51",
+      "production_run_id": "afbde75b-49a8-42ce-b47b-227c7061c472",
+      "work_unit_id": "7aafcd5d-8721-403b-9928-ae3a8c92f26f",
+      "plan_revision_id": "3f01a0b8-354a-4511-8241-f0e321800d83",
+      "source_baseline_id": "70b13638-265b-4856-9381-2cbe91c5388e",
+      "completion_evaluation_id": "a9e12b43-48ba-531d-9948-705d5c6a3c71",
+      "proposed_snapshot_id": "79a109a3-6bb6-5313-8c1b-fe8e1c136bc6",
+      "proposed_commit_identity": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+      "tree_identity": "29e2294feabcae289b268559f8037d7e487789c1",
+      "obligation": "PATH_SCOPE",
+      "obligation_fingerprint": "ff13be84308699bab09026815e73f77905e7af19627a6a422014a01dafb86d4b",
+      "provider": {
+        "provider_identity": "provider:repository-code-contract",
+        "provider_version": "v1"
+      },
+      "result": "PASS",
+      "evidence": {
+        "obligation": "PATH_SCOPE",
+        "subject_commit_identity": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+        "subject_tree_identity": "29e2294feabcae289b268559f8037d7e487789c1",
+        "expected": "the exact admitted typed code Verification obligation passes",
+        "observed": "PASS",
+        "metadata": {
+          "kind": "PATH_SCOPE",
+          "mode": "contract-driven-code-verification",
+          "target": null,
+          "changed_paths": [
+            "index.html"
+          ],
+          "decision_context": {
+            "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+            "protected_obligations": [
+              {
+                "content": "index.html changes alone",
+                "coverage": "COVERED",
+                "authority": "WATT_ARCHITECTURE_GOVERNOR",
+                "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:0",
+                "semantic_key": "greenfield-constraint:0",
+                "context_class": "APPROVED_CONSTRAINT",
+                "content_digest": "6efc3ee6307872c9f50d945ac6f4c69c06abb2c1b5ca0117c009329674740a12",
+                "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+                "verification_ref": null,
+                "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+              },
+              {
+                "content": "Excluded from this Work: deployment, publishing",
+                "coverage": "COVERED",
+                "authority": "WATT_ARCHITECTURE_GOVERNOR",
+                "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:1",
+                "semantic_key": "greenfield-constraint:1",
+                "context_class": "APPROVED_CONSTRAINT",
+                "content_digest": "dd2cfe25578eb3dc067cb581f09269920e139280391d883d9b65d1a067d5dd17",
+                "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+                "verification_ref": null,
+                "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+              },
+              {
+                "content": "A reviewable Candidate is left for Human acceptance",
+                "coverage": "PENDING_CANDIDATE_GATE",
+                "authority": "WATT_ARCHITECTURE_GOVERNOR",
+                "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:2",
+                "semantic_key": "greenfield-constraint:2",
+                "context_class": "APPROVED_CONSTRAINT",
+                "content_digest": "e2a293cc9ee7c6c2eb4e2bb5907c0fe0731f36e0c304c287a60451f91ea6e5f0",
+                "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+                "verification_ref": null,
+                "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+              },
+              {
+                "content": "Excluded from this Work: deployment",
+                "coverage": "COVERED",
+                "authority": "WATT_ARCHITECTURE_GOVERNOR",
+                "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:3",
+                "semantic_key": "greenfield-constraint:3",
+                "context_class": "APPROVED_CONSTRAINT",
+                "content_digest": "2daa60a268ab4beae79a2e77d1a2803019414734a9a52e3991ba4ef7c2765531",
+                "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+                "verification_ref": null,
+                "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+              },
+              {
+                "content": "Excluded from this Work: publishing",
+                "coverage": "COVERED",
+                "authority": "WATT_ARCHITECTURE_GOVERNOR",
+                "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:4",
+                "semantic_key": "greenfield-constraint:4",
+                "context_class": "APPROVED_CONSTRAINT",
+                "content_digest": "cb74abbf0b5db8207fbad70bdf5566ee63bcfe893ca144da10543198b2c3f4e9",
+                "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+                "verification_ref": null,
+                "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+              },
+              {
+                "content": "{\"desired_outcome\": \"Create index.html\", \"governed_production_intents\": [{\"acceptance_required\": true, \"allowed_areas\": [], \"bounded_change\": true, \"current\": true, \"delivery_authorized\": false, \"exclusions\": [\"deployment\", \"publishing\"], \"new_work\": true, \"objective\": \"Create index.html\\nh1 text in index.html equals C1 continuity\\nindex.html changes alone\\nExcluded from this Work: deployment, publishing\\nA reviewable Candidate is left for Human acceptance\", \"preview_required\": false, \"primary_change\": \"Create index.html\", \"repository_reference\": null, \"repository_required\": false, \"scope\": [], \"systemic_design\": false, \"target_paths\": [{\"provenance\": {\"evidence_reference\": null, \"origin\": \"HUMAN_EXPLICIT\", \"source_record_id\": \"d848e978-d0d8-4392-8f6f-f581e49e7320\", \"source_text\": \"Create index.html\"}, \"value\": \"index.html\"}], \"unresolved\": [], \"unresolved_arguments\": []}]}",
+                "coverage": "COVERED",
+                "authority": "WATT_PRODUCT_GOVERNOR",
+                "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-product-intent",
+                "semantic_key": "greenfield-product-intent",
+                "context_class": "PRODUCT_INTENT",
+                "content_digest": "a160bdfdc15ed9b7c8981821c883ac7271de5f80e9f3d8a1219115497de28294",
+                "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+                "verification_ref": null,
+                "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+              }
+            ]
+          },
+          "semantic_fact_ids": [
+            "74d3ea2b-2a70-5689-b649-19dcb807baa5"
+          ],
+          "unauthorized_paths": [],
+          "operation_mismatches": [],
+          "protected_context_checks": [
+            {
+              "reason": "EXACT_GIT_DIFF_SCOPE",
+              "content": "index.html changes alone",
+              "coverage": "COVERED",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:0",
+              "disposition": "COVERED",
+              "semantic_key": "greenfield-constraint:0",
+              "context_class": "APPROVED_CONSTRAINT",
+              "evidence_refs": [
+                "git-diff:9967ecf9a58bfbb23db027313bfa24f4640d1ffe:b12a04d7978b9880f17f802774b3ec2cb9021835"
+              ],
+              "candidate_tree": "29e2294feabcae289b268559f8037d7e487789c1",
+              "content_digest": "6efc3ee6307872c9f50d945ac6f4c69c06abb2c1b5ca0117c009329674740a12",
+              "evidence_owner": "VERIFICATION",
+              "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "verification_ref": null,
+              "candidate_revision": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+              "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+            },
+            {
+              "reason": "EXACT_CONTINUOUS_PERMISSION_GATES",
+              "content": "Excluded from this Work: deployment, publishing",
+              "coverage": "COVERED",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:1",
+              "disposition": "COVERED",
+              "semantic_key": "greenfield-constraint:1",
+              "context_class": "APPROVED_CONSTRAINT",
+              "evidence_refs": [
+                "ir-constraint:external-boundary:external-boundary:gate:cloud-delivery:human-authorization-required:binding:af9d7589c10bb2ee2e768ce4889564a93fb871bb0355fe6ed3da5c4b35bf1814",
+                "ir-constraint:external-boundary:external-boundary:gate:remote-delivery:human-authorization-required:binding:af9d7589c10bb2ee2e768ce4889564a93fb871bb0355fe6ed3da5c4b35bf1814"
+              ],
+              "candidate_tree": "29e2294feabcae289b268559f8037d7e487789c1",
+              "content_digest": "dd2cfe25578eb3dc067cb581f09269920e139280391d883d9b65d1a067d5dd17",
+              "evidence_owner": "EXECUTION_AND_DELIVERY_GATES",
+              "evidence_method": "EXACT_CONTINUOUS_PERMISSION_GATES",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "verification_ref": null,
+              "candidate_revision": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+              "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+            },
+            {
+              "reason": "EXACT_CANDIDATE_SEAL_REQUIRED",
+              "content": "A reviewable Candidate is left for Human acceptance",
+              "coverage": "PENDING_CANDIDATE_GATE",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:2",
+              "disposition": "PENDING_CANDIDATE_GATE",
+              "semantic_key": "greenfield-constraint:2",
+              "context_class": "APPROVED_CONSTRAINT",
+              "evidence_refs": [
+                "task-contract:baaa838f-23ca-5a06-842a-ee3880e73bd7"
+              ],
+              "candidate_tree": "29e2294feabcae289b268559f8037d7e487789c1",
+              "content_digest": "e2a293cc9ee7c6c2eb4e2bb5907c0fe0731f36e0c304c287a60451f91ea6e5f0",
+              "evidence_owner": "CANDIDATE",
+              "evidence_method": "EXACT_CANDIDATE_SEAL_REQUIRED",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "verification_ref": null,
+              "candidate_revision": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+              "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+            },
+            {
+              "reason": "EXACT_CONTINUOUS_PERMISSION_GATES",
+              "content": "Excluded from this Work: deployment",
+              "coverage": "COVERED",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:3",
+              "disposition": "COVERED",
+              "semantic_key": "greenfield-constraint:3",
+              "context_class": "APPROVED_CONSTRAINT",
+              "evidence_refs": [
+                "ir-constraint:external-boundary:external-boundary:gate:cloud-delivery:human-authorization-required:binding:af9d7589c10bb2ee2e768ce4889564a93fb871bb0355fe6ed3da5c4b35bf1814"
+              ],
+              "candidate_tree": "29e2294feabcae289b268559f8037d7e487789c1",
+              "content_digest": "2daa60a268ab4beae79a2e77d1a2803019414734a9a52e3991ba4ef7c2765531",
+              "evidence_owner": "EXECUTION_AND_DELIVERY_GATES",
+              "evidence_method": "EXACT_CONTINUOUS_PERMISSION_GATES",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "verification_ref": null,
+              "candidate_revision": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+              "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+            },
+            {
+              "reason": "EXACT_CONTINUOUS_PERMISSION_GATES",
+              "content": "Excluded from this Work: publishing",
+              "coverage": "COVERED",
+              "authority": "WATT_ARCHITECTURE_GOVERNOR",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:4",
+              "disposition": "COVERED",
+              "semantic_key": "greenfield-constraint:4",
+              "context_class": "APPROVED_CONSTRAINT",
+              "evidence_refs": [
+                "ir-constraint:external-boundary:external-boundary:gate:remote-delivery:human-authorization-required:binding:af9d7589c10bb2ee2e768ce4889564a93fb871bb0355fe6ed3da5c4b35bf1814"
+              ],
+              "candidate_tree": "29e2294feabcae289b268559f8037d7e487789c1",
+              "content_digest": "cb74abbf0b5db8207fbad70bdf5566ee63bcfe893ca144da10543198b2c3f4e9",
+              "evidence_owner": "EXECUTION_AND_DELIVERY_GATES",
+              "evidence_method": "EXACT_CONTINUOUS_PERMISSION_GATES",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "verification_ref": null,
+              "candidate_revision": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+              "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+            },
+            {
+              "reason": "EXACT_ADMITTED_INTENT_AND_CHILD_OBLIGATIONS",
+              "content": "{\"desired_outcome\": \"Create index.html\", \"governed_production_intents\": [{\"acceptance_required\": true, \"allowed_areas\": [], \"bounded_change\": true, \"current\": true, \"delivery_authorized\": false, \"exclusions\": [\"deployment\", \"publishing\"], \"new_work\": true, \"objective\": \"Create index.html\\nh1 text in index.html equals C1 continuity\\nindex.html changes alone\\nExcluded from this Work: deployment, publishing\\nA reviewable Candidate is left for Human acceptance\", \"preview_required\": false, \"primary_change\": \"Create index.html\", \"repository_reference\": null, \"repository_required\": false, \"scope\": [], \"systemic_design\": false, \"target_paths\": [{\"provenance\": {\"evidence_reference\": null, \"origin\": \"HUMAN_EXPLICIT\", \"source_record_id\": \"d848e978-d0d8-4392-8f6f-f581e49e7320\", \"source_text\": \"Create index.html\"}, \"value\": \"index.html\"}], \"unresolved\": [], \"unresolved_arguments\": []}]}",
+              "coverage": "COVERED",
+              "authority": "WATT_PRODUCT_GOVERNOR",
+              "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-product-intent",
+              "disposition": "COVERED",
+              "semantic_key": "greenfield-product-intent",
+              "context_class": "PRODUCT_INTENT",
+              "evidence_refs": [
+                "ecf:APPROVED_CONSTRAINT:greenfield-constraint:0",
+                "ecf:APPROVED_CONSTRAINT:greenfield-constraint:1",
+                "ecf:APPROVED_CONSTRAINT:greenfield-constraint:2",
+                "ecf:APPROVED_CONSTRAINT:greenfield-constraint:3",
+                "ecf:APPROVED_CONSTRAINT:greenfield-constraint:4"
+              ],
+              "candidate_tree": "29e2294feabcae289b268559f8037d7e487789c1",
+              "content_digest": "a160bdfdc15ed9b7c8981821c883ac7271de5f80e9f3d8a1219115497de28294",
+              "evidence_owner": "PRODUCT_SOURCE",
+              "evidence_method": "EXACT_ADMITTED_INTENT_AND_CHILD_OBLIGATIONS",
+              "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+              "verification_ref": null,
+              "candidate_revision": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+              "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+            }
+          ],
+          "static_html_semantic_checks": [
+            {
+              "scope": "index.html",
+              "passed": true,
+              "reason": "EXACT_H1",
+              "fact_id": "74d3ea2b-2a70-5689-b649-19dcb807baa5",
+              "subject": "page.h1",
+              "disposition": "VERIFIED_CURRENT",
+              "materialization": {
+                "scope": "index.html",
+                "method": "EXACT_H1",
+                "signal": null,
+                "fact_id": "74d3ea2b-2a70-5689-b649-19dcb807baa5",
+                "relation": "EQUALITY",
+                "authority": "HUMAN_EXPLICIT",
+                "target_path": "index.html",
+                "model_repair": null,
+                "value_digest": "21e1c5676eee4d32063f2102870f42b8bd59ede9326aac9777d1050db002cc6c",
+                "linked_fact_id": null,
+                "semantic_ir_id": "44e03ce6-e4cf-561b-b3f2-fa62f7f9a644",
+                "repair_attempts": 0,
+                "provenance_digest": "38034ce62fa4c91d83685d80296674e0a54adddfce679615827234853fc1cb75",
+                "qualifiers_digest": "3c6562a718dc62075801cb945056fdbad775657ba935f48ce36a8753eb2d17ac",
+                "source_record_ids": [
+                  "d848e978-d0d8-4392-8f6f-f581e49e7320"
+                ],
+                "candidate_revision": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+                "provenance_checked": true,
+                "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79"
+              }
+            },
+            {
+              "passed": true,
+              "reason": "EXACT_OWNER_EVIDENCE",
+              "component": "git-diff-scope",
+              "disposition": "VERIFIED_CURRENT",
+              "source_kind": "IR_CONSTRAINT",
+              "gate_evidence": {
+                "meaning": "current attempt and scoped verification only",
+                "attempt_id": "ad1a9ae8-2626-4651-9a03-7a790c3bdd5e",
+                "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+                "native_binding_digest": "af9d7589c10bb2ee2e768ce4889564a93fb871bb0355fe6ed3da5c4b35bf1814"
+              },
+              "constraint_item_id": "change-scope",
+              "constraint_clause_id": "change-scope",
+              "fulfillment_bindings": [
+                {
+                  "owner": "VERIFICATION",
+                  "phase": "CURRENT_VERIFICATION",
+                  "state": "BOUND_PENDING_EVIDENCE",
+                  "fact_id": null,
+                  "gate_ref": "code-verification:path-scope",
+                  "component": "git-diff-scope",
+                  "source_kind": "IR_CONSTRAINT",
+                  "source_quote": "index.html changes alone",
+                  "target_paths": [
+                    "index.html"
+                  ],
+                  "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+                  "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+                  "fact_fingerprint": null,
+                  "source_record_ids": [
+                    "d848e978-d0d8-4392-8f6f-f581e49e7320"
+                  ],
+                  "constraint_item_id": "change-scope",
+                  "constraint_clause_id": "change-scope",
+                  "constraint_fingerprint": "ca1b2980b52a05ef47107c2d3a385921bf980b6386274a55339a49f40d1a237e",
+                  "provenance_fingerprint": "f685d2129bb333650a4feb5d859d315346b4b0699a4e00974cf958e7de3eaf9f",
+                  "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79"
+                }
+              ],
+              "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79"
+            },
+            {
+              "passed": true,
+              "reason": "EXACT_OWNER_EVIDENCE",
+              "component": "deploy",
+              "disposition": "GATED_CONTINUOUS",
+              "source_kind": "IR_CONSTRAINT",
+              "gate_evidence": {
+                "meaning": "current attempt and scoped verification only",
+                "attempt_id": "ad1a9ae8-2626-4651-9a03-7a790c3bdd5e",
+                "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+                "native_binding_digest": "af9d7589c10bb2ee2e768ce4889564a93fb871bb0355fe6ed3da5c4b35bf1814"
+              },
+              "constraint_item_id": "external-boundary",
+              "constraint_clause_id": "external-boundary",
+              "fulfillment_bindings": [
+                {
+                  "owner": "DELIVERY_GATE",
+                  "phase": "CONTINUOUS_FROM_ADMISSION",
+                  "state": "BOUND_PENDING_EVIDENCE",
+                  "fact_id": null,
+                  "gate_ref": "cloud-delivery:human-authorization-required",
+                  "component": "deploy",
+                  "source_kind": "IR_CONSTRAINT",
+                  "source_quote": "Excluded from this Work: deployment, publishing",
+                  "target_paths": [],
+                  "evidence_method": "EXACT_PERMISSION_GATE",
+                  "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+                  "fact_fingerprint": null,
+                  "source_record_ids": [
+                    "d848e978-d0d8-4392-8f6f-f581e49e7320"
+                  ],
+                  "constraint_item_id": "external-boundary",
+                  "constraint_clause_id": "external-boundary",
+                  "constraint_fingerprint": "d492650764dfe35770cef3a5793f8075cc6fb89bf07a1a97baf1e05d86e06dc5",
+                  "provenance_fingerprint": "f5ad1e0e18823bd43cae72e8c4c7de9a8f54e3428b8d94e9302be8a8794c7237",
+                  "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79"
+                }
+              ],
+              "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79"
+            },
+            {
+              "passed": true,
+              "reason": "EXACT_OWNER_EVIDENCE",
+              "component": "publish",
+              "disposition": "GATED_CONTINUOUS",
+              "source_kind": "IR_CONSTRAINT",
+              "gate_evidence": {
+                "meaning": "current attempt and scoped verification only",
+                "attempt_id": "ad1a9ae8-2626-4651-9a03-7a790c3bdd5e",
+                "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+                "native_binding_digest": "af9d7589c10bb2ee2e768ce4889564a93fb871bb0355fe6ed3da5c4b35bf1814"
+              },
+              "constraint_item_id": "external-boundary",
+              "constraint_clause_id": "external-boundary",
+              "fulfillment_bindings": [
+                {
+                  "owner": "DELIVERY_GATE",
+                  "phase": "CONTINUOUS_FROM_ADMISSION",
+                  "state": "BOUND_PENDING_EVIDENCE",
+                  "fact_id": null,
+                  "gate_ref": "remote-delivery:human-authorization-required",
+                  "component": "publish",
+                  "source_kind": "IR_CONSTRAINT",
+                  "source_quote": "Excluded from this Work: deployment, publishing",
+                  "target_paths": [],
+                  "evidence_method": "EXACT_PERMISSION_GATE",
+                  "source_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+                  "fact_fingerprint": null,
+                  "source_record_ids": [
+                    "d848e978-d0d8-4392-8f6f-f581e49e7320"
+                  ],
+                  "constraint_item_id": "external-boundary",
+                  "constraint_clause_id": "external-boundary",
+                  "constraint_fingerprint": "d492650764dfe35770cef3a5793f8075cc6fb89bf07a1a97baf1e05d86e06dc5",
+                  "provenance_fingerprint": "f5ad1e0e18823bd43cae72e8c4c7de9a8f54e3428b8d94e9302be8a8794c7237",
+                  "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79"
+                }
+              ],
+              "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79"
+            }
+          ]
+        }
+      },
+      "basis_fingerprint": "a8606cde4764aeace0c84663aa243f5948b95ed7360d98e30d85349d7d8c273a",
+      "created_at": "2026-10-09T06:06:55.570732Z"
+    },
+    {
+      "id": "c2caeb92-a6af-576b-91d4-c8334eddce63",
+      "production_run_id": "afbde75b-49a8-42ce-b47b-227c7061c472",
+      "work_unit_id": "7aafcd5d-8721-403b-9928-ae3a8c92f26f",
+      "plan_revision_id": "3f01a0b8-354a-4511-8241-f0e321800d83",
+      "source_baseline_id": "70b13638-265b-4856-9381-2cbe91c5388e",
+      "completion_evaluation_id": "a9e12b43-48ba-531d-9948-705d5c6a3c71",
+      "proposed_snapshot_id": "79a109a3-6bb6-5313-8c1b-fe8e1c136bc6",
+      "proposed_commit_identity": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+      "tree_identity": "29e2294feabcae289b268559f8037d7e487789c1",
+      "obligation": "GIT_DIFF_CHECK",
+      "obligation_fingerprint": "f6dacebaa7e28a7fbe366accc359cd75db2171b05711a57f77ba45d210ccf78d",
+      "provider": {
+        "provider_identity": "provider:repository-code-contract",
+        "provider_version": "v1"
+      },
+      "result": "PASS",
+      "evidence": {
+        "obligation": "GIT_DIFF_CHECK",
+        "subject_commit_identity": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+        "subject_tree_identity": "29e2294feabcae289b268559f8037d7e487789c1",
+        "expected": "the exact admitted typed code Verification obligation passes",
+        "observed": "PASS",
+        "metadata": {
+          "kind": "GIT_DIFF_CHECK",
+          "mode": "contract-driven-code-verification",
+          "target": null,
+          "exit_code": 0,
+          "stderr_bytes": 0,
+          "stdout_bytes": 0,
+          "decision_context": {
+            "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+            "protected_obligations": [
+              {
+                "content": "index.html changes alone",
+                "coverage": "UNVERIFIED",
+                "authority": "WATT_ARCHITECTURE_GOVERNOR",
+                "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:0",
+                "semantic_key": "greenfield-constraint:0",
+                "context_class": "APPROVED_CONSTRAINT",
+                "content_digest": "6efc3ee6307872c9f50d945ac6f4c69c06abb2c1b5ca0117c009329674740a12",
+                "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+                "verification_ref": null,
+                "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+              },
+              {
+                "content": "Excluded from this Work: deployment, publishing",
+                "coverage": "UNVERIFIED",
+                "authority": "WATT_ARCHITECTURE_GOVERNOR",
+                "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:1",
+                "semantic_key": "greenfield-constraint:1",
+                "context_class": "APPROVED_CONSTRAINT",
+                "content_digest": "dd2cfe25578eb3dc067cb581f09269920e139280391d883d9b65d1a067d5dd17",
+                "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+                "verification_ref": null,
+                "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+              },
+              {
+                "content": "A reviewable Candidate is left for Human acceptance",
+                "coverage": "UNVERIFIED",
+                "authority": "WATT_ARCHITECTURE_GOVERNOR",
+                "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:2",
+                "semantic_key": "greenfield-constraint:2",
+                "context_class": "APPROVED_CONSTRAINT",
+                "content_digest": "e2a293cc9ee7c6c2eb4e2bb5907c0fe0731f36e0c304c287a60451f91ea6e5f0",
+                "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+                "verification_ref": null,
+                "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+              },
+              {
+                "content": "Excluded from this Work: deployment",
+                "coverage": "UNVERIFIED",
+                "authority": "WATT_ARCHITECTURE_GOVERNOR",
+                "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:3",
+                "semantic_key": "greenfield-constraint:3",
+                "context_class": "APPROVED_CONSTRAINT",
+                "content_digest": "2daa60a268ab4beae79a2e77d1a2803019414734a9a52e3991ba4ef7c2765531",
+                "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+                "verification_ref": null,
+                "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+              },
+              {
+                "content": "Excluded from this Work: publishing",
+                "coverage": "UNVERIFIED",
+                "authority": "WATT_ARCHITECTURE_GOVERNOR",
+                "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:4",
+                "semantic_key": "greenfield-constraint:4",
+                "context_class": "APPROVED_CONSTRAINT",
+                "content_digest": "cb74abbf0b5db8207fbad70bdf5566ee63bcfe893ca144da10543198b2c3f4e9",
+                "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+                "verification_ref": null,
+                "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+              },
+              {
+                "content": "{\"desired_outcome\": \"Create index.html\", \"governed_production_intents\": [{\"acceptance_required\": true, \"allowed_areas\": [], \"bounded_change\": true, \"current\": true, \"delivery_authorized\": false, \"exclusions\": [\"deployment\", \"publishing\"], \"new_work\": true, \"objective\": \"Create index.html\\nh1 text in index.html equals C1 continuity\\nindex.html changes alone\\nExcluded from this Work: deployment, publishing\\nA reviewable Candidate is left for Human acceptance\", \"preview_required\": false, \"primary_change\": \"Create index.html\", \"repository_reference\": null, \"repository_required\": false, \"scope\": [], \"systemic_design\": false, \"target_paths\": [{\"provenance\": {\"evidence_reference\": null, \"origin\": \"HUMAN_EXPLICIT\", \"source_record_id\": \"d848e978-d0d8-4392-8f6f-f581e49e7320\", \"source_text\": \"Create index.html\"}, \"value\": \"index.html\"}], \"unresolved\": [], \"unresolved_arguments\": []}]}",
+                "coverage": "UNVERIFIED",
+                "authority": "WATT_PRODUCT_GOVERNOR",
+                "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-product-intent",
+                "semantic_key": "greenfield-product-intent",
+                "context_class": "PRODUCT_INTENT",
+                "content_digest": "a160bdfdc15ed9b7c8981821c883ac7271de5f80e9f3d8a1219115497de28294",
+                "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+                "verification_ref": null,
+                "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85"
+              }
+            ]
+          },
+          "semantic_fact_ids": [
+            "74d3ea2b-2a70-5689-b649-19dcb807baa5"
+          ],
+          "output_fingerprint": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+        }
+      },
+      "basis_fingerprint": "9720b6b35837aa3f8852169339d56d3c9851c083df3d6a40b6a11a9fee91f7f9",
+      "created_at": "2026-10-09T06:06:55.687185Z"
+    }
+  ],
+  "candidate": {
+    "id": "ffbe6c9f-e7dd-5412-ab19-f9b14875fd6c",
+    "condition": "SEALED",
+    "production_run_id": "afbde75b-49a8-42ce-b47b-227c7061c472",
+    "plan_revision_id": "3f01a0b8-354a-4511-8241-f0e321800d83",
+    "source_baseline_id": "70b13638-265b-4856-9381-2cbe91c5388e",
+    "repository_identity": "test://c1-contract-f8e3120bf3004337b0862fe997f3250c",
+    "target_authoritative_ref": "refs/heads/main",
+    "expected_source_repository_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+    "proposed_snapshot_id": "79a109a3-6bb6-5313-8c1b-fe8e1c136bc6",
+    "proposed_commit_identity": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+    "proposed_tree_identity": "29e2294feabcae289b268559f8037d7e487789c1",
+    "satisfied_work_unit_ids": [
+      "7aafcd5d-8721-403b-9928-ae3a8c92f26f"
+    ],
+    "completion_evaluation_ids": [
+      "a9e12b43-48ba-531d-9948-705d5c6a3c71"
+    ],
+    "work_product_reference_ids": [
+      "1b3a68c2-4a5b-5cfa-8a18-9824f6e535d5"
+    ],
+    "verification_record_ids": [
+      "3a1f6ac7-9b32-5695-888b-1d89425fdd51",
+      "c2caeb92-a6af-576b-91d4-c8334eddce63"
+    ],
+    "production_admissibility_id": "6bc90638-af13-56d8-a727-01d671a194dc",
+    "production_admissibility_basis_fingerprint": "65e30a798eebfb7961ab078c793311c7a8114f8af396d367dd91a29cb38f7ac4",
+    "fingerprint": "da61e71644e72a67a7110418fc216d030a7036830c00d167d87b87c3e2135c5e",
+    "sealed_at": "2026-10-09T06:06:55.783297Z"
+  },
+  "human_authorizations": [],
+  "guardian_request": {
+    "contract_version": "watt-guardian-software-assurance-v1",
+    "evidence_contract_version": "governed-obligation-v2",
+    "production_lineage": {
+      "work_reality_revision_id": "6acf54b1-7444-4a2f-9724-046e0ae54d79",
+      "pwu_id": "7aafcd5d-8721-403b-9928-ae3a8c92f26f",
+      "source_baseline_id": "70b13638-265b-4856-9381-2cbe91c5388e",
+      "source_baseline_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+      "source_baseline_tree": "6ed77f11ba8456ba3c1342af247884809be1498e",
+      "qualified_output_revision": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+      "qualified_output_tree": "29e2294feabcae289b268559f8037d7e487789c1"
+    },
+    "request_id": "208f0927-3871-542e-8b01-e69646710302",
+    "product_ref": "product:a898bd4f-bc12-4fa2-a33b-c09f5068af57",
+    "work_ref": "work:c9539308-eebc-4570-b84d-25ddff38e704",
+    "governed_intent_ref": "work-reality-revision:6acf54b1-7444-4a2f-9724-046e0ae54d79",
+    "objective": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+    "constraints": [
+      "index.html changes alone",
+      "Excluded from this Work: deployment, publishing",
+      "A reviewable Candidate is left for Human acceptance",
+      "Excluded from this Work: deployment",
+      "Excluded from this Work: publishing"
+    ],
+    "exclusions": [],
+    "authority_ref": "engineering-scope:42af7a1c-c3b3-4b94-b16d-9ca9a51bb8f1",
+    "candidate_id": "ffbe6c9f-e7dd-5412-ab19-f9b14875fd6c",
+    "candidate_fingerprint": "da61e71644e72a67a7110418fc216d030a7036830c00d167d87b87c3e2135c5e",
+    "source_revision": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+    "source_tree": "29e2294feabcae289b268559f8037d7e487789c1",
+    "artifact_refs": [
+      "artifact:index.html",
+      "production-plan:3f01a0b8-354a-4511-8241-f0e321800d83:version:1",
+      "pwu:7aafcd5d-8721-403b-9928-ae3a8c92f26f",
+      "source-baseline:70b13638-265b-4856-9381-2cbe91c5388e",
+      "task-contract:baaa838f-23ca-5a06-842a-ee3880e73bd7",
+      "qualified-result:b12a04d7978b9880f17f802774b3ec2cb9021835:tree:29e2294feabcae289b268559f8037d7e487789c1",
+      "execution-attempt:ad1a9ae8-2626-4651-9a03-7a790c3bdd5e",
+      "execution-dispatch:f8386985-675a-45f4-8d4e-44b9a71c94d4"
+    ],
+    "runtime_ref": "candidate-preview:3751d83c-bef7-4696-b632-8d306832ded9",
+    "runtime_url": "http://127.0.0.1:37695",
+    "disposable_preview": true,
+    "verification_refs": [
+      "verification:3a1f6ac7-9b32-5695-888b-1d89425fdd51",
+      "verification:c2caeb92-a6af-576b-91d4-c8334eddce63"
+    ],
+    "task_contract_ref": "task-contract:baaa838f-23ca-5a06-842a-ee3880e73bd7",
+    "decision_context_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+    "protected_context": [
+      {
+        "context_class": "APPROVED_CONSTRAINT",
+        "semantic_key": "greenfield-constraint:0",
+        "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:0",
+        "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+        "authority": "WATT_ARCHITECTURE_GOVERNOR",
+        "content_digest": "6efc3ee6307872c9f50d945ac6f4c69c06abb2c1b5ca0117c009329674740a12",
+        "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+        "coverage": "COVERED",
+        "verification_refs": [
+          "verification:3a1f6ac7-9b32-5695-888b-1d89425fdd51"
+        ]
+      },
+      {
+        "context_class": "APPROVED_CONSTRAINT",
+        "semantic_key": "greenfield-constraint:1",
+        "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:1",
+        "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+        "authority": "WATT_ARCHITECTURE_GOVERNOR",
+        "content_digest": "dd2cfe25578eb3dc067cb581f09269920e139280391d883d9b65d1a067d5dd17",
+        "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+        "coverage": "COVERED",
+        "verification_refs": [
+          "verification:3a1f6ac7-9b32-5695-888b-1d89425fdd51"
+        ]
+      },
+      {
+        "context_class": "APPROVED_CONSTRAINT",
+        "semantic_key": "greenfield-constraint:2",
+        "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:2",
+        "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+        "authority": "WATT_ARCHITECTURE_GOVERNOR",
+        "content_digest": "e2a293cc9ee7c6c2eb4e2bb5907c0fe0731f36e0c304c287a60451f91ea6e5f0",
+        "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+        "coverage": "PENDING_CANDIDATE_GATE",
+        "verification_refs": [
+          "verification:3a1f6ac7-9b32-5695-888b-1d89425fdd51"
+        ]
+      },
+      {
+        "context_class": "APPROVED_CONSTRAINT",
+        "semantic_key": "greenfield-constraint:3",
+        "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:3",
+        "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+        "authority": "WATT_ARCHITECTURE_GOVERNOR",
+        "content_digest": "2daa60a268ab4beae79a2e77d1a2803019414734a9a52e3991ba4ef7c2765531",
+        "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+        "coverage": "COVERED",
+        "verification_refs": [
+          "verification:3a1f6ac7-9b32-5695-888b-1d89425fdd51"
+        ]
+      },
+      {
+        "context_class": "APPROVED_CONSTRAINT",
+        "semantic_key": "greenfield-constraint:4",
+        "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-constraint:4",
+        "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+        "authority": "WATT_ARCHITECTURE_GOVERNOR",
+        "content_digest": "cb74abbf0b5db8207fbad70bdf5566ee63bcfe893ca144da10543198b2c3f4e9",
+        "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+        "coverage": "COVERED",
+        "verification_refs": [
+          "verification:3a1f6ac7-9b32-5695-888b-1d89425fdd51"
+        ]
+      },
+      {
+        "context_class": "PRODUCT_INTENT",
+        "semantic_key": "greenfield-product-intent",
+        "source_ref": "work-reality:c9539308-eebc-4570-b84d-25ddff38e704:greenfield-product-intent",
+        "source_revision": "63e608cf72b5ae84e61ae1a46e28e585fcc355edfc34c12184a7251c7b82a628",
+        "authority": "WATT_PRODUCT_GOVERNOR",
+        "content_digest": "a160bdfdc15ed9b7c8981821c883ac7271de5f80e9f3d8a1219115497de28294",
+        "package_fingerprint": "34b083ba53fd42ec7cb1431d7602e5d908af1dadd9f1ef7face3a6c09bc97f85",
+        "coverage": "COVERED",
+        "verification_refs": [
+          "verification:3a1f6ac7-9b32-5695-888b-1d89425fdd51"
+        ]
+      }
+    ],
+    "acceptance_state": "PENDING",
+    "delivery_authorization_state": "NOT_AUTHORIZED",
+    "required_effects": [
+      {
+        "obligation_ref": "work-route:index.html",
+        "kind": "HTTP_ROUTE",
+        "expected_behavior": "Approved static result index.html is served from the exact Candidate",
+        "path": "/index.html",
+        "expected_status": 200,
+        "content_contains": null,
+        "link_href": null,
+        "create_path": null,
+        "read_path": null,
+        "create_body": null,
+        "expected_json_field": null,
+        "expected_json_value": null,
+        "dependency_owner": null
+      }
+    ],
+    "prior_finding_ids": [],
+    "submitted_at": "2026-10-09T06:06:56.027079Z"
+  },
+  "guardian_result": {
+    "contract_version": "watt-guardian-software-assurance-v1",
+    "result_id": "d61fb1ff-f3cb-4415-befb-dec9bd2f40d9",
+    "request_id": "208f0927-3871-542e-8b01-e69646710302",
+    "candidate_id": "ffbe6c9f-e7dd-5412-ab19-f9b14875fd6c",
+    "candidate_fingerprint": "da61e71644e72a67a7110418fc216d030a7036830c00d167d87b87c3e2135c5e",
+    "source_revision": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+    "source_tree": "29e2294feabcae289b268559f8037d7e487789c1",
+    "runtime_ref": "candidate-preview:3751d83c-bef7-4696-b632-8d306832ded9",
+    "gate": "PASS",
+    "coverage_obligation_refs": [
+      "work-route:index.html",
+      "ecf:APPROVED_CONSTRAINT:greenfield-constraint:0",
+      "ecf:APPROVED_CONSTRAINT:greenfield-constraint:1",
+      "ecf:APPROVED_CONSTRAINT:greenfield-constraint:2",
+      "ecf:APPROVED_CONSTRAINT:greenfield-constraint:3",
+      "ecf:APPROVED_CONSTRAINT:greenfield-constraint:4",
+      "ecf:PRODUCT_INTENT:greenfield-product-intent"
+    ],
+    "evidence": [
+      {
+        "evidence_id": "ed7c9cdf-abc7-4b76-9571-f019d3b4e0b0",
+        "obligation_ref": "work-route:index.html",
+        "observation": "GET /index.html returned HTTP 200 with exact Candidate identity",
+        "status_code": 200,
+        "response_sha256": "40eebeb8a519981b9506fe62c513d8a9e845b2b199da67e4ca040038a0f9c6d5",
+        "runtime_ref": "candidate-preview:3751d83c-bef7-4696-b632-8d306832ded9",
+        "observed_at": "2026-10-09T06:06:56.199613Z"
+      }
+    ],
+    "findings": [],
+    "supersedes_finding_ids": [],
+    "acceptance_state": "PENDING",
+    "delivery_authorization_state": "NOT_AUTHORIZED",
+    "assessed_at": "2026-10-09T06:06:56.543727Z"
+  },
+  "watt_guardian_projection": {
+    "status": "PASS",
+    "gate": "PASS",
+    "candidate_id": "ffbe6c9f-e7dd-5412-ab19-f9b14875fd6c",
+    "request_id": "208f0927-3871-542e-8b01-e69646710302",
+    "result_ref": "guardian:assurance-result:208f0927-3871-542e-8b01-e69646710302",
+    "result_refs": [
+      "guardian:assurance-result:208f0927-3871-542e-8b01-e69646710302"
+    ],
+    "required_pwu_ids": [
+      "7aafcd5d-8721-403b-9928-ae3a8c92f26f"
+    ],
+    "finding_count": 0,
+    "finding_ids": [],
+    "summary": "",
+    "evidence_ref": "guardian:evidence:ed7c9cdf-abc7-4b76-9571-f019d3b4e0b0"
+  }
+}

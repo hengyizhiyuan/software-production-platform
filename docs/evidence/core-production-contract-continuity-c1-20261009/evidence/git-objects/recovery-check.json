@@ -1,0 +1,16 @@
+[
+  {
+    "work_id": "c9539308-eebc-4570-b84d-25ddff38e704",
+    "pack_sha256": "e30c8f0e86e6c386d84721d179daade162310d8255336ae787854bd4f60af159",
+    "input_and_output_trees_recovered": true,
+    "candidate_blob_recovered": true,
+    "production_effect": false
+  },
+  {
+    "work_id": "85cc380f-2183-585c-9771-42054a25ac7d",
+    "pack_sha256": "3a265587a71329692124e8da8c7a5ca8b796f2242fa1b342f03b8ea3f96f0c62",
+    "input_and_output_trees_recovered": true,
+    "candidate_blob_recovered": true,
+    "production_effect": false
+  }
+]

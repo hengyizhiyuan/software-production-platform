@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="6.359" timestamp="2026-10-09T05:50:22.497446+00:00" hostname="cf39d07e1b6a"><testcase classname="tests.integration.test_c1_contract_continuity" name="test_both_actual_admission_paths_reach_independent_guardian[work]" time="1.815"><error message="failed on setup with &quot;ValueError: OBLIGATION_CONSTRAINT_SOURCE_MISMATCH&quot;">tests/integration/test_c1_contract_continuity.py:357: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:329: in _admit_c1
+    works.approve_work(draft.work_id, authority_identity="fixture:human:c1")
+src/spg/application/work.py:1791: in approve_work
+    fulfillment_bindings = admitted_fulfillment_bindings(
+src/spg/application/governed_obligations.py:115: in admitted_fulfillment_bindings
+    return materialize_continuous_gates(revision, assessment.semantic_ir)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:98: in materialize_continuous_gates
+    bindings.append(bind_admitted_constraint(
+src/spg/domain/governed_obligation.py:143: in bind_admitted_constraint
+    raise ValueError("OBLIGATION_CONSTRAINT_SOURCE_MISMATCH")
+E   ValueError: OBLIGATION_CONSTRAINT_SOURCE_MISMATCH</error></testcase></testsuite></testsuites>

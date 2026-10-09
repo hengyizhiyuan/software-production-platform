@@ -1,0 +1,32 @@
+[
+  {
+    "work_id": "c9539308-eebc-4570-b84d-25ddff38e704",
+    "source_receipt": "immediate_production-c9539308-eebc-4570-b84d-25ddff38e704.json",
+    "pack": "c9539308-eebc-4570-b84d-25ddff38e704.pack",
+    "pack_sha256": "e30c8f0e86e6c386d84721d179daade162310d8255336ae787854bd4f60af159",
+    "pack_bytes": 566,
+    "input_revision": "9967ecf9a58bfbb23db027313bfa24f4640d1ffe",
+    "input_tree": "6ed77f11ba8456ba3c1342af247884809be1498e",
+    "output_revision": "b12a04d7978b9880f17f802774b3ec2cb9021835",
+    "output_tree": "29e2294feabcae289b268559f8037d7e487789c1",
+    "index_html_sha256": "40eebeb8a519981b9506fe62c513d8a9e845b2b199da67e4ca040038a0f9c6d5",
+    "index_html_blob": "9ad5cdcb01546c8386c67fbb6793248907194f41",
+    "diff": "A\tindex.html",
+    "read_only_git_export": true
+  },
+  {
+    "work_id": "85cc380f-2183-585c-9771-42054a25ac7d",
+    "source_receipt": "long_lived_steering-85cc380f-2183-585c-9771-42054a25ac7d.json",
+    "pack": "85cc380f-2183-585c-9771-42054a25ac7d.pack",
+    "pack_sha256": "3a265587a71329692124e8da8c7a5ca8b796f2242fa1b342f03b8ea3f96f0c62",
+    "pack_bytes": 564,
+    "input_revision": "6b3f7648210f1b4a0a06133f9afdf78fe2b51839",
+    "input_tree": "6ed77f11ba8456ba3c1342af247884809be1498e",
+    "output_revision": "acf085f0b869e818f82bc20e69d4cdc7e4d3cf97",
+    "output_tree": "29e2294feabcae289b268559f8037d7e487789c1",
+    "index_html_sha256": "40eebeb8a519981b9506fe62c513d8a9e845b2b199da67e4ca040038a0f9c6d5",
+    "index_html_blob": "9ad5cdcb01546c8386c67fbb6793248907194f41",
+    "diff": "A\tindex.html",
+    "read_only_git_export": true
+  }
+]

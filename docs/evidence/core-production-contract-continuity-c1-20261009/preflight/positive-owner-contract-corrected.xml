@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="8.843" timestamp="2026-10-09T05:55:42.870520+00:00" hostname="cf39d07e1b6a"><testcase classname="tests.integration.test_c1_contract_continuity" name="test_both_actual_admission_paths_reach_independent_guardian[work]" time="4.299"><failure message="assert False&#10; +  where False = any(&lt;generator object test_both_actual_admission_paths_reach_independent_guardian.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f4969870380&gt;)">tests/integration/test_c1_contract_continuity.py:456: in test_both_actual_admission_paths_reach_independent_guardian
+    assert any(item["coverage"] == "PENDING_CANDIDATE_GATE"
+E   assert False
+E    +  where False = any(&lt;generator object test_both_actual_admission_paths_reach_independent_guardian.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f4969870380&gt;)</failure></testcase></testsuite></testsuites>

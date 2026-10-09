@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="11.081" timestamp="2026-10-09T05:44:40.022644+00:00" hostname="cf39d07e1b6a"><testcase classname="tests.integration.test_c1_contract_continuity" name="test_both_actual_admission_paths_reach_independent_guardian[work]" time="2.248"><error message="failed on setup with &quot;spg.domain.product.ProductInvariantViolation: Only a draft Work may be refined&quot;">tests/integration/test_c1_contract_continuity.py:266: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:239: in _admit_c1
+    draft = works.refine_work(admitted.work_id, WorkRefinementRequest(
+src/spg/application/work.py:1446: in refine_work
+    raise ProductInvariantViolation("Only a draft Work may be refined")
+E   spg.domain.product.ProductInvariantViolation: Only a draft Work may be refined</error></testcase></testsuite></testsuites>

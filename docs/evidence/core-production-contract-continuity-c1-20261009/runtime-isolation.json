@@ -1,0 +1,192 @@
+{
+  "captured_at_utc": "2026-10-09T06:13:46.389359+00:00",
+  "test_containers": [
+    {
+      "id": "31dd06710bb26fd540f25256f73cd0a8905b6f305fd1b8bd6b48d4a27b9c0633",
+      "name": "/watt-c1-contract-runner-20261009",
+      "image_id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+      "image_tag": "watt-n1-gof:84d16b1",
+      "labels": {
+        "watt.production": "false",
+        "watt.qualification": "C1-contract-continuity"
+      },
+      "network_mode": "container:cf39d07e1b6ac9edc9c14db58be3b101e746f286bdf1f53a820602d0b23ee053",
+      "memory_bytes": 1610612736,
+      "nano_cpus": 1000000000,
+      "pids_limit": 256,
+      "port_bindings": {},
+      "tmpfs": null,
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/data/watt/c1-contract-qualification-20261009",
+          "Destination": "/c1",
+          "Mode": "",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ],
+      "started_at": "2026-10-09T05:29:44.610496496Z",
+      "state": "running"
+    },
+    {
+      "id": "cf39d07e1b6ac9edc9c14db58be3b101e746f286bdf1f53a820602d0b23ee053",
+      "name": "/watt-c1-postgres-20261009",
+      "image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+      "image_tag": "public.ecr.aws/docker/library/postgres:17.6-alpine",
+      "labels": {
+        "watt.production": "false",
+        "watt.qualification": "C1-contract-continuity"
+      },
+      "network_mode": "none",
+      "memory_bytes": 536870912,
+      "nano_cpus": 1000000000,
+      "pids_limit": 256,
+      "port_bindings": {},
+      "tmpfs": {
+        "/var/lib/postgresql/data": "rw"
+      },
+      "mounts": [],
+      "started_at": "2026-10-09T05:27:06.216041857Z",
+      "state": "running"
+    }
+  ],
+  "existing_running_containers": [
+    {
+      "ID": "e942e5fc1f91",
+      "Names": "watt-n1-worker-20261008",
+      "Image": "watt-n1-gof:84d16b1",
+      "Status": "Up 5 hours",
+      "CreatedAt": "2026-10-09 09:00:55 +0800 CST"
+    },
+    {
+      "ID": "f4aa2f4646da",
+      "Names": "watt-n1-coordinator-20261008",
+      "Image": "watt-n1-gof:84d16b1",
+      "Status": "Up 5 hours",
+      "CreatedAt": "2026-10-09 09:00:54 +0800 CST"
+    },
+    {
+      "ID": "67eac0dce22c",
+      "Names": "watt-n1-api-20261008",
+      "Image": "watt-n1-gof:84d16b1",
+      "Status": "Up 5 hours",
+      "CreatedAt": "2026-10-09 09:00:53 +0800 CST"
+    },
+    {
+      "ID": "f2b37911c4d2",
+      "Names": "watt-n1-tool-host-20261008",
+      "Image": "watt-n1-gof:84d16b1",
+      "Status": "Up 5 hours",
+      "CreatedAt": "2026-10-09 09:00:53 +0800 CST"
+    },
+    {
+      "ID": "8271481d44d0",
+      "Names": "watt-n1-gitea-20261008",
+      "Image": "docker.gitea.com/gitea:1.27.3-rootless",
+      "Status": "Up 19 hours",
+      "CreatedAt": "2026-10-08 14:34:50 +0800 CST"
+    },
+    {
+      "ID": "907431da275d",
+      "Names": "watt-cloud-worker-quality-runner-1",
+      "Image": "watt-quality-runner:local",
+      "Status": "Up 37 hours",
+      "CreatedAt": "2026-10-08 01:32:18 +0800 CST"
+    },
+    {
+      "ID": "6940d567f06e",
+      "Names": "watt-cloud-worker-native-worker-1",
+      "Image": "watt-cloud-worker:local",
+      "Status": "Up 37 hours",
+      "CreatedAt": "2026-10-08 01:31:32 +0800 CST"
+    },
+    {
+      "ID": "1e100b5795dc",
+      "Names": "watt-cloud-worker-native-coordinator-1",
+      "Image": "watt-cloud-worker:local",
+      "Status": "Up 37 hours",
+      "CreatedAt": "2026-10-08 01:31:32 +0800 CST"
+    },
+    {
+      "ID": "405aa7b1ec1d",
+      "Names": "watt-cloud-worker-api-1",
+      "Image": "watt-cloud-worker:local",
+      "Status": "Up 37 hours (healthy)",
+      "CreatedAt": "2026-10-08 01:31:26 +0800 CST"
+    },
+    {
+      "ID": "5aa5758c0d30",
+      "Names": "watt-cloud-worker-native-tool-host-1",
+      "Image": "watt-cloud-worker:local",
+      "Status": "Up 37 hours (healthy)",
+      "CreatedAt": "2026-10-08 01:31:25 +0800 CST"
+    },
+    {
+      "ID": "abf187e37a74",
+      "Names": "watt-pe-d337fa04-b36c-4c22-9d02-1ccc0f014987",
+      "Image": "02c806d204dc",
+      "Status": "Up 47 hours",
+      "CreatedAt": "2026-10-07 14:59:49 +0800 CST"
+    },
+    {
+      "ID": "dd3429391345",
+      "Names": "watt-pe-99b33da4-f2ab-4c0d-903c-b2d780f15d6a",
+      "Image": "02c806d204dc",
+      "Status": "Up 47 hours",
+      "CreatedAt": "2026-10-07 14:59:46 +0800 CST"
+    },
+    {
+      "ID": "60d6f6ad0e04",
+      "Names": "watt-pe-7be24594-9b20-46a6-bb80-004c6aebd29d",
+      "Image": "02c806d204dc",
+      "Status": "Up 47 hours",
+      "CreatedAt": "2026-10-07 14:59:44 +0800 CST"
+    },
+    {
+      "ID": "2ce7345717f6",
+      "Names": "watt-pe-146b8359-959e-4e90-b26a-4cb682368997",
+      "Image": "02c806d204dc",
+      "Status": "Up 47 hours",
+      "CreatedAt": "2026-10-07 14:59:43 +0800 CST"
+    },
+    {
+      "ID": "bb75898e95f6",
+      "Names": "watt-pe-4924b80e-62c1-4157-bb50-1e10d8310260",
+      "Image": "02c806d204dc",
+      "Status": "Up 47 hours",
+      "CreatedAt": "2026-10-07 14:59:41 +0800 CST"
+    },
+    {
+      "ID": "054872b65f14",
+      "Names": "watt-pe-0ac6b623-bbb1-462e-ab4d-ada44d72645c",
+      "Image": "43b8cf40fb22",
+      "Status": "Up 3 days",
+      "CreatedAt": "2026-10-05 20:51:27 +0800 CST"
+    },
+    {
+      "ID": "6ecd0e02142d",
+      "Names": "watt-pe-708bb30a-8aac-4c8e-90b3-1366c5a9c8a4",
+      "Image": "dbd19575ef5e",
+      "Status": "Up 3 days",
+      "CreatedAt": "2026-10-05 20:42:10 +0800 CST"
+    },
+    {
+      "ID": "fe47063758f8",
+      "Names": "watt-cloud-worker-gitea-1",
+      "Image": "docker.gitea.com/gitea:1.27.3-rootless",
+      "Status": "Up 3 days (healthy)",
+      "CreatedAt": "2026-10-05 13:24:38 +0800 CST"
+    },
+    {
+      "ID": "b948e8f4b5c1",
+      "Names": "watt-cloud-worker-postgres-1",
+      "Image": "public.ecr.aws/docker/library/postgres:17.6-alpine",
+      "Status": "Up 3 days (healthy)",
+      "CreatedAt": "2026-10-05 09:42:51 +0800 CST"
+    }
+  ],
+  "production_source_head": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+  "production_source_dirty": "",
+  "reads_only": true
+}

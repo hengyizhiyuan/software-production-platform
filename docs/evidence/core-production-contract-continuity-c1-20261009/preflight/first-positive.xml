@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="8.880" timestamp="2026-10-09T05:34:04.094367+00:00" hostname="cf39d07e1b6a"><testcase classname="tests.integration.test_c1_contract_continuity" name="test_both_actual_admission_paths_reach_independent_guardian[work]" time="3.576"><error message="failed on setup with &quot;sqlalchemy.exc.IntegrityError: (psycopg.errors.ForeignKeyViolation) insert or update on table &quot;authority_resource_access&quot; violates foreign key constraint &quot;fk_authority_resource_access_actor_id_authority_actors&quot;&#10;DETAIL:  Key (actor_id)=(human:owner) is not present in table &quot;authority_actors&quot;.&#10;CONTEXT:  SQL statement &quot;INSERT INTO authority_resource_access&#10;                    (resource_kind, resource_id, actor_id, role)&#10;                VALUES ('repository', NEW.id::text, 'human:owner', 'OWNER')&#10;                ON CONFLICT DO NOTHING&quot;&#10;PL/pgSQL function authority_grant_repository_owner() line 2 at SQL statement&#10;[SQL: INSERT INTO engineering_resources (id, kind, repository_identity, location_ref, authoritative_ref, context_references, is_default, created_at, updated_at) VALUES (%(id)s::UUID, %(kind)s::VARCHAR, %(repository_identity)s::VARCHAR, %(location_ref)s::VARCHAR, %(authoritative_ref)s::VARCHAR, %(context_references)s::JSONB, %(is_default)s, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE)]&#10;[parameters: {'id': UUID('3f064f1c-b749-4885-96c5-bfbc78584dd7'), 'kind': 'REPOSITORY', 'repository_identity': 'test://c1-contract-b163e66cc5c04d75a895bb4596a95359', 'location_ref': '/tmp/pytest-of-root/pytest-0/test_both_actual_admission_pat0/wic-admission-repository', 'authoritative_ref': 'refs/heads/main', 'context_references': Jsonb([{'semantic_role': 'PROJECT_CONTEXT ... (83 chars)), 'is_default': True, 'created_at': datetime.datetime(2026, 10, 9, 5, 34, 11, 950976, tzinfo=datetime.timezone.utc), 'updated_at': datetime.datetime(2026, 10, 9, 5, 34, 11, 950976, tzinfo=datetime.timezone.utc)}]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)&quot;">/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+/opt/spg-venv/lib/python3.13/site-packages/psycopg/cursor.py:117: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.ForeignKeyViolation: insert or update on table "authority_resource_access" violates foreign key constraint "fk_authority_resource_access_actor_id_authority_actors"
+E   DETAIL:  Key (actor_id)=(human:owner) is not present in table "authority_actors".
+E   CONTEXT:  SQL statement "INSERT INTO authority_resource_access
+E                       (resource_kind, resource_id, actor_id, role)
+E                   VALUES ('repository', NEW.id::text, 'human:owner', 'OWNER')
+E                   ON CONFLICT DO NOTHING"
+E   PL/pgSQL function authority_grant_repository_owner() line 2 at SQL statement
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_c1_contract_continuity.py:259: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:199: in _admit_c1
+    works, _ = _services_for_resource(database, tmp_path, "test://c1-contract-" + uuid4().hex)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_wic_governed_work_admission.py:843: in _services_for_resource
+    work.register_engineering_resource(
+src/spg/application/work.py:325: in register_engineering_resource
+    store.insert_resource(
+src/spg/infrastructure/persistence/product_store.py:105: in insert_resource
+    self.session.execute(insert(engineering_resources).values(**values))
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2373: in execute
+    return self._execute_internal(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2280: in _execute_internal
+    result = conn.execute(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1421: in execute
+    return meth(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1848: in _execute_context
+    return self._exec_single_context(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+/opt/spg-venv/lib/python3.13/site-packages/psycopg/cursor.py:117: in execute
+    raise ex.with_traceback(None)
+E   sqlalchemy.exc.IntegrityError: (psycopg.errors.ForeignKeyViolation) insert or update on table "authority_resource_access" violates foreign key constraint "fk_authority_resource_access_actor_id_authority_actors"
+E   DETAIL:  Key (actor_id)=(human:owner) is not present in table "authority_actors".
+E   CONTEXT:  SQL statement "INSERT INTO authority_resource_access
+E                       (resource_kind, resource_id, actor_id, role)
+E                   VALUES ('repository', NEW.id::text, 'human:owner', 'OWNER')
+E                   ON CONFLICT DO NOTHING"
+E   PL/pgSQL function authority_grant_repository_owner() line 2 at SQL statement
+E   [SQL: INSERT INTO engineering_resources (id, kind, repository_identity, location_ref, authoritative_ref, context_references, is_default, created_at, updated_at) VALUES (%(id)s::UUID, %(kind)s::VARCHAR, %(repository_identity)s::VARCHAR, %(location_ref)s::VARCHAR, %(authoritative_ref)s::VARCHAR, %(context_references)s::JSONB, %(is_default)s, %(created_at)s::TIMESTAMP WITH TIME ZONE, %(updated_at)s::TIMESTAMP WITH TIME ZONE)]
+E   [parameters: {'id': UUID('3f064f1c-b749-4885-96c5-bfbc78584dd7'), 'kind': 'REPOSITORY', 'repository_identity': 'test://c1-contract-b163e66cc5c04d75a895bb4596a95359', 'location_ref': '/tmp/pytest-of-root/pytest-0/test_both_actual_admission_pat0/wic-admission-repository', 'authoritative_ref': 'refs/heads/main', 'context_references': Jsonb([{'semantic_role': 'PROJECT_CONTEXT ... (83 chars)), 'is_default': True, 'created_at': datetime.datetime(2026, 10, 9, 5, 34, 11, 950976, tzinfo=datetime.timezone.utc), 'updated_at': datetime.datetime(2026, 10, 9, 5, 34, 11, 950976, tzinfo=datetime.timezone.utc)}]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)</error></testcase></testsuite></testsuites>

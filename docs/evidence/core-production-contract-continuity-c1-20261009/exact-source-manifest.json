@@ -1,0 +1,80 @@
+{
+  "schema": "c1-exact-source-manifest-v1",
+  "captured_at_utc": "2026-10-09T06:04:31.269583+00:00",
+  "qualification_kind": "CONTROLLED_CONTRACT_INTEGRATION",
+  "live_model_production": false,
+  "sources": {
+    "watt": {
+      "repository": "https://github.com/hengyizhiyuan/software-production-platform.git",
+      "revision": "00e2a77e6b80ea79185d74a12db2cec8eeb9445e",
+      "tree": "5d9c8f9714d698c695484efc1091bc092862f6bd",
+      "base_revision": "5fd2579f8ab67db12f6ea122048613184276175f",
+      "archive": "watt-exact.tar",
+      "archive_sha256": "3723df8a574a63ed0b53c18a28d5253ca07fcec79d613650793c54a4fbcb0a26",
+      "archive_bytes": 94771200,
+      "committed_blob_sha256": {
+        "docs/context/ecf-integration.md": "6382588de837eda76254e85c106ed92668927a1b59d481384436418d9d0e9030",
+        "src/spg/application/decision_context.py": "867027816ad9327a91fbbf24b31d4ac15870c8ba7150fe9b904c9c1b76c29390",
+        "src/spg/application/governed_obligations.py": "8d783be8eb86dddebd520729ac1f30d188701c83174b814b16fc6b340d537bb9",
+        "src/spg/application/guardian_assurance.py": "48bed25088eafb1e42a8749a0f832881011ca2c75a74281472b81c38bb9151b3",
+        "src/spg/application/steering_production.py": "273c20faac004112f631cd250d703128795732a6fe6c56efedc8392e48a7997b",
+        "src/spg/application/work.py": "8ec2e8cd4dd1bb6e4af4c689422813dde0b1efe823df946275947ea5e98a5660",
+        "src/spg/providers/managed_context_fulfillment.py": "9c2331a1601dc21a161ca26b637e7b876959956c1701f78f437f64a60145461b",
+        "tests/integration/test_c1_contract_continuity.py": "91833560c7c7c578c0d8e3faca973244585be5b5899e59bbc8eb996bae398838",
+        "tests/test_c1_ecf_contract_compatibility.py": "7abe787b243003936a15fb42cb83c32bcd380393f54a62a9879374a6fddf3574"
+      }
+    },
+    "guardian": {
+      "repository": "https://github.com/hengyizhiyuan/guardian.git",
+      "revision": "6b974748df22d84b88f6908ea8ee90a9752fd183",
+      "tree": "c9a1bf4e102d8365a1ce27c9cced88f8ab0cd129",
+      "base_revision": "7cdd58540b59767d9a68a5d16038c06f89059a5d",
+      "archive": "guardian-exact.tar",
+      "archive_sha256": "f2cbee8ea23ad217b9307d9288c88c4a95673f97d8a218ebff8b74f9f894d915",
+      "archive_bytes": 256000,
+      "committed_blob_sha256": {
+        "docs/04_integration/watt-software-assurance-v1.md": "4841ac9132701bcfe80369f7948d564f6fd9ab6f789331cebf408eb9a6ec9875",
+        "src/guardian/contracts/software_assurance.py": "077336b7aa8363cfe4daae8879c90b76bbd69129bed07f0c73bb4a7ae3d7eee8",
+        "src/guardian/runtime.py": "d915fc9577a6330426e33c4548e33fc39199167c276cb6af0eb0663bf6e9abf6",
+        "tests/test_c1_governed_evidence_continuity.py": "31484fb60f7994b6acc5120221a3cc7803102f660b9e95ea13a97970d562daec"
+      }
+    },
+    "ecf": {
+      "repository": "https://github.com/hengyizhiyuan/engineering-context-fabric.git",
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+      "base_revision": null,
+      "archive": "ecf.tar",
+      "archive_sha256": "24ba8fedcd9555a6d08d90bc6aaf9206ac2b5f74d5c6f81061d99c89306b033c",
+      "archive_bytes": 215040,
+      "committed_blob_sha256": {
+        "src/ecf/decision_context.py": "5be292fd96b1a27d7221cece3f5b56aed521fcff2e64e2e3f10168a2924c5731"
+      }
+    },
+    "ecf-unsupported": {
+      "repository": "https://github.com/hengyizhiyuan/engineering-context-fabric.git",
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5",
+      "base_revision": null,
+      "archive": "ecf-current.tar",
+      "archive_sha256": "0c21dafb428769a77ce1eb04d557f7ac7b06372c0365232b51f5011759b9fa16",
+      "archive_bytes": 215040,
+      "committed_blob_sha256": {
+        "src/ecf/decision_context.py": "8e07ecf1d2fd3539911b0ffc63e5be57260bc86bde29f420a4ecd9e3389bbc5e"
+      }
+    }
+  },
+  "dependency_image": {
+    "tag": "watt-n1-gof:84d16b1",
+    "image_id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+    "image_original_application_revision": "84d16b1f98ee124a4a7fb11761c821e25223ad24",
+    "role": "dependency runtime only; application modules imported from exact mounted archives; no new application image qualification"
+  },
+  "database": {
+    "name": "c1_contract_continuity",
+    "migration": "20261007_72",
+    "container": "watt-c1-postgres-20261009",
+    "isolation": "new network-none container, tmpfs data, no published port"
+  },
+  "pytest_dependency_archive_sha256": "e8c5261006ae6a2db8d8a240c4247c349924d03ca0865b999ee0e357b927d4e9"
+}
