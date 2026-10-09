@@ -523,6 +523,11 @@ class NativeQueuedExecutorCapability:
                         f"semantic-fact:{item.fact_id}"
                         for item in work_unit.completion_contract.semantic_fact_obligations
                     ),
+                    *(
+                        f"ir-constraint:{item.constraint_item_id}:{item.constraint_clause_id}"
+                        for item in work_unit.completion_contract.fulfillment_bindings
+                        if item.constraint_item_id is not None
+                    ),
                 )
             ),
         )

@@ -143,13 +143,14 @@ class RepositoryCodeVerifier:
                         InteractionStore(unit_of_work.session).assessment(
                             admitted_revision.source_assessment_id))
                     admitted_ir = None if assessment is None else assessment.semantic_ir
-                if gate_bindings and proposed is not None:
+                if admitted_revision is not None and admitted_ir is not None:
                     from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
                     from spg.application.governed_obligations import validate_continuous_gates
                     validate_continuous_gates(gate_bindings, admitted_revision,
                         admitted_ir)
-                    native_binding = NativeExecutionStore(unit_of_work.session).attempt_binding(
-                        proposed.attempt_id)
+                    if gate_bindings and proposed is not None:
+                        native_binding = NativeExecutionStore(unit_of_work.session).attempt_binding(
+                            proposed.attempt_id)
             if source is None or dispatch is None or work_unit is None:
                 raise RuntimeError("code Verification repository lineage unavailable")
             if (
@@ -210,6 +211,14 @@ class RepositoryCodeVerifier:
                         admitted_facts=admitted_facts, ir=admitted_ir,
                         source_revision=contract.source_revision,
                         exact_target_paths=tuple(target.path for target in contract.exact_targets))
+                if gate_bindings:
+                    from spg.application.governed_obligations import evaluate_constraint_routes
+                    semantic_checks = (*semantic_checks, *evaluate_constraint_routes(
+                        gate_bindings, native_binding,
+                        source_revision=contract.source_revision,
+                        path_scope_passed=result is VerificationResultValue.PASS,
+                        exact_target_paths=tuple(
+                            target.path for target in contract.exact_targets)))
                 if semantic_checks:
                     metadata["static_html_semantic_checks"] = semantic_checks
                     if any(check["passed"] is not True for check in semantic_checks):

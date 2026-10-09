@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from hashlib import sha256
 import json
+from contextlib import contextmanager
 from pathlib import Path
 import subprocess
 from types import SimpleNamespace
@@ -14,8 +15,14 @@ import pytest
 from spg.application.governed_obligations import (
     materialize_continuous_gates, validate_continuous_gates,
     denied_execution_capabilities, evaluate_continuous_gates,
-    evaluate_candidate_handoffs,
+    evaluate_candidate_handoffs, evaluate_constraint_routes,
+    assert_delivery_effect_permitted,
 )
+from spg.domain.governed_obligation import (
+    FulfillmentOwner, FulfillmentPhase, bind_admitted_fact,
+)
+from spg.domain.intent_realization import SemanticClause, SemanticItem, SemanticKind
+from spg.domain.semantic_provenance import SemanticOrigin, SemanticProvenance
 from spg.domain.engineering_semantics import (
     EngineeringSemanticFact, SemanticFactAuthority, SemanticEpistemicStatus,
     SemanticFactProvenance, SemanticRelation, SemanticRoleOrigin,
@@ -44,36 +51,77 @@ def work(*facts):
 
 def ir(*exclusions):
     goal = SimpleNamespace(exclusions=exclusions, preview_required=False,
-                           delivery_authorized=False, acceptance_required=True)
+                           delivery_authorized=False, acceptance_required=True,
+                           target_paths=())
     return SimpleNamespace(current_production=(goal,))
 
 
-def test_prohibitions_bind_effects_without_rewriting_facts_or_content_absence():
-    preview = fact("release.preview_requested", SemanticRelation.EQUALITY,
-                   False, "No preview is requested.")
-    delivery = fact("release.deploy_and_publish_authorized", SemanticRelation.EQUALITY,
-                    False, "Do not deploy or publish.")
-    footer = fact("page.has_footer", SemanticRelation.EQUALITY,
-                  False, "The page must have no footer.")
-    revision = work(preview, delivery, footer)
-    original = tuple(item.model_dump(mode="json") for item in revision.engineering_semantic_facts)
-    bindings = materialize_continuous_gates(
-        revision, ir("Preview", "Deployment or publishing"))
-    assert [(item.fact_id, item.component) for item in bindings] == [
-        (preview.id, "preview"), (delivery.id, "deploy"), (delivery.id, "publish")]
-    assert denied_execution_capabilities(bindings) == {"preview.inspect"}
-    assert tuple(item.model_dump(mode="json") for item in revision.engineering_semantic_facts) == original
-    assert materialize_continuous_gates(revision, ir("No footer")) == ()
+def constraint_route(effects=("PROHIBIT_DEPLOY", "PROHIBIT_PUBLISH"), *,
+                     polarity="NEGATED"):
+    source_id = uuid4()
+    quote = "Do not release this artifact to any outside environment."
+    statement = "No external release is permitted."
+    item = SemanticItem(item_id="c-1", kind=SemanticKind.CONSTRAINT,
+                        statement=statement, subject="external-effects",
+                        provenance=(SemanticProvenance(
+                            origin=SemanticOrigin.HUMAN_EXPLICIT,
+                            source_record_id=source_id, source_text=quote),),
+                        confidence=1.0)
+    clause = SemanticClause(clause_id="cl-1", source_record_id=source_id,
+                            source_text=quote, semantic_item_ids=(item.item_id,),
+                            polarity=polarity, requested_effects=effects)
+    revision = work()
+    revision.constraints = (statement,)
+    revision.source_assessment_id = uuid4()
+    revision.source_record_ids = (source_id,)
+    typed = SimpleNamespace(id=uuid4(), items=(item,), clauses=(clause,),
+                            current_production=ir().current_production)
+    return revision, typed
+
+
+def test_prohibitions_bind_typed_constraint_without_inventing_fact_identity():
+    revision, typed = constraint_route()
+    bindings = materialize_continuous_gates(revision, typed)
+    assert [(item.fact_id, item.constraint_item_id, item.component)
+            for item in bindings] == [(None, "c-1", "deploy"),
+                                     (None, "c-1", "publish")]
+    assert denied_execution_capabilities(bindings) == frozenset()
+    assert revision.engineering_semantic_facts == ()
     with pytest.raises(ValueError, match="BINDING_DRIFT"):
-        validate_continuous_gates(bindings[:-1], revision,
-                                  ir("Preview", "Deployment or publishing"))
+        validate_continuous_gates(bindings[:-1], revision, typed)
+    revision.constraints = ()
+    with pytest.raises(ValueError, match="SOURCE_MISMATCH"):
+        materialize_continuous_gates(revision, typed)
+    revision.constraints = ("No external release is permitted.",)
+    with pytest.raises(ValueError, match="SOURCE_MISMATCH"):
+        materialize_continuous_gates(revision,
+            SimpleNamespace(**{**vars(typed), "clauses": (
+                typed.clauses[0].model_copy(update={"polarity": "AFFIRMATIVE"}),)}))
+    with pytest.raises(ValueError, match="UNRESOLVED"):
+        materialize_continuous_gates(revision,
+            SimpleNamespace(**{**vars(typed), "clauses": (
+                typed.clauses[0].model_copy(update={
+                    "requested_effects": ("PROHIBIT_UNMAPPED_EFFECT",)}),)}))
 
 
 def test_current_gate_requires_the_persisted_attempt_to_lack_the_capability():
     preview = fact("release.preview_requested", SemanticRelation.EQUALITY,
                    False, "No preview is requested.")
     revision = work(preview)
-    binding = materialize_continuous_gates(revision, ir("Preview"))[0]
+    binding = bind_admitted_fact(
+        reference=semantic_fact_reference(preview, work_revision_id=revision.id),
+        admitted=preview, component="preview", owner=FulfillmentOwner.EXECUTION_GATE,
+        phase=FulfillmentPhase.CONTINUOUS_FROM_ADMISSION,
+        evidence_method="EXACT_PERMISSION_GATE",
+        gate_ref="execution-capability:preview.inspect:denied",
+        source_quote=preview.provenance.source_text,
+        source_revision=revision.source_revision)
+    validate_continuous_gates((binding,), revision,
+                              SimpleNamespace(current_production=()))
+    with pytest.raises(ValueError, match="BINDING_DRIFT"):
+        validate_continuous_gates((binding.model_copy(update={
+            "source_revision": "0" * 40}),), revision,
+            SimpleNamespace(current_production=()))
     attempt = uuid4()
     base = dict(attempt_id=attempt, pwu_id=uuid4(),
         production_context=SimpleNamespace(work_reality_revision_id=revision.id),
@@ -91,6 +139,73 @@ def test_current_gate_requires_the_persisted_attempt_to_lack_the_capability():
             SimpleNamespace(identity="preview.inspect"),)))
     assert evaluate_continuous_gates((check,), (binding,), unsafe,
         source_revision=revision.source_revision)[0]["passed"] is False
+
+
+def test_constraint_route_needs_exact_native_reference_and_no_forbidden_grant():
+    revision, typed = constraint_route()
+    bindings = materialize_continuous_gates(revision, typed)
+    attempt = uuid4()
+    native = SimpleNamespace(attempt_id=attempt, pwu_id=uuid4(),
+        production_context=SimpleNamespace(work_reality_revision_id=revision.id),
+        obligation_references=("ir-constraint:c-1:cl-1",),
+        source_vector=SimpleNamespace(members=(
+            SimpleNamespace(source_commit_oid=revision.source_revision),)),
+        capability_grants=())
+    record = SimpleNamespace(attempt_id=attempt, binding_digest="d" * 64,
+                             binding=native)
+    assert all(check["passed"] for check in evaluate_constraint_routes(
+        bindings, record, source_revision=revision.source_revision,
+        path_scope_passed=True))
+    native.obligation_references = ()
+    assert not any(check["passed"] for check in evaluate_constraint_routes(
+        bindings, record, source_revision=revision.source_revision,
+        path_scope_passed=True))
+    native.obligation_references = ("ir-constraint:c-1:cl-1",)
+    native.capability_grants = (SimpleNamespace(identity="cloud.deploy"),)
+    assert not evaluate_constraint_routes(bindings, record,
+        source_revision=revision.source_revision,
+        path_scope_passed=True)[0]["passed"]
+
+
+def test_delivery_owner_rechecks_current_admitted_prohibition(monkeypatch):
+    from spg.infrastructure.persistence.product_store import ProductStore
+    from spg.infrastructure.persistence.interaction_store import InteractionStore
+
+    revision, typed = constraint_route()
+    @contextmanager
+    def unit_of_work():
+        yield SimpleNamespace(session=object())
+    database = SimpleNamespace(unit_of_work=unit_of_work)
+    monkeypatch.setattr(ProductStore, "current_work_reality_revision",
+                        lambda self, work_id: revision)
+    monkeypatch.setattr(InteractionStore, "assessment",
+                        lambda self, assessment_id: SimpleNamespace(semantic_ir=typed))
+    with pytest.raises(ValueError, match="DELIVERY_PROHIBITED"):
+        assert_delivery_effect_permitted(database, revision.work_id, "deploy")
+    with pytest.raises(ValueError, match="DELIVERY_PROHIBITED"):
+        assert_delivery_effect_permitted(database, revision.work_id, "publish")
+    typed.items = ()
+    typed.clauses = ()
+    assert_delivery_effect_permitted(database, revision.work_id, "deploy") is None
+
+
+def test_delivery_authorization_entrypoints_stop_before_external_effects(monkeypatch):
+    from spg.application.cloud_delivery import CloudDeliveryError, CloudDeliveryService
+    from spg.application.github_delivery import GitHubDeliveryError, GitHubDeliveryService
+    import spg.application.governed_obligations as obligations
+
+    def prohibited(database, work_id, component):
+        raise ValueError("OBLIGATION_DELIVERY_PROHIBITED")
+    monkeypatch.setattr(obligations, "assert_delivery_effect_permitted", prohibited)
+    inert = SimpleNamespace(database=object())
+    with pytest.raises(CloudDeliveryError, match="OBLIGATION_DELIVERY_PROHIBITED"):
+        CloudDeliveryService.authorize(inert, "human:owner", uuid4(), object())
+    with pytest.raises(GitHubDeliveryError) as error:
+        GitHubDeliveryService.authorize(inert, "human:owner", work_id=uuid4(),
+            manifest_id=uuid4(), expected_revision="a" * 40,
+            target_branch="main", expected_remote_revision=None,
+            rationale="Exact release review")
+    assert error.value.code == "OBLIGATION_DELIVERY_PROHIBITED"
 
 
 def test_mixed_acceptance_fact_checks_current_content_and_keeps_seal_pending():

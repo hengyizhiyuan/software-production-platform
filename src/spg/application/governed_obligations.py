@@ -1,19 +1,17 @@
-"""Bound current execution permissions from admitted Work facts and typed IR.
-
-This is an owner adapter, not another semantic authority.  It only creates a
-derived route when an exact Fact, its Human source, the admitted Production
-Intent, and an already implemented permission gate agree.  Other facts remain
-for Verification to materialize or explicitly fail as unresolved.
-"""
+"""Route admitted IR constraints to existing execution and Verification owners."""
 
 from __future__ import annotations
 
 import re
 
-from spg.domain.engineering_semantics import SemanticRelation, semantic_fact_reference
 from spg.domain.governed_obligation import (
-    FulfillmentBinding, FulfillmentOwner, FulfillmentPhase, bind_admitted_fact,
+    FulfillmentBinding, FulfillmentOwner, FulfillmentPhase,
+    FulfillmentSourceKind, canonical_fingerprint,
+    bind_admitted_fact, bind_admitted_constraint,
 )
+from spg.domain.engineering_semantics import semantic_fact_reference
+from spg.domain.intent_realization import SemanticKind
+from spg.domain.semantic_provenance import SemanticOrigin
 
 
 # These are stable effect capabilities enforced by existing owners, not a
@@ -32,69 +30,133 @@ _GATES = {
                 "remote-delivery:human-authorization-required"),
 }
 
+# IRK proposes typed effects; these entries are existing owner capabilities and
+# evidence methods, not prose/Subject aliases. Unknown effects stay unresolved.
+_TYPED_EFFECT_ROUTES = {
+    "PROHIBIT_PREVIEW": ("preview", *_GATES["preview"],
+                         FulfillmentPhase.CONTINUOUS_FROM_ADMISSION,
+                         "EXACT_PERMISSION_GATE", "NEGATED"),
+    "PROHIBIT_DEPLOY": ("deploy", *_GATES["deploy"],
+                        FulfillmentPhase.CONTINUOUS_FROM_ADMISSION,
+                        "EXACT_PERMISSION_GATE", "NEGATED"),
+    "PROHIBIT_PUBLISH": ("publish", *_GATES["publish"],
+                         FulfillmentPhase.CONTINUOUS_FROM_ADMISSION,
+                         "EXACT_PERMISSION_GATE", "NEGATED"),
+    "RESTRICT_CHANGE_SCOPE": ("git-diff-scope", FulfillmentOwner.VERIFICATION,
+                              "code-verification:path-scope",
+                              FulfillmentPhase.CURRENT_VERIFICATION,
+                              "EXACT_GIT_DIFF_SCOPE", "AFFIRMATIVE"),
+    "PROHIBIT_ADDITIONAL_PAGES": ("git-diff-scope", FulfillmentOwner.VERIFICATION,
+                                  "code-verification:path-scope",
+                                  FulfillmentPhase.CURRENT_VERIFICATION,
+                                  "EXACT_GIT_DIFF_SCOPE", "NEGATED"),
+    "PROHIBIT_README_CHANGE": ("git-diff-scope", FulfillmentOwner.VERIFICATION,
+                               "code-verification:path-scope",
+                               FulfillmentPhase.CURRENT_VERIFICATION,
+                               "EXACT_GIT_DIFF_SCOPE", "NEGATED"),
+}
+
 
 def _mentions(value: str, effect: str) -> bool:
     return any(re.search(rf"(?<![a-z]){re.escape(word)}(?![a-z])",
                          value.casefold()) for word in _EFFECT_WORDS[effect])
 
 
-def _negative_fact(fact) -> bool:
-    return (fact.relation is SemanticRelation.EQUALITY and fact.value is False
-            or fact.relation is SemanticRelation.SCOPE
-            and (isinstance(fact.value, str) and fact.value.casefold().startswith("no ")
-                 or any(value is False for value in fact.qualifiers.values())))
-
-
 def materialize_continuous_gates(revision, ir) -> tuple[FulfillmentBinding, ...]:
-    """Bind only prohibitions supported by a typed intent and an actual gate.
-
-    A default ``delivery_authorized=False`` alone never becomes a prohibition;
-    the exact source and an explicit admitted exclusion must also identify the
-    effect.  An unrelated negative content Fact therefore cannot inherit a
-    deployment or preview route.  Unclear expressions remain unresolved.
-    """
+    """Bind admitted typed constraints to existing permission and diff owners."""
     if ir is None or not ir.current_production:
         return ()
-    goals = ir.current_production
+    exact_targets = tuple(dict.fromkeys(
+        arg.value for goal in ir.current_production for arg in goal.target_paths))
+    valid_targets = bool(exact_targets) and all(
+        arg.provenance.origin is SemanticOrigin.HUMAN_EXPLICIT
+        and arg.provenance.source_record_id in revision.source_record_ids
+        for goal in ir.current_production for arg in goal.target_paths)
     bindings: list[FulfillmentBinding] = []
-    for fact in revision.engineering_semantic_facts:
-        if not fact.is_current or not _negative_fact(fact):
+    for item in ir.items:
+        if item.kind is not SemanticKind.CONSTRAINT:
             continue
-        quote = fact.provenance.source_text
-        reference = semantic_fact_reference(fact, work_revision_id=revision.id)
-        for effect, (owner, gate) in _GATES.items():
-            if not _mentions(quote, effect):
-                continue
-            if not all(any(_mentions(exclusion, effect) for exclusion in goal.exclusions)
-                       for goal in goals):
-                continue
-            if effect == "preview" and any(goal.preview_required for goal in goals):
-                continue
-            if effect in {"deploy", "publish"} and any(
-                    goal.delivery_authorized for goal in goals):
-                continue
-            # The component must also be expressed in the admitted Fact, not
-            # merely in its broad source paragraph.
-            if not (_mentions(fact.subject, effect)
-                    or _mentions(str(fact.value), effect)
-                    or any(_mentions(key, effect) and value is False
-                           for key, value in fact.qualifiers.items())):
-                continue
-            bindings.append(bind_admitted_fact(
-                reference=reference, admitted=fact, component=effect,
-                owner=owner, phase=FulfillmentPhase.CONTINUOUS_FROM_ADMISSION,
-                evidence_method="EXACT_PERMISSION_GATE",
-                gate_ref=gate, source_quote=quote,
-                source_revision=revision.source_revision or revision.revision_fingerprint,
-            ))
+        clauses = tuple(clause for clause in ir.clauses
+                        if item.item_id in clause.semantic_item_ids)
+        if not clauses:
+            raise ValueError("OBLIGATION_CONSTRAINT_CLAUSE_MISSING")
+        for clause in clauses:
+            for effect in clause.requested_effects:
+                route = _TYPED_EFFECT_ROUTES.get(effect)
+                if route is None:
+                    if effect.startswith(("PROHIBIT_", "RESTRICT_")):
+                        raise ValueError("OBLIGATION_EFFECT_ROUTE_UNRESOLVED")
+                    continue
+                component, owner, gate, phase, method, polarity = route
+                if method == "EXACT_GIT_DIFF_SCOPE" and not valid_targets:
+                    raise ValueError("OBLIGATION_SCOPE_TARGET_UNRESOLVED")
+                if (component == "preview" and any(goal.preview_required
+                        for goal in ir.current_production)) or (
+                        component in {"deploy", "publish"} and any(
+                            goal.delivery_authorized for goal in ir.current_production)):
+                    raise ValueError("OBLIGATION_EFFECT_AUTHORITY_CONFLICT")
+                bindings.append(bind_admitted_constraint(
+                    revision=revision, ir=ir, item=item, clause=clause,
+                    component=component, owner=owner, phase=phase,
+                    evidence_method=method, gate_ref=gate,
+                    expected_polarity=polarity,
+                    target_paths=(exact_targets if method == "EXACT_GIT_DIFF_SCOPE"
+                                  else ())))
     return tuple(bindings)
 
 
 def validate_continuous_gates(bindings, revision, ir) -> None:
     """Reject stale or injected routes before dispatch and Verification."""
     expected = materialize_continuous_gates(revision, ir)
-    if tuple(bindings) != expected:
+    constraints = tuple(item for item in bindings
+                        if item.source_kind is FulfillmentSourceKind.IR_CONSTRAINT)
+    if constraints != expected:
         raise ValueError("OBLIGATION_GATE_BINDING_DRIFT")
+    # Existing sealed Fact bindings remain readable and enforceable. New
+    # bindings are constructed from typed IR; no prose rematching is allowed.
+    for item in bindings:
+        if item.source_kind is not FulfillmentSourceKind.FACT:
+            continue
+        fact = next((fact for fact in revision.engineering_semantic_facts
+                     if fact.id == item.fact_id and fact.is_current), None)
+        if (fact is None or item.work_reality_revision_id != revision.id
+                or item.fact_fingerprint != canonical_fingerprint(
+                    semantic_fact_reference(fact,
+                        work_revision_id=revision.id).model_dump(mode="json"))
+                or item.provenance_fingerprint != canonical_fingerprint(
+                    fact.provenance.model_dump(mode="json"))
+                or item.source_record_ids != fact.provenance.source_record_ids
+                or item.source_quote not in fact.provenance.source_text
+                or item.source_revision != (
+                    revision.source_revision or revision.revision_fingerprint)
+                or item.component not in _GATES
+                or (item.owner, item.gate_ref) != _GATES[item.component]):
+            raise ValueError("OBLIGATION_GATE_BINDING_DRIFT")
+
+
+def assert_delivery_effect_permitted(database, work_id, component: str) -> None:
+    """Recheck current Work truth before a Human gate creates an external effect."""
+    if component not in {"deploy", "publish"}:
+        raise ValueError("OBLIGATION_DELIVERY_COMPONENT_UNSUPPORTED")
+    from spg.infrastructure.persistence.product_store import ProductStore
+    from spg.infrastructure.persistence.interaction_store import InteractionStore
+
+    with database.unit_of_work() as uow:
+        revision = ProductStore(uow.session).current_work_reality_revision(work_id)
+        if revision is None or revision.source_assessment_id is None:
+            return
+        assessment = InteractionStore(uow.session).assessment(
+            revision.source_assessment_id)
+        if assessment is None:
+            raise ValueError("OBLIGATION_DELIVERY_SOURCE_UNAVAILABLE")
+        if assessment.semantic_ir is None:
+            # Pre-IRK historical Work remains under the existing Human gates.
+            return
+        bindings = materialize_continuous_gates(revision, assessment.semantic_ir)
+        if any(item.component == component and
+               item.phase is FulfillmentPhase.CONTINUOUS_FROM_ADMISSION
+               for item in bindings):
+            raise ValueError("OBLIGATION_DELIVERY_PROHIBITED")
 
 
 def denied_execution_capabilities(bindings) -> frozenset[str]:
@@ -102,6 +164,59 @@ def denied_execution_capabilities(bindings) -> frozenset[str]:
                     if item.component == "preview"
                     and item.gate_ref == _GATES["preview"][1]
                     and item.phase is FulfillmentPhase.CONTINUOUS_FROM_ADMISSION)
+
+
+def evaluate_constraint_routes(bindings, native_record, *, source_revision: str,
+                               path_scope_passed: bool,
+                               exact_target_paths: tuple[str, ...] = ()) -> tuple[dict, ...]:
+    """Report one current result per constraint route, without claiming no-effect history."""
+    native = None if native_record is None else native_record.binding
+    context = None if native is None else native.production_context
+    grants = set() if native is None else {item.identity for item in native.capability_grants}
+    results = []
+    for item in bindings:
+        if item.source_kind is not FulfillmentSourceKind.IR_CONSTRAINT:
+            continue
+        exact = bool(native is not None and context is not None
+                     and native_record.attempt_id == native.attempt_id
+                     and context.work_reality_revision_id == item.work_reality_revision_id
+                     and item.source_revision == source_revision
+                     and any(member.source_commit_oid == source_revision
+                             for member in native.source_vector.members)
+                     and f"ir-constraint:{item.constraint_item_id}:{item.constraint_clause_id}"
+                     in native.obligation_references)
+        if item.evidence_method == "EXACT_GIT_DIFF_SCOPE":
+            member = None if native is None else next((member for member in
+                native.source_vector.members if member.source_commit_oid == source_revision), None)
+            passed = (exact and path_scope_passed
+                      and bool(item.target_paths)
+                      and set(item.target_paths) == set(exact_target_paths)
+                      and member is not None
+                      and set(item.target_paths) == set(member.write_scope)
+                      and set(item.target_paths).isdisjoint(member.forbidden_paths))
+        else:
+            forbidden = ({"preview.inspect"} if item.component == "preview" else
+                         {"cloud.deploy", "cloud.delivery"} if item.component == "deploy" else
+                         {"remote.publish", "remote.delivery", "github.publish"})
+            passed = exact and grants.isdisjoint(forbidden)
+        results.append({
+            "constraint_item_id": item.constraint_item_id,
+            "constraint_clause_id": item.constraint_clause_id,
+            "component": item.component, "passed": passed,
+            "disposition": ("VERIFIED_CURRENT" if passed and
+                            item.phase is FulfillmentPhase.CURRENT_VERIFICATION else
+                            "GATED_CONTINUOUS" if passed else "UNVERIFIABLE_CURRENT"),
+            "reason": ("EXACT_OWNER_EVIDENCE" if passed else
+                       "CONSTRAINT_OWNER_EVIDENCE_MISSING"),
+            "fulfillment_bindings": [item.model_dump(mode="json")],
+            "gate_evidence": {
+                "attempt_id": None if native is None else str(native.attempt_id),
+                "native_binding_digest": None if native_record is None else native_record.binding_digest,
+                "source_revision": source_revision,
+                "meaning": "current attempt and scoped verification only",
+            },
+        })
+    return tuple(results)
 
 
 def evaluate_continuous_gates(checks, bindings, native_record, *, source_revision: str):

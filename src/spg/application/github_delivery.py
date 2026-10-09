@@ -260,6 +260,12 @@ class GitHubDeliveryService:
     def authorize(self, actor_id: str, *, work_id: UUID, manifest_id: UUID,
         expected_revision: str, target_branch: str,
         expected_remote_revision: str | None, rationale: str) -> dict:
+        from spg.application.governed_obligations import assert_delivery_effect_permitted
+        try:
+            assert_delivery_effect_permitted(self.database, work_id, "publish")
+        except ValueError as error:
+            raise GitHubDeliveryError(str(error),
+                "Current admitted Work prohibits this delivery effect") from error
         if actor_id != "human:owner":
             raise GitHubDeliveryError("ACCESS_DENIED", "Human owner authority is required")
         if (not re.fullmatch(r"[0-9a-f]{40,64}", expected_revision)
@@ -335,6 +341,12 @@ class GitHubDeliveryService:
             raise GitHubDeliveryError("ACCESS_DENIED", "Remote delivery belongs to another actor")
         if receipt is not None:
             return self._receipt(receipt)
+        from spg.application.governed_obligations import assert_delivery_effect_permitted
+        try:
+            assert_delivery_effect_permitted(self.database, authorization["work_id"], "publish")
+        except ValueError as error:
+            raise GitHubDeliveryError(str(error),
+                "Current admitted Work prohibits this delivery effect") from error
         self._accepted_manifest(authorization["work_id"], authorization["manifest_id"],
             authorization["expected_revision"])
         owner, repo, url = github_repository(authorization["repository_url"])

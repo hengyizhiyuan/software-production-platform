@@ -375,6 +375,11 @@ class CloudDeliveryService:
 
     def authorize(self, actor: str, work_id: UUID,
                   request: CloudDeliveryAuthorizationRequest) -> dict:
+        from spg.application.governed_obligations import assert_delivery_effect_permitted
+        try:
+            assert_delivery_effect_permitted(self.database, work_id, "deploy")
+        except ValueError as error:
+            raise CloudDeliveryError(str(error)) from error
         # Expiry means recheck the same one-time grant, never send the Human
         # back to RAM for an instance-specific policy.
         with self.database.unit_of_work() as uow:
@@ -554,6 +559,11 @@ class CloudDeliveryService:
         if row is None:
             raise CloudDeliveryError("AUTHORIZATION_NOT_FOUND")
         authorization = CloudDeliveryAuthorization.model_validate(row)
+        from spg.application.governed_obligations import assert_delivery_effect_permitted
+        try:
+            assert_delivery_effect_permitted(self.database, authorization.work_id, "deploy")
+        except ValueError as error:
+            raise CloudDeliveryError(str(error)) from error
         if authorization.host_recipe_version != commands.HOST_RECIPE_VERSION or \
                 authorization.host_recipe_fingerprint != commands.HOST_RECIPE_FINGERPRINT:
             raise CloudDeliveryError("HOST_RECIPE_AUTHORIZATION_STALE")
