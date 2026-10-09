@@ -1,0 +1,24 @@
+{
+  "started_at_utc": "2026-10-09T16:02:48.256457Z",
+  "ended_at_utc": "2026-10-09T16:02:56.073809Z",
+  "actual_image": "sha256:4d3c64b1e3543a3574cd69b435d6f703fad6edc23b9db7d54d799dc1a652bf6e",
+  "container_id": "6a62fec8c1abf382e65ad2050eb08024442c35bac3d8fd57ffb5d2e092c98b78",
+  "source_overlay": false,
+  "test_overlay": true,
+  "test_sha256": "7b9d70d7a57775f78317b64e8fd74be49423677e2ada570fd5e3a6c3a94e7b68",
+  "exit_code": 1,
+  "model_calls": 0,
+  "network_mode": "none",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "junit_family=legacy",
+    "tests/test_c3_fulfillment_capacity_representation.py::test_expanded_observation_capacity_stop_returns_unresolved_and_replays_without_calls",
+    "--tb=short",
+    "--junitxml=/c3-evidence/pytest.xml"
+  ]
+}

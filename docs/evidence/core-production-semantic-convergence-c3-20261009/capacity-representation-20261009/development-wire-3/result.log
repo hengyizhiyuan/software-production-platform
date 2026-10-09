@@ -1,0 +1,13 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /c3-development
+plugins: anyio-4.14.2
+collected 75 items
+
+tests/test_c3_fulfillment_capacity_representation.py ................... [ 25%]
+..........................                                               [ 60%]
+tests/test_fulfillment_projection.py .....................               [ 88%]
+tests/test_c3_fulfillment_provider_failures.py .........                 [100%]
+
+----------------- generated xml file: /c3-evidence/result.xml ------------------
+============================== 75 passed in 6.28s ==============================

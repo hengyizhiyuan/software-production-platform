@@ -1,0 +1,27 @@
+{
+  "result": "SETUP_ERROR",
+  "counts": {
+    "tests": 4,
+    "failures": 0,
+    "errors": 4,
+    "skipped": 0,
+    "passed": 0
+  },
+  "actual_image_id": "sha256:7a4ac00e3599bda2dbcebe46b15dd0b45f3be86552021023ebd288eb732f7b35",
+  "actual_container_id": "74f26025cdda1be78724c8c5c0607049d141a44737fd976a2524829c3593c528",
+  "actual_postgres_image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+  "actual_postgres_container_id": "5b43ab5393f759ef2db47dc6cb183b8bba89cfb07855e4c4a4e6caa82f94547d",
+  "started_at_utc": "2026-10-09T16:28:49.884783525Z",
+  "ended_at_utc": "2026-10-09T16:29:01.407431881Z",
+  "timing_source": "ACTUAL_DOCKER_FACT",
+  "controller_wall_seconds": "UNKNOWN",
+  "database_name": "spg_c3_capacity_fixture",
+  "required_fixture_database_name": "c1_contract_continuity",
+  "migration_head": "UNKNOWN_NOT_CREATED",
+  "exit_code": 1,
+  "cause": "Existing fixture rejected the newly generated database name before schema setup",
+  "controller_sha256": "ef24e684563b06ff538fecdde39134184600018360ace7eb11c396a581bfedd5",
+  "actual_model_calls": 0,
+  "original_database_access": false,
+  "source_overlay": false
+}

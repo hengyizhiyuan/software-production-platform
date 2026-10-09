@@ -1,0 +1,57 @@
+{
+  "schema": "c3-exact-image-build-v1",
+  "started_at_utc": "2026-10-09T16:27:26.138756+00:00",
+  "ended_at_utc": "2026-10-09T16:27:49.351610+00:00",
+  "wall_seconds": 23.212923204002436,
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+      "tree": "d479d61f5fcac075a5af3a274f60cbe3f6e9f53f"
+    },
+    "guardian": {
+      "revision": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+      "tree": "4f75d9137bebc7bf956fe4466cbae93f88c5c03b"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "command": [
+    "docker",
+    "build",
+    "--network=none",
+    "--build-arg",
+    "BASE_IMAGE=watt-c3-continuation-dependency-base:6c1f48e-20261009",
+    "--build-arg",
+    "WATT_REVISION=e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+    "--build-arg",
+    "WATT_TREE=d479d61f5fcac075a5af3a274f60cbe3f6e9f53f",
+    "--build-arg",
+    "GUARDIAN_REVISION=d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+    "--build-arg",
+    "GUARDIAN_TREE=4f75d9137bebc7bf956fe4466cbae93f88c5c03b",
+    "--build-arg",
+    "ECF_REVISION=5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "--build-arg",
+    "ECF_TREE=878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "-f",
+    "/data/watt/c3-semantic-convergence-20261009/capacity-representation-20261009/final-image/context/watt/docs/evidence/core-production-semantic-convergence-c3-20261009/Dockerfile.c3",
+    "-t",
+    "watt-c3-capacity:e0df819",
+    "/data/watt/c3-semantic-convergence-20261009/capacity-representation-20261009/final-image/context"
+  ],
+  "source_overlay": false,
+  "real_model_calls": 0,
+  "scope": "Bounded C3 fulfillment wire capacity and unchanged semantic/evidence gates; no model requests, real G0 or Holdout",
+  "image": {
+    "Id": "sha256:7a4ac00e3599bda2dbcebe46b15dd0b45f3be86552021023ebd288eb732f7b35",
+    "RepoDigests": [],
+    "Created": "2026-10-10T00:27:40.103892185+08:00"
+  }
+}

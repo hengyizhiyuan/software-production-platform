@@ -1,0 +1,10 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_expanded_observation_capacity_stop_returns_unresolved_and_replays_without_calls _
+tests/test_c3_fulfillment_capacity_representation.py:67: in test_expanded_observation_capacity_stop_returns_unresolved_and_replays_without_calls
+    assert first_error is None, f"Capacity stop escaped instead of returning UNRESOLVED: {first_error}"
+E   AssertionError: Capacity stop escaped instead of returning UNRESOLVED: OBLIGATION_FORMATION_PENDING_OR_TERMINAL
+E   assert 'OBLIGATION_FORMATION_PENDING_OR_TERMINAL' is None
+=========================== short test summary info ============================
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_expanded_observation_capacity_stop_returns_unresolved_and_replays_without_calls
+1 failed in 3.64s

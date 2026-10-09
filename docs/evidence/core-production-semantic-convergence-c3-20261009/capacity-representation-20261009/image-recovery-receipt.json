@@ -1,0 +1,33 @@
+{
+  "source": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+  "sources": {
+    "watt": {
+      "revision": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+      "tree": "d479d61f5fcac075a5af3a274f60cbe3f6e9f53f"
+    },
+    "guardian": {
+      "revision": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+      "tree": "4f75d9137bebc7bf956fe4466cbae93f88c5c03b"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:7a4ac00e3599bda2dbcebe46b15dd0b45f3be86552021023ebd288eb732f7b35",
+  "path": "/data/watt/c3-semantic-convergence-20261009/capacity-representation-20261009/image-recovery/exact-image.tar.gz",
+  "sha256": "35576c81785997c4ff1e6d347671bdf283b0f38323875e3218affffbca8f4949",
+  "bytes": 293129132,
+  "mode": "0600",
+  "started_at_utc": "2026-10-09T16:33:26.565574Z",
+  "ended_at_utc": "2026-10-09T16:36:23.006326Z",
+  "wall_seconds": 176.44074858399108,
+  "restore_test": "NOT_PERFORMED",
+  "offsite_copy": "NOT_PERFORMED",
+  "production_resource_mutation": false,
+  "controller_sha256": "768adb3ae5f18115651659491a5b45c59c50dc878bb0c5055f88c41b28f867af"
+}

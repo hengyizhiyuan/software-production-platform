@@ -1,0 +1,71 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /c3-development
+plugins: anyio-4.14.2
+collected 187 items
+
+tests/test_c3_fulfillment_capacity_representation.py FFF................ [ 10%]
+.............FF...FF..                                                   [ 21%]
+tests/test_fulfillment_projection.py .....................               [ 33%]
+tests/test_c3_fulfillment_components.py ..............                   [ 40%]
+tests/test_c3_admitted_source_facets.py ............................     [ 55%]
+tests/test_c3_fulfillment_provider_failures.py .........                 [ 60%]
+tests/test_c3_fulfillment_admission_stop.py ....                         [ 62%]
+tests/test_c3_provider_http_metadata.py ............                     [ 68%]
+tests/test_model_runtime.py ....                                         [ 71%]
+tests/test_guardian_assurance_adapter.py ................                [ 79%]
+tests/test_c3_evidence_projection.py ...............................     [ 96%]
+tests/test_governed_obligation_fulfillment.py .......                    [100%]
+
+=================================== FAILURES ===================================
+_ test_compact_representation_preserves_complete_inventory_and_existing_owners[small] _
+tests/test_c3_fulfillment_capacity_representation.py:190: in test_compact_representation_preserves_complete_inventory_and_existing_owners
+    assert all(binding.state != "UNRESOLVED" for binding in result)
+E   assert False
+E    +  where False = all(<generator object test_compact_representation_preserves_complete_inventory_and_existing_owners.<locals>.<genexpr> at 0x7fcb7bf09490>)
+_ test_compact_representation_preserves_complete_inventory_and_existing_owners[medium] _
+tests/test_c3_fulfillment_capacity_representation.py:190: in test_compact_representation_preserves_complete_inventory_and_existing_owners
+    assert all(binding.state != "UNRESOLVED" for binding in result)
+E   assert False
+E    +  where False = all(<generator object test_compact_representation_preserves_complete_inventory_and_existing_owners.<locals>.<genexpr> at 0x7fcb7bff5150>)
+_ test_compact_representation_preserves_complete_inventory_and_existing_owners[complex] _
+tests/test_c3_fulfillment_capacity_representation.py:190: in test_compact_representation_preserves_complete_inventory_and_existing_owners
+    assert all(binding.state != "UNRESOLVED" for binding in result)
+E   assert False
+E    +  where False = all(<generator object test_compact_representation_preserves_complete_inventory_and_existing_owners.<locals>.<genexpr> at 0x7fcb7c080110>)
+_ test_compact_nonoverlapping_current_and_future_components_keep_their_original_contributions _
+tests/test_c3_fulfillment_capacity_representation.py:330: in test_compact_nonoverlapping_current_and_future_components_keep_their_original_contributions
+    assert len(calls) == 2 and len(mixed) == 2
+E   AssertionError: assert (2 == 2 and 1 == 2)
+E    +  where 2 = len([{'immutable_inventory': {'work_id': '4c02c2ac-0974-4216-adc2-2731f9a2d060', 'work_reality_revision_id': 'a6feb85b-ac7...02195f1abb92ad1', 'wire_schema_fingerprint': 'b9debbdfcd2cfcf64766286feecab856ebc211df2e4613a85c1e5143fe011ec3', ...}}])
+E    +  and   1 = len([FulfillmentBinding(fact_id=UUID('b6972222-dee8-4d3a-9b9b-cc5415ffad65'), source_kind=<FulfillmentSourceKind.FACT: 'FA...rk_constraint_indices=(), supporting_source_refs=(), formation_receipt=None, component_basis=None, state='UNRESOLVED')])
+_ test_compact_explicit_unique_quote_uses_existing_offset_repair_without_semantic_rewrite _
+tests/test_c3_fulfillment_capacity_representation.py:347: in test_compact_explicit_unique_quote_uses_existing_offset_repair_without_semantic_rewrite
+    validate_projection_candidate(located, revision, ir, inventory,
+src/spg/application/governed_obligations.py:980: in validate_projection_candidate
+    return tuple(_projection_binding(revision, ir, inventory, route,
+src/spg/application/governed_obligations.py:980: in <genexpr>
+    return tuple(_projection_binding(revision, ir, inventory, route,
+src/spg/application/governed_obligations.py:785: in _projection_binding
+    raise ValueError("OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED")
+E   ValueError: OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED
+_ test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget[false-review] _
+tests/test_c3_fulfillment_capacity_representation.py:432: in test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget
+    assert len(calls) == 4
+E   AssertionError: assert 2 == 4
+E    +  where 2 = len([{'immutable_inventory': {'work_id': '44b3aba4-cff8-41e2-b836-e8d1ef6f04c5', 'work_reality_revision_id': '7e1b6edf-fbb...d72a74f71134243', 'wire_schema_fingerprint': 'b9debbdfcd2cfcf64766286feecab856ebc211df2e4613a85c1e5143fe011ec3', ...}}])
+_ test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget[stale-review] _
+tests/test_c3_fulfillment_capacity_representation.py:432: in test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget
+    assert len(calls) == 4
+E   AssertionError: assert 2 == 4
+E    +  where 2 = len([{'immutable_inventory': {'work_id': 'da96b262-f966-4803-950c-a6a9a4d553a1', 'work_reality_revision_id': 'da821f98-5a7...afc08b7c1d4b891', 'wire_schema_fingerprint': 'b9debbdfcd2cfcf64766286feecab856ebc211df2e4613a85c1e5143fe011ec3', ...}}])
+----------------- generated xml file: /c3-evidence/result.xml ------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[small]
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[medium]
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[complex]
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_nonoverlapping_current_and_future_components_keep_their_original_contributions
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_explicit_unique_quote_uses_existing_offset_repair_without_semantic_rewrite
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget[false-review]
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget[stale-review]
+======================== 7 failed, 180 passed in 8.48s =========================

@@ -1,0 +1,24 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /c3-development
+plugins: anyio-4.14.2
+collected 44 items
+
+tests/test_c3_fulfillment_capacity_representation.py ................... [ 43%]
+......................FF.                                                [100%]
+
+=================================== FAILURES ===================================
+_ test_actual_provider_observation_never_retains_decodable_unicode_escaped_synthetic_secret _
+tests/test_c3_fulfillment_capacity_representation.py:489: in test_actual_provider_observation_never_retains_decodable_unicode_escaped_synthetic_secret
+    assert observed["candidate_retained"] is False
+E   assert True is False
+_ test_complete_pending_wire_metadata_cannot_replay_a_fully_unmarked_observation _
+tests/test_c3_fulfillment_capacity_representation.py:508: in test_complete_pending_wire_metadata_cannot_replay_a_fully_unmarked_observation
+    assert all(binding.state == "UNRESOLVED" for binding in result)
+E   assert False
+E    +  where False = all(<generator object test_complete_pending_wire_metadata_cannot_replay_a_fully_unmarked_observation.<locals>.<genexpr> at 0x7fbcf3876c20>)
+----------------- generated xml file: /c3-evidence/result.xml ------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_actual_provider_observation_never_retains_decodable_unicode_escaped_synthetic_secret
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_complete_pending_wire_metadata_cannot_replay_a_fully_unmarked_observation
+========================= 2 failed, 42 passed in 5.88s =========================

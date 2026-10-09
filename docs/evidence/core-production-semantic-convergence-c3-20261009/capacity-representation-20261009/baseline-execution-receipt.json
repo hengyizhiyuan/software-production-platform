@@ -1,0 +1,48 @@
+{
+  "started_at_utc": "2026-10-09T16:01:08.414097Z",
+  "ended_at_utc": "2026-10-09T16:01:14.049380Z",
+  "application_source": "e8e04b296b31d776a13dda728fa19469681cbaab",
+  "actual_image_id": "sha256:4d3c64b1e3543a3574cd69b435d6f703fad6edc23b9db7d54d799dc1a652bf6e",
+  "container_id": "51322ad97a301392170478a4fd65ce1388fec934217d58ef94125418116c4634",
+  "network_mode": "none",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/tmp/measure_capacity.py",
+      "Destination": "/measure.py",
+      "Mode": "ro",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json",
+      "Destination": "/basis.json",
+      "Mode": "ro",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/continuation-20261010/historical-provider-diagnostic-1/evidence/provider-diagnostic.json",
+      "Destination": "/diagnostic.json",
+      "Mode": "ro",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/capacity-representation-20261009/baseline-measurement-1/evidence",
+      "Destination": "/c3-evidence",
+      "Mode": "rw",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "exit_code": 0,
+  "model_requests": 0,
+  "http_requests_sent": 0,
+  "credential_inputs": 0,
+  "controller_sha256": "e3b060341826a8fcd944bcf707c5baeaec5e0c0d10cbd04193f4f73f8b6abd00",
+  "measurement_sha256": "c87fe121a10c338ceac3310b7b694988140253642000af7bdffabbe5ff1d918d"
+}

@@ -1,0 +1,9 @@
+....                                                                     [100%]
+=============================== warnings summary ===============================
+tests/integration/test_c3_fulfillment_receipts.py::test_actual_compact_observation_replays_from_postgresql_without_repeating_formation[work]
+tests/integration/test_c3_fulfillment_receipts.py::test_actual_compact_observation_replays_from_postgresql_without_repeating_formation[steering]
+  tests/integration/test_c3_fulfillment_receipts.py:60: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("route", ("work", "steering"))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+4 passed, 2 warnings in 16.22s

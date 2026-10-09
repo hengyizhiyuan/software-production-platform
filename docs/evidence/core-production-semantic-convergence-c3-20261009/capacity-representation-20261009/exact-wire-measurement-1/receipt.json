@@ -1,0 +1,33 @@
+{
+  "source_revision": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+  "sources": {
+    "watt": {
+      "revision": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+      "tree": "d479d61f5fcac075a5af3a274f60cbe3f6e9f53f"
+    },
+    "guardian": {
+      "revision": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+      "tree": "4f75d9137bebc7bf956fe4466cbae93f88c5c03b"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "expected_provider_sha256": "6c4daac28120f08a114a6dce79bedd7a3705b16437ff643f0f0a20ad51853df7",
+  "actual_image_id": "sha256:7a4ac00e3599bda2dbcebe46b15dd0b45f3be86552021023ebd288eb732f7b35",
+  "container_id": "e0781164d44aeab3a9a679cac20e3c7afa4435146a588e78e0e094fe9930aa0d",
+  "network_mode": "none",
+  "source_overlay": false,
+  "started_at_utc": "2026-10-09T16:28:42.928819Z",
+  "ended_at_utc": "2026-10-09T16:28:50.293303Z",
+  "model_calls": 0,
+  "http_requests_sent": 0,
+  "credentials_loaded": false,
+  "exit_code": 0,
+  "controller_sha256": "29b733e28b68c5fca2e8cd121d4be08cb9f18bd322a83a17e020f4656a5c7944"
+}
