@@ -1,0 +1,2600 @@
+{
+  "schema": "c3-semantic-contract-calibration-offline-v1",
+  "started_at_utc": "2026-10-09T17:35:44.525010+00:00",
+  "application_source": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+  "qualified_import_file_counts": {
+    "spg": 278,
+    "guardian": 5,
+    "ecf": 5
+  },
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "basis_sha256": "9b013274f1a6daafc776297a302c52c8247cd2fd5ec9c5b99a83279fd2ee8e2c",
+  "candidate_file_sha256": "e9020a908ba354c2e12ab4db297b32b7d17041fd12e4180a740f39d9fb42c9b5",
+  "candidate_fingerprint": "98e38e96d66751327a6eb44519cf980db471aae99664b324c3e36a043a049444",
+  "component_fingerprint": "74d621203266a170e163f420e9899ac989cd611d1c80c0d2a30af594ca74ff94",
+  "original_route_count": 57,
+  "catalog": [
+    {
+      "source_ordinal": 0,
+      "kind": "FACT",
+      "source_ref": "semantic-fact:db105ff8-4eb8-5d2d-b46a-a67ae008766d",
+      "source_text_sha256": "a24b1d48dd8fae804d8b7bf4e25740bf79c8716ebefc7201050f42b27e1296db",
+      "source_text_chars": 48,
+      "route_indices": [
+        0
+      ],
+      "capabilities": [
+        "ARTIFACT_CONTENT"
+      ],
+      "conflicting_source_disposition": false,
+      "fact": {
+        "subject": "page.content.h1.text",
+        "relation": "EQUALITY",
+        "scope": "index.html",
+        "unit": null,
+        "reference_role": null,
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "value_sha256": "d52f537c2068cd6c92e2da4c5d6855a9c58bef9763010829b2bc82ef92867799",
+        "value_type": "str",
+        "qualifier_keys": [
+          "cardinality"
+        ],
+        "provenance_origins": [
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT"
+        ],
+        "exact_file_scope_paths": null
+      }
+    },
+    {
+      "source_ordinal": 1,
+      "kind": "FACT",
+      "source_ref": "semantic-fact:a1b3a5fe-dec1-5f72-a806-5f66955bdb58",
+      "source_text_sha256": "5be6714bf14eea3261e40966c1d1a4039f752f3f376e0320166e32266011c8c4",
+      "source_text_chars": 55,
+      "route_indices": [
+        1
+      ],
+      "capabilities": [
+        "ARTIFACT_CONTENT"
+      ],
+      "conflicting_source_disposition": false,
+      "fact": {
+        "subject": "page.content.paragraph.text",
+        "relation": "EQUALITY",
+        "scope": "index.html",
+        "unit": null,
+        "reference_role": null,
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "value_sha256": "617f8812f9fb0eff85d2101ae6c55cb4c939e99cd4fa6596a8c2ec84da7b9e33",
+        "value_type": "str",
+        "qualifier_keys": [
+          "cardinality"
+        ],
+        "provenance_origins": [
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT"
+        ],
+        "exact_file_scope_paths": null
+      }
+    },
+    {
+      "source_ordinal": 2,
+      "kind": "FACT",
+      "source_ref": "semantic-fact:55eeaeb7-4b78-5269-ace0-af79de21770e",
+      "source_text_sha256": "9499d59538a154249d74cf83f71eedb58e1b98a4f88a9f74cd7b92dbe9e117bf",
+      "source_text_chars": 48,
+      "route_indices": [
+        2
+      ],
+      "capabilities": [
+        "ARTIFACT_CONTENT"
+      ],
+      "conflicting_source_disposition": false,
+      "fact": {
+        "subject": "page.count",
+        "relation": "CARDINALITY",
+        "scope": "static web page",
+        "unit": null,
+        "reference_role": null,
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "value_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "value_type": "int",
+        "qualifier_keys": [
+          "file"
+        ],
+        "provenance_origins": [
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT"
+        ],
+        "exact_file_scope_paths": null
+      }
+    },
+    {
+      "source_ordinal": 3,
+      "kind": "FACT",
+      "source_ref": "semantic-fact:ebcfeb68-75c8-5c8e-8a5c-37fbb3d471ba",
+      "source_text_sha256": "34da954957f63d650152a43706d27ed781f8c21b024606451681fadc7a52a81b",
+      "source_text_chars": 26,
+      "route_indices": [
+        3,
+        4
+      ],
+      "capabilities": [
+        "GIT_DIFF_SCOPE",
+        "ARTIFACT_CONTENT"
+      ],
+      "conflicting_source_disposition": false,
+      "fact": {
+        "subject": "change.scope.file",
+        "relation": "SCOPE",
+        "scope": "this request",
+        "unit": null,
+        "reference_role": null,
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "value_sha256": "3a86fe4bf5023ef10a5b20238946c4a045e9edf600be47b97a0ea8ca5e563708",
+        "value_type": "str",
+        "qualifier_keys": [
+          "exclusive"
+        ],
+        "provenance_origins": [
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT"
+        ],
+        "exact_file_scope_paths": null
+      }
+    },
+    {
+      "source_ordinal": 4,
+      "kind": "FACT",
+      "source_ref": "semantic-fact:714a86db-354c-508d-aa51-91a978ca1be3",
+      "source_text_sha256": "f1901b6c4ff6a5096108c39077aea5d20c1d49758d10b1717c4feb54440aab12",
+      "source_text_chars": 54,
+      "route_indices": [
+        5,
+        6,
+        7
+      ],
+      "capabilities": [
+        "DENY_PREVIEW",
+        "DENY_DEPLOY",
+        "DENY_PUBLISH"
+      ],
+      "conflicting_source_disposition": false,
+      "fact": {
+        "subject": "delivery.excluded_actions",
+        "relation": "SCOPE",
+        "scope": "this request",
+        "unit": null,
+        "reference_role": null,
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "value_sha256": "8384f66cf28bda9a5a8458dd8048f4d3b4ea6a89e6f2220b304ed593833a7de4",
+        "value_type": "tuple",
+        "qualifier_keys": [
+          "negated"
+        ],
+        "provenance_origins": [
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT"
+        ],
+        "exact_file_scope_paths": null
+      }
+    },
+    {
+      "source_ordinal": 5,
+      "kind": "FACT",
+      "source_ref": "semantic-fact:d5fb1b5b-bc33-5aef-ad06-78b5599d1fcc",
+      "source_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "source_text_chars": 72,
+      "route_indices": [
+        8,
+        9,
+        10
+      ],
+      "capabilities": [
+        "ARTIFACT_CONTENT",
+        "ARTIFACT_CONTENT",
+        "CANDIDATE_SEAL"
+      ],
+      "conflicting_source_disposition": false,
+      "fact": {
+        "subject": "acceptance.assertions",
+        "relation": "ACCEPTANCE_ASSERTION",
+        "scope": "index.html",
+        "unit": null,
+        "reference_role": null,
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "value_sha256": "c1ca58e9e7d28adbec66e89b48eae4faf82b8d9cb072e67297599a7755529f75",
+        "value_type": "tuple",
+        "qualifier_keys": [],
+        "provenance_origins": [
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT"
+        ],
+        "exact_file_scope_paths": null
+      }
+    },
+    {
+      "source_ordinal": 6,
+      "kind": "IR_CLAUSE",
+      "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c1",
+      "source_text_sha256": "c01616d2fa1687d3f2dbde62f78b2d07c72c8f63034431eb8b263f2cd82e53b1",
+      "source_text_chars": 49,
+      "route_indices": [
+        11,
+        12
+      ],
+      "capabilities": [
+        "RETAIN_CONTEXT",
+        "UNRESOLVED"
+      ],
+      "conflicting_source_disposition": true,
+      "clause": {
+        "clause_id": "c1",
+        "polarity": "AFFIRMATIVE",
+        "modality": "ASSERTION",
+        "temporal_scope": "CURRENT",
+        "speech_act": "DISCUSSION",
+        "requested_effects": []
+      },
+      "item": {
+        "item_id": "work_kind_code_work",
+        "kind": "FACT",
+        "requires_human": false,
+        "provenance_origins": [
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT"
+        ],
+        "production_present": false,
+        "action_present": false,
+        "is_context_only_by_existing_contract": true
+      }
+    },
+    {
+      "source_ordinal": 7,
+      "kind": "IR_CLAUSE",
+      "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+      "source_text_sha256": "9268cc964f6cb6011eb23204032873bdfbfff04e950cfda4f190d57a1cae73aa",
+      "source_text_chars": 91,
+      "route_indices": [
+        13,
+        14,
+        15
+      ],
+      "capabilities": [
+        "ARTIFACT_CONTENT",
+        "GIT_DIFF_SCOPE",
+        "RETAIN_CONTEXT"
+      ],
+      "conflicting_source_disposition": true,
+      "clause": {
+        "clause_id": "c2",
+        "polarity": "AFFIRMATIVE",
+        "modality": "REQUEST",
+        "temporal_scope": "CURRENT",
+        "speech_act": "EXPLICIT_REQUEST",
+        "requested_effects": []
+      },
+      "item": {
+        "item_id": "prod_index_html_n1",
+        "kind": "PRODUCTION_INTENT",
+        "requires_human": false,
+        "provenance_origins": [
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT"
+        ],
+        "production_present": true,
+        "action_present": false,
+        "is_context_only_by_existing_contract": false,
+        "production": {
+          "current": true,
+          "acceptance_required": true,
+          "preview_required": false,
+          "delivery_authorized": false,
+          "scope_count": 4,
+          "exclusion_count": 4
+        }
+      }
+    },
+    {
+      "source_ordinal": 8,
+      "kind": "IR_CLAUSE",
+      "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c3",
+      "source_text_sha256": "763311981a479580e9d52e736ecffbec46cfc41a94a3564badab89c5fa354e60",
+      "source_text_chars": 48,
+      "route_indices": [
+        16,
+        17
+      ],
+      "capabilities": [
+        "RETAIN_CONTEXT",
+        "UNRESOLVED"
+      ],
+      "conflicting_source_disposition": true,
+      "clause": {
+        "clause_id": "c3",
+        "polarity": "AFFIRMATIVE",
+        "modality": "ASSERTION",
+        "temporal_scope": "CURRENT",
+        "speech_act": "DISCUSSION",
+        "requested_effects": []
+      },
+      "item": {
+        "item_id": "work_kind_code_work",
+        "kind": "FACT",
+        "requires_human": false,
+        "provenance_origins": [
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT"
+        ],
+        "production_present": false,
+        "action_present": false,
+        "is_context_only_by_existing_contract": true
+      }
+    },
+    {
+      "source_ordinal": 9,
+      "kind": "IR_CONSTRAINT",
+      "source_ref": "ir-constraint:page_content_spec:c4",
+      "source_text_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+      "source_text_chars": 132,
+      "route_indices": [
+        18,
+        19
+      ],
+      "capabilities": [
+        "ARTIFACT_CONTENT",
+        "RETAIN_CONTEXT"
+      ],
+      "conflicting_source_disposition": true,
+      "clause": {
+        "clause_id": "c4",
+        "polarity": "AFFIRMATIVE",
+        "modality": "REQUEST",
+        "temporal_scope": "CURRENT",
+        "speech_act": "EXPLICIT_REQUEST",
+        "requested_effects": []
+      },
+      "item": {
+        "item_id": "page_content_spec",
+        "kind": "CONSTRAINT",
+        "requires_human": false,
+        "provenance_origins": [
+          "HUMAN_EXPLICIT"
+        ],
+        "production_present": false,
+        "action_present": false,
+        "is_context_only_by_existing_contract": false
+      }
+    },
+    {
+      "source_ordinal": 10,
+      "kind": "IR_CLAUSE",
+      "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4",
+      "source_text_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+      "source_text_chars": 132,
+      "route_indices": [
+        20,
+        21
+      ],
+      "capabilities": [
+        "ARTIFACT_CONTENT",
+        "RETAIN_CONTEXT"
+      ],
+      "conflicting_source_disposition": true,
+      "clause": {
+        "clause_id": "c4",
+        "polarity": "AFFIRMATIVE",
+        "modality": "REQUEST",
+        "temporal_scope": "CURRENT",
+        "speech_act": "EXPLICIT_REQUEST",
+        "requested_effects": []
+      },
+      "item": {
+        "item_id": "prod_index_html_n1",
+        "kind": "PRODUCTION_INTENT",
+        "requires_human": false,
+        "provenance_origins": [
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT"
+        ],
+        "production_present": true,
+        "action_present": false,
+        "is_context_only_by_existing_contract": false,
+        "production": {
+          "current": true,
+          "acceptance_required": true,
+          "preview_required": false,
+          "delivery_authorized": false,
+          "scope_count": 4,
+          "exclusion_count": 4
+        }
+      }
+    },
+    {
+      "source_ordinal": 11,
+      "kind": "IR_CONSTRAINT",
+      "source_ref": "ir-constraint:change_scope_exclusions:c5",
+      "source_text_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+      "source_text_chars": 27,
+      "route_indices": [
+        22,
+        23
+      ],
+      "capabilities": [
+        "GIT_DIFF_SCOPE",
+        "UNRESOLVED"
+      ],
+      "conflicting_source_disposition": true,
+      "clause": {
+        "clause_id": "c5",
+        "polarity": "AFFIRMATIVE",
+        "modality": "REQUEST",
+        "temporal_scope": "CURRENT",
+        "speech_act": "EXPLICIT_REQUEST",
+        "requested_effects": []
+      },
+      "item": {
+        "item_id": "change_scope_exclusions",
+        "kind": "CONSTRAINT",
+        "requires_human": false,
+        "provenance_origins": [
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT"
+        ],
+        "production_present": false,
+        "action_present": false,
+        "is_context_only_by_existing_contract": false
+      }
+    },
+    {
+      "source_ordinal": 12,
+      "kind": "IR_CONSTRAINT",
+      "source_ref": "ir-constraint:verification_and_candidate:c6",
+      "source_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "source_text_chars": 72,
+      "route_indices": [
+        24,
+        25,
+        26
+      ],
+      "capabilities": [
+        "ARTIFACT_CONTENT",
+        "CANDIDATE_SEAL",
+        "UNRESOLVED"
+      ],
+      "conflicting_source_disposition": true,
+      "clause": {
+        "clause_id": "c6",
+        "polarity": "AFFIRMATIVE",
+        "modality": "REQUEST",
+        "temporal_scope": "CURRENT",
+        "speech_act": "EXPLICIT_REQUEST",
+        "requested_effects": []
+      },
+      "item": {
+        "item_id": "verification_and_candidate",
+        "kind": "CONSTRAINT",
+        "requires_human": false,
+        "provenance_origins": [
+          "HUMAN_EXPLICIT"
+        ],
+        "production_present": false,
+        "action_present": false,
+        "is_context_only_by_existing_contract": false
+      }
+    },
+    {
+      "source_ordinal": 13,
+      "kind": "IR_CONSTRAINT",
+      "source_ref": "ir-constraint:change_scope_exclusions:c7",
+      "source_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "source_text_chars": 55,
+      "route_indices": [
+        27,
+        28,
+        29,
+        30
+      ],
+      "capabilities": [
+        "DENY_PREVIEW",
+        "DENY_DEPLOY",
+        "DENY_PUBLISH",
+        "GIT_DIFF_SCOPE"
+      ],
+      "conflicting_source_disposition": false,
+      "clause": {
+        "clause_id": "c7",
+        "polarity": "NEGATED",
+        "modality": "REQUEST",
+        "temporal_scope": "CURRENT",
+        "speech_act": "EXPLICIT_REQUEST",
+        "requested_effects": []
+      },
+      "item": {
+        "item_id": "change_scope_exclusions",
+        "kind": "CONSTRAINT",
+        "requires_human": false,
+        "provenance_origins": [
+          "HUMAN_EXPLICIT",
+          "HUMAN_EXPLICIT"
+        ],
+        "production_present": false,
+        "action_present": false,
+        "is_context_only_by_existing_contract": false
+      }
+    },
+    {
+      "source_ordinal": 14,
+      "kind": "WORK_CONSTRAINT",
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+      "source_text_sha256": "2a93a703143070e96fc0283568638cab2e4f0578ffaeaa6e5f402f1b57bd7a2d",
+      "source_text_chars": 118,
+      "route_indices": [
+        31,
+        32,
+        33,
+        34,
+        35
+      ],
+      "capabilities": [
+        "GIT_DIFF_SCOPE",
+        "DENY_PREVIEW",
+        "DENY_DEPLOY",
+        "DENY_PUBLISH",
+        "UNRESOLVED"
+      ],
+      "conflicting_source_disposition": true,
+      "constraint_index": 0,
+      "exact_clause_text_match_ordinals": [],
+      "exact_item_statement_match_ordinals": [
+        11,
+        13
+      ],
+      "production_scope_match_ordinals": [],
+      "production_exclusion_match_ordinals": []
+    },
+    {
+      "source_ordinal": 15,
+      "kind": "WORK_CONSTRAINT",
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:1",
+      "source_text_sha256": "25cda18c05430072bd03de90f709ccbcd7ed442e13e2a0016eec0fc01376f11e",
+      "source_text_chars": 150,
+      "route_indices": [
+        36,
+        37
+      ],
+      "capabilities": [
+        "ARTIFACT_CONTENT",
+        "RETAIN_CONTEXT"
+      ],
+      "conflicting_source_disposition": true,
+      "constraint_index": 1,
+      "exact_clause_text_match_ordinals": [],
+      "exact_item_statement_match_ordinals": [
+        9
+      ],
+      "production_scope_match_ordinals": [],
+      "production_exclusion_match_ordinals": []
+    },
+    {
+      "source_ordinal": 16,
+      "kind": "WORK_CONSTRAINT",
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:2",
+      "source_text_sha256": "0208047eed9c2a50373c9b2a7385f09db576d3fe9b004857318afb27d987b2d6",
+      "source_text_chars": 105,
+      "route_indices": [
+        38,
+        39,
+        40
+      ],
+      "capabilities": [
+        "ARTIFACT_CONTENT",
+        "CANDIDATE_SEAL",
+        "UNRESOLVED"
+      ],
+      "conflicting_source_disposition": true,
+      "constraint_index": 2,
+      "exact_clause_text_match_ordinals": [],
+      "exact_item_statement_match_ordinals": [
+        12
+      ],
+      "production_scope_match_ordinals": [],
+      "production_exclusion_match_ordinals": []
+    },
+    {
+      "source_ordinal": 17,
+      "kind": "WORK_CONSTRAINT",
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:3",
+      "source_text_sha256": "4c8f9cc2526ec0774a0c506e438015f2b5497a6dddd8555a8c190799817249fc",
+      "source_text_chars": 36,
+      "route_indices": [
+        41,
+        42
+      ],
+      "capabilities": [
+        "ARTIFACT_CONTENT",
+        "GIT_DIFF_SCOPE"
+      ],
+      "conflicting_source_disposition": false,
+      "constraint_index": 3,
+      "exact_clause_text_match_ordinals": [],
+      "exact_item_statement_match_ordinals": [],
+      "production_scope_match_ordinals": [
+        7,
+        10
+      ],
+      "production_exclusion_match_ordinals": []
+    },
+    {
+      "source_ordinal": 18,
+      "kind": "WORK_CONSTRAINT",
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:4",
+      "source_text_sha256": "3dd9700096bcb0a76177c2c46dafbaec7d6488e34affa439ed83c3cef45690d8",
+      "source_text_chars": 55,
+      "route_indices": [
+        43,
+        44
+      ],
+      "capabilities": [
+        "ARTIFACT_CONTENT",
+        "RETAIN_CONTEXT"
+      ],
+      "conflicting_source_disposition": true,
+      "constraint_index": 4,
+      "exact_clause_text_match_ordinals": [],
+      "exact_item_statement_match_ordinals": [],
+      "production_scope_match_ordinals": [
+        7,
+        10
+      ],
+      "production_exclusion_match_ordinals": []
+    },
+    {
+      "source_ordinal": 19,
+      "kind": "WORK_CONSTRAINT",
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:5",
+      "source_text_sha256": "64a9ece99667f4965fb3e20c787256f7fa050a6f769496e7519389f03eedfb0d",
+      "source_text_chars": 52,
+      "route_indices": [
+        45,
+        46
+      ],
+      "capabilities": [
+        "ARTIFACT_CONTENT",
+        "UNRESOLVED"
+      ],
+      "conflicting_source_disposition": true,
+      "constraint_index": 5,
+      "exact_clause_text_match_ordinals": [],
+      "exact_item_statement_match_ordinals": [],
+      "production_scope_match_ordinals": [
+        7,
+        10
+      ],
+      "production_exclusion_match_ordinals": []
+    },
+    {
+      "source_ordinal": 20,
+      "kind": "WORK_CONSTRAINT",
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:6",
+      "source_text_sha256": "68850b39fce33f0f7eae04aa6915746e229d512ac008b9ca47422aeb27a00d3a",
+      "source_text_chars": 28,
+      "route_indices": [
+        47,
+        48
+      ],
+      "capabilities": [
+        "CANDIDATE_SEAL",
+        "UNRESOLVED"
+      ],
+      "conflicting_source_disposition": true,
+      "constraint_index": 6,
+      "exact_clause_text_match_ordinals": [],
+      "exact_item_statement_match_ordinals": [],
+      "production_scope_match_ordinals": [
+        7,
+        10
+      ],
+      "production_exclusion_match_ordinals": []
+    },
+    {
+      "source_ordinal": 21,
+      "kind": "WORK_CONSTRAINT",
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:7",
+      "source_text_sha256": "8942f115f1bc6bf65051d307ede98fb645a4837849ed2259d1d3a9fc71a01727",
+      "source_text_chars": 31,
+      "route_indices": [
+        49
+      ],
+      "capabilities": [
+        "DENY_DEPLOY"
+      ],
+      "conflicting_source_disposition": false,
+      "constraint_index": 7,
+      "exact_clause_text_match_ordinals": [],
+      "exact_item_statement_match_ordinals": [],
+      "production_scope_match_ordinals": [],
+      "production_exclusion_match_ordinals": [
+        7,
+        10
+      ]
+    },
+    {
+      "source_ordinal": 22,
+      "kind": "WORK_CONSTRAINT",
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:8",
+      "source_text_sha256": "6208a9265a8563fbb4f6c90881e8d28bd17e6e7b35eb119d05e019163428e3cc",
+      "source_text_chars": 32,
+      "route_indices": [
+        50
+      ],
+      "capabilities": [
+        "DENY_PUBLISH"
+      ],
+      "conflicting_source_disposition": false,
+      "constraint_index": 8,
+      "exact_clause_text_match_ordinals": [],
+      "exact_item_statement_match_ordinals": [],
+      "production_scope_match_ordinals": [],
+      "production_exclusion_match_ordinals": [
+        7,
+        10
+      ]
+    },
+    {
+      "source_ordinal": 23,
+      "kind": "WORK_CONSTRAINT",
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:9",
+      "source_text_sha256": "78ed9b5b222638c5c378aa2d4c06f663d97316d1ba9c2724329e09c976d26097",
+      "source_text_chars": 34,
+      "route_indices": [
+        51,
+        52
+      ],
+      "capabilities": [
+        "GIT_DIFF_SCOPE",
+        "UNRESOLVED"
+      ],
+      "conflicting_source_disposition": true,
+      "constraint_index": 9,
+      "exact_clause_text_match_ordinals": [],
+      "exact_item_statement_match_ordinals": [],
+      "production_scope_match_ordinals": [],
+      "production_exclusion_match_ordinals": [
+        7,
+        10
+      ]
+    },
+    {
+      "source_ordinal": 24,
+      "kind": "WORK_CONSTRAINT",
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:10",
+      "source_text_sha256": "b5dfdb26dce5c39506573786ad37eb296c58e68f2e632899b29461b9affd6d83",
+      "source_text_chars": 41,
+      "route_indices": [
+        53,
+        54
+      ],
+      "capabilities": [
+        "GIT_DIFF_SCOPE",
+        "UNRESOLVED"
+      ],
+      "conflicting_source_disposition": true,
+      "constraint_index": 10,
+      "exact_clause_text_match_ordinals": [],
+      "exact_item_statement_match_ordinals": [],
+      "production_scope_match_ordinals": [],
+      "production_exclusion_match_ordinals": [
+        7,
+        10
+      ]
+    },
+    {
+      "source_ordinal": 25,
+      "kind": "WORK_CONTEXT",
+      "source_ref": "work-context:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+      "source_text_sha256": "55cb0ba03f6e5f21b18e9f8281cace84f4812f963314b9b1dc4886fdc05e21bd",
+      "source_text_chars": 127,
+      "route_indices": [
+        55,
+        56
+      ],
+      "capabilities": [
+        "RETAIN_CONTEXT",
+        "UNRESOLVED"
+      ],
+      "conflicting_source_disposition": true
+    }
+  ],
+  "routes": [
+    {
+      "route_index": 0,
+      "source_ordinal": 0,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [],
+      "span": [
+        0,
+        47
+      ],
+      "full_source_span": false,
+      "quote_sha256": "6fb6e71fbd8bf26841544b5fea47403a4e76ad1d1d72bd9eac297c9f7eab5a8b",
+      "rationale_sha256": "86347eb363be556e40b578c6923e38c3753ba3abde05bfc2ee65fd70382c7087",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 1,
+      "source_ordinal": 1,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [],
+      "span": [
+        0,
+        54
+      ],
+      "full_source_span": false,
+      "quote_sha256": "b3b19df13d47ac4baec75fff50ed5811250162c3147697ecd12a91107c896c1b",
+      "rationale_sha256": "d29ecf3eb3fc668c4303b2c7d9fba264000cc8f8df338e61a2374dd815993461",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 2,
+      "source_ordinal": 2,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [],
+      "span": [
+        0,
+        47
+      ],
+      "full_source_span": false,
+      "quote_sha256": "26ccfecf548d5e36212f92974cf5d0de19e9ea3db170bdb77cd26eeb1b6d5e77",
+      "rationale_sha256": "adfa110f5a56afba2a67b7dd4274f8373717c900ef03357441d87e66260322b3",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 3,
+      "source_ordinal": 3,
+      "capability": "GIT_DIFF_SCOPE",
+      "support_ordinals": [],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [],
+      "span": [
+        0,
+        25
+      ],
+      "full_source_span": false,
+      "quote_sha256": "536e06feacaad6bf5335f930154740a04ad76a83112eea83a44228b82a934430",
+      "rationale_sha256": "e1ab1906f457731a47d45594b022ca33115e5eca100cb532f59190b6aa888e66",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 4,
+      "source_ordinal": 3,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [],
+      "span": [
+        0,
+        25
+      ],
+      "full_source_span": false,
+      "quote_sha256": "536e06feacaad6bf5335f930154740a04ad76a83112eea83a44228b82a934430",
+      "rationale_sha256": "1779d673a9b7019c5566cba940ffbae7b3aad1ff576b3753b09d55f276b3dbef",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 5,
+      "source_ordinal": 4,
+      "capability": "DENY_PREVIEW",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        53
+      ],
+      "full_source_span": false,
+      "quote_sha256": "da003be189c4a80c9609452059d7ed1eb85c0339c272cb88b3f663c8029776d0",
+      "rationale_sha256": "46c75a53265395bf838bbc4663c824ddad019a09f17c284ce9dcb3648ea1c171",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 6,
+      "source_ordinal": 4,
+      "capability": "DENY_DEPLOY",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        53
+      ],
+      "full_source_span": false,
+      "quote_sha256": "da003be189c4a80c9609452059d7ed1eb85c0339c272cb88b3f663c8029776d0",
+      "rationale_sha256": "6392adb34f0625a5b335cd4edfaf4eee32d6b908946bad790b95deb08159882e",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 7,
+      "source_ordinal": 4,
+      "capability": "DENY_PUBLISH",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        53
+      ],
+      "full_source_span": false,
+      "quote_sha256": "da003be189c4a80c9609452059d7ed1eb85c0339c272cb88b3f663c8029776d0",
+      "rationale_sha256": "52d91403bc20403bc0af4e0accc53185e294b8c573d0381bc44784403fc7b071",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 8,
+      "source_ordinal": 5,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [
+        12
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [],
+      "span": [
+        0,
+        71
+      ],
+      "full_source_span": false,
+      "quote_sha256": "6d705ee2c308e80fe8caf6db21f4ba5b0e004098a0bf81bd13fbb7ea98be57e1",
+      "rationale_sha256": "5e72238d5646afd8f3f7ebbdac42e9f19b672bd091e98932e6d954d3ad2bf010",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 9,
+      "source_ordinal": 5,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [
+        12
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [],
+      "span": [
+        0,
+        71
+      ],
+      "full_source_span": false,
+      "quote_sha256": "6d705ee2c308e80fe8caf6db21f4ba5b0e004098a0bf81bd13fbb7ea98be57e1",
+      "rationale_sha256": "4cf510b193942ab8b4a97bd938459d97e3a8b9c41a312c3ad82be500e2ab41eb",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 10,
+      "source_ordinal": 5,
+      "capability": "CANDIDATE_SEAL",
+      "support_ordinals": [
+        12
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        71
+      ],
+      "full_source_span": false,
+      "quote_sha256": "6d705ee2c308e80fe8caf6db21f4ba5b0e004098a0bf81bd13fbb7ea98be57e1",
+      "rationale_sha256": "a63ee149540023fcbde4961b5bc0cfaef7f7f74ace23e1d03e83e76536407ab7",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 11,
+      "source_ordinal": 6,
+      "capability": "RETAIN_CONTEXT",
+      "support_ordinals": [],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        48
+      ],
+      "full_source_span": false,
+      "quote_sha256": "0ea8b72dc9aef606f6e80c314eb3c66198ce168e9d037d60fe59bd4a20007413",
+      "rationale_sha256": "6212f2ae47a5231bc27caf9f5ce7a3d3a843c504c0ae8995b014095e6dc6fd86",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "RETAINED_CONTEXT"
+      }
+    },
+    {
+      "route_index": 12,
+      "source_ordinal": 6,
+      "capability": "UNRESOLVED",
+      "support_ordinals": [],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        48
+      ],
+      "full_source_span": false,
+      "quote_sha256": "0ea8b72dc9aef606f6e80c314eb3c66198ce168e9d037d60fe59bd4a20007413",
+      "rationale_sha256": "e2468a4a2b25a067b62419f7a2a520fdfea4781e5bb62ca1f931e40cdb6e5828",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "UNRESOLVED"
+      }
+    },
+    {
+      "route_index": 13,
+      "source_ordinal": 7,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [
+        9
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [],
+      "span": [
+        0,
+        90
+      ],
+      "full_source_span": false,
+      "quote_sha256": "1c11bf8e684edafd0abc7351703468618f08d27402d9f98873a3cfb60d9d11a3",
+      "rationale_sha256": "748701bec3f34399bee6f00298d1c12d638cbf44e6651897038b4368b6d4750f",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 14,
+      "source_ordinal": 7,
+      "capability": "GIT_DIFF_SCOPE",
+      "support_ordinals": [
+        9
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [],
+      "span": [
+        0,
+        90
+      ],
+      "full_source_span": false,
+      "quote_sha256": "1c11bf8e684edafd0abc7351703468618f08d27402d9f98873a3cfb60d9d11a3",
+      "rationale_sha256": "2e5bb68a245d00084415e594b6e5a8480c58f387054102bd6ba9ac7748c384ef",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 15,
+      "source_ordinal": 7,
+      "capability": "RETAIN_CONTEXT",
+      "support_ordinals": [
+        9
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        90
+      ],
+      "full_source_span": false,
+      "quote_sha256": "1c11bf8e684edafd0abc7351703468618f08d27402d9f98873a3cfb60d9d11a3",
+      "rationale_sha256": "181424f3462312491efb3545ca513a598d37794103ac3ba1166708a7897c843c",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 16,
+      "source_ordinal": 8,
+      "capability": "RETAIN_CONTEXT",
+      "support_ordinals": [],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        47
+      ],
+      "full_source_span": false,
+      "quote_sha256": "a2d5682c0dd16ddb1a2d05dff2577e2db1c4aa60918e3b4956f35a9c838676ef",
+      "rationale_sha256": "927317c4f3517671d7d79fbe01b1cb31e1a0db70cd2ae8682d38ee7a026bccb6",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "RETAINED_CONTEXT"
+      }
+    },
+    {
+      "route_index": 17,
+      "source_ordinal": 8,
+      "capability": "UNRESOLVED",
+      "support_ordinals": [],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        47
+      ],
+      "full_source_span": false,
+      "quote_sha256": "a2d5682c0dd16ddb1a2d05dff2577e2db1c4aa60918e3b4956f35a9c838676ef",
+      "rationale_sha256": "7c6cb0bc29846cf054e2a3bfd934cc44c36f74a99b16aec5c0821838a86fc6ce",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "UNRESOLVED"
+      }
+    },
+    {
+      "route_index": 18,
+      "source_ordinal": 9,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [
+        15,
+        18
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [],
+      "span": [
+        0,
+        131
+      ],
+      "full_source_span": false,
+      "quote_sha256": "de458070ce031c63aacf7451386eaf373ca417d4c4777d0a70b1a2e14b452511",
+      "rationale_sha256": "8de05b40ff7d9f0ff538d1c7abe3bb338fe8ebd091ba6662dd76b3ef2ca1f806",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 19,
+      "source_ordinal": 9,
+      "capability": "RETAIN_CONTEXT",
+      "support_ordinals": [
+        15,
+        18
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        131
+      ],
+      "full_source_span": false,
+      "quote_sha256": "de458070ce031c63aacf7451386eaf373ca417d4c4777d0a70b1a2e14b452511",
+      "rationale_sha256": "da38d6bc772af465ee0c457807b3a507bc48ea7b484dd4dbd68ca53273085afb",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 20,
+      "source_ordinal": 10,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [
+        15,
+        18
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [],
+      "span": [
+        0,
+        131
+      ],
+      "full_source_span": false,
+      "quote_sha256": "de458070ce031c63aacf7451386eaf373ca417d4c4777d0a70b1a2e14b452511",
+      "rationale_sha256": "45c0e135bdeb00837c4c695e926686d66528cff023d41ec6422a7f0928627c0f",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 21,
+      "source_ordinal": 10,
+      "capability": "RETAIN_CONTEXT",
+      "support_ordinals": [
+        15,
+        18
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        131
+      ],
+      "full_source_span": false,
+      "quote_sha256": "de458070ce031c63aacf7451386eaf373ca417d4c4777d0a70b1a2e14b452511",
+      "rationale_sha256": "4672358f26fb1cb388dc6db05fc14a0757edb92cd19ec746c449c7f4f8a542aa",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 22,
+      "source_ordinal": 11,
+      "capability": "GIT_DIFF_SCOPE",
+      "support_ordinals": [
+        14
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [],
+      "span": [
+        0,
+        26
+      ],
+      "full_source_span": false,
+      "quote_sha256": "34da954957f63d650152a43706d27ed781f8c21b024606451681fadc7a52a81b",
+      "rationale_sha256": "18fa309d5881258cea44516b253f2f9069e5b87c68735116d8ab3adc049b412f",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 23,
+      "source_ordinal": 11,
+      "capability": "UNRESOLVED",
+      "support_ordinals": [
+        14
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        26
+      ],
+      "full_source_span": false,
+      "quote_sha256": "34da954957f63d650152a43706d27ed781f8c21b024606451681fadc7a52a81b",
+      "rationale_sha256": "3a284ec4fbdb75e9c15d50bc3d31340db0551f21cc73d379a824ac6b470cfedc",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "UNRESOLVED"
+      }
+    },
+    {
+      "route_index": 24,
+      "source_ordinal": 12,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [
+        19,
+        20
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [],
+      "span": [
+        0,
+        71
+      ],
+      "full_source_span": false,
+      "quote_sha256": "6d705ee2c308e80fe8caf6db21f4ba5b0e004098a0bf81bd13fbb7ea98be57e1",
+      "rationale_sha256": "7148ea2c276c0c8a3ef0f47fccd9ef21cdf2210f1e6af3110eee3fc64c0b6668",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 25,
+      "source_ordinal": 12,
+      "capability": "CANDIDATE_SEAL",
+      "support_ordinals": [
+        20
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        71
+      ],
+      "full_source_span": false,
+      "quote_sha256": "6d705ee2c308e80fe8caf6db21f4ba5b0e004098a0bf81bd13fbb7ea98be57e1",
+      "rationale_sha256": "15f1000bc3f4efcdfd7805e1d40ddb01637faa8a3fb4a5f0c04df610c8d3e4d0",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 26,
+      "source_ordinal": 12,
+      "capability": "UNRESOLVED",
+      "support_ordinals": [
+        20
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        71
+      ],
+      "full_source_span": false,
+      "quote_sha256": "6d705ee2c308e80fe8caf6db21f4ba5b0e004098a0bf81bd13fbb7ea98be57e1",
+      "rationale_sha256": "4484db85fa560db9271a4bb116859916db4ac21a6769bd4a084ddc13917e86e3",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "UNRESOLVED"
+      }
+    },
+    {
+      "route_index": 27,
+      "source_ordinal": 13,
+      "capability": "DENY_PREVIEW",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        54
+      ],
+      "full_source_span": false,
+      "quote_sha256": "f1901b6c4ff6a5096108c39077aea5d20c1d49758d10b1717c4feb54440aab12",
+      "rationale_sha256": "cecaf9862b8086f24f5627859a2fcf7fabf61d1000297971a1b6d59947bf1117",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 28,
+      "source_ordinal": 13,
+      "capability": "DENY_DEPLOY",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        54
+      ],
+      "full_source_span": false,
+      "quote_sha256": "f1901b6c4ff6a5096108c39077aea5d20c1d49758d10b1717c4feb54440aab12",
+      "rationale_sha256": "45cf1583bf17a893698846ab528d56b4fc5ee421a6a18dd4a0b57051f01989f6",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 29,
+      "source_ordinal": 13,
+      "capability": "DENY_PUBLISH",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        54
+      ],
+      "full_source_span": false,
+      "quote_sha256": "f1901b6c4ff6a5096108c39077aea5d20c1d49758d10b1717c4feb54440aab12",
+      "rationale_sha256": "7d40bfcee044cfd53fc7ece9e08721f7c968e371b9092ca7574acf1755d965c9",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 30,
+      "source_ordinal": 13,
+      "capability": "GIT_DIFF_SCOPE",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [],
+      "span": [
+        0,
+        54
+      ],
+      "full_source_span": false,
+      "quote_sha256": "f1901b6c4ff6a5096108c39077aea5d20c1d49758d10b1717c4feb54440aab12",
+      "rationale_sha256": "f8fe4ca192dd9d3228f933c5540f1fc75dac876e8471d97851914db0af0c3ca2",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 31,
+      "source_ordinal": 14,
+      "capability": "GIT_DIFF_SCOPE",
+      "support_ordinals": [
+        11,
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [
+        0
+      ],
+      "span": [
+        0,
+        117
+      ],
+      "full_source_span": false,
+      "quote_sha256": "a7a671e37878ad63eee3606f3d3ea874921aa28d451235d2db829b067497bf82",
+      "rationale_sha256": "0bd0390bd8e906efdd6ad23e987fa26cdb8ef075927f6a6b009264e2e51edc7f",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 32,
+      "source_ordinal": 14,
+      "capability": "DENY_PREVIEW",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        0
+      ],
+      "span": [
+        0,
+        117
+      ],
+      "full_source_span": false,
+      "quote_sha256": "a7a671e37878ad63eee3606f3d3ea874921aa28d451235d2db829b067497bf82",
+      "rationale_sha256": "caed819b6b4778b0b8a7227783931f8634f45adca81ded9c208f87533848fda8",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 33,
+      "source_ordinal": 14,
+      "capability": "DENY_DEPLOY",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        0
+      ],
+      "span": [
+        0,
+        117
+      ],
+      "full_source_span": false,
+      "quote_sha256": "a7a671e37878ad63eee3606f3d3ea874921aa28d451235d2db829b067497bf82",
+      "rationale_sha256": "d0501a35bcf965da8b399409120ecb2599d2a07cc6e9d33264c99177c13475a5",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 34,
+      "source_ordinal": 14,
+      "capability": "DENY_PUBLISH",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        0
+      ],
+      "span": [
+        0,
+        117
+      ],
+      "full_source_span": false,
+      "quote_sha256": "a7a671e37878ad63eee3606f3d3ea874921aa28d451235d2db829b067497bf82",
+      "rationale_sha256": "4f319a033792338fe195170b7f73227770b93a1d48c195be7c3984b5575ba91b",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 35,
+      "source_ordinal": 14,
+      "capability": "UNRESOLVED",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        0
+      ],
+      "span": [
+        0,
+        117
+      ],
+      "full_source_span": false,
+      "quote_sha256": "a7a671e37878ad63eee3606f3d3ea874921aa28d451235d2db829b067497bf82",
+      "rationale_sha256": "da9ba715984331f49d10ad744495620f38c8b524e4bccfc312dbf65ffad60675",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "UNRESOLVED"
+      }
+    },
+    {
+      "route_index": 36,
+      "source_ordinal": 15,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [
+        9
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [
+        1
+      ],
+      "span": [
+        0,
+        149
+      ],
+      "full_source_span": false,
+      "quote_sha256": "56f14619e358ae4260cdf671368758a5f8737ed8e8f30026b958ec1d9b0715ad",
+      "rationale_sha256": "75e7f184f92dd20b179cb4fa4f3a74aaea59e4deb43eca2ebb3677590c300d56",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 37,
+      "source_ordinal": 15,
+      "capability": "RETAIN_CONTEXT",
+      "support_ordinals": [
+        9
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        1
+      ],
+      "span": [
+        0,
+        149
+      ],
+      "full_source_span": false,
+      "quote_sha256": "56f14619e358ae4260cdf671368758a5f8737ed8e8f30026b958ec1d9b0715ad",
+      "rationale_sha256": "4a13cbdccd9e9c1fe0e4d04c26dbc141bda9c7652afb06f0c1d0e1e373e0befc",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_REQUIRED_CONSTRAINT_CANNOT_BE_CONTEXT_ONLY",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 38,
+      "source_ordinal": 16,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [
+        12
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [
+        2
+      ],
+      "span": [
+        0,
+        104
+      ],
+      "full_source_span": false,
+      "quote_sha256": "995322d7f932df72908734edac8529690ca580d3ae5fb08f84c269daf45b6b3d",
+      "rationale_sha256": "85a7e06b2a59b3438b2ff17d852fcb73a3c7941d5364661e9a99837a7c409af5",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "BOUND_PENDING_EVIDENCE"
+      }
+    },
+    {
+      "route_index": 39,
+      "source_ordinal": 16,
+      "capability": "CANDIDATE_SEAL",
+      "support_ordinals": [
+        20
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        2
+      ],
+      "span": [
+        0,
+        104
+      ],
+      "full_source_span": false,
+      "quote_sha256": "995322d7f932df72908734edac8529690ca580d3ae5fb08f84c269daf45b6b3d",
+      "rationale_sha256": "639f845f9cf54e90dfee40dadd7a64fd146eeb9a51b599a7799d312d30a4a69d",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 40,
+      "source_ordinal": 16,
+      "capability": "UNRESOLVED",
+      "support_ordinals": [
+        20
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        2
+      ],
+      "span": [
+        0,
+        104
+      ],
+      "full_source_span": false,
+      "quote_sha256": "995322d7f932df72908734edac8529690ca580d3ae5fb08f84c269daf45b6b3d",
+      "rationale_sha256": "7507c793c354e43a577628a4f6cff242c9cc2e8159e996a831b28798487df4dc",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 41,
+      "source_ordinal": 17,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [
+        2,
+        7
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [
+        3
+      ],
+      "span": [
+        0,
+        35
+      ],
+      "full_source_span": false,
+      "quote_sha256": "6beaa05ee737f5d804753fd1702147a5429b49307391cf57128f1b1f4f2e2e6b",
+      "rationale_sha256": "dc32c354b7230b980d6c6415e5a248905825d924d6b1a1e9efaf9a14be6e576e",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 42,
+      "source_ordinal": 17,
+      "capability": "GIT_DIFF_SCOPE",
+      "support_ordinals": [
+        2,
+        7
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [
+        3
+      ],
+      "span": [
+        0,
+        35
+      ],
+      "full_source_span": false,
+      "quote_sha256": "6beaa05ee737f5d804753fd1702147a5429b49307391cf57128f1b1f4f2e2e6b",
+      "rationale_sha256": "3b647d915abe9334295363bac5efd5c3915b31c60172c3d1e7a7d3ba75b585f0",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 43,
+      "source_ordinal": 18,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [
+        9
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [
+        4
+      ],
+      "span": [
+        0,
+        54
+      ],
+      "full_source_span": false,
+      "quote_sha256": "f1a62c72dd701a4bfab9c71b83d0ed7b5469a304a333a5e38aa62a3d2fd5c084",
+      "rationale_sha256": "a49ee9ecdca784faa162d4912bf66a3e997ead36f40d4b4413c0b52bc4ddabb8",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 44,
+      "source_ordinal": 18,
+      "capability": "RETAIN_CONTEXT",
+      "support_ordinals": [
+        9
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        4
+      ],
+      "span": [
+        0,
+        54
+      ],
+      "full_source_span": false,
+      "quote_sha256": "f1a62c72dd701a4bfab9c71b83d0ed7b5469a304a333a5e38aa62a3d2fd5c084",
+      "rationale_sha256": "2be375a58c5fed3dd528d97126270c060412eb54b770f6c138a15477c23c2986",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 45,
+      "source_ordinal": 19,
+      "capability": "ARTIFACT_CONTENT",
+      "support_ordinals": [
+        12
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [
+        5
+      ],
+      "span": [
+        0,
+        51
+      ],
+      "full_source_span": false,
+      "quote_sha256": "f3ca9af3fca8bc0bd93e220debac5c706ff21311c4ba64442712530791cb321d",
+      "rationale_sha256": "0ec4a3ea000a5abd7ed170c603aab26b8b9d40fe6dda0cca0c87eba5dda0739a",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 46,
+      "source_ordinal": 19,
+      "capability": "UNRESOLVED",
+      "support_ordinals": [
+        12
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        5
+      ],
+      "span": [
+        0,
+        51
+      ],
+      "full_source_span": false,
+      "quote_sha256": "f3ca9af3fca8bc0bd93e220debac5c706ff21311c4ba64442712530791cb321d",
+      "rationale_sha256": "6903e0299f24b6194b53749a0b38e348b941787e11b749836b20114c5f9b9b92",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 47,
+      "source_ordinal": 20,
+      "capability": "CANDIDATE_SEAL",
+      "support_ordinals": [
+        16
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        6
+      ],
+      "span": [
+        0,
+        27
+      ],
+      "full_source_span": false,
+      "quote_sha256": "77c2177f8e16b5860412d168676de502a2f091f691e7a113e0790ed6f6a87513",
+      "rationale_sha256": "71fa08ac7d0cf2c4b36823b4761d264c97535c7c40a10517de87cbf4315f73ca",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 48,
+      "source_ordinal": 20,
+      "capability": "UNRESOLVED",
+      "support_ordinals": [
+        16
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        6
+      ],
+      "span": [
+        0,
+        27
+      ],
+      "full_source_span": false,
+      "quote_sha256": "77c2177f8e16b5860412d168676de502a2f091f691e7a113e0790ed6f6a87513",
+      "rationale_sha256": "558e109e103f6f5d9c11a9ea85bf1a284da4840a80cbd71744e99a3011728f99",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 49,
+      "source_ordinal": 21,
+      "capability": "DENY_DEPLOY",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        7
+      ],
+      "span": [
+        0,
+        30
+      ],
+      "full_source_span": false,
+      "quote_sha256": "7314b10245a1ec23aad4ed619a60e40f82ff121c715fa9cc92dec2fd97e1ea95",
+      "rationale_sha256": "c1572fb951f3b2d6e1b6a4883b8650db6903958e1bf5ad1f7f89877dff049e42",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 50,
+      "source_ordinal": 22,
+      "capability": "DENY_PUBLISH",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        8
+      ],
+      "span": [
+        0,
+        31
+      ],
+      "full_source_span": false,
+      "quote_sha256": "90ec79f31d3e1f4a965fd7fc6a23464ecdd352902b3d18901b163db273b84f85",
+      "rationale_sha256": "343c8fda4578c91141b6653c3d84c6f944df39762f76359c1768d45d2396e23a",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 51,
+      "source_ordinal": 23,
+      "capability": "GIT_DIFF_SCOPE",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [
+        9
+      ],
+      "span": [
+        0,
+        33
+      ],
+      "full_source_span": false,
+      "quote_sha256": "ff51dad34ea7e2c3c31ac694e91bc4daa16f5d2c086f72cb427f66c5da22ee65",
+      "rationale_sha256": "6ed2ddf71d84509a549fc06d5d1244e4af865bc06387619074c83fe77259ef27",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 52,
+      "source_ordinal": 23,
+      "capability": "UNRESOLVED",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        9
+      ],
+      "span": [
+        0,
+        33
+      ],
+      "full_source_span": false,
+      "quote_sha256": "ff51dad34ea7e2c3c31ac694e91bc4daa16f5d2c086f72cb427f66c5da22ee65",
+      "rationale_sha256": "5353e18c09ea7912ef1ca901de578a9b912428413703d274c48d170205d280a0",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 53,
+      "source_ordinal": 24,
+      "capability": "GIT_DIFF_SCOPE",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "constraint_indices": [
+        10
+      ],
+      "span": [
+        0,
+        40
+      ],
+      "full_source_span": false,
+      "quote_sha256": "554e32bb4cefed99c3cf6972f6e8ceba06481d61bd678ed053aef07baae934f7",
+      "rationale_sha256": "e70442c21e6e03becdf213346594ca917f73689fdf7aacce0bc936df2748c805",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 54,
+      "source_ordinal": 24,
+      "capability": "UNRESOLVED",
+      "support_ordinals": [
+        13
+      ],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [
+        10
+      ],
+      "span": [
+        0,
+        40
+      ],
+      "full_source_span": false,
+      "quote_sha256": "554e32bb4cefed99c3cf6972f6e8ceba06481d61bd678ed053aef07baae934f7",
+      "rationale_sha256": "cd62c55b771602f5cf9b900ea9de2751b2991765d20d851005c9fd2bd2104c15",
+      "local_original_route_check": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+        "error_type": "ValueError"
+      }
+    },
+    {
+      "route_index": 55,
+      "source_ordinal": 25,
+      "capability": "RETAIN_CONTEXT",
+      "support_ordinals": [],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        126
+      ],
+      "full_source_span": false,
+      "quote_sha256": "582f573064d473a11e578dfa8e0178cfdadefcca9d5f0db80df53c303462ed50",
+      "rationale_sha256": "8462acdbfa989593228e44d3c282588e7ade62274c01aa654a7dfbabe60e3044",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "RETAINED_CONTEXT"
+      }
+    },
+    {
+      "route_index": 56,
+      "source_ordinal": 25,
+      "capability": "UNRESOLVED",
+      "support_ordinals": [],
+      "linked_fact_ordinals": [],
+      "target_paths": [],
+      "constraint_indices": [],
+      "span": [
+        0,
+        126
+      ],
+      "full_source_span": false,
+      "quote_sha256": "582f573064d473a11e578dfa8e0178cfdadefcca9d5f0db80df53c303462ed50",
+      "rationale_sha256": "2a038dd6b09a0e966ea88344e80543839ed3552267eee3f910aba48ed73f1597",
+      "local_original_route_check": {
+        "result": "LOCAL_PREDICATES_RETURNED_NOT_ADMISSION",
+        "state": "UNRESOLVED"
+      }
+    }
+  ],
+  "counterfactuals": [
+    {
+      "name": "ORIGINAL",
+      "counterfactual_only": true,
+      "invalid_as_production_result": true,
+      "recipe": "unchanged original actual candidate",
+      "kept_original_route_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56
+      ],
+      "removed_original_route_indices": [],
+      "candidate_fingerprint": "98e38e96d66751327a6eb44519cf980db471aae99664b324c3e36a043a049444",
+      "source_count": 26,
+      "result": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_PROJECTION_DUPLICATE_ROUTE",
+        "error_type": "ValueError"
+      },
+      "independent_review": "NOT_EXECUTED",
+      "admission_or_assurance": false
+    },
+    {
+      "name": "CF_EXACT_DUPLICATE_REMOVED",
+      "counterfactual_only": true,
+      "invalid_as_production_result": true,
+      "recipe": "Remove later repeated source/capability pair in isolated copy; never a repair",
+      "kept_original_route_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56
+      ],
+      "removed_original_route_indices": [
+        9
+      ],
+      "candidate_fingerprint": "c1f08045af822f6e4967ad7d9853fd9a72a6a372960094b92b2a812920bc4df9",
+      "source_count": 26,
+      "result": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+        "error_type": "ValueError"
+      },
+      "independent_review": "NOT_EXECUTED",
+      "admission_or_assurance": false
+    },
+    {
+      "name": "CF_PREFER_EXECUTABLE",
+      "counterfactual_only": true,
+      "invalid_as_production_result": true,
+      "recipe": "After dedup, suppress unresolved/context dispositions where an executable proposal exists; destroys proposed meaning and is not eligible",
+      "kept_original_route_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10,
+        11,
+        12,
+        13,
+        14,
+        16,
+        17,
+        18,
+        20,
+        22,
+        24,
+        25,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        36,
+        38,
+        39,
+        41,
+        42,
+        43,
+        45,
+        47,
+        49,
+        50,
+        51,
+        53,
+        55,
+        56
+      ],
+      "removed_original_route_indices": [
+        9,
+        15,
+        19,
+        21,
+        23,
+        26,
+        35,
+        37,
+        40,
+        44,
+        46,
+        48,
+        52,
+        54
+      ],
+      "candidate_fingerprint": "284712ddec3a35da8f3b29d3356be870f4d1fda044a1a39e30e4e5ce32adbe23",
+      "source_count": 26,
+      "result": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+        "error_type": "ValueError"
+      },
+      "independent_review": "NOT_EXECUTED",
+      "admission_or_assurance": false
+    },
+    {
+      "name": "CF_PREFER_UNRESOLVED",
+      "counterfactual_only": true,
+      "invalid_as_production_result": true,
+      "recipe": "After dedup, retain unresolved instead of other routes on that source; exposes remaining rejection, no fulfillment",
+      "kept_original_route_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10,
+        12,
+        13,
+        14,
+        15,
+        17,
+        18,
+        19,
+        20,
+        21,
+        23,
+        26,
+        27,
+        28,
+        29,
+        30,
+        35,
+        36,
+        37,
+        40,
+        41,
+        42,
+        43,
+        44,
+        46,
+        48,
+        49,
+        50,
+        52,
+        54,
+        56
+      ],
+      "removed_original_route_indices": [
+        9,
+        11,
+        16,
+        22,
+        24,
+        25,
+        31,
+        32,
+        33,
+        34,
+        38,
+        39,
+        45,
+        47,
+        51,
+        53,
+        55
+      ],
+      "candidate_fingerprint": "9e9c0bb310b023fb7c613d869da7935dd2077d9d01ec0a73491bda745e1b4231",
+      "source_count": 26,
+      "result": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+        "error_type": "ValueError"
+      },
+      "independent_review": "NOT_EXECUTED",
+      "admission_or_assurance": false
+    },
+    {
+      "name": "CF_PREFER_RETAINED",
+      "counterfactual_only": true,
+      "invalid_as_production_result": true,
+      "recipe": "After dedup, retain context instead of other routes on that source; diagnostic only",
+      "kept_original_route_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10,
+        11,
+        15,
+        16,
+        19,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55
+      ],
+      "removed_original_route_indices": [
+        9,
+        12,
+        13,
+        14,
+        17,
+        18,
+        20,
+        36,
+        43,
+        56
+      ],
+      "candidate_fingerprint": "aa7e1554d01b4f8443610e782218af706fc7a9106648048e2b80cf503e73e0d6",
+      "source_count": 26,
+      "result": {
+        "result": "REJECTED",
+        "predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+        "error_type": "ValueError"
+      },
+      "independent_review": "NOT_EXECUTED",
+      "admission_or_assurance": false
+    }
+  ],
+  "original_component_coverage_check_review_pending": {
+    "result": "REJECTED",
+    "predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+    "error_type": "ValueError"
+  },
+  "reviewed_background_eligibility_ordinals": [],
+  "model_calls": 0,
+  "database_access": false,
+  "input_files_mutated": false,
+  "semantic_review_or_assurance_claim": false,
+  "counterfactual_admission_claim": false,
+  "ended_at_utc": "2026-10-09T17:35:44.581793+00:00",
+  "wall_seconds": 0.05677839700365439
+}

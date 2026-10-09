@@ -1,0 +1,16 @@
+{
+  "observed_at_utc": "2026-10-09T17:48:43.213422+00:00",
+  "branch": "codex/c3-open-semantic-obligation-convergence",
+  "evidence_basis": "db78fdae67acb5862511f3672a58790a5a04e435",
+  "remote_refs_before": {
+    "refs/heads/codex/c3-open-semantic-obligation-convergence": "db78fdae67acb5862511f3672a58790a5a04e435",
+    "refs/heads/main": "5b7bf217937d7e002c0264c3fe9fdd518dba152c"
+  },
+  "ecs_checkout_before": [
+    "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+    "ee5bd86a53891f9391785c91d0ccef81ad2d56c3"
+  ],
+  "frozen_source_and_tests_delta": "EMPTY",
+  "task_model_calls": 0,
+  "production_writes": false
+}

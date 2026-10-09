@@ -1,0 +1,69 @@
+{
+  "contracts": [
+    {
+      "owner": "watt",
+      "pin": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+      "path": "src/spg/application/governed_obligations.py",
+      "sha256": "d228106711c75c29c8a259c32af709f06172f7d62242e5cc7c8b8fd4161b8b9d",
+      "bytes": 95452,
+      "pinned_to_checkout_source_diff": "EMPTY"
+    },
+    {
+      "owner": "watt",
+      "pin": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+      "path": "src/spg/domain/governed_obligation.py",
+      "sha256": "210b468a96cf8fda6c1532cd695569841c1b6eabecb399eb41c8ab8625b51a11",
+      "bytes": 15233,
+      "pinned_to_checkout_source_diff": "EMPTY"
+    },
+    {
+      "owner": "watt",
+      "pin": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+      "path": "src/spg/providers/fulfillment_candidate.py",
+      "sha256": "9cb6bf0d16af459141571188739bdf2c6dc197b069c56e56055b21762d784ff2",
+      "bytes": 24625,
+      "pinned_to_checkout_source_diff": "EMPTY"
+    },
+    {
+      "owner": "watt",
+      "pin": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+      "path": "src/spg/providers/managed_context_fulfillment.py",
+      "sha256": "39fb3fcffcb7419b5193dd24be7e6ea5ac4a14ca42f0de633aedc7fbd31cb5c4",
+      "bytes": 35704,
+      "pinned_to_checkout_source_diff": "EMPTY"
+    },
+    {
+      "owner": "watt",
+      "pin": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+      "path": "src/spg/application/guardian_assurance.py",
+      "sha256": "c7a709145a6b93440f44c257a382c312799a724df3b78f39a1a46b7b324751ba",
+      "bytes": 29916,
+      "pinned_to_checkout_source_diff": "EMPTY"
+    },
+    {
+      "owner": "guardian",
+      "pin": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+      "path": "src/guardian/contracts/software_assurance.py",
+      "sha256": "fa74e94abed0cc12267364bcc9dcd4430b545f494d6919d300473d92c63c639e",
+      "bytes": 8778,
+      "pinned_to_checkout_source_diff": "EMPTY"
+    },
+    {
+      "owner": "guardian",
+      "pin": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+      "path": "src/guardian/runtime.py",
+      "sha256": "3c952f7305f0648563315ade5d0f06e8d323fe5429ad98a05ff64cc8fdf73b86",
+      "bytes": 105392,
+      "pinned_to_checkout_source_diff": "EMPTY"
+    },
+    {
+      "owner": "ecf",
+      "pin": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "path": "src/ecf/contracts/production_environment.py",
+      "sha256": "6ec0a55e88b14234d7dd16ac18ab5c4b5fca66cdb184ec15791c1033cd3e2da3",
+      "bytes": 8829,
+      "pinned_to_checkout_source_diff": "EMPTY"
+    }
+  ],
+  "scope": "Only directly related formation, fulfillment, Assurance and ECF Reality contracts; no Yijue audit"
+}

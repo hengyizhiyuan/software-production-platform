@@ -1,0 +1,19 @@
+{
+  "inputs_before": {
+    "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json": "9b013274f1a6daafc776297a302c52c8247cd2fd5ec9c5b99a83279fd2ee8e2c",
+    "/data/watt/c3-semantic-convergence-20261009/capacity-representation-20261009/reasoning-none-control-1/private/model-observations/formation-located-candidate.json": "e9020a908ba354c2e12ab4db297b32b7d17041fd12e4180a740f39d9fb42c9b5",
+    "/data/watt/c3-semantic-convergence-20261009/capacity-representation-20261009/final-image/evidence/actual-imports.json": "fea7676b7c6bdfec6aa6d1fa1e6665a67ac0e205157cc48dc11af158a6823f12",
+    "/data/watt/c3-semantic-convergence-20261009/capacity-final-inputs/semantic-contract-calibration-1/analyze_candidate.py": "8081dbf7327f7cba04e5714edcb6098e07a0f2834c34c87ff244f465d47be2f9"
+  },
+  "inputs_after": {
+    "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json": "9b013274f1a6daafc776297a302c52c8247cd2fd5ec9c5b99a83279fd2ee8e2c",
+    "/data/watt/c3-semantic-convergence-20261009/capacity-representation-20261009/reasoning-none-control-1/private/model-observations/formation-located-candidate.json": "e9020a908ba354c2e12ab4db297b32b7d17041fd12e4180a740f39d9fb42c9b5",
+    "/data/watt/c3-semantic-convergence-20261009/capacity-representation-20261009/final-image/evidence/actual-imports.json": "fea7676b7c6bdfec6aa6d1fa1e6665a67ac0e205157cc48dc11af158a6823f12",
+    "/data/watt/c3-semantic-convergence-20261009/capacity-final-inputs/semantic-contract-calibration-1/analyze_candidate.py": "8081dbf7327f7cba04e5714edcb6098e07a0f2834c34c87ff244f465d47be2f9"
+  },
+  "immutable_inputs": true,
+  "docker_start_exit": 1,
+  "model_calls": 0,
+  "database_access": false,
+  "network": "none"
+}

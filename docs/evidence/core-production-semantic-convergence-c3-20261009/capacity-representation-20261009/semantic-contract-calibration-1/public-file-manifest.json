@@ -1,0 +1,100 @@
+{
+  "schema": "c3-semantic-contract-calibration-public-v1",
+  "files": [
+    {
+      "path": "analysis.json",
+      "bytes": 71551,
+      "sha256": "749eab72aecc0916c917bb8fd517267b9d4ba4b17c307872fb76744c394a7b14"
+    },
+    {
+      "path": "analyze_candidate.py",
+      "bytes": 14524,
+      "sha256": "8081dbf7327f7cba04e5714edcb6098e07a0f2834c34c87ff244f465d47be2f9"
+    },
+    {
+      "path": "architecture-lead-submission.md",
+      "bytes": 3833,
+      "sha256": "7a555f3b9c140517ec244e775c07e611c3602d9ce2a0286be8b9654a1e7a4fb1"
+    },
+    {
+      "path": "container-after.json",
+      "bytes": 2914,
+      "sha256": "fcf5bff5e9fd8713be5ac66cbf394f4df463c3233f9a3a2ece8e36befae60d46"
+    },
+    {
+      "path": "container-before.json",
+      "bytes": 2895,
+      "sha256": "948f8c665cd78c4bb25bb9f93231acce2c0493819830f539fca587e4c9fbd015"
+    },
+    {
+      "path": "contract-identities.json",
+      "bytes": 2583,
+      "sha256": "3010535bb706bb4ff610b8f9f6d5338976bdbe1945f72101ad460150f6a289d2"
+    },
+    {
+      "path": "controller.json",
+      "bytes": 1910,
+      "sha256": "2ef106ba859b5d806736fee45eb1d891a6486b156e19173323933a0ff1e0ba2a"
+    },
+    {
+      "path": "counterfactual-predicates.json",
+      "bytes": 6425,
+      "sha256": "a881b4f918ba0f9ae248d3b8c4d254e9cd0fc775aab5e9d5d859ed50371c4735"
+    },
+    {
+      "path": "counterfactual_predicates.py",
+      "bytes": 5063,
+      "sha256": "1250cd8aa8e2471f92d2462ddce529f63f7154b24570d964ba74f1ef86a7903e"
+    },
+    {
+      "path": "delivery-safety-before.json",
+      "bytes": 616,
+      "sha256": "a1ce6d4c6524f28c8649517d5acfafde9a3b0ccdc90cb4a3f1dbcd952d01b4a7"
+    },
+    {
+      "path": "followup-container-after.json",
+      "bytes": 2913,
+      "sha256": "d0bd70f8927bb4b6cbff98b242b70c0aea3ac34e258fbbd7a652fd2ef95d177e"
+    },
+    {
+      "path": "followup-container-before.json",
+      "bytes": 2895,
+      "sha256": "d8d915222fe21ad252ec838635522ac7185f569ff7c6d8a6df3274e99245207d"
+    },
+    {
+      "path": "followup-controller.json",
+      "bytes": 1910,
+      "sha256": "9e12766bf0b409a05fa0d36114a7ce0f896831e694a359241c86558346cc050e"
+    },
+    {
+      "path": "review.md",
+      "bytes": 30128,
+      "sha256": "ae32d1e9c70c9aebf5241d6cffcfa442b68756539b0bd85b7be019166d519bc1"
+    },
+    {
+      "path": "source-route-trace.md",
+      "bytes": 6533,
+      "sha256": "cb6b88ac2f28ed213167b0cf22ae5b85472b375256bbe3f3598ac457657460f3"
+    },
+    {
+      "path": "startup-failure-after.json",
+      "bytes": 2904,
+      "sha256": "a0fd93e58a69042171574ddf27ce4c178491046e8d044850fa92ca4683579fa0"
+    },
+    {
+      "path": "startup-failure-before.json",
+      "bytes": 2886,
+      "sha256": "02b761bc5d95012daeb2a05148b90dc3795e1e7fe18ab86d11439089687c001b"
+    },
+    {
+      "path": "startup-failure-controller.json",
+      "bytes": 1900,
+      "sha256": "bc3104194efd585e04b691c2d82a5f689c6e73acf7803d8275ceed0d7874ace7"
+    }
+  ],
+  "application_source": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+  "evidence_basis": "db78fdae67acb5862511f3672a58790a5a04e435",
+  "model_calls": 0,
+  "qualification": "ANALYSIS_ONLY / C3 PARTIAL",
+  "private_candidate_or_dossier_included": false
+}

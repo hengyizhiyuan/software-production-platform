@@ -1,0 +1,251 @@
+{
+  "schema": "c3-isolated-counterfactual-predicates-v1",
+  "observed_at_utc": "2026-10-09T17:39:15.998024+00:00",
+  "original_candidate_sha256": "e9020a908ba354c2e12ab4db297b32b7d17041fd12e4180a740f39d9fb42c9b5",
+  "counterfactuals": [
+    {
+      "name": "CF_SINGLE_DISPOSITION",
+      "counterfactual_only": true,
+      "invalid_as_production_result": true,
+      "recipe": "Discard duplicate and secondary dispositions; retains context for descriptive sources; destructive diagnostic selection only",
+      "candidate_fingerprint": "03bde13e87855d296e67b19b02eac58f78a81333be98b1eb35ecff861dd9de59",
+      "source_count": 26,
+      "route_count": 40,
+      "result": {
+        "predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST"
+      },
+      "independent_review": "NOT_EXECUTED",
+      "admission": false
+    },
+    {
+      "name": "CF_FULL_SOURCE_SPANS",
+      "counterfactual_only": true,
+      "invalid_as_production_result": true,
+      "recipe": "Extend every selected span to the full original source. This changes candidate meaning/identity and is not a valid repaired Candidate",
+      "candidate_fingerprint": "08de1f48b08cbd3e4404e3666b39bdf97f2d2363b66c76cc65f20f7567dc25f3",
+      "source_count": 26,
+      "route_count": 40,
+      "result": {
+        "predicate": "OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED"
+      },
+      "independent_review": "NOT_EXECUTED",
+      "admission": false
+    },
+    {
+      "name": "CF_SUPPRESS_UNSUPPORTED_FACT_SCOPE_ROUTE",
+      "counterfactual_only": true,
+      "invalid_as_production_result": true,
+      "recipe": "Remove Fact Scope Git route, leaving content proposal; conceals real obligation and cannot qualify",
+      "candidate_fingerprint": "d527240ec5b9a1b0086cf67422ba1844fd834e947dbac4feb112893c67e16ae2",
+      "source_count": 26,
+      "route_count": 39,
+      "result": {
+        "predicate": "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+      },
+      "independent_review": "NOT_EXECUTED",
+      "admission": false
+    },
+    {
+      "name": "CF_UNRESOLVED_PROHIBITION_FACT",
+      "counterfactual_only": true,
+      "invalid_as_production_result": true,
+      "recipe": "Replace three permission Fact routes by one UNRESOLVED; truthful unresolved still cannot permit runtime",
+      "candidate_fingerprint": "41d5a27778a288dc398a5762b9da3229e8568127dcaf92ca595d75ba15e3cc3b",
+      "source_count": 26,
+      "route_count": 37,
+      "result": {
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+      },
+      "independent_review": "NOT_EXECUTED",
+      "admission": false
+    }
+  ],
+  "uncovered_sources": [
+    {
+      "source_ordinal": 0,
+      "last_character_codepoint": 108,
+      "missing_nonwhitespace_positions": [
+        47
+      ]
+    },
+    {
+      "source_ordinal": 1,
+      "last_character_codepoint": 121,
+      "missing_nonwhitespace_positions": [
+        54
+      ]
+    },
+    {
+      "source_ordinal": 2,
+      "last_character_codepoint": 108,
+      "missing_nonwhitespace_positions": [
+        47
+      ]
+    },
+    {
+      "source_ordinal": 3,
+      "last_character_codepoint": 101,
+      "missing_nonwhitespace_positions": [
+        25
+      ]
+    },
+    {
+      "source_ordinal": 4,
+      "last_character_codepoint": 100,
+      "missing_nonwhitespace_positions": [
+        53
+      ]
+    },
+    {
+      "source_ordinal": 5,
+      "last_character_codepoint": 46,
+      "missing_nonwhitespace_positions": [
+        71
+      ]
+    },
+    {
+      "source_ordinal": 6,
+      "last_character_codepoint": 46,
+      "missing_nonwhitespace_positions": [
+        48
+      ]
+    },
+    {
+      "source_ordinal": 7,
+      "last_character_codepoint": 46,
+      "missing_nonwhitespace_positions": [
+        90
+      ]
+    },
+    {
+      "source_ordinal": 8,
+      "last_character_codepoint": 46,
+      "missing_nonwhitespace_positions": [
+        47
+      ]
+    },
+    {
+      "source_ordinal": 9,
+      "last_character_codepoint": 46,
+      "missing_nonwhitespace_positions": [
+        131
+      ]
+    },
+    {
+      "source_ordinal": 10,
+      "last_character_codepoint": 46,
+      "missing_nonwhitespace_positions": [
+        131
+      ]
+    },
+    {
+      "source_ordinal": 11,
+      "last_character_codepoint": 46,
+      "missing_nonwhitespace_positions": [
+        26
+      ]
+    },
+    {
+      "source_ordinal": 12,
+      "last_character_codepoint": 46,
+      "missing_nonwhitespace_positions": [
+        71
+      ]
+    },
+    {
+      "source_ordinal": 13,
+      "last_character_codepoint": 46,
+      "missing_nonwhitespace_positions": [
+        54
+      ]
+    },
+    {
+      "source_ordinal": 14,
+      "last_character_codepoint": 46,
+      "missing_nonwhitespace_positions": [
+        117
+      ]
+    },
+    {
+      "source_ordinal": 15,
+      "last_character_codepoint": 46,
+      "missing_nonwhitespace_positions": [
+        149
+      ]
+    },
+    {
+      "source_ordinal": 16,
+      "last_character_codepoint": 46,
+      "missing_nonwhitespace_positions": [
+        104
+      ]
+    },
+    {
+      "source_ordinal": 17,
+      "last_character_codepoint": 108,
+      "missing_nonwhitespace_positions": [
+        35
+      ]
+    },
+    {
+      "source_ordinal": 18,
+      "last_character_codepoint": 104,
+      "missing_nonwhitespace_positions": [
+        54
+      ]
+    },
+    {
+      "source_ordinal": 19,
+      "last_character_codepoint": 116,
+      "missing_nonwhitespace_positions": [
+        51
+      ]
+    },
+    {
+      "source_ordinal": 20,
+      "last_character_codepoint": 101,
+      "missing_nonwhitespace_positions": [
+        27
+      ]
+    },
+    {
+      "source_ordinal": 21,
+      "last_character_codepoint": 121,
+      "missing_nonwhitespace_positions": [
+        30
+      ]
+    },
+    {
+      "source_ordinal": 22,
+      "last_character_codepoint": 104,
+      "missing_nonwhitespace_positions": [
+        31
+      ]
+    },
+    {
+      "source_ordinal": 23,
+      "last_character_codepoint": 115,
+      "missing_nonwhitespace_positions": [
+        33
+      ]
+    },
+    {
+      "source_ordinal": 24,
+      "last_character_codepoint": 100,
+      "missing_nonwhitespace_positions": [
+        40
+      ]
+    },
+    {
+      "source_ordinal": 25,
+      "last_character_codepoint": 46,
+      "missing_nonwhitespace_positions": [
+        126
+      ]
+    }
+  ],
+  "original_span_end_is_length_minus_one": true,
+  "model_calls": 0,
+  "semantic_review": false,
+  "source_or_owner_writes": false
+}
