@@ -41,7 +41,7 @@ def prepare(args):
     assert not git(repo,"diff","--name-only",revision,"--",*WATT_INPUTS),"Uncommitted frozen inputs"
     other=set(git(repo,"ls-files","--others","--exclude-standard").splitlines())
     assert not any(n.startswith(("src/","tests/","migrations/","docker/")) for n in other)
-    output=repo/".c3-development-inputs/continuation-final-image"
+    output=repo/(".c3-development-inputs/continuation-final-image-"+revision[:7])
     assert not output.exists();output.mkdir()
     guardian=Path("D:/hy/c3-open-obligation-convergence/guardian")
     assert not git(guardian,"status","--porcelain")
