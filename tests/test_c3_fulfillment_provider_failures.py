@@ -111,7 +111,9 @@ def test_terminal_failure_preserves_exact_sources_and_same_basis_never_reopens_c
     failure_runtime = ControlledRuntime(typed_failure("unretained HTTP content " + sentinel))
     runtimes = [failure_runtime]
     if phase == "SEMANTIC_REVIEW":
-        formation_runtime = ControlledRuntime(StructuredModelResult(output_text=plan.model_dump_json(),
+        from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+        wire, _context = controlled_wire(inventory, plan)
+        formation_runtime = ControlledRuntime(StructuredModelResult(output_text=json.dumps(wire),
             provider=ModelProvider.DEEPSEEK, requested_model="controlled", effective_model="controlled",
             request_id="request-controlled-formation", usage=ModelUsage(total_tokens=17),
             timing=ModelTiming(completed_seconds=0.1)))

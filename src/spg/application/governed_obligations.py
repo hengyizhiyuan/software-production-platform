@@ -1087,6 +1087,10 @@ def unresolved_projection(revision, ir, inventory, *, reason, receipt=None):
 
 
 
+class FulfillmentReceiptCapacityStop(RuntimeError):
+    """The existing receipt Owner has already persisted a terminal limit."""
+
+
 class FulfillmentFormationReceipts:
     """Append derived observations to the existing Work plan JSON Owner record."""
     def __init__(self, revision, inventory, *, database=None, memory=None):
@@ -1121,7 +1125,8 @@ class FulfillmentFormationReceipts:
             row["unresolved_source_refs"] = [source["source_ref"] for source in self.inventory["sources"]]
         if len(json.dumps(row, ensure_ascii=False, default=str).encode()) > 131072:
             row = {key: value for key, value in row.items() if key not in {"candidate", "candidate_output", "feedback"}}
-            row.update(terminal=True, validation_passed=False, terminal_reason="OBLIGATION_FORMATION_RECEIPT_LIMIT")
+            row.update(terminal=True, validation_passed=False, terminal_reason="OBLIGATION_FORMATION_RECEIPT_LIMIT",
+                unresolved_source_refs=[source["source_ref"] for source in self.inventory["sources"]])
         if self.database is None:
             prior = self.records()
             self._check_append(prior, stage, attempt)
@@ -1150,6 +1155,10 @@ class FulfillmentFormationReceipts:
                     plan = work.production_plan.model_copy(update={"fulfillment_formation_receipts": (*all_rows, row)})
                     store.update_work(work.id, {"production_plan_proposal": plan.model_dump(mode="json")})
                 uow.commit()
+        if row.get("terminal_reason") == "OBLIGATION_FORMATION_RECEIPT_LIMIT":
+            # Stop before any further model/review or receipt append. The row is
+            # durable first, so the ordinary terminal replay remains authoritative.
+            raise FulfillmentReceiptCapacityStop("OBLIGATION_FORMATION_RECEIPT_LIMIT")
         return row
 
     @staticmethod
@@ -1257,6 +1266,19 @@ def _review_fulfillment_candidate(provider, candidate, inventory, recorder, atte
 
 def form_fulfillment_projection(revision, ir, *, provider, database=None,
                                 source_revision=None, exact_target_paths=()):
+    arguments = dict(provider=provider, database=database,
+        source_revision=source_revision, exact_target_paths=exact_target_paths,
+        _started=monotonic())
+    try:
+        return _form_fulfillment_projection(revision, ir, **arguments)
+    except FulfillmentReceiptCapacityStop:
+        # One read of the just-persisted terminal receipt. This never opens a
+        # new candidate/review slot or rewrites the immutable inventory.
+        return _form_fulfillment_projection(revision, ir, **arguments)
+
+
+def _form_fulfillment_projection(revision, ir, *, provider, database=None,
+                                source_revision=None, exact_target_paths=(), _started=None):
     """Two cumulative candidates on one basis, with recoverable Owner receipts."""
     inventory = fulfillment_inventory(revision, ir, source_revision=source_revision,
                                       exact_target_paths=exact_target_paths)
@@ -1264,7 +1286,7 @@ def form_fulfillment_projection(revision, ir, *, provider, database=None,
         provider._fulfillment_receipts = []
     recorder = FulfillmentFormationReceipts(revision, inventory, database=database,
                                            memory=provider._fulfillment_receipts)
-    started = monotonic()
+    started = monotonic() if _started is None else _started
     capabilities = fulfillment_capability_contracts()
     def finish(candidate, reason, passed):
         rows = recorder.records()
@@ -1317,12 +1339,31 @@ def form_fulfillment_projection(revision, ir, *, provider, database=None,
             observed_row = next((row for row in reversed(recorder.records()) if row["attempt"] == attempt and row["stage"] == "MODEL_RESPONSE_OBSERVED"), None)
             if observed_row is not None:
                 observed = observed_row.get("candidate")
-                if observed is None and observed_row.get("candidate_output") is not None:
-                    observed = json.loads(observed_row["candidate_output"])
+                raw_output = observed_row.get("candidate_output")
+                from spg.providers.fulfillment_candidate import _FULFILLMENT_WIRE_METADATA_KEYS
+                starts = [row for row in recorder.records() if row["attempt"] == attempt
+                    and row["stage"] == "MODEL_REQUEST_PENDING"]
+                compact_receipt = (any(key in observed_row for key in _FULFILLMENT_WIRE_METADATA_KEYS)
+                    or any(key in row for row in starts for key in _FULFILLMENT_WIRE_METADATA_KEYS))
+                if compact_receipt:
+                    from spg.providers.fulfillment_candidate import (
+                        _decode_fulfillment_candidate_wire,
+                        _FulfillmentWireReceiptIdentityError)
+                    if len(starts) != 1 or any(starts[0].get(key) != observed_row.get(key)
+                            for key in _FULFILLMENT_WIRE_METADATA_KEYS):
+                        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_RECEIPT_IDENTITY_DRIFT")
+                    observed = _decode_fulfillment_candidate_wire(
+                        observed if observed is not None else raw_output, inventory, capabilities,
+                        validation_feedback=starts[0].get("feedback"), wire_metadata=observed_row)
+                elif observed is None and raw_output is not None:
+                    # Unmarked historical receipts keep their canonical contract.
+                    observed = json.loads(raw_output)
                 if observed is None:
                     raise ValueError("OBLIGATION_FORMATION_CANDIDATE_NOT_RETAINED")
             else:
-                recorder.append("MODEL_REQUEST_PENDING", attempt, feedback=feedback)
+                metadata_builder = getattr(provider, "form_wire_metadata", None)
+                wire_metadata = metadata_builder(inventory, capabilities, validation_feedback=feedback) if callable(metadata_builder) else {}
+                recorder.append("MODEL_REQUEST_PENDING", attempt, feedback=feedback, **wire_metadata)
                 import inspect
                 accepts_callback = "receipt_callback" in inspect.signature(provider.form).parameters
                 def observed_callback(**values):
@@ -1354,6 +1395,8 @@ def form_fulfillment_projection(revision, ir, *, provider, database=None,
             bindings = validate_projection_candidate(candidate, revision, ir, inventory, semantic_review=semantic_review)
             passed = not any(binding.state == "UNRESOLVED" for binding in bindings)
             reason = "VALIDATED_PROJECTION" if passed else "UNRESOLVED_BINDING"
+        except FulfillmentReceiptCapacityStop:
+            raise
         except ValueError as error:
             feedback = str(error).split("\n", 1)[0][:1000]
             passed, reason = False, feedback
@@ -1364,8 +1407,11 @@ def form_fulfillment_projection(revision, ir, *, provider, database=None,
                 continue
         except Exception as error:
             # Transport/unknown failures cannot justify a probability retry.
-            from spg.providers.fulfillment_candidate import provider_failure_observation
-            reason = f"OBLIGATION_FORMATION_TRANSPORT_{type(error).__name__}"
+            from spg.providers.fulfillment_candidate import (
+                provider_failure_observation, _FulfillmentWireReceiptIdentityError)
+            reason = ("OBLIGATION_FORMATION_WIRE_RECEIPT_IDENTITY_DRIFT"
+                if isinstance(error, _FulfillmentWireReceiptIdentityError)
+                else f"OBLIGATION_FORMATION_TRANSPORT_{type(error).__name__}")
             recorder.append("CANDIDATE_VALIDATED", attempt, candidate=None, failed_predicate=reason,
                 terminal=True, validation_passed=False, terminal_reason=reason,
                 failure_stage=failure_stage, model=provider_failure_observation(error))

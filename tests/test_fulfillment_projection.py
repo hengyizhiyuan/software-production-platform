@@ -11,7 +11,7 @@ import pytest
 from spg.application.governed_obligations import (
     FulfillmentFormationReceipts, admitted_fulfillment_bindings,
     deterministic_fulfillment_projection, evaluate_candidate_handoffs,
-    form_fulfillment_projection, fulfillment_inventory, validate_fulfillment_projection,
+    form_fulfillment_projection, fulfillment_inventory, fulfillment_capability_contracts, validate_fulfillment_projection,
     validate_projection_candidate)
 from spg.domain.engineering_semantics import SemanticRelation, semantic_fact_reference
 from spg.domain.governed_obligation import (
@@ -197,7 +197,10 @@ def test_real_provider_keeps_schema_invalid_response_before_validation():
     runtime = SimpleNamespace(generate=lambda **kwargs: result, close=lambda: None)
     provider = ModelFulfillmentCandidateProvider(lambda: runtime)
     observed = []
-    with pytest.raises(ValueError): provider.form({}, [], receipt_callback=lambda **kwargs: observed.append(kwargs))
+    revision, ir = basis()
+    inventory = fulfillment_inventory(revision, ir)
+    with pytest.raises(ValueError): provider.form(inventory, fulfillment_capability_contracts(),
+        receipt_callback=lambda **kwargs: observed.append(kwargs))
     assert observed[0]["model"]["request_id"] == "request-controlled"
     assert observed[0]["model"]["usage"]["total_tokens"] == 17
     assert json.loads(observed[0]["candidate_output"]) == {"unexpected_shape": "not a plan"}
