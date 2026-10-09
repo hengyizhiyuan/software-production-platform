@@ -1,0 +1,181 @@
+{
+  "schema": "c3-authorized-capacity-model-plan-v1",
+  "started_at_utc": "2026-10-09T16:58:44.028082+00:00",
+  "application_source": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+  "application_tree": "d479d61f5fcac075a5af3a274f60cbe3f6e9f53f",
+  "guardian_source": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+  "ecf_source": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "authorization": "Human 2026-10-10 approved the exact live-model-decision-package; one formation and conditional one review",
+  "new_work_created": false,
+  "historical_owner_mutated": false,
+  "business_database_access": false,
+  "self_refine_calls": 0,
+  "holdout_access": false,
+  "production_resource_mutation": false,
+  "logical_model_entries": 1,
+  "calls": [
+    {
+      "operation": "formation",
+      "started_at_utc": "2026-10-09T16:58:44.186704+00:00",
+      "stages": [
+        {
+          "stage": "provider_request_queued",
+          "at_utc": "2026-10-09T16:58:44.197691+00:00"
+        },
+        {
+          "stage": "provider_request_sent",
+          "at_utc": "2026-10-09T16:58:44.199908+00:00"
+        },
+        {
+          "stage": "provider_response_accepted",
+          "at_utc": "2026-10-09T16:58:44.451803+00:00"
+        },
+        {
+          "stage": "provider_first_response_event",
+          "at_utc": "2026-10-09T16:58:44.453870+00:00"
+        }
+      ],
+      "http_request_hooks": [
+        {
+          "at_utc": "2026-10-09T16:58:44.206067+00:00",
+          "body_bytes": 54365,
+          "body_sha256": "9e9e5ab4753c4e20115e721b2c933cd9db20a1c36a7744dd7e037073eea3041d"
+        }
+      ],
+      "http_responses": [
+        {
+          "status_code": 200,
+          "at_utc": "2026-10-09T16:58:44.450351+00:00",
+          "request_id": null
+        }
+      ],
+      "usage": {
+        "input_tokens": 17466,
+        "output_tokens": 16384,
+        "cached_tokens": 0,
+        "reasoning_tokens": 16384,
+        "total_tokens": 33850,
+        "unknown": false
+      },
+      "provider_status": "incomplete",
+      "visible_json_tokens": "UNKNOWN",
+      "request_entity": {
+        "bytes": 54365,
+        "sha256": "9e9e5ab4753c4e20115e721b2c933cd9db20a1c36a7744dd7e037073eea3041d"
+      },
+      "ended_at_utc": "2026-10-09T16:59:44.619106+00:00",
+      "failure_observation": {
+        "provider_failure": {
+          "kind": "INCOMPLETE_RESPONSE",
+          "request_sent": true,
+          "usage_unknown": false,
+          "retryable": true,
+          "provider_status": "incomplete",
+          "termination_reason": "max_output_tokens",
+          "request_id": "aba0aaa8-1db5-45c9-94a4-0cbac10341b4",
+          "occurred_at": "2026-10-09T16:59:44.616049+00:00"
+        },
+        "usage": {
+          "input_tokens": 17466,
+          "output_tokens": 16384,
+          "cached_tokens": 0,
+          "reasoning_tokens": 16384,
+          "total_tokens": 33850,
+          "unknown": false
+        },
+        "transport_retry_count": 0
+      },
+      "provider_last_observation": {
+        "provider_failure": {
+          "kind": "INCOMPLETE_RESPONSE",
+          "request_sent": true,
+          "usage_unknown": false,
+          "retryable": true,
+          "provider_status": "incomplete",
+          "termination_reason": "max_output_tokens",
+          "request_id": "aba0aaa8-1db5-45c9-94a4-0cbac10341b4",
+          "occurred_at": "2026-10-09T16:59:44.616049+00:00"
+        },
+        "usage": {
+          "input_tokens": 17466,
+          "output_tokens": 16384,
+          "cached_tokens": 0,
+          "reasoning_tokens": 16384,
+          "total_tokens": 33850,
+          "unknown": false
+        },
+        "transport_retry_count": 0
+      }
+    }
+  ],
+  "deterministic_checks": [],
+  "candidate_stage": "NOT_REACHED",
+  "semantic_review_stage": "NOT_REACHED",
+  "historical_causal_exclusivity": "UNKNOWN",
+  "visible_json_token_count": "UNKNOWN",
+  "runtime_consumer_admission": "NOT_EXECUTED; isolated candidate validator only, no Owner or Work admission",
+  "qualification_boundary": "isolated derived fulfillment plan only; no Work/Candidate seal, Verification, Guardian or Human authority",
+  "installed_owner_file_hashes": {
+    "status": "PASS",
+    "counts": {
+      "spg": 278,
+      "guardian": 5,
+      "ecf": 5
+    },
+    "attestation_sha256": "fea7676b7c6bdfec6aa6d1fa1e6665a67ac0e205157cc48dc11af158a6823f12"
+  },
+  "basis_sha256": "9b013274f1a6daafc776297a302c52c8247cd2fd5ec9c5b99a83279fd2ee8e2c",
+  "work_id": "048189aa-0613-5307-b6f4-c430e7977f93",
+  "reality_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "source_count": 26,
+  "capability_count": 12,
+  "capabilities_fingerprint": "a2e695783b122373f0ed308a959fa4e3116c4a9df5454dbedd81695071153b17",
+  "wire_metadata": {
+    "provider_wire_version": "fulfillment-compact-v1",
+    "wire_request_fingerprint": "4b995573e01820631e063d0108388140be8576c3ac385a38da88d8ee87ea62d4",
+    "wire_table_fingerprint": "cddd1ffc3429695d19411d42c5d6b741534460496705dbb0a430ff138df9e429",
+    "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40"
+  },
+  "profile": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "reasoning_effort": "low",
+    "timeout_seconds": 120.0,
+    "max_output_tokens": 16384,
+    "base_url": "https://api.deepseek.com"
+  },
+  "preflight": "PASS_LOCAL_NO_HTTP",
+  "failure_stage": "FORMATION",
+  "result": "STOPPED",
+  "exception_type": "ModelProviderError",
+  "failed_predicate": null,
+  "provider_failure": {
+    "provider_failure": {
+      "kind": "INCOMPLETE_RESPONSE",
+      "request_sent": true,
+      "usage_unknown": false,
+      "retryable": true,
+      "provider_status": "incomplete",
+      "termination_reason": "max_output_tokens",
+      "request_id": "aba0aaa8-1db5-45c9-94a4-0cbac10341b4",
+      "occurred_at": "2026-10-09T16:59:44.616049+00:00"
+    },
+    "usage": {
+      "input_tokens": 17466,
+      "output_tokens": 16384,
+      "cached_tokens": 0,
+      "reasoning_tokens": 16384,
+      "total_tokens": 33850,
+      "unknown": false
+    },
+    "transport_retry_count": 0
+  },
+  "ended_at_utc": "2026-10-09T16:59:44.619282+00:00",
+  "wall_seconds": 60.591191162006,
+  "http_transmission_attempt_observations": 1,
+  "transport_recovery_stages": 0,
+  "token_usage_boundary": "Provider-reported numeric fields only; missing fields and visible JSON tokens UNKNOWN; unobserved transmissions may have UNKNOWN usage",
+  "runtime_or_assurance_pass": false,
+  "c3_status": "PARTIAL"
+}

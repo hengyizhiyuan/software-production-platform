@@ -1,0 +1,63 @@
+{
+  "schema": "c3-authorized-capacity-container-v1",
+  "created_observed_at_utc": "2026-10-09T16:58:39.340290+00:00",
+  "source_revision": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+  "actual_container_id": "ac1df9cde73656b346496347892f3a5e964b327574c606b468c05aeffaa4213d",
+  "actual_image_id": "sha256:7a4ac00e3599bda2dbcebe46b15dd0b45f3be86552021023ebd288eb732f7b35",
+  "user": "10001:10001",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/capacity-representation-20261009/live-model-verification-1/private/model-observations",
+      "Destination": "/c3-private",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/capacity-final-inputs/live-model-verification-1/verify_live_model.py",
+      "Destination": "/probe.py",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json",
+      "Destination": "/basis.json",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/capacity-representation-20261009/final-image/evidence/actual-imports.json",
+      "Destination": "/qualified-imports.json",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/capacity-representation-20261009/live-model-verification-1/evidence",
+      "Destination": "/c3-evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "network_mode": "watt-c3-control-20261009",
+  "probe_sha256": "8f63b5d8afac0a283d56f9f156c32a15bf5eea5c6ebeba07fbd319db76f58be9",
+  "controller_sha256": "ac400dc4c2efe40e01cabfe2cbe8991e35472482485e3462c2f7fcbc7a6efb56",
+  "source_overlay": false,
+  "business_database_access": false,
+  "new_work_created": false,
+  "existing_services_started_or_modified": false,
+  "mode": "live",
+  "recorded_at_utc": "2026-10-09T16:59:45.524835+00:00",
+  "exit_code": 0,
+  "docker_started_at": "2026-10-09T16:58:39.78928791Z",
+  "docker_finished_at": "2026-10-09T16:59:45.349824034Z",
+  "running": false
+}

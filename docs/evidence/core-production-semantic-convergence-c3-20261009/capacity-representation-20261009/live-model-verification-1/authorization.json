@@ -1,0 +1,23 @@
+{
+  "schema": "c3-live-verification-authorization-evidence-v1",
+  "source": "direct Human user message in this current task",
+  "client_date": "2026-10-10",
+  "exact_authorization_received_time": "UNKNOWN_NOT_CAPTURED",
+  "decision_package_path": "../live-model-decision-package.md",
+  "decision_package_sha256": "7e6041fded194be8203f5262f90b308220b7fae003ccb216d8aabf4ae834775c",
+  "approved": true,
+  "formation_limit": 1,
+  "review_limit": 1,
+  "review_precondition": "frozen deterministic validators pass and no unresolved binding",
+  "model": "deepseek-flash",
+  "reasoning_effort": "low",
+  "max_output_tokens": 16384,
+  "timeout_seconds": 120,
+  "transport_replay": "existing single pre-first-event transport recovery only",
+  "self_refine_allowed": false,
+  "work_or_owner_write_allowed": false,
+  "holdout_allowed": false,
+  "production_change_allowed": false,
+  "after_completion": "stop and submit result for Architecture Lead; no G0 or further repair",
+  "human_decision_database_record_created": false
+}

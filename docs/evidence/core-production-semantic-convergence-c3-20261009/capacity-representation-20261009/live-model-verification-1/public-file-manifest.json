@@ -1,0 +1,59 @@
+{
+  "recorded_at_utc": "2026-10-09T17:03:10.313427+00:00",
+  "application_source": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+  "actual_image_id": "sha256:7a4ac00e3599bda2dbcebe46b15dd0b45f3be86552021023ebd288eb732f7b35",
+  "status": "STOPPED; C3 PARTIAL; one authorized Formation; no Review or further calls",
+  "files": [
+    {
+      "path": "architecture-lead-submission.md",
+      "bytes": 6263,
+      "sha256": "8aa5990d1fe0b4fbf115c1f1ee9ae87b5546aa845b8350410d1a124b19ee209b"
+    },
+    {
+      "path": "authorization.json",
+      "bytes": 1017,
+      "sha256": "fb5ba711911df71f9aaf65b1c2f2e7cc10063c9637bdd3c39aef962cd28e0235"
+    },
+    {
+      "path": "delivery-and-recovery.md",
+      "bytes": 2963,
+      "sha256": "c8aa8c5ef6822dc903a477a1ab5b29bdd6df8fbca3fd370d3549aebe477dc9e1"
+    },
+    {
+      "path": "live-container-before.json",
+      "bytes": 2241,
+      "sha256": "155961e1ba7a2f6a6d976ddc7d6bbe387f757da157d77a4c89d9e53e884818ac"
+    },
+    {
+      "path": "live-container.json",
+      "bytes": 2450,
+      "sha256": "f47cd5b24d3ff6082b29ceae0e7ccc182243802f0737ac84d16a3088dea281cd"
+    },
+    {
+      "path": "live-model-result.json",
+      "bytes": 6534,
+      "sha256": "8316d5c4a45927b05c59678980fd233577abe253dae169dbd96a6889c87db03c"
+    },
+    {
+      "path": "preflight-container-before.json",
+      "bytes": 2226,
+      "sha256": "4332bfa4194dc3ec1b3dddba4a89b0bb930b86ef0c41f955657c32a79073a11b"
+    },
+    {
+      "path": "preflight-container.json",
+      "bytes": 3301,
+      "sha256": "ec9d990387fa3a97d3881baa0a736ba04b3b63048781bf41706977cd74f2ac79"
+    },
+    {
+      "path": "run_authorized_verification.py",
+      "bytes": 8216,
+      "sha256": "ac400dc4c2efe40e01cabfe2cbe8991e35472482485e3462c2f7fcbc7a6efb56"
+    },
+    {
+      "path": "verify_live_model.py",
+      "bytes": 19445,
+      "sha256": "8f63b5d8afac0a283d56f9f156c32a15bf5eea5c6ebeba07fbd319db76f58be9"
+    }
+  ],
+  "manifest_self_hash": "EXCLUDED_TO_AVOID_SELF_REFERENCE"
+}
