@@ -4,8 +4,9 @@ function surface(route='/admin',authorization=true,run=null,trace=null,extra={})
  const nodes={'#admin-content':{innerHTML:''},'#admin-notice':{textContent:'',hidden:true}};const listeners={};const calls=[];
  const worker={name:'cloud-worker-1',status:'READY',capacity:{max_concurrency:1},active_execution_count:0,available_slots:1};
  const overview={watt_revision:'d'.repeat(40),quality:{campaigns:[],runs:[],cases:[],clusters:[]},assurance:{mode:'REQUIRED',store_observed:true,results:[],quality_evaluations:[]},operations:{state:'CURRENT',node:{node_id:'i-exact',hostname:'host',region:'cn-wulanchabu',observed_at:new Date().toISOString(),cpu_percent:5,cpu_count:4,memory:{used_bytes:1000,total_bytes:2000},disk:{used_bytes:1000,total_bytes:10000,free_bytes:9000},network:{eth0:{rx_bytes:100,tx_bytes:200}},uptime_seconds:3600},production:{workers:[worker],queue:[],queue_depth:0,active_executions:0,available_slots:1},services:[{service:'api',state:'running',health:'healthy',node_id:'i-exact'}],storage:{docker:{categories:[]},note:'scopes'},topology:{nodes:[{id:'i-exact',hostname:'host',region:'cn-wulanchabu'}],service_placements:[{service:'api',health:'healthy',node_id:'i-exact'}]}}};
- const context={URLSearchParams,document:{querySelector:s=>nodes[s],querySelectorAll:()=>[],addEventListener:(k,f)=>listeners[k]=f},window:{addEventListener(){}},location:{pathname:route,search:trace?(trace.work?'?kind=work&entity=ordinary-work':'?case=historical-case'):run?'?run='+run.id:''},history:{pushState(){}},setTimeout(){},console,HTMLFormElement:class {},FormData:class {},async fetch(url,opts){calls.push([url,opts]);const data=extra[url] || (trace && url.includes('/trace')?trace:run && url.startsWith('/api/admin/runs/') ? run : url==='/api/admin/overview'?overview:url==='/api/admin/arena'?{experiments:[],preferences:[],learning_signals:[],promotion_decisions:[]}:url==='/api/admin/operations/history'?[]:{});return{ok:authorization,status:authorization?200:401,json:async()=>data};}};
- vm.runInNewContext(source,context);return{nodes,listeners,calls,overview,ready:()=>new Promise(r=>setImmediate(r))};
+ const downloads=[];
+ const context={URLSearchParams,URL:{createObjectURL:()=> 'blob:diagnostic',revokeObjectURL(){}},document:{querySelector:s=>nodes[s],querySelectorAll:()=>[],createElement:()=>({click(){downloads.push(this.download)},remove(){}}),body:{appendChild(){}},addEventListener:(k,f)=>listeners[k]=f},window:{addEventListener(){}},location:{pathname:route,search:trace?(trace.work?'?kind=work&entity=ordinary-work':'?case=historical-case'):run?'?run='+run.id:''},history:{pushState(){}},setTimeout(){},console,HTMLFormElement:class {},FormData:class {},async fetch(url,opts){calls.push([url,opts]);const data=extra[url] || (trace && url.includes('/trace')?trace:run && url.startsWith('/api/admin/runs/') ? run : url==='/api/admin/overview'?overview:url==='/api/admin/arena'?{experiments:[],preferences:[],learning_signals:[],promotion_decisions:[]}:url==='/api/admin/operations/history'?[]:{});return{ok:authorization&&!data._httpStatus,status:data._httpStatus|| (authorization?200:401),json:async()=>data,blob:async()=>Buffer.from('fixture')};}};
+ vm.runInNewContext(source,context);return{nodes,listeners,calls,downloads,overview,ready:()=>new Promise(r=>setImmediate(r))};
 }
 test('Admin uses existing authenticated session and dedicated navigation',async()=>{const s=surface();await s.ready();assert.equal(s.calls[0][0],'/auth/session');assert.match(s.nodes['#admin-content'].innerHTML,/总览|概览/);assert.doesNotMatch(s.nodes['#admin-content'].innerHTML,/data-quadrant/);});
 test('Unauthenticated Admin does not load owner data',async()=>{const s=surface('/admin',false);await s.ready();assert.match(s.nodes['#admin-content'].innerHTML,/登录 Watt Admin/);assert.equal(s.calls.length,1);});
@@ -39,16 +40,28 @@ test('Zero qualification duration is not presented as instantaneous software pro
 test('Work has first-level navigation and bounded list without overview or Trace hydration',async()=>{
  const data={total:51,next_offset:50,items:[{work_id:'ordinary-work',title:'创建工律官网',product_name:'工律官网',state_label:'受阻',stage_label:'生产',result_label:'尚未形成 Candidate',pwu_count:1,issue_hint:'验证失败',raw_user_requirement:'原始需求',self_refine_count:1}],note:'owner 事实'};
  const s=surface('/admin/works',true,null,null,{'/api/admin/works?filter=ALL&limit=50&offset=0':data});await s.ready();
- const h=s.nodes['#admin-content'].innerHTML;for(const word of ['创建工律官网','受阻','查看 Trace','等待我','下一页'])assert.ok(h.includes(word));
+ const h=s.nodes['#admin-content'].innerHTML;for(const word of ['创建工律官网','受阻','查看 Trace','导出 AI 诊断包','等待我','下一页'])assert.ok(h.includes(word));
  assert.equal(s.calls.length,2);assert.ok(!s.calls.some(([p])=>p.includes('/trace')||p.includes('/overview')));
  assert.match(fs.readFileSync('src/spg/web/admin.html','utf8'),/data-admin-route="works">Work</);
  await s.listeners.click({target:{closest:()=>({dataset:{workOffset:'50'}})}});
  assert.ok(s.calls.at(-1)[0].endsWith('offset=50'));
 });
+test('Work diagnostic download is lazy and shows the server error',async()=>{
+ const data={total:1,next_offset:null,items:[{work_id:'ordinary-work',title:'诊断目标',state_label:'受阻',stage_label:'设计',result_label:'未形成',raw_user_requirement:'需求'}],note:'owner 事实'};
+ const path='/api/admin/works/ordinary-work/diagnostic?mode=compact';
+ const s=surface('/admin/works',true,null,null,{'/api/admin/works?filter=ALL&limit=50&offset=0':data});await s.ready();
+ assert.equal(s.calls.length,2);
+ await s.listeners.click({target:{closest:()=>({dataset:{diagnosticWork:'ordinary-work',diagnosticMode:'compact'}})}});
+ assert.equal(s.calls.at(-1)[0],path);assert.deepEqual(s.downloads,['watt-work-ordinary-work-diagnostic.zip']);
+ const failed=surface('/admin/works',true,null,null,{'/api/admin/works?filter=ALL&limit=50&offset=0':data,[path]:{_httpStatus:409,message:'导出容量超限'}});await failed.ready();
+ await failed.listeners.click({target:{closest:()=>({dataset:{diagnosticWork:'ordinary-work',diagnosticMode:'compact'},disabled:false})}});
+ assert.match(failed.nodes['#admin-notice'].textContent,/导出容量超限/);assert.equal(failed.downloads.length,0);
+});
 test('Ordinary incomplete Work reuses Trace modes and does not claim Quality PASS or delivery',async()=>{
  const t=traceFixture();Object.assign(t,{work:{work_id:'ordinary-work'},story:{product_name:'工律官网',latest_event:'Preview 已检查',latest_activity_at:'2026-10-07T01:00:00Z'},detail_level:'summary',preview:{status:'READY'},manifests:[],acceptance:[]});t.diagnosis.quality_label='受阻';t.diagnosis.production_result='尚无交付 Manifest';
  const s=surface('/admin/trace',true,null,t);await s.ready();const h=s.nodes['#admin-content'].innerHTML;
  assert.match(h,/这次 Work 的目标/);assert.match(h,/返回 Work/);assert.match(h,/Preview 已检查/);assert.doesNotMatch(h,/这个场景在检查什么|场景符合预期/);
+ assert.match(h,/完整证据包/);assert.match(h,/下载 trace.json/);
  assert.ok(s.calls.some(([p])=>p==='/api/admin/traces/work/ordinary-work?view=summary'));
  assert.equal((h.match(/role="tab"/g)||[]).length,9);
  await s.listeners.click({target:{closest:()=>({dataset:{traceTab:'artifacts'}})}});

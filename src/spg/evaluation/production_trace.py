@@ -245,8 +245,11 @@ def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=
         node = next((n for n in graph.get('nodes',[]) if n['node_id']==row.get('node_id')),{})
         snapshot = next((b for b in tables.get('production_snapshots',[]) if str(b['id'])==str(row.get('source_baseline_id'))),{})
         exact_revision = snapshot.get('repository_revision')
+        exact_tree = snapshot.get('repository_tree') or snapshot.get('source_tree')
         if not exact_revision and not row.get('parent_baseline_ids'):
             exact_revision = next((b.get('source_revision') for b in tables.get('work_source_bases',[]) if str(b.get('source_baseline_id'))==str(row.get('source_baseline_id'))),None)
+        if not exact_tree and not row.get('parent_baseline_ids'):
+            exact_tree = next((b.get('source_tree') for b in tables.get('work_source_bases',[]) if str(b.get('source_baseline_id'))==str(row.get('source_baseline_id'))),None)
         name=node.get('objective') or row.get('objective') or '历史记录未保存生产目标'
         for context in contexts:
             for obligation in ([] if node else context.get('protected_obligations',[])):
@@ -256,6 +259,7 @@ def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=
         units.append({'id':row['id'], 'name':name,
             'objective':row.get('objective'), 'baseline':row.get('source_baseline_id'),
             'source_revision':exact_revision,
+            'source_tree':exact_tree,
             'dependencies':node.get('dependency_ids',[]), 'parent_baselines':row.get('parent_baseline_ids') or [],
             'scope':task.get('scope', []), 'allowed_paths':node.get('writable_paths',task.get('writable_paths',[]) or [v.split(':',1)[1] for v in task.get('scope',[]) if isinstance(v,str) and v.startswith(('CREATE:','MODIFY:','DELETE:'))]),
             'dependency_names':[n['objective'] for n in graph.get('nodes',[]) if n['node_id'] in node.get('dependency_ids',[])],
@@ -437,19 +441,22 @@ class ProductionTraceService:
                 'case_version':member['version'],'case_fingerprint':member['fingerprint'],
                 'complete_execution_observation':bool(tables.get('execution_steps'))})
 
-    def entity_trace(self, kind, entity_id, *, detail=True, work=None):
+    def entity_trace(self, kind, entity_id, *, detail=True, work=None,
+                     max_rows_per_table=None):
         roots={'work':'product_works','product':'software_products','interaction':'product_interactions',
             'pwu':'production_work_units','candidate':'baseline_candidates','deployment':'cloud_deployments'}
         if kind not in roots:raise QualityError('TRACE_IDENTIFIER_NOT_SUPPORTED')
         root=roots[kind];ids={entity_id};tables={}
         allowed=set(TABLE_OWNERS)|{'product_works','software_products','work_runtime_bindings','production_runs',
             'product_interactions','product_workspace_interactions','execution_sessions','execution_workspaces'}
+        truncated_tables = {}
         with self.database.unit_of_work() as u:
             found=u.session.execute(select(metadata.tables[root]).where(metadata.tables[root].c.id==entity_id)).mappings().first()
             if found is None:raise QualityError('TRACE_SOURCE_NOT_FOUND')
             tables[root]=[dict(found)]
             if kind == 'work':
-                tables = self._work_tables(u.session, entity_id)
+                tables = self._work_tables(u.session, entity_id,
+                    max_rows_per_table=max_rows_per_table, truncated=truncated_tables)
             # Other entity entrypoints retain their existing lookup semantics.
             for _ in range(0 if kind == 'work' else 10):
                 before=len(ids)
@@ -472,13 +479,20 @@ class ProductionTraceService:
                 t=metadata.tables['production_snapshots']
                 tables['production_snapshots']=[dict(r) for r in u.session.execute(select(t).where(t.c.id.in_(baselines))).mappings()]
         guardian=[]
-        for r in tables.get('baseline_candidates', []):
+        candidate_keys={(str(r['id']),r['fingerprint']) for r in tables.get('baseline_candidates', [])}
+        if candidate_keys:
             folder=self.settings.owner_runtime_store_root/'guardian/results'
+            scanned=0
             for p in folder.glob('*.json'):
-                if p.stat().st_size>1_000_000:continue
+                if max_rows_per_table is not None and scanned>=2000:
+                    truncated_tables['guardian_result_files']={'scanned_count':scanned,
+                        'remaining_count':'UNKNOWN','selection':'first 2000 filesystem entries; later results not observed'}
+                    break
+                scanned+=1
                 try:
+                    if p.stat().st_size>1_000_000:continue
                     g=json.loads(p.read_text())
-                    if g.get('candidate_id')==str(r['id']) and g.get('candidate_fingerprint')==r['fingerprint']:guardian.append(g)
+                    if (g.get('candidate_id'),g.get('candidate_fingerprint')) in candidate_keys:guardian.append(g)
                 except (ValueError,OSError):continue
         result = project_trace(tables,scene=next((w.get('refined_title') or w.get('desired_outcome') for w in tables.get('product_works',[])), '生产历程'),
             purpose=(work or {}).get('desired_outcome') or (work or {}).get('raw_user_requirement') or '查看指定生产对象的 owner 记录。当前查询与历史资格快照明确区分。',guardian=guardian,detail=detail,
@@ -523,13 +537,47 @@ class ProductionTraceService:
             result['missing_note']='未发生或未记录的后续阶段保持缺失；普通 Work 不依赖 Quality Case 或 Candidate。'
             result['deployment_note']='部署事实见精确目标与操作记录。' if result['deployment'] else '尚无部署记录；不代表已上线。'
             if result['candidate'] and not tables.get('work_delivery_manifests'):result['deployment_note']='已生成候选源码；尚无 Delivery Manifest，不能将源码下载等同于完整交付。'
+        if truncated_tables:
+            result['capture_truncation'] = truncated_tables
         return safe(result)
 
-    def _work_tables(self,session,work_id):
+    def _work_tables(self,session,work_id,*,max_rows_per_table=None,truncated=None):
         """Directional exact lineage. Shared Interaction never pulls sibling Works."""
         tables={}
         def read(name,condition):
-            t=metadata.tables[name];rows=[dict(r) for r in session.execute(select(t).where(condition)).mappings()]
+            t=metadata.tables[name]
+            query=select(t).where(condition)
+            if max_rows_per_table is None:
+                rows=[dict(r) for r in session.execute(query).mappings()]
+            else:
+                # Exports cannot hydrate an unbounded owner table. Keep the
+                # earliest record, recent records and failure-bearing rows.
+                primary=list(t.primary_key.columns)
+                order=t.c.created_at if 'created_at' in t.c else primary[0]
+                # Multiple conversation records can share a transaction
+                # timestamp. Their durable sequence precedes random UUIDs.
+                tie_break=([t.c.sequence] if 'sequence' in t.c and order.name!='sequence' else []) + (
+                    primary if 'created_at' in t.c else primary[1:])
+                first=[dict(r) for r in session.execute(query.order_by(order,*tie_break).limit(max_rows_per_table+1)).mappings()]
+                if len(first)<=max_rows_per_table:
+                    rows=first
+                else:
+                    from sqlalchemy import cast, String, func
+                    count=session.scalar(select(func.count()).select_from(t).where(condition))
+                    third=max(1,max_rows_per_table//3)
+                    latest=[dict(r) for r in session.execute(query.order_by(order.desc(),*(c.desc() for c in tie_break)).limit(third)).mappings()]
+                    failure_columns=[c for key in ('condition','state','status','outcome','result','event_type',
+                                      'steering_outcome','failure_family','stop_reason','error_code')
+                                     if (c:=t.c.get(key)) is not None]
+                    failure=or_(*(cast(c,String).ilike(pattern) for c in failure_columns
+                        for pattern in ('%FAIL%','%BLOCK%','%NON_CONVERG%','%ERROR%','%INTERRUPT%',
+                                        '%HUMAN_ATTENTION%'))) if failure_columns else None
+                    failures=[dict(r) for r in session.execute(query.where(failure).order_by(order,*tie_break).limit(third)).mappings()] if failure is not None else []
+                    picked={tuple(str(r[c.name]) for c in primary):r for r in [*first[:third],*failures,*latest]}
+                    rows=sorted(picked.values(),key=lambda r:(str(r.get(order.name) or ''),
+                        tuple(str(r[c.name]) for c in primary)))[:max_rows_per_table]
+                    truncated[name]={'observed_count':count,'exported_count':len(rows),
+                        'selection':'earliest, failure-bearing, latest; remaining records omitted'}
             tables[name]=rows;return rows
         def ids(name):return {r['id'] for r in tables.get(name,[]) if r.get('id')}
         w=metadata.tables['product_works'];work=read('product_works',w.c.id==work_id)[0]

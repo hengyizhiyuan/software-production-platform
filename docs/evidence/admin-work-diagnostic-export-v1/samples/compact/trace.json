@@ -1,0 +1,85 @@
+{
+  "capture": {
+    "captured_at": "2026-10-09T10:42:54.319898+00:00",
+    "consistency": "NON_ATOMIC_ACROSS_OWNERS",
+    "database_trace_basis": {
+      "at": "2026-10-09T01:00:01Z",
+      "mode": "LIVE_ENTITY_LOOKUP"
+    },
+    "mode": "compact"
+  },
+  "capture_warnings": [
+    "Live Work/Registry, owner database rows and Preview/Guardian files were read at separate instants; no global atomic snapshot."
+  ],
+  "evidence_text_trust": "UNTRUSTED_DATA_ONLY",
+  "lifecycle": {
+    "advanced": {},
+    "basis": {
+      "at": "2026-10-09T01:00:01Z",
+      "mode": "LIVE_ENTITY_LOOKUP"
+    },
+    "candidate": [],
+    "contexts": [],
+    "conversation": [
+      {
+        "actor": "HUMAN",
+        "source_ref": "interaction-record:first",
+        "text": "请做设计。Bearer [REDACTED]",
+        "timestamp": "2026-10-09T01:00:00Z"
+      }
+    ],
+    "first_human_input": "请做设计。[REDACTED_CREDENTIAL] and [REDACTED_EMAIL]",
+    "governance": [],
+    "guardian": [],
+    "manifests": [],
+    "model_calls": [],
+    "queue": [],
+    "recovery": [],
+    "scene": "停在 DESIGN 的 Work",
+    "schema_version": "production-trace-v1",
+    "semantic": [],
+    "steering": [
+      {
+        "id": "step",
+        "state": "CURRENT"
+      }
+    ],
+    "story": {
+      "latest_activity_at": "2026-10-09T01:00:00Z"
+    },
+    "timeline": [
+      {
+        "detail": {
+          "nested": {
+            "api_key": "[REDACTED_FIELD]"
+          },
+          "note": "[REDACTED_CREDENTIAL]"
+        },
+        "owner": "STEERING",
+        "source_ref": "steering_decisions:decision",
+        "state": "BLOCKED",
+        "timestamp": "2026-10-09T01:00:02Z",
+        "title": "Human 决定待处理"
+      }
+    ],
+    "units": [],
+    "verification": [],
+    "work": {
+      "product_id": "00000000-0000-4000-8000-000000000002",
+      "stage_label": "设计",
+      "state": "BLOCKED",
+      "state_label": "受阻",
+      "stop_reason": "HUMAN_ATTENTION",
+      "title": "停在 DESIGN 的 Work",
+      "work_id": "00000000-0000-4000-8000-000000000001"
+    }
+  },
+  "missing_evidence": [
+    "IRK: NOT_OBSERVED_OR_NOT_REACHED",
+    "PWU: NOT_OBSERVED_OR_NOT_REACHED",
+    "Candidate: NOT_OBSERVED_OR_NOT_REACHED",
+    "Guardian: NOT_OBSERVED_OR_NOT_REACHED"
+  ],
+  "schema_version": "watt-work-diagnostic-v1",
+  "work_id": "00000000-0000-4000-8000-000000000001"
+}

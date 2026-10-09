@@ -1,9 +1,10 @@
 """Admin is a projection and Quality command surface behind existing owner authentication."""
 from importlib.resources import files
+from hashlib import sha256
 from uuid import UUID
 
 from fastapi import APIRouter, Request, Query
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 
 from spg.api.authority import ACTOR_ID
 from spg.evaluation.catalog import import_core, create_fresh_holdout
@@ -12,6 +13,7 @@ from spg.evaluation.contracts import (CaseDefinition, CampaignRequest, Experimen
 from spg.evaluation.service import QualityService
 from spg.evaluation.operations import OperationsService
 from spg.evaluation.production_trace import ProductionTraceService
+from spg.evaluation.work_diagnostic_export import WorkDiagnosticExportService
 from spg.evaluation.admin_projection import cockpit_projection, outcome_projection
 
 
@@ -19,6 +21,7 @@ def install_admin(api, database, settings, runtime=None):
     quality = QualityService(database, settings)
     operations = OperationsService(database, settings, runtime)
     traces = ProductionTraceService(database, settings, quality)
+    diagnostic_exports = WorkDiagnosticExportService(database, settings, quality)
     api.state.quality_owner = quality
     api.state.operations_observer = operations
     router = APIRouter(prefix="/api/admin")
@@ -92,6 +95,25 @@ def install_admin(api, database, settings, runtime=None):
         from spg.evaluation.work_registry import WorkRegistryService
         return WorkRegistryService(database).list(getattr(http_request.state,'actor_id',ACTOR_ID),
             filter=filter,product=product_id,limit=limit,offset=offset,pulses=work_observations())
+
+    @router.get('/works/{work_id}/diagnostic')
+    def work_diagnostic_export(work_id: UUID, http_request: Request,
+                               mode: str = 'compact', file: str | None = None):
+        # The service independently scopes this exact Work through the owner
+        # registry before hydrating any Trace. The route is GET/read-only.
+        owner = getattr(http_request.state, 'actor_id', ACTOR_ID)
+        if file is None:
+            content = diagnostic_exports.zip(owner, work_id, mode=mode)
+            name = f'watt-work-{work_id}-diagnostic.zip'
+            media = 'application/zip'
+        else:
+            content = diagnostic_exports.file(owner, work_id, mode=mode, name=file)
+            name = file
+            media = 'application/json' if file.endswith('.json') else 'text/markdown; charset=utf-8'
+        return Response(content=content, media_type=media,
+            headers={'Content-Disposition':f'attachment; filename="{name}"',
+                'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff',
+                'X-Evidence-SHA256':sha256(content).hexdigest()})
 
     @router.get('/case-runs/{case_run_id}/trace')
     def case_trace(case_run_id: UUID, view: str = "full"):
