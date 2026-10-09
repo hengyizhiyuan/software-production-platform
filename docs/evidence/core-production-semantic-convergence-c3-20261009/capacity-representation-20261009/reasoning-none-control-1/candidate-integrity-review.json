@@ -1,0 +1,105 @@
+{
+  "scope": "Public candidate metadata analysis only; no model call, candidate change or Owner write",
+  "execution_result_sha256": "b1983ac75e9fd023bd629027159bde3bd289677e2e20e46254d9de48134dcb42",
+  "candidate_fingerprint": "98e38e96d66751327a6eb44519cf980db471aae99664b324c3e36a043a049444",
+  "components_fingerprint": "74d621203266a170e163f420e9899ac989cd611d1c80c0d2a30af594ca74ff94",
+  "route_count": 57,
+  "source_ordinals_present": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25
+  ],
+  "all_26_sources_present": true,
+  "constraint_indices_present": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "all_11_constraint_indices_present": true,
+  "candidate_capability_counts": {
+    "ARTIFACT_CONTENT": 15,
+    "GIT_DIFF_SCOPE": 8,
+    "DENY_PREVIEW": 3,
+    "DENY_DEPLOY": 4,
+    "DENY_PUBLISH": 4,
+    "CANDIDATE_SEAL": 4,
+    "RETAIN_CONTEXT": 8,
+    "UNRESOLVED": 11
+  },
+  "duplicate_pair_rows": [
+    {
+      "source_ordinal": 5,
+      "capability": "ARTIFACT_CONTENT",
+      "constraint_indices": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "support_ordinals": [
+        12
+      ],
+      "component": {
+        "start": 0,
+        "end": 71,
+        "quote_sha256": "6d705ee2c308e80fe8caf6db21f4ba5b0e004098a0bf81bd13fbb7ea98be57e1",
+        "fact_ordinals": []
+      },
+      "rationale_sha256": "5e72238d5646afd8f3f7ebbdac42e9f19b672bd091e98932e6d954d3ad2bf010"
+    },
+    {
+      "source_ordinal": 5,
+      "capability": "ARTIFACT_CONTENT",
+      "constraint_indices": [],
+      "target_paths": [
+        "index.html"
+      ],
+      "support_ordinals": [
+        12
+      ],
+      "component": {
+        "start": 0,
+        "end": 71,
+        "quote_sha256": "6d705ee2c308e80fe8caf6db21f4ba5b0e004098a0bf81bd13fbb7ea98be57e1",
+        "fact_ordinals": []
+      },
+      "rationale_sha256": "4cf510b193942ab8b4a97bd938459d97e3a8b9c41a312c3ad82be500e2ab41eb"
+    }
+  ],
+  "first_failed_predicate": "OBLIGATION_PROJECTION_DUPLICATE_ROUTE",
+  "proposal_unresolved_route_count": 11,
+  "presence_is_semantic_completeness": false,
+  "full_deterministic_validation": "FAIL at duplicate-route predicate; later predicates not reached",
+  "independent_semantic_review": "NOT_EXECUTED",
+  "runtime_bindings_created": false,
+  "candidate_deduplicated_or_repaired": false
+}

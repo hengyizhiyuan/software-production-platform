@@ -1,0 +1,69 @@
+{
+  "recorded_at_utc": "2026-10-09T17:19:46.096814+00:00",
+  "application_source": "e0df8196cb51480f542af13b40cfa77fca6b6a6e",
+  "actual_image_id": "sha256:7a4ac00e3599bda2dbcebe46b15dd0b45f3be86552021023ebd288eb732f7b35",
+  "status": "Provider COMPLETED; Candidate rejected; STOPPED / C3 PARTIAL",
+  "files": [
+    {
+      "path": "architecture-lead-submission.md",
+      "bytes": 7571,
+      "sha256": "5f2714bf5216fa3ddf28adfac5265cf637bb4f4d5e34171cc49ba8e4bb681592"
+    },
+    {
+      "path": "authorization.json",
+      "bytes": 1101,
+      "sha256": "07ef6fa0f09e841c16c492da222dcedaaf3da72b381436a9d542499ccca9920e"
+    },
+    {
+      "path": "candidate-integrity-review.json",
+      "bytes": 2488,
+      "sha256": "ff8984838d8f97a029bf5a4967da8b9fe14436ef137887a4881d0091bcd15e8b"
+    },
+    {
+      "path": "delivery-and-recovery.md",
+      "bytes": 2932,
+      "sha256": "dd5c36103f5bb74fc276ff4bc9426094e4b5ed441ce13ca6d8160544b220cb04"
+    },
+    {
+      "path": "derive_controls.py",
+      "bytes": 6085,
+      "sha256": "f4a12ea0fabce3c570c5cdf381ede2121a28cc50068ee1361eecfe06400f890f"
+    },
+    {
+      "path": "live-container-before.json",
+      "bytes": 2238,
+      "sha256": "9d4e566d0c110c4e1a8016e530a758d37f6fd785ace99429d8919f00592c497c"
+    },
+    {
+      "path": "live-container.json",
+      "bytes": 2448,
+      "sha256": "c4629e740a00b8e4013a40e857f0faa5929d0769be889346d43b08b04f223ea3"
+    },
+    {
+      "path": "preflight-container-before.json",
+      "bytes": 2223,
+      "sha256": "664cc88d61180c68e0408b34c9bfc2864d9feb87ba0a48a4a3ef9452f53c9da5"
+    },
+    {
+      "path": "preflight-container.json",
+      "bytes": 3596,
+      "sha256": "a57f10a095185916826bfdc4bb5a105bdcc609c3e773c8abd2137b10946a281d"
+    },
+    {
+      "path": "reasoning-mode-result.json",
+      "bytes": 68400,
+      "sha256": "b1983ac75e9fd023bd629027159bde3bd289677e2e20e46254d9de48134dcb42"
+    },
+    {
+      "path": "run_authorized_verification.py",
+      "bytes": 8258,
+      "sha256": "e86fcabce64f7734977762124bd2b88f590aba0ee3e6679624df8215aa898714"
+    },
+    {
+      "path": "verify_live_model.py",
+      "bytes": 21220,
+      "sha256": "dca4acab50dd13dec50eed9ad93a646d1bdc7ab782dc74e5b3329b75977a9e99"
+    }
+  ],
+  "manifest_self_hash": "EXCLUDED_TO_AVOID_SELF_REFERENCE"
+}
