@@ -25,14 +25,18 @@
 
 ## 数据库
 
-| 实际数据库 | 实际迁移头 | Dump状态 |
-| --- | --- | --- |
-| spg_c3_qualification_20261009 | ["20261007_72"] | CONSISTENT_DUMP_CAPTURED |
-| c3_contract_regression | [] | CONSISTENT_DUMP_CAPTURED |
-| spg_c3_retry1_qualification_20261009 | ["20261007_72"] | CONSISTENT_DUMP_CAPTURED |
-| c1_contract_continuity | ["20261007_72"] | CONSISTENT_DUMP_CAPTURED |
-| c3_independent_holdout_20261009 | ["20261007_72"] | CONSISTENT_DUMP_CAPTURED |
-| c1_contract_continuity | ["20261007_72"] | CONSISTENT_DUMP_CAPTURED |
+| 实际数据库 | PostgreSQL Owner | 实际迁移头 | Dump状态 |
+| --- | --- | --- | --- |
+| spg_c3_qualification_20261009 | C3 主 PG | ["20261007_72"] | CONSISTENT_DUMP_CAPTURED |
+| c3_contract_regression | C3 主 PG | [] | CONSISTENT_DUMP_CAPTURED |
+| spg_c3_retry1_qualification_20261009 | C3 主 PG | ["20261007_72"] | CONSISTENT_DUMP_CAPTURED |
+| c1_contract_continuity | C3 主 PG | ["20261007_72"] | CONSISTENT_DUMP_CAPTURED |
+| c3_independent_holdout_20261009 | C3 主 PG | ["20261007_72"] | CONSISTENT_DUMP_CAPTURED |
+| c1_contract_continuity | retry-1 独立 fixture PG | ["20261007_72"] | CONSISTENT_DUMP_CAPTURED |
+
+C3 主 PG 容器 ID：8b84f8448e7415e2d9d583c79731f7ebd7da3ea756d8e8e34f3a470a5fb84a8e。
+retry-1 独立 fixture PG 容器 ID：62edd2892aa09223700d21c561e8be73ef428507e60bf57c580bb5ef8c6e14cc。
+两个同名 c1_contract_continuity 属于不同 PostgreSQL Owner，恢复时必须按公开 receipt 的 container_id 和 dump path 区分。
 
 ## 外部保护
 
