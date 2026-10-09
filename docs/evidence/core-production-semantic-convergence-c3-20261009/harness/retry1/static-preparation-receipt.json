@@ -1,0 +1,277 @@
+{
+  "schema": "c3-retry1-control-static-preparation-v1",
+  "captured_at_utc": "2026-10-09T12:34:09.766001+00:00",
+  "status": "PREPARED_ONLY_NO_REMOTE_EXECUTION",
+  "scope": "control/evidence artifacts only; independent engineering agent not Human Acceptance",
+  "python_ast_valid_files": [
+    "build_c3_image.py",
+    "c3_export_owner_records.py",
+    "c3_export_work_snapshot.py",
+    "c3_normal_entry.py",
+    "c3_retry_scope.py",
+    "launch_c3_runtime.py",
+    "prepare_c3_freeze.py",
+    "prepare_c3_retry1_resources.py",
+    "run_c3_normal_entry.py",
+    "run_final_image_regression.py",
+    "scan_public_evidence.py",
+    "worker_root_probe.py"
+  ],
+  "default_no_contact_plans": [
+    {
+      "file": "prepare_c3_retry1_resources.py",
+      "exit_code": 0,
+      "observed_plan": {
+        "schema": "c3-retry1-control-plan-v1",
+        "action": "prepare-retry1-resources",
+        "run_root": "/data/watt/c3-semantic-convergence-20261009/retry-1",
+        "database": "spg_c3_retry1_qualification_20261009",
+        "roles": {
+          "api": "watt-c3-retry1-api-20261009",
+          "coordinator": "watt-c3-retry1-coordinator-20261009",
+          "worker": "watt-c3-retry1-worker-20261009",
+          "tool-host": "watt-c3-retry1-tool-host-20261009"
+        },
+        "volume": "watt-c3-retry1-workspaces-20261009",
+        "port": 18301,
+        "execute_required": "--execute",
+        "remote_contact": false,
+        "work_created": false,
+        "model_calls": 0
+      }
+    },
+    {
+      "file": "build_c3_image.py",
+      "exit_code": 0,
+      "observed_plan": {
+        "schema": "c3-retry1-control-plan-v1",
+        "action": "build_c3_image.py",
+        "run_root": "/data/watt/c3-semantic-convergence-20261009/retry-1",
+        "database": "spg_c3_retry1_qualification_20261009",
+        "roles": {
+          "api": "watt-c3-retry1-api-20261009",
+          "coordinator": "watt-c3-retry1-coordinator-20261009",
+          "worker": "watt-c3-retry1-worker-20261009",
+          "tool-host": "watt-c3-retry1-tool-host-20261009"
+        },
+        "volume": "watt-c3-retry1-workspaces-20261009",
+        "port": 18301,
+        "execute_required": "--execute",
+        "remote_contact": false,
+        "work_created": false,
+        "model_calls": 0
+      }
+    },
+    {
+      "file": "launch_c3_runtime.py",
+      "exit_code": 0,
+      "observed_plan": {
+        "schema": "c3-retry1-control-plan-v1",
+        "action": "launch_c3_runtime.py",
+        "run_root": "/data/watt/c3-semantic-convergence-20261009/retry-1",
+        "database": "spg_c3_retry1_qualification_20261009",
+        "roles": {
+          "api": "watt-c3-retry1-api-20261009",
+          "coordinator": "watt-c3-retry1-coordinator-20261009",
+          "worker": "watt-c3-retry1-worker-20261009",
+          "tool-host": "watt-c3-retry1-tool-host-20261009"
+        },
+        "volume": "watt-c3-retry1-workspaces-20261009",
+        "port": 18301,
+        "execute_required": "--execute",
+        "remote_contact": false,
+        "work_created": false,
+        "model_calls": 0
+      }
+    },
+    {
+      "file": "run_final_image_regression.py",
+      "exit_code": 0,
+      "observed_plan": {
+        "schema": "c3-retry1-control-plan-v1",
+        "action": "final-image-regression",
+        "run_root": "/data/watt/c3-semantic-convergence-20261009/retry-1",
+        "database": "spg_c3_retry1_qualification_20261009",
+        "roles": {
+          "api": "watt-c3-retry1-api-20261009",
+          "coordinator": "watt-c3-retry1-coordinator-20261009",
+          "worker": "watt-c3-retry1-worker-20261009",
+          "tool-host": "watt-c3-retry1-tool-host-20261009"
+        },
+        "volume": "watt-c3-retry1-workspaces-20261009",
+        "port": 18301,
+        "execute_required": "--execute",
+        "remote_contact": false,
+        "work_created": false,
+        "model_calls": 0
+      }
+    },
+    {
+      "file": "run_c3_normal_entry.py",
+      "exit_code": 0,
+      "observed_plan": {
+        "schema": "c3-retry1-control-plan-v1",
+        "action": "run_c3_normal_entry.py",
+        "run_root": "/data/watt/c3-semantic-convergence-20261009/retry-1",
+        "database": "spg_c3_retry1_qualification_20261009",
+        "roles": {
+          "api": "watt-c3-retry1-api-20261009",
+          "coordinator": "watt-c3-retry1-coordinator-20261009",
+          "worker": "watt-c3-retry1-worker-20261009",
+          "tool-host": "watt-c3-retry1-tool-host-20261009"
+        },
+        "volume": "watt-c3-retry1-workspaces-20261009",
+        "port": 18301,
+        "execute_required": "--execute",
+        "remote_contact": false,
+        "work_created": false,
+        "model_calls": 0
+      }
+    },
+    {
+      "file": "c3_export_owner_records.py",
+      "exit_code": 0,
+      "observed_plan": {
+        "schema": "c3-retry1-control-plan-v1",
+        "action": "c3_export_owner_records.py",
+        "run_root": "/data/watt/c3-semantic-convergence-20261009/retry-1",
+        "database": "spg_c3_retry1_qualification_20261009",
+        "roles": {
+          "api": "watt-c3-retry1-api-20261009",
+          "coordinator": "watt-c3-retry1-coordinator-20261009",
+          "worker": "watt-c3-retry1-worker-20261009",
+          "tool-host": "watt-c3-retry1-tool-host-20261009"
+        },
+        "volume": "watt-c3-retry1-workspaces-20261009",
+        "port": 18301,
+        "execute_required": "--execute-read-only",
+        "remote_contact": false,
+        "work_created": false,
+        "model_calls": 0
+      }
+    },
+    {
+      "file": "scan_public_evidence.py",
+      "exit_code": 0,
+      "observed_plan": {
+        "schema": "c3-retry1-control-plan-v1",
+        "action": "known-secret-public-evidence-scan",
+        "run_root": "/data/watt/c3-semantic-convergence-20261009/retry-1",
+        "database": "spg_c3_retry1_qualification_20261009",
+        "roles": {
+          "api": "watt-c3-retry1-api-20261009",
+          "coordinator": "watt-c3-retry1-coordinator-20261009",
+          "worker": "watt-c3-retry1-worker-20261009",
+          "tool-host": "watt-c3-retry1-tool-host-20261009"
+        },
+        "volume": "watt-c3-retry1-workspaces-20261009",
+        "port": 18301,
+        "execute_required": "--execute",
+        "remote_contact": false,
+        "work_created": false,
+        "model_calls": 0
+      }
+    }
+  ],
+  "strict_root_checks": [
+    {
+      "input": "/data/watt/c3-semantic-convergence-20261009/retry-1",
+      "result": "ACCEPTED",
+      "resolved": "/data/watt/c3-semantic-convergence-20261009/retry-1"
+    },
+    {
+      "input": "/data/watt/c3-semantic-convergence-20261009",
+      "result": "REJECTED",
+      "error": "RETRY_CONTROL_CANNOT_OPERATE_ORIGINAL_ROOT"
+    },
+    {
+      "input": "/data/watt/other",
+      "result": "REJECTED",
+      "error": "RUN_ROOT_OUTSIDE_APPROVED_C3_SCOPE"
+    },
+    {
+      "input": "/data/watt/c3-semantic-convergence-20261009/retry-1/../",
+      "result": "REJECTED",
+      "error": "RUN_ROOT_OUTSIDE_APPROVED_C3_SCOPE"
+    },
+    {
+      "input": "\\data\\watt\\c3-semantic-convergence-20261009\\retry-1",
+      "result": "REJECTED",
+      "error": "RUN_ROOT_OUTSIDE_APPROVED_C3_SCOPE"
+    }
+  ],
+  "file_sha256": {
+    "build_c3_image.py": "e0e55bf2555eb620e303cb9747c295df832596596e7cc4596cf95044d1476d90",
+    "c3_export_owner_records.py": "8cc1ef541bb62143baec963ae22b8f005ff35a761fd36d56b2fa65c1fcbb0fb7",
+    "c3_export_work_snapshot.py": "6527a2ec9098c2a9deef5eedc9a73a85e3cc9b5c7cae94b18bc1bc190d3b3a4a",
+    "c3_normal_entry.py": "96b8957cd4fa9e60fdbd29a9ce9393546c7a2b43c8800f0c1b4c975923b8e687",
+    "c3_retry_scope.py": "8714981a6b8f10a89466dd9a0b1102bf8f9b640b15fa4049742956e5402c09f7",
+    "launch_c3_runtime.py": "0475b6ba0c7570747d5f16f6026086fc92d5248441feb1ba9615cc265d6bd1f7",
+    "prepare_c3_freeze.py": "f7ebdb0bccd27665b9afa2382c7a6a21fb43116697c2243df90b9bd5a316c562",
+    "prepare_c3_retry1_resources.py": "3237018d7b46f0fd5892b61ce85a94a8656b7de354a7327bea360c3ef5bc9e55",
+    "README.md": "72cce6af0f901c940cf6ae41c5ed8bf12efba51b8cc0dae134506bad53eefd65",
+    "run_c3_normal_entry.py": "67608612fe91a2b3afedd73d2024e2c97e7325b4fcfb2c91f7f4176f102e2ce5",
+    "run_final_image_regression.py": "3e04440f0d61c2d4b0ad81cfef1ff5d4a3c29a3dcd90216ecf798a1d8476f104",
+    "scan_public_evidence.py": "5c11d48fd7467a0e064607ab3e8d40c93265cffcbf211a2367834e0613bf670d",
+    "worker_root_probe.py": "b9f16e9b7074e4c93c1387b1a42c00d31e84e4e3dcf6c9ed66f5e8fc9dcea89d"
+  },
+  "original_control_sha256_at_handoff": {
+    "build_c3_image.py": "494e622ab36092b0079467cf953450f640f6786a39d33fb3dbb5ac301e72155e",
+    "c3_export_owner_records.py": "a2409ec06cd699091d449eda09eb6589f28e7f9286c4520b1a123ca2e04ea0c0",
+    "c3_export_recover_snapshot.py": "7373e1c609031690f1ff07b8facfa8678ba75872cde03ab5780a8a4c636881dd",
+    "c3_export_work_snapshot.py": "57e2311c77bcc49a1240cc2c7b8041845f7ffa30985c26dc1860f5032645efec",
+    "c3_normal_entry.py": "0a2e2d6c04ba950ef9bbf80329c58a168f67bf74aab39491cb28c1bfd2f1996e",
+    "capture_c3_stop_logs.py": "fea93fd9b1fda5c83af6e5f395e17ba29006b9c644493d443193311a3e6bcc76",
+    "launch_c3_runtime.py": "4d3a445f23d0ecbd0440ba3c7457b6de494f33e07fd4510768c08c4677e2bcf7",
+    "observe_snapshot_2_formation_failure.py": "2ab06952dbe2bff3cc763c304e2414d489ab55875cbdcddaecf5f4fa11a64e6f",
+    "observe_snapshot_3_contract_owner_failure.py": "aac11025a5048252fadca1bdde57d23e625f3cfebe2e95406365f8676e784add",
+    "prepare_c3_freeze.py": "a3b2c740fc877cf3f56a85857859b3e7c18045ecb7e24e72afc46c954c18c8a5",
+    "prepare_c3_isolation.py": "a244bc1e0e5e243e16273a2450c02a15eb48626dde1b3350ef932ab2ba81d512",
+    "prepare_c3_runtime_dependencies.py": "89721c71267c2b321774a6f67e52c2c219a9a7230c5f058b30e7a8fe8764258a",
+    "prepare_development_coverage_retry.py": "5b0db8bbfc889ff5f3426764cf0e2c3e17045a95b0dc87912d52316a389e709e",
+    "prepare_development_snapshot_2.py": "f7bc1afe540824bc0354a00ad7977fd38a0368cc86b5b0e7e2f4b8047cfb06c1",
+    "prepare_development_snapshot_3.py": "b31ff80e02eb4bffadb0fa196a476d2197182b3bbe3cf20486549bd75e033214",
+    "prepare_development_source_facets.py": "c88bbcf1a5d0126ac57f4e442ab58e37b446a93895762c1f953229880399fb02",
+    "prepare_development_source_facets_2.py": "8351ff8684a27c64bc9b7e21e989f284835bb1b5e62d6b0203888d88654d4bc6",
+    "resume_development_regression_1.py": "b05c7daa0c570882c1e8fd977bb7a7c4ce66dc34ae9ca049ac9b3c072dce0341",
+    "resume_development_regression_1_remaining.py": "0b52f12e720de815f9039dbe10bdcf3262d7be4c01f203c9320ab16095723644",
+    "resume_development_regression_2_remaining.py": "6d18b855016b55eee4348f7411b708968e5bb30a39767c409dc10345d3dd3f6e",
+    "resume_development_regression_3_remaining.py": "84cf61d9d8f558b6e34ad2a68f25ee82a9337c9c7d215f8199b4f9bffaffbc6d",
+    "run_c3_normal_entry.py": "447f3801c2cfb4717836b40a1ae0355b81be1cb5ff4d9121e9ffee672e3f98f0",
+    "run_development_coverage_retry.py": "f9da4ee3d9d319485ea1dd100abfdb617557aca6aebcbb243e8c82fcfb9eecf8",
+    "run_development_regression.py": "be297f27f68cdd4818df7b35539daeba2d695380b2027d042ba1dd49f39cedb5",
+    "run_development_regression_2.py": "ce480062d0659c29c0f0846063dc51f9c4427847379f5c273f802367a0b0437c",
+    "run_development_regression_2_carrier.py": "80d12d4fa530e0398d2fb3b7737c90759db8ff90167a41344e7e2c25242e03a7",
+    "run_development_regression_2_static_fixture.py": "3f4954d29e699175c059f1a1077c4c1eeee742e12a56e4d5c16fe04c0af85a38",
+    "run_development_regression_3.py": "44aea9e5dc580e259e4cf02dc9f7713f6adb22eedd36f98ed9c26d1a01699d39",
+    "run_development_regression_3_fixtures.py": "230575dbfdf310e3b041e642430b51312856bdc554a43831dc51e3e10f1fe470",
+    "run_development_regression_3_guardian_contract.py": "e7d5415e85a17a2118a36c3a909f4d4f402ce27c292fcb4a1b6fba38d617f0e5",
+    "run_development_regression_3_guardian_contract_carrier.py": "3d5f60c35f1bf9082a5cd596038b627a080f9539e5b0f2843bf22617c7e14ab6",
+    "run_development_source_facets.py": "d93150ee6c8d243850b9ab35b606c22446b6e583c350d840e90a9c896f43d344",
+    "run_development_source_facets_2.py": "bfa28f912136190aaa1ea473a3dfe2cdf0a12ecc16660ad0ca481d8b26aaf269",
+    "run_development_source_facets_test_retry.py": "790974a52c473c13fec6fb34d9cf7f7928ed4396673e0c2cd156ca8382f046f7",
+    "run_final_image_c1_fixture_retry.py": "4998b1495cd64a5f353c4e85edb1b1a06cf634e7d85fb0767b6bfead5fb3a6bd",
+    "run_final_image_regression.py": "d1c78ef0d9522b886b1754e8c55733ac50d1668d7e5d83898756a2930b993e3b",
+    "run_pe_development_regression.py": "33aa031820576c0c783dcdba4d8255fe1b2581fa78577a4419d7c2baaa31d6a6",
+    "scan_public_evidence.py": "1cd17ae9bb574a8f88c7af44d0805fdb959d1f0f2ee1bbf04cc5ee116141822f",
+    "summarize_development_regressions.py": "8491877cf09effc95c0eb65de9340e10a0611965f8106e483c4c44869a160947",
+    "worker_root_probe.py": "b7a74510f45bd0018821683493b4b35d657da1b725c0b92725421ba2f28ba810"
+  },
+  "source_or_tests_edited_by_this_task": false,
+  "old_control_files_edited_by_this_task": false,
+  "remote_commands": 0,
+  "docker_calls": 0,
+  "database_calls": 0,
+  "model_calls": 0,
+  "work_created": 0,
+  "holdout_read": false,
+  "interpretation": "Local AST/dry plan proof only, not built image, owner evidence, Runtime Conformance or Work PASS",
+  "run_root": "/data/watt/c3-semantic-convergence-20261009/retry-1",
+  "qualification_db": "spg_c3_retry1_qualification_20261009",
+  "fixture_pg": "watt-c3-retry1-fixture-postgres-20261009",
+  "fixture_db": "c1_contract_continuity",
+  "port": 18301,
+  "volume": "watt-c3-retry1-workspaces-20261009",
+  "bytecode_creation_guard": "Every entry sys.dont_write_bytecode=True before scope import; SSH PYTHONDONTWRITEBYTECODE=1 required; no permissive pycache allowlist",
+  "host_controls_python_3_6_AST_valid": true
+}
