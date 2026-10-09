@@ -101,7 +101,7 @@ def test_conflicting_persisted_dispositions_do_not_prefer_coverage():
 def test_work_reality_resolver_reads_only_its_exact_source_assessment(monkeypatch, matching):
     revision_id, interaction_id, assessment_id = uuid4(), uuid4(), uuid4()
     revision = SimpleNamespace(source_kind="INTERACTION_ASSESSMENT",
-        source_interaction_id=interaction_id, source_assessment_id=assessment_id,
+        source_interaction_id=interaction_id, source_assessment_id=assessment_id, source_record_ids=(),
         model_dump=lambda **_: {"id": str(revision_id)})
     ir = {"id": str(uuid4()), "items": []}
     assessment = SimpleNamespace(interaction_id=interaction_id if matching else uuid4(),
@@ -127,6 +127,7 @@ def test_work_reality_resolver_reads_only_its_exact_source_assessment(monkeypatc
     observed = client._resolve_owner_evidence(f"work-reality:{revision_id}")
     assert reads == [("revision", revision_id), ("assessment", assessment_id)]
     assert observed["semantic_ir"] == (ir if matching else None)
+    assert observed["source_records"] == []
 
 
 def test_planning_replacement_preserves_pending_observations_and_replay_budget():

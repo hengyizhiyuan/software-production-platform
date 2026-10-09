@@ -89,6 +89,40 @@ class GuardianAssuranceClient:
         kind, separator, identity = reference.partition(":")
         if not separator:
             return None
+        if kind == "product-source":
+            product_identity, separator, version_text = identity.rpartition(":")
+            try:
+                product_id = UUID(product_identity)
+                version = int(version_text)
+            except (ValueError, TypeError):
+                return None
+            if not separator or version < 0 or str(version) != version_text:
+                return None
+            from spg.infrastructure.persistence.product_schema import (
+                product_managed_sources, product_source_versions,
+            )
+            with self.delivery.database.unit_of_work() as uow:
+                managed = uow.session.execute(select(product_managed_sources).where(
+                    product_managed_sources.c.product_id == product_id,
+                )).mappings().one_or_none()
+                source_version = uow.session.execute(select(product_source_versions).where(
+                    product_source_versions.c.product_id == product_id,
+                    product_source_versions.c.version == version,
+                )).mappings().one_or_none()
+                # The current accepted ref cannot prove an older version's ref.
+                # Missing/stale Owner facts stay unavailable; no record is created.
+                if (managed is None or source_version is None
+                        or managed["version"] != version
+                        or source_version["version"] != version
+                        or managed["accepted_revision"] != source_version["revision"]
+                        or managed["accepted_tree"] != source_version["tree"]):
+                    return None
+                def canonical(row):
+                    return json.loads(json.dumps(dict(row), default=str))
+                return {"product_id": str(product_id),
+                    "managed_source": canonical({key: value for key, value in managed.items()
+                        if key not in {"provider_reference", "origin"}}),
+                    "source_version": canonical(source_version)}
         try:
             record_id = UUID(identity)
         except ValueError:
@@ -125,7 +159,14 @@ class GuardianAssuranceClient:
                             and assessment.interaction_id == revision.source_interaction_id
                             and assessment.semantic_ir is not None):
                         semantic_ir = assessment.semantic_ir.model_dump(mode="json")
-                return {**revision.model_dump(mode="json"), "semantic_ir": semantic_ir}
+                source_records = []
+                interactions = InteractionStore(uow.session)
+                for source_id in revision.source_record_ids:
+                    source = interactions.record(source_id)
+                    if source is not None and source.interaction_id == revision.source_interaction_id:
+                        source_records.append(source.model_dump(mode="json"))
+                return {**revision.model_dump(mode="json"), "semantic_ir": semantic_ir,
+                    "source_records": source_records}
             if kind == "verification":
                 record = runtime.verification_record(record_id)
                 return None if record is None else record.model_dump(mode="json")

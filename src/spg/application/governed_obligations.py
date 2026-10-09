@@ -126,6 +126,9 @@ def admitted_fulfillment_bindings(revision, assessment, *, provider=None,
         return materialize_continuous_gates(revision, ir)
     inventory = fulfillment_inventory(revision, ir, source_revision=source_revision,
                                       exact_target_paths=exact_target_paths)
+    source_failure = admitted_clause_source_failure(revision, ir, database=database)
+    if source_failure is not None:
+        return unresolved_projection(revision, ir, inventory, reason=source_failure)
     typed = deterministic_fulfillment_projection(revision, ir, inventory)
     if not any(binding.state == "UNRESOLVED" for binding in typed):
         return typed
@@ -441,10 +444,13 @@ for _name in ("DENY_PREVIEW", "DENY_DEPLOY", "DENY_PUBLISH"):
     FULFILLMENT_CAPABILITIES[_name] = (_component, _owner, _phase, _method, _gate)
 
 
-def is_context_only_clause(revision, ir, item_id, clause_id):
+def is_context_only_clause(revision, ir, item_id, clause_id, *, bindings=()):
     """Retain a typed descriptive assertion, never hide a current requirement."""
     item = next((item for item in ir.items if item.item_id == item_id), None)
     clause = next((clause for clause in ir.clauses if clause.clause_id == clause_id), None)
+    if (item is not None and clause is not None and item.kind is SemanticKind.PRODUCTION_INTENT
+            and bindings and _reviewed_background_clause_retained(revision, ir, item_id, clause_id, bindings)):
+        return True
     if (item is None or clause is None or item.kind is not SemanticKind.FACT
             or item.action is not None or item.production is not None
             or clause.modality != "ASSERTION" or clause.polarity != "AFFIRMATIVE"
@@ -456,12 +462,146 @@ def is_context_only_clause(revision, ir, item_id, clause_id):
         for fact in revision.engineering_semantic_facts)
 
 
+def _current_fact_source_overlaps_clause(revision, quote):
+    # Both the primary extraction and original governed provenance may carry a
+    # current contribution. An unrelated primary span never erases its sources.
+    for fact in revision.engineering_semantic_facts:
+        if not fact.is_current:
+            continue
+        spans = (fact.provenance.source_text, *(source.source_text
+            for source in fact.provenance.governed_provenance))
+        if any(isinstance(span, str) and span.strip() and (
+                span.strip() in quote or quote in span) for span in spans):
+            return True
+    return False
+
+
+def _reviewed_background_context_refs(candidate, revision, ir, inventory):
+    """Only a reviewed exact background contribution may be retained.
+
+    CURRENT is a source time, not proof that every descriptive span is an
+    artifact requirement. The same original production Item must still have
+    a different current request bound to its existing current consumer.
+    """
+    from spg.domain.interaction_actions import ActionSpeechAct
+    by_ref = {source["source_ref"]: source for source in inventory["sources"]}
+    allowed = set()
+    for route in candidate.routes:
+        source = by_ref.get(route.source_ref)
+        if route.capability != "RETAIN_CONTEXT" or source is None or source["kind"] != "IR_CLAUSE":
+            continue
+        item = next(item for item in ir.items if item.item_id == source["item_id"])
+        clause = next(clause for clause in ir.clauses if clause.clause_id == source["clause_id"])
+        basis = route.component_basis
+        if (item.kind is not SemanticKind.PRODUCTION_INTENT or item.production is None
+                or not item.production.current or item.action is not None or item.requires_human
+                or clause.modality != "ASSERTION" or clause.polarity != "AFFIRMATIVE"
+                or clause.temporal_scope != "CURRENT" or clause.speech_act is not ActionSpeechAct.DISCUSSION
+                or clause.requested_effects or basis is None or basis.linked_fact_refs
+                or basis.source_span_start != 0 or basis.source_span_end != len(clause.source_text)
+                or basis.source_component_quote != clause.source_text):
+            continue
+        if _current_fact_source_overlaps_clause(revision, clause.source_text):
+            continue
+        for current in candidate.routes:
+            sibling = by_ref.get(current.source_ref)
+            if (current.capability not in {"ARTIFACT_CONTENT", "GIT_DIFF_SCOPE", "PRODUCT_SOURCE_IDENTITY"}
+                    or sibling is None or sibling["kind"] not in {"IR_CLAUSE", "IR_CONSTRAINT"}
+                    or sibling["item_id"] != item.item_id or sibling["clause_id"] == clause.clause_id):
+                continue
+            request = next(c for c in ir.clauses if c.clause_id == sibling["clause_id"])
+            if (request.temporal_scope == "CURRENT" and request.modality == "REQUEST"
+                    and request.polarity == "AFFIRMATIVE"
+                    and request.speech_act is ActionSpeechAct.EXPLICIT_REQUEST):
+                allowed.add(route.source_ref)
+                break
+    return frozenset(allowed)
+
+
+def _reviewed_background_clause_retained(revision, ir, item_id, clause_id, bindings):
+    """Consumer recheck of the already admitted full plan; never model Assurance."""
+    try:
+        first = bindings[0]
+        receipt = first.formation_receipt or {}
+        if receipt.get("capabilities_fingerprint") != canonical_fingerprint(fulfillment_capability_contracts()):
+            return False
+        inventory = fulfillment_inventory(revision, ir, source_revision=first.source_revision,
+            exact_target_paths=tuple(receipt.get("exact_target_paths", ())))
+        inverse = {value: key for key, value in FULFILLMENT_CAPABILITIES.items()}
+        from spg.domain.governed_obligation import FulfillmentRouteCandidate
+        routes = tuple(FulfillmentRouteCandidate(source_ref=fulfillment_source_ref(binding),
+            capability=inverse[(binding.component, binding.owner, binding.phase, binding.evidence_method, binding.gate_ref)],
+            work_constraint_indices=binding.work_constraint_indices, target_paths=binding.target_paths,
+            supporting_source_refs=binding.supporting_source_refs, component_basis=binding.component_basis,
+            rationale="Actual admitted derived plan") for binding in bindings)
+        plan = FulfillmentProjectionCandidate(inventory_fingerprint=first.projection_inventory_fingerprint, routes=routes)
+        if ({route.source_ref for route in routes} != {source["source_ref"] for source in inventory["sources"]}
+                or plan.inventory_fingerprint != inventory["inventory_fingerprint"]):
+            return False
+        validate_projection_components(plan, inventory, semantic_review=receipt.get("semantic_review"))
+        return f"ir-clause:{ir.id}:{item_id}:{clause_id}" in _reviewed_background_context_refs(plan, revision, ir, inventory)
+    except (KeyError, ValueError, TypeError, IndexError):
+        return False
+
+
 def state_for_capability(name):
     if name == "UNRESOLVED":
         return "UNRESOLVED"
     if name == "RETAIN_CONTEXT":
         return "RETAINED_CONTEXT"
     return "BOUND_PENDING_EVIDENCE"
+
+
+def _observed_context_item(item):
+    return (item.kind is SemanticKind.FACT and item.action is None
+        and item.production is None and not item.requires_human and bool(item.provenance)
+        and bool(item.observed_facts)
+        and all(p.origin is SemanticOrigin.REPOSITORY_OBSERVED for p in item.provenance))
+
+
+def _human_clause_item(item, clause):
+    # IRK admits each exact Human clause and each Item provenance independently.
+    # A shared Item can realize several distinct spans from that same record.
+    return any(p.source_record_id == clause.source_record_id and p.source_text
+        and p.origin in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}
+        for p in item.provenance)
+
+
+def admitted_clause_source_failure(revision, ir, *, database=None, records=None):
+    """Recheck durable Human identity at production, without reinterpreting IRK."""
+    if records is None and database is None:
+        # Pure contract callers still enforce exact admitted identities below;
+        # actual production supplies the existing Interaction Owner database.
+        return None
+    if records is None:
+        from spg.infrastructure.persistence.interaction_store import InteractionStore
+        with database.unit_of_work() as uow:
+            store = InteractionStore(uow.session)
+            records = tuple(store.record(record_id) for record_id in revision.source_record_ids)
+    by_id = {record.id: record for record in records if record is not None}
+    interaction_id = getattr(revision, "source_interaction_id", None)
+    if (interaction_id is None or getattr(ir, "interaction_id", None) != interaction_id
+            or getattr(ir, "source_record_id", None) not in revision.source_record_ids):
+        return "OBLIGATION_ADMITTED_CLAUSE_SOURCE_IDENTITY_INVALID"
+    for clause in ir.clauses:
+        record = by_id.get(clause.source_record_id)
+        if (clause.source_record_id != ir.source_record_id
+                or clause.source_record_id not in revision.source_record_ids
+                or record is None or record.interaction_id != interaction_id
+                or str(record.actor) != "HUMAN" or clause.source_text not in record.content
+                or record.content_fingerprint != sha256(record.content.encode()).hexdigest()):
+            return "OBLIGATION_ADMITTED_CLAUSE_HUMAN_SOURCE_INVALID"
+    for item in ir.items:
+        for source in item.provenance:
+            if source.origin not in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}:
+                continue
+            record = by_id.get(source.source_record_id)
+            if (record is None or record.interaction_id != interaction_id
+                    or str(record.actor) != "HUMAN" or not source.source_text
+                    or source.source_text not in record.content
+                    or record.content_fingerprint != sha256(record.content.encode()).hexdigest()):
+                return "OBLIGATION_ADMITTED_ITEM_HUMAN_SOURCE_INVALID"
+    return None
 
 
 def fulfillment_inventory(revision, ir, *, source_revision=None, exact_target_paths=()):
@@ -475,10 +615,17 @@ def fulfillment_inventory(revision, ir, *, source_revision=None, exact_target_pa
             "fact_id": str(fact.id), "payload": reference.model_dump(mode="json"),
             "provenance": fact.provenance.model_dump(mode="json")})
     for clause in ir.clauses:
-        for item_id in clause.semantic_item_ids:
-            item = next((item for item in ir.items if item.item_id == item_id), None)
-            if item is None:
-                raise ValueError("OBLIGATION_SOURCE_ITEM_MISSING")
+        clause_items = tuple(next((item for item in ir.items if item.item_id == item_id), None)
+                             for item_id in clause.semantic_item_ids)
+        if any(item is None for item in clause_items):
+            raise ValueError("OBLIGATION_SOURCE_ITEM_MISSING")
+        human_companion = any(_human_clause_item(item, clause) for item in clause_items)
+        for item in clause_items:
+            # Observed context is an independent Owner facet, not Human authority.
+            # The exact Clause remains represented by its Human companion(s).
+            # With no companion its original Clause stays explicitly unresolved.
+            if _observed_context_item(item) and human_companion:
+                continue
             sources.append({"source_ref": (f"ir-constraint:{item.item_id}:{clause.clause_id}"
                 if item.kind is SemanticKind.CONSTRAINT else f"ir-clause:{ir.id}:{item.item_id}:{clause.clause_id}"),
                 "kind": "IR_CONSTRAINT" if item.kind is SemanticKind.CONSTRAINT else "IR_CLAUSE", "item_id": item.item_id,
@@ -487,7 +634,7 @@ def fulfillment_inventory(revision, ir, *, source_revision=None, exact_target_pa
                             "clause": clause.model_dump(mode="json")}})
     linked_items = {item_id for clause in ir.clauses for item_id in clause.semantic_item_ids}
     for item in ir.items:
-        if item.item_id not in linked_items:
+        if item.item_id not in linked_items or _observed_context_item(item):
             sources.append({"source_ref": f"ir-item:{ir.id}:{item.item_id}", "kind": "IR_ITEM",
                 "item_id": item.item_id, "payload": {"ir_id": str(ir.id), "item": item.model_dump(mode="json")}})
     for kind, values, prefix in (("WORK_CONSTRAINT", revision.constraints, "work-constraint"),
@@ -526,7 +673,7 @@ def _capability_tuple(name):
     return route
 
 
-def _projection_binding(revision, ir, inventory, route):
+def _projection_binding(revision, ir, inventory, route, *, reviewed_background_refs=()):
     source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
     if source is None:
         raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
@@ -648,14 +795,16 @@ def _projection_binding(revision, ir, inventory, route):
                 "component", "owner", "phase", "evidence_method", "gate_ref", "source_revision", "target_paths"}}).model_copy(update=common)
     item = next(item for item in ir.items if item.item_id == source["item_id"])
     clause = next(clause for clause in ir.clauses if clause.clause_id == source["clause_id"])
-    if (clause.source_record_id not in revision.source_record_ids
-            or item.item_id not in clause.semantic_item_ids
-            or not any(p.source_record_id == clause.source_record_id
-                       and (p.source_text in clause.source_text or clause.source_text in p.source_text)
-                       and p.origin in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}
-                       for p in item.provenance)):
+    valid_clause_source = (clause.source_record_id in revision.source_record_ids
+        and item.item_id in clause.semantic_item_ids
+        and (not hasattr(ir, "source_record_id") or clause.source_record_id == ir.source_record_id)
+        and _human_clause_item(item, clause))
+    if state != "UNRESOLVED" and not valid_clause_source:
         raise ValueError("OBLIGATION_CLAUSE_PROVENANCE_INVALID")
-    if state == "RETAINED_CONTEXT" and not is_context_only_clause(revision, ir, item.item_id, clause.clause_id):
+    # A nonpromoting unresolved representation preserves the original source IDs
+    # and quote even when authority is insufficient; it grants no execution Gate.
+    if (state == "RETAINED_CONTEXT" and route.source_ref not in reviewed_background_refs
+            and not is_context_only_clause(revision, ir, item.item_id, clause.clause_id)):
         raise ValueError("OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY")
     if phase is FulfillmentPhase.CONTINUOUS_FROM_ADMISSION:
         if clause.polarity != "NEGATED" or clause.temporal_scope != "CURRENT":
@@ -827,7 +976,9 @@ def validate_projection_candidate(candidate, revision, ir, inventory, *, semanti
             if not future_only and not component_declared and "ARTIFACT_CONTENT" not in methods:
                 raise ValueError("OBLIGATION_MIXED_FACT_CURRENT_COMPONENT_LOST")
     validate_projection_components(candidate, inventory, semantic_review=semantic_review, allow_review_pending=allow_review_pending)
-    return tuple(_projection_binding(revision, ir, inventory, route) for route in candidate.routes)
+    reviewed_background_refs = _reviewed_background_context_refs(candidate, revision, ir, inventory)
+    return tuple(_projection_binding(revision, ir, inventory, route,
+        reviewed_background_refs=reviewed_background_refs) for route in candidate.routes)
 
 
 def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=None, exact_target_paths=()):
@@ -874,7 +1025,12 @@ def deterministic_fulfillment_projection(revision, ir, inventory):
             fact = next(fact for fact in revision.engineering_semantic_facts if str(fact.id) == source["fact_id"])
             if fact.epistemic_status.value != "UNRESOLVED":
                 if fact.relation is SemanticRelation.REFERENCE:
-                    methods = ["PRODUCT_SOURCE_IDENTITY"] if fact.reference_role is SemanticReferenceRole.PROJECT_REPOSITORY else ["RETAIN_CONTEXT"]
+                    if fact.reference_role is SemanticReferenceRole.PROJECT_REPOSITORY:
+                        methods = ["PRODUCT_SOURCE_IDENTITY"]
+                    elif (fact.reference_role is SemanticReferenceRole.EXTERNAL_REFERENCE
+                            or (fact.provenance.governed_provenance and all(p.origin is SemanticOrigin.REPOSITORY_OBSERVED
+                                for p in fact.provenance.governed_provenance))):
+                        methods = ["RETAIN_CONTEXT"]
                 elif fact.relation is SemanticRelation.SCOPE and exact_file_scope_paths(fact) is not None and set(exact_file_scope_paths(fact)) == set(inventory["exact_target_paths"]):
                     methods = ["GIT_DIFF_SCOPE"]
                 elif fact.relation in {SemanticRelation.EQUALITY, SemanticRelation.CARDINALITY,

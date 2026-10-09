@@ -363,7 +363,7 @@ def _future_gate_evidence(bindings, native_record):
                       if binding.evidence_method == "EXACT_HUMAN_AUTHORIZATION"]}
 
 
-def _retained_context_route(binding, revision, ir):
+def _retained_context_route(binding, revision, ir, bindings=()):
     from spg.application.governed_obligations import is_context_only_clause
     if binding.source_kind.value == "WORK_CONTEXT":
         return not binding.work_constraint_indices
@@ -376,7 +376,7 @@ def _retained_context_route(binding, revision, ir):
         # Full supporting source proof is supplied by _retained_binding_proof.
         return False
     if binding.source_kind.value == "IR_CLAUSE":
-        return is_context_only_clause(revision, ir, binding.constraint_item_id, binding.constraint_clause_id)
+        return is_context_only_clause(revision, ir, binding.constraint_item_id, binding.constraint_clause_id, bindings=bindings)
     if binding.source_kind.value != "FACT" or binding.work_constraint_indices:
         return False
     fact = next((fact for fact in revision.engineering_semantic_facts if fact.id == binding.fact_id), None)
@@ -437,7 +437,7 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
                     and revision.repository_ref == baseline.repository_ref)
             elif binding.evidence_method != "EXACT_CANDIDATE_CONTENT":
                 evaluations.append(False)
-        retained = bool(routes and not current and all(_retained_context_route(binding, revision, ir)
+        retained = bool(routes and not current and all(_retained_context_route(binding, revision, ir, bindings)
             and binding.phase.value == "CONTEXT_RETENTION" for binding in routes))
         # Continuous gate routes are independently evaluated by the existing
         # Native helper; no future-only Fact can bypass a current contribution.
@@ -463,12 +463,12 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
 
 def _retained_binding_proof(binding, revision, ir, bindings):
     if binding.source_kind.value != "WORK_CONSTRAINT":
-        return _retained_context_route(binding, revision, ir)
+        return _retained_context_route(binding, revision, ir, bindings)
     from spg.application.governed_obligations import is_context_only_clause
     from spg.domain.governed_obligation import fulfillment_source_ref
     supports = tuple(source for source in bindings if fulfillment_source_ref(source) in binding.supporting_source_refs)
     return bool(supports) and all(source.source_kind.value == "IR_CLAUSE" and is_context_only_clause(
-        revision, ir, source.constraint_item_id, source.constraint_clause_id) for source in supports)
+        revision, ir, source.constraint_item_id, source.constraint_clause_id, bindings=bindings) for source in supports)
 
 
 def verify_binding_inventory(*, request, task, contract, repository, baseline, revision, ir,

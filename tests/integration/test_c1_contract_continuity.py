@@ -624,7 +624,17 @@ def test_native_rejects_binding_loss_drift_and_injection(chain, corruption):
     elif corruption == "injected":
         bindings = (*bindings, bindings[0])
     else:
-        bindings = (bindings[0].model_copy(update={"constraint_item_id": "unadmitted"}), *bindings[1:])
+        from spg.domain.governed_obligation import FulfillmentSourceKind
+        # The complete C3 inventory can start with a Fact. Corrupt the actual
+        # IR Constraint identity so this remains a Native admission probe.
+        index = next(i for i, binding in enumerate(bindings)
+                     if binding.source_kind is FulfillmentSourceKind.IR_CONSTRAINT)
+        original = bindings[index]
+        assert original.fact_id is None and original.fact_fingerprint is None
+        assert original.constraint_item_id and original.constraint_clause_id
+        bindings = tuple(binding.model_copy(update={"constraint_item_id": "unadmitted"})
+                         if i == index else binding
+                         for i, binding in enumerate(bindings))
     wrong = completion.model_copy(update={"fulfillment_bindings": bindings})
     with chain.database.unit_of_work() as uow:
         uow.session.execute(update(production_work_units).where(

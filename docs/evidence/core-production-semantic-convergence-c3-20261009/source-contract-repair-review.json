@@ -1,0 +1,128 @@
+{
+  "schema": "c3-source-component-repair-review-v1",
+  "reviewed_at_utc": "2026-10-09T12:30:59.770170+00:00",
+  "original_work": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+  "original_application": "390fa22ec24cbab33f7feeeef96f0dfec9ce22f2",
+  "original_image": "sha256:54355780b7fdd683332b9f9e607b76fcbbfc69f2bf5c42d9a1f888e8acbb4bb3",
+  "original_preserved": true,
+  "historical_runtime_unknown_not_reconstructed": true,
+  "guardian_repair_revision": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+  "file_sha256": {
+    "src/spg/application/governed_obligations.py": "0fbfe1ce68e75a10faf09dab55683968e000da927af116a54faf1cdceea6e1b7",
+    "src/spg/application/guardian_assurance.py": "c7a709145a6b93440f44c257a382c312799a724df3b78f39a1a46b7b324751ba",
+    "src/spg/providers/managed_context_fulfillment.py": "39fb3fcffcb7419b5193dd24be7e6ea5ac4a14ca42f0de633aedc7fbd31cb5c4",
+    "tests/test_c3_admitted_source_facets.py": "03fca6ec0b60ead0e1cd621d670e556c7f630ac8b3629d0b9f8ede2cf906809e",
+    "tests/test_guardian_assurance_adapter.py": "b0932b6d4333588745b128be0d1fc7321ddf9ae7bb207c4c8abd869ecef75f91",
+    "tests/test_c3_evidence_projection.py": "9ec99c1795f6f6ad90a99878021b3eaca16a933e93f7a14d42c805ba327a6807",
+    "tests/integration/test_c1_contract_continuity.py": "d31d102e8cb3f183b8d5711527c61415b46f2dae5ceb9a464554df548149e677"
+  },
+  "regressions": [
+    {
+      "receipt": "dev-source-facets-1/watt-scoped-receipt.json",
+      "group": "watt-scoped-receipt.json",
+      "exit_code": 2,
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 1,
+        "skipped": 0,
+        "passed": 0
+      },
+      "wall_seconds": 11.178101245022845,
+      "source_overlay": true,
+      "real_ai_work_created": 0,
+      "live_model_calls": 0
+    },
+    {
+      "receipt": "dev-source-facets-1-test-parameter-retry/watt-scoped-receipt.json",
+      "group": "watt-scoped-receipt.json",
+      "exit_code": 1,
+      "counts": {
+        "tests": 109,
+        "failures": 2,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 107
+      },
+      "wall_seconds": 11.613486725022085,
+      "source_overlay": true,
+      "real_ai_work_created": 0,
+      "live_model_calls": 0
+    },
+    {
+      "receipt": "dev-source-facets-2/c1-positive-receipt.json",
+      "group": "c1-positive-receipt.json",
+      "exit_code": 0,
+      "counts": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 2
+      },
+      "wall_seconds": 42.93598174600629,
+      "source_overlay": true,
+      "real_ai_work_created": 0,
+      "live_model_calls": 0
+    },
+    {
+      "receipt": "dev-source-facets-2/c3-carrier-receipt.json",
+      "group": "c3-carrier-receipt.json",
+      "exit_code": 0,
+      "counts": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 2
+      },
+      "wall_seconds": 17.93342502298765,
+      "source_overlay": true,
+      "real_ai_work_created": 0,
+      "live_model_calls": 0
+    },
+    {
+      "receipt": "dev-source-facets-2/guardian-scoped-receipt.json",
+      "group": "guardian-scoped-receipt.json",
+      "exit_code": 0,
+      "counts": {
+        "tests": 135,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 135
+      },
+      "wall_seconds": 23.038748642022256,
+      "source_overlay": true,
+      "real_ai_work_created": 0,
+      "live_model_calls": 0
+    },
+    {
+      "receipt": "dev-source-facets-2/watt-scoped-receipt.json",
+      "group": "watt-scoped-receipt.json",
+      "exit_code": 0,
+      "counts": {
+        "tests": 30,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 30
+      },
+      "wall_seconds": 11.995108055009041,
+      "source_overlay": true,
+      "real_ai_work_created": 0,
+      "live_model_calls": 0
+    }
+  ],
+  "new_baked_image_qualification": "NOT_YET_RUN",
+  "new_real_g0": "NOT_YET_RUN",
+  "holdout": "SEALED_PENDING_EXPLICIT_HUMAN_READ_AUTHORIZATION",
+  "outside_checkout_observed": {
+    "head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+    "branch": "codex/admin-work-ai-diagnostic-export-ecs",
+    "clean": true,
+    "canonical_main_ref": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+    "change_origin": "UNKNOWN",
+    "read_only_c3_observation": true
+  }
+}

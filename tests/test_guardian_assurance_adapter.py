@@ -119,3 +119,103 @@ def test_preview_readiness_requires_guardian_pass(tmp_path, monkeypatch):
     service.assurance_client = client
     monkeypatch.setattr(service, "mode_for", lambda _: CandidatePreviewMode.FULL_APPLICATION_RUNTIME)
     assert not service.review_ready(preview.work_id, preview.candidate_id)
+
+
+class _OwnerRowsSession:
+    def __init__(self, managed, source_version):
+        self.rows = {"product_managed_sources": managed, "product_source_versions": source_version}
+        self.queries = []
+
+    def execute(self, statement):
+        table = statement.get_final_froms()[0].name
+        self.queries.append((table, statement.compile().params))
+        row = self.rows[table]
+        return SimpleNamespace(mappings=lambda: SimpleNamespace(one_or_none=lambda: row))
+
+
+def _source_owner_client(session, tmp_path):
+    uow = _Uow()
+    uow.session = session
+    database = SimpleNamespace(unit_of_work=lambda: uow)
+    return GuardianAssuranceClient(SimpleNamespace(database=database),
+        JsonProductionEnvironmentStore(tmp_path), SimpleNamespace())
+
+
+def _product_source_rows():
+    product_id = uuid4()
+    managed = {"product_id": product_id, "version": 0,
+        "repository_identity": f"watt://repositories/products/{product_id}",
+        "accepted_ref": "refs/heads/accepted", "accepted_revision": "a" * 40,
+        "accepted_tree": "b" * 40, "provider_kind": "gitea",
+        "provider_reference": "PRIVATE_PROVIDER_METADATA", "origin": {"private": "OMITTED"}}
+    version = {"id": uuid4(), "product_id": product_id, "version": 0,
+        "revision": "a" * 40, "tree": "b" * 40, "authority_identity": "watt:bootstrap",
+        "acceptance_id": None}
+    return product_id, managed, version
+
+
+def test_product_source_resolver_retains_current_owner_identity_without_private_metadata(tmp_path):
+    product_id, managed, version = _product_source_rows()
+    session = _OwnerRowsSession(managed, version)
+    client = _source_owner_client(session, tmp_path)
+    result = client._resolve_owner_evidence(f"product-source:{product_id}:0")
+    assert result["product_id"] == str(product_id)
+    assert result["managed_source"]["accepted_revision"] == version["revision"]
+    assert result["source_version"]["acceptance_id"] is None
+    assert result["source_version"]["authority_identity"] == "watt:bootstrap"
+    assert not {"provider_reference", "origin", "covered"}.intersection(result["managed_source"])
+    assert all(product_id in params.values() for _, params in session.queries)
+    assert any(0 in params.values() for _, params in session.queries)
+
+
+@pytest.mark.parametrize("corruption", ["managed_missing", "version_missing", "stale_ref", "wrong_revision", "wrong_tree"])
+def test_product_source_resolver_does_not_substitute_current_ref_for_unproven_version(tmp_path, corruption):
+    product_id, managed, version = _product_source_rows()
+    if corruption == "managed_missing":
+        managed = None
+    elif corruption == "version_missing":
+        version = None
+    elif corruption == "stale_ref":
+        managed["version"] = 1
+    elif corruption == "wrong_revision":
+        version["revision"] = "c" * 40
+    else:
+        version["tree"] = "c" * 40
+    client = _source_owner_client(_OwnerRowsSession(managed, version), tmp_path)
+    assert client._resolve_owner_evidence(f"product-source:{product_id}:0") is None
+
+
+@pytest.mark.parametrize("suffix", ["-1", "00", "invalid", "", "0:extra"])
+def test_product_source_resolver_rejects_noncanonical_version_before_owner_queries(tmp_path, suffix):
+    product_id, managed, version = _product_source_rows()
+    session = _OwnerRowsSession(managed, version)
+    assert _source_owner_client(session, tmp_path)._resolve_owner_evidence(
+        f"product-source:{product_id}:{suffix}") is None
+    assert session.queries == []
+
+
+@pytest.mark.parametrize("actor", ["HUMAN", "WATT"])
+def test_work_reality_resolver_preserves_actual_record_authority_and_stored_integrity(tmp_path, monkeypatch, actor):
+    from spg.domain.interaction import InteractionRecord
+    from spg.infrastructure.persistence.interaction_store import InteractionStore
+    interaction_id, revision_id, record_id = uuid4(), uuid4(), uuid4()
+    content = "Create a bounded artifact; leave authorization pending."
+    # Deliberately not recomputed by the resolver: independent Guardian must
+    # detect any bad stored fingerprint instead of receiving a repaired one.
+    record = InteractionRecord(id=record_id, interaction_id=interaction_id,
+        sequence=1, actor=actor, source="qualification", content=content,
+        content_fingerprint="f" * 64, created_at=datetime.now(UTC))
+    revision = SimpleNamespace(source_kind="INTERACTION_ASSESSMENT",
+        source_assessment_id=uuid4(), source_interaction_id=interaction_id,
+        source_record_ids=(record_id,), model_dump=lambda **_: {"id": str(revision_id),
+            "source_interaction_id": str(interaction_id), "source_record_ids": [str(record_id)]})
+    ir = SimpleNamespace(model_dump=lambda **_: {"interaction_id": str(interaction_id)})
+    assessment = SimpleNamespace(interaction_id=interaction_id, semantic_ir=ir)
+    monkeypatch.setattr("spg.application.guardian_assurance.ProductStore",
+        lambda _: SimpleNamespace(work_reality_revision=lambda _: revision))
+    monkeypatch.setattr(InteractionStore, "assessment", lambda *_: assessment)
+    monkeypatch.setattr(InteractionStore, "record", lambda *_: record)
+    result = _source_owner_client(_Session(), tmp_path)._resolve_owner_evidence(f"work-reality:{revision_id}")
+    assert result["source_records"][0]["actor"] == actor
+    assert result["source_records"][0]["content"] == content
+    assert result["source_records"][0]["content_fingerprint"] == "f" * 64
