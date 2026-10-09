@@ -526,12 +526,35 @@ class NativeExecutorRuntimeService:
 
     def record_production_preflight_rejection(
         self, grant: ExecutionAllocationGrant, *, failure: str,
+        diagnosis: dict[str, object] | None = None, worker_version: str | None = None,
     ) -> None:
-        """Keep the exact bounded preflight failure before terminal settlement.
+        """Keep bounded metadata and the failure before terminal settlement.
 
-        The workspace verifier emits only fixed diagnostic messages; no model
-        output, repository contents or credentials are recorded here.
+        Only the verifier's fixed scalar diagnostic fields are accepted; no
+        model output, repository contents, environment or stderr is recorded.
+        Existing callers may still record the original fixed failure alone.
         """
+        if diagnosis is not None:
+            allowed = {
+                "schema_version", "require_change", "attempt_id", "work_id", "pwu_id",
+                "workspace_id", "source_vector_digest", "expected_revision",
+                "work_reality_revision_id", "availability_wait_ms", "hostname", "pid",
+                "uid", "gid", "mount_namespace", "mount_id", "host_path", "container_path",
+                "expected_tree", "stat_kind", "stat_errno", "stat_device", "stat_inode",
+                "stat_uid", "stat_gid", "stat_mode", "resolved_path", "observed_repository_root",
+                "observed_revision", "observed_tree", "git_operation", "git_returncode", "check", "checked_at",
+                "checked_path", "failed_relative_path", "checked_stat_kind", "checked_stat_errno",
+                "checked_stat_device", "checked_stat_inode", "checked_stat_uid", "checked_stat_gid",
+                "checked_stat_mode", "workspace_write_access", "access_effective_ids",
+            }
+            if (not set(diagnosis).issubset(allowed)
+                    or diagnosis.get("schema_version") != 1
+                    or diagnosis.get("require_change") is not False
+                    or any(value is not None and not isinstance(value, (str, int, bool))
+                           for value in diagnosis.values())
+                    or sum(len(value) for value in diagnosis.values()
+                           if isinstance(value, str)) > 16384):
+                raise ValueError("unsupported production preflight metadata")
         if not failure.startswith(("VERIFICATION_FAILED:", "EXECUTION_CONTEXT_NOT_READY:")):
             raise ValueError("unsupported production preflight diagnosis")
         with self.database.unit_of_work() as uow:
@@ -539,11 +562,27 @@ class NativeExecutorRuntimeService:
             state = store.attempt_state(grant.allocation.attempt_id, lock=True)
             if state.worker_epoch != grant.allocation.lease_epoch:
                 raise NativeExecutionConflict("production preflight worker epoch was fenced")
+            if diagnosis is not None:
+                binding = store.attempt_binding(grant.allocation.attempt_id).binding
+                context = binding.production_context
+                exact = {
+                    "attempt_id": str(binding.attempt_id), "work_id": str(binding.work_id),
+                    "pwu_id": str(binding.pwu_id), "workspace_id": str(binding.workspace.workspace_id),
+                    "source_vector_digest": binding.source_vector.digest,
+                    "expected_tree": (binding.source_vector.members[0].source_tree_oid
+                                      if len(binding.source_vector.members) == 1 else None),
+                    "expected_revision": None if context is None else context.repository_revision,
+                    "work_reality_revision_id": None if context is None else str(context.work_reality_revision_id),
+                }
+                if any(diagnosis.get(key) != value for key, value in exact.items()):
+                    raise NativeExecutionConflict("production preflight metadata binding differs")
             self._append_event(
                 store, pwu_id=grant.allocation.pwu_id,
                 attempt_id=grant.allocation.attempt_id,
                 event_type="ExecutionWorkspacePreflightRejected",
-                payload={"failure": failure},
+                payload={"failure": failure, "worker_id": grant.allocation.worker_id,
+                         "runtime_version": worker_version,
+                         **({"workspace_diagnosis": diagnosis} if diagnosis is not None else {})},
             )
             uow.commit()
 

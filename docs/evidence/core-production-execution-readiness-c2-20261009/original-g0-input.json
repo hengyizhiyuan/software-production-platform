@@ -1,0 +1,14 @@
+{
+  "schema": "c2-original-g0-input-v1",
+  "recovered_at_utc": "2026-10-09T06:52:05Z",
+  "source": "read-only existing N1 isolated PostgreSQL",
+  "source_database": "spg_n1_qualification_20261008",
+  "source_record_id": "c7a403a4-866c-4a9b-81b5-868e6cff184c",
+  "source_interaction_id": "d93adc24-5227-465d-9ba5-b46717572b49",
+  "persisted_actor": "HUMAN",
+  "persisted_source_actor": "human:owner",
+  "original_fixture_authority": "agent-authored qualification input under existing Human isolation authorization",
+  "human_governor_content_acceptance": false,
+  "prompt": "N1 isolated G0 software production qualification. In this newly managed Product repository, create exactly one static web page at index.html. This is CODE_WORK producing a software artifact. Use semantic HTML with exactly one h1 whose text is N1 Software Control and one paragraph whose text is Isolated qualification only. Only index.html may change. Verify the exact heading and paragraph and leave a reviewable Candidate. Do not deploy, publish, add pages, or change README.md.",
+  "new_execution_authority": "current explicit C2 mission; no Integration/Acceptance/Delivery authorization"
+}

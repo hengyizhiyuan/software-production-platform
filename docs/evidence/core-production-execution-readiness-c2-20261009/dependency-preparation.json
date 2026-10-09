@@ -1,0 +1,100 @@
+{
+  "captured_at_utc": "2026-10-09T06:57:41.085581+00:00",
+  "qualification_root": "/data/watt/c2-execution-readiness-20261009",
+  "existing_running_ids_before": [
+    "e942e5fc1f917edc6e90b35bb3965d679c3cc554cba4a0724b8509756b71041b",
+    "f4aa2f4646dad389d475d353da17fc8751117fd1d86ba5c2b1cd7bef15a5dc34",
+    "67eac0dce22c1e15e50e4ae9023dba86a77284f3de9c21c93aafbe87378df8a5",
+    "f2b37911c4d2011e13ed80e5e1239e0970bc5a8dd85cb188b0b1453fff5da3e7",
+    "8271481d44d087cc3719d22254eeb5e71cbde4307a79457b61d0134b156614d4",
+    "907431da275d08f9b48a98a59d7226118bf54335e33cae16f56001d9c1a508d2",
+    "6940d567f06e2a21f38610048264717a63397269f1a469d789e6db0a65b0c2cc",
+    "1e100b5795dce67373afe7b6d3ba09d33cb406e1ebab13d20f61899aea33a823",
+    "405aa7b1ec1d6fab6962c25990a7fa04a6a25e8a0207e9c65d11d867ca54b06d",
+    "5aa5758c0d3057ef54467b69ae64e74adc91cbbd75734993954fd9bf98369c8c",
+    "abf187e37a7441de01b32257288b84279a1e8ba1858a0fae5eaa7880f7b5fe89",
+    "dd3429391345387ca9cdc71a8584e7e8244ef6f772791b69cd2b4a008f8d6cc6",
+    "60d6f6ad0e04fdb2673aca9d924a1b5f5d21025bfb7c092733b25688c98d55e2",
+    "2ce7345717f67aa980e3e76854e4363014248ad474f47c9746a2627003159011",
+    "bb75898e95f669c6a549fa24e9b43635e3f3175a5f44f9b3d74f9cbd5ad77037",
+    "054872b65f14de53b64b7cec7e9ddeb95b52c9b0fb0bf71ac8c806b19f9e07a3",
+    "6ecd0e02142d0d06272f8b22e9f83a65e955cd17aea42f305ebb22237cb30475",
+    "fe47063758f83842cc7626647b52e8b73bc6b121149fcf4f14978cc7ff26e739",
+    "b948e8f4b5c1ae6fcd877ef44eecfdcb4edaee92fac9e0b93c54fd8cd7d19803"
+  ],
+  "new_dependencies": [
+    {
+      "id": "4168bf0bddac673e5475b04a1490a2143fddabf3370a7525962aaa326967c7b3",
+      "name": "/watt-c2-postgres-20261009",
+      "image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+      "image": "public.ecr.aws/docker/library/postgres:17.6-alpine",
+      "user": "",
+      "labels": {
+        "watt.production": "false",
+        "watt.qualification": "C2-execution-readiness"
+      },
+      "networks": [
+        "watt-c2-control-20261009",
+        "watt-c2-executor-20261009"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/data/watt/c2-execution-readiness-20261009/postgres",
+          "Destination": "/var/lib/postgresql/data",
+          "Mode": "",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ],
+      "published_ports": {}
+    },
+    {
+      "id": "e100f324ec2d5b84418f0b3bbc16740489a71aec2d3a4025ba6e84739674fc0f",
+      "name": "/watt-c2-gitea-20261009",
+      "image_id": "sha256:071efa747340e5e211213fc79a0b928003bedf9b6b48f61cb32b3c52bfd1e09e",
+      "image": "docker.gitea.com/gitea:1.27.3-rootless",
+      "user": "1000:1000",
+      "labels": {
+        "watt.production": "false",
+        "watt.qualification": "C2-execution-readiness"
+      },
+      "networks": [
+        "watt-c2-control-20261009"
+      ],
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/data/watt/c2-execution-readiness-20261009/gitea-data",
+          "Destination": "/var/lib/gitea",
+          "Mode": "",
+          "RW": true,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/data/watt/c2-execution-readiness-20261009/gitea-config",
+          "Destination": "/etc/gitea",
+          "Mode": "",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ],
+      "published_ports": {}
+    }
+  ],
+  "control_network": "watt-c2-control-20261009",
+  "executor_network": "watt-c2-executor-20261009",
+  "workspace_volume": "watt-c2-workspaces-20261009",
+  "new_credentials_categories": [
+    "dedicated PostgreSQL",
+    "Operator API",
+    "Tool Host",
+    "isolated Gitea"
+  ],
+  "production_credentials_copied": false,
+  "provider_credential_status": "WAITING_INDEPENDENT_QUALIFICATION_CREDENTIAL",
+  "model_calls": 0,
+  "business_work_created": false,
+  "shared_docker_daemon": true
+}

@@ -75,6 +75,7 @@ class NativeExecutionWorker:
             ))
             return True
         if production_context is not None:
+            diagnosis = None
             if self.production_evidence_store is None:
                 failure = "EXECUTION_CONTEXT_NOT_READY: durable evidence storage missing"
             else:
@@ -91,10 +92,11 @@ class NativeExecutionWorker:
                     failure = None
                 except ProductionWorkspaceVerificationFailed as error:
                     failure = str(error)
+                    diagnosis = error.diagnosis
             if failure is not None:
                 await asyncio.to_thread(
                     self.runtime.record_production_preflight_rejection, grant,
-                    failure=failure,
+                    failure=failure, diagnosis=diagnosis, worker_version=offer.runtime_version,
                 )
                 await asyncio.to_thread(self.runtime.finish_allocation, grant, KernelRunResult(
                     runtime_mode=ExecutionMode.FINISHED,
