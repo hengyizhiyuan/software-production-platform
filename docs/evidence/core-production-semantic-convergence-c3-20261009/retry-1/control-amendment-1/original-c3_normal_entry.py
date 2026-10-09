@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""C3 normal Product/Experience entry. No fixture, retry, or Human gate writes."""
-from __future__ import annotations
-
 import sys
 sys.dont_write_bytecode = True
+"""C3 normal Product/Experience entry. No fixture, retry, or Human gate writes."""
+from __future__ import annotations
 
 import argparse
 import hashlib

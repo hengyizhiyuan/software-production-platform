@@ -1,0 +1,29 @@
+{
+  "schema": "c3-external-controller-compile-repair-v1",
+  "captured_at_utc": "2026-10-09T12:53:43.045648+00:00",
+  "changed_files": {
+    "c3_normal_entry.py": {
+      "before": "96b8957cd4fa9e60fdbd29a9ce9393546c7a2b43c8800f0c1b4c975923b8e687",
+      "after": "52ba3062d4f1eeb4ff0a87a5476a22adeff9631e46be5fad20e302bcdb30fbc7"
+    },
+    "run_c3_normal_entry.py": {
+      "before": "67608612fe91a2b3afedd73d2024e2c97e7325b4fcfb2c91f7f4176f102e2ce5",
+      "after": "b90f2272c56b8828c308c4c50b8e890a98972d0c8798ae29fad1de656b921c5e"
+    }
+  },
+  "all_12_controls_builtin_compile": "PASS",
+  "failure_scope": "external normal-entry controller compilation before HTTP",
+  "old_runner": "normal-entry-runner.json",
+  "old_console": "normal-entry-console.log",
+  "actual_database": "spg_c3_retry1_qualification_20261009",
+  "read_only_sql": "docker exec watt-c3-postgres-20261009 psql -U c3_app -d spg_c3_retry1_qualification_20261009 -Atc \"SELECT count(*) FROM software_products; SELECT count(*) FROM product_works;\"",
+  "product_rows": 0,
+  "work_rows": 0,
+  "read_only_exit_code": 0,
+  "application_changed": false,
+  "actual_image_unchanged": "sha256:6f8d9b3a27e7e2452097a77427115df6e09b9a03276eb72d0170a66160e0578f",
+  "normal_entry_repeated": false,
+  "work_created": false,
+  "model_calls_from_failed_controller": 0,
+  "original_build_control_revision": "b575e4346bf50d9046e4ed888daaeaccc4d5e8ee"
+}
