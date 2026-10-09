@@ -212,6 +212,25 @@ AI Coding Executors can significantly increase software production speed, but ra
 
 Software Evolution Governance is a long-term capability direction for keeping design consistency, architecture boundaries, Feature completeness, and historical decision constraints effective during continuous change.
 
+## Quality Revolution — Deferred Work Evidence Feedback Loop
+
+**Status: recorded future capability direction only; NOT STARTED, NOT IMPLEMENTATION-AUTHORIZED, and NOT an automatic next milestone.** Human Governor decision (2026-10-09): after the already-running Admin Work AI Diagnostic Export v1 is complete, return focus to the established core production program (including the active C3/C4 recovery, N1, and N3 according to their existing approved contracts). **After N3 completes, Human Governor will re-assess the October plan and personally decide what starts next.** Neither diagnostic export completion nor N3 closure automatically starts this capability or changes priority.
+
+The **first step** is the independent Admin Work AI Diagnostic Export v1: a read-only, permission-checked, redacted, provenance-aware, portable diagnostic snapshot of a Work's observed lifecycle (including Works halted in DESIGN before any PWU or Candidate). This is a diagnostic transport/view of existing authoritative Owner records, **not** a new Source of Truth.
+
+The **deferred second step**, to be considered in the future **Quality Revolution** work, is a governed evidence-driven improvement flywheel:
+
+1. Periodically consume existing Work/Quality Owner evidence and diagnostic-report schema (without requiring bulk ZIP regeneration or duplicating the ledger). Detect failures, false blocks, regressions, missing evidence, expensive interventions, and recoveries.
+2. Correlate related incidents across Works; distinguish deterministic observed signatures from model-proposed shared-root-cause **hypotheses**. Preserve source identity, code/runtime revision, confidence, impact, and UNKNOWN/NOT_OBSERVED boundaries. Do not treat textual similarity or frequency alone as proved causality.
+3. Prioritize candidate improvements by severity, affected Works/users, recurrence, attributable evidence, regression risk, estimated cost, and expected trusted production value. A single severe authority breach can outrank many repeated low-impact errors.
+4. Produce versioned, reviewable improvement proposals and bounded production plans with explicit affected Owner, evidence links, alternatives, guardrails, acceptance criteria, and independent regression/holdout strategy.
+5. **Human Governor approval is mandatory** before initiating any improvement Work. Approval admits only the reviewed scope and budget; it does not waive verification, Guardian, delivery authorization, or deployment controls.
+6. Reuse existing Watt Work/Task/PWU/Executor, Verification, Guardian, Quality Ledger/Case/Finding/Cluster/Regression and Golden/Holdout mechanisms to implement, qualify, compare before/after, and conditionally adopt improvements. Preserve old incidents and do not auto-close Findings based on a model claim.
+
+The long-term product interaction may offer **one-click approval to launch a governed improvement Work**, not one-click unreviewed code mutation or production rollout. The improvement intelligence must follow Program ADR-0002 (Reuse Determinism, Harness Stochasticity): model-assisted interpretation and clustering are candidates, while provenance, authority, effects, qualification and promotion remain governed.
+
+**Explicitly deferred:** periodic scanning/scheduling, automated clustering and attribution, automatic planning, approval-to-Work wiring, and automatic self-improvement. They are not part of the diagnostic-export implementation, C3/C4, N1, or N3 by implication. Do not initiate a pilot, create tasks, or change the roadmap until Human Governor re-prioritizes after N3.
+
 ## Engineering Change Intelligence (Tentative)
 
 Engineering Change Intelligence is a long-term capability direction, not an MVP requirement. It may support:
