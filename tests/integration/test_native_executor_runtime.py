@@ -3444,6 +3444,57 @@ def test_production_worker_verification_failure_cannot_claim_result_ready(
                    for item in service.execution_evidence(admission.binding.attempt_id))
 
 
+def test_production_preflight_failure_keeps_exact_diagnostic_before_terminal(
+    postgres_database: Database, git_repository: Path, tmp_path: Path,
+) -> None:
+    isolated = tmp_path / "isolated-missing-workspace"
+    subprocess.run(["git", "clone", str(git_repository), str(isolated)],
+                   check=True, capture_output=True)
+    service = NativeExecutorRuntimeService(postgres_database)
+    admission = _admission(postgres_database, git_repository)
+    binding = admission.binding
+    manifest = binding.workspace.model_copy(update={
+        "host_storage_id": str(isolated),
+        "mounts": (binding.workspace.mounts[0].model_copy(
+            update={"host_path": str(isolated)}),),
+    })
+    context = ProductionExecutionContext(
+        work_id=binding.work_id, task_contract_id=uuid4(),
+        ecf_context_fingerprint="a" * 64, irk_semantic_ir_id=uuid4(),
+        repository_identity=str(git_repository),
+        repository_revision=_git(git_repository, "rev-parse", "HEAD"),
+        workspace_id=manifest.workspace_id,
+        verification_requirements=("exact repository check",),
+        work_reality_revision_id=uuid4(),
+    )
+    admission = admission.model_copy(update={
+        "binding": binding.model_copy(update={
+            "workspace": manifest, "production_context": context,
+        }),
+        "materialization_path": str(isolated),
+    })
+    service.admit(admission)
+    isolated.rename(tmp_path / "workspace-unavailable-after-admission")
+
+    def never_run(_grant):
+        raise AssertionError("missing workspace reached the kernel")
+
+    worker = NativeExecutionWorker(service, never_run,
+        production_evidence_store=ContentAddressedStorage(tmp_path / "evidence"))
+    assert asyncio.run(worker.run_once(_offer())) is True
+    events = service.execution_evidence(admission.binding.attempt_id)
+    rejected = [item for item in events
+                if item["event_type"] == "ExecutionWorkspacePreflightRejected"]
+    assert len(rejected) == 1
+    assert rejected[0]["payload"]["failure"] == (
+        "VERIFICATION_FAILED: workspace unavailable")
+    assert not any(item["event_type"] == "ExecutionWorkspacePrepared"
+                   for item in events)
+    with postgres_database.unit_of_work() as uow:
+        state = NativeExecutionStore(uow.session).attempt_state(admission.binding.attempt_id)
+    assert state.terminal_outcome is AttemptTerminalOutcome.UNABLE_TO_COMPLETE
+
+
 def test_cloud_worker_crash_requeues_same_execution_after_lease_expiry(
     postgres_database: Database, git_repository: Path,
 ) -> None:

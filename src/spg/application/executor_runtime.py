@@ -524,6 +524,29 @@ class NativeExecutorRuntimeService:
             )
             uow.commit()
 
+    def record_production_preflight_rejection(
+        self, grant: ExecutionAllocationGrant, *, failure: str,
+    ) -> None:
+        """Keep the exact bounded preflight failure before terminal settlement.
+
+        The workspace verifier emits only fixed diagnostic messages; no model
+        output, repository contents or credentials are recorded here.
+        """
+        if not failure.startswith(("VERIFICATION_FAILED:", "EXECUTION_CONTEXT_NOT_READY:")):
+            raise ValueError("unsupported production preflight diagnosis")
+        with self.database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            state = store.attempt_state(grant.allocation.attempt_id, lock=True)
+            if state.worker_epoch != grant.allocation.lease_epoch:
+                raise NativeExecutionConflict("production preflight worker epoch was fenced")
+            self._append_event(
+                store, pwu_id=grant.allocation.pwu_id,
+                attempt_id=grant.allocation.attempt_id,
+                event_type="ExecutionWorkspacePreflightRejected",
+                payload={"failure": failure},
+            )
+            uow.commit()
+
     def list_workers(self) -> tuple[WorkerRegistrationRecord, ...]:
         with self.database.unit_of_work() as uow:
             store = NativeExecutionStore(uow.session)

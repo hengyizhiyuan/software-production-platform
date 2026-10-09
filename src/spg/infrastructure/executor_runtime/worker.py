@@ -92,6 +92,10 @@ class NativeExecutionWorker:
                 except ProductionWorkspaceVerificationFailed as error:
                     failure = str(error)
             if failure is not None:
+                await asyncio.to_thread(
+                    self.runtime.record_production_preflight_rejection, grant,
+                    failure=failure,
+                )
                 await asyncio.to_thread(self.runtime.finish_allocation, grant, KernelRunResult(
                     runtime_mode=ExecutionMode.FINISHED,
                     terminal_outcome=AttemptTerminalOutcome.UNABLE_TO_COMPLETE,
