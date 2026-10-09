@@ -1,0 +1,32 @@
+{
+  "schema": "c3-runtime-dependencies-v1",
+  "captured_at_utc": "2026-10-09T09:21:06.709461+00:00",
+  "gitea_container_id": "7cf33d1345ef58c824b2e22d264a763c0b6865b88ccc12938df90dd3fb9d72cd",
+  "gitea_image_id": "sha256:071efa747340e5e211213fc79a0b928003bedf9b6b48f61cb32b3c52bfd1e09e",
+  "gitea_mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/gitea-data",
+      "Destination": "/var/lib/gitea",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/gitea-config",
+      "Destination": "/etc/gitea",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "published_ports": {},
+  "executor_network": "watt-c3-executor-20261009",
+  "workspace_volume": "watt-c3-workspaces-20261009",
+  "independent_gitea_credentials": true,
+  "application_roles_created": false,
+  "real_work_created": 0,
+  "provider_calls": 0,
+  "old_data_or_services_modified": false
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "c3-pe-development-regression-v1",
+  "source_base_revision": "88f1d9805d3ed1aa779ed3c78902b193fae240f8",
+  "input_patch_archive_sha256": "1e325c94ba6f3f4984bb44a9ac872aae13bc09a8d6bf6de67cf9531915aa92be",
+  "dependency_test_image": "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+  "source_overlay": true,
+  "is_final_c3_runtime_qualification": false,
+  "started_at_utc": "2026-10-09T08:59:14.755286+00:00",
+  "ended_at_utc": "2026-10-09T08:59:22.374133+00:00",
+  "wall_seconds": 7.618833463988267,
+  "exit_code": 0,
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "junit_family=legacy",
+    "tests/test_container_production_environment_provider.py",
+    "-m",
+    "not real_container",
+    "--tb=short",
+    "--junitxml=/c3-evidence/pe.xml"
+  ],
+  "user": "10001:10001",
+  "real_model_calls": 0,
+  "real_works_created": 0,
+  "original_environment_modified": false
+}

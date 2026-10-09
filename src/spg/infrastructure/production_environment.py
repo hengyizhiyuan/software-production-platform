@@ -34,6 +34,7 @@ from spg.domain.production_environment import (
     PreparedRepositoryMount,
     PreparedWorkspaceV1,
     ProviderEnvironmentHandle,
+    ProviderRuntimeImageObservationV1,
     ProductionWorkspaceV1,
     safe_workspace_path,
 )
@@ -384,11 +385,23 @@ class ContainerProductionEnvironmentProvider:
             raise EnvironmentProviderError("container environment creation failed") from exc
         if not opaque_reference:
             raise EnvironmentProviderError("container runtime returned no environment identity")
-        return ProviderEnvironmentHandle(
-            provider_identity=self.provider_identity,
-            environment_id=request.environment.id,
-            opaque_reference=opaque_reference,
-        )
+        try:
+            # Only a runtime observer may produce actual image identity. Legacy
+            # provider ports without this capability retain UNKNOWN evidence.
+            observer = getattr(self.runtime, "observe_image", None)
+            observation = (None if observer is None else observer(
+                opaque_reference, environment_id=request.environment.id,
+                requested_image_reference=request.image_reference))
+            return ProviderEnvironmentHandle(
+                provider_identity=self.provider_identity,
+                environment_id=request.environment.id,
+                opaque_reference=opaque_reference,
+                runtime_image_observation=observation,
+            )
+        except Exception as exc:
+            self.runtime.remove(opaque_reference)
+            raise EnvironmentProviderError(
+                "PE_RUNTIME_IMAGE_OBSERVATION_REJECTED") from exc
 
     def prepare_dependencies(
         self,
@@ -750,6 +763,24 @@ class DockerCliContainerRuntime:
         with self._lock:
             self._mounts[container_id] = request.prepared_workspace.repository_mounts
         return container_id
+
+    def observe_image(
+        self, opaque_reference: str, *, environment_id: UUID,
+        requested_image_reference: str,
+    ) -> ProviderRuntimeImageObservationV1:
+        # Deliberately query only the fixed safe fields; never full inspect/ENV.
+        safe_format = ('{"container_identity":{{json .Id}},'
+                       '"actual_image_id":{{json .Image}},'
+                       '"running":{{json .State.Running}}}')
+        observed = json.loads(self._docker(
+            "inspect", "--format", safe_format, opaque_reference))
+        if not isinstance(observed, dict) or set(observed) != {
+                "container_identity", "actual_image_id", "running"}:
+            raise EnvironmentProviderError("PE_RUNTIME_OBSERVATION_FIELDS_INVALID")
+        return ProviderRuntimeImageObservationV1(
+            provider_identity="container-v1", environment_id=environment_id,
+            requested_image_reference=requested_image_reference,
+            observed_at=datetime.now(UTC), **observed)
 
     def execute(
         self,

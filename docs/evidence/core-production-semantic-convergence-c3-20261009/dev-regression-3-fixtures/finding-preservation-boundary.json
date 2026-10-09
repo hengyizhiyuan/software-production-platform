@@ -1,0 +1,32 @@
+{
+  "schema": "c3-fixture-finding-boundary-v1",
+  "recorded_at_utc": "2026-10-09T10:54:19.497045+00:00",
+  "fixture_container": "watt-c3-dev3-fixtures-c1-positive-20261009",
+  "observed_state": "exited",
+  "observed_tmpfs": {
+    "/tmp": "rw,exec,nosuid,size=512m"
+  },
+  "safe_pytest_evidence": {
+    "cases": 2,
+    "actual_guardian_gate": "BLOCKED",
+    "candidate_ids": [
+      "7d777cf7-ba37-538b-b479-ec8a8288c05d",
+      "4158ad2b-4fcd-5c84-b4e8-43127ea3744d"
+    ],
+    "guardian_request_ids": [
+      "591713c6-77bc-5ecf-933a-bb59fbf0d6f3",
+      "07b30325-ef70-5b30-8382-9df351bc5044"
+    ]
+  },
+  "historical_detailed_guardian_finding": "UNKNOWN",
+  "reason": "Failure path did not export Guardian JSON Owner files; pytest temp Owner root was under /tmp tmpfs. Safe assertion output is abbreviated. No detailed predicate has been reconstructed from current code.",
+  "rejected_action": {
+    "action": "copy entire stopped fixture container /tmp to ECS private directory",
+    "auto_review": "REJECTED",
+    "reason": "Unverified broad contents and scope; possible sensitive or unrelated data",
+    "executed": false,
+    "bypassed": false
+  },
+  "approved_correction": "Future limited fixture groups use unique private persisted basetemp and export only exact Guardian result/request records; old failure remains unchanged.",
+  "runtime_conformance_pass": false
+}

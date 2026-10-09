@@ -46,9 +46,13 @@ def _exact_protected_context_coverage(request: VerificationCapabilityRequest,
     observed = tuple(tuple(item.get(key) for key in identity) for item in checks)
     return (bool(expected) and len(set(expected)) == len(expected)
             and len(observed) == len(expected) and set(observed) == set(expected)
-            and all(item.get("coverage") in {"COVERED", "PENDING_CANDIDATE_GATE"}
+            and all(item.get("coverage") in {"COVERED", "PENDING_CANDIDATE_GATE", "PENDING_HUMAN_GATE", "CONTEXT_RETAINED"}
                     and (item.get("coverage") != "PENDING_CANDIDATE_GATE"
                          or item.get("evidence_method") == "EXACT_CANDIDATE_SEAL_REQUIRED")
+                    and (item.get("coverage") != "PENDING_HUMAN_GATE"
+                         or item.get("evidence_method") == "EXACT_HUMAN_AUTHORIZATION_REQUIRED")
+                    and (item.get("coverage") != "CONTEXT_RETAINED"
+                         or item.get("evidence_method") == "EXACT_RETAINED_AUTHORITATIVE_CONTEXT")
                     and item.get("candidate_revision") == request.proposed_commit_identity
                     and item.get("candidate_tree") == request.tree_identity
                     for item in checks))
@@ -77,6 +81,8 @@ class RepositoryCodeVerifier:
         request: VerificationCapabilityRequest,
     ) -> VerificationCapabilityResult:
         target: str | None = None
+        metadata = {"mode": "contract-driven-code-verification"}
+        receipt_recorder = None
         try:
             with self.database.unit_of_work() as unit_of_work:
                 store = RuntimeStore(unit_of_work.session)
@@ -146,8 +152,12 @@ class RepositoryCodeVerifier:
                 if admitted_revision is not None and admitted_ir is not None:
                     from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
                     from spg.application.governed_obligations import validate_continuous_gates
+                    active_contract = work_unit.completion_contract.change_contract
                     validate_continuous_gates(gate_bindings, admitted_revision,
-                        admitted_ir)
+                        admitted_ir, source_revision=source.repository_revision,
+                        exact_target_paths=tuple(target.path for target in active_contract.exact_targets)
+                        if active_contract is not None else tuple(
+                            artifact.path for artifact in work_unit.completion_contract.artifact_contract))
                     if gate_bindings and proposed is not None:
                         native_binding = NativeExecutionStore(unit_of_work.session).attempt_binding(
                             proposed.attempt_id)
@@ -181,6 +191,13 @@ class RepositoryCodeVerifier:
                     != work_unit.completion_contract.semantic_fact_obligations):
                 raise RuntimeError("Code semantic obligations differ from admitted contract")
             target = obligation.target
+            from spg.providers.verification_receipts import VerificationCandidateReceipts
+            receipt_recorder = VerificationCandidateReceipts(request, database=self.database,
+                work_id=None if admitted_revision is None else admitted_revision.work_id,
+                work_revision_id=None if admitted_revision is None else admitted_revision.id,
+                pwu_id=work_unit.id, attempt_id=proposed.attempt_id)
+            plan_repair = (None if self.context_verifier is None else StaticHTMLPlanRepair(
+                self.context_verifier.runtime_factory, receipt_recorder=receipt_recorder))
             result, metadata = self._evaluate(
                 repository=dispatch.workspace.repository_path,
                 source_revision=source.repository_revision,
@@ -188,16 +205,25 @@ class RepositoryCodeVerifier:
                 contract=contract,
                 obligation=obligation,
             )
+            if obligation.kind is CodeVerificationKind.PATH_SCOPE and gate_bindings:
+                from spg.application.governed_obligations import canonical_fingerprint
+                from spg.domain.governed_obligation import fulfillment_source_ref
+                metadata["fulfillment_binding_results"] = tuple({
+                    "source_ref": fulfillment_source_ref(binding),
+                    "binding_fingerprint": canonical_fingerprint(binding.model_dump(mode="json")),
+                    "owner": binding.owner.value, "phase": binding.phase.value,
+                    "evidence_method": binding.evidence_method,
+                    "disposition": "NOT_EVALUATED_PRIOR_GATE", "current_stage_satisfied": False,
+                    "candidate_revision": request.proposed_commit_identity, "candidate_tree": request.tree_identity}
+                    for binding in gate_bindings)
             if (obligation.kind is CodeVerificationKind.PATH_SCOPE
                     and result is VerificationResultValue.PASS):
-                semantic_checks = verify_static_html_semantic_facts(
-                    dispatch.workspace.repository_path,
-                    request.proposed_commit_identity,
-                    contract,
-                    work_unit.completion_contract.semantic_fact_obligations,
-                    admitted_facts=admitted_facts,
-                    plan_repair=self.plan_repair,
-                )
+                from spg.providers.managed_context_fulfillment import verify_fulfillment_fact_routes
+                semantic_checks = verify_fulfillment_fact_routes(
+                    repository=dispatch.workspace.repository_path, request=request, contract=contract,
+                    references=work_unit.completion_contract.semantic_fact_obligations,
+                    admitted_facts=admitted_facts, revision=admitted_revision, ir=admitted_ir,
+                    baseline=source, bindings=gate_bindings, plan_repair=plan_repair)
                 if gate_bindings:
                     from spg.application.governed_obligations import evaluate_continuous_gates
                     semantic_checks = evaluate_continuous_gates(
@@ -210,7 +236,8 @@ class RepositoryCodeVerifier:
                         references=request.semantic_fact_obligations,
                         admitted_facts=admitted_facts, ir=admitted_ir,
                         source_revision=contract.source_revision,
-                        exact_target_paths=tuple(target.path for target in contract.exact_targets))
+                        exact_target_paths=tuple(target.path for target in contract.exact_targets),
+                        fulfillment_bindings=gate_bindings)
                 if gate_bindings:
                     from spg.application.governed_obligations import evaluate_constraint_routes
                     semantic_checks = (*semantic_checks, *evaluate_constraint_routes(
@@ -244,25 +271,48 @@ class RepositoryCodeVerifier:
                             baseline=source.repository_revision,
                             revision=admitted_revision, ir=admitted_ir,
                             semantic_checks=metadata.get("static_html_semantic_checks", ()),
-                            static_verifier=self.context_verifier)
+                            static_verifier=self.context_verifier,
+                            fulfillment_bindings=gate_bindings,
+                            receipt_recorder=receipt_recorder, native_record=native_binding)
                     else:
                         checks = self.context_verifier.verify(
                             request, task, contract,
-                            dispatch.workspace.repository_path, source.repository_revision)
+                            dispatch.workspace.repository_path, source.repository_revision,
+                            receipt_recorder=receipt_recorder)
                     metadata["protected_context_checks"] = checks
                     if not _exact_protected_context_coverage(request, checks):
                         metadata["protected_context_failure"] = "PROTECTED_CONTEXT_COVERAGE_INCOMPLETE"
                         result = VerificationResultValue.FAIL
 
+            if (obligation.kind is CodeVerificationKind.PATH_SCOPE and result is VerificationResultValue.PASS
+                    and any(binding.projection_inventory_fingerprint for binding in gate_bindings)):
+                from spg.providers.managed_context_fulfillment import verify_binding_inventory
+                outcomes, derived_checks = verify_binding_inventory(request=request,
+                    task=work_unit.completion_contract.task_contract, contract=contract,
+                    repository=dispatch.workspace.repository_path, baseline=source.repository_revision,
+                    revision=admitted_revision, ir=admitted_ir, bindings=gate_bindings,
+                    semantic_checks=metadata.get("static_html_semantic_checks", ()),
+                    protected_checks=metadata.get("protected_context_checks", ()),
+                    static_verifier=self.context_verifier, receipt_recorder=receipt_recorder,
+                    native_record=native_binding)
+                metadata["fulfillment_binding_results"] = outcomes
+                metadata["fulfillment_binding_checks"] = derived_checks
+                if any(outcome["current_stage_satisfied"] is not True for outcome in outcomes):
+                    result = VerificationResultValue.FAIL
+
         except Exception as error:
             result = VerificationResultValue.UNKNOWN
-            metadata = {
-                "mode": "contract-driven-code-verification",
-                "target": target,
-                "failure_type": type(error).__name__,
-            }
-            if isinstance(error, ValueError) and str(error).startswith("PROTECTED_CONTEXT_"):
+            metadata = {**metadata,
+                "mode": "contract-driven-code-verification", "target": target,
+                "failure_type": type(error).__name__}
+            retained = getattr(error, "verification_metadata", None)
+            if isinstance(retained, dict):
+                metadata.update(retained)
+            if isinstance(error, ValueError) and str(error).startswith((
+                    "PROTECTED_CONTEXT_", "VERIFICATION_CANDIDATE_", "OBLIGATION_")):
                 metadata["failure_code"] = str(error)
+        if receipt_recorder is not None:
+            metadata["verification_candidate_receipts"] = receipt_recorder.metadata()
         metadata["semantic_fact_ids"] = [
             str(item.fact_id) for item in request.semantic_fact_obligations
         ]

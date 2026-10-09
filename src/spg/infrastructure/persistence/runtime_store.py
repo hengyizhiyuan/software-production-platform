@@ -419,6 +419,16 @@ class RuntimeStore:
         ).mappings()
         return [GovernanceRecord.model_validate(dict(row)) for row in rows]
 
+    def fulfillment_observations_for_receipt(self, receipt_id: UUID) -> list[GovernanceRecord]:
+        """Exact read from the existing Work governance observation carrier."""
+        rows = self.session.execute(select(governance_records).where(
+            governance_records.c.decision_type == "WORK_FULFILLMENT_OBSERVATION",
+            governance_records.c.authority_identity == "work-governance:derived-candidate-observation",
+            governance_records.c.subject_type == "WORK_FULFILLMENT_BASIS",
+            governance_records.c.scope["receipt_id"].astext == str(receipt_id),
+        ).limit(2)).mappings()
+        return [GovernanceRecord.model_validate(dict(row)) for row in rows]
+
     def run(
         self,
         run_id: UUID,

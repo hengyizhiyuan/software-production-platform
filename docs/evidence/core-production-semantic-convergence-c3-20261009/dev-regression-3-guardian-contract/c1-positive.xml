@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="13.538" timestamp="2026-10-09T10:53:08.854072+00:00" hostname="8b84f8448e74"><testcase classname="tests.integration.test_c1_contract_continuity" name="test_both_actual_admission_paths_reach_independent_guardian[work]" file="tests/integration/test_c1_contract_continuity.py" line="572" time="4.790"><failure message="AssertionError: {'status': 'BLOCKED', 'gate': 'BLOCKED', 'candidate_id': '5e19f4ff-fa5f-5342-9c94-b1683546d3de', 'request_id': 'ac374dea-dce6-5d9c-a8ef-43f65622b697', ...}&#10;assert 'BLOCKED' == 'PASS'&#10;  &#10;  - PASS&#10;  + BLOCKED">tests/integration/test_c1_contract_continuity.py:575: in test_both_actual_admission_paths_reach_independent_guardian
+    assert projection["gate"] == "PASS", projection
+E   AssertionError: {'status': 'BLOCKED', 'gate': 'BLOCKED', 'candidate_id': '5e19f4ff-fa5f-5342-9c94-b1683546d3de', 'request_id': 'ac374dea-dce6-5d9c-a8ef-43f65622b697', ...}
+E   assert 'BLOCKED' == 'PASS'
+E     
+E     - PASS
+E     + BLOCKED</failure></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_both_actual_admission_paths_reach_independent_guardian[steering]" file="tests/integration/test_c1_contract_continuity.py" line="572" time="4.179"><failure message="AssertionError: {'status': 'BLOCKED', 'gate': 'BLOCKED', 'candidate_id': '24efad30-3640-5eef-8562-83c651ff89c1', 'request_id': 'f7d2f0a6-088f-5492-8bbc-a988b444e7dc', ...}&#10;assert 'BLOCKED' == 'PASS'&#10;  &#10;  - PASS&#10;  + BLOCKED">tests/integration/test_c1_contract_continuity.py:575: in test_both_actual_admission_paths_reach_independent_guardian
+    assert projection["gate"] == "PASS", projection
+E   AssertionError: {'status': 'BLOCKED', 'gate': 'BLOCKED', 'candidate_id': '24efad30-3640-5eef-8562-83c651ff89c1', 'request_id': 'f7d2f0a6-088f-5492-8bbc-a988b444e7dc', ...}
+E   assert 'BLOCKED' == 'PASS'
+E     
+E     - PASS
+E     + BLOCKED</failure></testcase></testsuite></testsuites>

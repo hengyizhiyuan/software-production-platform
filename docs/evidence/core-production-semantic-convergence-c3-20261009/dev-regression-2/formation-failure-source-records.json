@@ -1,0 +1,305 @@
+{
+  "observed_at_utc": "2026-10-09T10:13:55.897431+00:00",
+  "database": "c1_contract_continuity",
+  "source": {
+    "work_reality_revision_id": "a2489a8e-fa3d-51cd-91e3-244545558aef",
+    "work_id": "6f630be4-0c13-51ec-8676-c4270f9cd2e5",
+    "constraints": [
+      "index.html changes alone",
+      "Excluded from this Work: deployment, publishing",
+      "A reviewable Candidate is left for Human acceptance",
+      "Excluded from this Work: deployment",
+      "Excluded from this Work: publishing"
+    ],
+    "context_facts": [],
+    "engineering_semantic_facts": [
+      {
+        "id": "efb93d43-fc38-50a0-b427-eaed09625771",
+        "unit": null,
+        "scope": "index.html",
+        "value": "C1 continuity",
+        "subject": "page.h1",
+        "relation": "EQUALITY",
+        "authority": "HUMAN_EXPLICIT",
+        "provenance": {
+          "role_origin": "EXPLICIT",
+          "source_text": "h1 text in index.html equals C1 continuity",
+          "semantic_ir_id": "4e976304-0d36-5ab0-b534-b73bae48aa32",
+          "source_record_ids": [
+            "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5"
+          ],
+          "governed_provenance": [
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_text": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+              "source_record_id": "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5",
+              "evidence_reference": null
+            },
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_text": "index.html changes alone",
+              "source_record_id": "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5",
+              "evidence_reference": null
+            },
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_text": "Excluded from this Work: deployment, publishing",
+              "source_record_id": "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5",
+              "evidence_reference": null
+            },
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_text": "A reviewable Candidate is left for Human acceptance",
+              "source_record_id": "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5",
+              "evidence_reference": null
+            }
+          ],
+          "source_extraction_ids": []
+        },
+        "qualifiers": {
+          "element": "h1"
+        },
+        "reference_role": null,
+        "epistemic_status": "CONFIRMED",
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": "a2489a8e-fa3d-51cd-91e3-244545558aef"
+      }
+    ],
+    "semantic_ir": {
+      "id": "4e976304-0d36-5ab0-b534-b73bae48aa32",
+      "items": [
+        {
+          "kind": "PRODUCTION_INTENT",
+          "action": null,
+          "answer": null,
+          "item_id": "meaning",
+          "subject": null,
+          "statement": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+          "confidence": 1.0,
+          "depends_on": [],
+          "production": {
+            "scope": [],
+            "current": true,
+            "new_work": true,
+            "objective": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+            "exclusions": [
+              "deployment",
+              "publishing"
+            ],
+            "unresolved": [],
+            "target_paths": [
+              {
+                "value": "index.html",
+                "provenance": {
+                  "origin": "HUMAN_EXPLICIT",
+                  "source_text": "Create index.html",
+                  "source_record_id": "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5",
+                  "evidence_reference": null
+                }
+              }
+            ],
+            "allowed_areas": [],
+            "bounded_change": true,
+            "primary_change": "Create index.html",
+            "systemic_design": false,
+            "preview_required": false,
+            "acceptance_required": true,
+            "delivery_authorized": false,
+            "repository_required": false,
+            "repository_reference": null,
+            "unresolved_arguments": []
+          },
+          "provenance": [
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_text": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+              "source_record_id": "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5",
+              "evidence_reference": null
+            }
+          ],
+          "supersedes": [],
+          "design_frame": null,
+          "observed_facts": {},
+          "requires_human": false
+        },
+        {
+          "kind": "CONSTRAINT",
+          "action": null,
+          "answer": null,
+          "item_id": "change-scope",
+          "subject": "repository-change-boundary",
+          "statement": "index.html changes alone",
+          "confidence": 1.0,
+          "depends_on": [],
+          "production": null,
+          "provenance": [
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_text": "index.html changes alone",
+              "source_record_id": "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5",
+              "evidence_reference": null
+            }
+          ],
+          "supersedes": [],
+          "design_frame": null,
+          "observed_facts": {},
+          "requires_human": false
+        },
+        {
+          "kind": "CONSTRAINT",
+          "action": null,
+          "answer": null,
+          "item_id": "external-boundary",
+          "subject": "release-boundary",
+          "statement": "Excluded from this Work: deployment, publishing",
+          "confidence": 1.0,
+          "depends_on": [],
+          "production": null,
+          "provenance": [
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_text": "Excluded from this Work: deployment, publishing",
+              "source_record_id": "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5",
+              "evidence_reference": null
+            }
+          ],
+          "supersedes": [],
+          "design_frame": null,
+          "observed_facts": {},
+          "requires_human": false
+        },
+        {
+          "kind": "CONSTRAINT",
+          "action": null,
+          "answer": null,
+          "item_id": "candidate-handoff",
+          "subject": "review-handoff",
+          "statement": "A reviewable Candidate is left for Human acceptance",
+          "confidence": 1.0,
+          "depends_on": [],
+          "production": null,
+          "provenance": [
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_text": "A reviewable Candidate is left for Human acceptance",
+              "source_record_id": "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5",
+              "evidence_reference": null
+            }
+          ],
+          "supersedes": [],
+          "design_frame": null,
+          "observed_facts": {},
+          "requires_human": false
+        }
+      ],
+      "clauses": [
+        {
+          "modality": "UNRESOLVED",
+          "polarity": "UNRESOLVED",
+          "clause_id": "current-source",
+          "refers_to": [],
+          "speech_act": null,
+          "supersedes": [],
+          "source_text": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+          "temporal_scope": "UNRESOLVED",
+          "source_record_id": "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5",
+          "requested_effects": [],
+          "semantic_item_ids": [
+            "meaning"
+          ]
+        },
+        {
+          "modality": "ASSERTION",
+          "polarity": "AFFIRMATIVE",
+          "clause_id": "change-scope",
+          "refers_to": [],
+          "speech_act": null,
+          "supersedes": [],
+          "source_text": "index.html changes alone",
+          "temporal_scope": "CURRENT",
+          "source_record_id": "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5",
+          "requested_effects": [
+            "RESTRICT_CHANGE_SCOPE"
+          ],
+          "semantic_item_ids": [
+            "change-scope"
+          ]
+        },
+        {
+          "modality": "ASSERTION",
+          "polarity": "NEGATED",
+          "clause_id": "external-boundary",
+          "refers_to": [],
+          "speech_act": null,
+          "supersedes": [],
+          "source_text": "Excluded from this Work: deployment, publishing",
+          "temporal_scope": "CURRENT",
+          "source_record_id": "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5",
+          "requested_effects": [
+            "PROHIBIT_DEPLOY",
+            "PROHIBIT_PUBLISH"
+          ],
+          "semantic_item_ids": [
+            "external-boundary"
+          ]
+        },
+        {
+          "modality": "ASSERTION",
+          "polarity": "AFFIRMATIVE",
+          "clause_id": "candidate-handoff",
+          "refers_to": [],
+          "speech_act": null,
+          "supersedes": [],
+          "source_text": "A reviewable Candidate is left for Human acceptance",
+          "temporal_scope": "CURRENT",
+          "source_record_id": "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5",
+          "requested_effects": [],
+          "semantic_item_ids": [
+            "candidate-handoff"
+          ]
+        }
+      ],
+      "questions": [],
+      "uncertain": false,
+      "unresolved": [],
+      "interaction_id": "0356bca5-141c-4b3c-9a61-1409b44c3815",
+      "schema_version": "irk-semantic-ir-v1",
+      "human_decisions": [],
+      "source_record_id": "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5",
+      "basis_fingerprint": "1ce0ccb132b7a7f4d084328633e8970896bd4b77163a693f8a30ba62a0d0ffaa",
+      "compiler_reference": "fixture:c1-declared-meaning",
+      "engineering_fact_ids": [
+        "efb93d43-fc38-50a0-b427-eaed09625771"
+      ],
+      "work_question_step_id": null,
+      "production_sufficiency": null,
+      "human_abstraction_level": "DOMAIN",
+      "legacy_typed_projection": false,
+      "semantic_fact_candidates": [
+        {
+          "unit": null,
+          "scope": "index.html",
+          "value": "C1 continuity",
+          "subject": "page.h1",
+          "relation": "EQUALITY",
+          "authority": "HUMAN_EXPLICIT",
+          "operation": "UPSERT",
+          "qualifiers": {
+            "element": "h1"
+          },
+          "role_origin": "EXPLICIT",
+          "source_text": "h1 text in index.html equals C1 continuity",
+          "candidate_id": "heading",
+          "reference_role": null,
+          "epistemic_status": "CONFIRMED",
+          "source_record_ids": [
+            "532f6e8f-4cfe-4db6-ba8d-8c92fe0198d5"
+          ],
+          "supersedes_fact_ids": [],
+          "source_extraction_ids": []
+        }
+      ],
+      "neutral_semantic_extractions": []
+    }
+  }
+}

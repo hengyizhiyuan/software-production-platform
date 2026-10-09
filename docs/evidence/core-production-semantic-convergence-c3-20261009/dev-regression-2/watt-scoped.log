@@ -1,0 +1,40 @@
+....FF..............                                                     [100%]
+=================================== FAILURES ===================================
+______ test_model_repairs_only_derived_method_against_exact_human_source _______
+src/spg/providers/static_html_semantic_verifier.py:526: in repair
+    "usage": asdict(response.usage)})
+                    ^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'usage'
+
+The above exception was the direct cause of the following exception:
+tests/test_n1_static_html_semantics.py:987: in test_model_repairs_only_derived_method_against_exact_human_source
+    checks = verify_static_html_semantic_facts(
+src/spg/providers/static_html_semantic_verifier.py:744: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:655: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/static_html_semantic_verifier.py:545: in repair
+    raise ValueError("STATIC_HTML_PLAN_MODEL_UNAVAILABLE") from error
+E   ValueError: STATIC_HTML_PLAN_MODEL_UNAVAILABLE
+___________ test_model_plan_exhaustion_cannot_invent_source_or_pass ____________
+src/spg/providers/static_html_semantic_verifier.py:526: in repair
+    "usage": asdict(response.usage)})
+                    ^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'usage'
+
+The above exception was the direct cause of the following exception:
+tests/test_n1_static_html_semantics.py:1041: in test_model_plan_exhaustion_cannot_invent_source_or_pass
+    checks = verify_static_html_semantic_facts(
+src/spg/providers/static_html_semantic_verifier.py:744: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:655: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/static_html_semantic_verifier.py:545: in repair
+    raise ValueError("STATIC_HTML_PLAN_MODEL_UNAVAILABLE") from error
+E   ValueError: STATIC_HTML_PLAN_MODEL_UNAVAILABLE
+=========================== short test summary info ============================
+FAILED tests/test_n1_static_html_semantics.py::test_model_repairs_only_derived_method_against_exact_human_source
+FAILED tests/test_n1_static_html_semantics.py::test_model_plan_exhaustion_cannot_invent_source_or_pass
+2 failed, 18 passed in 5.83s

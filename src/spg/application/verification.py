@@ -760,36 +760,101 @@ def _fingerprint(value: object) -> str:
     return sha256(canonical).hexdigest()
 
 
+def _exact_protected_coverage(obligation, checks, package_fingerprint):
+    """Project a unique exact Owner check; never decide Assurance or authority."""
+    related = [check for check in checks if isinstance(check, dict)
+        and all(check.get(key) == getattr(obligation, key) for key in
+                ("context_class", "semantic_key", "source_ref"))]
+    if len(related) != 1:
+        return None
+    check = related[0]
+    if (check.get("package_fingerprint") != package_fingerprint
+        or any(check.get(key) != getattr(obligation, key, None) for key in
+               ("source_revision", "authority", "content_digest"))):
+        return None
+    coverage = check.get("coverage")
+    return coverage if coverage in {
+        "COVERED", "PENDING_CANDIDATE_GATE", "PENDING_HUMAN_GATE",
+        "CONTEXT_RETAINED",
+    } else None
+
+
+def _code_check_does_not_consume_protected_context(subject, metadata):
+    """Recognize an existing typed code check, not a declared coverage waiver."""
+    from spg.domain.change import CodeVerificationKind, CodeVerificationObligation
+    if metadata.get("mode") != "contract-driven-code-verification":
+        return False
+    try:
+        check = CodeVerificationObligation(kind=metadata.get("kind"), target=metadata.get("target"))
+    except (TypeError, ValueError):
+        return False
+    return (check.kind is not CodeVerificationKind.PATH_SCOPE
+            and getattr(subject, "obligation", None) == check.identity)
+
+
+def _explicit_protected_nonconsumer(record, obligation, package_fingerprint):
+    """A separate unconsumed check cannot negate another Owner's real evidence.
+
+    A label alone is insufficient: the original typed check and immutable item
+    identity must match, and its original evidence must contain no related check.
+    This yields no coverage reference; an actual consuming record is still needed.
+    """
+    metadata = record.evidence.metadata
+    if (not _code_check_does_not_consume_protected_context(record, metadata)
+            or getattr(record.evidence, "obligation", None) != getattr(record, "obligation", None)):
+        return False
+    checks = metadata.get("protected_context_checks", ())
+    if not isinstance(checks, (list, tuple)) or any(isinstance(check, dict)
+            and all(check.get(key) == getattr(obligation, key) for key in ("context_class", "semantic_key"))
+            for check in checks):
+        return False
+    context = metadata.get("decision_context", {})
+    if context.get("package_fingerprint") != package_fingerprint:
+        return False
+    related = [item for item in context.get("protected_obligations", ()) if isinstance(item, dict)
+        and all(item.get(key) == getattr(obligation, key) for key in ("context_class", "semantic_key"))]
+    if len(related) != 1:
+        return False
+    item = related[0]
+    return (item.get("coverage") == "UNVERIFIED"
+        and item.get("projection_disposition") == "NOT_EVALUATED_BY_THIS_CHECK"
+        and item.get("package_fingerprint") == package_fingerprint
+        and all(item.get(key) == getattr(obligation, key, None) for key in
+            ("source_ref", "source_revision", "authority", "content_digest")))
+
+
 def _project_decision_context_evidence(request, result) -> dict:
     evidence = result.evidence.model_dump(mode="json")
     if request.decision_context_fingerprint is None:
         return evidence
     metadata = dict(evidence["metadata"])
+    checks = metadata.get("protected_context_checks", ())
+    passed = result.result is VerificationResultValue.PASS
+    projected = []
+    for item in request.protected_context_obligations:
+        coverage = (_exact_protected_coverage(item, checks,
+            request.decision_context_fingerprint) if passed else None)
+        # Preserve the existing exact named-test contract. A conflicting check
+        # cannot be repaired by this legacy test-target projection.
+        related = any(isinstance(check, dict)
+            and all(check.get(key) == getattr(item, key) for key in
+                    ("context_class", "semantic_key"))
+            for check in checks)
+        if (coverage is None and not related and passed
+                and item.verification_ref is not None
+                and metadata.get("kind") == "NODE_TEST_TARGET"
+                and metadata.get("target") == item.verification_ref):
+            coverage = "COVERED"
+        unconsumed = (passed and not related and coverage is None
+            and _code_check_does_not_consume_protected_context(request, metadata)
+            and getattr(result.evidence, "obligation", None) == getattr(request, "obligation", None))
+        projected.append({**item.model_dump(mode="json"),
+            "coverage": coverage or "UNVERIFIED",
+            "projection_disposition": ("NOT_EVALUATED_BY_THIS_CHECK" if unconsumed else
+                "CONSUMED" if coverage is not None else "CHECK_NOT_VERIFIED")})
     metadata["decision_context"] = {
         "package_fingerprint": request.decision_context_fingerprint,
-        "protected_obligations": [
-            {
-                **item.model_dump(mode="json"),
-                "coverage": (
-                    next((check.get("coverage") for check in
-                    metadata.get("protected_context_checks", ())
-                    if result.result is VerificationResultValue.PASS
-                    and check.get("context_class") == item.context_class
-                        and check.get("semantic_key") == item.semantic_key
-                        and check.get("source_ref") == item.source_ref
-                        and check.get("source_revision") == item.source_revision
-                        and check.get("package_fingerprint") == request.decision_context_fingerprint
-                        and check.get("coverage") in {"COVERED", "PENDING_CANDIDATE_GATE"}),
-                         None)
-                    or ("COVERED" if item.verification_ref is not None
-                        and result.result is VerificationResultValue.PASS
-                        and metadata.get("kind") == "NODE_TEST_TARGET"
-                        and metadata.get("target") == item.verification_ref
-                        else "UNVERIFIED")
-                ),
-            }
-            for item in request.protected_context_obligations
-        ],
+        "protected_obligations": projected,
     }
     evidence["metadata"] = metadata
     return evidence

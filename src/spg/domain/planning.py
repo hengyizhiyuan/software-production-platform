@@ -228,6 +228,8 @@ class ProductionPlanProposal(BaseModel):
     repository_identity: str = Field(min_length=1)
     source_baseline_id: UUID
     source_revision: str = Field(min_length=1)
+    # Derived Work-owner observations, never Engineering Truth or authority.
+    fulfillment_formation_receipts: tuple[dict, ...] = ()
 
     @model_validator(mode="after")
     def require_ordered_single_pwu_plan(self) -> "ProductionPlanProposal":

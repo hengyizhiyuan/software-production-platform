@@ -14,6 +14,7 @@ from spg.application.native_connector_qualification import NativeConnectorQualif
 from spg.application.native_production_environment import (
     NativeProductionEnvironmentRuntime,
 )
+from spg.domain.governed_obligation import fulfillment_source_ref
 from spg.domain.execution import (
     ExecutorDispatchRequest,
     ExecutorDispatchResult,
@@ -223,9 +224,15 @@ class NativeQueuedExecutorCapability:
             raise RuntimeError("native compatibility admission lineage is incomplete")
         if work_revision is not None:
             from spg.application.governed_obligations import validate_continuous_gates
+            completion = work_unit.completion_contract
+            change = completion.change_contract
+            artifact = completion.artifact_contract
             validate_continuous_gates(
-                work_unit.completion_contract.fulfillment_bindings,
-                work_revision, semantic_ir)
+                completion.fulfillment_bindings, work_revision, semantic_ir,
+                source_revision=None if change is None else change.source_revision,
+                exact_target_paths=(tuple(target.path for target in change.exact_targets)
+                    if change is not None else
+                    (artifact.artifact_path,) if artifact is not None else ()))
         work_id = (
             product_binding.work_id
             if product_binding is not None
@@ -524,9 +531,8 @@ class NativeQueuedExecutorCapability:
                         for item in work_unit.completion_contract.semantic_fact_obligations
                     ),
                     *(
-                        f"ir-constraint:{item.constraint_item_id}:{item.constraint_clause_id}"
+                        fulfillment_source_ref(item)
                         for item in work_unit.completion_contract.fulfillment_bindings
-                        if item.constraint_item_id is not None
                     ),
                 )
             ),

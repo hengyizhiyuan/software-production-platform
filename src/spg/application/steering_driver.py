@@ -127,7 +127,8 @@ class PlanSteeringDriver:
             database,
             capability or DeterministicPlanSteeringCapability(),
         )
-        self.production = SteeringProductionService(database)
+        self.production = SteeringProductionService(database,
+            fulfillment_provider=work_service.fulfillment_provider, settings=work_service.settings)
         repository_assets = repository_assets or RepositoryAssetService(
             database,
             work_service.workspace_root.parent / "repository-assets",

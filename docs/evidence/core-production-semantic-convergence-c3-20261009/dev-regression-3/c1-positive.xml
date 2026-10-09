@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="2" failures="0" skipped="0" tests="2" time="10.906" timestamp="2026-10-09T10:42:11.244613+00:00" hostname="8b84f8448e74"><testcase classname="tests.integration.test_c1_contract_continuity" name="test_both_actual_admission_paths_reach_independent_guardian[work]" file="tests/integration/test_c1_contract_continuity.py" line="572" time="3.081"><error message="failed on setup with &quot;assert {0, 1, 2, 3, 4} == {0, 1, 2}&#10;  &#10;  Extra items in the left set:&#10;  3&#10;  4&#10;  Use -v to get more diff&quot;">tests/integration/test_c1_contract_continuity.py:500: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:484: in _admit_c1
+    assert {index for binding in bindings for index in binding.work_constraint_indices} == {0, 1, 2}
+E   assert {0, 1, 2, 3, 4} == {0, 1, 2}
+E     
+E     Extra items in the left set:
+E     3
+E     4
+E     Use -v to get more diff</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_both_actual_admission_paths_reach_independent_guardian[steering]" file="tests/integration/test_c1_contract_continuity.py" line="572" time="2.188"><error message="failed on setup with &quot;assert {0, 1, 2, 3, 4} == {0, 1, 2}&#10;  &#10;  Extra items in the left set:&#10;  3&#10;  4&#10;  Use -v to get more diff&quot;">tests/integration/test_c1_contract_continuity.py:500: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:484: in _admit_c1
+    assert {index for binding in bindings for index in binding.work_constraint_indices} == {0, 1, 2}
+E   assert {0, 1, 2, 3, 4} == {0, 1, 2}
+E     
+E     Extra items in the left set:
+E     3
+E     4
+E     Use -v to get more diff</error></testcase></testsuite></testsuites>

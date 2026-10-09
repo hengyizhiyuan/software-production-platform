@@ -3,11 +3,19 @@
 from __future__ import annotations
 
 import re
+from dataclasses import asdict
+from hashlib import sha256
+import json
+from time import monotonic
+from uuid import NAMESPACE_URL, uuid5
 
 from spg.domain.governed_obligation import (
     FulfillmentBinding, FulfillmentOwner, FulfillmentPhase,
     FulfillmentSourceKind, canonical_fingerprint,
     bind_admitted_fact, bind_admitted_constraint,
+    FulfillmentProjectionCandidate, fulfillment_source_ref, exact_file_scope_paths,
+    FulfillmentSemanticReviewCandidate, fulfillment_candidate_fingerprint,
+    fulfillment_components_fingerprint, fulfillment_source_semantic_text,
 )
 from spg.domain.engineering_semantics import semantic_fact_reference
 from spg.domain.intent_realization import SemanticKind
@@ -105,19 +113,39 @@ def materialize_continuous_gates(revision, ir) -> tuple[FulfillmentBinding, ...]
     return tuple(bindings)
 
 
-def admitted_fulfillment_bindings(revision, assessment):
-    """Use the same persisted authority basis at every production entry point."""
+def admitted_fulfillment_bindings(revision, assessment, *, provider=None,
+                                  database=None, source_revision=None,
+                                  exact_target_paths=()):
+    """Project immutable admitted meaning once at the production boundary."""
     if revision is None or revision.source_assessment_id is None:
-        # Preserve the existing no-local-assessment path and downstream gates.
-        # This does not qualify revisions that inherit IR from an earlier basis.
         return ()
     if assessment is None or assessment.id != revision.source_assessment_id:
         raise ValueError("OBLIGATION_ADMITTED_SOURCE_UNAVAILABLE")
-    return materialize_continuous_gates(revision, assessment.semantic_ir)
+    ir = assessment.semantic_ir
+    if ir is None or getattr(ir, "legacy_typed_projection", False):
+        return materialize_continuous_gates(revision, ir)
+    inventory = fulfillment_inventory(revision, ir, source_revision=source_revision,
+                                      exact_target_paths=exact_target_paths)
+    typed = deterministic_fulfillment_projection(revision, ir, inventory)
+    if not any(binding.state == "UNRESOLVED" for binding in typed):
+        return typed
+    if provider is None:
+        # Typed capabilities are retained; only actually unknown dispositions
+        # remain unresolved. One known route never conceals the other sources.
+        return typed
+    return form_fulfillment_projection(revision, ir, provider=provider,
+        database=database, source_revision=source_revision,
+        exact_target_paths=exact_target_paths)
 
 
-def validate_continuous_gates(bindings, revision, ir) -> None:
+def validate_continuous_gates(bindings, revision, ir, *, source_revision=None, exact_target_paths=()) -> None:
     """Reject stale or injected routes before dispatch and Verification."""
+    projected = tuple(item for item in bindings if item.projection_inventory_fingerprint)
+    if projected:
+        if len(projected) != len(bindings):
+            raise ValueError("OBLIGATION_PROJECTION_MIXED_BASIS")
+        validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+        return
     expected = materialize_continuous_gates(revision, ir)
     constraints = tuple(item for item in bindings
                         if item.source_kind is FulfillmentSourceKind.IR_CONSTRAINT)
@@ -163,10 +191,30 @@ def assert_delivery_effect_permitted(database, work_id, component: str) -> None:
         if assessment.semantic_ir is None:
             # Pre-IRK historical Work remains under the existing Human gates.
             return
-        bindings = materialize_continuous_gates(revision, assessment.semantic_ir)
-        if any(item.component == component and
-               item.phase is FulfillmentPhase.CONTINUOUS_FROM_ADMISSION
-               for item in bindings):
+        typed = materialize_continuous_gates(revision, assessment.semantic_ir)
+        if any(item.component == component and item.phase is FulfillmentPhase.CONTINUOUS_FROM_ADMISSION for item in typed):
+            raise ValueError("OBLIGATION_DELIVERY_PROHIBITED")
+        if getattr(assessment.semantic_ir, "legacy_typed_projection", False):
+            return
+        product = ProductStore(uow.session)
+        runtime_binding = product.runtime_binding(work_id)
+        if runtime_binding is None or runtime_binding.work_reality_revision_id != revision.id:
+            raise ValueError("OBLIGATION_DELIVERY_PROJECTION_MISSING_OR_STALE")
+        from spg.infrastructure.persistence.runtime_store import RuntimeStore
+        unit = RuntimeStore(uow.session).work_unit(runtime_binding.work_unit_id)
+        if unit is None:
+            raise ValueError("OBLIGATION_DELIVERY_PROJECTION_MISSING_OR_STALE")
+        contract = unit.completion_contract
+        bindings = contract.fulfillment_bindings
+        if not bindings or not all(item.projection_inventory_fingerprint for item in bindings):
+            raise ValueError("OBLIGATION_DELIVERY_PROJECTION_MISSING_OR_STALE")
+        change = contract.change_contract
+        artifact = contract.artifact_contract
+        source = (change.source_revision if change else artifact.source_revision if artifact else revision.source_revision)
+        paths = tuple(target.path for target in change.exact_targets) if change else (() if artifact is None else (artifact.artifact_path,))
+        validate_continuous_gates(bindings, revision, assessment.semantic_ir,
+                                  source_revision=source, exact_target_paths=paths)
+        if any(item.component == component and item.phase is FulfillmentPhase.CONTINUOUS_FROM_ADMISSION for item in bindings):
             raise ValueError("OBLIGATION_DELIVERY_PROHIBITED")
 
 
@@ -186,7 +234,11 @@ def evaluate_constraint_routes(bindings, native_record, *, source_revision: str,
     grants = set() if native is None else {item.identity for item in native.capability_grants}
     results = []
     for item in bindings:
-        if item.source_kind is not FulfillmentSourceKind.IR_CONSTRAINT:
+        if item.source_kind not in {FulfillmentSourceKind.IR_CONSTRAINT, FulfillmentSourceKind.IR_CLAUSE, FulfillmentSourceKind.WORK_CONSTRAINT}:
+            continue
+        # Other current methods and future/context dispositions have their own
+        # typed consumers. No permission result is invented for them here.
+        if item.evidence_method not in {"EXACT_GIT_DIFF_SCOPE", "EXACT_PERMISSION_GATE"}:
             continue
         exact = bool(native is not None and context is not None
                      and native_record.attempt_id == native.attempt_id
@@ -194,8 +246,7 @@ def evaluate_constraint_routes(bindings, native_record, *, source_revision: str,
                      and item.source_revision == source_revision
                      and any(member.source_commit_oid == source_revision
                              for member in native.source_vector.members)
-                     and f"ir-constraint:{item.constraint_item_id}:{item.constraint_clause_id}"
-                     in native.obligation_references)
+                     and fulfillment_source_ref(item) in native.obligation_references)
         if item.evidence_method == "EXACT_GIT_DIFF_SCOPE":
             member = None if native is None else next((member for member in
                 native.source_vector.members if member.source_commit_oid == source_revision), None)
@@ -215,6 +266,7 @@ def evaluate_constraint_routes(bindings, native_record, *, source_revision: str,
             "work_reality_revision_id": str(item.work_reality_revision_id),
             "constraint_item_id": item.constraint_item_id,
             "constraint_clause_id": item.constraint_clause_id,
+            "semantic_ir_id": None if item.semantic_ir_id is None else str(item.semantic_ir_id),
             "component": item.component, "passed": passed,
             "disposition": ("VERIFIED_CURRENT" if passed and
                             item.phase is FulfillmentPhase.CURRENT_VERIFICATION else
@@ -286,13 +338,14 @@ def evaluate_continuous_gates(checks, bindings, native_record, *, source_revisio
 
 
 def evaluate_candidate_handoffs(checks, *, references, admitted_facts, ir,
-                                source_revision: str, exact_target_paths: tuple[str, ...]):
+                                source_revision: str, exact_target_paths: tuple[str, ...],
+                                fulfillment_bindings=()):
     """Split a mixed acceptance assertion without claiming a seal already exists.
 
-    Its current content/scope component is supported only by *all* the other
-    admitted checks.  The remaining Candidate component is carried to the
-    Candidate Owner.  If either half cannot be established the assertion stays
-    unresolved; no model can create the missing seal or Human decision.
+    New projections require the assertion's own current check to pass. Future
+    sealing/permission remains pending at its actual owner. Pre-IRK legacy
+    projections retain their historical compatibility path; they do not qualify
+    a new open plan or create a missing seal/Human decision.
     """
     from spg.domain.engineering_semantics import SemanticRelation
     by_id = {str(item.fact_id): item for item in references}
@@ -300,6 +353,26 @@ def evaluate_candidate_handoffs(checks, *, references, admitted_facts, ir,
     for check in checks:
         fact = by_id[check["fact_id"]]
         admitted = admitted_facts.get(check["fact_id"])
+        projected = tuple(binding for binding in fulfillment_bindings
+            if str(binding.fact_id) == check["fact_id"] and binding.projection_inventory_fingerprint)
+        if projected:
+            current = tuple(binding for binding in projected if binding.phase is FulfillmentPhase.CURRENT_VERIFICATION)
+            future = tuple(binding for binding in projected if binding.phase in {
+                FulfillmentPhase.CANDIDATE_SEAL, FulfillmentPhase.HUMAN_INTEGRATION})
+            exact = bool(admitted is not None and fact.relation is SemanticRelation.ACCEPTANCE_ASSERTION
+                and current and future and exact_target_paths and ir is not None
+                and all(goal.acceptance_required for goal in ir.current_production)
+                and all(binding.source_revision == source_revision
+                        and tuple(binding.target_paths) == tuple(exact_target_paths) for binding in current)
+                and check["passed"] is True)
+            output.append({**check,
+                "disposition": "CURRENT_VERIFIED_FUTURE_GATE_PENDING",
+                "fulfillment_bindings": [binding.model_dump(mode="json") for binding in projected],
+                "future_evidence_status": "PENDING_FUTURE_OWNER_GATE"} if exact else check)
+            continue
+        if (ir is not None and not getattr(ir, "legacy_typed_projection", True)):
+            output.append(check)
+            continue
         if (check["disposition"] != "UNVERIFIABLE_CURRENT"
                 or fact.relation is not SemanticRelation.ACCEPTANCE_ASSERTION
                 or not isinstance(fact.value, str)
@@ -336,3 +409,822 @@ def evaluate_candidate_handoffs(checks, *, references, admitted_facts, ir,
 
 def _mentions_candidate(value: str) -> bool:
     return bool(re.search(r"(?<![a-z])candidate(?![a-z])", value.casefold()))
+
+
+# Qualified evidence/permission capabilities, never Human phrase aliases.
+FULFILLMENT_CAPABILITIES = {
+    "ARTIFACT_CONTENT": ("artifact-content", FulfillmentOwner.VERIFICATION,
+        FulfillmentPhase.CURRENT_VERIFICATION, "EXACT_CANDIDATE_CONTENT", "code-verification:semantic-facts"),
+    "GIT_DIFF_SCOPE": ("git-diff-scope", FulfillmentOwner.VERIFICATION,
+        FulfillmentPhase.CURRENT_VERIFICATION, "EXACT_GIT_DIFF_SCOPE", "code-verification:path-scope"),
+    "PRODUCT_SOURCE_IDENTITY": ("source-identity", FulfillmentOwner.PRODUCT_SOURCE,
+        FulfillmentPhase.CURRENT_VERIFICATION, "EXACT_PRODUCT_SOURCE_IDENTITY", "product-source:accepted-source"),
+    "DENY_PREVIEW": ("preview", *_GATES["preview"], FulfillmentPhase.CONTINUOUS_FROM_ADMISSION, "EXACT_PERMISSION_GATE"),
+    "DENY_DEPLOY": ("deploy", *_GATES["deploy"], FulfillmentPhase.CONTINUOUS_FROM_ADMISSION, "EXACT_PERMISSION_GATE"),
+    "DENY_PUBLISH": ("publish", *_GATES["publish"], FulfillmentPhase.CONTINUOUS_FROM_ADMISSION, "EXACT_PERMISSION_GATE"),
+    "CANDIDATE_SEAL": ("reviewable-candidate", FulfillmentOwner.CANDIDATE,
+        FulfillmentPhase.CANDIDATE_SEAL, "EXACT_SEALED_CANDIDATE", "candidate-owner:sealed-after-verification"),
+    "HUMAN_INTEGRATION": ("human-integration", FulfillmentOwner.HUMAN_GATE,
+        FulfillmentPhase.HUMAN_INTEGRATION, "EXACT_HUMAN_AUTHORIZATION", "candidate-governance:human-integration"),
+    "HUMAN_DELIVERY_DEPLOY": ("deploy", FulfillmentOwner.DELIVERY_GATE,
+        FulfillmentPhase.DELIVERY, "EXACT_HUMAN_AUTHORIZATION", "cloud-delivery:human-authorization-required"),
+    "HUMAN_DELIVERY_PUBLISH": ("publish", FulfillmentOwner.DELIVERY_GATE,
+        FulfillmentPhase.DELIVERY, "EXACT_HUMAN_AUTHORIZATION", "remote-delivery:human-authorization-required"),
+    "RETAIN_CONTEXT": ("retained-context", FulfillmentOwner.PRODUCT_SOURCE,
+        FulfillmentPhase.CONTEXT_RETENTION, "RETAIN_AUTHORITATIVE_CONTEXT", "work-reality:retained"),
+    "UNRESOLVED": ("unresolved", FulfillmentOwner.UNRESOLVED,
+        FulfillmentPhase.UNRESOLVED, "UNRESOLVED", "unresolved:owner-binding"),
+}
+# Keep the same tuple order as all content routes above.
+for _name in ("DENY_PREVIEW", "DENY_DEPLOY", "DENY_PUBLISH"):
+    _component, _owner, _gate, _phase, _method = FULFILLMENT_CAPABILITIES[_name]
+    FULFILLMENT_CAPABILITIES[_name] = (_component, _owner, _phase, _method, _gate)
+
+
+def is_context_only_clause(revision, ir, item_id, clause_id):
+    """Retain a typed descriptive assertion, never hide a current requirement."""
+    item = next((item for item in ir.items if item.item_id == item_id), None)
+    clause = next((clause for clause in ir.clauses if clause.clause_id == clause_id), None)
+    if (item is None or clause is None or item.kind is not SemanticKind.FACT
+            or item.action is not None or item.production is not None
+            or clause.modality != "ASSERTION" or clause.polarity != "AFFIRMATIVE"
+            or clause.requested_effects or item.requires_human):
+        return False
+    return not any(fact.is_current and (
+        fact.provenance.source_text.strip() in clause.source_text
+        or clause.source_text.strip() in fact.provenance.source_text)
+        for fact in revision.engineering_semantic_facts)
+
+
+def state_for_capability(name):
+    if name == "UNRESOLVED":
+        return "UNRESOLVED"
+    if name == "RETAIN_CONTEXT":
+        return "RETAINED_CONTEXT"
+    return "BOUND_PENDING_EVIDENCE"
+
+
+def fulfillment_inventory(revision, ir, *, source_revision=None, exact_target_paths=()):
+    """Full immutable source basis; the model only proposes how it is consumed."""
+    sources = []
+    for fact in revision.engineering_semantic_facts:
+        if not fact.is_current:
+            continue
+        reference = semantic_fact_reference(fact, work_revision_id=revision.id)
+        sources.append({"source_ref": f"semantic-fact:{fact.id}", "kind": "FACT",
+            "fact_id": str(fact.id), "payload": reference.model_dump(mode="json"),
+            "provenance": fact.provenance.model_dump(mode="json")})
+    for clause in ir.clauses:
+        for item_id in clause.semantic_item_ids:
+            item = next((item for item in ir.items if item.item_id == item_id), None)
+            if item is None:
+                raise ValueError("OBLIGATION_SOURCE_ITEM_MISSING")
+            sources.append({"source_ref": (f"ir-constraint:{item.item_id}:{clause.clause_id}"
+                if item.kind is SemanticKind.CONSTRAINT else f"ir-clause:{ir.id}:{item.item_id}:{clause.clause_id}"),
+                "kind": "IR_CONSTRAINT" if item.kind is SemanticKind.CONSTRAINT else "IR_CLAUSE", "item_id": item.item_id,
+                "clause_id": clause.clause_id,
+                "payload": {"ir_id": str(ir.id), "item": item.model_dump(mode="json"),
+                            "clause": clause.model_dump(mode="json")}})
+    linked_items = {item_id for clause in ir.clauses for item_id in clause.semantic_item_ids}
+    for item in ir.items:
+        if item.item_id not in linked_items:
+            sources.append({"source_ref": f"ir-item:{ir.id}:{item.item_id}", "kind": "IR_ITEM",
+                "item_id": item.item_id, "payload": {"ir_id": str(ir.id), "item": item.model_dump(mode="json")}})
+    for kind, values, prefix in (("WORK_CONSTRAINT", revision.constraints, "work-constraint"),
+            ("WORK_CONTEXT", getattr(revision, "context_facts", ()), "work-context")):
+        for index, content in enumerate(values):
+            sources.append({"source_ref": f"{prefix}:{revision.id}:{index}", "kind": kind,
+                "index": index, "payload": {"work_reality_revision_id": str(revision.id),
+                    "index": index, "content": content, "content_digest": sha256(content.encode()).hexdigest()}})
+    refs = tuple(item["source_ref"] for item in sources)
+    if not refs or len(refs) != len(set(refs)):
+        raise ValueError("OBLIGATION_SOURCE_INVENTORY_INVALID")
+    target_paths = tuple(exact_target_paths) or tuple(dict.fromkeys(
+        arg.value for goal in ir.current_production for arg in goal.target_paths))
+    from spg.domain.change import safe_repository_path
+    for path in target_paths:
+        safe_repository_path(path)
+    basis = {"work_id": str(revision.work_id), "work_reality_revision_id": str(revision.id),
+        "work_revision_fingerprint": revision.revision_fingerprint,
+        "semantic_ir_id": str(ir.id),
+        "source_revision": source_revision or revision.source_revision or revision.revision_fingerprint,
+        "source_record_ids": [str(value) for value in revision.source_record_ids],
+        "sources": sources,
+        "work_constraints": [{"index": index, "content": content,
+                              "content_digest": sha256(content.encode()).hexdigest()}
+                             for index, content in enumerate(revision.constraints)],
+        "context_facts": list(getattr(revision, "context_facts", ())),
+        "exact_target_paths": list(target_paths),
+        "production_intents": [goal.model_dump(mode="json") for goal in ir.current_production]}
+    return {**basis, "inventory_fingerprint": canonical_fingerprint(basis)}
+
+
+def _capability_tuple(name):
+    route = FULFILLMENT_CAPABILITIES.get(name)
+    if route is None:
+        raise ValueError("OBLIGATION_OWNER_CAPABILITY_UNSUPPORTED")
+    return route
+
+
+def _projection_binding(revision, ir, inventory, route):
+    source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
+    if source is None:
+        raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
+    component, owner, phase, method, gate = _capability_tuple(route.capability)
+    if len(set(route.work_constraint_indices)) != len(route.work_constraint_indices) or any(
+            index < 0 or index >= len(revision.constraints) for index in route.work_constraint_indices):
+        raise ValueError("OBLIGATION_WORK_CONSTRAINT_REFERENCE_INVALID")
+    if len(set(route.target_paths)) != len(route.target_paths) or set(route.target_paths) - set(inventory["exact_target_paths"]):
+        raise ValueError("OBLIGATION_SCOPE_EXPANSION")
+    if method == "EXACT_GIT_DIFF_SCOPE" and tuple(route.target_paths) != tuple(inventory["exact_target_paths"]):
+        raise ValueError("OBLIGATION_DIFF_SCOPE_INCOMPLETE")
+    if source["kind"] == "WORK_CONSTRAINT":
+        if route.work_constraint_indices != (source["index"],):
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+    elif route.work_constraint_indices:
+        raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+    if len(set(route.supporting_source_refs)) != len(route.supporting_source_refs) or any(
+            ref not in {entry["source_ref"] for entry in inventory["sources"]}
+            for ref in route.supporting_source_refs):
+        raise ValueError("OBLIGATION_SUPPORTING_SOURCE_SUBSTITUTED")
+    if method == "EXACT_CANDIDATE_CONTENT" and not route.target_paths:
+        raise ValueError("OBLIGATION_CONTENT_TARGET_UNRESOLVED")
+    state = "UNRESOLVED" if owner is FulfillmentOwner.UNRESOLVED else (
+        "RETAINED_CONTEXT" if phase is FulfillmentPhase.CONTEXT_RETENTION else "BOUND_PENDING_EVIDENCE")
+    common = dict(component=component, owner=owner, phase=phase, evidence_method=method,
+        gate_ref=gate, source_revision=inventory["source_revision"], target_paths=route.target_paths,
+        projection_inventory_fingerprint=inventory["inventory_fingerprint"],
+        work_constraint_indices=route.work_constraint_indices,
+        supporting_source_refs=route.supporting_source_refs, state=state,
+        component_basis=route.component_basis)
+    if source["kind"] in {"WORK_CONSTRAINT", "WORK_CONTEXT", "IR_ITEM"}:
+        if source["kind"] == "IR_ITEM":
+            item = next(item for item in ir.items if item.item_id == source["item_id"])
+            origins = {p.origin for p in item.provenance}
+            if state == "RETAINED_CONTEXT" and (item.kind is not SemanticKind.FACT
+                    or item.action is not None or item.production is not None
+                    or item.requires_human or origins != {SemanticOrigin.REPOSITORY_OBSERVED}):
+                raise ValueError("OBLIGATION_UNLINKED_ITEM_NOT_OBSERVED_CONTEXT")
+            if state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                raise ValueError("OBLIGATION_UNLINKED_ITEM_CAPABILITY_UNRESOLVED")
+            records = tuple(dict.fromkeys(p.source_record_id for p in item.provenance if p.source_record_id is not None))
+            quote = item.statement
+            provenance = [p.model_dump(mode="json") for p in item.provenance]
+            item_id = item.item_id
+        else:
+            records = tuple(revision.source_record_ids)
+            quote = source["payload"]["content"]
+            provenance = {"work_reality_revision_id": str(revision.id),
+                          "source_record_ids": [str(value) for value in records]}
+            item_id = str(source["index"])
+            if source["kind"] == "WORK_CONTEXT" and state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                raise ValueError("OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT")
+            if source["kind"] == "WORK_CONSTRAINT":
+                supporting = [entry for entry in inventory["sources"] if entry["source_ref"] in route.supporting_source_refs]
+                clauses = [next(c for c in ir.clauses if c.clause_id == entry["clause_id"])
+                           for entry in supporting if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
+                if not work_constraint_sources_correspond(ir, quote, supporting, component=component,
+                        phase=phase, semantic_component_declared=route.component_basis is not None):
+                    raise ValueError("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
+                if state == "RETAINED_CONTEXT":
+                    if not supporting or not all(entry["kind"] == "IR_CLAUSE" and is_context_only_clause(
+                            revision, ir, entry["item_id"], entry["clause_id"]) for entry in supporting):
+                        raise ValueError("OBLIGATION_REQUIRED_CONSTRAINT_CANNOT_BE_CONTEXT_ONLY")
+                if phase is FulfillmentPhase.CONTINUOUS_FROM_ADMISSION:
+                    if not clauses or not any(c.polarity == "NEGATED" and c.temporal_scope == "CURRENT" for c in clauses):
+                        raise ValueError("OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE")
+                if phase in {FulfillmentPhase.CANDIDATE_SEAL, FulfillmentPhase.HUMAN_INTEGRATION, FulfillmentPhase.DELIVERY}:
+                    if not clauses or any(c.polarity != "AFFIRMATIVE" for c in clauses):
+                        raise ValueError("OBLIGATION_FUTURE_PHASE_SOURCE_UNPROVEN")
+                if method == "EXACT_PRODUCT_SOURCE_IDENTITY":
+                    raise ValueError("OBLIGATION_SOURCE_IDENTITY_RELATION_MISMATCH")
+        return FulfillmentBinding(source_kind=FulfillmentSourceKind(source["kind"]),
+            semantic_ir_id=ir.id, constraint_item_id=item_id, constraint_clause_id=None,
+            constraint_fingerprint=canonical_fingerprint(source["payload"]),
+            work_reality_revision_id=revision.id, provenance_fingerprint=canonical_fingerprint(provenance),
+            source_record_ids=records, source_quote=quote, **common)
+    if source["kind"] == "FACT":
+        fact = next(fact for fact in revision.engineering_semantic_facts if str(fact.id) == source["fact_id"])
+        if phase is FulfillmentPhase.CONTINUOUS_FROM_ADMISSION:
+            # A Boolean Fact alone cannot invent the effect's semantic identity.
+            # Bind new continuous routes to the admitted typed clause instead.
+            raise ValueError("OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE")
+        from spg.domain.engineering_semantics import SemanticRelation, SemanticReferenceRole
+        observed_context = bool(fact.provenance.governed_provenance) and all(
+            p.origin is SemanticOrigin.REPOSITORY_OBSERVED for p in fact.provenance.governed_provenance)
+        if state == "RETAINED_CONTEXT" and not (observed_context or (
+                fact.relation is SemanticRelation.REFERENCE
+                and fact.reference_role is SemanticReferenceRole.EXTERNAL_REFERENCE)):
+            raise ValueError("OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY")
+        if phase in {FulfillmentPhase.CANDIDATE_SEAL, FulfillmentPhase.HUMAN_INTEGRATION, FulfillmentPhase.DELIVERY} and fact.relation is not SemanticRelation.ACCEPTANCE_ASSERTION:
+            raise ValueError("OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED")
+        if state != "UNRESOLVED":
+            if (fact.relation is SemanticRelation.REFERENCE
+                    and fact.reference_role is SemanticReferenceRole.PROJECT_REPOSITORY
+                    and method != "EXACT_PRODUCT_SOURCE_IDENTITY"):
+                raise ValueError("OBLIGATION_PROJECT_SOURCE_OWNER_MISMATCH")
+            original_scope_paths = exact_file_scope_paths(fact) if fact.relation is SemanticRelation.SCOPE else None
+            if (original_scope_paths is not None and set(original_scope_paths) == set(inventory["exact_target_paths"])
+                    and method != "EXACT_GIT_DIFF_SCOPE"):
+                raise ValueError("OBLIGATION_FILE_SCOPE_OWNER_MISMATCH")
+            if (fact.relation is SemanticRelation.SCOPE and original_scope_paths is None
+                    and method == "EXACT_CANDIDATE_CONTENT" and route.component_basis is None):
+                raise ValueError("OBLIGATION_SCOPE_COMPONENT_UNRESOLVED")
+        if method == "EXACT_GIT_DIFF_SCOPE":
+            if fact.relation is not SemanticRelation.SCOPE:
+                raise ValueError("OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH")
+            original_paths = exact_file_scope_paths(fact)
+            if original_paths is None:
+                raise ValueError("OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED")
+            if set(route.target_paths) != set(original_paths):
+                raise ValueError("OBLIGATION_FACT_SCOPE_VALUE_MISMATCH")
+        if method == "EXACT_PRODUCT_SOURCE_IDENTITY" and (fact.relation is not SemanticRelation.REFERENCE or fact.reference_role is not SemanticReferenceRole.PROJECT_REPOSITORY):
+            raise ValueError("OBLIGATION_SOURCE_IDENTITY_RELATION_MISMATCH")
+        if fact.epistemic_status.value == "UNRESOLVED" and state != "UNRESOLVED":
+            raise ValueError("OBLIGATION_UNRESOLVED_FACT_PROMOTION")
+        return bind_admitted_fact(reference=semantic_fact_reference(fact, work_revision_id=revision.id),
+            admitted=fact, source_quote=fact.provenance.source_text,
+            **{key: value for key, value in common.items() if key in {
+                "component", "owner", "phase", "evidence_method", "gate_ref", "source_revision", "target_paths"}}).model_copy(update=common)
+    item = next(item for item in ir.items if item.item_id == source["item_id"])
+    clause = next(clause for clause in ir.clauses if clause.clause_id == source["clause_id"])
+    if (clause.source_record_id not in revision.source_record_ids
+            or item.item_id not in clause.semantic_item_ids
+            or not any(p.source_record_id == clause.source_record_id
+                       and (p.source_text in clause.source_text or clause.source_text in p.source_text)
+                       and p.origin in {SemanticOrigin.HUMAN_EXPLICIT, SemanticOrigin.HUMAN_CORRECTION}
+                       for p in item.provenance)):
+        raise ValueError("OBLIGATION_CLAUSE_PROVENANCE_INVALID")
+    if state == "RETAINED_CONTEXT" and not is_context_only_clause(revision, ir, item.item_id, clause.clause_id):
+        raise ValueError("OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY")
+    if phase is FulfillmentPhase.CONTINUOUS_FROM_ADMISSION:
+        if clause.polarity != "NEGATED" or clause.temporal_scope != "CURRENT":
+            raise ValueError("OBLIGATION_PERMISSION_POLARITY_CONFLICT")
+        if (component == "preview" and any(goal.preview_required for goal in ir.current_production)) or (
+                component in {"deploy", "publish"} and any(goal.delivery_authorized for goal in ir.current_production)):
+            raise ValueError("OBLIGATION_EFFECT_AUTHORITY_CONFLICT")
+    if phase in {FulfillmentPhase.CANDIDATE_SEAL, FulfillmentPhase.HUMAN_INTEGRATION} and (
+            not ir.current_production or not all(goal.acceptance_required for goal in ir.current_production)):
+        raise ValueError("OBLIGATION_CANDIDATE_GATE_NOT_REQUIRED")
+    if phase in {FulfillmentPhase.CANDIDATE_SEAL, FulfillmentPhase.HUMAN_INTEGRATION, FulfillmentPhase.DELIVERY} and clause.polarity == "NEGATED":
+        raise ValueError("OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION")
+    if item.requires_human and state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+        raise ValueError("OBLIGATION_UNRESOLVED_AUTHORITY_PROMOTION")
+    return FulfillmentBinding(source_kind=(FulfillmentSourceKind.IR_CONSTRAINT
+            if item.kind is SemanticKind.CONSTRAINT else FulfillmentSourceKind.IR_CLAUSE),
+        semantic_ir_id=ir.id, constraint_item_id=item.item_id, constraint_clause_id=clause.clause_id,
+        constraint_fingerprint=canonical_fingerprint(source["payload"]),
+        work_reality_revision_id=revision.id,
+        provenance_fingerprint=canonical_fingerprint([p.model_dump(mode="json") for p in item.provenance]),
+        source_record_ids=(clause.source_record_id,), source_quote=clause.source_text, **common)
+
+
+def work_constraint_sources_correspond(ir, quote, entries, *, component, phase, semantic_component_declared=False):
+    """Prove exact original source support, never classify wrapper vocabulary."""
+    def direct(entry):
+        if entry["kind"] not in {"IR_CLAUSE", "IR_CONSTRAINT"}:
+            return False
+        item = next(i for i in ir.items if i.item_id == entry["item_id"])
+        return quote == item.statement or quote == entry["payload"]["clause"]["source_text"] or (
+            item.production is not None and quote in item.production.scope)
+    if all(direct(entry) for entry in entries):
+        return True
+    production_values = [(entry, value) for entry in entries if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}
+        for item in ir.items if item.item_id == entry["item_id"] and item.production is not None
+        for value in item.production.exclusions if quote == f"Excluded from this Work: {value}"]
+    if not production_values:
+        return False
+    values = {value for _, value in production_values}
+    production_refs = {entry["source_ref"] for entry, _ in production_values}
+    others = [entry for entry in entries if entry["source_ref"] not in production_refs]
+    if phase is not FulfillmentPhase.CONTINUOUS_FROM_ADMISSION or not others:
+        return False
+    for entry in others:
+        if entry["kind"] not in {"IR_CLAUSE", "IR_CONSTRAINT"}:
+            return False
+        clause = next(c for c in ir.clauses if c.clause_id == entry["clause_id"])
+        routes = [_TYPED_EFFECT_ROUTES.get(effect) for effect in clause.requested_effects]
+        if (clause.polarity != "NEGATED" or clause.temporal_scope != "CURRENT"
+                or not semantic_component_declared and not all(value in clause.source_text for value in values)
+                or not any(route is not None and route[0] == component for route in routes)):
+            return False
+    return True
+
+
+def locate_projection_components(candidate, inventory):
+    """Locate a unique exact quote; repair offsets only, never source meaning."""
+    sources = {source["source_ref"]: source for source in inventory["sources"]}
+    routes, adjustments = [], []
+    for route in candidate.routes:
+        basis = route.component_basis
+        if basis is None or route.source_ref not in sources:
+            routes.append(route)
+            continue
+        text = fulfillment_source_semantic_text(sources[route.source_ref])
+        start, end = basis.source_span_start, basis.source_span_end
+        if 0 <= start < end <= len(text) and text[start:end] == basis.source_component_quote:
+            routes.append(route)
+            continue
+        quote = basis.source_component_quote
+        located = text.find(quote)
+        if located < 0:
+            raise ValueError("OBLIGATION_COMPONENT_SOURCE_QUOTE_DRIFT")
+        if text.find(quote, located + 1) >= 0:
+            raise ValueError("OBLIGATION_COMPONENT_SOURCE_LOCATION_AMBIGUOUS")
+        canonical = basis.model_copy(update={"source_span_start": located, "source_span_end": located + len(quote)})
+        routes.append(route.model_copy(update={"component_basis": canonical}))
+        adjustments.append({"source_ref": route.source_ref, "capability": route.capability,
+            "raw_span": [start, end], "canonical_span": [located, located + len(quote)],
+            "quote_sha256": sha256(quote.encode()).hexdigest(), "method": "UNIQUE_EXACT_SOURCE_QUOTE"})
+    return candidate.model_copy(update={"routes": tuple(routes)}), tuple(adjustments)
+
+
+def validate_projection_components(candidate, inventory, *, semantic_review=None, allow_review_pending=False):
+    if not any(route.component_basis is not None for route in candidate.routes):
+        return
+    if any(route.component_basis is None for route in candidate.routes):
+        raise ValueError("OBLIGATION_COMPONENT_INVENTORY_INCOMPLETE")
+    facts = {source["source_ref"] for source in inventory["sources"] if source["kind"] == "FACT"}
+    for source in inventory["sources"]:
+        text = fulfillment_source_semantic_text(source)
+        covered = set()
+        for route in candidate.routes:
+            if route.source_ref != source["source_ref"]:
+                continue
+            basis = route.component_basis
+            if (basis.source_span_start < 0 or basis.source_span_end > len(text) or basis.source_span_start >= basis.source_span_end
+                    or text[basis.source_span_start:basis.source_span_end] != basis.source_component_quote):
+                raise ValueError("OBLIGATION_COMPONENT_SOURCE_QUOTE_DRIFT")
+            if len(set(basis.linked_fact_refs)) != len(basis.linked_fact_refs) or set(basis.linked_fact_refs) - facts:
+                raise ValueError("OBLIGATION_COMPONENT_FACT_REFERENCE_SUBSTITUTED")
+            covered.update(range(basis.source_span_start, basis.source_span_end))
+        if any(not char.isspace() and index not in covered for index, char in enumerate(text)):
+            raise ValueError("OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST")
+    if semantic_review is None:
+        if allow_review_pending:
+            return
+        raise ValueError("OBLIGATION_SEMANTIC_REVIEW_REQUIRED")
+    result = FulfillmentSemanticReviewCandidate.model_validate(semantic_review)
+    refs = [row.source_ref for row in result.source_results]
+    if (result.inventory_fingerprint != inventory["inventory_fingerprint"]
+            or result.candidate_fingerprint != fulfillment_candidate_fingerprint(candidate)
+            or result.components_fingerprint != fulfillment_components_fingerprint(candidate)
+            or len(refs) != len(set(refs)) or set(refs) != {s["source_ref"] for s in inventory["sources"]}):
+        raise ValueError("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_DRIFT")
+    if not all(row.complete_and_equivalent for row in result.source_results):
+        raise ValueError("OBLIGATION_SEMANTIC_COMPONENT_MISMATCH")
+
+
+def validate_projection_candidate(candidate, revision, ir, inventory, *, semantic_review=None, allow_review_pending=False):
+    if candidate.inventory_fingerprint != inventory["inventory_fingerprint"]:
+        raise ValueError("OBLIGATION_PROJECTION_STALE_BASIS")
+    identities = [(route.source_ref, route.capability) for route in candidate.routes]
+    if len(identities) != len(set(identities)):
+        raise ValueError("OBLIGATION_PROJECTION_DUPLICATE_ROUTE")
+    if {route.source_ref for route in candidate.routes} != {source["source_ref"] for source in inventory["sources"]}:
+        raise ValueError("OBLIGATION_SOURCE_INVENTORY_INCOMPLETE")
+    if {index for route in candidate.routes for index in route.work_constraint_indices} != set(range(len(revision.constraints))):
+        raise ValueError("OBLIGATION_WORK_CONSTRAINT_INVENTORY_INCOMPLETE")
+    # One source cannot simultaneously be unresolved/retained and executable.
+    for ref in {route.source_ref for route in candidate.routes}:
+        methods = {route.capability for route in candidate.routes if route.source_ref == ref}
+        if methods & {"UNRESOLVED", "RETAIN_CONTEXT"} and len(methods) > 1:
+            raise ValueError("OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION")
+    for source in inventory["sources"]:
+        if source["kind"] not in {"IR_CONSTRAINT", "IR_CLAUSE"}:
+            continue
+        clause = next(clause for clause in ir.clauses if clause.clause_id == source["clause_id"])
+        proposed = {route.capability for route in candidate.routes if route.source_ref == source["source_ref"]}
+        for effect in clause.requested_effects:
+            typed = _TYPED_EFFECT_ROUTES.get(effect)
+            if typed is None:
+                if effect.startswith(("PROHIBIT_", "RESTRICT_")) and proposed != {"UNRESOLVED"}:
+                    raise ValueError("OBLIGATION_TYPED_EFFECT_ROUTE_UNRESOLVED")
+                continue
+            component, owner, gate, phase, method, _polarity = typed
+            required = next(key for key, value in FULFILLMENT_CAPABILITIES.items()
+                if value == (component, owner, phase, method, gate))
+            if required not in proposed and proposed != {"UNRESOLVED"}:
+                raise ValueError("OBLIGATION_TYPED_EFFECT_LOST")
+    from spg.domain.engineering_semantics import SemanticRelation
+    for source in inventory["sources"]:
+        if source["kind"] in {"IR_ITEM", "WORK_CONTEXT"}:
+            continue
+        methods = {route.capability for route in candidate.routes if route.source_ref == source["source_ref"]}
+        if methods & {"CANDIDATE_SEAL", "HUMAN_INTEGRATION", "HUMAN_DELIVERY_DEPLOY", "HUMAN_DELIVERY_PUBLISH"}:
+            # A mixed acceptance assertion may defer only its future component.
+            future_only = (source["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}
+                and next(c for c in ir.clauses if c.clause_id == source["clause_id"]).temporal_scope == "FUTURE")
+            if source["kind"] == "WORK_CONSTRAINT":
+                supports = {ref for route in candidate.routes if route.source_ref == source["source_ref"]
+                            for ref in route.supporting_source_refs}
+                entries = [entry for entry in inventory["sources"] if entry["source_ref"] in supports]
+                future_only = bool(entries) and all(entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}
+                    and next(c for c in ir.clauses if c.clause_id == entry["clause_id"]).temporal_scope == "FUTURE"
+                    for entry in entries)
+            component_declared = all(route.component_basis is not None for route in candidate.routes
+                if route.source_ref == source["source_ref"])
+            if not future_only and not component_declared and "ARTIFACT_CONTENT" not in methods:
+                raise ValueError("OBLIGATION_MIXED_FACT_CURRENT_COMPONENT_LOST")
+    validate_projection_components(candidate, inventory, semantic_review=semantic_review, allow_review_pending=allow_review_pending)
+    return tuple(_projection_binding(revision, ir, inventory, route) for route in candidate.routes)
+
+
+def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=None, exact_target_paths=()):
+    first = bindings[0]
+    expected_source = source_revision or revision.source_revision or revision.revision_fingerprint
+    if first.source_revision != expected_source:
+        raise ValueError("OBLIGATION_PROJECTION_SOURCE_REVISION_DRIFT")
+    inventory = fulfillment_inventory(revision, ir, source_revision=expected_source,
+                                     exact_target_paths=exact_target_paths)
+    inverse = {route: key for key, route in FULFILLMENT_CAPABILITIES.items()}
+    from spg.domain.governed_obligation import FulfillmentRouteCandidate
+    routes = []
+    for binding in bindings:
+        key = inverse.get((binding.component, binding.owner, binding.phase, binding.evidence_method, binding.gate_ref))
+        if key is None:
+            raise ValueError("OBLIGATION_OWNER_CAPABILITY_UNSUPPORTED")
+        routes.append(FulfillmentRouteCandidate(source_ref=fulfillment_source_ref(binding), capability=key,
+            work_constraint_indices=binding.work_constraint_indices, target_paths=binding.target_paths,
+            supporting_source_refs=binding.supporting_source_refs, component_basis=binding.component_basis,
+            rationale="Revalidate persisted projection against immutable owner sources."))
+    if any(route.component_basis is not None for route in routes) and (
+            first.formation_receipt is None or first.formation_receipt.get("capabilities_fingerprint") != canonical_fingerprint(fulfillment_capability_contracts())):
+        raise ValueError("OBLIGATION_SEMANTIC_REVIEW_CAPABILITIES_DRIFT")
+    expected = validate_projection_candidate(FulfillmentProjectionCandidate(
+        inventory_fingerprint=first.projection_inventory_fingerprint, routes=tuple(routes)), revision, ir, inventory,
+        semantic_review=None if first.formation_receipt is None else first.formation_receipt.get("semantic_review"))
+    for actual, wanted in zip(bindings, expected):
+        if actual.model_dump(exclude={"formation_receipt"}) != wanted.model_dump(exclude={"formation_receipt"}):
+            raise ValueError("OBLIGATION_GATE_BINDING_DRIFT")
+    if any(binding.state == "UNRESOLVED" for binding in bindings):
+        raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+
+
+def deterministic_fulfillment_projection(revision, ir, inventory):
+    """Reuse only existing typed relation/effect contracts, never classify prose."""
+    from spg.domain.governed_obligation import FulfillmentRouteCandidate
+    from spg.domain.engineering_semantics import SemanticRelation, SemanticReferenceRole
+    routes = []
+    by_source = {}
+    for source in inventory["sources"]:
+        methods = ["UNRESOLVED"]
+        supporting = ()
+        if source["kind"] == "FACT":
+            fact = next(fact for fact in revision.engineering_semantic_facts if str(fact.id) == source["fact_id"])
+            if fact.epistemic_status.value != "UNRESOLVED":
+                if fact.relation is SemanticRelation.REFERENCE:
+                    methods = ["PRODUCT_SOURCE_IDENTITY"] if fact.reference_role is SemanticReferenceRole.PROJECT_REPOSITORY else ["RETAIN_CONTEXT"]
+                elif fact.relation is SemanticRelation.SCOPE and exact_file_scope_paths(fact) is not None and set(exact_file_scope_paths(fact)) == set(inventory["exact_target_paths"]):
+                    methods = ["GIT_DIFF_SCOPE"]
+                elif fact.relation in {SemanticRelation.EQUALITY, SemanticRelation.CARDINALITY,
+                        SemanticRelation.ORDERED_COMPONENT, SemanticRelation.BOUND, SemanticRelation.COMPARISON,
+                        SemanticRelation.MAPPING, SemanticRelation.PRECEDENCE} and inventory["exact_target_paths"]:
+                    methods = ["ARTIFACT_CONTENT"]
+        elif source["kind"] in {"IR_CONSTRAINT", "IR_CLAUSE"}:
+            clause = next(clause for clause in ir.clauses if clause.clause_id == source["clause_id"])
+            if clause.requested_effects and all(effect in _TYPED_EFFECT_ROUTES for effect in clause.requested_effects):
+                methods = []
+                for effect in clause.requested_effects:
+                    component, owner, gate, phase, method, _ = _TYPED_EFFECT_ROUTES[effect]
+                    methods.append(next(key for key, value in FULFILLMENT_CAPABILITIES.items()
+                        if value == (component, owner, phase, method, gate)))
+                methods = list(dict.fromkeys(methods))
+            elif is_context_only_clause(revision, ir, source["item_id"], source["clause_id"]):
+                methods = ["RETAIN_CONTEXT"]
+        elif source["kind"] == "IR_ITEM":
+            item = next(item for item in ir.items if item.item_id == source["item_id"])
+            if item.kind is SemanticKind.FACT and item.action is None and item.production is None and not item.requires_human and all(
+                    p.origin is SemanticOrigin.REPOSITORY_OBSERVED for p in item.provenance):
+                methods = ["RETAIN_CONTEXT"]
+        elif source["kind"] == "WORK_CONTEXT":
+            methods = ["RETAIN_CONTEXT"]
+        elif source["kind"] == "WORK_CONSTRAINT":
+            matches = [entry for entry in inventory["sources"] if entry["kind"] in {"IR_CONSTRAINT", "IR_CLAUSE"}
+                and entry["payload"]["item"]["statement"] == source["payload"]["content"]]
+            if matches and all(by_source.get(entry["source_ref"], ["UNRESOLVED"]) != ["UNRESOLVED"] for entry in matches):
+                methods = list(dict.fromkeys(method for entry in matches for method in by_source[entry["source_ref"]]))
+                supporting = tuple(entry["source_ref"] for entry in matches)
+        by_source[source["source_ref"]] = methods
+        routes.extend(FulfillmentRouteCandidate(source_ref=source["source_ref"], capability=method,
+            work_constraint_indices=(source["index"],) if source["kind"] == "WORK_CONSTRAINT" else (),
+            target_paths=tuple(inventory["exact_target_paths"]) if method in {"ARTIFACT_CONTENT", "GIT_DIFF_SCOPE"} else (),
+            supporting_source_refs=supporting,
+            rationale="Existing typed relation/effect contract; unsupported meaning retained unresolved.") for method in methods)
+    candidate = FulfillmentProjectionCandidate(inventory_fingerprint=inventory["inventory_fingerprint"], routes=tuple(routes))
+    try:
+        return validate_projection_candidate(candidate, revision, ir, inventory)
+    except ValueError:
+        # Deterministic capability reuse never overrides a source/authority guard.
+        return unresolved_projection(revision, ir, inventory, reason="OBLIGATION_TYPED_CONTRACT_NOT_COMPLETE")
+
+
+def unresolved_projection(revision, ir, inventory, *, reason, receipt=None):
+    from spg.domain.governed_obligation import FulfillmentRouteCandidate
+    routes = tuple(FulfillmentRouteCandidate(source_ref=source["source_ref"], capability="UNRESOLVED",
+        work_constraint_indices=(source["index"],) if source["kind"] == "WORK_CONSTRAINT" else (),
+        rationale=reason) for index, source in enumerate(inventory["sources"]))
+    bindings = validate_projection_candidate(FulfillmentProjectionCandidate(
+        inventory_fingerprint=inventory["inventory_fingerprint"], routes=routes), revision, ir, inventory)
+    return (bindings[0].model_copy(update={"formation_receipt": receipt or {
+        "terminal_reason": reason, "exact_target_paths": inventory["exact_target_paths"]}}), *bindings[1:])
+
+
+
+class FulfillmentFormationReceipts:
+    """Append derived observations to the existing Work plan JSON Owner record."""
+    def __init__(self, revision, inventory, *, database=None, memory=None):
+        self.revision, self.inventory, self.database = revision, inventory, database
+        self.memory = memory if memory is not None else []
+
+    def records(self):
+        rows = self.memory
+        if self.database is not None:
+            from spg.infrastructure.persistence.runtime_store import RuntimeStore
+            with self.database.unit_of_work() as uow:
+                rows = tuple(record.scope for record in RuntimeStore(uow.session).governance_for_subject(
+                    self.inventory["inventory_fingerprint"])
+                    if record.decision_type == "WORK_FULFILLMENT_OBSERVATION"
+                    and record.authority_identity == "work-governance:derived-candidate-observation"
+                    and record.subject_type == "WORK_FULFILLMENT_BASIS")
+        return tuple(row for row in rows if row.get("inventory_fingerprint") == self.inventory["inventory_fingerprint"])
+
+    def append(self, stage, attempt, **values):
+        from datetime import UTC, datetime
+        from uuid import uuid4
+        from spg.providers.verification_receipts import _safe_value
+        row = {"schema": "work-fulfillment-formation-receipt-v1", "receipt_id": str(uuid4()),
+            "owner": "WORK_FULFILLMENT_PROJECTION", "stage": stage, "attempt": attempt,
+            "work_id": str(self.revision.work_id), "work_reality_revision_id": str(self.revision.id),
+            "inventory_fingerprint": self.inventory["inventory_fingerprint"],
+            "source_revision": self.inventory["source_revision"],
+            "exact_target_paths": self.inventory["exact_target_paths"],
+            "recorded_at_utc": datetime.now(UTC).isoformat(), "budget_limit": 2,
+            "candidate_is_authority": False, **_safe_value(values)}
+        if len(json.dumps(row, ensure_ascii=False, default=str).encode()) > 131072:
+            row = {key: value for key, value in row.items() if key not in {"candidate", "candidate_output", "feedback"}}
+            row.update(terminal=True, validation_passed=False, terminal_reason="OBLIGATION_FORMATION_RECEIPT_LIMIT")
+        if self.database is None:
+            prior = self.records()
+            self._check_append(prior, stage, attempt)
+            self.memory.append(row)
+        else:
+            from spg.infrastructure.persistence.product_store import ProductStore
+            with self.database.unit_of_work() as uow:
+                store = ProductStore(uow.session)
+                work = store.work(self.revision.work_id, for_update=True)
+                if (work is None or work.current_work_reality_revision_id != self.revision.id):
+                    raise ValueError("OBLIGATION_FORMATION_RECEIPT_OWNER_CHANGED")
+                from spg.infrastructure.persistence.runtime_store import RuntimeStore
+                runtime = RuntimeStore(uow.session)
+                prior = tuple(record.scope for record in runtime.governance_for_subject(self.inventory["inventory_fingerprint"])
+                    if record.decision_type == "WORK_FULFILLMENT_OBSERVATION"
+                    and record.authority_identity == "work-governance:derived-candidate-observation"
+                    and record.subject_type == "WORK_FULFILLMENT_BASIS")
+                self._check_append(prior, stage, attempt)
+                runtime.insert_governance({"id": uuid4(), "decision_type": "WORK_FULFILLMENT_OBSERVATION",
+                    "authority_identity": "work-governance:derived-candidate-observation",
+                    "subject_type": "WORK_FULFILLMENT_BASIS", "subject_identity": self.inventory["inventory_fingerprint"],
+                    "scope": row, "rationale": "Derived candidate observation; grants no Human authority, PASS or effect.",
+                    "created_at": datetime.now(UTC)})
+                if work.production_plan is not None:
+                    all_rows = work.production_plan.fulfillment_formation_receipts
+                    plan = work.production_plan.model_copy(update={"fulfillment_formation_receipts": (*all_rows, row)})
+                    store.update_work(work.id, {"production_plan_proposal": plan.model_dump(mode="json")})
+                uow.commit()
+        return row
+
+    @staticmethod
+    def _check_append(prior, stage, attempt):
+        if any(row.get("terminal") for row in prior):
+            raise ValueError("OBLIGATION_FORMATION_PENDING_OR_TERMINAL")
+        if stage == "SEMANTIC_REVIEW_PENDING":
+            if (any(row["stage"] == stage and row["attempt"] == attempt for row in prior)
+                    or not any(row["stage"] == "MODEL_RESPONSE_OBSERVED" and row["attempt"] == attempt for row in prior)):
+                raise ValueError("OBLIGATION_SEMANTIC_REVIEW_BUDGET_EXHAUSTED")
+        if stage != "MODEL_REQUEST_PENDING":
+            return
+        pending = [row for row in prior if row["stage"] == stage]
+        validated = {row["attempt"] for row in prior if row["stage"] == "CANDIDATE_VALIDATED"}
+        if any(row.get("terminal") for row in prior) or any(row["attempt"] not in validated for row in pending):
+            raise ValueError("OBLIGATION_FORMATION_PENDING_OR_TERMINAL")
+        if len(pending) >= 2 or attempt != len(pending) + 1:
+            raise ValueError("OBLIGATION_FORMATION_BUDGET_EXHAUSTED")
+
+
+def plan_with_formation_receipts(database, work_id, plan, *, inventory_fingerprint=None):
+    from spg.infrastructure.persistence.product_store import ProductStore
+    from spg.infrastructure.persistence.runtime_store import RuntimeStore
+    with database.unit_of_work() as uow:
+        work = ProductStore(uow.session).work(work_id)
+        records = (() if inventory_fingerprint is None else tuple(record.scope for record in
+            RuntimeStore(uow.session).governance_for_subject(inventory_fingerprint)
+            if record.decision_type == "WORK_FULFILLMENT_OBSERVATION"
+            and record.authority_identity == "work-governance:derived-candidate-observation"
+            and record.subject_type == "WORK_FULFILLMENT_BASIS"
+            and record.scope.get("work_id") == str(work_id)))
+    cached = () if work is None or work.production_plan is None else work.production_plan.fulfillment_formation_receipts
+    by_id = {row["receipt_id"]: row for row in (*cached, *records)}
+    return plan.model_copy(update={"fulfillment_formation_receipts": tuple(by_id.values())})
+
+
+def fulfillment_capability_contracts():
+    return [{"capability": key, "component": value[0], "owner": value[1].value,
+        "phase": value[2].value, "evidence_method": value[3], "gate_ref": value[4]}
+        for key, value in FULFILLMENT_CAPABILITIES.items()]
+
+
+class FulfillmentReviewOutcomeUnknown(RuntimeError):
+    pass
+
+
+def _review_fulfillment_candidate(provider, candidate, inventory, recorder, attempt, capabilities):
+    if not any(route.component_basis is not None for route in candidate.routes):
+        return None
+    if not hasattr(provider, "review"):
+        raise ValueError("OBLIGATION_SEMANTIC_REVIEW_UNAVAILABLE")
+    rows = recorder.records()
+    validated = next((row for row in reversed(rows) if row["attempt"] == attempt
+        and row["stage"] == "SEMANTIC_REVIEW_VALIDATED"), None)
+    if validated is not None:
+        if validated.get("capabilities_fingerprint") != canonical_fingerprint(capabilities):
+            raise ValueError("OBLIGATION_SEMANTIC_REVIEW_CAPABILITIES_DRIFT")
+        if not validated.get("validation_passed"):
+            raise ValueError(validated.get("failed_predicate", "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH"))
+        result = FulfillmentSemanticReviewCandidate.model_validate(validated["semantic_review"])
+        validate_projection_components(candidate, inventory, semantic_review=result)
+        return result.model_dump(mode="json")
+    observed = next((row for row in reversed(rows) if row["attempt"] == attempt
+        and row["stage"] == "SEMANTIC_REVIEW_OBSERVED"), None)
+    if observed is None:
+        if any(row["attempt"] == attempt and row["stage"] == "SEMANTIC_REVIEW_PENDING" for row in rows):
+            raise FulfillmentReviewOutcomeUnknown("OBLIGATION_SEMANTIC_REVIEW_PENDING_OUTCOME_UNKNOWN")
+        recorder.append("SEMANTIC_REVIEW_PENDING", attempt,
+            capabilities_fingerprint=canonical_fingerprint(capabilities),
+            candidate_fingerprint=fulfillment_candidate_fingerprint(candidate),
+            components_fingerprint=fulfillment_components_fingerprint(candidate))
+        import inspect
+        parameters = inspect.signature(provider.review).parameters
+        callback = "receipt_callback" in parameters
+        def observed_callback(**values):
+            recorder.append("SEMANTIC_REVIEW_OBSERVED", attempt, capabilities_fingerprint=canonical_fingerprint(capabilities), **values)
+        kwargs = {"receipt_callback": observed_callback} if callback else {}
+        if "capabilities" in parameters:
+            kwargs["capabilities"] = capabilities
+        response = provider.review(inventory, candidate, **kwargs)
+        if not callback:
+            recorder.append("SEMANTIC_REVIEW_OBSERVED", attempt,
+                capabilities_fingerprint=canonical_fingerprint(capabilities),
+                semantic_review=response.model_dump(mode="json") if isinstance(response, FulfillmentSemanticReviewCandidate) else response,
+                model=getattr(provider, "last_observation", None))
+    else:
+        if observed.get("capabilities_fingerprint") != canonical_fingerprint(capabilities):
+            raise ValueError("OBLIGATION_SEMANTIC_REVIEW_CAPABILITIES_DRIFT")
+        response = observed.get("semantic_review")
+        if response is None and observed.get("review_output") is not None:
+            response = json.loads(observed["review_output"])
+        if response is None:
+            raise ValueError("OBLIGATION_SEMANTIC_REVIEW_NOT_RETAINED")
+    result = response if isinstance(response, FulfillmentSemanticReviewCandidate) else FulfillmentSemanticReviewCandidate.model_validate(response)
+    try:
+        validate_projection_components(candidate, inventory, semantic_review=result)
+    except ValueError as error:
+        recorder.append("SEMANTIC_REVIEW_VALIDATED", attempt, capabilities_fingerprint=canonical_fingerprint(capabilities), semantic_review=result.model_dump(mode="json"),
+            validation_passed=False, failed_predicate=str(error))
+        raise
+    recorder.append("SEMANTIC_REVIEW_VALIDATED", attempt, capabilities_fingerprint=canonical_fingerprint(capabilities), semantic_review=result.model_dump(mode="json"),
+        validation_passed=True, failed_predicate=None)
+    return result.model_dump(mode="json")
+
+
+def form_fulfillment_projection(revision, ir, *, provider, database=None,
+                                source_revision=None, exact_target_paths=()):
+    """Two cumulative candidates on one basis, with recoverable Owner receipts."""
+    inventory = fulfillment_inventory(revision, ir, source_revision=source_revision,
+                                      exact_target_paths=exact_target_paths)
+    if not hasattr(provider, "_fulfillment_receipts"):
+        provider._fulfillment_receipts = []
+    recorder = FulfillmentFormationReceipts(revision, inventory, database=database,
+                                           memory=provider._fulfillment_receipts)
+    started = monotonic()
+    capabilities = fulfillment_capability_contracts()
+    def finish(candidate, reason, passed):
+        rows = recorder.records()
+        semantic_review = next((row.get("semantic_review") for row in reversed(rows)
+            if row["stage"] == "CANDIDATE_VALIDATED" and row.get("validation_passed")), None)
+        review_row = next((row for row in reversed(rows) if row["stage"] == "SEMANTIC_REVIEW_VALIDATED"
+            and row.get("validation_passed") and row.get("semantic_review") == semantic_review), None)
+        capability_fingerprint = canonical_fingerprint(capabilities) if semantic_review is None else (
+            None if review_row is None else review_row.get("capabilities_fingerprint"))
+        if semantic_review is not None and capability_fingerprint != canonical_fingerprint(capabilities):
+            raise ValueError("OBLIGATION_SEMANTIC_REVIEW_CAPABILITIES_DRIFT")
+        receipt = {"owner": "WORK_FULFILLMENT_PROJECTION", "inventory_fingerprint": inventory["inventory_fingerprint"],
+            "source_revision": inventory["source_revision"], "work_reality_revision_id": str(revision.id),
+            "exact_target_paths": inventory["exact_target_paths"], "bounded_feedback_limit": 1,
+            "candidate_attempt_limit": 2, "semantic_review_calls_per_candidate_limit": 1, "maximum_model_calls": 4,
+            "semantic_review": semantic_review, "capabilities_fingerprint": capability_fingerprint,
+            "semantic_review_receipt_refs": [f"work-plan-receipt:{row['receipt_id']}" for row in rows if row["stage"].startswith("SEMANTIC_REVIEW_")],
+            "provider_call_count": sum(row["stage"] in {"MODEL_REQUEST_PENDING", "SEMANTIC_REVIEW_PENDING"} for row in rows),
+            "observed_model_call_count": sum(row["stage"] in {"MODEL_RESPONSE_OBSERVED", "SEMANTIC_REVIEW_OBSERVED"}
+                and isinstance(row.get("model"), dict) and not row["model"].get("fixture", False) for row in rows),
+            "attempt_count": sum(row["stage"] == "MODEL_REQUEST_PENDING" for row in rows),
+            "receipt_refs": [f"work-plan-receipt:{row['receipt_id']}" for row in rows],
+            "candidate_attempts": list(rows), "terminal_reason": reason,
+            "elapsed_seconds": monotonic() - started,
+            "meaning": "derived binding only; no evidence PASS, authority or effect"}
+        if not passed or candidate is None:
+            return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
+        bindings = validate_projection_candidate(candidate, revision, ir, inventory, semantic_review=semantic_review)
+        return (bindings[0].model_copy(update={"formation_receipt": receipt}), *bindings[1:])
+    rows = recorder.records()
+    terminal = next((row for row in reversed(rows) if row.get("terminal")), None)
+    if terminal is not None:
+        candidate = None if terminal.get("candidate") is None else FulfillmentProjectionCandidate.model_validate(terminal["candidate"])
+        return finish(candidate, terminal.get("terminal_reason", "OBLIGATION_FORMATION_TERMINAL"), terminal.get("validation_passed", False))
+    pending = [row for row in rows if row["stage"] == "MODEL_REQUEST_PENDING"]
+    validated = {row["attempt"] for row in rows if row["stage"] == "CANDIDATE_VALIDATED"}
+    incomplete = next((row for row in pending if row["attempt"] not in validated), None)
+    if incomplete is not None and not any(row["attempt"] == incomplete["attempt"] and row["stage"] == "MODEL_RESPONSE_OBSERVED" for row in rows):
+        recorder.append("FORMATION_STOPPED", incomplete["attempt"], terminal=True,
+            validation_passed=False, terminal_reason="OBLIGATION_FORMATION_PENDING_OUTCOME_UNKNOWN")
+        return finish(None, "OBLIGATION_FORMATION_PENDING_OUTCOME_UNKNOWN", False)
+    feedback = next((row.get("failed_predicate") for row in reversed(rows) if row["stage"] == "CANDIDATE_VALIDATED"), None)
+    next_attempt = incomplete["attempt"] if incomplete is not None else len(pending) + 1
+    for attempt in range(next_attempt, 3):
+        candidate = None
+        semantic_review = None
+        try:
+            observed_row = next((row for row in reversed(recorder.records()) if row["attempt"] == attempt and row["stage"] == "MODEL_RESPONSE_OBSERVED"), None)
+            if observed_row is not None:
+                observed = observed_row.get("candidate")
+                if observed is None and observed_row.get("candidate_output") is not None:
+                    observed = json.loads(observed_row["candidate_output"])
+                if observed is None:
+                    raise ValueError("OBLIGATION_FORMATION_CANDIDATE_NOT_RETAINED")
+            else:
+                recorder.append("MODEL_REQUEST_PENDING", attempt, feedback=feedback)
+                import inspect
+                accepts_callback = "receipt_callback" in inspect.signature(provider.form).parameters
+                def observed_callback(**values):
+                    recorder.append("MODEL_RESPONSE_OBSERVED", attempt, **values)
+                arguments = {"validation_feedback": feedback}
+                if accepts_callback:
+                    arguments["receipt_callback"] = observed_callback
+                observed = provider.form(inventory, capabilities, **arguments)
+                if not accepts_callback:
+                    recorder.append("MODEL_RESPONSE_OBSERVED", attempt,
+                        candidate=observed.model_dump(mode="json") if isinstance(observed, FulfillmentProjectionCandidate) else observed,
+                        model=getattr(provider, "last_observation", None))
+            candidate = observed if isinstance(observed, FulfillmentProjectionCandidate) else FulfillmentProjectionCandidate.model_validate(observed)
+            raw_candidate = candidate
+            candidate, adjustments = locate_projection_components(candidate, inventory)
+            if adjustments:
+                prior_location = next((row for row in reversed(recorder.records()) if row["attempt"] == attempt
+                    and row["stage"] == "CANDIDATE_LOCATED"), None)
+                located = {"raw_candidate_fingerprint": fulfillment_candidate_fingerprint(raw_candidate),
+                    "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
+                    "locator_adjustments": list(adjustments)}
+                if prior_location is None:
+                    recorder.append("CANDIDATE_LOCATED", attempt, **located)
+                elif any(prior_location.get(key) != value for key, value in located.items()):
+                    raise ValueError("OBLIGATION_COMPONENT_LOCATOR_RECEIPT_DRIFT")
+            validate_projection_candidate(candidate, revision, ir, inventory, allow_review_pending=True)
+            semantic_review = _review_fulfillment_candidate(provider, candidate, inventory, recorder, attempt, capabilities)
+            bindings = validate_projection_candidate(candidate, revision, ir, inventory, semantic_review=semantic_review)
+            passed = not any(binding.state == "UNRESOLVED" for binding in bindings)
+            reason = "VALIDATED_PROJECTION" if passed else "UNRESOLVED_BINDING"
+        except ValueError as error:
+            feedback = str(error).split("\n", 1)[0][:1000]
+            passed, reason = False, feedback
+            recorder.append("CANDIDATE_VALIDATED", attempt, candidate=None if candidate is None else candidate.model_dump(mode="json"),
+                semantic_review=semantic_review, failed_predicate=feedback, validation_passed=False, terminal=attempt == 2,
+                terminal_reason=reason if attempt == 2 else None)
+            if attempt < 2:
+                continue
+        except Exception as error:
+            # Transport/unknown failures cannot justify a probability retry.
+            reason = f"OBLIGATION_FORMATION_TRANSPORT_{type(error).__name__}"
+            recorder.append("CANDIDATE_VALIDATED", attempt, candidate=None, failed_predicate=reason,
+                terminal=True, validation_passed=False, terminal_reason=reason)
+            return finish(None, reason, False)
+        else:
+            recorder.append("CANDIDATE_VALIDATED", attempt, candidate=candidate.model_dump(mode="json"),
+                semantic_review=semantic_review, failed_predicate=None if passed else reason, validation_passed=passed, terminal=True, terminal_reason=reason)
+        if attempt == 2 and database is not None:
+            from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+            from spg.domain.refinement_contract import RefinementSignalKind
+            model_rows = [row.get("model", {}) for row in recorder.records() if row["stage"] in {"MODEL_RESPONSE_OBSERVED", "SEMANTIC_REVIEW_OBSERVED"}]
+            usage = [row.get("usage", {}) for row in model_rows if isinstance(row, dict)]
+            with database.unit_of_work() as uow:
+                NativeExecutionStore(uow.session).record_bounded_refinement(work_id=revision.work_id,
+                    operation_id=uuid5(NAMESPACE_URL, f"fulfillment-projection:{inventory['inventory_fingerprint']}"),
+                    component="work/fulfillment-projection", signal_kind=RefinementSignalKind.CONTRACT_MISMATCH,
+                    signature_basis=feedback or "UNRESOLVED_BINDING", evidence_references=(f"work-reality-revision:{revision.id}", f"semantic-ir:{ir.id}"),
+                    converged=passed, attempt_count=2, elapsed_seconds=int(monotonic() - started),
+                    model_token_usage={"total_tokens": None if not usage or any(row.get("unknown") or row.get("total_tokens") is None for row in usage) else sum(int(row["total_tokens"]) for row in usage),
+                        "unknown": not usage or any(row.get("unknown") or row.get("total_tokens") is None for row in usage)},
+                    diagnostic_evidence={"inventory_fingerprint": inventory["inventory_fingerprint"],
+                        "receipt_refs": [f"work-plan-receipt:{row['receipt_id']}" for row in recorder.records()]})
+                uow.commit()
+        return finish(candidate, reason, passed)
+    return finish(None, "OBLIGATION_FORMATION_BUDGET_EXHAUSTED", False)

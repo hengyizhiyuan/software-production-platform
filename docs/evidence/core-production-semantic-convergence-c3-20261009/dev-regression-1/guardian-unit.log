@@ -1,0 +1,437 @@
+FFFFF.F.FFFFFFFFFFFF.................................................... [ 77%]
+.....................                                                    [100%]
+=================================== FAILURES ===================================
+___ test_pending_human_keeps_current_evidence_and_does_not_create_authority ____
+tests/test_c3_phase_evidence.py:97: in test_pending_human_keeps_current_evidence_and_does_not_create_authority
+    result=assess(tmp_path,req,records)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[missing-current] _
+tests/test_c3_phase_evidence.py:119: in test_pending_human_cannot_hide_missing_current_or_authoritative_evidence
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[wrong-value] _
+tests/test_c3_phase_evidence.py:119: in test_pending_human_cannot_hide_missing_current_or_authoritative_evidence
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[wrong-version] _
+tests/test_c3_phase_evidence.py:119: in test_pending_human_cannot_hide_missing_current_or_authoritative_evidence
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[missing-owner] _
+tests/test_c3_phase_evidence.py:119: in test_pending_human_cannot_hide_missing_current_or_authoritative_evidence
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[wrong-original] _
+tests/test_c3_phase_evidence.py:119: in test_pending_human_cannot_hide_missing_current_or_authoritative_evidence
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[duplicate-current] _
+tests/test_c3_phase_evidence.py:119: in test_pending_human_cannot_hide_missing_current_or_authoritative_evidence
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[wrong-gate] _
+tests/test_c3_phase_evidence.py:119: in test_pending_human_cannot_hide_missing_current_or_authoritative_evidence
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[missing-inventory] _
+tests/test_c3_phase_evidence.py:119: in test_pending_human_cannot_hide_missing_current_or_authoritative_evidence
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[duplicate-inventory] _
+tests/test_c3_phase_evidence.py:119: in test_pending_human_cannot_hide_missing_current_or_authoritative_evidence
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[missing-current-owner] _
+tests/test_c3_phase_evidence.py:119: in test_pending_human_cannot_hide_missing_current_or_authoritative_evidence
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_retained_context_reads_exact_original_clause_without_asserting_fulfillment _
+tests/test_c3_phase_evidence.py:124: in test_retained_context_reads_exact_original_clause_without_asserting_fulfillment
+    assert assess(tmp_path,req,records).gate is Gate.PASS
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+__ test_retention_cannot_hide_current_requirements_or_absent_sources[request] __
+tests/test_c3_phase_evidence.py:138: in test_retention_cannot_hide_current_requirements_or_absent_sources
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_retention_cannot_hide_current_requirements_or_absent_sources[operation] _
+tests/test_c3_phase_evidence.py:138: in test_retention_cannot_hide_current_requirements_or_absent_sources
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_retention_cannot_hide_current_requirements_or_absent_sources[needs-human] _
+tests/test_c3_phase_evidence.py:138: in test_retention_cannot_hide_current_requirements_or_absent_sources
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_retention_cannot_hide_current_requirements_or_absent_sources[current-fact] _
+tests/test_c3_phase_evidence.py:138: in test_retention_cannot_hide_current_requirements_or_absent_sources
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_retention_cannot_hide_current_requirements_or_absent_sources[missing-ir] _
+tests/test_c3_phase_evidence.py:138: in test_retention_cannot_hide_current_requirements_or_absent_sources
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+_ test_retention_cannot_hide_current_requirements_or_absent_sources[stale-provenance] _
+tests/test_c3_phase_evidence.py:138: in test_retention_cannot_hide_current_requirements_or_absent_sources
+    assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c1_governed_evidence_continuity.py:130: in assess
+    return owner.assess(req)
+           ^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:146: in assess
+    or self._resolve_protected_owner_evidence(request, obligation)))
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:211: in _resolve_protected_owner_evidence
+    and self._production_lineage_records(request, record, resolver) is None):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:472: in _production_lineage_records
+    and not JsonSoftwareAssuranceStore._projection_inventory_evidence(request, record, pwu, native, resolver)):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:490: in _projection_inventory_evidence
+    expected = [fingerprint(binding) for binding in bindings]
+                ^^^^^^^^^^^^^^^^^^^^
+src/guardian/runtime.py:488: in <lambda>
+    fingerprint = lambda value: sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                ^^^^^^
+E   NameError: name 'sha256' is not defined
+=========================== short test summary info ============================
+FAILED tests/test_c3_phase_evidence.py::test_pending_human_keeps_current_evidence_and_does_not_create_authority
+FAILED tests/test_c3_phase_evidence.py::test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[missing-current]
+FAILED tests/test_c3_phase_evidence.py::test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[wrong-value]
+FAILED tests/test_c3_phase_evidence.py::test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[wrong-version]
+FAILED tests/test_c3_phase_evidence.py::test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[missing-owner]
+FAILED tests/test_c3_phase_evidence.py::test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[wrong-original]
+FAILED tests/test_c3_phase_evidence.py::test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[duplicate-current]
+FAILED tests/test_c3_phase_evidence.py::test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[wrong-gate]
+FAILED tests/test_c3_phase_evidence.py::test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[missing-inventory]
+FAILED tests/test_c3_phase_evidence.py::test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[duplicate-inventory]
+FAILED tests/test_c3_phase_evidence.py::test_pending_human_cannot_hide_missing_current_or_authoritative_evidence[missing-current-owner]
+FAILED tests/test_c3_phase_evidence.py::test_retained_context_reads_exact_original_clause_without_asserting_fulfillment
+FAILED tests/test_c3_phase_evidence.py::test_retention_cannot_hide_current_requirements_or_absent_sources[request]
+FAILED tests/test_c3_phase_evidence.py::test_retention_cannot_hide_current_requirements_or_absent_sources[operation]
+FAILED tests/test_c3_phase_evidence.py::test_retention_cannot_hide_current_requirements_or_absent_sources[needs-human]
+FAILED tests/test_c3_phase_evidence.py::test_retention_cannot_hide_current_requirements_or_absent_sources[current-fact]
+FAILED tests/test_c3_phase_evidence.py::test_retention_cannot_hide_current_requirements_or_absent_sources[missing-ir]
+FAILED tests/test_c3_phase_evidence.py::test_retention_cannot_hide_current_requirements_or_absent_sources[stale-provenance]
+18 failed, 75 passed in 15.52s

@@ -1,5 +1,6 @@
 """Read-only checks for exact, Human-admitted static HTML semantic facts."""
 
+from dataclasses import asdict
 from html.parser import HTMLParser
 from hashlib import sha256
 import json
@@ -460,8 +461,9 @@ class _HTMLPlanCandidate(BaseModel):
 class StaticHTMLPlanRepair:
     """One owner-specific, bounded repair of an ambiguous derived check plan."""
 
-    def __init__(self, runtime_factory):
+    def __init__(self, runtime_factory, *, receipt_recorder=None):
         self.runtime_factory = runtime_factory
+        self.receipt_recorder = receipt_recorder
 
     def repair(self, fact: SemanticFactReference, admitted: EngineeringSemanticFact,
                path: str) -> tuple[str | None, dict[str, object]]:
@@ -486,9 +488,28 @@ class StaticHTMLPlanRepair:
             "A quote is evidence of method selection, not a proof that Candidate content passes."
         )
         attempts = []
+        component = "static-html-plan:" + str(fact.fact_id)
+        if self.receipt_recorder is not None:
+            completed = self.receipt_recorder.completed(component)
+            if completed is not None:
+                candidate = _HTMLPlanCandidate.model_validate(completed["candidate_checks"][0])
+                problem = self._candidate_problem(candidate, fact, source_text, path)
+                if problem:
+                    raise ValueError("VERIFICATION_REPLAY_BASIS_MISMATCH")
+                return (None if candidate.method == "UNVERIFIABLE" else candidate.method,
+                        {"attempts": [], "converged": candidate.method != "UNVERIFIABLE", "replayed": True})
+        if self.receipt_recorder is not None:
+            prior = [row for row in self.receipt_recorder.records if row["component"] == component
+                and row["stage"] == "CANDIDATE_VALIDATED" and row.get("failed_predicate")]
+            if prior:
+                payload["repair_feedback"] = prior[-1]["failed_predicate"]
         runtime = self.runtime_factory()
         try:
             for index in range(2):
+                number = index + 1
+                if self.receipt_recorder is not None:
+                    number = self.receipt_recorder.begin(component, feedback=payload.get("repair_feedback"))
+                candidate = None
                 try:
                     response = runtime.generate(
                         purpose=ModelPurpose.STEERING_SEMANTIC,
@@ -497,16 +518,31 @@ class StaticHTMLPlanRepair:
                         output_schema=_provider_strict_output_schema(
                             _HTMLPlanCandidate.model_json_schema()),
                     )
+                    if self.receipt_recorder is not None:
+                        self.receipt_recorder.observed(component, number, response)
                     candidate = _HTMLPlanCandidate.model_validate_json(response.output_text)
                     attempts.append({"request_id": response.request_id,
-                                     "method": candidate.method, "attempt": index + 1})
+                                     "method": candidate.method, "attempt": number,
+                                     "usage": asdict(response.usage)})
                     problem = self._candidate_problem(candidate, fact, source_text, path)
+                    if self.receipt_recorder is not None:
+                        self.receipt_recorder.validated(component, number, predicate=problem,
+                            feedback=problem, checks=[candidate.model_dump(mode="json")],
+                            terminal=problem is None or number >= 2, refinement_converged=candidate.method != "UNVERIFIABLE")
                     if problem is None:
                         return (None if candidate.method == "UNVERIFIABLE" else candidate.method,
                                 {"attempts": attempts, "converged": candidate.method != "UNVERIFIABLE"})
                 except (ValueError, TypeError) as error:
                     problem = type(error).__name__
-                    attempts.append({"attempt": index + 1, "failure": problem})
+                    attempts.append({"attempt": number, "failure": problem})
+                    if self.receipt_recorder is not None:
+                        self.receipt_recorder.validated(component, number,
+                            predicate=problem, feedback=problem, terminal=number >= 2)
+                except Exception as error:
+                    if self.receipt_recorder is not None:
+                        self.receipt_recorder.validated(component, number,
+                            predicate="STATIC_HTML_PLAN_MODEL_UNAVAILABLE", terminal=True)
+                    raise ValueError("STATIC_HTML_PLAN_MODEL_UNAVAILABLE") from error
                 payload["repair_feedback"] = problem
             return None, {"attempts": attempts, "converged": False}
         finally:
@@ -524,8 +560,8 @@ class StaticHTMLPlanRepair:
         if not quote or quote not in source_text:
             return "CONTRACT_MISMATCH: method has no exact Human source quote"
         markers = {"EXACT_H1": ("h1", "<h1>"),
-                   "EXACT_PARAGRAPH": ("paragraph", "<p>", "段落"),
-                   "EXACT_ORDERED_LIST": ("ordered list", "<ol>", "有序列表")}
+                   "EXACT_PARAGRAPH": ("paragraph", "<p>", "娈佃惤"),
+                   "EXACT_ORDERED_LIST": ("ordered list", "<ol>", "鏈夊簭鍒楄〃")}
         if not any(marker in quote.casefold() for marker in markers[candidate.method]):
             return "CONTRACT_MISMATCH: quote does not name the HTML check method"
         if candidate.method in {"EXACT_H1", "EXACT_PARAGRAPH"}:

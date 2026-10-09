@@ -147,6 +147,13 @@ class ProductStore:
         })
 
     def update_work(self, work_id: UUID, values: Mapping[str, Any]) -> None:
+        values = dict(values)
+        if values.get("production_plan_proposal") is not None:
+            current = self.work(work_id, for_update=True)
+            prior = None if current is None else current.production_plan
+            values["production_plan_proposal"] = _merge_fulfillment_formation_receipts(
+                None if prior is None else prior.model_dump(mode="json"),
+                values["production_plan_proposal"])
         result = self.session.execute(
             update(product_works).where(product_works.c.id == work_id).values(**values)
         )
@@ -734,3 +741,22 @@ class ProductStore:
 
     def _one(self, table, condition) -> Mapping[str, Any] | None:
         return self.session.execute(select(table).where(condition)).mappings().first()
+
+
+def _merge_fulfillment_formation_receipts(prior, incoming):
+    """Keep append-only Owner observations across replacement planning proposals."""
+    result = dict(incoming)
+    prior_rows = () if prior is None else prior.get("fulfillment_formation_receipts", ())
+    incoming_rows = result.get("fulfillment_formation_receipts", ())
+    if not prior_rows and not incoming_rows:
+        return result
+    merged = {}
+    for row in (*prior_rows, *incoming_rows):
+        identity = row.get("receipt_id")
+        if not identity:
+            raise ValueError("FULFILLMENT_RECEIPT_IDENTITY_MISSING")
+        if identity in merged and merged[identity] != row:
+            raise ValueError("FULFILLMENT_RECEIPT_IDENTITY_DRIFT")
+        merged[identity] = row
+    result["fulfillment_formation_receipts"] = list(merged.values())
+    return result

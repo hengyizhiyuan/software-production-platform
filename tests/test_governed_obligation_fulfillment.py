@@ -186,6 +186,13 @@ def test_delivery_owner_rechecks_current_admitted_prohibition(monkeypatch):
         assert_delivery_effect_permitted(database, revision.work_id, "publish")
     typed.items = ()
     typed.clauses = ()
+    monkeypatch.setattr(ProductStore, "runtime_binding", lambda self, work_id: None)
+    # Fresh admitted IR cannot silently release a prohibition when its persisted
+    # same-revision fulfillment projection is missing.
+    with pytest.raises(ValueError, match="DELIVERY_PROJECTION_MISSING_OR_STALE"):
+        assert_delivery_effect_permitted(database, revision.work_id, "deploy")
+    # Historical pre-open typed projections keep their explicit compatibility.
+    typed.legacy_typed_projection = True
     assert_delivery_effect_permitted(database, revision.work_id, "deploy") is None
 
 
@@ -297,7 +304,7 @@ def test_managed_ecf_routes_diff_content_candidate_and_gates_without_dropping_it
         @staticmethod
         def supports(_): return True
         @staticmethod
-        def verify(req, _task, _contract, _repo, _base, *, obligations):
+        def verify(req, _task, _contract, _repo, _base, *, obligations, **_):
             assert obligations == (items[1],)
             return [{**items[1].model_dump(mode="json"), "coverage": "COVERED",
                      "candidate_revision": req.proposed_commit_identity,
@@ -308,8 +315,7 @@ def test_managed_ecf_routes_diff_content_candidate_and_gates_without_dropping_it
         semantic_checks=semantic_checks, static_verifier=SourceVerifier())
     checks = verify_managed_context(**kwargs)
     assert len(checks) == len(items)
-    assert [item["coverage"] for item in checks] == [
-        "COVERED", "COVERED", "PENDING_CANDIDATE_GATE", "COVERED", "COVERED"]
+    assert [item["coverage"] for item in checks] == ["UNVERIFIED"] * len(items)
     no_gate = (semantic_checks[0],)
     assert verify_managed_context(**{**kwargs, "semantic_checks": no_gate})[3]["coverage"] == "UNVERIFIED"
     bad = items[0].model_copy(update={"content": "wrong source"})

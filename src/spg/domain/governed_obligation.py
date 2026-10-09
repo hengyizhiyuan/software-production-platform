@@ -7,6 +7,7 @@ grant an effect, or record that a future Human decision has occurred.
 from __future__ import annotations
 
 from enum import StrEnum
+from typing import Literal
 from hashlib import sha256
 import json
 from uuid import UUID
@@ -21,6 +22,7 @@ class FulfillmentOwner(StrEnum):
     HUMAN_GATE = "HUMAN_GATE"
     DELIVERY_GATE = "DELIVERY_GATE"
     EXECUTION_GATE = "EXECUTION_GATE"
+    UNRESOLVED = "UNRESOLVED"
 
 
 class FulfillmentPhase(StrEnum):
@@ -29,11 +31,28 @@ class FulfillmentPhase(StrEnum):
     CANDIDATE_SEAL = "CANDIDATE_SEAL"
     HUMAN_INTEGRATION = "HUMAN_INTEGRATION"
     DELIVERY = "DELIVERY"
+    CONTEXT_RETENTION = "CONTEXT_RETENTION"
+    UNRESOLVED = "UNRESOLVED"
 
 
 class FulfillmentSourceKind(StrEnum):
     FACT = "FACT"
     IR_CONSTRAINT = "IR_CONSTRAINT"
+    IR_CLAUSE = "IR_CLAUSE"
+    WORK_CONSTRAINT = "WORK_CONSTRAINT"
+    IR_ITEM = "IR_ITEM"
+    WORK_CONTEXT = "WORK_CONTEXT"
+
+
+class FulfillmentComponentBasis(BaseModel):
+    """Exact source contribution to a derived consumer, never a new fact."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    # Raw candidates may carry inaccurate offsets; the exact locator repairs
+    # only a unique immutable quote before admission to a binding.
+    source_span_start: int
+    source_span_end: int
+    source_component_quote: str = Field(min_length=1, max_length=65536)
+    linked_fact_refs: tuple[str, ...] = ()
 
 
 class FulfillmentBinding(BaseModel):
@@ -43,13 +62,14 @@ class FulfillmentBinding(BaseModel):
 
     fact_id: UUID | None = None
     source_kind: FulfillmentSourceKind = FulfillmentSourceKind.FACT
+    semantic_ir_id: UUID | None = None
     constraint_item_id: str | None = None
     constraint_clause_id: str | None = None
     constraint_fingerprint: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     work_reality_revision_id: UUID
     fact_fingerprint: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     provenance_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
-    source_record_ids: tuple[UUID, ...] = Field(min_length=1)
+    source_record_ids: tuple[UUID, ...] = ()
     component: str = Field(min_length=1)
     owner: FulfillmentOwner
     phase: FulfillmentPhase
@@ -58,20 +78,44 @@ class FulfillmentBinding(BaseModel):
     source_quote: str = Field(min_length=1)
     source_revision: str = Field(min_length=1)
     target_paths: tuple[str, ...] = ()
-    # This is deliberately not a satisfaction or Assurance verdict.
-    state: str = "BOUND_PENDING_EVIDENCE"
+    # Projection identity is independently recomputed by the consuming Owner.
+    projection_inventory_fingerprint: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    work_constraint_indices: tuple[int, ...] = ()
+    supporting_source_refs: tuple[str, ...] = ()
+    formation_receipt: dict | None = None
+    component_basis: FulfillmentComponentBasis | None = None
+    # These states do not record satisfaction, Assurance or Human authority.
+    state: Literal["BOUND_PENDING_EVIDENCE", "UNRESOLVED", "RETAINED_CONTEXT"] = "BOUND_PENDING_EVIDENCE"
 
     @model_validator(mode="after")
     def no_unowned_handoff(self):
+        if self.component_basis is not None and (self.component_basis.source_span_start < 0
+                or self.component_basis.source_span_end <= self.component_basis.source_span_start):
+            raise ValueError("A binding requires a canonical nonempty source span")
+        if not self.source_record_ids and self.source_kind is not FulfillmentSourceKind.IR_ITEM:
+            raise ValueError("Human/Work binding requires exact admitted source records")
         if self.source_kind is FulfillmentSourceKind.FACT:
             if self.fact_id is None or self.fact_fingerprint is None or any((
                     self.constraint_item_id, self.constraint_clause_id,
                     self.constraint_fingerprint)):
                 raise ValueError("Fact binding requires only exact Fact identity")
+        elif self.source_kind in {FulfillmentSourceKind.WORK_CONSTRAINT, FulfillmentSourceKind.IR_ITEM, FulfillmentSourceKind.WORK_CONTEXT}:
+            if self.fact_id is not None or self.fact_fingerprint is not None or not self.constraint_item_id or not self.constraint_fingerprint or self.constraint_clause_id is not None:
+                raise ValueError("Work/item binding requires its own exact source identity")
+            if self.source_kind is FulfillmentSourceKind.WORK_CONSTRAINT and self.work_constraint_indices != (int(self.constraint_item_id),):
+                raise ValueError("Work constraint binding must preserve its own index")
         elif (self.fact_id is not None or self.fact_fingerprint is not None
                 or not all((self.constraint_item_id, self.constraint_clause_id,
                             self.constraint_fingerprint))):
             raise ValueError("Constraint binding requires only exact IR identity")
+        if self.source_kind is FulfillmentSourceKind.IR_CLAUSE and self.semantic_ir_id is None:
+            raise ValueError("Clause binding requires exact Semantic IR identity")
+        if any(index < 0 for index in self.work_constraint_indices) or len(set(self.work_constraint_indices)) != len(self.work_constraint_indices):
+            raise ValueError("Work constraint references must be unique nonnegative indices")
+        if self.state == "UNRESOLVED" and (self.owner is not FulfillmentOwner.UNRESOLVED or self.phase is not FulfillmentPhase.UNRESOLVED):
+            raise ValueError("An unresolved projection cannot declare a fulfillment owner")
+        if self.state == "RETAINED_CONTEXT" and (self.owner is not FulfillmentOwner.PRODUCT_SOURCE or self.phase is not FulfillmentPhase.CONTEXT_RETENTION):
+            raise ValueError("Retained context is not a fulfilled execution obligation")
         if self.phase is FulfillmentPhase.CURRENT_VERIFICATION and self.owner not in {
             FulfillmentOwner.VERIFICATION, FulfillmentOwner.PRODUCT_SOURCE,
         }:
@@ -161,3 +205,94 @@ def bind_admitted_constraint(*, revision, ir, item, clause, component: str,
         source_revision=revision.source_revision or revision.revision_fingerprint,
         target_paths=target_paths,
     )
+
+
+def fulfillment_source_ref(binding: FulfillmentBinding) -> str:
+    """Canonical source identity shared by Native, Verification and Guardian."""
+    if binding.source_kind is FulfillmentSourceKind.FACT:
+        return f"semantic-fact:{binding.fact_id}"
+    if binding.source_kind is FulfillmentSourceKind.WORK_CONSTRAINT:
+        return f"work-constraint:{binding.work_reality_revision_id}:{binding.constraint_item_id}"
+    if binding.source_kind is FulfillmentSourceKind.WORK_CONTEXT:
+        return f"work-context:{binding.work_reality_revision_id}:{binding.constraint_item_id}"
+    if binding.source_kind is FulfillmentSourceKind.IR_ITEM:
+        return f"ir-item:{binding.semantic_ir_id}:{binding.constraint_item_id}"
+    if binding.source_kind is FulfillmentSourceKind.IR_CLAUSE:
+        return f"ir-clause:{binding.semantic_ir_id}:{binding.constraint_item_id}:{binding.constraint_clause_id}"
+    return f"ir-constraint:{binding.constraint_item_id}:{binding.constraint_clause_id}"
+
+
+class FulfillmentRouteCandidate(BaseModel):
+    """A model-proposed method, never an admitted Fact or evidence verdict."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    source_ref: str = Field(min_length=1)
+    capability: str = Field(min_length=1)
+    work_constraint_indices: tuple[int, ...] = ()
+    target_paths: tuple[str, ...] = ()
+    supporting_source_refs: tuple[str, ...] = ()
+    rationale: str = Field(min_length=1, max_length=1000)
+    component_basis: FulfillmentComponentBasis | None = None
+
+
+class FulfillmentProjectionCandidate(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    inventory_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    routes: tuple[FulfillmentRouteCandidate, ...] = Field(min_length=1, max_length=1024)
+
+
+class FulfillmentSemanticSourceReview(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    source_ref: str = Field(min_length=1)
+    complete_and_equivalent: bool
+    reason: str = Field(min_length=1, max_length=1000)
+
+
+class FulfillmentSemanticReviewCandidate(BaseModel):
+    """Independent derived-plan semantic validation; no Assurance/authority."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    inventory_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    candidate_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    components_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    source_results: tuple[FulfillmentSemanticSourceReview, ...] = Field(min_length=1, max_length=1024)
+
+
+def fulfillment_candidate_fingerprint(candidate) -> str:
+    return canonical_fingerprint({"inventory_fingerprint": candidate.inventory_fingerprint,
+        "routes": [route.model_dump(mode="json", exclude={"rationale"}) for route in candidate.routes]})
+
+
+def fulfillment_components_fingerprint(candidate) -> str:
+    return canonical_fingerprint([{ "source_ref": route.source_ref, "capability": route.capability,
+        "component_basis": None if route.component_basis is None else route.component_basis.model_dump(mode="json")}
+        for route in candidate.routes])
+
+
+def fulfillment_source_semantic_text(source) -> str:
+    if source["kind"] == "FACT":
+        return source["provenance"]["source_text"]
+    if source["kind"] in {"IR_CONSTRAINT", "IR_CLAUSE"}:
+        return source["payload"]["clause"]["source_text"]
+    if source["kind"] == "IR_ITEM":
+        return source["payload"]["item"]["statement"]
+    return source["payload"]["content"]
+
+
+def exact_file_scope_paths(fact_or_reference) -> tuple[str, ...] | None:
+    """Reuse an unqualified literal file Scope; never derive it from a contract."""
+    if getattr(fact_or_reference.relation, "value", fact_or_reference.relation) != "SCOPE" or fact_or_reference.qualifiers:
+        return None
+    value = fact_or_reference.value
+    values = (value,) if isinstance(value, str) else tuple(value) if isinstance(value, (tuple, list)) else None
+    if values is None or not all(isinstance(path, str) for path in values) or len(set(values)) != len(values):
+        return None
+    if getattr(fact_or_reference, "unit", None) is not None or (
+            fact_or_reference.scope is not None and fact_or_reference.scope not in values):
+        return None
+    from spg.domain.change import safe_repository_path
+    try:
+        for path in values:
+            if safe_repository_path(path) != path:
+                return None
+    except ValueError:
+        return None
+    return values

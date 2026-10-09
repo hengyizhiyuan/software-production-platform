@@ -12,7 +12,7 @@ from enum import StrEnum
 from hashlib import sha256
 import json
 from pathlib import Path, PurePosixPath
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -549,10 +549,52 @@ class GitOperationProductionRecordV1(ProductionEnvironmentContract):
         return self
 
 
+class ProviderRuntimeImageObservationV1(ProductionEnvironmentContract):
+    """Bounded actual runtime facts observed while the container exists."""
+
+    schema_version: int = Field(default=1, ge=1, le=1)
+    provider_identity: str = Field(min_length=1)
+    environment_id: UUID
+    container_identity: str = Field(pattern=r"^[0-9a-f]{64}$")
+    actual_image_id: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    requested_image_reference: str = Field(min_length=1)
+    observation_source: Literal["DOCKER_INSPECT"] = "DOCKER_INSPECT"
+    running: bool
+    observed_at: datetime
+    content_digest: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+
+    _observed_timezone = field_validator("observed_at")(require_timezone)
+
+    @model_validator(mode="after")
+    def exact_observed_identity(self) -> "ProviderRuntimeImageObservationV1":
+        if (self.requested_image_reference.startswith("sha256:")
+                and self.actual_image_id != self.requested_image_reference):
+            raise ValueError("PE_RUNTIME_IMAGE_IDENTITY_MISMATCH")
+        expected = canonical_digest(
+            self.model_dump(mode="json", exclude={"content_digest"}))
+        if self.content_digest is not None and self.content_digest != expected:
+            raise ValueError("PE_RUNTIME_OBSERVATION_DIGEST_MISMATCH")
+        object.__setattr__(self, "content_digest", expected)
+        return self
+
+
 class ProviderEnvironmentHandle(ProductionEnvironmentContract):
     provider_identity: str = Field(min_length=1)
     environment_id: UUID
     opaque_reference: str = Field(min_length=1)
+    # Historical handles remain readable with no fabricated runtime observation.
+    runtime_image_observation: ProviderRuntimeImageObservationV1 | None = None
+
+    @model_validator(mode="after")
+    def bind_runtime_observation(self) -> "ProviderEnvironmentHandle":
+        observation = self.runtime_image_observation
+        if observation is not None and (
+                observation.provider_identity != self.provider_identity
+                or observation.environment_id != self.environment_id
+                or observation.container_identity != self.opaque_reference
+                or not observation.running):
+            raise ValueError("PE_RUNTIME_OBSERVATION_HANDLE_MISMATCH")
+        return self
 
 
 class PreparedRepositoryMount(ProductionEnvironmentContract):

@@ -29,34 +29,36 @@ def _protected_context_for_guardian(task, verification_records) -> tuple:
     lineage = None if task is None else task.decision_context
     if lineage is None:
         return ()
+    from spg.application.verification import _exact_protected_coverage, _explicit_protected_nonconsumer
+
     projected = []
     for obligation in lineage.protected_obligations:
-        matching_refs = []
-        pending_refs = []
+        coverage_refs = {}
+        ambiguous = False
         for record in verification_records:
             if record is None or record.result.value != "PASS":
                 continue
             context = record.evidence.metadata.get("decision_context")
             if not context or context.get("package_fingerprint") != lineage.package_fingerprint:
                 continue
-            if any(
-                item.get("context_class") == obligation.context_class
-                and item.get("semantic_key") == obligation.semantic_key
-                and item.get("source_ref") == obligation.source_ref
-                and item.get("source_revision") == obligation.source_revision
-                and item.get("coverage") == "COVERED"
-                for item in context.get("protected_obligations", ())
-            ):
-                matching_refs.append(f"verification:{record.id}")
-            if any(
-                item.get("context_class") == obligation.context_class
-                and item.get("semantic_key") == obligation.semantic_key
-                and item.get("source_ref") == obligation.source_ref
-                and item.get("source_revision") == obligation.source_revision
-                and item.get("coverage") == "PENDING_CANDIDATE_GATE"
-                for item in context.get("protected_obligations", ())
-            ):
-                pending_refs.append(f"verification:{record.id}")
+            items = context.get("protected_obligations", ())
+            coverage = _exact_protected_coverage(obligation, items,
+                lineage.package_fingerprint)
+            if coverage is not None:
+                coverage_refs.setdefault(coverage, []).append(f"verification:{record.id}")
+            elif _explicit_protected_nonconsumer(record, obligation, lineage.package_fingerprint):
+                continue
+            elif any(isinstance(item, dict)
+                    and all(item.get(key) == getattr(obligation, key) for key in
+                            ("context_class", "semantic_key"))
+                    for item in items):
+                ambiguous = True
+        # Inconsistent persisted decisions are evidence to investigate, not a
+        # reason to prefer a more permissive lifecycle disposition.
+        if ambiguous or len(coverage_refs) != 1:
+            coverage, references = "GUARDIAN_REQUIRED", ()
+        else:
+            coverage, references = next(iter(coverage_refs.items()))
         projected.append(ProtectedContextEvidence(
             context_class=obligation.context_class,
             semantic_key=obligation.semantic_key,
@@ -65,9 +67,8 @@ def _protected_context_for_guardian(task, verification_records) -> tuple:
             authority=getattr(obligation, "authority", None),
             content_digest=getattr(obligation, "content_digest", None),
             package_fingerprint=lineage.package_fingerprint,
-            coverage=("COVERED" if matching_refs else
-                      "PENDING_CANDIDATE_GATE" if pending_refs else "GUARDIAN_REQUIRED"),
-            verification_refs=tuple(matching_refs or pending_refs),
+            coverage=coverage,
+            verification_refs=tuple(dict.fromkeys(references)),
         ))
     return tuple(projected)
 
@@ -94,6 +95,37 @@ class GuardianAssuranceClient:
             return None
         with self.delivery.database.unit_of_work() as uow:
             runtime = RuntimeStore(uow.session)
+            if kind == "work-plan-receipt":
+                observations = runtime.fulfillment_observations_for_receipt(record_id)
+                if len(observations) != 1:
+                    return None
+                record = observations[0]
+                scope = record.scope
+                if (record.decision_type != "WORK_FULFILLMENT_OBSERVATION"
+                        or record.authority_identity != "work-governance:derived-candidate-observation"
+                        or record.subject_type != "WORK_FULFILLMENT_BASIS"
+                        or scope.get("schema") != "work-fulfillment-formation-receipt-v1"
+                        or scope.get("owner") != "WORK_FULFILLMENT_PROJECTION"
+                        or scope.get("receipt_id") != str(record_id)
+                        or scope.get("candidate_is_authority") is not False
+                        or record.subject_identity != scope.get("inventory_fingerprint")):
+                    return None
+                return record.model_dump(mode="json")
+            if kind == "work-reality":
+                from spg.infrastructure.persistence.interaction_store import InteractionStore
+                revision = ProductStore(uow.session).work_reality_revision(record_id)
+                if revision is None:
+                    return None
+                semantic_ir = None
+                if (revision.source_kind == "INTERACTION_ASSESSMENT"
+                        and revision.source_assessment_id is not None):
+                    assessment = InteractionStore(uow.session).assessment(
+                        revision.source_assessment_id)
+                    if (assessment is not None
+                            and assessment.interaction_id == revision.source_interaction_id
+                            and assessment.semantic_ir is not None):
+                        semantic_ir = assessment.semantic_ir.model_dump(mode="json")
+                return {**revision.model_dump(mode="json"), "semantic_ir": semantic_ir}
             if kind == "verification":
                 record = runtime.verification_record(record_id)
                 return None if record is None else record.model_dump(mode="json")

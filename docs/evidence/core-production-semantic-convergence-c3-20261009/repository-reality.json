@@ -1,0 +1,18 @@
+{
+  "schema": "c3-repository-reality-v1",
+  "captured_at_utc": "2026-10-09T09:16:58.168012+00:00",
+  "watt_c3_base_head": "f2dda0549efe35e7855f26f73a5770ac4159f97a",
+  "watt_c3_base_tree": "a77b7c2df2a07f2fc555bd92e62d93bd19d98347",
+  "remote_c2_branch_head": "f2dda0549efe35e7855f26f73a5770ac4159f97a",
+  "remote_default_main_head_at_check": "3c367be19d7663b5b9764347b45e6ae355c28e7d",
+  "ecs_canonical_source_head": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+  "remote_default_is_not_ecs_canonical": "No checkout, pull, merge or runtime change was made to canonical source; C3 starts on exact C2 evidence branch.",
+  "guardian_base": "6b974748df22d84b88f6908ea8ee90a9752fd183",
+  "ecf_unchanged": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "c3_created_resources": [
+    "isolated PostgreSQL and development test containers"
+  ],
+  "actual_live_work_created": 0,
+  "c2_container_removed_image_identity": "UNKNOWN",
+  "c2_historical_attempt_cause": "UNKNOWN"
+}

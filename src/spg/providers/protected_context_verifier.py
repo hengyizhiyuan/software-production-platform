@@ -36,6 +36,44 @@ class ContextChecks(BaseModel):
     checks: list[Check]
 
 
+def _content_component(binding):
+    """Read the admitted derived contribution without changing original meaning."""
+    basis = getattr(binding, "component_basis", None)
+    if basis is None:
+        return None
+    value = basis.model_dump(mode="json") if hasattr(basis, "model_dump") else dict(basis)
+    start, end = value.get("source_span_start"), value.get("source_span_end")
+    quote = value.get("source_component_quote")
+    if (not isinstance(start, int) or isinstance(start, bool)
+            or not isinstance(end, int) or isinstance(end, bool)
+            or not 0 <= start < end <= len(binding.source_quote)
+            or not isinstance(quote, str) or not quote.strip()
+            or binding.source_quote[start:end] != quote):
+        raise ValueError("OBLIGATION_CURRENT_COMPONENT_SOURCE_MISMATCH")
+    return value
+
+
+def _current_contributions(obligation, bindings):
+    from spg.domain.governed_obligation import fulfillment_source_ref
+    output = []
+    for binding in bindings:
+        if binding.evidence_method != "EXACT_CANDIDATE_CONTENT" or binding.phase.value != "CURRENT_VERIFICATION":
+            continue
+        ref = fulfillment_source_ref(binding)
+        matches = obligation.semantic_key == ref or obligation.source_ref == ref or any(
+            obligation.context_class == "APPROVED_CONSTRAINT"
+            and obligation.semantic_key == f"greenfield-constraint:{index}"
+            for index in binding.work_constraint_indices)
+        if not matches:
+            continue
+        basis = _content_component(binding)
+        output.append({"source_ref": ref, "binding": binding.model_dump(mode="json"),
+            "component_basis": basis,
+            "current_component_quote": binding.source_quote if basis is None else basis["source_component_quote"],
+            "original_source_quote": binding.source_quote})
+    return output
+
+
 def git(repository, *args):
     return subprocess.run(["git", "-C", str(repository), *args], check=True,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=15).stdout
@@ -69,7 +107,33 @@ class StaticProtectedContextVerifier:
         return bool(not contract.allowed_areas and contract.exact_targets
             and all(PurePosixPath(t.path).suffix in suffixes for t in contract.exact_targets))
 
-    def verify(self, request, task, contract, repository, baseline, *, obligations=None):
+    def verify_fulfillment_bindings(self, request, task, contract, repository, baseline, *, bindings, receipt_recorder=None):
+        selected = self._derived_obligations(bindings, request.decision_context_fingerprint)
+        return self.verify(request, task, contract, repository, baseline, obligations=selected,
+            receipt_recorder=receipt_recorder, fulfillment_bindings=bindings, derived_bindings=bindings)
+
+    @staticmethod
+    def _derived_obligations(bindings, package_fingerprint):
+        from spg.domain.production_intelligence import ProtectedContextObligation
+        from spg.domain.governed_obligation import fulfillment_source_ref
+        selected = []
+        for binding in bindings:
+            if binding.evidence_method != "EXACT_CANDIDATE_CONTENT" or binding.phase.value != "CURRENT_VERIFICATION":
+                raise ValueError("OBLIGATION_DERIVED_CONTENT_OWNER_INVALID")
+            content = json.dumps({"source_ref": fulfillment_source_ref(binding),
+                "source_quote": binding.source_quote, "source_kind": binding.source_kind.value,
+                "work_reality_revision_id": str(binding.work_reality_revision_id),
+                "provenance_fingerprint": binding.provenance_fingerprint,
+                "source_record_ids": [str(identity) for identity in binding.source_record_ids],
+                "current_component_basis": _content_component(binding)}, ensure_ascii=False)
+            selected.append(ProtectedContextObligation(context_class="DERIVED_VERIFICATION_OBLIGATION",
+                semantic_key=fulfillment_source_ref(binding), source_ref=fulfillment_source_ref(binding),
+                source_revision=str(binding.work_reality_revision_id), authority="WATT_WORK_DERIVED_CHECK",
+                content=content, content_digest=sha256(content.encode()).hexdigest(), package_fingerprint=package_fingerprint))
+        return tuple(selected)
+
+    def verify(self, request, task, contract, repository, baseline, *, obligations=None, receipt_recorder=None,
+               fulfillment_bindings=(), derived_bindings=()):
         if (task is None or task.decision_context is None
                 or task.decision_context.package_fingerprint != request.decision_context_fingerprint
                 or tuple(task.decision_context.protected_obligations) != request.protected_context_obligations):
@@ -82,7 +146,8 @@ class StaticProtectedContextVerifier:
         selected_ids = [(item.context_class, item.semantic_key, item.source_ref,
                          item.source_revision, item.content_digest) for item in selected]
         if (not selected or len(set(selected_ids)) != len(selected_ids)
-                or any(item not in request.protected_context_obligations for item in selected)):
+                or (not derived_bindings and any(item not in request.protected_context_obligations for item in selected))
+                or (derived_bindings and selected != self._derived_obligations(derived_bindings, request.decision_context_fingerprint))):
             raise ValueError("PROTECTED_CONTEXT_SUBSET_IDENTITY_MISMATCH")
         revision = request.proposed_commit_identity
         if git(repository, "rev-parse", revision + "^{tree}").decode().strip() != request.tree_identity:
@@ -109,15 +174,29 @@ class StaticProtectedContextVerifier:
                 raise ValueError("PROTECTED_CONTEXT_SOURCE_LIMIT")
             materials[path] = body.decode("utf-8")
         changed = git(repository, "diff", "--name-status", baseline, revision, "--").decode()
+        contributions = {(item.context_class, item.semantic_key): _current_contributions(item, fulfillment_bindings)
+                         for item in selected}
+        if any(getattr(binding, "component_basis", None) is not None for binding in fulfillment_bindings) and any(
+                not contributions[(item.context_class, item.semantic_key)] for item in selected):
+            raise ValueError("OBLIGATION_CURRENT_COMPONENT_NOT_ASSIGNED")
         payload = {"task": {"id": str(task.task_contract_id), "objective": task.objective,
                    "scope": task.scope, "constraints": task.constraints, "out_of_scope": task.out_of_scope},
             "exact_candidate_revision": revision, "exact_candidate_tree": request.tree_identity,
             "baseline_revision": baseline, "changed_paths": changed,
             "protected_obligations": [item.model_dump(mode="json") for item in selected],
             "candidate_sources": materials,
+            "assigned_fulfillment_bindings": [binding.model_dump(mode="json") for binding in fulfillment_bindings],
+            "current_component_contributions": [{"context_class": key[0], "semantic_key": key[1],
+                "contributions": value} for key, value in contributions.items()],
             "governance_boundary": "This Verification authorizes no Candidate or Product baseline. Guardian runtime checks and explicit Human decisions are separate downstream owners."}
         instructions = (
-            "Independently verify the exact static Candidate against EVERY protected ECF obligation. "
+            "Independently verify the current CONTENT contribution of every selected immutable Work or protected ECF obligation. "
+            "Use assigned_fulfillment_bindings as an exact derived responsibility plan, not new facts or authority. "
+            "When current_component_contributions are supplied, verify exactly those original source contributions; "
+            "the full original protected source remains immutable identity and context. Component quotes are "
+            "derived scope for this content check, never a rewrite of original Fact values or constraints. "
+            "Other phase/Owner components remain separate pending gates; never prove Human decisions, permits "
+            "or Candidate sealing by source text. A pending component does not excuse wrong current content. "
             "Return one check per exact context_class/semantic_key. Judge whether this bounded PWU "
             "implements its approved contribution consistently with Product Intent, invariants and decisions; "
             "do not require one incremental PWU to implement unrelated future Product scope. "
@@ -132,48 +211,112 @@ class StaticProtectedContextVerifier:
             "runtime behavior must never pass merely because source text mentions it. Each witness has path "
             "and a nonempty exact quote from candidate_sources[path]. Do not create or run tests, code or shell commands.")
         from spg.providers.semantic_wire import _provider_strict_output_schema
-        runtime = self.runtime_factory()
+        from spg.providers.verification_receipts import (
+            VerificationCandidateReceipts, VerificationCandidateFailure,
+        )
+        recorder = receipt_recorder or VerificationCandidateReceipts(request)
+        component = ("protected-context" if not derived_bindings else "fulfillment-content:" + sha256(
+            json.dumps([binding.model_dump(mode="json") for binding in derived_bindings], sort_keys=True).encode()).hexdigest())
         expected = {(item.context_class, item.semantic_key): item for item in selected}
-        previous_checks = ()
+        previous_checks = tuple(Check.model_validate(c) for c in recorder.previous_checks(component))
         model_attempts = []
+        completed = recorder.completed(component)
+        failures = [row for row in recorder.records if row["component"] == component
+                    and row["stage"] == "CANDIDATE_VALIDATED" and row.get("failed_predicate")]
+        if completed is None and failures:
+            payload.update(wire_feedback=failures[-1]["failed_predicate"],
+                predicate_feedback=failures[-1].get("feedback"))
+        runtime = None if completed is not None else self.runtime_factory()
         try:
-            for attempt in range(2):
-                response = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
-                    instructions=instructions, input_text=json.dumps(payload, ensure_ascii=False),
-                    output_schema=_provider_strict_output_schema(ContextChecks.model_json_schema()))
+            for local_attempt in range(2):
+                try:
+                    attempt = completed["attempt"] if completed is not None else recorder.begin(component, feedback=payload.get("wire_feedback"))
+                except ValueError as error:
+                    raise VerificationCandidateFailure(str(error), recorder) from error
+                try:
+                    if completed is not None:
+                        from types import SimpleNamespace
+                        from spg.domain.model_runtime import ModelUsage
+                        retained = next(row for row in reversed(recorder.records)
+                            if row["component"] == component and row["stage"] == "CANDIDATE_OBSERVED"
+                            and row["attempt"] == attempt)
+                        response = SimpleNamespace(output_text=json.dumps({"checks": completed["candidate_checks"]}),
+                            provider=SimpleNamespace(value=retained.get("provider")),
+                            effective_model=retained.get("effective_model"),request_id=retained.get("request_id"),
+                            usage=ModelUsage(**(retained.get("usage") or {})))
+                    else:
+                        response = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
+                        instructions=instructions, input_text=json.dumps(payload, ensure_ascii=False),
+                        output_schema=_provider_strict_output_schema(ContextChecks.model_json_schema()))
+                    if completed is None:
+                        recorder.observed(component, attempt, response)
+                except Exception as error:
+                    code = (str(error) if isinstance(error, ValueError) and
+                            str(error).startswith("VERIFICATION_CANDIDATE_")
+                            else "PROTECTED_CONTEXT_MODEL_UNAVAILABLE")
+                    recorder.validated(component, attempt, predicate=code, terminal=True)
+                    raise VerificationCandidateFailure(code, recorder) from error
                 model_attempts.append({"provider": response.provider.value,
                     "effective_model": response.effective_model, "request_id": response.request_id,
-                    "usage": asdict(response.usage)})
-                observed = ContextChecks.model_validate_json(response.output_text)
-                if any(prior.disposition != "SATISFIED" and current.disposition == "SATISFIED"
-                        and (prior.context_class, prior.semantic_key) == (current.context_class, current.semantic_key)
-                        for prior in previous_checks for current in observed.checks):
-                    raise ValueError("PROTECTED_CONTEXT_REPAIR_CHANGED_JUDGMENT")
-                keys = [(c.context_class, c.semantic_key) for c in observed.checks]
+                    "usage": asdict(response.usage), "attempt": attempt})
+                observed = None
                 failure = None
-                if len(keys) != len(expected) or set(keys) != set(expected):
-                    failure = "PROTECTED_CONTEXT_INCOMPLETE_COVERAGE"
-                elif any(not c.witnesses or any(w.path not in materials
-                        or w.quote not in materials[w.path]
-                        or PurePosixPath(w.path).suffix == ".md" for w in c.witnesses)
-                        for c in observed.checks):
-                    failure = "PROTECTED_CONTEXT_WITNESS_NOT_OBSERVED"
+                feedback = None
+                try:
+                    observed = ContextChecks.model_validate_json(response.output_text)
+                    if any(prior.disposition != "SATISFIED" and current.disposition == "SATISFIED"
+                            and (prior.context_class, prior.semantic_key) == (current.context_class, current.semantic_key)
+                            for prior in previous_checks for current in observed.checks):
+                        failure = "PROTECTED_CONTEXT_REPAIR_CHANGED_JUDGMENT"
+                    keys = [(c.context_class, c.semantic_key) for c in observed.checks]
+                    if failure is None and (len(keys) != len(expected) or set(keys) != set(expected)):
+                        failure = "PROTECTED_CONTEXT_INCOMPLETE_COVERAGE"
+                        feedback = {"failed_predicate": failure,
+                            "expected_context_ids": list(expected), "observed_context_ids": keys}
+                    if failure is None:
+                        for check in observed.checks:
+                            # No proof can cover a positive judgment. A truthful
+                            # UNVERIFIABLE need not invent a nonexistent quote.
+                            if check.disposition == "SATISFIED" and not check.witnesses:
+                                failure = "PROTECTED_CONTEXT_WITNESS_NOT_OBSERVED"
+                                feedback = {"failed_predicate": "SATISFIED_REQUIRES_SOURCE_WITNESS",
+                                    "context_class": check.context_class, "semantic_key": check.semantic_key}
+                                break
+                            for witness in check.witnesses:
+                                predicate = ("WITNESS_PATH_NOT_OBSERVED" if witness.path not in materials else
+                                    "WITNESS_QUOTE_NOT_OBSERVED" if witness.quote not in materials[witness.path] else
+                                    "REQUIREMENTS_DOCUMENT_IS_NOT_IMPLEMENTATION_EVIDENCE"
+                                    if PurePosixPath(witness.path).suffix == ".md" else None)
+                                if predicate:
+                                    failure = "PROTECTED_CONTEXT_WITNESS_NOT_OBSERVED"
+                                    feedback = {"failed_predicate": predicate,
+                                        "context_class": check.context_class, "semantic_key": check.semantic_key,
+                                        "path": witness.path}
+                                    break
+                            if failure:
+                                break
+                except (ValueError, TypeError):
+                    failure = "PROTECTED_CONTEXT_CANDIDATE_SCHEMA_INVALID"
+                    feedback = {"failed_predicate": failure}
+                terminal = failure is None or attempt >= 2 or failure == "PROTECTED_CONTEXT_REPAIR_CHANGED_JUDGMENT"
+                if completed is None:
+                    recorder.validated(component, attempt, predicate=failure, feedback=feedback,
+                        checks=None if observed is None else [c.model_dump(mode="json") for c in observed.checks],
+                        terminal=terminal)
                 if failure is None:
                     break
-                if attempt:
-                    raise ValueError(failure)
-                previous_checks = tuple(observed.checks)
+                if terminal:
+                    raise VerificationCandidateFailure(failure, recorder)
+                previous_checks = () if observed is None else tuple(observed.checks)
                 payload = {**payload, "invalid_previous_checks": response.output_text,
-                    "wire_feedback": failure,
-                    "repair_instruction": "Repair only coverage identities and literal implementation quotes using exact candidate_sources. Preserve CONTRADICTED or UNVERIFIABLE judgments; never turn a contradiction into satisfaction to pass the check."}
+                    "wire_feedback": failure, "predicate_feedback": feedback,
+                    "repair_instruction": "Repair only coverage identities and exact observed evidence. Preserve CONTRADICTED or UNVERIFIABLE judgments. Do not invent evidence, grant authority, change accepted facts or turn a contradiction into satisfaction."}
         finally:
-            runtime.registry.close()
+            if runtime is not None:
+                runtime.registry.close()
         checks = []
         for check in observed.checks:
             obligation = expected[(check.context_class, check.semantic_key)]
-            if (not check.witnesses or any(w.path not in materials or w.quote not in materials[w.path]
-                    or PurePosixPath(w.path).suffix == ".md" for w in check.witnesses)):
-                raise ValueError("PROTECTED_CONTEXT_WITNESS_NOT_OBSERVED")
             checks.append({**obligation.model_dump(mode="json"),
                 "coverage": "COVERED" if check.disposition == "SATISFIED" else "UNVERIFIED",
                 "disposition": check.disposition, "reason": check.reason,
@@ -181,6 +324,8 @@ class StaticProtectedContextVerifier:
                 "candidate_revision": revision, "candidate_tree": request.tree_identity,
                 "observed_source_digests": {w.path: sha256(materials[w.path].encode()).hexdigest() for w in check.witnesses},
                 "model_attempts": model_attempts,
+                "verification_candidate_receipts": recorder.metadata(),
+                "source_component_evidence": contributions[(check.context_class, check.semantic_key)],
                 "model": {"provider": response.provider.value, "effective_model": response.effective_model,
                     "request_id": response.request_id, "usage": asdict(response.usage)}})
         return checks

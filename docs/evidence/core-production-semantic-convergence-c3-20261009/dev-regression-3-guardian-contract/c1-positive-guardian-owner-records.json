@@ -1,0 +1,658 @@
+{
+  "schema": "c3-scoped-guardian-fixture-owner-records-v1",
+  "sources": {
+    "watt": {
+      "head": "f2dda0549efe35e7855f26f73a5770ac4159f97a",
+      "head_tree": "a77b7c2df2a07f2fc555bd92e62d93bd19d98347",
+      "uncommitted_overlay": true,
+      "python_paths_sha256": "48a55405d6a8f05eeb8625cb5876caabaa9193cfae8cfe092ef170e9511c3b68"
+    },
+    "guardian": {
+      "head": "657ee84aa0b38672c1b4bd67ad7a834d96bfcabd",
+      "head_tree": "93903e1843b2f755bdc077c5330372b32cc779b6",
+      "uncommitted_overlay": false,
+      "python_paths_sha256": "5ca5a8306095f14e41d50dff2c1ce6d97c1aca209e13d5540f13cc5978cb7fef"
+    }
+  },
+  "container": "watt-c3-dev3-contract-c1-positive-20261009",
+  "observed_at_utc": "2026-10-09T10:53:24.376520+00:00",
+  "scope": "exact Guardian request/result files from this fixture group only",
+  "records": {
+    "ac374dea-dce6-5d9c-a8ef-43f65622b697": {
+      "actual_result": {
+        "contract_version": "watt-guardian-software-assurance-v1",
+        "result_id": "f28c0996-4f18-41cb-8119-4675f9478688",
+        "request_id": "ac374dea-dce6-5d9c-a8ef-43f65622b697",
+        "candidate_id": "5e19f4ff-fa5f-5342-9c94-b1683546d3de",
+        "candidate_fingerprint": "3f47cf18e33664d13cf534e6af69113da100638961c21272c34d9c30214e8449",
+        "source_revision": "8ac639a2bd473a2512ed0be51fba6703afd52135",
+        "source_tree": "29e2294feabcae289b268559f8037d7e487789c1",
+        "runtime_ref": "candidate-preview:c037845f-0970-484b-8fec-512f3db7d583",
+        "gate": "BLOCKED",
+        "coverage_obligation_refs": [
+          "work-route:index.html"
+        ],
+        "evidence": [
+          {
+            "evidence_id": "808cd5b7-9b0f-40ec-a92f-8aa185e87342",
+            "obligation_ref": "work-route:index.html",
+            "observation": "GET /index.html returned HTTP 200 with exact Candidate identity",
+            "status_code": 200,
+            "response_sha256": "40eebeb8a519981b9506fe62c513d8a9e845b2b199da67e4ca040038a0f9c6d5",
+            "runtime_ref": "candidate-preview:c037845f-0970-484b-8fec-512f3db7d583",
+            "observed_at": "2026-10-09T10:53:17.560633Z"
+          },
+          {
+            "evidence_id": "629ce8f0-f10d-486e-b818-11f8d304e042",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:0",
+            "observation": "No exact verification or Guardian effect covers work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:0@08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "status_code": null,
+            "response_sha256": null,
+            "runtime_ref": "candidate-preview:c037845f-0970-484b-8fec-512f3db7d583",
+            "observed_at": "2026-10-09T10:53:17.560778Z"
+          },
+          {
+            "evidence_id": "61dca63e-8564-4388-a0c9-89e4011ed968",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:1",
+            "observation": "No exact verification or Guardian effect covers work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:1@08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "status_code": null,
+            "response_sha256": null,
+            "runtime_ref": "candidate-preview:c037845f-0970-484b-8fec-512f3db7d583",
+            "observed_at": "2026-10-09T10:53:17.560890Z"
+          },
+          {
+            "evidence_id": "d7aa5e42-b833-400b-ba8d-ce6cb7ea5ccf",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:2",
+            "observation": "No exact verification or Guardian effect covers work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:2@08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "status_code": null,
+            "response_sha256": null,
+            "runtime_ref": "candidate-preview:c037845f-0970-484b-8fec-512f3db7d583",
+            "observed_at": "2026-10-09T10:53:17.560929Z"
+          },
+          {
+            "evidence_id": "14a636d6-1179-4419-80c2-c7799093ed3c",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:3",
+            "observation": "No exact verification or Guardian effect covers work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:3@08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "status_code": null,
+            "response_sha256": null,
+            "runtime_ref": "candidate-preview:c037845f-0970-484b-8fec-512f3db7d583",
+            "observed_at": "2026-10-09T10:53:17.560960Z"
+          },
+          {
+            "evidence_id": "11b0690f-10f1-447f-9f6c-271603e6cf88",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:4",
+            "observation": "No exact verification or Guardian effect covers work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:4@08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "status_code": null,
+            "response_sha256": null,
+            "runtime_ref": "candidate-preview:c037845f-0970-484b-8fec-512f3db7d583",
+            "observed_at": "2026-10-09T10:53:17.560990Z"
+          },
+          {
+            "evidence_id": "0a0a7388-cac0-4444-93fa-29dbd8e258d8",
+            "obligation_ref": "ecf:PRODUCT_INTENT:greenfield-product-intent",
+            "observation": "No exact verification or Guardian effect covers work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-product-intent@08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "status_code": null,
+            "response_sha256": null,
+            "runtime_ref": "candidate-preview:c037845f-0970-484b-8fec-512f3db7d583",
+            "observed_at": "2026-10-09T10:53:17.561017Z"
+          }
+        ],
+        "findings": [
+          {
+            "finding_id": "82b7366b-b675-41c2-9610-a9ce7c25ccf8",
+            "request_id": "ac374dea-dce6-5d9c-a8ef-43f65622b697",
+            "candidate_id": "5e19f4ff-fa5f-5342-9c94-b1683546d3de",
+            "category": "CONTEXT_COVERAGE_GAP",
+            "severity": "BLOCKER",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:0",
+            "expected_behavior": "Protected ECF obligation has exact coverage",
+            "observed_reality": "No exact verification or Guardian effect covers work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:0@08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "evidence_ids": [
+              "629ce8f0-f10d-486e-b818-11f8d304e042"
+            ],
+            "repairable": false,
+            "lifecycle": "OPEN"
+          },
+          {
+            "finding_id": "137c5270-b7fb-4b36-8688-473f09ed2c91",
+            "request_id": "ac374dea-dce6-5d9c-a8ef-43f65622b697",
+            "candidate_id": "5e19f4ff-fa5f-5342-9c94-b1683546d3de",
+            "category": "CONTEXT_COVERAGE_GAP",
+            "severity": "BLOCKER",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:1",
+            "expected_behavior": "Protected ECF obligation has exact coverage",
+            "observed_reality": "No exact verification or Guardian effect covers work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:1@08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "evidence_ids": [
+              "61dca63e-8564-4388-a0c9-89e4011ed968"
+            ],
+            "repairable": false,
+            "lifecycle": "OPEN"
+          },
+          {
+            "finding_id": "a6475da8-8730-4c05-9cca-e3ac70cf1df4",
+            "request_id": "ac374dea-dce6-5d9c-a8ef-43f65622b697",
+            "candidate_id": "5e19f4ff-fa5f-5342-9c94-b1683546d3de",
+            "category": "CONTEXT_COVERAGE_GAP",
+            "severity": "BLOCKER",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:2",
+            "expected_behavior": "Protected ECF obligation has exact coverage",
+            "observed_reality": "No exact verification or Guardian effect covers work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:2@08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "evidence_ids": [
+              "d7aa5e42-b833-400b-ba8d-ce6cb7ea5ccf"
+            ],
+            "repairable": false,
+            "lifecycle": "OPEN"
+          },
+          {
+            "finding_id": "8b0058f1-deaa-4979-a83a-e108fe59196c",
+            "request_id": "ac374dea-dce6-5d9c-a8ef-43f65622b697",
+            "candidate_id": "5e19f4ff-fa5f-5342-9c94-b1683546d3de",
+            "category": "CONTEXT_COVERAGE_GAP",
+            "severity": "BLOCKER",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:3",
+            "expected_behavior": "Protected ECF obligation has exact coverage",
+            "observed_reality": "No exact verification or Guardian effect covers work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:3@08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "evidence_ids": [
+              "14a636d6-1179-4419-80c2-c7799093ed3c"
+            ],
+            "repairable": false,
+            "lifecycle": "OPEN"
+          },
+          {
+            "finding_id": "2848541c-49ec-469e-8156-a78495191d85",
+            "request_id": "ac374dea-dce6-5d9c-a8ef-43f65622b697",
+            "candidate_id": "5e19f4ff-fa5f-5342-9c94-b1683546d3de",
+            "category": "CONTEXT_COVERAGE_GAP",
+            "severity": "BLOCKER",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:4",
+            "expected_behavior": "Protected ECF obligation has exact coverage",
+            "observed_reality": "No exact verification or Guardian effect covers work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:4@08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "evidence_ids": [
+              "11b0690f-10f1-447f-9f6c-271603e6cf88"
+            ],
+            "repairable": false,
+            "lifecycle": "OPEN"
+          },
+          {
+            "finding_id": "bc69642a-0e50-4c6c-b63a-cfec6278fc0f",
+            "request_id": "ac374dea-dce6-5d9c-a8ef-43f65622b697",
+            "candidate_id": "5e19f4ff-fa5f-5342-9c94-b1683546d3de",
+            "category": "CONTEXT_COVERAGE_GAP",
+            "severity": "BLOCKER",
+            "obligation_ref": "ecf:PRODUCT_INTENT:greenfield-product-intent",
+            "expected_behavior": "Protected ECF obligation has exact coverage",
+            "observed_reality": "No exact verification or Guardian effect covers work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-product-intent@08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "evidence_ids": [
+              "0a0a7388-cac0-4444-93fa-29dbd8e258d8"
+            ],
+            "repairable": false,
+            "lifecycle": "OPEN"
+          }
+        ],
+        "supersedes_finding_ids": [],
+        "acceptance_state": "PENDING",
+        "delivery_authorization_state": "NOT_AUTHORIZED",
+        "assessed_at": "2026-10-09T10:53:17.561059Z"
+      },
+      "actual_request": {
+        "contract_version": "watt-guardian-software-assurance-v1",
+        "evidence_contract_version": "governed-obligation-v2",
+        "production_lineage": {
+          "work_reality_revision_id": "61c36819-af68-4480-957e-60c3d96ebfc7",
+          "pwu_id": "1750f21e-4cb3-4e90-b31c-0ca6c5cf046e",
+          "source_baseline_id": "6c56a0a7-7fbf-4c7a-b58d-7d6b423704d5",
+          "source_baseline_revision": "1b00a2aeac0af27c61f4d3de33376e069e387f5d",
+          "source_baseline_tree": "6ed77f11ba8456ba3c1342af247884809be1498e",
+          "qualified_output_revision": "8ac639a2bd473a2512ed0be51fba6703afd52135",
+          "qualified_output_tree": "29e2294feabcae289b268559f8037d7e487789c1"
+        },
+        "request_id": "ac374dea-dce6-5d9c-a8ef-43f65622b697",
+        "product_ref": "product:4220765f-9f3b-4945-8352-d4e38e4da85c",
+        "work_ref": "work:fcc579de-b34e-4676-9f65-f70d4219997d",
+        "governed_intent_ref": "work-reality-revision:61c36819-af68-4480-957e-60c3d96ebfc7",
+        "objective": "Create index.html\nh1 text in index.html equals C1 continuity\nindex.html changes alone\nExcluded from this Work: deployment, publishing\nA reviewable Candidate is left for Human acceptance",
+        "constraints": [
+          "index.html changes alone",
+          "Excluded from this Work: deployment, publishing",
+          "A reviewable Candidate is left for Human acceptance",
+          "Excluded from this Work: deployment",
+          "Excluded from this Work: publishing"
+        ],
+        "exclusions": [],
+        "authority_ref": "engineering-scope:a8913837-ee0f-4659-b80e-9b89cfaa4302",
+        "candidate_id": "5e19f4ff-fa5f-5342-9c94-b1683546d3de",
+        "candidate_fingerprint": "3f47cf18e33664d13cf534e6af69113da100638961c21272c34d9c30214e8449",
+        "source_revision": "8ac639a2bd473a2512ed0be51fba6703afd52135",
+        "source_tree": "29e2294feabcae289b268559f8037d7e487789c1",
+        "artifact_refs": [
+          "artifact:index.html",
+          "production-plan:080ce6e3-f35b-4906-ba4b-bfbb52f58dbe:version:1",
+          "pwu:1750f21e-4cb3-4e90-b31c-0ca6c5cf046e",
+          "source-baseline:6c56a0a7-7fbf-4c7a-b58d-7d6b423704d5",
+          "task-contract:a5bbcf17-cd4a-5f1a-8c0d-d66996851b67",
+          "qualified-result:8ac639a2bd473a2512ed0be51fba6703afd52135:tree:29e2294feabcae289b268559f8037d7e487789c1",
+          "execution-attempt:bb21620b-7369-4018-885d-9233de191703",
+          "execution-dispatch:a9ccce41-eac3-44d0-9826-5f2861a46a6e"
+        ],
+        "runtime_ref": "candidate-preview:c037845f-0970-484b-8fec-512f3db7d583",
+        "runtime_url": "http://127.0.0.1:35807",
+        "disposable_preview": true,
+        "verification_refs": [
+          "verification:595b23e0-048e-5330-ba77-92e8406787a9",
+          "verification:99a1f8ae-1ab4-5362-a91f-e155728be912"
+        ],
+        "task_contract_ref": "task-contract:a5bbcf17-cd4a-5f1a-8c0d-d66996851b67",
+        "decision_context_fingerprint": "9ad45b490708e7344ada257a9746e720878dbc8e2724126ab4eb031b442e6324",
+        "protected_context": [
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:0",
+            "source_ref": "work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:0",
+            "source_revision": "08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "6efc3ee6307872c9f50d945ac6f4c69c06abb2c1b5ca0117c009329674740a12",
+            "package_fingerprint": "9ad45b490708e7344ada257a9746e720878dbc8e2724126ab4eb031b442e6324",
+            "coverage": "GUARDIAN_REQUIRED",
+            "verification_refs": []
+          },
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:1",
+            "source_ref": "work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:1",
+            "source_revision": "08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "dd2cfe25578eb3dc067cb581f09269920e139280391d883d9b65d1a067d5dd17",
+            "package_fingerprint": "9ad45b490708e7344ada257a9746e720878dbc8e2724126ab4eb031b442e6324",
+            "coverage": "GUARDIAN_REQUIRED",
+            "verification_refs": []
+          },
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:2",
+            "source_ref": "work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:2",
+            "source_revision": "08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "e2a293cc9ee7c6c2eb4e2bb5907c0fe0731f36e0c304c287a60451f91ea6e5f0",
+            "package_fingerprint": "9ad45b490708e7344ada257a9746e720878dbc8e2724126ab4eb031b442e6324",
+            "coverage": "GUARDIAN_REQUIRED",
+            "verification_refs": []
+          },
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:3",
+            "source_ref": "work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:3",
+            "source_revision": "08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "2daa60a268ab4beae79a2e77d1a2803019414734a9a52e3991ba4ef7c2765531",
+            "package_fingerprint": "9ad45b490708e7344ada257a9746e720878dbc8e2724126ab4eb031b442e6324",
+            "coverage": "GUARDIAN_REQUIRED",
+            "verification_refs": []
+          },
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:4",
+            "source_ref": "work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-constraint:4",
+            "source_revision": "08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "cb74abbf0b5db8207fbad70bdf5566ee63bcfe893ca144da10543198b2c3f4e9",
+            "package_fingerprint": "9ad45b490708e7344ada257a9746e720878dbc8e2724126ab4eb031b442e6324",
+            "coverage": "GUARDIAN_REQUIRED",
+            "verification_refs": []
+          },
+          {
+            "context_class": "PRODUCT_INTENT",
+            "semantic_key": "greenfield-product-intent",
+            "source_ref": "work-reality:fcc579de-b34e-4676-9f65-f70d4219997d:greenfield-product-intent",
+            "source_revision": "08d88ecd92d20f5ce8d3c44ccb541fa788d74e3ca6edc6e2fc70c333477fa560",
+            "authority": "WATT_PRODUCT_GOVERNOR",
+            "content_digest": "3e905d0dc51f8cce3c1f32de9204bd63d36909901beba82eb10ab17d05a6db7e",
+            "package_fingerprint": "9ad45b490708e7344ada257a9746e720878dbc8e2724126ab4eb031b442e6324",
+            "coverage": "GUARDIAN_REQUIRED",
+            "verification_refs": []
+          }
+        ],
+        "acceptance_state": "PENDING",
+        "delivery_authorization_state": "NOT_AUTHORIZED",
+        "required_effects": [
+          {
+            "obligation_ref": "work-route:index.html",
+            "kind": "HTTP_ROUTE",
+            "expected_behavior": "Approved static result index.html is served from the exact Candidate",
+            "path": "/index.html",
+            "expected_status": 200,
+            "content_contains": null,
+            "link_href": null,
+            "create_path": null,
+            "read_path": null,
+            "create_body": null,
+            "expected_json_field": null,
+            "expected_json_value": null,
+            "dependency_owner": null
+          }
+        ],
+        "prior_finding_ids": [],
+        "submitted_at": "2026-10-09T10:53:17.407093Z"
+      },
+      "private_result_path": "/data/watt/c3-semantic-convergence-20261009/private/watt-c3-dev3-contract-c1-positive-20261009-fixture-tmp/tests/test_both_actual_admission_pat0/guardian/results/ac374dea-dce6-5d9c-a8ef-43f65622b697.json",
+      "private_request_path": "/data/watt/c3-semantic-convergence-20261009/private/watt-c3-dev3-contract-c1-positive-20261009-fixture-tmp/tests/test_both_actual_admission_pat0/guardian/requests/ac374dea-dce6-5d9c-a8ef-43f65622b697.json"
+    },
+    "f7d2f0a6-088f-5492-8bbc-a988b444e7dc": {
+      "actual_result": {
+        "contract_version": "watt-guardian-software-assurance-v1",
+        "result_id": "f5b77387-c161-4923-a757-d59b7d5a486e",
+        "request_id": "f7d2f0a6-088f-5492-8bbc-a988b444e7dc",
+        "candidate_id": "24efad30-3640-5eef-8562-83c651ff89c1",
+        "candidate_fingerprint": "a2772d39333812f1dfc34a1d2329d63122e683191d886ceb31157c5277e856fe",
+        "source_revision": "9172d1dd0b014617d7cf1f25139cc1dbf5e7cfb3",
+        "source_tree": "29e2294feabcae289b268559f8037d7e487789c1",
+        "runtime_ref": "candidate-preview:a26f2bd6-c394-40f1-9964-55807599e562",
+        "gate": "BLOCKED",
+        "coverage_obligation_refs": [
+          "work-route:index.html"
+        ],
+        "evidence": [
+          {
+            "evidence_id": "60dc5ef1-8ca5-4608-95fa-d195dd553f60",
+            "obligation_ref": "work-route:index.html",
+            "observation": "GET /index.html returned HTTP 200 with exact Candidate identity",
+            "status_code": 200,
+            "response_sha256": "40eebeb8a519981b9506fe62c513d8a9e845b2b199da67e4ca040038a0f9c6d5",
+            "runtime_ref": "candidate-preview:a26f2bd6-c394-40f1-9964-55807599e562",
+            "observed_at": "2026-10-09T10:53:21.834428Z"
+          },
+          {
+            "evidence_id": "8f385ea8-c4f5-4fc4-b11f-92ea4878d8c4",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:0",
+            "observation": "No exact verification or Guardian effect covers work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:0@24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "status_code": null,
+            "response_sha256": null,
+            "runtime_ref": "candidate-preview:a26f2bd6-c394-40f1-9964-55807599e562",
+            "observed_at": "2026-10-09T10:53:21.834498Z"
+          },
+          {
+            "evidence_id": "2f99a894-d11f-40ea-a8bd-9da67641d933",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:1",
+            "observation": "No exact verification or Guardian effect covers work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:1@24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "status_code": null,
+            "response_sha256": null,
+            "runtime_ref": "candidate-preview:a26f2bd6-c394-40f1-9964-55807599e562",
+            "observed_at": "2026-10-09T10:53:21.834566Z"
+          },
+          {
+            "evidence_id": "9382a3bf-5a7e-423e-b155-ebd9ac78a621",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:2",
+            "observation": "No exact verification or Guardian effect covers work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:2@24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "status_code": null,
+            "response_sha256": null,
+            "runtime_ref": "candidate-preview:a26f2bd6-c394-40f1-9964-55807599e562",
+            "observed_at": "2026-10-09T10:53:21.834596Z"
+          },
+          {
+            "evidence_id": "8d8ef50a-0c07-43d3-bb00-81a3a9290e3a",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:3",
+            "observation": "No exact verification or Guardian effect covers work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:3@24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "status_code": null,
+            "response_sha256": null,
+            "runtime_ref": "candidate-preview:a26f2bd6-c394-40f1-9964-55807599e562",
+            "observed_at": "2026-10-09T10:53:21.834623Z"
+          },
+          {
+            "evidence_id": "e482f92a-b758-4de7-a249-bfdcd50b16e7",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:4",
+            "observation": "No exact verification or Guardian effect covers work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:4@24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "status_code": null,
+            "response_sha256": null,
+            "runtime_ref": "candidate-preview:a26f2bd6-c394-40f1-9964-55807599e562",
+            "observed_at": "2026-10-09T10:53:21.834651Z"
+          },
+          {
+            "evidence_id": "ad98d6a2-c6c4-4bf5-8ada-fe79584b1f01",
+            "obligation_ref": "ecf:PRODUCT_INTENT:greenfield-product-intent",
+            "observation": "No exact verification or Guardian effect covers work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-product-intent@24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "status_code": null,
+            "response_sha256": null,
+            "runtime_ref": "candidate-preview:a26f2bd6-c394-40f1-9964-55807599e562",
+            "observed_at": "2026-10-09T10:53:21.834678Z"
+          }
+        ],
+        "findings": [
+          {
+            "finding_id": "c64d5413-d68b-4c8c-8e2b-1122885155dd",
+            "request_id": "f7d2f0a6-088f-5492-8bbc-a988b444e7dc",
+            "candidate_id": "24efad30-3640-5eef-8562-83c651ff89c1",
+            "category": "CONTEXT_COVERAGE_GAP",
+            "severity": "BLOCKER",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:0",
+            "expected_behavior": "Protected ECF obligation has exact coverage",
+            "observed_reality": "No exact verification or Guardian effect covers work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:0@24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "evidence_ids": [
+              "8f385ea8-c4f5-4fc4-b11f-92ea4878d8c4"
+            ],
+            "repairable": false,
+            "lifecycle": "OPEN"
+          },
+          {
+            "finding_id": "572be6c2-1119-4bdd-8df1-97de45780458",
+            "request_id": "f7d2f0a6-088f-5492-8bbc-a988b444e7dc",
+            "candidate_id": "24efad30-3640-5eef-8562-83c651ff89c1",
+            "category": "CONTEXT_COVERAGE_GAP",
+            "severity": "BLOCKER",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:1",
+            "expected_behavior": "Protected ECF obligation has exact coverage",
+            "observed_reality": "No exact verification or Guardian effect covers work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:1@24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "evidence_ids": [
+              "2f99a894-d11f-40ea-a8bd-9da67641d933"
+            ],
+            "repairable": false,
+            "lifecycle": "OPEN"
+          },
+          {
+            "finding_id": "798abf30-2cd7-46d7-8a56-d3e49b80f81c",
+            "request_id": "f7d2f0a6-088f-5492-8bbc-a988b444e7dc",
+            "candidate_id": "24efad30-3640-5eef-8562-83c651ff89c1",
+            "category": "CONTEXT_COVERAGE_GAP",
+            "severity": "BLOCKER",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:2",
+            "expected_behavior": "Protected ECF obligation has exact coverage",
+            "observed_reality": "No exact verification or Guardian effect covers work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:2@24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "evidence_ids": [
+              "9382a3bf-5a7e-423e-b155-ebd9ac78a621"
+            ],
+            "repairable": false,
+            "lifecycle": "OPEN"
+          },
+          {
+            "finding_id": "e065785c-1ec6-426e-bd57-02c1a0b09351",
+            "request_id": "f7d2f0a6-088f-5492-8bbc-a988b444e7dc",
+            "candidate_id": "24efad30-3640-5eef-8562-83c651ff89c1",
+            "category": "CONTEXT_COVERAGE_GAP",
+            "severity": "BLOCKER",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:3",
+            "expected_behavior": "Protected ECF obligation has exact coverage",
+            "observed_reality": "No exact verification or Guardian effect covers work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:3@24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "evidence_ids": [
+              "8d8ef50a-0c07-43d3-bb00-81a3a9290e3a"
+            ],
+            "repairable": false,
+            "lifecycle": "OPEN"
+          },
+          {
+            "finding_id": "7e7f9f98-b497-4cf8-ad8d-99f3ca00dc53",
+            "request_id": "f7d2f0a6-088f-5492-8bbc-a988b444e7dc",
+            "candidate_id": "24efad30-3640-5eef-8562-83c651ff89c1",
+            "category": "CONTEXT_COVERAGE_GAP",
+            "severity": "BLOCKER",
+            "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:4",
+            "expected_behavior": "Protected ECF obligation has exact coverage",
+            "observed_reality": "No exact verification or Guardian effect covers work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:4@24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "evidence_ids": [
+              "e482f92a-b758-4de7-a249-bfdcd50b16e7"
+            ],
+            "repairable": false,
+            "lifecycle": "OPEN"
+          },
+          {
+            "finding_id": "5c234db6-bbac-4a0d-8cf0-77a6f0564a88",
+            "request_id": "f7d2f0a6-088f-5492-8bbc-a988b444e7dc",
+            "candidate_id": "24efad30-3640-5eef-8562-83c651ff89c1",
+            "category": "CONTEXT_COVERAGE_GAP",
+            "severity": "BLOCKER",
+            "obligation_ref": "ecf:PRODUCT_INTENT:greenfield-product-intent",
+            "expected_behavior": "Protected ECF obligation has exact coverage",
+            "observed_reality": "No exact verification or Guardian effect covers work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-product-intent@24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "evidence_ids": [
+              "ad98d6a2-c6c4-4bf5-8ada-fe79584b1f01"
+            ],
+            "repairable": false,
+            "lifecycle": "OPEN"
+          }
+        ],
+        "supersedes_finding_ids": [],
+        "acceptance_state": "PENDING",
+        "delivery_authorization_state": "NOT_AUTHORIZED",
+        "assessed_at": "2026-10-09T10:53:21.834770Z"
+      },
+      "actual_request": {
+        "contract_version": "watt-guardian-software-assurance-v1",
+        "evidence_contract_version": "governed-obligation-v2",
+        "production_lineage": {
+          "work_reality_revision_id": "35571d11-9ce6-5e45-812f-21a86b8b31fb",
+          "pwu_id": "4770e7c7-d15c-4f4e-b9a3-cce598818908",
+          "source_baseline_id": "63da793e-1a53-457f-92da-f84685717b3f",
+          "source_baseline_revision": "ff344076c01793d3879112125296649e46242703",
+          "source_baseline_tree": "6ed77f11ba8456ba3c1342af247884809be1498e",
+          "qualified_output_revision": "9172d1dd0b014617d7cf1f25139cc1dbf5e7cfb3",
+          "qualified_output_tree": "29e2294feabcae289b268559f8037d7e487789c1"
+        },
+        "request_id": "f7d2f0a6-088f-5492-8bbc-a988b444e7dc",
+        "product_ref": "product:b828d027-3c75-4a32-bd3b-1c25f5d87645",
+        "work_ref": "work:05ba84df-6881-56b6-a23a-f0e6c7120d41",
+        "governed_intent_ref": "work-reality-revision:35571d11-9ce6-5e45-812f-21a86b8b31fb",
+        "objective": "Create index.html",
+        "constraints": [
+          "index.html changes alone",
+          "Excluded from this Work: deployment, publishing",
+          "A reviewable Candidate is left for Human acceptance",
+          "Excluded from this Work: deployment",
+          "Excluded from this Work: publishing"
+        ],
+        "exclusions": [],
+        "authority_ref": "engineering-scope:f009c679-3fc0-5df4-bee6-0e42d3f5c158",
+        "candidate_id": "24efad30-3640-5eef-8562-83c651ff89c1",
+        "candidate_fingerprint": "a2772d39333812f1dfc34a1d2329d63122e683191d886ceb31157c5277e856fe",
+        "source_revision": "9172d1dd0b014617d7cf1f25139cc1dbf5e7cfb3",
+        "source_tree": "29e2294feabcae289b268559f8037d7e487789c1",
+        "artifact_refs": [
+          "artifact:index.html",
+          "production-plan:60cebdfd-997d-474b-af21-a72968d741d1:version:1",
+          "pwu:4770e7c7-d15c-4f4e-b9a3-cce598818908",
+          "source-baseline:63da793e-1a53-457f-92da-f84685717b3f",
+          "task-contract:94e1c403-cc69-5933-8e17-185d7d4be521",
+          "qualified-result:9172d1dd0b014617d7cf1f25139cc1dbf5e7cfb3:tree:29e2294feabcae289b268559f8037d7e487789c1",
+          "execution-attempt:cbb33894-8086-478d-b266-89ac4eeb5aed",
+          "execution-dispatch:56f6e945-462b-4509-bb59-d1ebd757181e"
+        ],
+        "runtime_ref": "candidate-preview:a26f2bd6-c394-40f1-9964-55807599e562",
+        "runtime_url": "http://127.0.0.1:35353",
+        "disposable_preview": true,
+        "verification_refs": [
+          "verification:2ad7d287-fa64-5624-a923-41b4f01a1b3a",
+          "verification:e9d817a6-d340-54c6-a14b-b71c8ae5e173"
+        ],
+        "task_contract_ref": "task-contract:94e1c403-cc69-5933-8e17-185d7d4be521",
+        "decision_context_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3",
+        "protected_context": [
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:0",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:0",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "6efc3ee6307872c9f50d945ac6f4c69c06abb2c1b5ca0117c009329674740a12",
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3",
+            "coverage": "GUARDIAN_REQUIRED",
+            "verification_refs": []
+          },
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:1",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:1",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "dd2cfe25578eb3dc067cb581f09269920e139280391d883d9b65d1a067d5dd17",
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3",
+            "coverage": "GUARDIAN_REQUIRED",
+            "verification_refs": []
+          },
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:2",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:2",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "e2a293cc9ee7c6c2eb4e2bb5907c0fe0731f36e0c304c287a60451f91ea6e5f0",
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3",
+            "coverage": "GUARDIAN_REQUIRED",
+            "verification_refs": []
+          },
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:3",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:3",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "2daa60a268ab4beae79a2e77d1a2803019414734a9a52e3991ba4ef7c2765531",
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3",
+            "coverage": "GUARDIAN_REQUIRED",
+            "verification_refs": []
+          },
+          {
+            "context_class": "APPROVED_CONSTRAINT",
+            "semantic_key": "greenfield-constraint:4",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:4",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "content_digest": "cb74abbf0b5db8207fbad70bdf5566ee63bcfe893ca144da10543198b2c3f4e9",
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3",
+            "coverage": "GUARDIAN_REQUIRED",
+            "verification_refs": []
+          },
+          {
+            "context_class": "PRODUCT_INTENT",
+            "semantic_key": "greenfield-product-intent",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-product-intent",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "authority": "WATT_PRODUCT_GOVERNOR",
+            "content_digest": "b0dbf8d5791cd91a9c51518013eb5a9d75b6d5156e14ad8caf5b7dbb7b253bfb",
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3",
+            "coverage": "GUARDIAN_REQUIRED",
+            "verification_refs": []
+          }
+        ],
+        "acceptance_state": "PENDING",
+        "delivery_authorization_state": "NOT_AUTHORIZED",
+        "required_effects": [
+          {
+            "obligation_ref": "work-route:index.html",
+            "kind": "HTTP_ROUTE",
+            "expected_behavior": "Approved static result index.html is served from the exact Candidate",
+            "path": "/index.html",
+            "expected_status": 200,
+            "content_contains": null,
+            "link_href": null,
+            "create_path": null,
+            "read_path": null,
+            "create_body": null,
+            "expected_json_field": null,
+            "expected_json_value": null,
+            "dependency_owner": null
+          }
+        ],
+        "prior_finding_ids": [],
+        "submitted_at": "2026-10-09T10:53:21.698542Z"
+      },
+      "private_result_path": "/data/watt/c3-semantic-convergence-20261009/private/watt-c3-dev3-contract-c1-positive-20261009-fixture-tmp/tests/test_both_actual_admission_pat1/guardian/results/f7d2f0a6-088f-5492-8bbc-a988b444e7dc.json",
+      "private_request_path": "/data/watt/c3-semantic-convergence-20261009/private/watt-c3-dev3-contract-c1-positive-20261009-fixture-tmp/tests/test_both_actual_admission_pat1/guardian/requests/f7d2f0a6-088f-5492-8bbc-a988b444e7dc.json"
+    }
+  }
+}

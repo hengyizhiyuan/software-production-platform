@@ -1,0 +1,21 @@
+{
+  "schema": "c3-independent-holdout-seal-v1",
+  "reviewer_role": "Independent engineering agent; not Human Governor or Human Acceptance",
+  "sealed_at_utc": "2026-10-09T08:48:55.249231Z",
+  "specification_sha256": "770828adeabec942548218c17bc6e9dbb9222ce19df19bc89c260f28ed8f4cf0",
+  "scenario_count": 24,
+  "category_count": 8,
+  "category_counts": {
+    "legal_chinese_english": 6,
+    "different_authority": 3,
+    "content_obligations": 3,
+    "file_scope": 3,
+    "continuous_prohibitions": 3,
+    "future_human_gate": 2,
+    "missing_evidence": 2,
+    "escalation_effects": 2
+  },
+  "implementation_agent_access_to_inputs_before_freeze": false,
+  "executed": false,
+  "human_acceptance": false
+}

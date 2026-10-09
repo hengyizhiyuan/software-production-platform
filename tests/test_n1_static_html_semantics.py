@@ -19,6 +19,9 @@ from spg.domain.engineering_semantics import (
     SemanticFactAuthority, SemanticFactReference, SemanticRelation,
     SemanticRoleOrigin,
 )
+from spg.domain.model_runtime import (
+    ModelProvider, ModelTiming, ModelUsage, StructuredModelResult,
+)
 from spg.providers.static_html_semantic_verifier import (
     StaticHTMLPlanRepair, verify_static_html_semantic_facts,
 )
@@ -980,8 +983,13 @@ def test_model_repairs_only_derived_method_against_exact_human_source(tmp_path: 
     calls = []
     def generate(**kwargs):
         calls.append(kwargs)
-        return SimpleNamespace(output_text=outputs[len(calls) - 1],
-                               request_id=f"plan-{len(calls)}")
+        return StructuredModelResult(
+            output_text=outputs[len(calls) - 1],
+            provider=ModelProvider.DEEPSEEK,
+            requested_model="controlled-static-html-fixture",
+            effective_model="controlled-static-html-fixture",
+            request_id=f"plan-{len(calls)}",
+            usage=ModelUsage(unknown=True), timing=ModelTiming())
     runtime = SimpleNamespace(generate=generate,
                               registry=SimpleNamespace(close=lambda: None))
     checks = verify_static_html_semantic_facts(
@@ -992,6 +1000,11 @@ def test_model_repairs_only_derived_method_against_exact_human_source(tmp_path: 
     plan = checks[0]["materialization"]
     assert plan["method"] == "EXACT_H1"
     assert plan["repair_attempts"] == 2
+    assert [row["request_id"] for row in plan["model_repair"]["attempts"]] == [
+        "plan-1", "plan-2"]
+    assert all(row["usage"]["unknown"] is True
+               and row["usage"]["total_tokens"] is None
+               for row in plan["model_repair"]["attempts"])
     assert plan["provenance_checked"] is True
     assert plan["source_record_ids"] == [str(record_id)]
     assert calls[1]["input_text"].find("target path differs") >= 0
@@ -1032,10 +1045,14 @@ def test_model_plan_exhaustion_cannot_invent_source_or_pass(tmp_path: Path) -> N
     calls = []
     def generate(**kwargs):
         calls.append(kwargs)
-        return SimpleNamespace(output_text=(
+        return StructuredModelResult(output_text=(
             '{"method":"EXACT_H1","target_path":"index.html",'
             '"source_quote":"invented Human approval"}'),
-            request_id=f"invalid-{len(calls)}")
+            provider=ModelProvider.DEEPSEEK,
+            requested_model="controlled-static-html-fixture",
+            effective_model="controlled-static-html-fixture",
+            request_id=f"invalid-{len(calls)}",
+            usage=ModelUsage(unknown=True), timing=ModelTiming())
     runtime = SimpleNamespace(generate=generate,
                               registry=SimpleNamespace(close=lambda: None))
     checks = verify_static_html_semantic_facts(
@@ -1044,4 +1061,10 @@ def test_model_plan_exhaustion_cannot_invent_source_or_pass(tmp_path: Path) -> N
         plan_repair=StaticHTMLPlanRepair(lambda: runtime))
     assert len(calls) == 2
     assert checks[0]["reason"] == "UNVERIFIABLE_FACT_PLAN"
-    assert checks[0]["materialization"]["model_repair"]["converged"] is False
+    repair = checks[0]["materialization"]["model_repair"]
+    assert repair["converged"] is False
+    assert [row["request_id"] for row in repair["attempts"]] == [
+        "invalid-1", "invalid-2"]
+    assert all(row["usage"]["unknown"] is True
+               and row["usage"]["total_tokens"] is None
+               for row in repair["attempts"])

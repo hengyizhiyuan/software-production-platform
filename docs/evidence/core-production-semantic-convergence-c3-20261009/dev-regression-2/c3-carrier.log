@@ -1,0 +1,34 @@
+EE                                                                       [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_owner_observation_survives_legal_plan_clear_and_preserves_budget[work] _
+tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+_ ERROR at setup of test_owner_observation_survives_legal_plan_clear_and_preserves_budget[steering] _
+tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+=========================== short test summary info ============================
+ERROR tests/integration/test_c3_fulfillment_receipts.py::test_owner_observation_survives_legal_plan_clear_and_preserves_budget[work]
+ERROR tests/integration/test_c3_fulfillment_receipts.py::test_owner_observation_survives_legal_plan_clear_and_preserves_budget[steering]
+2 errors in 10.35s

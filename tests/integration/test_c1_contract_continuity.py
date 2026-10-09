@@ -123,6 +123,97 @@ def c1_schema(postgres_database, monkeypatch):
     yield
 
 
+class DeclaredC1Fulfillment:
+    """Controlled source-to-capability candidates for the declared C1 fixture.
+
+    Production validates this complete candidate through the same validator used
+    for model candidates. This oracle is neither live-model nor Human authority.
+    """
+    last_observation = None
+
+    def form(self, inventory, capabilities, *, validation_feedback=None):
+        from spg.domain.governed_obligation import (FulfillmentProjectionCandidate, FulfillmentRouteCandidate,
+            FulfillmentComponentBasis, fulfillment_source_semantic_text)
+        routes = []
+        clause_sources = {source.get("item_id"): source["source_ref"] for source in inventory["sources"]
+            if source["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}}
+        production_sources = tuple(source for source in inventory["sources"] if source["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}
+            and source["payload"]["item"].get("production") is not None)
+        fact_refs = tuple(source["source_ref"] for source in inventory["sources"] if source["kind"] == "FACT")
+        for source in inventory["sources"]:
+            ref = source["source_ref"]
+            item = source.get("item_id")
+            supports = ()
+            indices = ()
+            if source["kind"] == "FACT": selected = ("ARTIFACT_CONTENT",)
+            elif source["kind"] in {"WORK_CONTEXT", "IR_ITEM"}: selected = ("RETAIN_CONTEXT",)
+            elif source["kind"] == "WORK_CONSTRAINT":
+                indices = (source["index"],)
+                content = source["payload"]["content"]
+                # Fixture-declared meanings, never production keyword routing.
+                meanings = {CONSTRAINTS[0]:("change-scope",("GIT_DIFF_SCOPE",)),
+                            CONSTRAINTS[1]:("external-boundary",("DENY_DEPLOY","DENY_PUBLISH")),
+                            CONSTRAINTS[2]:("candidate-handoff",("CANDIDATE_SEAL",))}
+                if content in meanings:
+                    original, selected = meanings[content]
+                    supports = (clause_sources[original],)
+                else:
+                    # Exact values already produced by the unchanged typed C1 IR.
+                    producer = next(entry for entry in production_sources
+                        if content in tuple("Excluded from this Work: "+value for value in entry["payload"]["item"]["production"]["exclusions"]))
+                    declared_effects = {"Excluded from this Work: deployment":("DENY_DEPLOY",),
+                        "Excluded from this Work: publishing":("DENY_PUBLISH",)}
+                    selected = declared_effects[content]
+                    supports = (producer["source_ref"], clause_sources["external-boundary"])
+            elif item == "change-scope": selected = ("GIT_DIFF_SCOPE",)
+            elif item == "external-boundary": selected = ("DENY_DEPLOY","DENY_PUBLISH")
+            elif item == "candidate-handoff": selected = ("CANDIDATE_SEAL",)
+            else: selected = ("ARTIFACT_CONTENT",)
+            for method in selected:
+                routes.append(FulfillmentRouteCandidate(source_ref=ref, capability=method,
+                    work_constraint_indices=indices,supporting_source_refs=supports,
+                    target_paths=("index.html",) if method in {"ARTIFACT_CONTENT","GIT_DIFF_SCOPE"} else (),
+                    rationale="Explicit declared C1 contract fixture responsibility.",
+                    component_basis=FulfillmentComponentBasis(source_span_start=0,
+                        source_span_end=len(fulfillment_source_semantic_text(source)),
+                        source_component_quote=fulfillment_source_semantic_text(source),
+                        linked_fact_refs=fact_refs if source in production_sources else ())))
+        return FulfillmentProjectionCandidate(inventory_fingerprint=inventory["inventory_fingerprint"], routes=tuple(routes))
+
+    def review(self, inventory, candidate):
+        return DeclaredC1SemanticReview().review(inventory, candidate)
+
+
+class DeclaredC1SemanticReview:
+    """Separate controlled semantic oracle for original C1 source contributions."""
+    def review(self, inventory, candidate):
+        from spg.domain.governed_obligation import (FulfillmentSemanticReviewCandidate,
+            FulfillmentSemanticSourceReview, fulfillment_candidate_fingerprint,
+            fulfillment_components_fingerprint, fulfillment_source_semantic_text)
+        results=[]
+        for source in inventory["sources"]:
+            routes=[route for route in candidate.routes if route.source_ref==source["source_ref"]]
+            methods={route.capability for route in routes}
+            item=source.get("item_id")
+            if source["kind"]=="FACT": expected={"ARTIFACT_CONTENT"}
+            elif source["kind"] in {"IR_ITEM","WORK_CONTEXT"}: expected={"RETAIN_CONTEXT"}
+            elif source["kind"]=="WORK_CONSTRAINT":
+                expected={CONSTRAINTS[0]:{"GIT_DIFF_SCOPE"},CONSTRAINTS[1]:{"DENY_DEPLOY","DENY_PUBLISH"},
+                    CONSTRAINTS[2]:{"CANDIDATE_SEAL"},"Excluded from this Work: deployment":{"DENY_DEPLOY"},
+                    "Excluded from this Work: publishing":{"DENY_PUBLISH"}}[source["payload"]["content"]]
+            elif item=="change-scope":expected={"GIT_DIFF_SCOPE"}
+            elif item=="external-boundary":expected={"DENY_DEPLOY","DENY_PUBLISH"}
+            elif item=="candidate-handoff":expected={"CANDIDATE_SEAL"}
+            else:expected={"ARTIFACT_CONTENT"}
+            preserved=methods==expected and all(route.component_basis is not None
+                and route.component_basis.source_component_quote==fulfillment_source_semantic_text(source) for route in routes)
+            results.append(FulfillmentSemanticSourceReview(source_ref=source["source_ref"],
+                complete_and_equivalent=preserved,reason="Controlled C1 original source meaning and consumer contract comparison."))
+        return FulfillmentSemanticReviewCandidate(inventory_fingerprint=inventory["inventory_fingerprint"],
+            candidate_fingerprint=fulfillment_candidate_fingerprint(candidate),
+            components_fingerprint=fulfillment_components_fingerprint(candidate),source_results=tuple(results))
+
+
 class DeclaredC1Meaning:
     """Typed fixture oracle, no live-model/generic language claim."""
     def interpret(self, basis):
@@ -328,6 +419,7 @@ def _materialize_steering_fixture_plan(database, works, admitted, resource, base
 
 def _admit_c1(database, tmp_path, route):
     works, _ = _services_for_resource(database, tmp_path, "test://c1-contract-" + uuid4().hex)
+    works.fulfillment_provider = DeclaredC1Fulfillment()
     interactions = WorkInteractionService(database, capability=DeclaredC1Meaning())
     origin = interactions.create_interaction(human_identity="fixture:human:c1")
     ready = interactions.append_and_assess(origin.id, REQUIREMENT, human_identity="fixture:human:c1")
@@ -374,25 +466,30 @@ def _admit_c1(database, tmp_path, route):
             steps=(SteeringStepSpec(type=SteeringStepType.PRODUCE,
                 objective="Create index.html", completion_condition="Exact contract output verified",
                 state=SteeringStepState.CURRENT),)))
-        bridge = SteeringProductionService(database)
+        bridge = SteeringProductionService(database, fulfillment_provider=DeclaredC1Fulfillment())
         bridge.admit_cycle(bridge.materialize_request(admitted.work_id))
     with database.unit_of_work() as uow:
         product = ProductStore(uow.session)
         binding = product.runtime_binding(admitted.work_id)
         pwu = RuntimeStore(uow.session).work_unit(binding.work_unit_id)
         assert product.current_work_reality_revision(admitted.work_id) == revision
-    assert pwu.completion_contract.fulfillment_bindings == materialize_continuous_gates(
-        revision, ready.latest_assessment.semantic_ir)
+    from spg.application.governed_obligations import validate_continuous_gates
     bindings = pwu.completion_contract.fulfillment_bindings
-    assert len(bindings) == 3
-    assert {item.component: (item.phase.value, item.evidence_method, item.target_paths)
-            for item in bindings} == {
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+        source_revision=baseline.repository_revision, exact_target_paths=("index.html",))
+    assert all(binding.projection_inventory_fingerprint for binding in bindings)
+    assert {binding.component for binding in bindings} >= {
+        "artifact-content", "git-diff-scope", "deploy", "publish", "reviewable-candidate"}
+    assert set(CONSTRAINTS) <= set(revision.constraints)
+    assert {index for binding in bindings for index in binding.work_constraint_indices} == set(range(len(revision.constraints)))
+    original_gates = tuple(binding for binding in bindings if binding.source_kind.value == "IR_CONSTRAINT"
+        and binding.component in {"git-diff-scope", "deploy", "publish"})
+    assert {binding.component: (binding.phase.value, binding.evidence_method, binding.target_paths)
+        for binding in original_gates} == {
         "git-diff-scope": ("CURRENT_VERIFICATION", "EXACT_GIT_DIFF_SCOPE", ("index.html",)),
         "deploy": ("CONTINUOUS_FROM_ADMISSION", "EXACT_PERMISSION_GATE", ()),
-        "publish": ("CONTINUOUS_FROM_ADMISSION", "EXACT_PERMISSION_GATE", ()),
-    }
-    assert set(CONSTRAINTS) <= set(revision.constraints)
-    assert all(item.fact_id is None for item in bindings)
+        "publish": ("CONTINUOUS_FROM_ADMISSION", "EXACT_PERMISSION_GATE", ())}
+    assert len(original_gates) == 3 and all(binding.fact_id is None for binding in original_gates)
     assert pwu.completion_contract.semantic_fact_obligations
     assert pwu.completion_contract.task_contract.semantic_fact_references == pwu.completion_contract.semantic_fact_obligations
     return works, admitted.work_id, revision, ready.latest_assessment.semantic_ir, repository, baseline, pwu
@@ -535,7 +632,7 @@ def test_native_rejects_binding_loss_drift_and_injection(chain, corruption):
                 completion_contract=wrong.model_dump(mode="json")))
         uow.commit()
     prepared = chain.prepared.execution_request
-    with pytest.raises(ValueError, match="OBLIGATION_GATE_BINDING_DRIFT"):
+    with pytest.raises(ValueError, match="OBLIGATION_(GATE_BINDING_DRIFT|PROJECTION_SOURCE_REVISION_DRIFT|PROJECTION_DUPLICATE_ROUTE|SOURCE_INVENTORY_INCOMPLETE|WORK_CONSTRAINT_INVENTORY_INCOMPLETE|PROJECTION_MIXED_BASIS)"):
         chain.executor._admission(ExecutorDispatchRequest(dispatch_id=uuid4(), execution=prepared))
     with chain.database.unit_of_work() as uow:
         assert ProductStore(uow.session).current_work_reality_revision(chain.work_id) == chain.revision

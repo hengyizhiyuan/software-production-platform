@@ -1,0 +1,65 @@
+{
+  "schema": "c3-scoped-failure-owner-observation-v1",
+  "observed_at_utc": "2026-10-09T10:12:44.164666+00:00",
+  "database": "c1_contract_continuity",
+  "context": "last carrier setup after C1 setup failure; controlled fixture only",
+  "query_scope": "WORK_FULFILLMENT_OBSERVATION exact authority",
+  "rows": [
+    {
+      "id": "561eecb0-59af-45d0-9ed2-87e09a939bac",
+      "decision_type": "WORK_FULFILLMENT_OBSERVATION",
+      "authority_identity": "work-governance:derived-candidate-observation",
+      "subject_type": "WORK_FULFILLMENT_BASIS",
+      "subject_identity": "9e686849943c4fe876a7750808007749e76d3f0e90aed16246a20610bd3436b1",
+      "scope": {
+        "owner": "WORK_FULFILLMENT_PROJECTION",
+        "stage": "MODEL_REQUEST_PENDING",
+        "schema": "work-fulfillment-formation-receipt-v1",
+        "attempt": 1,
+        "work_id": "6f630be4-0c13-51ec-8676-c4270f9cd2e5",
+        "feedback": null,
+        "receipt_id": "9cac9c68-3fa7-4dbf-b9d5-ec26402eab94",
+        "budget_limit": 2,
+        "recorded_at_utc": "2026-10-09T10:11:06.559479+00:00",
+        "source_revision": "7721dbd8cd53069d931a8fe8f6c5da220c71acec",
+        "exact_target_paths": [
+          "index.html"
+        ],
+        "inventory_fingerprint": "9e686849943c4fe876a7750808007749e76d3f0e90aed16246a20610bd3436b1",
+        "candidate_is_authority": false,
+        "work_reality_revision_id": "a2489a8e-fa3d-51cd-91e3-244545558aef"
+      },
+      "created_at": "2026-10-09T10:11:06.565897+00:00"
+    },
+    {
+      "id": "b253f91e-04bf-4c3a-aad2-d32b5f1a2bb9",
+      "decision_type": "WORK_FULFILLMENT_OBSERVATION",
+      "authority_identity": "work-governance:derived-candidate-observation",
+      "subject_type": "WORK_FULFILLMENT_BASIS",
+      "subject_identity": "9e686849943c4fe876a7750808007749e76d3f0e90aed16246a20610bd3436b1",
+      "scope": {
+        "owner": "WORK_FULFILLMENT_PROJECTION",
+        "stage": "CANDIDATE_VALIDATED",
+        "schema": "work-fulfillment-formation-receipt-v1",
+        "attempt": 1,
+        "work_id": "6f630be4-0c13-51ec-8676-c4270f9cd2e5",
+        "terminal": true,
+        "candidate": null,
+        "receipt_id": "0d4930c1-3fd4-454e-9b23-e0699bfeddaf",
+        "budget_limit": 2,
+        "recorded_at_utc": "2026-10-09T10:11:06.576279+00:00",
+        "source_revision": "7721dbd8cd53069d931a8fe8f6c5da220c71acec",
+        "terminal_reason": "OBLIGATION_FORMATION_TRANSPORT_KeyError",
+        "failed_predicate": "OBLIGATION_FORMATION_TRANSPORT_KeyError",
+        "validation_passed": false,
+        "exact_target_paths": [
+          "index.html"
+        ],
+        "inventory_fingerprint": "9e686849943c4fe876a7750808007749e76d3f0e90aed16246a20610bd3436b1",
+        "candidate_is_authority": false,
+        "work_reality_revision_id": "a2489a8e-fa3d-51cd-91e3-244545558aef"
+      },
+      "created_at": "2026-10-09T10:11:06.58326+00:00"
+    }
+  ]
+}

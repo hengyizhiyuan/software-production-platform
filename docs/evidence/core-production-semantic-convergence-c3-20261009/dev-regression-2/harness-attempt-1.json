@@ -1,0 +1,14 @@
+{
+  "schema": "c3-development-harness-attempt-v1",
+  "snapshot": "dev-regression-2",
+  "attempt": 1,
+  "captured_at_utc": "2026-10-09T10:03:45.944977+00:00",
+  "result": "HARNESS_FAILED_BEFORE_TESTS",
+  "failure_code": "HOST_PYTHON36_SUBPROCESS_TEXT_UNSUPPORTED",
+  "test_cases_executed": 0,
+  "test_containers_created": 0,
+  "live_model_calls": 0,
+  "real_ai_work_created": 0,
+  "source_archives_verified": true,
+  "correction": "universal_newlines=True; resume verified extracted archive without overwriting test receipts"
+}

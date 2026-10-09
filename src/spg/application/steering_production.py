@@ -72,8 +72,12 @@ from spg.providers.rule_based_planner import RuleBasedProductionPlanner
 class SteeringProductionService:
     """Admit the Step's versioned production plan without deciding WHAT NEXT."""
 
-    def __init__(self, database: Database) -> None:
+    def __init__(self, database: Database, *, fulfillment_provider=None, settings=None) -> None:
         self.database = database
+        from spg.config import Settings
+        from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+        self.fulfillment_provider = (fulfillment_provider if fulfillment_provider is not None
+            else ModelFulfillmentCandidateProvider.from_settings(settings or Settings()))
         self.runtime = RuntimeService(database)
         self.planning = ProductionPlanningService(RuleBasedProductionPlanner(), database=database)
 
@@ -483,7 +487,11 @@ class SteeringProductionService:
                 or (revision is not None and revision.id != request.work_reality_revision_id)):
             raise ProductInvariantViolation("Steering production Work Reality changed")
         from spg.application.governed_obligations import admitted_fulfillment_bindings
-        fulfillment_bindings = admitted_fulfillment_bindings(revision, assessment)
+        fulfillment_bindings = admitted_fulfillment_bindings(revision, assessment,
+            provider=self.fulfillment_provider, database=self.database,
+            source_revision=baseline.repository_revision,
+            exact_target_paths=tuple(target.path for target in request.change_contract.exact_targets)
+                if request.change_contract is not None else tuple(target.path for target in request.artifact_targets))
         plan = self.planning.propose(
             ProductionPlanningRequest(
                 work_id=work.id,
@@ -506,6 +514,9 @@ class SteeringProductionService:
                 ),
             )
         )
+        from spg.application.governed_obligations import plan_with_formation_receipts
+        plan = plan_with_formation_receipts(self.database, work.id, plan, inventory_fingerprint=(
+            fulfillment_bindings[0].projection_inventory_fingerprint if fulfillment_bindings else None))
         if plan.fit_classification not in {OnePwuFitClassification.ONE_PWU_FIT, OnePwuFitClassification.MULTI_PWU_FIT}:
             raise ProductInvariantViolation(
                 "Individual Steering PRODUCE Step has no executable PWU boundary"

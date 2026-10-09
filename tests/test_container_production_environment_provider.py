@@ -330,3 +330,90 @@ def test_docker_execution_passes_bounded_workspace_python_environment() -> None:
         argv=("python", "-m", "pytest"),
         working_directory="/workspace/primary",
     ).python_source_path is None
+
+
+class ObservedContainerRuntime(DockerCliContainerRuntime):
+    def __init__(self, payload=None):
+        super().__init__()
+        self.calls = []
+        self.removed = []
+        self.payload = payload or {
+            "container_identity": "a" * 64,
+            "actual_image_id": "sha256:" + "c" * 64,
+            "running": True,
+        }
+
+    def _docker(self, *arguments):
+        import json
+        self.calls.append(arguments)
+        if arguments[0] == "create":
+            return "a" * 64
+        if arguments[0] == "start":
+            return "a" * 64
+        if arguments[0] == "inspect":
+            return json.dumps(self.payload)
+        raise AssertionError("unexpected Docker operation")
+
+    def remove(self, opaque_reference):
+        self.removed.append(opaque_reference)
+
+
+def test_actual_pe_image_survives_runtime_removal_in_attempt_owner(tmp_path):
+    from spg.domain.production_environment import NativeExecutionEnvironmentBindingV1
+    from spg.infrastructure.production_environment_store import JsonProductionEnvironmentStore
+
+    request = provision_request(tmp_path)
+    request = request.model_copy(update={"image_reference": "sha256:" + "c" * 64})
+    runtime = ObservedContainerRuntime()
+    provider = ContainerProductionEnvironmentProvider(runtime)
+    handle = provider.create_workspace_environment(request)
+    observation = handle.runtime_image_observation
+    assert observation is not None
+    assert observation.actual_image_id == request.image_reference
+    assert observation.observation_source == "DOCKER_INSPECT"
+    assert observation.environment_id == request.environment.id
+    assert observation.observed_at.tzinfo is not None
+    store = JsonProductionEnvironmentStore(tmp_path / "owner")
+    binding = NativeExecutionEnvironmentBindingV1(
+        work_id=request.environment.work_id, pwu_id=uuid4(), attempt_id=uuid4(),
+        task_contract_reference="task-contract:controlled-image-observation",
+        workspace=request.workspace, prepared_workspace=request.prepared_workspace,
+        environment=request.environment, provider_handle=handle,
+        created_at=datetime.now(UTC),
+    )
+    store.save_native_execution_binding(binding)
+    provider.cleanup(handle)
+    restored = store.get_native_execution_binding(binding.attempt_id)
+    assert restored == binding
+    assert restored.provider_handle.runtime_image_observation == observation
+    assert runtime.removed == ["a" * 64]
+    assert [call[0] for call in runtime.calls] == ["create", "start", "inspect"]
+    assert ".Config" not in runtime.calls[-1][2]
+
+
+@pytest.mark.parametrize("payload", [
+    {"container_identity": "a" * 64, "actual_image_id": "sha256:" + "d" * 64, "running": True},
+    {"container_identity": "b" * 64, "actual_image_id": "sha256:" + "c" * 64, "running": True},
+    {"container_identity": "a" * 64, "actual_image_id": "sha256:" + "c" * 64, "running": False},
+    {"container_identity": "a" * 64, "actual_image_id": "not-an-image-id", "running": True},
+    {"container_identity": "a" * 64, "actual_image_id": "sha256:" + "c" * 64, "running": True,
+     "arbitrary_env": "must-not-be-admitted"},
+])
+def test_pe_image_observation_rejects_wrong_runtime_before_ready(tmp_path, payload):
+    request = provision_request(tmp_path).model_copy(
+        update={"image_reference": "sha256:" + "c" * 64})
+    runtime = ObservedContainerRuntime(payload)
+    provider = ContainerProductionEnvironmentProvider(runtime)
+    with pytest.raises(EnvironmentProviderError, match="PE_RUNTIME_IMAGE_OBSERVATION_REJECTED"):
+        provider.create_workspace_environment(request)
+    assert runtime.removed == ["a" * 64]
+    assert len([call for call in runtime.calls if call[0] == "create"]) == 1
+
+
+def test_historical_pe_handle_keeps_unknown_image():
+    handle = ProviderEnvironmentHandle(
+        provider_identity="container-v1", environment_id=uuid4(),
+        opaque_reference="historical-container-already-removed")
+    raw = handle.model_dump(mode="json", exclude={"runtime_image_observation"})
+    restored = ProviderEnvironmentHandle.model_validate(raw)
+    assert restored.runtime_image_observation is None

@@ -1,0 +1,64 @@
+.........F.............................................................. [ 67%]
+..............FF...F...............                                      [100%]
+=================================== FAILURES ===================================
+_ test_source_scope_phase_and_method_rejections[current-future-CURRENT_FACT_CANNOT_BE_DEFERRED] _
+tests/test_fulfillment_projection.py:133: in test_source_scope_phase_and_method_rejections
+    with pytest.raises(ValueError, match=reason):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'CURRENT_FACT_CANNOT_BE_DEFERRED'
+E     Actual message: 'OBLIGATION_MIXED_FACT_CURRENT_COMPONENT_LOST'
+______ test_model_repairs_only_derived_method_against_exact_human_source _______
+src/spg/providers/static_html_semantic_verifier.py:525: in repair
+    "usage": asdict(response.usage)})
+             ^^^^^^
+E   NameError: name 'asdict' is not defined
+
+The above exception was the direct cause of the following exception:
+tests/test_n1_static_html_semantics.py:987: in test_model_repairs_only_derived_method_against_exact_human_source
+    checks = verify_static_html_semantic_facts(
+src/spg/providers/static_html_semantic_verifier.py:743: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:654: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/static_html_semantic_verifier.py:544: in repair
+    raise ValueError("STATIC_HTML_PLAN_MODEL_UNAVAILABLE") from error
+E   ValueError: STATIC_HTML_PLAN_MODEL_UNAVAILABLE
+___________ test_model_plan_exhaustion_cannot_invent_source_or_pass ____________
+src/spg/providers/static_html_semantic_verifier.py:525: in repair
+    "usage": asdict(response.usage)})
+             ^^^^^^
+E   NameError: name 'asdict' is not defined
+
+The above exception was the direct cause of the following exception:
+tests/test_n1_static_html_semantics.py:1041: in test_model_plan_exhaustion_cannot_invent_source_or_pass
+    checks = verify_static_html_semantic_facts(
+src/spg/providers/static_html_semantic_verifier.py:743: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:654: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/static_html_semantic_verifier.py:544: in repair
+    raise ValueError("STATIC_HTML_PLAN_MODEL_UNAVAILABLE") from error
+E   ValueError: STATIC_HTML_PLAN_MODEL_UNAVAILABLE
+__________ test_delivery_owner_rechecks_current_admitted_prohibition ___________
+tests/test_governed_obligation_fulfillment.py:189: in test_delivery_owner_rechecks_current_admitted_prohibition
+    assert_delivery_effect_permitted(database, revision.work_id, "deploy") is None
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:198: in assert_delivery_effect_permitted
+    runtime_binding = product.runtime_binding(work_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/infrastructure/persistence/product_store.py:74: in call
+    return fn(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/infrastructure/persistence/product_store.py:365: in runtime_binding
+    row = self.session.execute(select(work_runtime_bindings).where(work_runtime_bindings.c.work_id == work_id).order_by(work_runtime_bindings.c.cycle_number.desc(),work_runtime_bindings.c.created_at.desc()).limit(1)).mappings().first()
+          ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'object' object has no attribute 'execute'
+=========================== short test summary info ============================
+FAILED tests/test_fulfillment_projection.py::test_source_scope_phase_and_method_rejections[current-future-CURRENT_FACT_CANNOT_BE_DEFERRED]
+FAILED tests/test_n1_static_html_semantics.py::test_model_repairs_only_derived_method_against_exact_human_source
+FAILED tests/test_n1_static_html_semantics.py::test_model_plan_exhaustion_cannot_invent_source_or_pass
+FAILED tests/test_governed_obligation_fulfillment.py::test_delivery_owner_rechecks_current_admitted_prohibition
+4 failed, 103 passed, 1 deselected in 9.50s

@@ -221,10 +221,14 @@ class WorkApplicationService:
         preparation: PreparationService | None = None,
         production_recorder: AuthorizedProductionRecorder | None = None,
         settings=None,
+        fulfillment_provider=None,
     ) -> None:
         self.database = database
         from spg.config import Settings
         self.settings = settings or Settings()
+        from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+        self.fulfillment_provider = (fulfillment_provider if fulfillment_provider is not None
+                                     else ModelFulfillmentCandidateProvider.from_settings(self.settings))
         self.workspace_root = (workspace_root or Path(".spg/workspaces")).resolve()
         self.executor = executor
         self.verifier = verifier
@@ -1787,9 +1791,6 @@ class WorkApplicationService:
                 )
             )
         )
-        from spg.application.governed_obligations import admitted_fulfillment_bindings
-        fulfillment_bindings = admitted_fulfillment_bindings(
-            work_revision, source_assessment)
         work_reality_references = [f"work:{work.id}"]
         if work_revision is not None:
             work_reality_references.append(
@@ -1893,6 +1894,14 @@ class WorkApplicationService:
             raise ProductInvariantViolation(
                 "Code Change Contract no longer matches the admitted Work authority envelope"
             )
+        from spg.application.governed_obligations import admitted_fulfillment_bindings, plan_with_formation_receipts
+        fulfillment_bindings = admitted_fulfillment_bindings(
+            work_revision, source_assessment, provider=self.fulfillment_provider,
+            database=self.database, source_revision=baseline.repository_revision,
+            exact_target_paths=tuple(target.path for target in change_contract.exact_targets)
+                if change_contract is not None else (() if artifact is None else (artifact.path,)))
+        plan = plan_with_formation_receipts(self.database, work.id, plan, inventory_fingerprint=(
+            fulfillment_bindings[0].projection_inventory_fingerprint if fulfillment_bindings else None))
         if (
             plan.desired_outcome
             != (work.desired_outcome or work.raw_user_requirement.strip())

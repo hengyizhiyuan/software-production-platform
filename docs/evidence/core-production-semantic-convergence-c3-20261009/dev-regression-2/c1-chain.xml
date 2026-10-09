@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="50" failures="0" skipped="0" tests="50" time="89.847" timestamp="2026-10-09T10:06:10.788673+00:00" hostname="8b84f8448e74"><testcase classname="tests.integration.test_c1_contract_continuity" name="test_both_actual_admission_paths_reach_independent_guardian[work]" file="tests/integration/test_c1_contract_continuity.py" line="523" time="4.747"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_both_actual_admission_paths_reach_independent_guardian[steering]" file="tests/integration/test_c1_contract_continuity.py" line="523" time="1.583"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_native_rejects_binding_loss_drift_and_injection[work-missing]" file="tests/integration/test_c1_contract_continuity.py" line="565" time="1.351"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_native_rejects_binding_loss_drift_and_injection[work-stale]" file="tests/integration/test_c1_contract_continuity.py" line="565" time="1.359"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_native_rejects_binding_loss_drift_and_injection[work-injected]" file="tests/integration/test_c1_contract_continuity.py" line="565" time="1.540"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_native_rejects_binding_loss_drift_and_injection[work-constraint_identity]" file="tests/integration/test_c1_contract_continuity.py" line="565" time="1.366"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_native_rejects_binding_loss_drift_and_injection[steering-missing]" file="tests/integration/test_c1_contract_continuity.py" line="565" time="1.449"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_native_rejects_binding_loss_drift_and_injection[steering-stale]" file="tests/integration/test_c1_contract_continuity.py" line="565" time="1.677"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_native_rejects_binding_loss_drift_and_injection[steering-injected]" file="tests/integration/test_c1_contract_continuity.py" line="565" time="1.537"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_native_rejects_binding_loss_drift_and_injection[steering-constraint_identity]" file="tests/integration/test_c1_contract_continuity.py" line="565" time="1.474"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_actual_repository_verification_rejects_source_identity_drift[work-fact_identity]" file="tests/integration/test_c1_contract_continuity.py" line="591" time="1.355"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_actual_repository_verification_rejects_source_identity_drift[work-work_revision]" file="tests/integration/test_c1_contract_continuity.py" line="591" time="1.669"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_actual_repository_verification_rejects_source_identity_drift[work-candidate_revision]" file="tests/integration/test_c1_contract_continuity.py" line="591" time="1.341"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_actual_repository_verification_rejects_source_identity_drift[work-candidate_tree]" file="tests/integration/test_c1_contract_continuity.py" line="591" time="1.360"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_actual_repository_verification_rejects_source_identity_drift[steering-fact_identity]" file="tests/integration/test_c1_contract_continuity.py" line="591" time="1.448"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_actual_repository_verification_rejects_source_identity_drift[steering-work_revision]" file="tests/integration/test_c1_contract_continuity.py" line="591" time="1.627"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_revision]" file="tests/integration/test_c1_contract_continuity.py" line="591" time="1.430"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_actual_repository_verification_rejects_source_identity_drift[steering-candidate_tree]" file="tests/integration/test_c1_contract_continuity.py" line="591" time="1.460"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_revision]" file="tests/integration/test_c1_contract_continuity.py" line="629" time="1.648"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-source_baseline_tree]" file="tests/integration/test_c1_contract_continuity.py" line="629" time="1.348"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-work_reality_revision_id]" file="tests/integration/test_c1_contract_continuity.py" line="629" time="1.348"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-pwu_id]" file="tests/integration/test_c1_contract_continuity.py" line="629" time="1.342"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_revision]" file="tests/integration/test_c1_contract_continuity.py" line="629" time="1.689"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_independently_rejects_input_output_and_work_lineage_drift[work-qualified_output_tree]" file="tests/integration/test_c1_contract_continuity.py" line="629" time="1.355"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_revision]" file="tests/integration/test_c1_contract_continuity.py" line="629" time="1.441"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-source_baseline_tree]" file="tests/integration/test_c1_contract_continuity.py" line="629" time="1.800"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-work_reality_revision_id]" file="tests/integration/test_c1_contract_continuity.py" line="629" time="1.606"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-pwu_id]" file="tests/integration/test_c1_contract_continuity.py" line="629" time="1.455"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_revision]" file="tests/integration/test_c1_contract_continuity.py" line="629" time="1.458"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_independently_rejects_input_output_and_work_lineage_drift[steering-qualified_output_tree]" file="tests/integration/test_c1_contract_continuity.py" line="629" time="1.889"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[work-verification]" file="tests/integration/test_c1_contract_continuity.py" line="643" time="1.382"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[work-candidate]" file="tests/integration/test_c1_contract_continuity.py" line="643" time="1.340"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[work-native-attempt]" file="tests/integration/test_c1_contract_continuity.py" line="643" time="1.338"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[work-source-baseline]" file="tests/integration/test_c1_contract_continuity.py" line="643" time="1.723"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[work-proposed-snapshot]" file="tests/integration/test_c1_contract_continuity.py" line="643" time="1.358"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[work-pwu]" file="tests/integration/test_c1_contract_continuity.py" line="643" time="1.351"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[steering-verification]" file="tests/integration/test_c1_contract_continuity.py" line="643" time="1.662"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[steering-candidate]" file="tests/integration/test_c1_contract_continuity.py" line="643" time="1.536"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[steering-native-attempt]" file="tests/integration/test_c1_contract_continuity.py" line="643" time="1.450"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[steering-source-baseline]" file="tests/integration/test_c1_contract_continuity.py" line="643" time="1.471"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[steering-proposed-snapshot]" file="tests/integration/test_c1_contract_continuity.py" line="643" time="1.789"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[steering-pwu]" file="tests/integration/test_c1_contract_continuity.py" line="643" time="1.445"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-deploy]" file="tests/integration/test_c1_contract_continuity.py" line="661" time="1.356"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_real_delivery_authorization_entrypoints_deny_prohibited_effects[work-publish]" file="tests/integration/test_c1_contract_continuity.py" line="661" time="1.429"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-deploy]" file="tests/integration/test_c1_contract_continuity.py" line="661" time="1.595"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_real_delivery_authorization_entrypoints_deny_prohibited_effects[steering-publish]" file="tests/integration/test_c1_contract_continuity.py" line="661" time="1.440"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_contract_rejects_fabricated_future_human_authority[work-acceptance_state-ACCEPTED]" file="tests/integration/test_c1_contract_continuity.py" line="683" time="1.411"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_contract_rejects_fabricated_future_human_authority[work-delivery_authorization_state-AUTHORIZED]" file="tests/integration/test_c1_contract_continuity.py" line="683" time="1.639"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_contract_rejects_fabricated_future_human_authority[steering-acceptance_state-ACCEPTED]" file="tests/integration/test_c1_contract_continuity.py" line="683" time="1.460"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_contract_rejects_fabricated_future_human_authority[steering-delivery_authorization_state-AUTHORIZED]" file="tests/integration/test_c1_contract_continuity.py" line="683" time="1.500"><error message="failed on setup with &quot;ValueError: OBLIGATION_PROJECTION_UNRESOLVED&quot;">tests/integration/test_c1_contract_continuity.py:451: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:429: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+src/spg/application/governed_obligations.py:145: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+src/spg/application/governed_obligations.py:749: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED</error></testcase></testsuite></testsuites>

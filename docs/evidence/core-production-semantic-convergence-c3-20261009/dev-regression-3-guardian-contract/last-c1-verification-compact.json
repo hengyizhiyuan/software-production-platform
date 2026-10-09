@@ -1,0 +1,175 @@
+{
+  "observed_at_utc": "2026-10-09T11:04:32.086506+00:00",
+  "work_id": "05ba84df-6881-56b6-a23a-f0e6c7120d41",
+  "work_reality_revision_id": "35571d11-9ce6-5e45-812f-21a86b8b31fb",
+  "pwu_id": "4770e7c7-d15c-4f4e-b9a3-cce598818908",
+  "verifications": [
+    {
+      "id": "2ad7d287-fa64-5624-a923-41b4f01a1b3a",
+      "obligation": "PATH_SCOPE",
+      "result": "PASS",
+      "protected_context_checks_count": 6,
+      "decision_context": {
+        "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3",
+        "protected_obligations": [
+          {
+            "content": "index.html changes alone",
+            "coverage": "COVERED",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:0",
+            "semantic_key": "greenfield-constraint:0",
+            "context_class": "APPROVED_CONSTRAINT",
+            "content_digest": "6efc3ee6307872c9f50d945ac6f4c69c06abb2c1b5ca0117c009329674740a12",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "verification_ref": null,
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3"
+          },
+          {
+            "content": "Excluded from this Work: deployment, publishing",
+            "coverage": "COVERED",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:1",
+            "semantic_key": "greenfield-constraint:1",
+            "context_class": "APPROVED_CONSTRAINT",
+            "content_digest": "dd2cfe25578eb3dc067cb581f09269920e139280391d883d9b65d1a067d5dd17",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "verification_ref": null,
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3"
+          },
+          {
+            "content": "A reviewable Candidate is left for Human acceptance",
+            "coverage": "PENDING_CANDIDATE_GATE",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:2",
+            "semantic_key": "greenfield-constraint:2",
+            "context_class": "APPROVED_CONSTRAINT",
+            "content_digest": "e2a293cc9ee7c6c2eb4e2bb5907c0fe0731f36e0c304c287a60451f91ea6e5f0",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "verification_ref": null,
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3"
+          },
+          {
+            "content": "Excluded from this Work: deployment",
+            "coverage": "COVERED",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:3",
+            "semantic_key": "greenfield-constraint:3",
+            "context_class": "APPROVED_CONSTRAINT",
+            "content_digest": "2daa60a268ab4beae79a2e77d1a2803019414734a9a52e3991ba4ef7c2765531",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "verification_ref": null,
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3"
+          },
+          {
+            "content": "Excluded from this Work: publishing",
+            "coverage": "COVERED",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:4",
+            "semantic_key": "greenfield-constraint:4",
+            "context_class": "APPROVED_CONSTRAINT",
+            "content_digest": "cb74abbf0b5db8207fbad70bdf5566ee63bcfe893ca144da10543198b2c3f4e9",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "verification_ref": null,
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3"
+          },
+          {
+            "content": "{\"desired_outcome\": \"Create index.html\", \"governed_production_intents\": [{\"acceptance_required\": true, \"allowed_areas\": [], \"bounded_change\": true, \"current\": true, \"delivery_authorized\": false, \"exclusions\": [\"deployment\", \"publishing\"], \"new_work\": true, \"objective\": \"Create index.html\\nh1 text in index.html equals C1 continuity\\nindex.html changes alone\\nExcluded from this Work: deployment, publishing\\nA reviewable Candidate is left for Human acceptance\", \"preview_required\": false, \"primary_change\": \"Create index.html\", \"repository_reference\": null, \"repository_required\": false, \"scope\": [], \"systemic_design\": false, \"target_paths\": [{\"provenance\": {\"evidence_reference\": null, \"origin\": \"HUMAN_EXPLICIT\", \"source_record_id\": \"d2f1cecb-75e5-4ea0-bbfd-87feab3b4367\", \"source_text\": \"Create index.html\"}, \"value\": \"index.html\"}], \"unresolved\": [], \"unresolved_arguments\": []}]}",
+            "coverage": "COVERED",
+            "authority": "WATT_PRODUCT_GOVERNOR",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-product-intent",
+            "semantic_key": "greenfield-product-intent",
+            "context_class": "PRODUCT_INTENT",
+            "content_digest": "b0dbf8d5791cd91a9c51518013eb5a9d75b6d5156e14ad8caf5b7dbb7b253bfb",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "verification_ref": null,
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e9d817a6-d340-54c6-a14b-b71c8ae5e173",
+      "obligation": "GIT_DIFF_CHECK",
+      "result": "PASS",
+      "protected_context_checks_count": 0,
+      "decision_context": {
+        "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3",
+        "protected_obligations": [
+          {
+            "content": "index.html changes alone",
+            "coverage": "UNVERIFIED",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:0",
+            "semantic_key": "greenfield-constraint:0",
+            "context_class": "APPROVED_CONSTRAINT",
+            "content_digest": "6efc3ee6307872c9f50d945ac6f4c69c06abb2c1b5ca0117c009329674740a12",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "verification_ref": null,
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3"
+          },
+          {
+            "content": "Excluded from this Work: deployment, publishing",
+            "coverage": "UNVERIFIED",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:1",
+            "semantic_key": "greenfield-constraint:1",
+            "context_class": "APPROVED_CONSTRAINT",
+            "content_digest": "dd2cfe25578eb3dc067cb581f09269920e139280391d883d9b65d1a067d5dd17",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "verification_ref": null,
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3"
+          },
+          {
+            "content": "A reviewable Candidate is left for Human acceptance",
+            "coverage": "UNVERIFIED",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:2",
+            "semantic_key": "greenfield-constraint:2",
+            "context_class": "APPROVED_CONSTRAINT",
+            "content_digest": "e2a293cc9ee7c6c2eb4e2bb5907c0fe0731f36e0c304c287a60451f91ea6e5f0",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "verification_ref": null,
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3"
+          },
+          {
+            "content": "Excluded from this Work: deployment",
+            "coverage": "UNVERIFIED",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:3",
+            "semantic_key": "greenfield-constraint:3",
+            "context_class": "APPROVED_CONSTRAINT",
+            "content_digest": "2daa60a268ab4beae79a2e77d1a2803019414734a9a52e3991ba4ef7c2765531",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "verification_ref": null,
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3"
+          },
+          {
+            "content": "Excluded from this Work: publishing",
+            "coverage": "UNVERIFIED",
+            "authority": "WATT_ARCHITECTURE_GOVERNOR",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-constraint:4",
+            "semantic_key": "greenfield-constraint:4",
+            "context_class": "APPROVED_CONSTRAINT",
+            "content_digest": "cb74abbf0b5db8207fbad70bdf5566ee63bcfe893ca144da10543198b2c3f4e9",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "verification_ref": null,
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3"
+          },
+          {
+            "content": "{\"desired_outcome\": \"Create index.html\", \"governed_production_intents\": [{\"acceptance_required\": true, \"allowed_areas\": [], \"bounded_change\": true, \"current\": true, \"delivery_authorized\": false, \"exclusions\": [\"deployment\", \"publishing\"], \"new_work\": true, \"objective\": \"Create index.html\\nh1 text in index.html equals C1 continuity\\nindex.html changes alone\\nExcluded from this Work: deployment, publishing\\nA reviewable Candidate is left for Human acceptance\", \"preview_required\": false, \"primary_change\": \"Create index.html\", \"repository_reference\": null, \"repository_required\": false, \"scope\": [], \"systemic_design\": false, \"target_paths\": [{\"provenance\": {\"evidence_reference\": null, \"origin\": \"HUMAN_EXPLICIT\", \"source_record_id\": \"d2f1cecb-75e5-4ea0-bbfd-87feab3b4367\", \"source_text\": \"Create index.html\"}, \"value\": \"index.html\"}], \"unresolved\": [], \"unresolved_arguments\": []}]}",
+            "coverage": "UNVERIFIED",
+            "authority": "WATT_PRODUCT_GOVERNOR",
+            "source_ref": "work-reality:05ba84df-6881-56b6-a23a-f0e6c7120d41:greenfield-product-intent",
+            "semantic_key": "greenfield-product-intent",
+            "context_class": "PRODUCT_INTENT",
+            "content_digest": "b0dbf8d5791cd91a9c51518013eb5a9d75b6d5156e14ad8caf5b7dbb7b253bfb",
+            "source_revision": "24965b0b729ce6861aa7f24ca6463dd5046628c8acba92791321c6149d07275a",
+            "verification_ref": null,
+            "package_fingerprint": "216a9bba93e0a59385df382aca6a4ca82b9f9aeaad22daa70107f23fb4189ae3"
+          }
+        ]
+      }
+    }
+  ],
+  "formation_observation_count": 6
+}

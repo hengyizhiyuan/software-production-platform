@@ -1,0 +1,36 @@
+EE                                                                       [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_both_actual_admission_paths_reach_independent_guardian[work] _
+tests/integration/test_c1_contract_continuity.py:500: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:484: in _admit_c1
+    assert {index for binding in bindings for index in binding.work_constraint_indices} == {0, 1, 2}
+E   assert {0, 1, 2, 3, 4} == {0, 1, 2}
+E     
+E     Extra items in the left set:
+E     3
+E     4
+E     Use -v to get more diff
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+_ ERROR at setup of test_both_actual_admission_paths_reach_independent_guardian[steering] _
+tests/integration/test_c1_contract_continuity.py:500: in admitted_contract
+    return _admit_c1(postgres_database, tmp_path, request.param)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:484: in _admit_c1
+    assert {index for binding in bindings for index in binding.work_constraint_indices} == {0, 1, 2}
+E   assert {0, 1, 2, 3, 4} == {0, 1, 2}
+E     
+E     Extra items in the left set:
+E     3
+E     4
+E     Use -v to get more diff
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+=========================== short test summary info ============================
+ERROR tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian[work]
+ERROR tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian[steering]
+2 errors in 10.90s
