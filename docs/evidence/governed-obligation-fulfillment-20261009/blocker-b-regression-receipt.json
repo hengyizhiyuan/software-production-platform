@@ -1,0 +1,15 @@
+{
+  "kind": "isolated-source-overlay-regression",
+  "branch_code_commit": "9b3ca2f0b3e298a64ba345229c5856e22be931e5",
+  "base_image": "watt-n1-gof:84d16b1",
+  "base_image_digest": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+  "source_work_revision": "c8372b46-7701-5d8c-bed9-c2a07084f66d",
+  "source_ir": "82132598-0186-58a7-b35d-cf70c02ccda3",
+  "route_count": 5,
+  "actual_g0_ir_probe": "PASS",
+  "negative_cases": ["missing-reference", "forbidden-grant", "wrong-revision", "failed-git-scope", "wrong-target-scope"],
+  "directed_python_tests": {"passed": 7, "failed": 0},
+  "new_image_built": false,
+  "new_work_created": false,
+  "live_work_pass": false
+}

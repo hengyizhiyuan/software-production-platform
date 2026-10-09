@@ -1,0 +1,17 @@
+{
+  "kind": "isolated-existing-attempt-preflight-replay",
+  "attempt_id": "e3addc05-7ee4-49f4-9043-c69b6466bcf8",
+  "historical_rejection_event_id": "879cdfb4-77e6-4837-a8af-875563dbb59b",
+  "worker_root": "/var/lib/spg/native-workspaces",
+  "persisted_mount_path": "/var/lib/spg/native-workspaces/e3addc05-7ee4-49f4-9043-c69b6466bcf8",
+  "source_revision": "0bdd028418e0e7efea7675cfbbd6b6a3a008ceeb",
+  "positive": "PASS_NOW_ONLY",
+  "checks": [
+    {"case": "wrong-path", "result": "REJECTED", "reason": "VERIFICATION_FAILED: workspace unavailable"},
+    {"case": "wrong-revision", "result": "REJECTED", "reason": "VERIFICATION_FAILED: repository basis changed"},
+    {"case": "symlink", "result": "REJECTED", "reason": "VERIFICATION_FAILED: workspace unavailable"},
+    {"case": "wrong-scope", "result": "REJECTED", "reason": "VERIFICATION_FAILED: changed file outside Task scope"}
+  ],
+  "historical_cause": "UNKNOWN",
+  "historical_attempt_reclassified": false
+}
