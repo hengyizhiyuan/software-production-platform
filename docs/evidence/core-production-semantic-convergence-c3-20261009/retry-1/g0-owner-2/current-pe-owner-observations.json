@@ -1,0 +1,13 @@
+{
+  "consistency": "DOCKER_READ_AFTER_DB_AND_FILESYSTEM_CAPTURE_NOT_ATOMIC",
+  "historical_effect_absence_not_inferred": true,
+  "public_release": {
+    "evidence_level": "E1_SCOPED_OWNER_OBSERVATION",
+    "method": "exact known C3 private credential values removed in memory",
+    "private_root_released": false,
+    "qualification_claim": "NO_WORK_PASS_OR_HUMAN_AUTHORITY_INFERRED",
+    "unknown_sensitive_values_not_claimed_absent": true
+  },
+  "records": [],
+  "scope": "existing actual Provider handle container IDs only; readonly Docker inspect"
+}

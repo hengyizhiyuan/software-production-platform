@@ -1,0 +1,95 @@
+{
+  "actual_api_container_id": "34b52f46af6c6d5505979da7ecf4a1c1dfa473e4a7075ecdcc498e80e61ee0ce",
+  "actual_api_image_id": "sha256:6f8d9b3a27e7e2452097a77427115df6e09b9a03276eb72d0170a66160e0578f",
+  "actual_api_user": "10001:10001",
+  "collector_exit_code": 0,
+  "collector_installs_source_overlay": false,
+  "database_transaction_read_only": "on",
+  "docker_services_created_restarted_or_removed": 0,
+  "ended_at_utc": "2026-10-09T13:00:24.049588Z",
+  "evidence_level": "E1_SCOPED_OWNER_OBSERVATIONS",
+  "export_complete": true,
+  "harness_sha256": {
+    "c3_export_owner_records.py": "8cc1ef541bb62143baec963ae22b8f005ff35a761fd36d56b2fa65c1fcbb0fb7",
+    "c3_export_work_snapshot.py": "6527a2ec9098c2a9deef5eedc9a73a85e3cc9b5c7cae94b18bc1bc190d3b3a4a"
+  },
+  "human_authority_written": false,
+  "known_credential_redactions": 0,
+  "known_secret_scan": "PASS_KNOWN_VALUES_ONLY",
+  "model_calls": 0,
+  "mutating_database_queries": 0,
+  "mutating_git_commands": 0,
+  "private_directory": "/data/watt/c3-semantic-convergence-20261009/retry-1/private/owner-export-20261009T130018202910Z-4e3bb0ce19814c93ab7aa569488755c6",
+  "private_file_mode": "0600",
+  "public_directory": "/data/watt/c3-semantic-convergence-20261009/retry-1/evidence/owner-export-20261009T130018202910Z-4e3bb0ce19814c93ab7aa569488755c6",
+  "public_files": [
+    {
+      "file": "20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json",
+      "sha256": "9b013274f1a6daafc776297a302c52c8247cd2fd5ec9c5b99a83279fd2ee8e2c"
+    },
+    {
+      "file": "20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-summary-draft.json",
+      "sha256": "2c2b78d058cdd3bd165bd665635fe24d215a5db0b0d83cee26d1262aca4d00c6"
+    },
+    {
+      "file": "current-pe-owner-observations.json",
+      "sha256": "5505102d30d1ee4ef7ee81c2db2bfaa4a8e69db8f258d43f0b91f20595a99c9e"
+    },
+    {
+      "file": "runner-raw.json",
+      "sha256": "23a2bb2857bce0d7a7775b9a8b6510a5f374f1f1499423b8bfa1958c446dbbfc"
+    }
+  ],
+  "qualification_claim": "NO_COMPLETE_WORK_OR_GENERIC_CAPABILITY_PASS_INFERRED",
+  "retained_history_rewritten": false,
+  "runtime_identity": {
+    "api_base_url": "http://watt-c3-retry1-api-20261009:8000",
+    "api_service": "watt-c3-retry1-api-20261009",
+    "captured_at_utc": "2026-10-09T12:49:15.912004+00:00",
+    "database_name": "spg_c3_retry1_qualification_20261009",
+    "image_id": "sha256:6f8d9b3a27e7e2452097a77427115df6e09b9a03276eb72d0170a66160e0578f",
+    "isolated": true,
+    "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+    "provider_ready": true,
+    "qualification": "C3",
+    "qualification_run": "retry-1",
+    "source_revision": "91f5dbc9906d1f857113736981517c1091ec52ae"
+  },
+  "schema": "c3-read-only-owner-export-execution-v1",
+  "source_identity_artifact_refs": [
+    {
+      "file": "build.json",
+      "sha256": "e7527017a7469550a6c942d9da3db98702244d5f8446582c98dcf18fe0afdbb9",
+      "status": "EXISTING_RETAINED_ARTIFACT"
+    },
+    {
+      "file": "runtime-role-preparation.json",
+      "sha256": "8d35a9c6c5dbaab1ac1ea8f8077512108068cbc038c2935725469a1e975cfc72",
+      "status": "EXISTING_RETAINED_ARTIFACT"
+    },
+    {
+      "file": "api-import-attestation.json",
+      "sha256": "51227fb803856e1ddb3d3a83431d0e29daf48fb0bb441a94a6c3ae08c8f72984",
+      "status": "EXISTING_RETAINED_ARTIFACT"
+    },
+    {
+      "file": "coordinator-import-attestation.json",
+      "sha256": "a4d7aa0653a85f1500c6a060e9f9ca99836669f1c5786c1ea04b8a7bf0c8455b",
+      "status": "EXISTING_RETAINED_ARTIFACT"
+    },
+    {
+      "file": "worker-import-attestation.json",
+      "sha256": "ac9804dd289396d560cb97629bda3c5ce8ef60b162b28f4193c77e116d016575",
+      "status": "EXISTING_RETAINED_ARTIFACT"
+    },
+    {
+      "file": "tool-host-import-attestation.json",
+      "sha256": "86aa3c2f32c5d05f96f73534dc103751b4770065fa1eeddf356f48868a9b594c",
+      "status": "EXISTING_RETAINED_ARTIFACT"
+    }
+  ],
+  "started_at_utc": "2026-10-09T13:00:19.314938Z",
+  "state_file_sha256": "1e43294ed5f2547ce941d6760fe17c75496477ade705fba2d89a17c5782a6188",
+  "work_created_or_resumed": false,
+  "work_id": "048189aa-0613-5307-b6f4-c430e7977f93"
+}

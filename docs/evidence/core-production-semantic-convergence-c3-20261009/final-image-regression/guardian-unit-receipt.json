@@ -1,0 +1,71 @@
+{
+  "schema": "c3-final-image-regression-v1",
+  "sources": {
+    "watt": {
+      "revision": "390fa22ec24cbab33f7feeeef96f0dfec9ce22f2",
+      "tree": "2aa36776b786bb088d34f5c082f0a19005944fd4"
+    },
+    "guardian": {
+      "revision": "657ee84aa0b38672c1b4bd67ad7a834d96bfcabd",
+      "tree": "93903e1843b2f755bdc077c5330372b32cc779b6"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "image_id": "sha256:54355780b7fdd683332b9f9e607b76fcbbfc69f2bf5c42d9a1f888e8acbb4bb3",
+  "source_overlay": false,
+  "pythonpath": "/opt/c3-owners/guardian/src:/opt/c3-owners/ecf/src:/opt/c3-test-deps:/guardian-tests",
+  "actual_imports_attestation": "actual-imports.json",
+  "guardian_test_input_path": "/data/watt/c3-semantic-convergence-20261009/build-390fa22-attempt-2/test-inputs/guardian",
+  "guardian_test_file_sha256": {
+    "tests/test_assurance_intake_runtime.py": "ee457b25bee18d3b0b9a75f4d0003d9b048a8073177bbc80f3eb79ec509e93e1",
+    "tests/test_c1_governed_evidence_continuity.py": "7ed793d8638c64403a03d017a3cbb0ae619e6d4ad0078aa5219b916280caffb7",
+    "tests/test_c3_phase_evidence.py": "064051df5109f665c73b541545c9c52a6159653d035ef7dca9d11052097aa131",
+    "tests/test_governed_obligation_evidence.py": "deae63fb961bdaf92e4ca93c711c6a8f76012aaa499218f9197d0e7c002645d1",
+    "tests/test_production_environment_intake_contract.py": "a23d29a5929250b6ac929d8cf0c9e80ff274f7a94b8a6219257ae78198613380",
+    "tests/test_software_assurance.py": "5eb770927970d2e2cc2967d653d00769ae1ea3fb266ad36c385f87ea7b0674ab"
+  },
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "--basetemp=/c3-private-fixture/tests",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "junit_family=legacy",
+    "tests/test_c3_phase_evidence.py",
+    "tests/test_c1_governed_evidence_continuity.py",
+    "tests/test_governed_obligation_evidence.py",
+    "tests/test_software_assurance.py",
+    "--tb=short",
+    "--junitxml=/c3-evidence/guardian-unit.xml"
+  ],
+  "container_name": "watt-c3-final-guardian-unit-20261009",
+  "started_at_utc": "2026-10-09T11:20:00.755514+00:00",
+  "ended_at_utc": "2026-10-09T11:20:17.495082+00:00",
+  "wall_seconds": 16.739583772956394,
+  "exit_code": 0,
+  "counts": {
+    "tests": 108,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 108
+  },
+  "database_name": "c1_contract_continuity",
+  "database_configuration_key": "SPG_TEST_DATABASE_URL",
+  "log_and_xml_sanitized": true,
+  "live_model_calls": 0,
+  "real_ai_work_created": 0,
+  "fixture_work_mutations_only": true,
+  "meaning": "exact baked-image regression; not a live AI Work qualification",
+  "private_fixture_basetemp_persisted": "/data/watt/c3-semantic-convergence-20261009/private/watt-c3-final-guardian-unit-20261009-fixture-tmp",
+  "harness_sha256": "d1c78ef0d9522b886b1754e8c55733ac50d1668d7e5d83898756a2930b993e3b"
+}

@@ -1,0 +1,8 @@
+
+==================================== ERRORS ====================================
+___________ ERROR collecting tests/test_c3_admitted_source_facets.py ___________
+tests/test_c3_admitted_source_facets.py::test_reviewed_background_same_item_keeps_all_current_request_evidence: 'request' is a reserved name and cannot be used in @pytest.mark.parametrize
+=========================== short test summary info ============================
+ERROR tests/test_c3_admitted_source_facets.py - Failed: tests/test_c3_admitte...
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 6.05s

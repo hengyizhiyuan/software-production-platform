@@ -1,0 +1,40 @@
+{
+  "failure_boundary": "host docker cp after successful existing collector output; original error stderr was not retained",
+  "files": [
+    {
+      "bytes": 166584,
+      "file": "20261009T114025817344Z-0f824f308f7c480a8c0acc0440eea4e2-canonical-work.json",
+      "raw_sha256": "1f91c7882d8f4515d2008afa3fa797bbab28a4a75872fc3d611a08ee56095d2a"
+    },
+    {
+      "bytes": 20607,
+      "file": "20261009T114025817344Z-0f824f308f7c480a8c0acc0440eea4e2-summary-draft.json",
+      "raw_sha256": "9a92e63e5c0f7be5e4fb0ee367c05909374a7759ee4b8549ab6b1a9518b35971"
+    }
+  ],
+  "historical_docker_cp_error_message": "UNKNOWN_NOT_RETAINED",
+  "known_credential_redactions": 0,
+  "model_calls": 0,
+  "original_collector_capture_started_at_utc": "2026-10-09T11:40:25.817504Z",
+  "original_collector_exit_code": 0,
+  "original_database_snapshot": {
+    "captured_at_utc": "2026-10-09 11:40:27.870137+00:00",
+    "database_name": "spg_c3_qualification_20261009",
+    "evidence_level": "E1",
+    "read_only": "on",
+    "scope": "one READ ONLY REPEATABLE READ database transaction; no qualification result inferred",
+    "transaction_snapshot": "17696:17696:"
+  },
+  "original_export_complete": true,
+  "original_raw_snapshot_sha256": "1f91c7882d8f4515d2008afa3fa797bbab28a4a75872fc3d611a08ee56095d2a",
+  "private_file_mode": "0600",
+  "qualification_claim": "ORIGINAL_SCOPED_OWNER_OBSERVATIONS_ONLY_NO_WORK_PASS",
+  "recaptured_database_or_owners": false,
+  "recovered_at_utc": "2026-10-09T11:45:56.014163Z",
+  "recovery_harness_sha256": "7373e1c609031690f1ff07b8facfa8678ba75872cde03ab5780a8a4c636881dd",
+  "root_private_directory": "/data/watt/c3-semantic-convergence-20261009/private/owner-export-20261009T114024248251Z-160bdaceae6d4e11ab9cfd1726340f5b",
+  "schema": "c3-saved-owner-snapshot-recovery-v1",
+  "transfer_method": "read exact existing files via docker exec Python read_bytes; no directory copy",
+  "work_created_resumed_or_changed": false,
+  "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+}

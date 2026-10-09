@@ -1,0 +1,2013 @@
+{
+  "captured_at": "2026-10-09T11:50:42.780453Z",
+  "evidence_level": "E1_SCOPED_APPLICATION_LOG_OBSERVATION",
+  "known_value_redaction_only": true,
+  "log_since": "2026-10-09T11:30:00Z",
+  "log_until": "2026-10-09T11:50:42.780453Z",
+  "logs_do_not_prove_full_effect_audit": true,
+  "private_raw_retained": true,
+  "records": [
+    {
+      "container_id": "3805116a12c57d73085e84990fffe84d84ed48103f2c5ad111f1c822a8a1c3e0",
+      "error_or_work_excerpts": [
+        {
+          "line": 55,
+          "text": "2026-10-09T11:39:13.530599482Z INFO:     172.26.0.8:32830 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 56,
+          "text": "2026-10-09T11:39:13.718388831Z INFO:     172.26.0.8:32840 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 57,
+          "text": "2026-10-09T11:39:13.794114984Z INFO:     172.26.0.8:32850 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 58,
+          "text": "2026-10-09T11:39:13.909005809Z INFO:     172.26.0.8:32856 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 59,
+          "text": "2026-10-09T11:39:14.048353617Z INFO:     172.26.0.8:32866 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 60,
+          "text": "2026-10-09T11:39:14.229073470Z INFO:     172.26.0.8:32882 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 61,
+          "text": "2026-10-09T11:39:14.424280244Z INFO:     172.26.0.8:32898 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 62,
+          "text": "2026-10-09T11:39:14.576891916Z INFO:     172.26.0.8:32902 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 63,
+          "text": "2026-10-09T11:39:14.650986588Z INFO:     172.26.0.8:32908 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 64,
+          "text": "2026-10-09T11:39:19.715014910Z INFO:     172.26.0.8:60842 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 65,
+          "text": "2026-10-09T11:39:19.877020472Z INFO:     172.26.0.8:60856 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 66,
+          "text": "2026-10-09T11:39:19.976412842Z INFO:     172.26.0.8:60868 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 67,
+          "text": "2026-10-09T11:39:20.097997904Z INFO:     172.26.0.8:60876 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 68,
+          "text": "2026-10-09T11:39:20.214899587Z INFO:     172.26.0.8:60884 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 69,
+          "text": "2026-10-09T11:39:20.363208474Z INFO:     172.26.0.8:60890 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 70,
+          "text": "2026-10-09T11:39:20.507001743Z INFO:     172.26.0.8:60906 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 71,
+          "text": "2026-10-09T11:39:20.560574639Z INFO:     172.26.0.8:60916 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 72,
+          "text": "2026-10-09T11:39:20.634386927Z INFO:     172.26.0.8:60926 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 73,
+          "text": "2026-10-09T11:39:25.705005376Z INFO:     172.26.0.8:60928 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 74,
+          "text": "2026-10-09T11:39:25.983102903Z INFO:     172.26.0.8:60942 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 75,
+          "text": "2026-10-09T11:39:26.074999797Z INFO:     172.26.0.8:60948 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 76,
+          "text": "2026-10-09T11:39:26.223279876Z INFO:     172.26.0.8:60962 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 77,
+          "text": "2026-10-09T11:39:26.363995944Z INFO:     172.26.0.8:60970 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 78,
+          "text": "2026-10-09T11:39:26.500931926Z INFO:     172.26.0.8:60974 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 79,
+          "text": "2026-10-09T11:39:26.670202178Z INFO:     172.26.0.8:60982 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 80,
+          "text": "2026-10-09T11:39:26.726653116Z INFO:     172.26.0.8:60988 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 81,
+          "text": "2026-10-09T11:39:26.777808062Z INFO:     172.26.0.8:60990 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 82,
+          "text": "2026-10-09T11:39:31.837665874Z INFO:     172.26.0.8:33600 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 83,
+          "text": "2026-10-09T11:39:32.111336918Z INFO:     172.26.0.8:33614 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 84,
+          "text": "2026-10-09T11:39:32.215057928Z INFO:     172.26.0.8:33626 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 85,
+          "text": "2026-10-09T11:39:32.389895026Z INFO:     172.26.0.8:33634 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 86,
+          "text": "2026-10-09T11:39:32.526907174Z INFO:     172.26.0.8:33650 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 87,
+          "text": "2026-10-09T11:39:32.648972254Z INFO:     172.26.0.8:33660 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 88,
+          "text": "2026-10-09T11:39:32.763630014Z INFO:     172.26.0.8:33674 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 89,
+          "text": "2026-10-09T11:39:32.809815315Z INFO:     172.26.0.8:33688 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 90,
+          "text": "2026-10-09T11:39:32.856332110Z INFO:     172.26.0.8:33692 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 91,
+          "text": "2026-10-09T11:39:37.919167857Z INFO:     172.26.0.8:33698 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 92,
+          "text": "2026-10-09T11:39:38.191733872Z INFO:     172.26.0.8:33708 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 93,
+          "text": "2026-10-09T11:39:38.284052464Z INFO:     172.26.0.8:33718 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 94,
+          "text": "2026-10-09T11:39:38.410023686Z INFO:     172.26.0.8:33720 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 95,
+          "text": "2026-10-09T11:39:38.524617207Z INFO:     172.26.0.8:33736 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 96,
+          "text": "2026-10-09T11:39:38.648465893Z INFO:     172.26.0.8:33752 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 97,
+          "text": "2026-10-09T11:39:38.752692514Z INFO:     172.26.0.8:33766 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 98,
+          "text": "2026-10-09T11:39:38.804766087Z INFO:     172.26.0.8:33780 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 99,
+          "text": "2026-10-09T11:39:38.852225974Z INFO:     172.26.0.8:33792 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 100,
+          "text": "2026-10-09T11:39:43.921109566Z INFO:     172.26.0.8:52984 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 101,
+          "text": "2026-10-09T11:39:44.178458887Z INFO:     172.26.0.8:52990 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 102,
+          "text": "2026-10-09T11:39:44.250022496Z INFO:     172.26.0.8:53006 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 103,
+          "text": "2026-10-09T11:39:44.416747050Z INFO:     172.26.0.8:53010 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 104,
+          "text": "2026-10-09T11:39:44.554153611Z INFO:     172.26.0.8:53018 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 105,
+          "text": "2026-10-09T11:39:44.685936243Z INFO:     172.26.0.8:53034 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 106,
+          "text": "2026-10-09T11:39:44.804301151Z INFO:     172.26.0.8:53044 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 107,
+          "text": "2026-10-09T11:39:44.872043543Z INFO:     172.26.0.8:53046 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 108,
+          "text": "2026-10-09T11:39:44.923476746Z INFO:     172.26.0.8:53062 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 109,
+          "text": "2026-10-09T11:39:49.997359343Z INFO:     172.26.0.8:54966 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 110,
+          "text": "2026-10-09T11:39:50.228979420Z INFO:     172.26.0.8:54974 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 111,
+          "text": "2026-10-09T11:39:50.299132439Z INFO:     172.26.0.8:54978 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 112,
+          "text": "2026-10-09T11:39:50.432083693Z INFO:     172.26.0.8:54984 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 113,
+          "text": "2026-10-09T11:39:50.551892113Z INFO:     172.26.0.8:54998 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 114,
+          "text": "2026-10-09T11:39:50.699842803Z INFO:     172.26.0.8:55014 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 115,
+          "text": "2026-10-09T11:39:50.812188627Z INFO:     172.26.0.8:55030 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 116,
+          "text": "2026-10-09T11:39:50.870506899Z INFO:     172.26.0.8:55044 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 117,
+          "text": "2026-10-09T11:39:50.931641968Z INFO:     172.26.0.8:55046 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 118,
+          "text": "2026-10-09T11:39:56.030428658Z INFO:     172.26.0.8:55062 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 119,
+          "text": "2026-10-09T11:39:56.195872510Z INFO:     172.26.0.8:55078 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 120,
+          "text": "2026-10-09T11:39:56.257801674Z INFO:     172.26.0.8:55084 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 121,
+          "text": "2026-10-09T11:39:56.370348493Z INFO:     172.26.0.8:55100 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 122,
+          "text": "2026-10-09T11:39:56.477837700Z INFO:     172.26.0.8:55104 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 123,
+          "text": "2026-10-09T11:39:56.611225579Z INFO:     172.26.0.8:55120 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 124,
+          "text": "2026-10-09T11:39:56.718240090Z INFO:     172.26.0.8:55126 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 125,
+          "text": "2026-10-09T11:39:56.763576036Z INFO:     172.26.0.8:55142 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 126,
+          "text": "2026-10-09T11:39:56.808104191Z INFO:     172.26.0.8:55148 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 127,
+          "text": "2026-10-09T11:40:01.890039367Z INFO:     172.26.0.8:58702 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 128,
+          "text": "2026-10-09T11:40:02.060202275Z INFO:     172.26.0.8:58718 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 129,
+          "text": "2026-10-09T11:40:02.120388693Z INFO:     172.26.0.8:58728 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 130,
+          "text": "2026-10-09T11:40:02.232658814Z INFO:     172.26.0.8:58734 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 131,
+          "text": "2026-10-09T11:40:02.338818555Z INFO:     172.26.0.8:58744 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 132,
+          "text": "2026-10-09T11:40:02.463662501Z INFO:     172.26.0.8:58752 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 133,
+          "text": "2026-10-09T11:40:02.578499093Z INFO:     172.26.0.8:58758 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 134,
+          "text": "2026-10-09T11:40:02.625282658Z INFO:     172.26.0.8:58766 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 135,
+          "text": "2026-10-09T11:40:02.678647612Z INFO:     172.26.0.8:58780 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 136,
+          "text": "2026-10-09T11:40:07.749737838Z INFO:     172.26.0.8:58792 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 137,
+          "text": "2026-10-09T11:40:07.907904523Z INFO:     172.26.0.8:58800 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 138,
+          "text": "2026-10-09T11:40:07.963794658Z INFO:     172.26.0.8:58810 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 139,
+          "text": "2026-10-09T11:40:08.082764421Z INFO:     172.26.0.8:58826 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 140,
+          "text": "2026-10-09T11:40:08.185668183Z INFO:     172.26.0.8:58828 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 141,
+          "text": "2026-10-09T11:40:08.297878976Z INFO:     172.26.0.8:58844 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 142,
+          "text": "2026-10-09T11:40:08.400473685Z INFO:     172.26.0.8:58856 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 143,
+          "text": "2026-10-09T11:40:08.448031226Z INFO:     172.26.0.8:58872 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 144,
+          "text": "2026-10-09T11:40:08.517090298Z INFO:     172.26.0.8:58882 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 145,
+          "text": "2026-10-09T11:40:13.565565583Z INFO:     172.26.0.8:53928 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 146,
+          "text": "2026-10-09T11:40:13.729367104Z INFO:     172.26.0.8:53938 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 147,
+          "text": "2026-10-09T11:40:13.789877642Z INFO:     172.26.0.8:53942 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 148,
+          "text": "2026-10-09T11:40:13.906466517Z INFO:     172.26.0.8:53956 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 149,
+          "text": "2026-10-09T11:40:14.019959519Z INFO:     172.26.0.8:53964 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 150,
+          "text": "2026-10-09T11:40:14.134059266Z INFO:     172.26.0.8:53966 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 151,
+          "text": "2026-10-09T11:40:14.231229152Z INFO:     172.26.0.8:53972 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 152,
+          "text": "2026-10-09T11:40:14.282092149Z INFO:     172.26.0.8:53980 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 153,
+          "text": "2026-10-09T11:40:14.356436611Z INFO:     172.26.0.8:53996 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 154,
+          "text": "2026-10-09T11:40:19.423418963Z INFO:     172.26.0.8:54002 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 155,
+          "text": "2026-10-09T11:40:19.610402195Z INFO:     172.26.0.8:51946 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 156,
+          "text": "2026-10-09T11:40:19.677048479Z INFO:     172.26.0.8:51960 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 157,
+          "text": "2026-10-09T11:40:19.791722823Z INFO:     172.26.0.8:51968 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 158,
+          "text": "2026-10-09T11:40:19.897214779Z INFO:     172.26.0.8:51984 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 159,
+          "text": "2026-10-09T11:40:20.002190815Z INFO:     172.26.0.8:52000 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 160,
+          "text": "2026-10-09T11:40:20.105587083Z INFO:     172.26.0.8:52006 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 161,
+          "text": "2026-10-09T11:40:20.171433372Z INFO:     172.26.0.8:52008 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 162,
+          "text": "2026-10-09T11:40:20.247990852Z INFO:     172.26.0.8:52010 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 163,
+          "text": "2026-10-09T11:40:25.354703075Z INFO:     172.26.0.8:52022 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 164,
+          "text": "2026-10-09T11:40:25.641973320Z INFO:     172.26.0.8:52036 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 165,
+          "text": "2026-10-09T11:40:25.750977241Z INFO:     172.26.0.8:52044 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 166,
+          "text": "2026-10-09T11:40:25.944016708Z INFO:     172.26.0.8:52046 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 167,
+          "text": "2026-10-09T11:40:26.127224986Z INFO:     172.26.0.8:52056 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 168,
+          "text": "2026-10-09T11:40:26.575851912Z INFO:     172.26.0.8:52070 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 169,
+          "text": "2026-10-09T11:40:26.815404385Z INFO:     172.26.0.8:52076 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 170,
+          "text": "2026-10-09T11:40:26.913842755Z INFO:     172.26.0.8:52078 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 171,
+          "text": "2026-10-09T11:40:27.022961022Z INFO:     172.26.0.8:52082 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 172,
+          "text": "2026-10-09T11:40:32.096267059Z INFO:     172.26.0.8:40020 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 173,
+          "text": "2026-10-09T11:40:32.319157934Z INFO:     172.26.0.8:40022 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 174,
+          "text": "2026-10-09T11:40:32.406687929Z INFO:     172.26.0.8:40036 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 175,
+          "text": "2026-10-09T11:40:32.539039920Z INFO:     172.26.0.8:40048 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 176,
+          "text": "2026-10-09T11:40:32.659747681Z INFO:     172.26.0.8:40056 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 177,
+          "text": "2026-10-09T11:40:32.802858158Z INFO:     172.26.0.8:40072 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 178,
+          "text": "2026-10-09T11:40:32.906309325Z INFO:     172.26.0.8:40078 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 179,
+          "text": "2026-10-09T11:40:32.957308363Z INFO:     172.26.0.8:40080 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 180,
+          "text": "2026-10-09T11:40:33.007210703Z INFO:     172.26.0.8:40084 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 181,
+          "text": "2026-10-09T11:40:38.090978096Z INFO:     172.26.0.8:40088 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 182,
+          "text": "2026-10-09T11:40:38.310513054Z INFO:     172.26.0.8:40100 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 183,
+          "text": "2026-10-09T11:40:38.397624855Z INFO:     172.26.0.8:40112 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 184,
+          "text": "2026-10-09T11:40:38.548203754Z INFO:     172.26.0.8:40122 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 185,
+          "text": "2026-10-09T11:40:38.702655007Z INFO:     172.26.0.8:40124 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 186,
+          "text": "2026-10-09T11:40:38.830221067Z INFO:     172.26.0.8:40130 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 187,
+          "text": "2026-10-09T11:40:38.939225187Z INFO:     172.26.0.8:40146 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 188,
+          "text": "2026-10-09T11:40:38.988694104Z INFO:     172.26.0.8:40162 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 189,
+          "text": "2026-10-09T11:40:39.044397646Z INFO:     172.26.0.8:40164 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 190,
+          "text": "2026-10-09T11:40:44.100927547Z INFO:     172.26.0.8:49258 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 191,
+          "text": "2026-10-09T11:40:44.325927346Z INFO:     172.26.0.8:49274 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 192,
+          "text": "2026-10-09T11:40:44.400736869Z INFO:     172.26.0.8:49286 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 193,
+          "text": "2026-10-09T11:40:44.558171146Z INFO:     172.26.0.8:49290 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 194,
+          "text": "2026-10-09T11:40:44.677724535Z INFO:     172.26.0.8:49300 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 195,
+          "text": "2026-10-09T11:40:44.787852143Z INFO:     172.26.0.8:49306 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 196,
+          "text": "2026-10-09T11:40:44.893467015Z INFO:     172.26.0.8:49312 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 197,
+          "text": "2026-10-09T11:40:44.948018629Z INFO:     172.26.0.8:49326 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 198,
+          "text": "2026-10-09T11:40:45.004460396Z INFO:     172.26.0.8:49340 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 199,
+          "text": "2026-10-09T11:40:50.165608560Z INFO:     172.26.0.8:60876 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 200,
+          "text": "2026-10-09T11:40:50.456790528Z INFO:     172.26.0.8:60884 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 201,
+          "text": "2026-10-09T11:40:50.549040091Z INFO:     172.26.0.8:60896 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 202,
+          "text": "2026-10-09T11:40:50.708922797Z INFO:     172.26.0.8:60906 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 203,
+          "text": "2026-10-09T11:40:50.850947970Z INFO:     172.26.0.8:60910 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 204,
+          "text": "2026-10-09T11:40:51.044358141Z INFO:     172.26.0.8:60920 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 205,
+          "text": "2026-10-09T11:40:51.190619883Z INFO:     172.26.0.8:60924 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 206,
+          "text": "2026-10-09T11:40:51.279291326Z INFO:     172.26.0.8:60936 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 207,
+          "text": "2026-10-09T11:40:51.390403918Z INFO:     172.26.0.8:60946 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 208,
+          "text": "2026-10-09T11:40:56.467340459Z INFO:     172.26.0.8:60956 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 209,
+          "text": "2026-10-09T11:40:56.724093646Z INFO:     172.26.0.8:60972 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 210,
+          "text": "2026-10-09T11:40:56.807895098Z INFO:     172.26.0.8:60978 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 211,
+          "text": "2026-10-09T11:40:57.000601712Z INFO:     172.26.0.8:60990 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 212,
+          "text": "2026-10-09T11:40:57.170346041Z INFO:     172.26.0.8:60998 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 213,
+          "text": "2026-10-09T11:40:57.367853352Z INFO:     172.26.0.8:32768 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 214,
+          "text": "2026-10-09T11:40:57.501969177Z INFO:     172.26.0.8:32778 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 215,
+          "text": "2026-10-09T11:40:57.563936072Z INFO:     172.26.0.8:32786 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 216,
+          "text": "2026-10-09T11:40:57.637988437Z INFO:     172.26.0.8:32796 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 217,
+          "text": "2026-10-09T11:41:02.733219986Z INFO:     172.26.0.8:41606 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 218,
+          "text": "2026-10-09T11:41:03.087901390Z INFO:     172.26.0.8:41614 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 219,
+          "text": "2026-10-09T11:41:03.196882866Z INFO:     172.26.0.8:41628 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 220,
+          "text": "2026-10-09T11:41:03.360102806Z INFO:     172.26.0.8:41634 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 221,
+          "text": "2026-10-09T11:41:03.502950048Z INFO:     172.26.0.8:41644 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 222,
+          "text": "2026-10-09T11:41:03.668337621Z INFO:     172.26.0.8:41660 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 223,
+          "text": "2026-10-09T11:41:03.841044452Z INFO:     172.26.0.8:41662 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 224,
+          "text": "2026-10-09T11:41:03.932239255Z INFO:     172.26.0.8:41664 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 225,
+          "text": "2026-10-09T11:41:04.064475415Z INFO:     172.26.0.8:41680 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 226,
+          "text": "2026-10-09T11:41:09.137271358Z INFO:     172.26.0.8:41692 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 227,
+          "text": "2026-10-09T11:41:09.363836544Z INFO:     172.26.0.8:41706 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 228,
+          "text": "2026-10-09T11:41:09.498938536Z INFO:     172.26.0.8:55932 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 229,
+          "text": "2026-10-09T11:41:09.675790999Z INFO:     172.26.0.8:55940 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 230,
+          "text": "2026-10-09T11:41:09.862248520Z INFO:     172.26.0.8:55950 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 231,
+          "text": "2026-10-09T11:41:10.022106363Z INFO:     172.26.0.8:55956 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 232,
+          "text": "2026-10-09T11:41:10.184480213Z INFO:     172.26.0.8:55972 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 233,
+          "text": "2026-10-09T11:41:10.274330594Z INFO:     172.26.0.8:55978 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 234,
+          "text": "2026-10-09T11:41:10.356749610Z INFO:     172.26.0.8:55990 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 235,
+          "text": "2026-10-09T11:41:15.450405050Z INFO:     172.26.0.8:56002 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 236,
+          "text": "2026-10-09T11:41:15.709510566Z INFO:     172.26.0.8:56018 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 237,
+          "text": "2026-10-09T11:41:15.787838523Z INFO:     172.26.0.8:56026 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 238,
+          "text": "2026-10-09T11:41:15.968937505Z INFO:     172.26.0.8:56034 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 239,
+          "text": "2026-10-09T11:41:16.153842036Z INFO:     172.26.0.8:56046 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 240,
+          "text": "2026-10-09T11:41:16.335138071Z INFO:     172.26.0.8:56060 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 241,
+          "text": "2026-10-09T11:41:16.465994624Z INFO:     172.26.0.8:56072 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 242,
+          "text": "2026-10-09T11:41:16.547782645Z INFO:     172.26.0.8:56088 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 243,
+          "text": "2026-10-09T11:41:16.655661429Z INFO:     172.26.0.8:56094 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 244,
+          "text": "2026-10-09T11:41:21.789993837Z INFO:     172.26.0.8:59854 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 245,
+          "text": "2026-10-09T11:41:22.045284911Z INFO:     172.26.0.8:59870 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 246,
+          "text": "2026-10-09T11:41:22.184207768Z INFO:     172.26.0.8:59872 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 247,
+          "text": "2026-10-09T11:41:22.393912810Z INFO:     172.26.0.8:59876 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 248,
+          "text": "2026-10-09T11:41:22.561296562Z INFO:     172.26.0.8:59878 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 249,
+          "text": "2026-10-09T11:41:22.717445521Z INFO:     172.26.0.8:59890 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 250,
+          "text": "2026-10-09T11:41:22.836192120Z INFO:     172.26.0.8:59896 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 251,
+          "text": "2026-10-09T11:41:22.902902272Z INFO:     172.26.0.8:59900 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 252,
+          "text": "2026-10-09T11:41:22.955131577Z INFO:     172.26.0.8:59908 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 253,
+          "text": "2026-10-09T11:41:28.036780608Z INFO:     172.26.0.8:59910 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 254,
+          "text": "2026-10-09T11:41:28.317799624Z INFO:     172.26.0.8:59914 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 255,
+          "text": "2026-10-09T11:41:28.403082775Z INFO:     172.26.0.8:59916 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 256,
+          "text": "2026-10-09T11:41:28.582165084Z INFO:     172.26.0.8:59932 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 257,
+          "text": "2026-10-09T11:41:28.752122817Z INFO:     172.26.0.8:59946 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 258,
+          "text": "2026-10-09T11:41:28.889817969Z INFO:     172.26.0.8:59962 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 259,
+          "text": "2026-10-09T11:41:29.050951459Z INFO:     172.26.0.8:59968 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 260,
+          "text": "2026-10-09T11:41:29.163995293Z INFO:     172.26.0.8:59972 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 261,
+          "text": "2026-10-09T11:41:29.264267953Z INFO:     172.26.0.8:59976 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 262,
+          "text": "2026-10-09T11:41:34.346991847Z INFO:     172.26.0.8:51350 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 263,
+          "text": "2026-10-09T11:41:34.630813795Z INFO:     172.26.0.8:51358 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 264,
+          "text": "2026-10-09T11:41:34.796003232Z INFO:     172.26.0.8:51374 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 265,
+          "text": "2026-10-09T11:41:35.106146158Z INFO:     172.26.0.8:51386 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 266,
+          "text": "2026-10-09T11:41:35.318165640Z INFO:     172.26.0.8:51392 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 267,
+          "text": "2026-10-09T11:41:35.580781592Z INFO:     172.26.0.8:51398 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 268,
+          "text": "2026-10-09T11:41:35.783651812Z INFO:     172.26.0.8:51400 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 269,
+          "text": "2026-10-09T11:41:35.909270155Z INFO:     172.26.0.8:51414 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 270,
+          "text": "2026-10-09T11:41:36.045749012Z INFO:     172.26.0.8:51422 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 271,
+          "text": "2026-10-09T11:41:41.166091803Z INFO:     172.26.0.8:46318 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 272,
+          "text": "2026-10-09T11:41:41.632791342Z INFO:     172.26.0.8:46322 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 273,
+          "text": "2026-10-09T11:41:41.748987075Z INFO:     172.26.0.8:46324 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 274,
+          "text": "2026-10-09T11:41:41.972826231Z INFO:     172.26.0.8:46328 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 275,
+          "text": "2026-10-09T11:41:42.147253363Z INFO:     172.26.0.8:46342 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 276,
+          "text": "2026-10-09T11:41:42.298569540Z INFO:     172.26.0.8:46354 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 277,
+          "text": "2026-10-09T11:41:42.421826716Z INFO:     172.26.0.8:46358 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 278,
+          "text": "2026-10-09T11:41:42.554955846Z INFO:     172.26.0.8:46362 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 279,
+          "text": "2026-10-09T11:41:42.696864138Z INFO:     172.26.0.8:46376 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 280,
+          "text": "2026-10-09T11:41:47.786066095Z INFO:     172.26.0.8:46378 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 281,
+          "text": "2026-10-09T11:41:48.024091913Z INFO:     172.26.0.8:46384 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 282,
+          "text": "2026-10-09T11:41:48.144848308Z INFO:     172.26.0.8:46394 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 283,
+          "text": "2026-10-09T11:41:48.291945379Z INFO:     172.26.0.8:46406 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 284,
+          "text": "2026-10-09T11:41:48.448184223Z INFO:     172.26.0.8:46414 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 285,
+          "text": "2026-10-09T11:41:48.594844883Z INFO:     172.26.0.8:46422 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 286,
+          "text": "2026-10-09T11:41:48.713494457Z INFO:     172.26.0.8:46428 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 287,
+          "text": "2026-10-09T11:41:48.772538435Z INFO:     172.26.0.8:46430 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 288,
+          "text": "2026-10-09T11:41:48.831827533Z INFO:     172.26.0.8:46438 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 289,
+          "text": "2026-10-09T11:41:53.901947391Z INFO:     172.26.0.8:41238 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 290,
+          "text": "2026-10-09T11:41:54.160393029Z INFO:     172.26.0.8:41240 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 291,
+          "text": "2026-10-09T11:41:54.277823124Z INFO:     172.26.0.8:41256 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 292,
+          "text": "2026-10-09T11:41:54.502919855Z INFO:     172.26.0.8:41270 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 293,
+          "text": "2026-10-09T11:41:54.641974164Z INFO:     172.26.0.8:41272 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 294,
+          "text": "2026-10-09T11:41:54.806336053Z INFO:     172.26.0.8:41288 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 295,
+          "text": "2026-10-09T11:41:54.950692297Z INFO:     172.26.0.8:41290 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 296,
+          "text": "2026-10-09T11:41:55.008793718Z INFO:     172.26.0.8:41304 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 297,
+          "text": "2026-10-09T11:41:55.081666094Z INFO:     172.26.0.8:41314 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 298,
+          "text": "2026-10-09T11:42:00.262349830Z INFO:     172.26.0.8:47884 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 299,
+          "text": "2026-10-09T11:42:00.520028697Z INFO:     172.26.0.8:47900 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 300,
+          "text": "2026-10-09T11:42:00.610797341Z INFO:     172.26.0.8:47916 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 301,
+          "text": "2026-10-09T11:42:00.814313405Z INFO:     172.26.0.8:47918 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 302,
+          "text": "2026-10-09T11:42:00.989929563Z INFO:     172.26.0.8:47924 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 303,
+          "text": "2026-10-09T11:42:01.133417697Z INFO:     172.26.0.8:47926 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 304,
+          "text": "2026-10-09T11:42:01.290961933Z INFO:     172.26.0.8:47938 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 305,
+          "text": "2026-10-09T11:42:01.368830899Z INFO:     172.26.0.8:47944 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 306,
+          "text": "2026-10-09T11:42:01.428193506Z INFO:     172.26.0.8:47946 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 307,
+          "text": "2026-10-09T11:42:06.503373075Z INFO:     172.26.0.8:47954 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 308,
+          "text": "2026-10-09T11:42:06.731033019Z INFO:     172.26.0.8:47970 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 309,
+          "text": "2026-10-09T11:42:06.807011001Z INFO:     172.26.0.8:47976 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 310,
+          "text": "2026-10-09T11:42:06.966477691Z INFO:     172.26.0.8:47982 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 311,
+          "text": "2026-10-09T11:42:07.163930144Z INFO:     172.26.0.8:47998 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 312,
+          "text": "2026-10-09T11:42:07.428044077Z INFO:     172.26.0.8:48012 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 313,
+          "text": "2026-10-09T11:42:07.566554857Z INFO:     172.26.0.8:48024 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 314,
+          "text": "2026-10-09T11:42:07.626929715Z INFO:     172.26.0.8:48032 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 315,
+          "text": "2026-10-09T11:42:07.760088593Z INFO:     172.26.0.8:48034 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 316,
+          "text": "2026-10-09T11:42:12.919030246Z INFO:     172.26.0.8:60926 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 317,
+          "text": "2026-10-09T11:42:13.153512985Z INFO:     172.26.0.8:60938 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 318,
+          "text": "2026-10-09T11:42:13.327016070Z INFO:     172.26.0.8:60946 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 319,
+          "text": "2026-10-09T11:42:13.511613848Z INFO:     172.26.0.8:60956 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 320,
+          "text": "2026-10-09T11:42:13.672859132Z INFO:     172.26.0.8:60966 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 321,
+          "text": "2026-10-09T11:42:13.862297313Z INFO:     172.26.0.8:60972 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 322,
+          "text": "2026-10-09T11:42:14.015171473Z INFO:     172.26.0.8:60986 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 323,
+          "text": "2026-10-09T11:42:14.091414759Z INFO:     172.26.0.8:60988 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 324,
+          "text": "2026-10-09T11:42:14.183515084Z INFO:     172.26.0.8:60990 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 325,
+          "text": "2026-10-09T11:42:19.301677896Z INFO:     172.26.0.8:60994 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 326,
+          "text": "2026-10-09T11:42:19.604132234Z INFO:     172.26.0.8:32768 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 327,
+          "text": "2026-10-09T11:42:19.843466794Z INFO:     172.26.0.8:49148 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 328,
+          "text": "2026-10-09T11:42:20.187527898Z INFO:     172.26.0.8:49154 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 329,
+          "text": "2026-10-09T11:42:20.342181573Z INFO:     172.26.0.8:49160 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 330,
+          "text": "2026-10-09T11:42:20.537427731Z INFO:     172.26.0.8:49172 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 331,
+          "text": "2026-10-09T11:42:20.688598740Z INFO:     172.26.0.8:49180 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 332,
+          "text": "2026-10-09T11:42:20.762115098Z INFO:     172.26.0.8:49184 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 333,
+          "text": "2026-10-09T11:42:20.838201631Z INFO:     172.26.0.8:49190 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 334,
+          "text": "2026-10-09T11:42:25.947508601Z INFO:     172.26.0.8:49204 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 335,
+          "text": "2026-10-09T11:42:26.317083025Z INFO:     172.26.0.8:49210 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 336,
+          "text": "2026-10-09T11:42:26.426189864Z INFO:     172.26.0.8:49218 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 337,
+          "text": "2026-10-09T11:42:26.590802279Z INFO:     172.26.0.8:49232 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 338,
+          "text": "2026-10-09T11:42:26.768292046Z INFO:     172.26.0.8:49236 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 339,
+          "text": "2026-10-09T11:42:26.907022348Z INFO:     172.26.0.8:49242 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 340,
+          "text": "2026-10-09T11:42:27.029993024Z INFO:     172.26.0.8:49252 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 341,
+          "text": "2026-10-09T11:42:27.096303004Z INFO:     172.26.0.8:49268 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 342,
+          "text": "2026-10-09T11:42:27.190001253Z INFO:     172.26.0.8:49272 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 343,
+          "text": "2026-10-09T11:42:32.338207095Z INFO:     172.26.0.8:43254 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 344,
+          "text": "2026-10-09T11:42:32.595937392Z INFO:     172.26.0.8:43270 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 345,
+          "text": "2026-10-09T11:42:32.708844304Z INFO:     172.26.0.8:43280 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 346,
+          "text": "2026-10-09T11:42:32.883554256Z INFO:     172.26.0.8:43284 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 347,
+          "text": "2026-10-09T11:42:33.059832542Z INFO:     172.26.0.8:43300 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 348,
+          "text": "2026-10-09T11:42:33.202089227Z INFO:     172.26.0.8:43310 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 349,
+          "text": "2026-10-09T11:42:33.346186866Z INFO:     172.26.0.8:43320 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 350,
+          "text": "2026-10-09T11:42:33.399440783Z INFO:     172.26.0.8:43324 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 351,
+          "text": "2026-10-09T11:42:33.457472152Z INFO:     172.26.0.8:43326 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 352,
+          "text": "2026-10-09T11:42:38.534203784Z INFO:     172.26.0.8:43336 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 353,
+          "text": "2026-10-09T11:42:38.720284591Z INFO:     172.26.0.8:43348 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 354,
+          "text": "2026-10-09T11:42:38.827969303Z INFO:     172.26.0.8:43356 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 355,
+          "text": "2026-10-09T11:42:38.991114971Z INFO:     172.26.0.8:43372 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 356,
+          "text": "2026-10-09T11:42:39.159637261Z INFO:     172.26.0.8:43374 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 357,
+          "text": "2026-10-09T11:42:39.296148076Z INFO:     172.26.0.8:43382 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 358,
+          "text": "2026-10-09T11:42:39.439886663Z INFO:     172.26.0.8:43390 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 359,
+          "text": "2026-10-09T11:42:39.517089384Z INFO:     172.26.0.8:37726 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 360,
+          "text": "2026-10-09T11:42:39.610828328Z INFO:     172.26.0.8:37736 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 361,
+          "text": "2026-10-09T11:42:44.745785975Z INFO:     172.26.0.8:37742 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 362,
+          "text": "2026-10-09T11:42:45.005115965Z INFO:     172.26.0.8:37758 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 363,
+          "text": "2026-10-09T11:42:45.090501040Z INFO:     172.26.0.8:37764 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 364,
+          "text": "2026-10-09T11:42:45.251333245Z INFO:     172.26.0.8:37780 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 365,
+          "text": "2026-10-09T11:42:45.444908281Z INFO:     172.26.0.8:37794 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 366,
+          "text": "2026-10-09T11:42:45.599195009Z INFO:     172.26.0.8:37804 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 367,
+          "text": "2026-10-09T11:42:45.788519958Z INFO:     172.26.0.8:37810 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 368,
+          "text": "2026-10-09T11:42:45.838283846Z INFO:     172.26.0.8:37822 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 369,
+          "text": "2026-10-09T11:42:45.897909864Z INFO:     172.26.0.8:37824 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 370,
+          "text": "2026-10-09T11:42:51.000900637Z INFO:     172.26.0.8:40868 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 371,
+          "text": "2026-10-09T11:42:51.268563436Z INFO:     172.26.0.8:40870 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 372,
+          "text": "2026-10-09T11:42:51.353217808Z INFO:     172.26.0.8:40876 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 373,
+          "text": "2026-10-09T11:42:51.491979614Z INFO:     172.26.0.8:40880 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 374,
+          "text": "2026-10-09T11:42:51.665923354Z INFO:     172.26.0.8:40896 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 375,
+          "text": "2026-10-09T11:42:51.859256602Z INFO:     172.26.0.8:40910 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 376,
+          "text": "2026-10-09T11:42:52.030912659Z INFO:     172.26.0.8:40922 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 377,
+          "text": "2026-10-09T11:42:52.144120005Z INFO:     172.26.0.8:40930 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 378,
+          "text": "2026-10-09T11:42:52.312930313Z INFO:     172.26.0.8:40942 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 379,
+          "text": "2026-10-09T11:42:57.393124316Z INFO:     172.26.0.8:40946 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 380,
+          "text": "2026-10-09T11:42:57.582410986Z INFO:     172.26.0.8:40956 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 381,
+          "text": "2026-10-09T11:42:57.772504580Z INFO:     172.26.0.8:40964 - \"GET /api/interactions/64478a9f-234f-43e7-8bfc-3eaa1b4b73b4/turns/61ce1843-e035-4a6a-b252-c531be68ed01/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 382,
+          "text": "2026-10-09T11:42:57.968320352Z INFO:     172.26.0.8:40980 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 383,
+          "text": "2026-10-09T11:42:58.111609704Z INFO:     172.26.0.8:40982 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 384,
+          "text": "2026-10-09T11:42:58.315690347Z INFO:     172.26.0.8:40986 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 385,
+          "text": "2026-10-09T11:42:58.479568228Z INFO:     172.26.0.8:40994 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 386,
+          "text": "2026-10-09T11:42:58.584856730Z INFO:     172.26.0.8:41008 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 387,
+          "text": "2026-10-09T11:42:58.660902633Z INFO:     172.26.0.8:41018 - \"GET /api/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 388,
+          "text": ""
+        },
+        {
+          "line": 389,
+          "text": "2026-10-09T11:37:04.884091767Z INFO:     Started server process [1]"
+        },
+        {
+          "line": 390,
+          "text": "2026-10-09T11:37:04.884172778Z INFO:     Waiting for application startup."
+        },
+        {
+          "line": 391,
+          "text": "2026-10-09T11:37:05.123281038Z INFO:     Application startup complete."
+        },
+        {
+          "line": 392,
+          "text": "2026-10-09T11:37:05.123314726Z INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)"
+        },
+        {
+          "line": 393,
+          "text": "2026-10-09T11:37:15.486653892Z 请求性能 {\"request_id\": \"b2982062-71ac-4a85-ab1e-44a0ee85344f\", \"endpoint\": \"/health\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 52.37, \"response_bytes\": 77, \"times_ms\": {\"db\": 2.98, \"serialization\": 0.11}, \"counts\": {\"db\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 394,
+          "text": "2026-10-09T11:37:44.052006048Z 请求性能 {\"request_id\": \"bdeadd88-74fa-4b3d-856b-e7d01df2d29b\", \"endpoint\": \"/api/products\", \"method\": \"POST\", \"status\": 201, \"total_ms\": 3010.73, \"response_bytes\": 1342, \"times_ms\": {\"db\": 90.0, \"subprocess\": 16.75, \"git\": 16.93, \"serialization\": 0.08}, \"counts\": {\"db\": 30, \"subprocess\": 4, \"git\": 4, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"filesystem\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 395,
+          "text": "2026-10-09T11:37:44.254418737Z 请求性能 {\"request_id\": \"542ce068-b189-4900-a054-b2c538e50cd2\", \"endpoint\": \"/api/experience/products/{product_id}/turns\", \"method\": \"POST\", \"status\": 200, \"total_ms\": 132.03, \"response_bytes\": 106, \"times_ms\": {\"db\": 61.82, \"projection\": 29.41, \"serialization\": 0.04}, \"counts\": {\"db\": 20, \"projection\": 2, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 396,
+          "text": "2026-10-09T11:37:44.362776285Z 请求性能 {\"request_id\": \"74e4b228-99af-4747-bd50-5b26dcd73721\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 64.24, \"response_bytes\": 434, \"times_ms\": {\"db\": 30.51, \"serialization\": 0.07}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 397,
+          "text": "2026-10-09T11:37:44.550744765Z 请求性能 {\"request_id\": \"277db9b1-9c70-4beb-901a-5d4d014e5cd2\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 153.48, \"response_bytes\": 4091, \"times_ms\": {\"db\": 75.32, \"serialization\": 0.13}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 398,
+          "text": "2026-10-09T11:37:44.637241491Z 请求性能 {\"request_id\": \"f208d0fb-f84d-472d-9f02-4ca20608a8aa\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 57.86, \"response_bytes\": 664, \"times_ms\": {\"db\": 25.05, \"serialization\": 0.05}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 399,
+          "text": "2026-10-09T11:37:49.687111311Z 请求性能 {\"request_id\": \"47353d1e-4407-430c-a252-4363aa20e5b3\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 15.24, \"response_bytes\": 434, \"times_ms\": {\"db\": 4.43, \"serialization\": 0.03}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 400,
+          "text": "2026-10-09T11:37:49.752161006Z 请求性能 {\"request_id\": \"3f2e9d2c-9236-4d67-a5ea-81e3d98d449b\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 34.85, \"response_bytes\": 4091, \"times_ms\": {\"db\": 14.45, \"serialization\": 0.13}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 401,
+          "text": "2026-10-09T11:37:49.815801762Z 请求性能 {\"request_id\": \"e942b281-8bf1-44f2-9bc7-c3162435497d\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 37.94, \"response_bytes\": 664, \"times_ms\": {\"db\": 14.98, \"serialization\": 0.06}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 402,
+          "text": "2026-10-09T11:37:54.877942141Z 请求性能 {\"request_id\": \"d5d69815-10d6-40a1-b921-1ccf6570e74a\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 27.99, \"response_bytes\": 434, \"times_ms\": {\"db\": 5.77, \"serialization\": 0.08}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 403,
+          "text": "2026-10-09T11:37:55.005367469Z 请求性能 {\"request_id\": \"db81daee-2e44-45de-8bbd-46cb51ddd95e\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 56.42, \"response_bytes\": 4091, \"times_ms\": {\"db\": 27.11, \"serialization\": 0.1}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 404,
+          "text": "2026-10-09T11:37:55.094451478Z 请求性能 {\"request_id\": \"84a10faf-3453-495d-b415-08baea90f66e\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 39.37, \"response_bytes\": 664, \"times_ms\": {\"db\": 18.23, \"serialization\": 0.04}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 405,
+          "text": "2026-10-09T11:38:00.223797777Z 请求性能 {\"request_id\": \"85dcd946-3611-49f3-b43f-ba488d776aa1\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 76.61, \"response_bytes\": 434, \"times_ms\": {\"db\": 31.08, \"serialization\": 0.05}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 406,
+          "text": "2026-10-09T11:38:00.343950111Z 请求性能 {\"request_id\": \"c0d42e1b-92ee-4164-80fe-fa79205a06de\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 73.15, \"response_bytes\": 4091, \"times_ms\": {\"db\": 41.49, \"serialization\": 0.1}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 407,
+          "text": "2026-10-09T11:38:00.423447621Z 请求性能 {\"request_id\": \"ebb7517c-38b2-4461-9abe-5a9ee65e555b\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 46.82, \"response_bytes\": 664, \"times_ms\": {\"db\": 22.12, \"serialization\": 0.08}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 408,
+          "text": "2026-10-09T11:38:05.480379367Z 请求性能 {\"request_id\": \"7c272e36-7417-4db3-b2a6-8c342fbed458\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 18.58, \"response_bytes\": 434, \"times_ms\": {\"db\": 4.77, \"serialization\": 0.1}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 409,
+          "text": "2026-10-09T11:38:05.544677998Z 请求性能 {\"request_id\": \"5baf9e94-20d0-4005-82fd-23b65859bdc3\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 39.98, \"response_bytes\": 4091, \"times_ms\": {\"db\": 17.92, \"serialization\": 0.1}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 410,
+          "text": "2026-10-09T11:38:05.603858525Z 请求性能 {\"request_id\": \"61ab1836-0cc2-41e8-ac2f-5da16a4d1a30\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 33.71, \"response_bytes\": 664, \"times_ms\": {\"db\": 11.66, \"serialization\": 0.1}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 411,
+          "text": "2026-10-09T11:38:10.652095098Z 请求性能 {\"request_id\": \"ae6eb5bc-97a5-4c34-942f-dbb6d0313ddb\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 19.28, \"response_bytes\": 434, \"times_ms\": {\"db\": 7.36, \"serialization\": 0.06}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 412,
+          "text": "2026-10-09T11:38:10.724819135Z 请求性能 {\"request_id\": \"f06b4560-dca4-45f3-936f-b7a06c5e1885\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 36.45, \"response_bytes\": 4091, \"times_ms\": {\"db\": 14.44, \"serialization\": 0.09}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 413,
+          "text": "2026-10-09T11:38:10.800553938Z 请求性能 {\"request_id\": \"58f1cb55-0c71-4453-8e28-8dea90f28127\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 38.03, \"response_bytes\": 664, \"times_ms\": {\"db\": 16.94, \"serialization\": 0.09}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 414,
+          "text": "2026-10-09T11:38:15.893019403Z 请求性能 {\"request_id\": \"e172d6b3-cc97-42ec-ac51-57dee1492998\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 49.56, \"response_bytes\": 434, \"times_ms\": {\"db\": 11.24, \"serialization\": 0.08}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 415,
+          "text": "2026-10-09T11:38:15.987167133Z 请求性能 {\"request_id\": \"18a567de-dde1-45f1-b708-01c066181383\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 56.36, \"response_bytes\": 4091, \"times_ms\": {\"db\": 20.33, \"serialization\": 0.1}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 416,
+          "text": "2026-10-09T11:38:16.099383494Z 请求性能 {\"request_id\": \"60b50790-6814-489a-9e42-9325ac432a2d\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 64.23, \"response_bytes\": 664, \"times_ms\": {\"db\": 28.52, \"serialization\": 0.09}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 417,
+          "text": "2026-10-09T11:38:21.172864955Z 请求性能 {\"request_id\": \"dfef326b-6c29-457c-8ec4-7c3d69695772\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 19.85, \"response_bytes\": 434, \"times_ms\": {\"db\": 7.67, \"serialization\": 0.07}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 418,
+          "text": "2026-10-09T11:38:21.242868697Z 请求性能 {\"request_id\": \"2227684d-6028-428e-aad7-079fe49355dd\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 44.19, \"response_bytes\": 4091, \"times_ms\": {\"db\": 19.36, \"serialization\": 0.15}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 419,
+          "text": "2026-10-09T11:38:21.299153056Z 请求性能 {\"request_id\": \"af4ef89e-65cf-4679-b690-51b190f3a7f9\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 33.9, \"response_bytes\": 664, \"times_ms\": {\"db\": 11.09, \"serialization\": 0.08}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 420,
+          "text": "2026-10-09T11:38:25.316559002Z WIC semantic validation failed request=9961c025-8cc8-4750-99c2-7f036baa2dbf model=deepseek-flash status=completed stage=payload_validation issue=ACTION_ARGUMENT_PROVENANCE_INVALID: fact claim differs from exact owner observation fields=['action_candidates', 'candidate_constraints', 'candidate_context', 'collaboration', 'current_requests', 'desired_outcome', 'focus_classification', 'impact_disposition', 'interpreted_motive', 'meanings', 'neutral_semantic_extractions', 'response_intent', 'semantic_fact_candidates', 'semantic_intent', 'supporting_references', 'unresolved_material_questions'] length=19326 repair=started"
+        },
+        {
+          "line": 421,
+          "text": "2026-10-09T11:38:26.354430244Z 请求性能 {\"request_id\": \"c267aaa6-7603-4b9b-9280-17494efc93ad\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 20.04, \"response_bytes\": 434, \"times_ms\": {\"db\": 9.63, \"serialization\": 0.04}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 422,
+          "text": "2026-10-09T11:38:26.410850424Z 请求性能 {\"request_id\": \"ee6cca6c-6d79-4d40-9a8c-bdaae0cee101\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 35.62, \"response_bytes\": 4091, \"times_ms\": {\"db\": 14.83, \"serialization\": 0.12}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 423,
+          "text": "2026-10-09T11:38:26.470667361Z 请求性能 {\"request_id\": \"9fa89ad8-4438-4960-a32d-5701ef2e01b6\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 36.53, \"response_bytes\": 664, \"times_ms\": {\"db\": 15.54, \"serialization\": 0.05}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 424,
+          "text": "2026-10-09T11:38:31.529761371Z 请求性能 {\"request_id\": \"7ca7ca52-aefb-43ad-8313-f8f9b83b4946\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 16.83, \"response_bytes\": 434, \"times_ms\": {\"db\": 4.58, \"serialization\": 0.05}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 425,
+          "text": "2026-10-09T11:38:31.592207755Z 请求性能 {\"request_id\": \"ef441d36-583b-4e7d-82b3-723b335b937e\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 39.9, \"response_bytes\": 4091, \"times_ms\": {\"db\": 16.36, \"serialization\": 0.1}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 426,
+          "text": "2026-10-09T11:38:31.644921871Z 请求性能 {\"request_id\": \"664e122e-9805-4aa9-8d22-688894cf4b77\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 31.1, \"response_bytes\": 664, \"times_ms\": {\"db\": 12.49, \"serialization\": 0.07}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 427,
+          "text": "2026-10-09T11:38:36.698231169Z 请求性能 {\"request_id\": \"2b52ca6e-8e54-4571-b40a-453e3a092d6f\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 19.41, \"response_bytes\": 434, \"times_ms\": {\"db\": 5.98, \"serialization\": 0.04}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 428,
+          "text": "2026-10-09T11:38:36.772266963Z 请求性能 {\"request_id\": \"b8b23dd6-af2c-47c0-acdc-e5c69b7aedef\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 39.09, \"response_bytes\": 4091, \"times_ms\": {\"db\": 16.78, \"serialization\": 0.07}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 429,
+          "text": "2026-10-09T11:38:36.844274487Z 请求性能 {\"request_id\": \"6a729d74-1da0-47b5-bfaf-ee39d6d96215\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 44.56, \"response_bytes\": 664, \"times_ms\": {\"db\": 18.65, \"serialization\": 0.07}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 430,
+          "text": "2026-10-09T11:38:41.892002967Z 请求性能 {\"request_id\": \"fa8e247e-b478-4f4b-b2b9-c42fba942330\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 17.64, \"response_bytes\": 434, \"times_ms\": {\"db\": 4.55, \"serialization\": 0.06}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 431,
+          "text": "2026-10-09T11:38:41.961532612Z 请求性能 {\"request_id\": \"39dce352-2c1b-42a4-9cd5-c4342e8a490e\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 45.54, \"response_bytes\": 4091, \"times_ms\": {\"db\": 21.72, \"serialization\": 0.15}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 432,
+          "text": "2026-10-09T11:38:42.021904506Z 请求性能 {\"request_id\": \"201c9ce7-daed-49ae-925c-33a31101dbd6\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 34.59, \"response_bytes\": 664, \"times_ms\": {\"db\": 12.37, \"serialization\": 0.06}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 433,
+          "text": "2026-10-09T11:38:47.078988989Z 请求性能 {\"request_id\": \"e04b6fc5-65e0-4566-91c8-14ee8f5004b5\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 24.16, \"response_bytes\": 434, \"times_ms\": {\"db\": 6.43, \"serialization\": 0.05}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 434,
+          "text": "2026-10-09T11:38:47.235696591Z 请求性能 {\"request_id\": \"355230de-e071-4313-a5b3-f9a58cce3d1b\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 104.04, \"response_bytes\": 4091, \"times_ms\": {\"db\": 46.58, \"serialization\": 0.11}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 435,
+          "text": "2026-10-09T11:38:47.342052409Z 请求性能 {\"request_id\": \"df72a62a-5a48-40b2-a660-0026efeed5e5\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 61.13, \"response_bytes\": 664, \"times_ms\": {\"db\": 31.4, \"serialization\": 0.06}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 436,
+          "text": "2026-10-09T11:38:52.432057134Z 请求性能 {\"request_id\": \"e90db498-db25-4e02-9102-921c9ac9d089\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 21.26, \"response_bytes\": 434, \"times_ms\": {\"db\": 4.37, \"serialization\": 0.06}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 437,
+          "text": "2026-10-09T11:38:52.504973010Z 请求性能 {\"request_id\": \"f008b662-a243-4fc4-954c-9162f002a1a8\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 45.99, \"response_bytes\": 4091, \"times_ms\": {\"db\": 18.7, \"serialization\": 0.15}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 438,
+          "text": "2026-10-09T11:38:52.605981465Z 请求性能 {\"request_id\": \"d3add5a1-cee9-41c5-8bd5-1c53f17e82fb\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 53.26, \"response_bytes\": 664, \"times_ms\": {\"db\": 25.86, \"serialization\": 0.06}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 439,
+          "text": "2026-10-09T11:38:57.676145256Z 请求性能 {\"request_id\": \"a758f9ee-0377-4415-9623-f4dfcb4f8a00\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 19.97, \"response_bytes\": 434, \"times_ms\": {\"db\": 8.24, \"serialization\": 0.03}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 440,
+          "text": "2026-10-09T11:38:57.740984891Z 请求性能 {\"request_id\": \"9d4b85fc-b4f8-42be-93e6-289638d30280\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 41.98, \"response_bytes\": 4091, \"times_ms\": {\"db\": 17.54, \"serialization\": 0.11}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 441,
+          "text": "2026-10-09T11:38:57.796145599Z 请求性能 {\"request_id\": \"4c1965ee-2d20-4412-941a-49973ff2b630\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 32.39, \"response_bytes\": 664, \"times_ms\": {\"db\": 13.84, \"serialization\": 0.06}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 510,
+          "text": "2026-10-09T11:39:50.817395337Z 请求性能 {\"request_id\": \"2225af73-a166-4af2-ac02-2e2fca5af10b\", \"endpoint\": \"/api/works/{work_id}/self-refine\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 89.23, \"response_bytes\": 909, \"times_ms\": {\"db\": 44.95, \"projection\": 0.9, \"serialization\": 0.1}, \"counts\": {\"db\": 22, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 511,
+          "text": "2026-10-09T11:39:50.870536381Z 请求性能 {\"request_id\": \"e9537c19-6eae-44fb-aff3-4601b6ba7db9\", \"endpoint\": \"/api/works/{work_id}/guardian-assurance\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 26.5, \"response_bytes\": 71, \"times_ms\": {\"db\": 9.8, \"filesystem\": 0.17, \"serialization\": 0.03}, \"counts\": {\"db\": 4, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 512,
+          "text": "2026-10-09T11:39:50.931536931Z 请求性能 {\"request_id\": \"6178bc11-e87d-43b7-947c-a8afc69b235f\", \"endpoint\": \"/api/works/{work_id}/delivery\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 31.98, \"response_bytes\": 146, \"times_ms\": {\"db\": 10.56, \"serialization\": 0.06}, \"counts\": {\"db\": 6, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 513,
+          "text": "2026-10-09T11:39:53.391404323Z Steering activation failed Work=24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        },
+        {
+          "line": 514,
+          "text": "2026-10-09T11:39:53.391450567Z Traceback (most recent call last):"
+        },
+        {
+          "line": 515,
+          "text": "2026-10-09T11:39:53.391453431Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py\", line 916, in deterministic_fulfillment_projection"
+        },
+        {
+          "line": 516,
+          "text": "2026-10-09T11:39:53.391456507Z     return validate_projection_candidate(candidate, revision, ir, inventory)"
+        },
+        {
+          "line": 517,
+          "text": "2026-10-09T11:39:53.391458573Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py\", line 830, in validate_projection_candidate"
+        },
+        {
+          "line": 518,
+          "text": "2026-10-09T11:39:53.391461908Z     return tuple(_projection_binding(revision, ir, inventory, route) for route in candidate.routes)"
+        },
+        {
+          "line": 519,
+          "text": "2026-10-09T11:39:53.391465809Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py\", line 830, in <genexpr>"
+        },
+        {
+          "line": 520,
+          "text": "2026-10-09T11:39:53.391468946Z     return tuple(_projection_binding(revision, ir, inventory, route) for route in candidate.routes)"
+        },
+        {
+          "line": 521,
+          "text": "2026-10-09T11:39:53.391471352Z                  ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+        },
+        {
+          "line": 522,
+          "text": "2026-10-09T11:39:53.391474291Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py\", line 618, in _projection_binding"
+        },
+        {
+          "line": 523,
+          "text": "2026-10-09T11:39:53.391476233Z     raise ValueError(\"OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY\")"
+        },
+        {
+          "line": 524,
+          "text": "2026-10-09T11:39:53.391478631Z ValueError: OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY"
+        },
+        {
+          "line": 525,
+          "text": "2026-10-09T11:39:53.391481750Z "
+        },
+        {
+          "line": 526,
+          "text": "2026-10-09T11:39:53.391483955Z During handling of the above exception, another exception occurred:"
+        },
+        {
+          "line": 527,
+          "text": "2026-10-09T11:39:53.391486355Z "
+        },
+        {
+          "line": 528,
+          "text": "2026-10-09T11:39:53.391488289Z Traceback (most recent call last):"
+        },
+        {
+          "line": 529,
+          "text": "2026-10-09T11:39:53.391490463Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/steering_driver.py\", line 1734, in _run_scheduled"
+        },
+        {
+          "line": 530,
+          "text": "2026-10-09T11:39:53.391494203Z     outcome = self.activate(work_id)"
+        },
+        {
+          "line": 531,
+          "text": "2026-10-09T11:39:53.391496203Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/steering_driver.py\", line 578, in activate"
+        },
+        {
+          "line": 532,
+          "text": "2026-10-09T11:39:53.391498172Z     result = self.iterate(work_id)"
+        },
+        {
+          "line": 533,
+          "text": "2026-10-09T11:39:53.391499964Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/steering_driver.py\", line 248, in iterate"
+        },
+        {
+          "line": 534,
+          "text": "2026-10-09T11:39:53.391502436Z     return self._produce_iteration(frame, before)"
+        },
+        {
+          "line": 535,
+          "text": "2026-10-09T11:39:53.391504519Z            ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^"
+        },
+        {
+          "line": 536,
+          "text": "2026-10-09T11:39:53.391506597Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/steering_driver.py\", line 1197, in _produce_iteration"
+        },
+        {
+          "line": 537,
+          "text": "2026-10-09T11:39:53.391508950Z     admission = self.production.admit_cycle("
+        },
+        {
+          "line": 538,
+          "text": "2026-10-09T11:39:53.391511614Z         self.production.materialize_request(frame.work_id)"
+        },
+        {
+          "line": 539,
+          "text": "2026-10-09T11:39:53.391514175Z     )"
+        },
+        {
+          "line": 540,
+          "text": "2026-10-09T11:39:53.391520865Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/steering_production.py\", line 374, in admit_cycle"
+        },
+        {
+          "line": 541,
+          "text": "2026-10-09T11:39:53.391523259Z     plan, completion_contract, horizon, objective = self._production_contract(request)"
+        },
+        {
+          "line": 542,
+          "text": "2026-10-09T11:39:53.391526104Z                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^"
+        },
+        {
+          "line": 543,
+          "text": "2026-10-09T11:39:53.391528350Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/steering_production.py\", line 490, in _production_contract"
+        },
+        {
+          "line": 544,
+          "text": "2026-10-09T11:39:53.391531288Z     fulfillment_bindings = admitted_fulfillment_bindings(revision, assessment,"
+        },
+        {
+          "line": 545,
+          "text": "2026-10-09T11:39:53.391533354Z         provider=self.fulfillment_provider, database=self.database,"
+        },
+        {
+          "line": 546,
+          "text": "2026-10-09T11:39:53.391535457Z         source_revision=baseline.repository_revision,"
+        },
+        {
+          "line": 547,
+          "text": "2026-10-09T11:39:53.391537732Z         exact_target_paths=tuple(target.path for target in request.change_contract.exact_targets)"
+        },
+        {
+          "line": 548,
+          "text": "2026-10-09T11:39:53.391572410Z             if request.change_contract is not None else tuple(target.path for target in request.artifact_targets))"
+        },
+        {
+          "line": 549,
+          "text": "2026-10-09T11:39:53.391574761Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py\", line 129, in admitted_fulfillment_bindings"
+        },
+        {
+          "line": 550,
+          "text": "2026-10-09T11:39:53.391576937Z     typed = deterministic_fulfillment_projection(revision, ir, inventory)"
+        },
+        {
+          "line": 551,
+          "text": "2026-10-09T11:39:53.391579188Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py\", line 919, in deterministic_fulfillment_projection"
+        },
+        {
+          "line": 552,
+          "text": "2026-10-09T11:39:53.391581172Z     return unresolved_projection(revision, ir, inventory, reason=\"OBLIGATION_TYPED_CONTRACT_NOT_COMPLETE\")"
+        },
+        {
+          "line": 553,
+          "text": "2026-10-09T11:39:53.391583397Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py\", line 927, in unresolved_projection"
+        },
+        {
+          "line": 554,
+          "text": "2026-10-09T11:39:53.391585738Z     bindings = validate_projection_candidate(FulfillmentProjectionCandidate("
+        },
+        {
+          "line": 555,
+          "text": "2026-10-09T11:39:53.391587974Z         inventory_fingerprint=inventory[\"inventory_fingerprint\"], routes=routes), revision, ir, inventory)"
+        },
+        {
+          "line": 556,
+          "text": "2026-10-09T11:39:53.391590310Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py\", line 830, in validate_projection_candidate"
+        },
+        {
+          "line": 557,
+          "text": "2026-10-09T11:39:53.391592680Z     return tuple(_projection_binding(revision, ir, inventory, route) for route in candidate.routes)"
+        },
+        {
+          "line": 558,
+          "text": "2026-10-09T11:39:53.391594447Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py\", line 830, in <genexpr>"
+        },
+        {
+          "line": 559,
+          "text": "2026-10-09T11:39:53.391596819Z     return tuple(_projection_binding(revision, ir, inventory, route) for route in candidate.routes)"
+        },
+        {
+          "line": 560,
+          "text": "2026-10-09T11:39:53.391598604Z                  ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+        },
+        {
+          "line": 561,
+          "text": "2026-10-09T11:39:53.391601482Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py\", line 657, in _projection_binding"
+        },
+        {
+          "line": 562,
+          "text": "2026-10-09T11:39:53.391603669Z     raise ValueError(\"OBLIGATION_CLAUSE_PROVENANCE_INVALID\")"
+        },
+        {
+          "line": 563,
+          "text": "2026-10-09T11:39:53.391605813Z ValueError: OBLIGATION_CLAUSE_PROVENANCE_INVALID"
+        },
+        {
+          "line": 564,
+          "text": "2026-10-09T11:39:56.030483350Z 请求性能 {\"request_id\": \"8701afd6-42de-4465-95fa-e1e7c2484b58\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 18.26, \"response_bytes\": 492, \"times_ms\": {\"db\": 5.29, \"serialization\": 0.05}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 565,
+          "text": "2026-10-09T11:39:56.197504657Z 请求性能 {\"request_id\": \"489e78fd-5c3e-4431-ae08-2cf43ea7bfd9\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 146.85, \"response_bytes\": 57013, \"times_ms\": {\"db\": 63.55, \"serialization\": 1.28}, \"counts\": {\"db\": 42, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 566,
+          "text": "2026-10-09T11:39:56.259307264Z 请求性能 {\"request_id\": \"8be611ca-9a43-438d-b5e2-e497f4dfc269\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 38.14, \"response_bytes\": 16696, \"times_ms\": {\"db\": 12.15, \"serialization\": 0.44}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 567,
+          "text": "2026-10-09T11:39:56.371942826Z 请求性能 {\"request_id\": \"5fe0033f-6a25-42a3-9478-c56ff032486e\", \"endpoint\": \"/api/works/{work_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 89.08, \"response_bytes\": 7150, \"times_ms\": {\"read_admission_wait\": 0.02, \"db\": 34.66, \"projection\": 7.45, \"serialization\": 0.26}, \"counts\": {\"read_admission_wait\": 1, \"db\": 23, \"projection\": 2, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 568,
+          "text": "2026-10-09T11:39:56.477943029Z 请求性能 {\"request_id\": \"8fb5d73f-f49c-44e9-a86d-803ef363cd4c\", \"endpoint\": \"/api/works/{work_id}/operations\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 78.98, \"response_bytes\": 1062, \"times_ms\": {\"db\": 35.34, \"projection\": 1.16, \"filesystem\": 0.26, \"serialization\": 0.09}, \"counts\": {\"db\": 24, \"projection\": 1, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 569,
+          "text": "2026-10-09T11:39:56.613318102Z 请求性能 {\"request_id\": \"462d71c0-2606-4f6d-9b1e-e7e1541d8b97\", \"endpoint\": \"/api/works/{work_id}/steering\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 103.13, \"response_bytes\": 2939, \"times_ms\": {\"db\": 50.88, \"projection\": 1.26, \"serialization\": 0.11}, \"counts\": {\"db\": 26, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 570,
+          "text": "2026-10-09T11:39:56.718299047Z 请求性能 {\"request_id\": \"7036e14e-bb0f-47ab-b8d8-43008e8f4e9b\", \"endpoint\": \"/api/works/{work_id}/self-refine\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 79.5, \"response_bytes\": 4878, \"times_ms\": {\"db\": 37.23, \"projection\": 1.26, \"serialization\": 0.1}, \"counts\": {\"db\": 22, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 571,
+          "text": "2026-10-09T11:39:56.763607349Z 请求性能 {\"request_id\": \"d297cb77-c1d6-45de-8f16-045e2396ee00\", \"endpoint\": \"/api/works/{work_id}/guardian-assurance\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 23.3, \"response_bytes\": 71, \"times_ms\": {\"db\": 6.53, \"filesystem\": 0.29, \"serialization\": 0.05}, \"counts\": {\"db\": 4, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 572,
+          "text": "2026-10-09T11:39:56.808075480Z 请求性能 {\"request_id\": \"3b8471fc-1b2e-4182-94af-e0f52dae5245\", \"endpoint\": \"/api/works/{work_id}/delivery\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 22.23, \"response_bytes\": 146, \"times_ms\": {\"db\": 7.45, \"serialization\": 0.05}, \"counts\": {\"db\": 6, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 573,
+          "text": "2026-10-09T11:40:01.892947883Z 请求性能 {\"request_id\": \"0de0f8b1-0659-4ef0-94f7-cd7c524e040f\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 20.56, \"response_bytes\": 492, \"times_ms\": {\"db\": 5.12, \"serialization\": 0.07}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 574,
+          "text": "2026-10-09T11:40:02.060255638Z 请求性能 {\"request_id\": \"0e77c612-530d-4cae-9c2f-ea03a9db5540\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 146.3, \"response_bytes\": 57013, \"times_ms\": {\"db\": 64.37, \"serialization\": 0.94}, \"counts\": {\"db\": 42, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 575,
+          "text": "2026-10-09T11:40:02.120454996Z 请求性能 {\"request_id\": \"f152dd6a-f6b4-4bbc-82a2-da46ab8cdff9\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 37.78, \"response_bytes\": 16696, \"times_ms\": {\"db\": 13.76, \"serialization\": 0.46}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 576,
+          "text": "2026-10-09T11:40:02.234897610Z 请求性能 {\"request_id\": \"cf82b056-308f-4bf5-9abb-e0af4ed1dc62\", \"endpoint\": \"/api/works/{work_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 91.21, \"response_bytes\": 7150, \"times_ms\": {\"read_admission_wait\": 0.01, \"db\": 36.33, \"projection\": 7.2, \"serialization\": 0.21}, \"counts\": {\"read_admission_wait\": 1, \"db\": 23, \"projection\": 2, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 577,
+          "text": "2026-10-09T11:40:02.338881878Z 请求性能 {\"request_id\": \"4f86dbad-017b-41a6-ab7f-77c5a0c00397\", \"endpoint\": \"/api/works/{work_id}/operations\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 80.77, \"response_bytes\": 1062, \"times_ms\": {\"db\": 37.47, \"projection\": 1.25, \"filesystem\": 0.2, \"serialization\": 0.07}, \"counts\": {\"db\": 24, \"projection\": 1, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 578,
+          "text": "2026-10-09T11:40:02.465871111Z 请求性能 {\"request_id\": \"cf7b4c05-8946-4f26-8291-5d344bdd958c\", \"endpoint\": \"/api/works/{work_id}/steering\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 102.32, \"response_bytes\": 2939, \"times_ms\": {\"db\": 56.15, \"projection\": 1.41, \"serialization\": 0.11}, \"counts\": {\"db\": 26, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 579,
+          "text": "2026-10-09T11:40:02.578566312Z 请求性能 {\"request_id\": \"edb8b1fa-2c26-4312-a045-e93b7455407c\", \"endpoint\": \"/api/works/{work_id}/self-refine\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 75.66, \"response_bytes\": 4878, \"times_ms\": {\"db\": 38.47, \"projection\": 1.1, \"serialization\": 0.09}, \"counts\": {\"db\": 22, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 580,
+          "text": "2026-10-09T11:40:02.625335522Z 请求性能 {\"request_id\": \"48ddb1e4-d7a5-4ac8-bbc4-0bb037220531\", \"endpoint\": \"/api/works/{work_id}/guardian-assurance\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 23.01, \"response_bytes\": 71, \"times_ms\": {\"db\": 9.65, \"filesystem\": 0.22, \"serialization\": 0.06}, \"counts\": {\"db\": 4, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 581,
+          "text": "2026-10-09T11:40:02.678691435Z 请求性能 {\"request_id\": \"a5988fb9-edc1-4173-89f0-9b5ffeddfb5b\", \"endpoint\": \"/api/works/{work_id}/delivery\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 28.97, \"response_bytes\": 146, \"times_ms\": {\"db\": 10.14, \"serialization\": 0.04}, \"counts\": {\"db\": 6, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 582,
+          "text": "2026-10-09T11:40:07.750286228Z 请求性能 {\"request_id\": \"9c77e689-f435-4f52-af55-d4d56a25d192\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 17.74, \"response_bytes\": 492, \"times_ms\": {\"db\": 5.99, \"serialization\": 0.04}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 583,
+          "text": "2026-10-09T11:40:07.907957922Z 请求性能 {\"request_id\": \"5ed4ab16-9d9f-4293-9456-e6785aa8eeb8\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 133.35, \"response_bytes\": 57013, \"times_ms\": {\"db\": 58.74, \"serialization\": 1.21}, \"counts\": {\"db\": 42, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 584,
+          "text": "2026-10-09T11:40:07.967807961Z 请求性能 {\"request_id\": \"59329778-fe5a-4032-826c-2f249c4a06c3\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 35.21, \"response_bytes\": 16696, \"times_ms\": {\"db\": 11.86, \"serialization\": 0.53}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 585,
+          "text": "2026-10-09T11:40:08.082726423Z 请求性能 {\"request_id\": \"b948d590-5cbe-4f09-b4a1-f0912957cb8e\", \"endpoint\": \"/api/works/{work_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 94.26, \"response_bytes\": 7150, \"times_ms\": {\"read_admission_wait\": 0.01, \"db\": 40.65, \"projection\": 7.58, \"serialization\": 0.16}, \"counts\": {\"read_admission_wait\": 1, \"db\": 23, \"projection\": 2, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 586,
+          "text": "2026-10-09T11:40:08.187145620Z 请求性能 {\"request_id\": \"c842ef96-040a-416a-876d-2a47bd8c9e79\", \"endpoint\": \"/api/works/{work_id}/operations\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 81.94, \"response_bytes\": 1062, \"times_ms\": {\"db\": 40.48, \"projection\": 1.26, \"filesystem\": 0.14, \"serialization\": 0.09}, \"counts\": {\"db\": 24, \"projection\": 1, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 587,
+          "text": "2026-10-09T11:40:08.297930898Z 请求性能 {\"request_id\": \"dc30dbf0-9be1-4679-9fde-a74faf490545\", \"endpoint\": \"/api/works/{work_id}/steering\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 85.39, \"response_bytes\": 2939, \"times_ms\": {\"db\": 38.85, \"projection\": 1.51, \"serialization\": 0.1}, \"counts\": {\"db\": 26, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 588,
+          "text": "2026-10-09T11:40:08.401831861Z 请求性能 {\"request_id\": \"fbb4e7e0-a5f7-46b0-8359-808442d55e6b\", \"endpoint\": \"/api/works/{work_id}/self-refine\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 79.15, \"response_bytes\": 4878, \"times_ms\": {\"db\": 40.33, \"projection\": 0.9, \"serialization\": 0.19}, \"counts\": {\"db\": 22, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 589,
+          "text": "2026-10-09T11:40:08.447984782Z 请求性能 {\"request_id\": \"e3cc8b61-cc8c-4157-abbd-c4949a67e6f1\", \"endpoint\": \"/api/works/{work_id}/guardian-assurance\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 20.81, \"response_bytes\": 71, \"times_ms\": {\"db\": 7.43, \"filesystem\": 0.2, \"serialization\": 0.03}, \"counts\": {\"db\": 4, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 590,
+          "text": "2026-10-09T11:40:08.517001456Z 请求性能 {\"request_id\": \"b1c946c2-f0b5-4c24-a2ba-ae4ec2226ce0\", \"endpoint\": \"/api/works/{work_id}/delivery\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 34.42, \"response_bytes\": 146, \"times_ms\": {\"db\": 11.44, \"serialization\": 0.07}, \"counts\": {\"db\": 6, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 591,
+          "text": "2026-10-09T11:40:13.565557351Z 请求性能 {\"request_id\": \"963ee488-3d7a-48ee-9ea0-fee6d1af0471\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 18.01, \"response_bytes\": 492, \"times_ms\": {\"db\": 4.22, \"serialization\": 0.06}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 592,
+          "text": "2026-10-09T11:40:13.729568847Z 请求性能 {\"request_id\": \"1234b58e-e47f-4884-a7df-3a1297d4b511\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 140.48, \"response_bytes\": 57013, \"times_ms\": {\"db\": 60.4, \"serialization\": 1.22}, \"counts\": {\"db\": 42, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 593,
+          "text": "2026-10-09T11:40:13.789948709Z 请求性能 {\"request_id\": \"1a33b7ef-efe5-46fd-8c69-5a36ddb647c0\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 37.49, \"response_bytes\": 16696, \"times_ms\": {\"db\": 12.57, \"serialization\": 0.43}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 594,
+          "text": "2026-10-09T11:40:13.907527537Z 请求性能 {\"request_id\": \"275ac192-d073-4c0a-9ebb-7ab6a8d1289e\", \"endpoint\": \"/api/works/{work_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 93.23, \"response_bytes\": 7150, \"times_ms\": {\"read_admission_wait\": 0.01, \"db\": 35.56, \"projection\": 7.91, \"serialization\": 0.17}, \"counts\": {\"read_admission_wait\": 1, \"db\": 23, \"projection\": 2, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 595,
+          "text": "2026-10-09T11:40:14.019944237Z 请求性能 {\"request_id\": \"36694ece-7997-41a4-ac4f-e72df3c7658c\", \"endpoint\": \"/api/works/{work_id}/operations\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 88.33, \"response_bytes\": 1062, \"times_ms\": {\"db\": 45.0, \"projection\": 1.3, \"filesystem\": 0.11, \"serialization\": 0.07}, \"counts\": {\"db\": 24, \"projection\": 1, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 596,
+          "text": "2026-10-09T11:40:14.134122434Z 请求性能 {\"request_id\": \"c3056b17-fdaa-41df-99ad-7284739c01a2\", \"endpoint\": \"/api/works/{work_id}/steering\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 88.45, \"response_bytes\": 2939, \"times_ms\": {\"db\": 42.18, \"projection\": 1.06, \"serialization\": 0.11}, \"counts\": {\"db\": 26, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 597,
+          "text": "2026-10-09T11:40:14.231176468Z 请求性能 {\"request_id\": \"a9eb1fff-8659-41b7-a468-2e72ff58914b\", \"endpoint\": \"/api/works/{work_id}/self-refine\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 75.78, \"response_bytes\": 4878, \"times_ms\": {\"db\": 36.47, \"projection\": 1.26, \"serialization\": 0.16}, \"counts\": {\"db\": 22, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 598,
+          "text": "2026-10-09T11:40:14.282182518Z 请求性能 {\"request_id\": \"339fb6b4-1a2e-4280-8868-2c6a3edcb676\", \"endpoint\": \"/api/works/{work_id}/guardian-assurance\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 25.95, \"response_bytes\": 71, \"times_ms\": {\"db\": 6.35, \"filesystem\": 0.24, \"serialization\": 0.04}, \"counts\": {\"db\": 4, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 599,
+          "text": "2026-10-09T11:40:14.357901605Z 请求性能 {\"request_id\": \"a952a11d-02d3-4aeb-aca9-a7cb81a82d1b\", \"endpoint\": \"/api/works/{work_id}/delivery\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 34.0, \"response_bytes\": 146, \"times_ms\": {\"db\": 15.64, \"serialization\": 0.08}, \"counts\": {\"db\": 6, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 600,
+          "text": "2026-10-09T11:40:19.423469458Z 请求性能 {\"request_id\": \"5a50f5a3-7ad0-4964-9bc7-ac363ac47eef\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 17.32, \"response_bytes\": 492, \"times_ms\": {\"db\": 4.84, \"serialization\": 0.06}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 601,
+          "text": "2026-10-09T11:40:19.612567564Z 请求性能 {\"request_id\": \"1d7b5f14-95fe-471f-bb68-c3403ec8b022\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 149.26, \"response_bytes\": 57013, \"times_ms\": {\"db\": 74.09, \"serialization\": 1.3}, \"counts\": {\"db\": 42, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 602,
+          "text": "2026-10-09T11:40:19.678920487Z 请求性能 {\"request_id\": \"09007087-f18a-47ab-b897-19b8ba7ba492\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 39.78, \"response_bytes\": 16696, \"times_ms\": {\"db\": 15.87, \"serialization\": 0.52}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 603,
+          "text": "2026-10-09T11:40:19.793211381Z 请求性能 {\"request_id\": \"b53f655c-0f92-4de9-b2c7-3599a579ef0b\", \"endpoint\": \"/api/works/{work_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 92.25, \"response_bytes\": 7150, \"times_ms\": {\"read_admission_wait\": 0.01, \"db\": 38.87, \"projection\": 7.2, \"serialization\": 0.18}, \"counts\": {\"read_admission_wait\": 1, \"db\": 23, \"projection\": 2, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 604,
+          "text": "2026-10-09T11:40:19.897209802Z 请求性能 {\"request_id\": \"a3afc6fb-31c4-4dd8-a2ef-887336cc79fa\", \"endpoint\": \"/api/works/{work_id}/operations\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 79.38, \"response_bytes\": 1062, \"times_ms\": {\"db\": 36.01, \"projection\": 1.36, \"filesystem\": 0.14, \"serialization\": 0.07}, \"counts\": {\"db\": 24, \"projection\": 1, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 605,
+          "text": "2026-10-09T11:40:20.004149376Z 请求性能 {\"request_id\": \"76e16cfa-ac9e-438d-a72c-cfb73d4528f2\", \"endpoint\": \"/api/works/{work_id}/steering\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 83.18, \"response_bytes\": 2939, \"times_ms\": {\"db\": 38.14, \"projection\": 0.94, \"serialization\": 0.13}, \"counts\": {\"db\": 26, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 606,
+          "text": "2026-10-09T11:40:20.107857670Z 请求性能 {\"request_id\": \"6ffa55e0-5613-41f7-9c9e-8f9d25a03327\", \"endpoint\": \"/api/works/{work_id}/self-refine\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 81.6, \"response_bytes\": 4878, \"times_ms\": {\"db\": 37.21, \"projection\": 1.46, \"serialization\": 0.16}, \"counts\": {\"db\": 22, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 607,
+          "text": "2026-10-09T11:40:20.171503043Z 请求性能 {\"request_id\": \"58dccbb3-3305-44d6-9c3d-b5d30b6f3716\", \"endpoint\": \"/api/works/{work_id}/guardian-assurance\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 26.74, \"response_bytes\": 71, \"times_ms\": {\"db\": 8.35, \"filesystem\": 0.16, \"serialization\": 0.04}, \"counts\": {\"db\": 4, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 608,
+          "text": "2026-10-09T11:40:20.248030469Z 请求性能 {\"request_id\": \"56b3df19-67f3-4c32-aa42-a36a6ddf0789\", \"endpoint\": \"/api/works/{work_id}/delivery\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 39.4, \"response_bytes\": 146, \"times_ms\": {\"db\": 14.11, \"serialization\": 0.05}, \"counts\": {\"db\": 6, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 609,
+          "text": "2026-10-09T11:40:25.358432874Z 请求性能 {\"request_id\": \"3b5578e8-50d3-4651-b91b-ea7589ceee36\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 40.74, \"response_bytes\": 492, \"times_ms\": {\"db\": 10.41, \"serialization\": 0.07}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 610,
+          "text": "2026-10-09T11:40:25.642030561Z 请求性能 {\"request_id\": \"26f87669-e1d8-4951-8450-e35e1b7d809f\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 255.74, \"response_bytes\": 57013, \"times_ms\": {\"db\": 119.71, \"serialization\": 1.07}, \"counts\": {\"db\": 42, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 611,
+          "text": "2026-10-09T11:40:25.751047606Z 请求性能 {\"request_id\": \"7f3a1040-a848-4613-be9f-d20c768428bd\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 68.1, \"response_bytes\": 16696, \"times_ms\": {\"db\": 35.82, \"serialization\": 0.44}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 612,
+          "text": "2026-10-09T11:40:25.944074260Z 请求性能 {\"request_id\": \"f1f5e151-5482-4be8-a33a-14a4cb9b48a1\", \"endpoint\": \"/api/works/{work_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 155.02, \"response_bytes\": 7150, \"times_ms\": {\"read_admission_wait\": 0.01, \"db\": 84.01, \"projection\": 5.75, \"serialization\": 0.18}, \"counts\": {\"read_admission_wait\": 1, \"db\": 23, \"projection\": 2, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 613,
+          "text": "2026-10-09T11:40:26.135264242Z 请求性能 {\"request_id\": \"ef5b3cf2-bfee-47e5-babb-19a0910a1355\", \"endpoint\": \"/api/works/{work_id}/operations\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 139.05, \"response_bytes\": 1062, \"times_ms\": {\"db\": 76.88, \"projection\": 1.24, \"filesystem\": 0.21, \"serialization\": 0.09}, \"counts\": {\"db\": 24, \"projection\": 1, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 614,
+          "text": "2026-10-09T11:40:26.579879048Z 请求性能 {\"request_id\": \"1cf252d1-e77d-4603-a68e-08c250d6b1d7\", \"endpoint\": \"/api/works/{work_id}/steering\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 309.66, \"response_bytes\": 2939, \"times_ms\": {\"db\": 216.35, \"projection\": 1.28, \"serialization\": 0.09}, \"counts\": {\"db\": 26, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 615,
+          "text": "2026-10-09T11:40:26.815464862Z 请求性能 {\"request_id\": \"911420b2-595b-4de7-a4e9-078150bcf014\", \"endpoint\": \"/api/works/{work_id}/self-refine\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 194.99, \"response_bytes\": 4878, \"times_ms\": {\"db\": 97.64, \"projection\": 1.4, \"serialization\": 0.2}, \"counts\": {\"db\": 22, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 616,
+          "text": "2026-10-09T11:40:26.913915322Z 请求性能 {\"request_id\": \"59a88054-b3d0-45ab-8b24-482101533e22\", \"endpoint\": \"/api/works/{work_id}/guardian-assurance\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 32.01, \"response_bytes\": 71, \"times_ms\": {\"db\": 13.85, \"filesystem\": 0.15, \"serialization\": 0.06}, \"counts\": {\"db\": 4, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 617,
+          "text": "2026-10-09T11:40:27.035117341Z 请求性能 {\"request_id\": \"3a39b827-48e5-4555-abe3-3b5701fab55d\", \"endpoint\": \"/api/works/{work_id}/delivery\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 48.4, \"response_bytes\": 146, \"times_ms\": {\"db\": 26.37, \"serialization\": 0.04}, \"counts\": {\"db\": 6, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        }
+      ],
+      "image": "sha256:54355780b7fdd683332b9f9e607b76fcbbfc69f2bf5c42d9a1f888e8acbb4bb3",
+      "known_redactions": 0,
+      "role": "watt-c3-api-20261009",
+      "total_lines": 833,
+      "user": "10001:10001"
+    },
+    {
+      "container_id": "7a07a0bd6ca8097bca0e5ad2e57a33634fbd1cc24a7d98513bc9fac083742124",
+      "error_or_work_excerpts": [],
+      "image": "sha256:54355780b7fdd683332b9f9e607b76fcbbfc69f2bf5c42d9a1f888e8acbb4bb3",
+      "known_redactions": 0,
+      "role": "watt-c3-coordinator-20261009",
+      "total_lines": 1,
+      "user": "10001:10001"
+    }
+  ],
+  "schema": "c3-existing-g0-stop-log-observation-v1",
+  "unknown_secrets_not_claimed_absent": true,
+  "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+}

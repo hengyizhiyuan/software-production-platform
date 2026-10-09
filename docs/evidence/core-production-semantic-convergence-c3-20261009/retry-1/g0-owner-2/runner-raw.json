@@ -1,0 +1,14 @@
+{
+  "ended_at_utc": "2026-10-09T13:00:22.915796Z",
+  "exit_code": 0,
+  "public_release": {
+    "evidence_level": "E1_SCOPED_OWNER_OBSERVATION",
+    "method": "exact known C3 private credential values removed in memory",
+    "private_root_released": false,
+    "qualification_claim": "NO_WORK_PASS_OR_HUMAN_AUTHORITY_INFERRED",
+    "unknown_sensitive_values_not_claimed_absent": true
+  },
+  "started_at_utc": "2026-10-09T13:00:19.314938Z",
+  "stderr": "",
+  "stdout": "{\"work_id\": \"048189aa-0613-5307-b6f4-c430e7977f93\", \"raw_private_file\": \"20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json\", \"raw_private_sha256\": \"28df5ea75ba1cc9c1d54daeb7a62e6cd48490908b024ac279ba567aff0e21714\", \"summary_private_file\": \"20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-summary-draft.json\", \"export_complete\": true, \"export_error_type\": null, \"public_release\": \"ROOT_REDACTION_APPROVAL_REQUIRED\"}\n"
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "c3-final-image-supplemental-test-input-v1",
+  "captured_at_utc": "2026-10-09T11:33:22.301912+00:00",
+  "application_revision": "390fa22ec24cbab33f7feeeef96f0dfec9ce22f2",
+  "guardian_revision": "657ee84aa0b38672c1b4bd67ad7a834d96bfcabd",
+  "ecf_revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "supplemental_test_source": {
+    "repository_path": "tests/integration/test_c1_contract_continuity.py",
+    "sha256": "d31d102e8cb3f183b8d5711527c61415b46f2dae5ceb9a464554df548149e677",
+    "change": "constraint_identity corruption selects exact admitted IR_CONSTRAINT binding; no source change or broadened regex"
+  },
+  "prior_result": {
+    "directory": "final-image-regression",
+    "c1_tests": 50,
+    "passed": 48,
+    "failed": 2,
+    "original_guard_rejection": "Fact binding requires only exact Fact identity",
+    "classification": "FIXTURE_WRONG_SOURCE_KIND; actual schema guard rejected; test assertion FAIL retained"
+  },
+  "run_scope": "exact final image targeted two failed test nodes plus previously unexecuted carrier/C2 PG groups; no live model/new AI Work; no app source/PYTHONPATH overlays",
+  "ast": "PASS"
+}

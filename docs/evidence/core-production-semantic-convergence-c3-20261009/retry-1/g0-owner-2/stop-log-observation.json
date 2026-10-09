@@ -1,0 +1,919 @@
+{
+  "application_revision": "91f5dbc9906d1f857113736981517c1091ec52ae",
+  "captured_at": "2026-10-09T13:03:58.591585Z",
+  "control_harness_sha256": "38cc7f919f408e8c0de3c8066056b5447a297621d4a720a869ceac64c4928d99",
+  "evidence_level": "E1_SCOPED_APPLICATION_LOG_OBSERVATION",
+  "known_value_redaction_only": true,
+  "log_since": "2026-10-09T12:55:00Z",
+  "log_until": "2026-10-09T13:03:58.591585Z",
+  "logs_do_not_prove_full_effect_audit": true,
+  "private_raw_retained": true,
+  "records": [
+    {
+      "container_id": "34b52f46af6c6d5505979da7ecf4a1c1dfa473e4a7075ecdcc498e80e61ee0ce",
+      "error_or_work_excerpts": [
+        {
+          "line": 57,
+          "text": "2026-10-09T12:56:55.669626182Z INFO:     172.26.0.13:46464 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 58,
+          "text": "2026-10-09T12:56:56.023096389Z INFO:     172.26.0.13:46478 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 59,
+          "text": "2026-10-09T12:56:56.204223586Z INFO:     172.26.0.13:46494 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 60,
+          "text": "2026-10-09T12:56:56.564860507Z INFO:     172.26.0.13:46508 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 61,
+          "text": "2026-10-09T12:56:56.784993313Z INFO:     172.26.0.13:46520 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 62,
+          "text": "2026-10-09T12:56:57.114124534Z INFO:     172.26.0.13:46528 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 63,
+          "text": "2026-10-09T12:56:57.385143474Z INFO:     172.26.0.13:46540 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 64,
+          "text": "2026-10-09T12:56:57.550972829Z INFO:     172.26.0.13:46548 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 65,
+          "text": "2026-10-09T12:56:57.646934718Z INFO:     172.26.0.13:46560 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 66,
+          "text": "2026-10-09T12:57:02.930982243Z INFO:     172.26.0.13:39068 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 67,
+          "text": "2026-10-09T12:57:03.379228377Z INFO:     172.26.0.13:39080 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 68,
+          "text": "2026-10-09T12:57:03.539356045Z INFO:     172.26.0.13:39092 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 69,
+          "text": "2026-10-09T12:57:03.752055239Z INFO:     172.26.0.13:39100 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 70,
+          "text": "2026-10-09T12:57:03.926991743Z INFO:     172.26.0.13:39116 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 71,
+          "text": "2026-10-09T12:57:04.191145508Z INFO:     172.26.0.13:39128 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 72,
+          "text": "2026-10-09T12:57:04.383023273Z INFO:     172.26.0.13:39136 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 73,
+          "text": "2026-10-09T12:57:04.476906524Z INFO:     172.26.0.13:39140 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 74,
+          "text": "2026-10-09T12:57:04.607988380Z INFO:     172.26.0.13:39146 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 75,
+          "text": "2026-10-09T12:57:09.703056153Z INFO:     172.26.0.13:59498 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 76,
+          "text": "2026-10-09T12:57:10.237621511Z INFO:     172.26.0.13:59504 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 77,
+          "text": "2026-10-09T12:57:10.436416670Z INFO:     172.26.0.13:59506 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 78,
+          "text": "2026-10-09T12:57:10.736912134Z INFO:     172.26.0.13:59518 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 79,
+          "text": "2026-10-09T12:57:11.020955263Z INFO:     172.26.0.13:59524 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 80,
+          "text": "2026-10-09T12:57:11.367904081Z INFO:     172.26.0.13:59538 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 81,
+          "text": "2026-10-09T12:57:11.526808283Z INFO:     172.26.0.13:59554 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 82,
+          "text": "2026-10-09T12:57:11.624378714Z INFO:     172.26.0.13:59570 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 83,
+          "text": "2026-10-09T12:57:11.742104856Z INFO:     172.26.0.13:59584 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 84,
+          "text": "2026-10-09T12:57:16.940288517Z INFO:     172.26.0.13:59598 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 85,
+          "text": "2026-10-09T12:57:17.339918167Z INFO:     172.26.0.13:59600 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 86,
+          "text": "2026-10-09T12:57:17.487532139Z INFO:     172.26.0.13:59602 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 87,
+          "text": "2026-10-09T12:57:17.703134213Z INFO:     172.26.0.13:59604 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 88,
+          "text": "2026-10-09T12:57:17.881270751Z INFO:     172.26.0.13:59616 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 89,
+          "text": "2026-10-09T12:57:18.089841125Z INFO:     172.26.0.13:59624 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 90,
+          "text": "2026-10-09T12:57:18.267627164Z INFO:     172.26.0.13:59638 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 91,
+          "text": "2026-10-09T12:57:18.346606810Z INFO:     172.26.0.13:59646 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 92,
+          "text": "2026-10-09T12:57:18.424130234Z INFO:     172.26.0.13:59654 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 93,
+          "text": "2026-10-09T12:57:23.619001481Z INFO:     172.26.0.13:54356 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 94,
+          "text": "2026-10-09T12:57:23.916806672Z INFO:     172.26.0.13:54370 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 95,
+          "text": "2026-10-09T12:57:24.138945580Z INFO:     172.26.0.13:54386 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 96,
+          "text": "2026-10-09T12:57:24.411263218Z INFO:     172.26.0.13:54388 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 97,
+          "text": "2026-10-09T12:57:24.578213992Z INFO:     172.26.0.13:54404 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 98,
+          "text": "2026-10-09T12:57:24.779102452Z INFO:     172.26.0.13:54418 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 99,
+          "text": "2026-10-09T12:57:24.959669871Z INFO:     172.26.0.13:54430 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 100,
+          "text": "2026-10-09T12:57:25.056928193Z INFO:     172.26.0.13:54442 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 101,
+          "text": "2026-10-09T12:57:25.172468844Z INFO:     172.26.0.13:54448 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 102,
+          "text": "2026-10-09T12:57:30.294927848Z INFO:     172.26.0.13:56754 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 103,
+          "text": "2026-10-09T12:57:30.622178327Z INFO:     172.26.0.13:56758 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 104,
+          "text": "2026-10-09T12:57:30.768930393Z INFO:     172.26.0.13:56766 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 105,
+          "text": "2026-10-09T12:57:30.922853046Z INFO:     172.26.0.13:56770 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 106,
+          "text": "2026-10-09T12:57:31.097169354Z INFO:     172.26.0.13:56774 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 107,
+          "text": "2026-10-09T12:57:31.358913046Z INFO:     172.26.0.13:56782 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 108,
+          "text": "2026-10-09T12:57:31.569951147Z INFO:     172.26.0.13:56798 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 109,
+          "text": "2026-10-09T12:57:31.709396490Z INFO:     172.26.0.13:56812 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 110,
+          "text": "2026-10-09T12:57:31.827249303Z INFO:     172.26.0.13:56818 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 111,
+          "text": "2026-10-09T12:57:36.996152718Z INFO:     172.26.0.13:56824 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 112,
+          "text": "2026-10-09T12:57:37.370963450Z INFO:     172.26.0.13:56830 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 113,
+          "text": "2026-10-09T12:57:37.544142953Z INFO:     172.26.0.13:56836 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 114,
+          "text": "2026-10-09T12:57:37.826330896Z INFO:     172.26.0.13:56842 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 115,
+          "text": "2026-10-09T12:57:38.048831726Z INFO:     172.26.0.13:56846 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 116,
+          "text": "2026-10-09T12:57:38.227050036Z INFO:     172.26.0.13:56852 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 117,
+          "text": "2026-10-09T12:57:38.403483439Z INFO:     172.26.0.13:56858 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 118,
+          "text": "2026-10-09T12:57:38.508164788Z INFO:     172.26.0.13:56870 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 119,
+          "text": "2026-10-09T12:57:38.638689141Z INFO:     172.26.0.13:56876 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 120,
+          "text": "2026-10-09T12:57:43.738033205Z INFO:     172.26.0.13:50650 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 121,
+          "text": "2026-10-09T12:57:44.128922473Z INFO:     172.26.0.13:50660 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 122,
+          "text": "2026-10-09T12:57:44.276137125Z INFO:     172.26.0.13:50664 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 123,
+          "text": "2026-10-09T12:57:44.506618739Z INFO:     172.26.0.13:50676 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 124,
+          "text": "2026-10-09T12:57:44.725743000Z INFO:     172.26.0.13:50680 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 125,
+          "text": "2026-10-09T12:57:44.928172788Z INFO:     172.26.0.13:50684 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 126,
+          "text": "2026-10-09T12:57:45.132346184Z INFO:     172.26.0.13:50692 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 127,
+          "text": "2026-10-09T12:57:45.213095885Z INFO:     172.26.0.13:50694 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 128,
+          "text": "2026-10-09T12:57:45.309112749Z INFO:     172.26.0.13:50704 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 129,
+          "text": "2026-10-09T12:57:50.399064060Z INFO:     172.26.0.13:46860 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 130,
+          "text": "2026-10-09T12:57:50.700915614Z INFO:     172.26.0.13:46872 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 131,
+          "text": "2026-10-09T12:57:50.822058061Z INFO:     172.26.0.13:46878 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 132,
+          "text": "2026-10-09T12:57:51.002807679Z INFO:     172.26.0.13:46894 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 133,
+          "text": "2026-10-09T12:57:51.268981465Z INFO:     172.26.0.13:46906 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 134,
+          "text": "2026-10-09T12:57:51.627907773Z INFO:     172.26.0.13:46916 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 135,
+          "text": "2026-10-09T12:57:51.917859026Z INFO:     172.26.0.13:46918 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 136,
+          "text": "2026-10-09T12:57:52.013095787Z INFO:     172.26.0.13:46930 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 137,
+          "text": "2026-10-09T12:57:52.202010460Z INFO:     172.26.0.13:46938 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 138,
+          "text": "2026-10-09T12:57:57.427653984Z INFO:     172.26.0.13:46946 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 139,
+          "text": "2026-10-09T12:57:57.743361993Z INFO:     172.26.0.13:46956 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 140,
+          "text": "2026-10-09T12:57:57.905571036Z INFO:     172.26.0.13:46968 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 141,
+          "text": "2026-10-09T12:57:58.200905916Z INFO:     172.26.0.13:46980 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 142,
+          "text": "2026-10-09T12:57:58.562192682Z INFO:     172.26.0.13:46994 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 143,
+          "text": "2026-10-09T12:57:58.954499304Z INFO:     172.26.0.13:46998 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 144,
+          "text": "2026-10-09T12:57:59.293864382Z INFO:     172.26.0.13:47000 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 145,
+          "text": "2026-10-09T12:57:59.422586310Z INFO:     172.26.0.13:47002 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 146,
+          "text": "2026-10-09T12:57:59.607120160Z INFO:     172.26.0.13:46700 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 147,
+          "text": "2026-10-09T12:58:04.775983494Z INFO:     172.26.0.13:46702 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 148,
+          "text": "2026-10-09T12:58:05.137118673Z INFO:     172.26.0.13:46706 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 149,
+          "text": "2026-10-09T12:58:05.356056336Z INFO:     172.26.0.13:46720 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 150,
+          "text": "2026-10-09T12:58:05.795008559Z INFO:     172.26.0.13:46726 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 151,
+          "text": "2026-10-09T12:58:05.980920052Z INFO:     172.26.0.13:46736 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 152,
+          "text": "2026-10-09T12:58:06.256495829Z INFO:     172.26.0.13:46740 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 153,
+          "text": "2026-10-09T12:58:06.449642932Z INFO:     172.26.0.13:46748 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 154,
+          "text": "2026-10-09T12:58:06.552331001Z INFO:     172.26.0.13:46760 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 155,
+          "text": "2026-10-09T12:58:06.643006149Z INFO:     172.26.0.13:46772 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 156,
+          "text": "2026-10-09T12:58:11.862157924Z INFO:     172.26.0.13:53162 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 157,
+          "text": "2026-10-09T12:58:12.592782905Z INFO:     172.26.0.13:53174 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 158,
+          "text": "2026-10-09T12:58:12.766580315Z INFO:     172.26.0.13:53190 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 159,
+          "text": "2026-10-09T12:58:13.356970467Z INFO:     172.26.0.13:53192 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 160,
+          "text": "2026-10-09T12:58:13.704950171Z INFO:     172.26.0.13:53196 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 161,
+          "text": "2026-10-09T12:58:14.070588101Z INFO:     172.26.0.13:53202 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 162,
+          "text": "2026-10-09T12:58:14.352196187Z INFO:     172.26.0.13:53216 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 163,
+          "text": "2026-10-09T12:58:14.550997152Z INFO:     172.26.0.13:53232 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 164,
+          "text": "2026-10-09T12:58:14.824869260Z INFO:     172.26.0.13:53248 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 165,
+          "text": "2026-10-09T12:58:19.969385241Z INFO:     172.26.0.13:33378 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 166,
+          "text": "2026-10-09T12:58:20.396051170Z INFO:     172.26.0.13:33394 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 167,
+          "text": "2026-10-09T12:58:20.527332922Z INFO:     172.26.0.13:33410 - \"GET /api/interactions/8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6/turns/1344304c-db26-42d1-a883-1991ace8bf30/realization HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 168,
+          "text": "2026-10-09T12:58:20.853581424Z INFO:     172.26.0.13:33424 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93 HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 169,
+          "text": "2026-10-09T12:58:21.149259675Z INFO:     172.26.0.13:33432 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/operations HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 170,
+          "text": "2026-10-09T12:58:21.603504050Z INFO:     172.26.0.13:33440 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/steering HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 171,
+          "text": "2026-10-09T12:58:21.868976865Z INFO:     172.26.0.13:33452 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/self-refine HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 172,
+          "text": "2026-10-09T12:58:22.077932294Z INFO:     172.26.0.13:33462 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/guardian-assurance HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 173,
+          "text": "2026-10-09T12:58:22.425954262Z INFO:     172.26.0.13:33470 - \"GET /api/works/048189aa-0613-5307-b6f4-c430e7977f93/delivery HTTP/1.1\" 200 OK"
+        },
+        {
+          "line": 174,
+          "text": ""
+        },
+        {
+          "line": 175,
+          "text": "2026-10-09T12:55:17.480484388Z 请求性能 {\"request_id\": \"3c3ab08f-e712-4d9c-9b78-4cf83d8de1b0\", \"endpoint\": \"/api/products\", \"method\": \"POST\", \"status\": 201, \"total_ms\": 4175.91, \"response_bytes\": 1350, \"times_ms\": {\"db\": 98.71, \"subprocess\": 22.3, \"git\": 22.51, \"serialization\": 0.07}, \"counts\": {\"db\": 30, \"subprocess\": 4, \"git\": 4, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"filesystem\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 176,
+          "text": "2026-10-09T12:55:17.683888534Z 请求性能 {\"request_id\": \"be742773-5103-494b-a43d-8d2924d9fff8\", \"endpoint\": \"/api/experience/products/{product_id}/turns\", \"method\": \"POST\", \"status\": 200, \"total_ms\": 134.08, \"response_bytes\": 106, \"times_ms\": {\"db\": 52.56, \"projection\": 24.33, \"serialization\": 0.05}, \"counts\": {\"db\": 20, \"projection\": 2, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 177,
+          "text": "2026-10-09T12:55:17.806561579Z 请求性能 {\"request_id\": \"02ddf59e-8253-46fc-ac74-0a56ebd9496a\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 35.97, \"response_bytes\": 434, \"times_ms\": {\"db\": 12.68, \"serialization\": 0.05}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 178,
+          "text": "2026-10-09T12:55:18.010047835Z 请求性能 {\"request_id\": \"7c5cb5fa-83c7-4a6f-854f-5bc6d726b77e\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 144.94, \"response_bytes\": 4091, \"times_ms\": {\"db\": 85.75, \"serialization\": 0.13}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 179,
+          "text": "2026-10-09T12:55:18.132224203Z 请求性能 {\"request_id\": \"43304a86-de02-498f-926c-903257a0407f\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 58.0, \"response_bytes\": 664, \"times_ms\": {\"db\": 23.5, \"serialization\": 0.07}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 180,
+          "text": "2026-10-09T12:55:23.210809218Z 请求性能 {\"request_id\": \"3583a911-1926-4560-aff9-a6762ea57360\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 19.49, \"response_bytes\": 434, \"times_ms\": {\"db\": 4.82, \"serialization\": 0.05}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 181,
+          "text": "2026-10-09T12:55:23.290382240Z 请求性能 {\"request_id\": \"a3a9bd4c-1e3c-40ac-8491-1b94f07615fa\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 43.43, \"response_bytes\": 4091, \"times_ms\": {\"db\": 18.61, \"serialization\": 0.12}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 182,
+          "text": "2026-10-09T12:55:23.365557138Z 请求性能 {\"request_id\": \"861e6518-b972-437a-95d7-050fde3f68b7\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 34.93, \"response_bytes\": 664, \"times_ms\": {\"db\": 15.88, \"serialization\": 0.08}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 183,
+          "text": "2026-10-09T12:55:28.437936975Z 请求性能 {\"request_id\": \"2ad92d0f-06b6-48c0-a348-39d30ebf068f\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 18.16, \"response_bytes\": 434, \"times_ms\": {\"db\": 4.73, \"serialization\": 0.05}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 184,
+          "text": "2026-10-09T12:55:28.510414666Z 请求性能 {\"request_id\": \"140e3035-5e5e-41d3-bc14-cf2cdca43463\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 41.61, \"response_bytes\": 4091, \"times_ms\": {\"db\": 19.5, \"serialization\": 0.1}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 185,
+          "text": "2026-10-09T12:55:28.591994517Z 请求性能 {\"request_id\": \"1b1cf79b-3e3f-4a87-87db-097d8162e689\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 33.62, \"response_bytes\": 664, \"times_ms\": {\"db\": 12.22, \"serialization\": 0.05}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 186,
+          "text": "2026-10-09T12:55:33.694588450Z 请求性能 {\"request_id\": \"ee124636-4310-434c-96ce-cdd0d9a5a044\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 25.33, \"response_bytes\": 434, \"times_ms\": {\"db\": 9.07, \"serialization\": 0.05}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 187,
+          "text": "2026-10-09T12:55:33.779182254Z 请求性能 {\"request_id\": \"922c4a52-c855-407f-b253-9449749b89c4\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 52.26, \"response_bytes\": 4091, \"times_ms\": {\"db\": 21.95, \"serialization\": 0.14}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 188,
+          "text": "2026-10-09T12:55:33.860238728Z 请求性能 {\"request_id\": \"de162a8d-9d5b-42b5-a35f-e9af3bbdf7cd\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 42.02, \"response_bytes\": 664, \"times_ms\": {\"db\": 16.17, \"serialization\": 0.08}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 189,
+          "text": "2026-10-09T12:55:38.922064639Z 请求性能 {\"request_id\": \"9c500010-9a72-46c0-b1ed-d5055ba1ec5d\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 22.03, \"response_bytes\": 434, \"times_ms\": {\"db\": 7.42, \"serialization\": 0.09}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 190,
+          "text": "2026-10-09T12:55:39.006357196Z 请求性能 {\"request_id\": \"649fe676-4158-43bc-9189-058cdc27a193\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 51.78, \"response_bytes\": 4091, \"times_ms\": {\"db\": 24.43, \"serialization\": 0.07}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 191,
+          "text": "2026-10-09T12:55:39.094657579Z 请求性能 {\"request_id\": \"79be4dbe-41eb-4e5e-b336-d2f555745002\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 55.65, \"response_bytes\": 664, \"times_ms\": {\"db\": 21.95, \"serialization\": 0.06}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 192,
+          "text": "2026-10-09T12:55:44.189539222Z 请求性能 {\"request_id\": \"a538bf8e-25f4-4c1e-9ff8-9e8f5b385260\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 27.44, \"response_bytes\": 434, \"times_ms\": {\"db\": 6.67, \"serialization\": 0.04}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 193,
+          "text": "2026-10-09T12:55:44.361908684Z 请求性能 {\"request_id\": \"c5f5ef40-0a54-4e69-b8c1-aadd7aa7cf46\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 109.45, \"response_bytes\": 4091, \"times_ms\": {\"db\": 50.92, \"serialization\": 0.12}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 194,
+          "text": "2026-10-09T12:55:44.453644697Z 请求性能 {\"request_id\": \"35cf47a2-1038-4ef1-a22d-63ebf9798c95\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 42.82, \"response_bytes\": 664, \"times_ms\": {\"db\": 15.67, \"serialization\": 0.06}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 195,
+          "text": "2026-10-09T12:55:49.654841349Z 请求性能 {\"request_id\": \"2785481d-01e2-4fa2-8587-097144a4333b\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 100.72, \"response_bytes\": 434, \"times_ms\": {\"db\": 25.61, \"serialization\": 0.05}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 196,
+          "text": "2026-10-09T12:55:49.800124487Z 请求性能 {\"request_id\": \"f4699218-20c2-42a8-bfdc-b43aae61791e\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 39.42, \"response_bytes\": 4091, \"times_ms\": {\"db\": 16.73, \"serialization\": 0.1}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 197,
+          "text": "2026-10-09T12:55:50.042072438Z 请求性能 {\"request_id\": \"0bb7c054-bc23-4aa9-96e8-2abd6a494b51\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 136.72, \"response_bytes\": 664, \"times_ms\": {\"db\": 62.9, \"serialization\": 0.07}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 198,
+          "text": "2026-10-09T12:55:55.228087065Z 请求性能 {\"request_id\": \"4d74e4f0-dc15-4570-a206-8a14ff3329d6\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 59.46, \"response_bytes\": 434, \"times_ms\": {\"db\": 18.25, \"serialization\": 0.06}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 199,
+          "text": "2026-10-09T12:55:55.475157948Z 请求性能 {\"request_id\": \"dc9ebf3a-31ca-4901-a1a7-a1d05ddfd837\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 139.78, \"response_bytes\": 4091, \"times_ms\": {\"db\": 56.03, \"serialization\": 0.12}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 200,
+          "text": "2026-10-09T12:55:55.775101506Z 请求性能 {\"request_id\": \"24e5fe2d-6611-42c2-ada6-d57c0dffacfa\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 130.67, \"response_bytes\": 664, \"times_ms\": {\"db\": 58.87, \"serialization\": 0.07}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 201,
+          "text": "2026-10-09T12:56:00.886301296Z 请求性能 {\"request_id\": \"fa089fba-1ed8-41a8-a3f8-e1708f0be6b0\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 29.04, \"response_bytes\": 434, \"times_ms\": {\"db\": 7.42, \"serialization\": 0.04}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 202,
+          "text": "2026-10-09T12:56:01.009488660Z 请求性能 {\"request_id\": \"d13defb5-8a3e-4757-9978-c65263bb4348\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 47.68, \"response_bytes\": 4091, \"times_ms\": {\"db\": 14.78, \"serialization\": 0.12}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 203,
+          "text": "2026-10-09T12:56:01.108636452Z 请求性能 {\"request_id\": \"5c93cd8d-3e5b-4928-af10-7e1aed991e29\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 47.07, \"response_bytes\": 664, \"times_ms\": {\"db\": 25.09, \"serialization\": 0.1}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 204,
+          "text": "2026-10-09T12:56:06.211975436Z 请求性能 {\"request_id\": \"2d383cb3-ed73-413f-961b-040a3a8fc24b\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 26.54, \"response_bytes\": 434, \"times_ms\": {\"db\": 9.64, \"serialization\": 0.07}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 205,
+          "text": "2026-10-09T12:56:06.317924905Z 请求性能 {\"request_id\": \"8d3913c0-24e3-4895-a13b-7be002c9a9d7\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 63.91, \"response_bytes\": 4091, \"times_ms\": {\"db\": 32.95, \"serialization\": 0.1}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 206,
+          "text": "2026-10-09T12:56:06.433724053Z 请求性能 {\"request_id\": \"489c5adb-6086-4315-9ba8-d7e68a004c79\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 43.39, \"response_bytes\": 664, \"times_ms\": {\"db\": 18.65, \"serialization\": 0.07}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 207,
+          "text": "2026-10-09T12:56:11.487652198Z WIC semantic validation failed request=29b54010-21b7-478f-90e2-6c301587f181 model=deepseek-flash status=completed stage=payload_validation issue=ACTION_ARGUMENT_PROVENANCE_INVALID: fact claim differs from exact owner observation fields=['action_candidates', 'candidate_constraints', 'candidate_context', 'collaboration', 'current_requests', 'desired_outcome', 'focus_classification', 'impact_disposition', 'interpreted_motive', 'meanings', 'neutral_semantic_extractions', 'response_intent', 'semantic_fact_candidates', 'semantic_intent', 'supporting_references', 'unresolved_material_questions'] length=26436 repair=started"
+        },
+        {
+          "line": 208,
+          "text": "2026-10-09T12:56:11.582744412Z 请求性能 {\"request_id\": \"9a7cea5a-3c53-414e-a47d-8efc202917e3\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 29.25, \"response_bytes\": 434, \"times_ms\": {\"db\": 13.41, \"serialization\": 0.05}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 209,
+          "text": "2026-10-09T12:56:11.812644454Z 请求性能 {\"request_id\": \"323ea719-0907-4c0f-ac7e-6acc19e56daa\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 106.77, \"response_bytes\": 4091, \"times_ms\": {\"db\": 49.39, \"serialization\": 0.13}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 210,
+          "text": "2026-10-09T12:56:11.922477234Z 请求性能 {\"request_id\": \"ad073898-e914-4edb-9fc3-f75a9b6550ee\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 40.96, \"response_bytes\": 664, \"times_ms\": {\"db\": 14.48, \"serialization\": 0.06}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 211,
+          "text": "2026-10-09T12:56:17.046855918Z 请求性能 {\"request_id\": \"eb8ac59b-4642-4383-88a0-30796d234849\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 22.57, \"response_bytes\": 434, \"times_ms\": {\"db\": 4.49, \"serialization\": 0.07}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 212,
+          "text": "2026-10-09T12:56:17.171211208Z 请求性能 {\"request_id\": \"1f51b67f-2319-4e31-8c3b-db23076f7825\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 54.57, \"response_bytes\": 4091, \"times_ms\": {\"db\": 23.75, \"serialization\": 0.11}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 213,
+          "text": "2026-10-09T12:56:17.313662143Z 请求性能 {\"request_id\": \"5dde4933-317d-45da-8449-76da75242683\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 59.47, \"response_bytes\": 664, \"times_ms\": {\"db\": 24.48, \"serialization\": 0.06}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 214,
+          "text": "2026-10-09T12:56:22.424126099Z 请求性能 {\"request_id\": \"35ac2a69-4cf1-407a-b6ee-b3fc1c5ee19e\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 28.68, \"response_bytes\": 434, \"times_ms\": {\"db\": 8.29, \"serialization\": 0.13}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 215,
+          "text": "2026-10-09T12:56:22.540623746Z 请求性能 {\"request_id\": \"0e84f6f8-9bd7-45c4-a78c-c24eb5bd441d\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 53.83, \"response_bytes\": 4091, \"times_ms\": {\"db\": 23.24, \"serialization\": 0.11}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 216,
+          "text": "2026-10-09T12:56:22.749127520Z 请求性能 {\"request_id\": \"bd5bcadb-06e6-4a06-8fe9-da5d8f356abf\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 133.28, \"response_bytes\": 664, \"times_ms\": {\"db\": 59.41, \"serialization\": 0.15}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 217,
+          "text": "2026-10-09T12:56:27.901224260Z 请求性能 {\"request_id\": \"05680b08-9488-4649-90e7-70a393d8ab36\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 25.45, \"response_bytes\": 434, \"times_ms\": {\"db\": 11.75, \"serialization\": 0.03}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 218,
+          "text": "2026-10-09T12:56:27.997507495Z 请求性能 {\"request_id\": \"637586a3-6cac-45d5-a35a-8a7d9c17a672\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 61.57, \"response_bytes\": 4091, \"times_ms\": {\"db\": 31.86, \"serialization\": 0.13}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 219,
+          "text": "2026-10-09T12:56:28.121265257Z 请求性能 {\"request_id\": \"2188aee5-80a1-4535-b9a4-47f967c96182\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 73.34, \"response_bytes\": 664, \"times_ms\": {\"db\": 27.6, \"serialization\": 0.06}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 220,
+          "text": "2026-10-09T12:56:33.281050418Z 请求性能 {\"request_id\": \"4471596e-2f05-488e-9d93-0632aa78e07c\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 44.86, \"response_bytes\": 434, \"times_ms\": {\"db\": 6.21, \"serialization\": 0.06}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 221,
+          "text": "2026-10-09T12:56:33.476937902Z 请求性能 {\"request_id\": \"b52aef17-43e4-4860-8de0-8ccb4a07f337\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 93.04, \"response_bytes\": 4091, \"times_ms\": {\"db\": 53.39, \"serialization\": 0.13}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 222,
+          "text": "2026-10-09T12:56:33.636954419Z 请求性能 {\"request_id\": \"86c0bb51-a8d9-4b00-9d74-946e938a4e88\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 87.71, \"response_bytes\": 664, \"times_ms\": {\"db\": 23.14, \"serialization\": 0.07}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 223,
+          "text": "2026-10-09T12:56:38.769836233Z 请求性能 {\"request_id\": \"ab738a3b-a450-4b04-8f01-70b2a9b97258\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 32.41, \"response_bytes\": 434, \"times_ms\": {\"db\": 5.55, \"serialization\": 0.05}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 224,
+          "text": "2026-10-09T12:56:39.092940025Z 请求性能 {\"request_id\": \"7ef2e78a-0359-45c0-9405-898ba843d67e\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 117.32, \"response_bytes\": 4091, \"times_ms\": {\"db\": 57.71, \"serialization\": 0.11}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 225,
+          "text": "2026-10-09T12:56:39.261845621Z 请求性能 {\"request_id\": \"7ba1cb32-ce7e-4061-ab33-59d5dec34bee\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 100.62, \"response_bytes\": 664, \"times_ms\": {\"db\": 19.97, \"serialization\": 0.09}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 226,
+          "text": "2026-10-09T12:56:44.451246064Z 请求性能 {\"request_id\": \"f20220b9-3b18-4bc7-9ef7-7f9de24da2a9\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 45.09, \"response_bytes\": 434, \"times_ms\": {\"db\": 15.03, \"serialization\": 0.05}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 227,
+          "text": "2026-10-09T12:56:44.675405273Z 请求性能 {\"request_id\": \"9f589155-f55d-4966-b51c-fecfa3393659\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 107.44, \"response_bytes\": 4091, \"times_ms\": {\"db\": 54.76, \"serialization\": 0.11}, \"counts\": {\"db\": 10, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 336,
+          "text": "2026-10-09T12:58:13.360893311Z 请求性能 {\"request_id\": \"dd0285f1-849a-418d-b196-d7042cd98383\", \"endpoint\": \"/api/works/{work_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 467.1, \"response_bytes\": 7850, \"times_ms\": {\"read_admission_wait\": 0.01, \"db\": 252.9, \"projection\": 28.39, \"serialization\": 0.2}, \"counts\": {\"read_admission_wait\": 1, \"db\": 33, \"projection\": 2, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 337,
+          "text": "2026-10-09T12:58:13.706843033Z 请求性能 {\"request_id\": \"1811f9cc-0dad-4aa6-8ca9-f89a372805e8\", \"endpoint\": \"/api/works/{work_id}/operations\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 295.05, \"response_bytes\": 1611, \"times_ms\": {\"db\": 167.49, \"projection\": 4.83, \"filesystem\": 0.18, \"serialization\": 0.1}, \"counts\": {\"db\": 50, \"projection\": 1, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 338,
+          "text": "2026-10-09T12:58:14.070588786Z 请求性能 {\"request_id\": \"a0bab3f0-691b-4da3-a59e-226ac215d76d\", \"endpoint\": \"/api/works/{work_id}/steering\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 307.5, \"response_bytes\": 3088, \"times_ms\": {\"db\": 188.39, \"projection\": 5.91, \"serialization\": 0.09}, \"counts\": {\"db\": 36, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 339,
+          "text": "2026-10-09T12:58:14.199579535Z Production orchestration stopped for Work=048189aa-0613-5307-b6f4-c430e7977f93"
+        },
+        {
+          "line": 340,
+          "text": "2026-10-09T12:58:14.199633545Z Traceback (most recent call last):"
+        },
+        {
+          "line": 341,
+          "text": "2026-10-09T12:58:14.199637787Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/orchestration.py\", line 294, in _run_scheduled"
+        },
+        {
+          "line": 342,
+          "text": "2026-10-09T12:58:14.199640430Z     outcome = self.orchestrate(work_id)"
+        },
+        {
+          "line": 343,
+          "text": "2026-10-09T12:58:14.199643377Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/orchestration.py\", line 199, in orchestrate"
+        },
+        {
+          "line": 344,
+          "text": "2026-10-09T12:58:14.199647253Z     self.work_service.advance_work(work_id)"
+        },
+        {
+          "line": 345,
+          "text": "2026-10-09T12:58:14.199649866Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^"
+        },
+        {
+          "line": 346,
+          "text": "2026-10-09T12:58:14.199652393Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/work.py\", line 2744, in advance_work"
+        },
+        {
+          "line": 347,
+          "text": "2026-10-09T12:58:14.199655037Z     self.execution.submit_queued_dispatch(summary.attempt_id, self.executor)"
+        },
+        {
+          "line": 348,
+          "text": "2026-10-09T12:58:14.199657542Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+        },
+        {
+          "line": 349,
+          "text": "2026-10-09T12:58:14.199660192Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/execution.py\", line 98, in submit_queued_dispatch"
+        },
+        {
+          "line": 350,
+          "text": "2026-10-09T12:58:14.199691238Z     executor.ensure_submitted(request)"
+        },
+        {
+          "line": 351,
+          "text": "2026-10-09T12:58:14.199693196Z     ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^"
+        },
+        {
+          "line": 352,
+          "text": "2026-10-09T12:58:14.199694945Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/infrastructure/executor_runtime/native_compatibility_executor.py\", line 125, in ensure_submitted"
+        },
+        {
+          "line": 353,
+          "text": "2026-10-09T12:58:14.199697825Z     self.submit(request)"
+        },
+        {
+          "line": 354,
+          "text": "2026-10-09T12:58:14.199700476Z     ~~~~~~~~~~~^^^^^^^^^"
+        },
+        {
+          "line": 355,
+          "text": "2026-10-09T12:58:14.199702334Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/infrastructure/executor_runtime/native_compatibility_executor.py\", line 121, in submit"
+        },
+        {
+          "line": 356,
+          "text": "2026-10-09T12:58:14.199746397Z     return self.runtime.admit(self._admission(request))"
+        },
+        {
+          "line": 357,
+          "text": "2026-10-09T12:58:14.199748513Z                               ~~~~~~~~~~~~~~~^^^^^^^^^"
+        },
+        {
+          "line": 358,
+          "text": "2026-10-09T12:58:14.199750242Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/infrastructure/executor_runtime/native_compatibility_executor.py\", line 230, in _admission"
+        },
+        {
+          "line": 359,
+          "text": "2026-10-09T12:58:14.199752352Z     validate_continuous_gates("
+        },
+        {
+          "line": 360,
+          "text": "2026-10-09T12:58:14.199754854Z     ~~~~~~~~~~~~~~~~~~~~~~~~~^"
+        },
+        {
+          "line": 361,
+          "text": "2026-10-09T12:58:14.199756676Z         completion.fulfillment_bindings, work_revision, semantic_ir,"
+        },
+        {
+          "line": 362,
+          "text": "2026-10-09T12:58:14.199758479Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+        },
+        {
+          "line": 363,
+          "text": "2026-10-09T12:58:14.199763084Z     ...<2 lines>..."
+        },
+        {
+          "line": 364,
+          "text": "2026-10-09T12:58:14.199764991Z             if change is not None else"
+        },
+        {
+          "line": 365,
+          "text": "2026-10-09T12:58:14.199766845Z             ^^^^^^^^^^^^^^^^^^^^^^^^^^"
+        },
+        {
+          "line": 366,
+          "text": "2026-10-09T12:58:14.199768802Z             (artifact.artifact_path,) if artifact is not None else ()))"
+        },
+        {
+          "line": 367,
+          "text": "2026-10-09T12:58:14.199771039Z             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+        },
+        {
+          "line": 368,
+          "text": "2026-10-09T12:58:14.199774543Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py\", line 150, in validate_continuous_gates"
+        },
+        {
+          "line": 369,
+          "text": "2026-10-09T12:58:14.199776487Z     validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)"
+        },
+        {
+          "line": 370,
+          "text": "2026-10-09T12:58:14.199778634Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+        },
+        {
+          "line": 371,
+          "text": "2026-10-09T12:58:14.199780480Z   File \"/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py\", line 1012, in validate_fulfillment_projection"
+        },
+        {
+          "line": 372,
+          "text": "2026-10-09T12:58:14.199782447Z     raise ValueError(\"OBLIGATION_PROJECTION_UNRESOLVED\")"
+        },
+        {
+          "line": 373,
+          "text": "2026-10-09T12:58:14.199784486Z ValueError: OBLIGATION_PROJECTION_UNRESOLVED"
+        },
+        {
+          "line": 374,
+          "text": "2026-10-09T12:58:14.352287918Z 请求性能 {\"request_id\": \"6c3af968-c203-4e7a-a651-159feb564f2a\", \"endpoint\": \"/api/works/{work_id}/self-refine\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 217.19, \"response_bytes\": 6194, \"times_ms\": {\"db\": 131.08, \"projection\": 8.91, \"serialization\": 0.21}, \"counts\": {\"db\": 34, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 375,
+          "text": "2026-10-09T12:58:14.551056613Z 请求性能 {\"request_id\": \"4cf1f81d-9afc-4a71-84ee-1b492479e341\", \"endpoint\": \"/api/works/{work_id}/guardian-assurance\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 84.26, \"response_bytes\": 71, \"times_ms\": {\"db\": 51.98, \"filesystem\": 0.17, \"serialization\": 0.04}, \"counts\": {\"db\": 13, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 376,
+          "text": "2026-10-09T12:58:14.824939734Z 请求性能 {\"request_id\": \"79575265-1078-4a8b-a31b-82a469d9a26a\", \"endpoint\": \"/api/works/{work_id}/delivery\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 178.55, \"response_bytes\": 146, \"times_ms\": {\"db\": 132.68, \"serialization\": 0.05}, \"counts\": {\"db\": 15, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 377,
+          "text": "2026-10-09T12:58:19.968862947Z 请求性能 {\"request_id\": \"19123973-cdeb-4c2a-a725-8715d1015fa2\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 41.17, \"response_bytes\": 492, \"times_ms\": {\"db\": 22.83, \"serialization\": 0.08}, \"counts\": {\"db\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 378,
+          "text": "2026-10-09T12:58:20.396177540Z 请求性能 {\"request_id\": \"24e5a6d3-e0a9-4332-a345-c289acd00bbd\", \"endpoint\": \"/api/interactions/{interaction_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 301.73, \"response_bytes\": 67009, \"times_ms\": {\"db\": 152.68, \"serialization\": 1.69}, \"counts\": {\"db\": 60, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 379,
+          "text": "2026-10-09T12:58:20.527450857Z 请求性能 {\"request_id\": \"9a8d4578-36c4-4153-bb23-10e6063cc149\", \"endpoint\": \"/api/interactions/{interaction_id}/turns/{turn_id}/realization\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 63.98, \"response_bytes\": 16743, \"times_ms\": {\"db\": 37.97, \"serialization\": 0.43}, \"counts\": {\"db\": 8, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 380,
+          "text": "2026-10-09T12:58:20.853621496Z 请求性能 {\"request_id\": \"2e572ea9-0f29-43b9-8b85-1fa8e5506a96\", \"endpoint\": \"/api/works/{work_id}\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 260.57, \"response_bytes\": 7995, \"times_ms\": {\"read_admission_wait\": 0.01, \"db\": 128.71, \"projection\": 75.46, \"serialization\": 0.21}, \"counts\": {\"read_admission_wait\": 1, \"db\": 39, \"projection\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 381,
+          "text": "2026-10-09T12:58:21.149325728Z 请求性能 {\"request_id\": \"5cccae0c-dca8-4a4a-8a35-97cc3d973d3b\", \"endpoint\": \"/api/works/{work_id}/operations\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 243.75, \"response_bytes\": 1790, \"times_ms\": {\"db\": 140.92, \"projection\": 7.81, \"filesystem\": 0.21, \"serialization\": 0.15}, \"counts\": {\"db\": 52, \"projection\": 1, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 382,
+          "text": "2026-10-09T12:58:21.603584522Z 请求性能 {\"request_id\": \"7e8ce1b9-df08-4d5f-ade6-fdf9ef71ccc6\", \"endpoint\": \"/api/works/{work_id}/steering\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 399.55, \"response_bytes\": 3469, \"times_ms\": {\"db\": 241.29, \"projection\": 192.99, \"serialization\": 0.13}, \"counts\": {\"db\": 67, \"projection\": 3, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 383,
+          "text": "2026-10-09T12:58:21.868924606Z 请求性能 {\"request_id\": \"78b478a6-6836-4658-a312-c6a78ffba691\", \"endpoint\": \"/api/works/{work_id}/self-refine\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 195.44, \"response_bytes\": 8939, \"times_ms\": {\"db\": 113.15, \"projection\": 6.14, \"serialization\": 0.34}, \"counts\": {\"db\": 35, \"projection\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 384,
+          "text": "2026-10-09T12:58:22.088906188Z 请求性能 {\"request_id\": \"72a7ae1f-908d-4c7a-9003-82425393f9b8\", \"endpoint\": \"/api/works/{work_id}/guardian-assurance\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 131.84, \"response_bytes\": 71, \"times_ms\": {\"db\": 42.97, \"filesystem\": 0.19, \"serialization\": 0.04}, \"counts\": {\"db\": 13, \"filesystem\": 1, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        },
+        {
+          "line": 385,
+          "text": "2026-10-09T12:58:22.426036291Z 请求性能 {\"request_id\": \"50ebf0f4-fe54-42f1-886c-3d646ba6d2b8\", \"endpoint\": \"/api/works/{work_id}/delivery\", \"method\": \"GET\", \"status\": 200, \"total_ms\": 208.2, \"response_bytes\": 146, \"times_ms\": {\"db\": 120.22, \"serialization\": 0.06}, \"counts\": {\"db\": 15, \"serialization\": 1}, \"unmeasured\": [\"model_provider\", \"external_http\", \"git\", \"filesystem\", \"subprocess\", \"projection\"], \"timing_semantics\": \"inclusive spans; missing categories unknown; streaming total ends at last body\"}"
+        }
+      ],
+      "image": "sha256:6f8d9b3a27e7e2452097a77427115df6e09b9a03276eb72d0170a66160e0578f",
+      "known_redactions": 0,
+      "role": "watt-c3-retry1-api-20261009",
+      "total_lines": 385,
+      "user": "10001:10001"
+    },
+    {
+      "container_id": "8676c87c3178bb37a59aaed990daaa1c0a0e04b36a17eb10d4078d8c60484d4d",
+      "error_or_work_excerpts": [],
+      "image": "sha256:6f8d9b3a27e7e2452097a77427115df6e09b9a03276eb72d0170a66160e0578f",
+      "known_redactions": 0,
+      "role": "watt-c3-retry1-coordinator-20261009",
+      "total_lines": 1,
+      "user": "10001:10001"
+    }
+  ],
+  "schema": "c3-existing-g0-stop-log-observation-v1",
+  "unknown_secrets_not_claimed_absent": true,
+  "work_id": "048189aa-0613-5307-b6f4-c430e7977f93"
+}

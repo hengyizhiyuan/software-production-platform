@@ -1,0 +1,60 @@
+{
+  "created_at_utc": "2026-10-09T11:37:40.962380Z",
+  "human_acceptance_written": false,
+  "human_delivery_authorization_written": false,
+  "human_integration_authorization_written": false,
+  "input_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+  "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+  "latest_observation": {
+    "automatic_progression_state": "STOPPED",
+    "current_production_run_id": null,
+    "current_work_reality_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+    "human_attention_required": false,
+    "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+    "status": "COMPLETED",
+    "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01",
+    "work_complete": false,
+    "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+    "work_status": "READY"
+  },
+  "operations": {
+    "create_product": {
+      "confirmed_at_utc": "2026-10-09T11:37:44.081448Z",
+      "path": "/api/products",
+      "request_body_sha256": "bfd1ce1a50358279d57dddf76f9f509227252d98244e6f3ba078ca3210f4fdcf",
+      "started_at_utc": "2026-10-09T11:37:40.981381Z",
+      "state": "CONFIRMED"
+    },
+    "submit_turn": {
+      "confirmed_at_utc": "2026-10-09T11:37:44.283311Z",
+      "path": "/api/experience/products/5ccb9748-b3a6-4ac0-a50b-6b056280bd4d/turns",
+      "request_body_sha256": "f241c9d0307bb90f2f0285c07219b7f996f63845a313f12ea5c3f6acf89a3212",
+      "started_at_utc": "2026-10-09T11:37:44.095182Z",
+      "state": "CONFIRMED"
+    }
+  },
+  "original_input_file_sha256": "c587f020c43275019b32c49a94ab8559587a01d339e1fe97b2c8e048a386258e",
+  "polls_completed": 54,
+  "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+  "product_name": "C3 G0 normal entry d0042d13-945f-44b0-8dfb-c4ae52725812",
+  "receipt_sequence": 386,
+  "run_id": "d0042d13-945f-44b0-8dfb-c4ae52725812",
+  "runtime_identity": {
+    "api_base_url": "http://watt-c3-api-20261009:8000",
+    "api_service": "watt-c3-api-20261009",
+    "captured_at_utc": "2026-10-09T11:37:23.261157+00:00",
+    "database_name": "spg_c3_qualification_20261009",
+    "image_id": "sha256:54355780b7fdd683332b9f9e607b76fcbbfc69f2bf5c42d9a1f888e8acbb4bb3",
+    "isolated": true,
+    "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+    "provider_ready": true,
+    "qualification": "C3",
+    "source_revision": "390fa22ec24cbab33f7feeeef96f0dfec9ce22f2"
+  },
+  "runtime_identity_file_sha256": "e6a58610acf80aff80212d1e6bbd89b39d93b7649bd6914b89c8828719c41e18",
+  "schema": "c3-normal-entry-state-v1",
+  "source_record_id": "c7a403a4-866c-4a9b-81b5-868e6cff184c",
+  "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01",
+  "updated_at_utc": "2026-10-09T11:42:58.733197Z",
+  "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+}

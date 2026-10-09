@@ -1,0 +1,70 @@
+{
+  "schema": "c3-retry1-isolated-preparation-v1",
+  "captured_at_utc": "2026-10-09T12:36:25.613867+00:00",
+  "qualification_root": "/data/watt/c3-semantic-convergence-20261009/retry-1",
+  "preserved_original_root": "/data/watt/c3-semantic-convergence-20261009",
+  "shared_dependencies": [
+    {
+      "name": "watt-c3-postgres-20261009",
+      "container_id": "8b84f8448e7415e2d9d583c79731f7ebd7da3ea756d8e8e34f3a470a5fb84a8e",
+      "image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+      "running": true
+    },
+    {
+      "name": "watt-c3-gitea-20261009",
+      "container_id": "7cf33d1345ef58c824b2e22d264a763c0b6865b88ccc12938df90dd3fb9d72cd",
+      "image_id": "sha256:071efa747340e5e211213fc79a0b928003bedf9b6b48f61cb32b3c52bfd1e09e",
+      "running": true
+    },
+    {
+      "name": "watt-c3-control-20261009",
+      "network_id": "f50777a14a7702cb6107bd24376702c664faf9cffce458d3382557f865e080d5",
+      "internal": false
+    },
+    {
+      "name": "watt-c3-executor-20261009",
+      "network_id": "874d49cef141a2feed6e5a5a7aececf03247320b7aa98fbb800e64d67abe4720",
+      "internal": true
+    }
+  ],
+  "new_database": "spg_c3_retry1_qualification_20261009",
+  "new_regression_database": "c1_contract_continuity",
+  "fixture_postgres_container_id": "62edd2892aa09223700d21c561e8be73ef428507e60bf57c580bb5ef8c6e14cc",
+  "fixture_postgres_name": "watt-c3-retry1-fixture-postgres-20261009",
+  "fixture_postgres_image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+  "fixture_postgres_published_ports": false,
+  "workspace_volume": "watt-c3-retry1-workspaces-20261009",
+  "role_names": {
+    "api": "watt-c3-retry1-api-20261009",
+    "coordinator": "watt-c3-retry1-coordinator-20261009",
+    "worker": "watt-c3-retry1-worker-20261009",
+    "tool-host": "watt-c3-retry1-tool-host-20261009"
+  },
+  "api_loopback_port": 18301,
+  "new_operator_and_tool_host_tokens": true,
+  "provider_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+  "credential_values_released": false,
+  "canonical_main_ref_revision": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+  "external_checkout_before": {
+    "head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+    "branch": "codex/admin-work-ai-diagnostic-export-ecs",
+    "status_porcelain": "",
+    "canonical_main_ref": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3"
+  },
+  "external_checkout_after": {
+    "head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+    "branch": "codex/admin-work-ai-diagnostic-export-ecs",
+    "status_porcelain": "",
+    "canonical_main_ref": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3"
+  },
+  "external_checkout_change_origin": "UNKNOWN",
+  "external_checkout_written_or_switched": false,
+  "original_g0_input_sha256": "c587f020c43275019b32c49a94ab8559587a01d339e1fe97b2c8e048a386258e",
+  "existing_services_restarted_reset_or_recreated": false,
+  "old_business_databases_mutated": false,
+  "shared_postgres_cluster_new_database_created": true,
+  "application_roles_created": false,
+  "work_created": 0,
+  "model_calls": 0,
+  "partial_preparation_requires_read_only_reconciliation": true
+}

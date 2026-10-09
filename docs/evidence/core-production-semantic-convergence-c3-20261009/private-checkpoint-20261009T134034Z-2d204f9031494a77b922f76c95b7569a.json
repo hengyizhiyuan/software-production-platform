@@ -1,0 +1,283 @@
+{
+  "archives": {
+    "images": {
+      "archive_directory_readable": true,
+      "bytes": 1576141824,
+      "member_count": 294,
+      "sha256": "95df7bfe5ea42b39a485f807d6b8d99f2db6b0d7ef07cfa5b37486f102a72722"
+    },
+    "root": {
+      "archive_directory_readable": true,
+      "bytes": 559790080,
+      "member_count": 36013,
+      "sha256": "ed42e5db7258176dceaed0db6bc6f89ced673327ba8b4af1a96726c6b2515971"
+    },
+    "watt-c3-retry1-workspaces-20261009": {
+      "archive_directory_readable": true,
+      "bytes": 61440,
+      "member_count": 46,
+      "sha256": "3ada0ffe6af8640b2dbce8043b5517c377a4814511446da3e1b162f5c0459f65"
+    },
+    "watt-c3-workspaces-20261009": {
+      "archive_directory_readable": true,
+      "bytes": 10240,
+      "member_count": 1,
+      "sha256": "ab4e3c91c1a55fc5a4971dc5c782f7ad631612c023fecbcfec0df3af338e003c"
+    }
+  },
+  "cold_filesystem_capture": true,
+  "container_ids": [
+    "01042523ad83de26f44a837383b12c74d07226dadb28fb25dc172578e24b5a08",
+    "03eee60f0352640b91d3523801ba165c412a6f752e4ff1d22c77766b22858ab6",
+    "090cce6c6f441e117e39d99cf1dc841f01880331becdd3f526eac9069307a411",
+    "11f13713d98a870747c75fb038325461baa1d26926e3df05f165dc98a8c5c5c7",
+    "1568c9149b783bbbf3ae1c3c4444baabedbf9747a814e5a2710fb390d5bf86b7",
+    "16cef6f328e521196a200347c8afaa0573184ca08d1024c61ca263d9de820c42",
+    "1e47931e7a261fd252a61e98916fff2e2b8905ac4e9189feebcac3f5c82b45fb",
+    "2c62126faacd8f74efe2ce2ba5d30b9b8d4a3de6afb631bb5a52773f19ea3a9a",
+    "32718b86c2fdd970500d08c7254cb9eb63bcd8599ee5becdfe34d0208a695bbe",
+    "34b52f46af6c6d5505979da7ecf4a1c1dfa473e4a7075ecdcc498e80e61ee0ce",
+    "35dedd0872293f2de5541d7ba04d9e1260968e21e5dc40b3824e7368782f0e55",
+    "37f6d33e68ae5e02e71e0057a855c2a4a10cb7b60f4ee8e5580bae6b01331cb2",
+    "3805116a12c57d73085e84990fffe84d84ed48103f2c5ad111f1c822a8a1c3e0",
+    "3d823e18428d0e9b9dafbe7f2ec0b2045875998c522615a6961b0e8096781e8f",
+    "4c0f94a2dc6120fdc27b167528b41ed6b6e8b0c9482b9bcd6b42f32cc54b3778",
+    "5366bc4803d0008ac58fb75e54b01088acdc5b0f3cba5c8d54903114c11cb174",
+    "57f7195edbe776bd5fbb8dceaac113753dea79b31635ae372a3503d7d6e6a766",
+    "5e65fa02ff06e55ced6607b27faeca6db002a48268d76ed3e8321188b64a1be1",
+    "611673a7e787c88ec5ee4043269f7d1b8bda5a4c2215f82229ecb93c74d0d4e8",
+    "615f7088ff312241bb7d474c76f0c0ebc349afc9e6c6088d72641422f58c50d9",
+    "62edd2892aa09223700d21c561e8be73ef428507e60bf57c580bb5ef8c6e14cc",
+    "6d3ce7fc4f21e3461c5eede2120472b676ddb6f86129e43387bfd2a189a3409d",
+    "721d158f5aa80259509152c848d05932f3bb7167e7cdde47ef3d73895c42f8d6",
+    "79b7cb330f046ffa326f30ac1b67c04c194559714b7f3da514e6e9fa010bef2d",
+    "7a07a0bd6ca8097bca0e5ad2e57a33634fbd1cc24a7d98513bc9fac083742124",
+    "7cf33d1345ef58c824b2e22d264a763c0b6865b88ccc12938df90dd3fb9d72cd",
+    "8676c87c3178bb37a59aaed990daaa1c0a0e04b36a17eb10d4078d8c60484d4d",
+    "8b84f8448e7415e2d9d583c79731f7ebd7da3ea756d8e8e34f3a470a5fb84a8e",
+    "9173e1200a38e3a1ca0f0278c5c17d2a97e941a4b761afe985531c57f237c38f",
+    "937d2c203cfcecdbebc15c1174bb154ef3837a850453429e3fd656404a884f80",
+    "97a53369bc40645235ef51c949d3b8c1e3c0fbb715e23d12dd2d9f6ee44f9fd5",
+    "a06181266e1a8051b14023e8bcbaff52a003863d2a2d350a2a8a7491d7dae287",
+    "a0d31c4548337cbf30433190ca2bbad0084972929f0d2af7ec67f3e39f3ad477",
+    "a24abb9edf1b866e7399a5921da9abd74b96cbc2e12827c259a064b4220d182f",
+    "a2feae8421699ef948330b500c428ffb9ab6ddc338b39738d06bfdbf87b401ba",
+    "ac251d03408ad2dd35ea2efcfa9dc7b0a1ead78fad7a116867b6782259aafdbd",
+    "aeda1f67670c4d0e97e87e9cd16d2ee2d3d28feb0444c3beebe51ad4bb446f3f",
+    "b470b5443e8f178bd6a49e166409a55d18e661eb657f36ca0de4448dadd1248d",
+    "b9eda76c71b9801fdfd4efb69d611fdc8af282988f81da4072a8d1eed518ca5f",
+    "ba7dd2c9b866133845d15363bbe331d35adbce62cb77a23bf49d01736a826f4d",
+    "bfe4b442d2ed18f23b6c9354d0027e8b3804266b52c728b923ae1841a5a8fc6c",
+    "c288fc1d971398e8f50d1b0cdd6129ea316fbd40fc794ba70b292a20e4003e7b",
+    "c39ac71f90c4884a408d055d7dfa03a96f46d237ea1085ec53e7bd026209e1d4",
+    "c835c0a44a2111fc17e5fff434b02c049990c84dfd73ce2a9ec70c11c3860b34",
+    "c8e4ef6c1819cede672bd60b9876fc3baca6c97a069ab171713cd35ec7f34244",
+    "d4f981e9a3db624337a7b95f6dcf225cdc780b0d66ed1dccafb7dba7b77a34ec",
+    "d7dc25d27f74fa487a9da99285dfc7694b50a9dea5ea8ab22d1bc27b8ba1e38b",
+    "de0e132fe90c69084dadb21191d168960451677e282f96feaeb8fd13814cde1b",
+    "e1155eaba29d34c38b7d838765d737edb2c17b834ad3425bd92cc8833a2cf4ff",
+    "e305a818334b4f129fe324b5781291189cc2cb3ba89839988c917044bdcb849b",
+    "e6c96f6405863ea0ab1fadc0824c19a67287d447e66563c5e3701151192dd472",
+    "e98a346105d759d268a8a4af46e16ae5c74b03bdf7793eb424fe9aba343fe370",
+    "ed9d4a4b20bf9b567f7799968e70c918b650933b4fca8a4198db8abae5907af5",
+    "f95ad73a90310f6f65e7abb88f246efb98d9500e1fd334bcd42466e1ba183f81",
+    "f971f142691298e4e1ab02be31aa65d4bef13cfd46133f0835107946129d4048",
+    "fda8f71fe395a250b730a169a0dff792b2c8e19354de94c6281938114a9c97c9"
+  ],
+  "database_consistency": "separate exported read-only snapshot per database after C3 app quiescence",
+  "database_dumps": [
+    {
+      "bytes": 463572,
+      "container_id": "8b84f8448e7415e2d9d583c79731f7ebd7da3ea756d8e8e34f3a470a5fb84a8e",
+      "database": "spg_c3_qualification_20261009",
+      "directory_readable": true,
+      "ended_at": "2026-10-09T13:41:59.524332Z",
+      "migration_head": [
+        "20261007_72"
+      ],
+      "present": true,
+      "restoration_exercised": false,
+      "sha256": "642fdac08209eaafaff13fe94926604af9c3c9611058430b40bf619ef3cde4b1",
+      "snapshot_observed_at": "2026-10-09T13:41:58.562068+00:00",
+      "started_at": "2026-10-09T13:41:58.566369Z",
+      "status": "CONSISTENT_DUMP_CAPTURED"
+    },
+    {
+      "bytes": 893,
+      "container_id": "8b84f8448e7415e2d9d583c79731f7ebd7da3ea756d8e8e34f3a470a5fb84a8e",
+      "database": "c3_contract_regression",
+      "directory_readable": true,
+      "ended_at": "2026-10-09T13:42:00.530443Z",
+      "migration_head": [],
+      "present": true,
+      "restoration_exercised": false,
+      "sha256": "ec4405defc9b61d7e10c93b25471b80e7d10219449c51c403b0f718d49dbccf0",
+      "snapshot_observed_at": "2026-10-09T13:41:59.963975+00:00",
+      "started_at": "2026-10-09T13:41:59.965529Z",
+      "status": "CONSISTENT_DUMP_CAPTURED"
+    },
+    {
+      "bytes": 480383,
+      "container_id": "8b84f8448e7415e2d9d583c79731f7ebd7da3ea756d8e8e34f3a470a5fb84a8e",
+      "database": "spg_c3_retry1_qualification_20261009",
+      "directory_readable": true,
+      "ended_at": "2026-10-09T13:42:01.910298Z",
+      "migration_head": [
+        "20261007_72"
+      ],
+      "present": true,
+      "restoration_exercised": false,
+      "sha256": "9ec0d37ddec6e818c3514a1a3df16965adafded4dd3ed7249732810d07210143",
+      "snapshot_observed_at": "2026-10-09T13:42:01.167037+00:00",
+      "started_at": "2026-10-09T13:42:01.167886Z",
+      "status": "CONSISTENT_DUMP_CAPTURED"
+    },
+    {
+      "bytes": 450755,
+      "container_id": "8b84f8448e7415e2d9d583c79731f7ebd7da3ea756d8e8e34f3a470a5fb84a8e",
+      "database": "c1_contract_continuity",
+      "directory_readable": true,
+      "ended_at": "2026-10-09T13:42:03.626754Z",
+      "migration_head": [
+        "20261007_72"
+      ],
+      "present": true,
+      "restoration_exercised": false,
+      "sha256": "b791604a2a9ea1d8ef0c1936daa3116834a2025acd625d5e839c2004d403c14a",
+      "snapshot_observed_at": "2026-10-09T13:42:02.612155+00:00",
+      "started_at": "2026-10-09T13:42:02.624448Z",
+      "status": "CONSISTENT_DUMP_CAPTURED"
+    },
+    {
+      "bytes": 431304,
+      "container_id": "8b84f8448e7415e2d9d583c79731f7ebd7da3ea756d8e8e34f3a470a5fb84a8e",
+      "database": "c3_independent_holdout_20261009",
+      "directory_readable": true,
+      "ended_at": "2026-10-09T13:42:05.236740Z",
+      "migration_head": [
+        "20261007_72"
+      ],
+      "present": true,
+      "restoration_exercised": false,
+      "sha256": "60fbeeb94f45249bade6c9db6fba608516da3b80a5796c0dde0be11df896c965",
+      "snapshot_observed_at": "2026-10-09T13:42:04.484043+00:00",
+      "started_at": "2026-10-09T13:42:04.486631Z",
+      "status": "CONSISTENT_DUMP_CAPTURED"
+    },
+    {
+      "bytes": 431979,
+      "container_id": "62edd2892aa09223700d21c561e8be73ef428507e60bf57c580bb5ef8c6e14cc",
+      "database": "c1_contract_continuity",
+      "directory_readable": true,
+      "ended_at": "2026-10-09T13:42:07.058639Z",
+      "migration_head": [
+        "20261007_72"
+      ],
+      "present": true,
+      "restoration_exercised": false,
+      "sha256": "e90054731487e938eebb7de80f2d6f977f62fd523dd188e6efb8c969a0e77177",
+      "snapshot_observed_at": "2026-10-09T13:42:05.892055+00:00",
+      "started_at": "2026-10-09T13:42:05.893676Z",
+      "status": "CONSISTENT_DUMP_CAPTURED"
+    }
+  ],
+  "default_state": "ONLY_C3_STOPPED_NO_RESTART",
+  "ended_at": "2026-10-09T13:45:27.559991Z",
+  "ephemeral_control_writable_layers_preserved": false,
+  "external_checkout_after": {
+    "branch": "codex/admin-work-ai-diagnostic-export-ecs",
+    "dirty": false,
+    "head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+    "refs_heads_main": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3"
+  },
+  "external_checkout_before": {
+    "branch": "codex/admin-work-ai-diagnostic-export-ecs",
+    "dirty": false,
+    "head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+    "refs_heads_main": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3"
+  },
+  "harness_sha256": "b4b21a497277757b6468d03b30f29cc064ff610122463a8e32e4a2823c373cc8",
+  "human_decisions_created": false,
+  "image_ids": [
+    "sha256:071efa747340e5e211213fc79a0b928003bedf9b6b48f61cb32b3c52bfd1e09e",
+    "sha256:205f7b42539767939675cebd6e8380be2757c5ebd6d7fbb08828bffae7799209",
+    "sha256:51c0b8be88969720cb3a3cfc4e047edc7f229aa22348a95a89cbb4bf83a18e39",
+    "sha256:54355780b7fdd683332b9f9e607b76fcbbfc69f2bf5c42d9a1f888e8acbb4bb3",
+    "sha256:6f8d9b3a27e7e2452097a77427115df6e09b9a03276eb72d0170a66160e0578f",
+    "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8"
+  ],
+  "model_calls": 0,
+  "offsite_backup_confirmed": false,
+  "outside_change_origin": "NOT_OBSERVED",
+  "outside_container_states_unchanged": true,
+  "persistent_c3_mount_data_captured": true,
+  "private_checkpoint_path": "/data/watt/c3-semantic-convergence-20261009/private/checkpoints/20261009T134034Z-2d204f9031494a77b922f76c95b7569a",
+  "production_or_external_checkout_written": false,
+  "quiesced_app_ids": [
+    "a0d31c4548337cbf30433190ca2bbad0084972929f0d2af7ec67f3e39f3ad477",
+    "3805116a12c57d73085e84990fffe84d84ed48103f2c5ad111f1c822a8a1c3e0",
+    "7a07a0bd6ca8097bca0e5ad2e57a33634fbd1cc24a7d98513bc9fac083742124",
+    "f95ad73a90310f6f65e7abb88f246efb98d9500e1fd334bcd42466e1ba183f81",
+    "5e65fa02ff06e55ced6607b27faeca6db002a48268d76ed3e8321188b64a1be1",
+    "34b52f46af6c6d5505979da7ecf4a1c1dfa473e4a7075ecdcc498e80e61ee0ce",
+    "8676c87c3178bb37a59aaed990daaa1c0a0e04b36a17eb10d4078d8c60484d4d",
+    "c835c0a44a2111fc17e5fff434b02c049990c84dfd73ce2a9ec70c11c3860b34"
+  ],
+  "restoration_exercised": false,
+  "schema": "c3-private-recovery-checkpoint-v1",
+  "scope_roots": [
+    "/data/watt/c3-semantic-convergence-20261009",
+    "/data/watt/c3-semantic-convergence-20261009/retry-1"
+  ],
+  "single_atomic_database_git_filesystem_snapshot": false,
+  "sources": {
+    "/data/watt/c3-semantic-convergence-20261009": {
+      "ecf": {
+        "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+        "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+      },
+      "ecf-unsupported": {
+        "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+        "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+      },
+      "guardian": {
+        "revision": "657ee84aa0b38672c1b4bd67ad7a834d96bfcabd",
+        "tree": "93903e1843b2f755bdc077c5330372b32cc779b6"
+      },
+      "watt": {
+        "revision": "390fa22ec24cbab33f7feeeef96f0dfec9ce22f2",
+        "tree": "2aa36776b786bb088d34f5c082f0a19005944fd4"
+      }
+    },
+    "/data/watt/c3-semantic-convergence-20261009/retry-1": {
+      "ecf": {
+        "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+        "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+      },
+      "ecf-unsupported": {
+        "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+        "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+      },
+      "guardian": {
+        "revision": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+        "tree": "4f75d9137bebc7bf956fe4466cbae93f88c5c03b"
+      },
+      "watt": {
+        "revision": "91f5dbc9906d1f857113736981517c1091ec52ae",
+        "tree": "50c6b8fad3f321638135fbec8afcba060b3fb2bc"
+      }
+    }
+  },
+  "started_at": "2026-10-09T13:40:34.625071Z",
+  "status": "CAPTURED_PRIVATE",
+  "stopped_dependency_ids": [
+    "8b84f8448e7415e2d9d583c79731f7ebd7da3ea756d8e8e34f3a470a5fb84a8e",
+    "7cf33d1345ef58c824b2e22d264a763c0b6865b88ccc12938df90dd3fb9d72cd",
+    "62edd2892aa09223700d21c561e8be73ef428507e60bf57c580bb5ef8c6e14cc"
+  ],
+  "work_created_resumed_or_modified": false,
+  "workspace_volumes": [
+    "watt-c3-workspaces-20261009",
+    "watt-c3-retry1-workspaces-20261009"
+  ]
+}

@@ -1,0 +1,3846 @@
+{
+  "actual_task_projections": [],
+  "authority": "READ_ONLY_OWNER_OBSERVATION_NO_QUALIFICATION_PASS",
+  "completed_at_utc": "2026-10-09T11:40:28.116234Z",
+  "database_snapshot": {
+    "captured_at_utc": "2026-10-09 11:40:27.870137+00:00",
+    "database_name": "spg_c3_qualification_20261009",
+    "evidence_level": "E1",
+    "read_only": "on",
+    "scope": "one READ ONLY REPEATABLE READ database transaction; no qualification result inferred",
+    "transaction_snapshot": "17696:17696:"
+  },
+  "datasets": {
+    "attempt_preparations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "attempt_id"
+    },
+    "baseline_candidates": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "production_run_id"
+    },
+    "checkpoint_bundles": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "attempt_id"
+    },
+    "completion_evaluations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "production_run_id"
+    },
+    "context_packages": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "production_run_id"
+    },
+    "effect_receipts": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "effect_id"
+    },
+    "engineering_resource_bindings": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "condition": "ACTIVE",
+          "created_at": "2026-10-09T11:39:05.655229+00:00",
+          "engineering_scope_id": "ac4fbc50-0aa0-54d5-8a1f-ae112ae69133",
+          "id": "4d71a667-c1f7-5dfa-b7b2-5f3bc473da6b",
+          "resource_id": "cefd57a8-f171-400d-98cb-1b8c0ba56e41"
+        }
+      ],
+      "scope_column": "engineering_scope_id",
+      "scope_ids": [
+        "ac4fbc50-0aa0-54d5-8a1f-ae112ae69133"
+      ]
+    },
+    "engineering_resources": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "authoritative_ref": "refs/heads/work-24d9cc2d52a85d27b38ae49c3f73394c",
+          "context_references": [
+            {
+              "repository_relative_path": "README.md",
+              "semantic_role": "PROJECT_CONTEXT"
+            }
+          ],
+          "created_at": "2026-10-09T11:39:08.585961+00:00",
+          "id": "cefd57a8-f171-400d-98cb-1b8c0ba56e41",
+          "is_default": false,
+          "kind": "REPOSITORY",
+          "location_ref": "/var/lib/spg/managed-source/works/24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+          "repository_identity": "watt://work-branches/24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+          "updated_at": "2026-10-09T11:39:08.585961+00:00"
+        }
+      ],
+      "scope_column": "id",
+      "scope_ids": [
+        "cefd57a8-f171-400d-98cb-1b8c0ba56e41"
+      ]
+    },
+    "engineering_scopes": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "condition": "ADMITTED",
+          "created_at": "2026-10-09T11:39:05.655229+00:00",
+          "fingerprint": "0ab5b43cf838e2abf0742c42c5205c5680b37eea3860ab431ddbe1081158ed22",
+          "id": "ac4fbc50-0aa0-54d5-8a1f-ae112ae69133",
+          "summary": "Long-lived Work authority envelope for watt://work-branches/24d9cc2d-52a8-5d27-b38a-e49c3f73394c at refs/heads/work-24d9cc2d52a85d27b38ae49c3f73394c",
+          "updated_at": "2026-10-09T11:39:05.655229+00:00",
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        }
+      ],
+      "scope_column": "work_id",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+      ]
+    },
+    "event_outbox": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "event_id"
+    },
+    "execution_allocations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "attempt_id"
+    },
+    "execution_attempts": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "work_unit_id"
+    },
+    "execution_control_requests": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "attempt_id"
+    },
+    "execution_dispatches": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "attempt_id"
+    },
+    "execution_effects": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "step_id"
+    },
+    "execution_events": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "pwu_id"
+    },
+    "execution_evidence": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "attempt_id"
+    },
+    "execution_recovery_cases": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "attempt_id"
+    },
+    "execution_resource_envelopes": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "id"
+    },
+    "execution_resource_usage": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "attempt_id"
+    },
+    "execution_sessions": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "pwu_id"
+    },
+    "execution_source_members": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "source_vector_id"
+    },
+    "execution_source_vectors": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "id"
+    },
+    "execution_steps": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "attempt_id"
+    },
+    "execution_workspaces": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "pwu_id"
+    },
+    "executor_leases": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "attempt_id"
+    },
+    "executor_queue": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "pwu_id"
+    },
+    "executor_worker_events": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "worker_id"
+    },
+    "executor_worker_registrations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "worker_id"
+    },
+    "governance_records": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "authority_identity": "human:owner",
+          "created_at": "2026-10-09T11:39:05.655229+00:00",
+          "decision_type": "ADMIT_LONG_LIVED_WORK",
+          "id": "50a43a8f-3eee-5ed9-820b-8bab1cfdd2c9",
+          "rationale": "The current governed production request authorizes Work formation. Source acquisition or managed-source preparation follows the typed source basis; delivery and final acceptance remain separately governed.",
+          "scope": {
+            "artifact_target": null,
+            "assessment_basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+            "constraints": [
+              "Only index.html may change; deployment, publication, additional pages, and any change to README.md are excluded.",
+              "One static web page at index.html",
+              "Semantic HTML with exactly one h1 and exactly one paragraph with the specified exact texts",
+              "Change limited to index.html",
+              "Verification of the exact heading and paragraph",
+              "A reviewable Candidate left for review",
+              "Excluded from this Work: No deployment",
+              "Excluded from this Work: No publication",
+              "Excluded from this Work: No additional pages",
+              "Excluded from this Work: No change to README.md"
+            ],
+            "desired_outcome": "Add index.html containing semantic HTML with exactly one h1 whose text is 'N1 Software Control' and one paragraph whose text is 'Isolated qualification only'.",
+            "engineering_scope_id": "ac4fbc50-0aa0-54d5-8a1f-ae112ae69133",
+            "repository_identity": "watt://work-branches/24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+            "repository_ref": "refs/heads/work-24d9cc2d52a85d27b38ae49c3f73394c",
+            "resource_id": "cefd57a8-f171-400d-98cb-1b8c0ba56e41",
+            "scope_fingerprint": "0ab5b43cf838e2abf0742c42c5205c5680b37eea3860ab431ddbe1081158ed22",
+            "source_assessment_id": "265c12f1-0e05-4aef-9e0f-cdb325c917e1",
+            "source_baseline_id": "f7ba6c82-28b2-4501-94df-12bfbafc9431",
+            "source_change_proposal_fingerprint": null,
+            "source_interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+            "source_revision": "53076c9371d50b77bbe1edb0d9bf44159e56c389",
+            "work_mode": "LONG_LIVED_STEERING",
+            "work_reality_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905"
+          },
+          "subject_identity": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+          "subject_type": "PRODUCT_WORK"
+        }
+      ],
+      "scope_column": "subject_identity",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+        "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+        "c6824f98-878f-5cbe-a5f1-55c02c203905",
+        "ed641807-e61c-4183-85fd-1ccd1ac23f81"
+      ]
+    },
+    "human_authorizations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "candidate_id"
+    },
+    "interaction_assessments": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "action_candidates": [],
+          "basis_active_runtime_binding_id": null,
+          "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+          "basis_last_sequence": 1,
+          "basis_steering_plan_revision_id": null,
+          "basis_steering_step_id": null,
+          "basis_work_revision_id": null,
+          "candidate_change": null,
+          "candidate_constraints": [
+            "Only index.html may change; deployment, publication, additional pages, and any change to README.md are excluded.",
+            "One static web page at index.html",
+            "Semantic HTML with exactly one h1 and exactly one paragraph with the specified exact texts",
+            "Change limited to index.html",
+            "Verification of the exact heading and paragraph",
+            "A reviewable Candidate left for review",
+            "Excluded from this Work: No deployment",
+            "Excluded from this Work: No publication",
+            "Excluded from this Work: No additional pages",
+            "Excluded from this Work: No change to README.md"
+          ],
+          "candidate_context": [
+            "This Interaction runs against a newly managed Watt Product source with bootstrap-only initialization, no external origin, and accepted ref refs/heads/accepted at revision 53076c9371d50b77bbe1edb0d9bf44159e56c389; this is Watt initialization storage, not evidence that the Human requested an existing project."
+          ],
+          "created_at": "2026-10-09T11:39:05.300807+00:00",
+          "current_requests": [
+            "Add index.html containing semantic HTML with exactly one h1 whose text is 'N1 Software Control' and one paragraph whose text is 'Isolated qualification only'."
+          ],
+          "design_intent_frame": {
+            "ambiguities": [],
+            "business_context": null,
+            "candidate_assumptions": [],
+            "collaboration_mode": "execution",
+            "confidence": 0.93,
+            "design_subject": "Produce the N1 isolated G0 software production qualification artifact: a single static index.html page in the managed Product repository.",
+            "desired_outcome": "Add index.html containing semantic HTML with exactly one h1 whose text is 'N1 Software Control' and one paragraph whose text is 'Isolated qualification only'.",
+            "object_type": "FEATURE",
+            "scope_level": "implementation"
+          },
+          "desired_outcome": "Add index.html containing semantic HTML with exactly one h1 whose text is 'N1 Software Control' and one paragraph whose text is 'Isolated qualification only'.",
+          "engineering_semantic_facts": [
+            {
+              "admitted_work_revision_id": null,
+              "authority": "HUMAN_EXPLICIT",
+              "epistemic_status": "CONFIRMED",
+              "id": "84caed25-1a80-5718-95da-85b74b61db8a",
+              "provenance": {
+                "governed_provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "role_origin": "EXPLICIT",
+                "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+                "source_extraction_ids": [
+                  "e1"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "exactly one static web page"
+              },
+              "qualifiers": {},
+              "reference_role": null,
+              "relation": "CARDINALITY",
+              "scope": "index.html",
+              "subject": "page.file.count",
+              "supersedes_fact_ids": [],
+              "unit": null,
+              "value": 1
+            },
+            {
+              "admitted_work_revision_id": null,
+              "authority": "HUMAN_EXPLICIT",
+              "epistemic_status": "CONFIRMED",
+              "id": "fd425161-a627-5a3b-b24a-0464a4583d78",
+              "provenance": {
+                "governed_provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "role_origin": "EXPLICIT",
+                "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+                "source_extraction_ids": [
+                  "e5"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "at index.html"
+              },
+              "qualifiers": {},
+              "reference_role": null,
+              "relation": "REFERENCE",
+              "scope": "index.html",
+              "subject": "artifact.path",
+              "supersedes_fact_ids": [],
+              "unit": null,
+              "value": "index.html"
+            },
+            {
+              "admitted_work_revision_id": null,
+              "authority": "HUMAN_EXPLICIT",
+              "epistemic_status": "CONFIRMED",
+              "id": "9944fba1-332d-5eda-8d36-21e108a35ce2",
+              "provenance": {
+                "governed_provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "role_origin": "EXPLICIT",
+                "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+                "source_extraction_ids": [
+                  "e2"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "exactly one h1"
+              },
+              "qualifiers": {},
+              "reference_role": null,
+              "relation": "CARDINALITY",
+              "scope": "index.html",
+              "subject": "page.h1.count",
+              "supersedes_fact_ids": [],
+              "unit": null,
+              "value": 1
+            },
+            {
+              "admitted_work_revision_id": null,
+              "authority": "HUMAN_EXPLICIT",
+              "epistemic_status": "CONFIRMED",
+              "id": "ebbc2f13-82aa-5369-8a8f-a7f5c46a848b",
+              "provenance": {
+                "governed_provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "role_origin": "EXPLICIT",
+                "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+                "source_extraction_ids": [
+                  "e4"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "whose text is N1 Software Control"
+              },
+              "qualifiers": {},
+              "reference_role": null,
+              "relation": "EQUALITY",
+              "scope": "index.html",
+              "subject": "page.h1.text",
+              "supersedes_fact_ids": [],
+              "unit": null,
+              "value": "N1 Software Control"
+            },
+            {
+              "admitted_work_revision_id": null,
+              "authority": "HUMAN_EXPLICIT",
+              "epistemic_status": "CONFIRMED",
+              "id": "7af6a0e0-b86b-51b0-81d8-85f77ba3a2ad",
+              "provenance": {
+                "governed_provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "role_origin": "EXPLICIT",
+                "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+                "source_extraction_ids": [
+                  "e3"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "one paragraph"
+              },
+              "qualifiers": {},
+              "reference_role": null,
+              "relation": "CARDINALITY",
+              "scope": "index.html",
+              "subject": "page.paragraph.count",
+              "supersedes_fact_ids": [],
+              "unit": null,
+              "value": 1
+            },
+            {
+              "admitted_work_revision_id": null,
+              "authority": "HUMAN_EXPLICIT",
+              "epistemic_status": "CONFIRMED",
+              "id": "f52658ef-eca4-5d32-9320-bc8e89c0605d",
+              "provenance": {
+                "governed_provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "role_origin": "EXPLICIT",
+                "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+                "source_extraction_ids": [
+                  "e4"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "whose text is Isolated qualification only"
+              },
+              "qualifiers": {},
+              "reference_role": null,
+              "relation": "EQUALITY",
+              "scope": "index.html",
+              "subject": "page.paragraph.text",
+              "supersedes_fact_ids": [],
+              "unit": null,
+              "value": "Isolated qualification only"
+            },
+            {
+              "admitted_work_revision_id": null,
+              "authority": "HUMAN_EXPLICIT",
+              "epistemic_status": "CONFIRMED",
+              "id": "6a2e329d-e5b8-5ebb-9761-40d47ae3b1fa",
+              "provenance": {
+                "governed_provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "role_origin": "EXPLICIT",
+                "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+                "source_extraction_ids": [
+                  "e6"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "Only index.html may change"
+              },
+              "qualifiers": {},
+              "reference_role": null,
+              "relation": "SCOPE",
+              "scope": "index.html",
+              "subject": "change.scope",
+              "supersedes_fact_ids": [],
+              "unit": null,
+              "value": "index.html"
+            }
+          ],
+          "focus_classification": null,
+          "id": "265c12f1-0e05-4aef-9e0f-cdb325c917e1",
+          "impact_disposition": null,
+          "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+          "interpreted_motive": "Produce the N1 isolated G0 software production qualification artifact: a single static index.html page in the managed Product repository.",
+          "meanings": [
+            {
+              "clarification_required": false,
+              "confidence": 0.93,
+              "kind": "OBJECTIVE_OR_SCOPE_CHANGE",
+              "rationale": "Governed semantic item: 0fb56d5e-a0a8-5519-8b79-d46e9ea64406:pi-index-html",
+              "source_record_ids": [
+                "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+              ],
+              "statement": "Create exactly one static web page at index.html in the newly managed Product repository, using semantic HTML with exactly one h1 'N1 Software Control' and one paragraph 'Isolated qualification only'; only index.html may change, verify the exact heading and paragraph, and leave a reviewable Candidate without deploying, publishing, adding pages or changing README.md."
+            },
+            {
+              "clarification_required": false,
+              "confidence": 0.95,
+              "kind": "CONSTRAINT",
+              "rationale": "Governed semantic item: 0fb56d5e-a0a8-5519-8b79-d46e9ea64406:constraint-change-scope",
+              "source_record_ids": [
+                "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+              ],
+              "statement": "Only index.html may change; deployment, publication, additional pages, and any change to README.md are excluded."
+            },
+            {
+              "clarification_required": false,
+              "confidence": 0.85,
+              "kind": "FACT",
+              "rationale": "Governed semantic item: 0fb56d5e-a0a8-5519-8b79-d46e9ea64406:fact-managed-source",
+              "source_record_ids": [
+                "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+              ],
+              "statement": "This Interaction runs against a newly managed Watt Product source with bootstrap-only initialization, no external origin, and accepted ref refs/heads/accepted at revision 53076c9371d50b77bbe1edb0d9bf44159e56c389; this is Watt initialization storage, not evidence that the Human requested an existing project."
+            }
+          ],
+          "model_identity": "deepseek-flash",
+          "natural_response": "I will treat this as an added constraint on the current Work: Only index.html may change; deployment, publication, additional pages, and any change to README.md are excluded.; One static web page at index.html; Semantic HTML with exactly one h1 and exactly one paragraph with the specified exact texts; Change limited to index.html; Verification of the exact heading and paragraph; A reviewable Candidate left for review; Excluded from this Work: No deployment; Excluded from this Work: No publication; Excluded from this Work: No additional pages; Excluded from this Work: No change to README.md. The current Work objective and scope remain unchanged. This does not create a new Work.",
+          "neutral_semantic_extractions": [
+            {
+              "explicit_roles": [
+                "static web page"
+              ],
+              "extraction_id": "e1",
+              "kind": "QUANTITY",
+              "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "source_text": "exactly one static web page",
+              "unit": null,
+              "values": [
+                1
+              ]
+            },
+            {
+              "explicit_roles": [
+                "h1"
+              ],
+              "extraction_id": "e2",
+              "kind": "QUANTITY",
+              "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "source_text": "exactly one h1",
+              "unit": null,
+              "values": [
+                1
+              ]
+            },
+            {
+              "explicit_roles": [
+                "paragraph"
+              ],
+              "extraction_id": "e3",
+              "kind": "QUANTITY",
+              "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "source_text": "one paragraph",
+              "unit": null,
+              "values": [
+                1
+              ]
+            },
+            {
+              "explicit_roles": [
+                "h1 text",
+                "paragraph text"
+              ],
+              "extraction_id": "e4",
+              "kind": "ORDERED_VALUES",
+              "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "source_text": "exactly one h1 whose text is N1 Software Control and one paragraph whose text is Isolated qualification only",
+              "unit": null,
+              "values": [
+                "N1 Software Control",
+                "Isolated qualification only"
+              ]
+            },
+            {
+              "explicit_roles": [
+                "file path"
+              ],
+              "extraction_id": "e5",
+              "kind": "REFERENCE",
+              "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "source_text": "at index.html",
+              "unit": null,
+              "values": [
+                "index.html"
+              ]
+            },
+            {
+              "explicit_roles": [
+                "only changeable target"
+              ],
+              "extraction_id": "e6",
+              "kind": "SCOPE",
+              "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "source_text": "Only index.html may change",
+              "unit": null,
+              "values": [
+                "index.html"
+              ]
+            },
+            {
+              "explicit_roles": [
+                null,
+                null,
+                null,
+                null
+              ],
+              "extraction_id": "e7",
+              "kind": "ORDERED_VALUES",
+              "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "source_text": "Do not deploy, publish, add pages, or change README.md.",
+              "unit": null,
+              "values": [
+                "deploy",
+                "publish",
+                "add pages",
+                "change README.md"
+              ]
+            }
+          ],
+          "progressive_semantics": {
+            "artifact_recommendation": null,
+            "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+            "deltas": [
+              {
+                "authority": "ADVISORY",
+                "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+                "category": "MOTIVE",
+                "confidence": 0.9,
+                "id": "9c60868c-30ca-553f-99ec-a826f62f0e45",
+                "operation": "ADDED",
+                "prior_assessment_id": null,
+                "prior_value": null,
+                "rationale": "Consume the governed IRK meaning on the exact current basis.",
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "supersedes_delta_ids": [],
+                "value": "Produce the N1 isolated G0 software production qualification artifact: a single static index.html page in the managed Product repository."
+              },
+              {
+                "authority": "ADVISORY",
+                "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+                "category": "CONSTRAINT",
+                "confidence": 0.9,
+                "id": "dc3ee5f7-2ad2-593a-897f-71decf82bc47",
+                "operation": "ADDED",
+                "prior_assessment_id": null,
+                "prior_value": null,
+                "rationale": "IRK-governed constraint; no downstream prose interpretation.",
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "supersedes_delta_ids": [],
+                "value": "Only index.html may change; deployment, publication, additional pages, and any change to README.md are excluded."
+              },
+              {
+                "authority": "ADVISORY",
+                "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+                "category": "CONSTRAINT",
+                "confidence": 0.9,
+                "id": "2a471be5-59ba-5a44-9db2-a8f875c94160",
+                "operation": "ADDED",
+                "prior_assessment_id": null,
+                "prior_value": null,
+                "rationale": "IRK-governed constraint; no downstream prose interpretation.",
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "supersedes_delta_ids": [],
+                "value": "One static web page at index.html"
+              },
+              {
+                "authority": "ADVISORY",
+                "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+                "category": "CONSTRAINT",
+                "confidence": 0.9,
+                "id": "30199a99-2762-5b65-ac71-673607a0f88c",
+                "operation": "ADDED",
+                "prior_assessment_id": null,
+                "prior_value": null,
+                "rationale": "IRK-governed constraint; no downstream prose interpretation.",
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "supersedes_delta_ids": [],
+                "value": "Semantic HTML with exactly one h1 and exactly one paragraph with the specified exact texts"
+              },
+              {
+                "authority": "ADVISORY",
+                "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+                "category": "CONSTRAINT",
+                "confidence": 0.9,
+                "id": "ce4b3f0f-008d-5d19-99f3-5595a6378fd6",
+                "operation": "ADDED",
+                "prior_assessment_id": null,
+                "prior_value": null,
+                "rationale": "IRK-governed constraint; no downstream prose interpretation.",
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "supersedes_delta_ids": [],
+                "value": "Change limited to index.html"
+              },
+              {
+                "authority": "ADVISORY",
+                "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+                "category": "CONSTRAINT",
+                "confidence": 0.9,
+                "id": "7cf0c393-795c-51e5-8b3c-8f7f8c6944b9",
+                "operation": "ADDED",
+                "prior_assessment_id": null,
+                "prior_value": null,
+                "rationale": "IRK-governed constraint; no downstream prose interpretation.",
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "supersedes_delta_ids": [],
+                "value": "Verification of the exact heading and paragraph"
+              },
+              {
+                "authority": "ADVISORY",
+                "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+                "category": "CONSTRAINT",
+                "confidence": 0.9,
+                "id": "fceeb60a-7aaa-5bee-a39d-5ce553504d8a",
+                "operation": "ADDED",
+                "prior_assessment_id": null,
+                "prior_value": null,
+                "rationale": "IRK-governed constraint; no downstream prose interpretation.",
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "supersedes_delta_ids": [],
+                "value": "A reviewable Candidate left for review"
+              },
+              {
+                "authority": "ADVISORY",
+                "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+                "category": "CONSTRAINT",
+                "confidence": 0.9,
+                "id": "39ac7a01-c7f0-5762-a9ce-95c59a8ecadb",
+                "operation": "ADDED",
+                "prior_assessment_id": null,
+                "prior_value": null,
+                "rationale": "IRK-governed constraint; no downstream prose interpretation.",
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "supersedes_delta_ids": [],
+                "value": "Excluded from this Work: No deployment"
+              },
+              {
+                "authority": "ADVISORY",
+                "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+                "category": "CONSTRAINT",
+                "confidence": 0.9,
+                "id": "bba1c8e2-775f-5869-9272-5238c9b3c25f",
+                "operation": "ADDED",
+                "prior_assessment_id": null,
+                "prior_value": null,
+                "rationale": "IRK-governed constraint; no downstream prose interpretation.",
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "supersedes_delta_ids": [],
+                "value": "Excluded from this Work: No publication"
+              },
+              {
+                "authority": "ADVISORY",
+                "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+                "category": "CONSTRAINT",
+                "confidence": 0.9,
+                "id": "68216b0c-5ca8-5d84-991a-a4bcee2e5d77",
+                "operation": "ADDED",
+                "prior_assessment_id": null,
+                "prior_value": null,
+                "rationale": "IRK-governed constraint; no downstream prose interpretation.",
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "supersedes_delta_ids": [],
+                "value": "Excluded from this Work: No additional pages"
+              },
+              {
+                "authority": "ADVISORY",
+                "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+                "category": "CONSTRAINT",
+                "confidence": 0.9,
+                "id": "b6125ead-e6c7-5630-99e1-132fbb0001e8",
+                "operation": "ADDED",
+                "prior_assessment_id": null,
+                "prior_value": null,
+                "rationale": "IRK-governed constraint; no downstream prose interpretation.",
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "supersedes_delta_ids": [],
+                "value": "Excluded from this Work: No change to README.md"
+              }
+            ],
+            "explicit_assumptions": [],
+            "factual_contradictions": [],
+            "governance_candidate": "WORK_FORMATION_PROPOSAL",
+            "inference_disposition": "NO_INFERENCE",
+            "pattern_signals": [
+              "CONSTRAINT_ADDITION",
+              "PRODUCTION_REQUEST",
+              "BOUNDED_CHANGE"
+            ],
+            "question_policy_revision": "wic-question-value-v1",
+            "questions": [],
+            "readiness": [
+              {
+                "authority": "ADVISORY_ONLY",
+                "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "missing_material_evidence": [],
+                "profile_revision": "wic-transition-readiness-v1",
+                "satisfied_evidence": [
+                  "MOTIVE",
+                  "DESIRED_OUTCOME"
+                ],
+                "status": "READY",
+                "target": "WORK_FORMATION",
+                "unresolved_human_decisions": [],
+                "useful_work_may_continue": true
+              },
+              {
+                "authority": "ADVISORY_ONLY",
+                "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "missing_material_evidence": [],
+                "profile_revision": "wic-transition-readiness-v1",
+                "satisfied_evidence": [],
+                "status": "NOT_APPLICABLE",
+                "target": "WORK_REVISION",
+                "unresolved_human_decisions": [],
+                "useful_work_may_continue": true
+              },
+              {
+                "authority": "ADVISORY_ONLY",
+                "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+                "explicit_assumptions": [],
+                "material_risks": [],
+                "missing_material_evidence": [],
+                "profile_revision": "wic-transition-readiness-v1",
+                "satisfied_evidence": [
+                  "CURRENT_FOCUS"
+                ],
+                "status": "READY",
+                "target": "DESIGN_PROGRESSION",
+                "unresolved_human_decisions": [],
+                "useful_work_may_continue": true
+              }
+            ],
+            "reception_meanings": [
+              "CONSTRAINT:Only index.html may change; deployment, publication, additional pages, and any change to README.md are excluded."
+            ],
+            "selected_question": null,
+            "semantic_policy_revision": "wic-semantic-policy-v1",
+            "source_record_ids": [
+              "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+            ],
+            "turn_intent": "BUILD",
+            "unresolved_human_decisions": [],
+            "working_constraints": [
+              "Only index.html may change; deployment, publication, additional pages, and any change to README.md are excluded.",
+              "One static web page at index.html",
+              "Semantic HTML with exactly one h1 and exactly one paragraph with the specified exact texts",
+              "Change limited to index.html",
+              "Verification of the exact heading and paragraph",
+              "A reviewable Candidate left for review",
+              "Excluded from this Work: No deployment",
+              "Excluded from this Work: No publication",
+              "Excluded from this Work: No additional pages",
+              "Excluded from this Work: No change to README.md"
+            ],
+            "working_desired_outcome": "Add index.html containing semantic HTML with exactly one h1 whose text is 'N1 Software Control' and one paragraph whose text is 'Isolated qualification only'.",
+            "working_facts": [
+              "This Interaction runs against a newly managed Watt Product source with bootstrap-only initialization, no external origin, and accepted ref refs/heads/accepted at revision 53076c9371d50b77bbe1edb0d9bf44159e56c389; this is Watt initialization storage, not evidence that the Human requested an existing project."
+            ],
+            "working_motive": "Produce the N1 isolated G0 software production qualification artifact: a single static index.html page in the managed Product repository.",
+            "working_requests": [
+              "Add index.html containing semantic HTML with exactly one h1 whose text is 'N1 Software Control' and one paragraph whose text is 'Isolated qualification only'."
+            ]
+          },
+          "provider_identity": "deepseek-responses:semantic:request:91eb611f-4b9b-481e-bee5-af30a82a0d58",
+          "readiness": {
+            "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+            "missing_information": [],
+            "profile": "LONG_LIVED_STEERING",
+            "profile_version": "v0",
+            "reasons": [
+              "Motive and desired outcome are clear enough to form governed Work."
+            ],
+            "satisfied_requirements": [
+              "MOTIVE",
+              "DESIRED_OUTCOME"
+            ],
+            "status": "READY",
+            "unresolved_material_questions": []
+          },
+          "refinement_observation": {
+            "attempt_count": 2,
+            "component": "wic/semantic-provider",
+            "converged": true,
+            "human_escalation": false,
+            "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+            "semantic_version": 2,
+            "signal_kind": "ACTION_ARGUMENT_PROVENANCE_INVALID"
+          },
+          "schema_version": "wic-assessment-v8",
+          "semantic_ir": {
+            "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+            "clauses": [
+              {
+                "clause_id": "c1",
+                "modality": "ASSERTION",
+                "polarity": "AFFIRMATIVE",
+                "refers_to": [],
+                "requested_effects": [],
+                "semantic_item_ids": [
+                  "pi-index-html"
+                ],
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "N1 isolated G0 software production qualification.",
+                "speech_act": "DISCUSSION",
+                "supersedes": [],
+                "temporal_scope": "CURRENT"
+              },
+              {
+                "clause_id": "c2",
+                "modality": "REQUEST",
+                "polarity": "AFFIRMATIVE",
+                "refers_to": [],
+                "requested_effects": [],
+                "semantic_item_ids": [
+                  "pi-index-html",
+                  "fact-managed-source"
+                ],
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "In this newly managed Product repository, create exactly one static web page at index.html.",
+                "speech_act": "EXPLICIT_REQUEST",
+                "supersedes": [],
+                "temporal_scope": "CURRENT"
+              },
+              {
+                "clause_id": "c3",
+                "modality": "ASSERTION",
+                "polarity": "AFFIRMATIVE",
+                "refers_to": [],
+                "requested_effects": [],
+                "semantic_item_ids": [
+                  "pi-index-html"
+                ],
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "This is CODE_WORK producing a software artifact.",
+                "speech_act": "DISCUSSION",
+                "supersedes": [],
+                "temporal_scope": "CURRENT"
+              },
+              {
+                "clause_id": "c4",
+                "modality": "REQUEST",
+                "polarity": "AFFIRMATIVE",
+                "refers_to": [],
+                "requested_effects": [],
+                "semantic_item_ids": [
+                  "pi-index-html"
+                ],
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "Use semantic HTML with exactly one h1 whose text is N1 Software Control and one paragraph whose text is Isolated qualification only.",
+                "speech_act": "EXPLICIT_REQUEST",
+                "supersedes": [],
+                "temporal_scope": "CURRENT"
+              },
+              {
+                "clause_id": "c5",
+                "modality": "REQUEST",
+                "polarity": "AFFIRMATIVE",
+                "refers_to": [],
+                "requested_effects": [],
+                "semantic_item_ids": [
+                  "constraint-change-scope",
+                  "pi-index-html"
+                ],
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "Only index.html may change.",
+                "speech_act": "EXPLICIT_REQUEST",
+                "supersedes": [],
+                "temporal_scope": "CURRENT"
+              },
+              {
+                "clause_id": "c6",
+                "modality": "REQUEST",
+                "polarity": "AFFIRMATIVE",
+                "refers_to": [],
+                "requested_effects": [],
+                "semantic_item_ids": [
+                  "pi-index-html"
+                ],
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "Verify the exact heading and paragraph and leave a reviewable Candidate.",
+                "speech_act": "EXPLICIT_REQUEST",
+                "supersedes": [],
+                "temporal_scope": "CURRENT"
+              },
+              {
+                "clause_id": "c7",
+                "modality": "REQUEST",
+                "polarity": "NEGATED",
+                "refers_to": [],
+                "requested_effects": [],
+                "semantic_item_ids": [
+                  "constraint-change-scope",
+                  "pi-index-html"
+                ],
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "Do not deploy, publish, add pages, or change README.md.",
+                "speech_act": "EXPLICIT_REQUEST",
+                "supersedes": [],
+                "temporal_scope": "CURRENT"
+              }
+            ],
+            "compiler_reference": "deepseek-responses:semantic:request:91eb611f-4b9b-481e-bee5-af30a82a0d58",
+            "engineering_fact_ids": [
+              "84caed25-1a80-5718-95da-85b74b61db8a",
+              "fd425161-a627-5a3b-b24a-0464a4583d78",
+              "9944fba1-332d-5eda-8d36-21e108a35ce2",
+              "ebbc2f13-82aa-5369-8a8f-a7f5c46a848b",
+              "7af6a0e0-b86b-51b0-81d8-85f77ba3a2ad",
+              "f52658ef-eca4-5d32-9320-bc8e89c0605d",
+              "6a2e329d-e5b8-5ebb-9761-40d47ae3b1fa"
+            ],
+            "human_abstraction_level": "IMPLEMENTATION",
+            "human_decisions": [],
+            "id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+            "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+            "items": [
+              {
+                "action": null,
+                "answer": null,
+                "confidence": 0.93,
+                "depends_on": [],
+                "design_frame": null,
+                "item_id": "pi-index-html",
+                "kind": "PRODUCTION_INTENT",
+                "observed_facts": {},
+                "production": {
+                  "acceptance_required": true,
+                  "allowed_areas": [],
+                  "bounded_change": true,
+                  "current": true,
+                  "delivery_authorized": false,
+                  "exclusions": [
+                    "No deployment",
+                    "No publication",
+                    "No additional pages",
+                    "No change to README.md"
+                  ],
+                  "new_work": true,
+                  "objective": "Produce the N1 isolated G0 software production qualification artifact: a single static index.html page in the managed Product repository.",
+                  "preview_required": false,
+                  "primary_change": "Add index.html containing semantic HTML with exactly one h1 whose text is 'N1 Software Control' and one paragraph whose text is 'Isolated qualification only'.",
+                  "repository_reference": null,
+                  "repository_required": false,
+                  "scope": [
+                    "One static web page at index.html",
+                    "Semantic HTML with exactly one h1 and exactly one paragraph with the specified exact texts",
+                    "Change limited to index.html",
+                    "Verification of the exact heading and paragraph",
+                    "A reviewable Candidate left for review"
+                  ],
+                  "systemic_design": false,
+                  "target_paths": [
+                    {
+                      "provenance": {
+                        "evidence_reference": null,
+                        "origin": "HUMAN_EXPLICIT",
+                        "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                        "source_text": "create exactly one static web page at index.html"
+                      },
+                      "value": "index.html"
+                    }
+                  ],
+                  "unresolved": [],
+                  "unresolved_arguments": []
+                },
+                "provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  }
+                ],
+                "requires_human": false,
+                "statement": "Create exactly one static web page at index.html in the newly managed Product repository, using semantic HTML with exactly one h1 'N1 Software Control' and one paragraph 'Isolated qualification only'; only index.html may change, verify the exact heading and paragraph, and leave a reviewable Candidate without deploying, publishing, adding pages or changing README.md.",
+                "subject": "index.html",
+                "supersedes": []
+              },
+              {
+                "action": null,
+                "answer": null,
+                "confidence": 0.95,
+                "depends_on": [],
+                "design_frame": null,
+                "item_id": "constraint-change-scope",
+                "kind": "CONSTRAINT",
+                "observed_facts": {},
+                "production": null,
+                "provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "requires_human": false,
+                "statement": "Only index.html may change; deployment, publication, additional pages, and any change to README.md are excluded.",
+                "subject": "change_scope",
+                "supersedes": []
+              },
+              {
+                "action": null,
+                "answer": null,
+                "confidence": 0.85,
+                "depends_on": [],
+                "design_frame": null,
+                "item_id": "fact-managed-source",
+                "kind": "FACT",
+                "observed_facts": {
+                  "accepted_ref": {
+                    "provenance": {
+                      "evidence_reference": "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+                      "origin": "REPOSITORY_OBSERVED",
+                      "source_record_id": null,
+                      "source_text": null
+                    },
+                    "value": "refs/heads/accepted"
+                  },
+                  "accepted_revision": {
+                    "provenance": {
+                      "evidence_reference": "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+                      "origin": "REPOSITORY_OBSERVED",
+                      "source_record_id": null,
+                      "source_text": null
+                    },
+                    "value": "53076c9371d50b77bbe1edb0d9bf44159e56c389"
+                  },
+                  "accepted_tree": {
+                    "provenance": {
+                      "evidence_reference": "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+                      "origin": "REPOSITORY_OBSERVED",
+                      "source_record_id": null,
+                      "source_text": null
+                    },
+                    "value": "7dcefdcef56cacfa22992ed42b2c7bc3c3c6ac70"
+                  },
+                  "product_id": {
+                    "provenance": {
+                      "evidence_reference": "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+                      "origin": "REPOSITORY_OBSERVED",
+                      "source_record_id": null,
+                      "source_text": null
+                    },
+                    "value": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d"
+                  },
+                  "repository_identity": {
+                    "provenance": {
+                      "evidence_reference": "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+                      "origin": "REPOSITORY_OBSERVED",
+                      "source_record_id": null,
+                      "source_text": null
+                    },
+                    "value": "watt://repositories/products/5ccb9748-b3a6-4ac0-a50b-6b056280bd4d"
+                  }
+                },
+                "production": null,
+                "provenance": [
+                  {
+                    "evidence_reference": "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+                    "origin": "REPOSITORY_OBSERVED",
+                    "source_record_id": null,
+                    "source_text": null
+                  }
+                ],
+                "requires_human": false,
+                "statement": "This Interaction runs against a newly managed Watt Product source with bootstrap-only initialization, no external origin, and accepted ref refs/heads/accepted at revision 53076c9371d50b77bbe1edb0d9bf44159e56c389; this is Watt initialization storage, not evidence that the Human requested an existing project.",
+                "subject": "product_source",
+                "supersedes": []
+              }
+            ],
+            "legacy_typed_projection": false,
+            "neutral_semantic_extractions": [
+              {
+                "explicit_roles": [
+                  "static web page"
+                ],
+                "extraction_id": "e1",
+                "kind": "QUANTITY",
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "exactly one static web page",
+                "unit": null,
+                "values": [
+                  1
+                ]
+              },
+              {
+                "explicit_roles": [
+                  "h1"
+                ],
+                "extraction_id": "e2",
+                "kind": "QUANTITY",
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "exactly one h1",
+                "unit": null,
+                "values": [
+                  1
+                ]
+              },
+              {
+                "explicit_roles": [
+                  "paragraph"
+                ],
+                "extraction_id": "e3",
+                "kind": "QUANTITY",
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "one paragraph",
+                "unit": null,
+                "values": [
+                  1
+                ]
+              },
+              {
+                "explicit_roles": [
+                  "h1 text",
+                  "paragraph text"
+                ],
+                "extraction_id": "e4",
+                "kind": "ORDERED_VALUES",
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "exactly one h1 whose text is N1 Software Control and one paragraph whose text is Isolated qualification only",
+                "unit": null,
+                "values": [
+                  "N1 Software Control",
+                  "Isolated qualification only"
+                ]
+              },
+              {
+                "explicit_roles": [
+                  "file path"
+                ],
+                "extraction_id": "e5",
+                "kind": "REFERENCE",
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "at index.html",
+                "unit": null,
+                "values": [
+                  "index.html"
+                ]
+              },
+              {
+                "explicit_roles": [
+                  "only changeable target"
+                ],
+                "extraction_id": "e6",
+                "kind": "SCOPE",
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "Only index.html may change",
+                "unit": null,
+                "values": [
+                  "index.html"
+                ]
+              },
+              {
+                "explicit_roles": [
+                  null,
+                  null,
+                  null,
+                  null
+                ],
+                "extraction_id": "e7",
+                "kind": "ORDERED_VALUES",
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "Do not deploy, publish, add pages, or change README.md.",
+                "unit": null,
+                "values": [
+                  "deploy",
+                  "publish",
+                  "add pages",
+                  "change README.md"
+                ]
+              }
+            ],
+            "production_sufficiency": {
+              "context_references": [
+                "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+                "product-context:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:2026-10-09T11:37:41.052876+00:00"
+              ],
+              "gaps": [
+                {
+                  "consequence": "Not specified; an ordinary semantic-HTML document shell can be produced and adjusted without changing the requested outcome.",
+                  "kind": "ROUTINE_HOW",
+                  "subject": "Non-visible document head content such as a <title>"
+                },
+                {
+                  "consequence": "Human asked only for semantic HTML with one heading and one paragraph; default is unstyled markup, freely revisable.",
+                  "kind": "SAFE_DEFAULT",
+                  "subject": "Whether any inline styling is expected"
+                },
+                {
+                  "consequence": "Handled by the governed repository preparation path; index.html at the page root is the natural placement for 'at index.html'.",
+                  "kind": "ROUTINE_HOW",
+                  "subject": "Exact repository-relative placement and file revision mechanics"
+                }
+              ],
+              "proposal": null,
+              "proposal_basis": null,
+              "question": null,
+              "reason": "A bounded outcome is fully specified: one file (index.html), exact h1 and paragraph texts, semantic-HTML requirement, a fixed change scope, explicit exclusions, and a verification plus reviewable-Candidate obligation. Only cheap implementation details remain open.",
+              "recommendation_acceptance": null,
+              "status": "READY"
+            },
+            "questions": [],
+            "schema_version": "irk-semantic-ir-v1",
+            "semantic_fact_candidates": [
+              {
+                "authority": "HUMAN_EXPLICIT",
+                "candidate_id": "fc-page-count",
+                "epistemic_status": "CONFIRMED",
+                "operation": "UPSERT",
+                "qualifiers": {},
+                "reference_role": null,
+                "relation": "CARDINALITY",
+                "role_origin": "EXPLICIT",
+                "scope": "index.html",
+                "source_extraction_ids": [
+                  "e1"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "exactly one static web page",
+                "subject": "page.file.count",
+                "supersedes_fact_ids": [],
+                "unit": null,
+                "value": 1
+              },
+              {
+                "authority": "HUMAN_EXPLICIT",
+                "candidate_id": "fc-artifact-path",
+                "epistemic_status": "CONFIRMED",
+                "operation": "UPSERT",
+                "qualifiers": {},
+                "reference_role": null,
+                "relation": "REFERENCE",
+                "role_origin": "EXPLICIT",
+                "scope": "index.html",
+                "source_extraction_ids": [
+                  "e5"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "at index.html",
+                "subject": "artifact.path",
+                "supersedes_fact_ids": [],
+                "unit": null,
+                "value": "index.html"
+              },
+              {
+                "authority": "HUMAN_EXPLICIT",
+                "candidate_id": "fc-h1-count",
+                "epistemic_status": "CONFIRMED",
+                "operation": "UPSERT",
+                "qualifiers": {},
+                "reference_role": null,
+                "relation": "CARDINALITY",
+                "role_origin": "EXPLICIT",
+                "scope": "index.html",
+                "source_extraction_ids": [
+                  "e2"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "exactly one h1",
+                "subject": "page.h1.count",
+                "supersedes_fact_ids": [],
+                "unit": null,
+                "value": 1
+              },
+              {
+                "authority": "HUMAN_EXPLICIT",
+                "candidate_id": "fc-h1-text",
+                "epistemic_status": "CONFIRMED",
+                "operation": "UPSERT",
+                "qualifiers": {},
+                "reference_role": null,
+                "relation": "EQUALITY",
+                "role_origin": "EXPLICIT",
+                "scope": "index.html",
+                "source_extraction_ids": [
+                  "e4"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "whose text is N1 Software Control",
+                "subject": "page.h1.text",
+                "supersedes_fact_ids": [],
+                "unit": null,
+                "value": "N1 Software Control"
+              },
+              {
+                "authority": "HUMAN_EXPLICIT",
+                "candidate_id": "fc-paragraph-count",
+                "epistemic_status": "CONFIRMED",
+                "operation": "UPSERT",
+                "qualifiers": {},
+                "reference_role": null,
+                "relation": "CARDINALITY",
+                "role_origin": "EXPLICIT",
+                "scope": "index.html",
+                "source_extraction_ids": [
+                  "e3"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "one paragraph",
+                "subject": "page.paragraph.count",
+                "supersedes_fact_ids": [],
+                "unit": null,
+                "value": 1
+              },
+              {
+                "authority": "HUMAN_EXPLICIT",
+                "candidate_id": "fc-paragraph-text",
+                "epistemic_status": "CONFIRMED",
+                "operation": "UPSERT",
+                "qualifiers": {},
+                "reference_role": null,
+                "relation": "EQUALITY",
+                "role_origin": "EXPLICIT",
+                "scope": "index.html",
+                "source_extraction_ids": [
+                  "e4"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "whose text is Isolated qualification only",
+                "subject": "page.paragraph.text",
+                "supersedes_fact_ids": [],
+                "unit": null,
+                "value": "Isolated qualification only"
+              },
+              {
+                "authority": "HUMAN_EXPLICIT",
+                "candidate_id": "fc-change-scope",
+                "epistemic_status": "CONFIRMED",
+                "operation": "UPSERT",
+                "qualifiers": {},
+                "reference_role": null,
+                "relation": "SCOPE",
+                "role_origin": "EXPLICIT",
+                "scope": "index.html",
+                "source_extraction_ids": [
+                  "e6"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "Only index.html may change",
+                "subject": "change.scope",
+                "supersedes_fact_ids": [],
+                "unit": null,
+                "value": "index.html"
+              }
+            ],
+            "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+            "uncertain": false,
+            "unresolved": [],
+            "work_question_step_id": null
+          },
+          "supporting_references": [],
+          "unresolved_material_questions": []
+        }
+      ],
+      "scope_column": "interaction_id",
+      "scope_ids": [
+        "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4"
+      ]
+    },
+    "interaction_records": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "actor": "HUMAN",
+          "content": "N1 isolated G0 software production qualification. In this newly managed Product repository, create exactly one static web page at index.html. This is CODE_WORK producing a software artifact. Use semantic HTML with exactly one h1 whose text is N1 Software Control and one paragraph whose text is Isolated qualification only. Only index.html may change. Verify the exact heading and paragraph and leave a reviewable Candidate. Do not deploy, publish, add pages, or change README.md.",
+          "content_fingerprint": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+          "created_at": "2026-10-09T11:37:44.177639+00:00",
+          "id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+          "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+          "sequence": 1,
+          "source": "human:owner",
+          "supporting_references": [],
+          "work_focus_id": null
+        }
+      ],
+      "scope_column": "interaction_id",
+      "scope_ids": [
+        "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4"
+      ]
+    },
+    "interaction_turn_obligations": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "id": "ec46820d-a996-5daf-85c0-ea1b4db0f17c",
+          "payload": {
+            "blocker_reference": null,
+            "depends_on": [],
+            "expected_effects": [
+              {
+                "exact_revision": null,
+                "parameters": {},
+                "predicate": "WORK_ADMITTED",
+                "target": null
+              }
+            ],
+            "id": "ec46820d-a996-5daf-85c0-ea1b4db0f17c",
+            "observed_effect": {
+              "evidence_references": [
+                "work-reality-revision:c6824f98-878f-5cbe-a5f1-55c02c203905"
+              ],
+              "facts": {
+                "admitted_work_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+                "assessment_id": "265c12f1-0e05-4aef-9e0f-cdb325c917e1",
+                "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+                "work_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905"
+              },
+              "owner": "work-admission"
+            },
+            "operation": null,
+            "plane": "WORK",
+            "refinement_ids": [],
+            "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+            "semantic_item_id": "pi-index-html",
+            "state": "SATISFIED",
+            "supersession": null,
+            "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01",
+            "version": 2
+          },
+          "semantic_item_id": "pi-index-html",
+          "state": "SATISFIED",
+          "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01",
+          "version": 2
+        }
+      ],
+      "scope_column": "turn_id",
+      "scope_ids": [
+        "61ce1843-e035-4a6a-b252-c531be68ed01"
+      ]
+    },
+    "interaction_turn_realization_refinements": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "attempt": 1,
+          "id": "628d8460-d329-4dd6-9d77-94796f1812ad",
+          "obligation_id": null,
+          "parent_id": null,
+          "payload": {
+            "attempt": 1,
+            "attempt_budget": 2,
+            "evidence_references": [
+              "interaction-record:1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "interaction-assessment:265c12f1-0e05-4aef-9e0f-cdb325c917e1"
+            ],
+            "id": "628d8460-d329-4dd6-9d77-94796f1812ad",
+            "local_recovered": false,
+            "obligation_id": null,
+            "parent_id": null,
+            "scope": "TURN",
+            "signal": "ACTION_ARGUMENT_PROVENANCE_INVALID",
+            "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01",
+            "work_converged": false
+          },
+          "scope": "TURN",
+          "signature": "TURN:None",
+          "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01"
+        },
+        {
+          "attempt": 2,
+          "id": "41998818-5757-4638-bcd9-a456d33ee0b6",
+          "obligation_id": null,
+          "parent_id": "628d8460-d329-4dd6-9d77-94796f1812ad",
+          "payload": {
+            "attempt": 2,
+            "attempt_budget": 2,
+            "evidence_references": [
+              "interaction-record:1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "interaction-assessment:265c12f1-0e05-4aef-9e0f-cdb325c917e1"
+            ],
+            "id": "41998818-5757-4638-bcd9-a456d33ee0b6",
+            "local_recovered": true,
+            "obligation_id": null,
+            "parent_id": "628d8460-d329-4dd6-9d77-94796f1812ad",
+            "scope": "TURN",
+            "signal": "ACTION_ARGUMENT_PROVENANCE_INVALID",
+            "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01",
+            "work_converged": false
+          },
+          "scope": "TURN",
+          "signature": "TURN:None",
+          "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01"
+        }
+      ],
+      "scope_column": "turn_id",
+      "scope_ids": [
+        "61ce1843-e035-4a6a-b252-c531be68ed01"
+      ]
+    },
+    "interaction_turn_realizations": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "assessment_id": "265c12f1-0e05-4aef-9e0f-cdb325c917e1",
+          "payload": {
+            "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+            "clauses": [
+              {
+                "clause_id": "c1",
+                "modality": "ASSERTION",
+                "polarity": "AFFIRMATIVE",
+                "refers_to": [],
+                "requested_effects": [],
+                "semantic_item_ids": [
+                  "pi-index-html"
+                ],
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "N1 isolated G0 software production qualification.",
+                "speech_act": "DISCUSSION",
+                "supersedes": [],
+                "temporal_scope": "CURRENT"
+              },
+              {
+                "clause_id": "c2",
+                "modality": "REQUEST",
+                "polarity": "AFFIRMATIVE",
+                "refers_to": [],
+                "requested_effects": [],
+                "semantic_item_ids": [
+                  "pi-index-html",
+                  "fact-managed-source"
+                ],
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "In this newly managed Product repository, create exactly one static web page at index.html.",
+                "speech_act": "EXPLICIT_REQUEST",
+                "supersedes": [],
+                "temporal_scope": "CURRENT"
+              },
+              {
+                "clause_id": "c3",
+                "modality": "ASSERTION",
+                "polarity": "AFFIRMATIVE",
+                "refers_to": [],
+                "requested_effects": [],
+                "semantic_item_ids": [
+                  "pi-index-html"
+                ],
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "This is CODE_WORK producing a software artifact.",
+                "speech_act": "DISCUSSION",
+                "supersedes": [],
+                "temporal_scope": "CURRENT"
+              },
+              {
+                "clause_id": "c4",
+                "modality": "REQUEST",
+                "polarity": "AFFIRMATIVE",
+                "refers_to": [],
+                "requested_effects": [],
+                "semantic_item_ids": [
+                  "pi-index-html"
+                ],
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "Use semantic HTML with exactly one h1 whose text is N1 Software Control and one paragraph whose text is Isolated qualification only.",
+                "speech_act": "EXPLICIT_REQUEST",
+                "supersedes": [],
+                "temporal_scope": "CURRENT"
+              },
+              {
+                "clause_id": "c5",
+                "modality": "REQUEST",
+                "polarity": "AFFIRMATIVE",
+                "refers_to": [],
+                "requested_effects": [],
+                "semantic_item_ids": [
+                  "constraint-change-scope",
+                  "pi-index-html"
+                ],
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "Only index.html may change.",
+                "speech_act": "EXPLICIT_REQUEST",
+                "supersedes": [],
+                "temporal_scope": "CURRENT"
+              },
+              {
+                "clause_id": "c6",
+                "modality": "REQUEST",
+                "polarity": "AFFIRMATIVE",
+                "refers_to": [],
+                "requested_effects": [],
+                "semantic_item_ids": [
+                  "pi-index-html"
+                ],
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "Verify the exact heading and paragraph and leave a reviewable Candidate.",
+                "speech_act": "EXPLICIT_REQUEST",
+                "supersedes": [],
+                "temporal_scope": "CURRENT"
+              },
+              {
+                "clause_id": "c7",
+                "modality": "REQUEST",
+                "polarity": "NEGATED",
+                "refers_to": [],
+                "requested_effects": [],
+                "semantic_item_ids": [
+                  "constraint-change-scope",
+                  "pi-index-html"
+                ],
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "Do not deploy, publish, add pages, or change README.md.",
+                "speech_act": "EXPLICIT_REQUEST",
+                "supersedes": [],
+                "temporal_scope": "CURRENT"
+              }
+            ],
+            "compiler_reference": "deepseek-responses:semantic:request:91eb611f-4b9b-481e-bee5-af30a82a0d58",
+            "engineering_fact_ids": [
+              "84caed25-1a80-5718-95da-85b74b61db8a",
+              "fd425161-a627-5a3b-b24a-0464a4583d78",
+              "9944fba1-332d-5eda-8d36-21e108a35ce2",
+              "ebbc2f13-82aa-5369-8a8f-a7f5c46a848b",
+              "7af6a0e0-b86b-51b0-81d8-85f77ba3a2ad",
+              "f52658ef-eca4-5d32-9320-bc8e89c0605d",
+              "6a2e329d-e5b8-5ebb-9761-40d47ae3b1fa"
+            ],
+            "human_abstraction_level": "IMPLEMENTATION",
+            "human_decisions": [],
+            "id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+            "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+            "items": [
+              {
+                "action": null,
+                "answer": null,
+                "confidence": 0.93,
+                "depends_on": [],
+                "design_frame": null,
+                "item_id": "pi-index-html",
+                "kind": "PRODUCTION_INTENT",
+                "observed_facts": {},
+                "production": {
+                  "acceptance_required": true,
+                  "allowed_areas": [],
+                  "bounded_change": true,
+                  "current": true,
+                  "delivery_authorized": false,
+                  "exclusions": [
+                    "No deployment",
+                    "No publication",
+                    "No additional pages",
+                    "No change to README.md"
+                  ],
+                  "new_work": true,
+                  "objective": "Produce the N1 isolated G0 software production qualification artifact: a single static index.html page in the managed Product repository.",
+                  "preview_required": false,
+                  "primary_change": "Add index.html containing semantic HTML with exactly one h1 whose text is 'N1 Software Control' and one paragraph whose text is 'Isolated qualification only'.",
+                  "repository_reference": null,
+                  "repository_required": false,
+                  "scope": [
+                    "One static web page at index.html",
+                    "Semantic HTML with exactly one h1 and exactly one paragraph with the specified exact texts",
+                    "Change limited to index.html",
+                    "Verification of the exact heading and paragraph",
+                    "A reviewable Candidate left for review"
+                  ],
+                  "systemic_design": false,
+                  "target_paths": [
+                    {
+                      "provenance": {
+                        "evidence_reference": null,
+                        "origin": "HUMAN_EXPLICIT",
+                        "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                        "source_text": "create exactly one static web page at index.html"
+                      },
+                      "value": "index.html"
+                    }
+                  ],
+                  "unresolved": [],
+                  "unresolved_arguments": []
+                },
+                "provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  }
+                ],
+                "requires_human": false,
+                "statement": "Create exactly one static web page at index.html in the newly managed Product repository, using semantic HTML with exactly one h1 'N1 Software Control' and one paragraph 'Isolated qualification only'; only index.html may change, verify the exact heading and paragraph, and leave a reviewable Candidate without deploying, publishing, adding pages or changing README.md.",
+                "subject": "index.html",
+                "supersedes": []
+              },
+              {
+                "action": null,
+                "answer": null,
+                "confidence": 0.95,
+                "depends_on": [],
+                "design_frame": null,
+                "item_id": "constraint-change-scope",
+                "kind": "CONSTRAINT",
+                "observed_facts": {},
+                "production": null,
+                "provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "requires_human": false,
+                "statement": "Only index.html may change; deployment, publication, additional pages, and any change to README.md are excluded.",
+                "subject": "change_scope",
+                "supersedes": []
+              },
+              {
+                "action": null,
+                "answer": null,
+                "confidence": 0.85,
+                "depends_on": [],
+                "design_frame": null,
+                "item_id": "fact-managed-source",
+                "kind": "FACT",
+                "observed_facts": {
+                  "accepted_ref": {
+                    "provenance": {
+                      "evidence_reference": "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+                      "origin": "REPOSITORY_OBSERVED",
+                      "source_record_id": null,
+                      "source_text": null
+                    },
+                    "value": "refs/heads/accepted"
+                  },
+                  "accepted_revision": {
+                    "provenance": {
+                      "evidence_reference": "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+                      "origin": "REPOSITORY_OBSERVED",
+                      "source_record_id": null,
+                      "source_text": null
+                    },
+                    "value": "53076c9371d50b77bbe1edb0d9bf44159e56c389"
+                  },
+                  "accepted_tree": {
+                    "provenance": {
+                      "evidence_reference": "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+                      "origin": "REPOSITORY_OBSERVED",
+                      "source_record_id": null,
+                      "source_text": null
+                    },
+                    "value": "7dcefdcef56cacfa22992ed42b2c7bc3c3c6ac70"
+                  },
+                  "product_id": {
+                    "provenance": {
+                      "evidence_reference": "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+                      "origin": "REPOSITORY_OBSERVED",
+                      "source_record_id": null,
+                      "source_text": null
+                    },
+                    "value": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d"
+                  },
+                  "repository_identity": {
+                    "provenance": {
+                      "evidence_reference": "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+                      "origin": "REPOSITORY_OBSERVED",
+                      "source_record_id": null,
+                      "source_text": null
+                    },
+                    "value": "watt://repositories/products/5ccb9748-b3a6-4ac0-a50b-6b056280bd4d"
+                  }
+                },
+                "production": null,
+                "provenance": [
+                  {
+                    "evidence_reference": "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+                    "origin": "REPOSITORY_OBSERVED",
+                    "source_record_id": null,
+                    "source_text": null
+                  }
+                ],
+                "requires_human": false,
+                "statement": "This Interaction runs against a newly managed Watt Product source with bootstrap-only initialization, no external origin, and accepted ref refs/heads/accepted at revision 53076c9371d50b77bbe1edb0d9bf44159e56c389; this is Watt initialization storage, not evidence that the Human requested an existing project.",
+                "subject": "product_source",
+                "supersedes": []
+              }
+            ],
+            "legacy_typed_projection": false,
+            "neutral_semantic_extractions": [
+              {
+                "explicit_roles": [
+                  "static web page"
+                ],
+                "extraction_id": "e1",
+                "kind": "QUANTITY",
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "exactly one static web page",
+                "unit": null,
+                "values": [
+                  1
+                ]
+              },
+              {
+                "explicit_roles": [
+                  "h1"
+                ],
+                "extraction_id": "e2",
+                "kind": "QUANTITY",
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "exactly one h1",
+                "unit": null,
+                "values": [
+                  1
+                ]
+              },
+              {
+                "explicit_roles": [
+                  "paragraph"
+                ],
+                "extraction_id": "e3",
+                "kind": "QUANTITY",
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "one paragraph",
+                "unit": null,
+                "values": [
+                  1
+                ]
+              },
+              {
+                "explicit_roles": [
+                  "h1 text",
+                  "paragraph text"
+                ],
+                "extraction_id": "e4",
+                "kind": "ORDERED_VALUES",
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "exactly one h1 whose text is N1 Software Control and one paragraph whose text is Isolated qualification only",
+                "unit": null,
+                "values": [
+                  "N1 Software Control",
+                  "Isolated qualification only"
+                ]
+              },
+              {
+                "explicit_roles": [
+                  "file path"
+                ],
+                "extraction_id": "e5",
+                "kind": "REFERENCE",
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "at index.html",
+                "unit": null,
+                "values": [
+                  "index.html"
+                ]
+              },
+              {
+                "explicit_roles": [
+                  "only changeable target"
+                ],
+                "extraction_id": "e6",
+                "kind": "SCOPE",
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "Only index.html may change",
+                "unit": null,
+                "values": [
+                  "index.html"
+                ]
+              },
+              {
+                "explicit_roles": [
+                  null,
+                  null,
+                  null,
+                  null
+                ],
+                "extraction_id": "e7",
+                "kind": "ORDERED_VALUES",
+                "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                "source_text": "Do not deploy, publish, add pages, or change README.md.",
+                "unit": null,
+                "values": [
+                  "deploy",
+                  "publish",
+                  "add pages",
+                  "change README.md"
+                ]
+              }
+            ],
+            "production_sufficiency": {
+              "context_references": [
+                "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+                "product-context:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:2026-10-09T11:37:41.052876+00:00"
+              ],
+              "gaps": [
+                {
+                  "consequence": "Not specified; an ordinary semantic-HTML document shell can be produced and adjusted without changing the requested outcome.",
+                  "kind": "ROUTINE_HOW",
+                  "subject": "Non-visible document head content such as a <title>"
+                },
+                {
+                  "consequence": "Human asked only for semantic HTML with one heading and one paragraph; default is unstyled markup, freely revisable.",
+                  "kind": "SAFE_DEFAULT",
+                  "subject": "Whether any inline styling is expected"
+                },
+                {
+                  "consequence": "Handled by the governed repository preparation path; index.html at the page root is the natural placement for 'at index.html'.",
+                  "kind": "ROUTINE_HOW",
+                  "subject": "Exact repository-relative placement and file revision mechanics"
+                }
+              ],
+              "proposal": null,
+              "proposal_basis": null,
+              "question": null,
+              "reason": "A bounded outcome is fully specified: one file (index.html), exact h1 and paragraph texts, semantic-HTML requirement, a fixed change scope, explicit exclusions, and a verification plus reviewable-Candidate obligation. Only cheap implementation details remain open.",
+              "recommendation_acceptance": null,
+              "status": "READY"
+            },
+            "questions": [],
+            "schema_version": "irk-semantic-ir-v1",
+            "semantic_fact_candidates": [
+              {
+                "authority": "HUMAN_EXPLICIT",
+                "candidate_id": "fc-page-count",
+                "epistemic_status": "CONFIRMED",
+                "operation": "UPSERT",
+                "qualifiers": {},
+                "reference_role": null,
+                "relation": "CARDINALITY",
+                "role_origin": "EXPLICIT",
+                "scope": "index.html",
+                "source_extraction_ids": [
+                  "e1"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "exactly one static web page",
+                "subject": "page.file.count",
+                "supersedes_fact_ids": [],
+                "unit": null,
+                "value": 1
+              },
+              {
+                "authority": "HUMAN_EXPLICIT",
+                "candidate_id": "fc-artifact-path",
+                "epistemic_status": "CONFIRMED",
+                "operation": "UPSERT",
+                "qualifiers": {},
+                "reference_role": null,
+                "relation": "REFERENCE",
+                "role_origin": "EXPLICIT",
+                "scope": "index.html",
+                "source_extraction_ids": [
+                  "e5"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "at index.html",
+                "subject": "artifact.path",
+                "supersedes_fact_ids": [],
+                "unit": null,
+                "value": "index.html"
+              },
+              {
+                "authority": "HUMAN_EXPLICIT",
+                "candidate_id": "fc-h1-count",
+                "epistemic_status": "CONFIRMED",
+                "operation": "UPSERT",
+                "qualifiers": {},
+                "reference_role": null,
+                "relation": "CARDINALITY",
+                "role_origin": "EXPLICIT",
+                "scope": "index.html",
+                "source_extraction_ids": [
+                  "e2"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "exactly one h1",
+                "subject": "page.h1.count",
+                "supersedes_fact_ids": [],
+                "unit": null,
+                "value": 1
+              },
+              {
+                "authority": "HUMAN_EXPLICIT",
+                "candidate_id": "fc-h1-text",
+                "epistemic_status": "CONFIRMED",
+                "operation": "UPSERT",
+                "qualifiers": {},
+                "reference_role": null,
+                "relation": "EQUALITY",
+                "role_origin": "EXPLICIT",
+                "scope": "index.html",
+                "source_extraction_ids": [
+                  "e4"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "whose text is N1 Software Control",
+                "subject": "page.h1.text",
+                "supersedes_fact_ids": [],
+                "unit": null,
+                "value": "N1 Software Control"
+              },
+              {
+                "authority": "HUMAN_EXPLICIT",
+                "candidate_id": "fc-paragraph-count",
+                "epistemic_status": "CONFIRMED",
+                "operation": "UPSERT",
+                "qualifiers": {},
+                "reference_role": null,
+                "relation": "CARDINALITY",
+                "role_origin": "EXPLICIT",
+                "scope": "index.html",
+                "source_extraction_ids": [
+                  "e3"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "one paragraph",
+                "subject": "page.paragraph.count",
+                "supersedes_fact_ids": [],
+                "unit": null,
+                "value": 1
+              },
+              {
+                "authority": "HUMAN_EXPLICIT",
+                "candidate_id": "fc-paragraph-text",
+                "epistemic_status": "CONFIRMED",
+                "operation": "UPSERT",
+                "qualifiers": {},
+                "reference_role": null,
+                "relation": "EQUALITY",
+                "role_origin": "EXPLICIT",
+                "scope": "index.html",
+                "source_extraction_ids": [
+                  "e4"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "whose text is Isolated qualification only",
+                "subject": "page.paragraph.text",
+                "supersedes_fact_ids": [],
+                "unit": null,
+                "value": "Isolated qualification only"
+              },
+              {
+                "authority": "HUMAN_EXPLICIT",
+                "candidate_id": "fc-change-scope",
+                "epistemic_status": "CONFIRMED",
+                "operation": "UPSERT",
+                "qualifiers": {},
+                "reference_role": null,
+                "relation": "SCOPE",
+                "role_origin": "EXPLICIT",
+                "scope": "index.html",
+                "source_extraction_ids": [
+                  "e6"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "Only index.html may change",
+                "subject": "change.scope",
+                "supersedes_fact_ids": [],
+                "unit": null,
+                "value": "index.html"
+              }
+            ],
+            "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+            "uncertain": false,
+            "unresolved": [],
+            "work_question_step_id": null
+          },
+          "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+          "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01"
+        }
+      ],
+      "scope_column": "turn_id",
+      "scope_ids": [
+        "61ce1843-e035-4a6a-b252-c531be68ed01"
+      ]
+    },
+    "interaction_turn_semantic_envelopes": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "attempt": 1,
+          "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+          "blocker": null,
+          "history": [
+            {
+              "at": "2026-10-09T11:37:44.266420+00:00",
+              "attempt": 1,
+              "state": "COMPILING"
+            },
+            {
+              "at": "2026-10-09T11:39:05.428605+00:00",
+              "attempt": 1,
+              "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+              "state": "GOVERNED"
+            }
+          ],
+          "human_content_hash": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+          "provenance_basis": {
+            "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+            "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+            "supporting_references": [],
+            "work_focus_id": null
+          },
+          "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+          "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+          "state": "GOVERNED",
+          "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01"
+        }
+      ],
+      "scope_column": "turn_id",
+      "scope_ids": [
+        "61ce1843-e035-4a6a-b252-c531be68ed01"
+      ]
+    },
+    "interaction_turns": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "assessment_id": "265c12f1-0e05-4aef-9e0f-cdb325c917e1",
+          "completed_at": "2026-10-09T11:39:12.677894+00:00",
+          "created_at": "2026-10-09T11:37:44.177639+00:00",
+          "failure_code": null,
+          "failure_message": null,
+          "id": "61ce1843-e035-4a6a-b252-c531be68ed01",
+          "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+          "refinement_observation": null,
+          "request_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+          "started_at": "2026-10-09T11:37:44.245825+00:00",
+          "status": "COMPLETED",
+          "updated_at": "2026-10-09T11:39:12.677894+00:00",
+          "wic_mode": "WIC_VNEXT_CONTROLLED"
+        }
+      ],
+      "scope_column": "interaction_id",
+      "scope_ids": [
+        "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4"
+      ]
+    },
+    "native_attempt_bindings": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "pwu_id"
+    },
+    "native_attempt_states": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "attempt_id"
+    },
+    "plan_revisions": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "production_run_id"
+    },
+    "product_interactions": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "condition": "OPEN",
+          "created_at": "2026-10-09T11:37:44.153699+00:00",
+          "created_by": "human:owner",
+          "current_work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+          "design_schema_selection_rationale": "The Design Intent Frame identifies a feature/capability evolution of an existing system.",
+          "id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+          "selected_design_schema_identity": "watt:guided-design:existing-product-evolution",
+          "selected_design_schema_version": "0.1",
+          "updated_at": "2026-10-09T11:39:05.655229+00:00",
+          "updated_by": "human:owner"
+        }
+      ],
+      "scope_column": "id",
+      "scope_ids": [
+        "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4"
+      ]
+    },
+    "product_managed_sources": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "accepted_ref": "refs/heads/accepted",
+          "accepted_revision": "53076c9371d50b77bbe1edb0d9bf44159e56c389",
+          "accepted_tree": "7dcefdcef56cacfa22992ed42b2c7bc3c3c6ac70",
+          "origin": {},
+          "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+          "provider_kind": "gitea",
+          "provider_reference": "product-5ccb9748b3a64ac0a50b6b056280bd4d",
+          "repository_identity": "watt://repositories/products/5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+          "updated_at": "2026-10-09T11:37:43.992879+00:00",
+          "version": 0
+        }
+      ],
+      "scope_column": "product_id",
+      "scope_ids": [
+        "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d"
+      ]
+    },
+    "product_source_promotion_intents": {
+      "query_status": "QUERIED",
+      "rows": [],
+      "scope_column": "work_id",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+      ]
+    },
+    "product_source_versions": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "acceptance_id": null,
+          "authority_identity": "human:owner",
+          "candidate_id": null,
+          "created_at": "2026-10-09T11:37:43.992879+00:00",
+          "id": "9a22766d-31a8-4fb6-9b63-998694b031a2",
+          "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+          "revision": "53076c9371d50b77bbe1edb0d9bf44159e56c389",
+          "tree": "7dcefdcef56cacfa22992ed42b2c7bc3c3c6ac70",
+          "version": 0,
+          "work_id": null
+        }
+      ],
+      "scope_column": "product_id",
+      "scope_ids": [
+        "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d"
+      ]
+    },
+    "product_works": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "artifact_operation": null,
+          "artifact_placement_rationale": null,
+          "artifact_source_baseline_id": null,
+          "artifact_source_revision": null,
+          "artifact_target_confidence": null,
+          "code_change_proposal": {
+            "allowed_areas": [],
+            "confidence": "HIGH",
+            "engineering_resource_id": "cefd57a8-f171-400d-98cb-1b8c0ba56e41",
+            "forbidden_areas": [],
+            "proposal_id": "5a516991-2530-5a10-8908-c1418b0ae4c4",
+            "proposed_targets": [
+              {
+                "confidence": "HIGH",
+                "disposition": "REQUIRED",
+                "evidence": "Exact path in refined intent; inspected at 53076c9371d5.",
+                "operation": "CREATE",
+                "path": "index.html",
+                "rationale": "The refinement supplied this exact repository target."
+              }
+            ],
+            "provenance": {
+              "inspection_method": "git-object-read-only:path-enumeration+text-search",
+              "provider_identity": "provider:repository-aware-change-proposal-lite",
+              "provider_version": "v1"
+            },
+            "rationale": "Proposed from exact targets in refinement and exact-baseline inspection.",
+            "repository_identity": "watt://work-branches/24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+            "source_baseline_id": "f7ba6c82-28b2-4501-94df-12bfbafc9431",
+            "source_ref": "refs/heads/work-24d9cc2d52a85d27b38ae49c3f73394c",
+            "source_revision": "53076c9371d50b77bbe1edb0d9bf44159e56c389",
+            "target_kind": "CODE_WORK",
+            "unresolved_scope_questions": [],
+            "verification_obligations": [
+              {
+                "kind": "PATH_SCOPE",
+                "target": null
+              },
+              {
+                "kind": "GIT_DIFF_CHECK",
+                "target": null
+              }
+            ]
+          },
+          "condition": "READY",
+          "constraints": [
+            "Only index.html may change; deployment, publication, additional pages, and any change to README.md are excluded.",
+            "One static web page at index.html",
+            "Semantic HTML with exactly one h1 and exactly one paragraph with the specified exact texts",
+            "Change limited to index.html",
+            "Verification of the exact heading and paragraph",
+            "A reviewable Candidate left for review",
+            "Excluded from this Work: No deployment",
+            "Excluded from this Work: No publication",
+            "Excluded from this Work: No additional pages",
+            "Excluded from this Work: No change to README.md"
+          ],
+          "created_at": "2026-10-09T11:39:05.655229+00:00",
+          "current_engineering_scope_id": "ac4fbc50-0aa0-54d5-8a1f-ae112ae69133",
+          "current_work_reality_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+          "desired_outcome": "Add index.html containing semantic HTML with exactly one h1 whose text is 'N1 Software Control' and one paragraph whose text is 'Isolated qualification only'.",
+          "expected_artifact_path": null,
+          "goal_id": null,
+          "id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+          "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+          "production_objective": "Create repository-relative index.html as a single static semantic HTML page whose only heading is one h1 with the exact text 'N1 Software Control' and whose only paragraph is one p with the exact text 'Isolated qualification only'. No other file in the work branch may change, and the page must be left as a reviewable Candidate without deployment or publication.",
+          "production_plan_proposal": {
+            "artifact_targets": [],
+            "assumptions": [
+              "The admitted Work can be executed through one governed PWU and Attempt lineage."
+            ],
+            "change_contract": null,
+            "change_proposal": {
+              "allowed_areas": [],
+              "confidence": "HIGH",
+              "engineering_resource_id": "cefd57a8-f171-400d-98cb-1b8c0ba56e41",
+              "forbidden_areas": [],
+              "proposal_id": "5a516991-2530-5a10-8908-c1418b0ae4c4",
+              "proposed_targets": [
+                {
+                  "confidence": "HIGH",
+                  "disposition": "REQUIRED",
+                  "evidence": "Exact path in refined intent; inspected at 53076c9371d5.",
+                  "operation": "CREATE",
+                  "path": "index.html",
+                  "rationale": "The refinement supplied this exact repository target."
+                }
+              ],
+              "provenance": {
+                "inspection_method": "git-object-read-only:path-enumeration+text-search",
+                "provider_identity": "provider:repository-aware-change-proposal-lite",
+                "provider_version": "v1"
+              },
+              "rationale": "Proposed from exact targets in refinement and exact-baseline inspection.",
+              "repository_identity": "watt://work-branches/24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+              "source_baseline_id": "f7ba6c82-28b2-4501-94df-12bfbafc9431",
+              "source_ref": "refs/heads/work-24d9cc2d52a85d27b38ae49c3f73394c",
+              "source_revision": "53076c9371d50b77bbe1edb0d9bf44159e56c389",
+              "target_kind": "CODE_WORK",
+              "unresolved_scope_questions": [],
+              "verification_obligations": [
+                {
+                  "kind": "PATH_SCOPE",
+                  "target": null
+                },
+                {
+                  "kind": "GIT_DIFF_CHECK",
+                  "target": null
+                }
+              ]
+            },
+            "desired_outcome": "Add index.html containing semantic HTML with exactly one h1 whose text is 'N1 Software Control' and one paragraph whose text is 'Isolated qualification only'.",
+            "engineering_resource_id": "cefd57a8-f171-400d-98cb-1b8c0ba56e41",
+            "fit_classification": "ONE_PWU_FIT",
+            "fulfillment_formation_receipts": [],
+            "graph": null,
+            "inherited_constraints": [
+              "Only index.html may change; deployment, publication, additional pages, and any change to README.md are excluded.",
+              "One static web page at index.html",
+              "Semantic HTML with exactly one h1 and exactly one paragraph with the specified exact texts",
+              "Change limited to index.html",
+              "Verification of the exact heading and paragraph",
+              "A reviewable Candidate left for review",
+              "Excluded from this Work: No deployment",
+              "Excluded from this Work: No publication",
+              "Excluded from this Work: No additional pages",
+              "Excluded from this Work: No change to README.md"
+            ],
+            "objective": "Add index.html containing semantic HTML with exactly one h1 whose text is 'N1 Software Control' and one paragraph whose text is 'Isolated qualification only'.",
+            "ordered_steps": [
+              {
+                "instruction": "Inspect the admitted Source of Truth and existing repository conventions.",
+                "position": 1
+              },
+              {
+                "instruction": "Prepare the repository-inspected code targets: index.html.",
+                "position": 2
+              },
+              {
+                "instruction": "Run the admitted targeted verification and report the resulting evidence.",
+                "position": 3
+              }
+            ],
+            "proposal_id": "a4118321-fe40-5ca2-92d8-59c47575988a",
+            "repository_identity": "watt://work-branches/24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+            "source_baseline_id": "f7ba6c82-28b2-4501-94df-12bfbafc9431",
+            "source_revision": "53076c9371d50b77bbe1edb0d9bf44159e56c389",
+            "target_kind": "CODE_WORK",
+            "unresolved_questions": [],
+            "verification_approach": "Verify the admitted desired outcome against the exact Candidate, run repository-appropriate checks, and provide a real preview when requested; do not add unrequested functionality or deliver without Human authorization."
+          },
+          "raw_user_requirement": "Produce the N1 isolated G0 software production qualification artifact: a single static index.html page in the managed Product repository.",
+          "refined_title": "Produce the N1 isolated G0 software production qualification artifact: a single static index.html page in the managed Pr",
+          "scope_summary": "Long-lived Work authority envelope for watt://work-branches/24d9cc2d-52a8-5d27-b38a-e49c3f73394c at refs/heads/work-24d9cc2d52a85d27b38ae49c3f73394c",
+          "tags": [],
+          "updated_at": "2026-10-09T11:39:51.939236+00:00",
+          "verification_expectation": "Inspect the produced Candidate: confirm index.html exists at the work-branch root; confirm exactly one h1 element whose text is exactly 'N1 Software Control'; confirm exactly one paragraph element whose text is exactly 'Isolated qualification only'; confirm README.md is unchanged and no additional page file or route was added. Record the exact-text check results as Candidate verification evidence and leave the Candidate for review.",
+          "work_mode": "LONG_LIVED_STEERING"
+        }
+      ],
+      "scope_column": "id",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+      ]
+    },
+    "product_workspace_interactions": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:37:44.157595+00:00",
+          "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+          "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d"
+        }
+      ],
+      "scope_column": "interaction_id",
+      "scope_ids": [
+        "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4"
+      ]
+    },
+    "production_admissibility_records": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "production_run_id"
+    },
+    "production_runs": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "id"
+    },
+    "production_snapshots": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "condition": "TRUSTED",
+          "created_at": "2026-10-09T11:39:08.664939+00:00",
+          "id": "f7ba6c82-28b2-4501-94df-12bfbafc9431",
+          "repository_identity": "watt://work-branches/24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+          "repository_ref": "refs/heads/work-24d9cc2d52a85d27b38ae49c3f73394c",
+          "repository_revision": "53076c9371d50b77bbe1edb0d9bf44159e56c389",
+          "repository_tree_identity": "7dcefdcef56cacfa22992ed42b2c7bc3c3c6ac70",
+          "source_baseline_id": null
+        }
+      ],
+      "scope_column": "id",
+      "scope_ids": [
+        "f7ba6c82-28b2-4501-94df-12bfbafc9431"
+      ]
+    },
+    "production_work_units": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "production_run_id"
+    },
+    "proposed_repository_snapshots": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "production_run_id"
+    },
+    "provider_execution_reports": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "attempt_id"
+    },
+    "pwu_contract_versions": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "pwu_id"
+    },
+    "repository_integration_effects": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "candidate_id"
+    },
+    "repository_observations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "attempt_id"
+    },
+    "result_ready_claims": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "pwu_id"
+    },
+    "runtime_commits": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "candidate_id"
+    },
+    "self_refine_actions": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:51.920612+00:00",
+          "event_id": "b2cce513-53da-4962-b161-1491e4730bc2",
+          "evidence_references": [
+            "source-baseline:f7ba6c82-28b2-4501-94df-12bfbafc9431"
+          ],
+          "id": "f47d8cbe-185c-4a36-9dc9-f903995f0bda",
+          "observed_reality": {
+            "attempt_count": 2,
+            "signal_kind": "CANDIDATE_INCONSISTENT"
+          },
+          "outcome": "RECOVERED",
+          "repair_action": "Attempt bounded candidate refinement against the same input",
+          "sequence": 1
+        }
+      ],
+      "scope_column": "event_id",
+      "scope_ids": [
+        "b2cce513-53da-4962-b161-1491e4730bc2"
+      ]
+    },
+    "self_refine_events": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "affected_component": "semantic/scope",
+          "budget_decision": {
+            "attempt_count": 2,
+            "bounded": true,
+            "human_escalated": false
+          },
+          "compute_overhead": {},
+          "created_at": "2026-10-09T11:39:51.920612+00:00",
+          "diagnosis_summary": "The owner observed a failure against its bounded acceptance obligation.",
+          "diagnostic_evidence": {
+            "authority_expanded": false,
+            "candidate_paths": [
+              "index.html"
+            ],
+            "rejected_behaviors": [
+              "Deployment configuration or deployment execution",
+              "Publication or release automation",
+              "Additional HTML pages beyond index.html",
+              "Any change to README.md",
+              "JavaScript, CSS frameworks, forms, persistence, routing, navigation, or backend behavior"
+            ],
+            "required_paths": [
+              "index.html"
+            ],
+            "signal": "SCOPE_INFLATION"
+          },
+          "evidence_references": [
+            "source-baseline:f7ba6c82-28b2-4501-94df-12bfbafc9431"
+          ],
+          "expected_reality": {},
+          "extra_elapsed_seconds": 0,
+          "failure_family": "CANDIDATE_INCONSISTENT",
+          "failure_signature": "d4c2569ec7c31ec016fcc3aaf07db1248d75241100aa37a540ec1e5b7c43222f",
+          "final_result": "LOCAL_OBLIGATION_RECOVERED",
+          "id": "b2cce513-53da-4962-b161-1491e4730bc2",
+          "known_failure_match": false,
+          "model_token_usage": {
+            "cached_tokens": 1024,
+            "input_tokens": 13151,
+            "output_tokens": 9231,
+            "reasoning_tokens": 7604,
+            "total_tokens": 22382,
+            "unknown": false
+          },
+          "observation_confidence": "OBSERVED_SUCCESS",
+          "observed_reality": {},
+          "operation_id": "e49b0095-96e7-4a86-87c8-b4ca00d8b1dd",
+          "platform_improvement_candidate_ref": null,
+          "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+          "repair_hypothesis": "Revalidate a revised candidate against the unchanged governed basis.",
+          "repairability": "AUTONOMOUSLY_REPAIRABLE",
+          "root_cause_classification": "CANDIDATE_INCONSISTENT",
+          "semantic_version": 2,
+          "signal_kind": "CANDIDATE_INCONSISTENT",
+          "status": "VERIFIED",
+          "updated_at": "2026-10-09T11:39:51.920612+00:00",
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+          "work_resume_result": "RESUMED"
+        }
+      ],
+      "scope_column": "work_id",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+      ]
+    },
+    "semantic_step_results": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "authority_assessment": "WITHIN_AUTHORITY",
+          "basis_fingerprint": "1cdf9314922f5442ddef668b231643a97d430dcb7ed42a23d7b2102d6be75c4f",
+          "bounded_summary": "The current DESIGN Step leads to PRODUCE: add exactly one static web page at repository-relative index.html in the managed Product work branch, using semantic HTML with exactly one h1 reading 'N1 Software Control' and exactly one paragraph reading 'Isolated qualification only'. The baseline tree contains only README.md, so index.html is a CREATE. Scope is fixed to index.html alone; deployment, publication, additional pages, and README.md changes are excluded. Verification is against the exact heading and paragraph texts, leaving a reviewable Candidate.",
+          "completion_satisfied": true,
+          "created_at": "2026-10-09T11:39:51.939236+00:00",
+          "decisions": [
+            "Treat this as CODE_WORK producing a software artifact, per the admitted semantic clause c3.",
+            "Create index.html at the work-branch repository root; the supplied tree shows only README.md, so the page is a new CREATE target rather than an update.",
+            "Author the document with exactly one h1 element whose text is 'N1 Software Control' and exactly one paragraph element whose text is 'Isolated qualification only', using semantic HTML markup.",
+            "Keep the change bounded to index.html; do not modify README.md and do not add any additional page or route.",
+            "Use plain, unstyled semantic markup; inline styling and non-visible head content such as a title are ordinary routine choices that do not alter the admitted outcome.",
+            "Verify the produced Candidate by confirming the exact heading text, the exact paragraph text, the single h1 count and the single paragraph count, then leave it for review.",
+            "Do not deploy or publish: those operations are outside this Work and the corresponding capabilities are unavailable in this Step's governed input."
+          ],
+          "derived_constraints": [
+            "Only index.html may change; deployment, publication, additional pages, and any change to README.md are excluded.",
+            "One static web page at index.html",
+            "Semantic HTML with exactly one h1 and exactly one paragraph with the specified exact texts",
+            "Change limited to index.html",
+            "Verification of the exact heading and paragraph",
+            "A reviewable Candidate left for review",
+            "Excluded from this Work: No deployment",
+            "Excluded from this Work: No publication",
+            "Excluded from this Work: No additional pages",
+            "Excluded from this Work: No change to README.md"
+          ],
+          "evidence_refs": [
+            {
+              "identity": "50a43a8f-3eee-5ed9-820b-8bab1cfdd2c9",
+              "kind": "GOVERNANCE_DECISION"
+            },
+            {
+              "identity": "f7ba6c82-28b2-4501-94df-12bfbafc9431",
+              "kind": "TRUSTED_BASELINE"
+            },
+            {
+              "identity": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+              "kind": "WORK"
+            },
+            {
+              "identity": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+              "kind": "WORK_REALITY_REVISION"
+            }
+          ],
+          "human_attention_recommendation": null,
+          "human_decision_need": null,
+          "id": "0f9340c8-fd1f-4e4b-9513-c18cafda126b",
+          "material_direction_fingerprint": "6c400f36fa34a8c16657ff2a3079c79172bc83f8a175ad4d3c1a89efa1dd8947",
+          "proposed_production": {
+            "allowed_areas": [],
+            "artifact_targets": [],
+            "code_targets": [
+              "index.html"
+            ],
+            "forbidden_areas": [],
+            "objective": "Create repository-relative index.html as a single static semantic HTML page whose only heading is one h1 with the exact text 'N1 Software Control' and whose only paragraph is one p with the exact text 'Isolated qualification only'. No other file in the work branch may change, and the page must be left as a reviewable Candidate without deployment or publication.",
+            "target_kind": "CODE_WORK",
+            "verification_expectation": "Inspect the produced Candidate: confirm index.html exists at the work-branch root; confirm exactly one h1 element whose text is exactly 'N1 Software Control'; confirm exactly one paragraph element whose text is exactly 'Isolated qualification only'; confirm README.md is unchanged and no additional page file or route was added. Record the exact-text check results as Candidate verification evidence and leave the Candidate for review."
+          },
+          "reasoning_provider_identity": "deepseek-responses:steering-semantic:request:76d5841b-a6e0-4419-b405-0a5903c4a9b8",
+          "result_kind": "DESIGN_DIRECTION",
+          "steering_plan_revision_id": "809f8419-8a41-4023-b798-99020798b211",
+          "step_id": "e49b0095-96e7-4a86-87c8-b4ca00d8b1dd",
+          "step_type": "DESIGN",
+          "unresolved_questions": [],
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        }
+      ],
+      "scope_column": "work_id",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+      ]
+    },
+    "software_product_assets": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "asset_kind": "REPOSITORY",
+          "created_at": "2026-10-09T11:37:43.992879+00:00",
+          "id": "2206024b-9d30-42f7-94af-bb3d5a8a7c33",
+          "metadata": {
+            "origin": {},
+            "source": "WATT_MANAGED"
+          },
+          "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+          "reference": "watt://repositories/products/5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+          "resource_id": "343b8c00-cfe0-41fc-9856-9b0c34a8a258"
+        }
+      ],
+      "scope_column": "product_id",
+      "scope_ids": [
+        "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d"
+      ]
+    },
+    "software_products": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:37:41.052876+00:00",
+          "description": "C3 isolated normal-entry qualification; no Human Integration, Acceptance or Delivery authorization.",
+          "id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+          "lifecycle": "ACTIVE",
+          "name": "C3 G0 normal entry d0042d13-945f-44b0-8dfb-c4ae52725812",
+          "owner_id": "human:owner",
+          "updated_at": "2026-10-09T11:37:41.052876+00:00"
+        }
+      ],
+      "scope_column": "id",
+      "scope_ids": [
+        "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d"
+      ]
+    },
+    "steering_decisions": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "alternatives": [],
+          "attention_reason": null,
+          "authority_assessment": "WITHIN_AUTHORITY",
+          "basis_fingerprint": "c9b774a85270526feb06a73bc28459e7bf5fc1b0448c75ab8f970af54232a4e3",
+          "completion_condition": "The exact bounded production cycle reaches trusted Runtime Commit",
+          "created_at": "2026-10-09T11:39:52.703528+00:00",
+          "current_step_id": "e49b0095-96e7-4a86-87c8-b4ca00d8b1dd",
+          "expected_impact": null,
+          "human_decision_need": null,
+          "human_required": false,
+          "id": "ed641807-e61c-4183-85fd-1ccd1ac23f81",
+          "next_step_type": "PRODUCE",
+          "objective": "Produce the next exact change admitted from current Reality",
+          "proposed_engineering_scope_fingerprint": "0ab5b43cf838e2abf0742c42c5205c5680b37eea3860ab431ddbe1081158ed22",
+          "reality_refs": [
+            {
+              "identity": "50a43a8f-3eee-5ed9-820b-8bab1cfdd2c9",
+              "kind": "GOVERNANCE_DECISION"
+            },
+            {
+              "identity": "0f9340c8-fd1f-4e4b-9513-c18cafda126b",
+              "kind": "SEMANTIC_RESULT"
+            },
+            {
+              "identity": "f7ba6c82-28b2-4501-94df-12bfbafc9431",
+              "kind": "TRUSTED_BASELINE"
+            },
+            {
+              "identity": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+              "kind": "WORK"
+            },
+            {
+              "identity": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+              "kind": "WORK_REALITY_REVISION"
+            }
+          ],
+          "reason": "The current governed Step is ready to yield to the next admitted ordered Step",
+          "reasoning_provider_identity": null,
+          "recommendation": null,
+          "steering_outcome": "AUTO_CONTINUE",
+          "steering_plan_revision_id": "809f8419-8a41-4023-b798-99020798b211",
+          "trade_offs": []
+        }
+      ],
+      "scope_column": "steering_plan_revision_id",
+      "scope_ids": [
+        "809f8419-8a41-4023-b798-99020798b211"
+      ]
+    },
+    "steering_history_events": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:52.756349+00:00",
+          "event_type": "STEP_TRANSITION",
+          "from_revision_id": null,
+          "from_step_id": "e49b0095-96e7-4a86-87c8-b4ca00d8b1dd",
+          "id": "c5ac242b-e162-4529-8005-a6782b86f495",
+          "rationale": "The current governed Step is ready to yield to the next admitted ordered Step",
+          "reality_refs": [
+            {
+              "identity": "50a43a8f-3eee-5ed9-820b-8bab1cfdd2c9",
+              "kind": "GOVERNANCE_DECISION"
+            },
+            {
+              "identity": "0f9340c8-fd1f-4e4b-9513-c18cafda126b",
+              "kind": "SEMANTIC_RESULT"
+            },
+            {
+              "identity": "f7ba6c82-28b2-4501-94df-12bfbafc9431",
+              "kind": "TRUSTED_BASELINE"
+            },
+            {
+              "identity": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+              "kind": "WORK"
+            },
+            {
+              "identity": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+              "kind": "WORK_REALITY_REVISION"
+            }
+          ],
+          "related_step_ids": [],
+          "steering_decision_id": "ed641807-e61c-4183-85fd-1ccd1ac23f81",
+          "steering_plan_id": "a02421f0-1332-4ef5-ac86-e058bb40630d",
+          "steering_plan_revision_id": "809f8419-8a41-4023-b798-99020798b211",
+          "to_revision_id": null,
+          "to_step_id": "6f4b51c7-decd-4f95-a48b-8b4c84ffe606"
+        }
+      ],
+      "scope_column": "steering_plan_id",
+      "scope_ids": [
+        "a02421f0-1332-4ef5-ac86-e058bb40630d"
+      ]
+    },
+    "steering_plan_revisions": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "condition": "ACTIVE",
+          "created_at": "2026-10-09T11:39:09.058693+00:00",
+          "id": "809f8419-8a41-4023-b798-99020798b211",
+          "rationale": "Initial provider-neutral Steering trajectory formed from the Human-admitted Work envelope by capability:deterministic-initial-steering-plan-v1",
+          "reality_refs": [
+            {
+              "identity": "f7ba6c82-28b2-4501-94df-12bfbafc9431",
+              "kind": "TRUSTED_BASELINE"
+            },
+            {
+              "identity": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+              "kind": "WORK"
+            },
+            {
+              "identity": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+              "kind": "WORK_REALITY_REVISION"
+            }
+          ],
+          "revision_number": 1,
+          "steering_plan_id": "a02421f0-1332-4ef5-ac86-e058bb40630d",
+          "supersedes_revision_id": null,
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        }
+      ],
+      "scope_column": "work_id",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+      ]
+    },
+    "steering_plans": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:09.058693+00:00",
+          "id": "a02421f0-1332-4ef5-ac86-e058bb40630d",
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        }
+      ],
+      "scope_column": "work_id",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+      ]
+    },
+    "steering_steps": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "completion_condition": "Governed evidence supports product acceptance",
+          "created_at": "2026-10-09T11:39:09.058693+00:00",
+          "design_issue_key": null,
+          "elaborates_step_id": null,
+          "id": "ac274320-ed0f-4cf5-a9fc-0a9497c46f50",
+          "objective": "Assess the trusted result against the long-lived outcome",
+          "position": 3,
+          "state": "KNOWN",
+          "steering_plan_revision_id": "809f8419-8a41-4023-b798-99020798b211",
+          "type": "VERIFY_ACCEPT"
+        },
+        {
+          "completion_condition": "The admitted Work outcome is satisfied",
+          "created_at": "2026-10-09T11:39:09.058693+00:00",
+          "design_issue_key": null,
+          "elaborates_step_id": null,
+          "id": "162ffe9b-7047-4a6b-bd1f-d5dcff55164d",
+          "objective": "Complete the admitted long-lived Work",
+          "position": 4,
+          "state": "KNOWN",
+          "steering_plan_revision_id": "809f8419-8a41-4023-b798-99020798b211",
+          "type": "COMPLETE"
+        },
+        {
+          "completion_condition": "A bounded design direction is supported by current Reality",
+          "created_at": "2026-10-09T11:39:09.058693+00:00",
+          "design_issue_key": null,
+          "elaborates_step_id": null,
+          "id": "e49b0095-96e7-4a86-87c8-b4ca00d8b1dd",
+          "objective": "Add index.html containing semantic HTML with exactly one h1 whose text is 'N1 Software Control' and one paragraph whose text is 'Isolated qualification only'.",
+          "position": 1,
+          "state": "CLOSED",
+          "steering_plan_revision_id": "809f8419-8a41-4023-b798-99020798b211",
+          "type": "DESIGN"
+        },
+        {
+          "completion_condition": "The exact bounded production cycle reaches trusted Runtime Commit",
+          "created_at": "2026-10-09T11:39:09.058693+00:00",
+          "design_issue_key": null,
+          "elaborates_step_id": null,
+          "id": "6f4b51c7-decd-4f95-a48b-8b4c84ffe606",
+          "objective": "Produce the next exact change admitted from current Reality",
+          "position": 2,
+          "state": "CURRENT",
+          "steering_plan_revision_id": "809f8419-8a41-4023-b798-99020798b211",
+          "type": "PRODUCE"
+        }
+      ],
+      "scope_column": "steering_plan_revision_id",
+      "scope_ids": [
+        "809f8419-8a41-4023-b798-99020798b211"
+      ]
+    },
+    "transition_history": {
+      "query_status": "QUERIED",
+      "rows": [],
+      "scope_column": "entity_identity",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+        "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+        "c6824f98-878f-5cbe-a5f1-55c02c203905",
+        "ed641807-e61c-4183-85fd-1ccd1ac23f81"
+      ]
+    },
+    "verification_records": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "production_run_id"
+    },
+    "work_convergence_observations": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "attempts": 1,
+          "boundary": "SEMANTIC_RESULT_ADMISSION",
+          "candidate_identity": null,
+          "compute_cost": {
+            "execution_seconds": 0,
+            "resource_units": {},
+            "status": "UNREPORTED"
+          },
+          "condition": "NOT_YET_CONVERGED",
+          "created_at": "2026-10-09T11:39:52.097127+00:00",
+          "elapsed_seconds": 0,
+          "evidence": {
+            "delivery_authorized": false,
+            "human_acceptance": "PENDING",
+            "owner_budget_exhausted": false,
+            "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+            "source": "persisted Work/Runtime and Candidate Preview"
+          },
+          "failure_signature": null,
+          "human_intervention_count": 0,
+          "id": "decba8ab-5bac-4491-ac84-9272d96c6faa",
+          "intent_identity": "d1675968ba3ccceee9e27e1548160dea51f72d2cf3be4dbf83cf6c44462ff445",
+          "missing_acceptance": [
+            "CANDIDATE_SEALED",
+            "REVIEW_RUNTIME_READY",
+            "SOURCE_VERIFIED"
+          ],
+          "model_cost": {
+            "amount": null,
+            "status": "UNREPORTED"
+          },
+          "no_progress_count": 0,
+          "predecessor_id": null,
+          "previous_repair_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+          "reality_identity": "f85b874d002068c22aea84b4e500210a9998b28ecdfc040b03f519e1ecfc2445",
+          "sequence": 1,
+          "token_usage": {
+            "status": "UNREPORTED"
+          },
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        },
+        {
+          "attempts": 2,
+          "boundary": "STEP_TRANSITION",
+          "candidate_identity": null,
+          "compute_cost": {
+            "execution_seconds": 0,
+            "resource_units": {},
+            "status": "UNREPORTED"
+          },
+          "condition": "NOT_YET_CONVERGED",
+          "created_at": "2026-10-09T11:39:52.917967+00:00",
+          "elapsed_seconds": 0,
+          "evidence": {
+            "delivery_authorized": false,
+            "human_acceptance": "PENDING",
+            "owner_budget_exhausted": false,
+            "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+            "source": "persisted Work/Runtime and Candidate Preview"
+          },
+          "failure_signature": null,
+          "human_intervention_count": 0,
+          "id": "21c35d9a-63d0-4043-bcd6-c3f91adc88f4",
+          "intent_identity": "d1675968ba3ccceee9e27e1548160dea51f72d2cf3be4dbf83cf6c44462ff445",
+          "missing_acceptance": [
+            "CANDIDATE_SEALED",
+            "REVIEW_RUNTIME_READY",
+            "SOURCE_VERIFIED"
+          ],
+          "model_cost": {
+            "amount": null,
+            "status": "UNREPORTED"
+          },
+          "no_progress_count": 0,
+          "predecessor_id": "decba8ab-5bac-4491-ac84-9272d96c6faa",
+          "previous_repair_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+          "reality_identity": "f85b874d002068c22aea84b4e500210a9998b28ecdfc040b03f519e1ecfc2445",
+          "sequence": 2,
+          "token_usage": {
+            "status": "UNREPORTED"
+          },
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        }
+      ],
+      "scope_column": "work_id",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+      ]
+    },
+    "work_delivery_acceptances": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "manifest_id"
+    },
+    "work_delivery_manifests": {
+      "query_status": "QUERIED",
+      "rows": [],
+      "scope_column": "work_id",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+      ]
+    },
+    "work_delivery_runtimes": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "manifest_id"
+    },
+    "work_delivery_targets": {
+      "query_status": "QUERIED",
+      "rows": [],
+      "scope_column": "work_id",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+      ]
+    },
+    "work_product_references": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "rows": [],
+      "scope_column": "attempt_id"
+    },
+    "work_reality_revisions": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "admitted_by": "human:owner",
+          "basis_fingerprint": "83e5e24b3d1169e9dac68cd5c283b1fda9800486aafa2581aa23dbe834f8bc9a",
+          "change_set": [],
+          "constraints": [
+            "Only index.html may change; deployment, publication, additional pages, and any change to README.md are excluded.",
+            "One static web page at index.html",
+            "Semantic HTML with exactly one h1 and exactly one paragraph with the specified exact texts",
+            "Change limited to index.html",
+            "Verification of the exact heading and paragraph",
+            "A reviewable Candidate left for review",
+            "Excluded from this Work: No deployment",
+            "Excluded from this Work: No publication",
+            "Excluded from this Work: No additional pages",
+            "Excluded from this Work: No change to README.md"
+          ],
+          "context_facts": [
+            "This Interaction runs against a newly managed Watt Product source with bootstrap-only initialization, no external origin, and accepted ref refs/heads/accepted at revision 53076c9371d50b77bbe1edb0d9bf44159e56c389; this is Watt initialization storage, not evidence that the Human requested an existing project."
+          ],
+          "created_at": "2026-10-09T11:39:05.655229+00:00",
+          "desired_outcome": "Add index.html containing semantic HTML with exactly one h1 whose text is 'N1 Software Control' and one paragraph whose text is 'Isolated qualification only'.",
+          "engineering_resource_id": "cefd57a8-f171-400d-98cb-1b8c0ba56e41",
+          "engineering_scope_id": "ac4fbc50-0aa0-54d5-8a1f-ae112ae69133",
+          "engineering_semantic_facts": [
+            {
+              "admitted_work_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+              "authority": "HUMAN_EXPLICIT",
+              "epistemic_status": "CONFIRMED",
+              "id": "84caed25-1a80-5718-95da-85b74b61db8a",
+              "provenance": {
+                "governed_provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "role_origin": "EXPLICIT",
+                "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+                "source_extraction_ids": [
+                  "e1"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "exactly one static web page"
+              },
+              "qualifiers": {},
+              "reference_role": null,
+              "relation": "CARDINALITY",
+              "scope": "index.html",
+              "subject": "page.file.count",
+              "supersedes_fact_ids": [],
+              "unit": null,
+              "value": 1
+            },
+            {
+              "admitted_work_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+              "authority": "HUMAN_EXPLICIT",
+              "epistemic_status": "CONFIRMED",
+              "id": "fd425161-a627-5a3b-b24a-0464a4583d78",
+              "provenance": {
+                "governed_provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "role_origin": "EXPLICIT",
+                "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+                "source_extraction_ids": [
+                  "e5"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "at index.html"
+              },
+              "qualifiers": {},
+              "reference_role": null,
+              "relation": "REFERENCE",
+              "scope": "index.html",
+              "subject": "artifact.path",
+              "supersedes_fact_ids": [],
+              "unit": null,
+              "value": "index.html"
+            },
+            {
+              "admitted_work_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+              "authority": "HUMAN_EXPLICIT",
+              "epistemic_status": "CONFIRMED",
+              "id": "9944fba1-332d-5eda-8d36-21e108a35ce2",
+              "provenance": {
+                "governed_provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "role_origin": "EXPLICIT",
+                "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+                "source_extraction_ids": [
+                  "e2"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "exactly one h1"
+              },
+              "qualifiers": {},
+              "reference_role": null,
+              "relation": "CARDINALITY",
+              "scope": "index.html",
+              "subject": "page.h1.count",
+              "supersedes_fact_ids": [],
+              "unit": null,
+              "value": 1
+            },
+            {
+              "admitted_work_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+              "authority": "HUMAN_EXPLICIT",
+              "epistemic_status": "CONFIRMED",
+              "id": "ebbc2f13-82aa-5369-8a8f-a7f5c46a848b",
+              "provenance": {
+                "governed_provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "role_origin": "EXPLICIT",
+                "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+                "source_extraction_ids": [
+                  "e4"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "whose text is N1 Software Control"
+              },
+              "qualifiers": {},
+              "reference_role": null,
+              "relation": "EQUALITY",
+              "scope": "index.html",
+              "subject": "page.h1.text",
+              "supersedes_fact_ids": [],
+              "unit": null,
+              "value": "N1 Software Control"
+            },
+            {
+              "admitted_work_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+              "authority": "HUMAN_EXPLICIT",
+              "epistemic_status": "CONFIRMED",
+              "id": "7af6a0e0-b86b-51b0-81d8-85f77ba3a2ad",
+              "provenance": {
+                "governed_provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "role_origin": "EXPLICIT",
+                "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+                "source_extraction_ids": [
+                  "e3"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "one paragraph"
+              },
+              "qualifiers": {},
+              "reference_role": null,
+              "relation": "CARDINALITY",
+              "scope": "index.html",
+              "subject": "page.paragraph.count",
+              "supersedes_fact_ids": [],
+              "unit": null,
+              "value": 1
+            },
+            {
+              "admitted_work_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+              "authority": "HUMAN_EXPLICIT",
+              "epistemic_status": "CONFIRMED",
+              "id": "f52658ef-eca4-5d32-9320-bc8e89c0605d",
+              "provenance": {
+                "governed_provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "role_origin": "EXPLICIT",
+                "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+                "source_extraction_ids": [
+                  "e4"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "whose text is Isolated qualification only"
+              },
+              "qualifiers": {},
+              "reference_role": null,
+              "relation": "EQUALITY",
+              "scope": "index.html",
+              "subject": "page.paragraph.text",
+              "supersedes_fact_ids": [],
+              "unit": null,
+              "value": "Isolated qualification only"
+            },
+            {
+              "admitted_work_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+              "authority": "HUMAN_EXPLICIT",
+              "epistemic_status": "CONFIRMED",
+              "id": "6a2e329d-e5b8-5ebb-9761-40d47ae3b1fa",
+              "provenance": {
+                "governed_provenance": [
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Only index.html may change."
+                  },
+                  {
+                    "evidence_reference": null,
+                    "origin": "HUMAN_EXPLICIT",
+                    "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+                    "source_text": "Do not deploy, publish, add pages, or change README.md."
+                  }
+                ],
+                "role_origin": "EXPLICIT",
+                "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+                "source_extraction_ids": [
+                  "e6"
+                ],
+                "source_record_ids": [
+                  "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+                ],
+                "source_text": "Only index.html may change"
+              },
+              "qualifiers": {},
+              "reference_role": null,
+              "relation": "SCOPE",
+              "scope": "index.html",
+              "subject": "change.scope",
+              "supersedes_fact_ids": [],
+              "unit": null,
+              "value": "index.html"
+            }
+          ],
+          "governance_record_id": "50a43a8f-3eee-5ed9-820b-8bab1cfdd2c9",
+          "id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+          "motive": "Produce the N1 isolated G0 software production qualification artifact: a single static index.html page in the managed Product repository.",
+          "previous_revision_id": null,
+          "rationale": "The current governed production request authorizes Work formation. Source acquisition or managed-source preparation follows the typed source basis; delivery and final acceptance remain separately governed.",
+          "repository_identity": "watt://work-branches/24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+          "repository_ref": "refs/heads/work-24d9cc2d52a85d27b38ae49c3f73394c",
+          "requests": [
+            "Add index.html containing semantic HTML with exactly one h1 whose text is 'N1 Software Control' and one paragraph whose text is 'Isolated qualification only'."
+          ],
+          "revision_fingerprint": "d9220289de5f2f8391a04a5b22196b476f601c34bc8e25ce806bcc2f0bab6d32",
+          "revision_number": 1,
+          "schema_version": "wic-work-reality-v3",
+          "scope_basis_fingerprint": "0ab5b43cf838e2abf0742c42c5205c5680b37eea3860ab431ddbe1081158ed22",
+          "source_assessment_id": "265c12f1-0e05-4aef-9e0f-cdb325c917e1",
+          "source_baseline_id": "f7ba6c82-28b2-4501-94df-12bfbafc9431",
+          "source_interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+          "source_kind": "INTERACTION_ASSESSMENT",
+          "source_record_ids": [
+            "1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+          ],
+          "source_revision": "53076c9371d50b77bbe1edb0d9bf44159e56c389",
+          "supporting_references": [
+            "INTERACTION_RECORD:1316dd51-c5c4-4b29-b5ba-823d188eae8c"
+          ],
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        }
+      ],
+      "scope_column": "work_id",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+      ]
+    },
+    "work_runtime_bindings": {
+      "query_status": "QUERIED",
+      "rows": [],
+      "scope_column": "work_id",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+      ]
+    },
+    "work_source_bases": {
+      "query_status": "QUERIED",
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:08.773419+00:00",
+          "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+          "resource_id": "cefd57a8-f171-400d-98cb-1b8c0ba56e41",
+          "source_revision": "53076c9371d50b77bbe1edb0d9bf44159e56c389",
+          "source_tree": "7dcefdcef56cacfa22992ed42b2c7bc3c3c6ac70",
+          "source_version": 0,
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+          "work_ref": "refs/heads/work-24d9cc2d52a85d27b38ae49c3f73394c"
+        }
+      ],
+      "scope_column": "work_id",
+      "scope_ids": [
+        "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+      ]
+    }
+  },
+  "db_export_completed_at_utc": "2026-10-09T11:40:28.070066Z",
+  "driver_state": {
+    "created_at_utc": "2026-10-09T11:37:40.962380Z",
+    "human_acceptance_written": false,
+    "human_delivery_authorization_written": false,
+    "human_integration_authorization_written": false,
+    "input_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+    "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+    "latest_observation": {
+      "automatic_progression_state": "STOPPED",
+      "current_production_run_id": null,
+      "current_work_reality_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+      "human_attention_required": false,
+      "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+      "status": "COMPLETED",
+      "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01",
+      "work_complete": false,
+      "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+      "work_status": "READY"
+    },
+    "operations": {
+      "create_product": {
+        "confirmed_at_utc": "2026-10-09T11:37:44.081448Z",
+        "path": "/api/products",
+        "request_body_sha256": "bfd1ce1a50358279d57dddf76f9f509227252d98244e6f3ba078ca3210f4fdcf",
+        "started_at_utc": "2026-10-09T11:37:40.981381Z",
+        "state": "CONFIRMED"
+      },
+      "submit_turn": {
+        "confirmed_at_utc": "2026-10-09T11:37:44.283311Z",
+        "path": "/api/experience/products/5ccb9748-b3a6-4ac0-a50b-6b056280bd4d/turns",
+        "request_body_sha256": "f241c9d0307bb90f2f0285c07219b7f996f63845a313f12ea5c3f6acf89a3212",
+        "started_at_utc": "2026-10-09T11:37:44.095182Z",
+        "state": "CONFIRMED"
+      }
+    },
+    "original_input_file_sha256": "c587f020c43275019b32c49a94ab8559587a01d339e1fe97b2c8e048a386258e",
+    "polls_completed": 29,
+    "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+    "product_name": "C3 G0 normal entry d0042d13-945f-44b0-8dfb-c4ae52725812",
+    "receipt_sequence": 161,
+    "run_id": "d0042d13-945f-44b0-8dfb-c4ae52725812",
+    "runtime_identity": {
+      "api_base_url": "http://watt-c3-api-20261009:8000",
+      "api_service": "watt-c3-api-20261009",
+      "captured_at_utc": "2026-10-09T11:37:23.261157+00:00",
+      "database_name": "spg_c3_qualification_20261009",
+      "image_id": "sha256:54355780b7fdd683332b9f9e607b76fcbbfc69f2bf5c42d9a1f888e8acbb4bb3",
+      "isolated": true,
+      "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+      "provider_ready": true,
+      "qualification": "C3",
+      "source_revision": "390fa22ec24cbab33f7feeeef96f0dfec9ce22f2"
+    },
+    "runtime_identity_file_sha256": "e6a58610acf80aff80212d1e6bbd89b39d93b7649bd6914b89c8828719c41e18",
+    "schema": "c3-normal-entry-state-v1",
+    "source_record_id": "c7a403a4-866c-4a9b-81b5-868e6cff184c",
+    "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01",
+    "updated_at_utc": "2026-10-09T11:40:20.297909Z",
+    "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+  },
+  "evidence_level": "E1_SCOPED_OWNER_OBSERVATIONS",
+  "filesystem_owner_observations": {
+    "consistency": "FILES_CAPTURED_AFTER_DB_SNAPSHOT_NOT_ATOMIC_WITH_DATABASE",
+    "evidence_level": "E1",
+    "files": [],
+    "meaning": "persisted Owner facts at capture; missing file is UNKNOWN historical state, not proof of no prior effect",
+    "missing_at_observation": [
+      {
+        "evidence_level": "UNKNOWN",
+        "relative_path": "guardian-requirements/24d9cc2d-52a8-5d27-b38a-e49c3f73394c-c6824f98-878f-5cbe-a5f1-55c02c203905.json",
+        "status": "MISSING_AT_OBSERVATION_HISTORY_UNKNOWN"
+      },
+      {
+        "evidence_level": "UNKNOWN",
+        "relative_path": "candidate-previews/by-work/24d9cc2d-52a8-5d27-b38a-e49c3f73394c.json",
+        "status": "MISSING_AT_OBSERVATION_HISTORY_UNKNOWN"
+      }
+    ],
+    "observed_at_utc": "2026-10-09T11:40:28.082618Z"
+  },
+  "formation_owner_query": {
+    "evidence_level": "E1",
+    "meaning": "actual existing GovernanceRecord observations; candidate review does not grant Engineering/Human/Assurance authority",
+    "query_status": "QUERIED",
+    "record_ids": [],
+    "scope_receipt_ids": [],
+    "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+    "work_reality_revision_ids": [
+      "c6824f98-878f-5cbe-a5f1-55c02c203905"
+    ]
+  },
+  "git_owner_observations": {
+    "consistency": "GIT_READ_AFTER_DATABASE_SNAPSHOT_NOT_ATOMIC",
+    "mutating_git_commands": 0,
+    "observed_at_utc": "2026-10-09T11:40:28.116205Z",
+    "repositories": [],
+    "scope": "actual dispatch repositories; exact captured baseline/Candidate commits and admitted artifact paths only"
+  },
+  "guardian_owner_observations": {
+    "consistency": "FILES_CAPTURED_AFTER_DATABASE_SNAPSHOT",
+    "files": [],
+    "missing_at_observation": [],
+    "no_assurance_assessed": true,
+    "query_scope": "request IDs referenced by this Work's actual preview projection only"
+  },
+  "new_request_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+  "public_release": {
+    "evidence_level": "E1_SCOPED_OWNER_OBSERVATIONS",
+    "method": "known C3 credential values removed in memory",
+    "private_root_released": false,
+    "qualification_claim": "NO_PASS_OR_AUTHORITY_INFERRED",
+    "recovery_not_new_capture": true,
+    "unknown_sensitive_values_not_claimed_absent": true
+  },
+  "qualification_claim": "NO_WORK_PASS_OR_HUMAN_AUTHORITY_INFERRED",
+  "raw_records_publication": "PRIVATE_0600_ROOT_REDACTION_REQUIRED",
+  "schema": "c3-work-canonical-private-snapshot-v1",
+  "started_at_utc": "2026-10-09T11:40:25.817504Z",
+  "verification_candidate_receipt_ids": [],
+  "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+}

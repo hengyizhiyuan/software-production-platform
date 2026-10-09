@@ -96,12 +96,14 @@
     "boundary": "Design scope recovery only; not whole Work or formation success."
   },
   "final_work": {
-    "status": "NEEDS_ATTENTION",
     "automatic_state": "STOPPED",
     "work_complete": false,
     "candidate_exists": false,
     "human_authorization_written": false,
-    "boundary": "Not a Candidate-ready Human Integration review."
+    "boundary": "Not a Candidate-ready Human Integration review.",
+    "observed_driver_or_api_status": "NEEDS_ATTENTION",
+    "stored_postgresql_work_condition": "READY",
+    "observation_boundary": "Driver/API projection and later read-only product_works.condition are different Owner/observation fields; neither is full Work PASS or Candidate-ready."
   },
   "authority_query_boundary": "No scoped identities existed for Human Authorization/RuntimeCommit/Acceptance; collector reported NO_SCOPED_IDENTITIES_NOT_QUERIED. This is not a complete side-effect audit.",
   "full_effect_audit_claim": false,
@@ -117,6 +119,6 @@
       "sha256": "1095a2ce83a7a15b056fba2bf66b4ec1d19c92bf0bb44828e7da345ffd34f577"
     }
   ],
-  "next_boundary": "Fix safe Provider failure receipts and consume unresolved formation before runtime creation using existing BLOCKED. This does not recover the historical Provider cause or prove transport restored. No blind new Work attempt.",
+  "next_boundary": "Safe Provider failure receipts and prior-runtime truthful BLOCKED implemented/tested on d8ea064. Historical specific Provider cause remains UNKNOWN; future diagnosis depends on observed typed fields, which may remain null. No blind new Work attempt.",
   "holdout": "SEALED_NOT_READ_OR_EXECUTED_PENDING_EXPLICIT_HUMAN_UNSEAL_AUTHORIZATION_AFTER_AUTOMATIC_REVIEW_REJECTION"
 }

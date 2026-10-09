@@ -1,0 +1,61 @@
+{
+  "schema": "c3-final-image-targeted-fixture-regression-v1",
+  "sources": {
+    "watt": {
+      "revision": "390fa22ec24cbab33f7feeeef96f0dfec9ce22f2",
+      "tree": "2aa36776b786bb088d34f5c082f0a19005944fd4"
+    },
+    "guardian": {
+      "revision": "657ee84aa0b38672c1b4bd67ad7a834d96bfcabd",
+      "tree": "93903e1843b2f755bdc077c5330372b32cc779b6"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "image_id": "sha256:54355780b7fdd683332b9f9e607b76fcbbfc69f2bf5c42d9a1f888e8acbb4bb3",
+  "application_source_overlay": false,
+  "pythonpath": "/opt/c3-owners/guardian/src:/opt/c3-owners/ecf/src:/opt/c3-test-deps",
+  "actual_imports_attestation": "../final-image-regression/actual-imports.json",
+  "supplemental_test_source": null,
+  "test_source_role": "original baked test inputs",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "--basetemp=/c3-private-fixture/tests",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "junit_family=legacy",
+    "tests/integration/test_c3_fulfillment_receipts.py",
+    "--tb=short",
+    "--junitxml=/c3-evidence/c3-carrier.xml"
+  ],
+  "container_name": "watt-c3-final-supplement-c3-carrier-20261009",
+  "started_at_utc": "2026-10-09T11:33:46.145672+00:00",
+  "ended_at_utc": "2026-10-09T11:34:00.250828+00:00",
+  "wall_seconds": 14.105123494984582,
+  "exit_code": 0,
+  "counts": {
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 2
+  },
+  "database_name": "c1_contract_continuity",
+  "database_configuration_key": "SPG_TEST_DATABASE_URL",
+  "log_and_xml_sanitized": true,
+  "live_model_calls": 0,
+  "real_ai_work_created": 0,
+  "fixture_work_mutations_only": true,
+  "harness_sha256": "4998b1495cd64a5f353c4e85edb1b1a06cf634e7d85fb0767b6bfead5fb3a6bd",
+  "private_fixture_basetemp_persisted": "/data/watt/c3-semantic-convergence-20261009/private/watt-c3-final-supplement-c3-carrier-20261009-fixture-tmp",
+  "meaning": "exact installed final application image; supplemental tests distinguished; not live AI Work"
+}

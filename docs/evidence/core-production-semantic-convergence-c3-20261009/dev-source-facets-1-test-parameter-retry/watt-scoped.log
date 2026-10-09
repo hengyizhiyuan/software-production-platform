@@ -1,0 +1,23 @@
+........................................................................ [ 66%]
+.FF..................................                                    [100%]
+=================================== FAILURES ===================================
+___ test_work_reality_resolver_reads_only_its_exact_source_assessment[True] ____
+tests/test_c3_evidence_projection.py:127: in test_work_reality_resolver_reads_only_its_exact_source_assessment
+    observed = client._resolve_owner_evidence(f"work-reality:{revision_id}")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/guardian_assurance.py:164: in _resolve_owner_evidence
+    for source_id in revision.source_record_ids:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'source_record_ids'
+___ test_work_reality_resolver_reads_only_its_exact_source_assessment[False] ___
+tests/test_c3_evidence_projection.py:127: in test_work_reality_resolver_reads_only_its_exact_source_assessment
+    observed = client._resolve_owner_evidence(f"work-reality:{revision_id}")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/guardian_assurance.py:164: in _resolve_owner_evidence
+    for source_id in revision.source_record_ids:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'source_record_ids'
+=========================== short test summary info ============================
+FAILED tests/test_c3_evidence_projection.py::test_work_reality_resolver_reads_only_its_exact_source_assessment[True]
+FAILED tests/test_c3_evidence_projection.py::test_work_reality_resolver_reads_only_its_exact_source_assessment[False]
+2 failed, 107 passed in 6.74s

@@ -1,0 +1,74 @@
+{
+  "schema": "c3-exact-image-build-v1",
+  "started_at_utc": "2026-10-09T12:36:52.266900+00:00",
+  "ended_at_utc": "2026-10-09T12:37:19.806564+00:00",
+  "wall_seconds": 27.539667057979386,
+  "exit_code": 0,
+  "command": [
+    "docker",
+    "build",
+    "--network=none",
+    "--build-arg",
+    "BASE_IMAGE=watt-c3-retry1-dependency-base:6c1f48e-20261009",
+    "--build-arg",
+    "WATT_REVISION=91f5dbc9906d1f857113736981517c1091ec52ae",
+    "--build-arg",
+    "WATT_TREE=50c6b8fad3f321638135fbec8afcba060b3fb2bc",
+    "--build-arg",
+    "GUARDIAN_REVISION=d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+    "--build-arg",
+    "GUARDIAN_TREE=4f75d9137bebc7bf956fe4466cbae93f88c5c03b",
+    "--build-arg",
+    "ECF_REVISION=5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "--build-arg",
+    "ECF_TREE=878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "-f",
+    "/data/watt/c3-semantic-convergence-20261009/retry-1/build-91f5dbc/context/watt/docs/evidence/core-production-semantic-convergence-c3-20261009/Dockerfile.c3",
+    "-t",
+    "watt-c3-retry1:91f5dbc",
+    "/data/watt/c3-semantic-convergence-20261009/retry-1/build-91f5dbc/context"
+  ],
+  "sources": {
+    "watt": {
+      "revision": "91f5dbc9906d1f857113736981517c1091ec52ae",
+      "tree": "50c6b8fad3f321638135fbec8afcba060b3fb2bc"
+    },
+    "guardian": {
+      "revision": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+      "tree": "4f75d9137bebc7bf956fe4466cbae93f88c5c03b"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "build_directory": "/data/watt/c3-semantic-convergence-20261009/retry-1/build-91f5dbc",
+  "build_attempt_id": 1,
+  "control_harness_revision": "b575e4346bf50d9046e4ed888daaeaccc4d5e8ee",
+  "source_identity_sha256": "555c0201429267efcffa93d6b85ab88b904d98859feb0d8ed9fc3f660a85ea10",
+  "real_model_calls": 0,
+  "source_overlay": false,
+  "image": {
+    "Id": "sha256:6f8d9b3a27e7e2452097a77427115df6e09b9a03276eb72d0170a66160e0578f",
+    "RepoTags": [
+      "watt-c3-retry1:91f5dbc"
+    ],
+    "RepoDigests": [],
+    "Created": "2026-10-09T20:37:08.75878422+08:00",
+    "labels": {
+      "org.opencontainers.image.revision": "91f5dbc9906d1f857113736981517c1091ec52ae",
+      "watt.c3.base-image-id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+      "watt.c3.ecf-revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "watt.c3.ecf-tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+      "watt.c3.ecf-unsupported-revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "watt.c3.guardian-revision": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+      "watt.c3.guardian-tree": "4f75d9137bebc7bf956fe4466cbae93f88c5c03b",
+      "watt.c3.source-tree": "50c6b8fad3f321638135fbec8afcba060b3fb2bc"
+    },
+    "user": "spg"
+  }
+}

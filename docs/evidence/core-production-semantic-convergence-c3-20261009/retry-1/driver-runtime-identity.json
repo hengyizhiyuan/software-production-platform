@@ -1,0 +1,15 @@
+{
+  "qualification": "C3",
+  "qualification_run": "retry-1",
+  "isolated": true,
+  "api_service": "watt-c3-retry1-api-20261009",
+  "api_base_url": "http://watt-c3-retry1-api-20261009:8000",
+  "source_revision": "91f5dbc9906d1f857113736981517c1091ec52ae",
+  "image_id": "sha256:6f8d9b3a27e7e2452097a77427115df6e09b9a03276eb72d0170a66160e0578f",
+  "database_name": "spg_c3_retry1_qualification_20261009",
+  "captured_at_utc": "2026-10-09T12:49:15.912004+00:00",
+  "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+  "provider_ready": true,
+  "provider_readiness_scope": "configuration only; no Provider request yet",
+  "deployment_receipt": "runtime-role-preparation.json"
+}

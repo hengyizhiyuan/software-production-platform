@@ -1,0 +1,679 @@
+{
+  "captured_at_utc": "2026-10-09T11:40:28.122002Z",
+  "datasets": {
+    "attempt_preparations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "baseline_candidates": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "checkpoint_bundles": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "completion_evaluations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "context_packages": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "effect_receipts": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "engineering_resource_bindings": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "condition": "ACTIVE",
+          "created_at": "2026-10-09T11:39:05.655229+00:00",
+          "engineering_scope_id": "ac4fbc50-0aa0-54d5-8a1f-ae112ae69133",
+          "id": "4d71a667-c1f7-5dfa-b7b2-5f3bc473da6b",
+          "resource_id": "cefd57a8-f171-400d-98cb-1b8c0ba56e41"
+        }
+      ]
+    },
+    "engineering_resources": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:08.585961+00:00",
+          "id": "cefd57a8-f171-400d-98cb-1b8c0ba56e41",
+          "kind": "REPOSITORY",
+          "updated_at": "2026-10-09T11:39:08.585961+00:00"
+        }
+      ]
+    },
+    "engineering_scopes": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "condition": "ADMITTED",
+          "created_at": "2026-10-09T11:39:05.655229+00:00",
+          "id": "ac4fbc50-0aa0-54d5-8a1f-ae112ae69133",
+          "updated_at": "2026-10-09T11:39:05.655229+00:00",
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        }
+      ]
+    },
+    "event_outbox": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_allocations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_attempts": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_control_requests": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_dispatches": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_effects": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_events": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_evidence": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_recovery_cases": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_resource_envelopes": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_resource_usage": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_sessions": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_source_members": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_source_vectors": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_steps": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "execution_workspaces": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "executor_leases": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "executor_queue": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "executor_worker_events": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "executor_worker_registrations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "governance_records": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:05.655229+00:00",
+          "id": "50a43a8f-3eee-5ed9-820b-8bab1cfdd2c9"
+        }
+      ]
+    },
+    "human_authorizations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "interaction_assessments": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:05.300807+00:00",
+          "id": "265c12f1-0e05-4aef-9e0f-cdb325c917e1",
+          "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4"
+        }
+      ]
+    },
+    "interaction_records": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:37:44.177639+00:00",
+          "id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+          "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+          "sequence": 1
+        }
+      ]
+    },
+    "interaction_turn_obligations": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "id": "ec46820d-a996-5daf-85c0-ea1b4db0f17c",
+          "state": "SATISFIED",
+          "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01",
+          "version": 2
+        }
+      ]
+    },
+    "interaction_turn_realization_refinements": {
+      "query_status": "QUERIED",
+      "row_count": 2,
+      "rows": [
+        {
+          "id": "628d8460-d329-4dd6-9d77-94796f1812ad",
+          "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01"
+        },
+        {
+          "id": "41998818-5757-4638-bcd9-a456d33ee0b6",
+          "parent_id": "628d8460-d329-4dd6-9d77-94796f1812ad",
+          "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01"
+        }
+      ]
+    },
+    "interaction_turn_realizations": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "assessment_id": "265c12f1-0e05-4aef-9e0f-cdb325c917e1",
+          "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+          "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01"
+        }
+      ]
+    },
+    "interaction_turn_semantic_envelopes": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+          "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+          "state": "GOVERNED",
+          "turn_id": "61ce1843-e035-4a6a-b252-c531be68ed01"
+        }
+      ]
+    },
+    "interaction_turns": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "assessment_id": "265c12f1-0e05-4aef-9e0f-cdb325c917e1",
+          "completed_at": "2026-10-09T11:39:12.677894+00:00",
+          "created_at": "2026-10-09T11:37:44.177639+00:00",
+          "failure_code": null,
+          "id": "61ce1843-e035-4a6a-b252-c531be68ed01",
+          "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+          "request_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+          "started_at": "2026-10-09T11:37:44.245825+00:00",
+          "status": "COMPLETED",
+          "updated_at": "2026-10-09T11:39:12.677894+00:00"
+        }
+      ]
+    },
+    "native_attempt_bindings": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "native_attempt_states": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "plan_revisions": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "product_interactions": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "condition": "OPEN",
+          "created_at": "2026-10-09T11:37:44.153699+00:00",
+          "current_work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+          "id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+          "updated_at": "2026-10-09T11:39:05.655229+00:00"
+        }
+      ]
+    },
+    "product_managed_sources": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+          "updated_at": "2026-10-09T11:37:43.992879+00:00",
+          "version": 0
+        }
+      ]
+    },
+    "product_source_promotion_intents": {
+      "query_status": "QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "product_source_versions": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:37:43.992879+00:00",
+          "id": "9a22766d-31a8-4fb6-9b63-998694b031a2",
+          "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+          "version": 0
+        }
+      ]
+    },
+    "product_works": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "condition": "READY",
+          "created_at": "2026-10-09T11:39:05.655229+00:00",
+          "current_engineering_scope_id": "ac4fbc50-0aa0-54d5-8a1f-ae112ae69133",
+          "current_work_reality_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+          "id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+          "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+          "updated_at": "2026-10-09T11:39:51.939236+00:00"
+        }
+      ]
+    },
+    "product_workspace_interactions": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:37:44.157595+00:00",
+          "interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+          "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d"
+        }
+      ]
+    },
+    "production_admissibility_records": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "production_runs": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "production_snapshots": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "condition": "TRUSTED",
+          "created_at": "2026-10-09T11:39:08.664939+00:00",
+          "id": "f7ba6c82-28b2-4501-94df-12bfbafc9431"
+        }
+      ]
+    },
+    "production_work_units": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "proposed_repository_snapshots": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "provider_execution_reports": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "pwu_contract_versions": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "repository_integration_effects": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "repository_observations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "result_ready_claims": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "runtime_commits": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "self_refine_actions": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:51.920612+00:00",
+          "event_id": "b2cce513-53da-4962-b161-1491e4730bc2",
+          "id": "f47d8cbe-185c-4a36-9dc9-f903995f0bda",
+          "outcome": "RECOVERED",
+          "sequence": 1
+        }
+      ]
+    },
+    "self_refine_events": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:51.920612+00:00",
+          "failure_family": "CANDIDATE_INCONSISTENT",
+          "final_result": "LOCAL_OBLIGATION_RECOVERED",
+          "id": "b2cce513-53da-4962-b161-1491e4730bc2",
+          "operation_id": "e49b0095-96e7-4a86-87c8-b4ca00d8b1dd",
+          "refinement_class": "ROUTINE_STOCHASTIC_REFINEMENT",
+          "root_cause_classification": "CANDIDATE_INCONSISTENT",
+          "signal_kind": "CANDIDATE_INCONSISTENT",
+          "status": "VERIFIED",
+          "updated_at": "2026-10-09T11:39:51.920612+00:00",
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+          "work_resume_result": "RESUMED"
+        }
+      ]
+    },
+    "semantic_step_results": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:51.939236+00:00",
+          "id": "0f9340c8-fd1f-4e4b-9513-c18cafda126b",
+          "steering_plan_revision_id": "809f8419-8a41-4023-b798-99020798b211",
+          "step_id": "e49b0095-96e7-4a86-87c8-b4ca00d8b1dd",
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        }
+      ]
+    },
+    "software_product_assets": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:37:43.992879+00:00",
+          "id": "2206024b-9d30-42f7-94af-bb3d5a8a7c33",
+          "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+          "resource_id": "343b8c00-cfe0-41fc-9856-9b0c34a8a258"
+        }
+      ]
+    },
+    "software_products": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:37:41.052876+00:00",
+          "id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+          "updated_at": "2026-10-09T11:37:41.052876+00:00"
+        }
+      ]
+    },
+    "steering_decisions": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:52.703528+00:00",
+          "current_step_id": "e49b0095-96e7-4a86-87c8-b4ca00d8b1dd",
+          "id": "ed641807-e61c-4183-85fd-1ccd1ac23f81",
+          "steering_plan_revision_id": "809f8419-8a41-4023-b798-99020798b211"
+        }
+      ]
+    },
+    "steering_history_events": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:52.756349+00:00",
+          "event_type": "STEP_TRANSITION",
+          "from_step_id": "e49b0095-96e7-4a86-87c8-b4ca00d8b1dd",
+          "id": "c5ac242b-e162-4529-8005-a6782b86f495",
+          "steering_decision_id": "ed641807-e61c-4183-85fd-1ccd1ac23f81",
+          "steering_plan_id": "a02421f0-1332-4ef5-ac86-e058bb40630d",
+          "steering_plan_revision_id": "809f8419-8a41-4023-b798-99020798b211",
+          "to_step_id": "6f4b51c7-decd-4f95-a48b-8b4c84ffe606"
+        }
+      ]
+    },
+    "steering_plan_revisions": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "condition": "ACTIVE",
+          "created_at": "2026-10-09T11:39:09.058693+00:00",
+          "id": "809f8419-8a41-4023-b798-99020798b211",
+          "revision_number": 1,
+          "steering_plan_id": "a02421f0-1332-4ef5-ac86-e058bb40630d",
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        }
+      ]
+    },
+    "steering_plans": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:09.058693+00:00",
+          "id": "a02421f0-1332-4ef5-ac86-e058bb40630d",
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        }
+      ]
+    },
+    "steering_steps": {
+      "query_status": "QUERIED",
+      "row_count": 4,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:09.058693+00:00",
+          "id": "ac274320-ed0f-4cf5-a9fc-0a9497c46f50",
+          "state": "KNOWN",
+          "steering_plan_revision_id": "809f8419-8a41-4023-b798-99020798b211"
+        },
+        {
+          "created_at": "2026-10-09T11:39:09.058693+00:00",
+          "id": "162ffe9b-7047-4a6b-bd1f-d5dcff55164d",
+          "state": "KNOWN",
+          "steering_plan_revision_id": "809f8419-8a41-4023-b798-99020798b211"
+        },
+        {
+          "created_at": "2026-10-09T11:39:09.058693+00:00",
+          "id": "e49b0095-96e7-4a86-87c8-b4ca00d8b1dd",
+          "state": "CLOSED",
+          "steering_plan_revision_id": "809f8419-8a41-4023-b798-99020798b211"
+        },
+        {
+          "created_at": "2026-10-09T11:39:09.058693+00:00",
+          "id": "6f4b51c7-decd-4f95-a48b-8b4c84ffe606",
+          "state": "CURRENT",
+          "steering_plan_revision_id": "809f8419-8a41-4023-b798-99020798b211"
+        }
+      ]
+    },
+    "transition_history": {
+      "query_status": "QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "verification_records": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "work_convergence_observations": {
+      "query_status": "QUERIED",
+      "row_count": 2,
+      "rows": [
+        {
+          "condition": "NOT_YET_CONVERGED",
+          "created_at": "2026-10-09T11:39:52.097127+00:00",
+          "id": "decba8ab-5bac-4491-ac84-9272d96c6faa",
+          "sequence": 1,
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        },
+        {
+          "condition": "NOT_YET_CONVERGED",
+          "created_at": "2026-10-09T11:39:52.917967+00:00",
+          "id": "21c35d9a-63d0-4043-bcd6-c3f91adc88f4",
+          "predecessor_id": "decba8ab-5bac-4491-ac84-9272d96c6faa",
+          "sequence": 2,
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        }
+      ]
+    },
+    "work_delivery_acceptances": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "work_delivery_manifests": {
+      "query_status": "QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "work_delivery_runtimes": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "work_delivery_targets": {
+      "query_status": "QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "work_product_references": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "work_reality_revisions": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:05.655229+00:00",
+          "engineering_resource_id": "cefd57a8-f171-400d-98cb-1b8c0ba56e41",
+          "engineering_scope_id": "ac4fbc50-0aa0-54d5-8a1f-ae112ae69133",
+          "governance_record_id": "50a43a8f-3eee-5ed9-820b-8bab1cfdd2c9",
+          "id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+          "revision_number": 1,
+          "source_assessment_id": "265c12f1-0e05-4aef-9e0f-cdb325c917e1",
+          "source_baseline_id": "f7ba6c82-28b2-4501-94df-12bfbafc9431",
+          "source_interaction_id": "64478a9f-234f-43e7-8bfc-3eaa1b4b73b4",
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        }
+      ]
+    },
+    "work_runtime_bindings": {
+      "query_status": "QUERIED",
+      "row_count": 0,
+      "rows": []
+    },
+    "work_source_bases": {
+      "query_status": "QUERIED",
+      "row_count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-09T11:39:08.773419+00:00",
+          "product_id": "5ccb9748-b3a6-4ac0-a50b-6b056280bd4d",
+          "resource_id": "cefd57a8-f171-400d-98cb-1b8c0ba56e41",
+          "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+        }
+      ]
+    }
+  },
+  "export_complete": true,
+  "filesystem_file_count": 0,
+  "public_release": {
+    "evidence_level": "E1_SCOPED_OWNER_OBSERVATIONS",
+    "method": "known C3 credential values removed in memory",
+    "private_root_released": false,
+    "qualification_claim": "NO_PASS_OR_AUTHORITY_INFERRED",
+    "recovery_not_new_capture": true,
+    "unknown_sensitive_values_not_claimed_absent": true
+  },
+  "raw_private_file": "20261009T114025817344Z-0f824f308f7c480a8c0acc0440eea4e2-canonical-work.json",
+  "raw_private_sha256": "1f91c7882d8f4515d2008afa3fa797bbab28a4a75872fc3d611a08ee56095d2a",
+  "schema": "c3-work-canonical-summary-draft-v1",
+  "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c"
+}

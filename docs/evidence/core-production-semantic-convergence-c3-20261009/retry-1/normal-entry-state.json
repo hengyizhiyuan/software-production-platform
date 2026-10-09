@@ -1,0 +1,62 @@
+{
+  "created_at_utc": "2026-10-09T12:55:13.219096Z",
+  "driver_status": "HUMAN_ATTENTION_PENDING_NO_AUTHORIZATION_WRITTEN",
+  "human_acceptance_written": false,
+  "human_delivery_authorization_written": false,
+  "human_integration_authorization_written": false,
+  "input_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+  "interaction_id": "8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6",
+  "latest_observation": {
+    "automatic_progression_state": "STOPPED",
+    "current_production_run_id": "f9f06c0a-b5fd-41c4-8e09-594cb91ea029",
+    "current_work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+    "human_attention_required": true,
+    "interaction_id": "8440c2a5-9cbe-4443-ac2c-df78bc9ef6f6",
+    "status": "COMPLETED",
+    "turn_id": "1344304c-db26-42d1-a883-1991ace8bf30",
+    "work_complete": false,
+    "work_id": "048189aa-0613-5307-b6f4-c430e7977f93",
+    "work_status": "NEEDS_ATTENTION"
+  },
+  "operations": {
+    "create_product": {
+      "confirmed_at_utc": "2026-10-09T12:55:17.517923Z",
+      "path": "/api/products",
+      "request_body_sha256": "21447b18d409edeb02e027e31cfac86df3baa7a43e533bfc3809ad8c524d3dda",
+      "started_at_utc": "2026-10-09T12:55:13.257810Z",
+      "state": "CONFIRMED"
+    },
+    "submit_turn": {
+      "confirmed_at_utc": "2026-10-09T12:55:17.729200Z",
+      "path": "/api/experience/products/b2f46852-a9cd-4d0f-bcb4-ec2a3b0d7587/turns",
+      "request_body_sha256": "f241c9d0307bb90f2f0285c07219b7f996f63845a313f12ea5c3f6acf89a3212",
+      "started_at_utc": "2026-10-09T12:55:17.526591Z",
+      "state": "CONFIRMED"
+    }
+  },
+  "original_input_file_sha256": "c587f020c43275019b32c49a94ab8559587a01d339e1fe97b2c8e048a386258e",
+  "polls_completed": 31,
+  "product_id": "b2f46852-a9cd-4d0f-bcb4-ec2a3b0d7587",
+  "product_name": "C3 G0 normal entry 58d9af79-2c46-4451-bfd8-19b1f3d4612d",
+  "receipt_sequence": 173,
+  "run_id": "58d9af79-2c46-4451-bfd8-19b1f3d4612d",
+  "runtime_identity": {
+    "api_base_url": "http://watt-c3-retry1-api-20261009:8000",
+    "api_service": "watt-c3-retry1-api-20261009",
+    "captured_at_utc": "2026-10-09T12:49:15.912004+00:00",
+    "database_name": "spg_c3_retry1_qualification_20261009",
+    "image_id": "sha256:6f8d9b3a27e7e2452097a77427115df6e09b9a03276eb72d0170a66160e0578f",
+    "isolated": true,
+    "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+    "provider_ready": true,
+    "qualification": "C3",
+    "qualification_run": "retry-1",
+    "source_revision": "91f5dbc9906d1f857113736981517c1091ec52ae"
+  },
+  "runtime_identity_file_sha256": "878201ebb5256bd61b118f1eaffced2c8bbd76131cdb3540f776501c44bcdbb3",
+  "schema": "c3-normal-entry-state-v1",
+  "source_record_id": "c7a403a4-866c-4a9b-81b5-868e6cff184c",
+  "turn_id": "1344304c-db26-42d1-a883-1991ace8bf30",
+  "updated_at_utc": "2026-10-09T12:58:22.529940Z",
+  "work_id": "048189aa-0613-5307-b6f4-c430e7977f93"
+}

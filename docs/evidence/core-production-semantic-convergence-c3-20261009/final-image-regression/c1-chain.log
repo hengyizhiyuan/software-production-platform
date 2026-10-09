@@ -1,0 +1,26 @@
+.....F...F........................................                       [100%]
+=================================== FAILURES ===================================
+_ test_native_rejects_binding_loss_drift_and_injection[work-constraint_identity] _
+tests/integration/test_c1_contract_continuity.py:635: in test_native_rejects_binding_loss_drift_and_injection
+    with pytest.raises(ValueError, match="OBLIGATION_(GATE_BINDING_DRIFT|PROJECTION_SOURCE_REVISION_DRIFT|PROJECTION_DUPLICATE_ROUTE|SOURCE_INVENTORY_INCOMPLETE|WORK_CONSTRAINT_INVENTORY_INCOMPLETE|PROJECTION_MIXED_BASIS)"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'OBLIGATION_(GATE_BINDING_DRIFT|PROJECTION_SOURCE_REVISION_DRIFT|PROJECTION_DUPLICATE_ROUTE|SOURCE_INVENTORY_INCOMPLETE|WORK_CONSTRAINT_INVENTORY_INCOMPLETE|PROJECTION_MIXED_BASIS)'
+E     Actual message: "1 validation error for CompletionContract\nfulfillment_bindings.0\n  Value error, Fact binding requires only exact Fact identity [type=value_error, input_value={'owner': 'VERIFICATION',...31184603c7243a70167d4c'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+_ test_native_rejects_binding_loss_drift_and_injection[steering-constraint_identity] _
+tests/integration/test_c1_contract_continuity.py:635: in test_native_rejects_binding_loss_drift_and_injection
+    with pytest.raises(ValueError, match="OBLIGATION_(GATE_BINDING_DRIFT|PROJECTION_SOURCE_REVISION_DRIFT|PROJECTION_DUPLICATE_ROUTE|SOURCE_INVENTORY_INCOMPLETE|WORK_CONSTRAINT_INVENTORY_INCOMPLETE|PROJECTION_MIXED_BASIS)"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'OBLIGATION_(GATE_BINDING_DRIFT|PROJECTION_SOURCE_REVISION_DRIFT|PROJECTION_DUPLICATE_ROUTE|SOURCE_INVENTORY_INCOMPLETE|WORK_CONSTRAINT_INVENTORY_INCOMPLETE|PROJECTION_MIXED_BASIS)'
+E     Actual message: "1 validation error for CompletionContract\nfulfillment_bindings.0\n  Value error, Fact binding requires only exact Fact identity [type=value_error, input_value={'owner': 'VERIFICATION',...47e83a782651fcfbb412f6'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+=========================== short test summary info ============================
+FAILED tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[work-constraint_identity]
+FAILED tests/integration/test_c1_contract_continuity.py::test_native_rejects_binding_loss_drift_and_injection[steering-constraint_identity]
+2 failed, 48 passed in 387.34s (0:06:27)

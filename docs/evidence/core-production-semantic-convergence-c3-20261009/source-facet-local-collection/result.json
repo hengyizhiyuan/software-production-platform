@@ -1,0 +1,30 @@
+{
+  "schema": "c3-local-source-facet-collection-v1",
+  "observed_at_utc": "2026-10-09T12:07:00.383610+00:00",
+  "source_identity": {
+    "base": "390fa22ec24cbab33f7feeeef96f0dfec9ce22f2",
+    "uncommitted_sources": [
+      {
+        "path": "src/spg/application/governed_obligations.py",
+        "sha256": "874f653c61e7f2e05d88dd5a4b471fe0c798435a857c85002348c6631085057e",
+        "size_bytes": 87481
+      },
+      {
+        "path": "tests/test_c3_admitted_source_facets.py",
+        "sha256": "c26ba48a0cbcf3ccbb3d50cfcb04fb7221c2f8446ffaf8e85c3e69aa0a1e7025",
+        "size_bytes": 10113
+      }
+    ]
+  },
+  "execution": {
+    "platform": "Windows",
+    "test_module": "tests/test_c3_admitted_source_facets.py",
+    "exit_code": 1,
+    "executed_test_cases": 0,
+    "failure_kind": "COLLECTION_PLATFORM_DEPENDENCY",
+    "failed_import": "fcntl",
+    "runner_wall_seconds": 6.3609231,
+    "exact_start_utc": "UNKNOWN"
+  },
+  "qualification_claim": "NONE; source AST only; no Linux shim, models, database or ECS service accessed"
+}

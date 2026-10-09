@@ -1,0 +1,15 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /guardian-tests
+plugins: anyio-4.14.2
+collected 140 items
+
+tests/test_c3_phase_evidence.py ........................................ [ 28%]
+...........................                                              [ 47%]
+tests/test_c1_governed_evidence_continuity.py .......................... [ 66%]
+.......................................                                  [ 94%]
+tests/test_governed_obligation_evidence.py ...                           [ 96%]
+tests/test_software_assurance.py .....                                   [100%]
+
+-------------- generated xml file: /c3-evidence/guardian-unit.xml --------------
+============================= 140 passed in 18.64s =============================

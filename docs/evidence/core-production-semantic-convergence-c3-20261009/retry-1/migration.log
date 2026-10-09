@@ -1,0 +1,74 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20260827_01, Create the S1-C minimum durable Runtime spine.
+INFO  [alembic.runtime.migration] Running upgrade 20260827_01 -> 20260828_02, Add S2-A Context Package and Attempt preparation bindings.
+INFO  [alembic.runtime.migration] Running upgrade 20260828_02 -> 20260828_03, Add S2-B dispatch, provider report, observation, and Work Product facts.
+INFO  [alembic.runtime.migration] Running upgrade 20260828_03 -> 20260828_04, Add S3-A immutable Completion Evaluation facts.
+INFO  [alembic.runtime.migration] Running upgrade 20260828_04 -> 20260828_05, Add S3-B proposed snapshot, Verification, and admissibility facts.
+INFO  [alembic.runtime.migration] Running upgrade 20260828_05 -> 20260828_06, Add S3-C Baseline Candidate and Human Authorization facts.
+INFO  [alembic.runtime.migration] Running upgrade 20260828_06 -> 20260829_07, Add the narrow S4-A repository ref integration effect.
+INFO  [alembic.runtime.migration] Running upgrade 20260829_07 -> 20260829_08, Add the narrow S4-B Runtime Commit audit linkage.
+INFO  [alembic.runtime.migration] Running upgrade 20260829_08 -> 20260829_09, Add the narrow S5-A immutable Recovery Assessment.
+INFO  [alembic.runtime.migration] Running upgrade 20260829_09 -> 20260829_10, Add narrow S5-B Recovery Action records.
+INFO  [alembic.runtime.migration] Running upgrade 20260829_10 -> 20260829_11, Extend narrow Recovery Actions for S5-C Attempt recovery.
+INFO  [alembic.runtime.migration] Running upgrade 20260829_11 -> 20260829_12, Add exact durable Materialized Execution Input for S6-B1.
+INFO  [alembic.runtime.migration] Running upgrade 20260829_12 -> 20260902_13, Add verified maintenance recovery admission and supersession concurrency.
+INFO  [alembic.runtime.migration] Running upgrade 20260902_13 -> 20260902_14, Add MVP Goal, Work, Engineering Scope, and Runtime lineage bindings.
+INFO  [alembic.runtime.migration] Running upgrade 20260902_14 -> 20260903_15, Add governed MVP Artifact Target proposal fields.
+INFO  [alembic.runtime.migration] Running upgrade 20260903_15 -> 20260904_16, Add durable single-PWU Production Plan proposals.
+INFO  [alembic.runtime.migration] Running upgrade 20260904_16 -> 20260904_17, Add durable repository-aware Code Change Proposal.
+INFO  [alembic.runtime.migration] Running upgrade 20260904_17 -> 20260905_18, Add the long-lived Steering Plan truth spine.
+INFO  [alembic.runtime.migration] Running upgrade 20260905_18 -> 20260905_19, Add MVP Steering decision and Human Attention detail.
+INFO  [alembic.runtime.migration] Running upgrade 20260905_19 -> 20260905_20, Allow long-lived Works to own independent Steering production cycles.
+INFO  [alembic.runtime.migration] Running upgrade 20260905_20 -> 20260905_21, Separate long-lived Work admission from immediate production admission.
+INFO  [alembic.runtime.migration] Running upgrade 20260905_21 -> 20260905_22, Persist governed semantic Steering Step results.
+INFO  [alembic.runtime.migration] Running upgrade 20260905_22 -> 20260907_23, Add the WIC Interaction truth spine and version-ready Work Reality links.
+INFO  [alembic.runtime.migration] Running upgrade 20260907_23 -> 20260907_24, Bind governed Work revision one to exact Interaction admission Reality.
+INFO  [alembic.runtime.migration] Running upgrade 20260907_24 -> 20260907_25, Add WIC active-Work focus, impact, and revision-lineage evidence.
+INFO  [alembic.runtime.migration] Running upgrade 20260907_25 -> 20260907_26, Add WIC Work-satisfaction continuation transition provenance.
+INFO  [alembic.runtime.migration] Running upgrade 20260907_26 -> 20260908_27, Add reconstructable guided design process and agenda truth.
+INFO  [alembic.runtime.migration] Running upgrade 20260908_27 -> 20260908_28, Add durable Human-Watt turns, conversation history, and schema selection.
+INFO  [alembic.runtime.migration] Running upgrade 20260908_28 -> 20260909_29, Persist advisory Design Intent Frames for reconstructable WIC understanding.
+INFO  [alembic.runtime.migration] Running upgrade 20260909_29 -> 20260910_30, Partition trusted baseline pointers by immutable repository identity and ref.
+INFO  [alembic.runtime.migration] Running upgrade 20260910_30 -> 20260910_31, Allow Work before repository and explicit asset-scope admission provenance.
+INFO  [alembic.runtime.migration] Running upgrade 20260910_31 -> 20260910_32, Work delivery targets, exact manifests and Human acceptance.
+INFO  [alembic.runtime.migration] Running upgrade 20260910_32 -> 20260910_33, Persist isolated local software runtime identities without altering SPG.
+INFO  [alembic.runtime.migration] Running upgrade 20260910_33 -> 20260911_34, add watt native executor runtime
+INFO  [alembic.runtime.migration] Running upgrade 20260911_34 -> 20260912_35, add native multi-repository candidate vectors
+INFO  [alembic.runtime.migration] Running upgrade 20260912_35 -> 20260912_36, add native workspace retention actions and pins
+INFO  [alembic.runtime.migration] Running upgrade 20260912_36 -> 20260912_37, add exact native vector verification records
+INFO  [alembic.runtime.migration] Running upgrade 20260912_37 -> 20260912_38, bind native resource envelopes to exact permitted provider profiles
+INFO  [alembic.runtime.migration] Running upgrade 20260912_38 -> 20260912_39, version native execution checkpoint bundles
+INFO  [alembic.runtime.migration] Running upgrade 20260912_39 -> 20260915_40, add progressive WIC semantics to interaction assessments
+INFO  [alembic.runtime.migration] Running upgrade 20260915_40 -> 20260915_41, Persist WIC response identity and reconciliation evidence.
+INFO  [alembic.runtime.migration] Running upgrade 20260915_41 -> 20260917_42, Add Work-scoped working-agreement event history.
+INFO  [alembic.runtime.migration] Running upgrade 20260917_42 -> 20260918_43, Add governed Engineering Semantic Truth projections.
+INFO  [alembic.runtime.migration] Running upgrade 20260918_43 -> 20260919_44, persist expiring native Executor worker capacity observations
+INFO  [alembic.runtime.migration] Running upgrade 20260919_44 -> 20260923_45, persist scoped connector capability facts and resumable gaps
+INFO  [alembic.runtime.migration] Running upgrade 20260923_45 -> 20260924_46, Persist auditable Self-Refine episodes and append-only repair actions.
+INFO  [alembic.runtime.migration] Running upgrade 20260924_46 -> 20260925_47, Persist repairability, observation confidence, budget and diagnostic evidence.
+INFO  [alembic.runtime.migration] Running upgrade 20260925_47 -> 20260925_48, Version Self-Refine semantics without reclassifying historical incidents.
+INFO  [alembic.runtime.migration] Running upgrade 20260925_48 -> 20260925_49, Keep WIC candidate correction evidence with its owning assessment or turn.
+INFO  [alembic.runtime.migration] Running upgrade 20260925_49 -> 20260926_50, Persist versioned Production Plan DAG and per-PWU baseline lineage.
+INFO  [alembic.runtime.migration] Running upgrade 20260926_50 -> 20260926_51, Record exact Git tree identity alongside versioned baseline revision.
+INFO  [alembic.runtime.migration] Running upgrade 20260926_51 -> 20260926_52, Persist actor, organization membership and resource access.
+INFO  [alembic.runtime.migration] Running upgrade 20260926_52 -> 20260926_53, Persist managed Git source independently of execution workspaces.
+INFO  [alembic.runtime.migration] Running upgrade 20260926_53 -> 20260926_54, Persist access grants and exact remote delivery authority/effects.
+INFO  [alembic.runtime.migration] Running upgrade 20260926_54 -> 20260926_55, Introduce long-lived Products without assigning unknown historical Works.
+INFO  [alembic.runtime.migration] Running upgrade 20260926_55 -> 20260926_56, Add connector controls and credential audit without storing secrets.
+INFO  [alembic.runtime.migration] Running upgrade 20260926_56 -> 20260926_57, Persist qualified evaluation reports and baseline lineage.
+INFO  [alembic.runtime.migration] Running upgrade 20260926_57 -> 20260927_58, Durable Work convergence lineage within the existing refinement capability.
+INFO  [alembic.runtime.migration] Running upgrade 20260927_58 -> 20260927_59, Persist WIC canonical action candidates with their immutable assessment basis.
+INFO  [alembic.runtime.migration] Running upgrade 20260927_59 -> 20260927_60, Distinguish unrecorded legacy action interpretation from interpreted no-action.
+INFO  [alembic.runtime.migration] Running upgrade 20260927_60 -> 20260927_61, Persist governed Turn semantics and obligations; historical IR remains NULL.
+INFO  [alembic.runtime.migration] Running upgrade 20260927_61 -> 20260928_62, Persist a governed semantic lifecycle for each new Human Turn.
+INFO  [alembic.runtime.migration] Running upgrade 20260928_62 -> 20261001_63, Product accepted source and exact Work source lineage.
+INFO  [alembic.runtime.migration] Running upgrade 20261001_63 -> 20261001_64, Preserve Product context for Workspace conversations without granting Work authority.
+INFO  [alembic.runtime.migration] Running upgrade 20261001_64 -> 20261002_65, Persist governed Alibaba Cloud connection and exact ECS Delivery Reality.
+INFO  [alembic.runtime.migration] Running upgrade 20261002_65 -> 20261005_66, Govern existing native queue and workers as Cloud Worker runtime resources.
+INFO  [alembic.runtime.migration] Running upgrade 20261005_66 -> 20261005_67, Persist production workspace size and cleanup governance.
+INFO  [alembic.runtime.migration] Running upgrade 20261005_67 -> 20261005_68, Durable explicit Human source promotion intent; accepted baseline stays Product owned.
+INFO  [alembic.runtime.migration] Running upgrade 20261005_68 -> 20261006_69, Unified Quality owner and bounded operational observations.
+INFO  [alembic.runtime.migration] Running upgrade 20261006_69 -> 20261006_70, Safe campaign controls and immutable rerun selection.
+INFO  [alembic.runtime.migration] Running upgrade 20261006_70 -> 20261006_71, Durable qualified decisions and derived WIC realization cache.
+INFO  [alembic.runtime.migration] Running upgrade 20261006_71 -> 20261007_72, Bounded delivery observation lookup in the existing audit ledger.

@@ -113,7 +113,37 @@ def main():
     exclusive_json(target/'runner-raw.json',{'started_at_utc':started,'ended_at_utc':now(),
         'exit_code':result.returncode,'stdout':result.stdout.decode('utf-8',errors='replace'),
         'stderr':result.stderr.decode('utf-8',errors='replace')},private=True)
-    invoke(['docker','cp',api+':'+tmp+'/private/canonical/.',str(target)])
+    # Preserve partial captures too: transfer only the exact filenames actually
+    # emitted by this collector. The first historical directory copy failed;
+    # these same two read_bytes transfers were independently successful in its
+    # recovery. No retry or recapture is performed here.
+    try:
+        info=json.loads(result.stdout.decode('utf-8'))
+    except (ValueError,UnicodeDecodeError):
+        raise ValueError('COLLECTOR_OUTPUT_IDENTITY_UNAVAILABLE')
+    if info.get('work_id')!=wid:
+        raise ValueError('COLLECTOR_WORK_IDENTITY_MISMATCH')
+    for ordinal,name in enumerate((info.get('raw_private_file'),info.get('summary_private_file')),start=1):
+        if not isinstance(name,str) or Path(name).name!=name or not name.endswith('.json'):
+            raise ValueError('EXACT_COLLECTOR_FILE_NAME_REQUIRED')
+        read_command=['docker','exec','--user','10001:10001',api,'python','-c',
+            'import sys;from pathlib import Path;sys.stdout.buffer.write(Path(sys.argv[1]).read_bytes())',
+            tmp+'/private/canonical/'+name]
+        transferred=subprocess.run(read_command,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        if transferred.returncode:
+            exclusive_json(target/('transfer-'+str(ordinal)+'-error.json'),
+                {'command_ordinal':ordinal,'operation':'read exact existing collector file',
+                 'exit_code':transferred.returncode,'private_stderr':transferred.stderr.decode('utf-8',errors='replace')},private=True)
+            raise RuntimeError('EXACT_COLLECTOR_FILE_TRANSFER_FAILED')
+        raw_file=transferred.stdout
+        payload=json.loads(raw_file)
+        if payload.get('work_id')!=wid:
+            raise ValueError('TRANSFERRED_CAPTURE_WORK_MISMATCH')
+        if ordinal==1 and hashlib.sha256(raw_file).hexdigest()!=info.get('raw_private_sha256'):
+            raise ValueError('ORIGINAL_COLLECTOR_CAPTURE_HASH_MISMATCH')
+        descriptor=os.open(str(target/name),os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
+        with os.fdopen(descriptor,'wb') as stream:
+            stream.write(raw_file);stream.flush();os.fsync(stream.fileno())
     for path in target.rglob('*'):
         if path.is_symlink():raise ValueError('PRIVATE_EXPORT_SYMLINK_REJECTED')
         os.chmod(str(path),0o700 if path.is_dir() else 0o600)

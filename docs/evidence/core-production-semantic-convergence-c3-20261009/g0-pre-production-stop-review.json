@@ -1,0 +1,210 @@
+{
+  "schema": "c3-g0-pre-production-stop-review-v1",
+  "reviewed_at": "2026-10-09T11:53:21.983974+00:00",
+  "work_id": "24d9cc2d-52a8-5d27-b38a-e49c3f73394c",
+  "work_reality_revision_id": "c6824f98-878f-5cbe-a5f1-55c02c203905",
+  "semantic_ir_id": "0fb56d5e-a0a8-5519-8b79-d46e9ea64406",
+  "application_revision": "390fa22ec24cbab33f7feeeef96f0dfec9ce22f2",
+  "application_tree": "2aa36776b786bb088d34f5c082f0a19005944fd4",
+  "image": "sha256:54355780b7fdd683332b9f9e607b76fcbbfc69f2bf5c42d9a1f888e8acbb4bb3",
+  "evidence": [
+    {
+      "level": "E1",
+      "kind": "original scoped DB snapshot",
+      "observation_time": "2026-10-09T11:40:25.817504Z",
+      "formation_owner_records": 0,
+      "actual_owner_counts": {
+        "production_runs": 0,
+        "production_work_units": 0,
+        "execution_attempts": 0,
+        "verification_records": 0,
+        "baseline_candidates": 0,
+        "human_authorizations": 0,
+        "runtime_commits": 0,
+        "work_delivery_manifests": 0
+      }
+    },
+    {
+      "level": "E1",
+      "kind": "new C3 role log observation",
+      "log_error_time": "2026-10-09T11:39:53.391Z",
+      "first_error": "OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY",
+      "terminal_error": "OBLIGATION_CLAUSE_PROVENANCE_INVALID",
+      "exception_type": "ValueError",
+      "call_path": [
+        "steering_driver._produce_iteration",
+        "SteeringProductionService.admit_cycle",
+        "_production_contract",
+        "admitted_fulfillment_bindings",
+        "deterministic_fulfillment_projection",
+        "unresolved_projection",
+        "validate_projection_candidate",
+        "_projection_binding"
+      ],
+      "causality": "PROVEN for observed exceptions and call boundary; specific source associations below reconstructed from exact persisted input plus frozen consumer code."
+    },
+    {
+      "level": "E3",
+      "kind": "frozen source predicate and original owner input",
+      "fact_reference_with_no_typed_context_role": [
+        {
+          "fact_id": "fd425161-a627-5a3b-b24a-0464a4583d78",
+          "subject": "artifact.path",
+          "relation": "REFERENCE",
+          "value": "index.html",
+          "reference_role": null
+        }
+      ],
+      "consumer_provenance_predicate_mismatches": [
+        {
+          "clause_id": "c1",
+          "item_id": "pi-index-html",
+          "clause_source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+          "original_item_provenance": [
+            {
+              "evidence_reference": null,
+              "origin": "HUMAN_EXPLICIT",
+              "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+            }
+          ],
+          "note": "Original admitted values retained; this is the exact frozen consumer predicate, not an assertion that admitted semantic association is invalid."
+        },
+        {
+          "clause_id": "c2",
+          "item_id": "fact-managed-source",
+          "clause_source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+          "original_item_provenance": [
+            {
+              "evidence_reference": "product-source:5ccb9748-b3a6-4ac0-a50b-6b056280bd4d:0",
+              "origin": "REPOSITORY_OBSERVED",
+              "source_record_id": null,
+              "source_text": null
+            }
+          ],
+          "note": "Original admitted values retained; this is the exact frozen consumer predicate, not an assertion that admitted semantic association is invalid."
+        },
+        {
+          "clause_id": "c3",
+          "item_id": "pi-index-html",
+          "clause_source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+          "original_item_provenance": [
+            {
+              "evidence_reference": null,
+              "origin": "HUMAN_EXPLICIT",
+              "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+            }
+          ],
+          "note": "Original admitted values retained; this is the exact frozen consumer predicate, not an assertion that admitted semantic association is invalid."
+        },
+        {
+          "clause_id": "c4",
+          "item_id": "pi-index-html",
+          "clause_source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+          "original_item_provenance": [
+            {
+              "evidence_reference": null,
+              "origin": "HUMAN_EXPLICIT",
+              "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+            }
+          ],
+          "note": "Original admitted values retained; this is the exact frozen consumer predicate, not an assertion that admitted semantic association is invalid."
+        },
+        {
+          "clause_id": "c5",
+          "item_id": "pi-index-html",
+          "clause_source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+          "original_item_provenance": [
+            {
+              "evidence_reference": null,
+              "origin": "HUMAN_EXPLICIT",
+              "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+            }
+          ],
+          "note": "Original admitted values retained; this is the exact frozen consumer predicate, not an assertion that admitted semantic association is invalid."
+        },
+        {
+          "clause_id": "c6",
+          "item_id": "pi-index-html",
+          "clause_source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+          "original_item_provenance": [
+            {
+              "evidence_reference": null,
+              "origin": "HUMAN_EXPLICIT",
+              "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+            }
+          ],
+          "note": "Original admitted values retained; this is the exact frozen consumer predicate, not an assertion that admitted semantic association is invalid."
+        },
+        {
+          "clause_id": "c7",
+          "item_id": "pi-index-html",
+          "clause_source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+          "original_item_provenance": [
+            {
+              "evidence_reference": null,
+              "origin": "HUMAN_EXPLICIT",
+              "source_record_id": "1316dd51-c5c4-4b29-b5ba-823d188eae8c",
+              "source_text": "In this newly managed Product repository, create exactly one static web page at index.html."
+            }
+          ],
+          "note": "Original admitted values retained; this is the exact frozen consumer predicate, not an assertion that admitted semantic association is invalid."
+        }
+      ],
+      "finding": "Typed candidate rejection is followed by unresolved fallback that still requires each associated Clause to overlap the Item provenance quote; this preempts bounded formation before any request receipt. Do not relax original Fact protection or fabricate Human provenance."
+    }
+  ],
+  "classification": "DEFECT_CONFIRMED",
+  "status": "N1 PARTIAL / C3 real G0 stopped before production admission",
+  "not_qualified": [
+    "new G0 Worker",
+    "new G0 Candidate",
+    "new G0 Verification",
+    "new G0 Guardian",
+    "Human Integration",
+    "Product acceptance",
+    "Delivery"
+  ],
+  "local_self_refine_is_not_full_work_success": true,
+  "scope_limits": [
+    "No original Work or facts changed by this audit.",
+    "No collector rerun; recovered DB snapshot preserves original capture time.",
+    "No negative effect absence claimed from log absence.",
+    "No current full Work or N1 Closure PASS.",
+    "The container copy failure is an evidence-transfer failure distinct from this production exception."
+  ],
+  "files": [
+    {
+      "file": "g0-owner-1/canonical-work.json",
+      "sha256": "c3b357fc06ad3e762f4a81210fc32844a9d20d4a40d3397df89bdc990d15923e",
+      "size_bytes": 166917
+    },
+    {
+      "file": "g0-owner-1/summary-draft.json",
+      "sha256": "35ee367c578e0d5878f3564be3d9782cc176b3c285b5649747a81ab0c70efb2b",
+      "size_bytes": 20884
+    },
+    {
+      "file": "g0-owner-1/recovery-execution.json",
+      "sha256": "8ed945e74acff808c1c5bd4e610cb8355f8e55f4615bc26c56c595193b08f7c3",
+      "size_bytes": 2000
+    },
+    {
+      "file": "g0-owner-1/stop-log-observation.json",
+      "sha256": "f7bc492d1f0c2b61d445d6561e1bc3959c7ae966e282674f171dd66700e04939",
+      "size_bytes": 151705
+    }
+  ],
+  "cross_computer_recovery": {
+    "private": "/data/watt/c3-semantic-convergence-20261009/private/owner-export-20261009T114024248251Z-160bdaceae6d4e11ab9cfd1726340f5b",
+    "public_original_snapshot": "/data/watt/c3-semantic-convergence-20261009/evidence/owner-export-recovered-20261009T114024248251Z-160bdaceae6d4e11ab9cfd1726340f5b",
+    "public_logs": "/data/watt/c3-semantic-convergence-20261009/evidence/g0-stop-logs-20261009T115042Z-7394486978844bb48c256ed088843739",
+    "local_short_folder": "g0-owner-1",
+    "private_raw_mode": "0600",
+    "public_scrub_method": "known C3 credential values replaced in memory; unknown sensitive values not claimed absent"
+  }
+}

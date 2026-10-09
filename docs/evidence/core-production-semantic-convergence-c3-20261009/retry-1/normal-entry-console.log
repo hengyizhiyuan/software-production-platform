@@ -1,0 +1,4 @@
+  File "/control/c3_normal_entry.py", line 5
+    from __future__ import annotations
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: from __future__ imports must occur at the beginning of the file

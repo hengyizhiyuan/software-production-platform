@@ -1,0 +1,9 @@
+{
+  "captured_at_utc": "2026-10-09T12:48:42.899531+00:00",
+  "image_id": "sha256:6f8d9b3a27e7e2452097a77427115df6e09b9a03276eb72d0170a66160e0578f",
+  "source_revision": "91f5dbc9906d1f857113736981517c1091ec52ae",
+  "database": "spg_c3_retry1_qualification_20261009",
+  "migration_head": "20261007_72",
+  "exit_code": 0,
+  "production_database_modified": false
+}

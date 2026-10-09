@@ -1,0 +1,57 @@
+{
+  "schema": "c3-exact-image-build-v1",
+  "started_at_utc": "2026-10-09T13:30:05.456879+00:00",
+  "ended_at_utc": "2026-10-09T13:30:41.452382+00:00",
+  "wall_seconds": 35.99558828701265,
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "d8ea0642f0c360794e69c366e8f15fa369eeed0b",
+      "tree": "390f00dce94089af2de1b750954ddabb42451f44"
+    },
+    "guardian": {
+      "revision": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+      "tree": "4f75d9137bebc7bf956fe4466cbae93f88c5c03b"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "command": [
+    "docker",
+    "build",
+    "--network=none",
+    "--build-arg",
+    "BASE_IMAGE=watt-c3-terminal-dependency-base:6c1f48e-20261009",
+    "--build-arg",
+    "WATT_REVISION=d8ea0642f0c360794e69c366e8f15fa369eeed0b",
+    "--build-arg",
+    "WATT_TREE=390f00dce94089af2de1b750954ddabb42451f44",
+    "--build-arg",
+    "GUARDIAN_REVISION=d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+    "--build-arg",
+    "GUARDIAN_TREE=4f75d9137bebc7bf956fe4466cbae93f88c5c03b",
+    "--build-arg",
+    "ECF_REVISION=5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "--build-arg",
+    "ECF_TREE=878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "-f",
+    "/data/watt/c3-semantic-convergence-20261009/terminal-fix-qualification/context/watt/docs/evidence/core-production-semantic-convergence-c3-20261009/Dockerfile.c3",
+    "-t",
+    "watt-c3-terminal:d8ea064",
+    "/data/watt/c3-semantic-convergence-20261009/terminal-fix-qualification/context"
+  ],
+  "source_overlay": false,
+  "real_model_calls": 0,
+  "scope": "Final safe failure diagnostic/upstream truthful stop regression, not normal Work or Provider recovery",
+  "image": {
+    "Id": "sha256:51c0b8be88969720cb3a3cfc4e047edc7f229aa22348a95a89cbb4bf83a18e39",
+    "RepoDigests": [],
+    "Created": "2026-10-09T21:30:29.339738751+08:00"
+  }
+}

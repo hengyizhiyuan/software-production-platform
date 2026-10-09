@@ -1,0 +1,81 @@
+{
+  "schema": "c3-final-image-regression-v1",
+  "sources": {
+    "watt": {
+      "revision": "91f5dbc9906d1f857113736981517c1091ec52ae",
+      "tree": "50c6b8fad3f321638135fbec8afcba060b3fb2bc"
+    },
+    "guardian": {
+      "revision": "d01bac1ad153e1eadefafe87d2ea4f5d65896ab6",
+      "tree": "4f75d9137bebc7bf956fe4466cbae93f88c5c03b"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "image_id": "sha256:6f8d9b3a27e7e2452097a77427115df6e09b9a03276eb72d0170a66160e0578f",
+  "source_overlay": false,
+  "pythonpath": "/opt/c3-owners/guardian/src:/opt/c3-owners/ecf/src:/opt/c3-test-deps",
+  "actual_imports_attestation": "actual-imports.json",
+  "guardian_test_input_path": "/data/watt/c3-semantic-convergence-20261009/retry-1/build-91f5dbc/test-inputs/guardian",
+  "guardian_test_file_sha256": {
+    "tests/test_assurance_intake_runtime.py": "ee457b25bee18d3b0b9a75f4d0003d9b048a8073177bbc80f3eb79ec509e93e1",
+    "tests/test_c1_governed_evidence_continuity.py": "7ed793d8638c64403a03d017a3cbb0ae619e6d4ad0078aa5219b916280caffb7",
+    "tests/test_c3_phase_evidence.py": "1bd5b3f61065057c2e551d3c029e40381d2287e6404a4a2c778d072c13bcd73b",
+    "tests/test_governed_obligation_evidence.py": "deae63fb961bdaf92e4ca93c711c6a8f76012aaa499218f9197d0e7c002645d1",
+    "tests/test_production_environment_intake_contract.py": "a23d29a5929250b6ac929d8cf0c9e80ff274f7a94b8a6219257ae78198613380",
+    "tests/test_software_assurance.py": "5eb770927970d2e2cc2967d653d00769ae1ea3fb266ad36c385f87ea7b0674ab"
+  },
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "--basetemp=/c3-private-fixture/tests",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "junit_family=legacy",
+    "tests/test_guardian_assurance_adapter.py",
+    "tests/test_c3_admitted_source_facets.py",
+    "tests/test_fulfillment_projection.py",
+    "tests/test_c3_fulfillment_components.py",
+    "tests/test_c3_evidence_projection.py",
+    "tests/test_c3_verification_receipts.py",
+    "tests/test_static_protected_context_verifier.py",
+    "tests/test_n1_static_html_semantics.py",
+    "tests/test_governed_obligation_fulfillment.py",
+    "tests/test_container_production_environment_provider.py",
+    "tests/test_c2_workspace_preflight.py",
+    "-m",
+    "not real_container",
+    "--tb=short",
+    "--junitxml=/c3-evidence/watt-unit.xml"
+  ],
+  "container_name": "watt-c3-retry1-final-watt-unit-20261009",
+  "started_at_utc": "2026-10-09T12:37:52.319427+00:00",
+  "ended_at_utc": "2026-10-09T12:38:13.417131+00:00",
+  "wall_seconds": 21.097660580009688,
+  "exit_code": 0,
+  "counts": {
+    "tests": 203,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 203
+  },
+  "database_name": "c1_contract_continuity",
+  "database_server": "watt-c3-retry1-fixture-postgres-20261009",
+  "database_configuration_key": "SPG_TEST_DATABASE_URL",
+  "log_and_xml_sanitized": true,
+  "live_model_calls": 0,
+  "real_ai_work_created": 0,
+  "fixture_work_mutations_only": true,
+  "meaning": "exact baked-image regression; not a live AI Work qualification",
+  "private_fixture_basetemp_persisted": "/data/watt/c3-semantic-convergence-20261009/retry-1/private/watt-c3-retry1-final-watt-unit-20261009-fixture-tmp",
+  "harness_sha256": "3e04440f0d61c2d4b0ad81cfef1ff5d4a3c29a3dcd90216ecf798a1d8476f104"
+}
