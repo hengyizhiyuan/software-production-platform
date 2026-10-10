@@ -92,6 +92,56 @@ def test_same_text_from_different_item_does_not_prove_work_correspondence():
     assert not work_constraint_sources_correspond(ir,target['payload']['content'],[foreign],**args)
 
 
+@pytest.mark.parametrize('scale', ('small','medium','complex'))
+def test_fact_type_failure_exposes_existing_owner_prerequisite_without_reclassifying(scale):
+    from spg.domain.engineering_semantics import SemanticRelation
+    revision, ir, _, _ = controlled_capacity_case(scale)
+    original = revision.engineering_semantic_facts[0]
+    revision.engineering_semantic_facts = (original.model_copy(update={
+        'relation': SemanticRelation.CARDINALITY, 'value': 1}), *revision.engineering_semantic_facts[1:])
+    inventory = fulfillment_inventory(revision,ir,exact_target_paths=('index.html',))
+    caps = fulfillment_capability_contracts()
+    preconditions = _owner_source_preconditions(revision,ir,inventory,caps)
+    source = next(i for i,s in enumerate(inventory['sources']) if s.get('fact_id')==str(original.id))
+    cap = next(i for i,c in enumerate(caps) if c['capability']=='GIT_DIFF_SCOPE')
+    row = preconditions['sources'][source]
+    assert row['original_fact_type']['relation']=='CARDINALITY'
+    assert next(r for r in row['ineligible_binding_prerequisites'] if r['capability']==cap)['codes']==[
+        'OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH']
+    # A wire proposal still fails. No diagnostic may turn CARDINALITY into SCOPE.
+    from spg.providers.fulfillment_candidate import _fulfillment_wire_context
+    from spg.domain.governed_obligation import fulfillment_source_semantic_text
+    context = _fulfillment_wire_context(inventory,caps,owner_preconditions=preconditions)
+    wire={'v':1,'h':context['wire_request_fingerprint'],'d':context['wire_table_fingerprint'],
+          'routes':[{'s':source,'c':cap,'a':0,'z':len(fulfillment_source_semantic_text(inventory['sources'][source])),
+                     'q':None,'f':[source],'t':[0],'u':[],'r':'A file qualifier does not change Fact relation.'}]}
+    observation = _owner_repair_context(json.dumps(wire),revision,ir,inventory,caps,
+        validation_feedback=None,owner_preconditions=preconditions)
+    failure = next(r for r in observation['violations'] if r['code']=='OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH')
+    assert failure['owner_operand_observations']['typed_prerequisites']['original_fact_type']['relation']=='CARDINALITY'
+    assert revision.engineering_semantic_facts[0].relation is SemanticRelation.CARDINALITY
+
+
+def test_primary_negative_clause_never_becomes_future_authorization_prerequisite():
+    revision,ir,inventory,_=controlled_capacity_case()
+    caps=fulfillment_capability_contracts()
+    prerequisites=_owner_source_preconditions(revision,ir,inventory,caps)
+    negative=next(s for s in inventory['sources'] if s.get('clause_id')=='original-clause')
+    source=next(r for r in prerequisites['sources'] if r['source_ref']==negative['source_ref'])
+    for capability in ('HUMAN_DELIVERY_DEPLOY','HUMAN_DELIVERY_PUBLISH'):
+        ordinal=next(i for i,c in enumerate(caps) if c['capability']==capability)
+        assert 'OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION' in next(
+            r for r in source['ineligible_binding_prerequisites'] if r['capability']==ordinal)['codes']
+
+
+def test_previous_operand_contract_shape_remains_recomputable():
+    revision,ir,inventory,_=controlled_capacity_case()
+    old=_owner_source_preconditions(revision,ir,inventory,fulfillment_capability_contracts(),include_typed_observations=False)
+    assert old['operand_observation_contract']=='existing-owner-operands-v1'
+    assert 'typed_prerequisite_contract' not in old
+    assert all('ineligible_binding_prerequisites' not in row for row in old['sources'])
+
+
 @pytest.mark.parametrize('tamper', (None,'owner-source','owner-errors','remove-owner-context','owner-marker','remove-both','legacy-feedback'))
 def test_bound_feedback_repairs_once_or_stops_drift_without_review(tamper):
     revision,ir,inventory,plan=controlled_capacity_case()
@@ -205,7 +255,7 @@ def test_negative_fact_proofs_do_not_license_missing_or_ineligible_origin(bad):
     assert bool(proofs)==(bad in ('missing','fact-instead-of-clause'))
 
 
-@pytest.mark.parametrize('tamper', ('contents','remove-one','remove-both','operands','unknown-operands'))
+@pytest.mark.parametrize('tamper', ('contents','remove-one','remove-both','operands','unknown-operands','typed','unknown-typed'))
 def test_initial_preconditions_are_bound_to_wire_attempt_and_replay(tamper):
     from tests.test_c3_fulfillment_capacity_representation import controlled_model_provider
     revision,ir,inventory,plan=controlled_capacity_case()
@@ -227,6 +277,8 @@ def test_initial_preconditions_are_bound_to_wire_attempt_and_replay(tamper):
         if tamper=='contents':row['owner_source_preconditions']['sources'][0]['source']=999
         elif tamper=='operands':row['owner_source_preconditions']['capability_operand_requirements'][0]['target_operand']['required_ordinals']=[]
         elif tamper=='unknown-operands':row['owner_source_preconditions']['operand_observation_contract']='unknown'
+        elif tamper=='typed':row['owner_source_preconditions']['sources'][0]['ineligible_binding_prerequisites']=[]
+        elif tamper=='unknown-typed':row['owner_source_preconditions']['typed_prerequisite_contract']='unknown'
         elif tamper=='remove-both' or row['stage']=='MODEL_RESPONSE_OBSERVED':row.pop('owner_source_preconditions')
     result=run()
     assert len(calls)==1 and all(b.state=='UNRESOLVED' for b in result)
@@ -300,6 +352,7 @@ def test_old_operandless_receipts_replay_without_feedback_identity_drift(monkeyp
     original=owner._owner_source_preconditions
     def legacy(*args,**kwargs):
         kwargs['include_operand_observations']=False
+        kwargs['include_typed_observations']=False
         return original(*args,**kwargs)
     provider,calls=controlled_model_provider(inventory,plan)
     def run():return form_fulfillment_projection(revision,ir,provider=provider,
