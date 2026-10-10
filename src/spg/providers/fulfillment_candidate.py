@@ -718,10 +718,12 @@ def _fulfillment_wire_route_observations(output, inventory, capabilities, *, val
         return (), ["RAW_ROUTE_OWNER_PRECONDITIONS"]
     if wire.h != context["wire_request_fingerprint"] or wire.d != context["wire_table_fingerprint"]:
         return (), ["RAW_ROUTE_OWNER_PRECONDITIONS"]
-    observations, unavailable = [], syntax_unavailable
+    observations, unavailable = [], list(syntax_unavailable)
+    expanded = []
     for index, raw in enumerate(wire.routes):
         try:
             route = _expand_fulfillment_wire_route(raw, inventory, capabilities, context)
+            expanded.append((index, raw.model_dump(mode="json"), route))
             text = context["source_texts"][raw.s]
             # Quote relocation requires the complete candidate's existing
             # locator; do not invent a location in the diagnostic view.
@@ -731,6 +733,21 @@ def _fulfillment_wire_route_observations(output, inventory, capabilities, *, val
             unavailable.append(index)
         else:
             observations.append((index, raw.model_dump(mode="json"), route))
+    if ((owner_preconditions or {}).get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v8"
+            and not syntax_unavailable and len(expanded) == len(wire.routes)):
+        # Coverage failure does not make exact identity/quote location
+        # unknowable. Observe the complete original Wire, never an isolated
+        # route or an admitted/repaired Candidate. All other gates remain.
+        from spg.application.governed_obligations import locate_projection_components
+        from spg.domain.governed_obligation import FulfillmentProjectionCandidate
+        try:
+            proposal = FulfillmentProjectionCandidate(inventory_fingerprint=inventory["inventory_fingerprint"],
+                routes=tuple(route for _,_,route in expanded))
+            located, _ = locate_projection_components(proposal, inventory)
+        except ValueError:
+            pass
+        else:
+            return tuple((i, original, located.routes[i]) for i,original,_ in expanded), []
     return tuple(observations), unavailable
 
 
@@ -1013,7 +1030,7 @@ class ModelFulfillmentCandidateProvider:
                     "context or an approved replacement span. If you choose to change a disposition, the new "
                     "proposal must still preserve all original contributions and governing operators. "
                     "whole_source_basis supplies exact geometry for the whole original source. You may "
-                    "choose that basis for consumers that legitimately share the whole qualified contribution; "
+                    "prefer that exact basis when a consumer legitimately covers the whole qualified contribution; "
                     "it is not a proposed component or a semantic approval. Otherwise quote an exact contiguous "
                     "component in q rather than guessing its offsets. Keep shared negation, conjunctions and "
                     "qualifiers within the declared bases; a bare action word loses its governing context. "

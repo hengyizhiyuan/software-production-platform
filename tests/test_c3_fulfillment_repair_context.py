@@ -129,7 +129,7 @@ def test_incomplete_feedback_checkpoint_resumes_only_remaining_calls_on_original
     assert result[0].formation_receipt['attempt_count'] == 2
 
 
-def repair_case(scale='small', interrupt=False, coverage_failure=False):
+def repair_case(scale='small', interrupt=False, coverage_failure=False, predecode_coverage_failure=False):
     revision, ir, inventory, plan = controlled_capacity_case(scale)
     calls, wires = [], []
     def generate(**request):
@@ -153,7 +153,7 @@ def repair_case(scale='small', interrupt=False, coverage_failure=False):
                         if row['s'] == ordinal:
                             # Raw geometry differs: the existing unique-quote
                             # locator must run before coverage is evaluable.
-                            row['a'] = 0
+                            row['a'] = 1 if predecode_coverage_failure else 0
                             row['q'] = original[1:]
                 else:
                     wire['routes'].append(deepcopy(wire['routes'][0]))
@@ -161,7 +161,8 @@ def repair_case(scale='small', interrupt=False, coverage_failure=False):
                 data = json.loads(feedback)
                 assert data['untrusted_previous_wire'] == wires[0]
                 if coverage_failure:
-                    assert data['coverage_observation_contract'] == 'existing-located-coverage-feedback-v1'
+                    if not predecode_coverage_failure:
+                        assert data['coverage_observation_contract'] == 'existing-located-coverage-feedback-v1'
                     gap = next(v for v in data['violations'] if 'uncovered_codepoint_ranges' in v)
                     assert gap['uncovered_codepoint_ranges'] == [[0, 1]]
                     assert data['primary_error'] == 'OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST'
@@ -171,7 +172,7 @@ def repair_case(scale='small', interrupt=False, coverage_failure=False):
                 binding = data['repair_feedback_binding']
                 assert binding['wire_output_fingerprint'] == sha256(wires[0].encode()).hexdigest()
                 assert binding['inventory_fingerprint'] == inventory['inventory_fingerprint']
-                assert binding['candidate_fingerprint'] is not None
+                assert (binding['candidate_fingerprint'] is None) == predecode_coverage_failure
             output = json.dumps(wire, ensure_ascii=False)
             wires.append(output)
         return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
@@ -202,6 +203,45 @@ def test_located_gap_checkpoint_resumes_only_remaining_calls_and_preserves_origi
     assert provider._fulfillment_receipts[:len(frozen)] == frozen
     run()
     assert len(calls) == 3
+
+
+def test_predecode_coverage_feedback_observes_full_wire_without_admitting_candidate():
+    provider, calls, wires, run = repair_case(interrupt=True,coverage_failure=True,predecode_coverage_failure=True)
+    with pytest.raises(Checkpoint): run()
+    provider._fulfillment_receipts = list(provider._fulfillment_receipts)
+    failed = next(r for r in provider._fulfillment_receipts if r['stage']=='CANDIDATE_VALIDATED')
+    assert failed['candidate'] is None and failed['validation_passed'] is False
+    feedback=json.loads(failed['validation_feedback'])
+    observed=feedback['owner_repair_context']
+    assert observed['raw_routes_not_evaluable']==[]
+    assert 'ADMISSION_NOT_GRANTED' in observed['location_status']
+    assert 'COMPLETE_PLAN_ADMISSION' in observed['not_evaluable']
+    assert 'INDEPENDENT_SEMANTIC_REVIEW' in observed['not_evaluable']
+    assert 'coverage_observation_contract' not in feedback
+    original=deepcopy(provider._fulfillment_receipts)
+    result=run()
+    assert all(b.state!='UNRESOLVED' for b in result) and len(calls)==3
+    assert provider._fulfillment_receipts[:len(original)]==original
+
+
+@pytest.mark.parametrize('version', ('existing-owner-typed-prerequisites-v6','existing-owner-typed-prerequisites-v7'))
+def test_historical_located_feedback_replays_exact_bytes_without_new_calls(monkeypatch,version):
+    import spg.application.governed_obligations as owner
+    original_builder=owner._owner_source_preconditions
+    def historical_builder(*args,**kwargs):
+        kwargs['typed_prerequisite_contract']=version
+        return original_builder(*args,**kwargs)
+    provider,calls,wires,run=repair_case(coverage_failure=True)
+    with monkeypatch.context() as legacy:
+        legacy.setattr(owner,'_owner_source_preconditions',historical_builder)
+        assert all(b.state!='UNRESOLVED' for b in run())
+    frozen=deepcopy(provider._fulfillment_receipts)
+    failed=next(r for r in frozen if r['stage']=='CANDIDATE_VALIDATED' and r['attempt']==1)
+    feedback=json.loads(failed['validation_feedback'])
+    assert 'location_status' not in feedback['owner_repair_context']
+    result=run()
+    assert all(b.state!='UNRESOLVED' for b in result)
+    assert len(calls)==3 and len(wires)==2 and provider._fulfillment_receipts==frozen
 
 
 @pytest.mark.parametrize('tamper', ('range', 'source-hash', 'contract', 'located-span'))
