@@ -228,3 +228,16 @@ def test_initial_preconditions_are_bound_to_wire_attempt_and_replay(tamper):
     result=run()
     assert len(calls)==1 and all(b.state=='UNRESOLVED' for b in result)
     assert result[0].formation_receipt['terminal_reason']=='OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
+
+
+def test_successful_terminal_replay_cannot_drop_initial_proof_context():
+    from tests.test_c3_fulfillment_capacity_representation import controlled_model_provider
+    revision,ir,inventory,plan=controlled_capacity_case()
+    provider,calls=controlled_model_provider(inventory,plan)
+    def run():return form_fulfillment_projection(revision,ir,provider=provider,
+        source_revision=inventory['source_revision'],exact_target_paths=inventory['exact_target_paths'])
+    assert all(b.state!='UNRESOLVED' for b in run()) and len(calls)==2
+    for row in provider._fulfillment_receipts:row.pop('owner_source_preconditions',None)
+    result=run()
+    assert len(calls)==2 and all(b.state=='UNRESOLVED' for b in result)
+    assert result[0].formation_receipt['terminal_reason']=='OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'

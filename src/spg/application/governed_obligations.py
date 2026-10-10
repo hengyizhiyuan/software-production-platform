@@ -1628,12 +1628,18 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
     candidate consume the same bound feedback, never another attempt's output.
     """
     from spg.providers.fulfillment_candidate import (
-        _decode_fulfillment_candidate_wire, _FulfillmentWireValidationError, _FulfillmentWireReceiptIdentityError)
+        _decode_fulfillment_candidate_wire, _FulfillmentWireValidationError, _FulfillmentWireReceiptIdentityError,
+        _FULFILLMENT_WIRE_METADATA_KEYS)
     for row in rows:
         if row.get("owner_source_preconditions") is not None and (
                 row.get("stage") not in {"MODEL_REQUEST_PENDING", "MODEL_RESPONSE_OBSERVED"}
                 or row["owner_source_preconditions"] != _owner_source_preconditions(revision, ir, inventory, capabilities)):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+        if (row.get("stage") == "MODEL_RESPONSE_OBSERVED" and row.get("candidate_retained") is True
+                and any(key in row for key in _FULFILLMENT_WIRE_METADATA_KEYS)):
+            # Successful terminal replay must check the original request too,
+            # including removal of preconditions from BOTH durable records.
+            _wire_response_basis(rows, row["attempt"], revision, inventory, capabilities)
     expected = {"work_id": str(revision.work_id), "work_reality_revision_id": str(revision.id),
         "inventory_fingerprint": inventory["inventory_fingerprint"],
         "source_revision": inventory["source_revision"], "exact_target_paths": inventory["exact_target_paths"],
