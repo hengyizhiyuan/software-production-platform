@@ -2239,7 +2239,7 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
              "predicate": "EXISTING_MIXED_ACCEPTANCE_CONSUMER_DEPENDS_ON_ITS_OWN_CURRENT_PROOF"}
             for index,wire_route,route in observations if route.capability == "ARTIFACT_CONTENT"
             and route.source_ref.removeprefix("semantic-fact:") in dependencies
-            and route.source_ref.removeprefix("semantic-fact:") in dependencies[route.source_ref.removeprefix("semantic-fact:")]]
+            and route.source_ref in route.component_basis.linked_fact_refs]
     return {"inventory_fingerprint": inventory["inventory_fingerprint"], **raw_operands,
         **({"operand_observation_reference_contract": "existing-original-route-operands-v1",
             "route_operand_observations": [{"route": i, "observations": operand_observations[i]}

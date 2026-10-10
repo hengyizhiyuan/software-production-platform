@@ -128,6 +128,27 @@ def test_unrelated_invalid_sibling_cannot_hide_proven_mixed_acceptance_self_depe
     assert repair["raw_routes_not_evaluable"] and "OWNER_BACKGROUND_CROSS_ROUTE_PRECONDITIONS" in repair["not_evaluable"]
     assert before==wire
 
+
+def test_mixed_acceptance_self_dependency_is_not_broadcast_to_another_component():
+    from tests.test_c3_generation_owner_domains import mixed_current_proof_case
+    from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+    revision,ir,inventory,plan,_=mixed_current_proof_case(self_reference=True)
+    content=plan.routes[0]
+    other=next(s['source_ref'] for s in inventory['sources'] if s['kind']=='FACT' and s['source_ref']!=content.source_ref)
+    distinct=content.model_copy(update={'component_basis':content.component_basis.model_copy(update={
+        'linked_fact_refs':(other,), 'source_span_end':content.component_basis.source_span_end-1,
+        'source_component_quote':content.component_basis.source_component_quote[:-1]})})
+    plan=plan.model_copy(update={'routes':(*plan.routes,distinct)})
+    caps=a.fulfillment_capability_contracts()
+    owner=a._owner_source_preconditions(revision,ir,inventory,caps,
+        raw_operand_observation_contract='existing-original-wire-owner-operands-v1')
+    wire,_=controlled_wire(inventory,plan,owner_preconditions=owner)
+    result=a._owner_repair_context(json.dumps(wire),revision,ir,inventory,caps,
+        validation_feedback=None,owner_preconditions=owner)['original_wire_owner_operands']
+    failures=result['definite_fact_self_dependencies']
+    assert any(f['route']==0 for f in failures)
+    assert all(f['route']!=len(plan.routes)-1 for f in failures)
+
 @pytest.mark.parametrize("scale", ["small", "medium", "complex"])
 def test_new_request_reuses_canonical_domains_and_full_owner_proofs(scale, record_property):
     revision,ir,inventory,plan=controlled_capacity_case(scale)
