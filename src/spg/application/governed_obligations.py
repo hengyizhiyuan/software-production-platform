@@ -365,6 +365,7 @@ def evaluate_candidate_handoffs(checks, *, references, admitted_facts, ir,
             future = tuple(binding for binding in projected if binding.phase in {
                 FulfillmentPhase.CANDIDATE_SEAL, FulfillmentPhase.HUMAN_INTEGRATION})
             seal_only = bool(future and all(binding.phase is FulfillmentPhase.CANDIDATE_SEAL for binding in future)
+                and not any(binding.phase is FulfillmentPhase.DELIVERY for binding in projected)
                 and fulfillment_bindings and (fulfillment_bindings[0].formation_receipt or {}).get("source_role_contract") == "v3")
             if seal_only and revision is not None:
                 try:

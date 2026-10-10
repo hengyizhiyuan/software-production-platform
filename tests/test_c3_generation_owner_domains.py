@@ -768,7 +768,7 @@ def test_v3_final_consumer_revalidates_actual_formation_and_review_lineage(tampe
         validate_fulfillment_projection(altered, revision, ir, exact_target_paths=inv["exact_target_paths"])
 
 
-@pytest.mark.parametrize("failure", [None, "missing-revision", "missing-review", "current-fail"])
+@pytest.mark.parametrize("failure", [None, "missing-revision", "missing-review", "current-fail", "mixed-delivery", "mixed-integration"])
 def test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance(failure):
     from tests.test_c3_fulfillment_components import current_lifecycle_candidate
     from spg.domain.engineering_semantics import SemanticRelation, semantic_fact_reference
@@ -785,6 +785,14 @@ def test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance(failure):
     if failure == "missing-review":
         receipt = deepcopy(bindings[0].formation_receipt);receipt.pop("semantic_review")
         bindings = (bindings[0].model_copy(update={"formation_receipt": receipt}), *bindings[1:])
+    if failure in {"mixed-delivery", "mixed-integration"}:
+        from spg.domain.governed_obligation import FulfillmentPhase, FulfillmentOwner
+        original = next(b for b in bindings if b.fact_id == fact.id and b.phase is FulfillmentPhase.CANDIDATE_SEAL)
+        extra = original.model_copy(update={"phase": FulfillmentPhase.DELIVERY if failure == "mixed-delivery" else FulfillmentPhase.HUMAN_INTEGRATION,
+            "owner": FulfillmentOwner.DELIVERY_GATE if failure == "mixed-delivery" else FulfillmentOwner.HUMAN_GATE,
+            "component": "deploy" if failure == "mixed-delivery" else "human-integration",
+            "evidence_method": "EXACT_HUMAN_AUTHORIZATION", "gate_ref": "cloud-delivery:human-authorization-required" if failure == "mixed-delivery" else "candidate-governance:human-integration"})
+        bindings = (*bindings, extra)
     check = {"fact_id": str(fact.id), "passed": failure != "current-fail", "disposition": "VERIFIED_CURRENT"}
     result = evaluate_candidate_handoffs((check,), references=(semantic_fact_reference(fact, work_revision_id=revision.id),),
         admitted_facts={str(fact.id): fact}, ir=ir, revision=None if failure == "missing-revision" else revision,
