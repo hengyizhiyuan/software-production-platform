@@ -142,6 +142,39 @@ def test_previous_operand_contract_shape_remains_recomputable():
     assert all('ineligible_binding_prerequisites' not in row for row in old['sources'])
 
 
+@pytest.mark.parametrize('scale', ('small','medium','complex'))
+def test_content_target_feedback_does_not_authorize_context_fallback(scale):
+    revision,ir,inventory,plan=controlled_capacity_case(scale)
+    caps=fulfillment_capability_contracts()
+    preconditions=_owner_source_preconditions(revision,ir,inventory,caps)
+    wire,_=controlled_wire(inventory,plan,owner_preconditions=preconditions)
+    ordinal=next(i for i,r in enumerate(wire['routes']) if caps[r['c']]['capability']=='ARTIFACT_CONTENT')
+    route=wire['routes'][ordinal];route['t']=[]
+    context=_owner_repair_context(json.dumps(wire),revision,ir,inventory,caps,
+        validation_feedback=None,owner_preconditions=preconditions)
+    failure=next(r for r in context['violations'] if r['route']==ordinal and r['code']=='OBLIGATION_CONTENT_TARGET_UNRESOLVED')
+    observed=failure['owner_operand_observations']['target_operand']
+    assert observed['relation']=='NONEMPTY_ADMITTED_SUBSET' and observed['minimum_count']==1
+    assert observed['allowed_ordinals']==list(range(len(inventory['exact_target_paths'])))
+    assert observed['observed_count']==0 and not observed['matches']
+    retention=next(i for i,c in enumerate(caps) if c['capability']=='RETAIN_CONTEXT')
+    rejection=next(r for r in preconditions['sources'][route['s']]['ineligible_binding_prerequisites'] if r['capability']==retention)
+    assert 'OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY' in rejection['codes']
+    route['c']=retention
+    context=_owner_repair_context(json.dumps(wire),revision,ir,inventory,caps,
+        validation_feedback=None,owner_preconditions=preconditions)
+    assert any(r['route']==ordinal and r['code']=='OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY' for r in context['violations'])
+
+
+def test_old_typed_v1_prerequisites_preserve_the_original_operand_and_retention_shape():
+    revision,ir,inventory,_=controlled_capacity_case()
+    caps=fulfillment_capability_contracts()
+    old=_owner_source_preconditions(revision,ir,inventory,caps,typed_prerequisite_contract='existing-owner-typed-prerequisites-v1')
+    assert all(r['evidence_method']=='EXACT_GIT_DIFF_SCOPE' for r in old['capability_operand_requirements'])
+    retained=next(i for i,c in enumerate(caps) if c['capability']=='RETAIN_CONTEXT')
+    assert not any(r['capability']==retained for r in old['sources'][0]['ineligible_binding_prerequisites'])
+
+
 @pytest.mark.parametrize('tamper', (None,'owner-source','owner-errors','remove-owner-context','owner-marker','remove-both','legacy-feedback'))
 def test_bound_feedback_repairs_once_or_stops_drift_without_review(tamper):
     revision,ir,inventory,plan=controlled_capacity_case()
