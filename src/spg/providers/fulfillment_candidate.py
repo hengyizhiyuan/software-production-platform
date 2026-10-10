@@ -385,6 +385,7 @@ def _formation_source_table(context, *, inventory=None):
 
 
 _SOURCE_CONSUMER_INPUT_CONTRACT = "existing-lossless-source-consumer-input-v3"
+_PRIMARY_MEANING_INPUT_CONTRACT = "existing-primary-meaning-owner-reference-v1"
 _SOURCE_CONSUMER_LEGACY_CONTRACT = "existing-lossless-source-consumer-input-v1"
 _SOURCE_CONSUMER_FEEDBACK_CONTRACTS = {"existing-lossless-source-consumer-input-v2", _SOURCE_CONSUMER_INPUT_CONTRACT}
 _SOURCE_CONSUMER_INSTRUCTIONS = (
@@ -466,6 +467,26 @@ _SOURCE_CONSUMER_INSTRUCTIONS = (
 )
 
 
+def _primary_meaning_instructions(owner_preconditions):
+    return (_SOURCE_CONSUMER_INSTRUCTIONS +
+        " The source table contains original meaning and geometry, not a fulfillment checklist. "
+        "Select only the operations actually required by each contribution. After that semantic choice, "
+        "resolve owner_prerequisites_ref to consult the full original Owner record. Its nonrejected "
+        "capabilities and minimal_support_sets are alternative necessary prerequisites, never a request "
+        "to emit all capabilities or one route per proof set. Two different u proof alternatives for "
+        "the same original component and same consumer are alternative justifications for ONE proposed "
+        "binding, not distinct semantic components. Choose an entailed proof without fabricating "
+        "authority; if none is established retain UNRESOLVED. Legitimate distinct components and "
+        "complementary operations still require their separate bindings. In r explain which original "
+        "semantic contribution warrants this exact operation and phase; structural eligibility or "
+        "an available support alternative is not that explanation. Do not invent new components "
+        "merely to enumerate paths through the prerequisite table." +
+        (" When failed_owner is INDEPENDENT_SEMANTIC_REVIEW_OUTPUT, the critic response failed "
+         "its output contract; that is not a semantic rejection of the proposer. Preserve all lawful "
+         "contributions while independent semantic judgment remains required."
+         if owner_preconditions.get("review_input_contract") == _REVIEW_INPUT_CONTRACT else ""))
+
+
 def _source_consumer_input(inventory, capabilities, context, owner_preconditions):
     """Losslessly reference the existing Owner rows from their original basis.
 
@@ -492,7 +513,7 @@ def _source_consumer_input(inventory, capabilities, context, owner_preconditions
     restored = {**header, "sources": [deepcopy(header["sources"][row["owner_prerequisites_ref"]]) for row in rows]}
     if restored != owner_preconditions:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_OWNER_PRECONDITION_IDENTITY_DRIFT")
-    return {"immutable_inventory": inventory_view,
+    result = {"immutable_inventory": inventory_view,
         **({"existing_ir_item_table": items} if items else {}),
         "existing_capability_contracts": capabilities,
         "existing_consumer_contracts": _existing_consumer_contracts(capabilities),
@@ -506,6 +527,46 @@ def _source_consumer_input(inventory, capabilities, context, owner_preconditions
             "capability_index_table": [{"index": i, "capability": c["capability"], "owner": c["owner"],
                 "phase": c["phase"], "evidence_method": c["evidence_method"]} for i, c in enumerate(capabilities)],
             "target_index_table": [{"index": i, "path": path} for i, path in enumerate(context["tables"]["target_paths"])]}}
+    marker = owner_preconditions.get("semantic_selection_input_contract")
+    if marker is None:
+        return result
+    if marker != _PRIMARY_MEANING_INPUT_CONTRACT:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
+    view = deepcopy(result)
+    # These derived eligibility copies are not semantic requests. Keep their
+    # exact authoritative Owner rows once, referenced at the original source.
+    # No capability/proof is selected and no original prerequisite is removed.
+    for row in view["temporary_wire"]["source_index_table"]:
+        del row["necessary_capability_domain"]
+        row.pop("conditional_provenance_operands", None)
+    view["semantic_selection_input_contract"] = marker
+    if _restore_primary_meaning_input(view) != result:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_OWNER_PRECONDITION_IDENTITY_DRIFT")
+    return view
+
+
+def _restore_primary_meaning_input(view):
+    """Reconstruct request-only copies, never invent a model contribution."""
+    restored = deepcopy(view)
+    marker = restored.pop("semantic_selection_input_contract", None)
+    owner = restored["owner_source_preconditions"]
+    if marker != _PRIMARY_MEANING_INPUT_CONTRACT or owner.get("semantic_selection_input_contract") != marker:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
+    inventory = _restore_formation_inventory_view(restored["immutable_inventory"], restored.get("existing_ir_item_table", {}))
+    caps = restored["existing_capability_contracts"]
+    choices = _formation_binding_choices(inventory, caps, owner)
+    rows = restored["temporary_wire"]["source_index_table"]
+    if len(rows) != len(choices):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_OWNER_PRECONDITION_IDENTITY_DRIFT")
+    for row, choice in zip(rows, choices, strict=True):
+        if (row.get("index") != choice["source"] or row.get("owner_prerequisites_ref") != choice["source"]
+                or row.get("source_ref") != choice["source_ref"]
+                or "necessary_capability_domain" in row or "conditional_provenance_operands" in row):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_OWNER_PRECONDITION_IDENTITY_DRIFT")
+        row["necessary_capability_domain"] = choice["candidate_capabilities"]
+        if owner.get("generation_view_contract") == _SOURCE_CONSUMER_INPUT_CONTRACT:
+            row["conditional_provenance_operands"] = _formation_provenance_operands(choice, caps)
+    return restored
 
 
 def _fulfillment_wire_context(inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
@@ -1093,8 +1154,25 @@ def _raw_fulfillment_owner_operands(output, inventory, capabilities, *, validati
     context = _fulfillment_wire_context(inventory, capabilities,
         validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
     choices = _formation_binding_choices(inventory, capabilities, owner_preconditions)
+    syntax_observation = None
     try:
         wire = _FulfillmentCompactCandidate.model_validate(json.loads(output, object_pairs_hook=_wire_json_object))
+    except json.JSONDecodeError as error:
+        if (error.msg != "Extra data" or (owner_preconditions or {}).get("semantic_selection_input_contract")
+                != _PRIMARY_MEANING_INPUT_CONTRACT or (owner_preconditions or {}).get("syntax_observation_contract")
+                not in {"complete-value-owner-observations-v1", "complete-value-owner-observations-v2"}):
+            return {"violations": [], "not_evaluable": ["ORIGINAL_WIRE_OWNER_OPERANDS"]}
+        try:
+            begin = len(output)-len(output.lstrip())
+            value, end = json.JSONDecoder(object_pairs_hook=_wire_json_object).raw_decode(output, begin)
+            wire = _FulfillmentCompactCandidate.model_validate(value)
+        except ValueError:
+            return {"violations": [], "not_evaluable": ["ORIGINAL_WIRE_OWNER_OPERANDS"]}
+        syntax_observation = {"original_wire_sha256": sha256(output.encode()).hexdigest(),
+            "original_wire_bytes": len(output.encode()), "complete_value_range": [begin, end],
+            "complete_value_sha256": sha256(output[begin:end].encode()).hexdigest(),
+            "trailing_bytes": len(output[end:].encode()),
+            "disposition": "UNADMITTED_COMPLETE_VALUE_NECESSARY_OPERANDS_ONLY; SYNTAX_REMAINS_FAILED"}
     except ValueError:
         return {"violations": [], "not_evaluable": ["ORIGINAL_WIRE_OWNER_OPERANDS"]}
     if wire.h != context["wire_request_fingerprint"] or wire.d != context["wire_table_fingerprint"]:
@@ -1132,8 +1210,10 @@ def _raw_fulfillment_owner_operands(output, inventory, capabilities, *, validati
                     "allowed_original_source_ordinals": sorted(allowed)}} if proof is not None else {}),
                 "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"})
     return {"violations": failures[:64], "additional_violation_count": max(0, len(failures)-64),
+        **({"complete_value_observation": syntax_observation} if syntax_observation is not None else {}),
         "not_evaluable": ["COMPLETE_PLAN_ADMISSION", "CROSS_ROUTE_FACT_PROOFS",
-            "SEMANTIC_EQUIVALENCE", "INDEPENDENT_SEMANTIC_REVIEW", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"]}
+            "SEMANTIC_EQUIVALENCE", "INDEPENDENT_SEMANTIC_REVIEW", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE",
+            *( ["COMPLETE_WIRE_SYNTAX"] if syntax_observation is not None else [])]}
 
 
 def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
@@ -1325,7 +1405,9 @@ class ModelFulfillmentCandidateProvider:
                     if "reviewed_background_prerequisites" in choices:
                         source["reviewed_background_prerequisites"] = deepcopy(choices["reviewed_background_prerequisites"])
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
-                instructions=((_SOURCE_CONSUMER_INSTRUCTIONS + (
+                instructions=((_primary_meaning_instructions(owner_preconditions)
+                    if (owner_preconditions or {}).get("semantic_selection_input_contract") == _PRIMARY_MEANING_INPUT_CONTRACT
+                    else _SOURCE_CONSUMER_INSTRUCTIONS + (
                     " The capability domain and Schema branches are ALTERNATIVE necessary field domains, "
                     "not obligations to enumerate. Return only consumers actually entailed by each source's "
                     "meaning. Never append UNRESOLVED as a fallback to an already executable component, "

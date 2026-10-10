@@ -1,0 +1,516 @@
+{
+  "schema": "ordinary-original19-controlled-lawful-binding-proof-v1",
+  "source": "d808afa02939ccd5c39775d3783644c25374e411",
+  "actual_image": "sha256:fd534d4acddc95005c9803b92707cdb0ec84052de4b04ade69ea97b8e4e5f623",
+  "basis_sha256": "aad0fa15b3b24c12aa5b4b1099f8fe7ef0d6f7044bbc79ba8650a68ad4c81998",
+  "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+  "controlled_candidate_fingerprint": "6cfa93ad602f1b764dd6f8856a1b0b374ea70101b441f377fb1051c2847b97cc",
+  "sources": [
+    {
+      "source": 0,
+      "source_ref": "semantic-fact:f1baae6a-b455-523a-9a9a-5e180dc7618f",
+      "kind": "FACT",
+      "original_text_sha256": "a24b1d48dd8fae804d8b7bf4e25740bf79c8716ebefc7201050f42b27e1296db",
+      "bindings": [
+        {
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "7f9be2e6f3cfc7372c92f82cb78431afe7d1a81ba8433a87731438e335dbed62",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [],
+          "target_paths": [
+            "index.html"
+          ]
+        }
+      ]
+    },
+    {
+      "source": 1,
+      "source_ref": "semantic-fact:64507732-d7be-5aa0-90f8-6ec7ef76b488",
+      "kind": "FACT",
+      "original_text_sha256": "5be6714bf14eea3261e40966c1d1a4039f752f3f376e0320166e32266011c8c4",
+      "bindings": [
+        {
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "17696c29e9cde1515646aae8d546eeca8c5d6f161182349e2431dfa9e13be18f",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [],
+          "target_paths": [
+            "index.html"
+          ]
+        }
+      ]
+    },
+    {
+      "source": 2,
+      "source_ref": "semantic-fact:eb087a06-092c-5e9d-b34e-12504005de6c",
+      "kind": "FACT",
+      "original_text_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+      "bindings": [
+        {
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "22418fcc6eca7a07afe5ca04d20dd2688bf6d08c9a46189b501566d2ee9f2455",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [],
+          "target_paths": [
+            "index.html"
+          ]
+        }
+      ]
+    },
+    {
+      "source": 3,
+      "source_ref": "semantic-fact:a0fd0fa9-b66f-5246-9dde-9166a9dfb552",
+      "kind": "FACT",
+      "original_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "bindings": [
+        {
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "2607a1bb30912fc9951d349c1590d99aac9f705010c9003a94303bf467e9d1ad",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [],
+          "target_paths": [
+            "index.html"
+          ]
+        },
+        {
+          "capability": "CANDIDATE_SEAL",
+          "component_id": "bd06cb2b0e35efb964884fe7a6d89eb4131f609f3b91d192c9a711080fdc590c",
+          "owner": "CANDIDATE",
+          "phase": "CANDIDATE_SEAL",
+          "method": "EXACT_SEALED_CANDIDATE",
+          "gate": "candidate-owner:sealed-after-verification",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [],
+          "target_paths": []
+        }
+      ]
+    },
+    {
+      "source": 4,
+      "source_ref": "semantic-fact:bdc36ce9-cd24-574f-95c5-808d57220e91",
+      "kind": "FACT",
+      "original_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "bindings": [
+        {
+          "capability": "DENY_DEPLOY",
+          "component_id": "0335f33ef42e9ea56675b2b6cd5f58d5e889256ed84e9aca2137c2408b01c492",
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "cloud-delivery:human-authorization-required",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [
+            "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c7"
+          ],
+          "target_paths": []
+        },
+        {
+          "capability": "DENY_PUBLISH",
+          "component_id": "0335f33ef42e9ea56675b2b6cd5f58d5e889256ed84e9aca2137c2408b01c492",
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "remote-delivery:human-authorization-required",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [
+            "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c7"
+          ],
+          "target_paths": []
+        },
+        {
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "0335f33ef42e9ea56675b2b6cd5f58d5e889256ed84e9aca2137c2408b01c492",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [
+            "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c7"
+          ],
+          "target_paths": [
+            "index.html"
+          ]
+        }
+      ]
+    },
+    {
+      "source": 5,
+      "source_ref": "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c1",
+      "kind": "IR_CLAUSE",
+      "original_text_sha256": "c01616d2fa1687d3f2dbde62f78b2d07c72c8f63034431eb8b263f2cd82e53b1",
+      "bindings": [
+        {
+          "capability": "RETAIN_CONTEXT",
+          "component_id": "00479c30eec357a9bb04a5acea9e4380a6f27716eab3a933b9f5df0df33e708c",
+          "owner": "PRODUCT_SOURCE",
+          "phase": "CONTEXT_RETENTION",
+          "method": "RETAIN_AUTHORITATIVE_CONTEXT",
+          "gate": "work-reality:retained",
+          "state": "RETAINED_CONTEXT",
+          "supporting_source_refs": [],
+          "target_paths": []
+        }
+      ]
+    },
+    {
+      "source": 6,
+      "source_ref": "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c2",
+      "kind": "IR_CLAUSE",
+      "original_text_sha256": "9268cc964f6cb6011eb23204032873bdfbfff04e950cfda4f190d57a1cae73aa",
+      "bindings": [
+        {
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "999824c669ce1a898fbc03d2d20214ca0a919e71d8004c342adfc03745093663",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [],
+          "target_paths": [
+            "index.html"
+          ]
+        }
+      ]
+    },
+    {
+      "source": 7,
+      "source_ref": "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c3",
+      "kind": "IR_CLAUSE",
+      "original_text_sha256": "763311981a479580e9d52e736ecffbec46cfc41a94a3564badab89c5fa354e60",
+      "bindings": [
+        {
+          "capability": "RETAIN_CONTEXT",
+          "component_id": "9bb6b708755ae6fff377a84557a5e0c65de4b22e9124f8975731d0cc4b2d62c4",
+          "owner": "PRODUCT_SOURCE",
+          "phase": "CONTEXT_RETENTION",
+          "method": "RETAIN_AUTHORITATIVE_CONTEXT",
+          "gate": "work-reality:retained",
+          "state": "RETAINED_CONTEXT",
+          "supporting_source_refs": [],
+          "target_paths": []
+        }
+      ]
+    },
+    {
+      "source": 8,
+      "source_ref": "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c4",
+      "kind": "IR_CLAUSE",
+      "original_text_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+      "bindings": [
+        {
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "ef5d46587a0ada3aae814abeca8baf2f3c0d292c8a28570bf25b5e94d2afce91",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [],
+          "target_paths": [
+            "index.html"
+          ]
+        }
+      ]
+    },
+    {
+      "source": 9,
+      "source_ref": "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c5",
+      "kind": "IR_CLAUSE",
+      "original_text_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+      "bindings": [
+        {
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "11d50a4791152e6ee24ea561371bd0548c31c0836dad35f5199d5123e8fed823",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [],
+          "target_paths": [
+            "index.html"
+          ]
+        }
+      ]
+    },
+    {
+      "source": 10,
+      "source_ref": "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c6",
+      "kind": "IR_CLAUSE",
+      "original_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "bindings": [
+        {
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "fe8356fc0134c8f2cef1bb71a621a26deeb3aeaf958635c98c7d5c88dca7fa20",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [],
+          "target_paths": [
+            "index.html"
+          ]
+        },
+        {
+          "capability": "CANDIDATE_SEAL",
+          "component_id": "fe8356fc0134c8f2cef1bb71a621a26deeb3aeaf958635c98c7d5c88dca7fa20",
+          "owner": "CANDIDATE",
+          "phase": "CANDIDATE_SEAL",
+          "method": "EXACT_SEALED_CANDIDATE",
+          "gate": "candidate-owner:sealed-after-verification",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [],
+          "target_paths": []
+        }
+      ]
+    },
+    {
+      "source": 11,
+      "source_ref": "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c7",
+      "kind": "IR_CLAUSE",
+      "original_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "bindings": [
+        {
+          "capability": "DENY_DEPLOY",
+          "component_id": "6fe81132c32ccb5b3af590dfe7750be9ed11ba7982a7b877c3f1542a54c25ab8",
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "cloud-delivery:human-authorization-required",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [],
+          "target_paths": []
+        },
+        {
+          "capability": "DENY_PUBLISH",
+          "component_id": "6fe81132c32ccb5b3af590dfe7750be9ed11ba7982a7b877c3f1542a54c25ab8",
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "remote-delivery:human-authorization-required",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [],
+          "target_paths": []
+        },
+        {
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "6fe81132c32ccb5b3af590dfe7750be9ed11ba7982a7b877c3f1542a54c25ab8",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [],
+          "target_paths": [
+            "index.html"
+          ]
+        }
+      ]
+    },
+    {
+      "source": 12,
+      "source_ref": "work-constraint:f1f690bd-4005-5104-a8a9-cb5563a3204c:0",
+      "kind": "WORK_CONSTRAINT",
+      "original_text_sha256": "57cb451611ece48c519970730d053123646136b1b1f355133abc42fe7384638f",
+      "bindings": [
+        {
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "5803e12497318f6d23fc457ece2e1d8d70a016e8366b132291d8aa56ced97b59",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [
+            "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c2"
+          ],
+          "target_paths": [
+            "index.html"
+          ]
+        }
+      ]
+    },
+    {
+      "source": 13,
+      "source_ref": "work-constraint:f1f690bd-4005-5104-a8a9-cb5563a3204c:1",
+      "kind": "WORK_CONSTRAINT",
+      "original_text_sha256": "739b15bc79375f46eff063aa8ddbff21cbeac67890f413337406f4719dc627f8",
+      "bindings": [
+        {
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "9181561728d526d51be4392c9583f8bec30717589ff1394c965c7a096b98063a",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [
+            "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c6"
+          ],
+          "target_paths": [
+            "index.html"
+          ]
+        }
+      ]
+    },
+    {
+      "source": 14,
+      "source_ref": "work-constraint:f1f690bd-4005-5104-a8a9-cb5563a3204c:2",
+      "kind": "WORK_CONSTRAINT",
+      "original_text_sha256": "e5baed22a33dfb818a6a438f8e1c7595598c7c6c26b6caccf1945a979328be7c",
+      "bindings": [
+        {
+          "capability": "CANDIDATE_SEAL",
+          "component_id": "65b6cea440fc9d51ff445b459aa14d74ae347eff7d00e82bbcdb4fa4feecb185",
+          "owner": "CANDIDATE",
+          "phase": "CANDIDATE_SEAL",
+          "method": "EXACT_SEALED_CANDIDATE",
+          "gate": "candidate-owner:sealed-after-verification",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [
+            "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c6"
+          ],
+          "target_paths": []
+        }
+      ]
+    },
+    {
+      "source": 15,
+      "source_ref": "work-constraint:f1f690bd-4005-5104-a8a9-cb5563a3204c:3",
+      "kind": "WORK_CONSTRAINT",
+      "original_text_sha256": "8f73931419beb5ccb80dbdd5aa3aa609513cff870ae39d6181a04d0b4fb9b1bd",
+      "bindings": [
+        {
+          "capability": "DENY_DEPLOY",
+          "component_id": "a003e98d82bb1f580bb6b625e07474b388d5ec2a7d92eea3f7e4a43d653d76ce",
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "cloud-delivery:human-authorization-required",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [
+            "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c7"
+          ],
+          "target_paths": []
+        }
+      ]
+    },
+    {
+      "source": 16,
+      "source_ref": "work-constraint:f1f690bd-4005-5104-a8a9-cb5563a3204c:4",
+      "kind": "WORK_CONSTRAINT",
+      "original_text_sha256": "5b7cd03090c3931b77a8929c4e8aab12368a7f8fcb5d941b155013aac44be6fd",
+      "bindings": [
+        {
+          "capability": "DENY_PUBLISH",
+          "component_id": "b52f39e7932b70f6fd55c0649032074484e8f11e6380667cf49f51273b18463a",
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "remote-delivery:human-authorization-required",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [
+            "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c7"
+          ],
+          "target_paths": []
+        }
+      ]
+    },
+    {
+      "source": 17,
+      "source_ref": "work-constraint:f1f690bd-4005-5104-a8a9-cb5563a3204c:5",
+      "kind": "WORK_CONSTRAINT",
+      "original_text_sha256": "8314fcbae674bc2d2d5f514db6776b0ba01afb427ff4a931c0be2907609cf114",
+      "bindings": [
+        {
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "ef2fb7cfe681d54dd539df3e382a7648701ef7a696149199bb9ef8eb0bb006d7",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [
+            "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c7"
+          ],
+          "target_paths": [
+            "index.html"
+          ]
+        }
+      ]
+    },
+    {
+      "source": 18,
+      "source_ref": "work-constraint:f1f690bd-4005-5104-a8a9-cb5563a3204c:6",
+      "kind": "WORK_CONSTRAINT",
+      "original_text_sha256": "43c16d3a65f35160438c5b7952e55d3da51f243d4e0ba2a150578155c39b3786",
+      "bindings": [
+        {
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "f293f481b215450da0a340dc06fe20469e51a15a17c5a20c6101d33e036c5a2d",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope",
+          "state": "BOUND_PENDING_EVIDENCE",
+          "supporting_source_refs": [
+            "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c7"
+          ],
+          "target_paths": [
+            "index.html"
+          ]
+        }
+      ]
+    }
+  ],
+  "negative_checks": [
+    {
+      "case": "missing-review",
+      "result": "REJECTED",
+      "code": "OBLIGATION_COMPONENT_REVIEW_REQUIRED"
+    },
+    {
+      "case": "unsupported-negative-sibling",
+      "result": "REJECTED",
+      "code": "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+    },
+    {
+      "case": "wrong-path",
+      "result": "REJECTED",
+      "code": "OBLIGATION_SCOPE_EXPANSION"
+    },
+    {
+      "case": "exclusion-source-substitution",
+      "result": "REJECTED",
+      "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+    }
+  ],
+  "structural_contract": "PASS_REVIEW_PENDING_ONLY",
+  "independent_semantic_review": "NOT_EXECUTED",
+  "actual_owner_evidence": "NOT_EVALUATED",
+  "assurance_pass": false,
+  "model_calls": 0,
+  "work_mutations": 0,
+  "historical_candidate_modified": false,
+  "used_to_tune_holdout": false,
+  "not_a_model_candidate": true
+}

@@ -179,6 +179,104 @@ def test_legacy_request_marker_preserves_formation_instructions():
     assert 'INDEPENDENT_SEMANTIC_REVIEW_OUTPUT' in instructions[1]
 
 
+@pytest.mark.parametrize('scale', ['small', 'medium', 'complex'])
+def test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist(scale, record_property):
+    revision, ir, inventory, plan = controlled_capacity_case(scale)
+    caps = a.fulfillment_capability_contracts()
+    owner = a._owner_source_preconditions(revision, ir, inventory, caps,
+        generation_view_contract=p._SOURCE_CONSUMER_INPUT_CONTRACT,
+        semantic_selection_input_contract=p._PRIMARY_MEANING_INPUT_CONTRACT)
+    before = deepcopy((inventory, owner))
+    context = p._fulfillment_wire_context(inventory, caps, owner_preconditions=owner)
+    view = p._source_consumer_input(inventory, caps, context, owner)
+    restored = p._restore_primary_meaning_input(view)
+    assert view['owner_source_preconditions'] == owner
+    for original, row in zip(restored['temporary_wire']['source_index_table'], view['temporary_wire']['source_index_table'], strict=True):
+        assert 'necessary_capability_domain' not in row and 'conditional_provenance_operands' not in row
+        assert original['primary_semantic_text'] == row['primary_semantic_text']
+        assert original['whole_source_basis'] == row['whole_source_basis']
+        assert original['owner_prerequisites_ref'] == row['index']
+    comparison = deepcopy(owner); comparison.pop('semantic_selection_input_contract')
+    legacy = p._source_consumer_input(inventory, caps,
+        p._fulfillment_wire_context(inventory, caps, owner_preconditions=comparison), comparison)
+    assert [r['primary_semantic_text'] for r in view['temporary_wire']['source_index_table']] == [r['primary_semantic_text'] for r in legacy['temporary_wire']['source_index_table']]
+    assert len(json.dumps(view)) < len(json.dumps(restored))
+    record_property('complete_joined_bytes', len(json.dumps(restored, ensure_ascii=False).encode()))
+    record_property('primary_meaning_reference_bytes', len(json.dumps(view, ensure_ascii=False).encode()))
+    assert (inventory, owner) == before
+    a.validate_projection_candidate(plan, revision, ir, inventory, allow_review_pending=True, source_contract='v3', owner_preconditions=owner)
+    with pytest.raises(ValueError, match='REVIEW_REQUIRED'):
+        a.validate_projection_candidate(plan, revision, ir, inventory, source_contract='v3', owner_preconditions=owner)
+
+
+@pytest.mark.parametrize('drift', ['owner-ref', 'source-ref', 'reintroduced-domain', 'unknown-marker'])
+def test_primary_meaning_reference_drift_cannot_change_source_or_owner_choices(drift):
+    revision, ir, inventory, plan = controlled_capacity_case()
+    caps = a.fulfillment_capability_contracts()
+    owner = a._owner_source_preconditions(revision, ir, inventory, caps,
+        generation_view_contract=p._SOURCE_CONSUMER_INPUT_CONTRACT,
+        semantic_selection_input_contract=p._PRIMARY_MEANING_INPUT_CONTRACT)
+    view = p._source_consumer_input(inventory, caps, p._fulfillment_wire_context(inventory, caps, owner_preconditions=owner), owner)
+    row = view['temporary_wire']['source_index_table'][0]
+    if drift == 'owner-ref': row['owner_prerequisites_ref'] = 1
+    elif drift == 'source-ref': row['source_ref'] = inventory['sources'][1]['source_ref']
+    elif drift == 'reintroduced-domain': row['necessary_capability_domain'] = [0]
+    else: view['semantic_selection_input_contract'] = 'invented'
+    with pytest.raises(p._FulfillmentWireReceiptIdentityError): p._restore_primary_meaning_input(view)
+
+
+@pytest.mark.parametrize('change', ['valid-prefix', 'wrong-header', 'duplicate-key', 'incomplete', 'legacy'])
+def test_complete_value_owner_checks_observe_original_wire_without_admitting_prefix(change):
+    from hashlib import sha256
+    from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+    revision, ir, inventory, plan = controlled_capacity_case()
+    caps = a.fulfillment_capability_contracts()
+    owner = a._owner_source_preconditions(revision, ir, inventory, caps,
+        generation_view_contract=p._SOURCE_CONSUMER_INPUT_CONTRACT,
+        semantic_selection_input_contract=p._PRIMARY_MEANING_INPUT_CONTRACT if change != 'legacy' else None)
+    wire, _ = controlled_wire(inventory, plan, owner_preconditions=owner)
+    wire['routes'][0]['t'] = []
+    wire['routes'][0]['f'] = [next(i for i,s in enumerate(inventory['sources']) if s['kind'] != 'FACT')]
+    if change == 'wrong-header': wire['h'] = '0'*64
+    raw = json.dumps(wire)
+    if change == 'duplicate-key': raw = '{"v":1,' + raw[1:]
+    elif change == 'incomplete': raw = raw[:-1]
+    raw += '}'
+    if change == 'incomplete': raw = raw[:-3]
+    observed = p._raw_fulfillment_owner_operands(raw, inventory, caps, owner_preconditions=owner)
+    if change == 'valid-prefix':
+        assert any('OBLIGATION_CONTENT_TARGET_UNRESOLVED' in v['failed_predicates'] for v in observed['violations'])
+        assert observed['complete_value_observation']['original_wire_sha256'] == sha256(raw.encode()).hexdigest()
+        assert observed['complete_value_observation']['trailing_bytes'] == 1
+        assert 'COMPLETE_WIRE_SYNTAX' in observed['not_evaluable']
+        assert 'SEMANTIC_EQUIVALENCE' in observed['not_evaluable']
+        with pytest.raises(p._FulfillmentWireValidationError, match='WIRE_JSON_INVALID'):
+            p._decode_fulfillment_candidate_wire(raw, inventory, caps, owner_preconditions=owner)
+    else:
+        assert observed == {'violations': [], 'not_evaluable': ['ORIGINAL_WIRE_OWNER_OPERANDS']}
+
+
+def test_new_selection_hint_does_not_rewrite_legacy_request_or_grant_an_operation():
+    revision, ir, inventory, plan = controlled_capacity_case()
+    caps = a.fulfillment_capability_contracts()
+    old = a._owner_source_preconditions(revision, ir, inventory, caps,
+        generation_view_contract=p._SOURCE_CONSUMER_INPUT_CONTRACT)
+    assert 'semantic_selection_input_contract' not in old
+    new = a._owner_source_preconditions(revision, ir, inventory, caps,
+        generation_view_contract=p._SOURCE_CONSUMER_INPUT_CONTRACT,
+        semantic_selection_input_contract=p._PRIMARY_MEANING_INPUT_CONTRACT)
+    assert p._fulfillment_wire_context(inventory, caps, owner_preconditions=old)['wire_request_fingerprint'] != p._fulfillment_wire_context(inventory, caps, owner_preconditions=new)['wire_request_fingerprint']
+    assert p._fulfillment_wire_context(inventory, caps, owner_preconditions=old)['wire_table_fingerprint'] == p._fulfillment_wire_context(inventory, caps, owner_preconditions=new)['wire_table_fingerprint']
+    assert 'alternative justifications for ONE proposed binding' in p._primary_meaning_instructions(new)
+    assert new['sources'] == old['sources']
+    with pytest.raises(ValueError, match='REQUEST_VIEW_CONTRACT_INVALID'):
+        a._owner_source_preconditions(revision, ir, inventory, caps,
+            semantic_selection_input_contract=p._PRIMARY_MEANING_INPUT_CONTRACT)
+    unsupported = plan.model_copy(update={'routes': (*plan.routes, plan.routes[0])})
+    with pytest.raises(ValueError, match='DUPLICATE_ROUTE'):
+        a.validate_projection_candidate(unsupported, revision, ir, inventory, allow_review_pending=True, source_contract='v3', owner_preconditions=new)
+
+
 def test_invalid_fact_operand_cannot_hide_independent_original_source_and_scope_rejections():
     from tests.test_c3_fulfillment_capacity_representation import controlled_wire
     revision,ir,inventory,plan=controlled_capacity_case()

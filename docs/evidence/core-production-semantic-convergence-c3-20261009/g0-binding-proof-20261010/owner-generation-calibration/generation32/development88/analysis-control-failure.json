@@ -1,0 +1,8 @@
+{
+  "container_id": "e6ed28855de3a37f7add98b2a77d2fc59ded1cdc53ae657ab3813428a5f6121e",
+  "image": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "exit_code": 1,
+  "reason": "READ_PERMISSION_DENIED_WITH_UID_0_AND_DROPPED_CAPABILITIES",
+  "provider_calls": 0,
+  "original_permissions_unchanged": true
+}

@@ -362,7 +362,7 @@ def test_actual_compact_observation_replays_from_postgresql_without_repeating_fo
     record_property("receipt_ids", json.dumps([row.scope["receipt_id"] for row in rows]))
 
 
-@pytest.mark.parametrize('tamper', (None, 'feedback', 'response-receipt', 'scope-inventory', 'owner-precondition', 'initial-prerequisite', 'raw-owner-observation'))
+@pytest.mark.parametrize('tamper', (None, 'feedback', 'response-receipt', 'scope-inventory', 'owner-precondition', 'initial-prerequisite', 'raw-owner-observation', 'selection-input-contract'))
 @pytest.mark.parametrize('failure_kind', ('predecode', 'canonical', 'complete-prefix'))
 def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
     postgres_database, tmp_path, monkeypatch, record_property, tamper, failure_kind,
@@ -452,8 +452,10 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
             assert any('OBLIGATION_CONTENT_TARGET_UNRESOLVED' in f['failed_predicates']
                 for f in raw_operands['violations'])
         if failure_kind == 'complete-prefix':
-            assert raw_operands['violations'] == []
-            assert 'ORIGINAL_WIRE_OWNER_OPERANDS' in raw_operands['not_evaluable']
+            assert any('OBLIGATION_CONTENT_TARGET_UNRESOLVED' in f['failed_predicates']
+                for f in raw_operands['violations'])
+            assert raw_operands['complete_value_observation']['original_wire_sha256'] == binding['wire_output_fingerprint']
+            assert 'COMPLETE_WIRE_SYNTAX' in raw_operands['not_evaluable']
         else:
             assert 'ASSURANCE' in raw_operands['not_evaluable']
         assert 'ASSURANCE' in feedback['owner_repair_context']['not_evaluable']
@@ -473,6 +475,11 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
                 for original in records[:2]:
                     changed=deepcopy(original.scope)
                     changed['owner_source_preconditions']['sources'][0]['source']=999
+                    uow.session.execute(update(governance_records).where(governance_records.c.id == original.id).values(scope=changed))
+            elif tamper == 'selection-input-contract':
+                for original in records[:2]:
+                    changed=deepcopy(original.scope)
+                    changed['owner_source_preconditions'].pop('semantic_selection_input_contract')
                     uow.session.execute(update(governance_records).where(governance_records.c.id == original.id).values(scope=changed))
             else:
                 changed = json.loads(scope['validation_feedback'])
