@@ -163,6 +163,13 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
             branch["properties"]["a"]["minimum"] = 0
             branch["properties"]["z"]["maximum"] = length
             branch["properties"]["z"]["minimum"] = 1
+            # Request a lossless locator operand, not model-computed offsets
+            # for a partial component. Canonical Wire v1 still accepts exact
+            # historical numeric spans; this only narrows new generation.
+            branch["anyOf"] = [
+                {"properties": {"q": {"type": "null"}, "a": {"enum": [0]}, "z": {"enum": [length]}}},
+                {"properties": {"q": {"type": "string", "minLength": 1}}},
+            ]
             if support is not None:
                 branch["properties"]["u"]["items"]["enum"] = list(support)
                 branch["properties"]["u"]["minItems"] = minimum
@@ -897,8 +904,10 @@ class ModelFulfillmentCandidateProvider:
                     "causes; do not expand unrelated components into every possible capability or discard "
                     "their still-required provenance. A revised complete plan is revalidated independently. "
                     "Echo the CURRENT h/d from temporary_wire, not those of the previous proposal. "
-                    "q=null lets the Owner restore the exact source slice. If exact offsets are uncertain, "
-                    "q may be the original exact component quote; the existing unique-quote locator may "
+                    "For NEW generation, q=null is reserved for the supplied whole_source_basis "
+                    "(a=0,z=the exact source length). For every partial semantic component, q MUST be its "
+                    "exact contiguous original quote, not null: do not compute partial offsets from memory. "
+                    "The existing unique-quote locator may "
                     "correct offsets, but repeated or invented quotes cannot establish an ambiguous location. "
                     "whole_source_basis supplies exact geometry for the whole original source. You may "
                     "choose that basis for consumers that legitimately share the whole qualified contribution; "

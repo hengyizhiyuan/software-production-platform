@@ -315,6 +315,33 @@ def test_source_geometry_view_cannot_change_components_or_relax_lost_operators()
         _decode_fulfillment_candidate_wire(json.dumps(wire), inv, caps, owner_preconditions=preconditions)
 
 
+def test_generation_requires_original_quote_for_partial_components_without_changing_wire_v1():
+    _, _, inventory, _, capabilities, preconditions = case()
+    schema = _formation_output_schema(inventory, capabilities, owner_preconditions=preconditions)
+    for branch in schema["properties"]["routes"]["items"]["anyOf"]:
+        guards = branch["anyOf"]
+        assert guards[0]["properties"]["a"]["enum"] == [0]
+        length, = guards[0]["properties"]["z"]["enum"]
+        assert guards == [
+            {"properties": {"q": {"type": "null"}, "a": {"enum": [0]}, "z": {"enum": [length]}}},
+            {"properties": {"q": {"type": "string", "minLength": 1}}},
+        ]
+    # This request guard cannot supply text, extend spans, or admit a route.
+    inv, caps, _, wire = wire_case(preconditions)
+    wire["routes"][0]["a"] = 1
+    with pytest.raises(_FulfillmentWireValidationError, match="SOURCE_CONTRIBUTION_LOST"):
+        _decode_fulfillment_candidate_wire(json.dumps(wire), inv, caps, owner_preconditions=preconditions)
+    # An explicit original quote can be located by the existing Owner; this
+    # does not invent the missing character in the numeric-only proposal.
+    from spg.application.governed_obligations import locate_projection_components
+    inv, caps, _, wire = wire_case(preconditions)
+    plan = _decode_fulfillment_candidate_wire(json.dumps(wire), inv, caps, owner_preconditions=preconditions)
+    wire["routes"][0].update(a=1, q=plan.routes[0].component_basis.source_component_quote)
+    raw = _decode_fulfillment_candidate_wire(json.dumps(wire), inv, caps, owner_preconditions=preconditions)
+    located, adjustments = locate_projection_components(raw, inv)
+    assert adjustments and located.routes[0].component_basis == plan.routes[0].component_basis
+
+
 def test_shared_existing_ir_items_round_trip_every_admitted_semantic_field():
     from spg.providers.fulfillment_candidate import _formation_inventory_view, _restore_formation_inventory_view
     _, _, inventory, _, _, _ = case()
