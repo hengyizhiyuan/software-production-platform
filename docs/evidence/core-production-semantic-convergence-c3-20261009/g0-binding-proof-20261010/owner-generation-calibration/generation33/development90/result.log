@@ -1,0 +1,32 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 43 items
+
+tests/test_c3_generation_projection_economy.py ......................... [ 58%]
+..................                                                       [100%]
+
+=============================== warnings summary ===============================
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[small]
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[medium]
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[complex]
+  tests/test_c3_generation_projection_economy.py:11: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[small]
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[medium]
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[complex]
+  tests/test_c3_generation_projection_economy.py:182: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize('scale', ['small', 'medium', 'complex'])
+
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[small]
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[medium]
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[complex]
+  tests/test_c3_generation_projection_economy.py:417: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ["small", "medium", "complex"])
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------------------- generated xml file: /out/result.xml ----------------------
+======================= 43 passed, 9 warnings in 10.79s ========================

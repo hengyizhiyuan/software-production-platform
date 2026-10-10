@@ -75,6 +75,7 @@ def test_rejected_candidate_reference_retains_exact_wire_and_attempt(monkeypatch
         preconditions=app._owner_source_preconditions
         def old_view(*args,**kwargs):
             kwargs['generation_view_contract']='existing-lossless-source-consumer-input-v1'
+            kwargs['semantic_selection_input_contract']=None
             return preconditions(*args,**kwargs)
         monkeypatch.setattr(app,'_owner_source_preconditions',old_view)
     kwargs={'provider':provider,'exact_target_paths':inventory['exact_target_paths']}

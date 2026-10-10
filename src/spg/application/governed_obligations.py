@@ -3032,6 +3032,13 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
         except _FulfillmentWireReceiptIdentityError as error:
             return stop_identity(str(error))
         except ValueError as error:
+            if not any(row["stage"] == "MODEL_REQUEST_PENDING" and row["attempt"] == attempt
+                    for row in recorder.records()):
+                # Request construction failed before inference. There is no
+                # Candidate or response identity to attach repair feedback to.
+                recorder.append("FORMATION_STOPPED", attempt, terminal=True,
+                    validation_passed=False, terminal_reason=str(error), failure_stage=failure_stage)
+                return finish(None, str(error), False)
             wire_diagnostics = None
             if isinstance(error, _FulfillmentWireValidationError):
                 try:

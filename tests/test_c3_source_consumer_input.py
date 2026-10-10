@@ -147,6 +147,7 @@ def test_interrupted_feedback_retains_initial_request_view_and_original_receipts
     if legacy:
         def frozen_view(*args, **kwargs):
             kwargs["generation_view_contract"] = "existing-lossless-source-consumer-input-" + legacy if legacy in ("v1", "v2") else None
+            kwargs["semantic_selection_input_contract"] = None
             return source_preconditions(*args, **kwargs)
         monkeypatch.setattr(app, "_owner_source_preconditions", frozen_view)
     append = app.FulfillmentFormationReceipts.append
@@ -178,3 +179,27 @@ def test_interrupted_feedback_retains_initial_request_view_and_original_receipts
     before = deepcopy(rows)
     app.form_fulfillment_projection(revision, ir, **kwargs)
     assert rows == before and len(calls) == 3
+
+
+def test_invalid_request_view_stops_before_inference_and_replays_without_calls(monkeypatch):
+    import spg.application.governed_obligations as app
+    revision, ir, inventory, plan = controlled_capacity_case()
+    provider, calls = controlled_model_provider(inventory, plan)
+    preconditions = app._owner_source_preconditions
+    def invalid_view(*args, **kwargs):
+        kwargs["generation_view_contract"] = "existing-lossless-source-consumer-input-v1"
+        return preconditions(*args, **kwargs)
+    monkeypatch.setattr(app, "_owner_source_preconditions", invalid_view)
+    kwargs = {"provider": provider, "exact_target_paths": inventory["exact_target_paths"]}
+    result = app.form_fulfillment_projection(revision, ir, **kwargs)
+    assert all(binding.state == "UNRESOLVED" for binding in result)
+    assert result[0].formation_receipt["terminal_reason"] == "OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID"
+    assert calls == []
+    rows = provider._fulfillment_receipts
+    assert len(rows) == 1 and rows[0]["stage"] == "FORMATION_STOPPED"
+    assert rows[0]["failure_stage"] == "MODEL_REQUEST"
+    original = deepcopy(rows)
+    monkeypatch.setattr(app, "_owner_source_preconditions", preconditions)
+    replay = app.form_fulfillment_projection(revision, ir, **kwargs)
+    assert replay[0].formation_receipt["terminal_reason"] == "OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID"
+    assert rows == original and calls == []
