@@ -252,13 +252,24 @@ def _fulfillment_wire_route_observations(output, inventory, capabilities, *, val
     cannot provide proof for another route. Full-plan validation is unchanged.
     """
     context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
+    syntax_unavailable = []
     try:
         wire = _FulfillmentCompactCandidate.model_validate(json.loads(output, object_pairs_hook=_wire_json_object))
+    except json.JSONDecodeError as error:
+        if (error.msg != "Extra data" or owner_preconditions is None
+                or owner_preconditions.get("syntax_observation_contract") != "complete-value-owner-observations-v1"):
+            return (), ["RAW_ROUTE_OWNER_PRECONDITIONS"]
+        try:
+            value, _ = json.JSONDecoder(object_pairs_hook=_wire_json_object).raw_decode(output, len(output)-len(output.lstrip()))
+            wire = _FulfillmentCompactCandidate.model_validate(value)
+        except ValueError:
+            return (), ["RAW_ROUTE_OWNER_PRECONDITIONS"]
+        syntax_unavailable = ["COMPLETE_WIRE_SYNTAX"]
     except ValueError:
         return (), ["RAW_ROUTE_OWNER_PRECONDITIONS"]
     if wire.h != context["wire_request_fingerprint"] or wire.d != context["wire_table_fingerprint"]:
         return (), ["RAW_ROUTE_OWNER_PRECONDITIONS"]
-    observations, unavailable = [], []
+    observations, unavailable = [], syntax_unavailable
     for index, raw in enumerate(wire.routes):
         try:
             route = _expand_fulfillment_wire_route(raw, inventory, capabilities, context)
@@ -299,7 +310,8 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
         violations = [{"code": code}]
         additional = 0
         if (isinstance(error, json.JSONDecodeError) and owner_preconditions is not None
-                and owner_preconditions.get("syntax_observation_contract") == "complete-value-observations-v1"):
+                and owner_preconditions.get("syntax_observation_contract") in {
+                    "complete-value-observations-v1", "complete-value-owner-observations-v1"}):
             observation = {"line": error.lineno, "column": error.colno,
                 "character_offset": error.pos, "reason": "EXTRA_DATA" if error.msg == "Extra data" else "INVALID_SYNTAX"}
             violations[0]["json_parse_observation"] = observation

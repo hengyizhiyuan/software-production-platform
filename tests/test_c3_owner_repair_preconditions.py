@@ -241,3 +241,20 @@ def test_successful_terminal_replay_cannot_drop_initial_proof_context():
     result=run()
     assert len(calls)==2 and all(b.state=='UNRESOLVED' for b in result)
     assert result[0].formation_receipt['terminal_reason']=='OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
+
+
+@pytest.mark.parametrize('contract', ('complete-value-owner-observations-v1','complete-value-observations-v1'))
+def test_complete_value_owner_observations_are_negotiated_and_never_admitted(contract):
+    revision,ir,inventory,plan=controlled_capacity_case()
+    prerequisites=_owner_source_preconditions(revision,ir,inventory,fulfillment_capability_contracts(),syntax_observation_contract=contract)
+    wire,_=controlled_wire(inventory,plan,owner_preconditions=prerequisites)
+    scope=next(r for r in wire['routes'] if fulfillment_capability_contracts()[r['c']]['capability']=='GIT_DIFF_SCOPE')
+    scope['c']=next(i for i,c in enumerate(fulfillment_capability_contracts()) if c['capability']=='ARTIFACT_CONTENT')
+    raw=json.dumps(wire)+'}'
+    with pytest.raises(_FulfillmentWireValidationError,match='WIRE_JSON_INVALID'):
+        _decode_fulfillment_candidate_wire(raw,inventory,fulfillment_capability_contracts(),owner_preconditions=prerequisites)
+    context=_owner_repair_context(raw,revision,ir,inventory,fulfillment_capability_contracts(),validation_feedback=None,owner_preconditions=prerequisites)
+    codes={r['code'] for r in context['violations']}
+    assert ('OBLIGATION_FILE_SCOPE_OWNER_MISMATCH' in codes)==(contract=='complete-value-owner-observations-v1')
+    assert context['raw_routes_not_evaluable'] and 'COMPLETE_PLAN_ADMISSION' in context['not_evaluable']
+    assert context['status']=='UNADMITTED_OWNER_PRECONDITION_OBSERVATIONS'
