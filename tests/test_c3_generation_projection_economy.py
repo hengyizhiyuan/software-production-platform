@@ -8,6 +8,177 @@ from spg.providers.verification_receipts import MAX_CANDIDATE_BYTES
 from tests.test_c3_fulfillment_capacity_representation import controlled_capacity_case, controlled_model_provider
 
 
+@pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+def test_independent_review_shares_contracts_without_losing_components_or_semantics(scale, record_property):
+    _, _, inventory, plan = controlled_capacity_case(scale)
+    caps = a.fulfillment_capability_contracts()
+    before = deepcopy((inventory, plan.model_dump(mode="json"), caps))
+    view = p._review_input_view(inventory, plan, caps, {})
+    assert p._restore_review_component_contracts(view["component_index_table"], caps) == p._review_component_table(inventory, plan, caps)
+    assert p._restore_formation_inventory_view(view["immutable_inventory"], view.get("existing_ir_item_table", {})) == inventory
+    assert len(view["component_index_table"]) == len(plan.routes)
+    assert view["required_result_identity_slots"] == p._review_result_identity_slots(inventory, plan)
+    assert (inventory, plan.model_dump(mode="json"), caps) == before
+    # Every original component remains explicit; only repeated Owner contracts
+    # move to their existing authoritative table, with no model output repair.
+    old = p._review_component_table(inventory, plan, caps)
+    assert len(json.dumps(view["component_index_table"]).encode()) < len(json.dumps(old).encode())
+    record_property("original_comparison_bytes", len(json.dumps(old).encode()))
+    record_property("shared_comparison_bytes", len(json.dumps(view["component_index_table"]).encode()))
+
+
+@pytest.mark.parametrize("field", ("consumer_binding", "consumer_operation_contract"))
+def test_review_contract_reference_cannot_drift_to_a_different_owner(field):
+    _, _, inventory, plan = controlled_capacity_case()
+    caps = a.fulfillment_capability_contracts()
+    view = p._review_input_view(inventory, plan, caps, {})
+    row = next(r for r in view["component_index_table"] if field in r)
+    row[field] = {next(iter(row[field])): "UNRESOLVED"}
+    with pytest.raises(p._FulfillmentWireReceiptIdentityError, match="REVIEW_INPUT_IDENTITY_DRIFT"):
+        p._restore_review_component_contracts(view["component_index_table"], caps)
+
+
+@pytest.mark.parametrize("drift", (None, "source", "field"))
+def test_reviewer_prerequisite_sharing_retains_exact_original_source_domains(drift):
+    revision, ir, inventory, plan = controlled_capacity_case()
+    caps = a.fulfillment_capability_contracts()
+    owner = a._owner_source_preconditions(revision, ir, inventory, caps,
+        generation_view_contract=p._SOURCE_CONSUMER_INPUT_CONTRACT, review_input_contract=p._REVIEW_INPUT_CONTRACT)
+    choices = p._formation_binding_choices(inventory, caps, owner)
+    view = p._review_input_view(inventory, plan, caps, {
+        "existing_owner_source_preconditions": owner, "existing_owner_binding_domains": choices})
+    shared = view["existing_owner_binding_domains"]
+    if drift is None:
+        assert p._restore_review_owner_domains(shared, owner) == choices
+        assert len(json.dumps(shared).encode()) < len(json.dumps(choices).encode())
+    else:
+        row = next(r for r in shared if isinstance(r.get('necessary_source_proofs'), dict))
+        operand = row['necessary_source_proofs']
+        if drift == 'source': operand['existing_owner_prerequisite_ref'] = (row['source'] + 1) % len(shared)
+        else: operand['field'] = 'ineligible_binding_prerequisites'
+        with pytest.raises(p._FulfillmentWireReceiptIdentityError, match='REVIEW_INPUT_IDENTITY_DRIFT'):
+            p._restore_review_owner_domains(shared, owner)
+
+
+def test_invalid_critic_identity_is_bound_to_review_not_mislabeled_as_mapping_failure():
+    from hashlib import sha256
+    revision, ir, inventory, plan = controlled_capacity_case()
+    count = 0
+    def change(review):
+        nonlocal count
+        count += 1
+        if count == 1:
+            review["component_results"] = review["component_results"][:1]
+            review["component_results"][0]["component_id"] = review["component_results"][0]["component_id"][:48]
+    provider, calls = controlled_model_provider(inventory, plan, review_change=change)
+    kwargs = {"provider": provider, "exact_target_paths": inventory["exact_target_paths"]}
+    result = a.form_fulfillment_projection(revision, ir, **kwargs)
+    assert result[0].formation_receipt["terminal_reason"] == "VALIDATED_PROJECTION" and len(calls) == 4
+    failed = next(r for r in provider._fulfillment_receipts if r["stage"] == "CANDIDATE_VALIDATED" and r["attempt"] == 1)
+    f = json.loads(failed["validation_feedback"])
+    assert f["primary_error"] == "OBLIGATION_SEMANTIC_REVIEW_SCHEMA_INVALID"
+    violation = next(v for v in f["violations"] if v.get("failed_owner") == "INDEPENDENT_SEMANTIC_REVIEW_OUTPUT")
+    assert violation["formation_deterministic_status"] == "PASS_REVIEW_PENDING_ONLY"
+    d = violation["review_contract_failure"]
+    assert d["observed_component_count"] == 1 and d["required_component_count"] == len(plan.routes)
+    assert d["missing_component_route_indices"] == list(range(len(plan.routes)))
+    observed = next(r for r in provider._fulfillment_receipts if r["stage"] == "SEMANTIC_REVIEW_OBSERVED" and r["attempt"] == 1)
+    assert d["review_output_sha256"] == sha256(observed["review_output"].encode()).hexdigest()
+    assert f["semantic_review_feedback_binding"]["observed_receipt_id"] == observed["receipt_id"]
+    assert "INDEPENDENT_SEMANTIC_REVIEW" in f["not_evaluable"]
+    original = deepcopy(provider._fulfillment_receipts)
+    a.form_fulfillment_projection(revision, ir, **kwargs)
+    assert len(calls) == 4 and provider._fulfillment_receipts == original
+    f["semantic_review_feedback_binding"]["review_output_sha256"] = "0" * 64
+    failed["validation_feedback"] = json.dumps(f, separators=(",", ":"))
+    stopped = a.form_fulfillment_projection(revision, ir, **kwargs)
+    assert stopped[0].formation_receipt["terminal_reason"] == "OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT"
+    assert len(calls) == 4
+
+
+def test_review_schema_observation_never_backfills_missing_ids_or_uses_invalid_verdicts():
+    from tests.test_c3_semantic_contract_calibration import review
+    _, _, inventory, plan = controlled_capacity_case()
+    raw = review(inventory, plan).model_dump(mode="json")
+    before = deepcopy(raw)
+    assert p._review_schema_failure_observation(json.dumps(raw), inventory, plan) is None
+    raw["component_results"][0]["component_id"] = "wrong-id"
+    raw["private arbitrary provider field must not be published"] = "private payload"
+    d = p._review_schema_failure_observation(json.dumps(raw), inventory, plan)
+    assert d["schema_errors"] and 0 in d["missing_component_route_indices"]
+    assert "INDEPENDENT_SEMANTIC_EQUIVALENCE" in d["not_evaluable"]
+    assert "private arbitrary" not in json.dumps(d) and "private payload" not in json.dumps(d)
+    assert raw["component_results"][0]["component_id"] == "wrong-id"
+    invalid = p._review_schema_failure_observation("{", inventory, plan)
+    assert invalid["observed_component_count"] == 0 and invalid["missing_component_route_indices"] == list(range(len(plan.routes)))
+    assert before["component_results"][0]["component_id"] != "wrong-id"
+
+
+def test_observed_only_invalid_json_review_recovers_without_repeating_critic():
+    from dataclasses import replace
+    revision, ir, inventory, plan = controlled_capacity_case()
+    provider, calls = controlled_model_provider(inventory, plan)
+    runtime = provider.runtime_factory()
+    generate = runtime.generate
+    seen = 0
+    def invalid_once(**request):
+        nonlocal seen
+        result = generate(**request)
+        if 'untrusted_fulfillment_candidate' in json.loads(request['input_text']):
+            seen += 1
+            if seen == 1:
+                result = replace(result, output_text='{')
+        return result
+    runtime.generate = invalid_once
+    original_review = provider.review
+    class AfterObserved(BaseException):
+        pass
+    stopped = False
+    def interrupt(inventory, candidate, *, capabilities, receipt_callback=None, owner_preconditions=None):
+        def observe(**values):
+            nonlocal stopped
+            receipt_callback(**values)
+            if not stopped:
+                stopped = True
+                raise AfterObserved()
+        return original_review(inventory, candidate, capabilities=capabilities,
+            owner_preconditions=owner_preconditions, receipt_callback=observe)
+    provider.review = interrupt
+    kwargs = {'provider': provider, 'exact_target_paths': inventory['exact_target_paths']}
+    with pytest.raises(AfterObserved):
+        a.form_fulfillment_projection(revision, ir, **kwargs)
+    assert len(calls) == 2
+    result = a.form_fulfillment_projection(revision, ir, **kwargs)
+    assert result[0].formation_receipt['terminal_reason'] == 'VALIDATED_PROJECTION'
+    assert len(calls) == 4 and seen == 2
+    failed = next(r for r in provider._fulfillment_receipts if r['stage'] == 'SEMANTIC_REVIEW_VALIDATED' and r['attempt'] == 1)
+    assert failed['review_contract_failure']['observed_component_count'] == 0
+    assert failed['failed_predicate'] == 'OBLIGATION_SEMANTIC_REVIEW_SCHEMA_INVALID'
+    a.form_fulfillment_projection(revision, ir, **kwargs)
+    assert len(calls) == 4
+
+
+def test_legacy_request_marker_preserves_formation_instructions():
+    revision, ir, inventory, plan = controlled_capacity_case()
+    provider, calls = controlled_model_provider(inventory, plan)
+    runtime = provider.runtime_factory(); generate = runtime.generate; instructions = []
+    def capture(**request):
+        instructions.append(request['instructions'])
+        return generate(**request)
+    runtime.generate = capture
+    caps = a.fulfillment_capability_contracts()
+    legacy = a._owner_source_preconditions(revision, ir, inventory, caps,
+        generation_view_contract=p._SOURCE_CONSUMER_INPUT_CONTRACT,
+        raw_operand_observation_contract='existing-original-wire-owner-operands-v1')
+    provider.form(inventory, caps, owner_preconditions=legacy)
+    assert len(instructions[0].encode()) == 7413
+    assert 'INDEPENDENT_SEMANTIC_REVIEW_OUTPUT' not in instructions[0]
+    fresh = {**legacy, 'review_input_contract': p._REVIEW_INPUT_CONTRACT}
+    provider.form(inventory, caps, owner_preconditions=fresh)
+    assert instructions[1].startswith(instructions[0])
+    assert 'INDEPENDENT_SEMANTIC_REVIEW_OUTPUT' in instructions[1]
+
+
 def test_invalid_fact_operand_cannot_hide_independent_original_source_and_scope_rejections():
     from tests.test_c3_fulfillment_capacity_representation import controlled_wire
     revision,ir,inventory,plan=controlled_capacity_case()

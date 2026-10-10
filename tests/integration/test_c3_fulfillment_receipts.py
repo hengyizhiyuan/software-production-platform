@@ -82,7 +82,7 @@ class NeverCallAgain:
         raise AssertionError("A sealed same-basis receipt must be replayed without another model call")
 
 
-@pytest.mark.parametrize('first_failure', ('semantic', 'incomplete'))
+@pytest.mark.parametrize('first_failure', ('semantic', 'incomplete', 'critic-schema', 'critic-json'))
 def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql(postgres_database, tmp_path, monkeypatch, first_failure):
     import json
     from types import SimpleNamespace
@@ -103,8 +103,14 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
                 first, *rest = verdict.component_results
                 verdict = verdict.model_copy(update={'component_results': (
                     first.model_copy(update={'complete_and_equivalent': False, 'reason': 'Controlled rejected interpretation.'}), *rest)})
+            if not reviews and first_failure == 'critic-schema':
+                first = verdict.component_results[0]
+                verdict = verdict.model_copy(update={'component_results': (
+                    first.model_copy(update={'component_id': first.component_id[:48]}),)})
             reviews.append(verdict)
             output = verdict.model_dump_json()
+            if len(reviews) == 1 and first_failure == 'critic-json':
+                output = '{'
         else:
             plan = declared.form(inventory, payload['existing_capability_contracts'],
                 validation_feedback=payload.get('same_basis_validation_feedback'))
@@ -131,6 +137,17 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
         if first_failure == 'semantic':
             assert feedback['semantic_review_feedback_binding']['observed_receipt_id'] == observed['receipt_id']
             assert feedback['violations'][0]['review_reason'] == 'Controlled rejected interpretation.'
+        elif first_failure.startswith('critic-'):
+            from hashlib import sha256
+            assert feedback['primary_error'] == 'OBLIGATION_SEMANTIC_REVIEW_SCHEMA_INVALID'
+            assert feedback['semantic_review_feedback_binding']['observed_receipt_id'] == observed['receipt_id']
+            diagnostic = feedback['semantic_review_feedback_binding']['review_contract_failure']
+            assert diagnostic['review_output_sha256'] == sha256(observed['review_output'].encode()).hexdigest()
+            assert diagnostic['missing_component_route_indices']
+            validated = next(r for r in records if r.scope['stage'] == 'SEMANTIC_REVIEW_VALIDATED' and r.scope['attempt'] == 1)
+            assert validated.scope['validation_passed'] is False
+            assert validated.scope['review_contract_failure'] == diagnostic
+            assert 'INDEPENDENT_SEMANTIC_REVIEW' in feedback['not_evaluable']
         else:
             assert feedback['completion_observation_contract'] == 'existing-bounded-completion-feedback-v1'
             assert feedback['primary_error'] == 'OBLIGATION_PROJECTION_UNRESOLVED'
@@ -144,6 +161,24 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
     assert never.calls == 0 and all(b.state != 'UNRESOLVED' for b in replay)
     with postgres_database.unit_of_work() as uow:
         assert len(RuntimeStore(uow.session).governance_for_subject(fingerprint)) == count
+    if first_failure.startswith('critic-'):
+        from copy import deepcopy
+        from sqlalchemy import update
+        from spg.infrastructure.persistence.runtime_store import governance_records
+        with postgres_database.unit_of_work() as uow:
+            record = next(r for r in RuntimeStore(uow.session).governance_for_subject(fingerprint)
+                if r.scope['stage'] == 'SEMANTIC_REVIEW_VALIDATED' and r.scope['attempt'] == 1)
+            changed = deepcopy(record.scope)
+            changed['review_contract_failure']['observed_component_count'] = 999
+            uow.session.execute(update(governance_records).where(governance_records.c.id == record.id).values(scope=changed))
+            uow.commit()
+        refused = form_fulfillment_projection(revision, ir, provider=never, database=postgres_database,
+            source_revision=baseline.repository_revision, exact_target_paths=('index.html',))
+        assert never.calls == 0 and all(b.state == 'UNRESOLVED' for b in refused)
+        assert refused[0].formation_receipt['terminal_reason'] == 'OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
+        with postgres_database.unit_of_work() as uow:
+            assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
+            assert len(RuntimeStore(uow.session).governance_for_subject(fingerprint)) == count
 
 
 def test_calibrated_component_review_persists_replays_and_reaches_independent_guardian(

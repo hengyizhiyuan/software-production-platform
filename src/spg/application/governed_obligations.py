@@ -1479,7 +1479,13 @@ def projection_validation_feedback(candidate, revision, ir, inventory, primary_e
                             original_text_sha256=sha256(text.encode()).hexdigest(),
                             observed_source_route_indices=[i for i,r in enumerate(candidate.routes) if r.source_ref == entry['source_ref']],
                             disposition="UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL")
-    if semantic_observation is not None:
+    if semantic_observation is not None and "review_contract_failure" in semantic_observation:
+        identity_valid = False
+        add("OBLIGATION_SEMANTIC_REVIEW_SCHEMA_INVALID")
+        failures[-1].update(failed_owner="INDEPENDENT_SEMANTIC_REVIEW_OUTPUT",
+            review_contract_failure=semantic_observation["review_contract_failure"],
+            formation_deterministic_status="PASS_REVIEW_PENDING_ONLY")
+    elif semantic_observation is not None:
         review = FulfillmentSemanticReviewCandidate.model_validate(semantic_observation["review"])
         if (candidate is None or review.inventory_fingerprint != inventory["inventory_fingerprint"]
                 or review.candidate_fingerprint != fulfillment_candidate_fingerprint(candidate)
@@ -1803,7 +1809,8 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                                 syntax_observation_contract="complete-value-owner-observations-v2",
                                 include_operand_observations=True, include_typed_observations=True,
                                 typed_prerequisite_contract="existing-owner-typed-prerequisites-v11",
-                                generation_view_contract=None, raw_operand_observation_contract=None):
+                                generation_view_contract=None, raw_operand_observation_contract=None,
+                                review_input_contract=None):
     """Necessary proof sets from existing Owner predicates, never route proposals.
 
     The semantic boundary still chooses components and which eligible origin
@@ -1813,6 +1820,8 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
     if generation_view_contract not in (None, "existing-lossless-source-consumer-input-v1", "existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3"):
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     if raw_operand_observation_contract not in (None, "existing-original-wire-owner-operands-v1"):
+        raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
+    if review_input_contract not in (None, "existing-lossless-review-input-v1"):
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     from types import SimpleNamespace
     sources = inventory["sources"]
@@ -1986,6 +1995,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
     return {"contract": "existing-owner-source-prerequisites-v1", "inventory_fingerprint": inventory["inventory_fingerprint"],
         **({"raw_operand_observation_contract": raw_operand_observation_contract}
            if raw_operand_observation_contract is not None else {}),
+        **({"review_input_contract": review_input_contract} if review_input_contract is not None else {}),
         **({"generation_view_contract": generation_view_contract} if generation_view_contract is not None else {}),
         **({"syntax_observation_contract": syntax_observation_contract} if include_syntax_observations else {}),
         **({"typed_prerequisite_contract": typed_prerequisite_contract,
@@ -2321,9 +2331,28 @@ def _semantic_repair_observation(rows, attempt, candidate, inventory, capabiliti
         if (sha256(output.encode()).hexdigest() != observed.get("review_output_sha256")
                 or len(output.encode()) != observed.get("review_output_bytes") or observed.get("review_retained") is not True):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
-        retained = json.loads(output)
+        retained = None  # Schema-rejected original Wire need not be parseable.
     else:
         retained = observed.get("semantic_review")
+    if validated.get("review_contract_failure") is not None:
+        from spg.providers.fulfillment_candidate import _review_schema_failure_observation
+        start = single("MODEL_REQUEST_PENDING")
+        diagnostic = (_review_schema_failure_observation(output, inventory, candidate)
+            if isinstance(output, str) else None)
+        if ((start.get("owner_source_preconditions") or {}).get("review_input_contract") != "existing-lossless-review-input-v1"
+                or diagnostic is None or diagnostic != validated["review_contract_failure"]
+                or validated.get("failed_predicate") != "OBLIGATION_SEMANTIC_REVIEW_SCHEMA_INVALID"
+                or validated.get("semantic_review") is not None):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+        return {"review_contract_failure": diagnostic, "inventory_fingerprint": inventory["inventory_fingerprint"],
+            "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
+            "components_fingerprint": fulfillment_components_fingerprint(candidate),
+            "capabilities_fingerprint": cap_fp, "attempt": attempt,
+            "pending_receipt_id": pending["receipt_id"], "observed_receipt_id": observed["receipt_id"],
+            "validated_receipt_id": validated["receipt_id"], "review_output_sha256": observed["review_output_sha256"],
+            "failed_predicate": validated["failed_predicate"]}
+    if output is not None:
+        retained = json.loads(output)
     if retained != validated.get("semantic_review"):
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     review = FulfillmentSemanticReviewCandidate.model_validate(retained)
@@ -2407,6 +2436,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     None, "complete-value-observations-v1", "complete-value-owner-observations-v1", "complete-value-owner-observations-v2")
                 or preconditions.get("operand_observation_contract") not in (None, "existing-owner-operands-v1")
                 or preconditions.get("raw_operand_observation_contract") not in (None, "existing-original-wire-owner-operands-v1")
+                or preconditions.get("review_input_contract") not in (None, "existing-lossless-review-input-v1")
                 or preconditions.get("generation_view_contract") not in (None, "existing-lossless-source-consumer-input-v1", "existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3")
                 or preconditions.get("typed_prerequisite_contract") not in (None, "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11")):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
@@ -2419,7 +2449,8 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     include_typed_observations=preconditions.get("typed_prerequisite_contract") is not None,
                     typed_prerequisite_contract=preconditions.get("typed_prerequisite_contract"),
                     generation_view_contract=preconditions.get("generation_view_contract"),
-                    raw_operand_observation_contract=preconditions.get("raw_operand_observation_contract"))):
+                    raw_operand_observation_contract=preconditions.get("raw_operand_observation_contract"),
+                    review_input_contract=preconditions.get("review_input_contract"))):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if (row.get("stage") == "MODEL_RESPONSE_OBSERVED" and row.get("candidate_retained") is True
                 and any(key in row for key in _FULFILLMENT_WIRE_METADATA_KEYS)):
@@ -2636,6 +2667,28 @@ class FulfillmentReviewOutcomeUnknown(RuntimeError):
     pass
 
 
+def _record_review_contract_failure(error, recorder, attempt, inventory, candidate, capabilities):
+    """Persist a critic schema rejection against its exact original response."""
+    from spg.providers.fulfillment_candidate import _review_schema_failure_observation, _FulfillmentWireReceiptIdentityError
+    rows = recorder.records()
+    starts = [r for r in rows if r["stage"] == "MODEL_REQUEST_PENDING" and r["attempt"] == attempt]
+    observations = [r for r in rows if r["stage"] == "SEMANTIC_REVIEW_OBSERVED" and r["attempt"] == attempt]
+    if (len(starts) != 1 or len(observations) != 1
+            or (starts[0].get("owner_source_preconditions") or {}).get("review_input_contract") != "existing-lossless-review-input-v1"):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    observed = observations[0]
+    output = observed.get("review_output")
+    if (not isinstance(output, str) or observed.get("review_retained") is not True
+            or sha256(output.encode()).hexdigest() != observed.get("review_output_sha256")
+            or len(output.encode()) != observed.get("review_output_bytes")
+            or observed.get("capabilities_fingerprint") != canonical_fingerprint(capabilities)
+            or _review_schema_failure_observation(output, inventory, candidate) != error.diagnostics):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    recorder.append("SEMANTIC_REVIEW_VALIDATED", attempt, capabilities_fingerprint=canonical_fingerprint(capabilities),
+        validation_passed=False, failed_predicate=str(error), review_contract_failure=error.diagnostics,
+        semantic_feedback_contract="existing-independent-review-feedback-v1")
+
+
 def _review_fulfillment_candidate(provider, candidate, inventory, recorder, attempt, capabilities):
     if not any(route.component_basis is not None for route in candidate.routes):
         return None
@@ -2672,7 +2725,14 @@ def _review_fulfillment_candidate(provider, candidate, inventory, recorder, atte
         if "owner_preconditions" in parameters:
             start = next(row for row in rows if row["attempt"] == attempt and row["stage"] == "MODEL_REQUEST_PENDING")
             kwargs["owner_preconditions"] = start.get("owner_source_preconditions")
-        response = provider.review(inventory, candidate, **kwargs)
+        try:
+            response = provider.review(inventory, candidate, **kwargs)
+        except ValueError as error:
+            from spg.providers.fulfillment_candidate import _FulfillmentReviewValidationError
+            if not isinstance(error, _FulfillmentReviewValidationError):
+                raise
+            _record_review_contract_failure(error, recorder, attempt, inventory, candidate, capabilities)
+            raise
         if not callback:
             recorder.append("SEMANTIC_REVIEW_OBSERVED", attempt,
                 capabilities_fingerprint=canonical_fingerprint(capabilities),
@@ -2683,10 +2743,28 @@ def _review_fulfillment_candidate(provider, candidate, inventory, recorder, atte
             raise ValueError("OBLIGATION_SEMANTIC_REVIEW_CAPABILITIES_DRIFT")
         response = observed.get("semantic_review")
         if response is None and observed.get("review_output") is not None:
-            response = json.loads(observed["review_output"])
+            # Keep the original Wire until the common schema/diagnostic path.
+            # An observed-only interruption must not dispatch Review again.
+            response = observed["review_output"]
         if response is None:
             raise ValueError("OBLIGATION_SEMANTIC_REVIEW_NOT_RETAINED")
-    result = response if isinstance(response, FulfillmentSemanticReviewCandidate) else FulfillmentSemanticReviewCandidate.model_validate(response)
+    try:
+        result = (response if isinstance(response, FulfillmentSemanticReviewCandidate) else
+            FulfillmentSemanticReviewCandidate.model_validate_json(response) if isinstance(response, str) else
+            FulfillmentSemanticReviewCandidate.model_validate(response))
+    except ValueError:
+        from spg.providers.fulfillment_candidate import _review_schema_failure_observation, _FulfillmentReviewValidationError
+        start = next(row for row in recorder.records() if row["stage"] == "MODEL_REQUEST_PENDING" and row["attempt"] == attempt)
+        if (start.get("owner_source_preconditions") or {}).get("review_input_contract") != "existing-lossless-review-input-v1":
+            raise
+        actual = next(row for row in recorder.records() if row["stage"] == "SEMANTIC_REVIEW_OBSERVED" and row["attempt"] == attempt)
+        output = actual.get("review_output")
+        diagnostic = _review_schema_failure_observation(output, inventory, candidate) if isinstance(output, str) else None
+        if diagnostic is None:
+            raise
+        error = _FulfillmentReviewValidationError(diagnostic)
+        _record_review_contract_failure(error, recorder, attempt, inventory, candidate, capabilities)
+        raise error
     try:
         validate_projection_components(candidate, inventory, semantic_review=result)
     except ValueError as error:
@@ -2874,7 +2952,9 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     generation_view_contract=((initial_request.get("owner_source_preconditions") or {}).get("generation_view_contract")
                         if initial_request is not None else "existing-lossless-source-consumer-input-v3"),
                     raw_operand_observation_contract=((initial_request.get("owner_source_preconditions") or {}).get("raw_operand_observation_contract")
-                        if initial_request is not None else "existing-original-wire-owner-operands-v1"))}
+                        if initial_request is not None else "existing-original-wire-owner-operands-v1"),
+                    review_input_contract=((initial_request.get("owner_source_preconditions") or {}).get("review_input_contract")
+                        if initial_request is not None else "existing-lossless-review-input-v1"))}
                     if supports_preconditions and callable(metadata_builder)
                     and "owner_preconditions" in inspect.signature(metadata_builder).parameters else {})
                 if initial_request is None and precondition_arguments:

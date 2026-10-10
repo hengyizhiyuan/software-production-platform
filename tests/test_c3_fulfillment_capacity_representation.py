@@ -145,10 +145,14 @@ def controlled_review(inventory, plan, *, equivalent=True):
 
 def decode_review_input(payload):
     """The controlled reviewer consumes the same exact representation as live."""
+    inventory = payload['immutable_inventory']
+    if 'existing_ir_item_table' in payload:
+        from spg.providers.fulfillment_candidate import _restore_formation_inventory_view
+        inventory = _restore_formation_inventory_view(inventory, payload['existing_ir_item_table'])
     if payload.get('candidate_representation') == 'fulfillment-compact-v1':
         from spg.providers.fulfillment_candidate import _decode_fulfillment_candidate_wire
         return _decode_fulfillment_candidate_wire(json.dumps(payload['untrusted_fulfillment_candidate']),
-            payload['immutable_inventory'],payload['existing_capability_contracts'])
+            inventory,payload['existing_capability_contracts'])
     return FulfillmentProjectionCandidate.model_validate(payload['untrusted_fulfillment_candidate'])
 
 

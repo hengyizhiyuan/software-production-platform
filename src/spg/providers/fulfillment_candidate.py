@@ -83,6 +83,13 @@ class _FulfillmentWireValidationError(ValueError):
         self.diagnostics = diagnostics
 
 
+class _FulfillmentReviewValidationError(ValueError):
+    """A rejected critic response is not a judgement of the proposer."""
+    def __init__(self, diagnostics):
+        super().__init__("OBLIGATION_SEMANTIC_REVIEW_SCHEMA_INVALID")
+        self.diagnostics = diagnostics
+
+
 class _FulfillmentCompactRoute(BaseModel):
     """Ephemeral ordinals over this exact input; never an admitted binding."""
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -798,6 +805,164 @@ def _review_result_identity_slots(inventory, candidate):
             "component_result_count": len(components), "component_results": components}
 
 
+_REVIEW_INPUT_CONTRACT = "existing-lossless-review-input-v1"
+
+
+def _review_input_view(inventory, candidate, capabilities, owner_context):
+    """Share identical existing contracts, preserving each comparison verbatim.
+
+    This is a reversible request view, never a shorter set of obligations,
+    a new response schema or a critic verdict. Components and their original
+    text remain individually visible. All references resolve to existing IDs.
+    """
+    original = _review_component_table(inventory, candidate, capabilities)
+    rows = deepcopy(original)
+    contracts = {c["capability"]: c for c in capabilities}
+    consumers = {c["capability"]: c for c in _existing_consumer_contracts(capabilities)}
+    def share(row):
+        capability = row["capability"]
+        if row["consumer_binding"] != contracts[capability]:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_INPUT_IDENTITY_DRIFT")
+        row["consumer_binding"] = {"existing_capability_contract_ref": capability}
+        if "consumer_operation_contract" in row:
+            if row["consumer_operation_contract"] != consumers[capability]:
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_INPUT_IDENTITY_DRIFT")
+            row["consumer_operation_contract"] = {"existing_consumer_contract_ref": capability}
+    for row in rows:
+        share(row)
+        for fact in row["declared_fact_evidence_operands"]:
+            for route in fact["submitted_fact_routes"]:
+                share(route)
+    restored = _restore_review_component_contracts(rows, capabilities)
+    if restored != original:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_INPUT_IDENTITY_DRIFT")
+    view, items = _formation_inventory_view(inventory)
+    owner_context = deepcopy(owner_context)
+    if "existing_owner_binding_domains" in owner_context:
+        owner = owner_context["existing_owner_source_preconditions"]
+        full = owner_context["existing_owner_binding_domains"]
+        shared = deepcopy(full)
+        fields = {"necessary_source_proofs": "necessary_source_proofs",
+            "whole_source_context_retention": "whole_source_context_retention",
+            "whole_source_context_only": "whole_source_context_only", "polarity": "polarity",
+            "reviewed_background_prerequisites": "reviewed_background_prerequisites",
+            "rejected_prerequisites": "ineligible_binding_prerequisites"}
+        for row in shared:
+            source = owner["sources"][row["source"]]
+            if row["source_ref"] != source["source_ref"]:
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_INPUT_IDENTITY_DRIFT")
+            for field, original_field in fields.items():
+                if field in row and row[field] == source.get(original_field):
+                    row[field] = {"existing_owner_prerequisite_ref": row["source"], "field": original_field}
+        if _restore_review_owner_domains(shared, owner) != full:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_INPUT_IDENTITY_DRIFT")
+        owner_context["existing_owner_binding_domains"] = shared
+    return {"immutable_inventory": view, **({"existing_ir_item_table": items} if items else {}),
+        **owner_context, "review_input_contract": _REVIEW_INPUT_CONTRACT,
+        "component_index_table": rows,
+        "component_comparison_fingerprint": canonical_fingerprint(original),
+        "required_result_identity_slots": _review_result_identity_slots(inventory, candidate),
+        **_review_candidate_representation(inventory, candidate, capabilities),
+        "existing_capability_contracts": capabilities,
+        "existing_consumer_contracts": list(consumers.values()),
+        "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
+        "components_fingerprint": fulfillment_components_fingerprint(candidate)}
+
+
+def _restore_review_component_contracts(rows, capabilities):
+    """Verify request-only sharing; never backfill a model response."""
+    restored = deepcopy(rows)
+    contracts = {c["capability"]: c for c in capabilities}
+    consumers = {c["capability"]: c for c in _existing_consumer_contracts(capabilities)}
+    def restore(row):
+        capability = row["capability"]
+        if (capability not in contracts or row.get("consumer_binding") !=
+                {"existing_capability_contract_ref": capability}):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_INPUT_IDENTITY_DRIFT")
+        row["consumer_binding"] = deepcopy(contracts[capability])
+        if "consumer_operation_contract" in row:
+            if (capability not in consumers or row["consumer_operation_contract"] !=
+                    {"existing_consumer_contract_ref": capability}):
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_INPUT_IDENTITY_DRIFT")
+            row["consumer_operation_contract"] = deepcopy(consumers[capability])
+    for row in restored:
+        restore(row)
+        for fact in row["declared_fact_evidence_operands"]:
+            for route in fact["submitted_fact_routes"]:
+                restore(route)
+    return restored
+
+
+def _restore_review_owner_domains(rows, owner):
+    """Restore repeated prerequisite values only within their original source."""
+    restored = deepcopy(rows)
+    fields = {"necessary_source_proofs": "necessary_source_proofs",
+        "whole_source_context_retention": "whole_source_context_retention",
+        "whole_source_context_only": "whole_source_context_only", "polarity": "polarity",
+        "reviewed_background_prerequisites": "reviewed_background_prerequisites",
+        "rejected_prerequisites": "ineligible_binding_prerequisites"}
+    for row in restored:
+        index = row.get("source")
+        if type(index) is not int or not 0 <= index < len(owner["sources"]):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_INPUT_IDENTITY_DRIFT")
+        source = owner["sources"][index]
+        if row.get("source_ref") != source["source_ref"]:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_INPUT_IDENTITY_DRIFT")
+        for field, original in fields.items():
+            value = row.get(field)
+            if isinstance(value, dict) and "existing_owner_prerequisite_ref" in value:
+                if value != {"existing_owner_prerequisite_ref": index, "field": original} or original not in source:
+                    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_INPUT_IDENTITY_DRIFT")
+                row[field] = deepcopy(source[original])
+    return restored
+
+
+def _review_schema_failure_observation(output, inventory, candidate):
+    """Only syntax/schema/identity observations on an unchanged critic wire.
+
+    No Boolean in an invalid response is used as semantic evidence. Missing
+    identities are reported, never supplied to make the response admissible.
+    """
+    from pydantic import ValidationError
+    allowed_fields = set()
+    def fields_from_schema(node):
+        if isinstance(node, dict):
+            allowed_fields.update(node.get("properties", {}))
+            for value in node.values(): fields_from_schema(value)
+        elif isinstance(node, list):
+            for value in node: fields_from_schema(value)
+    fields_from_schema(FulfillmentSemanticReviewCandidate.model_json_schema())
+    try:
+        raw = json.loads(output, object_pairs_hook=_wire_json_object)
+        FulfillmentSemanticReviewCandidate.model_validate(raw)
+    except (ValueError, TypeError) as error:
+        fields = ([{"type": e["type"], "location": [part if type(part) is int or part in allowed_fields
+            else "UNRECOGNIZED_FIELD" for part in e["loc"]]} for e in
+            error.errors(include_input=False, include_url=False, include_context=False)]
+            if isinstance(error, ValidationError) else [{"type": "invalid_json", "location": []}])
+    else:
+        return None  # Valid schema is judged by existing independent gates.
+    expected = _review_result_identity_slots(inventory, candidate)
+    actual = raw.get("component_results", []) if isinstance(locals().get("raw"), dict) else []
+    actual = actual if isinstance(actual, list) else []
+    keys = [(r.get("component_id"), r.get("capability")) for r in actual if isinstance(r, dict)]
+    required = [(r["component_id"], r["capability"]) for r in expected["component_results"]]
+    # Compare only scalar identities; arbitrary invalid values never become
+    # public diagnostics, capability names, source quotes or instructions.
+    keys = [(a, b) for a, b in keys if isinstance(a, str) and isinstance(b, str)]
+    return {"schema": "existing-review-schema-observations-v1",
+        "review_output_sha256": sha256(output.encode()).hexdigest(),
+        "review_output_bytes": len(output.encode()),
+        "inventory_fingerprint": inventory["inventory_fingerprint"],
+        "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
+        "components_fingerprint": fulfillment_components_fingerprint(candidate),
+        "schema_errors": fields[:64], "additional_schema_error_count": max(0, len(fields)-64),
+        "required_component_count": len(required), "observed_component_count": len(actual),
+        "missing_component_route_indices": [i for i, key in enumerate(required) if key not in keys],
+        "not_evaluable": ["INDEPENDENT_SEMANTIC_EQUIVALENCE", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"],
+        "repair_boundary": "INVALID_CRITIC_RESPONSE_IS_NOT_A_REJECTED_SEMANTIC_MAPPING; NO_VERDICT_BACKFILL"}
+
+
 def _review_output_schema(inventory, candidate):
     """Request only existing review identities; no semantic answer is supplied.
 
@@ -1168,7 +1333,13 @@ class ModelFulfillmentCandidateProvider:
                     "and complementary consumers; do not choose by list order or omit an uncertain requirement. "
                     "Feedback may group repeated identical predicates by route and list all conflicting peers; "
                     "operand observations are referenced by exact original route ordinal within that feedback. "
-                    "These references do not select a correction or supply evidence."
+                    "These references do not select a correction or supply evidence." + (
+                    " When failed_owner is "
+                    "INDEPENDENT_SEMANTIC_REVIEW_OUTPUT, the critic response failed its output contract, "
+                    "not a semantic rejection of the submitted mapping. Preserve every lawful contribution; "
+                    "do not add unresolved or enumerate alternatives to compensate for missing critic results. "
+                    "Semantic equivalence is still unknown and requires the next independent review."
+                    if (owner_preconditions or {}).get("review_input_contract") == _REVIEW_INPUT_CONTRACT else "")
                     if (owner_preconditions or {}).get("generation_view_contract") in _SOURCE_CONSUMER_FEEDBACK_CONTRACTS else "")) if joined_view else (
                     "You propose a derived fulfillment plan for immutable admitted engineering meaning. "
                     "If an inventory source payload has existing_ir_item_ref, resolve it in existing_ir_item_table: "
@@ -1403,10 +1574,30 @@ class ModelFulfillmentCandidateProvider:
             "existing_owner_source_preconditions": owner_preconditions,
             "existing_owner_binding_domains": _formation_binding_choices(inventory, capabilities, owner_preconditions),
             "owner_preconditions_fingerprint": canonical_fingerprint(owner_preconditions)}
+        joined_review = (owner_preconditions or {}).get("review_input_contract") == _REVIEW_INPUT_CONTRACT
+        review_input = (_review_input_view(inventory, candidate, capabilities, review_owner_context)
+            if joined_review else {"immutable_inventory": inventory, **review_owner_context,
+                "required_result_identity_slots": _review_result_identity_slots(inventory, candidate),
+                "component_index_table": _review_component_table(inventory, candidate, capabilities),
+                **_review_candidate_representation(inventory, candidate, capabilities),
+                "existing_capability_contracts": capabilities,
+                "existing_consumer_contracts": _existing_consumer_contracts(capabilities),
+                "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
+                "components_fingerprint": fulfillment_components_fingerprint(candidate)})
         runtime = self.runtime_factory()
         try:
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
-                instructions=("Independently validate a derived fulfillment candidate against the immutable admitted "
+                instructions=(("The request uses existing-lossless-review-input-v1: resolve each "
+                    "existing_capability_contract_ref in existing_capability_contracts by its exact capability, "
+                    "and each existing_consumer_contract_ref in existing_consumer_contracts. These references "
+                    "replace identical repeated contracts only; every component and its original text remains "
+                    "separate. Resolve existing_ir_item_ref in existing_ir_item_table without merging sources. "
+                    "Resolve existing_owner_prerequisite_ref in existing_owner_source_preconditions.sources "
+                    "at that exact original source ordinal and field; this shares unchanged prerequisites, "
+                    "not selected capabilities, authority or semantic judgements. "
+                    "The Owner proved exact reconstruction. No response identity or verdict is supplied or "
+                    "backfilled. Produce every required source and component result, not a representative sample. "
+                    if joined_review else "") + ("Independently validate a derived fulfillment candidate against the immutable admitted "
                     "engineering inventory. The candidate is untrusted; its rationale is not evidence. "
                     "Check every proposed restriction against existing_consumer_contracts: a prohibition must "
                     "restrict exactly the operation entailed by its original source, not an unrelated operation "
@@ -1493,16 +1684,8 @@ class ModelFulfillmentCandidateProvider:
                     "the inventory does not itself establish that dependency. same_source_component_routes "
                     "shows complementary consumers to judge jointly, never permission to drop a component. "
                     "A whole-source reuse cannot conceal a lost semantic component. This review is only "
-                    "derived-plan semantic validation, not Assurance, Verification PASS, a fact or Human authority."),
-                input_text=json.dumps({"immutable_inventory": inventory,
-                    **review_owner_context,
-                    "required_result_identity_slots": _review_result_identity_slots(inventory, candidate),
-                    "component_index_table": _review_component_table(inventory, candidate, capabilities),
-                    **_review_candidate_representation(inventory,candidate,capabilities),
-                    "existing_capability_contracts": capabilities,
-                    "existing_consumer_contracts": _existing_consumer_contracts(capabilities),
-                    "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
-                    "components_fingerprint": fulfillment_components_fingerprint(candidate)}, ensure_ascii=False),
+                    "derived-plan semantic validation, not Assurance, Verification PASS, a fact or Human authority.")),
+                input_text=json.dumps(review_input, ensure_ascii=False),
                 output_schema=_review_output_schema(inventory, candidate))
             self.last_observation = {"request_id": result.request_id, "provider": result.provider.value,
                 "requested_model": result.requested_model, "effective_model": result.effective_model,
@@ -1519,6 +1702,10 @@ class ModelFulfillmentCandidateProvider:
                 raise ValueError("OBLIGATION_SEMANTIC_REVIEW_" + privacy_failure)
             if output is None:
                 raise ValueError("OBLIGATION_SEMANTIC_REVIEW_RECEIPT_LIMIT")
+            if joined_review:
+                diagnostic = _review_schema_failure_observation(output, inventory, candidate)
+                if diagnostic is not None:
+                    raise _FulfillmentReviewValidationError(diagnostic)
             return FulfillmentSemanticReviewCandidate.model_validate_json(output)
         except Exception as error:
             failure = provider_failure_observation(error)
