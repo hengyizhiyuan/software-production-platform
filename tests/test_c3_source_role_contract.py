@@ -63,6 +63,23 @@ def test_shared_production_and_negative_clause_identity_has_a_legal_full_binding
     assert result[0].formation_receipt["source_role_contract"] == "v2"
 
 
+@pytest.mark.parametrize("description", ["This is an internal review exercise.", "这是一次内部验证场景。", "The present output is a software artifact."])
+def test_generation_domain_preserves_legal_reviewed_whole_background_not_just_typed_context(description):
+    from spg.providers.fulfillment_candidate import _formation_output_schema
+    revision, ir, inventory, plan = shared_item_case(description)
+    capabilities = fulfillment_capability_contracts()
+    prerequisites = _owner_source_preconditions(revision, ir, inventory, capabilities)
+    ordinal = next(i for i,s in enumerate(inventory['sources']) if s.get('clause_id') == 'description')
+    assert prerequisites['sources'][ordinal]['whole_source_context_only'] is False
+    schema = _formation_output_schema(inventory, capabilities, owner_preconditions=prerequisites)
+    retain = next(i for i,c in enumerate(capabilities) if c['capability'] == 'RETAIN_CONTEXT')
+    branch = next(b for b in schema['properties']['routes']['items']['anyOf']
+        if ordinal in b['properties']['s']['enum'] and retain in b['properties']['c']['enum'])
+    assert {'properties': {'q': {'type': 'null'}, 'a': {'enum': [0]}, 'z': {'enum': [len(description)]}}} in branch['anyOf']
+    result = validate_projection_candidate(plan, revision, ir, inventory, semantic_review=review(inventory,plan))
+    assert any(b.state == 'RETAINED_CONTEXT' for b in result)
+
+
 def test_same_item_clause_proves_two_roles_but_affirmative_or_future_cannot_prove_prohibition():
     revision, ir, inventory, _ = shared_item_case()
     source = next(s for s in inventory["sources"] if s["kind"] == "WORK_CONSTRAINT")

@@ -298,6 +298,11 @@ def test_review_generation_identity_domains_do_not_supply_or_repair_semantic_ver
     from spg.domain.governed_obligation import fulfillment_candidate_fingerprint, fulfillment_components_fingerprint, fulfillment_component_id
     _, _, inventory, plan, _, _ = case()
     schema = _review_output_schema(inventory, plan)
+    from spg.domain.governed_obligation import FulfillmentSemanticReviewCandidate
+    canonical = FulfillmentSemanticReviewCandidate.model_json_schema()
+    for name in ('FulfillmentSemanticSourceReview', 'FulfillmentSemanticComponentReview'):
+        assert schema['$defs'][name]['properties']['reason']['maxLength'] == 512
+        assert canonical['$defs'][name]['properties']['reason']['maxLength'] == 1000
     assert schema["properties"]["candidate_fingerprint"]["enum"] == [fulfillment_candidate_fingerprint(plan)]
     assert schema["properties"]["components_fingerprint"]["enum"] == [fulfillment_components_fingerprint(plan)]
     expected = {(fulfillment_component_id(r, inventory["inventory_fingerprint"]), r.capability) for r in plan.routes}

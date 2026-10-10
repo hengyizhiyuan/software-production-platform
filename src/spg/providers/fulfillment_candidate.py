@@ -158,7 +158,10 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
                 context = row.get("whole_source_context_retention")
                 partial_context_only = bool(capabilities[capability]["capability"] == "RETAIN_CONTEXT" and (
                     context and not context["whole_source_eligible"]
-                    or row.get("whole_source_context_only") is False))
+                    # The full-plan reviewed-background path can retain an
+                    # affirmative production description even when it is not
+                    # directly typed context. Negation has no such exception.
+                    or row.get("whole_source_context_only") is False and row.get("polarity") == "NEGATED"))
                 if partial_context_only and length <= 1:
                     continue
                 proof = next((p for p in row["necessary_source_proofs"] if p["capability"] == capability), None)
@@ -241,6 +244,7 @@ def _formation_binding_choices(inventory, capabilities, owner_preconditions):
                if "whole_source_context_retention" in row else {}),
             **({"whole_source_context_only": row["whole_source_context_only"]}
                if "whole_source_context_only" in row else {}),
+            **({"polarity": row["polarity"]} if "polarity" in row else {}),
             "rejected_prerequisites": deepcopy(rejected),
             "semantic_selection": "UNPROVEN; SELECT_FROM_ORIGINAL_COMPONENT; NO_PERMISSION_OR_EVIDENCE"})
     return result
@@ -496,7 +500,7 @@ def _existing_consumer_contracts(capabilities):
     methods = {
         "EXACT_CANDIDATE_CONTENT": ("CURRENT_CANDIDATE_CONTENT", (verify_binding_inventory,
             StaticProtectedContextVerifier.verify_fulfillment_bindings),
-            "Check original content components against exact Candidate revision/tree and source witnesses or independently verified linked Facts.",
+            "Check original artifact outcomes against exact Candidate revision/tree and implementation-file source witnesses or independently verified linked Facts. A requested implementation is an outcome to prove from the resulting artifact; it does not require a separate permission capability for the act of producing it. Keep any exclusive file-change constraint at the distinct exact Git Diff consumer. Missing implementation or incomplete behavior must fail content Verification.",
             "Does not authorize execution effects, seal a Candidate, or prove future Human acceptance."),
         "EXACT_GIT_DIFF_SCOPE": ("EXACT_CHANGED_PATH_SET", (_checked_paths, evaluate_constraint_routes),
             "Compare the complete actual Git changed-path set, including file additions, deletions and modifications, from exact source baseline to Candidate with the original exclusive authorized write scope and forbidden paths. Any changed file outside that set fails; the Native SourceVector write scope must match the same exact target set.",
@@ -643,6 +647,9 @@ def _review_output_schema(inventory, candidate):
             "Concise evidence comparison for the exact submitted source/component, not hidden reasoning "
             "or instructions to repair it. Any unsupported restriction, missing meaning or incorrect "
             "Owner/Phase/Evidence must be reflected by false in the applicable verdict below.")
+        # Request a concise comparison inside the existing canonical limit;
+        # never truncate an observed Review or weaken its verdict predicates.
+        properties["reason"]["maxLength"] = min(properties["reason"]["maxLength"], 512)
         properties["complete_and_equivalent"]["description"] = (
             "True only when the submitted contribution preserves all original meaning without adding "
             "an unsupported requirement. False if any submitted route for this source/component must "
@@ -890,7 +897,8 @@ class ModelFulfillmentCandidateProvider:
                     original = owner_preconditions["sources"][source["index"]]
                     if "whole_source_context_only" in original:
                         source["existing_context_prerequisites"] = {"whole_source_context_only":
-                            original["whole_source_context_only"], "meaning": "OWNER_STRUCTURAL_ELIGIBILITY_ONLY; INDEPENDENT_REVIEW_REQUIRED"}
+                            original["whole_source_context_only"], "meaning": "DIRECT_TYPED_CONTEXT_ELIGIBILITY_ONLY; NOT_A_FULL_PLAN_VERDICT",
+                            "conditional_whole_plan_retention": "An affirmative production description may be retained through the existing full-plan Review only if its original current Fact requirements and sibling production requests retain their separate lawful consumers. Current negated clauses cannot use this exception. Independent semantic comparison must establish that no required contribution was turned into background."}
                     if "whole_source_context_retention" in choices:
                         source["whole_source_context_retention"] = deepcopy(choices["whole_source_context_retention"])
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
@@ -970,6 +978,10 @@ class ModelFulfillmentCandidateProvider:
                     "legal component bindings. Nonexecutable description may be retained only under the existing "
                     "Owner prerequisites and independent component Review; an explicit request label alone "
                     "does not turn every descriptive word into a content check. "
+                    "whole_source_context_only reports direct typed-context eligibility, not a prohibition "
+                    "of the existing reviewed-background path for affirmative production descriptions. "
+                    "That path requires all original current Facts and sibling requests to keep their lawful "
+                    "consumers and an independent Review to confirm the proposed background meaning. "
                     "All selected supports must legitimately "
                     "correspond; do not add same-clause references merely because their text looks similar. "
                     "That old proposal is not authority and must not be admitted or blindly copied. Preserve "
@@ -1144,6 +1156,9 @@ class ModelFulfillmentCandidateProvider:
                     "in reason while returning true does not reject anything. Give a concise original-source "
                     "versus proposed-consumer comparison in reason before filling the verdict predicates; "
                     "each verdict must agree with that comparison. No hidden reasoning is requested. "
+                    "Use one or two concise sentences per reason, at most 512 characters. Put the specific "
+                    "failed comparison in its existing component result rather than repeating every sibling "
+                    "comparison in a source reason. Never omit a failure or change a verdict to shorten text. "
                     "Return the unchanged canonical review schema, "
                     "not compact indices or a candidate repair. For EVERY exact "
                     "source_ref decide whether its complete meaning is preserved by the source-linked component "
