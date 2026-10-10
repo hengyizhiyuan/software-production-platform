@@ -156,8 +156,9 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
             operands = {}
             for capability in row["candidate_capabilities"]:
                 context = row.get("whole_source_context_retention")
-                partial_context_only = bool(context and capability == context["capability"]
-                    and not context["whole_source_eligible"])
+                partial_context_only = bool(capabilities[capability]["capability"] == "RETAIN_CONTEXT" and (
+                    context and not context["whole_source_eligible"]
+                    or row.get("whole_source_context_only") is False))
                 if partial_context_only and length <= 1:
                     continue
                 proof = next((p for p in row["necessary_source_proofs"] if p["capability"] == capability), None)
@@ -238,6 +239,8 @@ def _formation_binding_choices(inventory, capabilities, owner_preconditions):
             "necessary_source_proofs": deepcopy(row.get("necessary_source_proofs", [])),
             **({"whole_source_context_retention": deepcopy(row["whole_source_context_retention"])}
                if "whole_source_context_retention" in row else {}),
+            **({"whole_source_context_only": row["whole_source_context_only"]}
+               if "whole_source_context_only" in row else {}),
             "rejected_prerequisites": deepcopy(rejected),
             "semantic_selection": "UNPROVEN; SELECT_FROM_ORIGINAL_COMPONENT; NO_PERMISSION_OR_EVIDENCE"})
     return result

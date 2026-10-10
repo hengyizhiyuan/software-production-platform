@@ -19,6 +19,116 @@ class Checkpoint(BaseException):
     pass
 
 
+def incomplete_case(*, remains_unresolved=False, authority_unknown=False, interrupt=False):
+    from spg.application.governed_obligations import fulfillment_inventory
+    from spg.domain.engineering_semantics import SemanticEpistemicStatus
+    revision, ir, inventory, plan = controlled_capacity_case('small')
+    if authority_unknown:
+        revision.engineering_semantic_facts = tuple(f.model_copy(update={
+            'epistemic_status': SemanticEpistemicStatus.UNRESOLVED}) for f in revision.engineering_semantic_facts)
+        inventory = fulfillment_inventory(revision, ir, source_revision=inventory['source_revision'],
+            exact_target_paths=inventory['exact_target_paths'])
+        plan = plan.model_copy(update={'inventory_fingerprint': inventory['inventory_fingerprint']})
+    pending = plan.model_copy(update={'routes': tuple(r.model_copy(update={
+        'capability': 'UNRESOLVED', 'target_paths': (), 'supporting_source_refs': ()})
+        if r.source_ref.startswith('semantic-fact:') else r for r in plan.routes)})
+    calls, wires = [], []
+    def generate(**request):
+        payload = json.loads(request['input_text']);calls.append(payload)
+        if 'untrusted_fulfillment_candidate' in payload:
+            output = review(inventory, decode_review_input(payload)).model_dump_json()
+        else:
+            feedback = payload.get('same_basis_validation_feedback')
+            selected = pending if feedback is None or remains_unresolved else plan
+            if feedback is not None:
+                data = json.loads(feedback)
+                assert data['completion_observation_contract'] == 'existing-bounded-completion-feedback-v1'
+                assert any(v['code'] == 'OBLIGATION_PROJECTION_UNRESOLVED' for v in data['violations'])
+                assert data['repair_feedback_binding']['wire_output_fingerprint'] == sha256(wires[0].encode()).hexdigest()
+                assert data['repair_feedback_binding']['completion_feedback_contract'] == 'existing-bounded-completion-feedback-v1'
+            wire, _ = controlled_wire(inventory, selected, feedback=feedback,
+                owner_preconditions=payload.get('owner_source_preconditions'))
+            output = json.dumps(wire);wires.append(output)
+        return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
+            requested_model='controlled-incomplete-plan', effective_model='controlled-incomplete-plan',
+            request_id=f'controlled-incomplete-{len(calls)}', usage=ModelUsage(), timing=ModelTiming(), retry_count=0)
+    provider = ModelFulfillmentCandidateProvider(lambda: SimpleNamespace(generate=generate, close=lambda: None))
+    if interrupt:
+        class Memory(list):
+            def append(self, row):
+                super().append(row)
+                if row['stage'] == 'CANDIDATE_VALIDATED' and row['attempt'] == 1: raise Checkpoint()
+        provider._fulfillment_receipts = Memory()
+    def run():
+        return form_fulfillment_projection(revision, ir, provider=provider,
+            source_revision=inventory['source_revision'], exact_target_paths=inventory['exact_target_paths'])
+    return provider, calls, wires, run
+
+
+def test_incomplete_legal_candidate_can_use_one_existing_feedback_and_replay_never_reexecutes():
+    provider, calls, wires, run = incomplete_case()
+    result = run()
+    assert all(b.state != 'UNRESOLVED' for b in result)
+    assert len(wires) == 2 and len(calls) == 4
+    assert result[0].formation_receipt['attempt_count'] == 2
+    frozen = deepcopy(provider._fulfillment_receipts)
+    run()
+    assert provider._fulfillment_receipts == frozen and len(calls) == 4
+
+
+def test_second_incomplete_candidate_stops_without_budget_reset():
+    provider, calls, wires, run = incomplete_case(remains_unresolved=True)
+    result = run()
+    assert all(b.state == 'UNRESOLVED' for b in result)
+    assert result[0].formation_receipt['terminal_reason'] == 'OBLIGATION_PROJECTION_UNRESOLVED'
+    assert len(wires) == 2 and len(calls) == 4
+    frozen = deepcopy(provider._fulfillment_receipts)
+    run();assert len(calls) == 4 and provider._fulfillment_receipts == frozen
+
+
+def test_real_unknown_authority_does_not_open_probability_repair_slot():
+    provider, calls, wires, run = incomplete_case(authority_unknown=True)
+    result = run()
+    assert all(b.state == 'UNRESOLVED' for b in result)
+    assert result[0].formation_receipt['terminal_reason'] == 'UNRESOLVED_BINDING'
+    assert len(wires) == 1 and len(calls) == 2
+
+
+@pytest.mark.parametrize('tamper', ('pending-only', 'both-records', 'feedback-policy', 'wire-output'))
+def test_incomplete_feedback_contract_drift_stops_before_repair_call(tamper):
+    provider, calls, wires, run = incomplete_case(interrupt=True)
+    with pytest.raises(Checkpoint):run()
+    provider._fulfillment_receipts = list(provider._fulfillment_receipts)
+    start = next(r for r in provider._fulfillment_receipts if r['stage'] == 'MODEL_REQUEST_PENDING')
+    if tamper in ('pending-only', 'both-records'):
+        del start['completion_feedback_contract']
+        if tamper == 'both-records':
+            next(r for r in provider._fulfillment_receipts if r['stage'] == 'MODEL_RESPONSE_OBSERVED').pop('completion_feedback_contract')
+    elif tamper == 'wire-output':
+        next(r for r in provider._fulfillment_receipts if r['stage'] == 'MODEL_RESPONSE_OBSERVED')['candidate_output'] += ' '
+    else:
+        row = next(r for r in provider._fulfillment_receipts if r['stage'] == 'CANDIDATE_VALIDATED')
+        feedback = json.loads(row['validation_feedback'])
+        feedback.pop('completion_observation_contract')
+        row['validation_feedback'] = json.dumps(feedback)
+    result = run()
+    assert all(b.state == 'UNRESOLVED' for b in result)
+    assert result[0].formation_receipt['terminal_reason'] == 'OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
+    assert len(wires) == 1 and len(calls) == 2
+
+
+def test_incomplete_feedback_checkpoint_resumes_only_remaining_calls_on_original_basis():
+    provider, calls, wires, run = incomplete_case(interrupt=True)
+    with pytest.raises(Checkpoint): run()
+    frozen = deepcopy(list(provider._fulfillment_receipts))
+    provider._fulfillment_receipts = list(provider._fulfillment_receipts)
+    result = run()
+    assert all(b.state != 'UNRESOLVED' for b in result)
+    assert len(wires) == 2 and len(calls) == 4
+    assert provider._fulfillment_receipts[:len(frozen)] == frozen
+    assert result[0].formation_receipt['attempt_count'] == 2
+
+
 def repair_case(scale='small', interrupt=False):
     revision, ir, inventory, plan = controlled_capacity_case(scale)
     calls, wires = [], []

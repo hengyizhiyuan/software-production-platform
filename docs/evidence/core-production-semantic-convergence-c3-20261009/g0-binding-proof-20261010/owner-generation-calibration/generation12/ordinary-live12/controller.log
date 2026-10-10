@@ -1,0 +1,1 @@
+{"result": "STOPPED", "terminal_reason": "OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID", "logical_calls": 2, "formation_attempt_count": 2, "feedback_count": 1, "observed_terminal_usage_sum": {"input_tokens": 117757, "output_tokens": 1857, "cached_tokens": 2688, "reasoning_tokens": 0, "total_tokens": 119614}, "wall_seconds": 9.348752118996345}

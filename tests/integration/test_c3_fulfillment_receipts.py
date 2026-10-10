@@ -20,7 +20,8 @@ class NeverCallAgain:
         raise AssertionError("A sealed same-basis receipt must be replayed without another model call")
 
 
-def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql(postgres_database, tmp_path, monkeypatch):
+@pytest.mark.parametrize('first_failure', ('semantic', 'incomplete'))
+def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql(postgres_database, tmp_path, monkeypatch, first_failure):
     import json
     from types import SimpleNamespace
     from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
@@ -36,7 +37,7 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
         if 'untrusted_fulfillment_candidate' in payload:
             candidate = decode_review_input(payload)
             verdict = review(inventory, candidate)
-            if not reviews:
+            if not reviews and first_failure == 'semantic':
                 first, *rest = verdict.component_results
                 verdict = verdict.model_copy(update={'component_results': (
                     first.model_copy(update={'complete_and_equivalent': False, 'reason': 'Controlled rejected interpretation.'}), *rest)})
@@ -45,6 +46,10 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
         else:
             plan = declared.form(inventory, payload['existing_capability_contracts'],
                 validation_feedback=payload.get('same_basis_validation_feedback'))
+            if first_failure == 'incomplete' and payload.get('same_basis_validation_feedback') is None:
+                plan = plan.model_copy(update={'routes': tuple(r.model_copy(update={
+                    'capability': 'UNRESOLVED', 'target_paths': (), 'supporting_source_refs': ()})
+                    if r.source_ref.startswith('semantic-fact:') else r for r in plan.routes)})
             wire, _ = controlled_wire(inventory, plan, feedback=payload.get('same_basis_validation_feedback'),
                 owner_preconditions=payload.get('owner_source_preconditions'))
             output = json.dumps(wire)
@@ -61,8 +66,15 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
         failed = next(r.scope for r in records if r.scope['stage'] == 'CANDIDATE_VALIDATED' and r.scope['attempt'] == 1)
         feedback = json.loads(failed['validation_feedback'])
         observed = next(r.scope for r in records if r.scope['stage'] == 'SEMANTIC_REVIEW_OBSERVED' and r.scope['attempt'] == 1)
-        assert feedback['semantic_review_feedback_binding']['observed_receipt_id'] == observed['receipt_id']
-        assert feedback['violations'][0]['review_reason'] == 'Controlled rejected interpretation.'
+        if first_failure == 'semantic':
+            assert feedback['semantic_review_feedback_binding']['observed_receipt_id'] == observed['receipt_id']
+            assert feedback['violations'][0]['review_reason'] == 'Controlled rejected interpretation.'
+        else:
+            assert feedback['completion_observation_contract'] == 'existing-bounded-completion-feedback-v1'
+            assert feedback['primary_error'] == 'OBLIGATION_PROJECTION_UNRESOLVED'
+            assert all(v['code'] == 'OBLIGATION_PROJECTION_UNRESOLVED' for v in feedback['violations'])
+            assert failed['terminal'] is False
+            assert feedback['repair_feedback_binding']['completion_feedback_contract'] == 'existing-bounded-completion-feedback-v1'
         count = len(records)
     never = NeverCallAgain()
     replay = form_fulfillment_projection(revision, ir, provider=never, database=postgres_database,

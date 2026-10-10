@@ -72,6 +72,23 @@ def test_future_provenance_domain_excludes_negative_sibling_and_owner_rejects_it
         _projection_binding(revision, ir, inventory, route, allow_calibrated=True, source_contract="v2")
 
 
+def test_whole_context_preconditions_apply_to_clauses_and_constraints_without_business_aliases():
+    _, _, inventory, _, capabilities, preconditions = case()
+    schema = _formation_output_schema(inventory, capabilities, owner_preconditions=preconditions)
+    context = next(i for i,c in enumerate(capabilities) if c['capability'] == 'RETAIN_CONTEXT')
+    negative = next(row for row in preconditions['sources'] if row.get('polarity') == 'NEGATED')
+    source = inventory['sources'][negative['source']]
+    from spg.domain.governed_obligation import fulfillment_source_semantic_text
+    length = len(fulfillment_source_semantic_text(source))
+    branch = next(b for b in schema['properties']['routes']['items']['anyOf']
+        if negative['source'] in b['properties']['s']['enum'] and context in b['properties']['c']['enum'])
+    assert branch['anyOf'] == [{'properties': {'q': {'type': 'string', 'minLength': 1, 'maxLength': length - 1}}}]
+    # Partial background stays only a proposal; the complete current source
+    # cannot be retained to evade its required gates.
+    assert negative['whole_source_context_only'] is False
+    assert _formation_binding_choices(inventory, capabilities, preconditions)[negative['source']]['whole_source_context_only'] is False
+
+
 def test_request_schema_only_excludes_existing_owner_rejections_and_preserves_unresolved():
     _, _, inventory, _, capabilities, preconditions = case()
     original = deepcopy(_fulfillment_wire_schema())
