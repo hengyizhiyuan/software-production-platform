@@ -139,6 +139,16 @@ def _formation_output_schema(inventory, capabilities):
     return schema
 
 
+def _formation_source_table(context):
+    """Expose the exact primary meaning beside its existing shared ordinal."""
+    rows = []
+    for index, (entry, text) in enumerate(zip(context["tables"]["sources"], context["source_texts"], strict=True)):
+        if sha256(text.encode()).hexdigest() != entry["text_sha256"] or len(text) != entry["text_length"]:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_SOURCE_TABLE_IDENTITY_DRIFT")
+        rows.append({"index": index, **entry, "primary_semantic_text": text})
+    return rows
+
+
 def _fulfillment_wire_context(inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
     """Construct a reversible, request-local dictionary from original identities."""
     from spg.domain.change import safe_repository_path
@@ -553,8 +563,16 @@ class ModelFulfillmentCandidateProvider:
                     "independently choose that capability for this component, THEN u must contain every member "
                     "of one semantically correct proof alternative. The entry is not a request to emit that "
                     "capability. Multiple structurally eligible gates do not mean the requirement forbids all "
-                    "their effects. Select capabilities from this component's actual admitted meaning, not "
-                    "by enumerating eligible proof entries. A FACT in f never replaces original clause supports "
+                    "their effects. Select capabilities from this component's actual admitted meaning, never "
+                    "by enumerating eligible proof entries or importing the union of meanings in supporting sources. "
+                    "First read source_index_table[s]."
+                    "primary_semantic_text and compare that component with the actual consumer operation, "
+                    "including existing_consumer_contracts.enforced_decision and tool_contract when supplied. "
+                    "u proves provenance; it cannot import other prohibitions from a broader parent clause "
+                    "into a narrower primary exclusion. An additional restriction is not equivalent merely "
+                    "because it seems safe. Inspecting a static artifact is a read operation, not creation, "
+                    "modification or external release. Each binding must follow from its own primary component. "
+                    "A FACT in f never replaces original clause supports "
                     "required in u, including for a negative Fact's Git scope. For GIT_DIFF_SCOPE, t is the "
                     "complete admitted change allowlist even when the component describes excluded changes; "
                     "it is neither an excluded-path list nor an empty prohibition marker. Rationale cannot "
@@ -611,7 +629,7 @@ class ModelFulfillmentCandidateProvider:
                     "temporary_wire": {**wire_metadata,
                         "f_allowed_source_ordinals": [index for index, source in enumerate(inventory["sources"])
                             if source["kind"] == "FACT"],
-                        "source_index_table": [{"index": index, **entry} for index, entry in enumerate(context["tables"]["sources"])],
+                        "source_index_table": _formation_source_table(context),
                         "capability_index_table": [{"index": index, "capability": entry["capability"]}
                             for index, entry in enumerate(context["tables"]["capabilities"])],
                         "target_index_table": [{"index": index, "path": path}

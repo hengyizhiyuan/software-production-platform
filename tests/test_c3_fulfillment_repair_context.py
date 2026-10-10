@@ -239,3 +239,31 @@ def test_generation_schema_no_fact_domain_requires_empty_f_not_a_new_index_space
     inventory = fulfillment_inventory(revision, ir)
     props = _formation_output_schema(inventory, fulfillment_capability_contracts())['$defs']['_FulfillmentCompactRoute']['properties']
     assert props['f']['maxItems'] == 0 and 'enum' not in props['f']['items']
+
+
+@pytest.mark.parametrize('scale', ('small', 'medium', 'complex'))
+def test_formation_primary_meaning_projection_preserves_shared_identity_and_original_text(scale):
+    from spg.providers.fulfillment_candidate import _formation_source_table, _fulfillment_wire_context
+    from spg.application.governed_obligations import fulfillment_capability_contracts
+    from spg.domain.governed_obligation import fulfillment_source_semantic_text
+    _, _, inventory, _ = controlled_capacity_case(scale)
+    context = _fulfillment_wire_context(inventory, fulfillment_capability_contracts())
+    original = deepcopy(context)
+    rows = _formation_source_table(context)
+    assert context == original
+    assert len(rows) == len(inventory['sources'])
+    for index, (row, source) in enumerate(zip(rows, inventory['sources'], strict=True)):
+        assert row['index'] == index and row['source_ref'] == source['source_ref']
+        assert row['primary_semantic_text'] == fulfillment_source_semantic_text(source)
+        assert row['text_sha256'] == sha256(row['primary_semantic_text'].encode()).hexdigest()
+        assert 'capability' not in row and 'permission' not in row
+
+
+def test_formation_primary_text_identity_drift_is_not_silently_restored():
+    from spg.providers.fulfillment_candidate import _formation_source_table, _fulfillment_wire_context, _FulfillmentWireReceiptIdentityError
+    from spg.application.governed_obligations import fulfillment_capability_contracts
+    _, _, inventory, _ = controlled_capacity_case()
+    context = _fulfillment_wire_context(inventory, fulfillment_capability_contracts())
+    context['source_texts'] = ('substituted', *context['source_texts'][1:])
+    with pytest.raises(_FulfillmentWireReceiptIdentityError, match='SOURCE_TABLE_IDENTITY_DRIFT'):
+        _formation_source_table(context)
