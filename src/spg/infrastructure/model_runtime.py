@@ -6,6 +6,7 @@ from collections.abc import Callable
 from copy import deepcopy
 from datetime import UTC, datetime
 from enum import StrEnum
+from hashlib import sha256
 import json
 import re
 from threading import Lock
@@ -242,6 +243,10 @@ class ResponsesModelAdapter:
                                     candidate = event.get("response")
                                     if isinstance(candidate, dict):
                                         final_payload = candidate
+                                        # A typed terminal event completes this
+                                        # inference. EOF is transport framing,
+                                        # not another permission to keep reading.
+                                        break
                         break
                     except httpx2.RemoteProtocolError:
                         # A stale keep-alive or an upstream disconnect before the
@@ -317,7 +322,37 @@ class ResponsesModelAdapter:
                 request_id=request_id,
                 occurred_at=datetime.now(UTC),
             )
-        output_text = "".join(output_parts) or self._output_text(final_payload)
+        delta_text = "".join(output_parts)
+        terminal_text = self._output_text(final_payload)
+        if terminal_text and delta_text and not terminal_text.startswith(delta_text):
+            # Neither a different terminal value nor a truncated terminal can
+            # silently replace text already emitted to the consumer.
+            raise ModelProviderError(
+                ModelFailureKind.PROTOCOL_OR_SCHEMA,
+                f"{self.provider.value} stream and terminal output disagree",
+                request_sent=True, usage_unknown=observed_usage.unknown,
+                observed_usage=observed_usage, transport_retry_count=retry_count,
+                retryable=False, provider_status="completed",
+                termination_reason="STREAM_TERMINAL_OUTPUT_MISMATCH",
+                request_id=(str(final_payload["id"])
+                    if isinstance(final_payload.get("id"), str) else None),
+                occurred_at=datetime.now(UTC),
+            )
+        output_text = terminal_text or delta_text
+        missing_tail = terminal_text[len(delta_text):] if terminal_text else ""
+        if missing_tail and on_output_delta is not None:
+            on_output_delta(missing_tail)
+        output_evidence = {
+            "provider_status": "completed",
+            "delta_sha256": sha256(delta_text.encode()).hexdigest(),
+            "delta_bytes": len(delta_text.encode()),
+            "terminal_text_observed": bool(terminal_text),
+            "terminal_sha256": sha256(terminal_text.encode()).hexdigest() if terminal_text else None,
+            "terminal_bytes": len(terminal_text.encode()) if terminal_text else None,
+            "selection": ("TERMINAL_EXACT_PREFIX_COMPLETION" if terminal_text and delta_text and missing_tail
+                else "TERMINAL_MATCHED_DELTA" if terminal_text and delta_text
+                else "TERMINAL_ONLY" if terminal_text else "DELTA_WITHOUT_TERMINAL_TEXT"),
+        }
         if not output_text.strip():
             raise ModelProviderError(
                 ModelFailureKind.MALFORMED_RESPONSE,
@@ -356,6 +391,7 @@ class ResponsesModelAdapter:
                 completed_seconds=completed_at - started,
             ),
             retry_count=retry_count,
+            output_evidence=output_evidence,
         )
 
     def _payload(

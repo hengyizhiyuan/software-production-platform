@@ -82,7 +82,7 @@ class NeverCallAgain:
         raise AssertionError("A sealed same-basis receipt must be replayed without another model call")
 
 
-@pytest.mark.parametrize('first_failure', ('semantic', 'semantic-jsonb-order', 'incomplete', 'critic-schema', 'critic-json'))
+@pytest.mark.parametrize('first_failure', ('semantic', 'semantic-jsonb-order', 'semantic-framed', 'incomplete', 'critic-schema', 'critic-json'))
 def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql(postgres_database, tmp_path, monkeypatch, first_failure):
     import json
     from types import SimpleNamespace
@@ -121,6 +121,8 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
             wire, _ = controlled_wire(inventory, plan, feedback=payload.get('same_basis_validation_feedback'),
                 owner_preconditions=payload.get('owner_source_preconditions'))
             output = json.dumps(wire)
+            if first_failure == 'semantic-framed':
+                output = '```json\n' + output + '\n```'
         return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
             requested_model='controlled-pg-semantic-feedback', effective_model='controlled-pg-semantic-feedback',
             request_id=f'controlled-pg-feedback-{len(calls)}', usage=ModelUsage(), timing=ModelTiming(), retry_count=0)
@@ -155,6 +157,16 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
             assert failed['terminal'] is False
             assert feedback['repair_feedback_binding']['completion_feedback_contract'] == 'existing-bounded-completion-feedback-v1'
         count = len(records)
+        if first_failure == 'semantic-framed':
+            from spg.providers.fulfillment_candidate import _fulfillment_wire_value
+            formations = [r.scope for r in records if r.scope['stage'] == 'MODEL_RESPONSE_OBSERVED']
+            assert len(formations) == 2
+            for scope in formations:
+                assert scope['candidate_output'].startswith('```json')
+                assert scope['wire_presentation'] == _fulfillment_wire_value(scope['candidate_output'],
+                    scope['owner_source_preconditions'])[1]
+            assert feedback['repair_feedback_binding']['response_receipt_id'] == formations[0]['receipt_id']
+            assert feedback['repair_feedback_binding']['wire_presentation'] == formations[0]['wire_presentation']
     never = NeverCallAgain()
     if first_failure == 'semantic-jsonb-order':
         # The actual PG JSONB representation may reorder nested objects used

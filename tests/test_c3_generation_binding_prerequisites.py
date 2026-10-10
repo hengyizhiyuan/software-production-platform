@@ -108,7 +108,7 @@ def test_legacy_schema_is_unchanged_and_new_marker_is_identity_bound():
             a._owner_source_preconditions(revision,ir,inventory,caps,generation_prerequisite_contract=marker)
 
 
-@pytest.mark.parametrize("tamper", (None, "generation_prerequisite_contract", "semantic_selection_input_contract", "typed_prerequisite_contract"))
+@pytest.mark.parametrize("tamper", (None, "generation_prerequisite_contract", "semantic_selection_input_contract", "typed_prerequisite_contract", "source_context_contract", "wire_presentation_contract"))
 def test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget(tamper):
     from tests.test_c3_fulfillment_capacity_representation import controlled_model_provider
     revision,ir,inventory,plan = controlled_capacity_case()

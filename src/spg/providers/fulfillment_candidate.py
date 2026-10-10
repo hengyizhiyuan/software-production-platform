@@ -578,6 +578,16 @@ _SOURCE_CONSUMER_INSTRUCTIONS = (
 
 def _primary_meaning_instructions(owner_preconditions):
     return (_SOURCE_CONSUMER_INSTRUCTIONS +
+        (" After selecting each contribution, independently check the UNION of consumers belonging "
+         "to EACH original source against its COMPLETE original meaning. Routes over other sources "
+         "and provenance citations cannot silently fulfill this source's missing contribution. "
+         "A future Candidate Seal observes sealing, not present content verification; an effect "
+         "denial observes that operation's gate, not all other operations or file changes stated "
+         "in the same source. Preserve every complementary current and future responsibility. "
+         "Conditional background eligibility is only permission to propose a disposition for "
+         "independent Review, not evidence that the source is descriptive. Shared Fact provenance "
+         "is source participation, not proof that every provenance span states the Fact's outcome."
+         if owner_preconditions.get("source_context_contract") == "existing-primary-contribution-background-v1" else "") +
         (" For each proposed route, emit its exact basis and r comparison BEFORE c. "
          "In that brief public justification identify the original contribution and the "
          "observation that would actually distinguish its violation from fulfillment, then "
@@ -1338,6 +1348,7 @@ def _fulfillment_wire_route_observations(output, inventory, capabilities, *, val
     cannot provide proof for another route. Full-plan validation is unchanged.
     """
     context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
+    output, _ = _fulfillment_wire_value(output, owner_preconditions)
     syntax_unavailable = []
     try:
         wire = _FulfillmentCompactCandidate.model_validate(json.loads(output, object_pairs_hook=_wire_json_object))
@@ -1399,6 +1410,7 @@ def _raw_fulfillment_owner_operands(output, inventory, capabilities, *, validati
     context = _fulfillment_wire_context(inventory, capabilities,
         validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
     choices = _formation_binding_choices(inventory, capabilities, owner_preconditions)
+    output, _ = _fulfillment_wire_value(output, owner_preconditions)
     syntax_observation = None
     try:
         wire = _FulfillmentCompactCandidate.model_validate(json.loads(output, object_pairs_hook=_wire_json_object))
@@ -1461,6 +1473,40 @@ def _raw_fulfillment_owner_operands(output, inventory, capabilities, *, validati
             *( ["COMPLETE_WIRE_SYNTAX"] if syntax_observation is not None else [])]}
 
 
+_WIRE_PRESENTATION_CONTRACT = "existing-lossless-json-frame-v1"
+
+
+def _fulfillment_wire_value(output, owner_preconditions=None):
+    """Select only a request-bound, complete outer representation, never repair.
+
+    The original Wire remains the Provider observation. Character and UTF-8
+    geometry bind a derived body to it; every JSON/schema/identity/semantic
+    predicate still runs on the complete body. Legacy requests stay strict.
+    """
+    if (not isinstance(output, str) or (owner_preconditions or {}).get(
+            "wire_presentation_contract") != _WIRE_PRESENTATION_CONTRACT):
+        return output, None
+    import re
+    frame = re.fullmatch(r"\s*```json\r?\n(?P<body>[\s\S]*?)\r?\n```\s*", output)
+    if frame is not None:
+        try:
+            complete = json.loads(frame.group("body"))
+        except (ValueError, RecursionError):
+            frame = None
+        else:
+            if not isinstance(complete, dict):
+                frame = None
+    start, end = frame.span("body") if frame is not None else (0, len(output))
+    body = output[start:end]
+    return body, {"contract": _WIRE_PRESENTATION_CONTRACT,
+        "representation": "UNIQUE_COMPLETE_JSON_FRAME" if frame is not None else "ORIGINAL_JSON_VALUE",
+        "original_wire_sha256": sha256(output.encode()).hexdigest(),
+        "original_wire_bytes": len(output.encode()), "inner_character_range": [start, end],
+        "inner_utf8_byte_range": [len(output[:start].encode()), len(output[:end].encode())],
+        "inner_sha256": sha256(body.encode()).hexdigest(), "inner_bytes": len(body.encode()),
+        "disposition": "DERIVED_REPRESENTATION_ONLY; ALL_VALIDATION_AND_AUTHORITY_GATES_REQUIRED"}
+
+
 def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
                                      validation_feedback=None, wire_metadata=None, owner_preconditions=None):
     """Expand only metadata; all semantic route choices remain model candidates."""
@@ -1476,6 +1522,9 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
         "inventory_fingerprint": inventory["inventory_fingerprint"],
         **{key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS}}
     detailed = (owner_preconditions or {}).get("syntax_observation_contract") == "complete-value-owner-observations-v2"
+    output, presentation = _fulfillment_wire_value(output, owner_preconditions)
+    if presentation is not None:
+        diagnostic_basis["wire_presentation"] = presentation
     try:
         if isinstance(output, str):
             output = json.loads(output, object_pairs_hook=_wire_json_object)
@@ -1566,7 +1615,7 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
     return candidate
 
 
-def _safe_fulfillment_response_output(text):
+def _safe_fulfillment_response_output(text, *, owner_preconditions=None):
     """Retain only a privacy-safe observation, without repairing the candidate.
 
     This parse is solely for privacy: keep duplicate values and object keys so
@@ -1580,7 +1629,8 @@ def _safe_fulfillment_response_output(text):
     if output != text:
         return None, digest, count, "SECRET_BACKFILL"
     try:
-        decoded = json.loads(text, object_pairs_hook=lambda pairs: [
+        value, _ = _fulfillment_wire_value(text, owner_preconditions)
+        decoded = json.loads(value, object_pairs_hook=lambda pairs: [
             [key, value] for key, value in pairs])
     except (json.JSONDecodeError, ValueError, RecursionError):
         # An invalid JSON document with escapes cannot be proved privacy-safe.
@@ -1869,8 +1919,10 @@ class ModelFulfillmentCandidateProvider:
                 "transport_retry_count": result.retry_count,
                 "output_sha256": sha256(result.output_text.encode()).hexdigest(),
                 "output_bytes": len(result.output_text.encode())}
+            if getattr(result, "output_evidence", None) is not None:
+                self.last_observation["output_evidence"] = result.output_evidence
             safe_output, output_digest, output_bytes, privacy_failure = (
-                _safe_fulfillment_response_output(result.output_text))
+                _safe_fulfillment_response_output(result.output_text, owner_preconditions=owner_preconditions))
             if receipt_callback is not None:
                 receipt_callback(candidate_output=safe_output, candidate_output_sha256=output_digest,
                     candidate_output_bytes=output_bytes, candidate_retained=safe_output is not None,
@@ -1914,7 +1966,15 @@ class ModelFulfillmentCandidateProvider:
         runtime = self.runtime_factory()
         try:
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
-                instructions=((("First use original_authority_type_projection, the exact existing field contracts "
+                instructions=((("For EACH original source compare its COMPLETE meaning to the UNION of its "
+                    "actual submitted consumers. Future sealing is not current content verification; denying "
+                    "one operation is not a file-change or other-operation check. Reject missing complementary "
+                    "responsibilities even if their words occur in another source. The conditional background "
+                    "predicate only exposes a candidate for this independent judgment. Empty effects or shared "
+                    "Fact provenance alone prove neither background nor a required artifact outcome; judge "
+                    "the exact original contribution. Never approve an actual request as retained description. "
+                    if (owner_preconditions or {}).get("source_context_contract") == "existing-primary-contribution-background-v1" else "") +
+                    ("First use original_authority_type_projection, the exact existing field contracts "
                     "and derivation locations. ProductionIntent.scope contains BUSINESS scope summaries, "
                     "not filesystem paths or write grants. An original content requirement derived from "
                     "that field remains content; putting it in Work.constraints does not turn it into a "
@@ -2045,6 +2105,8 @@ class ModelFulfillmentCandidateProvider:
                 "transport_retry_count": result.retry_count,
                 "output_sha256": sha256(result.output_text.encode()).hexdigest(),
                 "output_bytes": len(result.output_text.encode())}
+            if getattr(result, "output_evidence", None) is not None:
+                self.last_observation["output_evidence"] = result.output_evidence
             output, digest, count, privacy_failure = (
                 _safe_fulfillment_response_output(result.output_text))
             if receipt_callback is not None:

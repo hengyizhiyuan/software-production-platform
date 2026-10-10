@@ -205,3 +205,53 @@ def test_incomplete_response_preserves_safe_recovery_diagnostics() -> None:
     assert failure.value.termination_reason == "max_output_tokens"
     assert failure.value.request_id == "response-incomplete-1"
     assert failure.value.occurred_at is not None
+
+
+def _terminal_output_adapter(delta: str, terminal_text: str, *, reject_after_terminal=False):
+    terminal = {"id": "terminal-output-identity", "status": "completed",
+        "model": "deepseek-flash", "output_text": terminal_text,
+        "usage": {"input_tokens": 10, "output_tokens": 5, "total_tokens": 15}}
+    payload = ("data: " + json.dumps({"type": "response.output_text.delta", "delta": delta})
+        + "\n\ndata: " + json.dumps({"type": "response.completed", "response": terminal}) + "\n\n").encode()
+    class Stream(httpx2.SyncByteStream):
+        def __iter__(self):
+            yield payload
+            if reject_after_terminal:
+                raise AssertionError("Transport read continued after terminal identity")
+    return DeepSeekResponsesModelAdapter(api_key=lambda: "test-secret",
+        base_url="https://api.deepseek.com", client=httpx2.Client(
+            base_url="https://api.deepseek.com", transport=httpx2.MockTransport(
+                lambda _request: httpx2.Response(200, stream=Stream()))))
+
+
+def test_terminal_response_closes_stream_without_waiting_for_eof() -> None:
+    adapter = _terminal_output_adapter('{"ok":true}', '{"ok":true}', reject_after_terminal=True)
+    result = adapter.generate(profile=_profile(), instructions="x", input_text="y", output_schema={"type":"object"})
+    assert result.output_text == '{"ok":true}'
+    assert result.retry_count == 0
+
+
+def test_exact_terminal_completion_preserves_delta_prefix_and_receipt_identity() -> None:
+    from hashlib import sha256
+    delta, complete = '{"ok":', '{"ok":true}'
+    adapter = _terminal_output_adapter(delta, complete)
+    emitted = []
+    result = adapter.generate(profile=_profile(), instructions="x", input_text="y",
+        output_schema={"type":"object"}, on_output_delta=emitted.append)
+    assert result.output_text == complete and ''.join(emitted) == complete
+    assert result.output_evidence['delta_sha256'] == sha256(delta.encode()).hexdigest()
+    assert result.output_evidence['terminal_sha256'] == sha256(complete.encode()).hexdigest()
+    assert result.output_evidence['selection'] == 'TERMINAL_EXACT_PREFIX_COMPLETION'
+    assert result.retry_count == 0 and result.usage.total_tokens == 15
+
+
+@pytest.mark.parametrize('delta,terminal', [('{"ok":true}', '{"ok":false}'), ('{"ok":true}', '{"ok":')])
+def test_conflicting_terminal_and_delta_are_protocol_stop_not_candidate_repair(delta, terminal) -> None:
+    adapter = _terminal_output_adapter(delta, terminal)
+    with pytest.raises(ModelProviderError) as failed:
+        adapter.generate(profile=_profile(), instructions="x", input_text="y", output_schema={"type":"object"})
+    assert failed.value.kind is ModelFailureKind.PROTOCOL_OR_SCHEMA
+    assert failed.value.retryable is False
+    assert failed.value.termination_reason == 'STREAM_TERMINAL_OUTPUT_MISMATCH'
+    assert failed.value.request_id == 'terminal-output-identity'
+    assert failed.value.observed_usage.total_tokens == 15

@@ -86,6 +86,7 @@ class StructuredModelResult:
     usage: ModelUsage
     timing: ModelTiming
     retry_count: int = 0
+    output_evidence: dict[str, object] | None = None
 
 
 ModelDeltaCallback = Callable[[str], None]
