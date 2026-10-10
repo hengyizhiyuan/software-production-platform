@@ -1,0 +1,18 @@
+{
+  "actual_schema_sha256": "925873b46d6a6f8005275805b8b9ef0aa5e034b89e451d711e646a32373e32fc",
+  "oracle": "jsonschema.Draft202012Validator",
+  "schema_valid": true,
+  "controlled_shape_valid": true,
+  "semantic_validity_of_fixture": "NOT_EVALUATED",
+  "model_calls": 0,
+  "rejections": {
+    "wrong-id": true,
+    "duplicate": true,
+    "wrong-consumer": true,
+    "missing": true,
+    "extra": true,
+    "wrong-source": true,
+    "historical-copy-error": true
+  },
+  "negative_verdict_shape_allowed": true
+}

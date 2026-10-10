@@ -1,0 +1,15 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 84 items
+
+tests/test_n1_static_html_semantics.py ................................. [ 39%]
+......................................                                   [ 84%]
+tests/test_c3_static_scope_binding.py ........                           [ 94%]
+tests/test_c3_route_scoped_review.py ....                                [ 98%]
+tests/test_c3_generation_projection_economy.py .                         [100%]
+
+--------------------- generated xml file: /out/result.xml ----------------------
+============================= 84 passed in 19.23s ==============================

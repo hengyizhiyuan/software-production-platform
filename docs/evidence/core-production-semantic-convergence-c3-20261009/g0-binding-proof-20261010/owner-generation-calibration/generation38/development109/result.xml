@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="10.620" timestamp="2026-10-10T19:56:37.366996+00:00" hostname="53461b95fc8c"><testcase classname="" name="tests.test_c3_static_scope_binding" time="0.000"><error message="collection failure">ImportError while importing test module '/dev-input/tests/test_c3_static_scope_binding.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_static_scope_binding.py:13: in &lt;module&gt;
+    from tests.test_n1_static_html_semantics import _fixture, _candidate, _admitted_count, ITEMS, HEADING, _git
+E   ImportError: cannot import name 'HEADING' from 'tests.test_n1_static_html_semantics' (/dev-input/tests/test_n1_static_html_semantics.py)</error></testcase></testsuite></testsuites>

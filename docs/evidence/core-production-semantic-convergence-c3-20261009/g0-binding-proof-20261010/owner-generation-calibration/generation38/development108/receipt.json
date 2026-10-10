@@ -1,0 +1,22 @@
+{
+  "exit_code": 1,
+  "wall_seconds": 86.42349232698325,
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "container_id": "134856eb640f4cb87625c7c89b17967b2c7076d4bb6101823a2f44865f4d2db0",
+  "source_overlay": true,
+  "snapshot_sha256": "25544c437cc0ac07ab2aeb5bc990ec3d1d1f65ac1810b7c18954d7b88ba65c40",
+  "nodes": [
+    "tests/test_c3_route_scoped_review.py",
+    "tests/test_c3_generation_projection_economy.py",
+    "tests/test_c3_fulfillment_capacity_representation.py",
+    "tests/test_c3_owner_repair_preconditions.py",
+    "tests/test_c3_generation_owner_domains.py",
+    "tests/test_c3_source_role_contract.py",
+    "tests/test_c3_fulfillment_repair_context.py",
+    "tests/test_c3_fulfillment_wire_feedback.py",
+    "tests/test_c3_semantic_contract_calibration.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

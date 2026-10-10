@@ -1,0 +1,17 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 29.00547686300706,
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "container_id": "d68a3b3a9dd022f61cc03a1c2d9d40a51fa2095f66233eff6fdb13b4af54f74c",
+  "source_overlay": true,
+  "snapshot_sha256": "e2afeea97e708b808d859112331cfb749bf1947d9aeda08c8a0b32166dfd91d1",
+  "nodes": [
+    "tests/test_n1_static_html_semantics.py",
+    "tests/test_c3_static_scope_binding.py",
+    "tests/test_c3_route_scoped_review.py",
+    "tests/test_c3_generation_projection_economy.py::test_legacy_request_marker_preserves_formation_instructions"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

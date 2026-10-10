@@ -1,0 +1,166 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 182 items
+
+tests/test_n1_static_html_semantics.py ................................. [ 18%]
+......................................                                   [ 39%]
+tests/test_c3_static_scope_binding.py FFFFFFF                            [ 42%]
+tests/test_c3_route_scoped_review.py ....                                [ 45%]
+tests/test_c3_generation_projection_economy.py ......................... [ 58%]
+.............................                                            [ 74%]
+tests/test_c3_fulfillment_repair_context.py ............................ [ 90%]
+..................                                                       [100%]
+
+=================================== FAILURES ===================================
+_ test_open_scope_preserved_and_bound_only_after_existing_independent_review[the requested landing page] _
+tests/test_c3_static_scope_binding.py:44: in test_open_scope_preserved_and_bound_only_after_existing_independent_review
+    result = verify_static_html_semantic_facts(repository, candidate, contract, (fact,),
+src/spg/providers/static_html_semantic_verifier.py:1019: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:920: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path,
+src/spg/providers/static_html_semantic_verifier.py:510: in repair
+    return self._repair_count(fact, source_text, path, payload, instructions,
+src/spg/providers/static_html_semantic_verifier.py:731: in _repair_count
+    number = index + 1 if recorder is None else recorder.begin(
+src/spg/providers/verification_receipts.py:149: in begin
+    self._append(component, attempt, "MODEL_REQUEST_PENDING", feedback=feedback)
+src/spg/providers/verification_receipts.py:97: in _append
+    "fact_refs": [str(item.fact_id) for item in self.request.semantic_fact_obligations],
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'semantic_fact_obligations'
+_ test_open_scope_preserved_and_bound_only_after_existing_independent_review[\u672c\u5de5\u4f5c\u8981\u6c42\u7684\u65b0\u5efa\u9875\u9762] _
+tests/test_c3_static_scope_binding.py:44: in test_open_scope_preserved_and_bound_only_after_existing_independent_review
+    result = verify_static_html_semantic_facts(repository, candidate, contract, (fact,),
+src/spg/providers/static_html_semantic_verifier.py:1019: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:920: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path,
+src/spg/providers/static_html_semantic_verifier.py:510: in repair
+    return self._repair_count(fact, source_text, path, payload, instructions,
+src/spg/providers/static_html_semantic_verifier.py:731: in _repair_count
+    number = index + 1 if recorder is None else recorder.begin(
+src/spg/providers/verification_receipts.py:149: in begin
+    self._append(component, attempt, "MODEL_REQUEST_PENDING", feedback=feedback)
+src/spg/providers/verification_receipts.py:97: in _append
+    "fact_refs": [str(item.fact_id) for item in self.request.semantic_fact_obligations],
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'semantic_fact_obligations'
+_ test_open_scope_preserved_and_bound_only_after_existing_independent_review[the authorized introductory surface] _
+tests/test_c3_static_scope_binding.py:44: in test_open_scope_preserved_and_bound_only_after_existing_independent_review
+    result = verify_static_html_semantic_facts(repository, candidate, contract, (fact,),
+src/spg/providers/static_html_semantic_verifier.py:1019: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:920: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path,
+src/spg/providers/static_html_semantic_verifier.py:510: in repair
+    return self._repair_count(fact, source_text, path, payload, instructions,
+src/spg/providers/static_html_semantic_verifier.py:731: in _repair_count
+    number = index + 1 if recorder is None else recorder.begin(
+src/spg/providers/verification_receipts.py:149: in begin
+    self._append(component, attempt, "MODEL_REQUEST_PENDING", feedback=feedback)
+src/spg/providers/verification_receipts.py:97: in _append
+    "fact_refs": [str(item.fact_id) for item in self.request.semantic_fact_obligations],
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'semantic_fact_obligations'
+_ test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[unauthorized-path] _
+tests/test_c3_static_scope_binding.py:87: in test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review
+    result=verify_static_html_semantic_facts(repository,candidate,contract,(fact,),
+src/spg/providers/static_html_semantic_verifier.py:1019: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:920: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path,
+src/spg/providers/static_html_semantic_verifier.py:510: in repair
+    return self._repair_count(fact, source_text, path, payload, instructions,
+src/spg/providers/static_html_semantic_verifier.py:731: in _repair_count
+    number = index + 1 if recorder is None else recorder.begin(
+src/spg/providers/verification_receipts.py:149: in begin
+    self._append(component, attempt, "MODEL_REQUEST_PENDING", feedback=feedback)
+src/spg/providers/verification_receipts.py:97: in _append
+    "fact_refs": [str(item.fact_id) for item in self.request.semantic_fact_obligations],
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'semantic_fact_obligations'
+_ test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[unknown-qualifier] _
+tests/test_c3_static_scope_binding.py:87: in test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review
+    result=verify_static_html_semantic_facts(repository,candidate,contract,(fact,),
+src/spg/providers/static_html_semantic_verifier.py:1019: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:920: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path,
+src/spg/providers/static_html_semantic_verifier.py:510: in repair
+    return self._repair_count(fact, source_text, path, payload, instructions,
+src/spg/providers/static_html_semantic_verifier.py:731: in _repair_count
+    number = index + 1 if recorder is None else recorder.begin(
+src/spg/providers/verification_receipts.py:149: in begin
+    self._append(component, attempt, "MODEL_REQUEST_PENDING", feedback=feedback)
+src/spg/providers/verification_receipts.py:97: in _append
+    "fact_refs": [str(item.fact_id) for item in self.request.semantic_fact_obligations],
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'semantic_fact_obligations'
+_ test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[review-refusal] _
+tests/test_c3_static_scope_binding.py:87: in test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review
+    result=verify_static_html_semantic_facts(repository,candidate,contract,(fact,),
+src/spg/providers/static_html_semantic_verifier.py:1019: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:920: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path,
+src/spg/providers/static_html_semantic_verifier.py:510: in repair
+    return self._repair_count(fact, source_text, path, payload, instructions,
+src/spg/providers/static_html_semantic_verifier.py:731: in _repair_count
+    number = index + 1 if recorder is None else recorder.begin(
+src/spg/providers/verification_receipts.py:149: in begin
+    self._append(component, attempt, "MODEL_REQUEST_PENDING", feedback=feedback)
+src/spg/providers/verification_receipts.py:97: in _append
+    "fact_refs": [str(item.fact_id) for item in self.request.semantic_fact_obligations],
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'semantic_fact_obligations'
+_ test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[missing-review] _
+tests/test_c3_static_scope_binding.py:83: in test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review
+    verify_static_html_semantic_facts(repository,candidate,contract,(fact,),
+src/spg/providers/static_html_semantic_verifier.py:1019: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:920: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path,
+src/spg/providers/static_html_semantic_verifier.py:510: in repair
+    return self._repair_count(fact, source_text, path, payload, instructions,
+src/spg/providers/static_html_semantic_verifier.py:731: in _repair_count
+    number = index + 1 if recorder is None else recorder.begin(
+src/spg/providers/verification_receipts.py:149: in begin
+    self._append(component, attempt, "MODEL_REQUEST_PENDING", feedback=feedback)
+src/spg/providers/verification_receipts.py:97: in _append
+    "fact_refs": [str(item.fact_id) for item in self.request.semantic_fact_obligations],
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'semantic_fact_obligations'
+=============================== warnings summary ===============================
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[small]
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[medium]
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[complex]
+  tests/test_c3_generation_projection_economy.py:11: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[small]
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[medium]
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[complex]
+  tests/test_c3_generation_projection_economy.py:182: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize('scale', ['small', 'medium', 'complex'])
+
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[small]
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[medium]
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[complex]
+  tests/test_c3_generation_projection_economy.py:421: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ["small", "medium", "complex"])
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_static_scope_binding.py::test_open_scope_preserved_and_bound_only_after_existing_independent_review[the requested landing page]
+FAILED tests/test_c3_static_scope_binding.py::test_open_scope_preserved_and_bound_only_after_existing_independent_review[\u672c\u5de5\u4f5c\u8981\u6c42\u7684\u65b0\u5efa\u9875\u9762]
+FAILED tests/test_c3_static_scope_binding.py::test_open_scope_preserved_and_bound_only_after_existing_independent_review[the authorized introductory surface]
+FAILED tests/test_c3_static_scope_binding.py::test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[unauthorized-path]
+FAILED tests/test_c3_static_scope_binding.py::test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[unknown-qualifier]
+FAILED tests/test_c3_static_scope_binding.py::test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[review-refusal]
+FAILED tests/test_c3_static_scope_binding.py::test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[missing-review]
+================== 7 failed, 175 passed, 9 warnings in 56.09s ==================

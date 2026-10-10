@@ -1,0 +1,66 @@
+{
+  "schema": "independent-historical-v1-review-byte-and-terminal-replay-v1",
+  "time_utc": "2026-10-10T20:07:59.509291Z",
+  "old_image": "sha256:18a0e4454195c043aa2a5354a8be53a4c35bdf54e529dfd479b95275ff6c85b4",
+  "new_image": "sha256:241e4d9aeaf20335263d895d2f9a0ba49e1f8b6b61a5cd10f0db5e74d56dfb8e",
+  "old_source": "7820ec05ca20b2421f99c82eaf906cf539eb05f6",
+  "new_source": "69663b501fe00887733114ebe040e04d4e343e81",
+  "export_sha256": "15152aa2a034ed024e7337abc1964f195ba32b447e59c5e72e7a0bb778fd8616",
+  "requests_exact_byte_equal": true,
+  "request_comparisons": [
+    {
+      "attempt": 1,
+      "input_text": true,
+      "instructions": true,
+      "output_schema": true
+    },
+    {
+      "attempt": 2,
+      "input_text": true,
+      "instructions": true,
+      "output_schema": true
+    }
+  ],
+  "terminal_replay_normalized_byte_equal": true,
+  "normalization": "Only nondeterministic elapsed_seconds omitted from derived replay output. Original persisted terminal and full receipt sequence independently remain unchanged.",
+  "old_core": {
+    "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+    "source_count": 19,
+    "all_governance_record_count": 15,
+    "formation_stage_record_count": 14,
+    "source_role_contract": "v3",
+    "legacy_review_input_contract": "existing-lossless-review-input-v1",
+    "terminal_reason": "OBLIGATION_COMPONENT_REVIEW_IDENTITY_DRIFT",
+    "original_terminal_sha256": "d0a025383b58592bf0fc7a1cd3fbd7fb5e1d8dc4bd6a74cc03a6a8a209de3b23",
+    "original_receipt_sequence_sha256": "8198ec629636020a87311c3594adb7c60fdef02570766e0c6b3f934a03ee2679",
+    "post_receipt_sequence_sha256": "8198ec629636020a87311c3594adb7c60fdef02570766e0c6b3f934a03ee2679",
+    "runtime_factory_calls": 0,
+    "provider_network_calls": 0,
+    "new_receipts": 0,
+    "replayed_binding_count": 19,
+    "all_unresolved": true
+  },
+  "new_core": {
+    "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+    "source_count": 19,
+    "all_governance_record_count": 15,
+    "formation_stage_record_count": 14,
+    "source_role_contract": "v3",
+    "legacy_review_input_contract": "existing-lossless-review-input-v1",
+    "terminal_reason": "OBLIGATION_COMPONENT_REVIEW_IDENTITY_DRIFT",
+    "original_terminal_sha256": "d0a025383b58592bf0fc7a1cd3fbd7fb5e1d8dc4bd6a74cc03a6a8a209de3b23",
+    "original_receipt_sequence_sha256": "8198ec629636020a87311c3594adb7c60fdef02570766e0c6b3f934a03ee2679",
+    "post_receipt_sequence_sha256": "8198ec629636020a87311c3594adb7c60fdef02570766e0c6b3f934a03ee2679",
+    "runtime_factory_calls": 0,
+    "provider_network_calls": 0,
+    "new_receipts": 0,
+    "replayed_binding_count": 19,
+    "all_unresolved": true
+  },
+  "result": "PASS_HISTORICAL_V1_BYTES_AND_UNRESOLVED_ZERO_MODEL_REPLAY_ONLY",
+  "holdout_read": false,
+  "historical_data_changed": false,
+  "provider_calls": 0,
+  "new_receipts": 0,
+  "runtime_or_assurance_pass": false
+}

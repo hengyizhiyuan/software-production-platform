@@ -1,0 +1,63 @@
+{
+  "schema": "independent-historical-v1-review-audit-manifest-v1",
+  "recorded_at_utc": "2026-10-10T20:08:37.591701Z",
+  "source": "69663b501fe00887733114ebe040e04d4e343e81",
+  "expected_tree": "c6df902cd3f13b328a0711280fa51f51e5ed9e11",
+  "actual_image": "sha256:241e4d9aeaf20335263d895d2f9a0ba49e1f8b6b61a5cd10f0db5e74d56dfb8e",
+  "build_receipt_sha256": "b24d169c37c4e3347351edb8cab636803b74896937cfccfc1080b465cae6a2a6",
+  "controller_sha256": "d28912da6b775b8c3a49f623bdda87aa255e8e3560394076a87da174a92181b4",
+  "comparison_sha256": "4ce4748a74d84f1aebc3444df810f3a481419b02ff64f66dcd7d9474670237c3",
+  "files": [
+    {
+      "relative_path": "audit_historical_review.py",
+      "bytes": 9368,
+      "sha256": "d28912da6b775b8c3a49f623bdda87aa255e8e3560394076a87da174a92181b4",
+      "visibility": "PUBLIC_SAFE"
+    },
+    {
+      "relative_path": "evidence/old-generation37-summary.json",
+      "bytes": 2393,
+      "sha256": "5cfceedda63ae978eeeae8cf24f7bd5b378df8ea8c8d94e25674b8db0a753c76",
+      "visibility": "PUBLIC_SAFE"
+    },
+    {
+      "relative_path": "evidence/new-generation38-summary.json",
+      "bytes": 2393,
+      "sha256": "e1a55daedb7f00748d80ede772a937670f4bdbbf5a3748c60a8b67ceeaa78c8a",
+      "visibility": "PUBLIC_SAFE"
+    },
+    {
+      "relative_path": "evidence/comparison.json",
+      "bytes": 2976,
+      "sha256": "4ce4748a74d84f1aebc3444df810f3a481419b02ff64f66dcd7d9474670237c3",
+      "visibility": "PUBLIC_SAFE"
+    },
+    {
+      "relative_path": "private/old-generation37-capture-and-replay.json",
+      "bytes": 901172,
+      "sha256": "1e3b09acc65736710cd00db0ba02ee5fe6d4b76821026416dc2a4e163f17fe16",
+      "visibility": "PRIVATE"
+    },
+    {
+      "relative_path": "private/new-generation38-capture-and-replay.json",
+      "bytes": 901172,
+      "sha256": "08be49b927f2d6d45dcfa19eb5632282adcec907a7af2d3f1c8be6b266f07ef0",
+      "visibility": "PRIVATE"
+    }
+  ],
+  "result": "PASS_HISTORICAL_V1_BYTES_AND_UNRESOLVED_ZERO_MODEL_REPLAY_ONLY",
+  "cost": {
+    "model_calls": 0,
+    "tokens": 0,
+    "provider_transport_calls": 0,
+    "model_execution_time_seconds": 0,
+    "qualification_scope": "LOGICAL_REQUEST_CAPTURE_AND_ZERO_MODEL_UNRESOLVED_REPLAY_ONLY"
+  },
+  "historical_governance_records": 15,
+  "historical_formation_stage_records": 14,
+  "original_export_unchanged_sha256": "15152aa2a034ed024e7337abc1964f195ba32b447e59c5e72e7a0bb778fd8616",
+  "production_modified": false,
+  "holdout_accessed": false,
+  "owner_or_history_modified": false,
+  "normal_g0_or_c3_closure_qualified": false
+}

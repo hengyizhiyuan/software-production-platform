@@ -1,0 +1,90 @@
+{
+  "schema": "c3-ordinary-negative-independent-review-v1",
+  "basis_sha256": "15152aa2a034ed024e7337abc1964f195ba32b447e59c5e72e7a0bb778fd8616",
+  "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+  "candidate_fingerprint": "2e6a8ea09541ce7bf0eec5bcbff0dc358356d6e0f7869863c7964ebc7e41d294",
+  "components_fingerprint": "0fe9aa61b80d0dc805dabad3fcfc98719736bbf5f07f092799c128cfb956d5e2",
+  "history_modified": false,
+  "work_created": false,
+  "business_database_access": false,
+  "model_calls": 1,
+  "provider_status": "completed",
+  "usage": {
+    "input_tokens": 51256,
+    "output_tokens": 5193,
+    "cached_tokens": 0,
+    "reasoning_tokens": 0,
+    "total_tokens": 56449,
+    "unknown": false
+  },
+  "actual_schema_sha256": "925873b46d6a6f8005275805b8b9ef0aa5e034b89e451d711e646a32373e32fc",
+  "result": "STOPPED",
+  "started_at_utc": "2026-10-10T20:18:08.604678+00:00",
+  "http_status_codes": [
+    200
+  ],
+  "http_transmissions": 1,
+  "terminal_events": [
+    {
+      "type": "response.completed",
+      "status": "completed",
+      "response_id": "2f7f4b07-2905-40bd-abef-2775e89c4b33",
+      "actual_usage_numeric_fields": {
+        "input_tokens": 51256,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 5193,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 56449
+      }
+    }
+  ],
+  "request_sha256": "9047f49caa7da4560d774ddb7e24878ba8fc21184ccd1cf9f262d59934e329f9",
+  "input_bytes": 116684,
+  "instructions_bytes": 8507,
+  "profile": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "reasoning_effort": "none",
+    "max_output_tokens": 16384,
+    "timeout_seconds": 120.0
+  },
+  "stages": [
+    {
+      "stage": "provider_request_queued",
+      "at_utc": "2026-10-10T20:18:09.664547+00:00"
+    },
+    {
+      "stage": "provider_request_sent",
+      "at_utc": "2026-10-10T20:18:09.665249+00:00"
+    },
+    {
+      "stage": "provider_response_accepted",
+      "at_utc": "2026-10-10T20:18:10.133328+00:00"
+    },
+    {
+      "stage": "provider_first_response_event",
+      "at_utc": "2026-10-10T20:18:10.156459+00:00"
+    },
+    {
+      "stage": "provider_first_token",
+      "at_utc": "2026-10-10T20:18:10.858919+00:00"
+    }
+  ],
+  "request_id": "2f7f4b07-2905-40bd-abef-2775e89c4b33",
+  "timing": {
+    "request_sent_seconds": 0.004363490967079997,
+    "first_response_event_seconds": 0.4955706399632618,
+    "first_token_seconds": 1.1980421009939164,
+    "completed_seconds": 16.153173128026538
+  },
+  "transport_retry_count": 0,
+  "review_wire_sha256": "819f3a186c1fd51be2a66cc0367b151f9bc079dd28a7335603b63b3f0ce05a3c",
+  "exception_type": "KeyError",
+  "failure": null,
+  "ended_at_utc": "2026-10-10T20:18:25.832017+00:00",
+  "wall_seconds": 17.227392188971862
+}

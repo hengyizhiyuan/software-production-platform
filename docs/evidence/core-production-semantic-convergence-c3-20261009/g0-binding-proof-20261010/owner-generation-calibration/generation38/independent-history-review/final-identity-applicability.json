@@ -1,0 +1,76 @@
+{
+  "schema": "independent-historical-v1-final-identity-applicability-v1",
+  "observed_at_utc": "2026-10-10T20:16:35.207759Z",
+  "scope": "HISTORICAL_V1_REQUEST_BYTES_AND_ZERO_MODEL_UNRESOLVED_REPLAY_APPLICABILITY_ONLY",
+  "parent_qualification_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation38-qualified-20261010/independent-history-review/evidence/comparison.json",
+  "parent_qualification_sha256": "4ce4748a74d84f1aebc3444df810f3a481419b02ff64f66dcd7d9474670237c3",
+  "generation38": {
+    "source": "69663b501fe00887733114ebe040e04d4e343e81",
+    "tree": "c6df902cd3f13b328a0711280fa51f51e5ed9e11",
+    "actual_image": "sha256:241e4d9aeaf20335263d895d2f9a0ba49e1f8b6b61a5cd10f0db5e74d56dfb8e",
+    "actual_imports_sha256": "49cc2f065e19957cf2ebd2286f910f7d26c3473c6f8dab2ce4048c137ab4b6fe"
+  },
+  "generation39": {
+    "source": "774c61fd8b798613e03d9a0fb30d2412d34e6875",
+    "tree": "5a264ab716798f6757ede7f824a4364b20914981",
+    "actual_image": "sha256:333576af543d6ca99e61516a220c925972d0e53047dc0fc24e1535c923fb112a",
+    "actual_imports_sha256": "25456153f6dfbdb78c3845b85da99c1e4cadba4f6c7fa750f67cb63d167b007f",
+    "build_receipt_sha256": "4e8ede76a265913103cf0414b4a7eb4c6aedb06799f433f6c54d7b778ea2df11"
+  },
+  "packages": [
+    {
+      "package": "spg",
+      "verified_file_count": 278,
+      "entire_file_map_exactly_equal": true,
+      "canonical_file_map_sha256": "247ce6d4de2ad3718cdc90991d9c28fdff9d76751661aa5cf5c0f16e3092a48f",
+      "module_file": "/opt/spg-venv/lib/python3.13/site-packages/spg/__init__.py",
+      "package_root": "/opt/spg-venv/lib/python3.13/site-packages/spg"
+    },
+    {
+      "package": "guardian",
+      "verified_file_count": 5,
+      "entire_file_map_exactly_equal": true,
+      "canonical_file_map_sha256": "448bed690519cf4375842f4574cb8990c4a9d027ff620e5edcb6874db1aa527a",
+      "module_file": "/opt/c3-owners/guardian/src/guardian/__init__.py",
+      "package_root": "/opt/c3-owners/guardian/src/guardian"
+    },
+    {
+      "package": "ecf",
+      "verified_file_count": 5,
+      "entire_file_map_exactly_equal": true,
+      "canonical_file_map_sha256": "c4612d648134baed41510f99ab2201ea836434b1582b7f06502c53aaf3ee5b16",
+      "module_file": "/opt/c3-owners/ecf/src/ecf/__init__.py",
+      "package_root": "/opt/c3-owners/ecf/src/ecf"
+    }
+  ],
+  "owner_source_identity": {
+    "guardian": {
+      "revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+      "tree": "6066a6d6b8d91bec610021409ab320309ed0e437"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    }
+  },
+  "package_versions_python_uid_gid_groups_equal": true,
+  "test_fixture_changes_do_not_change_imported_production_packages": true,
+  "result": "APPLICABLE_BY_EXACT_INSTALLED_PACKAGE_IDENTITY; ORIGINAL_QUALIFICATION_NOT_RERUN",
+  "not_claimed": [
+    "GENERATION39_NEW_WORK_PRODUCTION_PASS",
+    "GENERATION39_FULL_REGRESSION_PASS",
+    "CANDIDATE_SEAL",
+    "GUARDIAN_ASSURANCE",
+    "HUMAN_AUTHORIZATION",
+    "C3_CLOSURE"
+  ],
+  "model_calls": 0,
+  "provider_requests": 0,
+  "historical_receipts_appended_or_modified": false,
+  "holdout_read": false,
+  "proof_dependencies": {
+    "source10": "Current ARTIFACT content binding must cover primary original meaning. Actual PATH_SCOPE CREATE operation+Git added path identifies lawful new file; exact immutable Git Blob plus f0 proves its own heading/value/count only. If the primary source requires additional software or semantic HTML structure, those aspects require direct content evidence and cannot be inferred from f0 alone. Independent review establishes semantic sufficiency; it is not completed artifact evidence.",
+    "source11": "Exact current f1, effective target within both binding paths, immutable Work/Source/version, original count and value, completed current evidence are necessary before reuse. u is provenance only.",
+    "source12": "Declared f0/f1 must both have unique actual passed current content records for the same Work/Source/allowed effective target; original descriptive scopes remain immutable and any target selection needs separately reviewed scoped materialization. Actual PATH_SCOPE and Git/exclusion constraints apply independently. Content acceptance is not Human Integration or Delivery authority."
+  }
+}

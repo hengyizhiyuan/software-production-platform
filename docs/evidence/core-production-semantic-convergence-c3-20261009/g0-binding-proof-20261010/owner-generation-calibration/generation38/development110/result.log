@@ -1,0 +1,193 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 182 items
+
+tests/test_n1_static_html_semantics.py ................................. [ 18%]
+......................................                                   [ 39%]
+tests/test_c3_static_scope_binding.py FFFFFFF                            [ 42%]
+tests/test_c3_route_scoped_review.py ....                                [ 45%]
+tests/test_c3_generation_projection_economy.py FFF...................... [ 58%]
+.............................                                            [ 74%]
+tests/test_c3_fulfillment_repair_context.py ............................ [ 90%]
+..................                                                       [100%]
+
+=================================== FAILURES ===================================
+_ test_open_scope_preserved_and_bound_only_after_existing_independent_review[the requested landing page] _
+tests/test_c3_static_scope_binding.py:44: in test_open_scope_preserved_and_bound_only_after_existing_independent_review
+    result = verify_static_html_semantic_facts(repository, candidate, contract, (fact,),
+src/spg/providers/static_html_semantic_verifier.py:1019: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:920: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path,
+src/spg/providers/static_html_semantic_verifier.py:510: in repair
+    return self._repair_count(fact, source_text, path, payload, instructions,
+src/spg/providers/static_html_semantic_verifier.py:731: in _repair_count
+    number = index + 1 if recorder is None else recorder.begin(
+src/spg/providers/verification_receipts.py:149: in begin
+    self._append(component, attempt, "MODEL_REQUEST_PENDING", feedback=feedback)
+src/spg/providers/verification_receipts.py:96: in _append
+    "decision_context_fingerprint": self.request.decision_context_fingerprint,
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'decision_context_fingerprint'
+_ test_open_scope_preserved_and_bound_only_after_existing_independent_review[\u672c\u5de5\u4f5c\u8981\u6c42\u7684\u65b0\u5efa\u9875\u9762] _
+tests/test_c3_static_scope_binding.py:44: in test_open_scope_preserved_and_bound_only_after_existing_independent_review
+    result = verify_static_html_semantic_facts(repository, candidate, contract, (fact,),
+src/spg/providers/static_html_semantic_verifier.py:1019: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:920: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path,
+src/spg/providers/static_html_semantic_verifier.py:510: in repair
+    return self._repair_count(fact, source_text, path, payload, instructions,
+src/spg/providers/static_html_semantic_verifier.py:731: in _repair_count
+    number = index + 1 if recorder is None else recorder.begin(
+src/spg/providers/verification_receipts.py:149: in begin
+    self._append(component, attempt, "MODEL_REQUEST_PENDING", feedback=feedback)
+src/spg/providers/verification_receipts.py:96: in _append
+    "decision_context_fingerprint": self.request.decision_context_fingerprint,
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'decision_context_fingerprint'
+_ test_open_scope_preserved_and_bound_only_after_existing_independent_review[the authorized introductory surface] _
+tests/test_c3_static_scope_binding.py:44: in test_open_scope_preserved_and_bound_only_after_existing_independent_review
+    result = verify_static_html_semantic_facts(repository, candidate, contract, (fact,),
+src/spg/providers/static_html_semantic_verifier.py:1019: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:920: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path,
+src/spg/providers/static_html_semantic_verifier.py:510: in repair
+    return self._repair_count(fact, source_text, path, payload, instructions,
+src/spg/providers/static_html_semantic_verifier.py:731: in _repair_count
+    number = index + 1 if recorder is None else recorder.begin(
+src/spg/providers/verification_receipts.py:149: in begin
+    self._append(component, attempt, "MODEL_REQUEST_PENDING", feedback=feedback)
+src/spg/providers/verification_receipts.py:96: in _append
+    "decision_context_fingerprint": self.request.decision_context_fingerprint,
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'decision_context_fingerprint'
+_ test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[unauthorized-path] _
+tests/test_c3_static_scope_binding.py:87: in test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review
+    result=verify_static_html_semantic_facts(repository,candidate,contract,(fact,),
+src/spg/providers/static_html_semantic_verifier.py:1019: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:920: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path,
+src/spg/providers/static_html_semantic_verifier.py:510: in repair
+    return self._repair_count(fact, source_text, path, payload, instructions,
+src/spg/providers/static_html_semantic_verifier.py:731: in _repair_count
+    number = index + 1 if recorder is None else recorder.begin(
+src/spg/providers/verification_receipts.py:149: in begin
+    self._append(component, attempt, "MODEL_REQUEST_PENDING", feedback=feedback)
+src/spg/providers/verification_receipts.py:96: in _append
+    "decision_context_fingerprint": self.request.decision_context_fingerprint,
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'decision_context_fingerprint'
+_ test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[unknown-qualifier] _
+tests/test_c3_static_scope_binding.py:87: in test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review
+    result=verify_static_html_semantic_facts(repository,candidate,contract,(fact,),
+src/spg/providers/static_html_semantic_verifier.py:1019: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:920: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path,
+src/spg/providers/static_html_semantic_verifier.py:510: in repair
+    return self._repair_count(fact, source_text, path, payload, instructions,
+src/spg/providers/static_html_semantic_verifier.py:731: in _repair_count
+    number = index + 1 if recorder is None else recorder.begin(
+src/spg/providers/verification_receipts.py:149: in begin
+    self._append(component, attempt, "MODEL_REQUEST_PENDING", feedback=feedback)
+src/spg/providers/verification_receipts.py:96: in _append
+    "decision_context_fingerprint": self.request.decision_context_fingerprint,
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'decision_context_fingerprint'
+_ test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[review-refusal] _
+tests/test_c3_static_scope_binding.py:87: in test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review
+    result=verify_static_html_semantic_facts(repository,candidate,contract,(fact,),
+src/spg/providers/static_html_semantic_verifier.py:1019: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:920: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path,
+src/spg/providers/static_html_semantic_verifier.py:510: in repair
+    return self._repair_count(fact, source_text, path, payload, instructions,
+src/spg/providers/static_html_semantic_verifier.py:731: in _repair_count
+    number = index + 1 if recorder is None else recorder.begin(
+src/spg/providers/verification_receipts.py:149: in begin
+    self._append(component, attempt, "MODEL_REQUEST_PENDING", feedback=feedback)
+src/spg/providers/verification_receipts.py:96: in _append
+    "decision_context_fingerprint": self.request.decision_context_fingerprint,
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'decision_context_fingerprint'
+_ test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[missing-review] _
+tests/test_c3_static_scope_binding.py:83: in test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review
+    verify_static_html_semantic_facts(repository,candidate,contract,(fact,),
+src/spg/providers/static_html_semantic_verifier.py:1019: in verify_static_html_semantic_facts
+    checks.append(_materialize_fact_check(
+src/spg/providers/static_html_semantic_verifier.py:920: in _materialize_fact_check
+    method, repair_trace = plan_repair.repair(fact, admitted_fact, path,
+src/spg/providers/static_html_semantic_verifier.py:510: in repair
+    return self._repair_count(fact, source_text, path, payload, instructions,
+src/spg/providers/static_html_semantic_verifier.py:731: in _repair_count
+    number = index + 1 if recorder is None else recorder.begin(
+src/spg/providers/verification_receipts.py:149: in begin
+    self._append(component, attempt, "MODEL_REQUEST_PENDING", feedback=feedback)
+src/spg/providers/verification_receipts.py:96: in _append
+    "decision_context_fingerprint": self.request.decision_context_fingerprint,
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'decision_context_fingerprint'
+_ test_independent_review_shares_contracts_without_losing_components_or_semantics[small] _
+tests/test_c3_generation_projection_economy.py:17: in test_independent_review_shares_contracts_without_losing_components_or_semantics
+    assert p._restore_review_component_contracts(view["component_index_table"], caps) == p._review_component_table(inventory, plan, caps)
+E   AssertionError: assert [{'route': 0,...T', ...}, ...] == [{'route': 0,...T', ...}, ...]
+E     
+E     At index 0 diff: {'route': 0, 'component_id': '6b7759f79c77747649c1d4f40a083cd55eaccd06fa30fbb8ecd82a074b755286', 'source_ref': 'semantic-fact:a4e59900-020f-476d-aabf-adc312f76bef', 'source_kind': 'FACT', 'capability': 'ARTIFACT_CONTENT', 'original_component_text': '第 0 项必须保留原值 0: Preserve the exact visible contribution 👩\u200d💻。', 'source_span': [0, 59], 'consumer_binding': {'capability': 'ARTIFACT_CONTENT', 'component': 'artifact-content', 'owner': 'VERIFICATION', 'phase': 'CURRENT_VERIFICATION', 'evidence_method': 'EXACT_CANDIDATE_CONTENT', 'gate_ref': 'code-verifica...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+_ test_independent_review_shares_contracts_without_losing_components_or_semantics[medium] _
+tests/test_c3_generation_projection_economy.py:17: in test_independent_review_shares_contracts_without_losing_components_or_semantics
+    assert p._restore_review_component_contracts(view["component_index_table"], caps) == p._review_component_table(inventory, plan, caps)
+E   AssertionError: assert [{'route': 0,...T', ...}, ...] == [{'route': 0,...T', ...}, ...]
+E     
+E     At index 0 diff: {'route': 0, 'component_id': 'd0db7deb33f313418d058cee49035873facacf069fe08a6ddec7af23ee26c15f', 'source_ref': 'semantic-fact:d652a52c-3575-44f2-a8a1-95a27cc94aa9', 'source_kind': 'FACT', 'capability': 'ARTIFACT_CONTENT', 'original_component_text': '第 0 项必须保留原值 0: Preserve the exact visible contribution 👩\u200d💻。', 'source_span': [0, 59], 'consumer_binding': {'capability': 'ARTIFACT_CONTENT', 'component': 'artifact-content', 'owner': 'VERIFICATION', 'phase': 'CURRENT_VERIFICATION', 'evidence_method': 'EXACT_CANDIDATE_CONTENT', 'gate_ref': 'code-verifica...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+_ test_independent_review_shares_contracts_without_losing_components_or_semantics[complex] _
+tests/test_c3_generation_projection_economy.py:17: in test_independent_review_shares_contracts_without_losing_components_or_semantics
+    assert p._restore_review_component_contracts(view["component_index_table"], caps) == p._review_component_table(inventory, plan, caps)
+E   AssertionError: assert [{'route': 0,...T', ...}, ...] == [{'route': 0,...T', ...}, ...]
+E     
+E     At index 0 diff: {'route': 0, 'component_id': '53bb72c5c4b8c8f8f972b30cf703a0f4d3fac81b8a8dac1ebd47d62bfbf303c0', 'source_ref': 'semantic-fact:02c913c6-66af-4c0e-83a5-e42ffe9c76e4', 'source_kind': 'FACT', 'capability': 'ARTIFACT_CONTENT', 'original_component_text': '第 0 项必须保留原值 0: Preserve the exact visible contribution 👩\u200d💻。', 'source_span': [0, 59], 'consumer_binding': {'capability': 'ARTIFACT_CONTENT', 'component': 'artifact-content', 'owner': 'VERIFICATION', 'phase': 'CURRENT_VERIFICATION', 'evidence_method': 'EXACT_CANDIDATE_CONTENT', 'gate_ref': 'code-verifica...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show
+=============================== warnings summary ===============================
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[small]
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[medium]
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[complex]
+  tests/test_c3_generation_projection_economy.py:11: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[small]
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[medium]
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[complex]
+  tests/test_c3_generation_projection_economy.py:182: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize('scale', ['small', 'medium', 'complex'])
+
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[small]
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[medium]
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[complex]
+  tests/test_c3_generation_projection_economy.py:421: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ["small", "medium", "complex"])
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_static_scope_binding.py::test_open_scope_preserved_and_bound_only_after_existing_independent_review[the requested landing page]
+FAILED tests/test_c3_static_scope_binding.py::test_open_scope_preserved_and_bound_only_after_existing_independent_review[\u672c\u5de5\u4f5c\u8981\u6c42\u7684\u65b0\u5efa\u9875\u9762]
+FAILED tests/test_c3_static_scope_binding.py::test_open_scope_preserved_and_bound_only_after_existing_independent_review[the authorized introductory surface]
+FAILED tests/test_c3_static_scope_binding.py::test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[unauthorized-path]
+FAILED tests/test_c3_static_scope_binding.py::test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[unknown-qualifier]
+FAILED tests/test_c3_static_scope_binding.py::test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[review-refusal]
+FAILED tests/test_c3_static_scope_binding.py::test_scope_binding_cannot_expand_targets_drop_qualifiers_or_manufacture_review[missing-review]
+FAILED tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[small]
+FAILED tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[medium]
+FAILED tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[complex]
+================= 10 failed, 172 passed, 9 warnings in 52.33s ==================
