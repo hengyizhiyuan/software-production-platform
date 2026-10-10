@@ -1,0 +1,26 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 3 items
+
+tests/test_c3_source_role_contract.py ..F                                [100%]
+
+=================================== FAILURES ===================================
+_ test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay[unsupported] _
+tests/test_c3_source_role_contract.py:156: in test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay
+    result = run()
+             ^^^^^
+tests/test_c3_fulfillment_repair_context.py:61: in run
+    return form_fulfillment_projection(revision, ir, provider=provider,
+src/spg/application/governed_obligations.py:2168: in form_fulfillment_projection
+    return _form_fulfillment_projection(revision, ir, **arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:2190: in _form_fulfillment_projection
+    raise ValueError("OBLIGATION_SOURCE_ROLE_CONTRACT_UNSUPPORTED")
+E   ValueError: OBLIGATION_SOURCE_ROLE_CONTRACT_UNSUPPORTED
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_source_role_contract.py::test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay[unsupported]
+========================= 1 failed, 2 passed in 4.15s ==========================

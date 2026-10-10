@@ -141,3 +141,20 @@ def test_consumer_view_binds_actual_implementation_and_keeps_evidence_domains_di
         assert row["original_component_text"] == route.component_basis.source_component_quote
         assert row["consumer_operation_contract"] == rows[route.capability]
         assert not {"passed", "complete_and_equivalent", "rationale"} & row.keys()
+
+
+@pytest.mark.parametrize("change", ["v1", "removed", "unsupported"])
+def test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay(change):
+    from tests.test_c3_fulfillment_repair_context import repair_case
+    provider, calls, _, run = repair_case()
+    assert all(b.state != "UNRESOLVED" for b in run())
+    before = len(calls)
+    request = next(r for r in provider._fulfillment_receipts if r["stage"] == "MODEL_REQUEST_PENDING")
+    assert request["source_role_contract"] == "v2"
+    if change == "removed": request.pop("source_role_contract")
+    else: request["source_role_contract"] = "v1" if change == "v1" else "unknown-role-policy"
+    result = run()
+    assert len(calls) == before
+    assert all(b.state == "UNRESOLVED" for b in result)
+    assert result[0].formation_receipt["terminal_reason"] in {
+        "OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT", "OBLIGATION_SOURCE_ROLE_CONTRACT_UNSUPPORTED"}

@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 3 items
+
+tests/test_c3_source_role_contract.py ...                                [100%]
+
+--------------------- generated xml file: /out/result.xml ----------------------
+============================== 3 passed in 3.99s ===============================

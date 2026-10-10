@@ -35,3 +35,9 @@ The same-source provenance roles and reviewed context eligibility are checked on
 Public and private evidence: `/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010`.
 Private canonical export remains under the previous ordinary qualification root; do not publish its raw Candidate/Provider content.
 Remaining: final exact source/image regressions, PostgreSQL/Guardian contract persistence, real Formation/Review and normal G0 to Candidate/appropriate Assurance, independent unseen qualification without tuning on exposed Holdout. Production and original Work remain unchanged. No C3 Closure claim is made by this proof.
+
+## Exact-image regression delta
+
+First source freeze `83c60ab7ab26dd73aa3baf38e185868201a5d925`, image `sha256:397c5719a7049a843fc263baa3c3065d734b575bf874fe28b4aac1638f35c543`: 392/398 passed. Six regressions identified context eligibility overreach and historical source-only background Review compatibility. No live model or Work was started on that failed qualification.
+The narrowed correction rejects a REQUEST without the accepted PRODUCTION_INTENT role, and rejects context spans directly carrying a current Fact's specific primary/governed provenance. Whole-turn provenance alone remains distinct. Previously legal background keeps original source-level Review compatibility; newly admitted ambiguous contributions require component Review.
+Development 3: 133 passed. Development 4 exposed a new test helper unpacking error; development 5 retained two PASS and exposed unsupported receipt policy throwing instead of the existing truthful identity stop. The replay path now delegates the malformed policy to the existing identity validator before any model call.

@@ -514,6 +514,11 @@ def _reviewed_background_context_refs(candidate, revision, ir, inventory, *, sou
             if (clause.modality not in {"ASSERTION", "REQUEST"}
                     or clause.speech_act not in {ActionSpeechAct.DISCUSSION, ActionSpeechAct.EXPLICIT_REQUEST}
                     or set(clause.requested_effects) - {"PRODUCTION_INTENT"}
+                    or (clause.modality == "REQUEST" and set(clause.requested_effects) != {"PRODUCTION_INTENT"})
+                    or any(fact.is_current and any(isinstance(span, str) and span.strip()
+                        and span.strip() in clause.source_text for span in (
+                            fact.provenance.source_text, *(p.source_text for p in fact.provenance.governed_provenance)))
+                        for fact in revision.engineering_semantic_facts)
                     or any(fact.is_current and not any(
                         r.source_ref == "semantic-fact:" + str(fact.id)
                         and r.capability not in {"RETAIN_CONTEXT", "UNRESOLVED"}
@@ -1062,6 +1067,8 @@ def _fact_gate_correspondence_missing(route, candidate, inventory):
 
 
 def validate_projection_candidate(candidate, revision, ir, inventory, *, semantic_review=None, allow_review_pending=False, source_contract="v2"):
+    if source_contract not in {"v1", "v2"}:
+        raise ValueError("OBLIGATION_SOURCE_ROLE_CONTRACT_UNSUPPORTED")
     if candidate.inventory_fingerprint != inventory["inventory_fingerprint"]:
         raise ValueError("OBLIGATION_PROJECTION_STALE_BASIS")
     from spg.domain.governed_obligation import fulfillment_component_id
@@ -1126,7 +1133,10 @@ def validate_projection_candidate(candidate, revision, ir, inventory, *, semanti
         reviewed_background_refs=reviewed_background_refs, allow_calibrated=route.component_basis is not None,
         background_components=partial_background, source_contract=source_contract) for route in candidate.routes)
     legacy_ids = [(route.source_ref, route.capability) for route in candidate.routes]
-    calibrated = len(set(legacy_ids)) != len(legacy_ids) or bool(partial_background) or (source_contract == "v2" and bool(reviewed_background_refs))
+    legacy_background_refs = (_reviewed_background_context_refs(candidate, revision, ir, inventory, source_contract="v1")
+        if source_contract == "v2" else reviewed_background_refs)
+    calibrated = (len(set(legacy_ids)) != len(legacy_ids) or bool(partial_background)
+        or bool(reviewed_background_refs - legacy_background_refs))
     for route in candidate.routes:
         methods = {r.capability for r in candidate.routes if r.source_ref == route.source_ref}
         calibrated |= bool(methods & {"UNRESOLVED", "RETAIN_CONTEXT"} and len(methods) > 1)
@@ -1913,7 +1923,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
         preconditions = row.get("owner_source_preconditions")
         if row.get("stage") == "MODEL_REQUEST_PENDING" and row.get("source_role_contract") not in (None, "v1", "v2"):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
-        if row.get("stage") == "MODEL_REQUEST_PENDING" and preconditions is not None and (
+        if row.get("stage") == "MODEL_REQUEST_PENDING" and isinstance(preconditions, dict) and (
                 (row.get("source_role_contract", "v1") == "v2") !=
                 (preconditions.get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v4")):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
@@ -2176,8 +2186,6 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
     initial_rows = recorder.records()
     initial_request = next((r for r in initial_rows if r["stage"] == "MODEL_REQUEST_PENDING"), None)
     source_contract = "v2" if initial_request is None else initial_request.get("source_role_contract", "v1")
-    if source_contract not in {"v1", "v2"}:
-        raise ValueError("OBLIGATION_SOURCE_ROLE_CONTRACT_UNSUPPORTED")
     def finish(candidate, reason, passed):
         rows = recorder.records()
         semantic_review = next((row.get("semantic_review") for row in reversed(rows)
