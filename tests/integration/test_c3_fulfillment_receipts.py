@@ -200,8 +200,9 @@ def test_actual_compact_observation_replays_from_postgresql_without_repeating_fo
 
 
 @pytest.mark.parametrize('tamper', (None, 'feedback', 'response-receipt', 'scope-inventory'))
+@pytest.mark.parametrize('failure_kind', ('predecode', 'canonical'))
 def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
-    postgres_database, tmp_path, monkeypatch, record_property, tamper,
+    postgres_database, tmp_path, monkeypatch, record_property, tamper, failure_kind,
 ):
     """New isolated fixture records only; no historical or live model writes."""
     from copy import deepcopy
@@ -234,9 +235,16 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
             plan = declared.form(inventory, payload['existing_capability_contracts'])
             wire, _ = controlled_wire(inventory, plan, feedback=payload.get('same_basis_validation_feedback'))
             if len(calls) == 1:
-                wire['routes'][0]['f'] = [i for i,s in enumerate(inventory['sources'])
-                                         if s['kind'] in {'IR_CLAUSE','IR_CONSTRAINT'}][:2]
-                assert len(wire['routes'][0]['f']) == 2
+                if failure_kind == 'canonical':
+                    wire['routes'].append(deepcopy(wire['routes'][0]))
+                else:
+                    wire['routes'][0]['f'] = [i for i,s in enumerate(inventory['sources'])
+                                             if s['kind'] in {'IR_CLAUSE','IR_CONSTRAINT'}][:2]
+                    assert len(wire['routes'][0]['f']) == 2
+            elif payload.get('same_basis_validation_feedback') is not None:
+                feedback = json.loads(payload['same_basis_validation_feedback'])
+                assert feedback['untrusted_previous_wire']
+                assert feedback['repair_feedback_binding']['attempt'] == 1
             output = json.dumps(wire, ensure_ascii=False)
         return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
             requested_model='controlled-pg-feedback', effective_model='controlled-pg-feedback',
@@ -267,14 +275,18 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
         assert [r.scope['stage'] for r in records] == ['MODEL_REQUEST_PENDING','MODEL_RESPONSE_OBSERVED','CANDIDATE_VALIDATED']
         failed = records[-1]
         original_scope = deepcopy(failed.scope)
-        binding = original_scope['predecode_diagnostics']['binding']
+        feedback = json.loads(original_scope['validation_feedback'])
+        binding = feedback['repair_feedback_binding']
         assert binding['response_receipt_id'] == records[1].scope['receipt_id']
         assert binding['request_receipt_id'] == records[0].scope['receipt_id']
         if tamper:
             scope = deepcopy(original_scope)
             if tamper == 'feedback': scope['validation_feedback'] += ' '
             elif tamper == 'scope-inventory': scope['inventory_fingerprint'] = '0'*64
-            else: scope['predecode_diagnostics']['binding']['response_receipt_id'] = str(work_id)
+            else:
+                changed = json.loads(scope['validation_feedback'])
+                changed['repair_feedback_binding']['response_receipt_id'] = str(work_id)
+                scope['validation_feedback'] = json.dumps(changed)
             # Deliberate corruption of this freshly created isolated fixture.
             uow.session.execute(update(governance_records).where(governance_records.c.id == failed.id).values(scope=scope))
             uow.commit()

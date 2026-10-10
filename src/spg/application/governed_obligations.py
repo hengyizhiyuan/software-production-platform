@@ -1445,6 +1445,24 @@ def _bind_wire_diagnostics(error, rows, attempt, revision, inventory, capabiliti
     return {**bound, "diagnostic_fingerprint": canonical_fingerprint(bound)}
 
 
+def _bind_repair_feedback(feedback, rows, attempt, revision, inventory, capabilities, candidate):
+    """Return the exact untrusted proposal with feedback, never a repaired plan.
+
+    A route ordinal/hash without its original proposal is not actionable repair
+    context. Reuse the retained Owner observation; do not duplicate the inventory
+    or manufacture a second source identity space.
+    """
+    from spg.providers.verification_receipts import _safe_value
+    from spg.providers.fulfillment_candidate import _FulfillmentWireReceiptIdentityError
+    raw, binding = _wire_response_basis(rows, attempt, revision, inventory, capabilities)
+    payload = json.loads(feedback)
+    payload.update(untrusted_previous_wire=raw, repair_feedback_binding={**binding,
+        "candidate_fingerprint": None if candidate is None else fulfillment_candidate_fingerprint(candidate)})
+    if _safe_value(payload) != payload:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    return json.dumps(payload, separators=(",", ":"))
+
+
 def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities):
     """Recompute new diagnostics; legacy sealed receipts remain historical.
 
@@ -1464,6 +1482,14 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
     if any(not isinstance(value, str) or not value for value in receipt_ids) or len(set(receipt_ids)) != len(receipt_ids):
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     for row in rows:
+        if row.get("repair_feedback_bound") is True:
+            try:
+                bound_feedback = json.loads(row.get("validation_feedback") or "null")
+            except ValueError as error:
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT") from error
+            if (not isinstance(bound_feedback, dict) or "repair_feedback_binding" not in bound_feedback
+                    or "untrusted_previous_wire" not in bound_feedback):
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         diagnostics = row.get("predecode_diagnostics")
         if diagnostics is None:
             if row.get("validation_feedback") is not None and not isinstance(row["validation_feedback"], str):
@@ -1473,6 +1499,37 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
             except ValueError:
                 feedback = None
             if isinstance(feedback, dict) and "wire_diagnostic_binding" in feedback:
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+            if isinstance(feedback, dict) and "repair_feedback_binding" in feedback:
+                attempt = row.get("attempt")
+                if (row.get("stage") != "CANDIDATE_VALIDATED" or row.get("validation_passed") is not False
+                        or sum(r.get("stage") == "CANDIDATE_VALIDATED" and r.get("attempt") == attempt for r in rows) != 1):
+                    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                raw, _ = _wire_response_basis(rows, attempt, revision, inventory, capabilities)
+                start = next(r for r in rows if r.get("stage") == "MODEL_REQUEST_PENDING" and r.get("attempt") == attempt)
+                response = next(r for r in rows if r.get("stage") == "MODEL_RESPONSE_OBSERVED" and r.get("attempt") == attempt)
+                try:
+                    original = _decode_fulfillment_candidate_wire(raw, inventory, capabilities,
+                        validation_feedback=start.get("feedback"), wire_metadata=response)
+                    deterministic_error = None
+                    try:
+                        original, _ = locate_projection_components(original, inventory)
+                        validate_projection_candidate(original, revision, ir, inventory, allow_review_pending=True)
+                    except ValueError as error:
+                        deterministic_error = json.loads(projection_validation_feedback(
+                            original, revision, ir, inventory, error))["primary_error"]
+                    if deterministic_error is not None and row.get("failed_predicate") != deterministic_error:
+                        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                    if row.get("candidate") != original.model_dump(mode="json"):
+                        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                    expected_feedback = projection_validation_feedback(original, revision, ir, inventory, row.get("failed_predicate"))
+                    expected_feedback = _bind_repair_feedback(expected_feedback, rows, attempt,
+                        revision, inventory, capabilities, original)
+                    if row.get("validation_feedback") != expected_feedback:
+                        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                except ValueError as error:
+                    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT") from error
+            elif isinstance(feedback, dict) and "untrusted_previous_wire" in feedback:
                 raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
             continue
         attempt = row.get("attempt")
@@ -1489,6 +1546,12 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
         except _FulfillmentWireValidationError as error:
             bound = _bind_wire_diagnostics(error, rows, attempt, revision, inventory, capabilities)
             feedback = projection_validation_feedback(None, revision, ir, inventory, error, wire_diagnostics=bound)
+            try:
+                retained_feedback = json.loads(row.get("validation_feedback") or "null")
+            except ValueError as drift:
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT") from drift
+            if isinstance(retained_feedback, dict) and "repair_feedback_binding" in retained_feedback:
+                feedback = _bind_repair_feedback(feedback, rows, attempt, revision, inventory, capabilities, None)
             if (diagnostics != bound or row.get("validation_feedback") != feedback
                     or row.get("failed_predicate") != str(error)
                     or any(row.get(key) != bound["binding"][key] for key in
@@ -1510,9 +1573,9 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
             feedback = json.loads(start["feedback"])
         except ValueError:
             continue  # Existing canonical/legacy feedback may be an error code.
-        if isinstance(feedback, dict) and "wire_diagnostic_binding" in feedback:
+        if isinstance(feedback, dict) and ("wire_diagnostic_binding" in feedback or "repair_feedback_binding" in feedback):
             parents = [r for r in rows if r.get("stage") == "CANDIDATE_VALIDATED"
-                and r.get("predecode_diagnostics") is not None and r.get("attempt") == start.get("attempt", 0) - 1
+                and r.get("attempt") == start.get("attempt", 0) - 1
                 and r.get("validation_feedback") == start["feedback"]]
             if len(parents) != 1 or start.get("feedback_receipt_id") != parents[0].get("receipt_id"):
                 raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
@@ -1718,7 +1781,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                 metadata_builder = getattr(provider, "form_wire_metadata", None)
                 wire_metadata = metadata_builder(inventory, capabilities, validation_feedback=feedback) if callable(metadata_builder) else {}
                 parents = [row for row in recorder.records() if row["stage"] == "CANDIDATE_VALIDATED"
-                    and row["attempt"] == attempt - 1 and row.get("predecode_diagnostics") is not None]
+                    and row["attempt"] == attempt - 1 and row.get("validation_feedback") is not None]
                 recorder.append("MODEL_REQUEST_PENDING", attempt, feedback=feedback, **wire_metadata,
                     **({"feedback_receipt_id": parents[0]["receipt_id"]} if len(parents) == 1 else {}))
                 import inspect
@@ -1768,10 +1831,20 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     return stop_identity(str(drift))
             feedback = projection_validation_feedback(candidate, revision, ir, inventory, error,
                 wire_diagnostics=wire_diagnostics)
+            responses = [row for row in recorder.records() if row.get("stage") == "MODEL_RESPONSE_OBSERVED"
+                and row.get("attempt") == attempt]
+            if (len(responses) == 1 and responses[0].get("provider_wire_version") is not None
+                    and (candidate is not None or wire_diagnostics is not None)):
+                try:
+                    feedback = _bind_repair_feedback(feedback, recorder.records(), attempt,
+                        revision, inventory, capabilities, candidate)
+                except _FulfillmentWireReceiptIdentityError as drift:
+                    return stop_identity(str(drift))
             passed, reason = False, json.loads(feedback)["primary_error"]
             recorder.append("CANDIDATE_VALIDATED", attempt, candidate=None if candidate is None else candidate.model_dump(mode="json"),
                 semantic_review=semantic_review, failed_predicate=reason, validation_feedback=feedback, validation_passed=False, terminal=attempt == 2,
                 terminal_reason=reason if attempt == 2 else None,
+                **({"repair_feedback_bound": True} if "repair_feedback_binding" in json.loads(feedback) else {}),
                 **({"predecode_diagnostics": wire_diagnostics} if wire_diagnostics is not None else {}))
             if attempt < 2:
                 continue

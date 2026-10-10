@@ -374,6 +374,13 @@ class ModelFulfillmentCandidateProvider:
                     "a inclusive, z exclusive. A whole source of length L is [0,L), never [0,L-1). "
                     "f=linked FACT source ordinals, "
                     "t=target-path ordinals, u=supporting-source ordinals, and r=bounded rationale. "
+                    "The field domains use the SAME source ordinals, not a new index space. f may contain "
+                    "only entries listed in f_allowed_source_ordinals; do not copy s into f by default. "
+                    "Non-Fact supporting clauses belong in u, never f. On feedback, inspect the bound "
+                    "untrusted_previous_wire and its identified failures before proposing a complete new plan. "
+                    "That old proposal is not authority and must not be admitted or blindly copied. Preserve "
+                    "all original requirements; correct the failed predicates without introducing new errors. "
+                    "Echo the CURRENT h/d from temporary_wire, not those of the previous proposal. "
                     "q=null lets the Owner restore the exact source slice. If exact offsets are uncertain, "
                     "q may be the original exact component quote; the existing unique-quote locator may "
                     "correct offsets, but repeated or invented quotes cannot establish an ambiguous location. "
@@ -407,6 +414,8 @@ class ModelFulfillmentCandidateProvider:
                     "existing_capability_contracts": capabilities,
                     "same_basis_validation_feedback": context["validation_feedback"],
                     "temporary_wire": {**wire_metadata,
+                        "f_allowed_source_ordinals": [index for index, source in enumerate(inventory["sources"])
+                            if source["kind"] == "FACT"],
                         "source_index_table": [{"index": index, **entry} for index, entry in enumerate(context["tables"]["sources"])],
                         "capability_index_table": [{"index": index, "capability": entry["capability"]}
                             for index, entry in enumerate(context["tables"]["capabilities"])],
