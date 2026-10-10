@@ -19,6 +19,58 @@ class NeverCallAgain:
         raise AssertionError("A sealed same-basis receipt must be replayed without another model call")
 
 
+def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql(postgres_database, tmp_path, monkeypatch):
+    import json
+    from types import SimpleNamespace
+    from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+    from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+    from tests.integration import test_c1_contract_continuity as c1
+    from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+    from tests.test_c3_semantic_contract_calibration import review
+    declared = c1.DeclaredC1Fulfillment()
+    calls, reviews = [], []
+    def generate(**request):
+        payload = json.loads(request['input_text']); calls.append(payload)
+        inventory = payload['immutable_inventory']
+        if 'untrusted_fulfillment_candidate' in payload:
+            candidate = decode_review_input(payload)
+            verdict = review(inventory, candidate)
+            if not reviews:
+                first, *rest = verdict.component_results
+                verdict = verdict.model_copy(update={'component_results': (
+                    first.model_copy(update={'complete_and_equivalent': False, 'reason': 'Controlled rejected interpretation.'}), *rest)})
+            reviews.append(verdict)
+            output = verdict.model_dump_json()
+        else:
+            plan = declared.form(inventory, payload['existing_capability_contracts'],
+                validation_feedback=payload.get('same_basis_validation_feedback'))
+            wire, _ = controlled_wire(inventory, plan, feedback=payload.get('same_basis_validation_feedback'),
+                owner_preconditions=payload.get('owner_source_preconditions'))
+            output = json.dumps(wire)
+        return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
+            requested_model='controlled-pg-semantic-feedback', effective_model='controlled-pg-semantic-feedback',
+            request_id=f'controlled-pg-feedback-{len(calls)}', usage=ModelUsage(), timing=ModelTiming(), retry_count=0)
+    provider = ModelFulfillmentCandidateProvider(lambda: SimpleNamespace(generate=generate, close=lambda: None))
+    monkeypatch.setattr(c1, 'DeclaredC1Fulfillment', lambda: provider)
+    _, work_id, revision, ir, _, baseline, pwu = c1._admit_c1(postgres_database, tmp_path, 'work')
+    assert len(calls) == 4 and len(reviews) == 2
+    fingerprint = pwu.completion_contract.fulfillment_bindings[0].projection_inventory_fingerprint
+    with postgres_database.unit_of_work() as uow:
+        records = RuntimeStore(uow.session).governance_for_subject(fingerprint)
+        failed = next(r.scope for r in records if r.scope['stage'] == 'CANDIDATE_VALIDATED' and r.scope['attempt'] == 1)
+        feedback = json.loads(failed['validation_feedback'])
+        observed = next(r.scope for r in records if r.scope['stage'] == 'SEMANTIC_REVIEW_OBSERVED' and r.scope['attempt'] == 1)
+        assert feedback['semantic_review_feedback_binding']['observed_receipt_id'] == observed['receipt_id']
+        assert feedback['violations'][0]['review_reason'] == 'Controlled rejected interpretation.'
+        count = len(records)
+    never = NeverCallAgain()
+    replay = form_fulfillment_projection(revision, ir, provider=never, database=postgres_database,
+        source_revision=baseline.repository_revision, exact_target_paths=('index.html',))
+    assert never.calls == 0 and all(b.state != 'UNRESOLVED' for b in replay)
+    with postgres_database.unit_of_work() as uow:
+        assert len(RuntimeStore(uow.session).governance_for_subject(fingerprint)) == count
+
+
 def test_calibrated_component_review_persists_replays_and_reaches_independent_guardian(
     postgres_database, tmp_path, monkeypatch, record_property,
 ):

@@ -1153,7 +1153,8 @@ def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=N
         raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
 
 
-def projection_validation_feedback(candidate, revision, ir, inventory, primary_error, *, wire_diagnostics=None):
+def projection_validation_feedback(candidate, revision, ir, inventory, primary_error, *, wire_diagnostics=None,
+                                   semantic_observation=None):
     """Bounded observations on one immutable candidate, never a patched plan.
 
     Only independently evaluable predicates are collected; consumer execution
@@ -1226,9 +1227,39 @@ def projection_validation_feedback(candidate, revision, ir, inventory, primary_e
                         covered.update(range(max(0, route.component_basis.source_span_start), min(len(text), route.component_basis.source_span_end)))
                 if any(not char.isspace() and index not in covered for index, char in enumerate(text)):
                     add("OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST", source=source)
+    if semantic_observation is not None:
+        review = FulfillmentSemanticReviewCandidate.model_validate(semantic_observation["review"])
+        if (candidate is None or review.inventory_fingerprint != inventory["inventory_fingerprint"]
+                or review.candidate_fingerprint != fulfillment_candidate_fingerprint(candidate)
+                or review.components_fingerprint != fulfillment_components_fingerprint(candidate)):
+            raise ValueError("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_DRIFT")
+        source_refs = [row.source_ref for row in review.source_results]
+        expected_components = {(fulfillment_component_id(r, inventory["inventory_fingerprint"]), r.capability): i
+            for i, r in enumerate(candidate.routes)}
+        keys = [(row.component_id, row.capability) for row in review.component_results or ()]
+        identity_valid = (len(source_refs) == len(set(source_refs)) and set(source_refs) == set(refs)
+            and len(keys) == len(set(keys)) and set(keys) == set(expected_components))
+        if not identity_valid:
+            add("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_DRIFT")
+        else:
+            for row in review.source_results:
+                if not row.complete_and_equivalent:
+                    add("OBLIGATION_SEMANTIC_SOURCE_MISMATCH", source=refs[row.source_ref])
+                    failures[-1]["review_reason"] = row.reason
+            for row in review.component_results:
+                predicates = [name for name in ("complete_and_equivalent", "nonredundant", "owner_phase_evidence_valid")
+                    if not getattr(row, name)]
+                if row.context_only != (row.capability == "RETAIN_CONTEXT"):
+                    predicates.append("context_only")
+                if predicates:
+                    add("OBLIGATION_SEMANTIC_COMPONENT_MISMATCH", expected_components[(row.component_id, row.capability)])
+                    failures[-1].update(capability=row.capability, failed_review_predicates=predicates, review_reason=row.reason)
+        semantic_observation = {k:v for k,v in semantic_observation.items() if k != "review"}
     return json.dumps({"schema": "fulfillment-validation-feedback-v2", "inventory_fingerprint": inventory["inventory_fingerprint"],
         "primary_error": primary, "violations": failures[:64], "additional_violation_count": max(0, len(failures)-64),
-        "not_evaluable": ["INDEPENDENT_SEMANTIC_REVIEW", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"]}, separators=(",", ":"))
+        "not_evaluable": (["INDEPENDENT_SEMANTIC_REVIEW"] if semantic_observation is None or not identity_valid else [])
+            + ["ACTUAL_OWNER_EVIDENCE", "ASSURANCE"],
+        **({"semantic_review_feedback_binding": semantic_observation} if semantic_observation is not None else {})}, separators=(",", ":"))
 
 
 def calibrated_background_binding_permitted(binding, revision, ir, bindings):
@@ -1789,6 +1820,52 @@ def _bind_repair_feedback(feedback, rows, attempt, revision, inventory, capabili
     return json.dumps(payload, separators=(",", ":"))
 
 
+def _semantic_repair_observation(rows, attempt, candidate, inventory, capabilities):
+    """Only a rejected, persisted independent Review may feed semantic repair."""
+    from spg.providers.fulfillment_candidate import _FulfillmentWireReceiptIdentityError
+    def single(stage):
+        matches = [r for r in rows if r.get("stage") == stage and r.get("attempt") == attempt]
+        if len(matches) != 1:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+        return matches[0]
+    pending, observed, validated = (single(s) for s in (
+        "SEMANTIC_REVIEW_PENDING", "SEMANTIC_REVIEW_OBSERVED", "SEMANTIC_REVIEW_VALIDATED"))
+    cap_fp = canonical_fingerprint(capabilities)
+    if (candidate is None or any(r.get("capabilities_fingerprint") != cap_fp for r in (pending, observed, validated))
+            or pending.get("candidate_fingerprint") != fulfillment_candidate_fingerprint(candidate)
+            or pending.get("components_fingerprint") != fulfillment_components_fingerprint(candidate)
+            or validated.get("validation_passed") is not False):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    output = observed.get("review_output")
+    if output is not None:
+        if (sha256(output.encode()).hexdigest() != observed.get("review_output_sha256")
+                or len(output.encode()) != observed.get("review_output_bytes") or observed.get("review_retained") is not True):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+        retained = json.loads(output)
+    else:
+        retained = observed.get("semantic_review")
+    if retained != validated.get("semantic_review"):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    review = FulfillmentSemanticReviewCandidate.model_validate(retained)
+    if (review.inventory_fingerprint != inventory["inventory_fingerprint"]
+            or review.candidate_fingerprint != fulfillment_candidate_fingerprint(candidate)
+            or review.components_fingerprint != fulfillment_components_fingerprint(candidate)):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    try:
+        validate_projection_components(candidate, inventory, semantic_review=review)
+    except ValueError as error:
+        if str(error) != validated.get("failed_predicate"):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT") from error
+    else:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    return {"review": review.model_dump(mode="json"), "inventory_fingerprint": inventory["inventory_fingerprint"],
+        "candidate_fingerprint": review.candidate_fingerprint, "components_fingerprint": review.components_fingerprint,
+        "review_fingerprint": canonical_fingerprint(retained), "capabilities_fingerprint": cap_fp,
+        "attempt": attempt, "pending_receipt_id": pending["receipt_id"], "observed_receipt_id": observed["receipt_id"],
+        "validated_receipt_id": validated["receipt_id"], "review_output_sha256": observed.get("review_output_sha256"),
+        "failed_predicate": validated["failed_predicate"]}
+
+
 def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities):
     """Recompute new diagnostics; legacy sealed receipts remain historical.
 
@@ -1799,6 +1876,11 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
         _decode_fulfillment_candidate_wire, _FulfillmentWireValidationError, _FulfillmentWireReceiptIdentityError,
         _FULFILLMENT_WIRE_METADATA_KEYS)
     for row in rows:
+        if (row.get("stage") == "CANDIDATE_VALIDATED" and row.get("validation_passed") is False
+                and any(r.get("attempt") == row.get("attempt") and r.get("stage") == "SEMANTIC_REVIEW_VALIDATED"
+                    and r.get("semantic_feedback_contract") == "existing-independent-review-feedback-v1" for r in rows)
+                and row.get("semantic_feedback_contract") != "existing-independent-review-feedback-v1"):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         preconditions = row.get("owner_source_preconditions")
         if preconditions is not None and (not isinstance(preconditions, dict)
                 or preconditions.get("syntax_observation_contract") not in (
@@ -1841,6 +1923,9 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                 raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
             if (row.get("owner_repair_context_bound") is True) != ("owner_repair_context" in bound_feedback):
                 raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+            if (row.get("semantic_feedback_contract") not in (None, "existing-independent-review-feedback-v1")
+                    or (row.get("semantic_feedback_contract") is not None) != ("semantic_review_feedback_binding" in bound_feedback)):
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
             start = next((r for r in rows if r.get("stage") == "MODEL_REQUEST_PENDING"
                 and r.get("attempt") == row.get("attempt")), {})
             if start.get("owner_repair_context_contract") is not None and row.get("owner_repair_context_bound") is not True:
@@ -1878,7 +1963,10 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
                     if row.get("candidate") != original.model_dump(mode="json"):
                         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
-                    expected_feedback = projection_validation_feedback(original, revision, ir, inventory, row.get("failed_predicate"))
+                    semantic_observation = (_semantic_repair_observation(rows, attempt, original, inventory, capabilities)
+                        if row.get("semantic_feedback_contract") is not None else None)
+                    expected_feedback = projection_validation_feedback(original, revision, ir, inventory, row.get("failed_predicate"),
+                        semantic_observation=semantic_observation)
                     expected_feedback = _bind_repair_feedback(expected_feedback, rows, attempt,
                         revision, inventory, capabilities, original, ir=ir,
                         include_owner_preconditions=row.get("owner_repair_context_bound") is True)
@@ -2018,7 +2106,7 @@ def _review_fulfillment_candidate(provider, candidate, inventory, recorder, atte
         validate_projection_components(candidate, inventory, semantic_review=result)
     except ValueError as error:
         recorder.append("SEMANTIC_REVIEW_VALIDATED", attempt, capabilities_fingerprint=canonical_fingerprint(capabilities), semantic_review=result.model_dump(mode="json"),
-            validation_passed=False, failed_predicate=str(error))
+            validation_passed=False, failed_predicate=str(error), semantic_feedback_contract="existing-independent-review-feedback-v1")
         raise
     recorder.append("SEMANTIC_REVIEW_VALIDATED", attempt, capabilities_fingerprint=canonical_fingerprint(capabilities), semantic_review=result.model_dump(mode="json"),
         validation_passed=True, failed_predicate=None)
@@ -2199,8 +2287,15 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                         revision, inventory, capabilities)
                 except _FulfillmentWireReceiptIdentityError as drift:
                     return stop_identity(str(drift))
+            semantic_observation = None
+            if candidate is not None and any(r.get("stage") == "SEMANTIC_REVIEW_VALIDATED"
+                    and r.get("attempt") == attempt and r.get("validation_passed") is False for r in recorder.records()):
+                try:
+                    semantic_observation = _semantic_repair_observation(recorder.records(), attempt, candidate, inventory, capabilities)
+                except _FulfillmentWireReceiptIdentityError as drift:
+                    return stop_identity(str(drift))
             feedback = projection_validation_feedback(candidate, revision, ir, inventory, error,
-                wire_diagnostics=wire_diagnostics)
+                wire_diagnostics=wire_diagnostics, semantic_observation=semantic_observation)
             responses = [row for row in recorder.records() if row.get("stage") == "MODEL_RESPONSE_OBSERVED"
                 and row.get("attempt") == attempt]
             if (len(responses) == 1 and responses[0].get("provider_wire_version") is not None
@@ -2216,6 +2311,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                 terminal_reason=reason if attempt == 2 else None,
                 **({"repair_feedback_bound": True} if "repair_feedback_binding" in json.loads(feedback) else {}),
                 **({"owner_repair_context_bound": True} if "owner_repair_context" in json.loads(feedback) else {}),
+                **({"semantic_feedback_contract": "existing-independent-review-feedback-v1"} if semantic_observation is not None else {}),
                 **({"predecode_diagnostics": wire_diagnostics} if wire_diagnostics is not None else {}))
             if attempt < 2:
                 continue

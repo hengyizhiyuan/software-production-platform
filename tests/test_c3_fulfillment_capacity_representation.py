@@ -480,12 +480,14 @@ def test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget(f
     result = form_fulfillment_projection(revision, ir, provider=provider,
         exact_target_paths=inventory["exact_target_paths"])
     assert all(binding.state == "UNRESOLVED" for binding in result)
-    assert len(calls) == 4
-    assert result[0].formation_receipt["provider_call_count"] == 4
-    assert result[0].formation_receipt["attempt_count"] == 2
+    # A different candidate's Review cannot justify feedback or another request.
+    expected_calls = 2 if failure == "stale-review" else 4
+    assert len(calls) == expected_calls
+    assert result[0].formation_receipt["provider_call_count"] == expected_calls
+    assert result[0].formation_receipt["attempt_count"] == expected_calls // 2
     form_fulfillment_projection(revision, ir, provider=provider,
         exact_target_paths=inventory["exact_target_paths"])
-    assert len(calls) == 4
+    assert len(calls) == expected_calls
 
 
 def test_compact_owner_quote_restoration_cannot_reintroduce_a_synthetic_secret(monkeypatch):
