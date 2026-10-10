@@ -10,7 +10,7 @@ from spg.application.governed_obligations import form_fulfillment_projection, fu
 from spg.domain.governed_obligation import fulfillment_source_ref
 from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
 from spg.infrastructure.model_runtime import ModelFailureKind, ModelProviderError
-from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider, provider_failure_observation
+from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider, provider_failure_observation, _REVIEW_INPUT_CONTRACT
 from tests.test_c3_fulfillment_components import current_lifecycle_candidate
 from tests.test_fulfillment_projection import basis, Oracle
 
@@ -117,7 +117,7 @@ def test_terminal_failure_preserves_exact_sources_and_same_basis_never_reopens_c
             _owner_source_preconditions(revision, ir, inventory, fulfillment_capability_contracts(),
                 generation_view_contract="existing-lossless-source-consumer-input-v3",
                 raw_operand_observation_contract="existing-original-wire-owner-operands-v1",
-                review_input_contract="existing-lossless-review-input-v1",
+                review_input_contract=_REVIEW_INPUT_CONTRACT,
                 semantic_selection_input_contract="existing-primary-meaning-owner-reference-v2"))
         formation_runtime = ControlledRuntime(StructuredModelResult(output_text=json.dumps(wire),
             provider=ModelProvider.DEEPSEEK, requested_model="controlled", effective_model="controlled",
