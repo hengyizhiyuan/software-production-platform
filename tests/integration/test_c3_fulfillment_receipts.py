@@ -200,7 +200,7 @@ def test_actual_compact_observation_replays_from_postgresql_without_repeating_fo
 
 
 @pytest.mark.parametrize('tamper', (None, 'feedback', 'response-receipt', 'scope-inventory', 'owner-precondition', 'initial-prerequisite'))
-@pytest.mark.parametrize('failure_kind', ('predecode', 'canonical'))
+@pytest.mark.parametrize('failure_kind', ('predecode', 'canonical', 'complete-prefix'))
 def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
     postgres_database, tmp_path, monkeypatch, record_property, tamper, failure_kind,
 ):
@@ -246,6 +246,8 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
                 assert feedback['untrusted_previous_wire']
                 assert feedback['repair_feedback_binding']['attempt'] == 1
             output = json.dumps(wire, ensure_ascii=False)
+            if failure_kind == 'complete-prefix' and len(calls) == 1:
+                output += '}'  # Complete original value remains unadmitted.
         return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
             requested_model='controlled-pg-feedback', effective_model='controlled-pg-feedback',
             request_id=f'controlled-pg-feedback-{len(calls)}', usage=ModelUsage(), timing=ModelTiming(), retry_count=0)

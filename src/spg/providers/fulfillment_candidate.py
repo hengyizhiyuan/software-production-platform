@@ -296,8 +296,34 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
         code = (str(error) if str(error) == "OBLIGATION_FORMATION_WIRE_DUPLICATE_KEY" else
                 "OBLIGATION_FORMATION_WIRE_JSON_INVALID" if isinstance(error, json.JSONDecodeError) else
                 "OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID")
+        violations = [{"code": code}]
+        additional = 0
+        if (isinstance(error, json.JSONDecodeError) and owner_preconditions is not None
+                and owner_preconditions.get("syntax_observation_contract") == "complete-value-observations-v1"):
+            observation = {"line": error.lineno, "column": error.colno,
+                "character_offset": error.pos, "reason": "EXTRA_DATA" if error.msg == "Extra data" else "INVALID_SYNTAX"}
+            violations[0]["json_parse_observation"] = observation
+            if error.msg == "Extra data" and isinstance(output, str):
+                # Observe a complete original value, NEVER accept a prefix as
+                # the candidate. No regex reconstruction, delimiter removal,
+                # source quoting, span repair or invented component IDs.
+                try:
+                    begin = len(output)-len(output.lstrip())
+                    prefix, end = json.JSONDecoder(object_pairs_hook=_wire_json_object).raw_decode(output, begin)
+                    observed = _FulfillmentCompactCandidate.model_validate(prefix)
+                    if observed.h != context["wire_request_fingerprint"] or observed.d != context["wire_table_fingerprint"]:
+                        raise ValueError("OBLIGATION_FORMATION_WIRE_BASIS_DRIFT")
+                    predicates = _fulfillment_wire_diagnostics(observed, inventory, context)
+                    observation.update(complete_value_range=[begin,end],
+                        complete_value_sha256=sha256(output[begin:end].encode()).hexdigest(),
+                        trailing_bytes=len(output[end:].encode()), disposition="UNADMITTED_SYNTAX_OBSERVATION")
+                    violations.extend(predicates["violations"])
+                    additional = predicates["additional_violation_count"] + max(0,len(violations)-64)
+                    violations = violations[:64]
+                except ValueError:
+                    observation["wire_fields"] = "NOT_EVALUABLE"
         raise _FulfillmentWireValidationError(code, {**diagnostic_basis,
-            "violations": [{"code": code}], "additional_violation_count": 0,
+            "violations": violations, "additional_violation_count": additional,
             "not_evaluable": ["WIRE_ROUTE_VALIDATION", "CANONICAL_COMPONENT_VALIDATION",
                 "OWNER_PHASE_EVIDENCE", "INDEPENDENT_SEMANTIC_REVIEW", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"]}) from error
     if wire.h != context["wire_request_fingerprint"] or wire.d != context["wire_table_fingerprint"]:

@@ -21,6 +21,57 @@ class Checkpoint(BaseException):
     pass
 
 
+@pytest.mark.parametrize('tail', ('}', ' trailing text', '\n{"second":1}'))
+def test_complete_original_json_value_exposes_fields_without_admitting_prefix(tail):
+    from spg.application.governed_obligations import _owner_source_preconditions
+    rev,ir,inventory,plan=controlled_capacity_case()
+    prerequisites=_owner_source_preconditions(rev,ir,inventory,fulfillment_capability_contracts())
+    wire,_=controlled_wire(inventory,plan,owner_preconditions=prerequisites)
+    invalid_references(wire,inventory)
+    value=json.dumps(wire);raw=' \n'+value+tail
+    with pytest.raises(_FulfillmentWireValidationError,match='WIRE_JSON_INVALID') as captured:
+        _decode_fulfillment_candidate_wire(raw,inventory,fulfillment_capability_contracts(),owner_preconditions=prerequisites)
+    d=captured.value.diagnostics
+    assert d['wire_output_fingerprint']==sha256(raw.encode()).hexdigest()
+    assert d['violations'][0]['code']=='OBLIGATION_FORMATION_WIRE_JSON_INVALID'
+    observed=d['violations'][0]['json_parse_observation']
+    assert observed['complete_value_range']==[2,2+len(value)]
+    assert observed['complete_value_sha256']==sha256(value.encode()).hexdigest()
+    assert observed['disposition']=='UNADMITTED_SYNTAX_OBSERVATION'
+    assert any(r['code']=='OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID' for r in d['violations'])
+    assert 'CANONICAL_COMPONENT_VALIDATION' in d['not_evaluable']
+    assert 'component_id' not in json.dumps(d)
+
+
+@pytest.mark.parametrize('malformed', ('incomplete','identity','duplicate-key','schema'))
+def test_syntax_observation_cannot_infer_fields_from_invalid_basis(malformed):
+    from spg.application.governed_obligations import _owner_source_preconditions
+    rev,ir,inventory,plan=controlled_capacity_case()
+    prerequisites=_owner_source_preconditions(rev,ir,inventory,fulfillment_capability_contracts())
+    wire,_=controlled_wire(inventory,plan,owner_preconditions=prerequisites)
+    if malformed=='identity':wire['h']='0'*64
+    if malformed=='schema':wire['routes'][0]['f']=['not an ordinal']
+    raw=json.dumps(wire)
+    if malformed=='incomplete':raw=raw[:-10]
+    elif malformed=='duplicate-key':raw='{"v":1,'+raw[1:]+'}'
+    else:raw+='}'
+    with pytest.raises(_FulfillmentWireValidationError) as captured:
+        _decode_fulfillment_candidate_wire(raw,inventory,fulfillment_capability_contracts(),owner_preconditions=prerequisites)
+    d=captured.value.diagnostics
+    assert not any(r['code']=='OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID' for r in d['violations'])
+    assert 'ACTUAL_OWNER_EVIDENCE' in d['not_evaluable']
+
+
+def test_legacy_json_failure_diagnostics_are_not_rewritten():
+    rev,ir,inventory,plan=controlled_capacity_case()
+    from spg.application.governed_obligations import _owner_source_preconditions
+    prerequisites=_owner_source_preconditions(rev,ir,inventory,fulfillment_capability_contracts(),include_syntax_observations=False)
+    wire,_=controlled_wire(inventory,plan,owner_preconditions=prerequisites)
+    with pytest.raises(_FulfillmentWireValidationError) as captured:
+        _decode_fulfillment_candidate_wire(json.dumps(wire)+'}',inventory,fulfillment_capability_contracts(),owner_preconditions=prerequisites)
+    assert captured.value.diagnostics['violations']==[{'code':'OBLIGATION_FORMATION_WIRE_JSON_INVALID'}]
+
+
 def invalid_references(wire, inventory):
     """Same failure category as retained outputs, no fixed source ordinals."""
     route = next(r for r in wire['routes'] if inventory['sources'][r['s']]['kind'] == 'WORK_CONTEXT')

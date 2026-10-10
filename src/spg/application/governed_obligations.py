@@ -1462,7 +1462,7 @@ def _bind_wire_diagnostics(error, rows, attempt, revision, inventory, capabiliti
     return {**bound, "diagnostic_fingerprint": canonical_fingerprint(bound)}
 
 
-def _owner_source_preconditions(revision, ir, inventory, capabilities):
+def _owner_source_preconditions(revision, ir, inventory, capabilities, *, include_syntax_observations=True):
     """Necessary proof sets from existing Owner predicates, never route proposals.
 
     The semantic boundary still chooses components and which eligible origin
@@ -1527,6 +1527,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities):
                 row["necessary_evidence_method"] = "EXACT_GIT_DIFF_SCOPE"
         rows.append(row)
     return {"contract": "existing-owner-source-prerequisites-v1", "inventory_fingerprint": inventory["inventory_fingerprint"],
+        **({"syntax_observation_contract": "complete-value-observations-v1"} if include_syntax_observations else {}),
         "work_reality_revision_id": str(revision.id), "source_revision": inventory["source_revision"],
         "capabilities_fingerprint": canonical_fingerprint(capabilities), "sources": rows,
         "component_rule": "COMPLETE_OWN_SOURCE_SPANS; NO_CONFLICTING_DISPOSITION_FOR_SAME_COMPONENT",
@@ -1631,9 +1632,14 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
         _decode_fulfillment_candidate_wire, _FulfillmentWireValidationError, _FulfillmentWireReceiptIdentityError,
         _FULFILLMENT_WIRE_METADATA_KEYS)
     for row in rows:
+        preconditions = row.get("owner_source_preconditions")
+        if preconditions is not None and (not isinstance(preconditions, dict)
+                or preconditions.get("syntax_observation_contract") not in (None, "complete-value-observations-v1")):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if row.get("owner_source_preconditions") is not None and (
                 row.get("stage") not in {"MODEL_REQUEST_PENDING", "MODEL_RESPONSE_OBSERVED"}
-                or row["owner_source_preconditions"] != _owner_source_preconditions(revision, ir, inventory, capabilities)):
+                or preconditions != _owner_source_preconditions(revision, ir, inventory, capabilities,
+                    include_syntax_observations=preconditions.get("syntax_observation_contract") is not None)):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if (row.get("stage") == "MODEL_RESPONSE_OBSERVED" and row.get("candidate_retained") is True
                 and any(key in row for key in _FULFILLMENT_WIRE_METADATA_KEYS)):
