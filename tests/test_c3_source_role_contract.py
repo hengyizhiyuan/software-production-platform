@@ -116,6 +116,48 @@ def test_located_coverage_feedback_reports_exact_gap_without_repairing_candidate
     assert all('uncovered_codepoint_ranges' not in v for v in old['violations'])
 
 
+def test_full_wire_owner_feedback_uses_same_locator_and_exposes_context_removal_geometry_only():
+    from spg.application.governed_obligations import _owner_repair_context, _owner_source_preconditions, fulfillment_capability_contracts, locate_projection_components
+    from spg.domain.governed_obligation import fulfillment_candidate_fingerprint
+    from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+    import json
+    revision, ir, inventory, plan = shared_item_case()
+    artifact = next(r for r in plan.routes if r.capability == 'ARTIFACT_CONTENT' and r.source_ref.startswith('ir-clause:'))
+    text = artifact.component_basis.source_component_quote
+    shortened = artifact.model_copy(update={'component_basis': artifact.component_basis.model_copy(update={
+        'source_span_end': len(text)-1, 'source_component_quote': text[:-1]})})
+    retained = artifact.model_copy(update={'capability': 'RETAIN_CONTEXT', 'target_paths': (),
+        'component_basis': artifact.component_basis.model_copy(update={'linked_fact_refs': ()})})
+    proposal = plan.model_copy(update={'routes': tuple(shortened if r == artifact else r for r in plan.routes)+(retained,)})
+    caps = fulfillment_capability_contracts()
+    prerequisites = _owner_source_preconditions(revision, ir, inventory, caps)
+    wire, _ = controlled_wire(inventory, proposal, owner_preconditions=prerequisites)
+    ordinal = next(i for i,r in enumerate(proposal.routes) if r == shortened)
+    wire['routes'][ordinal].update(a=1,z=len(text),q=text[:-1])
+    raw = json.dumps(wire)
+    before = proposal.model_dump_json()
+    observed = _owner_repair_context(raw,revision,ir,inventory,caps,validation_feedback=None,
+        owner_preconditions=prerequisites,located_candidate=proposal)
+    assert observed['located_component_observation_contract']=='existing-complete-wire-location-feedback-v1'
+    assert observed['raw_routes_not_evaluable']==[]
+    assert observed['located_components'][ordinal]['located_span']==[0,len(text)-1]
+    counterfactual = next(v for v in observed['coverage_if_context_routes_removed']
+        if ordinal in v['remaining_route_indices'])
+    assert counterfactual['uncovered_codepoint_ranges']==[[len(text)-1,len(text)]]
+    assert 'SEMANTIC_DISPOSITION_NOT_EVALUATED' in counterfactual['disposition']
+    assert proposal.model_dump_json()==before and wire['routes'][ordinal]['a']==1
+    old = _owner_source_preconditions(revision,ir,inventory,caps,typed_prerequisite_contract='existing-owner-typed-prerequisites-v6')
+    old_wire,_=controlled_wire(inventory,proposal,owner_preconditions=old)
+    old_wire['routes'][ordinal].update(a=1,z=len(text),q=text[:-1])
+    legacy = _owner_repair_context(json.dumps(old_wire),revision,ir,inventory,caps,validation_feedback=None,
+        owner_preconditions=old,located_candidate=proposal)
+    assert 'located_component_observation_contract' not in legacy and ordinal in legacy['raw_routes_not_evaluable']
+    changed = proposal.model_copy(update={'routes': proposal.routes[:-1]})
+    with pytest.raises(RuntimeError,match='WIRE_FEEDBACK_IDENTITY_DRIFT'):
+        _owner_repair_context(raw,revision,ir,inventory,caps,validation_feedback=None,
+            owner_preconditions=prerequisites,located_candidate=changed)
+
+
 def test_same_item_clause_proves_two_roles_but_affirmative_or_future_cannot_prove_prohibition():
     revision, ir, inventory, _ = shared_item_case()
     source = next(s for s in inventory["sources"] if s["kind"] == "WORK_CONSTRAINT")

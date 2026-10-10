@@ -204,7 +204,7 @@ def test_located_gap_checkpoint_resumes_only_remaining_calls_and_preserves_origi
     assert len(calls) == 3
 
 
-@pytest.mark.parametrize('tamper', ('range', 'source-hash', 'contract'))
+@pytest.mark.parametrize('tamper', ('range', 'source-hash', 'contract', 'located-span'))
 def test_located_gap_feedback_drift_is_rejected_before_any_repair_request(tamper):
     provider, calls, wires, run = repair_case(interrupt=True, coverage_failure=True)
     with pytest.raises(Checkpoint): run()
@@ -214,7 +214,8 @@ def test_located_gap_feedback_drift_is_rejected_before_any_repair_request(tamper
     gap = next(v for v in payload['violations'] if 'uncovered_codepoint_ranges' in v)
     if tamper == 'range': gap['uncovered_codepoint_ranges'] = [[0, 2]]
     elif tamper == 'source-hash': gap['original_text_sha256'] = '0' * 64
-    else: payload.pop('coverage_observation_contract')
+    elif tamper == 'contract': payload.pop('coverage_observation_contract')
+    else: payload['owner_repair_context']['located_components'][0]['located_span'] = [0, 1]
     failed['validation_feedback'] = json.dumps(payload, separators=(',', ':'))
     result = run()
     assert all(b.state == 'UNRESOLVED' for b in result)
