@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="8" time="3.970" timestamp="2026-10-10T23:28:10.970841+00:00" hostname="06bced1e14a0"><testcase classname="test_model_runtime" name="test_deepseek_responses_transport_streams_and_normalizes_usage" time="0.003" /><testcase classname="test_model_runtime" name="test_readiness_is_no_request_and_http_failure_is_not_retried" time="0.002" /><testcase classname="test_model_runtime" name="test_remote_protocol_failure_before_first_event_gets_one_fresh_replay" time="0.211" /><testcase classname="test_model_runtime" name="test_incomplete_response_preserves_safe_recovery_diagnostics" time="0.002" /><testcase classname="test_model_runtime" name="test_terminal_response_closes_stream_without_waiting_for_eof" time="0.002"><failure message="AssertionError: Transport read continued after terminal identity">/test_model_runtime.py:229: in test_terminal_response_closes_stream_without_waiting_for_eof
+    result = adapter.generate(profile=_profile(), instructions="x", input_text="y", output_schema={"type":"object"})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/spg/infrastructure/performance.py:62: in call
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/spg/infrastructure/model_runtime.py:208: in generate
+    for line in response.iter_lines():
+                ^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/httpx2/_models.py:924: in iter_lines
+    for text in self.iter_text():
+                ^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/httpx2/_models.py:911: in iter_text
+    for byte_content in self.iter_bytes():
+                        ^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/httpx2/_models.py:892: in iter_bytes
+    for raw_bytes in self.iter_raw():
+                     ^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/httpx2/_models.py:947: in iter_raw
+    for raw_stream_bytes in self.stream:
+                            ^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/httpx2/_client.py:143: in __iter__
+    yield from self._stream
+/test_model_runtime.py:220: in __iter__
+    raise AssertionError("Transport read continued after terminal identity")
+E   AssertionError: Transport read continued after terminal identity</failure></testcase><testcase classname="test_model_runtime" name="test_exact_terminal_completion_preserves_delta_prefix_and_receipt_identity" time="0.003"><failure message="assert ('{&quot;ok&quot;:' == '{&quot;ok&quot;:true}'&#10;  &#10;  - {&quot;ok&quot;:true}&#10;  + {&quot;ok&quot;:)">/test_model_runtime.py:241: in test_exact_terminal_completion_preserves_delta_prefix_and_receipt_identity
+    assert result.output_text == complete and ''.join(emitted) == complete
+E   assert ('{"ok":' == '{"ok":true}'
+E     
+E     - {"ok":true}
+E     + {"ok":)</failure></testcase><testcase classname="test_model_runtime" name="test_conflicting_terminal_and_delta_are_protocol_stop_not_candidate_repair[{&quot;ok&quot;:true}-{&quot;ok&quot;:false}]" time="0.004"><failure message="Failed: DID NOT RAISE ModelProviderError">/test_model_runtime.py:251: in test_conflicting_terminal_and_delta_are_protocol_stop_not_candidate_repair
+    with pytest.raises(ModelProviderError) as failed:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ModelProviderError</failure></testcase><testcase classname="test_model_runtime" name="test_conflicting_terminal_and_delta_are_protocol_stop_not_candidate_repair[{&quot;ok&quot;:true}-{&quot;ok&quot;:]" time="0.003"><failure message="Failed: DID NOT RAISE ModelProviderError">/test_model_runtime.py:251: in test_conflicting_terminal_and_delta_are_protocol_stop_not_candidate_repair
+    with pytest.raises(ModelProviderError) as failed:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ModelProviderError</failure></testcase></testsuite></testsuites>

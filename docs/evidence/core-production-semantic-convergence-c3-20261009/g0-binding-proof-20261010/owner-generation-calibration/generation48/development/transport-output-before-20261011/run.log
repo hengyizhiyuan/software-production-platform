@@ -1,0 +1,52 @@
+....FFFF                                                                 [100%]
+=================================== FAILURES ===================================
+_________ test_terminal_response_closes_stream_without_waiting_for_eof _________
+/test_model_runtime.py:229: in test_terminal_response_closes_stream_without_waiting_for_eof
+    result = adapter.generate(profile=_profile(), instructions="x", input_text="y", output_schema={"type":"object"})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/spg/infrastructure/performance.py:62: in call
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/spg/infrastructure/model_runtime.py:208: in generate
+    for line in response.iter_lines():
+                ^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/httpx2/_models.py:924: in iter_lines
+    for text in self.iter_text():
+                ^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/httpx2/_models.py:911: in iter_text
+    for byte_content in self.iter_bytes():
+                        ^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/httpx2/_models.py:892: in iter_bytes
+    for raw_bytes in self.iter_raw():
+                     ^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/httpx2/_models.py:947: in iter_raw
+    for raw_stream_bytes in self.stream:
+                            ^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/httpx2/_client.py:143: in __iter__
+    yield from self._stream
+/test_model_runtime.py:220: in __iter__
+    raise AssertionError("Transport read continued after terminal identity")
+E   AssertionError: Transport read continued after terminal identity
+__ test_exact_terminal_completion_preserves_delta_prefix_and_receipt_identity __
+/test_model_runtime.py:241: in test_exact_terminal_completion_preserves_delta_prefix_and_receipt_identity
+    assert result.output_text == complete and ''.join(emitted) == complete
+E   assert ('{"ok":' == '{"ok":true}'
+E     
+E     - {"ok":true}
+E     + {"ok":)
+_ test_conflicting_terminal_and_delta_are_protocol_stop_not_candidate_repair[{"ok":true}-{"ok":false}] _
+/test_model_runtime.py:251: in test_conflicting_terminal_and_delta_are_protocol_stop_not_candidate_repair
+    with pytest.raises(ModelProviderError) as failed:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ModelProviderError
+_ test_conflicting_terminal_and_delta_are_protocol_stop_not_candidate_repair[{"ok":true}-{"ok":] _
+/test_model_runtime.py:251: in test_conflicting_terminal_and_delta_are_protocol_stop_not_candidate_repair
+    with pytest.raises(ModelProviderError) as failed:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ModelProviderError
+=========================== short test summary info ============================
+FAILED ../test_model_runtime.py::test_terminal_response_closes_stream_without_waiting_for_eof
+FAILED ../test_model_runtime.py::test_exact_terminal_completion_preserves_delta_prefix_and_receipt_identity
+FAILED ../test_model_runtime.py::test_conflicting_terminal_and_delta_are_protocol_stop_not_candidate_repair[{"ok":true}-{"ok":false}]
+FAILED ../test_model_runtime.py::test_conflicting_terminal_and_delta_are_protocol_stop_not_candidate_repair[{"ok":true}-{"ok":]
+4 failed, 4 passed in 3.93s

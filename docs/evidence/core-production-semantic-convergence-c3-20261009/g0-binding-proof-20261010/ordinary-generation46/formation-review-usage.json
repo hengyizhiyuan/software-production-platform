@@ -1,0 +1,115 @@
+{
+  "schema": "c3-observed-formation-review-usage-v1",
+  "work_id": "a3938a73-9da7-5ba3-9056-6df739122a99",
+  "snapshot_sha256": "a4bc8434d2afa99f3a383266d8f8d65147bb7cc4be02d83297eb31a8b6c81676",
+  "logical_calls": 3,
+  "actual_owner_observations": [
+    {
+      "attempt": 1,
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "receipt_id": "ec7300c3-b2a0-4479-8021-c05f7c393f16",
+      "request_receipt_id": "40023159-0261-4cbe-aead-0dcccd7872ea",
+      "recorded_at_utc": "2026-10-10T22:30:18.925112+00:00",
+      "model": {
+        "request_id": "22f9c93e-08d2-4688-96fc-42fc07c9841b",
+        "provider": "deepseek",
+        "requested_model": "deepseek-flash",
+        "effective_model": "deepseek-flash",
+        "usage": {
+          "cached_tokens": 1792,
+          "input_tokens": 37915,
+          "output_tokens": 2943,
+          "reasoning_tokens": 0,
+          "total_tokens": 40858,
+          "unknown": false
+        },
+        "timing": {
+          "completed_seconds": 10.825281725963578,
+          "first_response_event_seconds": 0.4791894389782101,
+          "first_token_seconds": 1.2045010350411758,
+          "request_sent_seconds": 0.002448549959808588
+        },
+        "transport_retry_count": 0,
+        "output_sha256": "b86dea8e453a2cf30be94ee480a87c1c4c4f5f12c0e09ed781e4213054217f18",
+        "output_bytes": 10782
+      },
+      "provider_http_status": "UNKNOWN_NOT_RECORDED",
+      "provider_finish_reason": "UNKNOWN_NOT_RECORDED"
+    },
+    {
+      "attempt": 2,
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "receipt_id": "aac2ea3f-a0cf-4f87-8927-16738253c208",
+      "request_receipt_id": "584a3d1d-7536-4d49-8471-0c4e2619d000",
+      "recorded_at_utc": "2026-10-10T22:30:31.105376+00:00",
+      "model": {
+        "request_id": "6a48d5b0-7d4a-42b7-9207-d3b736f06469",
+        "provider": "deepseek",
+        "requested_model": "deepseek-flash",
+        "effective_model": "deepseek-flash",
+        "usage": {
+          "cached_tokens": 2176,
+          "input_tokens": 58534,
+          "output_tokens": 2738,
+          "reasoning_tokens": 0,
+          "total_tokens": 61272,
+          "unknown": false
+        },
+        "timing": {
+          "completed_seconds": 9.607215060968883,
+          "first_response_event_seconds": 0.4428397889714688,
+          "first_token_seconds": 1.9647501850267872,
+          "request_sent_seconds": 0.004951394977979362
+        },
+        "transport_retry_count": 0,
+        "output_sha256": "8e0fb2222f0cc602f299976a2ba2fcbc2bd8cba874bdd0d2c64af39e11b4d883",
+        "output_bytes": 10070
+      },
+      "provider_http_status": "UNKNOWN_NOT_RECORDED",
+      "provider_finish_reason": "UNKNOWN_NOT_RECORDED"
+    },
+    {
+      "attempt": 2,
+      "stage": "SEMANTIC_REVIEW_OBSERVED",
+      "receipt_id": "06118cdc-d35b-4e9f-bd1f-e4336790e3aa",
+      "request_receipt_id": "ecd86498-0b43-4e1b-aa27-73ff3a09abb5",
+      "recorded_at_utc": "2026-10-10T22:30:51.974518+00:00",
+      "model": {
+        "request_id": "a8eca099-c182-46cb-b7fe-cf05c6f9b746",
+        "provider": "deepseek",
+        "requested_model": "deepseek-flash",
+        "effective_model": "deepseek-flash",
+        "usage": {
+          "cached_tokens": 1792,
+          "input_tokens": 62468,
+          "output_tokens": 6013,
+          "reasoning_tokens": 0,
+          "total_tokens": 68481,
+          "unknown": false
+        },
+        "timing": {
+          "completed_seconds": 19.91279933799524,
+          "first_response_event_seconds": 0.612015716964379,
+          "first_token_seconds": 1.932954121963121,
+          "request_sent_seconds": 0.004585440969094634
+        },
+        "transport_retry_count": 0,
+        "output_sha256": "4e4cd58bfc67764826a0cbdc6353fb9a0d94e76657eb7ac717fac782cc0f90eb",
+        "output_bytes": 19824
+      },
+      "provider_http_status": "UNKNOWN_NOT_RECORDED",
+      "provider_finish_reason": "UNKNOWN_NOT_RECORDED"
+    }
+  ],
+  "deduplicated_usage": {
+    "input_tokens": 158917,
+    "output_tokens": 11694,
+    "cached_tokens": 5760,
+    "reasoning_tokens": 0,
+    "total_tokens": 170611
+  },
+  "whole_wic_cost": "UNKNOWN",
+  "monetary_cost": "UNKNOWN",
+  "extra_model_calls": 0,
+  "work_mutations": 0
+}

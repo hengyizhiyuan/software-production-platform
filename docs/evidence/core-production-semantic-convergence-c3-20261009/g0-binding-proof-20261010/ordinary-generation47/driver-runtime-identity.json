@@ -1,0 +1,14 @@
+{
+  "qualification": "C3",
+  "qualification_run": "final-g0",
+  "isolated": true,
+  "api_service": "watt-c3-bindingg0g47-api-20261010",
+  "api_base_url": "http://watt-c3-bindingg0g47-api-20261010:8000",
+  "source_revision": "e5df24cf5eb358346a4c2f23bde9e99feb808d76",
+  "image_id": "sha256:8f189b7b3cd261a1861ccd6e6b69024801e1c765decadb8deae0768c17302ac2",
+  "database_name": "spg_c3_bindingg0g47_qualification_20261010",
+  "captured_at_utc": "2026-10-10T23:07:52.683280+00:00",
+  "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+  "provider_ready": true,
+  "provider_readiness_scope": "configuration only; no request yet"
+}

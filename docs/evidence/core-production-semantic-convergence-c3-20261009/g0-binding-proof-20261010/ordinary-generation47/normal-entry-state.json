@@ -1,0 +1,62 @@
+{
+  "created_at_utc": "2026-10-10T23:09:03.036481Z",
+  "driver_status": "BOUNDED_OBSERVATION_WINDOW_ENDED",
+  "human_acceptance_written": false,
+  "human_delivery_authorization_written": false,
+  "human_integration_authorization_written": false,
+  "input_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+  "interaction_id": "9d4509fd-7c01-4836-8b37-d8d18f51e7ca",
+  "latest_observation": {
+    "automatic_progression_state": "STOPPED",
+    "current_production_run_id": null,
+    "current_work_reality_revision_id": "2512755e-fc60-540d-b35b-40c257b5b2c7",
+    "human_attention_required": false,
+    "interaction_id": "9d4509fd-7c01-4836-8b37-d8d18f51e7ca",
+    "status": "COMPLETED",
+    "turn_id": "b2e7faa3-d856-4ece-abca-a73b5c3b8c27",
+    "work_complete": false,
+    "work_id": "0707d46d-c00c-566c-96b4-255ff81a722d",
+    "work_status": "READY"
+  },
+  "operations": {
+    "create_product": {
+      "confirmed_at_utc": "2026-10-10T23:09:11.324959Z",
+      "path": "/api/products",
+      "request_body_sha256": "1e362dde2cb006c168cff7cc6f22a5e95eb1e6bc14f8a4174091af7be6b5ead9",
+      "started_at_utc": "2026-10-10T23:09:03.082337Z",
+      "state": "CONFIRMED"
+    },
+    "submit_turn": {
+      "confirmed_at_utc": "2026-10-10T23:09:11.994372Z",
+      "path": "/api/experience/products/584796e7-c751-4a1e-acb8-91f5aaabba7b/turns",
+      "request_body_sha256": "f241c9d0307bb90f2f0285c07219b7f996f63845a313f12ea5c3f6acf89a3212",
+      "started_at_utc": "2026-10-10T23:09:11.367928Z",
+      "state": "CONFIRMED"
+    }
+  },
+  "original_input_file_sha256": "c587f020c43275019b32c49a94ab8559587a01d339e1fe97b2c8e048a386258e",
+  "polls_completed": 100,
+  "product_id": "584796e7-c751-4a1e-acb8-91f5aaabba7b",
+  "product_name": "C3 G0 normal entry 4e7b0c77-2c75-4ade-9482-6a4b380dd923",
+  "receipt_sequence": 878,
+  "run_id": "4e7b0c77-2c75-4ade-9482-6a4b380dd923",
+  "runtime_identity": {
+    "api_base_url": "http://watt-c3-bindingg0g47-api-20261010:8000",
+    "api_service": "watt-c3-bindingg0g47-api-20261010",
+    "captured_at_utc": "2026-10-10T23:07:52.683280+00:00",
+    "database_name": "spg_c3_bindingg0g47_qualification_20261010",
+    "image_id": "sha256:8f189b7b3cd261a1861ccd6e6b69024801e1c765decadb8deae0768c17302ac2",
+    "isolated": true,
+    "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+    "provider_ready": true,
+    "qualification": "C3",
+    "qualification_run": "final-g0",
+    "source_revision": "e5df24cf5eb358346a4c2f23bde9e99feb808d76"
+  },
+  "runtime_identity_file_sha256": "e012a5e519c2a58df638959ac375a3d4a859ef4a101a1444e82ced4e8efa7c28",
+  "schema": "c3-normal-entry-state-v1",
+  "source_record_id": "c7a403a4-866c-4a9b-81b5-868e6cff184c",
+  "turn_id": "b2e7faa3-d856-4ece-abca-a73b5c3b8c27",
+  "updated_at_utc": "2026-10-10T23:24:22.174353Z",
+  "work_id": "0707d46d-c00c-566c-96b4-255ff81a722d"
+}

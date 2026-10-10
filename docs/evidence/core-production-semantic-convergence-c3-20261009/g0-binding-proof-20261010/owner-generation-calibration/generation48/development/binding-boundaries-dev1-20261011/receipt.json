@@ -1,0 +1,21 @@
+{
+  "scope": "CONTROLLED_BOUNDARY_REGRESSION_NO_MODEL_NO_WORK",
+  "source_overlay": true,
+  "exit_code": 4,
+  "wall_seconds": 12.143283133977093,
+  "counts": {
+    "tests": 0,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "input_sha256": {
+    "src/spg/application/governed_obligations.py": "e84bb07b8c92a95ddc538df24eabd87b915edc64ca989ee3c6e856527172d063",
+    "src/spg/providers/fulfillment_candidate.py": "53f5a6d768eb6ad61c192ee375506939104edbca1d2c574e1b33ddf78c11192f",
+    "src/spg/domain/model_runtime.py": "82866396fbba1eafa5f66a2693230ed19d0bcdcdee15d2781c65042f491d55d1",
+    "src/spg/infrastructure/model_runtime.py": "914f6569770a8eeb666180daf7b38707c3155bddacbc584ee79ea0c2cf9600f4",
+    "tests/test_c3_primary_context_contract.py": "07fa780bebf31e0993c0384fd96598351332a09dbff12586233d69fca5c243c3",
+    "tests/test_c3_wire_presentation.py": "c603b4367e8ba47d14a1497c7ae45de56377ebe7915a9ca069254b5122bc6390",
+    "tests/test_model_runtime.py": "d5b5645c1f405d5e37c6fa89924e694215a731e2e91317edc86fbffd9cc7be39"
+  }
+}

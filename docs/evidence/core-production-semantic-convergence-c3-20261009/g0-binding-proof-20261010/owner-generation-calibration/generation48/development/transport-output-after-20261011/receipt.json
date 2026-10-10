@@ -1,0 +1,18 @@
+{
+  "scope": "CONTROLLED_TRANSPORT_ONLY_NO_MODEL_NO_WORK",
+  "source_overlay": true,
+  "label": "after",
+  "exit_code": 0,
+  "wall_seconds": 14.281155328033492,
+  "counts": {
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "input_sha256": {
+    "domain_model_runtime.py": "82866396fbba1eafa5f66a2693230ed19d0bcdcdee15d2781c65042f491d55d1",
+    "test_model_runtime.py": "d5b5645c1f405d5e37c6fa89924e694215a731e2e91317edc86fbffd9cc7be39",
+    "infrastructure_model_runtime.py": "914f6569770a8eeb666180daf7b38707c3155bddacbc584ee79ea0c2cf9600f4"
+  }
+}

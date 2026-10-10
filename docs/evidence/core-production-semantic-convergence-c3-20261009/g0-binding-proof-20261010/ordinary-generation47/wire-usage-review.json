@@ -1,0 +1,594 @@
+{
+  "snapshot_sha256": "a6fce87118b570930298fb8910fedef64fa37c8cb95451103c520d2fd5b87e79",
+  "rows": [
+    {
+      "receipt_id": "6ce58dc5-ae1e-4ed4-9bcc-4adf8e1f6afa",
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "attempt": 1,
+      "keys": [
+        "attempt",
+        "budget_limit",
+        "candidate_is_authority",
+        "candidate_output",
+        "candidate_output_bytes",
+        "candidate_output_sha256",
+        "candidate_retained",
+        "completion_feedback_contract",
+        "exact_target_paths",
+        "inventory_fingerprint",
+        "model",
+        "owner",
+        "owner_repair_context_contract",
+        "owner_source_preconditions",
+        "provider_wire_version",
+        "receipt_id",
+        "recorded_at_utc",
+        "schema",
+        "source_revision",
+        "stage",
+        "wire_request_fingerprint",
+        "wire_schema_fingerprint",
+        "wire_table_fingerprint",
+        "work_id",
+        "work_reality_revision_id"
+      ],
+      "fields": {
+        "candidate_output": {
+          "utf8_bytes": 8332,
+          "sha256": "338bcec7a6011f73a9d8fdf1b74e8ee547decea473a789f9f84d243c10a5b93b",
+          "json_valid": false,
+          "error": "Expecting property name enclosed in double quotes",
+          "line": 1,
+          "column": 8333,
+          "offset": 8332,
+          "punctuation_at_error": "OTHER_OR_EOF",
+          "leading_codepoints": [
+            123,
+            34,
+            118
+          ],
+          "trailing_codepoints": [
+            49,
+            52,
+            44
+          ],
+          "syntax_only_window": "XX[XX] XXXXX XXXX\"}, {\"X\": XX,"
+        },
+        "candidate_output_sha256": {
+          "utf8_bytes": 64,
+          "sha256": "3d5276a408e6f6385d086408a59082b5c5ea1c0547efd725d296aa927a0f3db3"
+        },
+        "completion_feedback_contract": {
+          "utf8_bytes": 39,
+          "sha256": "4bccbe4bda04a701fd005fc9fa2d08123c22c29b6aa18532a343c408211bf56d"
+        },
+        "inventory_fingerprint": {
+          "utf8_bytes": 64,
+          "sha256": "38c81e68aa6a157617e711ff1ebf31a3a5c21e2c83130a40fbc5a537ede99b6c"
+        },
+        "model": {
+          "keys": [
+            "effective_model",
+            "generation_schema_fingerprint",
+            "output_bytes",
+            "output_sha256",
+            "provider",
+            "request_id",
+            "requested_model",
+            "timing",
+            "transport_retry_count",
+            "usage"
+          ]
+        },
+        "owner": {
+          "utf8_bytes": 27,
+          "sha256": "7f0717b68c60f953e381c952d29c4d5b983ef330c1c0567593506191448d3afe"
+        },
+        "owner_repair_context_contract": {
+          "utf8_bytes": 31,
+          "sha256": "0274b4b1f95b7d8512fa4fe91835cbcb99704b5757d607bfda163b32cb07817d"
+        },
+        "owner_source_preconditions": {
+          "keys": [
+            "capabilities_fingerprint",
+            "capability_operand_requirements",
+            "component_rule",
+            "contract",
+            "current_fact_dependency_contract",
+            "current_fact_dependency_rule",
+            "fact_support_route_rule",
+            "generation_prerequisite_contract",
+            "generation_view_contract",
+            "inventory_fingerprint",
+            "meaning",
+            "operand_observation_contract",
+            "original_authority_type_projection",
+            "raw_operand_observation_contract",
+            "review_input_contract",
+            "semantic_selection_input_contract",
+            "source_revision",
+            "sources",
+            "support_operand_rule",
+            "syntax_observation_contract",
+            "typed_prerequisite_contract",
+            "typed_prerequisite_rule",
+            "work_reality_revision_id"
+          ]
+        },
+        "provider_wire_version": {
+          "utf8_bytes": 22,
+          "sha256": "9625ea507798bcd37ffbcc30f7ad0f68141872c98abe15e10f344970c0255e76"
+        },
+        "receipt_id": {
+          "utf8_bytes": 36,
+          "sha256": "9a5997d03d8ccf382111372b6f012f25d5efae4b20db4eb5f0d2f09ccb2b3495"
+        },
+        "recorded_at_utc": {
+          "utf8_bytes": 32,
+          "sha256": "7f8ffb5e59634cf1720b4182a718aa8a7b13db3d8dd9dfb819f5ffdcdaf8ef54"
+        },
+        "schema": {
+          "utf8_bytes": 37,
+          "sha256": "988a22a5b5bbf19728e3844df5bb7928648ebd5913153aad197902a63597dd64"
+        },
+        "source_revision": {
+          "utf8_bytes": 40,
+          "sha256": "0e6eb13307538601cad5e0e89b7e9cc0cc518700f255d14c44d99213925bc7fb"
+        },
+        "stage": {
+          "utf8_bytes": 23,
+          "sha256": "fcbc62bebb15e2ad5ed77b5fd8b00713cfc28b67fff22e37e1b582d1a71baa62"
+        },
+        "wire_request_fingerprint": {
+          "utf8_bytes": 64,
+          "sha256": "7c896049b2233522010f5d139656db86f3b87b2e7f50737f86f7b37932df3ffa"
+        },
+        "wire_schema_fingerprint": {
+          "utf8_bytes": 64,
+          "sha256": "2d126a9cbb55f904f67875da2eb97320497dac060ff199c8b7108f78785b32b9"
+        },
+        "wire_table_fingerprint": {
+          "utf8_bytes": 64,
+          "sha256": "882be106c00d964235f0068b444ce1c7f700dde95498b769fc5bddcd69d3909f"
+        },
+        "work_id": {
+          "utf8_bytes": 36,
+          "sha256": "f4c0e42bec98ebfac1acb994970e7832af73e780595a6c7bca79cb1725162d77"
+        },
+        "work_reality_revision_id": {
+          "utf8_bytes": 36,
+          "sha256": "8c725e83af8d471d3839f534233f89694806b79ce629a6c386829eee8ee30ac5"
+        }
+      },
+      "model": {
+        "provider": "deepseek",
+        "requested_model": "deepseek-flash",
+        "effective_model": "deepseek-flash",
+        "request_id": "4df8b338-2a51-4f8b-8bbd-d03fda3c7671",
+        "timing": {
+          "completed_seconds": 610.0440439080121,
+          "first_response_event_seconds": 0.5641511500580236,
+          "first_token_seconds": 1.0026166030438617,
+          "request_sent_seconds": 0.0027949040522798896
+        },
+        "transport_retry_count": 0,
+        "usage": {
+          "cached_tokens": 1024,
+          "input_tokens": 37883,
+          "output_tokens": 2499,
+          "reasoning_tokens": 0,
+          "total_tokens": 40382,
+          "unknown": false
+        }
+      }
+    },
+    {
+      "receipt_id": "e9d92f4c-6989-485f-b0a0-6a6de76cfda1",
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 1,
+      "keys": [
+        "attempt",
+        "budget_limit",
+        "candidate",
+        "candidate_is_authority",
+        "exact_target_paths",
+        "failed_predicate",
+        "inventory_fingerprint",
+        "owner",
+        "owner_repair_context_bound",
+        "predecode_diagnostics",
+        "receipt_id",
+        "recorded_at_utc",
+        "repair_feedback_bound",
+        "schema",
+        "semantic_review",
+        "source_revision",
+        "stage",
+        "terminal",
+        "terminal_reason",
+        "validation_feedback",
+        "validation_feedback_bytes",
+        "validation_feedback_sha256",
+        "validation_passed",
+        "work_id",
+        "work_reality_revision_id"
+      ],
+      "fields": {
+        "failed_predicate": {
+          "utf8_bytes": 38,
+          "sha256": "37174c130284be66a4276aae5c3bbb0b6915eec69172b4b5d14d654a13decda7"
+        },
+        "inventory_fingerprint": {
+          "utf8_bytes": 64,
+          "sha256": "38c81e68aa6a157617e711ff1ebf31a3a5c21e2c83130a40fbc5a537ede99b6c"
+        },
+        "owner": {
+          "utf8_bytes": 27,
+          "sha256": "7f0717b68c60f953e381c952d29c4d5b983ef330c1c0567593506191448d3afe"
+        },
+        "predecode_diagnostics": {
+          "keys": [
+            "additional_violation_count",
+            "binding",
+            "diagnostic_fingerprint",
+            "inventory_fingerprint",
+            "not_evaluable",
+            "provider_wire_version",
+            "schema",
+            "violations",
+            "wire_output_fingerprint",
+            "wire_request_fingerprint",
+            "wire_schema_fingerprint",
+            "wire_table_fingerprint"
+          ]
+        },
+        "receipt_id": {
+          "utf8_bytes": 36,
+          "sha256": "158859f7243f3302d0eb1dec865f1638a37ba650045f052160eb99cf640b0c6b"
+        },
+        "recorded_at_utc": {
+          "utf8_bytes": 32,
+          "sha256": "ca54cbe53805059e10a27576b934c646f79080d1b3763afce90e8ff6724bfc62"
+        },
+        "schema": {
+          "utf8_bytes": 37,
+          "sha256": "988a22a5b5bbf19728e3844df5bb7928648ebd5913153aad197902a63597dd64"
+        },
+        "source_revision": {
+          "utf8_bytes": 40,
+          "sha256": "0e6eb13307538601cad5e0e89b7e9cc0cc518700f255d14c44d99213925bc7fb"
+        },
+        "stage": {
+          "utf8_bytes": 19,
+          "sha256": "e3743a8a3d6a8b01c39d5eb4e694b97e4951ecee717eb03b26b780618b551c11"
+        },
+        "validation_feedback_sha256": {
+          "utf8_bytes": 64,
+          "sha256": "33d0841af0212c7e180a482771880cc0eb4fc725bcc4494c9dd2a45e70f1ea9c"
+        },
+        "work_id": {
+          "utf8_bytes": 36,
+          "sha256": "f4c0e42bec98ebfac1acb994970e7832af73e780595a6c7bca79cb1725162d77"
+        },
+        "work_reality_revision_id": {
+          "utf8_bytes": 36,
+          "sha256": "8c725e83af8d471d3839f534233f89694806b79ce629a6c386829eee8ee30ac5"
+        }
+      },
+      "diagnostics": {
+        "not_evaluable": [
+          "WIRE_ROUTE_VALIDATION",
+          "CANONICAL_COMPONENT_VALIDATION",
+          "OWNER_PHASE_EVIDENCE",
+          "INDEPENDENT_SEMANTIC_REVIEW",
+          "ACTUAL_OWNER_EVIDENCE",
+          "ASSURANCE"
+        ],
+        "additional_violation_count": 0,
+        "diagnostic_fingerprint": "a268d2f396050e584f689c0a25b9d38873608e7397e484581ea97bea62e3ff18",
+        "violations": [
+          {
+            "code": "OBLIGATION_FORMATION_WIRE_JSON_INVALID"
+          }
+        ]
+      }
+    },
+    {
+      "receipt_id": "022a6792-2eb4-4f93-9f1a-5af09a3c1e57",
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "attempt": 2,
+      "keys": [
+        "attempt",
+        "budget_limit",
+        "candidate_is_authority",
+        "candidate_output",
+        "candidate_output_bytes",
+        "candidate_output_sha256",
+        "candidate_retained",
+        "completion_feedback_contract",
+        "exact_target_paths",
+        "inventory_fingerprint",
+        "model",
+        "owner",
+        "owner_repair_context_contract",
+        "owner_source_preconditions",
+        "provider_wire_version",
+        "receipt_id",
+        "recorded_at_utc",
+        "schema",
+        "source_revision",
+        "stage",
+        "wire_request_fingerprint",
+        "wire_schema_fingerprint",
+        "wire_table_fingerprint",
+        "work_id",
+        "work_reality_revision_id"
+      ],
+      "fields": {
+        "candidate_output": {
+          "utf8_bytes": 10541,
+          "sha256": "b31cb68cee675ba4438550fd9d7929a2b92d4497ca8532c8ca91f2680fdf6fc8",
+          "json_valid": false,
+          "error": "Expecting value",
+          "line": 1,
+          "column": 1,
+          "offset": 0,
+          "punctuation_at_error": "OTHER_OR_EOF",
+          "leading_codepoints": [
+            96,
+            96,
+            96
+          ],
+          "trailing_codepoints": [
+            96,
+            96,
+            96
+          ],
+          "syntax_only_window": "XXXXXXX\n{\"X\":X,\"X\":\"XXXXXXXXXX"
+        },
+        "candidate_output_sha256": {
+          "utf8_bytes": 64,
+          "sha256": "e53749926a01c663e755151339fe4189017275e9b59b48eae27058d6f364f2d4"
+        },
+        "completion_feedback_contract": {
+          "utf8_bytes": 39,
+          "sha256": "4bccbe4bda04a701fd005fc9fa2d08123c22c29b6aa18532a343c408211bf56d"
+        },
+        "inventory_fingerprint": {
+          "utf8_bytes": 64,
+          "sha256": "38c81e68aa6a157617e711ff1ebf31a3a5c21e2c83130a40fbc5a537ede99b6c"
+        },
+        "model": {
+          "keys": [
+            "effective_model",
+            "generation_schema_fingerprint",
+            "output_bytes",
+            "output_sha256",
+            "provider",
+            "request_id",
+            "requested_model",
+            "timing",
+            "transport_retry_count",
+            "usage"
+          ]
+        },
+        "owner": {
+          "utf8_bytes": 27,
+          "sha256": "7f0717b68c60f953e381c952d29c4d5b983ef330c1c0567593506191448d3afe"
+        },
+        "owner_repair_context_contract": {
+          "utf8_bytes": 31,
+          "sha256": "0274b4b1f95b7d8512fa4fe91835cbcb99704b5757d607bfda163b32cb07817d"
+        },
+        "owner_source_preconditions": {
+          "keys": [
+            "capabilities_fingerprint",
+            "capability_operand_requirements",
+            "component_rule",
+            "contract",
+            "current_fact_dependency_contract",
+            "current_fact_dependency_rule",
+            "fact_support_route_rule",
+            "generation_prerequisite_contract",
+            "generation_view_contract",
+            "inventory_fingerprint",
+            "meaning",
+            "operand_observation_contract",
+            "original_authority_type_projection",
+            "raw_operand_observation_contract",
+            "review_input_contract",
+            "semantic_selection_input_contract",
+            "source_revision",
+            "sources",
+            "support_operand_rule",
+            "syntax_observation_contract",
+            "typed_prerequisite_contract",
+            "typed_prerequisite_rule",
+            "work_reality_revision_id"
+          ]
+        },
+        "provider_wire_version": {
+          "utf8_bytes": 22,
+          "sha256": "9625ea507798bcd37ffbcc30f7ad0f68141872c98abe15e10f344970c0255e76"
+        },
+        "receipt_id": {
+          "utf8_bytes": 36,
+          "sha256": "5501eaf90a16ba5e1704c22dd3eace945fb4f670e0c8000f18accafcd08944ee"
+        },
+        "recorded_at_utc": {
+          "utf8_bytes": 32,
+          "sha256": "c8917cffd824b0bec5241c5c2abe3f8e8a4304f196e23465de4d8809cd3cab3a"
+        },
+        "schema": {
+          "utf8_bytes": 37,
+          "sha256": "988a22a5b5bbf19728e3844df5bb7928648ebd5913153aad197902a63597dd64"
+        },
+        "source_revision": {
+          "utf8_bytes": 40,
+          "sha256": "0e6eb13307538601cad5e0e89b7e9cc0cc518700f255d14c44d99213925bc7fb"
+        },
+        "stage": {
+          "utf8_bytes": 23,
+          "sha256": "fcbc62bebb15e2ad5ed77b5fd8b00713cfc28b67fff22e37e1b582d1a71baa62"
+        },
+        "wire_request_fingerprint": {
+          "utf8_bytes": 64,
+          "sha256": "519b79ff7abc8301985312211444a1e5e7ea9cd7a64498f9004426b96ae58438"
+        },
+        "wire_schema_fingerprint": {
+          "utf8_bytes": 64,
+          "sha256": "2d126a9cbb55f904f67875da2eb97320497dac060ff199c8b7108f78785b32b9"
+        },
+        "wire_table_fingerprint": {
+          "utf8_bytes": 64,
+          "sha256": "882be106c00d964235f0068b444ce1c7f700dde95498b769fc5bddcd69d3909f"
+        },
+        "work_id": {
+          "utf8_bytes": 36,
+          "sha256": "f4c0e42bec98ebfac1acb994970e7832af73e780595a6c7bca79cb1725162d77"
+        },
+        "work_reality_revision_id": {
+          "utf8_bytes": 36,
+          "sha256": "8c725e83af8d471d3839f534233f89694806b79ce629a6c386829eee8ee30ac5"
+        }
+      },
+      "model": {
+        "provider": "deepseek",
+        "requested_model": "deepseek-flash",
+        "effective_model": "deepseek-flash",
+        "request_id": "0fa647c9-505f-4642-9aee-c12d137a814f",
+        "timing": {
+          "completed_seconds": 9.913350421003997,
+          "first_response_event_seconds": 0.7823960479581729,
+          "first_token_seconds": 1.7583823839668185,
+          "request_sent_seconds": 0.0029509960440918803
+        },
+        "transport_retry_count": 0,
+        "usage": {
+          "cached_tokens": 2432,
+          "input_tokens": 45426,
+          "output_tokens": 2888,
+          "reasoning_tokens": 0,
+          "total_tokens": 48314,
+          "unknown": false
+        }
+      }
+    },
+    {
+      "receipt_id": "f7c4bdc7-7eef-4c20-892c-a7c1d5bdf483",
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 2,
+      "keys": [
+        "attempt",
+        "budget_limit",
+        "candidate",
+        "candidate_is_authority",
+        "exact_target_paths",
+        "failed_predicate",
+        "inventory_fingerprint",
+        "owner",
+        "owner_repair_context_bound",
+        "predecode_diagnostics",
+        "receipt_id",
+        "recorded_at_utc",
+        "repair_feedback_bound",
+        "schema",
+        "semantic_review",
+        "source_revision",
+        "stage",
+        "terminal",
+        "terminal_reason",
+        "unresolved_source_refs",
+        "validation_feedback",
+        "validation_feedback_bytes",
+        "validation_feedback_sha256",
+        "validation_passed",
+        "work_id",
+        "work_reality_revision_id"
+      ],
+      "fields": {
+        "failed_predicate": {
+          "utf8_bytes": 38,
+          "sha256": "37174c130284be66a4276aae5c3bbb0b6915eec69172b4b5d14d654a13decda7"
+        },
+        "inventory_fingerprint": {
+          "utf8_bytes": 64,
+          "sha256": "38c81e68aa6a157617e711ff1ebf31a3a5c21e2c83130a40fbc5a537ede99b6c"
+        },
+        "owner": {
+          "utf8_bytes": 27,
+          "sha256": "7f0717b68c60f953e381c952d29c4d5b983ef330c1c0567593506191448d3afe"
+        },
+        "predecode_diagnostics": {
+          "keys": [
+            "additional_violation_count",
+            "binding",
+            "diagnostic_fingerprint",
+            "inventory_fingerprint",
+            "not_evaluable",
+            "provider_wire_version",
+            "schema",
+            "violations",
+            "wire_output_fingerprint",
+            "wire_request_fingerprint",
+            "wire_schema_fingerprint",
+            "wire_table_fingerprint"
+          ]
+        },
+        "receipt_id": {
+          "utf8_bytes": 36,
+          "sha256": "9b804695626350c2b7025931879c66fb32e5183d1a9a6f7bdf259a6895bd18e1"
+        },
+        "recorded_at_utc": {
+          "utf8_bytes": 32,
+          "sha256": "acee128c61ff1c4690c98354b0b049f5b6a7697e62d2421db66eeeda2a88b401"
+        },
+        "schema": {
+          "utf8_bytes": 37,
+          "sha256": "988a22a5b5bbf19728e3844df5bb7928648ebd5913153aad197902a63597dd64"
+        },
+        "source_revision": {
+          "utf8_bytes": 40,
+          "sha256": "0e6eb13307538601cad5e0e89b7e9cc0cc518700f255d14c44d99213925bc7fb"
+        },
+        "stage": {
+          "utf8_bytes": 19,
+          "sha256": "e3743a8a3d6a8b01c39d5eb4e694b97e4951ecee717eb03b26b780618b551c11"
+        },
+        "terminal_reason": {
+          "utf8_bytes": 38,
+          "sha256": "37174c130284be66a4276aae5c3bbb0b6915eec69172b4b5d14d654a13decda7"
+        },
+        "validation_feedback_sha256": {
+          "utf8_bytes": 64,
+          "sha256": "13097606f9598624709ea22e4cf2f2296f6954a9209193730d053cebf0d15788"
+        },
+        "work_id": {
+          "utf8_bytes": 36,
+          "sha256": "f4c0e42bec98ebfac1acb994970e7832af73e780595a6c7bca79cb1725162d77"
+        },
+        "work_reality_revision_id": {
+          "utf8_bytes": 36,
+          "sha256": "8c725e83af8d471d3839f534233f89694806b79ce629a6c386829eee8ee30ac5"
+        }
+      },
+      "diagnostics": {
+        "not_evaluable": [
+          "WIRE_ROUTE_VALIDATION",
+          "CANONICAL_COMPONENT_VALIDATION",
+          "OWNER_PHASE_EVIDENCE",
+          "INDEPENDENT_SEMANTIC_REVIEW",
+          "ACTUAL_OWNER_EVIDENCE",
+          "ASSURANCE"
+        ],
+        "additional_violation_count": 0,
+        "diagnostic_fingerprint": "eb75df8047f83579fa7504726ea729b83d2752dccce94341c8d44891cdc9d50f",
+        "violations": [
+          {
+            "code": "OBLIGATION_FORMATION_WIRE_JSON_INVALID"
+          }
+        ]
+      }
+    }
+  ]
+}
