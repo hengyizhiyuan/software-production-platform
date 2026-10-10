@@ -1,0 +1,22 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input/watt
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 56 items
+
+tests/test_c3_owner_repair_preconditions.py ...............F             [ 28%]
+tests/test_c3_fulfillment_repair_context.py ..........                   [ 46%]
+tests/test_c3_fulfillment_wire_feedback.py ............................. [ 98%]
+.                                                                        [100%]
+
+=================================== FAILURES ===================================
+_ test_bound_feedback_repairs_once_or_stops_drift_without_review[legacy-feedback] _
+tests/test_c3_owner_repair_preconditions.py:148: in test_bound_feedback_repairs_once_or_stops_drift_without_review
+    assert len(calls)==3 and all(b.state!='UNRESOLVED' for b in result)
+E   AssertionError: assert (1 == 3)
+E    +  where 1 = len([{'immutable_inventory': {'work_id': 'c44a241b-469f-4945-b10d-4b52bad7509f', 'work_reality_revision_id': '6ae87a4a-8f0...063f7fb6aa57616', 'wire_schema_fingerprint': '5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40', ...}}])
+----------------- generated xml file: /c3-evidence/result.xml ------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_owner_repair_preconditions.py::test_bound_feedback_repairs_once_or_stops_drift_without_review[legacy-feedback]
+========================= 1 failed, 55 passed in 6.33s =========================

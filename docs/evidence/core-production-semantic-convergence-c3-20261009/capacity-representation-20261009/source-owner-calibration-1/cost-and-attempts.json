@@ -1,0 +1,143 @@
+{
+  "schema": "c3-source-owner-calibration-cost-v1",
+  "captured_at_utc": "2026-10-10T05:20:24.504147+00:00",
+  "real_provider_calls": 0,
+  "real_provider_tokens": 0,
+  "real_semantic_reviews": 0,
+  "new_real_g0_works": 0,
+  "exact_image_builds": 1,
+  "exact_image_build_wall_seconds": 17.33485781494528,
+  "exact_image_regression_wall_seconds": 12.774576387018897,
+  "isolated_pg_wall_seconds": 180.39126686402597,
+  "image_export_wall_seconds": 37.64261476194952,
+  "cpu_time": "UNKNOWN_NOT_CAPTURED",
+  "monetary_cost": "UNKNOWN_NOT_QUERIED",
+  "task_elapsed_time": "NOT_EQUAL_TO_SUM_OF_OVERLAPPING_PROCESS_WALL_TIMES",
+  "development_runs": [
+    {
+      "schema": "c3-predecode-development-regression-v1",
+      "started_at_utc": "2026-10-10T05:09:41.142143+00:00",
+      "ended_at_utc": "2026-10-10T05:09:50.725693+00:00",
+      "wall_seconds": 9.583586943044793,
+      "counts": {
+        "tests": 54,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 54
+      },
+      "exit_code": 0,
+      "snapshot_sha256": "78f3cde76d5eb743a60edb9000168d84a51d970a64e7d309aa274e7f5926431a",
+      "actual_image_id": "sha256:619598878ebef02b80635efb0e991fece07038d9ee8e93ad78d2a1e57beb8377",
+      "actual_container_id": "b23786051378c525d65786dc4cb5de5264561e3867388d653b2be02ca460faf4",
+      "network": "none",
+      "source_overlay": true,
+      "model_calls": 0,
+      "original_database_access": false,
+      "production_resources_modified": false,
+      "nodes": [
+        "tests/test_c3_owner_repair_preconditions.py",
+        "tests/test_c3_fulfillment_repair_context.py",
+        "tests/test_c3_fulfillment_wire_feedback.py"
+      ],
+      "controller_sha256": "6ba4b15311987a1d9d8b1bdb3c405b36c8f024c7a794bc6822aa59de0bd45b6f",
+      "claim": "CONTROLLED_REGRESSION_NOT_EXACT_NEW_IMAGE_OR_LIVE_MODEL_QUALIFICATION"
+    },
+    {
+      "schema": "c3-predecode-development-regression-v1",
+      "started_at_utc": "2026-10-10T05:10:33.243397+00:00",
+      "ended_at_utc": "2026-10-10T05:10:45.751509+00:00",
+      "wall_seconds": 12.50811525300378,
+      "counts": {
+        "tests": 233,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 233
+      },
+      "exit_code": 0,
+      "snapshot_sha256": "aed2cc1399fcea81f68f4cfe654d6daa8581b026deb2e74e9388fa29de2c8266",
+      "actual_image_id": "sha256:619598878ebef02b80635efb0e991fece07038d9ee8e93ad78d2a1e57beb8377",
+      "actual_container_id": "62a01977b2f6645c7c72d6f9385ef95bf19f33b9a3bebd9f57a9897244e1edf7",
+      "network": "none",
+      "source_overlay": true,
+      "model_calls": 0,
+      "original_database_access": false,
+      "production_resources_modified": false,
+      "nodes": [
+        "tests/test_c3_owner_repair_preconditions.py",
+        "tests/test_c3_fulfillment_repair_context.py",
+        "tests/test_c3_fulfillment_wire_feedback.py",
+        "tests/test_c3_fulfillment_capacity_representation.py",
+        "tests/test_c3_semantic_contract_calibration.py",
+        "tests/test_c3_fulfillment_provider_failures.py",
+        "tests/test_c3_fulfillment_components.py",
+        "tests/test_fulfillment_projection.py",
+        "tests/test_governed_obligation_fulfillment.py",
+        "tests/test_c3_fulfillment_stop_projection.py",
+        "tests/test_c3_fulfillment_admission_stop.py"
+      ],
+      "controller_sha256": "6ba4b15311987a1d9d8b1bdb3c405b36c8f024c7a794bc6822aa59de0bd45b6f",
+      "claim": "CONTROLLED_REGRESSION_NOT_EXACT_NEW_IMAGE_OR_LIVE_MODEL_QUALIFICATION"
+    },
+    {
+      "schema": "c3-predecode-development-regression-v1",
+      "started_at_utc": "2026-10-10T05:12:37.946899+00:00",
+      "ended_at_utc": "2026-10-10T05:12:47.443591+00:00",
+      "wall_seconds": 9.496697944996413,
+      "counts": {
+        "tests": 56,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 55
+      },
+      "exit_code": 1,
+      "snapshot_sha256": "6e431dba4401ed7eccb5981672f15a23ed4fc8933114e7cac1aaeb2ab72f584e",
+      "actual_image_id": "sha256:619598878ebef02b80635efb0e991fece07038d9ee8e93ad78d2a1e57beb8377",
+      "actual_container_id": "041585b1dc6a46a607d264da094bc3814bd391e91ffc9995d54ab4896ee23d20",
+      "network": "none",
+      "source_overlay": true,
+      "model_calls": 0,
+      "original_database_access": false,
+      "production_resources_modified": false,
+      "nodes": [
+        "tests/test_c3_owner_repair_preconditions.py",
+        "tests/test_c3_fulfillment_repair_context.py",
+        "tests/test_c3_fulfillment_wire_feedback.py"
+      ],
+      "controller_sha256": "6ba4b15311987a1d9d8b1bdb3c405b36c8f024c7a794bc6822aa59de0bd45b6f",
+      "claim": "CONTROLLED_REGRESSION_NOT_EXACT_NEW_IMAGE_OR_LIVE_MODEL_QUALIFICATION"
+    },
+    {
+      "schema": "c3-predecode-development-regression-v1",
+      "started_at_utc": "2026-10-10T05:13:22.741428+00:00",
+      "ended_at_utc": "2026-10-10T05:13:32.499567+00:00",
+      "wall_seconds": 9.758143307990395,
+      "counts": {
+        "tests": 56,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 56
+      },
+      "exit_code": 0,
+      "snapshot_sha256": "462343eaccdedfb879c65224a5de182b884e69d7c21ab49db3d9bf1019e57bc2",
+      "actual_image_id": "sha256:619598878ebef02b80635efb0e991fece07038d9ee8e93ad78d2a1e57beb8377",
+      "actual_container_id": "d5774591fd91e9e846cb64d9bc9bab74b86b3b21df8e52f5bd6a5b2b062b8427",
+      "network": "none",
+      "source_overlay": true,
+      "model_calls": 0,
+      "original_database_access": false,
+      "production_resources_modified": false,
+      "nodes": [
+        "tests/test_c3_owner_repair_preconditions.py",
+        "tests/test_c3_fulfillment_repair_context.py",
+        "tests/test_c3_fulfillment_wire_feedback.py"
+      ],
+      "controller_sha256": "6ba4b15311987a1d9d8b1bdb3c405b36c8f024c7a794bc6822aa59de0bd45b6f",
+      "claim": "CONTROLLED_REGRESSION_NOT_EXACT_NEW_IMAGE_OR_LIVE_MODEL_QUALIFICATION"
+    }
+  ],
+  "qualification_boundary": "Controlled diagnostic and contract regression, not real model convergence, G0 or Holdout"
+}

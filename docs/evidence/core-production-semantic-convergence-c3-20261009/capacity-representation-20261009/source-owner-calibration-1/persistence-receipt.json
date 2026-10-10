@@ -1,0 +1,19 @@
+{
+  "schema": "c3-source-owner-public-persistence-v1",
+  "recorded_at_utc": "2026-10-10T05:21:20.655338+00:00",
+  "public_directory": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/source-owner-calibration-20261010/public-delivery",
+  "public_archive_sha256": "c53e0f1cc37a91fbc7a5f87bcf4491aa3d9893b026af3d03f0f662eea9fb7929",
+  "public_files": 41,
+  "public_credentials_found": false,
+  "private_original_text_found": false,
+  "image_archive_verified": true,
+  "image_id": "sha256:7c9e3782d985ec93c72b3d71d7fa24b2b10fc1123305119cdbc6c64687faca82",
+  "watt_source": "9846bddee5b63cfa427a3ec70828b5e5180480fc",
+  "original_ecs_head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+  "original_ecs_main_ref": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+  "production_modified": false,
+  "historical_owner_mutated": false,
+  "model_calls": 0,
+  "status": "C3_PARTIAL",
+  "snapshot_boundary": "Public evidence before this persistence receipt and final Git checkpoint; both later added to Git/final recovery files"
+}

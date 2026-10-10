@@ -1,0 +1,14 @@
+{
+  "exit_code": 0,
+  "actual_image_id": "sha256:7c9e3782d985ec93c72b3d71d7fa24b2b10fc1123305119cdbc6c64687faca82",
+  "container_id": "954036d155ea0a12696b9d554dc74d960e13ab22e36ff71a43fb5355cf2e431e",
+  "network": "none",
+  "source_overlay": false,
+  "watt_source": "9846bddee5b63cfa427a3ec70828b5e5180480fc",
+  "source_snapshot_sha256": "aed2cc1399fcea81f68f4cfe654d6daa8581b026deb2e74e9388fa29de2c8266",
+  "controller_sha256": "1cb29442079e729e38e27934ddc21736d721e6ff5e84f1d470f15973acdc9330",
+  "script_sha256": "a088359652817a1a1d4e5f1df0305bf4d2f13f97607bfd1989ed0085a0490438",
+  "private_mounts_readonly": true,
+  "production_modified": false,
+  "model_calls": 0
+}

@@ -1,0 +1,13 @@
+{
+  "exit_code": 0,
+  "actual_image_id": "sha256:619598878ebef02b80635efb0e991fece07038d9ee8e93ad78d2a1e57beb8377",
+  "container_id": "6a5deba1dc56933f423e4dc1a1806c15d877d035f95b12995cc1c89d1160fb40",
+  "network": "none",
+  "source_overlay": true,
+  "source_snapshot_sha256": "aed2cc1399fcea81f68f4cfe654d6daa8581b026deb2e74e9388fa29de2c8266",
+  "controller_sha256": "3964604cb592039c8cb4c6c54c76f2d3b8f77bcd628149b242189438ad3c653b",
+  "script_sha256": "2d16805d0f9327f4ff022cd9f4770575aa5d4ce08228d95a3643bd0bf9fdbbe1",
+  "private_mounts_readonly": true,
+  "production_modified": false,
+  "model_calls": 0
+}
