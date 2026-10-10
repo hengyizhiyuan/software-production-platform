@@ -1,0 +1,1 @@
+{"result": "STOPPED", "terminal_reason": "OBLIGATION_CANDIDATE_SCHEMA_INVALID", "logical_calls": 3, "formation_attempt_count": 2, "feedback_count": 1, "observed_terminal_usage_sum": {"input_tokens": 188685, "output_tokens": 11704, "cached_tokens": 4736, "reasoning_tokens": 0, "total_tokens": 200389}, "wall_seconds": 40.232823578000534}

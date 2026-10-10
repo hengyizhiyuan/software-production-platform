@@ -733,7 +733,7 @@ def _fulfillment_wire_route_observations(output, inventory, capabilities, *, val
             unavailable.append(index)
         else:
             observations.append((index, raw.model_dump(mode="json"), route))
-    if ((owner_preconditions or {}).get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v8"
+    if ((owner_preconditions or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9"}
             and not syntax_unavailable and len(expanded) == len(wire.routes)):
         # Coverage failure does not make exact identity/quote location
         # unknowable. Observe the complete original Wire, never an isolated
@@ -1139,10 +1139,17 @@ class ModelFulfillmentCandidateProvider:
             runtime.close()
 
 
-    def review(self, inventory, candidate, *, capabilities, receipt_callback=None):
+    def review(self, inventory, candidate, *, capabilities, receipt_callback=None, owner_preconditions=None):
         """One independent semantic review; no review retry or authority verdict."""
         from spg.providers.semantic_wire import _provider_strict_output_schema
         self.last_observation = None
+        # The independent critic consumes the same exact Owner prerequisites,
+        # not a separately inferred version of scope or background eligibility.
+        # This view supplies no verdict, performed evidence or permission.
+        review_owner_context = {} if owner_preconditions is None else {
+            "existing_owner_source_preconditions": owner_preconditions,
+            "existing_owner_binding_domains": _formation_binding_choices(inventory, capabilities, owner_preconditions),
+            "owner_preconditions_fingerprint": canonical_fingerprint(owner_preconditions)}
         runtime = self.runtime_factory()
         try:
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
@@ -1193,6 +1200,12 @@ class ModelFulfillmentCandidateProvider:
                     "Use one or two concise sentences per reason, at most 512 characters. Put the specific "
                     "failed comparison in its existing component result rather than repeating every sibling "
                     "comparison in a source reason. Never omit a failure or change a verdict to shorten text. "
+                    "Where supplied, existing_owner_source_preconditions are the exact same structural "
+                    "prerequisites used for this formation attempt. Distinguish legitimate nonexecuting "
+                    "background retention from a missing lawful method. These conditional prerequisites "
+                    "do not select a disposition or prove semantic equivalence. Preserve and independently "
+                    "judge all original qualifier meanings and open effect expressions; no qualifier name "
+                    "or unknown effect token itself proves a permission or exclusive scope. "
                     "Return the unchanged canonical review schema, "
                     "not compact indices or a candidate repair. For EVERY exact "
                     "source_ref decide whether its complete meaning is preserved by the source-linked component "
@@ -1219,6 +1232,7 @@ class ModelFulfillmentCandidateProvider:
                     "sufficiency. A whole-source reuse cannot conceal a lost semantic component. This review is only "
                     "derived-plan semantic validation, not Assurance, Verification PASS, a fact or Human authority."),
                 input_text=json.dumps({"immutable_inventory": inventory,
+                    **review_owner_context,
                     "required_result_identity_slots": _review_result_identity_slots(inventory, candidate),
                     "component_index_table": _review_component_table(inventory, candidate, capabilities),
                     **_review_candidate_representation(inventory,candidate,capabilities),

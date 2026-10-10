@@ -245,7 +245,7 @@ def test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay(
     assert all(b.state != "UNRESOLVED" for b in run())
     before = len(calls)
     request = next(r for r in provider._fulfillment_receipts if r["stage"] == "MODEL_REQUEST_PENDING")
-    assert request["source_role_contract"] == "v2"
+    assert request["source_role_contract"] == "v3"
     if change == "removed": request.pop("source_role_contract")
     else: request["source_role_contract"] = "v1" if change == "v1" else "unknown-role-policy"
     result = run()

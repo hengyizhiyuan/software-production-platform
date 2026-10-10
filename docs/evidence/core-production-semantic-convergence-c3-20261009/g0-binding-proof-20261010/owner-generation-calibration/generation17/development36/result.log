@@ -1,0 +1,44 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 171 items
+
+tests/test_c3_generation_owner_domains.py .............................. [ 17%]
+..                                                                       [ 18%]
+tests/test_c3_source_role_contract.py ........F........                  [ 28%]
+tests/test_c3_fulfillment_repair_context.py .............F.............. [ 45%]
+................                                                         [ 54%]
+tests/test_c3_fulfillment_wire_feedback.py ............................. [ 71%]
+.........                                                                [ 76%]
+tests/test_c3_semantic_contract_calibration.py ......................... [ 91%]
+...............                                                          [100%]
+
+=================================== FAILURES ===================================
+_ test_full_wire_owner_feedback_uses_same_locator_and_exposes_context_removal_geometry_only _
+tests/test_c3_source_role_contract.py:141: in test_full_wire_owner_feedback_uses_same_locator_and_exposes_context_removal_geometry_only
+    assert observed['located_component_observation_contract']=='existing-complete-wire-location-feedback-v1'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'located_component_observation_contract'
+_ test_located_gap_feedback_drift_is_rejected_before_any_repair_request[located-span] _
+tests/test_c3_fulfillment_repair_context.py:238: in test_located_gap_feedback_drift_is_rejected_before_any_repair_request
+    else: payload['owner_repair_context']['located_components'][0]['located_span'] = [0, 1]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'located_components'
+=============================== warnings summary ===============================
+tests/test_c3_semantic_contract_calibration.py::test_negative_file_component_preserves_original_exclusion_and_requires_real_diff
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_source_role_contract.py::test_full_wire_owner_feedback_uses_same_locator_and_exposes_context_removal_geometry_only
+FAILED tests/test_c3_fulfillment_repair_context.py::test_located_gap_feedback_drift_is_rejected_before_any_repair_request[located-span]
+================== 2 failed, 169 passed, 1 warning in 16.02s ===================

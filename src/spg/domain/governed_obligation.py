@@ -314,12 +314,26 @@ def exact_file_scope_paths(fact_or_reference, *, qualified=False) -> tuple[str, 
     if qualifiers and not (qualified and qualifiers == {"exclusive": True}
             and type(qualifiers["exclusive"]) is bool):
         return None
+    paths = literal_file_scope_value_paths(fact_or_reference)
+    if paths is None or not qualified and fact_or_reference.scope is not None and fact_or_reference.scope not in paths:
+        return None
+    return paths
+
+
+def literal_file_scope_value_paths(fact_or_reference) -> tuple[str, ...] | None:
+    """Observe literal Scope values, without judging any qualifier semantics.
+
+    This is not exclusive-scope evidence or authority. A calibrated consumer
+    must independently review the unchanged qualifiers before admitting its
+    proposed exclusive-diff meaning.
+    """
+    if getattr(fact_or_reference.relation, "value", fact_or_reference.relation) != "SCOPE":
+        return None
     value = fact_or_reference.value
     values = (value,) if isinstance(value, str) else tuple(value) if isinstance(value, (tuple, list)) else None
     if not values or not all(isinstance(path, str) for path in values) or len(set(values)) != len(values):
         return None
-    if getattr(fact_or_reference, "reference_role", None) is not None or getattr(fact_or_reference, "unit", None) is not None or (
-            not qualified and fact_or_reference.scope is not None and fact_or_reference.scope not in values):
+    if getattr(fact_or_reference, "reference_role", None) is not None or getattr(fact_or_reference, "unit", None) is not None:
         return None
     from spg.domain.change import safe_repository_path
     try:

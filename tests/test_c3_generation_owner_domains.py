@@ -526,3 +526,243 @@ def test_corresponding_observed_context_constraint_keeps_legal_whole_retention()
         component_basis={"source_span_start": 0, "source_span_end": len(text), "source_component_quote": text},
         rationale="Controlled Owner context prerequisite, not a real admission.")
     assert _projection_binding(revision, ir, inventory, route, allow_calibrated=True).state == "RETAINED_CONTEXT"
+
+
+@pytest.mark.parametrize("qualifiers", [{"only_artifact": True}, {"only_artifact": False}, {"permitted_paths_only": "yes"}])
+def test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review(qualifiers):
+    from tests.test_c3_fulfillment_components import current_lifecycle_candidate, ReviewedOracle
+    from tests.test_c3_semantic_contract_calibration import review
+    from spg.domain.engineering_semantics import SemanticRelation
+    from spg.application.governed_obligations import fulfillment_inventory, validate_projection_candidate
+    from spg.domain.governed_obligation import exact_file_scope_paths, literal_file_scope_value_paths
+    revision, ir, _, plan = current_lifecycle_candidate()
+    fact = revision.engineering_semantic_facts[0].model_copy(update={"relation": SemanticRelation.SCOPE,
+        "value": ["index.html"], "scope": "permitted changed artifacts", "qualifiers": qualifiers})
+    before = deepcopy(fact.model_dump(mode="json"))
+    revision.engineering_semantic_facts = (fact,)
+    inventory = fulfillment_inventory(revision, ir)
+    plan = plan.model_copy(update={"inventory_fingerprint": inventory["inventory_fingerprint"],
+        "routes": (plan.routes[0].model_copy(update={"capability": "GIT_DIFF_SCOPE"}), *plan.routes[1:])})
+    assert exact_file_scope_paths(fact, qualified=True) is None
+    assert literal_file_scope_value_paths(fact) == ("index.html",)
+    with pytest.raises(ValueError, match="SCOPE_VALUE_UNSUPPORTED"):
+        validate_projection_candidate(plan, revision, ir, inventory, semantic_review=review(inventory, plan), source_contract="v2")
+    with pytest.raises(ValueError, match="COMPONENT_REVIEW_REQUIRED"):
+        validate_projection_candidate(plan, revision, ir, inventory, semantic_review=ReviewedOracle([]).review(inventory, plan), source_contract="v3")
+    verdict = review(inventory, plan)
+    rejected = verdict.model_copy(update={"component_results": tuple(r.model_copy(update={"complete_and_equivalent": False})
+        if r.capability == "GIT_DIFF_SCOPE" else r for r in verdict.component_results)})
+    with pytest.raises(ValueError, match="SEMANTIC_COMPONENT_MISMATCH"):
+        validate_projection_candidate(plan, revision, ir, inventory, semantic_review=rejected, source_contract="v3")
+    # Controlled affirmative review proves contract expressibility only; the
+    # false qualifier variant is deliberately NOT a live semantic qualification.
+    if qualifiers == {"only_artifact": True}:
+        bindings = validate_projection_candidate(plan, revision, ir, inventory, semantic_review=verdict, source_contract="v3")
+        assert all(b.state != "UNRESOLVED" for b in bindings)
+    content = plan.model_copy(update={"routes": (plan.routes[0].model_copy(update={"capability": "ARTIFACT_CONTENT"}), *plan.routes[1:])})
+    with pytest.raises(ValueError, match="FILE_SCOPE_OWNER_MISMATCH"):
+        validate_projection_candidate(content, revision, ir, inventory, semantic_review=review(inventory, content), source_contract="v3")
+    assert fact.model_dump(mode="json") == before
+
+
+@pytest.mark.parametrize("expression", [("PROHIBIT_EXTERNAL_RELEASE",), ("不得形成外部发布效果",)])
+def test_v3_open_effect_expression_preserves_exact_negative_derivation_without_aliases(expression):
+    from spg.application.governed_obligations import fulfillment_inventory, work_constraint_sources_correspond
+    from spg.domain.governed_obligation import FulfillmentPhase
+    revision, ir, _, _ = shared_item_case()
+    ir.clauses = tuple(c.model_copy(update={"requested_effects": expression}) if c.polarity == "NEGATED" else c for c in ir.clauses)
+    inventory = fulfillment_inventory(revision, ir)
+    supports = [s for s in inventory["sources"] if s.get("clause_id") == next(c.clause_id for c in ir.clauses if c.polarity == "NEGATED")]
+    args = dict(component="deploy", phase=FulfillmentPhase.CONTINUOUS_FROM_ADMISSION, semantic_component_declared=True, calibrated=True)
+    assert not work_constraint_sources_correspond(ir, revision.constraints[0], supports, source_contract="v2", **args)
+    assert work_constraint_sources_correspond(ir, revision.constraints[0], supports, source_contract="v3", **args)
+    assert not work_constraint_sources_correspond(ir, "Excluded from this Work: invented effect", supports, source_contract="v3", **args)
+    assert not work_constraint_sources_correspond(ir, revision.constraints[0], [], source_contract="v3", **args)
+    assert next(c.requested_effects for c in ir.clauses if c.polarity == "NEGATED") == expression
+
+
+def test_v3_seal_is_distinct_from_human_acceptance_and_integration():
+    from tests.test_c3_fulfillment_components import current_lifecycle_candidate
+    from tests.test_c3_semantic_contract_calibration import review
+    from spg.application.governed_obligations import fulfillment_inventory, validate_projection_candidate
+    revision, ir, _, plan = current_lifecycle_candidate()
+    ir.current_production = tuple(g.model_copy(update={"acceptance_required": False}) for g in ir.current_production)
+    inventory = fulfillment_inventory(revision, ir)
+    plan = plan.model_copy(update={"inventory_fingerprint": inventory["inventory_fingerprint"]})
+    with pytest.raises(ValueError, match="CANDIDATE_GATE_NOT_REQUIRED"):
+        validate_projection_candidate(plan, revision, ir, inventory, semantic_review=review(inventory, plan), source_contract="v2")
+    assert validate_projection_candidate(plan, revision, ir, inventory, semantic_review=review(inventory, plan), source_contract="v3")
+    integration = plan.model_copy(update={"routes": tuple(r.model_copy(update={"capability": "HUMAN_INTEGRATION"})
+        if r.capability == "CANDIDATE_SEAL" else r for r in plan.routes)})
+    with pytest.raises(ValueError, match="CANDIDATE_GATE_NOT_REQUIRED"):
+        validate_projection_candidate(integration, revision, ir, inventory, semantic_review=review(inventory, integration), source_contract="v3")
+
+
+
+def _controlled_v3_binding_receipt(revision, ir, inventory, plan):
+    """Controlled contract receipt; never a model or production qualification."""
+    from types import SimpleNamespace
+    from tests.test_c3_semantic_contract_calibration import review
+    from tests.test_c3_fulfillment_capacity_representation import controlled_wire, decode_review_input
+    from spg.application.governed_obligations import form_fulfillment_projection
+    from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+    from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+    def generate(**request):
+        payload = json.loads(request["input_text"])
+        if "untrusted_fulfillment_candidate" in payload:
+            output = review(inventory, decode_review_input(payload)).model_dump_json()
+        else:
+            wire, _ = controlled_wire(inventory, plan, feedback=payload.get("same_basis_validation_feedback"),
+                owner_preconditions=payload.get("owner_source_preconditions"))
+            output = json.dumps(wire)
+        return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
+            requested_model="controlled-v3-contract", effective_model="controlled-v3-contract",
+            request_id="controlled-v3", usage=ModelUsage(), timing=ModelTiming(), retry_count=0)
+    provider = ModelFulfillmentCandidateProvider(lambda: SimpleNamespace(generate=generate, close=lambda: None))
+    result = form_fulfillment_projection(revision, ir, provider=provider,
+        source_revision=inventory["source_revision"], exact_target_paths=inventory["exact_target_paths"])
+    assert all(b.state != "UNRESOLVED" for b in result)
+    return result
+
+
+def test_v9_generation_probe_matches_qualified_scope_consumer_and_keeps_v8_replay():
+    from tests.test_c3_fulfillment_components import current_lifecycle_candidate
+    from spg.domain.engineering_semantics import SemanticRelation
+    from spg.application.governed_obligations import fulfillment_inventory
+    revision, ir, _, _ = current_lifecycle_candidate()
+    fact = revision.engineering_semantic_facts[0].model_copy(update={"relation": SemanticRelation.SCOPE,
+        "value": ("index.html",), "scope": "permitted changed artifacts", "qualifiers": {"only_artifact": True}})
+    revision.engineering_semantic_facts = (fact,)
+    inv = fulfillment_inventory(revision, ir)
+    caps = fulfillment_capability_contracts()
+    cap = next(i for i, c in enumerate(caps) if c["capability"] == "GIT_DIFF_SCOPE")
+    old = _owner_source_preconditions(revision, ir, inv, caps, typed_prerequisite_contract="existing-owner-typed-prerequisites-v8")
+    new = _owner_source_preconditions(revision, ir, inv, caps)
+    old_codes = next(r["codes"] for r in old["sources"][0]["ineligible_binding_prerequisites"] if r["capability"] == cap)
+    assert "OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED" in old_codes
+    assert not any(r["capability"] == cap for r in new["sources"][0]["ineligible_binding_prerequisites"])
+    assert _owner_source_preconditions(revision, ir, inv, caps, typed_prerequisite_contract="existing-owner-typed-prerequisites-v8") == old
+    assert fact.qualifiers == {"only_artifact": True}
+
+
+@pytest.mark.parametrize("expression", [("PROHIBIT_EXTERNAL_RELEASE",), ("不得形成外部发布效果",)])
+def test_v3_open_negative_effect_has_complete_projection_not_only_support_probe(expression):
+    from tests.test_c3_semantic_contract_calibration import review
+    from spg.application.governed_obligations import fulfillment_inventory, validate_projection_candidate
+    revision, ir, _, plan = shared_item_case()
+    ir.clauses = tuple(c.model_copy(update={"requested_effects": expression}) if c.polarity == "NEGATED" else c for c in ir.clauses)
+    inv = fulfillment_inventory(revision, ir)
+    plan = plan.model_copy(update={"inventory_fingerprint": inv["inventory_fingerprint"]})
+    result = validate_projection_candidate(plan, revision, ir, inv, semantic_review=review(inv, plan), source_contract="v3")
+    assert result and all(b.state != "UNRESOLVED" for b in result)
+    assert next(c.requested_effects for c in ir.clauses if c.polarity == "NEGATED") == expression
+    changed = plan.model_copy(update={"routes": tuple(r.model_copy(update={"capability": "HUMAN_DELIVERY_DEPLOY"})
+        if r.capability == "DENY_DEPLOY" else r for r in plan.routes)})
+    with pytest.raises(ValueError, match="PROHIBITION_CANNOT_BE_FUTURE_PERMISSION|POLARITY_CONFLICT"):
+        validate_projection_candidate(changed, revision, ir, inv, semantic_review=review(inv, changed), source_contract="v3")
+
+
+def test_known_typed_prohibition_still_requires_exact_gate_under_v3():
+    from tests.test_c3_semantic_contract_calibration import review
+    from spg.application.governed_obligations import fulfillment_inventory, validate_projection_candidate
+    revision, ir, _, plan = shared_item_case()
+    ir.clauses = tuple(c.model_copy(update={"requested_effects": ("PROHIBIT_DEPLOY",)}) if c.polarity == "NEGATED" else c for c in ir.clauses)
+    inv = fulfillment_inventory(revision, ir)
+    plan = plan.model_copy(update={"inventory_fingerprint": inv["inventory_fingerprint"], "routes": tuple(
+        r.model_copy(update={"capability": "DENY_PREVIEW"}) if r.capability == "DENY_DEPLOY" else r for r in plan.routes)})
+    with pytest.raises(ValueError, match="TYPED_EFFECT_LOST"):
+        validate_projection_candidate(plan, revision, ir, inv, semantic_review=review(inv, plan), source_contract="v3")
+
+
+@pytest.mark.parametrize("failure", [None, "missing-review", "negative-review", "wrong-capabilities", "wrong-revision", "marker-only", "wrong-diff"])
+def test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection(failure):
+    from tests.test_c3_fulfillment_components import current_lifecycle_candidate
+    from spg.domain.engineering_semantics import SemanticRelation
+    from spg.application.governed_obligations import fulfillment_inventory
+    from spg.providers.managed_context_fulfillment import _exact_fact_git_scope
+    revision, ir, _, plan = current_lifecycle_candidate()
+    fact = revision.engineering_semantic_facts[0].model_copy(update={"relation": SemanticRelation.SCOPE,
+        "value": ("index.html",), "scope": "permitted changed artifacts", "qualifiers": {"only_artifact": True}})
+    revision.engineering_semantic_facts = (fact,)
+    inv = fulfillment_inventory(revision, ir)
+    plan = plan.model_copy(update={"inventory_fingerprint": inv["inventory_fingerprint"],
+        "routes": (plan.routes[0].model_copy(update={"capability": "GIT_DIFF_SCOPE"}), *plan.routes[1:])})
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+    receipt = deepcopy(bindings[0].formation_receipt)
+    if failure == "missing-review": receipt.pop("semantic_review")
+    if failure == "negative-review": receipt["semantic_review"]["component_results"][0]["complete_and_equivalent"] = False
+    if failure == "wrong-capabilities": receipt["capabilities_fingerprint"] = "0" * 64
+    if failure == "marker-only": receipt = {"source_role_contract": "v3"}
+    bindings = (bindings[0].model_copy(update={"formation_receipt": receipt}), *bindings[1:])
+    observed_revision = deepcopy(revision)
+    if failure == "wrong-revision": observed_revision.revision_fingerprint = "0" * 64
+    result = _exact_fact_git_scope(fact, bindings[0], ("index.html",),
+        ("unauthorized.html",) if failure == "wrong-diff" else ("index.html",),
+        revision=observed_revision, ir=ir, bindings=bindings)
+    assert result is (failure is None)
+
+
+@pytest.mark.parametrize("failure", [None, "missing-review", "marker-only", "missing-native-gate"])
+def test_v3_seal_reaches_both_actual_consumers_without_human_acceptance(failure):
+    from types import SimpleNamespace
+    from tests.test_c3_fulfillment_components import current_lifecycle_candidate
+    from spg.application.governed_obligations import fulfillment_inventory
+    from spg.providers.managed_context_fulfillment import _candidate_seal_gate_required, verify_binding_inventory
+    from spg.domain.governed_obligation import fulfillment_source_ref
+    revision, ir, _, plan = current_lifecycle_candidate()
+    ir.current_production = tuple(g.model_copy(update={"acceptance_required": False}) for g in ir.current_production)
+    inv = fulfillment_inventory(revision, ir)
+    plan = plan.model_copy(update={"inventory_fingerprint": inv["inventory_fingerprint"]})
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+    if failure in {"missing-review", "marker-only"}:
+        receipt = deepcopy(bindings[0].formation_receipt)
+        if failure == "missing-review": receipt.pop("semantic_review")
+        else: receipt = {"source_role_contract": "v3"}
+        bindings = (bindings[0].model_copy(update={"formation_receipt": receipt}), *bindings[1:])
+    seals = [b for b in bindings if b.evidence_method == "EXACT_SEALED_CANDIDATE"]
+    native = SimpleNamespace(binding=SimpleNamespace(obligation_references=tuple(fulfillment_source_ref(b) for b in bindings)))
+    if failure == "missing-native-gate": native = None
+    rows, _ = verify_binding_inventory(request=SimpleNamespace(proposed_commit_identity="a" * 40, tree_identity="b" * 40),
+        task=None, contract=None, repository=None, baseline=None, revision=revision, ir=ir, bindings=bindings,
+        semantic_checks=(), protected_checks=(), static_verifier=None, receipt_recorder=None, native_record=native)
+    for seal in seals:
+        assert _candidate_seal_gate_required(seal, revision, ir, bindings) is (failure not in {"missing-review", "marker-only"})
+    seal_rows = [r for r in rows if r["evidence_method"] == "EXACT_SEALED_CANDIDATE"]
+    assert seal_rows and all(r["disposition"] == ("PENDING_CANDIDATE_GATE" if failure is None else "UNVERIFIABLE") for r in seal_rows)
+
+
+@pytest.mark.parametrize("capability", ["CANDIDATE_SEAL", "DENY_DEPLOY"])
+def test_v3_marker_never_admits_componentless_legacy_route(capability):
+    from tests.test_c3_semantic_contract_calibration import review
+    from spg.application.governed_obligations import validate_projection_candidate
+    revision, ir, inv, plan = shared_item_case()
+    changed = plan.model_copy(update={"routes": tuple(r.model_copy(update={"component_basis": None}) for r in plan.routes)})
+    with pytest.raises(ValueError, match="COMPONENT_INVENTORY_INCOMPLETE"):
+        validate_projection_candidate(changed, revision, ir, inv, semantic_review=review(inv, plan), source_contract="v3")
+
+
+@pytest.mark.parametrize("tamper", ["wire", "inventory", "attempt", "review-output", "review-row", "receipt-removal", "owner-policy", "review-pending-capabilities", "review-observed-capabilities", "review-validated-capabilities"])
+def test_v3_final_consumer_revalidates_actual_formation_and_review_lineage(tamper):
+    from tests.test_c3_fulfillment_components import current_lifecycle_candidate
+    from spg.application.governed_obligations import fulfillment_inventory, validate_fulfillment_projection
+    revision, ir, _, plan = current_lifecycle_candidate()
+    ir.current_production = tuple(g.model_copy(update={"acceptance_required": False}) for g in ir.current_production)
+    inv = fulfillment_inventory(revision, ir)
+    plan = plan.model_copy(update={"inventory_fingerprint": inv["inventory_fingerprint"]})
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+    validate_fulfillment_projection(bindings, revision, ir, exact_target_paths=inv["exact_target_paths"])
+    receipt = deepcopy(bindings[0].formation_receipt)
+    rows = receipt["candidate_attempts"]
+    if tamper == "wire": next(r for r in rows if r["stage"] == "MODEL_RESPONSE_OBSERVED")["candidate_output"] += " "
+    if tamper == "inventory": rows[0]["inventory_fingerprint"] = "0" * 64
+    if tamper == "attempt": next(r for r in rows if r["stage"] == "SEMANTIC_REVIEW_PENDING")["attempt"] = 2
+    if tamper == "review-output": next(r for r in rows if r["stage"] == "SEMANTIC_REVIEW_OBSERVED")["review_output"] += " "
+    if tamper == "review-row": next(r for r in rows if r["stage"] == "SEMANTIC_REVIEW_VALIDATED")["semantic_review"]["component_results"][0]["nonredundant"] = False
+    if tamper == "receipt-removal": receipt["candidate_attempts"] = []
+    if tamper == "owner-policy": next(r for r in rows if r["stage"] == "MODEL_REQUEST_PENDING")["owner_source_preconditions"]["typed_prerequisite_contract"] = "existing-owner-typed-prerequisites-v8"
+    if tamper.startswith("review-") and tamper.endswith("-capabilities"):
+        stage = {"review-pending-capabilities": "SEMANTIC_REVIEW_PENDING", "review-observed-capabilities": "SEMANTIC_REVIEW_OBSERVED", "review-validated-capabilities": "SEMANTIC_REVIEW_VALIDATED"}[tamper]
+        next(r for r in rows if r["stage"] == stage)["capabilities_fingerprint"] = "0" * 64
+    altered = (bindings[0].model_copy(update={"formation_receipt": receipt}), *bindings[1:])
+    with pytest.raises(ValueError, match="IDENTITY_DRIFT|SEMANTIC_COMPONENT_MISMATCH"):
+        validate_fulfillment_projection(altered, revision, ir, exact_target_paths=inv["exact_target_paths"])

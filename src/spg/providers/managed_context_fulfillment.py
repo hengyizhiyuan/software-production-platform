@@ -217,7 +217,7 @@ def verify_managed_context(*, request, task, contract, repository, baseline,
             elif (method == "EXACT_SEALED_CANDIDATE" and route.phase.value == "CANDIDATE_SEAL"
                   and route.owner.value == "CANDIDATE"
                   and route.gate_ref == "candidate-owner:sealed-after-verification"
-                  and all(goal.acceptance_required for goal in ir.current_production)):
+                  and _candidate_seal_gate_required(route, revision, ir, bindings)):
                 observations.append(("PENDING_CANDIDATE_GATE", "EXACT_CANDIDATE_SEAL_REQUIRED", (ref,), route))
             elif method == "EXACT_HUMAN_AUTHORIZATION":
                 # A future authorization cannot be proved by an HTML witness.
@@ -559,7 +559,7 @@ def verify_binding_inventory(*, request, task, contract, repository, baseline, r
             status = "VERIFIED_CURRENT" if len(matches) == 1 else "UNVERIFIABLE"
         elif method == "EXACT_SEALED_CANDIDATE":
             if (binding.gate_ref == "candidate-owner:sealed-after-verification" and ir.current_production
-                    and all(goal.acceptance_required for goal in ir.current_production)
+                    and _candidate_seal_gate_required(binding, revision, ir, bindings)
                     and native_record is not None and ref in native_record.binding.obligation_references):
                 status = "PENDING_CANDIDATE_GATE"
         elif method == "EXACT_HUMAN_AUTHORIZATION":
@@ -587,15 +587,39 @@ def verify_binding_inventory(*, request, task, contract, repository, baseline, r
     return tuple(results), tuple(derived)
 
 
+def _candidate_seal_gate_required(binding, revision, ir, bindings):
+    """Seal is a Candidate Owner obligation, not Human acceptance authority.
+
+    Preserve historical contracts. A current calibrated Seal must revalidate
+    the entire exact projection and independent Review; a role marker alone
+    cannot establish a later gate or create an authorization.
+    """
+    if not ir.current_production:
+        return False
+    if all(goal.acceptance_required for goal in ir.current_production):
+        return True
+    if not bindings or (bindings[0].formation_receipt or {}).get("source_role_contract") != "v3":
+        return False
+    from spg.application.governed_obligations import validate_fulfillment_projection
+    try:
+        validate_fulfillment_projection(bindings, revision, ir,
+            source_revision=binding.source_revision, exact_target_paths=bindings[0].formation_receipt.get("exact_target_paths", ()))
+    except (ValueError, TypeError, IndexError):
+        return False
+    return binding in bindings and binding.owner.value == "CANDIDATE" and binding.phase.value == "CANDIDATE_SEAL"
+
+
 def _exact_fact_git_scope(reference, binding, targets, changed, *, revision=None, ir=None, bindings=()):
     """Consume the original SCOPE value; a broad contract never broadens a Fact.
 
     This capability handles explicit unqualified repository paths. Arbitrary
-    scopes/qualifiers require a suitable different consumer and stay unresolved.
+    New calibrated qualifier interpretations require the exact independently
+    reviewed projection; literal value observation alone is never a PASS.
     """
     from spg.domain.governed_obligation import exact_file_scope_paths
     paths = exact_file_scope_paths(reference, qualified=binding.component_basis is not None)
-    if paths is None and reference.qualifiers == {"negated": True} and binding.component_basis is not None:
+    calibrated = any((b.formation_receipt or {}).get("source_role_contract") == "v3" for b in bindings)
+    if paths is None and (reference.qualifiers == {"negated": True} or calibrated) and binding.component_basis is not None:
         if revision is None or ir is None:
             return False
         from spg.application.governed_obligations import validate_fulfillment_projection
@@ -606,7 +630,10 @@ def _exact_fact_git_scope(reference, binding, targets, changed, *, revision=None
             return False
         # The negative value remains the original exclusion. The authorized
         # target set is supplied by the Task, not reinterpreted from that value.
-        paths = targets
+        # Full projection validation has re-proved source/qualifier meaning,
+        # exact literal-value equality or exact negative-clause correspondence,
+        # independent Review and the original Task allowlist.
+        paths = binding.target_paths
     if paths is None:
         return False
     return bool(changed and set(binding.target_paths) == set(paths) and set(targets) == set(paths)
