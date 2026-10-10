@@ -24,3 +24,7 @@ Development7 was a controller collection failure (wrong test filename), preserve
 Independent sealed verification on bbe4b8e/image209ce is retained in its own evidence directory, failed/partial, and was not used to tune this correction. No private Holdout input or Oracle was read. Main, production configuration, historical Work, decisions, ledger and Candidates remain unchanged. C3 cannot close on controlled proof or this diagnostic.
 
 Cross-computer recovery: Git evidence on existing C3 branch; ECS `/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010` for proofs/development, `/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-final-qualified-20261010/ordinary-g0-live-1/private` for original private outputs and bound Owner journal. Private data is not committed.
+
+## First frozen-image gate
+
+7cdccc95 / image f714aab6 ran455 tests:451 PASS,4 FAIL due to an old test namespace lacking the required component_basis field. The four rejection predicates were not reached, so this image is not qualified by that receipt and no real model call was made on it. The minimal fixture correction sets component_basis=None, representing a real legacy Binding; it changes neither implementation nor rejection expectations. Development10 reruns the four actual Git Scope negative predicates. First failure receipts remain immutable.

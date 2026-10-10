@@ -1,0 +1,57 @@
+........................................................................ [ 15%]
+........................................................................ [ 31%]
+........................................................................ [ 47%]
+........................................................................ [ 63%]
+........................................................................ [ 79%]
+.............................................FFFF....................... [ 94%]
+.......................                                                  [100%]
+=================================== FAILURES ===================================
+_ test_git_scope_consumer_preserves_original_fact_value_scope_and_qualifiers[broad-contract] _
+tests/test_c3_verification_receipts.py:144: in test_git_scope_consumer_preserves_original_fact_value_scope_and_qualifiers
+    assert _exact_fact_git_scope(reference,binding,targets,changed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/spg/providers/managed_context_fulfillment.py:597: in _exact_fact_git_scope
+    paths = exact_file_scope_paths(reference, qualified=binding.component_basis is not None)
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'component_basis'
+_ test_git_scope_consumer_preserves_original_fact_value_scope_and_qualifiers[wrong-path-value] _
+tests/test_c3_verification_receipts.py:144: in test_git_scope_consumer_preserves_original_fact_value_scope_and_qualifiers
+    assert _exact_fact_git_scope(reference,binding,targets,changed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/spg/providers/managed_context_fulfillment.py:597: in _exact_fact_git_scope
+    paths = exact_file_scope_paths(reference, qualified=binding.component_basis is not None)
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'component_basis'
+_ test_git_scope_consumer_preserves_original_fact_value_scope_and_qualifiers[unresolved-scope] _
+tests/test_c3_verification_receipts.py:144: in test_git_scope_consumer_preserves_original_fact_value_scope_and_qualifiers
+    assert _exact_fact_git_scope(reference,binding,targets,changed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/spg/providers/managed_context_fulfillment.py:597: in _exact_fact_git_scope
+    paths = exact_file_scope_paths(reference, qualified=binding.component_basis is not None)
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'component_basis'
+_ test_git_scope_consumer_preserves_original_fact_value_scope_and_qualifiers[unconsumed-qualifier] _
+tests/test_c3_verification_receipts.py:144: in test_git_scope_consumer_preserves_original_fact_value_scope_and_qualifiers
+    assert _exact_fact_git_scope(reference,binding,targets,changed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/spg/providers/managed_context_fulfillment.py:597: in _exact_fact_git_scope
+    paths = exact_file_scope_paths(reference, qualified=binding.component_basis is not None)
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'component_basis'
+=============================== warnings summary ===============================
+tests/test_c3_semantic_contract_calibration.py::test_negative_file_component_preserves_original_exclusion_and_requires_real_diff
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_c3_verification_receipts.py::test_git_scope_consumer_preserves_original_fact_value_scope_and_qualifiers[broad-contract]
+FAILED tests/test_c3_verification_receipts.py::test_git_scope_consumer_preserves_original_fact_value_scope_and_qualifiers[wrong-path-value]
+FAILED tests/test_c3_verification_receipts.py::test_git_scope_consumer_preserves_original_fact_value_scope_and_qualifiers[unresolved-scope]
+FAILED tests/test_c3_verification_receipts.py::test_git_scope_consumer_preserves_original_fact_value_scope_and_qualifiers[unconsumed-qualifier]
+4 failed, 451 passed, 1 warning in 23.25s

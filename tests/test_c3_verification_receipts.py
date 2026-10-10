@@ -138,7 +138,7 @@ def test_git_scope_consumer_preserves_original_fact_value_scope_and_qualifiers(c
     from spg.providers.managed_context_fulfillment import _exact_fact_git_scope
     reference=SimpleNamespace(relation=SimpleNamespace(value="SCOPE"), value=("index.html",),
         qualifiers={}, unit=None, scope=None)
-    binding=SimpleNamespace(target_paths=("index.html",))
+    binding=SimpleNamespace(target_paths=("index.html",), component_basis=None)
     targets=("index.html",)
     changed=("index.html",)
     assert _exact_fact_git_scope(reference,binding,targets,changed)

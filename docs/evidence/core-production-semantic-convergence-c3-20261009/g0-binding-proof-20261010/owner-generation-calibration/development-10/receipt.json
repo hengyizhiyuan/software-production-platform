@@ -1,0 +1,14 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 7.250559422012884,
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "container_id": "3a96da8a3314dd79c162ee8c5db1755a82084526e680f59580a04160d396b1a8",
+  "source_overlay": true,
+  "snapshot_sha256": "440156b7d3a4e2bc5ba4724121710c95491ad7049b89b5a6372632b6c3619de5",
+  "nodes": [
+    "tests/test_c3_verification_receipts.py::test_git_scope_consumer_preserves_original_fact_value_scope_and_qualifiers"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}
