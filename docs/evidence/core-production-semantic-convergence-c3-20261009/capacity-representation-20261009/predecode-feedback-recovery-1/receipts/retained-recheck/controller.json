@@ -1,0 +1,37 @@
+{
+  "schema": "c3-retained-recheck-controller-v1",
+  "recorded_at_utc": "2026-10-10T03:15:23.268626+00:00",
+  "application_source": "e7afb5a15df4c187a9248b4a073391a62037677f",
+  "actual_image_id": "sha256:e42fcb7dfe18254f1396f2faaaadd95b0d24efe445db6ce19beedfdebac32726",
+  "actual_container_id": "18f7f1ab29b3c6965214c8a5bed4bf383b4b13a97dd730e74fd7bb87cea1d457",
+  "network": "none",
+  "source_overlay": false,
+  "diagnostic_probe_mount": true,
+  "inputs_before": {
+    "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json": "9b013274f1a6daafc776297a302c52c8247cd2fd5ec9c5b99a83279fd2ee8e2c",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/wire-feedback-recovery-20261010/final-inputs/recheck_retained_outputs.py": "1deed63130116a885f00dae92b589e9fe5c484faa4d3cd2afd4dcf74567ba2b0",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/private/model-observations/formation-2-safe-wire.txt": "98b70541f2b10f3f00a04ba797d0e393781a4143ecac0af109c4d31f437132df",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/private/model-observations/capability-contracts.json": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/private/model-observations/formation-1-safe-wire.txt": "c60c7f4d1060017a8ddbdd289105350bbfa4aefca0a94f3845d9cc496d83267b",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/private/model-observations/formation-owner-observations.json": "1b4086918812396a9c6e7727ab51af0efd44d94a53d988c4e6297ee9ae108a19",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/private/model-observations/immutable-inventory.json": "2efad43b2f96bb8738667bffd6111e4aeee332fef611e968b0fa8330defad88f",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/private/model-observations/final-derived-projection.json": "dedb0aca6b303c90b5705bd96ec4bad03470f8c4d9e1d45ceb079f9d63e43d8f"
+  },
+  "inputs_after": {
+    "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json": "9b013274f1a6daafc776297a302c52c8247cd2fd5ec9c5b99a83279fd2ee8e2c",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/wire-feedback-recovery-20261010/final-inputs/recheck_retained_outputs.py": "1deed63130116a885f00dae92b589e9fe5c484faa4d3cd2afd4dcf74567ba2b0",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/private/model-observations/formation-2-safe-wire.txt": "98b70541f2b10f3f00a04ba797d0e393781a4143ecac0af109c4d31f437132df",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/private/model-observations/capability-contracts.json": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/private/model-observations/formation-1-safe-wire.txt": "c60c7f4d1060017a8ddbdd289105350bbfa4aefca0a94f3845d9cc496d83267b",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/private/model-observations/formation-owner-observations.json": "1b4086918812396a9c6e7727ab51af0efd44d94a53d988c4e6297ee9ae108a19",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/private/model-observations/immutable-inventory.json": "2efad43b2f96bb8738667bffd6111e4aeee332fef611e968b0fa8330defad88f",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/private/model-observations/final-derived-projection.json": "dedb0aca6b303c90b5705bd96ec4bad03470f8c4d9e1d45ceb079f9d63e43d8f"
+  },
+  "immutable_inputs": true,
+  "exit_code": 0,
+  "model_calls": 0,
+  "database_access": false,
+  "history_mutated": false,
+  "production_resources_modified": false,
+  "controller_sha256": "STDIN_CONTROL"
+}

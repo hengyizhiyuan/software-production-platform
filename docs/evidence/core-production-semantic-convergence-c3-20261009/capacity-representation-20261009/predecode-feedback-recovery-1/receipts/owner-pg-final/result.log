@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /qualification
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 9 items
+
+tests/integration/test_c3_fulfillment_receipts.py .........              [100%]
+
+----------------- generated xml file: /c3-evidence/result.xml ------------------
+============================== 9 passed in 19.92s ==============================

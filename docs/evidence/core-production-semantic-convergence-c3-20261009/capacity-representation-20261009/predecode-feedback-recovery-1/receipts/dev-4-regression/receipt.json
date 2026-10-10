@@ -1,0 +1,35 @@
+{
+  "schema": "c3-predecode-development-regression-v1",
+  "started_at_utc": "2026-10-10T03:08:37.545456+00:00",
+  "ended_at_utc": "2026-10-10T03:08:48.133429+00:00",
+  "wall_seconds": 10.58797832595883,
+  "counts": {
+    "tests": 208,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 208
+  },
+  "exit_code": 0,
+  "snapshot_sha256": "08c465ab65df48c6a36e68d39f3f5852f2c69effc780c396eb4baa214c87d1a3",
+  "actual_image_id": "sha256:90f2cd847ad891fda6ca95b5736c84b680c9d58bd6a3203bf0ea31c970da0f16",
+  "actual_container_id": "0f73cf6476e167b9c051bf5b5fe25bf3f98c52a4e8f756a8de8d80633654ab50",
+  "network": "none",
+  "source_overlay": true,
+  "model_calls": 0,
+  "original_database_access": false,
+  "production_resources_modified": false,
+  "nodes": [
+    "tests/test_c3_fulfillment_wire_feedback.py",
+    "tests/test_c3_fulfillment_capacity_representation.py",
+    "tests/test_c3_semantic_contract_calibration.py",
+    "tests/test_c3_fulfillment_provider_failures.py",
+    "tests/test_c3_fulfillment_components.py",
+    "tests/test_fulfillment_projection.py",
+    "tests/test_governed_obligation_fulfillment.py",
+    "tests/test_c3_fulfillment_stop_projection.py",
+    "tests/test_c3_fulfillment_admission_stop.py"
+  ],
+  "controller_sha256": "bc4135110a22baf7b3fc31f353f9f01d1fc21586e268c7592418adb7c0e44c9c",
+  "claim": "CONTROLLED_REGRESSION_NOT_EXACT_NEW_IMAGE_OR_LIVE_MODEL_QUALIFICATION"
+}

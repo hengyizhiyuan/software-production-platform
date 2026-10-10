@@ -1,0 +1,36 @@
+{
+  "schema": "c3-semantic-owner-pg-regression-v1",
+  "started_at_utc": "2026-10-10T03:04:43.707991+00:00",
+  "ended_at_utc": "2026-10-10T03:04:59.895427+00:00",
+  "wall_seconds": 16.187423199007753,
+  "counts": {
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 3
+  },
+  "exit_code": 0,
+  "sources": {
+    "qualification": "DEVELOPMENT_OVERLAY"
+  },
+  "actual_image_id": "sha256:90f2cd847ad891fda6ca95b5736c84b680c9d58bd6a3203bf0ea31c970da0f16",
+  "actual_container_id": "caf79bec8de29bd5be52c9c0edfc11bc3e25b2b51158705d818d1bf97c7c14be",
+  "actual_postgres_image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+  "actual_postgres_container_id": "d94fbb689552f40a0474364a3ca9feec5de98b79e9ac1dc2127354d4b93fc2b4",
+  "database_name": "c1_contract_continuity",
+  "migration_head": "20261007_72",
+  "network_internal": true,
+  "nodes": [
+    "tests/integration/test_c3_fulfillment_receipts.py::test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift"
+  ],
+  "source_or_test_overlay": true,
+  "credentials_independently_generated": true,
+  "live_model_calls": 0,
+  "actual_ai_work_created": 0,
+  "fixture_only": true,
+  "original_database_access": false,
+  "existing_services_started": false,
+  "controller_sha256": "ddf026d7d81a9bc6f30ce6036c00a2242e23d9a6f33b5d3fed87b189d3e58fe3",
+  "claim": "ISOLATED_PG_OWNER_PERSISTENCE_AND_STATE_REGRESSION_NOT_REAL_G0"
+}

@@ -1,0 +1,13 @@
+{
+  "schema": "c3-predecode-delivery-integrity-v1",
+  "recorded_at_utc": "2026-10-10T03:22:33.430508+00:00",
+  "public_receipts_verified": 33,
+  "exact_source_image_owner_match": true,
+  "unit_passed": 299,
+  "pg_passed": 9,
+  "old_outputs_still_rejected": true,
+  "historical_input_hashes_unchanged": true,
+  "new_live_model_calls": 0,
+  "claim": "CONTROLLED_ENGINEERING_REPAIR_QUALIFIED_NOT_C3_CLOSURE",
+  "c3_status": "PARTIAL"
+}

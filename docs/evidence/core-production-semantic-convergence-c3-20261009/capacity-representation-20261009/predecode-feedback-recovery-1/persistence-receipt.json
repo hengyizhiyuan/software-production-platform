@@ -1,0 +1,21 @@
+{
+  "schema": "c3-predecode-public-persistence-v1",
+  "recorded_at_utc": "2026-10-10T03:24:07.967338+00:00",
+  "public_directory": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/wire-feedback-recovery-20261010/public-delivery",
+  "public_archive": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/wire-feedback-recovery-20261010/public-delivery.tar.gz",
+  "public_archive_sha256": "b95e2378928ad70cf75cd5e388e1b8ddd600b4bc78ac32b6cd53f92e8057f747",
+  "public_files": 47,
+  "public_credentials_found": false,
+  "private_model_content_in_public": false,
+  "exact_image_archive_verified": true,
+  "exact_image_archive_sha256": "75a451244304df6417a81dfa39a1226dc8b5897c4b11e4cf7946e89e786d682f",
+  "original_ecs_source_head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+  "original_ecs_main_ref": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+  "application_source": "e7afb5a15df4c187a9248b4a073391a62037677f",
+  "actual_image_id": "sha256:e42fcb7dfe18254f1396f2faaaadd95b0d24efe445db6ce19beedfdebac32726",
+  "model_calls": 0,
+  "production_resources_modified": false,
+  "c3_status": "PARTIAL",
+  "offsite_backup": "NOT_PERFORMED",
+  "recovery": "Git C3 branch + watt-ecs persisted run, original private inputs, exact image archive"
+}

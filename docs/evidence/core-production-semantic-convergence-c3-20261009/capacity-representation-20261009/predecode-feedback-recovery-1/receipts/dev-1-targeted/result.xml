@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="28" skipped="0" tests="28" time="4.173" timestamp="2026-10-10T03:00:27.838002+00:00" hostname="25aa74125dc3"><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review[small]" file="tests/test_c3_fulfillment_wire_feedback.py" line="76" time="0.033"><failure message="AssertionError: assert (1 == 3)&#10; +  where 1 = len([{'immutable_inventory': {'work_id': '0fa8907d-16f4-4b01-a759-6bb954582d47', 'work_reality_revision_id': 'e8cdc3a7-3a6...4c91d2386aa3677', 'wire_schema_fingerprint': '5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40', ...}}])">tests/test_c3_fulfillment_wire_feedback.py:83: in test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review
+    assert len(calls) == 3 and 'untrusted_fulfillment_candidate' in calls[-1]
+E   AssertionError: assert (1 == 3)
+E    +  where 1 = len([{'immutable_inventory': {'work_id': '0fa8907d-16f4-4b01-a759-6bb954582d47', 'work_reality_revision_id': 'e8cdc3a7-3a6...4c91d2386aa3677', 'wire_schema_fingerprint': '5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40', ...}}])</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review[medium]" file="tests/test_c3_fulfillment_wire_feedback.py" line="76" time="0.017"><failure message="AssertionError: assert (1 == 3)&#10; +  where 1 = len([{'immutable_inventory': {'work_id': '7a3fbf8f-0c11-4142-b505-d63810bf5292', 'work_reality_revision_id': 'e6612ba4-3e2...36a2b11970cfe02', 'wire_schema_fingerprint': '5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40', ...}}])">tests/test_c3_fulfillment_wire_feedback.py:83: in test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review
+    assert len(calls) == 3 and 'untrusted_fulfillment_candidate' in calls[-1]
+E   AssertionError: assert (1 == 3)
+E    +  where 1 = len([{'immutable_inventory': {'work_id': '7a3fbf8f-0c11-4142-b505-d63810bf5292', 'work_reality_revision_id': 'e6612ba4-3e2...36a2b11970cfe02', 'wire_schema_fingerprint': '5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40', ...}}])</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review[complex]" file="tests/test_c3_fulfillment_wire_feedback.py" line="76" time="0.022"><failure message="AssertionError: assert (1 == 3)&#10; +  where 1 = len([{'immutable_inventory': {'work_id': '21d73a4d-86d9-484e-aac8-aa087feee079', 'work_reality_revision_id': '14c67c6e-c59...750d86ac23f7e59', 'wire_schema_fingerprint': '5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40', ...}}])">tests/test_c3_fulfillment_wire_feedback.py:83: in test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review
+    assert len(calls) == 3 and 'untrusted_fulfillment_candidate' in calls[-1]
+E   AssertionError: assert (1 == 3)
+E    +  where 1 = len([{'immutable_inventory': {'work_id': '21d73a4d-86d9-484e-aac8-aa087feee079', 'work_reality_revision_id': '14c67c6e-c59...750d86ac23f7e59', 'wire_schema_fingerprint': '5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40', ...}}])</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls[first-observation]" file="tests/test_c3_fulfillment_wire_feedback.py" line="106" time="0.014"><failure message="Failed: DID NOT RAISE Checkpoint">tests/test_c3_fulfillment_wire_feedback.py:111: in test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls
+    with pytest.raises(Checkpoint):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE Checkpoint</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls[first-validation]" file="tests/test_c3_fulfillment_wire_feedback.py" line="106" time="0.011"><failure message="test_c3_fulfillment_wire_feedback.Checkpoint">tests/test_c3_fulfillment_wire_feedback.py:113: in test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls
+    retained = deepcopy(provider._fulfillment_receipts)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.13/copy.py:163: in deepcopy
+    y = _reconstruct(x, memo, *rv)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.13/copy.py:278: in _reconstruct
+    y.append(item)
+tests/test_c3_fulfillment_wire_feedback.py:67: in append
+    raise Checkpoint()
+E   test_c3_fulfillment_wire_feedback.Checkpoint</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls[second-observation]" file="tests/test_c3_fulfillment_wire_feedback.py" line="106" time="0.014"><failure message="Failed: DID NOT RAISE Checkpoint">tests/test_c3_fulfillment_wire_feedback.py:111: in test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls
+    with pytest.raises(Checkpoint):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE Checkpoint</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[raw]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.012"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[raw-sha]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.015"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[raw-bytes]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.017"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[inventory]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.012"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[attempt]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.012"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[request-receipt]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.012"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[response-receipt]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.012"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[diagnostic-hash]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.011"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[violation]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.012"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[feedback]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.012"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[row-work]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.011"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[row-revision]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.011"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[row-source]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.011"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[row-paths]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.012"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[missing-diagnostics]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.011"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[duplicate-response]" file="tests/test_c3_fulfillment_wire_feedback.py" line="121" time="0.011"><failure message="StopIteration">tests/test_c3_fulfillment_wire_feedback.py:131: in test_feedback_drift_stops_before_another_model_request
+    response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_second_attempt_cannot_consume_another_feedback_or_receipt[feedback]" file="tests/test_c3_fulfillment_wire_feedback.py" line="155" time="0.014"><failure message="Failed: DID NOT RAISE Checkpoint">tests/test_c3_fulfillment_wire_feedback.py:160: in test_second_attempt_cannot_consume_another_feedback_or_receipt
+    with pytest.raises(Checkpoint): run_case(revision, ir, inventory, provider)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE Checkpoint</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_second_attempt_cannot_consume_another_feedback_or_receipt[feedback_receipt_id]" file="tests/test_c3_fulfillment_wire_feedback.py" line="155" time="0.014"><failure message="Failed: DID NOT RAISE Checkpoint">tests/test_c3_fulfillment_wire_feedback.py:160: in test_second_attempt_cannot_consume_another_feedback_or_receipt
+    with pytest.raises(Checkpoint): run_case(revision, ir, inventory, provider)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE Checkpoint</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_repeated_invalid_wire_exhausts_existing_budget_and_replay_cannot_reset_it" file="tests/test_c3_fulfillment_wire_feedback.py" line="167" time="0.014"><failure message="AssertionError: assert (1 == 2)&#10; +  where 1 = len([{'immutable_inventory': {'work_id': 'e0614b16-54e2-40ee-8447-3dd15997c9b8', 'work_reality_revision_id': '03e071da-42b...3500f7335458ca1', 'wire_schema_fingerprint': '5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40', ...}}])">tests/test_c3_fulfillment_wire_feedback.py:172: in test_repeated_invalid_wire_exhausts_existing_budget_and_replay_cannot_reset_it
+    assert len(calls) == 2 and all(b.state == 'UNRESOLVED' for b in result)
+E   AssertionError: assert (1 == 2)
+E    +  where 1 = len([{'immutable_inventory': {'work_id': 'e0614b16-54e2-40ee-8447-3dd15997c9b8', 'work_reality_revision_id': '03e071da-42b...3500f7335458ca1', 'wire_schema_fingerprint': '5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40', ...}}])</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_predecode_collects_independent_errors_and_coverage_without_admitting_components" file="tests/test_c3_fulfillment_wire_feedback.py" line="186" time="0.005"><failure message="assert 0 == 2&#10; +  where 0 = len([])">tests/test_c3_fulfillment_wire_feedback.py:190: in test_predecode_collects_independent_errors_and_coverage_without_admitting_components
+    invalid_references(wire, inventory)
+tests/test_c3_fulfillment_wire_feedback.py:28: in invalid_references
+    assert len(refs) == 2
+E   assert 0 == 2
+E    +  where 0 = len([])</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_explicit_quote_needing_locator_does_not_produce_a_false_raw_coverage_failure" file="tests/test_c3_fulfillment_wire_feedback.py" line="206" time="0.004"><failure message="assert 0 == 2&#10; +  where 0 = len([])">tests/test_c3_fulfillment_wire_feedback.py:210: in test_explicit_quote_needing_locator_does_not_produce_a_false_raw_coverage_failure
+    invalid_references(wire, inventory)
+tests/test_c3_fulfillment_wire_feedback.py:28: in invalid_references
+    assert len(refs) == 2
+E   assert 0 == 2
+E    +  where 0 = len([])</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_diagnostic_error_set_remains_bounded_and_does_not_echo_candidate_prose" file="tests/test_c3_fulfillment_wire_feedback.py" line="220" time="0.004"><failure message="assert 0 == 2&#10; +  where 0 = len([])">tests/test_c3_fulfillment_wire_feedback.py:224: in test_diagnostic_error_set_remains_bounded_and_does_not_echo_candidate_prose
+    route, _ = invalid_references(wire, inventory)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_fulfillment_wire_feedback.py:28: in invalid_references
+    assert len(refs) == 2
+E   assert 0 == 2
+E    +  where 0 = len([])</failure></testcase></testsuite></testsuites>

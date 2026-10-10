@@ -1,0 +1,311 @@
+{
+  "schema": "c3-predecode-retained-diagnostic-recheck-v1",
+  "recorded_at_utc": "2026-10-10T03:15:22.598058+00:00",
+  "application_source": "e7afb5a15df4c187a9248b4a073391a62037677f",
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "source_count": 26,
+  "capability_count": 12,
+  "capabilities_fingerprint": "a2e695783b122373f0ed308a959fa4e3116c4a9df5454dbedd81695071153b17",
+  "inputs_before": {
+    "basis.json": "9b013274f1a6daafc776297a302c52c8247cd2fd5ec9c5b99a83279fd2ee8e2c",
+    "immutable-inventory.json": "2efad43b2f96bb8738667bffd6111e4aeee332fef611e968b0fa8330defad88f",
+    "capability-contracts.json": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+    "formation-owner-observations.json": "1b4086918812396a9c6e7727ab51af0efd44d94a53d988c4e6297ee9ae108a19",
+    "formation-1-safe-wire.txt": "c60c7f4d1060017a8ddbdd289105350bbfa4aefca0a94f3845d9cc496d83267b",
+    "formation-2-safe-wire.txt": "98b70541f2b10f3f00a04ba797d0e393781a4143ecac0af109c4d31f437132df"
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "canonical_candidate": "NOT_CONSTRUCTED",
+      "primary_error": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+      "new_derived_diagnostics": {
+        "schema": "fulfillment-wire-diagnostics-v1",
+        "wire_output_fingerprint": "c60c7f4d1060017a8ddbdd289105350bbfa4aefca0a94f3845d9cc496d83267b",
+        "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+        "provider_wire_version": "fulfillment-compact-v1",
+        "wire_request_fingerprint": "4b995573e01820631e063d0108388140be8576c3ac385a38da88d8ee87ea62d4",
+        "wire_table_fingerprint": "cddd1ffc3429695d19411d42c5d6b741534460496705dbb0a430ff138df9e429",
+        "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+        "violations": [
+          {
+            "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+            "field": "f",
+            "referenced_source": 6,
+            "expected_kind": "FACT",
+            "actual_kind": "IR_CLAUSE",
+            "route": 36,
+            "source": 25,
+            "capability": 10,
+            "raw_route_fingerprint": "0600cfdb215348f39b36f46290c5c90393d7865ea0d14bd5554f83d97e4ac07f"
+          },
+          {
+            "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+            "field": "f",
+            "referenced_source": 8,
+            "expected_kind": "FACT",
+            "actual_kind": "IR_CLAUSE",
+            "route": 36,
+            "source": 25,
+            "capability": 10,
+            "raw_route_fingerprint": "0600cfdb215348f39b36f46290c5c90393d7865ea0d14bd5554f83d97e4ac07f"
+          }
+        ],
+        "additional_violation_count": 0,
+        "not_evaluable": [
+          "CANONICAL_COMPONENT_VALIDATION",
+          "OWNER_PHASE_EVIDENCE",
+          "INDEPENDENT_SEMANTIC_REVIEW",
+          "ACTUAL_OWNER_EVIDENCE",
+          "ASSURANCE"
+        ],
+        "coverage_not_evaluable_sources": [],
+        "binding": {
+          "work_id": "048189aa-0613-5307-b6f4-c430e7977f93",
+          "work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+          "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+          "source_revision": "465038ded6cf4ba335a11577de76acb1dea55b76",
+          "exact_target_paths": [
+            "index.html"
+          ],
+          "attempt": 1,
+          "wire_output_fingerprint": "c60c7f4d1060017a8ddbdd289105350bbfa4aefca0a94f3845d9cc496d83267b",
+          "request_receipt_id": "6a4d8566-278f-4cff-b664-1c0f5dd59e59",
+          "response_receipt_id": "0b225a13-29df-4068-aca7-25aa56323a33",
+          "provider_wire_version": "fulfillment-compact-v1",
+          "wire_request_fingerprint": "4b995573e01820631e063d0108388140be8576c3ac385a38da88d8ee87ea62d4",
+          "wire_table_fingerprint": "cddd1ffc3429695d19411d42c5d6b741534460496705dbb0a430ff138df9e429",
+          "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40"
+        },
+        "diagnostic_fingerprint": "2da07e61c7381900e30d3306472fbe2818e68dfb2f00bbce3c3d91df0b02af11"
+      },
+      "new_derived_feedback": {
+        "schema": "fulfillment-validation-feedback-v2",
+        "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+        "primary_error": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+        "violations": [
+          {
+            "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+            "field": "f",
+            "referenced_source": 6,
+            "expected_kind": "FACT",
+            "actual_kind": "IR_CLAUSE",
+            "route": 36,
+            "source": 25,
+            "capability": 10,
+            "raw_route_fingerprint": "0600cfdb215348f39b36f46290c5c90393d7865ea0d14bd5554f83d97e4ac07f"
+          },
+          {
+            "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+            "field": "f",
+            "referenced_source": 8,
+            "expected_kind": "FACT",
+            "actual_kind": "IR_CLAUSE",
+            "route": 36,
+            "source": 25,
+            "capability": 10,
+            "raw_route_fingerprint": "0600cfdb215348f39b36f46290c5c90393d7865ea0d14bd5554f83d97e4ac07f"
+          }
+        ],
+        "additional_violation_count": 0,
+        "not_evaluable": [
+          "CANONICAL_COMPONENT_VALIDATION",
+          "OWNER_PHASE_EVIDENCE",
+          "INDEPENDENT_SEMANTIC_REVIEW",
+          "ACTUAL_OWNER_EVIDENCE",
+          "ASSURANCE"
+        ],
+        "coverage_not_evaluable_sources": [],
+        "wire_diagnostic_binding": {
+          "work_id": "048189aa-0613-5307-b6f4-c430e7977f93",
+          "work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+          "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+          "source_revision": "465038ded6cf4ba335a11577de76acb1dea55b76",
+          "exact_target_paths": [
+            "index.html"
+          ],
+          "attempt": 1,
+          "wire_output_fingerprint": "c60c7f4d1060017a8ddbdd289105350bbfa4aefca0a94f3845d9cc496d83267b",
+          "request_receipt_id": "6a4d8566-278f-4cff-b664-1c0f5dd59e59",
+          "response_receipt_id": "0b225a13-29df-4068-aca7-25aa56323a33",
+          "provider_wire_version": "fulfillment-compact-v1",
+          "wire_request_fingerprint": "4b995573e01820631e063d0108388140be8576c3ac385a38da88d8ee87ea62d4",
+          "wire_table_fingerprint": "cddd1ffc3429695d19411d42c5d6b741534460496705dbb0a430ff138df9e429",
+          "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+          "diagnostic_fingerprint": "2da07e61c7381900e30d3306472fbe2818e68dfb2f00bbce3c3d91df0b02af11"
+        }
+      },
+      "feedback_sent_to_provider": false,
+      "historical_feedback_replaced": false
+    },
+    {
+      "attempt": 2,
+      "canonical_candidate": "NOT_CONSTRUCTED",
+      "primary_error": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+      "new_derived_diagnostics": {
+        "schema": "fulfillment-wire-diagnostics-v1",
+        "wire_output_fingerprint": "98b70541f2b10f3f00a04ba797d0e393781a4143ecac0af109c4d31f437132df",
+        "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+        "provider_wire_version": "fulfillment-compact-v1",
+        "wire_request_fingerprint": "1fa3cfae082bc36921b271fdd6388e390b966ae4b6965a3e3cbb824bb92ad279",
+        "wire_table_fingerprint": "cddd1ffc3429695d19411d42c5d6b741534460496705dbb0a430ff138df9e429",
+        "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+        "violations": [
+          {
+            "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+            "field": "f",
+            "referenced_source": 6,
+            "expected_kind": "FACT",
+            "actual_kind": "IR_CLAUSE",
+            "route": 22,
+            "source": 25,
+            "capability": 10,
+            "raw_route_fingerprint": "00177796c2f5c0e52802d27d52a8b5c0f72b1e1af28c4838ddb71374caaa63e5"
+          },
+          {
+            "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+            "field": "f",
+            "referenced_source": 8,
+            "expected_kind": "FACT",
+            "actual_kind": "IR_CLAUSE",
+            "route": 22,
+            "source": 25,
+            "capability": 10,
+            "raw_route_fingerprint": "00177796c2f5c0e52802d27d52a8b5c0f72b1e1af28c4838ddb71374caaa63e5"
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 4
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 9
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 10
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 12
+          }
+        ],
+        "additional_violation_count": 0,
+        "not_evaluable": [
+          "CANONICAL_COMPONENT_VALIDATION",
+          "OWNER_PHASE_EVIDENCE",
+          "INDEPENDENT_SEMANTIC_REVIEW",
+          "ACTUAL_OWNER_EVIDENCE",
+          "ASSURANCE"
+        ],
+        "coverage_not_evaluable_sources": [],
+        "binding": {
+          "work_id": "048189aa-0613-5307-b6f4-c430e7977f93",
+          "work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+          "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+          "source_revision": "465038ded6cf4ba335a11577de76acb1dea55b76",
+          "exact_target_paths": [
+            "index.html"
+          ],
+          "attempt": 2,
+          "wire_output_fingerprint": "98b70541f2b10f3f00a04ba797d0e393781a4143ecac0af109c4d31f437132df",
+          "request_receipt_id": "ea37df56-a342-448c-bd06-67b74e055a19",
+          "response_receipt_id": "f2165107-35a2-42de-bbd8-10803108fe17",
+          "provider_wire_version": "fulfillment-compact-v1",
+          "wire_request_fingerprint": "1fa3cfae082bc36921b271fdd6388e390b966ae4b6965a3e3cbb824bb92ad279",
+          "wire_table_fingerprint": "cddd1ffc3429695d19411d42c5d6b741534460496705dbb0a430ff138df9e429",
+          "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40"
+        },
+        "diagnostic_fingerprint": "3554a59fdffaa5875f58f4e4dcccf813debd76fe03c9e16d62ccb9ab0eaf962a"
+      },
+      "new_derived_feedback": {
+        "schema": "fulfillment-validation-feedback-v2",
+        "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+        "primary_error": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+        "violations": [
+          {
+            "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+            "field": "f",
+            "referenced_source": 6,
+            "expected_kind": "FACT",
+            "actual_kind": "IR_CLAUSE",
+            "route": 22,
+            "source": 25,
+            "capability": 10,
+            "raw_route_fingerprint": "00177796c2f5c0e52802d27d52a8b5c0f72b1e1af28c4838ddb71374caaa63e5"
+          },
+          {
+            "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+            "field": "f",
+            "referenced_source": 8,
+            "expected_kind": "FACT",
+            "actual_kind": "IR_CLAUSE",
+            "route": 22,
+            "source": 25,
+            "capability": 10,
+            "raw_route_fingerprint": "00177796c2f5c0e52802d27d52a8b5c0f72b1e1af28c4838ddb71374caaa63e5"
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 4
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 9
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 10
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 12
+          }
+        ],
+        "additional_violation_count": 0,
+        "not_evaluable": [
+          "CANONICAL_COMPONENT_VALIDATION",
+          "OWNER_PHASE_EVIDENCE",
+          "INDEPENDENT_SEMANTIC_REVIEW",
+          "ACTUAL_OWNER_EVIDENCE",
+          "ASSURANCE"
+        ],
+        "coverage_not_evaluable_sources": [],
+        "wire_diagnostic_binding": {
+          "work_id": "048189aa-0613-5307-b6f4-c430e7977f93",
+          "work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+          "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+          "source_revision": "465038ded6cf4ba335a11577de76acb1dea55b76",
+          "exact_target_paths": [
+            "index.html"
+          ],
+          "attempt": 2,
+          "wire_output_fingerprint": "98b70541f2b10f3f00a04ba797d0e393781a4143ecac0af109c4d31f437132df",
+          "request_receipt_id": "ea37df56-a342-448c-bd06-67b74e055a19",
+          "response_receipt_id": "f2165107-35a2-42de-bbd8-10803108fe17",
+          "provider_wire_version": "fulfillment-compact-v1",
+          "wire_request_fingerprint": "1fa3cfae082bc36921b271fdd6388e390b966ae4b6965a3e3cbb824bb92ad279",
+          "wire_table_fingerprint": "cddd1ffc3429695d19411d42c5d6b741534460496705dbb0a430ff138df9e429",
+          "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+          "diagnostic_fingerprint": "3554a59fdffaa5875f58f4e4dcccf813debd76fe03c9e16d62ccb9ab0eaf962a"
+        }
+      },
+      "feedback_sent_to_provider": false,
+      "historical_feedback_replaced": false
+    }
+  ],
+  "model_calls": 0,
+  "database_access": false,
+  "history_mutated": false,
+  "candidate_repaired": false,
+  "canonical_candidate_admitted": false,
+  "claim": "NEW_READONLY_DIAGNOSTICS_OF_OLD_OUTPUTS_NOT_NEW_LIVE_CONVERGENCE",
+  "inputs_after": {
+    "basis.json": "9b013274f1a6daafc776297a302c52c8247cd2fd5ec9c5b99a83279fd2ee8e2c",
+    "immutable-inventory.json": "2efad43b2f96bb8738667bffd6111e4aeee332fef611e968b0fa8330defad88f",
+    "capability-contracts.json": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+    "formation-owner-observations.json": "1b4086918812396a9c6e7727ab51af0efd44d94a53d988c4e6297ee9ae108a19",
+    "formation-1-safe-wire.txt": "c60c7f4d1060017a8ddbdd289105350bbfa4aefca0a94f3845d9cc496d83267b",
+    "formation-2-safe-wire.txt": "98b70541f2b10f3f00a04ba797d0e393781a4143ecac0af109c4d31f437132df"
+  }
+}

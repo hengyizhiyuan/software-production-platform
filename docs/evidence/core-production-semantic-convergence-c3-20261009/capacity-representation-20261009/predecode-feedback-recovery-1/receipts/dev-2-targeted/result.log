@@ -1,0 +1,26 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input/watt
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 28 items
+
+tests/test_c3_fulfillment_wire_feedback.py ....F.......................  [100%]
+
+=================================== FAILURES ===================================
+_ test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls[first-validation] _
+tests/test_c3_fulfillment_wire_feedback.py:113: in test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls
+    retained = deepcopy(provider._fulfillment_receipts)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.13/copy.py:163: in deepcopy
+    y = _reconstruct(x, memo, *rv)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.13/copy.py:278: in _reconstruct
+    y.append(item)
+tests/test_c3_fulfillment_wire_feedback.py:67: in append
+    raise Checkpoint()
+E   test_c3_fulfillment_wire_feedback.Checkpoint
+----------------- generated xml file: /c3-evidence/result.xml ------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_fulfillment_wire_feedback.py::test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls[first-validation]
+========================= 1 failed, 27 passed in 4.91s =========================

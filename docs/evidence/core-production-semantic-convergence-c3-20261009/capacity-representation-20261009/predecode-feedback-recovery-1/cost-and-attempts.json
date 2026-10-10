@@ -1,0 +1,94 @@
+{
+  "live_model_calls": 0,
+  "actual_provider_tokens": 0,
+  "monetary_cost": "UNKNOWN",
+  "transfer_and_unobserved_cpu_cost": "UNKNOWN",
+  "build_count": 1,
+  "build_wall_seconds": 17.47086457599653,
+  "final_unit_wall_seconds": 11.183707519958261,
+  "final_pg_wall_seconds": 24.87364104797598,
+  "development_test_runs": [
+    {
+      "run": "dev-1-targeted",
+      "counts": {
+        "tests": 28,
+        "failures": 28,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 0
+      },
+      "wall_seconds": 7.194333441962954,
+      "exit_code": 1,
+      "qualification": "DEVELOPMENT_OVERLAY"
+    },
+    {
+      "run": "dev-2-targeted",
+      "counts": {
+        "tests": 28,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 27
+      },
+      "wall_seconds": 8.145502085972112,
+      "exit_code": 1,
+      "qualification": "DEVELOPMENT_OVERLAY"
+    },
+    {
+      "run": "dev-3-regression",
+      "counts": {
+        "tests": 206,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 206
+      },
+      "wall_seconds": 10.541305680002552,
+      "exit_code": 0,
+      "qualification": "DEVELOPMENT_OVERLAY"
+    },
+    {
+      "run": "dev-4-regression",
+      "counts": {
+        "tests": 208,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 208
+      },
+      "wall_seconds": 10.58797832595883,
+      "exit_code": 0,
+      "qualification": "DEVELOPMENT_OVERLAY"
+    },
+    {
+      "run": "pg-dev-1",
+      "counts": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 3
+      },
+      "wall_seconds": 16.187423199007753,
+      "exit_code": 0,
+      "qualification": "DEVELOPMENT_OVERLAY"
+    },
+    {
+      "run": "pg-dev-2",
+      "counts": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 4
+      },
+      "wall_seconds": 14.35837020596955,
+      "exit_code": 0,
+      "qualification": "DEVELOPMENT_OVERLAY"
+    }
+  ],
+  "observed_test_run_wall_seconds_sum": 103.07226150680799,
+  "image_export_wall_seconds": 28.705269979021978,
+  "stub_usage_is_provider_usage": false,
+  "prior_live_tokens_not_counted_in_this_run": 39947
+}
