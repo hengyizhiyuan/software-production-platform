@@ -1,0 +1,2837 @@
+{
+  "schema": "ordinary-g0-original-source-consumer-probe-v1",
+  "work_id": "4af5b2db-716c-51d6-af06-4e1eb510e92b",
+  "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+  "actual_image": "sha256:6529ef0a67d651b2385789b67f1419a5528885b7aa8973ec84f4959bdfbd30af",
+  "source": "b556c86a1cfb0ad072c17db9187c941d6165137d",
+  "sources": [
+    {
+      "source": 0,
+      "source_ref": "semantic-fact:f1baae6a-b455-523a-9a9a-5e180dc7618f",
+      "kind": "FACT",
+      "old_rejected": [
+        {
+          "capability": 1,
+          "codes": [
+            "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SOURCE_IDENTITY_RELATION_MISMATCH"
+          ]
+        },
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 10,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 1,
+          "codes": [
+            "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SOURCE_IDENTITY_RELATION_MISMATCH"
+          ]
+        },
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 10,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 1,
+      "source_ref": "semantic-fact:64507732-d7be-5aa0-90f8-6ec7ef76b488",
+      "kind": "FACT",
+      "old_rejected": [
+        {
+          "capability": 1,
+          "codes": [
+            "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SOURCE_IDENTITY_RELATION_MISMATCH"
+          ]
+        },
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 10,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 1,
+          "codes": [
+            "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SOURCE_IDENTITY_RELATION_MISMATCH"
+          ]
+        },
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 10,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 2,
+      "source_ref": "semantic-fact:eb087a06-092c-5e9d-b34e-12504005de6c",
+      "kind": "FACT",
+      "old_rejected": [
+        {
+          "capability": 1,
+          "codes": [
+            "OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SOURCE_IDENTITY_RELATION_MISMATCH"
+          ]
+        },
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 10,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 0,
+          "codes": [
+            "OBLIGATION_FILE_SCOPE_OWNER_MISMATCH"
+          ]
+        },
+        {
+          "capability": 1,
+          "codes": [
+            "OBLIGATION_NEGATED_SCOPE_TARGET_CONFLICT"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_FILE_SCOPE_OWNER_MISMATCH"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 10,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [
+        {
+          "capability": 1,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 3,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 4,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 5,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        }
+      ],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 3,
+      "source_ref": "semantic-fact:a0fd0fa9-b66f-5246-9dde-9166a9dfb552",
+      "kind": "FACT",
+      "old_rejected": [
+        {
+          "capability": 1,
+          "codes": [
+            "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SOURCE_IDENTITY_RELATION_MISMATCH"
+          ]
+        },
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 10,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 1,
+          "codes": [
+            "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SOURCE_IDENTITY_RELATION_MISMATCH"
+          ]
+        },
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 10,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 4,
+      "source_ref": "semantic-fact:bdc36ce9-cd24-574f-95c5-808d57220e91",
+      "kind": "FACT",
+      "old_rejected": [
+        {
+          "capability": 1,
+          "codes": [
+            "OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SOURCE_IDENTITY_RELATION_MISMATCH"
+          ]
+        },
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 10,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SOURCE_IDENTITY_RELATION_MISMATCH"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 10,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [
+        {
+          "capability": 1,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 3,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 4,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 5,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        }
+      ],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 5,
+      "source_ref": "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c1",
+      "kind": "IR_CLAUSE",
+      "old_rejected": [
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 6,
+      "source_ref": "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c2",
+      "kind": "IR_CLAUSE",
+      "old_rejected": [
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 7,
+      "source_ref": "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c3",
+      "kind": "IR_CLAUSE",
+      "old_rejected": [
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 8,
+      "source_ref": "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c4",
+      "kind": "IR_CLAUSE",
+      "old_rejected": [
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 9,
+      "source_ref": "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c5",
+      "kind": "IR_CLAUSE",
+      "old_rejected": [
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 10,
+      "source_ref": "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c6",
+      "kind": "IR_CLAUSE",
+      "old_rejected": [
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 11,
+      "source_ref": "ir-clause:438fa46d-2fd6-529f-ba2c-9591e23948f7:pi-n1-index-page:c7",
+      "kind": "IR_CLAUSE",
+      "old_rejected": [
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 12,
+      "source_ref": "work-constraint:f1f690bd-4005-5104-a8a9-cb5563a3204c:0",
+      "kind": "WORK_CONSTRAINT",
+      "old_rejected": [
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [
+        {
+          "capability": 0,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 1,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 3,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 4,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 5,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 6,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ]
+          ]
+        },
+        {
+          "capability": 7,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ]
+          ]
+        },
+        {
+          "capability": 8,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ]
+          ]
+        },
+        {
+          "capability": 9,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ]
+          ]
+        }
+      ],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 13,
+      "source_ref": "work-constraint:f1f690bd-4005-5104-a8a9-cb5563a3204c:1",
+      "kind": "WORK_CONSTRAINT",
+      "old_rejected": [
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [
+        {
+          "capability": 0,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 1,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 3,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 4,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 5,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 6,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ]
+          ]
+        },
+        {
+          "capability": 7,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ]
+          ]
+        },
+        {
+          "capability": 8,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ]
+          ]
+        },
+        {
+          "capability": 9,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ]
+          ]
+        }
+      ],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 14,
+      "source_ref": "work-constraint:f1f690bd-4005-5104-a8a9-cb5563a3204c:2",
+      "kind": "WORK_CONSTRAINT",
+      "old_rejected": [
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [
+        {
+          "capability": 0,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 1,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 3,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 4,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 5,
+          "minimal_support_sets": [
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 6,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ]
+          ]
+        },
+        {
+          "capability": 7,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ]
+          ]
+        },
+        {
+          "capability": 8,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ]
+          ]
+        },
+        {
+          "capability": 9,
+          "minimal_support_sets": [
+            [
+              5
+            ],
+            [
+              6
+            ],
+            [
+              7
+            ],
+            [
+              8
+            ],
+            [
+              9
+            ],
+            [
+              10
+            ]
+          ]
+        }
+      ],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 15,
+      "source_ref": "work-constraint:f1f690bd-4005-5104-a8a9-cb5563a3204c:3",
+      "kind": "WORK_CONSTRAINT",
+      "old_rejected": [
+        {
+          "capability": 0,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 1,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 0,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [
+        {
+          "capability": 1,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 3,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 4,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 5,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        }
+      ],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 16,
+      "source_ref": "work-constraint:f1f690bd-4005-5104-a8a9-cb5563a3204c:4",
+      "kind": "WORK_CONSTRAINT",
+      "old_rejected": [
+        {
+          "capability": 0,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 1,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 0,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [
+        {
+          "capability": 1,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 3,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 4,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 5,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        }
+      ],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 17,
+      "source_ref": "work-constraint:f1f690bd-4005-5104-a8a9-cb5563a3204c:5",
+      "kind": "WORK_CONSTRAINT",
+      "old_rejected": [
+        {
+          "capability": 0,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 1,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 0,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [
+        {
+          "capability": 1,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 3,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 4,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 5,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        }
+      ],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    },
+    {
+      "source": 18,
+      "source_ref": "work-constraint:f1f690bd-4005-5104-a8a9-cb5563a3204c:6",
+      "kind": "WORK_CONSTRAINT",
+      "old_rejected": [
+        {
+          "capability": 0,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 1,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "new_rejected": [
+        {
+          "capability": 0,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "new_necessary_source_proofs": [
+        {
+          "capability": 1,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 3,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 4,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        },
+        {
+          "capability": 5,
+          "minimal_support_sets": [
+            [
+              5,
+              11
+            ],
+            [
+              6,
+              11
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              8,
+              11
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              11
+            ]
+          ]
+        }
+      ],
+      "meaning": "Necessary structural availability only; not semantic equivalence or evidence PASS"
+    }
+  ],
+  "unchanged_historical_candidate_counterfactual": [
+    {
+      "attempt": 1,
+      "original_receipt_id": "98301621-a3fa-475d-8a61-b2011e588eb6",
+      "original_candidate_fingerprint": "94a4692ebc8d8f6c026e2058d5fc77da01902d45afa64ed4f710b7360bd9c723",
+      "policies": {
+        "v2": {
+          "violations": [
+            {
+              "code": "OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED",
+              "route": 2,
+              "source": 2,
+              "component_id": "21b810788e693e86f5e22e4424fad111b2b5eb03ea0f1276e4833ce5889fba9a"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 5,
+              "source": 4,
+              "component_id": "c35227f7f3ffa37e86ae2abc59fe9a7fd78c1e1d3bcada8999749f82b786cb7a"
+            },
+            {
+              "code": "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE",
+              "route": 6,
+              "source": 4,
+              "component_id": "c35227f7f3ffa37e86ae2abc59fe9a7fd78c1e1d3bcada8999749f82b786cb7a"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+              "route": 6,
+              "source": 4,
+              "component_id": "c35227f7f3ffa37e86ae2abc59fe9a7fd78c1e1d3bcada8999749f82b786cb7a"
+            },
+            {
+              "code": "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE",
+              "route": 7,
+              "source": 4,
+              "component_id": "c35227f7f3ffa37e86ae2abc59fe9a7fd78c1e1d3bcada8999749f82b786cb7a"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+              "route": 7,
+              "source": 4,
+              "component_id": "c35227f7f3ffa37e86ae2abc59fe9a7fd78c1e1d3bcada8999749f82b786cb7a"
+            },
+            {
+              "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+              "route": 8,
+              "source": 5,
+              "component_id": "34a1bb427162b794c254c31c1b809fdbd2b59b00b4db78323edd82a60fb58fe2"
+            },
+            {
+              "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+              "route": 11,
+              "source": 7,
+              "component_id": "8edcc9755287f9081b98053d3991410aba5a4ef98211c377a99b1b6d0304161d"
+            },
+            {
+              "code": "OBLIGATION_CANDIDATE_GATE_NOT_REQUIRED",
+              "route": 15,
+              "source": 10,
+              "component_id": "241ea2b226bfbc2ccb478c6c0705cf2fe1d258b6040a43767e322e1123d6fc3a"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 19,
+              "source": 11,
+              "component_id": "45acf059811681a463a864f236f11f65d25d318cb2593d960f506c804551bad7"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+              "route": 19,
+              "source": 11,
+              "component_id": "45acf059811681a463a864f236f11f65d25d318cb2593d960f506c804551bad7"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 24,
+              "source": 15,
+              "component_id": "a003e98d82bb1f580bb6b625e07474b388d5ec2a7d92eea3f7e4a43d653d76ce"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 25,
+              "source": 16,
+              "component_id": "b52f39e7932b70f6fd55c0649032074484e8f11e6380667cf49f51273b18463a"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 26,
+              "source": 17,
+              "component_id": "ef2fb7cfe681d54dd539df3e382a7648701ef7a696149199bb9ef8eb0bb006d7"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 27,
+              "source": 18,
+              "component_id": "f293f481b215450da0a340dc06fe20469e51a15a17c5a20c6101d33e036c5a2d"
+            }
+          ],
+          "not_evaluable": [
+            "INDEPENDENT_SEMANTIC_REVIEW",
+            "ACTUAL_OWNER_EVIDENCE",
+            "ASSURANCE"
+          ]
+        },
+        "v3": {
+          "violations": [
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 5,
+              "source": 4,
+              "component_id": "c35227f7f3ffa37e86ae2abc59fe9a7fd78c1e1d3bcada8999749f82b786cb7a"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+              "route": 6,
+              "source": 4,
+              "component_id": "c35227f7f3ffa37e86ae2abc59fe9a7fd78c1e1d3bcada8999749f82b786cb7a"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+              "route": 7,
+              "source": 4,
+              "component_id": "c35227f7f3ffa37e86ae2abc59fe9a7fd78c1e1d3bcada8999749f82b786cb7a"
+            },
+            {
+              "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+              "route": 8,
+              "source": 5,
+              "component_id": "34a1bb427162b794c254c31c1b809fdbd2b59b00b4db78323edd82a60fb58fe2"
+            },
+            {
+              "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+              "route": 11,
+              "source": 7,
+              "component_id": "8edcc9755287f9081b98053d3991410aba5a4ef98211c377a99b1b6d0304161d"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 19,
+              "source": 11,
+              "component_id": "45acf059811681a463a864f236f11f65d25d318cb2593d960f506c804551bad7"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+              "route": 19,
+              "source": 11,
+              "component_id": "45acf059811681a463a864f236f11f65d25d318cb2593d960f506c804551bad7"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 24,
+              "source": 15,
+              "component_id": "a003e98d82bb1f580bb6b625e07474b388d5ec2a7d92eea3f7e4a43d653d76ce"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 25,
+              "source": 16,
+              "component_id": "b52f39e7932b70f6fd55c0649032074484e8f11e6380667cf49f51273b18463a"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 26,
+              "source": 17,
+              "component_id": "ef2fb7cfe681d54dd539df3e382a7648701ef7a696149199bb9ef8eb0bb006d7"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 27,
+              "source": 18,
+              "component_id": "f293f481b215450da0a340dc06fe20469e51a15a17c5a20c6101d33e036c5a2d"
+            }
+          ],
+          "not_evaluable": [
+            "INDEPENDENT_SEMANTIC_REVIEW",
+            "ACTUAL_OWNER_EVIDENCE",
+            "ASSURANCE"
+          ]
+        }
+      },
+      "candidate_modified": false,
+      "admitted": false
+    },
+    {
+      "attempt": 2,
+      "original_receipt_id": "0ded6c2f-697f-4112-97f0-4a2d6ca13e18",
+      "original_candidate_fingerprint": "ea3c35c165039292c5fe0382bd883552bd661f2e60d2d4221d8604df256891ab",
+      "policies": {
+        "v2": {
+          "violations": [
+            {
+              "code": "OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED",
+              "route": 2,
+              "source": 2,
+              "component_id": "21b810788e693e86f5e22e4424fad111b2b5eb03ea0f1276e4833ce5889fba9a"
+            },
+            {
+              "code": "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE",
+              "route": 5,
+              "source": 4,
+              "component_id": "c35227f7f3ffa37e86ae2abc59fe9a7fd78c1e1d3bcada8999749f82b786cb7a"
+            },
+            {
+              "code": "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE",
+              "route": 6,
+              "source": 4,
+              "component_id": "c35227f7f3ffa37e86ae2abc59fe9a7fd78c1e1d3bcada8999749f82b786cb7a"
+            },
+            {
+              "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+              "route": 7,
+              "source": 5,
+              "component_id": "34a1bb427162b794c254c31c1b809fdbd2b59b00b4db78323edd82a60fb58fe2"
+            },
+            {
+              "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+              "route": 10,
+              "source": 7,
+              "component_id": "8edcc9755287f9081b98053d3991410aba5a4ef98211c377a99b1b6d0304161d"
+            },
+            {
+              "code": "OBLIGATION_CANDIDATE_GATE_NOT_REQUIRED",
+              "route": 14,
+              "source": 10,
+              "component_id": "241ea2b226bfbc2ccb478c6c0705cf2fe1d258b6040a43767e322e1123d6fc3a"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 17,
+              "source": 11,
+              "component_id": "45acf059811681a463a864f236f11f65d25d318cb2593d960f506c804551bad7"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+              "route": 17,
+              "source": 11,
+              "component_id": "45acf059811681a463a864f236f11f65d25d318cb2593d960f506c804551bad7"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 22,
+              "source": 15,
+              "component_id": "a003e98d82bb1f580bb6b625e07474b388d5ec2a7d92eea3f7e4a43d653d76ce"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 23,
+              "source": 16,
+              "component_id": "b52f39e7932b70f6fd55c0649032074484e8f11e6380667cf49f51273b18463a"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 24,
+              "source": 17,
+              "component_id": "ef2fb7cfe681d54dd539df3e382a7648701ef7a696149199bb9ef8eb0bb006d7"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 25,
+              "source": 18,
+              "component_id": "f293f481b215450da0a340dc06fe20469e51a15a17c5a20c6101d33e036c5a2d"
+            }
+          ],
+          "not_evaluable": [
+            "INDEPENDENT_SEMANTIC_REVIEW",
+            "ACTUAL_OWNER_EVIDENCE",
+            "ASSURANCE"
+          ]
+        },
+        "v3": {
+          "violations": [
+            {
+              "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+              "route": 7,
+              "source": 5,
+              "component_id": "34a1bb427162b794c254c31c1b809fdbd2b59b00b4db78323edd82a60fb58fe2"
+            },
+            {
+              "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+              "route": 10,
+              "source": 7,
+              "component_id": "8edcc9755287f9081b98053d3991410aba5a4ef98211c377a99b1b6d0304161d"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 17,
+              "source": 11,
+              "component_id": "45acf059811681a463a864f236f11f65d25d318cb2593d960f506c804551bad7"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+              "route": 17,
+              "source": 11,
+              "component_id": "45acf059811681a463a864f236f11f65d25d318cb2593d960f506c804551bad7"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 22,
+              "source": 15,
+              "component_id": "a003e98d82bb1f580bb6b625e07474b388d5ec2a7d92eea3f7e4a43d653d76ce"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 23,
+              "source": 16,
+              "component_id": "b52f39e7932b70f6fd55c0649032074484e8f11e6380667cf49f51273b18463a"
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+              "route": 24,
+              "source": 17,
+              "component_id": "ef2fb7cfe681d54dd539df3e382a7648701ef7a696149199bb9ef8eb0bb006d7"
+            }
+          ],
+          "not_evaluable": [
+            "INDEPENDENT_SEMANTIC_REVIEW",
+            "ACTUAL_OWNER_EVIDENCE",
+            "ASSURANCE"
+          ]
+        }
+      },
+      "candidate_modified": false,
+      "admitted": false
+    }
+  ],
+  "model_calls": 0,
+  "work_mutations": 0,
+  "assurance_pass": false,
+  "public_raw_semantic_content": false
+}

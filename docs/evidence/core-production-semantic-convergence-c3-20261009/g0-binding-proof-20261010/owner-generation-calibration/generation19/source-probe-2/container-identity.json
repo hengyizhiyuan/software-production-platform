@@ -1,0 +1,9 @@
+{
+  "actual_container": "f36bb5a7554516bbec414715b1389c0c9d535398d508b02446222d3bc204c782",
+  "actual_image": "sha256:6529ef0a67d651b2385789b67f1419a5528885b7aa8973ec84f4959bdfbd30af",
+  "exit_code": 0,
+  "source_overlay": false,
+  "model_calls": 0,
+  "work_created": false,
+  "original_file_permissions_mutated": false
+}

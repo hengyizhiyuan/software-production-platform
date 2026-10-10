@@ -799,3 +799,32 @@ def test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance(failure):
         source_revision=inv["source_revision"], exact_target_paths=inv["exact_target_paths"], fulfillment_bindings=bindings)
     assert (result[0]["disposition"] == "CURRENT_VERIFIED_FUTURE_GATE_PENDING") is (failure is None)
     assert result[0]["passed"] is (failure != "current-fail")
+
+
+
+def test_v9_scope_does_not_inherit_negative_sibling_from_shared_human_record():
+    from spg.application.governed_obligations import fulfillment_inventory, _fact_prohibition_sources, _projection_binding
+    from spg.domain.engineering_semantics import SemanticRelation
+    from spg.domain.governed_obligation import FulfillmentRouteCandidate
+    from types import SimpleNamespace
+    revision, ir, _, _ = shared_item_case()
+    negative = next(c for c in ir.clauses if c.polarity == "NEGATED")
+    fact = revision.engineering_semantic_facts[0].model_copy(update={"relation": SemanticRelation.SCOPE,
+        "value": ("index.html",), "scope": "permitted changed artifacts", "qualifiers": {"only_artifact": True},
+        "provenance": revision.engineering_semantic_facts[0].provenance.model_copy(update={
+            "source_record_ids": (negative.source_record_id,), "source_text": "Only index.html may change."})})
+    revision.engineering_semantic_facts = (fact, *revision.engineering_semantic_facts[1:])
+    inv = fulfillment_inventory(revision, ir)
+    caps = fulfillment_capability_contracts();pred = _owner_source_preconditions(revision, ir, inv, caps)
+    source = next(s for s in inv["sources"] if s.get("fact_id") == str(fact.id))
+    clause_source = next(s for s in inv["sources"] if s.get("clause_id") == negative.clause_id)
+    cap = next(i for i,c in enumerate(caps) if c["capability"] == "GIT_DIFF_SCOPE")
+    assert not any(row["capability"] == cap for row in pred['sources'][0]["ineligible_binding_prerequisites"])
+    assert [] in next(row["minimal_support_sets"] for row in pred['sources'][0]["necessary_source_proofs"] if row["capability"] == cap)
+    assert not _fact_prohibition_sources(revision, ir, inv, fact,
+        SimpleNamespace(capability="DENY_DEPLOY", supporting_source_refs=(clause_source["source_ref"],)), source_contract="v3")
+    route = FulfillmentRouteCandidate(source_ref=source["source_ref"], capability="GIT_DIFF_SCOPE", target_paths=("index.html",),
+        component_basis={"source_span_start":0, "source_span_end":len(fact.provenance.source_text), "source_component_quote":fact.provenance.source_text},
+        rationale="Controlled positive Scope preserves original contribution.")
+    assert _projection_binding(revision, ir, inv, route, allow_calibrated=True, source_contract="v3").evidence_method == "EXACT_GIT_DIFF_SCOPE"
+    assert fact.qualifiers == {"only_artifact": True}

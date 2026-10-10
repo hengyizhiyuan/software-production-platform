@@ -1,0 +1,8 @@
+{
+  "actual_container": "f80da717cef173c55f761e54ed7852aa315e8f68d9a028b526bf19a306eabf2f",
+  "actual_image": "sha256:6529ef0a67d651b2385789b67f1419a5528885b7aa8973ec84f4959bdfbd30af",
+  "exit_code": 1,
+  "source_overlay": false,
+  "model_calls": 0,
+  "work_created": false
+}

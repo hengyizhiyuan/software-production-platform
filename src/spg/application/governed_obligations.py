@@ -986,6 +986,12 @@ def _fact_prohibition_sources(revision, ir, inventory, fact, route, *, source_co
                 or clause.source_record_id not in fact.provenance.source_record_ids
                 or not _human_clause_item(item, clause)):
             return False
+        if source_contract == "v3" and not (fact.provenance.source_text
+                and (clause.source_text in fact.provenance.source_text or fact.provenance.source_text in clause.source_text)):
+            # A shared Human record does not prove that this Fact was admitted
+            # from this negative clause. Preserve exact original contribution;
+            # semantic Review must additionally prove the gate entails the Fact.
+            return False
         if route.capability != "GIT_DIFF_SCOPE" and clause.requested_effects and not any(
                 (_TYPED_EFFECT_ROUTES.get(effect) or (None,))[0] == _capability_tuple(route.capability)[0]
                 for effect in clause.requested_effects) and not (source_contract == "v3"
@@ -1739,6 +1745,13 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                     supports = [[j] for j, entry in enumerate(sources)
                         if _fact_prohibition_sources(revision, ir, inventory, fact,
                             SimpleNamespace(capability=capability, supporting_source_refs=(entry["source_ref"],)), source_contract=source_contract)]
+                if source_contract == "v3" and method == "EXACT_GIT_DIFF_SCOPE":
+                    from spg.domain.governed_obligation import literal_file_scope_value_paths
+                    if literal_file_scope_value_paths(fact) == tuple(inventory["exact_target_paths"]):
+                        # A literal current edit boundary also has a direct
+                        # Fact consumer. Do not force an unrelated negative
+                        # sibling as its sole support or evidence method.
+                        supports = [[], *supports]
             elif source["kind"] == "WORK_CONSTRAINT" and phase not in {
                     FulfillmentPhase.CONTEXT_RETENTION} and method not in {
                     "EXACT_PRODUCT_SOURCE_IDENTITY", "UNRESOLVED"} and capability != "UNRESOLVED":
