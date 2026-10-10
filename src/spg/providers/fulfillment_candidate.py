@@ -245,6 +245,31 @@ def _expand_fulfillment_wire_route(route, inventory, capabilities, context):
             "linked_fact_refs": tuple(sources[index]["source_ref"] for index in route.f)})
 
 
+def _review_candidate_representation(inventory, candidate, capabilities):
+    """Reuse the existing reversible wire; the review verdict stays canonical.
+
+    Legacy plans without component locations retain their existing representation.
+    An exact round trip is mandatory before sending a compact review input.
+    """
+    if any(route.component_basis is None for route in candidate.routes):
+        return {"untrusted_fulfillment_candidate": candidate.model_dump(mode="json")}
+    context = _fulfillment_wire_context(inventory, capabilities)
+    sources = {s["source_ref"]: i for i,s in enumerate(inventory["sources"])}
+    names = {c["capability"]: i for i,c in enumerate(capabilities)}
+    paths = {p:i for i,p in enumerate(inventory["exact_target_paths"])}
+    wire = {"v": 1, "h": context["wire_request_fingerprint"], "d": context["wire_table_fingerprint"],
+        "routes": [{"s": sources[r.source_ref], "c": names[r.capability],
+            "a": r.component_basis.source_span_start, "z": r.component_basis.source_span_end,
+            "q": None, "f": [sources[f] for f in r.component_basis.linked_fact_refs],
+            "t": [paths[p] for p in r.target_paths], "u": [sources[s] for s in r.supporting_source_refs],
+            "r": r.rationale} for r in candidate.routes]}
+    restored = _decode_fulfillment_candidate_wire(json.dumps(wire,ensure_ascii=False), inventory, capabilities)
+    if restored != candidate:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_INPUT_IDENTITY_DRIFT")
+    return {"untrusted_fulfillment_candidate": wire,
+        "candidate_representation": _FULFILLMENT_WIRE_VERSION}
+
+
 def _fulfillment_wire_route_observations(output, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
     """Read exact raw routes for Owner diagnostics, never a partial Candidate.
 
@@ -551,7 +576,18 @@ class ModelFulfillmentCandidateProvider:
         try:
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
                 instructions=("Independently validate a derived fulfillment candidate against the immutable admitted "
-                    "engineering inventory. The candidate is untrusted; its rationale is not evidence. For EVERY exact "
+                    "engineering inventory. The candidate is untrusted; its rationale is not evidence. When "
+                    "candidate_representation is fulfillment-compact-v1, read the existing wire against the "
+                    "ordered immutable inventory, capability contracts and exact_target_paths: s/u/f use the "
+                    "same source ordinals (f only FACT), c is the capability ordinal, t contains path ordinals. "
+                    "[a,z) are Unicode code-point offsets in the original source semantic text: FACT uses "
+                    "provenance.source_text; IR_CLAUSE/IR_CONSTRAINT uses payload.clause.source_text; IR_ITEM uses "
+                    "payload.item.statement; WORK_CONSTRAINT/WORK_CONTEXT uses payload.content. q=null means "
+                    "the exact original slice, never missing meaning. The Owner already proved an exact round "
+                    "trip to the canonical candidate; you still independently judge every component. "
+                    "component_index_table corresponds to wire route order and supplies the original exact "
+                    "component_id/capability for each result. Return the unchanged canonical review schema, "
+                    "not compact indices or a candidate repair. For EVERY exact "
                     "source_ref decide whether its complete meaning is preserved by the source-linked component "
                     "spans, original Fact references, selected consumer contracts and fulfillment phases. Do not "
                     "change accepted Fact relation/value/order/scope/qualifiers/provenance/authority. A current request "
@@ -568,7 +604,7 @@ class ModelFulfillmentCandidateProvider:
                     "sufficiency. A whole-source reuse cannot conceal a lost semantic component. This review is only "
                     "derived-plan semantic validation, not Assurance, Verification PASS, a fact or Human authority."),
                 input_text=json.dumps({"immutable_inventory": inventory,
-                    "untrusted_fulfillment_candidate": candidate.model_dump(mode="json"),
+                    **_review_candidate_representation(inventory,candidate,capabilities),
                     "component_index_table": [{"component_id": fulfillment_component_id(route, inventory["inventory_fingerprint"]),
                         "capability": route.capability} for route in candidate.routes],
                     "existing_capability_contracts": capabilities,

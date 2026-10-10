@@ -1,5 +1,6 @@
 """Predecode feedback identity; controlled adapters, no live model or Work."""
 from copy import deepcopy
+from tests.test_c3_fulfillment_capacity_representation import decode_review_input
 from hashlib import sha256
 import json
 from types import SimpleNamespace
@@ -87,7 +88,7 @@ def provider_for_case(inventory, plan, *, checkpoint=None, repeat=False):
         payload = json.loads(request['input_text'])
         calls.append(payload)
         if 'untrusted_fulfillment_candidate' in payload:
-            restored = FulfillmentProjectionCandidate.model_validate(payload['untrusted_fulfillment_candidate'])
+            restored = decode_review_input(payload)
             output = review(inventory, restored).model_dump_json()
         else:
             wire, _ = controlled_wire(inventory, plan, feedback=payload.get('same_basis_validation_feedback'), owner_preconditions=payload.get('owner_source_preconditions'))

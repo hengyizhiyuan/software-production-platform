@@ -1,5 +1,6 @@
 """Exact-source coverage and existing Owner prerequisites; no live success."""
 from copy import deepcopy
+from tests.test_c3_fulfillment_capacity_representation import decode_review_input
 from hashlib import sha256
 import json
 from types import SimpleNamespace
@@ -103,7 +104,7 @@ def test_bound_feedback_repairs_once_or_stops_drift_without_review(tamper):
     def generate(**request):
         payload=json.loads(request['input_text']);calls.append(payload)
         if 'untrusted_fulfillment_candidate' in payload:
-            candidate=FulfillmentProjectionCandidate.model_validate(payload['untrusted_fulfillment_candidate'])
+            candidate=decode_review_input(payload)
             output=review(inventory,candidate).model_dump_json()
         else:
             feedback=payload.get('same_basis_validation_feedback')

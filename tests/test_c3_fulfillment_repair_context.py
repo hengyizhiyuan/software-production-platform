@@ -1,5 +1,6 @@
 """Repair sees the original untrusted proposal; no intelligent success claim."""
 from copy import deepcopy
+from tests.test_c3_fulfillment_capacity_representation import decode_review_input
 from hashlib import sha256
 import json
 from types import SimpleNamespace
@@ -25,7 +26,7 @@ def repair_case(scale='small', interrupt=False):
         payload = json.loads(request['input_text'])
         calls.append(payload)
         if 'untrusted_fulfillment_candidate' in payload:
-            candidate = FulfillmentProjectionCandidate.model_validate(payload['untrusted_fulfillment_candidate'])
+            candidate = decode_review_input(payload)
             output = review(inventory, candidate).model_dump_json()
         else:
             domains = payload['temporary_wire']['f_allowed_source_ordinals']

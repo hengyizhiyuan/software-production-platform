@@ -125,7 +125,7 @@ def test_actual_compact_observation_replays_from_postgresql_without_repeating_fo
         inventory = payload["immutable_inventory"]
         if "untrusted_fulfillment_candidate" in payload:
             from spg.domain.governed_obligation import FulfillmentProjectionCandidate
-            plan = FulfillmentProjectionCandidate.model_validate(payload["untrusted_fulfillment_candidate"])
+            plan = decode_review_input(payload)
             output = declared.review(inventory, plan).model_dump_json()
         else:
             plan = declared.form(inventory, payload["existing_capability_contracts"],
@@ -206,6 +206,7 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
 ):
     """New isolated fixture records only; no historical or live model writes."""
     from copy import deepcopy
+from tests.test_c3_fulfillment_capacity_representation import decode_review_input
     import json
     from types import SimpleNamespace
     from sqlalchemy import update
@@ -227,7 +228,7 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
         inventory = payload['immutable_inventory']
         inventories.append(inventory)
         if 'untrusted_fulfillment_candidate' in payload:
-            plan = FulfillmentProjectionCandidate.model_validate(payload['untrusted_fulfillment_candidate'])
+            plan = decode_review_input(payload)
             result = declared.review(inventory, plan).model_copy(update={
                 'component_results': component_review(inventory, plan).component_results})
             output = result.model_dump_json()

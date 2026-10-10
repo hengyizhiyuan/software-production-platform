@@ -143,6 +143,50 @@ def controlled_review(inventory, plan, *, equivalent=True):
             for source in inventory["sources"]))
 
 
+def decode_review_input(payload):
+    """The controlled reviewer consumes the same exact representation as live."""
+    if payload.get('candidate_representation') == 'fulfillment-compact-v1':
+        from spg.providers.fulfillment_candidate import _decode_fulfillment_candidate_wire
+        return _decode_fulfillment_candidate_wire(json.dumps(payload['untrusted_fulfillment_candidate']),
+            payload['immutable_inventory'],payload['existing_capability_contracts'])
+    return FulfillmentProjectionCandidate.model_validate(payload['untrusted_fulfillment_candidate'])
+
+
+@pytest.mark.parametrize('scale', ('small','medium','complex'))
+def test_independent_review_reuses_wire_without_losing_any_component(scale,record_property):
+    from spg.providers.fulfillment_candidate import _review_candidate_representation
+    revision,ir,inventory,plan=controlled_capacity_case(scale)
+    before=deepcopy(plan.model_dump(mode='json'))
+    caps=fulfillment_capability_contracts()
+    compact=_review_candidate_representation(inventory,plan,caps)
+    payload={'immutable_inventory':inventory,'existing_capability_contracts':caps,**compact}
+    restored=decode_review_input(payload)
+    assert restored==plan and plan.model_dump(mode='json')==before
+    assert fulfillment_candidate_fingerprint(restored)==fulfillment_candidate_fingerprint(plan)
+    assert fulfillment_components_fingerprint(restored)==fulfillment_components_fingerprint(plan)
+    assert len(json.dumps(compact,ensure_ascii=False).encode())<len(plan.model_dump_json().encode())
+    record_property('review_representation_scale',scale)
+    record_property('review_canonical_bytes',len(plan.model_dump_json().encode()))
+    record_property('review_compact_bytes',len(json.dumps(compact,ensure_ascii=False).encode()))
+
+
+@pytest.mark.parametrize('change', ('quote','inventory','constraint-index','path','fact-link'))
+def test_review_representation_does_not_repair_invalid_or_drifting_identity(change):
+    from spg.providers.fulfillment_candidate import _review_candidate_representation
+    _,_,inventory,plan=controlled_capacity_case()
+    routes=list(plan.routes);route=routes[0]
+    if change=='quote':route=route.model_copy(update={'component_basis':route.component_basis.model_copy(update={'source_component_quote':'invented quotation'})})
+    elif change=='inventory':plan=plan.model_copy(update={'inventory_fingerprint':'0'*64})
+    elif change=='constraint-index':
+        index=next(i for i,r in enumerate(routes) if r.work_constraint_indices)
+        routes[index]=routes[index].model_copy(update={'work_constraint_indices':(999,)})
+    elif change=='path':route=route.model_copy(update={'target_paths':('unadmitted/path.html',)})
+    else:route=route.model_copy(update={'component_basis':route.component_basis.model_copy(update={'linked_fact_refs':('semantic-fact:missing',)})})
+    routes[0]=route;plan=plan.model_copy(update={'routes':tuple(routes)})
+    with pytest.raises((ValueError,RuntimeError,KeyError)):
+        _review_candidate_representation(inventory,plan,fulfillment_capability_contracts())
+
+
 def controlled_model_provider(inventory, plan, *, equivalent=True, review_change=None, wire_change=None):
     """Actual Provider methods with a deterministic, network-free runtime stub."""
     calls = []
@@ -150,7 +194,7 @@ def controlled_model_provider(inventory, plan, *, equivalent=True, review_change
         payload = json.loads(request["input_text"])
         calls.append(payload)
         if "untrusted_fulfillment_candidate" in payload:
-            restored = FulfillmentProjectionCandidate.model_validate(payload["untrusted_fulfillment_candidate"])
+            restored = decode_review_input(payload)
             review = controlled_review(inventory, restored, equivalent=equivalent).model_dump(mode="json")
             if review_change:
                 review_change(review)
