@@ -128,3 +128,28 @@ def test_canonical_rejection_next_request_capacity_preserves_parent_identity(mon
     rejected=a.form_fulfillment_projection(revision,ir,**kwargs)
     assert rejected[0].formation_receipt["terminal_reason"]=="OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT"
     assert len(calls)==1 and all(b.state=="UNRESOLVED" for b in rejected)
+
+
+@pytest.mark.parametrize("tamper", [False, True])
+def test_first_request_capacity_has_no_parent_and_never_dispatches(monkeypatch, tamper):
+    revision,ir,inventory,plan=controlled_capacity_case()
+    provider,calls=controlled_model_provider(inventory,plan)
+    owner=a._owner_source_preconditions
+    def excessive_owner_input(*args,**kwargs):
+        result=owner(*args,**kwargs);result["controlled_test_padding"]="x"*140000
+        return result
+    monkeypatch.setattr(a,"_owner_source_preconditions",excessive_owner_input)
+    kwargs={"provider":provider,"exact_target_paths":inventory["exact_target_paths"]}
+    result=a.form_fulfillment_projection(revision,ir,**kwargs)
+    assert len(calls)==0 and result[0].formation_receipt["terminal_reason"]=="OBLIGATION_FORMATION_RECEIPT_LIMIT"
+    rows=provider._fulfillment_receipts
+    assert len(rows)==1 and rows[0]["stage"]=="MODEL_REQUEST_PENDING" and rows[0]["attempt"]==1
+    assert rows[0].get("feedback_receipt_id") is None and rows[0]["capacity_observation"]
+    before=deepcopy(rows)
+    a.form_fulfillment_projection(revision,ir,**kwargs)
+    assert rows==before and len(calls)==0
+    if tamper:
+        next(d for d in rows[0]["capacity_observation"]["dropped_fields"] if d["field"]=="feedback")["sha256"]="0"*64
+        rejected=a.form_fulfillment_projection(revision,ir,**kwargs)
+        assert rejected[0].formation_receipt["terminal_reason"]=="OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT"
+        assert len(calls)==0 and all(b.state=="UNRESOLVED" for b in rejected)

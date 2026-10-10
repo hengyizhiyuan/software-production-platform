@@ -2538,6 +2538,16 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
             # The capacity shape was validated above. Both canonical and
             # predecode parents were independently revalidated on the original
             # Wire; a missing next-request body never permits identity drift.
+            if start.get("attempt") == 1:
+                encoded = b"null"  # Initial request has no previous feedback.
+                dropped = [d for d in capacity["dropped_fields"] if d["field"] == "feedback"]
+                if (len(dropped) != 1 or dropped[0]["bytes"] != len(encoded)
+                        or dropped[0]["sha256"] != sha256(encoded).hexdigest()
+                        or start.get("feedback_receipt_id") is not None):
+                    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                continue
+            if start.get("attempt") != 2:
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
             parents = [r for r in rows if r.get("stage") == "CANDIDATE_VALIDATED"
                 and r.get("attempt") == start.get("attempt", 0) - 1
                 and isinstance(r.get("validation_feedback"), str)]
