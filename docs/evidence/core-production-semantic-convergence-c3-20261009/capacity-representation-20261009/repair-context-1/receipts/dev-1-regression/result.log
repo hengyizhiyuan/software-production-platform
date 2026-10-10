@@ -1,0 +1,43 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input/watt
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 215 items
+
+tests/test_c3_fulfillment_repair_context.py .......                      [  3%]
+tests/test_c3_fulfillment_wire_feedback.py ............................. [ 16%]
+.                                                                        [ 17%]
+tests/test_c3_fulfillment_capacity_representation.py ................... [ 26%]
+.................F........                                               [ 38%]
+tests/test_c3_semantic_contract_calibration.py ......................... [ 49%]
+...............                                                          [ 56%]
+tests/test_c3_fulfillment_provider_failures.py .........                 [ 60%]
+tests/test_c3_fulfillment_components.py ..............                   [ 67%]
+tests/test_fulfillment_projection.py .....................               [ 77%]
+tests/test_governed_obligation_fulfillment.py .......                    [ 80%]
+tests/test_c3_fulfillment_stop_projection.py ........................... [ 93%]
+...........                                                              [ 98%]
+tests/test_c3_fulfillment_admission_stop.py ....                         [100%]
+
+=================================== FAILURES ===================================
+____ test_compact_wire_size_does_not_hide_expanded_payload_capacity_failure ____
+tests/test_c3_fulfillment_capacity_representation.py:401: in test_compact_wire_size_does_not_hide_expanded_payload_capacity_failure
+    assert len(calls) == 2 and all("untrusted_fulfillment_candidate" not in call for call in calls)
+E   AssertionError: assert (1 == 2)
+E    +  where 1 = len([{'immutable_inventory': {'work_id': 'd710c316-6276-459c-84a5-f14dd1105e43', 'work_reality_revision_id': 'd82798b5-e90...aec83eac215ca20', 'wire_schema_fingerprint': '5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40', ...}}])
+=============================== warnings summary ===============================
+tests/test_c3_semantic_contract_calibration.py::test_negative_file_component_preserves_original_exclusion_and_requires_real_diff
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+----------------- generated xml file: /c3-evidence/result.xml ------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_wire_size_does_not_hide_expanded_payload_capacity_failure
+=================== 1 failed, 214 passed, 1 warning in 9.72s ===================

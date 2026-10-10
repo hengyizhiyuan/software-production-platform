@@ -1,0 +1,18 @@
+{
+  "schema": "c3-predecode-exact-image-recovery-v1",
+  "application_source": "ddb9b0cb62a26d13cca0eb46d693d95ef618f476",
+  "image_id": "sha256:619598878ebef02b80635efb0e991fece07038d9ee8e93ad78d2a1e57beb8377",
+  "archive": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/repair-context-20261010/image-recovery/exact-image.tar.gz",
+  "archive_bytes": 336579297,
+  "archive_sha256": "05e9c0129dfa8fce6e04b3adf7d0068bc7e272d2dbd0fe4d80416078ff50b1a0",
+  "started_at_utc": "2026-10-10T04:01:37.219053+00:00",
+  "ended_at_utc": "2026-10-10T04:02:10.912649+00:00",
+  "wall_seconds": 33.69359813001938,
+  "archive_mode": "0600",
+  "directory_mode": "0700",
+  "model_calls": 0,
+  "production_resources_modified": false,
+  "restore_test": "NOT_PERFORMED",
+  "offsite_backup": "NOT_PERFORMED",
+  "purpose": "Restore exact qualified isolated image; rebuilding may produce another image identity"
+}

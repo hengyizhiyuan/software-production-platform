@@ -1,0 +1,23 @@
+{
+  "schema": "c3-repair-context-public-persistence-v1",
+  "recorded_at_utc": "2026-10-10T04:58:57.774662+00:00",
+  "public_directory": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/repair-context-20261010/public-delivery",
+  "public_archive": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/repair-context-20261010/public-delivery.tar.gz",
+  "public_archive_sha256": "fda14e7feed4bce49c634a14bccad2928c7802b9789a3477e62d6522191ffc2e",
+  "public_files": 53,
+  "snapshot_boundary": "Controls, receipts and reviews before persistence/final Git checkpoint; final Git also contains this persistence receipt",
+  "public_credentials_found": false,
+  "private_model_content_in_public": false,
+  "exact_image_archive_verified": true,
+  "exact_image_archive_sha256": "05e9c0129dfa8fce6e04b3adf7d0068bc7e272d2dbd0fe4d80416078ff50b1a0",
+  "image_id": "sha256:619598878ebef02b80635efb0e991fece07038d9ee8e93ad78d2a1e57beb8377",
+  "application_source": "ddb9b0cb62a26d13cca0eb46d693d95ef618f476",
+  "original_ecs_source_head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+  "original_ecs_main_ref": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+  "historical_owner_mutated": false,
+  "production_resources_modified": false,
+  "c3_status": "PARTIAL",
+  "restore_test": "NOT_PERFORMED",
+  "offsite_backup": "NOT_PERFORMED",
+  "recovery": "Git C3 branch, this snapshot, separate original live private directories, exact image archive"
+}

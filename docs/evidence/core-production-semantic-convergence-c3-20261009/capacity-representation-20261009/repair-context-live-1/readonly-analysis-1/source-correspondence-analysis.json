@@ -1,0 +1,242 @@
+{
+  "application_source": "ddb9b0cb62a26d13cca0eb46d693d95ef618f476",
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "attempts": [
+    {
+      "attempt": 1,
+      "wire_sha256": "c284188fa79f1d59840abe30ada227600af39c0b010cad1a19e5b844fbf46297",
+      "primary_source_count": 23,
+      "missing_source_records": [
+        {
+          "source": 9,
+          "source_ref": "ir-constraint:page_content_spec:c4",
+          "kind": "IR_CONSTRAINT",
+          "clause_id": "c4",
+          "semantic_item_kind": "CONSTRAINT",
+          "own_route_count": 0,
+          "same_text_source_records": [
+            {
+              "source": 10,
+              "kind": "IR_CLAUSE",
+              "own_route_capabilities": [],
+              "same_clause_id": true
+            }
+          ],
+          "support_reference_routes": [
+            {
+              "route": 11,
+              "primary_source": 15,
+              "capability": "ARTIFACT_CONTENT"
+            },
+            {
+              "route": 12,
+              "primary_source": 17,
+              "capability": "ARTIFACT_CONTENT"
+            },
+            {
+              "route": 13,
+              "primary_source": 18,
+              "capability": "ARTIFACT_CONTENT"
+            }
+          ],
+          "semantic_equivalence_or_complete_business_coverage": "NOT_EVALUATED_NO_INDEPENDENT_REVIEW"
+        },
+        {
+          "source": 10,
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4",
+          "kind": "IR_CLAUSE",
+          "clause_id": "c4",
+          "semantic_item_kind": "PRODUCTION_INTENT",
+          "own_route_count": 0,
+          "same_text_source_records": [
+            {
+              "source": 9,
+              "kind": "IR_CONSTRAINT",
+              "own_route_capabilities": [],
+              "same_clause_id": true
+            }
+          ],
+          "support_reference_routes": [
+            {
+              "route": 11,
+              "primary_source": 15,
+              "capability": "ARTIFACT_CONTENT"
+            },
+            {
+              "route": 12,
+              "primary_source": 17,
+              "capability": "ARTIFACT_CONTENT"
+            },
+            {
+              "route": 13,
+              "primary_source": 18,
+              "capability": "ARTIFACT_CONTENT"
+            }
+          ],
+          "semantic_equivalence_or_complete_business_coverage": "NOT_EVALUATED_NO_INDEPENDENT_REVIEW"
+        },
+        {
+          "source": 12,
+          "source_ref": "ir-constraint:verification_and_candidate:c6",
+          "kind": "IR_CONSTRAINT",
+          "clause_id": "c6",
+          "semantic_item_kind": "CONSTRAINT",
+          "own_route_count": 0,
+          "same_text_source_records": [
+            {
+              "source": 5,
+              "kind": "FACT",
+              "own_route_capabilities": [
+                "ARTIFACT_CONTENT"
+              ],
+              "same_clause_id": false
+            }
+          ],
+          "support_reference_routes": [
+            {
+              "route": 14,
+              "primary_source": 16,
+              "capability": "ARTIFACT_CONTENT"
+            },
+            {
+              "route": 15,
+              "primary_source": 16,
+              "capability": "CANDIDATE_SEAL"
+            },
+            {
+              "route": 16,
+              "primary_source": 19,
+              "capability": "ARTIFACT_CONTENT"
+            },
+            {
+              "route": 17,
+              "primary_source": 20,
+              "capability": "CANDIDATE_SEAL"
+            }
+          ],
+          "semantic_equivalence_or_complete_business_coverage": "NOT_EVALUATED_NO_INDEPENDENT_REVIEW"
+        }
+      ]
+    },
+    {
+      "attempt": 2,
+      "wire_sha256": "c9556f29b825ee22d997b026e5171df12ab0a377e8d46d60a8c05b7defda7eda",
+      "primary_source_count": 23,
+      "missing_source_records": [
+        {
+          "source": 9,
+          "source_ref": "ir-constraint:page_content_spec:c4",
+          "kind": "IR_CONSTRAINT",
+          "clause_id": "c4",
+          "semantic_item_kind": "CONSTRAINT",
+          "own_route_count": 0,
+          "same_text_source_records": [
+            {
+              "source": 10,
+              "kind": "IR_CLAUSE",
+              "own_route_capabilities": [],
+              "same_clause_id": true
+            }
+          ],
+          "support_reference_routes": [
+            {
+              "route": 11,
+              "primary_source": 15,
+              "capability": "ARTIFACT_CONTENT"
+            },
+            {
+              "route": 12,
+              "primary_source": 17,
+              "capability": "ARTIFACT_CONTENT"
+            },
+            {
+              "route": 13,
+              "primary_source": 18,
+              "capability": "ARTIFACT_CONTENT"
+            }
+          ],
+          "semantic_equivalence_or_complete_business_coverage": "NOT_EVALUATED_NO_INDEPENDENT_REVIEW"
+        },
+        {
+          "source": 10,
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4",
+          "kind": "IR_CLAUSE",
+          "clause_id": "c4",
+          "semantic_item_kind": "PRODUCTION_INTENT",
+          "own_route_count": 0,
+          "same_text_source_records": [
+            {
+              "source": 9,
+              "kind": "IR_CONSTRAINT",
+              "own_route_capabilities": [],
+              "same_clause_id": true
+            }
+          ],
+          "support_reference_routes": [
+            {
+              "route": 11,
+              "primary_source": 15,
+              "capability": "ARTIFACT_CONTENT"
+            },
+            {
+              "route": 12,
+              "primary_source": 17,
+              "capability": "ARTIFACT_CONTENT"
+            },
+            {
+              "route": 13,
+              "primary_source": 18,
+              "capability": "ARTIFACT_CONTENT"
+            }
+          ],
+          "semantic_equivalence_or_complete_business_coverage": "NOT_EVALUATED_NO_INDEPENDENT_REVIEW"
+        },
+        {
+          "source": 12,
+          "source_ref": "ir-constraint:verification_and_candidate:c6",
+          "kind": "IR_CONSTRAINT",
+          "clause_id": "c6",
+          "semantic_item_kind": "CONSTRAINT",
+          "own_route_count": 0,
+          "same_text_source_records": [
+            {
+              "source": 5,
+              "kind": "FACT",
+              "own_route_capabilities": [
+                "ARTIFACT_CONTENT"
+              ],
+              "same_clause_id": false
+            }
+          ],
+          "support_reference_routes": [
+            {
+              "route": 14,
+              "primary_source": 16,
+              "capability": "ARTIFACT_CONTENT"
+            },
+            {
+              "route": 15,
+              "primary_source": 16,
+              "capability": "CANDIDATE_SEAL"
+            },
+            {
+              "route": 16,
+              "primary_source": 19,
+              "capability": "ARTIFACT_CONTENT"
+            },
+            {
+              "route": 17,
+              "primary_source": 20,
+              "capability": "CANDIDATE_SEAL"
+            }
+          ],
+          "semantic_equivalence_or_complete_business_coverage": "NOT_EVALUATED_NO_INDEPENDENT_REVIEW"
+        }
+      ]
+    }
+  ],
+  "model_calls": 0,
+  "candidate_modified": false,
+  "private_text_published": false,
+  "meaning": "Identical source text does not prove identical Fact/Clause/Constraint authority or disposition; supporting references are not own source-component routes under the current contract."
+}

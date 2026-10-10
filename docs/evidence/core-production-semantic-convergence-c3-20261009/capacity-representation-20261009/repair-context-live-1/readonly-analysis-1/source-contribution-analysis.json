@@ -1,0 +1,589 @@
+{
+  "application_source": "ddb9b0cb62a26d13cca0eb46d693d95ef618f476",
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "candidate_modified": false,
+  "model_calls": 0,
+  "private_source_text_published": false,
+  "attempts": [
+    {
+      "attempt": 1,
+      "wire_sha256": "c284188fa79f1d59840abe30ada227600af39c0b010cad1a19e5b844fbf46297",
+      "route_count": 29,
+      "coverage_gaps": [
+        {
+          "source": 9,
+          "kind": "IR_CONSTRAINT",
+          "source_ref": "ir-constraint:page_content_spec:c4",
+          "source_text_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+          "source_length": 132,
+          "proposed_spans": [],
+          "missing_ranges": [
+            [
+              0,
+              3
+            ],
+            [
+              4,
+              12
+            ],
+            [
+              13,
+              17
+            ],
+            [
+              18,
+              22
+            ],
+            [
+              23,
+              30
+            ],
+            [
+              31,
+              34
+            ],
+            [
+              35,
+              37
+            ],
+            [
+              38,
+              43
+            ],
+            [
+              44,
+              48
+            ],
+            [
+              49,
+              51
+            ],
+            [
+              52,
+              54
+            ],
+            [
+              55,
+              63
+            ],
+            [
+              64,
+              71
+            ],
+            [
+              72,
+              75
+            ],
+            [
+              76,
+              79
+            ],
+            [
+              80,
+              89
+            ],
+            [
+              90,
+              95
+            ],
+            [
+              96,
+              100
+            ],
+            [
+              101,
+              103
+            ],
+            [
+              104,
+              112
+            ],
+            [
+              113,
+              126
+            ],
+            [
+              127,
+              132
+            ]
+          ],
+          "missing_nonwhitespace_count": 111,
+          "missing_unicode_categories": [
+            "Ll",
+            "Lu",
+            "Nd",
+            "Po"
+          ],
+          "all_missing_are_punctuation": false,
+          "missing_text_sha256": "4094df754d2b5809c41d44109956247c6f7bdc5c689c888e4d1eb81f3d16ca42"
+        },
+        {
+          "source": 10,
+          "kind": "IR_CLAUSE",
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4",
+          "source_text_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+          "source_length": 132,
+          "proposed_spans": [],
+          "missing_ranges": [
+            [
+              0,
+              3
+            ],
+            [
+              4,
+              12
+            ],
+            [
+              13,
+              17
+            ],
+            [
+              18,
+              22
+            ],
+            [
+              23,
+              30
+            ],
+            [
+              31,
+              34
+            ],
+            [
+              35,
+              37
+            ],
+            [
+              38,
+              43
+            ],
+            [
+              44,
+              48
+            ],
+            [
+              49,
+              51
+            ],
+            [
+              52,
+              54
+            ],
+            [
+              55,
+              63
+            ],
+            [
+              64,
+              71
+            ],
+            [
+              72,
+              75
+            ],
+            [
+              76,
+              79
+            ],
+            [
+              80,
+              89
+            ],
+            [
+              90,
+              95
+            ],
+            [
+              96,
+              100
+            ],
+            [
+              101,
+              103
+            ],
+            [
+              104,
+              112
+            ],
+            [
+              113,
+              126
+            ],
+            [
+              127,
+              132
+            ]
+          ],
+          "missing_nonwhitespace_count": 111,
+          "missing_unicode_categories": [
+            "Ll",
+            "Lu",
+            "Nd",
+            "Po"
+          ],
+          "all_missing_are_punctuation": false,
+          "missing_text_sha256": "4094df754d2b5809c41d44109956247c6f7bdc5c689c888e4d1eb81f3d16ca42"
+        },
+        {
+          "source": 12,
+          "kind": "IR_CONSTRAINT",
+          "source_ref": "ir-constraint:verification_and_candidate:c6",
+          "source_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+          "source_length": 72,
+          "proposed_spans": [],
+          "missing_ranges": [
+            [
+              0,
+              6
+            ],
+            [
+              7,
+              10
+            ],
+            [
+              11,
+              16
+            ],
+            [
+              17,
+              24
+            ],
+            [
+              25,
+              28
+            ],
+            [
+              29,
+              38
+            ],
+            [
+              39,
+              42
+            ],
+            [
+              43,
+              48
+            ],
+            [
+              49,
+              50
+            ],
+            [
+              51,
+              61
+            ],
+            [
+              62,
+              72
+            ]
+          ],
+          "missing_nonwhitespace_count": 62,
+          "missing_unicode_categories": [
+            "Ll",
+            "Lu",
+            "Po"
+          ],
+          "all_missing_are_punctuation": false,
+          "missing_text_sha256": "c9dbb9bfd3621f879cacaba8107daaba7b9c93c91969866f7061b82a1f9d860d"
+        }
+      ]
+    },
+    {
+      "attempt": 2,
+      "wire_sha256": "c9556f29b825ee22d997b026e5171df12ab0a377e8d46d60a8c05b7defda7eda",
+      "route_count": 29,
+      "coverage_gaps": [
+        {
+          "source": 9,
+          "kind": "IR_CONSTRAINT",
+          "source_ref": "ir-constraint:page_content_spec:c4",
+          "source_text_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+          "source_length": 132,
+          "proposed_spans": [],
+          "missing_ranges": [
+            [
+              0,
+              3
+            ],
+            [
+              4,
+              12
+            ],
+            [
+              13,
+              17
+            ],
+            [
+              18,
+              22
+            ],
+            [
+              23,
+              30
+            ],
+            [
+              31,
+              34
+            ],
+            [
+              35,
+              37
+            ],
+            [
+              38,
+              43
+            ],
+            [
+              44,
+              48
+            ],
+            [
+              49,
+              51
+            ],
+            [
+              52,
+              54
+            ],
+            [
+              55,
+              63
+            ],
+            [
+              64,
+              71
+            ],
+            [
+              72,
+              75
+            ],
+            [
+              76,
+              79
+            ],
+            [
+              80,
+              89
+            ],
+            [
+              90,
+              95
+            ],
+            [
+              96,
+              100
+            ],
+            [
+              101,
+              103
+            ],
+            [
+              104,
+              112
+            ],
+            [
+              113,
+              126
+            ],
+            [
+              127,
+              132
+            ]
+          ],
+          "missing_nonwhitespace_count": 111,
+          "missing_unicode_categories": [
+            "Ll",
+            "Lu",
+            "Nd",
+            "Po"
+          ],
+          "all_missing_are_punctuation": false,
+          "missing_text_sha256": "4094df754d2b5809c41d44109956247c6f7bdc5c689c888e4d1eb81f3d16ca42"
+        },
+        {
+          "source": 10,
+          "kind": "IR_CLAUSE",
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4",
+          "source_text_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+          "source_length": 132,
+          "proposed_spans": [],
+          "missing_ranges": [
+            [
+              0,
+              3
+            ],
+            [
+              4,
+              12
+            ],
+            [
+              13,
+              17
+            ],
+            [
+              18,
+              22
+            ],
+            [
+              23,
+              30
+            ],
+            [
+              31,
+              34
+            ],
+            [
+              35,
+              37
+            ],
+            [
+              38,
+              43
+            ],
+            [
+              44,
+              48
+            ],
+            [
+              49,
+              51
+            ],
+            [
+              52,
+              54
+            ],
+            [
+              55,
+              63
+            ],
+            [
+              64,
+              71
+            ],
+            [
+              72,
+              75
+            ],
+            [
+              76,
+              79
+            ],
+            [
+              80,
+              89
+            ],
+            [
+              90,
+              95
+            ],
+            [
+              96,
+              100
+            ],
+            [
+              101,
+              103
+            ],
+            [
+              104,
+              112
+            ],
+            [
+              113,
+              126
+            ],
+            [
+              127,
+              132
+            ]
+          ],
+          "missing_nonwhitespace_count": 111,
+          "missing_unicode_categories": [
+            "Ll",
+            "Lu",
+            "Nd",
+            "Po"
+          ],
+          "all_missing_are_punctuation": false,
+          "missing_text_sha256": "4094df754d2b5809c41d44109956247c6f7bdc5c689c888e4d1eb81f3d16ca42"
+        },
+        {
+          "source": 12,
+          "kind": "IR_CONSTRAINT",
+          "source_ref": "ir-constraint:verification_and_candidate:c6",
+          "source_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+          "source_length": 72,
+          "proposed_spans": [],
+          "missing_ranges": [
+            [
+              0,
+              6
+            ],
+            [
+              7,
+              10
+            ],
+            [
+              11,
+              16
+            ],
+            [
+              17,
+              24
+            ],
+            [
+              25,
+              28
+            ],
+            [
+              29,
+              38
+            ],
+            [
+              39,
+              42
+            ],
+            [
+              43,
+              48
+            ],
+            [
+              49,
+              50
+            ],
+            [
+              51,
+              61
+            ],
+            [
+              62,
+              72
+            ]
+          ],
+          "missing_nonwhitespace_count": 62,
+          "missing_unicode_categories": [
+            "Ll",
+            "Lu",
+            "Po"
+          ],
+          "all_missing_are_punctuation": false,
+          "missing_text_sha256": "c9dbb9bfd3621f879cacaba8107daaba7b9c93c91969866f7061b82a1f9d860d"
+        }
+      ]
+    }
+  ],
+  "inputs_before": {
+    "immutable-inventory.json": "2efad43b2f96bb8738667bffd6111e4aeee332fef611e968b0fa8330defad88f",
+    "capability-contracts.json": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+    "formation-owner-observations.json": "8f2795238d1983a34116f0fd2d0ba4adad8a1f3ce771af2dd77734116f7b43c1",
+    "formation-1-safe-wire.txt": "c284188fa79f1d59840abe30ada227600af39c0b010cad1a19e5b844fbf46297",
+    "formation-2-safe-wire.txt": "c9556f29b825ee22d997b026e5171df12ab0a377e8d46d60a8c05b7defda7eda"
+  },
+  "inputs_after": {
+    "immutable-inventory.json": "2efad43b2f96bb8738667bffd6111e4aeee332fef611e968b0fa8330defad88f",
+    "capability-contracts.json": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+    "formation-owner-observations.json": "8f2795238d1983a34116f0fd2d0ba4adad8a1f3ce771af2dd77734116f7b43c1",
+    "formation-1-safe-wire.txt": "c284188fa79f1d59840abe30ada227600af39c0b010cad1a19e5b844fbf46297",
+    "formation-2-safe-wire.txt": "c9556f29b825ee22d997b026e5171df12ab0a377e8d46d60a8c05b7defda7eda"
+  }
+}

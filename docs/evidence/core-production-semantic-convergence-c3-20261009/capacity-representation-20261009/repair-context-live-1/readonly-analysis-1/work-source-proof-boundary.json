@@ -1,0 +1,176 @@
+{
+  "application_source": "ddb9b0cb62a26d13cca0eb46d693d95ef618f476",
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "source_revision": "465038ded6cf4ba335a11577de76acb1dea55b76",
+  "work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+  "model_calls": 0,
+  "owner_writes": 0,
+  "private_text_published": false,
+  "contract_symbol": "spg.application.governed_obligations.work_constraint_sources_correspond",
+  "all_original_clause_entries_checked": 8,
+  "work_constraint_success_prerequisites": [
+    {
+      "source": 14,
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+      "constraint_index": 0,
+      "content_sha256": "2a93a703143070e96fc0283568638cab2e4f0578ffaeaa6e5f402f1b57bd7a2d",
+      "exact_original_source_matches": [
+        "ir-constraint:change_scope_exclusions:c5",
+        "ir-constraint:change_scope_exclusions:c7"
+      ],
+      "exact_existing_exclusion_derivation_matches": [],
+      "can_existing_correspondence_function_enter_a_success_branch": true,
+      "semantic_equivalence": "UNKNOWN_NOT_REVIEWED",
+      "owner_identity": "EXACT_PERSISTED_WORK_REALITY",
+      "meaning": "This checks all success-branch prerequisites of current work_constraint_sources_correspond; no new route, binding, review or authority is created."
+    },
+    {
+      "source": 15,
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:1",
+      "constraint_index": 1,
+      "content_sha256": "25cda18c05430072bd03de90f709ccbcd7ed442e13e2a0016eec0fc01376f11e",
+      "exact_original_source_matches": [
+        "ir-constraint:page_content_spec:c4"
+      ],
+      "exact_existing_exclusion_derivation_matches": [],
+      "can_existing_correspondence_function_enter_a_success_branch": true,
+      "semantic_equivalence": "UNKNOWN_NOT_REVIEWED",
+      "owner_identity": "EXACT_PERSISTED_WORK_REALITY",
+      "meaning": "This checks all success-branch prerequisites of current work_constraint_sources_correspond; no new route, binding, review or authority is created."
+    },
+    {
+      "source": 16,
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:2",
+      "constraint_index": 2,
+      "content_sha256": "0208047eed9c2a50373c9b2a7385f09db576d3fe9b004857318afb27d987b2d6",
+      "exact_original_source_matches": [
+        "ir-constraint:verification_and_candidate:c6"
+      ],
+      "exact_existing_exclusion_derivation_matches": [],
+      "can_existing_correspondence_function_enter_a_success_branch": true,
+      "semantic_equivalence": "UNKNOWN_NOT_REVIEWED",
+      "owner_identity": "EXACT_PERSISTED_WORK_REALITY",
+      "meaning": "This checks all success-branch prerequisites of current work_constraint_sources_correspond; no new route, binding, review or authority is created."
+    },
+    {
+      "source": 17,
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:3",
+      "constraint_index": 3,
+      "content_sha256": "4c8f9cc2526ec0774a0c506e438015f2b5497a6dddd8555a8c190799817249fc",
+      "exact_original_source_matches": [
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4"
+      ],
+      "exact_existing_exclusion_derivation_matches": [],
+      "can_existing_correspondence_function_enter_a_success_branch": true,
+      "semantic_equivalence": "UNKNOWN_NOT_REVIEWED",
+      "owner_identity": "EXACT_PERSISTED_WORK_REALITY",
+      "meaning": "This checks all success-branch prerequisites of current work_constraint_sources_correspond; no new route, binding, review or authority is created."
+    },
+    {
+      "source": 18,
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:4",
+      "constraint_index": 4,
+      "content_sha256": "3dd9700096bcb0a76177c2c46dafbaec7d6488e34affa439ed83c3cef45690d8",
+      "exact_original_source_matches": [
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4"
+      ],
+      "exact_existing_exclusion_derivation_matches": [],
+      "can_existing_correspondence_function_enter_a_success_branch": true,
+      "semantic_equivalence": "UNKNOWN_NOT_REVIEWED",
+      "owner_identity": "EXACT_PERSISTED_WORK_REALITY",
+      "meaning": "This checks all success-branch prerequisites of current work_constraint_sources_correspond; no new route, binding, review or authority is created."
+    },
+    {
+      "source": 19,
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:5",
+      "constraint_index": 5,
+      "content_sha256": "64a9ece99667f4965fb3e20c787256f7fa050a6f769496e7519389f03eedfb0d",
+      "exact_original_source_matches": [
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4"
+      ],
+      "exact_existing_exclusion_derivation_matches": [],
+      "can_existing_correspondence_function_enter_a_success_branch": true,
+      "semantic_equivalence": "UNKNOWN_NOT_REVIEWED",
+      "owner_identity": "EXACT_PERSISTED_WORK_REALITY",
+      "meaning": "This checks all success-branch prerequisites of current work_constraint_sources_correspond; no new route, binding, review or authority is created."
+    },
+    {
+      "source": 20,
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:6",
+      "constraint_index": 6,
+      "content_sha256": "68850b39fce33f0f7eae04aa6915746e229d512ac008b9ca47422aeb27a00d3a",
+      "exact_original_source_matches": [
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4"
+      ],
+      "exact_existing_exclusion_derivation_matches": [],
+      "can_existing_correspondence_function_enter_a_success_branch": true,
+      "semantic_equivalence": "UNKNOWN_NOT_REVIEWED",
+      "owner_identity": "EXACT_PERSISTED_WORK_REALITY",
+      "meaning": "This checks all success-branch prerequisites of current work_constraint_sources_correspond; no new route, binding, review or authority is created."
+    },
+    {
+      "source": 21,
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:7",
+      "constraint_index": 7,
+      "content_sha256": "8942f115f1bc6bf65051d307ede98fb645a4837849ed2259d1d3a9fc71a01727",
+      "exact_original_source_matches": [],
+      "exact_existing_exclusion_derivation_matches": [
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4"
+      ],
+      "can_existing_correspondence_function_enter_a_success_branch": true,
+      "semantic_equivalence": "UNKNOWN_NOT_REVIEWED",
+      "owner_identity": "EXACT_PERSISTED_WORK_REALITY",
+      "meaning": "This checks all success-branch prerequisites of current work_constraint_sources_correspond; no new route, binding, review or authority is created."
+    },
+    {
+      "source": 22,
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:8",
+      "constraint_index": 8,
+      "content_sha256": "6208a9265a8563fbb4f6c90881e8d28bd17e6e7b35eb119d05e019163428e3cc",
+      "exact_original_source_matches": [],
+      "exact_existing_exclusion_derivation_matches": [
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4"
+      ],
+      "can_existing_correspondence_function_enter_a_success_branch": true,
+      "semantic_equivalence": "UNKNOWN_NOT_REVIEWED",
+      "owner_identity": "EXACT_PERSISTED_WORK_REALITY",
+      "meaning": "This checks all success-branch prerequisites of current work_constraint_sources_correspond; no new route, binding, review or authority is created."
+    },
+    {
+      "source": 23,
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:9",
+      "constraint_index": 9,
+      "content_sha256": "78ed9b5b222638c5c378aa2d4c06f663d97316d1ba9c2724329e09c976d26097",
+      "exact_original_source_matches": [],
+      "exact_existing_exclusion_derivation_matches": [
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4"
+      ],
+      "can_existing_correspondence_function_enter_a_success_branch": true,
+      "semantic_equivalence": "UNKNOWN_NOT_REVIEWED",
+      "owner_identity": "EXACT_PERSISTED_WORK_REALITY",
+      "meaning": "This checks all success-branch prerequisites of current work_constraint_sources_correspond; no new route, binding, review or authority is created."
+    },
+    {
+      "source": 24,
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:10",
+      "constraint_index": 10,
+      "content_sha256": "b5dfdb26dce5c39506573786ad37eb296c58e68f2e632899b29461b9affd6d83",
+      "exact_original_source_matches": [],
+      "exact_existing_exclusion_derivation_matches": [
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+        "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4"
+      ],
+      "can_existing_correspondence_function_enter_a_success_branch": true,
+      "semantic_equivalence": "UNKNOWN_NOT_REVIEWED",
+      "owner_identity": "EXACT_PERSISTED_WORK_REALITY",
+      "meaning": "This checks all success-branch prerequisites of current work_constraint_sources_correspond; no new route, binding, review or authority is created."
+    }
+  ]
+}
