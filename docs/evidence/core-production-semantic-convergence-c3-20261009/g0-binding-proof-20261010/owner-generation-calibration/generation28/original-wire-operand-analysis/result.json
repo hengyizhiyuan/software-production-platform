@@ -1,0 +1,918 @@
+{
+  "schema": "original-wire-independent-owner-operands-analysis-v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+      "wire_output_sha256": "26e65fa920db925730f7bf7a055a7a62ff34773e9ac36240e13486f2482199d8",
+      "request_receipt_id": "e26986e0-dd4d-49e2-87e4-40dee6bf29d8",
+      "response_receipt_id": "854efd2c-af86-427c-81d4-2ace2b7682f4",
+      "validated_receipt_id": "198e703a-f6bb-4be2-94fe-f7d32dd4c081",
+      "source_count": 19,
+      "route_count": 70,
+      "original_feedback_sha256": "8c92ba938d40eb81b1f4a50d8ac62b49b22cee1fb4561641025fc9bfcb5c9c52",
+      "original_feedback_bytes": 41144,
+      "raw_necessary_operand_observations": {
+        "violations": [
+          {
+            "route": 50,
+            "source": 15,
+            "capability": 1,
+            "raw_route_fingerprint": "1df8d5efcbba86ecedf25fc888c418de91d124c174c7786921256ca5bf49a929",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 51,
+            "source": 15,
+            "capability": 3,
+            "raw_route_fingerprint": "b88c7b86052e12bf0c4db7a30d09622a827e4d6cd5643a2dcea7f55dbe8a2957",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 52,
+            "source": 15,
+            "capability": 4,
+            "raw_route_fingerprint": "ec268295414c1b8555f3b59a5cab6acef1f6d62a8be10574c3a041a35ba1dc40",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 53,
+            "source": 15,
+            "capability": 5,
+            "raw_route_fingerprint": "bb2fcfe8011f0cdcbeeaaa288031625de25d154815c6285d3edf3f1260a2db93",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 55,
+            "source": 16,
+            "capability": 1,
+            "raw_route_fingerprint": "7bf89351bf478a76468a63232d5d1e704d98ace1de149ae566622ba2fafe1f6d",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 56,
+            "source": 16,
+            "capability": 3,
+            "raw_route_fingerprint": "0a1ed9b54e0a9e64041ad5484adb90f2e105235b4fa9a5ff0b05a5229d8d7e22",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 57,
+            "source": 16,
+            "capability": 4,
+            "raw_route_fingerprint": "6a0f3dff6b08172e213b18648a98ed4bdff8304ce8b320e4015381db1027c40b",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 58,
+            "source": 16,
+            "capability": 5,
+            "raw_route_fingerprint": "9fd6ff4066434edd29f12c473230ea6248b9a291bc9c68b80ad468cfcbf1ba74",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 60,
+            "source": 17,
+            "capability": 1,
+            "raw_route_fingerprint": "1dffe1f0d4cb4a6f483832db1c8eddff155e88b5125634c20341c49b7da99301",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 61,
+            "source": 17,
+            "capability": 3,
+            "raw_route_fingerprint": "8c2145b2a338a1d59092ed43cf80e0282e9bcdfb9fe1bf6003bd707b44886d2c",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 62,
+            "source": 17,
+            "capability": 4,
+            "raw_route_fingerprint": "907d15e7ed3053475ee13de65b0acd5a02c35f5efe3c8a7904b7ab090643908a",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 63,
+            "source": 17,
+            "capability": 5,
+            "raw_route_fingerprint": "1eeb2fb18fcff30e2de1b1f7d83dd480068ca7dc6b5a3cc6bdd5ac982b38b3f7",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 65,
+            "source": 18,
+            "capability": 1,
+            "raw_route_fingerprint": "0d7de1a43ce2ff7a785c2d65db2f8e4d76d13d6bda434e77c83d822e2bc37f1d",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 66,
+            "source": 18,
+            "capability": 3,
+            "raw_route_fingerprint": "b2477a65bc1c252f039786b6a72f416e0c9daca71e32e31f2448b7f9ac281f5c",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 67,
+            "source": 18,
+            "capability": 4,
+            "raw_route_fingerprint": "b9c38330ecdecf5b697edf65ead6c8e219d6cce6cba0b16dc1c4f4a20d5e400e",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          },
+          {
+            "route": 68,
+            "source": 18,
+            "capability": 5,
+            "raw_route_fingerprint": "d962a34d1c3016d20325ee9d7b3e5aad0121223f0dbacc3aea6f52b86eab0a78",
+            "failed_predicates": [
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+            ],
+            "support_operand": {
+              "observed_ordinals": [
+                5
+              ],
+              "minimal_support_sets": [
+                [
+                  5,
+                  11
+                ],
+                [
+                  6,
+                  11
+                ],
+                [
+                  7,
+                  11
+                ],
+                [
+                  8,
+                  11
+                ],
+                [
+                  9,
+                  11
+                ],
+                [
+                  10,
+                  11
+                ],
+                [
+                  11
+                ]
+              ],
+              "allowed_original_source_ordinals": [
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ]
+            },
+            "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"
+          }
+        ],
+        "additional_violation_count": 0,
+        "not_evaluable": [
+          "COMPLETE_PLAN_ADMISSION",
+          "CROSS_ROUTE_FACT_PROOFS",
+          "SEMANTIC_EQUIVALENCE",
+          "INDEPENDENT_SEMANTIC_REVIEW",
+          "ACTUAL_OWNER_EVIDENCE",
+          "ASSURANCE"
+        ]
+      },
+      "failure_counts": {
+        "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN": 16
+      },
+      "observation_only": true,
+      "original_feedback_modified": false,
+      "candidate_admitted": false
+    },
+    {
+      "attempt": 2,
+      "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+      "wire_output_sha256": "20113967e48e544316fe28e8d7ab00d8eac964fe760f9ccd53e2cc776900b291",
+      "request_receipt_id": "b58b185e-688f-4d56-b894-f2d6a2381ecc",
+      "response_receipt_id": "d22f8708-c618-41f1-ad25-a5cb1f4492d6",
+      "validated_receipt_id": "770eaef9-1269-43a0-94a5-cfd107540c15",
+      "source_count": 19,
+      "route_count": 73,
+      "original_feedback_sha256": "29d8906a7a92af1b211647cbaad089bfe8dde5e8ebd473ad969cd01a4005426c",
+      "original_feedback_bytes": 59109,
+      "raw_necessary_operand_observations": {
+        "violations": [],
+        "additional_violation_count": 0,
+        "not_evaluable": [
+          "COMPLETE_PLAN_ADMISSION",
+          "CROSS_ROUTE_FACT_PROOFS",
+          "SEMANTIC_EQUIVALENCE",
+          "INDEPENDENT_SEMANTIC_REVIEW",
+          "ACTUAL_OWNER_EVIDENCE",
+          "ASSURANCE"
+        ]
+      },
+      "failure_counts": {},
+      "observation_only": true,
+      "original_feedback_modified": false,
+      "candidate_admitted": false
+    }
+  ],
+  "source_overlay": true,
+  "model_calls": 0,
+  "review_calls": 0,
+  "historical_owner_mutated": false,
+  "holdout_opened": false,
+  "semantic_equivalence": "NOT_EVALUABLE"
+}

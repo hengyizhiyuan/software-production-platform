@@ -1803,7 +1803,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                                 syntax_observation_contract="complete-value-owner-observations-v2",
                                 include_operand_observations=True, include_typed_observations=True,
                                 typed_prerequisite_contract="existing-owner-typed-prerequisites-v11",
-                                generation_view_contract=None):
+                                generation_view_contract=None, raw_operand_observation_contract=None):
     """Necessary proof sets from existing Owner predicates, never route proposals.
 
     The semantic boundary still chooses components and which eligible origin
@@ -1811,6 +1811,8 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
     evidence satisfaction, independent review or authority.
     """
     if generation_view_contract not in (None, "existing-lossless-source-consumer-input-v1", "existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3"):
+        raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
+    if raw_operand_observation_contract not in (None, "existing-original-wire-owner-operands-v1"):
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     from types import SimpleNamespace
     sources = inventory["sources"]
@@ -1982,6 +1984,8 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                 row["ineligible_binding_prerequisites"] = rejected
         rows.append(row)
     return {"contract": "existing-owner-source-prerequisites-v1", "inventory_fingerprint": inventory["inventory_fingerprint"],
+        **({"raw_operand_observation_contract": raw_operand_observation_contract}
+           if raw_operand_observation_contract is not None else {}),
         **({"generation_view_contract": generation_view_contract} if generation_view_contract is not None else {}),
         **({"syntax_observation_contract": syntax_observation_contract} if include_syntax_observations else {}),
         **({"typed_prerequisite_contract": typed_prerequisite_contract,
@@ -2206,7 +2210,37 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
                 raise ValueError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
             operand_observations[route] = details
             failure["owner_operand_observations_ref"] = route
-    return {"inventory_fingerprint": inventory["inventory_fingerprint"],
+    raw_operands = {}
+    if (owner_preconditions or {}).get("raw_operand_observation_contract") == "existing-original-wire-owner-operands-v1":
+        from spg.providers.fulfillment_candidate import _raw_fulfillment_owner_operands
+        raw_operands = {"original_wire_owner_operands": _raw_fulfillment_owner_operands(raw, inventory, capabilities,
+            validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)}
+        # Missing/malformed siblings cannot establish full proof availability.
+        # But an exact mixed acceptance consumer explicitly depending on
+        # itself is already impossible, irrespective of those siblings. Reuse
+        # the actual consumer's classification; never infer missing proofs
+        # from this diagnostic subset or create a partial admitted Candidate.
+        from spg.providers.managed_context_fulfillment import linked_component_dependencies
+        exact_fact_bindings = []
+        for _, _, route in observations:
+            source = next(s for s in inventory["sources"] if s["source_ref"] == route.source_ref)
+            if source["kind"] != "FACT":
+                continue
+            try:
+                exact_fact_bindings.append(_projection_binding(revision, ir, inventory, route,
+                    allow_calibrated=True, source_contract=source_contract))
+            except ValueError:
+                continue
+        dependencies = linked_component_dependencies(revision.engineering_semantic_facts, exact_fact_bindings)
+        raw_operands["original_wire_owner_operands"]["definite_fact_self_dependencies"] = [
+            {"route": index, "source": next(i for i,s in enumerate(inventory["sources"]) if s["source_ref"] == route.source_ref),
+             "raw_route_fingerprint": canonical_fingerprint(wire_route),
+             "code": "OBLIGATION_LINKED_FACT_DEPENDENCY_UNFULFILLABLE",
+             "predicate": "EXISTING_MIXED_ACCEPTANCE_CONSUMER_DEPENDS_ON_ITS_OWN_CURRENT_PROOF"}
+            for index,wire_route,route in observations if route.capability == "ARTIFACT_CONTENT"
+            and route.source_ref.removeprefix("semantic-fact:") in dependencies
+            and route.source_ref.removeprefix("semantic-fact:") in dependencies[route.source_ref.removeprefix("semantic-fact:")]]
+    return {"inventory_fingerprint": inventory["inventory_fingerprint"], **raw_operands,
         **({"operand_observation_reference_contract": "existing-original-route-operands-v1",
             "route_operand_observations": [{"route": i, "observations": operand_observations[i]}
                 for i in sorted(operand_observations)]} if compact_feedback else {}),
@@ -2372,6 +2406,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                 or preconditions.get("syntax_observation_contract") not in (
                     None, "complete-value-observations-v1", "complete-value-owner-observations-v1", "complete-value-owner-observations-v2")
                 or preconditions.get("operand_observation_contract") not in (None, "existing-owner-operands-v1")
+                or preconditions.get("raw_operand_observation_contract") not in (None, "existing-original-wire-owner-operands-v1")
                 or preconditions.get("generation_view_contract") not in (None, "existing-lossless-source-consumer-input-v1", "existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3")
                 or preconditions.get("typed_prerequisite_contract") not in (None, "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11")):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
@@ -2383,7 +2418,8 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     include_operand_observations=preconditions.get("operand_observation_contract") is not None,
                     include_typed_observations=preconditions.get("typed_prerequisite_contract") is not None,
                     typed_prerequisite_contract=preconditions.get("typed_prerequisite_contract"),
-                    generation_view_contract=preconditions.get("generation_view_contract"))):
+                    generation_view_contract=preconditions.get("generation_view_contract"),
+                    raw_operand_observation_contract=preconditions.get("raw_operand_observation_contract"))):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if (row.get("stage") == "MODEL_RESPONSE_OBSERVED" and row.get("candidate_retained") is True
                 and any(key in row for key in _FULFILLMENT_WIRE_METADATA_KEYS)):
@@ -2836,7 +2872,9 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     typed_prerequisite_contract=((initial_request.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract", "existing-owner-typed-prerequisites-v11") if initial_request is not None and source_contract == "v3" else "existing-owner-typed-prerequisites-v11" if initial_request is None else
                         "existing-owner-typed-prerequisites-v8" if source_contract == "v2" else "existing-owner-typed-prerequisites-v3"),
                     generation_view_contract=((initial_request.get("owner_source_preconditions") or {}).get("generation_view_contract")
-                        if initial_request is not None else "existing-lossless-source-consumer-input-v3"))}
+                        if initial_request is not None else "existing-lossless-source-consumer-input-v3"),
+                    raw_operand_observation_contract=((initial_request.get("owner_source_preconditions") or {}).get("raw_operand_observation_contract")
+                        if initial_request is not None else "existing-original-wire-owner-operands-v1"))}
                     if supports_preconditions and callable(metadata_builder)
                     and "owner_preconditions" in inspect.signature(metadata_builder).parameters else {})
                 if initial_request is None and precondition_arguments:

@@ -918,6 +918,59 @@ def _fulfillment_wire_route_observations(output, inventory, capabilities, *, val
     return tuple(observations), unavailable
 
 
+def _raw_fulfillment_owner_operands(output, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
+    """Evaluate independent operands on the unchanged Wire, not a partial plan.
+
+    An invalid Fact link must not hide a separately decidable target or
+    original-source prerequisite. No route is expanded, located, repaired or
+    admitted here; cross-route evidence and semantic equivalence stay unknown.
+    """
+    context = _fulfillment_wire_context(inventory, capabilities,
+        validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
+    choices = _formation_binding_choices(inventory, capabilities, owner_preconditions)
+    try:
+        wire = _FulfillmentCompactCandidate.model_validate(json.loads(output, object_pairs_hook=_wire_json_object))
+    except ValueError:
+        return {"violations": [], "not_evaluable": ["ORIGINAL_WIRE_OWNER_OPERANDS"]}
+    if wire.h != context["wire_request_fingerprint"] or wire.d != context["wire_table_fingerprint"]:
+        return {"violations": [], "not_evaluable": ["ORIGINAL_WIRE_OWNER_OPERANDS"]}
+    failures = []
+    requirements = {row["capability"]: row["target_operand"]
+        for row in owner_preconditions.get("capability_operand_requirements", [])}
+    for index, route in enumerate(wire.routes):
+        if route.s >= len(choices) or route.c >= len(capabilities):
+            continue
+        choice = choices[route.s]
+        codes = list(next((r["codes"] for r in choice["rejected_prerequisites"]
+            if r["capability"] == route.c), ()))
+        target = requirements.get(route.c)
+        if target is not None:
+            if target["relation"] == "EXACT_ORDERED_SET" and list(route.t) != target["required_ordinals"]:
+                codes.append("OBLIGATION_DIFF_SCOPE_INCOMPLETE")
+            elif target["relation"] == "NONEMPTY_ADMITTED_SUBSET" and not route.t:
+                codes.append("OBLIGATION_CONTENT_TARGET_UNRESOLVED")
+        proof = next((p for p in choice["necessary_source_proofs"] if p["capability"] == route.c), None)
+        if proof is not None:
+            alternatives = [list(s) for s in proof["minimal_support_sets"]]
+            allowed = {s for group in alternatives for s in group}
+            # This is only a necessary proof domain. A union of alternatives
+            # is never reported as a sufficient provenance or semantic proof.
+            if (not any(set(group).issubset(route.u) for group in alternatives)
+                    or not set(route.u).issubset(allowed)):
+                codes.append("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
+        if codes:
+            failures.append({"route": index, "source": route.s, "capability": route.c,
+                "raw_route_fingerprint": canonical_fingerprint(route.model_dump(mode="json")),
+                "failed_predicates": sorted(set(codes)),
+                **({"support_operand": {"observed_ordinals": list(route.u),
+                    "minimal_support_sets": alternatives,
+                    "allowed_original_source_ordinals": sorted(allowed)}} if proof is not None else {}),
+                "disposition": "UNADMITTED_ORIGINAL_WIRE_NECESSARY_OPERANDS_ONLY"})
+    return {"violations": failures[:64], "additional_violation_count": max(0, len(failures)-64),
+        "not_evaluable": ["COMPLETE_PLAN_ADMISSION", "CROSS_ROUTE_FACT_PROOFS",
+            "SEMANTIC_EQUIVALENCE", "INDEPENDENT_SEMANTIC_REVIEW", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"]}
+
+
 def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
                                      validation_feedback=None, wire_metadata=None, owner_preconditions=None):
     """Expand only metadata; all semantic route choices remain model candidates."""

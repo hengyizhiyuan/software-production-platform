@@ -1,0 +1,55 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 14 items
+
+tests/test_c3_generation_projection_economy.py .......FFFFF..            [100%]
+
+=================================== FAILURES ===================================
+_ test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[feedback_fits] _
+tests/test_c3_generation_projection_economy.py:129: in test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation
+    failed=next(r for r in provider._fulfillment_receipts if r["stage"]=="CANDIDATE_VALIDATED" and r["attempt"]==1)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration
+_ test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[row_limit] _
+tests/test_c3_generation_projection_economy.py:129: in test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation
+    failed=next(r for r in provider._fulfillment_receipts if r["stage"]=="CANDIDATE_VALIDATED" and r["attempt"]==1)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration
+_ test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[next_request_limit] _
+tests/test_c3_generation_projection_economy.py:129: in test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation
+    failed=next(r for r in provider._fulfillment_receipts if r["stage"]=="CANDIDATE_VALIDATED" and r["attempt"]==1)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   StopIteration
+_ test_canonical_rejection_next_request_capacity_preserves_parent_identity[sha256] _
+tests/test_c3_generation_projection_economy.py:176: in test_canonical_rejection_next_request_capacity_preserves_parent_identity
+    assert result[0].formation_receipt["terminal_reason"]=="OBLIGATION_FORMATION_RECEIPT_LIMIT" and len(calls)==1
+E   AssertionError: assert ('OBLIGATION_F...DENTITY_DRIFT' == 'OBLIGATION_F...RECEIPT_LIMIT'
+E     
+E     - OBLIGATION_FORMATION_RECEIPT_LIMIT
+E     + OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT)
+_ test_canonical_rejection_next_request_capacity_preserves_parent_identity[parent] _
+tests/test_c3_generation_projection_economy.py:176: in test_canonical_rejection_next_request_capacity_preserves_parent_identity
+    assert result[0].formation_receipt["terminal_reason"]=="OBLIGATION_FORMATION_RECEIPT_LIMIT" and len(calls)==1
+E   AssertionError: assert ('OBLIGATION_F...DENTITY_DRIFT' == 'OBLIGATION_F...RECEIPT_LIMIT'
+E     
+E     - OBLIGATION_FORMATION_RECEIPT_LIMIT
+E     + OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT)
+=============================== warnings summary ===============================
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[small]
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[medium]
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[complex]
+  tests/test_c3_generation_projection_economy.py:68: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ["small", "medium", "complex"])
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_generation_projection_economy.py::test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[feedback_fits]
+FAILED tests/test_c3_generation_projection_economy.py::test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[row_limit]
+FAILED tests/test_c3_generation_projection_economy.py::test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[next_request_limit]
+FAILED tests/test_c3_generation_projection_economy.py::test_canonical_rejection_next_request_capacity_preserves_parent_identity[sha256]
+FAILED tests/test_c3_generation_projection_economy.py::test_canonical_rejection_next_request_capacity_preserves_parent_identity[parent]
+=================== 5 failed, 9 passed, 3 warnings in 5.15s ====================

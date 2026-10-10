@@ -1,0 +1,104 @@
+{
+  "actual_image_observation": {
+    "actual_container_imports": "NOT_EXECUTED",
+    "actual_image_id": "sha256:0ed46675fe516c7de800b33d81bb05b213194fa67ac4cb3c5d5baf3cc958c5cc",
+    "method": "actual Docker image inspect",
+    "verified_ecf_revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "verified_guardian_revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+    "verified_source_revision": "ce0053e6fea363f4d6ce59efb5746b5eed5b9ee1",
+    "verified_source_tree": "1608a14e5b87115e4fcbbb330cb86cd57b177d77"
+  },
+  "case_count": 8,
+  "control_sha256": {
+    "holdout_adapter.py": "0c0318ecb0a86aaf3145760e3174b61db26462d4dd18a1b8934e65e359bf1818",
+    "holdout_runner.py": "ef8fe306e1bd0b568bc1e3ebb9a418c23d872ec4321f82b89aa852e91d7366f3"
+  },
+  "controlled_owner_case_count": 4,
+  "controller_mechanical_rebinding": [
+    {
+      "case_oracle_changes": false,
+      "current_sha256": "0c0318ecb0a86aaf3145760e3174b61db26462d4dd18a1b8934e65e359bf1818",
+      "file": "holdout_adapter.py",
+      "previous_sha256": "0c0318ecb0a86aaf3145760e3174b61db26462d4dd18a1b8934e65e359bf1818",
+      "public_identity_replacements": []
+    },
+    {
+      "case_oracle_changes": false,
+      "current_sha256": "ef8fe306e1bd0b568bc1e3ebb9a418c23d872ec4321f82b89aa852e91d7366f3",
+      "file": "holdout_runner.py",
+      "previous_sha256": "ef8fe306e1bd0b568bc1e3ebb9a418c23d872ec4321f82b89aa852e91d7366f3",
+      "public_identity_replacements": []
+    }
+  ],
+  "controller_rebinding_status": "OPAQUE_CONTROLLERS_IDENTITY_VERIFIED_UNCHANGED; EXTERNAL_EXACT_BINDING_PREPARED_ONLY",
+  "coverage_categories": [
+    "content obligations",
+    "file and change scope",
+    "continuous prohibited effects",
+    "future Human Gate",
+    "context retention",
+    "missing independent evidence",
+    "wrong Source version",
+    "unauthorized actual effect permit"
+  ],
+  "execution_requires_parent_final_g0_and_pg_gate_result": true,
+  "execution_runtime_configuration_check": "PENDING_AUTHORIZED_UNSEAL; control files copied byte-identically, no known public freeze/root literals found. Exact external binding is sealed, but controller loading of embedded legacy metadata must be checked before any execution; no execution-readiness claim.",
+  "external_binding_is_new_qualification_identity": true,
+  "external_execution_freeze_path": "/data/watt/c3-semantic-convergence-20261009/final-independent-holdout-generation28-20261011/control/execution-freeze.json",
+  "external_execution_freeze_sha256": "8753fb86811dd341c94e06b9608b7c5235b9cfdf1a43591007da9b4ca7d46580",
+  "freeze": {
+    "application_image_id": "sha256:0ed46675fe516c7de800b33d81bb05b213194fa67ac4cb3c5d5baf3cc958c5cc",
+    "ecf_revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "ecf_tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "guardian_revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+    "guardian_tree": "6066a6d6b8d91bec610021409ab320309ed0e437",
+    "source_revision": "ce0053e6fea363f4d6ce59efb5746b5eed5b9ee1",
+    "source_tree": "1608a14e5b87115e4fcbbb330cb86cd57b177d77"
+  },
+  "harness_final_exact_binding_validation": "PENDING_AUTHORIZED_UNSEAL_AFTER_NORMAL_G0_AND_PG_GATES",
+  "human_acceptance": false,
+  "live_semantic_case_count": 4,
+  "maximum_formation_owner_logical_calls": 16,
+  "model_calls": 0,
+  "original_24_to_new_8_case_crosswalk": "NOT_EVALUATED_METADATA_HAS_NO_PER_SCENARIO_MAPPING; PENDING_INDEPENDENT_UNSEAL",
+  "original_category_counts": {
+    "content_obligations": 3,
+    "continuous_prohibitions": 3,
+    "different_authority": 3,
+    "escalation_effects": 2,
+    "file_scope": 3,
+    "future_human_gate": 2,
+    "legal_chinese_english": 6,
+    "missing_evidence": 2
+  },
+  "original_qualification_preserved": {
+    "category_count": 8,
+    "historical_execution_not_reclassified": true,
+    "historical_public_receipts_root": "/data/watt/c3-semantic-convergence-20261009/holdout-final-qualification-20261010/evidence",
+    "never_relabelled_unseen": true,
+    "not_replaced_by_8_case_package": true,
+    "previously_executed_and_exposed": true,
+    "private_specification_bytes": 54960,
+    "private_specification_hash_verified_without_unseal": true,
+    "private_specification_recovery_path": "/data/watt/c3-semantic-convergence-20261009/holdout-final-qualification-20261010/control/sealed-specification.json",
+    "public_seal_recovery_path": "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/holdout-seal.json",
+    "scenario_count": 24,
+    "specification_sha256": "770828adeabec942548218c17bc6e9dbb9222ce19df19bc89c260f28ed8f4cf0"
+  },
+  "preparation_previous_generation_root": "/data/watt/c3-semantic-convergence-20261009/final-independent-holdout-generation25-20261011",
+  "previous_package_preserved": true,
+  "previous_public_seal_sha256": "f740db3efd937d2fda128739f20446f218c993c1edbcb148e9e26c80d9d42d2b",
+  "previous_sealed_specification_sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0",
+  "private_cases_and_oracle_unchanged": "Opaque byte copy and hash equality only; no parsing/unsealing",
+  "private_embedded_legacy_freeze_unchanged": true,
+  "private_recovery_root": "/data/watt/c3-semantic-convergence-20261009/final-independent-holdout-generation28-20261011",
+  "resources_created": "sealed files only; no container/network/database/model call",
+  "same_private_case_inventory_sha256": "ea3a73609afc6283aa6aaf3d6cf443108bdb8ee3e4497d304e2beeb246693ab3",
+  "schema": "c3-independent-new-seal-metadata-v1",
+  "scope_preservation_rule": "All original categories and necessary negative gates remain obligations; this 8-case package does not certify 24 prior scenarios. Independent post-G0 unseal must establish coverage crosswalk; any uncovered necessary item remains NOT_QUALIFIED. No hidden scope reduction or implementation tuning.",
+  "sealed_at_utc": "2026-10-10T17:02:57.532873Z",
+  "sealed_specification_bytes": 11320,
+  "sealed_specification_sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0",
+  "self_refine_limit": "Only original one feedback within each Formation case; no added retries",
+  "status": "SEALED_EXTERNAL_EXACT_BINDING_PREPARED_NOT_EXECUTED"
+}

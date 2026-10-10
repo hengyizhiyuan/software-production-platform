@@ -1,0 +1,1 @@
+{"attempts": [{"attempt": 1, "failure_counts": {"OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN": 16}, "routes_rejected_by_independent_operands": 16, "original_feedback_bytes": 41144}, {"attempt": 2, "failure_counts": {}, "routes_rejected_by_independent_operands": 0, "original_feedback_bytes": 59109}], "model_calls": 0, "historical_owner_mutated": false}

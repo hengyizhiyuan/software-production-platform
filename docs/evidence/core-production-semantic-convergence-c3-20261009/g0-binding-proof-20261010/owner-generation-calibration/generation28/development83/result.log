@@ -1,0 +1,77 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 387 items
+
+tests/test_c3_generation_projection_economy.py ................          [  4%]
+tests/test_c3_fulfillment_capacity_representation.py ................... [  9%]
+..................................                                       [ 17%]
+tests/test_c3_owner_repair_preconditions.py ............................ [ 25%]
+.........................                                                [ 31%]
+tests/test_c3_generation_owner_domains.py .............................. [ 39%]
+.............................................................            [ 55%]
+tests/test_c3_source_consumer_input.py ..............                    [ 58%]
+tests/test_c3_source_role_contract.py .................                  [ 63%]
+tests/test_c3_fulfillment_repair_context.py ............................ [ 70%]
+..................                                                       [ 74%]
+tests/test_c3_fulfillment_wire_feedback.py ............................. [ 82%]
+.........                                                                [ 84%]
+tests/test_c3_semantic_contract_calibration.py ......................... [ 91%]
+...............                                                          [ 95%]
+tests/test_c3_feedback_observation_capacity.py ..........                [ 97%]
+tests/test_c3_fulfillment_provider_failures.py ......F..                 [100%]
+
+=================================== FAILURES ===================================
+_ test_terminal_failure_preserves_exact_sources_and_same_basis_never_reopens_calls[SEMANTIC_REVIEW] _
+tests/test_c3_fulfillment_provider_failures.py:133: in test_terminal_failure_preserves_exact_sources_and_same_basis_never_reopens_calls
+    assert terminal["failure_stage"] == phase
+E   AssertionError: assert 'MODEL_REQUEST' == 'SEMANTIC_REVIEW'
+E     
+E     - SEMANTIC_REVIEW
+E     + MODEL_REQUEST
+=============================== warnings summary ===============================
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[small]
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[medium]
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[complex]
+  tests/test_c3_generation_projection_economy.py:110: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ["small", "medium", "complex"])
+
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[small]
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[medium]
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[complex]
+  tests/test_c3_fulfillment_capacity_representation.py:155: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize('scale', ('small','medium','complex'))
+
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[small]
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[medium]
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[complex]
+  tests/test_c3_fulfillment_capacity_representation.py:220: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers0]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers1]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers2]
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+tests/test_c3_semantic_contract_calibration.py::test_negative_file_component_preserves_original_exclusion_and_requires_real_diff
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_fulfillment_provider_failures.py::test_terminal_failure_preserves_exact_sources_and_same_basis_never_reopens_calls[SEMANTIC_REVIEW]
+================= 1 failed, 386 passed, 13 warnings in 46.66s ==================

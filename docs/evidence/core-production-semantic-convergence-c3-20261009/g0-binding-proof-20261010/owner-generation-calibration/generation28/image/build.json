@@ -1,0 +1,57 @@
+{
+  "schema": "c3-exact-image-build-v1",
+  "started_at_utc": "2026-10-10T17:01:06.993231+00:00",
+  "ended_at_utc": "2026-10-10T17:01:27.321385+00:00",
+  "wall_seconds": 20.32820400298806,
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "ce0053e6fea363f4d6ce59efb5746b5eed5b9ee1",
+      "tree": "1608a14e5b87115e4fcbbb330cb86cd57b177d77"
+    },
+    "guardian": {
+      "revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+      "tree": "6066a6d6b8d91bec610021409ab320309ed0e437"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "command": [
+    "docker",
+    "build",
+    "--network=none",
+    "--build-arg",
+    "BASE_IMAGE=watt-c3-continuation-dependency-base:6c1f48e-20261009",
+    "--build-arg",
+    "WATT_REVISION=ce0053e6fea363f4d6ce59efb5746b5eed5b9ee1",
+    "--build-arg",
+    "WATT_TREE=1608a14e5b87115e4fcbbb330cb86cd57b177d77",
+    "--build-arg",
+    "GUARDIAN_REVISION=76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+    "--build-arg",
+    "GUARDIAN_TREE=6066a6d6b8d91bec610021409ab320309ed0e437",
+    "--build-arg",
+    "ECF_REVISION=5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "--build-arg",
+    "ECF_TREE=878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "-f",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation28-qualified-20261010/final-image/context/watt/docs/evidence/core-production-semantic-convergence-c3-20261009/Dockerfile.c3",
+    "-t",
+    "watt-c3-source-owner:ce0053e",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation28-qualified-20261010/final-image/context"
+  ],
+  "source_overlay": false,
+  "real_model_calls": 0,
+  "scope": "C3 source contribution and existing Owner prerequisite diagnostics; unchanged Wire schema, authority and budgets; no model requests, real G0 or Holdout",
+  "image": {
+    "Id": "sha256:0ed46675fe516c7de800b33d81bb05b213194fa67ac4cb3c5d5baf3cc958c5cc",
+    "RepoDigests": [],
+    "Created": "2026-10-11T01:01:19.165380452+08:00"
+  }
+}

@@ -327,7 +327,7 @@ def test_actual_compact_observation_replays_from_postgresql_without_repeating_fo
     record_property("receipt_ids", json.dumps([row.scope["receipt_id"] for row in rows]))
 
 
-@pytest.mark.parametrize('tamper', (None, 'feedback', 'response-receipt', 'scope-inventory', 'owner-precondition', 'initial-prerequisite'))
+@pytest.mark.parametrize('tamper', (None, 'feedback', 'response-receipt', 'scope-inventory', 'owner-precondition', 'initial-prerequisite', 'raw-owner-observation'))
 @pytest.mark.parametrize('failure_kind', ('predecode', 'canonical', 'complete-prefix'))
 def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
     postgres_database, tmp_path, monkeypatch, record_property, tamper, failure_kind,
@@ -369,6 +369,7 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
                     wire['routes'][0]['f'] = [i for i,s in enumerate(inventory['sources'])
                                              if s['kind'] in {'IR_CLAUSE','IR_CONSTRAINT'}][:2]
                     assert len(wire['routes'][0]['f']) == 2
+                    wire['routes'][0]['t'] = []
             elif payload.get('same_basis_validation_feedback') is not None:
                 feedback = json.loads(payload['same_basis_validation_feedback'])
                 assert feedback['untrusted_previous_wire']
@@ -411,6 +412,11 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
         assert feedback['owner_repair_context']['inventory_fingerprint'] == fingerprint
         assert binding['response_receipt_id'] == records[1].scope['receipt_id']
         assert binding['request_receipt_id'] == records[0].scope['receipt_id']
+        raw_operands = feedback['owner_repair_context']['original_wire_owner_operands']
+        if failure_kind == 'predecode':
+            assert any('OBLIGATION_CONTENT_TARGET_UNRESOLVED' in f['failed_predicates']
+                for f in raw_operands['violations'])
+        assert 'ASSURANCE' in raw_operands['not_evaluable']
         if tamper:
             scope = deepcopy(original_scope)
             if tamper == 'feedback': scope['validation_feedback'] += ' '
@@ -418,6 +424,10 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
             elif tamper == 'owner-precondition':
                 changed = json.loads(scope['validation_feedback'])
                 changed['owner_repair_context']['source_preconditions'][0]['primary_component_required'] = False
+                scope['validation_feedback'] = json.dumps(changed)
+            elif tamper == 'raw-owner-observation':
+                changed = json.loads(scope['validation_feedback'])
+                changed['owner_repair_context']['original_wire_owner_operands']['not_evaluable'].append('INVENTED')
                 scope['validation_feedback'] = json.dumps(changed)
             elif tamper == 'initial-prerequisite':
                 for original in records[:2]:
