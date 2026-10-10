@@ -1,0 +1,71 @@
+{
+  "ecs_root": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation4-qualified-20261010/",
+  "files": [
+    {
+      "path": "counterfactual-review-2/actual-container-identity.json",
+      "bytes": 2167,
+      "sha256": "c6127305ddb82b3b96cd9de970184ff1cea2a50d7b4158bfbfed50fe91445858"
+    },
+    {
+      "path": "counterfactual-review-2/controller.log",
+      "bytes": 368,
+      "sha256": "fd46e623770fd7355d1ff004a28ea55ac9a105af5b69afdea6fd54fde7b7d8dc"
+    },
+    {
+      "path": "counterfactual-review-2/live-result.json",
+      "bytes": 123827,
+      "sha256": "5345680de08cb25c633d325726a1e527e1dd5e529e210539f1f5d0866ade4cf5"
+    },
+    {
+      "path": "counterfactual-review-2/preflight.log",
+      "bytes": 1028,
+      "sha256": "fed33705186a35f1c42025d006e7d1bb84c04a343f56b732ed1fb631e8ddc2e9"
+    },
+    {
+      "path": "image/actual-imports.json",
+      "bytes": 434913,
+      "sha256": "24e6b5f11c7f248ca9d32778d35abbf65b1ef117780bdef35c334ee69cd88ed7"
+    },
+    {
+      "path": "image/actual-imports.log",
+      "bytes": 215,
+      "sha256": "da9e0fff69285202782987fe19ff821eae51fd05624af1ebb45ed5a9ea0bbc3a"
+    },
+    {
+      "path": "image/build-input-identity.json",
+      "bytes": 130585,
+      "sha256": "635927621d4ed4a4a3851fe74432f65e1530b3b2f71d3a7aacc6f2d9b7631ab9"
+    },
+    {
+      "path": "image/build.json",
+      "bytes": 2283,
+      "sha256": "1e4dc89059488b8060e2fdf3e8057329c400ff3626c91b4fb16006ccd008d633"
+    },
+    {
+      "path": "image/build.log",
+      "bytes": 261380,
+      "sha256": "22e37d3d30316b8e4b2205457e4916996203f4b7e9c2cbc795b5d47758c57194"
+    },
+    {
+      "path": "image/frozen-inputs.json",
+      "bytes": 75757,
+      "sha256": "f75b80a714971847d978df569a2cf872d68f7cb4c00464a2018b623e6abc38b8"
+    },
+    {
+      "path": "image/watt-continuation-receipt.json",
+      "bytes": 2557,
+      "sha256": "12f50a7a757409f04514935757268352209c3e5e1d4ff41fd95f8df76fcbfba9"
+    },
+    {
+      "path": "image/watt-continuation.log",
+      "bytes": 1931,
+      "sha256": "933e9918991d0ba0989fcb86a1a63c4466ec372bdbd9ddb2d296c3d50a1d14a7"
+    },
+    {
+      "path": "image/watt-continuation.xml",
+      "bytes": 107892,
+      "sha256": "e8526d714a58436654cf076154705b7a1f6d4db38d5443c897bbb95ed75dac84"
+    }
+  ],
+  "private_raw_outputs_committed": false
+}

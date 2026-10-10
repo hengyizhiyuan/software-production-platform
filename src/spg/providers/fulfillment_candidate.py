@@ -500,6 +500,30 @@ def _review_output_schema(inventory, candidate):
     """
     from spg.providers.semantic_wire import _provider_strict_output_schema
     schema = _provider_strict_output_schema(FulfillmentSemanticReviewCandidate.model_json_schema())
+    # The response is a judgement of the fixed submitted plan, not a repaired
+    # plan described by the critic. Put a concise source/consumer comparison
+    # before the verdict in this request only. Historical serialization and
+    # all admission predicates remain unchanged; prose never overrides flags.
+    for definition, identities in (("FulfillmentSemanticSourceReview", ("source_ref",)),
+                                   ("FulfillmentSemanticComponentReview", ("component_id", "capability"))):
+        entry = schema["$defs"][definition]
+        properties = entry["properties"]
+        properties["reason"]["description"] = (
+            "Concise evidence comparison for the exact submitted source/component, not hidden reasoning "
+            "or instructions to repair it. Any unsupported restriction, missing meaning or incorrect "
+            "Owner/Phase/Evidence must be reflected by false in the applicable verdict below.")
+        properties["complete_and_equivalent"]["description"] = (
+            "True only when the submitted contribution preserves all original meaning without adding "
+            "an unsupported requirement. False if any submitted route for this source/component must "
+            "be removed, repaired or reinterpreted. Judgement is on the unchanged fingerprinted plan.")
+        if "owner_phase_evidence_valid" in properties:
+            properties["owner_phase_evidence_valid"]["description"] = (
+                "True only when this exact proposed consumer, operation, phase and evidence method "
+                "are warranted by the original contribution. An existing gate or a valid enum alone "
+                "does not prove that correspondence.")
+        entry["properties"] = {name: properties[name] for name in (*identities, "reason",
+            *(name for name in properties if name not in {*identities, "reason"}))}
+        entry["required"] = list(entry["properties"])
     for field, value in (("inventory_fingerprint", inventory["inventory_fingerprint"]),
                          ("candidate_fingerprint", fulfillment_candidate_fingerprint(candidate)),
                          ("components_fingerprint", fulfillment_components_fingerprint(candidate))):
@@ -921,6 +945,14 @@ class ModelFulfillmentCandidateProvider:
                     "component_index_table corresponds to wire route order and supplies the original exact "
                     "component_id/capability for each result. Return exactly one source result per inventory "
                     "source, with no duplicate source_ref, and exactly one result per component table entry. "
+                    "Judge ONLY the fixed submitted candidate whose fingerprint is supplied. You cannot "
+                    "remove a route, treat it as already rejected, repair it in reason, or pretend another "
+                    "Owner rejected it. If an original source does not entail a submitted restriction, "
+                    "that component's complete_and_equivalent and owner_phase_evidence_valid must be false, "
+                    "and the corresponding source's complete_and_equivalent must be false. Saying 'reject' "
+                    "in reason while returning true does not reject anything. Give a concise original-source "
+                    "versus proposed-consumer comparison in reason before filling the verdict predicates; "
+                    "each verdict must agree with that comparison. No hidden reasoning is requested. "
                     "Return the unchanged canonical review schema, "
                     "not compact indices or a candidate repair. For EVERY exact "
                     "source_ref decide whether its complete meaning is preserved by the source-linked component "

@@ -252,3 +252,18 @@ def test_legacy_review_shape_is_not_rewritten_by_generation_constraints():
         candidate_fingerprint="a" * 64, components_fingerprint="b" * 64,
         source_results=({"source_ref": inventory["sources"][0]["source_ref"], "complete_and_equivalent": True, "reason": "Legacy receipt retained."},))
     assert "component_results" not in original.model_dump(mode="json")
+
+
+def test_review_request_judges_fixed_plan_after_source_consumer_comparison():
+    from spg.providers.fulfillment_candidate import _review_output_schema
+    _, _, inventory, plan, _, _ = case()
+    schema = _review_output_schema(inventory, plan)
+    for name in ("FulfillmentSemanticSourceReview", "FulfillmentSemanticComponentReview"):
+        fields = schema["$defs"][name]["properties"]
+        assert list(fields).index("reason") < list(fields).index("complete_and_equivalent")
+        assert "unchanged fingerprinted plan" in fields["complete_and_equivalent"]["description"]
+        assert fields["complete_and_equivalent"]["type"] == "boolean"
+        assert "enum" not in fields["complete_and_equivalent"]
+    # This describes an independent verdict; no new repair or admission output.
+    assert set(schema["properties"]) == {"inventory_fingerprint", "candidate_fingerprint",
+        "components_fingerprint", "source_results", "component_results"}
