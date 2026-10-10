@@ -1,0 +1,15 @@
+{
+  "scope": "CONTROLLED_BOUNDARY_REGRESSION_NO_MODEL_NO_WORK",
+  "source_overlay": true,
+  "exit_code": 0,
+  "wall_seconds": 27.191198493004777,
+  "counts": {
+    "tests": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "input_sha256": {
+    "tests/test_c3_fulfillment_provider_failures.py": "46ea6359bc7024fd30bef924317094717baea17f2fe2051d6d91622144a9bec0"
+  }
+}
