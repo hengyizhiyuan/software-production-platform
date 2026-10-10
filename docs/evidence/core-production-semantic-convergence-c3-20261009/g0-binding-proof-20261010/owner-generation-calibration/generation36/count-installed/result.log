@@ -1,0 +1,12 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /qualification
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 63 items
+
+tests/test_n1_static_html_semantics.py ................................. [ 52%]
+..............................                                           [100%]
+
+----------------- generated xml file: /c3-evidence/result.xml ------------------
+============================= 63 passed in 10.29s ==============================

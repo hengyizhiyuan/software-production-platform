@@ -1,0 +1,35 @@
+{
+  "files": [
+    {
+      "file": "preparation-resource-preflight-1.json",
+      "sha256": "6b56751e71ea00066cf9d7066e95c300e527d9be9a50dd7618ac2a72132ffa61",
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation36-control-inputs-20261010/resource-preflight-1.json"
+    },
+    {
+      "file": "preparation-preflight.json",
+      "sha256": "f3663cfdfd587ae18c0d1bb9639c7d4dd01f1c3c901ed4b3200e57862745166d",
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation36-qualification-20261010/evidence/preparation-preflight.json"
+    },
+    {
+      "file": "worker-root-preflight.json",
+      "sha256": "6ab3012969f254b7a48db45dde1105555565f13ffed400846a09ae804b7b8001",
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation36-qualification-20261010/evidence/worker-root-preflight.json"
+    },
+    {
+      "file": "runtime-role-preparation.json",
+      "sha256": "deba6233f14bef48b11a171d4f6f44d0bf35cc027cd7d78a179c49ab2130a644",
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation36-qualification-20261010/evidence/runtime-role-preparation.json"
+    },
+    {
+      "file": "migration.json",
+      "sha256": "86612e389ff6d96b91333b40cab155bc0ac5838bfbcf96762c016f8f2b4edec4",
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation36-qualification-20261010/evidence/migration.json"
+    },
+    {
+      "file": "driver-runtime-identity.json",
+      "sha256": "2c2f1e9b661a2eb6b2f549df4854366968f839360f64c9402c2e179646a14d39",
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation36-qualification-20261010/evidence/driver-runtime-identity.json"
+    }
+  ],
+  "private_artifacts_included": false
+}

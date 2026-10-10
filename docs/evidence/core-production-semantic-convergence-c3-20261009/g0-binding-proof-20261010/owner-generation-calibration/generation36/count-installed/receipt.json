@@ -1,0 +1,22 @@
+{
+  "source": {
+    "revision": "9bd18c69c7b92f1eed7093134dacd16eab7fb0cc",
+    "tree": "7d55ab25247b6651da86cad5ff4193f950a55653"
+  },
+  "actual_image": "sha256:f348a9092fae689b2557cf52ebe5faba37d3d8bd02727dedb93f77cdafb72b32",
+  "actual_container": "2382b21cec72d9a8f668d039e0f110c3c928978c956824ee6477e8417aafa196",
+  "counts": {
+    "tests": 63,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 63
+  },
+  "exit_code": 0,
+  "wall_seconds": 16.069386202958412,
+  "source_overlay": false,
+  "network": "none",
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

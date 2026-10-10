@@ -1,0 +1,46 @@
+{
+  "code": "ISOLATION_SUBNET_OVERLAP_BEFORE_RESOURCE_CREATION",
+  "conflicts": [
+    {
+      "owner": "watt-c3-g0-binding-final-owner-pg-generation28-subnet1-20261010",
+      "subnet": "172.23.2.208/28",
+      "proposed": "172.23.2.208/28"
+    },
+    {
+      "owner": "host-route",
+      "subnet": "172.23.2.208/28",
+      "proposed": "172.23.2.208/28"
+    },
+    {
+      "owner": "watt-c3-g0-binding-final-owner-pg-generation30-subnet1-20261010",
+      "subnet": "172.23.2.224/28",
+      "proposed": "172.23.2.224/28"
+    },
+    {
+      "owner": "host-route",
+      "subnet": "172.23.2.224/28",
+      "proposed": "172.23.2.224/28"
+    }
+  ],
+  "free_options": [
+    "172.23.4.0/28",
+    "172.23.4.16/28",
+    "172.23.4.32/28",
+    "172.23.4.48/28",
+    "172.23.4.64/28",
+    "172.23.4.80/28",
+    "172.23.4.96/28",
+    "172.23.4.112/28",
+    "172.23.4.128/28",
+    "172.23.4.144/28",
+    "172.23.4.160/28",
+    "172.23.4.176/28",
+    "172.23.4.192/28",
+    "172.23.4.208/28",
+    "172.23.4.224/28",
+    "172.23.4.240/28"
+  ],
+  "work_created": false,
+  "model_calls": 0,
+  "qualification_root_exists": false
+}
