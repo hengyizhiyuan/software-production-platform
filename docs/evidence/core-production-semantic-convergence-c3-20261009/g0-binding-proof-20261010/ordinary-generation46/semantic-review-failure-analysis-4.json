@@ -1,0 +1,1404 @@
+{
+  "qualification": "READ_ONLY_REAL_ORDINARY_FAILURE_ANALYSIS_NOT_MODEL_SUCCESS",
+  "work_id": "a3938a73-9da7-5ba3-9056-6df739122a99",
+  "snapshot_sha256": "a4bc8434d2afa99f3a383266d8f8d65147bb7cc4be02d83297eb31a8b6c81676",
+  "source_count": 20,
+  "route_count": 31,
+  "inventory_fingerprint": "718ebcd5f83d2d6c49c0e0184bd2e52a5288b936f4b06b05c811c3bcbb288023",
+  "candidate_fingerprint": "336a88b061471d0818188a5c5a77240e631e38f35e1060ddf875fb4773c81b03",
+  "components_fingerprint": "dc3f8c33b3634261bfbbfed6c39676d38deaf3610d383967987fb1c0d64a70d9",
+  "wire_sha256": "8e0fb2222f0cc602f299976a2ba2fcbc2bd8cba874bdd0d2c64af39e11b4d883",
+  "whole_lineage": "OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT",
+  "feedback_recomputation_diffs": [
+    {
+      "attempt": 1,
+      "same_bytes": false,
+      "differences": []
+    }
+  ],
+  "deterministic_owner_validation": "FORENSIC_ONLY_UNADMITTED; EXACT_WIRE_PENDING_AND_RESPONSE_CHECKED",
+  "review_receipt": "b43980b6-2414-427d-94d7-535135dcd938",
+  "terminal_receipt": "72cb71c8-c921-49a6-96a2-0fbfb2faf3e2",
+  "violations": [
+    {
+      "code": "OBLIGATION_SEMANTIC_SOURCE_MISMATCH",
+      "source": 7,
+      "review_reason_sha256": "206bb2c233420d3f9d95e462c7d9aadbb6d7bb6ffa64d1bd680d6c5495fdbd1e",
+      "review_reason_characters": 187
+    },
+    {
+      "code": "OBLIGATION_SEMANTIC_SOURCE_MISMATCH",
+      "source": 11,
+      "review_reason_sha256": "81f0cec2f0ea2658f871333e575ce70449b4e36f9f74360c64fd3843dde47cc1",
+      "review_reason_characters": 190
+    },
+    {
+      "code": "OBLIGATION_SEMANTIC_SOURCE_MISMATCH",
+      "source": 15,
+      "review_reason_sha256": "cc0ca95aae9a28fb8cf8d0b9ecb4fc3777b2b1d3391a40ab14c4146c507b8bbc",
+      "review_reason_characters": 208
+    },
+    {
+      "code": "OBLIGATION_SEMANTIC_SOURCE_MISMATCH",
+      "source": 16,
+      "review_reason_sha256": "bbf39cec5f29cfd3c662f2a0ad866808353f4e2a6a9daf268545fa99b1b57188",
+      "review_reason_characters": 202
+    },
+    {
+      "code": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+      "route": 9,
+      "source": 7,
+      "component_id": "e7ee38a0d7cbe260b22cad42203c62a6c36f60557fb567397c8d99f95f6b781a",
+      "capability": "GIT_DIFF_SCOPE",
+      "failed_review_predicates": [
+        "complete_and_equivalent",
+        "nonredundant",
+        "owner_phase_evidence_valid"
+      ],
+      "submitted_consumer_comparison": {
+        "original_route": 9,
+        "consumer_contract": {
+          "capability": "GIT_DIFF_SCOPE",
+          "component": "git-diff-scope",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+          "gate_ref": "code-verification:path-scope"
+        },
+        "component_basis_fingerprint": "4c6062dd899e742e50209c634d36788f88a0046636e6d4d4c06ed9140150b6e7",
+        "source_basis_ref": "EXACT_ORIGINAL_WIRE_AND_LOCATED_COMPONENTS",
+        "declared_fact_refs": [],
+        "target_paths": [
+          "index.html"
+        ],
+        "provenance_support_refs": [
+          "ir-constraint:n1-exact-content-constraint:c4"
+        ],
+        "same_source_complementary_routes": [
+          8
+        ],
+        "status": "REJECTED_SUBMITTED_BINDING; NOT_A_REPLACEMENT_PLAN_OR_COMPLETED_PROOF"
+      },
+      "review_reason_sha256": "0de7b01e333ec65c8a460ad7fcb525bda9b83435e9edd15a8681e1b6962a8c47",
+      "review_reason_characters": 200
+    },
+    {
+      "code": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+      "route": 17,
+      "source": 11,
+      "component_id": "85046d5e73e0868715921ac5c0211de4688f0adc0d7ab7986d87b25f19b04505",
+      "capability": "GIT_DIFF_SCOPE",
+      "failed_review_predicates": [
+        "complete_and_equivalent",
+        "nonredundant",
+        "owner_phase_evidence_valid"
+      ],
+      "submitted_consumer_comparison": {
+        "original_route": 17,
+        "consumer_contract": {
+          "capability": "GIT_DIFF_SCOPE",
+          "component": "git-diff-scope",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+          "gate_ref": "code-verification:path-scope"
+        },
+        "component_basis_fingerprint": "ed02fd1e940658421d9c4c8753bb5b6742ee251c995ee79fa4b7013ec53cbb00",
+        "source_basis_ref": "EXACT_ORIGINAL_WIRE_AND_LOCATED_COMPONENTS",
+        "declared_fact_refs": [],
+        "target_paths": [
+          "index.html"
+        ],
+        "provenance_support_refs": [
+          "ir-constraint:n1-exact-content-constraint:c4"
+        ],
+        "same_source_complementary_routes": [
+          16
+        ],
+        "status": "REJECTED_SUBMITTED_BINDING; NOT_A_REPLACEMENT_PLAN_OR_COMPLETED_PROOF"
+      },
+      "review_reason_sha256": "8874b8dde1370833c1964a3baf391588944f004bcb3bb17506d3646388a62087",
+      "review_reason_characters": 215
+    },
+    {
+      "code": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+      "route": 25,
+      "source": 15,
+      "component_id": "70dbbf8bf5eb912544d34394acdd46518d439940120a216921b9075b7478ccca",
+      "capability": "GIT_DIFF_SCOPE",
+      "failed_review_predicates": [
+        "complete_and_equivalent",
+        "nonredundant",
+        "owner_phase_evidence_valid"
+      ],
+      "submitted_consumer_comparison": {
+        "original_route": 25,
+        "consumer_contract": {
+          "capability": "GIT_DIFF_SCOPE",
+          "component": "git-diff-scope",
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+          "gate_ref": "code-verification:path-scope"
+        },
+        "component_basis_fingerprint": "d877b2f7365df7b8ffc7f1394ee380c1360f2d750efc27545571f623bf5b53bd",
+        "source_basis_ref": "EXACT_ORIGINAL_WIRE_AND_LOCATED_COMPONENTS",
+        "declared_fact_refs": [],
+        "target_paths": [
+          "index.html"
+        ],
+        "provenance_support_refs": [
+          "ir-clause:32423ab2-e31d-5b00-8af5-ad0286c7cd4d:n1-qualification-goal:c1"
+        ],
+        "same_source_complementary_routes": [
+          24
+        ],
+        "status": "REJECTED_SUBMITTED_BINDING; NOT_A_REPLACEMENT_PLAN_OR_COMPLETED_PROOF"
+      },
+      "review_reason_sha256": "8cbbe44e621127b72058611afd60f41c6254a92dfb06194b2f09ea21376b0522",
+      "review_reason_characters": 215
+    },
+    {
+      "code": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+      "route": 26,
+      "source": 16,
+      "component_id": "0fa9f9bb7098c9de110af9a121fae08debec40ac87f1d3015ae9c4190f9ac363",
+      "capability": "DENY_PREVIEW",
+      "failed_review_predicates": [
+        "complete_and_equivalent",
+        "nonredundant",
+        "owner_phase_evidence_valid"
+      ],
+      "submitted_consumer_comparison": {
+        "original_route": 26,
+        "consumer_contract": {
+          "capability": "DENY_PREVIEW",
+          "component": "preview",
+          "owner": "EXECUTION_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "evidence_method": "EXACT_PERMISSION_GATE",
+          "gate_ref": "execution-capability:preview.inspect:denied"
+        },
+        "component_basis_fingerprint": "8f04a8e5d3a4c2db6c96d0618cea51600ccc69d36f7f16a5c762cabdb8f7d5f5",
+        "source_basis_ref": "EXACT_ORIGINAL_WIRE_AND_LOCATED_COMPONENTS",
+        "declared_fact_refs": [],
+        "target_paths": [
+          "index.html"
+        ],
+        "provenance_support_refs": [
+          "ir-clause:32423ab2-e31d-5b00-8af5-ad0286c7cd4d:n1-qualification-goal:c1",
+          "ir-constraint:n1-exclusions:c7"
+        ],
+        "same_source_complementary_routes": [
+          27
+        ],
+        "status": "REJECTED_SUBMITTED_BINDING; NOT_A_REPLACEMENT_PLAN_OR_COMPLETED_PROOF"
+      },
+      "review_reason_sha256": "b9536d4e88449fb04ddcda322953ba1f211cc98b19b40e810d4c774f243bdcfe",
+      "review_reason_characters": 202
+    }
+  ],
+  "sources": [
+    {
+      "ordinal": 0,
+      "ref": "semantic-fact:45d4c0bb-d0d9-53f2-a07a-9f188afef786",
+      "kind": "FACT",
+      "semantic_text_sha256": "9499d59538a154249d74cf83f71eedb58e1b98a4f88a9f74cd7b92dbe9e117bf",
+      "text_characters": 48,
+      "relation": "EQUALITY",
+      "scope": "index.html",
+      "qualifiers": {
+        "repository": "watt://repositories/products/a3b0389e-8c89-4fc4-8be1-fa64814b6d95"
+      },
+      "clause_polarity": null,
+      "clause_speech_act": null,
+      "item_kind": null,
+      "routes": [
+        {
+          "route": 0,
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "97fe1b92085cc0e7f1f9f4b0fd5d5293dd8164a95bdb3be1890885ab794db285",
+          "span": [
+            0,
+            48
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 1,
+      "ref": "semantic-fact:690d4c15-d902-5b5c-9a1b-a012b1cf3800",
+      "kind": "FACT",
+      "semantic_text_sha256": "a24b1d48dd8fae804d8b7bf4e25740bf79c8716ebefc7201050f42b27e1296db",
+      "text_characters": 48,
+      "relation": "EQUALITY",
+      "scope": "index.html",
+      "qualifiers": {
+        "count": "1",
+        "element": "h1"
+      },
+      "clause_polarity": null,
+      "clause_speech_act": null,
+      "item_kind": null,
+      "routes": [
+        {
+          "route": 1,
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "c77082e2cafd231ae45081f7d5923b99f0a867ab12063522a0a56e9a8fcb96f1",
+          "span": [
+            0,
+            48
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 2,
+      "ref": "semantic-fact:3540a8fa-751f-57c1-a5bd-247945f5ed7f",
+      "kind": "FACT",
+      "semantic_text_sha256": "5be6714bf14eea3261e40966c1d1a4039f752f3f376e0320166e32266011c8c4",
+      "text_characters": 55,
+      "relation": "EQUALITY",
+      "scope": "index.html",
+      "qualifiers": {
+        "count": "1",
+        "element": "p"
+      },
+      "clause_polarity": null,
+      "clause_speech_act": null,
+      "item_kind": null,
+      "routes": [
+        {
+          "route": 2,
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "f506b840f46c6e63f66459afb56303cda9354793bd0a8ba4ddc7868155fab53b",
+          "span": [
+            0,
+            55
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 3,
+      "ref": "semantic-fact:31abad51-e0b3-507b-b847-4ed32e7026fe",
+      "kind": "FACT",
+      "semantic_text_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+      "text_characters": 27,
+      "relation": "SCOPE",
+      "scope": "repository",
+      "qualifiers": {
+        "repository": "watt://repositories/products/a3b0389e-8c89-4fc4-8be1-fa64814b6d95"
+      },
+      "clause_polarity": null,
+      "clause_speech_act": null,
+      "item_kind": null,
+      "routes": [
+        {
+          "route": 3,
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "7344c19235e8f856e157197f0456b27a6a6908af390141121df018510fc2f2ed",
+          "span": [
+            0,
+            27
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 4,
+      "ref": "ir-clause:32423ab2-e31d-5b00-8af5-ad0286c7cd4d:n1-qualification-goal:c1",
+      "kind": "IR_CLAUSE",
+      "semantic_text_sha256": "c01616d2fa1687d3f2dbde62f78b2d07c72c8f63034431eb8b263f2cd82e53b1",
+      "text_characters": 49,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": "AFFIRMATIVE",
+      "clause_speech_act": "EXPLICIT_REQUEST",
+      "item_kind": "PRODUCTION_INTENT",
+      "routes": [
+        {
+          "route": 4,
+          "capability": "RETAIN_CONTEXT",
+          "component_id": "f0ef31b818354391267757b1d37c3815d3ed82a93cfc1c44f6fa7ef1193147a0",
+          "span": [
+            0,
+            49
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "PRODUCT_SOURCE",
+              "phase": "CONTEXT_RETENTION",
+              "method": "RETAIN_AUTHORITATIVE_CONTEXT",
+              "gate": "work-reality:retained"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 5,
+      "ref": "ir-clause:32423ab2-e31d-5b00-8af5-ad0286c7cd4d:n1-qualification-goal:c2",
+      "kind": "IR_CLAUSE",
+      "semantic_text_sha256": "9268cc964f6cb6011eb23204032873bdfbfff04e950cfda4f190d57a1cae73aa",
+      "text_characters": 91,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": "AFFIRMATIVE",
+      "clause_speech_act": "EXPLICIT_REQUEST",
+      "item_kind": "PRODUCTION_INTENT",
+      "routes": [
+        {
+          "route": 5,
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "ac46fdac58adc09211af6c4e6c4f3cee13e7fb68dfdf1115286ec9b8f9f64e4a",
+          "span": [
+            0,
+            91
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            },
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        },
+        {
+          "route": 6,
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "ac46fdac58adc09211af6c4e6c4f3cee13e7fb68dfdf1115286ec9b8f9f64e4a",
+          "span": [
+            0,
+            91
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            },
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 6,
+      "ref": "ir-clause:32423ab2-e31d-5b00-8af5-ad0286c7cd4d:n1-qualification-goal:c3",
+      "kind": "IR_CLAUSE",
+      "semantic_text_sha256": "763311981a479580e9d52e736ecffbec46cfc41a94a3564badab89c5fa354e60",
+      "text_characters": 48,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": "AFFIRMATIVE",
+      "clause_speech_act": "EXPLICIT_REQUEST",
+      "item_kind": "PRODUCTION_INTENT",
+      "routes": [
+        {
+          "route": 7,
+          "capability": "RETAIN_CONTEXT",
+          "component_id": "4116d21af7a14f23cce7b505f6fc4997e02bf17f10a594f992fdbd165a241004",
+          "span": [
+            0,
+            48
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "PRODUCT_SOURCE",
+              "phase": "CONTEXT_RETENTION",
+              "method": "RETAIN_AUTHORITATIVE_CONTEXT",
+              "gate": "work-reality:retained"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 7,
+      "ref": "ir-constraint:n1-exact-content-constraint:c4",
+      "kind": "IR_CONSTRAINT",
+      "semantic_text_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+      "text_characters": 132,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": "AFFIRMATIVE",
+      "clause_speech_act": "EXPLICIT_REQUEST",
+      "item_kind": "CONSTRAINT",
+      "routes": [
+        {
+          "route": 8,
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "e7ee38a0d7cbe260b22cad42203c62a6c36f60557fb567397c8d99f95f6b781a",
+          "span": [
+            0,
+            132
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            7
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            },
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        },
+        {
+          "route": 9,
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "e7ee38a0d7cbe260b22cad42203c62a6c36f60557fb567397c8d99f95f6b781a",
+          "span": [
+            0,
+            132
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            7
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            },
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 8,
+      "ref": "ir-constraint:n1-scope-restriction:c5",
+      "kind": "IR_CONSTRAINT",
+      "semantic_text_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+      "text_characters": 27,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": "AFFIRMATIVE",
+      "clause_speech_act": "EXPLICIT_REQUEST",
+      "item_kind": "CONSTRAINT",
+      "routes": [
+        {
+          "route": 10,
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "6efe9302ff4a29a992ac974f9caa55ba2f6879483e786eaaca7569b2c62e3195",
+          "span": [
+            0,
+            27
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            8
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 9,
+      "ref": "ir-constraint:n1-verification-requirement:c6",
+      "kind": "IR_CONSTRAINT",
+      "semantic_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "text_characters": 72,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": "AFFIRMATIVE",
+      "clause_speech_act": "EXPLICIT_REQUEST",
+      "item_kind": "CONSTRAINT",
+      "routes": [
+        {
+          "route": 11,
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "831dc7d07cabd70d5c16132e203a5a6da08890d7e83b4bd6faa8c6380f7bc095",
+          "span": [
+            0,
+            72
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            9
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            },
+            {
+              "owner": "CANDIDATE",
+              "phase": "CANDIDATE_SEAL",
+              "method": "EXACT_SEALED_CANDIDATE",
+              "gate": "candidate-owner:sealed-after-verification"
+            }
+          ]
+        },
+        {
+          "route": 12,
+          "capability": "CANDIDATE_SEAL",
+          "component_id": "831dc7d07cabd70d5c16132e203a5a6da08890d7e83b4bd6faa8c6380f7bc095",
+          "span": [
+            0,
+            72
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            9
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            },
+            {
+              "owner": "CANDIDATE",
+              "phase": "CANDIDATE_SEAL",
+              "method": "EXACT_SEALED_CANDIDATE",
+              "gate": "candidate-owner:sealed-after-verification"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 10,
+      "ref": "ir-constraint:n1-exclusions:c7",
+      "kind": "IR_CONSTRAINT",
+      "semantic_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "text_characters": 55,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": "NEGATED",
+      "clause_speech_act": "EXPLICIT_REQUEST",
+      "item_kind": "CONSTRAINT",
+      "routes": [
+        {
+          "route": 13,
+          "capability": "DENY_DEPLOY",
+          "component_id": "35270568b28f3cafe7773a3c9059bf9b4fc3dde440729330ccc826e99b71c361",
+          "span": [
+            0,
+            55
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            10
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "cloud-delivery:human-authorization-required"
+            },
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "remote-delivery:human-authorization-required"
+            },
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        },
+        {
+          "route": 14,
+          "capability": "DENY_PUBLISH",
+          "component_id": "35270568b28f3cafe7773a3c9059bf9b4fc3dde440729330ccc826e99b71c361",
+          "span": [
+            0,
+            55
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            10
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "cloud-delivery:human-authorization-required"
+            },
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "remote-delivery:human-authorization-required"
+            },
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        },
+        {
+          "route": 15,
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "35270568b28f3cafe7773a3c9059bf9b4fc3dde440729330ccc826e99b71c361",
+          "span": [
+            0,
+            55
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            10
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "cloud-delivery:human-authorization-required"
+            },
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "remote-delivery:human-authorization-required"
+            },
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 11,
+      "ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:0",
+      "kind": "WORK_CONSTRAINT",
+      "semantic_text_sha256": "dd16947c93e937861d5eb96924e26dc0f04c4e7d6f381ae8fde82e46d6e03a53",
+      "text_characters": 136,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": null,
+      "clause_speech_act": null,
+      "item_kind": null,
+      "routes": [
+        {
+          "route": 16,
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "85046d5e73e0868715921ac5c0211de4688f0adc0d7ab7986d87b25f19b04505",
+          "span": [
+            0,
+            136
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            7
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            },
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        },
+        {
+          "route": 17,
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "85046d5e73e0868715921ac5c0211de4688f0adc0d7ab7986d87b25f19b04505",
+          "span": [
+            0,
+            136
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            7
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            },
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 12,
+      "ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:1",
+      "kind": "WORK_CONSTRAINT",
+      "semantic_text_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+      "text_characters": 27,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": null,
+      "clause_speech_act": null,
+      "item_kind": null,
+      "routes": [
+        {
+          "route": 18,
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "e6f5853476a4596da1d0576936ae4f65dec407cf900711d197b27cb517f3e142",
+          "span": [
+            0,
+            27
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            8
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 13,
+      "ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:2",
+      "kind": "WORK_CONSTRAINT",
+      "semantic_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "text_characters": 72,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": null,
+      "clause_speech_act": null,
+      "item_kind": null,
+      "routes": [
+        {
+          "route": 19,
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "d5118ebd3b123e8ecaa7648f636f4fbae42baeb89a6b2f41391723a16b0ef6e7",
+          "span": [
+            0,
+            72
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            9
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            },
+            {
+              "owner": "CANDIDATE",
+              "phase": "CANDIDATE_SEAL",
+              "method": "EXACT_SEALED_CANDIDATE",
+              "gate": "candidate-owner:sealed-after-verification"
+            }
+          ]
+        },
+        {
+          "route": 20,
+          "capability": "CANDIDATE_SEAL",
+          "component_id": "d5118ebd3b123e8ecaa7648f636f4fbae42baeb89a6b2f41391723a16b0ef6e7",
+          "span": [
+            0,
+            72
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            9
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            },
+            {
+              "owner": "CANDIDATE",
+              "phase": "CANDIDATE_SEAL",
+              "method": "EXACT_SEALED_CANDIDATE",
+              "gate": "candidate-owner:sealed-after-verification"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 14,
+      "ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:3",
+      "kind": "WORK_CONSTRAINT",
+      "semantic_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "text_characters": 55,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": null,
+      "clause_speech_act": null,
+      "item_kind": null,
+      "routes": [
+        {
+          "route": 21,
+          "capability": "DENY_DEPLOY",
+          "component_id": "1951968195c531283af4ee7c0e1802daab45eb47ade8fa00340d92351cf41ed8",
+          "span": [
+            0,
+            55
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            10
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "cloud-delivery:human-authorization-required"
+            },
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "remote-delivery:human-authorization-required"
+            },
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        },
+        {
+          "route": 22,
+          "capability": "DENY_PUBLISH",
+          "component_id": "1951968195c531283af4ee7c0e1802daab45eb47ade8fa00340d92351cf41ed8",
+          "span": [
+            0,
+            55
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            10
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "cloud-delivery:human-authorization-required"
+            },
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "remote-delivery:human-authorization-required"
+            },
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        },
+        {
+          "route": 23,
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "1951968195c531283af4ee7c0e1802daab45eb47ade8fa00340d92351cf41ed8",
+          "span": [
+            0,
+            55
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            10
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "cloud-delivery:human-authorization-required"
+            },
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "remote-delivery:human-authorization-required"
+            },
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 15,
+      "ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:4",
+      "kind": "WORK_CONSTRAINT",
+      "semantic_text_sha256": "ed78e6391d1ac22cc7327b7621f49985d7e9cc64d1fe7ce51d3cac90b61b91f6",
+      "text_characters": 34,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": null,
+      "clause_speech_act": null,
+      "item_kind": null,
+      "routes": [
+        {
+          "route": 24,
+          "capability": "ARTIFACT_CONTENT",
+          "component_id": "70dbbf8bf5eb912544d34394acdd46518d439940120a216921b9075b7478ccca",
+          "span": [
+            0,
+            34
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            4
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            },
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        },
+        {
+          "route": 25,
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "70dbbf8bf5eb912544d34394acdd46518d439940120a216921b9075b7478ccca",
+          "span": [
+            0,
+            34
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            4
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_CANDIDATE_CONTENT",
+              "gate": "code-verification:semantic-facts"
+            },
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 16,
+      "ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:5",
+      "kind": "WORK_CONSTRAINT",
+      "semantic_text_sha256": "5577e77f1035d1a0960c99cdc44761e92fa7f6a95f2140e881eb62c722ce246c",
+      "text_characters": 35,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": null,
+      "clause_speech_act": null,
+      "item_kind": null,
+      "routes": [
+        {
+          "route": 26,
+          "capability": "DENY_PREVIEW",
+          "component_id": "0fa9f9bb7098c9de110af9a121fae08debec40ac87f1d3015ae9c4190f9ac363",
+          "span": [
+            0,
+            35
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            4,
+            10
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "EXECUTION_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "execution-capability:preview.inspect:denied"
+            },
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "cloud-delivery:human-authorization-required"
+            }
+          ]
+        },
+        {
+          "route": 27,
+          "capability": "DENY_DEPLOY",
+          "component_id": "0fa9f9bb7098c9de110af9a121fae08debec40ac87f1d3015ae9c4190f9ac363",
+          "span": [
+            0,
+            35
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            4,
+            10
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "EXECUTION_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "execution-capability:preview.inspect:denied"
+            },
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "cloud-delivery:human-authorization-required"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 17,
+      "ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:6",
+      "kind": "WORK_CONSTRAINT",
+      "semantic_text_sha256": "a595ced2563e61dd7e1dea14b8a23ae2d3bbedee9dd20059d66f756afa8b35aa",
+      "text_characters": 36,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": null,
+      "clause_speech_act": null,
+      "item_kind": null,
+      "routes": [
+        {
+          "route": 28,
+          "capability": "DENY_PUBLISH",
+          "component_id": "0e4a6e79266b78ae9c3aba062f262af82ef4519890dfd433289aa41a95ef7ca2",
+          "span": [
+            0,
+            36
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            4,
+            10
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "DELIVERY_GATE",
+              "phase": "CONTINUOUS_FROM_ADMISSION",
+              "method": "EXACT_PERMISSION_GATE",
+              "gate": "remote-delivery:human-authorization-required"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 18,
+      "ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:7",
+      "kind": "WORK_CONSTRAINT",
+      "semantic_text_sha256": "07e3b3c0e75b6d7005cbce24d0132991c692cefb989fdc443a62f094344b7bcd",
+      "text_characters": 41,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": null,
+      "clause_speech_act": null,
+      "item_kind": null,
+      "routes": [
+        {
+          "route": 29,
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "d03cf567eef809c53fb57b66490066ee872e06775dba8595364764bee38a1432",
+          "span": [
+            0,
+            41
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            4,
+            10
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 19,
+      "ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:8",
+      "kind": "WORK_CONSTRAINT",
+      "semantic_text_sha256": "027dfb3814cc11079f18cc1bb3034374a2bc97bbca4937b9daf512cf6621fb01",
+      "text_characters": 50,
+      "relation": null,
+      "scope": null,
+      "qualifiers": null,
+      "clause_polarity": null,
+      "clause_speech_act": null,
+      "item_kind": null,
+      "routes": [
+        {
+          "route": 30,
+          "capability": "GIT_DIFF_SCOPE",
+          "component_id": "38d193877ff7371c0458ed21986b1ec70fd711fdc3fcaeb356dfdc77c7ec3fb7",
+          "span": [
+            0,
+            50
+          ],
+          "target_paths": [
+            "index.html"
+          ],
+          "support_source_ordinals": [
+            4,
+            10
+          ],
+          "fact_refs": [],
+          "owner_binding": [
+            {
+              "owner": "VERIFICATION",
+              "phase": "CURRENT_VERIFICATION",
+              "method": "EXACT_GIT_DIFF_SCOPE",
+              "gate": "code-verification:path-scope"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "live_model_calls": 0,
+  "work_mutations": 0
+}

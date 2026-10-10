@@ -82,7 +82,7 @@ class NeverCallAgain:
         raise AssertionError("A sealed same-basis receipt must be replayed without another model call")
 
 
-@pytest.mark.parametrize('first_failure', ('semantic', 'incomplete', 'critic-schema', 'critic-json'))
+@pytest.mark.parametrize('first_failure', ('semantic', 'semantic-jsonb-order', 'incomplete', 'critic-schema', 'critic-json'))
 def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql(postgres_database, tmp_path, monkeypatch, first_failure):
     import json
     from types import SimpleNamespace
@@ -99,7 +99,7 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
         if 'untrusted_fulfillment_candidate' in payload:
             candidate = decode_review_input(payload)
             verdict = review(inventory, candidate)
-            if not reviews and first_failure == 'semantic':
+            if not reviews and first_failure.startswith('semantic'):
                 first, *rest = verdict.component_results
                 verdict = verdict.model_copy(update={'component_results': (
                     first.model_copy(update={'complete_and_equivalent': False, 'reason': 'Controlled rejected interpretation.'}), *rest)})
@@ -134,7 +134,7 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
         failed = next(r.scope for r in records if r.scope['stage'] == 'CANDIDATE_VALIDATED' and r.scope['attempt'] == 1)
         feedback = json.loads(failed['validation_feedback'])
         observed = next(r.scope for r in records if r.scope['stage'] == 'SEMANTIC_REVIEW_OBSERVED' and r.scope['attempt'] == 1)
-        if first_failure == 'semantic':
+        if first_failure.startswith('semantic'):
             assert feedback['semantic_review_feedback_binding']['observed_receipt_id'] == observed['receipt_id']
             assert feedback['violations'][0]['review_reason'] == 'Controlled rejected interpretation.'
         elif first_failure.startswith('critic-'):
@@ -156,11 +156,32 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
             assert feedback['repair_feedback_binding']['completion_feedback_contract'] == 'existing-bounded-completion-feedback-v1'
         count = len(records)
     never = NeverCallAgain()
+    if first_failure == 'semantic-jsonb-order':
+        # The actual PG JSONB representation may reorder nested objects used
+        # during feedback recomputation. Never rewrite the historical strings
+        # or next request: those remain bound to their original fingerprints.
+        from sqlalchemy import text
+        from spg.application import governed_obligations as app
+        recompute=app._bind_repair_feedback
+        changed_bytes=[]
+        def jsonb_recompute(*args,**kwargs):
+            original=recompute(*args,**kwargs)
+            with postgres_database.unit_of_work() as uow:
+                restored=uow.session.execute(text('SELECT CAST(CAST(:value AS jsonb) AS text)'),
+                    {'value':original}).scalar_one()
+            assert json.loads(restored)==json.loads(original)
+            changed_bytes.append(restored!=original)
+            return restored
+        monkeypatch.setattr(app,'_bind_repair_feedback',jsonb_recompute)
     replay = form_fulfillment_projection(revision, ir, provider=never, database=postgres_database,
         source_revision=baseline.repository_revision, exact_target_paths=('index.html',))
     assert never.calls == 0 and all(b.state != 'UNRESOLVED' for b in replay)
+    if first_failure == 'semantic-jsonb-order':
+        assert changed_bytes and all(changed_bytes)
     with postgres_database.unit_of_work() as uow:
-        assert len(RuntimeStore(uow.session).governance_for_subject(fingerprint)) == count
+        restored=RuntimeStore(uow.session).governance_for_subject(fingerprint)
+        assert len(restored)==count
+        assert [r.scope for r in restored]==[r.scope for r in records]
     if first_failure.startswith('critic-'):
         from copy import deepcopy
         from sqlalchemy import update

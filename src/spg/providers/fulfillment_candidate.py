@@ -142,6 +142,20 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
                 raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_BASIS_DRIFT")
             schema["properties"][field]["enum"] = [value]
     route = schema["$defs"]["_FulfillmentCompactRoute"]["properties"]
+    if (owner_preconditions or {}).get("generation_prerequisite_contract") == "existing-owner-binding-generation-v2":
+        # Same Wire fields and admissible values. A comparison precedes the
+        # proposed consumer in this request's presentation. Provider compliance
+        # and the effect on actual convergence require live qualification.
+        # This is an inspectable Candidate justification, never hidden reasoning
+        # or evidence. Independent semantic Review remains mandatory.
+        route["r"]["description"] = (
+            "Brief source-to-consumer comparison: the original required contribution, "
+            "the observation that would distinguish its violation from fulfillment, "
+            "and why this operation and phase correspond. Necessary provenance or "
+            "structural eligibility alone does not warrant an operation. No performed "
+            "evidence or private reasoning is requested.")
+        schema["$defs"]["_FulfillmentCompactRoute"]["properties"] = route = {
+            name: route[name] for name in ("s", "a", "z", "q", "r", "c", "f", "t", "u")}
     sources = list(range(len(inventory["sources"])))
     route["s"]["enum"] = sources
     route["c"]["enum"] = list(range(len(capabilities)))
@@ -160,7 +174,7 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
         if owner_preconditions.get("semantic_selection_input_contract") == _PRIMARY_MEANING_INPUT_CONTRACT:
             schema["properties"]["routes"]["items"] = _qualified_operand_generation_schema(
                 inventory, capabilities, choices, enforce_owner_prerequisites=owner_preconditions.get(
-                    "generation_prerequisite_contract") == "existing-owner-binding-generation-v1")
+                    "generation_prerequisite_contract") in {"existing-owner-binding-generation-v1", "existing-owner-binding-generation-v2"})
             route["q"]["description"] = (
                 "Null copies the exact full original [0,L) basis. Otherwise this exact original "
                 "contiguous quote, not a/z, determines the located contribution. To repair its "
@@ -564,6 +578,23 @@ _SOURCE_CONSUMER_INSTRUCTIONS = (
 
 def _primary_meaning_instructions(owner_preconditions):
     return (_SOURCE_CONSUMER_INSTRUCTIONS +
+        (" For each proposed route, emit its exact basis and r comparison BEFORE c. "
+         "In that brief public justification identify the original contribution and the "
+         "observation that would actually distinguish its violation from fulfillment, then "
+         "select the corresponding existing consumer and phase. Evaluate only the contribution "
+         "this consumer is responsible for, not every other contribution in a shared original "
+         "basis: complementary Owners may legitimately share that basis. If its proposed evidence "
+         "could remain identical while its own contribution is violated, it cannot prove that "
+         "contribution. For future gates identify the decision or lifecycle observation that "
+         "will be required then; do not require it to exist now. Conversely, a prohibited effect must correspond to the operation "
+         "actually prohibited, not a different operation with a common supporting source. "
+         "The justification is not evidence and does not grant authority; actual gates and "
+         "independent Review still decide. Emit only entailed complementary operations. "
+         "Before returning, compare component identities and chosen consumers: different "
+         "r wording or alternative u operands do not create distinct components, so emit "
+         "one binding, not duplicate proposals. Preserve genuinely distinct components "
+         "and original required contributions; never deduplicate by discarding meaning."
+         if owner_preconditions.get("generation_prerequisite_contract") == "existing-owner-binding-generation-v2" else "") +
         (" Consult original_authority_type_projection: it quotes the existing ProductionIntent "
          "field contracts and exact original derivations. production.scope denotes business scope "
          "summaries, not filesystem paths or write grants. A constraint derived from it still requires "

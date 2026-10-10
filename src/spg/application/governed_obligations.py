@@ -1690,6 +1690,10 @@ class FulfillmentFormationReceipts:
             "exact_target_paths": self.inventory["exact_target_paths"],
             "recorded_at_utc": datetime.now(UTC).isoformat(), "budget_limit": 2,
             "candidate_is_authority": False, **_safe_value(values)}
+        if isinstance(row.get("validation_feedback"), str):
+            encoded_feedback = row["validation_feedback"].encode()
+            row["validation_feedback_sha256"] = sha256(encoded_feedback).hexdigest()
+            row["validation_feedback_bytes"] = len(encoded_feedback)
         if row.get("terminal") and not row.get("validation_passed"):
             row["unresolved_source_refs"] = [source["source_ref"] for source in self.inventory["sources"]]
         original_row_bytes = json.dumps(row, ensure_ascii=False, default=str).encode()
@@ -1918,7 +1922,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     if semantic_selection_input_contract is not None and generation_view_contract != "existing-lossless-source-consumer-input-v3":
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
-    if (generation_prerequisite_contract not in (None, "existing-owner-binding-generation-v1")
+    if (generation_prerequisite_contract not in (None, "existing-owner-binding-generation-v1", "existing-owner-binding-generation-v2")
             or generation_prerequisite_contract is not None and (
                 semantic_selection_input_contract != "existing-primary-meaning-owner-reference-v2"
                 or not include_typed_observations
@@ -2500,6 +2504,40 @@ def _semantic_repair_observation(rows, attempt, candidate, inventory, capabiliti
         "failed_predicate": validated["failed_predicate"]}
 
 
+def _same_recomputed_feedback(original, recomputed):
+    """Compare derived JSON, without changing the original request/Wire bytes.
+
+    JSONB may reorder nested Owner observations before they are reconstructed.
+    Those object orders are not semantics. Strings (including the original
+    Wire), arrays, values and every bound identity must still match exactly.
+    Duplicate keys and non-JSON numbers cannot be normalized into acceptance.
+    """
+    from decimal import Decimal
+    from spg.providers.fulfillment_candidate import _wire_json_object
+    def reject_constant(value):
+        raise ValueError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    try:
+        if not isinstance(original, str) or not isinstance(recomputed, str):
+            return False
+        # Do not round Provider/receipt numbers through float: overflow or
+        # precision loss could otherwise make different values compare equal.
+        left = json.loads(original, object_pairs_hook=_wire_json_object,
+            parse_float=Decimal, parse_constant=reject_constant)
+        right = json.loads(recomputed, object_pairs_hook=_wire_json_object,
+            parse_float=Decimal, parse_constant=reject_constant)
+        def same(a, b):
+            if type(a) is not type(b):
+                return False
+            if isinstance(a, dict):
+                return a.keys() == b.keys() and all(same(a[k], b[k]) for k in a)
+            if isinstance(a, list):
+                return len(a) == len(b) and all(same(x, y) for x, y in zip(a, b))
+            return a == b
+        return isinstance(left, dict) and isinstance(right, dict) and same(left, right)
+    except (ValueError, TypeError):
+        return False
+
+
 def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities):
     """Recompute new diagnostics; legacy sealed receipts remain historical.
 
@@ -2563,7 +2601,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                 or preconditions.get("raw_operand_observation_contract") not in (None, "existing-original-wire-owner-operands-v1")
                 or preconditions.get("review_input_contract") not in (None, "existing-lossless-review-input-v1", "existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3", "existing-source-typed-comparison-input-v4", "existing-admission-source-comparison-input-v5")
                 or preconditions.get("semantic_selection_input_contract") not in (None, "existing-primary-meaning-owner-reference-v1", "existing-primary-meaning-owner-reference-v2")
-                or preconditions.get("generation_prerequisite_contract") not in (None, "existing-owner-binding-generation-v1")
+                or preconditions.get("generation_prerequisite_contract") not in (None, "existing-owner-binding-generation-v1", "existing-owner-binding-generation-v2")
                 or preconditions.get("generation_view_contract") not in (None, "existing-lossless-source-consumer-input-v1", "existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3")
                 or preconditions.get("typed_prerequisite_contract") not in (None, "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11")):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
@@ -2612,6 +2650,18 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
             # Strict stub and all core identities were checked above. Its
             # omitted feedback is unavailable, not a different Candidate.
             continue
+        retained_feedback = row.get("validation_feedback")
+        start = next((r for r in rows if r.get("stage") == "MODEL_REQUEST_PENDING"
+            and r.get("attempt") == row.get("attempt")), {})
+        exact_feedback_required = (start.get("owner_source_preconditions") or {}).get(
+            "generation_prerequisite_contract") == "existing-owner-binding-generation-v2"
+        has_feedback_identity = "validation_feedback_sha256" in row or "validation_feedback_bytes" in row
+        if isinstance(retained_feedback, str) and (has_feedback_identity or exact_feedback_required):
+            encoded_feedback = retained_feedback.encode()
+            if (row.get("validation_feedback_sha256") != sha256(encoded_feedback).hexdigest()
+                    or type(row.get("validation_feedback_bytes")) is not int
+                    or row["validation_feedback_bytes"] != len(encoded_feedback)):
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if row.get("repair_feedback_bound") is True:
             try:
                 bound_feedback = json.loads(row.get("validation_feedback") or "null")
@@ -2692,7 +2742,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     expected_feedback = _bind_repair_feedback(expected_feedback, rows, attempt,
                         revision, inventory, capabilities, original, ir=ir,
                         include_owner_preconditions=row.get("owner_repair_context_bound") is True)
-                    if row.get("validation_feedback") != expected_feedback:
+                    if not _same_recomputed_feedback(row.get("validation_feedback"), expected_feedback):
                         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
                 except ValueError as error:
                     raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT") from error
@@ -2721,7 +2771,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
             if isinstance(retained_feedback, dict) and "repair_feedback_binding" in retained_feedback:
                 feedback = _bind_repair_feedback(feedback, rows, attempt, revision, inventory, capabilities, None,
                     ir=ir, include_owner_preconditions=row.get("owner_repair_context_bound") is True)
-            if (diagnostics != bound or row.get("validation_feedback") != feedback
+            if (diagnostics != bound or not _same_recomputed_feedback(row.get("validation_feedback"), feedback)
                     or row.get("failed_predicate") != str(error)
                     or any(row.get(key) != bound["binding"][key] for key in
                         ("work_id", "work_reality_revision_id", "source_revision", "inventory_fingerprint", "exact_target_paths"))):
@@ -2734,7 +2784,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
             if next_start.get("stage") == "MODEL_REQUEST_PENDING" and next_start.get("attempt") == attempt + 1:
                 if next_start.get("capacity_observation") is not None:
                     continue  # All capacity-stopped requests are checked below.
-                if (next_start.get("feedback") != feedback
+                if (next_start.get("feedback") != row.get("validation_feedback")
                         or next_start.get("feedback_receipt_id") != row.get("receipt_id")):
                     raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     for start in rows:
@@ -3109,7 +3159,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                             and actual_preconditions.get("semantic_selection_input_contract") == "existing-primary-meaning-owner-reference-v2"):
                         # Opt in only after the adapter has returned its actual
                         # Owner contract. Never upgrade a legacy/replayed request.
-                        actual_preconditions["generation_prerequisite_contract"] = "existing-owner-binding-generation-v1"
+                        actual_preconditions["generation_prerequisite_contract"] = "existing-owner-binding-generation-v2"
                     source_contract = ("v3" if precondition_arguments["owner_preconditions"].get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v2" if precondition_arguments["owner_preconditions"].get(
                         "typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v1")
                 wire_metadata = metadata_builder(inventory, capabilities, validation_feedback=feedback,

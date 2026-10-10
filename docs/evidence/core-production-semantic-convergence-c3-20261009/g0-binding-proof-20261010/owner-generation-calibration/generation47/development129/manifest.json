@@ -1,0 +1,10 @@
+{
+  "persistent_root": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-129/evidence",
+  "source_overlay": true,
+  "live_model_calls": 0,
+  "files": {
+    "result.log": "4d8acf2aedf8ec0a8c5b012cabce65d1156e265aacfbb8d664915d0f54db651c",
+    "receipt.json": "add0480d1a676b6d732352d121ee02a0f74f58ecc85b0b2b97cffb406040845d",
+    "result.xml": "681c57cb01ab9fe47aaf2c4e7fe25bc9489e141c73d247f909dda2b8ae01b329"
+  }
+}

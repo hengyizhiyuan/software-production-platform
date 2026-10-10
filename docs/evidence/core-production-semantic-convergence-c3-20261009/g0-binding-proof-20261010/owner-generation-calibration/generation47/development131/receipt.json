@@ -1,0 +1,16 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 65.80471312906593,
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "container_id": "8ca90db8940434bd8574566cce01492be4eba6eae661c50b4e95fe1345725a8b",
+  "source_overlay": true,
+  "snapshot_sha256": "e6f00477df9f06c1c5343d70ffeb8ae1d1240174a9c90d103fae382a834662fe",
+  "nodes": [
+    "tests/test_c3_generation_binding_prerequisites.py",
+    "tests/test_c3_fulfillment_wire_feedback.py",
+    "tests/test_c3_fulfillment_provider_failures.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

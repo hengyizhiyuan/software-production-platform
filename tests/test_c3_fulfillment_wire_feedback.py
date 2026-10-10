@@ -173,7 +173,8 @@ def test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_c
 
 @pytest.mark.parametrize('change', ('raw', 'raw-sha', 'raw-bytes', 'inventory', 'attempt',
     'request-receipt', 'response-receipt', 'diagnostic-hash', 'violation', 'feedback',
-    'row-work', 'row-revision', 'row-source', 'row-paths', 'missing-diagnostics', 'duplicate-response', 'duplicate-validation'))
+    'row-work', 'row-revision', 'row-source', 'row-paths', 'missing-diagnostics', 'duplicate-response', 'duplicate-validation',
+    'feedback-reorder', 'feedback-sha', 'feedback-bytes', 'missing-feedback-identity'))
 def test_feedback_drift_stops_before_another_model_request(change):
     revision, ir, inventory, plan = controlled_capacity_case()
     provider, calls = provider_for_case(inventory, plan, checkpoint='first-validation')
@@ -192,6 +193,11 @@ def test_feedback_drift_stops_before_another_model_request(change):
     elif change == 'diagnostic-hash': diagnostics['diagnostic_fingerprint'] = '0'*64
     elif change == 'violation': diagnostics['violations'][0]['referenced_source'] = 0
     elif change == 'feedback': failed['validation_feedback'] += ' '
+    elif change == 'feedback-reorder': failed['validation_feedback'] = json.dumps(json.loads(failed['validation_feedback']),sort_keys=True)
+    elif change == 'feedback-sha': failed['validation_feedback_sha256']='0'*64
+    elif change == 'feedback-bytes': failed['validation_feedback_bytes']+=1
+    elif change == 'missing-feedback-identity':
+        failed.pop('validation_feedback_sha256'); failed.pop('validation_feedback_bytes')
     elif change == 'missing-diagnostics': failed.pop('predecode_diagnostics')
     elif change == 'duplicate-response': list.append(rows, deepcopy(response))
     elif change == 'duplicate-validation': list.append(rows, deepcopy(failed))

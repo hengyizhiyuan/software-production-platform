@@ -1,0 +1,15 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 75 items
+
+tests/test_c3_generation_binding_prerequisites.py ...................... [ 29%]
+..                                                                       [ 32%]
+tests/test_c3_fulfillment_wire_feedback.py ............................. [ 70%]
+.............                                                            [ 88%]
+tests/test_c3_fulfillment_provider_failures.py .........                 [100%]
+
+--------------------- generated xml file: /out/result.xml ----------------------
+============================= 75 passed in 51.74s ==============================

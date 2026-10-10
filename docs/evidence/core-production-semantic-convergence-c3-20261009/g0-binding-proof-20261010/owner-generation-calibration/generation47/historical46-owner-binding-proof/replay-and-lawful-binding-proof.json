@@ -1,0 +1,334 @@
+{
+  "qualification": "UNADMITTED_CONTROLLED_REPLAY_AND_OWNER_EXPRESSIBILITY_NOT_MODEL_SUCCESS",
+  "source_overlay": true,
+  "whole_lineage": "PASS",
+  "historical_snapshot_sha256": "a4bc8434d2afa99f3a383266d8f8d65147bb7cc4be02d83297eb31a8b6c81676",
+  "work_id": "a3938a73-9da7-5ba3-9056-6df739122a99",
+  "live_model_calls": 0,
+  "historical_records_unchanged": true,
+  "receipt_list_unchanged": true,
+  "historical_terminal_reason": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+  "historical_disposition": "REJECTED_UNRESOLVED_NO_BUDGET_REOPEN",
+  "counterfactual_removed_original_routes": [
+    9,
+    17,
+    25,
+    26
+  ],
+  "counterfactual_source_count": 20,
+  "counterfactual_binding_count": 27,
+  "counterfactual_owner_validation": "PASS_NECESSARY_CONTRACTS_ONLY",
+  "counterfactual_independent_review": "NOT_PERFORMED_NOT_ADMITTED",
+  "counterfactual_candidate_fingerprint": "c5e6357b0ca63844e8f7dd4f72020d01260b72a7ab2dceaf7c672e3002a4f4aa",
+  "sources": [
+    {
+      "ordinal": 0,
+      "source_ref": "semantic-fact:45d4c0bb-d0d9-53f2-a07a-9f188afef786",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 1,
+      "source_ref": "semantic-fact:690d4c15-d902-5b5c-9a1b-a012b1cf3800",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 2,
+      "source_ref": "semantic-fact:3540a8fa-751f-57c1-a5bd-247945f5ed7f",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 3,
+      "source_ref": "semantic-fact:31abad51-e0b3-507b-b847-4ed32e7026fe",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 4,
+      "source_ref": "ir-clause:32423ab2-e31d-5b00-8af5-ad0286c7cd4d:n1-qualification-goal:c1",
+      "bindings": [
+        {
+          "owner": "PRODUCT_SOURCE",
+          "phase": "CONTEXT_RETENTION",
+          "method": "RETAIN_AUTHORITATIVE_CONTEXT",
+          "gate": "work-reality:retained",
+          "state": "RETAINED_CONTEXT"
+        }
+      ]
+    },
+    {
+      "ordinal": 5,
+      "source_ref": "ir-clause:32423ab2-e31d-5b00-8af5-ad0286c7cd4d:n1-qualification-goal:c2",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE"
+        },
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 6,
+      "source_ref": "ir-clause:32423ab2-e31d-5b00-8af5-ad0286c7cd4d:n1-qualification-goal:c3",
+      "bindings": [
+        {
+          "owner": "PRODUCT_SOURCE",
+          "phase": "CONTEXT_RETENTION",
+          "method": "RETAIN_AUTHORITATIVE_CONTEXT",
+          "gate": "work-reality:retained",
+          "state": "RETAINED_CONTEXT"
+        }
+      ]
+    },
+    {
+      "ordinal": 7,
+      "source_ref": "ir-constraint:n1-exact-content-constraint:c4",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 8,
+      "source_ref": "ir-constraint:n1-scope-restriction:c5",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 9,
+      "source_ref": "ir-constraint:n1-verification-requirement:c6",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE"
+        },
+        {
+          "owner": "CANDIDATE",
+          "phase": "CANDIDATE_SEAL",
+          "method": "EXACT_SEALED_CANDIDATE",
+          "gate": "candidate-owner:sealed-after-verification",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 10,
+      "source_ref": "ir-constraint:n1-exclusions:c7",
+      "bindings": [
+        {
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "cloud-delivery:human-authorization-required",
+          "state": "BOUND_PENDING_EVIDENCE"
+        },
+        {
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "remote-delivery:human-authorization-required",
+          "state": "BOUND_PENDING_EVIDENCE"
+        },
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 11,
+      "source_ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:0",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 12,
+      "source_ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:1",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 13,
+      "source_ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:2",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE"
+        },
+        {
+          "owner": "CANDIDATE",
+          "phase": "CANDIDATE_SEAL",
+          "method": "EXACT_SEALED_CANDIDATE",
+          "gate": "candidate-owner:sealed-after-verification",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 14,
+      "source_ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:3",
+      "bindings": [
+        {
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "cloud-delivery:human-authorization-required",
+          "state": "BOUND_PENDING_EVIDENCE"
+        },
+        {
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "remote-delivery:human-authorization-required",
+          "state": "BOUND_PENDING_EVIDENCE"
+        },
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 15,
+      "source_ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:4",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 16,
+      "source_ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:5",
+      "bindings": [
+        {
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "cloud-delivery:human-authorization-required",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 17,
+      "source_ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:6",
+      "bindings": [
+        {
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "remote-delivery:human-authorization-required",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 18,
+      "source_ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:7",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    },
+    {
+      "ordinal": 19,
+      "source_ref": "work-constraint:d3696fb0-1c8f-5e5e-910a-319b1b71de28:8",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope",
+          "state": "BOUND_PENDING_EVIDENCE"
+        }
+      ]
+    }
+  ]
+}

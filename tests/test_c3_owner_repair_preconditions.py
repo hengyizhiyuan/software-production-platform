@@ -267,6 +267,9 @@ def test_bound_feedback_repairs_once_or_stops_drift_without_review(tamper):
     elif tamper=='legacy-feedback':
         # Simulate the previously supported receipt shape, without rewriting
         # any actual historical receipt or introducing a new request slot.
+        # That shape predates the original feedback byte-identity observation.
+        failed.pop('validation_feedback_sha256')
+        failed.pop('validation_feedback_bytes')
         failed.pop('owner_repair_context_bound')
         for row in provider._fulfillment_receipts:
             row.pop('owner_repair_context_contract', None)

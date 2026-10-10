@@ -119,7 +119,7 @@ def test_terminal_failure_preserves_exact_sources_and_same_basis_never_reopens_c
                 raw_operand_observation_contract="existing-original-wire-owner-operands-v1",
                 review_input_contract=_REVIEW_INPUT_CONTRACT,
                 semantic_selection_input_contract="existing-primary-meaning-owner-reference-v2",
-                generation_prerequisite_contract="existing-owner-binding-generation-v1"))
+                generation_prerequisite_contract="existing-owner-binding-generation-v2"))
         formation_runtime = ControlledRuntime(StructuredModelResult(output_text=json.dumps(wire),
             provider=ModelProvider.DEEPSEEK, requested_model="controlled", effective_model="controlled",
             request_id="request-controlled-formation", usage=ModelUsage(total_tokens=17),
