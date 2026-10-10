@@ -14,14 +14,14 @@ def test_independent_review_shares_contracts_without_losing_components_or_semant
     caps = a.fulfillment_capability_contracts()
     before = deepcopy((inventory, plan.model_dump(mode="json"), caps))
     view = p._review_input_view(inventory, plan, caps, {})
-    assert p._restore_review_component_contracts(view["component_index_table"], caps) == p._review_component_table(inventory, plan, caps)
+    assert p._restore_review_component_contracts(view["component_index_table"], caps) == p._review_component_table(inventory, plan, caps, full_fact_payload=True, route_scoped=True)
     assert p._restore_formation_inventory_view(view["immutable_inventory"], view.get("existing_ir_item_table", {})) == inventory
     assert len(view["component_index_table"]) == len(plan.routes)
     assert view["required_result_identity_slots"] == p._review_result_identity_slots(inventory, plan)
     assert (inventory, plan.model_dump(mode="json"), caps) == before
     # Every original component remains explicit; only repeated Owner contracts
     # move to their existing authoritative table, with no model output repair.
-    old = p._review_component_table(inventory, plan, caps)
+    old = p._review_component_table(inventory, plan, caps, full_fact_payload=True, route_scoped=True)
     assert len(json.dumps(view["component_index_table"]).encode()) < len(json.dumps(old).encode())
     record_property("original_comparison_bytes", len(json.dumps(old).encode()))
     record_property("shared_comparison_bytes", len(json.dumps(view["component_index_table"]).encode()))

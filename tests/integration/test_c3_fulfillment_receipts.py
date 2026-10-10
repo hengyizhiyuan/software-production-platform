@@ -580,7 +580,11 @@ def test_expanded_candidate_capacity_is_durable_without_repair_authority(postgre
         assert all(RuntimeStore(uow.session).human_authorization(r.id) is None for r in rows)
 
 
-def test_count_plan_review_role_is_durable_in_existing_native_receipts(postgres_database, tmp_path):
+@pytest.mark.parametrize("roles", [
+    ("COUNT_PLAN_PROPOSAL", "INDEPENDENT_COUNT_PLAN_REVIEW"),
+    ("SCOPED_PLAN_PROPOSAL", "INDEPENDENT_SCOPED_PLAN_REVIEW"),
+])
+def test_count_plan_review_role_is_durable_in_existing_native_receipts(postgres_database, tmp_path, roles):
     """Receipt persistence only; does not claim a counted Fact or Work is accepted."""
     from types import SimpleNamespace
     from uuid import uuid4
@@ -597,7 +601,7 @@ def test_count_plan_review_role_is_durable_in_existing_native_receipts(postgres_
         protected_context_obligations=())
     args=dict(database=postgres_database,work_id=work_id,work_revision_id=revision.id,pwu_id=pwu.id,attempt_id=attempt.id)
     recorder=VerificationCandidateReceipts(request,**args)
-    for role in ('COUNT_PLAN_PROPOSAL','INDEPENDENT_COUNT_PLAN_REVIEW'):
+    for role in roles:
         number=recorder.begin('controlled-count-role')
         recorder.observed('controlled-count-role',number,response('{"controlled_receipt_only":true}'))
         recorder.validated('controlled-count-role',number,checks=[{'controlled_receipt_only':True}],
@@ -606,7 +610,7 @@ def test_count_plan_review_role_is_durable_in_existing_native_receipts(postgres_
         before=NativeExecutionStore(uow.session).evidence_for_attempt(attempt.id)
     restored=VerificationCandidateReceipts(request,**args)
     terminal=restored.completed('controlled-count-role')
-    assert terminal['plan_review_role']=='INDEPENDENT_COUNT_PLAN_REVIEW'
+    assert terminal['plan_review_role']==roles[1]
     assert terminal['attempt']==2 and terminal['budget_limit']==2 and terminal['candidate_is_authority'] is False
     assert terminal['work_id']==str(work_id) and terminal['attempt_id']==str(attempt.id)
     with pytest.raises(ValueError,match='ALREADY_TERMINAL'):

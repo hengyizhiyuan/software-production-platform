@@ -529,6 +529,13 @@ _SOURCE_CONSUMER_INSTRUCTIONS = (
 
 def _primary_meaning_instructions(owner_preconditions):
     return (_SOURCE_CONSUMER_INSTRUCTIONS +
+        (" A semantic-component mismatch judges the exact submitted consumer, not merely its source "
+         "span or u operands. Consult submitted_consumer_comparison: preserving an erroneous capability "
+         "while changing r, u or an unrelated sibling does not repair that mismatch. Re-evaluate every "
+         "rejected contribution against original meaning and actual consumer contracts; propose the "
+         "lawful contribution(s), not a cosmetic edit. Feedback is a bound failed-review observation, "
+         "not a mandated replacement or a new fact."
+         if owner_preconditions.get("review_input_contract") == _REVIEW_INPUT_CONTRACT else "") +
         " The source table contains original meaning and geometry, not a fulfillment checklist. "
         "Select only the operations actually required by each contribution. After that semantic choice, "
         "resolve owner_prerequisites_ref to consult the full original Owner record. Its nonrejected "
@@ -544,7 +551,7 @@ def _primary_meaning_instructions(owner_preconditions):
         (" When failed_owner is INDEPENDENT_SEMANTIC_REVIEW_OUTPUT, the critic response failed "
          "its output contract; that is not a semantic rejection of the proposer. Preserve all lawful "
          "contributions while independent semantic judgment remains required."
-         if owner_preconditions.get("review_input_contract") == _REVIEW_INPUT_CONTRACT else "") +
+         if owner_preconditions.get("review_input_contract") in _REVIEW_INPUT_CONTRACTS else "") +
         (" Source basis is a qualified original proposition, not just an operation name. "
          "When q is non-null, its unchanged exact text determines the located basis: changing a/z "
          "alone cannot change its contribution or fill a coverage gap. The previous Wire claimed "
@@ -881,7 +888,7 @@ def _review_candidate_representation(inventory, candidate, capabilities):
         "candidate_representation": _FULFILLMENT_WIRE_VERSION}
 
 
-def _review_component_table(inventory, candidate, capabilities):
+def _review_component_table(inventory, candidate, capabilities, *, full_fact_payload=False, route_scoped=False):
     """Deterministically display the source-to-consumer comparison, no verdict.
 
     The compact candidate and original fingerprints remain intact. This view
@@ -910,9 +917,21 @@ def _review_component_table(inventory, candidate, capabilities):
             row["original_text_role"] = "EXACT_FACT_PROVENANCE; NOT_A_NEW_PARENT_INTENT_OR_CAPABILITY"
         if route.capability in consumers:
             row["consumer_operation_contract"] = consumers[route.capability]
+            if route_scoped:
+                # These are actual consumer capabilities, not a judgement or
+                # a predicted mapping of the original natural language.
+                row["submitted_consumer_proof_boundary"] = {
+                    "capability": route.capability,
+                    "phase": contracts[route.capability]["phase"],
+                    "evidence_method": contracts[route.capability]["evidence_method"],
+                    "operation": consumers[route.capability]["enforced_decision"],
+                    "cannot_prove": consumers[route.capability]["does_not_prove"],
+                    "judgement_object": "THIS_UNCHANGED_ROUTE; NOT_AN_IMAGINED_CONTENT_ROUTE",
+                    "provenance_support_is_completed_evidence": False}
         row["declared_fact_evidence_operands"] = [{
-            "source_ref": ref, "original_fact": {key: deepcopy(sources[ref]["payload"].get(key))
-                for key in ("fact_id", "relation", "value", "scope", "qualifiers")},
+            "source_ref": ref, "original_fact": (deepcopy(sources[ref]["payload"]) if full_fact_payload else
+                {key: deepcopy(sources[ref]["payload"].get(key))
+                 for key in ("fact_id", "relation", "value", "scope", "qualifiers")}),
             "submitted_fact_routes": [{"capability": r.capability,
                 "target_paths": list(r.target_paths),
                 "linked_fact_refs": [] if r.component_basis is None else list(r.component_basis.linked_fact_refs),
@@ -942,7 +961,9 @@ def _review_result_identity_slots(inventory, candidate):
             "component_result_count": len(components), "component_results": components}
 
 
-_REVIEW_INPUT_CONTRACT = "existing-lossless-review-input-v1"
+_REVIEW_INPUT_LEGACY_CONTRACT = "existing-lossless-review-input-v1"
+_REVIEW_INPUT_CONTRACT = "existing-route-scoped-review-input-v2"
+_REVIEW_INPUT_CONTRACTS = {_REVIEW_INPUT_LEGACY_CONTRACT, _REVIEW_INPUT_CONTRACT}
 
 
 def _review_input_view(inventory, candidate, capabilities, owner_context):
@@ -952,7 +973,11 @@ def _review_input_view(inventory, candidate, capabilities, owner_context):
     a new response schema or a critic verdict. Components and their original
     text remain individually visible. All references resolve to existing IDs.
     """
-    original = _review_component_table(inventory, candidate, capabilities)
+    selected_contract = owner_context.get("existing_owner_source_preconditions", {}).get(
+        "review_input_contract", _REVIEW_INPUT_CONTRACT)
+    original = _review_component_table(inventory, candidate, capabilities,
+        full_fact_payload=selected_contract == _REVIEW_INPUT_CONTRACT,
+        route_scoped=selected_contract == _REVIEW_INPUT_CONTRACT)
     rows = deepcopy(original)
     contracts = {c["capability"]: c for c in capabilities}
     consumers = {c["capability"]: c for c in _existing_consumer_contracts(capabilities)}
@@ -994,8 +1019,10 @@ def _review_input_view(inventory, candidate, capabilities, owner_context):
         if _restore_review_owner_domains(shared, owner) != full:
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_INPUT_IDENTITY_DRIFT")
         owner_context["existing_owner_binding_domains"] = shared
-    return {"immutable_inventory": view, **({"existing_ir_item_table": items} if items else {}),
-        **owner_context, "review_input_contract": _REVIEW_INPUT_CONTRACT,
+    selected_contract = owner_context.get("existing_owner_source_preconditions", {}).get(
+        "review_input_contract", _REVIEW_INPUT_CONTRACT)
+    payload = {"immutable_inventory": view, **({"existing_ir_item_table": items} if items else {}),
+        **owner_context, "review_input_contract": selected_contract,
         "component_index_table": rows,
         "component_comparison_fingerprint": canonical_fingerprint(original),
         "required_result_identity_slots": _review_result_identity_slots(inventory, candidate),
@@ -1004,6 +1031,10 @@ def _review_input_view(inventory, candidate, capabilities, owner_context):
         "existing_consumer_contracts": list(consumers.values()),
         "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
         "components_fingerprint": fulfillment_components_fingerprint(candidate)}
+    if selected_contract == _REVIEW_INPUT_CONTRACT:
+        payload = {"component_index_table": payload["component_index_table"],
+                   **{key:value for key,value in payload.items() if key != "component_index_table"}}
+    return payload
 
 
 def _restore_review_component_contracts(rows, capabilities):
@@ -1100,7 +1131,7 @@ def _review_schema_failure_observation(output, inventory, candidate):
         "repair_boundary": "INVALID_CRITIC_RESPONSE_IS_NOT_A_REJECTED_SEMANTIC_MAPPING; NO_VERDICT_BACKFILL"}
 
 
-def _review_output_schema(inventory, candidate):
+def _review_output_schema(inventory, candidate, *, route_scoped=False):
     """Request only existing review identities; no semantic answer is supplied.
 
     The canonical review and historical receipt shapes stay unchanged. The
@@ -1159,6 +1190,43 @@ def _review_output_schema(inventory, candidate):
             branches.append(branch)
         schema["properties"]["component_results"] = {"type": "array", "items": {"anyOf": branches},
             "minItems": len(candidate.routes), "maxItems": len(candidate.routes)}
+    if route_scoped and all(r.component_basis is not None for r in candidate.routes):
+        # Each existing array position is a distinct submitted comparison. Do
+        # not ask the critic to select an identity from a capability-wide pool
+        # while judging a different component. No verdict is predetermined.
+        from spg.application.governed_obligations import fulfillment_capability_contracts
+        contracts = {c["capability"]: c for c in fulfillment_capability_contracts()}
+        components = []
+        for ordinal, route in enumerate(candidate.routes):
+            entry = deepcopy(schema["$defs"]["FulfillmentSemanticComponentReview"])
+            props = entry["properties"]
+            props["component_id"]["enum"] = [fulfillment_component_id(route, inventory["inventory_fingerprint"])]
+            props["capability"]["enum"] = [route.capability]
+            props["context_only"]["enum"] = [route.capability == "RETAIN_CONTEXT"]
+            contract = contracts[route.capability]
+            props["reason"]["description"] = (
+                f"Compare component_index_table[{ordinal}] with ONLY its submitted consumer "
+                f"{route.capability}, phase {contract['phase']}, method {contract['evidence_method']}. "
+                "State what that actual consumer proves and what original contribution it cannot prove. "
+                "Do not judge an imagined repaired route or borrow another source's content consumer. "
+                "Same-source complementary routes and explicitly declared Fact dependencies may be "
+                "considered only as actually submitted. Source-wide completeness is judged separately.")
+            components.append(entry)
+        schema["properties"]["component_results"] = {"type": "array", "prefixItems": components,
+            "items": False, "minItems": len(components), "maxItems": len(components)}
+        sources = []
+        for source in inventory["sources"]:
+            entry = deepcopy(schema["$defs"]["FulfillmentSemanticSourceReview"])
+            entry["properties"]["source_ref"]["enum"] = [source["source_ref"]]
+            sources.append(entry)
+        schema["properties"]["source_results"] = {"type": "array", "prefixItems": sources,
+            "items": False, "minItems": len(sources), "maxItems": len(sources)}
+        # Compare the submitted consumers first, then assess the union under
+        # each original source. This is still one independent logical review.
+        fields = schema["properties"]
+        schema["properties"] = {k: fields[k] for k in ("inventory_fingerprint", "candidate_fingerprint",
+            "components_fingerprint", "component_results", "source_results")}
+        schema["required"] = list(schema["properties"])
     return schema
 
 
@@ -1497,7 +1565,7 @@ class ModelFulfillmentCandidateProvider:
                     "not a semantic rejection of the submitted mapping. Preserve every lawful contribution; "
                     "do not add unresolved or enumerate alternatives to compensate for missing critic results. "
                     "Semantic equivalence is still unknown and requires the next independent review."
-                    if (owner_preconditions or {}).get("review_input_contract") == _REVIEW_INPUT_CONTRACT else "")
+                    if (owner_preconditions or {}).get("review_input_contract") in _REVIEW_INPUT_CONTRACTS else "")
                     if (owner_preconditions or {}).get("generation_view_contract") in _SOURCE_CONSUMER_FEEDBACK_CONTRACTS else "")) if joined_view else (
                     "You propose a derived fulfillment plan for immutable admitted engineering meaning. "
                     "If an inventory source payload has existing_ir_item_ref, resolve it in existing_ir_item_table: "
@@ -1732,7 +1800,7 @@ class ModelFulfillmentCandidateProvider:
             "existing_owner_source_preconditions": owner_preconditions,
             "existing_owner_binding_domains": _formation_binding_choices(inventory, capabilities, owner_preconditions),
             "owner_preconditions_fingerprint": canonical_fingerprint(owner_preconditions)}
-        joined_review = (owner_preconditions or {}).get("review_input_contract") == _REVIEW_INPUT_CONTRACT
+        joined_review = (owner_preconditions or {}).get("review_input_contract") in _REVIEW_INPUT_CONTRACTS
         review_input = (_review_input_view(inventory, candidate, capabilities, review_owner_context)
             if joined_review else {"immutable_inventory": inventory, **review_owner_context,
                 "required_result_identity_slots": _review_result_identity_slots(inventory, candidate),
@@ -1745,7 +1813,9 @@ class ModelFulfillmentCandidateProvider:
         runtime = self.runtime_factory()
         try:
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
-                instructions=(("The request uses existing-lossless-review-input-v1: resolve each "
+                instructions=((("The request losslessly shares existing contracts: resolve each "
+                    if (owner_preconditions or {}).get("review_input_contract") == _REVIEW_INPUT_CONTRACT else
+                    "The request uses existing-lossless-review-input-v1: resolve each ") +
                     "existing_capability_contract_ref in existing_capability_contracts by its exact capability, "
                     "and each existing_consumer_contract_ref in existing_consumer_contracts. These references "
                     "replace identical repeated contracts only; every component and its original text remains "
@@ -1844,7 +1914,7 @@ class ModelFulfillmentCandidateProvider:
                     "A whole-source reuse cannot conceal a lost semantic component. This review is only "
                     "derived-plan semantic validation, not Assurance, Verification PASS, a fact or Human authority.")),
                 input_text=json.dumps(review_input, ensure_ascii=False),
-                output_schema=_review_output_schema(inventory, candidate))
+                output_schema=_review_output_schema(inventory, candidate, route_scoped=(owner_preconditions or {}).get("review_input_contract") == _REVIEW_INPUT_CONTRACT))
             self.last_observation = {"request_id": result.request_id, "provider": result.provider.value,
                 "requested_model": result.requested_model, "effective_model": result.effective_model,
                 "usage": asdict(result.usage), "timing": asdict(result.timing),
