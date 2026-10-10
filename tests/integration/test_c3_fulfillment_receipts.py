@@ -129,7 +129,7 @@ def test_actual_compact_observation_replays_from_postgresql_without_repeating_fo
             output = declared.review(inventory, plan).model_dump_json()
         else:
             plan = declared.form(inventory, payload["existing_capability_contracts"],
-                validation_feedback=payload.get("same_basis_validation_feedback"), owner_preconditions=payload.get("owner_source_preconditions"))
+                validation_feedback=payload.get("same_basis_validation_feedback"))
             wire, _ = controlled_wire(inventory, plan, feedback=payload.get("same_basis_validation_feedback"), owner_preconditions=payload.get("owner_source_preconditions"))
             output = json.dumps(wire, ensure_ascii=False)
         return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
