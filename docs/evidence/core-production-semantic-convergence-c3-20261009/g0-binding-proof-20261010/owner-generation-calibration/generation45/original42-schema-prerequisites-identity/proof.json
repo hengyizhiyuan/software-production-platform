@@ -1,0 +1,26 @@
+{
+  "qualification": "CONTROLLED_ORIGINAL_WIRE_SCHEMA_FORENSICS_NOT_MODEL_SUCCESS",
+  "inventory_fingerprint": "dddddf753d0e752c80eddd6b993374dba178ddd04cd005f50cec5576335023a5",
+  "sources": 19,
+  "wire_sha256": "a0e7791729159b9e7169e98f5f612ba6042f932a01fa2856a8d037dfa5895069",
+  "historical_receipts_unchanged": true,
+  "model_calls": 0,
+  "semantic_review": false,
+  "schemas": {
+    "historical": {
+      "bytes": 5475,
+      "source4_actual_whole_background_route_eligible": true
+    },
+    "current": {
+      "bytes": 7383,
+      "source4_actual_whole_background_route_eligible": false
+    }
+  },
+  "schema_owner_basis_request_receipt": "2c130ad3-d0e4-410b-8718-e4c3f2b94e54",
+  "wire_attempt": 2,
+  "wire_request_receipt": "6191a04a-f6a8-4510-bc4b-310ad8a68678",
+  "wire_response_receipt": "fc5a08f1-4170-4f31-ad59-11d061cb3115",
+  "original_wire_request_fingerprint": "ba087edfd27ccadb35c168f9c8b8e73b1615a259519149196fce2d89a2f69c93",
+  "original_wire_table_fingerprint": "d7c81d73aa28057a46b5e7c7f5fca1a617cd94420faf198c7b8d608903b22d85",
+  "identity_annotation_corrects": "original42-schema-prerequisites/proof.json: request referred to initial schema Owner basis, not attempt-2 Wire request; no historical Owner/Wire mutation"
+}

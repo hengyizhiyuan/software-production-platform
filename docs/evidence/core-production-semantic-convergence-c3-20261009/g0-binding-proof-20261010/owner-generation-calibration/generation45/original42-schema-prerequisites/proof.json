@@ -1,0 +1,20 @@
+{
+  "qualification": "CONTROLLED_ORIGINAL_WIRE_SCHEMA_FORENSICS_NOT_MODEL_SUCCESS",
+  "inventory_fingerprint": "dddddf753d0e752c80eddd6b993374dba178ddd04cd005f50cec5576335023a5",
+  "sources": 19,
+  "wire_sha256": "a0e7791729159b9e7169e98f5f612ba6042f932a01fa2856a8d037dfa5895069",
+  "request": "2c130ad3-d0e4-410b-8718-e4c3f2b94e54",
+  "historical_receipts_unchanged": true,
+  "model_calls": 0,
+  "semantic_review": false,
+  "schemas": {
+    "historical": {
+      "bytes": 5475,
+      "source4_actual_whole_background_route_eligible": true
+    },
+    "current": {
+      "bytes": 7383,
+      "source4_actual_whole_background_route_eligible": false
+    }
+  }
+}

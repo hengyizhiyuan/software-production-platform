@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /fixture-correction
+plugins: anyio-4.14.2
+collected 19 items
+
+tests/test_c3_fulfillment_provider_failures.py .........                 [ 47%]
+tests/test_c3_generation_binding_prerequisites.py ..........             [100%]
+
+--------------------- generated xml file: /out/result.xml ----------------------
+============================= 19 passed in 14.44s ==============================

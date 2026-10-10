@@ -2567,9 +2567,11 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                 or preconditions.get("generation_view_contract") not in (None, "existing-lossless-source-consumer-input-v1", "existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3")
                 or preconditions.get("typed_prerequisite_contract") not in (None, "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11")):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
-        if row.get("owner_source_preconditions") is not None and (
-                row.get("stage") not in {"MODEL_REQUEST_PENDING", "MODEL_RESPONSE_OBSERVED"}
-                or preconditions != _owner_source_preconditions(revision, ir, inventory, capabilities,
+        if preconditions is not None:
+            if row.get("stage") not in {"MODEL_REQUEST_PENDING", "MODEL_RESPONSE_OBSERVED"}:
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+            try:
+                restored_preconditions = _owner_source_preconditions(revision, ir, inventory, capabilities,
                     include_syntax_observations=preconditions.get("syntax_observation_contract") is not None,
                     syntax_observation_contract=preconditions.get("syntax_observation_contract"),
                     include_operand_observations=preconditions.get("operand_observation_contract") is not None,
@@ -2579,8 +2581,17 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     raw_operand_observation_contract=preconditions.get("raw_operand_observation_contract"),
                     review_input_contract=preconditions.get("review_input_contract"),
                     semantic_selection_input_contract=preconditions.get("semantic_selection_input_contract"),
-                    generation_prerequisite_contract=preconditions.get("generation_prerequisite_contract"))):
-            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                    generation_prerequisite_contract=preconditions.get("generation_prerequisite_contract"))
+            except ValueError as error:
+                # An individually known marker can still form an invalid
+                # restored contract combination. Preserve the existing
+                # durable identity stop; do not let it escape or reopen calls.
+                if str(error) != "OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID":
+                    raise
+                raise _FulfillmentWireReceiptIdentityError(
+                    "OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT") from error
+            if preconditions != restored_preconditions:
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if (row.get("stage") == "MODEL_RESPONSE_OBSERVED" and row.get("candidate_retained") is True
                 and any(key in row for key in _FULFILLMENT_WIRE_METADATA_KEYS)):
             # Successful terminal replay must check the original request too,

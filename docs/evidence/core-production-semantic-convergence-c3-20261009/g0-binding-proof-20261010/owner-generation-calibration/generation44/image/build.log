@@ -1,0 +1,91 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.c3
+#1 transferring dockerfile: 4.00kB 0.0s done
+#1 DONE 0.2s
+
+#2 [internal] load metadata for docker.io/library/watt-c3-continuation-dependency-base:6c1f48e-20261009
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 0.0s
+#3 transferring context: 2B 0.0s done
+#3 DONE 0.2s
+
+#4 [ 1/19] FROM docker.io/library/watt-c3-continuation-dependency-base:6c1f48e-20261009
+#4 DONE 0.0s
+
+#5 [ 2/19] WORKDIR /app
+#5 CACHED
+
+#6 [internal] load build context
+#6 ...
+
+#7 [ 3/19] RUN test "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14" = "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14"     && printf '%s  /app/uv.lock\n' '279fba19bb5a40457739e49408137190d3d6f8e2e7171a273b3e742bae12a038' | sha256sum --check --status
+#7 DONE 1.2s
+
+#6 [internal] load build context
+#6 transferring context: 19.58MB 2.0s done
+#6 DONE 2.1s
+
+#8 [ 4/19] RUN rm -rf /app/src /app/migrations /app/docker /qualification     /opt/c2-owners /opt/c2-test-deps /opt/c2-build /opt/c3-owners /opt/c3-test-deps /opt/c3-build
+#8 DONE 1.2s
+
+#9 [ 5/19] COPY watt/pyproject.toml watt/uv.lock watt/alembic.ini watt/README.md /app/
+#9 DONE 1.2s
+
+#10 [ 6/19] COPY watt/src/ /app/src/
+#10 DONE 1.0s
+
+#11 [ 7/19] COPY watt/migrations/ /app/migrations/
+#11 DONE 1.0s
+
+#12 [ 8/19] COPY watt/docker/ /app/docker/
+#12 DONE 0.5s
+
+#13 [ 9/19] COPY watt/tests/ /qualification/tests/
+#13 DONE 0.9s
+
+#14 [10/19] COPY watt/migrations/ /qualification/migrations/
+#14 DONE 0.6s
+
+#15 [11/19] COPY watt/pyproject.toml watt/alembic.ini /qualification/
+#15 DONE 0.5s
+
+#16 [12/19] COPY guardian/src/ /opt/c3-owners/guardian/src/
+#16 DONE 0.8s
+
+#17 [13/19] COPY ecf/src/ /opt/c3-owners/ecf/src/
+#17 DONE 0.8s
+
+#18 [14/19] COPY ecf-unsupported/src/ /qualification/ecf-current/src/
+#18 DONE 0.5s
+
+#19 [15/19] COPY test-deps/ /opt/c3-test-deps/
+#19 DONE 1.2s
+
+#20 [16/19] COPY watt/docs/evidence/core-production-semantic-convergence-c3-20261009/Dockerfile.c3 /opt/c3-build/Dockerfile.c3
+#20 DONE 0.5s
+
+#21 [17/19] COPY watt/docs/evidence/core-production-semantic-convergence-c3-20261009/attest_c3_image.py /opt/c3-build/attest_c3_image.py
+#21 DONE 0.4s
+
+#22 [18/19] COPY c3-source-identity.json /opt/c3-build/c3-source-identity.json
+#22 DONE 0.7s
+
+#23 [19/19] RUN python /opt/c3-build/attest_c3_image.py --build-inputs-only     && uv sync --locked --no-dev --no-editable --reinstall-package spg-runtime --offline     && python /opt/c3-build/attest_c3_image.py --output /opt/c3-build/build-attestation.json
+#23 2.559 {"finding_code": "DEPENDENCY_LOCK_MISMATCH", "relative_path": null, "status": "FAIL"}
+#23 ERROR: process "/bin/sh -c python /opt/c3-build/attest_c3_image.py --build-inputs-only     && uv sync --locked --no-dev --no-editable --reinstall-package spg-runtime --offline     && python /opt/c3-build/attest_c3_image.py --output /opt/c3-build/build-attestation.json" did not complete successfully: exit code: 1
+------
+ > [19/19] RUN python /opt/c3-build/attest_c3_image.py --build-inputs-only     && uv sync --locked --no-dev --no-editable --reinstall-package spg-runtime --offline     && python /opt/c3-build/attest_c3_image.py --output /opt/c3-build/build-attestation.json:
+2.559 {"finding_code": "DEPENDENCY_LOCK_MISMATCH", "relative_path": null, "status": "FAIL"}
+------
+Dockerfile.c3:70
+--------------------
+  69 |     
+  70 | >>> RUN python /opt/c3-build/attest_c3_image.py --build-inputs-only \
+  71 | >>>     && uv sync --locked --no-dev --no-editable --reinstall-package spg-runtime --offline \
+  72 | >>>     && python /opt/c3-build/attest_c3_image.py --output /opt/c3-build/build-attestation.json
+  73 |     
+--------------------
+ERROR: failed to solve: process "/bin/sh -c python /opt/c3-build/attest_c3_image.py --build-inputs-only     && uv sync --locked --no-dev --no-editable --reinstall-package spg-runtime --offline     && python /opt/c3-build/attest_c3_image.py --output /opt/c3-build/build-attestation.json" did not complete successfully: exit code: 1
