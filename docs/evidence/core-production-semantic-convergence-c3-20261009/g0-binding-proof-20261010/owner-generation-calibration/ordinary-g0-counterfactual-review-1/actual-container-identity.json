@@ -1,0 +1,48 @@
+{
+  "captured_at_utc": "2026-10-10T11:13:41.421174+00:00",
+  "actual_container_id": "a0f03596bbb227912534c6b5f4796ce2680fa304abfcd43d616a4fc1791323fb",
+  "actual_image_id": "sha256:0b2dfaa0ed6c456fdac29783702201f91e784ee047307da4aad01d63969059b3",
+  "requested_image_id": "sha256:0b2dfaa0ed6c456fdac29783702201f91e784ee047307da4aad01d63969059b3",
+  "source": "f5242928983fec8c2a9ff44c06a999b134b9d199",
+  "installed_attestation_sha256": "fd8579776100743abfbf9bb16de107673672ccac38193a16c015938d724c884f",
+  "controller_sha256": "2b94333cf34fdc431faf114843b517a0943b7b260eb617e42ad16866a23c2239",
+  "mounts": [
+    {
+      "source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation3-qualified-20261010/ordinary-g0-counterfactual-review-1/private/basis.json",
+      "destination": "/basis.json",
+      "rw": false,
+      "type": "bind"
+    },
+    {
+      "source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation3-qualified-20261010/verify_counterfactual.py",
+      "destination": "/verify-live.py",
+      "rw": false,
+      "type": "bind"
+    },
+    {
+      "source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation3-qualified-20261010/final-image/evidence/actual-imports.json",
+      "destination": "/qualified-imports.json",
+      "rw": false,
+      "type": "bind"
+    },
+    {
+      "source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation3-qualified-20261010/ordinary-g0-counterfactual-review-1/evidence",
+      "destination": "/c3-evidence",
+      "rw": true,
+      "type": "bind"
+    },
+    {
+      "source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation3-qualified-20261010/ordinary-g0-counterfactual-review-1/private",
+      "destination": "/c3-private",
+      "rw": true,
+      "type": "bind"
+    }
+  ],
+  "new_work_created": false,
+  "business_database_access": false,
+  "model_limits": {
+    "formation": 2,
+    "feedback": 1,
+    "logical": 4
+  }
+}

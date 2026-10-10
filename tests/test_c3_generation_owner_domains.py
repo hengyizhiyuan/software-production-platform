@@ -202,3 +202,53 @@ def test_invented_source_kind_in_original_fact_view_is_rejected():
     substituted["sources"][0]["kind"] = "WORK_CONSTRAINT"
     with pytest.raises(_FulfillmentWireReceiptIdentityError, match="SOURCE_TABLE_IDENTITY_DRIFT"):
         _formation_source_table(context, inventory=substituted)
+
+
+def test_review_generation_identity_domains_do_not_supply_or_repair_semantic_verdicts():
+    from spg.providers.fulfillment_candidate import _review_output_schema
+    from spg.domain.governed_obligation import fulfillment_candidate_fingerprint, fulfillment_components_fingerprint, fulfillment_component_id
+    _, _, inventory, plan, _, _ = case()
+    schema = _review_output_schema(inventory, plan)
+    assert schema["properties"]["candidate_fingerprint"]["enum"] == [fulfillment_candidate_fingerprint(plan)]
+    assert schema["properties"]["components_fingerprint"]["enum"] == [fulfillment_components_fingerprint(plan)]
+    expected = {(fulfillment_component_id(r, inventory["inventory_fingerprint"]), r.capability) for r in plan.routes}
+    observed = set()
+    for branch in schema["properties"]["component_results"]["items"]["anyOf"]:
+        props = branch["properties"]
+        capability, = props["capability"]["enum"]
+        observed.update((c, capability) for c in props["component_id"]["enum"])
+        assert props["context_only"]["enum"] == [capability == "RETAIN_CONTEXT"]
+        for field in ("complete_and_equivalent", "nonredundant", "owner_phase_evidence_valid"):
+            assert props[field]["type"] == "boolean" and "enum" not in props[field]
+    assert observed == expected
+    assert schema["properties"]["component_results"]["minItems"] == len(plan.routes)
+    assert schema["properties"]["source_results"]["maxItems"] == len(inventory["sources"])
+
+
+def test_wrong_review_identity_and_real_semantic_rejection_still_fail_without_backfill():
+    from tests.test_c3_semantic_contract_calibration import review
+    from spg.application.governed_obligations import validate_projection_candidate
+    from spg.domain.governed_obligation import FulfillmentSemanticReviewCandidate
+    revision, ir, inventory, plan, _, _ = case()
+    verdict = review(inventory, plan)
+    raw = verdict.model_dump(mode="json")
+    raw["component_results"][0]["component_id"] = raw["component_results"][0]["component_id"][:-2]
+    with pytest.raises(ValueError): FulfillmentSemanticReviewCandidate.model_validate(raw)
+    rejected = verdict.model_copy(update={"component_results": tuple(r.model_copy(update={
+        "complete_and_equivalent": False, "reason": "Controlled independent rejection of unsupported meaning."})
+        if r.capability == "RETAIN_CONTEXT" else r for r in verdict.component_results)})
+    with pytest.raises(ValueError, match="SEMANTIC_COMPONENT_MISMATCH"):
+        validate_projection_candidate(plan, revision, ir, inventory, semantic_review=rejected)
+
+
+def test_legacy_review_shape_is_not_rewritten_by_generation_constraints():
+    from spg.providers.fulfillment_candidate import _review_output_schema
+    from spg.domain.governed_obligation import FulfillmentSemanticReviewCandidate
+    _, _, inventory, plan, _, _ = case()
+    legacy = plan.model_copy(update={"routes": tuple(r.model_copy(update={"component_basis": None}) for r in plan.routes)})
+    schema = _review_output_schema(inventory, legacy)
+    assert "anyOf" in schema["properties"]["component_results"]
+    original = FulfillmentSemanticReviewCandidate(inventory_fingerprint=inventory["inventory_fingerprint"],
+        candidate_fingerprint="a" * 64, components_fingerprint="b" * 64,
+        source_results=({"source_ref": inventory["sources"][0]["source_ref"], "complete_and_equivalent": True, "reason": "Legacy receipt retained."},))
+    assert "component_results" not in original.model_dump(mode="json")

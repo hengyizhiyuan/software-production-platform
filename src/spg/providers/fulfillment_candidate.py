@@ -491,6 +491,41 @@ def _review_component_table(inventory, candidate, capabilities):
     return rows
 
 
+def _review_output_schema(inventory, candidate):
+    """Request only existing review identities; no semantic answer is supplied.
+
+    The canonical review and historical receipt shapes stay unchanged. The
+    decoder and Owner independently reject missing, duplicate or drifted IDs,
+    even if a Provider ignores these necessary generation constraints.
+    """
+    from spg.providers.semantic_wire import _provider_strict_output_schema
+    schema = _provider_strict_output_schema(FulfillmentSemanticReviewCandidate.model_json_schema())
+    for field, value in (("inventory_fingerprint", inventory["inventory_fingerprint"]),
+                         ("candidate_fingerprint", fulfillment_candidate_fingerprint(candidate)),
+                         ("components_fingerprint", fulfillment_components_fingerprint(candidate))):
+        schema["properties"][field]["enum"] = [value]
+    refs = [s["source_ref"] for s in inventory["sources"]]
+    schema["$defs"]["FulfillmentSemanticSourceReview"]["properties"]["source_ref"]["enum"] = refs
+    schema["properties"]["source_results"].update(minItems=len(refs), maxItems=len(refs))
+    if all(r.component_basis is not None for r in candidate.routes):
+        by_capability = {}
+        for route in candidate.routes:
+            by_capability.setdefault(route.capability, set()).add(
+                fulfillment_component_id(route, inventory["inventory_fingerprint"]))
+        branches = []
+        for capability, ids in by_capability.items():
+            branch = deepcopy(schema["$defs"]["FulfillmentSemanticComponentReview"])
+            branch["properties"]["component_id"]["enum"] = sorted(ids)
+            branch["properties"]["capability"]["enum"] = [capability]
+            # This field describes the proposed disposition, not its legality.
+            # complete/equivalent and the other critic judgements stay open.
+            branch["properties"]["context_only"]["enum"] = [capability == "RETAIN_CONTEXT"]
+            branches.append(branch)
+        schema["properties"]["component_results"] = {"type": "array", "items": {"anyOf": branches},
+            "minItems": len(candidate.routes), "maxItems": len(candidate.routes)}
+    return schema
+
+
 def _fulfillment_wire_route_observations(output, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
     """Read exact raw routes for Owner diagnostics, never a partial Candidate.
 
@@ -899,7 +934,15 @@ class ModelFulfillmentCandidateProvider:
                     "negative clause meaning; absent typed effects must remain absent. Do not infer permissions from absence of logs. Reject missing, "
                     "wrong or unsupported semantic correspondence. UNRESOLVED preserves uncertainty. Return only the "
                     "review candidate with exact supplied fingerprints and one result per source, plus one "
-                    "component_results entry per supplied (component_id, capability). Verify component nonredundancy, "
+                    "component_results entry per supplied (component_id, capability). Component nonredundancy is "
+                    "judged within its exact original source identity: reject repeated or semantically duplicate "
+                    "proposals for the same source contribution, not faithful traces of distinct original sources. "
+                    "A sole legitimate RETAIN_CONTEXT binding is necessary retention, not redundant merely "
+                    "because it performs no executable check. Nor does an equivalent sibling Fact make its "
+                    "original clause or derived constraint dispensable. Complementary consumers for a mixed "
+                    "source may be legitimate; unexplained duplicate checks or conflicting dispositions are not. "
+                    "If nonredundant=false, explain the actual competing same-source component in reason, "
+                    "not simply that the source is context. Verify "
                     "exact meaning, all qualifiers, legitimate context-only disposition and actual Owner/Phase/Evidence "
                     "sufficiency. A whole-source reuse cannot conceal a lost semantic component. This review is only "
                     "derived-plan semantic validation, not Assurance, Verification PASS, a fact or Human authority."),
@@ -910,7 +953,7 @@ class ModelFulfillmentCandidateProvider:
                     "existing_consumer_contracts": _existing_consumer_contracts(capabilities),
                     "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
                     "components_fingerprint": fulfillment_components_fingerprint(candidate)}, ensure_ascii=False),
-                output_schema=_provider_strict_output_schema(FulfillmentSemanticReviewCandidate.model_json_schema()))
+                output_schema=_review_output_schema(inventory, candidate))
             self.last_observation = {"request_id": result.request_id, "provider": result.provider.value,
                 "requested_model": result.requested_model, "effective_model": result.effective_model,
                 "usage": asdict(result.usage), "timing": asdict(result.timing),
