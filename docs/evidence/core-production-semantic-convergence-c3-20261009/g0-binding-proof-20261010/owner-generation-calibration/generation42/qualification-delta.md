@@ -1,0 +1,19 @@
+# Generation42 qualification delta
+
+Frozen source671dc10becbe9924e39c306d51e91da0e80dcace / tree808b0a042cefa20ca0d54de5656429887d2c768a / actual image sha256:e39081e40da7d0f8054f1da0c533e168d59f1ae5f7993bb5513f062f7fbe4f1f. Guardian76c1e87a1b29d151f4ed949748e3298f2169c5b1, ECF5aa4f8833c359c15bd059eda5972aa3915bcc18c unchanged. No source overlay in final qualification.
+
+- Development121:29PASS/1fixtureFAIL; current prohibition was legal and did not yield the expected negative predicate. Development122:212PASS. Development123 after strict new/legacy feedback version pair binding:413PASS. All original failures retained; source-overlay checks are not exact-image qualification.
+- Build53.6144 seconds; actual installed imports attest exact three Owner identities. Installed738PASS/0FAIL/0ERROR/0SKIP.
+- Fresh isolated PostgreSQL + actual C1 Guardian contract40PASS/0SKIP; migration20261007_72;308.854 wall seconds; fixture database c1_contract_continuity, independent credentials, own PostgreSQL stopped, volume retained. No original/production database access.
+- Actual v1–v4 Reviewer requests remain byte-identical (input/instructions/schema). Initial compatibility-controller TypeError passed a new optional parameter to the historical function; private error and stop receipt retained. Corrected controller, unchanged application/image, verified all four legacy versions. New v5 input118935 bytes, same schema5541569e678c4e7b1f6572a9fe858ebbc06acfc6195a6677cd966b80a53af7a1.
+- Historical ordinary41 wire-feedback lineage revalidated with zero model calls; immutable receipts unchanged. Both request/response feedback markers forcibly upgraded in an isolated counterfactual copy were rejected with OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT. Existing source support domains identical; exact original Admission derivations separately recorded. Prefix diagnostics are counterfactual only and never admitted.
+
+## Actual independent negative Review: STOPPED, not semantic qualification
+
+One logical Review/one transmission, HTTP completed; input53444/output4829/reasoning0/cache28288/total58273 actual tokens. Same immutable ordinary37 Candidate fingerprint2e6a8ea09541ce7bf0eec5bcbff0dc358356d6e0f7869863c7964ebc7e41d294,22 required components. Raw output SHA1118b90b0b2159c6225407bd7c8a2fc5e91474fbb4d5739946c6d70a02c145c4 /16488 bytes.
+
+All22 required component identities occur, but23 rows were emitted; row14 has an invalid component_id. Formal Reviewer schema rejects the entire result. Required wrong Git source10/11/12 rows each have complete_and_equivalent=false and owner_phase_evidence_valid=false; these are UNVALIDATED_WIRE_FORENSICS ONLY, not a passed semantic qualification. No extra result removed, repaired, backfilled or replayed as valid. No new Formation, Work, authorization or evidence was created by this test.
+
+This failure is a critic response contract violation, distinct from generation41's Formation mapping conflicts and false universal prerequisite feedback. Exact additional-row cause is under independent read-only review; internal model causality remains UNKNOWN. Correct schema refusal provides failure protection, not semantic success. No blind model retry. Independent Holdout remains sealed and unused in implementation.
+
+Recovery: complete private model output/request evidence is at /data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation42-qualified-20261010/ordinary37-negative-review/private; safe manifest stores exact receipt hashes. Historical and production resources preserved. Normal-entry G0 and independent Holdout are still required for C3 Closure; this delta alone does not close C3.

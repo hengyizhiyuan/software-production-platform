@@ -1,0 +1,1 @@
+{"error_type": "TypeError", "cause": "AUDIT_CONTROLLER_PASSED_NEW_OPTIONAL_PARAMETER_TO_HISTORICAL_FUNCTION_SIGNATURE", "model_calls": 0, "work_created": false, "application_defect": false, "original_artifacts_preserved": true}

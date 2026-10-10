@@ -1,0 +1,18 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 92.97453478700481,
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "container_id": "701a19cfa10691ab05bd00a51ae92ea83fa6006b52a55840e82962b06dd7f017",
+  "source_overlay": true,
+  "snapshot_sha256": "bd5b1e1af9d183f445d21b790c4849f4485acb84bf1817fa322977fcc72d43fa",
+  "nodes": [
+    "tests/test_c3_route_scoped_review.py",
+    "tests/test_c3_owner_repair_preconditions.py",
+    "tests/test_c3_fulfillment_wire_feedback.py",
+    "tests/test_c3_fulfillment_repair_context.py",
+    "tests/test_c3_generation_projection_economy.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

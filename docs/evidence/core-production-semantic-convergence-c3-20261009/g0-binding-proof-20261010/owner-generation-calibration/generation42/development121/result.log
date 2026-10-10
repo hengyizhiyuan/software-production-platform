@@ -1,0 +1,27 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 30 items
+
+tests/test_c3_route_scoped_review.py ...................F.               [ 70%]
+tests/test_c3_fulfillment_provider_failures.py .........                 [100%]
+
+=================================== FAILURES ===================================
+_ test_feedback_scope_condition_matches_actual_owner_source_and_method[IR_CONSTRAINT-DENY_PUBLISH] _
+tests/test_c3_route_scoped_review.py:258: in test_feedback_scope_condition_matches_actual_owner_source_and_method
+    assert old_rows and len(old_rows) == len(new_rows)
+E   assert ([])
+=============================== warnings summary ===============================
+tests/test_c3_route_scoped_review.py::test_independent_comparison_preserves_all_meaning_but_proposer_claims_cannot_change_request[small]
+tests/test_c3_route_scoped_review.py::test_independent_comparison_preserves_all_meaning_but_proposer_claims_cannot_change_request[medium]
+tests/test_c3_route_scoped_review.py::test_independent_comparison_preserves_all_meaning_but_proposer_claims_cannot_change_request[complex]
+  tests/test_c3_route_scoped_review.py:96: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_route_scoped_review.py::test_feedback_scope_condition_matches_actual_owner_source_and_method[IR_CONSTRAINT-DENY_PUBLISH]
+================== 1 failed, 29 passed, 3 warnings in 13.90s ===================
