@@ -140,3 +140,97 @@ def test_historical_review_views_retain_original_proposal_and_generation_domains
     assert [r["r"] for r in view["untrusted_fulfillment_candidate"]["routes"]] == [r.rationale for r in plan.routes]
     assert p._restore_review_owner_domains(view["existing_owner_binding_domains"], owner) == choices
     assert "review_basis" not in view
+
+
+def test_business_scope_derivation_is_original_type_evidence_not_a_file_grant_or_mapping_verdict():
+    from spg.domain.intent_realization import ProductionIntent, SemanticItem, SemanticKind
+    revision, ir, inventory, plan = controlled_capacity_case("medium")
+    # Controlled variations exercise existing derivation types, not production
+    # Work mutation or an injected model output.
+    values = ("Preserve the original outcome and its exact count.",
+              "Keep the requested paragraph unchanged.", "仅形成候选，等待后续真实授权。")
+    item = SemanticItem(item_id="controlled-business-scope-origin", kind=SemanticKind.PRODUCTION_INTENT,
+        statement="Controlled original production meaning", confidence=1, provenance=ir.items[0].provenance,
+        production=ir.current_production[0].model_copy(update={"scope": values}))
+    ir.items = (*ir.items, item)
+    revision.constraints = values
+    inventory = a.fulfillment_inventory(revision, ir, source_revision=inventory["source_revision"],
+        exact_target_paths=inventory["exact_target_paths"])
+    original = deepcopy((vars(revision), vars(ir), inventory))
+    projection = a._existing_source_type_projection(revision, ir, inventory)
+    assert projection["existing_type_contracts"]["scope"]["description"] == ProductionIntent.model_fields["scope"].description
+    rows = projection["exact_work_constraint_derivations"]
+    assert len(rows) == 3
+    for index, row in enumerate(rows):
+        assert row["index"] == index
+        assert row["original_value_fingerprint"] == a.canonical_fingerprint(values[index])
+        assert row["original_business_scope_derivations"] == [{
+            "semantic_ir_id": str(ir.id), "item_id": item.item_id,
+            "field": "production.scope", "index": index, "existing_type_contract_ref": "scope",
+            "original_value_fingerprint": a.canonical_fingerprint(values[index])}]
+        assert row["correspondence_proves"] == "EXACT_ORIGINAL_SOURCE_DERIVATION_ONLY"
+        assert "capability" not in row and "target_paths" not in row
+    assert (vars(revision), vars(ir), inventory) == original
+    drifted = deepcopy(revision)
+    drifted.constraints = values[::-1]
+    with pytest.raises(ValueError, match="SOURCE_DERIVATION_IDENTITY_DRIFT"):
+        a._existing_source_type_projection(drifted, ir, inventory)
+
+
+@pytest.mark.parametrize("drift", ("field-contract", "source-identity", "missing"))
+def test_source_type_projection_cannot_change_under_valid_candidate_or_all_true_review(drift):
+    revision, ir, inventory, plan = controlled_capacity_case("medium")
+    caps = a.fulfillment_capability_contracts()
+    owner = a._owner_source_preconditions(revision, ir, inventory, caps,
+        review_input_contract=p._REVIEW_INPUT_CONTRACT)
+    original = deepcopy(owner)
+    if drift == "field-contract":
+        owner["original_authority_type_projection"]["existing_type_contracts"]["scope"]["description"] = "Filesystem write grants"
+    elif drift == "source-identity":
+        owner["original_authority_type_projection"]["exact_work_constraint_derivations"][0]["source_ref"] = "invented"
+    else:
+        owner.pop("original_authority_type_projection")
+    with pytest.raises(ValueError, match="SOURCE_DERIVATION_IDENTITY_DRIFT"):
+        a.validate_projection_candidate(plan, revision, ir, inventory,
+            semantic_review=review(inventory, plan), owner_preconditions=owner)
+    assert original != owner
+
+
+def test_previous_independent_view_does_not_invent_new_type_projection_or_response_header():
+    revision, ir, inventory, plan = controlled_capacity_case()
+    caps = a.fulfillment_capability_contracts()
+    owner = a._owner_source_preconditions(revision, ir, inventory, caps,
+        review_input_contract=p._REVIEW_INPUT_INDEPENDENT_CONTRACT)
+    assert "original_authority_type_projection" not in owner
+    view = p._review_input_view(inventory, plan, caps, {"existing_owner_source_preconditions": owner})
+    assert "exact_response_header" not in view
+    assert "existing_owner_binding_domains" not in view
+    assert view["candidate_representation"] == "EXISTING_CANONICAL_MEANING_WITHOUT_PROPOSER_RATIONALE"
+
+
+def test_actual_provider_receives_bound_type_evidence_and_exact_id_operands_without_conflicting_instruction():
+    from tests.test_c3_fulfillment_capacity_representation import controlled_model_provider
+    revision, ir, inventory, plan = controlled_capacity_case()
+    caps = a.fulfillment_capability_contracts()
+    owner = a._owner_source_preconditions(revision, ir, inventory, caps,
+        review_input_contract=p._REVIEW_INPUT_CONTRACT)
+    provider, calls = controlled_model_provider(inventory, plan)
+    runtime = provider.runtime_factory()
+    original = runtime.generate
+    captured = []
+    def generate(**request):
+        captured.append(request)
+        return original(**request)
+    runtime.generate = generate
+    provider.review(inventory, plan, capabilities=caps, owner_preconditions=owner)
+    assert len(captured) == 1
+    payload = json.loads(captured[0]["input_text"])
+    assert payload["existing_owner_source_preconditions"]["original_authority_type_projection"] == a._existing_source_type_projection(revision, ir, inventory)
+    assert payload["exact_response_header"] == {
+        "inventory_fingerprint": inventory["inventory_fingerprint"],
+        "candidate_fingerprint": a.fulfillment_candidate_fingerprint(plan),
+        "components_fingerprint": a.fulfillment_components_fingerprint(plan)}
+    assert "Original identity operands ARE supplied" in captured[0]["instructions"]
+    assert "No response identity or verdict is supplied" not in captured[0]["instructions"]
+    assert "No verdict is supplied" in captured[0]["instructions"]
+    assert "not filesystem paths or write grants" in captured[0]["instructions"]

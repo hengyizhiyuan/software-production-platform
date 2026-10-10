@@ -917,7 +917,11 @@ def _fact_evidence_method_failure(fact, method):
 
 
 def _work_constraint_direct_source(ir, quote, entry):
-    """Existing exact correspondence predicate, shared with repair diagnostics."""
+    """Exact provenance correspondence, never consumer-method sufficiency.
+
+    In particular ProductionIntent.scope is a business summary, not a path
+    grant. Matching its original value cannot prove a Git-only disposition.
+    """
     if entry["kind"] not in {"IR_CLAUSE", "IR_CONSTRAINT"}:
         return False
     item = next(i for i in ir.items if i.item_id == entry["item_id"])
@@ -1161,6 +1165,10 @@ def validate_projection_candidate(candidate, revision, ir, inventory, *, semanti
         raise ValueError("OBLIGATION_COMPONENT_REVIEW_REQUIRED")
     if candidate.inventory_fingerprint != inventory["inventory_fingerprint"]:
         raise ValueError("OBLIGATION_PROJECTION_STALE_BASIS")
+    if ((owner_preconditions or {}).get("review_input_contract") == "existing-source-typed-comparison-input-v4"
+            and owner_preconditions.get("original_authority_type_projection")
+                != _existing_source_type_projection(revision, ir, inventory)):
+        raise ValueError("OBLIGATION_SOURCE_DERIVATION_IDENTITY_DRIFT")
     for route in candidate.routes:
         failure = _route_owner_method_failure(route, inventory, owner_preconditions)
         if failure:
@@ -1512,7 +1520,7 @@ def projection_validation_feedback(candidate, revision, ir, inventory, primary_e
                 if predicates:
                     add("OBLIGATION_SEMANTIC_COMPONENT_MISMATCH", expected_components[(row.component_id, row.capability)])
                     failures[-1].update(capability=row.capability, failed_review_predicates=predicates, review_reason=row.reason)
-                    if (owner_preconditions or {}).get("review_input_contract") in {"existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3"}:
+                    if (owner_preconditions or {}).get("review_input_contract") in {"existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3", "existing-source-typed-comparison-input-v4"}:
                         index = expected_components[(row.component_id, row.capability)]
                         route = candidate.routes[index]
                         contract = next(c for c in fulfillment_capability_contracts() if c["capability"] == route.capability)
@@ -1819,6 +1827,47 @@ def _bind_wire_diagnostics(error, rows, attempt, revision, inventory, capabiliti
     return {**bound, "diagnostic_fingerprint": canonical_fingerprint(bound)}
 
 
+def _existing_source_type_projection(revision, ir, inventory):
+    """Project existing authority types and exact derivations, no routing verdict.
+
+    Source-field identity is deterministic; interpreting its complete original
+    requirement remains the independent semantic boundary's responsibility.
+    No business summary is converted into a filesystem scope or permission.
+    """
+    from spg.domain.intent_realization import ProductionIntent
+    contracts = {name: {"model": "ProductionIntent", "field": name,
+        "description": ProductionIntent.model_fields[name].description}
+        for name in ("scope", "target_paths", "allowed_areas")}
+    derivations = []
+    for source in inventory["sources"]:
+        if source["kind"] != "WORK_CONSTRAINT":
+            continue
+        index = source["index"]
+        text = source["payload"]["content"]
+        if not 0 <= index < len(revision.constraints) or revision.constraints[index] != text:
+            raise ValueError("OBLIGATION_SOURCE_DERIVATION_IDENTITY_DRIFT")
+        origins = []
+        for item in ir.items:
+            if item.production is None:
+                continue
+            for ordinal, value in enumerate(item.production.scope):
+                if value == text:
+                    origins.append({"semantic_ir_id": str(ir.id), "item_id": item.item_id,
+                        "field": "production.scope", "index": ordinal,
+                        "existing_type_contract_ref": "scope",
+                        "original_value_fingerprint": canonical_fingerprint(value)})
+        derivations.append({"source_ref": source["source_ref"], "work_reality_revision_id": str(revision.id),
+            "field": "constraints", "index": index, "original_value_fingerprint": canonical_fingerprint(text),
+            "original_business_scope_derivations": origins,
+            "correspondence_proves": "EXACT_ORIGINAL_SOURCE_DERIVATION_ONLY",
+            "correspondence_does_not_prove": "CONSUMER_METHOD_SUFFICIENCY_OR_FILESYSTEM_WRITE_AUTHORITY"})
+    return {"existing_type_contracts": contracts, "exact_work_constraint_derivations": derivations,
+        "interpretation_boundary": "Use complete original meaning and actual submitted consumer proofs. "
+            "Business scope summaries, typed Fact Scope and authorized repository write paths are distinct. "
+            "A field named scope or valid provenance support cannot turn a content outcome into a path predicate. "
+            "These original type contracts select no method and grant no effect."}
+
+
 def _owner_source_preconditions(revision, ir, inventory, capabilities, *, include_syntax_observations=True,
                                 syntax_observation_contract="complete-value-owner-observations-v2",
                                 include_operand_observations=True, include_typed_observations=True,
@@ -1835,7 +1884,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     if raw_operand_observation_contract not in (None, "existing-original-wire-owner-operands-v1"):
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
-    if review_input_contract not in (None, "existing-lossless-review-input-v1", "existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3"):
+    if review_input_contract not in (None, "existing-lossless-review-input-v1", "existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3", "existing-source-typed-comparison-input-v4"):
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     if semantic_selection_input_contract not in (None, "existing-primary-meaning-owner-reference-v1", "existing-primary-meaning-owner-reference-v2"):
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
@@ -2011,6 +2060,8 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                 row["ineligible_binding_prerequisites"] = rejected
         rows.append(row)
     return {"contract": "existing-owner-source-prerequisites-v1", "inventory_fingerprint": inventory["inventory_fingerprint"],
+        **({"original_authority_type_projection": _existing_source_type_projection(revision, ir, inventory)}
+           if review_input_contract == "existing-source-typed-comparison-input-v4" else {}),
         **({"raw_operand_observation_contract": raw_operand_observation_contract}
            if raw_operand_observation_contract is not None else {}),
         **({"review_input_contract": review_input_contract} if review_input_contract is not None else {}),
@@ -2365,7 +2416,7 @@ def _semantic_repair_observation(rows, attempt, candidate, inventory, capabiliti
         start = single("MODEL_REQUEST_PENDING")
         diagnostic = (_review_schema_failure_observation(output, inventory, candidate)
             if isinstance(output, str) else None)
-        if ((start.get("owner_source_preconditions") or {}).get("review_input_contract") not in {"existing-lossless-review-input-v1", "existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3"}
+        if ((start.get("owner_source_preconditions") or {}).get("review_input_contract") not in {"existing-lossless-review-input-v1", "existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3", "existing-source-typed-comparison-input-v4"}
                 or diagnostic is None or diagnostic != validated["review_contract_failure"]
                 or validated.get("failed_predicate") != "OBLIGATION_SEMANTIC_REVIEW_SCHEMA_INVALID"
                 or validated.get("semantic_review") is not None):
@@ -2462,7 +2513,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     None, "complete-value-observations-v1", "complete-value-owner-observations-v1", "complete-value-owner-observations-v2")
                 or preconditions.get("operand_observation_contract") not in (None, "existing-owner-operands-v1")
                 or preconditions.get("raw_operand_observation_contract") not in (None, "existing-original-wire-owner-operands-v1")
-                or preconditions.get("review_input_contract") not in (None, "existing-lossless-review-input-v1", "existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3")
+                or preconditions.get("review_input_contract") not in (None, "existing-lossless-review-input-v1", "existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3", "existing-source-typed-comparison-input-v4")
                 or preconditions.get("semantic_selection_input_contract") not in (None, "existing-primary-meaning-owner-reference-v1", "existing-primary-meaning-owner-reference-v2")
                 or preconditions.get("generation_view_contract") not in (None, "existing-lossless-source-consumer-input-v1", "existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3")
                 or preconditions.get("typed_prerequisite_contract") not in (None, "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11")):
@@ -2702,7 +2753,7 @@ def _record_review_contract_failure(error, recorder, attempt, inventory, candida
     starts = [r for r in rows if r["stage"] == "MODEL_REQUEST_PENDING" and r["attempt"] == attempt]
     observations = [r for r in rows if r["stage"] == "SEMANTIC_REVIEW_OBSERVED" and r["attempt"] == attempt]
     if (len(starts) != 1 or len(observations) != 1
-            or (starts[0].get("owner_source_preconditions") or {}).get("review_input_contract") not in {"existing-lossless-review-input-v1", "existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3"}):
+            or (starts[0].get("owner_source_preconditions") or {}).get("review_input_contract") not in {"existing-lossless-review-input-v1", "existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3", "existing-source-typed-comparison-input-v4"}):
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     observed = observations[0]
     output = observed.get("review_output")
@@ -2783,7 +2834,7 @@ def _review_fulfillment_candidate(provider, candidate, inventory, recorder, atte
     except ValueError:
         from spg.providers.fulfillment_candidate import _review_schema_failure_observation, _FulfillmentReviewValidationError
         start = next(row for row in recorder.records() if row["stage"] == "MODEL_REQUEST_PENDING" and row["attempt"] == attempt)
-        if (start.get("owner_source_preconditions") or {}).get("review_input_contract") not in {"existing-lossless-review-input-v1", "existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3"}:
+        if (start.get("owner_source_preconditions") or {}).get("review_input_contract") not in {"existing-lossless-review-input-v1", "existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3", "existing-source-typed-comparison-input-v4"}:
             raise
         actual = next(row for row in recorder.records() if row["stage"] == "SEMANTIC_REVIEW_OBSERVED" and row["attempt"] == attempt)
         output = actual.get("review_output")
@@ -2982,7 +3033,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     raw_operand_observation_contract=((initial_request.get("owner_source_preconditions") or {}).get("raw_operand_observation_contract")
                         if initial_request is not None else "existing-original-wire-owner-operands-v1"),
                     review_input_contract=((initial_request.get("owner_source_preconditions") or {}).get("review_input_contract")
-                        if initial_request is not None else "existing-independent-comparison-input-v3"),
+                        if initial_request is not None else "existing-source-typed-comparison-input-v4"),
                     semantic_selection_input_contract=((initial_request.get("owner_source_preconditions") or {}).get("semantic_selection_input_contract")
                         if initial_request is not None else "existing-primary-meaning-owner-reference-v2"))}
                     if supports_preconditions and callable(metadata_builder)

@@ -529,6 +529,13 @@ _SOURCE_CONSUMER_INSTRUCTIONS = (
 
 def _primary_meaning_instructions(owner_preconditions):
     return (_SOURCE_CONSUMER_INSTRUCTIONS +
+        (" Consult original_authority_type_projection: it quotes the existing ProductionIntent "
+         "field contracts and exact original derivations. production.scope denotes business scope "
+         "summaries, not filesystem paths or write grants. A constraint derived from it still requires "
+         "the original outcome it describes; do not treat a successful provenance lookup as a "
+         "Git-method endorsement. Independently interpret the complete original contribution before "
+         "selecting its actual consumers. The type projection selects no capability."
+         if owner_preconditions.get("review_input_contract") == _REVIEW_INPUT_CONTRACT else "") +
         (" A semantic-component mismatch judges the exact submitted consumer, not merely its source "
          "span or u operands. Consult submitted_consumer_comparison: preserving an erroneous capability "
          "while changing r, u or an unrelated sibling does not repair that mismatch. Re-evaluate every "
@@ -963,8 +970,10 @@ def _review_result_identity_slots(inventory, candidate):
 
 _REVIEW_INPUT_LEGACY_CONTRACT = "existing-lossless-review-input-v1"
 _REVIEW_INPUT_ROUTE_SCOPED_CONTRACT = "existing-route-scoped-review-input-v2"
-_REVIEW_INPUT_CONTRACT = "existing-independent-comparison-input-v3"
-_ROUTE_SCOPED_REVIEW_INPUTS = {_REVIEW_INPUT_ROUTE_SCOPED_CONTRACT, _REVIEW_INPUT_CONTRACT}
+_REVIEW_INPUT_INDEPENDENT_CONTRACT = "existing-independent-comparison-input-v3"
+_REVIEW_INPUT_CONTRACT = "existing-source-typed-comparison-input-v4"
+_INDEPENDENT_REVIEW_INPUTS = {_REVIEW_INPUT_INDEPENDENT_CONTRACT, _REVIEW_INPUT_CONTRACT}
+_ROUTE_SCOPED_REVIEW_INPUTS = {_REVIEW_INPUT_ROUTE_SCOPED_CONTRACT, *_INDEPENDENT_REVIEW_INPUTS}
 _REVIEW_INPUT_CONTRACTS = {_REVIEW_INPUT_LEGACY_CONTRACT, *_ROUTE_SCOPED_REVIEW_INPUTS}
 
 
@@ -1036,7 +1045,7 @@ def _review_input_view(inventory, candidate, capabilities, owner_context):
     if selected_contract in _ROUTE_SCOPED_REVIEW_INPUTS:
         payload = {"component_index_table": payload["component_index_table"],
                    **{key:value for key,value in payload.items() if key != "component_index_table"}}
-    if selected_contract == _REVIEW_INPUT_CONTRACT:
+    if selected_contract in _INDEPENDENT_REVIEW_INPUTS:
         original_routes = [r.model_dump(mode="json", exclude={"rationale"}) for r in candidate.routes]
         if canonical_fingerprint({"inventory_fingerprint": inventory["inventory_fingerprint"],
                 "routes": original_routes}) != fulfillment_candidate_fingerprint(candidate):
@@ -1054,6 +1063,10 @@ def _review_input_view(inventory, candidate, capabilities, owner_context):
             "proposer_rationale_is_evidence": False,
             "generation_choice_domains_are_evidence": False,
             "original_inventory_and_owner_preconditions_retained": True}
+        if selected_contract == _REVIEW_INPUT_CONTRACT:
+            payload["exact_response_header"] = {key: payload[key] for key in (
+                "candidate_fingerprint", "components_fingerprint")}
+            payload["exact_response_header"]["inventory_fingerprint"] = inventory["inventory_fingerprint"]
     return payload
 
 
@@ -1833,13 +1846,25 @@ class ModelFulfillmentCandidateProvider:
         runtime = self.runtime_factory()
         try:
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
-                instructions=((("The independent comparison contains original immutable sources and unchanged canonical routing fields. "
+                instructions=((("First use original_authority_type_projection, the exact existing field contracts "
+                    "and derivation locations. ProductionIntent.scope contains BUSINESS scope summaries, "
+                    "not filesystem paths or write grants. An original content requirement derived from "
+                    "that field remains content; putting it in Work.constraints does not turn it into a "
+                    "path restriction. Source correspondence u proves only original derivation; it cannot "
+                    "prove the original goal or serve as an unsubmitted content check. Determine what "
+                    "the original contribution requires, then compare ONLY its actual consumers and "
+                    "declared proof dependencies. Separately reject any missing outcome even if other "
+                    "sources have content methods. Never infer required methods from the selected method "
+                    "or from the word scope. This is the existing type contract, not a prescribed verdict. "
+                    "Copy exact_response_header literal values without adding prefixes or changing characters. "
+                    if (owner_preconditions or {}).get("review_input_contract") == _REVIEW_INPUT_CONTRACT else "") +
+                    ("The independent comparison contains original immutable sources and unchanged canonical routing fields. "
                     "The fingerprint excludes proposer rationale; no proposer explanation or planning choice "
                     "list is supplied as evidence. Evaluate original meaning against only actual submitted "
                     "consumers, declared dependencies and same-source complementary components. All other "
                     "sources remain separately reviewed; their existence cannot supply an undeclared f "
                     "proof. No approved outcome or semantic verdict is provided. "
-                    if (owner_preconditions or {}).get("review_input_contract") == _REVIEW_INPUT_CONTRACT else "") +
+                    if (owner_preconditions or {}).get("review_input_contract") in _INDEPENDENT_REVIEW_INPUTS else "") +
                     ("The request losslessly shares existing contracts: resolve each "
                     if (owner_preconditions or {}).get("review_input_contract") in _ROUTE_SCOPED_REVIEW_INPUTS else
                     "The request uses existing-lossless-review-input-v1: resolve each ") +
@@ -1850,8 +1875,12 @@ class ModelFulfillmentCandidateProvider:
                     "Resolve existing_owner_prerequisite_ref in existing_owner_source_preconditions.sources "
                     "at that exact original source ordinal and field; this shares unchanged prerequisites, "
                     "not selected capabilities, authority or semantic judgements. "
-                    "The Owner proved exact reconstruction. No response identity or verdict is supplied or "
-                    "backfilled. Produce every required source and component result, not a representative sample. "
+                    "The Owner proved exact reconstruction. " +
+                    ("Original identity operands ARE supplied. No verdict is supplied; the Owner never "
+                     "repairs or backfills an identity or predicate in an observed response. "
+                     if (owner_preconditions or {}).get("review_input_contract") == _REVIEW_INPUT_CONTRACT else
+                     "No response identity or verdict is supplied or backfilled. ") +
+                    "Produce every required source and component result, not a representative sample. "
                     if joined_review else "") + ("Independently validate a derived fulfillment candidate against the immutable admitted "
                     "engineering inventory. The candidate is untrusted; its rationale is not evidence. "
                     "Check every proposed restriction against existing_consumer_contracts: a prohibition must "
