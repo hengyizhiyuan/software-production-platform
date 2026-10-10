@@ -244,6 +244,49 @@ def test_original_fact_negative_clause_and_gate_correspond_without_fabricating_e
     assert not missing[0]["passed"] and missing[0]["reason"]=="CONTINUOUS_GATE_EVIDENCE_MISSING"
 
 
+def negative_git_plan():
+    rev,ir,inv,plan=negative_fact_plan()
+    plan=plan.model_copy(update={"routes":tuple(r.model_copy(update={
+        "capability":"GIT_DIFF_SCOPE","target_paths":("index.html",)})
+        if next(s for s in inv["sources"] if s["source_ref"]==r.source_ref)["kind"] != "WORK_CONTEXT"
+        else r for r in plan.routes)})
+    return rev,ir,inv,plan
+
+
+def test_negative_file_component_preserves_original_exclusion_and_requires_real_diff():
+    from spg.providers.managed_context_fulfillment import _exact_fact_git_scope
+    from spg.domain.engineering_semantics import semantic_fact_reference
+    rev,ir,inv,plan=negative_git_plan()
+    original=rev.engineering_semantic_facts[0].model_dump(mode="json")
+    bindings=form_fulfillment_projection(rev,ir,provider=ComponentOracle([plan]))
+    binding=next(b for b in bindings if b.fact_id)
+    ref=semantic_fact_reference(rev.engineering_semantic_facts[0],work_revision_id=rev.id)
+    assert _exact_fact_git_scope(ref,binding,("index.html",),("index.html",),revision=rev,ir=ir,bindings=bindings)
+    for changed in ((),("README.md",),("index.html","new.html")):
+        assert not _exact_fact_git_scope(ref,binding,("index.html",),changed,revision=rev,ir=ir,bindings=bindings)
+    assert not _exact_fact_git_scope(ref,binding,("index.html",),("index.html",))
+    assert rev.engineering_semantic_facts[0].model_dump(mode="json")==original
+
+
+@pytest.mark.parametrize("change",["missing-clause-route","literal-target-conflict","html-substitute","affirmative-source"])
+def test_negative_file_component_cannot_fake_correspondence(change):
+    rev,ir,inv,plan=negative_git_plan()
+    if change=="missing-clause-route":
+        # Select by original inventory identity rather than a naming convention.
+        plan=plan.model_copy(update={"routes":tuple(r.model_copy(update={"capability":"DENY_DEPLOY","target_paths":()})
+            if next(s for s in inv["sources"] if s["source_ref"]==r.source_ref)["kind"] in {"IR_CLAUSE","IR_CONSTRAINT"} else r for r in plan.routes)})
+    elif change=="literal-target-conflict":
+        rev.engineering_semantic_facts=(rev.engineering_semantic_facts[0].model_copy(update={"value":["index.html"]}),)
+    elif change=="affirmative-source":
+        ir.clauses=(ir.clauses[0].model_copy(update={"polarity":"AFFIRMATIVE"}),)
+    else:
+        plan=plan.model_copy(update={"routes":tuple(r.model_copy(update={"capability":"ARTIFACT_CONTENT"})
+            if r.source_ref.startswith("semantic-fact:") else r for r in plan.routes)})
+    inv=fulfillment_inventory(rev,ir);plan=plan.model_copy(update={"inventory_fingerprint":inv["inventory_fingerprint"]})
+    with pytest.raises(ValueError,match="CORRESPONDENCE_UNPROVEN|TARGET_CONFLICT|OWNER_MISMATCH|VALUE_UNSUPPORTED|POLARITY"):
+        validate_projection_candidate(plan,rev,ir,inv,semantic_review=review(inv,plan))
+
+
 @pytest.mark.parametrize("change",["affirmative","wrong-source","missing-support","wrong-gate","invented-preview"])
 def test_prohibition_cannot_invent_source_operation_or_permission(change):
     rev,ir,inv,plan=negative_fact_plan()

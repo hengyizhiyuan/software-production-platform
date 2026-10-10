@@ -774,6 +774,9 @@ def _projection_binding(revision, ir, inventory, route, *, reviewed_background_r
         if phase in {FulfillmentPhase.CANDIDATE_SEAL, FulfillmentPhase.HUMAN_INTEGRATION, FulfillmentPhase.DELIVERY} and fact.relation is not SemanticRelation.ACCEPTANCE_ASSERTION:
             raise ValueError("OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED")
         if state != "UNRESOLVED":
+            if (fact.relation is SemanticRelation.SCOPE and fact.qualifiers.get("negated") is True
+                    and method not in {"EXACT_GIT_DIFF_SCOPE", "EXACT_PERMISSION_GATE"}):
+                raise ValueError("OBLIGATION_NEGATED_SCOPE_EVIDENCE_OWNER_MISMATCH")
             if (fact.relation is SemanticRelation.REFERENCE
                     and fact.reference_role is SemanticReferenceRole.PROJECT_REPOSITORY
                     and method != "EXACT_PRODUCT_SOURCE_IDENTITY"):
@@ -789,10 +792,16 @@ def _projection_binding(revision, ir, inventory, route, *, reviewed_background_r
             if fact.relation is not SemanticRelation.SCOPE:
                 raise ValueError("OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH")
             original_paths = exact_file_scope_paths(fact, qualified=allow_calibrated)
-            if original_paths is None:
+            negative_scope = (allow_calibrated and route.component_basis is not None
+                and _fact_prohibition_sources(revision, ir, inventory, fact, route))
+            if original_paths is None and not negative_scope:
                 raise ValueError("OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED")
-            if set(route.target_paths) != set(original_paths):
+            if original_paths is not None and set(route.target_paths) != set(original_paths):
                 raise ValueError("OBLIGATION_FACT_SCOPE_VALUE_MISMATCH")
+            if negative_scope:
+                values = (fact.value,) if isinstance(fact.value, str) else fact.value if isinstance(fact.value, (list, tuple)) else ()
+                if any(value in route.target_paths for value in values):
+                    raise ValueError("OBLIGATION_NEGATED_SCOPE_TARGET_CONFLICT")
         if method == "EXACT_PRODUCT_SOURCE_IDENTITY" and (fact.relation is not SemanticRelation.REFERENCE or fact.reference_role is not SemanticReferenceRole.PROJECT_REPOSITORY):
             raise ValueError("OBLIGATION_SOURCE_IDENTITY_RELATION_MISMATCH")
         if fact.epistemic_status.value == "UNRESOLVED" and state != "UNRESOLVED":
@@ -890,7 +899,7 @@ def _fact_prohibition_sources(revision, ir, inventory, fact, route):
                 or clause.source_record_id not in fact.provenance.source_record_ids
                 or not _human_clause_item(item, clause)):
             return False
-        if clause.requested_effects and not any(
+        if route.capability != "GIT_DIFF_SCOPE" and clause.requested_effects and not any(
                 (_TYPED_EFFECT_ROUTES.get(effect) or (None,))[0] == _capability_tuple(route.capability)[0]
                 for effect in clause.requested_effects):
             return False
@@ -1076,7 +1085,9 @@ def validate_projection_candidate(candidate, revision, ir, inventory, *, semanti
     # A Fact prohibition cites an actual clause route with the same Owner/Gate.
     for route in candidate.routes:
         source = next(s for s in inventory["sources"] if s["source_ref"] == route.source_ref)
-        if source["kind"] == "FACT" and route.capability in {"DENY_PREVIEW", "DENY_DEPLOY", "DENY_PUBLISH"}:
+        negative_git = (source["kind"] == "FACT" and route.capability == "GIT_DIFF_SCOPE"
+            and source["payload"]["qualifiers"].get("negated") is True)
+        if source["kind"] == "FACT" and (route.capability in {"DENY_PREVIEW", "DENY_DEPLOY", "DENY_PUBLISH"} or negative_git):
             if not all(any(other.source_ref == ref and other.capability == route.capability
                            for other in candidate.routes) for ref in route.supporting_source_refs):
                 raise ValueError("OBLIGATION_FACT_GATE_CORRESPONDENCE_UNPROVEN")

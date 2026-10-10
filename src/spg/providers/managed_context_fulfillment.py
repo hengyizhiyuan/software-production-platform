@@ -447,7 +447,8 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
             evaluations.append(check["passed"] is True)
         for binding in current:
             if binding.evidence_method == "EXACT_GIT_DIFF_SCOPE":
-                evaluations.append(_exact_fact_git_scope(reference, binding, targets, changed))
+                evaluations.append(_exact_fact_git_scope(reference, binding, targets, changed,
+                    revision=revision, ir=ir, bindings=bindings))
             elif binding.evidence_method == "EXACT_PRODUCT_SOURCE_IDENTITY":
                 # These are existing immutable Source Owner identities. A natural
                 # language label that has no authoritative link stays unresolved.
@@ -586,7 +587,7 @@ def verify_binding_inventory(*, request, task, contract, repository, baseline, r
     return tuple(results), tuple(derived)
 
 
-def _exact_fact_git_scope(reference, binding, targets, changed):
+def _exact_fact_git_scope(reference, binding, targets, changed, *, revision=None, ir=None, bindings=()):
     """Consume the original SCOPE value; a broad contract never broadens a Fact.
 
     This capability handles explicit unqualified repository paths. Arbitrary
@@ -594,6 +595,18 @@ def _exact_fact_git_scope(reference, binding, targets, changed):
     """
     from spg.domain.governed_obligation import exact_file_scope_paths
     paths = exact_file_scope_paths(reference, qualified=binding.component_basis is not None)
+    if paths is None and reference.qualifiers == {"negated": True} and binding.component_basis is not None:
+        if revision is None or ir is None:
+            return False
+        from spg.application.governed_obligations import validate_fulfillment_projection
+        try:
+            validate_fulfillment_projection(bindings, revision, ir,
+                source_revision=binding.source_revision, exact_target_paths=targets)
+        except (ValueError, TypeError):
+            return False
+        # The negative value remains the original exclusion. The authorized
+        # target set is supplied by the Task, not reinterpreted from that value.
+        paths = targets
     if paths is None:
         return False
     return bool(changed and set(binding.target_paths) == set(paths) and set(targets) == set(paths)
