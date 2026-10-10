@@ -1,0 +1,8 @@
+{
+  "actual_image": "sha256:7ecb2f05f8c9ccde3f2d6d577ee72a69040258df6a659cbffe39093a0bf05643",
+  "container_id": "a980c8f763acd2c689d13121e03dda4d3a7504222541a5345fb37013976618f8",
+  "source": "b56e659f24a696e23297ec4c1e8881d46a39cdf1",
+  "controller_sha256": "16e53c4c30151abd7e23b112b0206a214ea9924e58b9822e44d1e9fee9f5f3d3",
+  "source_overlay": false,
+  "model_calls": 0
+}

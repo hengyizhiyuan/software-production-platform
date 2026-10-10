@@ -564,3 +564,157 @@ def test_first_request_capacity_has_no_parent_and_never_dispatches(monkeypatch, 
         rejected=a.form_fulfillment_projection(revision,ir,**kwargs)
         assert rejected[0].formation_receipt["terminal_reason"]=="OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT"
         assert len(calls)==0 and all(b.state=="UNRESOLVED" for b in rejected)
+
+
+@pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+def test_qualified_generation_operands_reuse_original_geometry_and_exact_proof_sets(scale):
+    revision, ir, inventory, plan = controlled_capacity_case(scale)
+    caps = a.fulfillment_capability_contracts()
+    owner = a._owner_source_preconditions(revision, ir, inventory, caps,
+        generation_view_contract=p._SOURCE_CONSUMER_INPUT_CONTRACT,
+        semantic_selection_input_contract=p._PRIMARY_MEANING_INPUT_CONTRACT)
+    choices = p._formation_binding_choices(inventory, caps, owner)
+    schema = p._formation_output_schema(inventory, caps, owner_preconditions=owner)
+    base, geometry, provenance = schema['properties']['routes']['items']['allOf']
+    assert base == {'$ref': '#/$defs/_FulfillmentCompactRoute'}
+    assert schema['$defs']['_FulfillmentCompactRoute']['required'] == p._fulfillment_wire_schema()['$defs']['_FulfillmentCompactRoute']['required']
+    for ordinal, source in enumerate(inventory['sources']):
+        entry = next(b for b in geometry['anyOf'] if ordinal in b['properties']['s']['enum'])
+        length = len(p.fulfillment_source_semantic_text(source))
+        assert entry['anyOf'][0]['properties'] == {'q': {'type': 'null'}, 'a': {'enum': [0]}, 'z': {'enum': [length]}}
+        # Legitimate partial components remain open, not forced into one full
+        # source route or a preselected capability.
+        assert entry['anyOf'][1]['properties']['q']['type'] == 'string'
+        for consumer in range(len(caps)):
+            selected = [b for b in provenance['anyOf'] if ordinal in b['properties']['s']['enum'] and consumer in b['properties']['c']['enum']]
+            assert len(selected) == 1
+            proof = next((r for r in choices[ordinal]['necessary_source_proofs'] if r['capability'] == consumer), None)
+            operand = selected[0]['properties'].get('u')
+            if proof is None:
+                assert operand is None
+            else:
+                expected = proof['minimal_support_sets']
+                actual = [[member['contains']['enum'][0] for member in alternative.get('allOf', [])] for alternative in operand['anyOf']]
+                assert actual == expected
+                allowed = sorted({i for group in expected for i in group})
+                if allowed:
+                    assert operand['items']['enum'] == allowed
+                else:
+                    assert operand['maxItems'] == 0 and 'items' not in operand
+                assert operand['uniqueItems'] is True
+    a.validate_projection_candidate(plan, revision, ir, inventory, allow_review_pending=True, source_contract='v3', owner_preconditions=owner)
+    with pytest.raises(ValueError, match='REVIEW_REQUIRED'):
+        a.validate_projection_candidate(plan, revision, ir, inventory, source_contract='v3', owner_preconditions=owner)
+
+
+def test_previous_selection_request_does_not_receive_new_generation_or_feedback_rules():
+    revision, ir, inventory, plan = controlled_capacity_case()
+    caps = a.fulfillment_capability_contracts()
+    owner = a._owner_source_preconditions(revision, ir, inventory, caps,
+        generation_view_contract=p._SOURCE_CONSUMER_INPUT_CONTRACT,
+        semantic_selection_input_contract=p._PRIMARY_MEANING_LEGACY_CONTRACT)
+    new = {**owner, 'semantic_selection_input_contract': p._PRIMARY_MEANING_INPUT_CONTRACT}
+    assert p._formation_output_schema(inventory, caps, owner_preconditions=owner)['properties']['routes']['items'] == {'$ref': '#/$defs/_FulfillmentCompactRoute'}
+    old_instructions = p._primary_meaning_instructions(owner)
+    assert p._primary_meaning_instructions(new).startswith(old_instructions)
+    assert 'changing a/z' not in old_instructions
+    assert p._fulfillment_wire_context(inventory, caps, owner_preconditions=owner)['wire_request_fingerprint'] != p._fulfillment_wire_context(inventory, caps, owner_preconditions=new)['wire_request_fingerprint']
+    view = p._source_consumer_input(inventory, caps, p._fulfillment_wire_context(inventory, caps, owner_preconditions=owner), owner)
+    assert p._restore_primary_meaning_input(view)['owner_source_preconditions'] == owner
+
+
+@pytest.mark.parametrize('alternatives', ([[]], [[], [1]], [[1]]))
+def test_original_empty_support_options_are_preserved_as_legal_schema_operands(alternatives):
+    revision, ir, inventory, plan = controlled_capacity_case()
+    caps = a.fulfillment_capability_contracts()
+    choices = [{'source': i, 'necessary_source_proofs': []} for i in range(len(inventory['sources']))]
+    choices[0]['necessary_source_proofs'] = [{'capability': 0, 'minimal_support_sets': alternatives}]
+    schema = p._qualified_operand_generation_schema(inventory, caps, choices)
+    branch = next(b for b in schema['allOf'][2]['anyOf']
+                  if 0 in b['properties']['s']['enum'] and 0 in b['properties']['c']['enum'])
+    operand = branch['properties']['u']
+    assert operand['anyOf'] == [({'allOf': [{'contains': {'enum': [member]}} for member in group]} if group else {})
+                               for group in alternatives]
+    if alternatives == [[]]:
+        assert operand['maxItems'] == 0 and 'items' not in operand
+    else:
+        assert operand['items']['enum'] == [1]
+    # Empty proof alternatives remove only a required supporting member. They
+    # never permit a fabricated source outside the original proof domain.
+    assert operand['uniqueItems'] is True
+
+
+@pytest.mark.parametrize('marker', (p._PRIMARY_MEANING_LEGACY_CONTRACT, p._PRIMARY_MEANING_INPUT_CONTRACT))
+def test_numeric_offset_changes_cannot_extend_an_unchanged_exact_quote(marker):
+    from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+    revision, ir, inventory, plan = controlled_capacity_case()
+    caps = a.fulfillment_capability_contracts()
+    owner = a._owner_source_preconditions(revision, ir, inventory, caps,
+        generation_view_contract=p._SOURCE_CONSUMER_INPUT_CONTRACT,
+        semantic_selection_input_contract=marker)
+    wire, context = controlled_wire(inventory, plan, owner_preconditions=owner)
+    text = p.fulfillment_source_semantic_text(inventory['sources'][wire['routes'][0]['s']])
+    row = wire['routes'][0]
+    row.update(a=0, z=len(text), q=text[1:])
+    original = deepcopy(wire)
+    decoded = p._decode_fulfillment_candidate_wire(json.dumps(wire), inventory, caps, owner_preconditions=owner)
+    located, adjustments = a.locate_projection_components(decoded, inventory)
+    assert located.routes[0].component_basis.source_span_start == 1
+    assert located.routes[0].component_basis.source_component_quote == text[1:]
+    assert adjustments and wire == original
+    with pytest.raises(ValueError, match='SOURCE_CONTRIBUTION_LOST'):
+        a.validate_projection_components(located, inventory, allow_review_pending=True)
+    observed = a._owner_repair_context(json.dumps(wire), revision, ir, inventory, caps, validation_feedback=None, owner_preconditions=owner)
+    component = next(c for c in observed['located_components'] if c['route'] == 0)
+    assert component['located_span'] == [1, len(text)]
+    if marker == p._PRIMARY_MEANING_INPUT_CONTRACT:
+        contract = observed['quote_locator_operand_contract']
+        assert contract['raw_operand_ref'] == 'untrusted_previous_wire.routes[route].{a,z,q}'
+        assert contract['located_span_ref'] == 'located_components[route].located_span'
+        assert contract['location_status'] == 'OBSERVED_UNADMITTED'
+        assert 'NUMERIC_ONLY_CHANGE_CANNOT_EXTEND_Q' in contract['rule']
+        assert component['raw_route_fingerprint'] == a.canonical_fingerprint(wire['routes'][component['route']])
+    else:
+        assert 'quote_locator_operand_contract' not in observed
+    assert 'raw_wire_span' not in component
+    # Choosing the actual whole source is a distinct model proposal, never an
+    # automatic widening of the unchanged rejected quote.
+    row.update(q=None)
+    complete = p._decode_fulfillment_candidate_wire(json.dumps(wire), inventory, caps, owner_preconditions=owner)
+    a.validate_projection_components(complete, inventory, allow_review_pending=True)
+
+
+def test_locator_reference_does_not_claim_a_missing_complete_candidate():
+    revision, ir, inventory, plan = controlled_capacity_case()
+    caps = a.fulfillment_capability_contracts()
+    owner = a._owner_source_preconditions(revision, ir, inventory, caps,
+        generation_view_contract=p._SOURCE_CONSUMER_INPUT_CONTRACT,
+        semantic_selection_input_contract=p._PRIMARY_MEANING_INPUT_CONTRACT)
+    observed = a._owner_repair_context('{', revision, ir, inventory, caps,
+                                     validation_feedback=None, owner_preconditions=owner)
+    assert observed['quote_locator_operand_contract']['location_status'] == 'NOT_EVALUABLE'
+    assert observed['quote_locator_operand_contract']['located_span_ref'] is None
+    assert 'located_components' not in observed
+
+
+def test_qualified_generation_keeps_distinct_same_consumer_components_and_all_gates():
+    from tests.test_c3_semantic_contract_calibration import split_content
+    from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+    revision, ir, inventory, plan = split_content()
+    caps = a.fulfillment_capability_contracts()
+    owner = a._owner_source_preconditions(revision, ir, inventory, caps,
+        generation_view_contract=p._SOURCE_CONSUMER_INPUT_CONTRACT,
+        semantic_selection_input_contract=p._PRIMARY_MEANING_INPUT_CONTRACT)
+    wire, context = controlled_wire(inventory, plan, owner_preconditions=owner)
+    for raw, route in zip(wire['routes'], plan.routes, strict=True):
+        if route.component_basis.source_component_quote != p.fulfillment_source_semantic_text(inventory['sources'][raw['s']]):
+            raw['q'] = route.component_basis.source_component_quote
+    decoded = p._decode_fulfillment_candidate_wire(json.dumps(wire), inventory, caps, owner_preconditions=owner)
+    located, _ = a.locate_projection_components(decoded, inventory)
+    assert located == plan
+    a.validate_projection_candidate(located, revision, ir, inventory, allow_review_pending=True, source_contract='v3', owner_preconditions=owner)
+    with pytest.raises(ValueError, match='REVIEW_REQUIRED'):
+        a.validate_projection_candidate(located, revision, ir, inventory, source_contract='v3', owner_preconditions=owner)
+    duplicate = located.model_copy(update={'routes': (*located.routes, located.routes[0])})
+    with pytest.raises(ValueError, match='DUPLICATE_ROUTE'):
+        a.validate_projection_candidate(duplicate, revision, ir, inventory, allow_review_pending=True, source_contract='v3', owner_preconditions=owner)

@@ -156,7 +156,17 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
         # source-specific necessities remain in the complete Owner input and
         # are independently enforced before Review and again at consumers.
         # Do not duplicate that projection as dozens of alternative schemas.
-        _formation_binding_choices(inventory, capabilities, owner_preconditions)
+        choices = _formation_binding_choices(inventory, capabilities, owner_preconditions)
+        if owner_preconditions.get("semantic_selection_input_contract") == _PRIMARY_MEANING_INPUT_CONTRACT:
+            schema["properties"]["routes"]["items"] = _qualified_operand_generation_schema(inventory, capabilities, choices)
+            route["q"]["description"] = (
+                "Null copies the exact full original [0,L) basis. Otherwise this exact original "
+                "contiguous quote, not a/z, determines the located contribution. To repair its "
+                "coverage change the quote or actively select whole_source_basis; never expect "
+                "numeric offset changes to extend an unchanged quote.")
+            route["u"]["description"] = (
+                "Original provenance operands for the chosen consumer; satisfy one complete "
+                "Owner proof alternative. Linked current Fact dependencies in f cannot replace u.")
         return schema
     if owner_preconditions is not None:
         # Restrict generation to prerequisites already enforced by the Owner.
@@ -252,6 +262,54 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
                         whole({"enum": [i for i in range(len(capabilities)) if i != disposition]})]}})
             schema["properties"]["routes"]["allOf"] = rules
     return schema
+
+
+def _qualified_operand_generation_schema(inventory, capabilities, choices):
+    """Request a subset of existing Wire operands, never choose semantic routes.
+
+    Geometry depends only on original source identity; proof operands depend
+    on the consumer independently chosen by the proposer. Canonical consumers
+    still reject invalid coverage, source correspondence and missing evidence.
+    """
+    geometry_groups, provenance_groups = {}, {}
+    for source, choice in zip(inventory["sources"], choices, strict=True):
+        length = len(fulfillment_source_semantic_text(source))
+        geometry_groups.setdefault(length, []).append(choice["source"])
+        proofs = {row["capability"]: row["minimal_support_sets"]
+                  for row in choice["necessary_source_proofs"]}
+        for capability in range(len(capabilities)):
+            alternatives = proofs.get(capability)
+            key = None if alternatives is None else tuple(tuple(group) for group in alternatives)
+            provenance_groups.setdefault(key, {}).setdefault(choice["source"], []).append(capability)
+    geometry = [{"properties": {"s": {"enum": indices}}, "anyOf": [
+        {"properties": {"q": {"type": "null"}, "a": {"enum": [0]}, "z": {"enum": [length]}}},
+        {"properties": {"q": {"type": "string", "minLength": 1}}}]}
+        for length, indices in geometry_groups.items()]
+    provenance = []
+    for alternatives, sources in provenance_groups.items():
+        by_capabilities = {}
+        for source, consumers in sources.items():
+            by_capabilities.setdefault(tuple(consumers), []).append(source)
+        for consumers, indices in by_capabilities.items():
+            branch = {"properties": {"s": {"enum": indices}, "c": {"enum": list(consumers)}}}
+            if alternatives is not None:
+                # Every selected member must belong to the same original
+                # proof domain, and at least one full alternative must hold.
+                allowed = sorted({member for group in alternatives for member in group})
+                operand = {"type": "array", "uniqueItems": True, "anyOf": [
+                    {"allOf": [{"contains": {"enum": [member]}} for member in group]} if group else {}
+                    for group in alternatives]}
+                # Some existing Owners legitimately prove a direct binding
+                # without a supporting source. Preserve that empty option;
+                # empty enum/allOf are not legal JSON Schema expressions.
+                if allowed:
+                    operand["items"] = {"enum": allowed}
+                else:
+                    operand["maxItems"] = 0
+                branch["properties"]["u"] = operand
+            provenance.append(branch)
+    return {"allOf": [{"$ref": "#/$defs/_FulfillmentCompactRoute"},
+                       {"anyOf": geometry}, {"anyOf": provenance}]}
 
 
 def _formation_binding_choices(inventory, capabilities, owner_preconditions):
@@ -385,7 +443,9 @@ def _formation_source_table(context, *, inventory=None):
 
 
 _SOURCE_CONSUMER_INPUT_CONTRACT = "existing-lossless-source-consumer-input-v3"
-_PRIMARY_MEANING_INPUT_CONTRACT = "existing-primary-meaning-owner-reference-v1"
+_PRIMARY_MEANING_LEGACY_CONTRACT = "existing-primary-meaning-owner-reference-v1"
+_PRIMARY_MEANING_INPUT_CONTRACT = "existing-primary-meaning-owner-reference-v2"
+_PRIMARY_MEANING_INPUT_CONTRACTS = {_PRIMARY_MEANING_LEGACY_CONTRACT, _PRIMARY_MEANING_INPUT_CONTRACT}
 _SOURCE_CONSUMER_LEGACY_CONTRACT = "existing-lossless-source-consumer-input-v1"
 _SOURCE_CONSUMER_FEEDBACK_CONTRACTS = {"existing-lossless-source-consumer-input-v2", _SOURCE_CONSUMER_INPUT_CONTRACT}
 _SOURCE_CONSUMER_INSTRUCTIONS = (
@@ -484,7 +544,23 @@ def _primary_meaning_instructions(owner_preconditions):
         (" When failed_owner is INDEPENDENT_SEMANTIC_REVIEW_OUTPUT, the critic response failed "
          "its output contract; that is not a semantic rejection of the proposer. Preserve all lawful "
          "contributions while independent semantic judgment remains required."
-         if owner_preconditions.get("review_input_contract") == _REVIEW_INPUT_CONTRACT else ""))
+         if owner_preconditions.get("review_input_contract") == _REVIEW_INPUT_CONTRACT else "") +
+        (" Source basis is a qualified original proposition, not just an operation name. "
+         "When q is non-null, its unchanged exact text determines the located basis: changing a/z "
+         "alone cannot change its contribution or fill a coverage gap. The previous Wire claimed "
+         "span and the Owner-located quote span are separate observations. If the selected quote "
+         "omits governing negation, conjunction, scope, exclusion or punctuation, the proposer must "
+         "choose a legally complete original quote or actively select the supplied q=null whole_source_basis. "
+         "Complementary consumers may share that unchanged full basis; this does not merge distinct "
+         "semantic components or let one consumer satisfy another. Never add a context route to "
+         "archive missing grammar or expect the locator to extend a quote. q=null requires the exact "
+         "supplied [0,L), while q is an exact contiguous quote for a genuine component. "
+         "For a chosen capability, required u provenance and f completed-Fact dependencies are "
+         "different operands. Changing f, rationale or span cannot satisfy a missing u prerequisite. "
+         "The request schema projects necessary geometry and provenance domains only; it does not "
+         "select a semantic consumer or certify any candidate. Read the original proof alternatives "
+         "for the selected capability and choose one justified original support set; do not enumerate them."
+         if owner_preconditions.get("semantic_selection_input_contract") == _PRIMARY_MEANING_INPUT_CONTRACT else ""))
 
 
 def _source_consumer_input(inventory, capabilities, context, owner_preconditions):
@@ -530,7 +606,7 @@ def _source_consumer_input(inventory, capabilities, context, owner_preconditions
     marker = owner_preconditions.get("semantic_selection_input_contract")
     if marker is None:
         return result
-    if marker != _PRIMARY_MEANING_INPUT_CONTRACT:
+    if marker not in _PRIMARY_MEANING_INPUT_CONTRACTS:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     view = deepcopy(result)
     # These derived eligibility copies are not semantic requests. Keep their
@@ -550,7 +626,7 @@ def _restore_primary_meaning_input(view):
     restored = deepcopy(view)
     marker = restored.pop("semantic_selection_input_contract", None)
     owner = restored["owner_source_preconditions"]
-    if marker != _PRIMARY_MEANING_INPUT_CONTRACT or owner.get("semantic_selection_input_contract") != marker:
+    if marker not in _PRIMARY_MEANING_INPUT_CONTRACTS or owner.get("semantic_selection_input_contract") != marker:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     inventory = _restore_formation_inventory_view(restored["immutable_inventory"], restored.get("existing_ir_item_table", {}))
     caps = restored["existing_capability_contracts"]
@@ -1159,7 +1235,7 @@ def _raw_fulfillment_owner_operands(output, inventory, capabilities, *, validati
         wire = _FulfillmentCompactCandidate.model_validate(json.loads(output, object_pairs_hook=_wire_json_object))
     except json.JSONDecodeError as error:
         if (error.msg != "Extra data" or (owner_preconditions or {}).get("semantic_selection_input_contract")
-                != _PRIMARY_MEANING_INPUT_CONTRACT or (owner_preconditions or {}).get("syntax_observation_contract")
+                not in _PRIMARY_MEANING_INPUT_CONTRACTS or (owner_preconditions or {}).get("syntax_observation_contract")
                 not in {"complete-value-owner-observations-v1", "complete-value-owner-observations-v2"}):
             return {"violations": [], "not_evaluable": ["ORIGINAL_WIRE_OWNER_OPERANDS"]}
         try:
@@ -1406,7 +1482,7 @@ class ModelFulfillmentCandidateProvider:
                         source["reviewed_background_prerequisites"] = deepcopy(choices["reviewed_background_prerequisites"])
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
                 instructions=((_primary_meaning_instructions(owner_preconditions)
-                    if (owner_preconditions or {}).get("semantic_selection_input_contract") == _PRIMARY_MEANING_INPUT_CONTRACT
+                    if (owner_preconditions or {}).get("semantic_selection_input_contract") in _PRIMARY_MEANING_INPUT_CONTRACTS
                     else _SOURCE_CONSUMER_INSTRUCTIONS + (
                     " The capability domain and Schema branches are ALTERNATIVE necessary field domains, "
                     "not obligations to enumerate. Return only consumers actually entailed by each source's "

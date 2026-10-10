@@ -1,0 +1,48 @@
+{
+  "captured_at_utc": "2026-10-10T18:19:14.846083+00:00",
+  "actual_container_id": "96dfff1c2f6819d127526bc5087711955633e948280f91ba10a0648b562e2020",
+  "actual_image_id": "sha256:7ecb2f05f8c9ccde3f2d6d577ee72a69040258df6a659cbffe39093a0bf05643",
+  "requested_image_id": "sha256:7ecb2f05f8c9ccde3f2d6d577ee72a69040258df6a659cbffe39093a0bf05643",
+  "source": "b56e659f24a696e23297ec4c1e8881d46a39cdf1",
+  "installed_attestation_sha256": "c82c0bfba7c1e013e147dbaec31ed788f543c6e8a76a4bc1011c905e10942905",
+  "controller_sha256": "01faf78374c1498037a0603c8207b31123f50ce917be5e9818d21045ab280513",
+  "mounts": [
+    {
+      "source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation34-qualified-20261010/ordinary-g0-live-34/private/basis.json",
+      "destination": "/basis.json",
+      "rw": false,
+      "type": "bind"
+    },
+    {
+      "source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation34-qualified-20261010/verify_live_model34.py",
+      "destination": "/verify-live.py",
+      "rw": false,
+      "type": "bind"
+    },
+    {
+      "source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation34-qualified-20261010/final-image/evidence/actual-imports.json",
+      "destination": "/qualified-imports.json",
+      "rw": false,
+      "type": "bind"
+    },
+    {
+      "source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation34-qualified-20261010/ordinary-g0-live-34/evidence",
+      "destination": "/c3-evidence",
+      "rw": true,
+      "type": "bind"
+    },
+    {
+      "source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation34-qualified-20261010/ordinary-g0-live-34/private",
+      "destination": "/c3-private",
+      "rw": true,
+      "type": "bind"
+    }
+  ],
+  "new_work_created": false,
+  "business_database_access": false,
+  "model_limits": {
+    "formation": 2,
+    "feedback": 1,
+    "logical": 4
+  }
+}

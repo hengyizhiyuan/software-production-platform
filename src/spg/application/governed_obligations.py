@@ -1823,7 +1823,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     if review_input_contract not in (None, "existing-lossless-review-input-v1"):
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
-    if semantic_selection_input_contract not in (None, "existing-primary-meaning-owner-reference-v1"):
+    if semantic_selection_input_contract not in (None, "existing-primary-meaning-owner-reference-v1", "existing-primary-meaning-owner-reference-v2"):
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     if semantic_selection_input_contract is not None and generation_view_contract != "existing-lossless-source-consumer-input-v3":
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
@@ -2257,6 +2257,12 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
             and route.source_ref.removeprefix("semantic-fact:") in dependencies
             and route.source_ref in route.component_basis.linked_fact_refs]
     return {"inventory_fingerprint": inventory["inventory_fingerprint"], **raw_operands,
+        **({"quote_locator_operand_contract": {
+            "raw_operand_ref": "untrusted_previous_wire.routes[route].{a,z,q}",
+            "located_span_ref": "located_components[route].located_span" if located_view is not None else None,
+            "location_status": "OBSERVED_UNADMITTED" if located_view is not None else "NOT_EVALUABLE",
+            "rule": "NON_NULL_Q_DETERMINES_BASIS; NUMERIC_ONLY_CHANGE_CANNOT_EXTEND_Q; NO_QUOTE_EXPANSION"}}
+           if (owner_preconditions or {}).get("semantic_selection_input_contract") == "existing-primary-meaning-owner-reference-v2" else {}),
         **({"operand_observation_reference_contract": "existing-original-route-operands-v1",
             "route_operand_observations": [{"route": i, "observations": operand_observations[i]}
                 for i in sorted(operand_observations)]} if compact_feedback else {}),
@@ -2443,7 +2449,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                 or preconditions.get("operand_observation_contract") not in (None, "existing-owner-operands-v1")
                 or preconditions.get("raw_operand_observation_contract") not in (None, "existing-original-wire-owner-operands-v1")
                 or preconditions.get("review_input_contract") not in (None, "existing-lossless-review-input-v1")
-                or preconditions.get("semantic_selection_input_contract") not in (None, "existing-primary-meaning-owner-reference-v1")
+                or preconditions.get("semantic_selection_input_contract") not in (None, "existing-primary-meaning-owner-reference-v1", "existing-primary-meaning-owner-reference-v2")
                 or preconditions.get("generation_view_contract") not in (None, "existing-lossless-source-consumer-input-v1", "existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3")
                 or preconditions.get("typed_prerequisite_contract") not in (None, "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11")):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
@@ -2964,7 +2970,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     review_input_contract=((initial_request.get("owner_source_preconditions") or {}).get("review_input_contract")
                         if initial_request is not None else "existing-lossless-review-input-v1"),
                     semantic_selection_input_contract=((initial_request.get("owner_source_preconditions") or {}).get("semantic_selection_input_contract")
-                        if initial_request is not None else "existing-primary-meaning-owner-reference-v1"))}
+                        if initial_request is not None else "existing-primary-meaning-owner-reference-v2"))}
                     if supports_preconditions and callable(metadata_builder)
                     and "owner_preconditions" in inspect.signature(metadata_builder).parameters else {})
                 if initial_request is None and precondition_arguments:
