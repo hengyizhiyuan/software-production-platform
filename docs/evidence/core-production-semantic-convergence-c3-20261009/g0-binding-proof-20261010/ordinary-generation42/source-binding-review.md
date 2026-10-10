@@ -32,7 +32,7 @@ Existing primary-meaning generation schema carried geometry and provenance but o
 
 A persisted `generation_prerequisite_contract` binds the exact request. Legacy adapters and restored historical requests retain their actual original contract. Both pending/response identity and recomputation must agree; recovery cannot upgrade the request or reopen its budget. The repair is only an improved lawful candidate-generation boundary; actual Provider adherence and convergence remain to be qualified on a new exact image.
 
-Controlled source overlays initially exposed one fixture error and four legacy-adapter regressions (development124), then an implementation dictionary-key error (125). Original failure receipts are retained. Fixed development126: **421 PASS, 0 failures/errors/skips**, no model/Work/old DB access. Additional original-request replay/tamper cases and final installed-image/PG qualification are required before a new normal G0.
+Controlled source overlays initially exposed one fixture error and four legacy-adapter regressions (development124), then an implementation dictionary-key error (125). Original failure receipts are retained. Fixed development126: **421 PASS**; development127 including original-request replay/tamper: **423 PASS, 0 failures/errors/skips**, no model/Work/old DB access. Final installed-image/PG qualification is still required before a new normal G0.
 
 ## Evidence and recovery
 
