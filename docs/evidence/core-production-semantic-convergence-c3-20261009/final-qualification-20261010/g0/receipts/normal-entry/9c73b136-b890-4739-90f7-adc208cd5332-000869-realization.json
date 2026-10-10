@@ -1,0 +1,43 @@
+{
+  "completed_at_utc": "2026-10-10T09:45:15.013305Z",
+  "http_status": 200,
+  "input_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+  "method": "GET",
+  "path": "/api/interactions/2a6caa70-dedf-48e4-a31e-1a34b32a4c2a/turns/7bfc0169-d032-4082-be1a-2f6958d330e2/realization",
+  "projection": {
+    "obligations": [
+      {
+        "id": "ac6fdf9c-754c-5a45-b9cc-b4028adeef68",
+        "state": "SATISFIED",
+        "turn_id": "7bfc0169-d032-4082-be1a-2f6958d330e2"
+      }
+    ],
+    "refinements": [],
+    "semantic_ir": {
+      "basis_fingerprint": "fa929f78b4f5ea3f48c4cb1872f23090b18e2ae827f285580087e714e232fd07",
+      "id": "57f37dcd-69a8-5767-b4f9-5c02984f0dc3",
+      "interaction_id": "2a6caa70-dedf-48e4-a31e-1a34b32a4c2a"
+    }
+  },
+  "qualification_claim": "OBSERVATION_ONLY_NOT_WORK_PASS",
+  "request_body_sha256": null,
+  "response_body_sha256": "e726fe16ab0854f2a18caec09ff23b1d67363ada1b08bd9048de1e7802101dfc",
+  "response_bytes_observed": 10493,
+  "response_json_valid": true,
+  "run_id": "9c73b136-b890-4739-90f7-adc208cd5332",
+  "runtime_identity": {
+    "api_base_url": "http://watt-c3-finalg0-api-20261010:8000",
+    "api_service": "watt-c3-finalg0-api-20261010",
+    "captured_at_utc": "2026-10-10T09:34:56.530057+00:00",
+    "database_name": "spg_c3_finalg0_qualification_20261010",
+    "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+    "isolated": true,
+    "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+    "provider_ready": true,
+    "qualification": "C3",
+    "qualification_run": "final-g0",
+    "source_revision": "34e9ca9cc5cd5623a9463b42ba4c26ede061640f"
+  },
+  "schema": "c3-normal-entry-api-observation-v1",
+  "started_at_utc": "2026-10-10T09:45:14.974424Z"
+}

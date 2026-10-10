@@ -1,0 +1,129 @@
+{
+  "schema": "c3-final-g0-private-recovery-checkpoint-v1",
+  "started_at_utc": "2026-10-10T09:48:25.246581+00:00",
+  "finished_at_utc": "2026-10-10T09:48:53.025748+00:00",
+  "work_id": "c703f518-52a2-5531-90d1-e751b809fe68",
+  "result": "G0_FAIL_C3_PARTIAL",
+  "private_recovery_directory": "/data/watt/c3-semantic-convergence-20261009/final-g0-recovery-20261010",
+  "archives": [
+    {
+      "path": "/data/watt/c3-semantic-convergence-20261009/final-g0-recovery-20261010/qualification.pgcustom",
+      "sha256": "8fce8e8ed1ba70bfe758f15fa6066a2e8c64c00b8ed4b9664245e9d757fd5d84",
+      "bytes": 506173
+    },
+    {
+      "path": "/data/watt/c3-semantic-convergence-20261009/final-g0-recovery-20261010/qualification-root.tar.gz",
+      "sha256": "0ca249f2ac2f05e35989d4390edf48f1c38d7ff8276f24355a48431e3d18553c",
+      "bytes": 12218914
+    },
+    {
+      "path": "/data/watt/c3-semantic-convergence-20261009/final-g0-recovery-20261010/workspace-volume.tar.gz",
+      "sha256": "125bbb46f870a53c0be27bade2b49237d8d0e5d0261361cc52bf7ab5209e299c",
+      "bytes": 139
+    }
+  ],
+  "exact_application_image_archive": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/review-primary-qualified-20261010/image-recovery/exact-image.tar.gz",
+  "exact_application_image_archive_sha256": "286053124619831b03f243c02f79b35df6408035fe86e234c752a40df465a377",
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "database": "spg_c3_finalg0_qualification_20261010",
+  "migration": "20261007_72",
+  "pg_dump_exit_code": 0,
+  "pg_restore_list_exit_code": 0,
+  "dump_consistency": "pg_dump read-only consistent snapshot after new application roles quiesced; filesystem archive after new PG/Gitea cold stop; not one cross-resource transaction",
+  "stopped_only_new_names": [
+    "watt-c3-finalg0-api-20261010",
+    "watt-c3-finalg0-coordinator-20261010",
+    "watt-c3-finalg0-worker-20261010",
+    "watt-c3-finalg0-tool-host-20261010",
+    "watt-c3-finalg0-postgres-20261010",
+    "watt-c3-finalg0-gitea-20261010"
+  ],
+  "preexisting_container_states": [
+    {
+      "id": "04f4dde8796dded9981ab5d3edca2b0828a1bf9aa82b497a4efa8ff5315bc5ec",
+      "running": true
+    },
+    {
+      "id": "29c290617ab5fb01e8d77f748665dbda1f2bdbc64244274aa65191dfe0678d9c",
+      "running": true
+    },
+    {
+      "id": "58b17dc016723b4b7067bc0069b9adcd1587e641e9ee0b1493858ddf5372324d",
+      "running": true
+    },
+    {
+      "id": "f4aa2f4646dad389d475d353da17fc8751117fd1d86ba5c2b1cd7bef15a5dc34",
+      "running": true
+    },
+    {
+      "id": "67eac0dce22c1e15e50e4ae9023dba86a77284f3de9c21c93aafbe87378df8a5",
+      "running": true
+    },
+    {
+      "id": "f2b37911c4d2011e13ed80e5e1239e0970bc5a8dd85cb188b0b1453fff5da3e7",
+      "running": true
+    },
+    {
+      "id": "8271481d44d087cc3719d22254eeb5e71cbde4307a79457b61d0134b156614d4",
+      "running": true
+    },
+    {
+      "id": "907431da275d08f9b48a98a59d7226118bf54335e33cae16f56001d9c1a508d2",
+      "running": true
+    },
+    {
+      "id": "1e100b5795dce67373afe7b6d3ba09d33cb406e1ebab13d20f61899aea33a823",
+      "running": true
+    },
+    {
+      "id": "5aa5758c0d3057ef54467b69ae64e74adc91cbbd75734993954fd9bf98369c8c",
+      "running": true
+    },
+    {
+      "id": "abf187e37a7441de01b32257288b84279a1e8ba1858a0fae5eaa7880f7b5fe89",
+      "running": true
+    },
+    {
+      "id": "dd3429391345387ca9cdc71a8584e7e8244ef6f772791b69cd2b4a008f8d6cc6",
+      "running": true
+    },
+    {
+      "id": "60d6f6ad0e04fdb2673aca9d924a1b5f5d21025bfb7c092733b25688c98d55e2",
+      "running": true
+    },
+    {
+      "id": "2ce7345717f67aa980e3e76854e4363014248ad474f47c9746a2627003159011",
+      "running": true
+    },
+    {
+      "id": "bb75898e95f669c6a549fa24e9b43635e3f3175a5f44f9b3d74f9cbd5ad77037",
+      "running": true
+    },
+    {
+      "id": "054872b65f14de53b64b7cec7e9ddeb95b52c9b0fb0bf71ac8c806b19f9e07a3",
+      "running": true
+    },
+    {
+      "id": "6ecd0e02142d0d06272f8b22e9f83a65e955cd17aea42f305ebb22237cb30475",
+      "running": true
+    },
+    {
+      "id": "fe47063758f83842cc7626647b52e8b73bc6b121149fcf4f14978cc7ff26e739",
+      "running": true
+    },
+    {
+      "id": "b948e8f4b5c1ae6fcd877ef44eecfdcb4edaee92fac9e0b93c54fd8cd7d19803",
+      "running": true
+    }
+  ],
+  "original_ecs_head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+  "original_ecs_main_ref": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+  "original_historical_basis_sha256": "9b013274f1a6daafc776297a302c52c8247cd2fd5ec9c5b99a83279fd2ee8e2c",
+  "production_modified": false,
+  "historical_work_modified": false,
+  "model_calls": 0,
+  "restore_test": "NOT_PERFORMED",
+  "offsite_backup": "NOT_PERFORMED",
+  "private_archive_contains_credentials": true,
+  "public_release_contains_private_archive": false
+}

@@ -1,0 +1,62 @@
+{
+  "checked_at_utc": "2026-10-10T09:47:53.379103+00:00",
+  "public_credential_hits": 0,
+  "private_sealed_input_nonce_or_oracle_hits": 0,
+  "public_files_scanned": 12,
+  "private_inputs_not_transferred": true,
+  "isolated_resources_stopped": [
+    {
+      "name": "watt-c3-finalholdout-live-20261010",
+      "container_id": "7a2e8ae07f2040c1d6006ac3da7730dbd42ac05d84dc6129497d46facffd1275",
+      "image": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+      "state": "exited",
+      "exit_code": 0
+    },
+    {
+      "name": "watt-c3-finalholdout-pg-20261010",
+      "container_id": "df1fb1c9583632978ee1048729eefac6d7d23da6e709618cc6218eab78b7b53c",
+      "image": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+      "state": "exited",
+      "exit_code": 0
+    },
+    {
+      "name": "watt-c3-finalholdout-migrate-20261010",
+      "container_id": "0e90e32daa66943a332551c08eaafb030d844e3b524cfd96846fdf5dda037492",
+      "image": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+      "state": "exited",
+      "exit_code": 0
+    },
+    {
+      "name": "watt-c3-finalholdout-owner-probes-20261010",
+      "container_id": "f7b870742cdc9827fd11f896741cad66c39b452f9242656f6be88b9092bed5d5",
+      "image": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+      "state": "exited",
+      "exit_code": 1
+    },
+    {
+      "name": "watt-c3-finalholdout-owner-probes-v2-20261010",
+      "container_id": "719bf515613b081a806e2db170629e67d70df8e4630a6a0193f9983e52938b37",
+      "image": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+      "state": "exited",
+      "exit_code": 0
+    },
+    {
+      "name": "watt-c3-finalholdout-owner-h24-20261010",
+      "container_id": "7858f19bfcefb05638f58a04885dc5211a20c89545b500fa4512a712426e15a4",
+      "image": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+      "state": "exited",
+      "exit_code": 0
+    },
+    {
+      "name": "watt-c3-finalholdout-joint-owner-20261010",
+      "container_id": "d644218459eecfc2deaa7ce3dcb5bbacfc9c6bd885d253b51a956b49b9fd705f",
+      "image": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+      "state": "exited",
+      "exit_code": 0
+    }
+  ],
+  "new_database_volume_and_network_retained": true,
+  "production_resources_modified": false,
+  "sealed_original_sha256": "770828adeabec942548218c17bc6e9dbb9222ce19df19bc89c260f28ed8f4cf0",
+  "unseen_holdout_reuse_forbidden": true
+}

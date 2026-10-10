@@ -1,0 +1,142 @@
+{
+  "all_controlled_not_real_ai_work": true,
+  "results": [
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE_FROM_SEALED_INPUT",
+      "case_id": "H10",
+      "coverage_limitation": null,
+      "evidence_sha256": "cd472f53ce969b0312148cb418bee54b168489b5e1c62d2625ba179ffc4fe03a",
+      "model_calls": 0,
+      "ordinal": 9,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE_FROM_SEALED_INPUT",
+      "case_id": "H11",
+      "coverage_limitation": null,
+      "evidence_sha256": "8c5cf74886b6c53833b5951fba8776f01b8f467b690989a666bfac6faf09e61f",
+      "model_calls": 0,
+      "ordinal": 10,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE_FROM_SEALED_INPUT",
+      "case_id": "H12",
+      "coverage_limitation": null,
+      "evidence_sha256": "85cb3849b250fbe35ffb1969433b31b9c5d7ed3ffd94961c5d34f8aa76edffeb",
+      "model_calls": 0,
+      "ordinal": 11,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE_FROM_SEALED_INPUT",
+      "case_id": "H13",
+      "coverage_limitation": null,
+      "evidence_sha256": "ee5b4ce9229f09636282fb2e2105d60d2dc903e2c520eb49c2cec4496315907a",
+      "model_calls": 0,
+      "ordinal": 12,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE_FROM_SEALED_INPUT",
+      "case_id": "H14",
+      "coverage_limitation": null,
+      "evidence_sha256": "f6041c4fe5c284228f6ed7aa329b0fb574caa75379f376bd96a1e5166d35b4b6",
+      "model_calls": 0,
+      "ordinal": 13,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE_FROM_SEALED_INPUT",
+      "case_id": "H15",
+      "coverage_limitation": null,
+      "evidence_sha256": "4c0f4afa575b11bb7d3fa46e11b17a945e5f8f24d1b0a92f6e90ebbca5563333",
+      "model_calls": 0,
+      "ordinal": 14,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H16",
+      "coverage_limitation": null,
+      "evidence_sha256": "3106b0788170dbd46cf74d9ae74a56dc1df135334988934db41a3836407e9cfd",
+      "model_calls": 0,
+      "ordinal": 15,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H17",
+      "coverage_limitation": null,
+      "evidence_sha256": "dde47180138097bb955add016c4bf4b67c6d59f204f63a35ea827bae534fbe2c",
+      "model_calls": 0,
+      "ordinal": 16,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H18",
+      "coverage_limitation": null,
+      "evidence_sha256": "c5c1c2f6d71b1c63d8e8b24aabb2fd2e50de9435ffad4d75ab14c151538df6c2",
+      "model_calls": 0,
+      "ordinal": 17,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H19",
+      "coverage_limitation": "Current content/handoff linked and missing authority rejected at actual Integration Owner; software Candidate sealing separately real G0",
+      "evidence_sha256": "c21b78013079c599cf704304bf35d56252260dd2fec19289273e115db5aa37d9",
+      "model_calls": 0,
+      "ordinal": 18,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H20",
+      "coverage_limitation": null,
+      "evidence_sha256": "72fe9ce5605c66fba1022511b82150c0904ea3865faa7bc9b8d4bd01adeadd6e",
+      "model_calls": 0,
+      "ordinal": 19,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H21",
+      "coverage_limitation": null,
+      "evidence_sha256": "9db527eddca56e9a6b7410a3dec61ec9827d4b28215f3b0578e192f70c498729",
+      "model_calls": 0,
+      "ordinal": 20,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H22",
+      "coverage_limitation": null,
+      "evidence_sha256": "cff3374385a991cd5d7ecf1a078d2d7fdf1df89c808875c942afed788490045d",
+      "model_calls": 0,
+      "ordinal": 21,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H23",
+      "coverage_limitation": null,
+      "evidence_sha256": "e005cd62c72e2792ef54ab13136d0b341a31efb4af32ca4bedbf6a1544e3aafc",
+      "model_calls": 0,
+      "ordinal": 22,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "case_id": "H24",
+      "model_calls": 0,
+      "ordinal": 23,
+      "reason": "AssertionError",
+      "reason_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result": "NOT_EVALUABLE"
+    }
+  ],
+  "schema": "c3-independent-holdout-owner-probes-v1",
+  "source_tuning": false,
+  "specification_sha256": "770828adeabec942548218c17bc6e9dbb9222ce19df19bc89c260f28ed8f4cf0"
+}

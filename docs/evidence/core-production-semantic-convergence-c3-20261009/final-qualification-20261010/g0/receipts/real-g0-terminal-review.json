@@ -1,0 +1,1677 @@
+{
+  "schema": "c3-final-real-g0-terminal-review-v1",
+  "recorded_at_utc": "2026-10-10T09:46:07.636145+00:00",
+  "result": "FAIL_NOT_REAL_G0_QUALIFIED",
+  "source": "34e9ca9cc5cd5623a9463b42ba4c26ede061640f",
+  "tree": "00f053019cf3c1ba0cd43fa1b1fca023ef638a71",
+  "image": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "guardian": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+  "ecf": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "database": "spg_c3_finalg0_qualification_20261010",
+  "migration": "20261007_72",
+  "work_id": "c703f518-52a2-5531-90d1-e751b809fe68",
+  "product_id": "49074219-d220-4f2c-9294-1bacb638fff1",
+  "interaction_id": "2a6caa70-dedf-48e4-a31e-1a34b32a4c2a",
+  "turn_id": "7bfc0169-d032-4082-be1a-2f6958d330e2",
+  "input_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+  "actual_database_snapshot": {
+    "captured_at_utc": "2026-10-10 09:46:05.587503+00:00",
+    "database_name": "spg_c3_finalg0_qualification_20261010",
+    "evidence_level": "E1",
+    "read_only": "on",
+    "scope": "one READ ONLY REPEATABLE READ database transaction; no qualification result inferred",
+    "transaction_snapshot": "56589:56589:"
+  },
+  "private_export_directory": "/data/watt/c3-semantic-convergence-20261009/final-g0-qualification-20261010/private/owner-export-20261010T094603-0158bd8c12ba46eaa7531e226aec198d",
+  "private_export_file": "20261010T094604243626Z-0f96817e609b4b0e88f17bdda6b1b760-canonical-work.json",
+  "private_export_sha256": "4ed82eb189d3c6d8edab7cc9bd8df3451e4d4cee0b82c58d7e146e8892518797",
+  "table_counts": {
+    "attempt_preparations": 0,
+    "baseline_candidates": 0,
+    "checkpoint_bundles": 0,
+    "completion_evaluations": 0,
+    "context_packages": 0,
+    "effect_receipts": 0,
+    "engineering_resource_bindings": 1,
+    "engineering_resources": 1,
+    "engineering_scopes": 1,
+    "event_outbox": 0,
+    "execution_allocations": 0,
+    "execution_attempts": 0,
+    "execution_control_requests": 0,
+    "execution_dispatches": 0,
+    "execution_effects": 0,
+    "execution_events": 0,
+    "execution_evidence": 0,
+    "execution_recovery_cases": 0,
+    "execution_resource_envelopes": 0,
+    "execution_resource_usage": 0,
+    "execution_sessions": 0,
+    "execution_source_members": 0,
+    "execution_source_vectors": 0,
+    "execution_steps": 0,
+    "execution_workspaces": 0,
+    "executor_leases": 0,
+    "executor_queue": 0,
+    "executor_worker_events": 0,
+    "executor_worker_registrations": 0,
+    "governance_records": 7,
+    "human_authorizations": 0,
+    "interaction_assessments": 1,
+    "interaction_records": 1,
+    "interaction_turn_obligations": 1,
+    "interaction_turn_realization_refinements": 0,
+    "interaction_turn_realizations": 1,
+    "interaction_turn_semantic_envelopes": 1,
+    "interaction_turns": 1,
+    "native_attempt_bindings": 0,
+    "native_attempt_states": 0,
+    "plan_revisions": 0,
+    "product_interactions": 1,
+    "product_managed_sources": 1,
+    "product_source_promotion_intents": 0,
+    "product_source_versions": 1,
+    "product_works": 1,
+    "product_workspace_interactions": 1,
+    "production_admissibility_records": 0,
+    "production_runs": 0,
+    "production_snapshots": 1,
+    "production_work_units": 0,
+    "proposed_repository_snapshots": 0,
+    "provider_execution_reports": 0,
+    "pwu_contract_versions": 0,
+    "repository_integration_effects": 0,
+    "repository_observations": 0,
+    "result_ready_claims": 0,
+    "runtime_commits": 0,
+    "self_refine_actions": 2,
+    "self_refine_events": 2,
+    "semantic_step_results": 1,
+    "software_product_assets": 1,
+    "software_products": 1,
+    "steering_decisions": 1,
+    "steering_history_events": 1,
+    "steering_plan_revisions": 1,
+    "steering_plans": 1,
+    "steering_steps": 4,
+    "transition_history": 0,
+    "verification_records": 0,
+    "work_convergence_observations": 2,
+    "work_delivery_acceptances": 0,
+    "work_delivery_manifests": 0,
+    "work_delivery_runtimes": 0,
+    "work_delivery_targets": 0,
+    "work_product_references": 0,
+    "work_reality_revisions": 1,
+    "work_runtime_bindings": 0,
+    "work_source_bases": 1
+  },
+  "formation": [
+    {
+      "stage": "MODEL_REQUEST_PENDING",
+      "receipt_id": "4c61ac31-feb2-498d-b238-6401021e7679",
+      "attempt": 1,
+      "budget_limit": 2,
+      "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+      "source_revision": "da9e4af489b54700715ed4ddd655515bc94d9f45",
+      "exact_target_paths": [
+        "index.html"
+      ],
+      "governance_row_id": "141959b5-a46c-47f2-ab9b-9d17800cbc93",
+      "created_at": "2026-10-10T09:35:33.948694+00:00"
+    },
+    {
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "receipt_id": "b978bd0f-d13b-4fc0-a37d-7d328ad14fd7",
+      "attempt": 1,
+      "budget_limit": 2,
+      "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+      "source_revision": "da9e4af489b54700715ed4ddd655515bc94d9f45",
+      "exact_target_paths": [
+        "index.html"
+      ],
+      "governance_row_id": "a1ac184c-360a-4927-8b2d-1ca64651fd98",
+      "created_at": "2026-10-10T09:35:40.903082+00:00",
+      "model_metadata": {
+        "output_bytes": 6573,
+        "output_sha256": "4b481fea21f1da7d8ec99769b3f76f91c977075d359f34138af3511b62506eb3",
+        "provider": "deepseek",
+        "request_id": "957ccb3a-100f-421b-b086-86bdf9d4f1fe",
+        "transport_retry_count": 0,
+        "usage": {
+          "cached_tokens": 1280,
+          "input_tokens": 23356,
+          "output_tokens": 2067,
+          "reasoning_tokens": 0,
+          "total_tokens": 25423,
+          "unknown": false
+        }
+      },
+      "model_observation_original_keys": [
+        "effective_model",
+        "generation_schema_fingerprint",
+        "output_bytes",
+        "output_sha256",
+        "provider",
+        "request_id",
+        "requested_model",
+        "timing",
+        "transport_retry_count",
+        "usage"
+      ]
+    },
+    {
+      "stage": "CANDIDATE_VALIDATED",
+      "receipt_id": "a906b5b1-4873-495c-91a6-f9bf148220ce",
+      "attempt": 1,
+      "budget_limit": 2,
+      "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+      "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "validation_passed": false,
+      "terminal": false,
+      "terminal_reason": null,
+      "source_revision": "da9e4af489b54700715ed4ddd655515bc94d9f45",
+      "exact_target_paths": [
+        "index.html"
+      ],
+      "repair_feedback_bound": true,
+      "governance_row_id": "b2824d35-86ae-455e-a83e-0553851892aa",
+      "created_at": "2026-10-10T09:35:41.021064+00:00",
+      "candidate_route_count": 29,
+      "candidate_original_json_fingerprint": "8c6979de7d48585bb5edef113ef9142abe384e65d022c2ae05a4b354a5661aa7",
+      "validation_feedback": {
+        "schema": "fulfillment-validation-feedback-v2",
+        "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+        "primary_error": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+        "violations": [
+          {
+            "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+            "route": 3,
+            "source": 3,
+            "component_id": "dcdf7c6e760b4f89f1cde685fbba8a5ca9fe9764c9ccd06b43ed49af20603211"
+          },
+          {
+            "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+            "route": 7,
+            "source": 5,
+            "component_id": "e62a65cd425287c5c4003be012a3fd91cbca7d53ae88e70708da7970fea9a3b1"
+          },
+          {
+            "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+            "route": 9,
+            "source": 6,
+            "component_id": "5900e248cbccb15be1bc5243a7f3dcdc65b5aed5da8da7aaad43dbfd8e17cdb2"
+          },
+          {
+            "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+            "route": 9,
+            "source": 6,
+            "component_id": "5900e248cbccb15be1bc5243a7f3dcdc65b5aed5da8da7aaad43dbfd8e17cdb2"
+          },
+          {
+            "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+            "route": 16,
+            "source": 9,
+            "component_id": "3ebefd6698b8191498362908a4f8d05589526442f071cca506ecdd8ce1e36958"
+          },
+          {
+            "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+            "route": 16,
+            "source": 9,
+            "component_id": "3ebefd6698b8191498362908a4f8d05589526442f071cca506ecdd8ce1e36958"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "route": 24,
+            "source": 15,
+            "component_id": "d88b7f341994a47eba78aac0c5a9a4058e55802b1761c4bfc9d22bb09aa782b9"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "route": 25,
+            "source": 16,
+            "component_id": "125db868c7a95c49b6e8b3ba614b11b03cce9fec2cd9f0b8e35eb93dfae857cf"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "route": 26,
+            "source": 17,
+            "component_id": "ee23ad30fb29125b778a5e1e3cc0cf5f096522a46b1ed3a48443b91e93f16401"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "route": 27,
+            "source": 18,
+            "component_id": "2d5250529bb9efb5dd9f8f6fdf19ae19d2526e536d15a378e7c8109c96a3fb66"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "route": 28,
+            "source": 19,
+            "component_id": "0b313cc03109b6b6f1f794d89cd59143b9aaa31a53d3ebfc1eff155101c0baff"
+          }
+        ],
+        "additional_violation_count": 0,
+        "not_evaluable": [
+          "INDEPENDENT_SEMANTIC_REVIEW",
+          "ACTUAL_OWNER_EVIDENCE",
+          "ASSURANCE"
+        ],
+        "repair_feedback_binding": {
+          "work_id": "c703f518-52a2-5531-90d1-e751b809fe68",
+          "work_reality_revision_id": "4d674f62-99c6-5fed-ba6e-45f90ca2f9a2",
+          "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+          "source_revision": "da9e4af489b54700715ed4ddd655515bc94d9f45",
+          "exact_target_paths": [
+            "index.html"
+          ],
+          "attempt": 1,
+          "wire_output_fingerprint": "4b481fea21f1da7d8ec99769b3f76f91c977075d359f34138af3511b62506eb3",
+          "request_receipt_id": "4c61ac31-feb2-498d-b238-6401021e7679",
+          "response_receipt_id": "b978bd0f-d13b-4fc0-a37d-7d328ad14fd7",
+          "owner_repair_context_contract": "existing-owner-preconditions-v1",
+          "owner_source_preconditions_fingerprint": "619ac699214ab564670e2e4ab0a76e2391ca51ed67cf2c5a493ade852d8b5cd2",
+          "provider_wire_version": "fulfillment-compact-v1",
+          "wire_request_fingerprint": "4ab1fc4636a23145d4d22f77aed3f26cd1f18433d7bfcc47df88db7ad3e82d16",
+          "wire_table_fingerprint": "b0f54fa3a389afb1877181996ff2da20c87e4cb7ea8148c9547499cb2630dbf3",
+          "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+          "candidate_fingerprint": "f17a646936472ce82db3f4d4b83ac14f474034644a0495197ac5acddfb826579"
+        },
+        "owner_repair_context": {
+          "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+          "status": "UNADMITTED_OWNER_PRECONDITION_OBSERVATIONS",
+          "violations": [
+            {
+              "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+              "route": 3,
+              "source": 3,
+              "component_id": "dcdf7c6e760b4f89f1cde685fbba8a5ca9fe9764c9ccd06b43ed49af20603211",
+              "raw_route_fingerprint": "b974224464ffd61aab21ff4fde819c49c64afbaa934235a0d96781875843f864",
+              "owner_operand_observations": {
+                "capability": 10,
+                "evidence_method": "RETAIN_AUTHORITATIVE_CONTEXT",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "typed_prerequisites": {
+                  "source_kind": "IR_CLAUSE",
+                  "original_fact_type": null,
+                  "rejected_binding": null,
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+              "route": 7,
+              "source": 5,
+              "component_id": "e62a65cd425287c5c4003be012a3fd91cbca7d53ae88e70708da7970fea9a3b1",
+              "raw_route_fingerprint": "8d9d6bf22de0b5fdc8c8aa5d7ed2177e2f6d4039644c6001f0dcde04ea0dbdf9",
+              "owner_operand_observations": {
+                "capability": 10,
+                "evidence_method": "RETAIN_AUTHORITATIVE_CONTEXT",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "typed_prerequisites": {
+                  "source_kind": "IR_CLAUSE",
+                  "original_fact_type": null,
+                  "rejected_binding": null,
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+              "route": 9,
+              "source": 6,
+              "component_id": "5900e248cbccb15be1bc5243a7f3dcdc65b5aed5da8da7aaad43dbfd8e17cdb2",
+              "raw_route_fingerprint": "507fc232905329a35fdcbdebd1a91e7945e4048f8074ddbf8de2cf8ada620c39",
+              "owner_operand_observations": {
+                "capability": 10,
+                "evidence_method": "RETAIN_AUTHORITATIVE_CONTEXT",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "typed_prerequisites": {
+                  "source_kind": "IR_CLAUSE",
+                  "original_fact_type": null,
+                  "rejected_binding": null,
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+              "route": 9,
+              "source": 6,
+              "component_id": "5900e248cbccb15be1bc5243a7f3dcdc65b5aed5da8da7aaad43dbfd8e17cdb2",
+              "raw_route_fingerprint": "507fc232905329a35fdcbdebd1a91e7945e4048f8074ddbf8de2cf8ada620c39",
+              "owner_operand_observations": {
+                "capability": 10,
+                "evidence_method": "RETAIN_AUTHORITATIVE_CONTEXT",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "typed_prerequisites": {
+                  "source_kind": "IR_CLAUSE",
+                  "original_fact_type": null,
+                  "rejected_binding": null,
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+              "route": 16,
+              "source": 9,
+              "component_id": "3ebefd6698b8191498362908a4f8d05589526442f071cca506ecdd8ce1e36958",
+              "raw_route_fingerprint": "7ed1bc18297410704fda3c0a990cd5ff338450ef477895bed1d86bcd8e39037d",
+              "owner_operand_observations": {
+                "capability": 10,
+                "evidence_method": "RETAIN_AUTHORITATIVE_CONTEXT",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "typed_prerequisites": {
+                  "source_kind": "IR_CLAUSE",
+                  "original_fact_type": null,
+                  "rejected_binding": null,
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+              "route": 16,
+              "source": 9,
+              "component_id": "3ebefd6698b8191498362908a4f8d05589526442f071cca506ecdd8ce1e36958",
+              "raw_route_fingerprint": "7ed1bc18297410704fda3c0a990cd5ff338450ef477895bed1d86bcd8e39037d",
+              "owner_operand_observations": {
+                "capability": 10,
+                "evidence_method": "RETAIN_AUTHORITATIVE_CONTEXT",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "typed_prerequisites": {
+                  "source_kind": "IR_CLAUSE",
+                  "original_fact_type": null,
+                  "rejected_binding": null,
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 24,
+              "source": 15,
+              "component_id": "d88b7f341994a47eba78aac0c5a9a4058e55802b1761c4bfc9d22bb09aa782b9",
+              "raw_route_fingerprint": "40094b681bd255f84ca4d99687cc5607bfb4858bec6033ab90470e49dc77f348",
+              "owner_operand_observations": {
+                "capability": 4,
+                "evidence_method": "EXACT_PERMISSION_GATE",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "typed_prerequisites": {
+                  "source_kind": "WORK_CONSTRAINT",
+                  "original_fact_type": null,
+                  "rejected_binding": {
+                    "codes": [
+                      "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+                    ],
+                    "capability": 4
+                  },
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 25,
+              "source": 16,
+              "component_id": "125db868c7a95c49b6e8b3ba614b11b03cce9fec2cd9f0b8e35eb93dfae857cf",
+              "raw_route_fingerprint": "fad4dd35124ff08621cf6d270e5a533077e0da8aa0334d3178c86b6172ab862c",
+              "owner_operand_observations": {
+                "capability": 5,
+                "evidence_method": "EXACT_PERMISSION_GATE",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "typed_prerequisites": {
+                  "source_kind": "WORK_CONSTRAINT",
+                  "original_fact_type": null,
+                  "rejected_binding": {
+                    "codes": [
+                      "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+                    ],
+                    "capability": 5
+                  },
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 26,
+              "source": 17,
+              "component_id": "ee23ad30fb29125b778a5e1e3cc0cf5f096522a46b1ed3a48443b91e93f16401",
+              "raw_route_fingerprint": "ad201c1063ef323cf528c01f183619b1380f100c907f8c6f9212ba8a065cc8a7",
+              "owner_operand_observations": {
+                "capability": 1,
+                "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "target_operand": {
+                  "field": "t",
+                  "meaning": "COMPLETE_ADMITTED_CHANGE_ALLOWLIST; NOT_EXCLUDED_PATHS_OR_EFFECTS",
+                  "relation": "EXACT_ORDERED_SET",
+                  "required_ordinals": [
+                    0
+                  ],
+                  "observed_ordinals": [
+                    0
+                  ],
+                  "missing_ordinals": [],
+                  "unexpected_ordinals": [],
+                  "matches": true
+                },
+                "typed_prerequisites": {
+                  "source_kind": "WORK_CONSTRAINT",
+                  "original_fact_type": null,
+                  "rejected_binding": {
+                    "codes": [
+                      "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+                    ],
+                    "capability": 1
+                  },
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 27,
+              "source": 18,
+              "component_id": "2d5250529bb9efb5dd9f8f6fdf19ae19d2526e536d15a378e7c8109c96a3fb66",
+              "raw_route_fingerprint": "9ca6ac07c57e7a66809df0d30ba657dfa2bc2416564773c7ac17636cd2bdc9c9",
+              "owner_operand_observations": {
+                "capability": 1,
+                "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "target_operand": {
+                  "field": "t",
+                  "meaning": "COMPLETE_ADMITTED_CHANGE_ALLOWLIST; NOT_EXCLUDED_PATHS_OR_EFFECTS",
+                  "relation": "EXACT_ORDERED_SET",
+                  "required_ordinals": [
+                    0
+                  ],
+                  "observed_ordinals": [
+                    0
+                  ],
+                  "missing_ordinals": [],
+                  "unexpected_ordinals": [],
+                  "matches": true
+                },
+                "typed_prerequisites": {
+                  "source_kind": "WORK_CONSTRAINT",
+                  "original_fact_type": null,
+                  "rejected_binding": {
+                    "codes": [
+                      "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+                    ],
+                    "capability": 1
+                  },
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 28,
+              "source": 19,
+              "component_id": "0b313cc03109b6b6f1f794d89cd59143b9aaa31a53d3ebfc1eff155101c0baff",
+              "raw_route_fingerprint": "7587d6cbab5d399faf70f4fa9485a265be2e3dbe224c367165601f1594e1f34a",
+              "owner_operand_observations": {
+                "capability": 1,
+                "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "target_operand": {
+                  "field": "t",
+                  "meaning": "COMPLETE_ADMITTED_CHANGE_ALLOWLIST; NOT_EXCLUDED_PATHS_OR_EFFECTS",
+                  "relation": "EXACT_ORDERED_SET",
+                  "required_ordinals": [
+                    0
+                  ],
+                  "observed_ordinals": [
+                    0
+                  ],
+                  "missing_ordinals": [],
+                  "unexpected_ordinals": [],
+                  "matches": true
+                },
+                "typed_prerequisites": {
+                  "source_kind": "WORK_CONSTRAINT",
+                  "original_fact_type": null,
+                  "rejected_binding": {
+                    "codes": [
+                      "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+                    ],
+                    "capability": 1
+                  },
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            }
+          ],
+          "additional_violation_count": 0,
+          "raw_routes_not_evaluable": [],
+          "source_preconditions": [
+            {
+              "source": 0,
+              "source_ref": "semantic-fact:1a4d882e-16a3-55da-a034-e4b8ff4a781d",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 1,
+              "source_ref": "semantic-fact:418f0b05-f833-586f-af19-6277d63a5260",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 2,
+              "source_ref": "semantic-fact:ceb4834d-8454-5cfc-850b-c2f44563920c",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "necessary_evidence_method": "EXACT_GIT_DIFF_SCOPE"
+            },
+            {
+              "source": 3,
+              "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c1",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 4,
+              "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 5,
+              "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c3",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 6,
+              "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c4",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 7,
+              "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c5",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 8,
+              "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c6",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 9,
+              "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 10,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:0",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "exact_exclusion_derivation_source_ordinals": [],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 11,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:1",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "exact_exclusion_derivation_source_ordinals": [],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 12,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:2",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "exact_exclusion_derivation_source_ordinals": [],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 13,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:3",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "exact_exclusion_derivation_source_ordinals": [],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 14,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:4",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "exact_exclusion_derivation_source_ordinals": [],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 15,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:5",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [],
+              "exact_exclusion_derivation_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 16,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:6",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [],
+              "exact_exclusion_derivation_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 17,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:7",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [],
+              "exact_exclusion_derivation_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 18,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:8",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [],
+              "exact_exclusion_derivation_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 19,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:9",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [],
+              "exact_exclusion_derivation_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            }
+          ],
+          "not_evaluable": [
+            "COMPLETE_PLAN_ADMISSION",
+            "INDEPENDENT_SEMANTIC_REVIEW",
+            "ACTUAL_OWNER_EVIDENCE",
+            "ASSURANCE"
+          ],
+          "instruction": "Select semantic components yourself. Every source needs its own complete component spans even when cited in u. Exact text equality does not merge source identities. The listed origins are necessary correspondence prerequisites, not evidence or permission. Do not add unrelated supports; do not change meaning or copy another source's scope. Revalidate the complete new proposal through existing gates."
+        },
+        "private_original_wire_sha256": "4b481fea21f1da7d8ec99769b3f76f91c977075d359f34138af3511b62506eb3"
+      },
+      "validation_feedback_sha256": "c59d4486b7ff1b0c28195c2754f025e980fa7072a975e1adea8422e1f5237ed3"
+    },
+    {
+      "stage": "MODEL_REQUEST_PENDING",
+      "receipt_id": "3d4808b7-f347-410a-930c-9661d201a4b5",
+      "attempt": 2,
+      "budget_limit": 2,
+      "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+      "source_revision": "da9e4af489b54700715ed4ddd655515bc94d9f45",
+      "exact_target_paths": [
+        "index.html"
+      ],
+      "governance_row_id": "701a7fda-a7c2-402f-911b-3d4273adba6d",
+      "created_at": "2026-10-10T09:35:41.192919+00:00"
+    },
+    {
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "receipt_id": "6eea3fb8-e602-4d3d-a532-4a9e175da383",
+      "attempt": 2,
+      "budget_limit": 2,
+      "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+      "source_revision": "da9e4af489b54700715ed4ddd655515bc94d9f45",
+      "exact_target_paths": [
+        "index.html"
+      ],
+      "governance_row_id": "8f182584-5070-455d-bed4-149f0e8f9920",
+      "created_at": "2026-10-10T09:35:47.576355+00:00",
+      "model_metadata": {
+        "output_bytes": 6515,
+        "output_sha256": "6900f1bb6f75db40dcdf40797b990d7748490ff3b10c5b112dca69855aae2ecc",
+        "provider": "deepseek",
+        "request_id": "6320e5aa-6171-4621-b8a7-828f791151a8",
+        "transport_retry_count": 0,
+        "usage": {
+          "cached_tokens": 20096,
+          "input_tokens": 34897,
+          "output_tokens": 2097,
+          "reasoning_tokens": 0,
+          "total_tokens": 36994,
+          "unknown": false
+        }
+      },
+      "model_observation_original_keys": [
+        "effective_model",
+        "generation_schema_fingerprint",
+        "output_bytes",
+        "output_sha256",
+        "provider",
+        "request_id",
+        "requested_model",
+        "timing",
+        "transport_retry_count",
+        "usage"
+      ]
+    },
+    {
+      "stage": "CANDIDATE_VALIDATED",
+      "receipt_id": "27e2d8d8-d095-40c0-88a3-b4cb188c815e",
+      "attempt": 2,
+      "budget_limit": 2,
+      "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+      "failed_predicate": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+      "validation_passed": false,
+      "terminal": true,
+      "terminal_reason": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+      "source_revision": "da9e4af489b54700715ed4ddd655515bc94d9f45",
+      "exact_target_paths": [
+        "index.html"
+      ],
+      "repair_feedback_bound": true,
+      "governance_row_id": "b1c466c7-63c0-47e6-84d1-73899c13c8b0",
+      "created_at": "2026-10-10T09:35:47.728661+00:00",
+      "candidate_route_count": 29,
+      "candidate_original_json_fingerprint": "c3249d72d9a1b488aac9bf882605e09ed84fa747eabd7868513a6f20b5b9d996",
+      "validation_feedback": {
+        "schema": "fulfillment-validation-feedback-v2",
+        "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+        "primary_error": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+        "violations": [
+          {
+            "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+            "route": 3,
+            "source": 3,
+            "component_id": "dcdf7c6e760b4f89f1cde685fbba8a5ca9fe9764c9ccd06b43ed49af20603211"
+          },
+          {
+            "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+            "route": 7,
+            "source": 5,
+            "component_id": "e62a65cd425287c5c4003be012a3fd91cbca7d53ae88e70708da7970fea9a3b1"
+          },
+          {
+            "code": "OBLIGATION_FUTURE_PHASE_SOURCE_UNPROVEN",
+            "route": 22,
+            "source": 13,
+            "component_id": "42be937d912a22a6663273d13d193e2614f372aef7b5e998b46c097aa864fce4"
+          },
+          {
+            "code": "OBLIGATION_FUTURE_PHASE_SOURCE_UNPROVEN",
+            "route": 23,
+            "source": 14,
+            "component_id": "db78f90fbfed51ac2abaea82f8f877e1c6252904e447b29a2fa95f4127e7164b"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "route": 24,
+            "source": 15,
+            "component_id": "d88b7f341994a47eba78aac0c5a9a4058e55802b1761c4bfc9d22bb09aa782b9"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "route": 25,
+            "source": 16,
+            "component_id": "125db868c7a95c49b6e8b3ba614b11b03cce9fec2cd9f0b8e35eb93dfae857cf"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "route": 26,
+            "source": 17,
+            "component_id": "ee23ad30fb29125b778a5e1e3cc0cf5f096522a46b1ed3a48443b91e93f16401"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "route": 27,
+            "source": 18,
+            "component_id": "2d5250529bb9efb5dd9f8f6fdf19ae19d2526e536d15a378e7c8109c96a3fb66"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "route": 28,
+            "source": 19,
+            "component_id": "0b313cc03109b6b6f1f794d89cd59143b9aaa31a53d3ebfc1eff155101c0baff"
+          }
+        ],
+        "additional_violation_count": 0,
+        "not_evaluable": [
+          "INDEPENDENT_SEMANTIC_REVIEW",
+          "ACTUAL_OWNER_EVIDENCE",
+          "ASSURANCE"
+        ],
+        "repair_feedback_binding": {
+          "work_id": "c703f518-52a2-5531-90d1-e751b809fe68",
+          "work_reality_revision_id": "4d674f62-99c6-5fed-ba6e-45f90ca2f9a2",
+          "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+          "source_revision": "da9e4af489b54700715ed4ddd655515bc94d9f45",
+          "exact_target_paths": [
+            "index.html"
+          ],
+          "attempt": 2,
+          "wire_output_fingerprint": "6900f1bb6f75db40dcdf40797b990d7748490ff3b10c5b112dca69855aae2ecc",
+          "request_receipt_id": "3d4808b7-f347-410a-930c-9661d201a4b5",
+          "response_receipt_id": "6eea3fb8-e602-4d3d-a532-4a9e175da383",
+          "owner_repair_context_contract": "existing-owner-preconditions-v1",
+          "owner_source_preconditions_fingerprint": "619ac699214ab564670e2e4ab0a76e2391ca51ed67cf2c5a493ade852d8b5cd2",
+          "provider_wire_version": "fulfillment-compact-v1",
+          "wire_request_fingerprint": "d2836a53e848ca488f5a93edd25c7b466690f3b5b60666695a974eaff59b82bf",
+          "wire_table_fingerprint": "b0f54fa3a389afb1877181996ff2da20c87e4cb7ea8148c9547499cb2630dbf3",
+          "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+          "candidate_fingerprint": "17f7d497b13b792d85ea7192e2255ea825166800ea6c51d944fbf2bef8383e3f"
+        },
+        "owner_repair_context": {
+          "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+          "status": "UNADMITTED_OWNER_PRECONDITION_OBSERVATIONS",
+          "violations": [
+            {
+              "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+              "route": 3,
+              "source": 3,
+              "component_id": "dcdf7c6e760b4f89f1cde685fbba8a5ca9fe9764c9ccd06b43ed49af20603211",
+              "raw_route_fingerprint": "c40cca11feaad0ec773f0e2f01eff78d7ffc8781a0145525f4d6ead86fbbeaa8",
+              "owner_operand_observations": {
+                "capability": 10,
+                "evidence_method": "RETAIN_AUTHORITATIVE_CONTEXT",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "typed_prerequisites": {
+                  "source_kind": "IR_CLAUSE",
+                  "original_fact_type": null,
+                  "rejected_binding": null,
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+              "route": 7,
+              "source": 5,
+              "component_id": "e62a65cd425287c5c4003be012a3fd91cbca7d53ae88e70708da7970fea9a3b1",
+              "raw_route_fingerprint": "a2839ae996d1179f4d853f1ca3f0fc95b2ad7c967ed74741360a4c67b712cf79",
+              "owner_operand_observations": {
+                "capability": 10,
+                "evidence_method": "RETAIN_AUTHORITATIVE_CONTEXT",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "typed_prerequisites": {
+                  "source_kind": "IR_CLAUSE",
+                  "original_fact_type": null,
+                  "rejected_binding": null,
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_FUTURE_PHASE_SOURCE_UNPROVEN",
+              "route": 22,
+              "source": 13,
+              "component_id": "42be937d912a22a6663273d13d193e2614f372aef7b5e998b46c097aa864fce4",
+              "raw_route_fingerprint": "90842ddb5e7434a9bb767466a84d2444dd422a896c77219ff77276d1c11c7788",
+              "owner_operand_observations": {
+                "capability": 6,
+                "evidence_method": "EXACT_SEALED_CANDIDATE",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "typed_prerequisites": {
+                  "source_kind": "WORK_CONSTRAINT",
+                  "original_fact_type": null,
+                  "rejected_binding": null,
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                },
+                "support_operand": {
+                  "field": "u",
+                  "observed_ordinals": [
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9
+                  ],
+                  "relation": "ALL_REQUIRED_PROOF_MEMBERS; ALTERNATIVE_PROOF_SETS",
+                  "minimal_support_sets": [
+                    [
+                      3
+                    ],
+                    [
+                      4
+                    ],
+                    [
+                      5
+                    ],
+                    [
+                      6
+                    ],
+                    [
+                      7
+                    ],
+                    [
+                      8
+                    ]
+                  ],
+                  "missing_members_by_alternative": [
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    []
+                  ],
+                  "semantic_equivalence": "NOT_EVALUATED"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_FUTURE_PHASE_SOURCE_UNPROVEN",
+              "route": 23,
+              "source": 14,
+              "component_id": "db78f90fbfed51ac2abaea82f8f877e1c6252904e447b29a2fa95f4127e7164b",
+              "raw_route_fingerprint": "b0dec2031fff73dc8fd7de9db5dbfc644c7d2591799c7902c4666764277f7989",
+              "owner_operand_observations": {
+                "capability": 6,
+                "evidence_method": "EXACT_SEALED_CANDIDATE",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "typed_prerequisites": {
+                  "source_kind": "WORK_CONSTRAINT",
+                  "original_fact_type": null,
+                  "rejected_binding": null,
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                },
+                "support_operand": {
+                  "field": "u",
+                  "observed_ordinals": [
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9
+                  ],
+                  "relation": "ALL_REQUIRED_PROOF_MEMBERS; ALTERNATIVE_PROOF_SETS",
+                  "minimal_support_sets": [
+                    [
+                      3
+                    ],
+                    [
+                      4
+                    ],
+                    [
+                      5
+                    ],
+                    [
+                      6
+                    ],
+                    [
+                      7
+                    ],
+                    [
+                      8
+                    ]
+                  ],
+                  "missing_members_by_alternative": [
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    []
+                  ],
+                  "semantic_equivalence": "NOT_EVALUATED"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 24,
+              "source": 15,
+              "component_id": "d88b7f341994a47eba78aac0c5a9a4058e55802b1761c4bfc9d22bb09aa782b9",
+              "raw_route_fingerprint": "96aefb0cc34a54a32bc6ebc42dcbfb787c5d2570bbb4302be580d84dc3bd007d",
+              "owner_operand_observations": {
+                "capability": 4,
+                "evidence_method": "EXACT_PERMISSION_GATE",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "typed_prerequisites": {
+                  "source_kind": "WORK_CONSTRAINT",
+                  "original_fact_type": null,
+                  "rejected_binding": {
+                    "codes": [
+                      "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+                    ],
+                    "capability": 4
+                  },
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 25,
+              "source": 16,
+              "component_id": "125db868c7a95c49b6e8b3ba614b11b03cce9fec2cd9f0b8e35eb93dfae857cf",
+              "raw_route_fingerprint": "9acac13fdcee1a0584f9ffd9381854bcc36f5fe03334d272ece0d858e5887fb3",
+              "owner_operand_observations": {
+                "capability": 5,
+                "evidence_method": "EXACT_PERMISSION_GATE",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "typed_prerequisites": {
+                  "source_kind": "WORK_CONSTRAINT",
+                  "original_fact_type": null,
+                  "rejected_binding": {
+                    "codes": [
+                      "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+                    ],
+                    "capability": 5
+                  },
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 26,
+              "source": 17,
+              "component_id": "ee23ad30fb29125b778a5e1e3cc0cf5f096522a46b1ed3a48443b91e93f16401",
+              "raw_route_fingerprint": "b8f625410b93157996aa071b5b3c8268f3993e7ece1cb7e1d3910fd315c9e9c0",
+              "owner_operand_observations": {
+                "capability": 1,
+                "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "target_operand": {
+                  "field": "t",
+                  "meaning": "COMPLETE_ADMITTED_CHANGE_ALLOWLIST; NOT_EXCLUDED_PATHS_OR_EFFECTS",
+                  "relation": "EXACT_ORDERED_SET",
+                  "required_ordinals": [
+                    0
+                  ],
+                  "observed_ordinals": [
+                    0
+                  ],
+                  "missing_ordinals": [],
+                  "unexpected_ordinals": [],
+                  "matches": true
+                },
+                "typed_prerequisites": {
+                  "source_kind": "WORK_CONSTRAINT",
+                  "original_fact_type": null,
+                  "rejected_binding": {
+                    "codes": [
+                      "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+                    ],
+                    "capability": 1
+                  },
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 27,
+              "source": 18,
+              "component_id": "2d5250529bb9efb5dd9f8f6fdf19ae19d2526e536d15a378e7c8109c96a3fb66",
+              "raw_route_fingerprint": "71339a3919c5d28ef2a3540e849259d60bcf0b5e6a847db31d833d44f8ba7684",
+              "owner_operand_observations": {
+                "capability": 1,
+                "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "target_operand": {
+                  "field": "t",
+                  "meaning": "COMPLETE_ADMITTED_CHANGE_ALLOWLIST; NOT_EXCLUDED_PATHS_OR_EFFECTS",
+                  "relation": "EXACT_ORDERED_SET",
+                  "required_ordinals": [
+                    0
+                  ],
+                  "observed_ordinals": [
+                    0
+                  ],
+                  "missing_ordinals": [],
+                  "unexpected_ordinals": [],
+                  "matches": true
+                },
+                "typed_prerequisites": {
+                  "source_kind": "WORK_CONSTRAINT",
+                  "original_fact_type": null,
+                  "rejected_binding": {
+                    "codes": [
+                      "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+                    ],
+                    "capability": 1
+                  },
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 28,
+              "source": 19,
+              "component_id": "0b313cc03109b6b6f1f794d89cd59143b9aaa31a53d3ebfc1eff155101c0baff",
+              "raw_route_fingerprint": "97a1e2b1c8db9259a41edb4eb79e8eb4fecb2dee9ebeffd58033586f768757b5",
+              "owner_operand_observations": {
+                "capability": 1,
+                "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+                "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED",
+                "target_operand": {
+                  "field": "t",
+                  "meaning": "COMPLETE_ADMITTED_CHANGE_ALLOWLIST; NOT_EXCLUDED_PATHS_OR_EFFECTS",
+                  "relation": "EXACT_ORDERED_SET",
+                  "required_ordinals": [
+                    0
+                  ],
+                  "observed_ordinals": [
+                    0
+                  ],
+                  "missing_ordinals": [],
+                  "unexpected_ordinals": [],
+                  "matches": true
+                },
+                "typed_prerequisites": {
+                  "source_kind": "WORK_CONSTRAINT",
+                  "original_fact_type": null,
+                  "rejected_binding": {
+                    "codes": [
+                      "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+                    ],
+                    "capability": 1
+                  },
+                  "scope_method_requirement": "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE",
+                  "meaning": "EXISTING_OWNER_PREREQUISITES; NOT_SEMANTIC_CLASSIFICATION_OR_EVIDENCE"
+                }
+              }
+            }
+          ],
+          "additional_violation_count": 0,
+          "raw_routes_not_evaluable": [],
+          "source_preconditions": [
+            {
+              "source": 0,
+              "source_ref": "semantic-fact:1a4d882e-16a3-55da-a034-e4b8ff4a781d",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 1,
+              "source_ref": "semantic-fact:418f0b05-f833-586f-af19-6277d63a5260",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 2,
+              "source_ref": "semantic-fact:ceb4834d-8454-5cfc-850b-c2f44563920c",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "necessary_evidence_method": "EXACT_GIT_DIFF_SCOPE"
+            },
+            {
+              "source": 3,
+              "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c1",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 4,
+              "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 5,
+              "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c3",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 6,
+              "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c4",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 7,
+              "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c5",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 8,
+              "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c6",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 9,
+              "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true
+            },
+            {
+              "source": 10,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:0",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "exact_exclusion_derivation_source_ordinals": [],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 11,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:1",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "exact_exclusion_derivation_source_ordinals": [],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 12,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:2",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "exact_exclusion_derivation_source_ordinals": [],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 13,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:3",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "exact_exclusion_derivation_source_ordinals": [],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 14,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:4",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "exact_exclusion_derivation_source_ordinals": [],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 15,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:5",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [],
+              "exact_exclusion_derivation_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 16,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:6",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [],
+              "exact_exclusion_derivation_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 17,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:7",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [],
+              "exact_exclusion_derivation_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 18,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:8",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [],
+              "exact_exclusion_derivation_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            },
+            {
+              "source": 19,
+              "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:9",
+              "primary_component_required": true,
+              "supporting_reference_does_not_cover_source": true,
+              "exact_corresponding_source_ordinals": [],
+              "exact_exclusion_derivation_source_ordinals": [
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "correspondence_rule": "ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+              "exclusion_rule": "ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+              "permission_rule": "CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+              "future_gate_rule": "AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED"
+            }
+          ],
+          "not_evaluable": [
+            "COMPLETE_PLAN_ADMISSION",
+            "INDEPENDENT_SEMANTIC_REVIEW",
+            "ACTUAL_OWNER_EVIDENCE",
+            "ASSURANCE"
+          ],
+          "instruction": "Select semantic components yourself. Every source needs its own complete component spans even when cited in u. Exact text equality does not merge source identities. The listed origins are necessary correspondence prerequisites, not evidence or permission. Do not add unrelated supports; do not change meaning or copy another source's scope. Revalidate the complete new proposal through existing gates."
+        },
+        "private_original_wire_sha256": "6900f1bb6f75db40dcdf40797b990d7748490ff3b10c5b112dca69855aae2ecc"
+      },
+      "validation_feedback_sha256": "9616443327d4e1983e05a8dd0340723951d4681845fd3e5a7f242efc855161ca"
+    }
+  ],
+  "self_refine": [
+    {
+      "id": "f8c447ff-5368-4379-a335-a76517cddc51",
+      "status": "VERIFIED",
+      "failure_family": "CANDIDATE_INCONSISTENT",
+      "final_result": "LOCAL_OBLIGATION_RECOVERED",
+      "work_resume_result": "RESUMED",
+      "model_token_usage": {
+        "cached_tokens": 0,
+        "input_tokens": 11317,
+        "output_tokens": 1883,
+        "reasoning_tokens": 0,
+        "total_tokens": 13200,
+        "unknown": false
+      },
+      "created_at": "2026-10-10T09:35:32.835089+00:00",
+      "updated_at": "2026-10-10T09:35:32.835089+00:00"
+    },
+    {
+      "id": "07e64eec-325f-4828-b986-5f2d31aa69d4",
+      "status": "MITIGATED",
+      "failure_family": "CONTRACT_MISMATCH",
+      "final_result": "ESCALATED",
+      "work_resume_result": "NOT_RESUMED",
+      "model_token_usage": {
+        "total_tokens": 62417,
+        "unknown": false
+      },
+      "created_at": "2026-10-10T09:35:47.795842+00:00",
+      "updated_at": "2026-10-10T09:35:47.795842+00:00"
+    }
+  ],
+  "human_integration_authorized": false,
+  "human_acceptance_written": false,
+  "human_delivery_authorized": false,
+  "full_effect_audit_claim": false,
+  "formation_actual_usage_sum": {
+    "input_tokens": 58253,
+    "output_tokens": 4164,
+    "reasoning_tokens": 0,
+    "cached_tokens": 21376,
+    "total_tokens": 62417
+  },
+  "formation_logical_calls": 2,
+  "semantic_review_calls": 0,
+  "feedback_count": 1,
+  "cost_boundary": "Formation actual usage counted once from response receipts. Same usage in proposal and self-refine event is a duplicate representation, not extra tokens. WIC/base Design usage, complete HTTP call count and monetary cost UNKNOWN.",
+  "final_projection": {
+    "automatic_progression_state": "STOPPED",
+    "current_production_run_id": null,
+    "current_work_reality_revision_id": "4d674f62-99c6-5fed-ba6e-45f90ca2f9a2",
+    "human_attention_required": false,
+    "interaction_id": "2a6caa70-dedf-48e4-a31e-1a34b32a4c2a",
+    "status": "COMPLETED",
+    "turn_id": "7bfc0169-d032-4082-be1a-2f6958d330e2",
+    "work_complete": false,
+    "work_id": "c703f518-52a2-5531-90d1-e751b809fe68",
+    "work_status": "READY"
+  },
+  "driver_status": "BOUNDED_OBSERVATION_WINDOW_ENDED",
+  "stored_work_condition": "READY",
+  "not_reached": [
+    "Runtime",
+    "PWU",
+    "Task Workspace",
+    "Attempt",
+    "Native Binding/Permit",
+    "Queue",
+    "actual business Worker",
+    "Git production artifact",
+    "Verification",
+    "software Candidate Seal",
+    "applicable Work Guardian Assurance",
+    "Human Integration/Acceptance/Delivery"
+  ],
+  "automatic_retry_or_new_work": false
+}

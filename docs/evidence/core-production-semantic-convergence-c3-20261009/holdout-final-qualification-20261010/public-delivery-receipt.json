@@ -1,0 +1,11 @@
+{
+  "archive_sha256": "ac8007f915f8ade86bb03eff86b2bd7cac47ea01c4671890d858ec0a6ef958ec",
+  "archive_bytes": 19348,
+  "public_file_count": 14,
+  "private_recovery_root": "/data/watt/c3-semantic-convergence-20261009/holdout-final-qualification-20261010",
+  "archive": "/data/watt/c3-semantic-convergence-20261009/holdout-final-qualification-20261010/public-delivery.tar.gz",
+  "model_calls": 33,
+  "qualification": "NOT_QUALIFIED",
+  "c3_closure_supported": false,
+  "public_sensitive_hits": 0
+}

@@ -1,0 +1,8 @@
+{
+  "recorded_at_utc": "2026-10-10T09:46:49.639933+00:00",
+  "actual_failure_times": "UNKNOWN; tool observations retained by agent session",
+  "preflight_host_python": "Python3.6 subprocess text argument unsupported; stopped before Docker resources/models; universal_newlines mechanical correction in prepare-v2.py",
+  "owner_probe_first": "Script execution lacks installed /qualification test-helper import path; zero probes/models; appended test-only directory in owner_probes-v2.py, no application overlay",
+  "h24": "Initial harness required both deploy and publish checks fail when only a forbidden cloud.deploy grant was injected. Followup corrects predicate granularity, retains first failure, does not change sealed input/oracle/application.",
+  "source_changes": false
+}

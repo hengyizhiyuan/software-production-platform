@@ -1,0 +1,8 @@
+{
+  "application_or_oracle_changed": false,
+  "evidence_sha256": "dcfe0ad4e0695baf297da1b774ca7e2f4eda9444af92e3ef5904dd90e4d7b914",
+  "model_calls": 0,
+  "ordinal": 23,
+  "original_failure_preserved": true,
+  "result": "PASS_SCOPED_CONTROLLED_OWNER"
+}

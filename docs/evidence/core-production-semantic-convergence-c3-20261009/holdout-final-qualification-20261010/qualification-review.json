@@ -1,0 +1,624 @@
+{
+  "schema": "c3-independent-holdout-final-review-v1",
+  "reviewed_at_utc": "2026-10-10T09:46:49.631446+00:00",
+  "reviewer": "Independent engineering Reviewer /root/c3_holdout_reviewer; not Human Acceptance",
+  "source_revision": "34e9ca9cc5cd5623a9463b42ba4c26ede061640f",
+  "source_tree": "00f053019cf3c1ba0cd43fa1b1fca023ef638a71",
+  "image": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "guardian": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+  "ecf": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "original_sealed_specification_sha256": "770828adeabec942548218c17bc6e9dbb9222ce19df19bc89c260f28ed8f4cf0",
+  "case_count": 24,
+  "category_count": 8,
+  "results": [
+    {
+      "case_id": "H01",
+      "ordinal": 0,
+      "source_basis_kind": "ACTUAL_WIC_IRK_IN_UNADMITTED_QUALIFICATION_ENVELOPE_NOT_PRODUCT_SOURCE",
+      "actual_call_count": 3,
+      "observed_binding_count": 26,
+      "binding_states": {
+        "BOUND_PENDING_EVIDENCE": 26
+      },
+      "owner_predicates": [
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "failed_predicate": null,
+          "terminal_reason": "VALIDATED_PROJECTION",
+          "receipt_id": "a709c0a7-1b78-4137-82de-e878671981cb",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "49bfa10c4ef7e12858079b59b678b74284ed8e7d64a9420cf597b34be566b0b0",
+          "components_fingerprint": null
+        }
+      ],
+      "work_admission_claimed": false,
+      "assurance_pass_claimed": false,
+      "original_facts_unchanged": true,
+      "original_ir_unchanged": true,
+      "private_observation_sha256": "960ca16c878ea52a7ef088581588e2990dc414806d0900e5a13f0f9f28eb9bee",
+      "result": "FAIL",
+      "failed_predicate": "HOLDOUT_PRIMARY_COMPONENT_SEMANTICS_MISMATCH",
+      "false_positive_independent_model_review": true,
+      "offending_bindings": [
+        {
+          "binding_ordinal": 23,
+          "source_kind": "WORK_CONSTRAINT",
+          "component": "git-diff-scope",
+          "phase": "CURRENT_VERIFICATION",
+          "source_quote_sha256": "5258681e97196d9ad26ec789d421bf5fa8fa34e4076f753a1a8ad9e13cdd46ad",
+          "component_basis": {
+            "source_span_start": 0,
+            "source_span_end": 75,
+            "source_payload_fingerprint": null
+          }
+        }
+      ]
+    },
+    {
+      "case_id": "H02",
+      "ordinal": 1,
+      "source_basis_kind": "ACTUAL_WIC_IRK_IN_UNADMITTED_QUALIFICATION_ENVELOPE_NOT_PRODUCT_SOURCE",
+      "actual_call_count": 6,
+      "observed_binding_count": 22,
+      "binding_states": {
+        "BOUND_PENDING_EVIDENCE": 20,
+        "RETAINED_CONTEXT": 2
+      },
+      "owner_predicates": [
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "failed_predicate": null,
+          "terminal_reason": "VALIDATED_PROJECTION",
+          "receipt_id": "c8a01202-64fa-4583-8876-c1866825c34e",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "0331552d3d3b205eb385b741e6d8b74d97f54d0ef54f5ca8e3a802b65e3d1108",
+          "components_fingerprint": null
+        }
+      ],
+      "work_admission_claimed": false,
+      "assurance_pass_claimed": false,
+      "original_facts_unchanged": true,
+      "original_ir_unchanged": true,
+      "private_observation_sha256": "634a3420c6cf173239d077879f8f00870d26ce4c721a76836e560688884eb773",
+      "result": "FAIL",
+      "failed_predicate": "HOLDOUT_PRIMARY_COMPONENT_SEMANTICS_MISMATCH",
+      "false_positive_independent_model_review": true,
+      "offending_bindings": [
+        {
+          "binding_ordinal": 18,
+          "source_kind": "WORK_CONSTRAINT",
+          "component": "git-diff-scope",
+          "phase": "CURRENT_VERIFICATION",
+          "source_quote_sha256": "2c87a28b9445a54259476ebd28e800c5ee7941bbe7abbd802bacc5cf34070dfe",
+          "component_basis": {
+            "source_span_start": 0,
+            "source_span_end": 29,
+            "source_payload_fingerprint": null
+          }
+        },
+        {
+          "binding_ordinal": 19,
+          "source_kind": "WORK_CONSTRAINT",
+          "component": "git-diff-scope",
+          "phase": "CURRENT_VERIFICATION",
+          "source_quote_sha256": "93a309de52dfa08f9fc72d4ca10da1ec65313c3fd940c7fcbb5d672d68e210e7",
+          "component_basis": {
+            "source_span_start": 0,
+            "source_span_end": 27,
+            "source_payload_fingerprint": null
+          }
+        }
+      ]
+    },
+    {
+      "case_id": "H03",
+      "ordinal": 2,
+      "source_basis_kind": "ACTUAL_WIC_IRK_IN_UNADMITTED_QUALIFICATION_ENVELOPE_NOT_PRODUCT_SOURCE",
+      "actual_call_count": 4,
+      "observed_binding_count": 17,
+      "binding_states": {
+        "UNRESOLVED": 17
+      },
+      "owner_predicates": [
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "failed_predicate": "OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED",
+          "terminal_reason": null,
+          "receipt_id": "85dd2bbf-44e3-4277-b745-9c37bdb735f1",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "4efa6662fa59500485844ea9caaf14645a2ef6250caf0d3b7bf706f3b2cffe97",
+          "components_fingerprint": null
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 2,
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "terminal_reason": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "receipt_id": "4bcf0234-83a3-4ce8-a34a-0785b7b6dd28",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "4efa6662fa59500485844ea9caaf14645a2ef6250caf0d3b7bf706f3b2cffe97",
+          "components_fingerprint": null
+        }
+      ],
+      "work_admission_claimed": false,
+      "assurance_pass_claimed": false,
+      "original_facts_unchanged": true,
+      "original_ir_unchanged": true,
+      "private_observation_sha256": "bb0ad8d78a2c246c46d495bf41525f139eb861fe5e5ec4855f56bceb192f88e9",
+      "result": "FAIL",
+      "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "reason": "Legal sealed semantic path did not converge; all source contributions remain unresolved. The failure is preserved, not rerun."
+    },
+    {
+      "case_id": "H04",
+      "ordinal": 3,
+      "source_basis_kind": "ACTUAL_WIC_IRK_IN_UNADMITTED_QUALIFICATION_ENVELOPE_NOT_PRODUCT_SOURCE",
+      "actual_call_count": 3,
+      "observed_binding_count": 20,
+      "binding_states": {
+        "UNRESOLVED": 20
+      },
+      "owner_predicates": [
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "failed_predicate": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+          "terminal_reason": null,
+          "receipt_id": "debab4a6-a243-41b5-ba28-409a0dc1affe",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "5630a9ccc88b7296b1ea7601ba755414ba48b855baf5f484ef92e6f93edbeca8",
+          "components_fingerprint": null
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 2,
+          "failed_predicate": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+          "terminal_reason": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+          "receipt_id": "ec145f8b-bc90-4e70-998f-ef0f66a1eb2b",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "5630a9ccc88b7296b1ea7601ba755414ba48b855baf5f484ef92e6f93edbeca8",
+          "components_fingerprint": null
+        }
+      ],
+      "work_admission_claimed": false,
+      "assurance_pass_claimed": false,
+      "original_facts_unchanged": true,
+      "original_ir_unchanged": true,
+      "private_observation_sha256": "9e43db49e649eae45a656a72ed6349f2004bf969343963db76da83037d7fde10",
+      "result": "FAIL",
+      "failed_predicate": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+      "reason": "Legal sealed semantic path did not converge; all source contributions remain unresolved. The failure is preserved, not rerun."
+    },
+    {
+      "case_id": "H05",
+      "ordinal": 4,
+      "source_basis_kind": "ACTUAL_WIC_IRK_IN_UNADMITTED_QUALIFICATION_ENVELOPE_NOT_PRODUCT_SOURCE",
+      "actual_call_count": 3,
+      "observed_binding_count": 18,
+      "binding_states": {
+        "UNRESOLVED": 18
+      },
+      "owner_predicates": [
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "terminal_reason": null,
+          "receipt_id": "b50bbf84-ba78-4807-9037-ff742b6ed3ed",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "eec4ddd20d80018e930bbb1c508b62b08d090226b0964d0cc1af3c368ab7b656",
+          "components_fingerprint": null
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 2,
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "terminal_reason": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "receipt_id": "dd8cdd2c-0217-47d7-836e-8c8099f547c6",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "eec4ddd20d80018e930bbb1c508b62b08d090226b0964d0cc1af3c368ab7b656",
+          "components_fingerprint": null
+        }
+      ],
+      "work_admission_claimed": false,
+      "assurance_pass_claimed": false,
+      "original_facts_unchanged": true,
+      "original_ir_unchanged": true,
+      "private_observation_sha256": "45444d9fe224bbcbb9e3bfeed7f980d3b049434d3b1935c3a93832116b3e4eae",
+      "result": "FAIL",
+      "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "reason": "Legal sealed semantic path did not converge; all source contributions remain unresolved. The failure is preserved, not rerun."
+    },
+    {
+      "case_id": "H06",
+      "ordinal": 5,
+      "source_basis_kind": "ACTUAL_WIC_IRK_IN_UNADMITTED_QUALIFICATION_ENVELOPE_NOT_PRODUCT_SOURCE",
+      "actual_call_count": 3,
+      "observed_binding_count": 16,
+      "binding_states": {
+        "UNRESOLVED": 16
+      },
+      "owner_predicates": [
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "terminal_reason": null,
+          "receipt_id": "6fcbaddb-3ba5-4711-b245-7331a4e2195b",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "cd660dc1c60d39db00f61bfbb9541b5331fc7baa1d756fc49b59c1d9c9ae407c",
+          "components_fingerprint": null
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 2,
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "terminal_reason": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "receipt_id": "1dc80473-8a60-49b0-aad3-c3b9dc210a84",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "cd660dc1c60d39db00f61bfbb9541b5331fc7baa1d756fc49b59c1d9c9ae407c",
+          "components_fingerprint": null
+        }
+      ],
+      "work_admission_claimed": false,
+      "assurance_pass_claimed": false,
+      "original_facts_unchanged": true,
+      "original_ir_unchanged": true,
+      "private_observation_sha256": "51236f1662a5a67d777abd9df28432a8ba5f439158decb693dfd6a70efaac7c3",
+      "result": "FAIL",
+      "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "reason": "Legal sealed semantic path did not converge; all source contributions remain unresolved. The failure is preserved, not rerun."
+    },
+    {
+      "case_id": "H07",
+      "ordinal": 6,
+      "source_basis_kind": "ACTUAL_WIC_IRK_IN_UNADMITTED_QUALIFICATION_ENVELOPE_NOT_PRODUCT_SOURCE",
+      "actual_call_count": 3,
+      "observed_binding_count": 11,
+      "binding_states": {
+        "UNRESOLVED": 11
+      },
+      "owner_predicates": [
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "terminal_reason": null,
+          "receipt_id": "d2a3e4f3-ecb5-483a-bea4-610466e1a32f",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "723d3c38dba1121ec6769b82522e2111fa3fae969dc837100d58c748fb830fc5",
+          "components_fingerprint": null
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 2,
+          "failed_predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "terminal_reason": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "receipt_id": "88e9c016-60ed-4403-aa12-b8fb0c91e0da",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "723d3c38dba1121ec6769b82522e2111fa3fae969dc837100d58c748fb830fc5",
+          "components_fingerprint": null
+        }
+      ],
+      "work_admission_claimed": false,
+      "assurance_pass_claimed": false,
+      "original_facts_unchanged": true,
+      "original_ir_unchanged": true,
+      "private_observation_sha256": "398e018785f422a243a5297bc5749ecd65fe9c02036919b1c344cf3f8f3dacae",
+      "result": "FAIL",
+      "failed_predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+      "reason": "Legal sealed semantic path did not converge; all source contributions remain unresolved. The failure is preserved, not rerun."
+    },
+    {
+      "case_id": "H08",
+      "ordinal": 7,
+      "source_basis_kind": "ACTUAL_WIC_IRK_IN_UNADMITTED_QUALIFICATION_ENVELOPE_NOT_PRODUCT_SOURCE",
+      "actual_call_count": 5,
+      "observed_binding_count": 9,
+      "binding_states": {
+        "UNRESOLVED": 9
+      },
+      "owner_predicates": [
+        {
+          "stage": "SEMANTIC_REVIEW_VALIDATED",
+          "attempt": 1,
+          "failed_predicate": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+          "terminal_reason": null,
+          "receipt_id": "0dfd63e8-2c96-4e73-88e4-e68230cd7f1c",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "ab1fa46c4024e670082c4df4fad54189a977126ed72514d19cbad6f1c71deae0",
+          "components_fingerprint": null
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "failed_predicate": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+          "terminal_reason": null,
+          "receipt_id": "97a4ed8e-71da-47ff-8c61-a6068c640a0b",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "ab1fa46c4024e670082c4df4fad54189a977126ed72514d19cbad6f1c71deae0",
+          "components_fingerprint": null
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 2,
+          "failed_predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "terminal_reason": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "receipt_id": "3f211a0a-3bd9-4f99-9336-4f5692e49299",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "ab1fa46c4024e670082c4df4fad54189a977126ed72514d19cbad6f1c71deae0",
+          "components_fingerprint": null
+        }
+      ],
+      "work_admission_claimed": false,
+      "assurance_pass_claimed": false,
+      "original_facts_unchanged": true,
+      "original_ir_unchanged": true,
+      "private_observation_sha256": "4615123f277e4e3be497e4363862d44a9ec4e5eac42eeb76398cdac13f412f5c",
+      "result": "PARTIAL_NOT_AT_REQUIRED_GATE",
+      "failed_predicate": "HOLDOUT_REQUEST_RETAINED_BUT_AUTHORITY_GATE_NOT_REACHED",
+      "reason": "Requested effect remains in immutable original inventory, but formation ended unresolved before a current permission/effect gate. No effect or authorization was attempted; generic earlier stop is not the requested authority-boundary qualification."
+    },
+    {
+      "case_id": "H09",
+      "ordinal": 8,
+      "source_basis_kind": "ACTUAL_WIC_IRK_IN_UNADMITTED_QUALIFICATION_ENVELOPE_NOT_PRODUCT_SOURCE",
+      "actual_call_count": 3,
+      "observed_binding_count": 13,
+      "binding_states": {
+        "UNRESOLVED": 13
+      },
+      "owner_predicates": [
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "terminal_reason": null,
+          "receipt_id": "2510aa86-d485-43e0-ae89-de343851ae80",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "a3f321b3f248fafcb5b2c7161c98edf77037f563ca8ce1a632078c21150426c5",
+          "components_fingerprint": null
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 2,
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "terminal_reason": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "receipt_id": "2a251894-face-401f-a2dc-557cc2d8e0c1",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "a3f321b3f248fafcb5b2c7161c98edf77037f563ca8ce1a632078c21150426c5",
+          "components_fingerprint": null
+        }
+      ],
+      "work_admission_claimed": false,
+      "assurance_pass_claimed": false,
+      "original_facts_unchanged": true,
+      "original_ir_unchanged": true,
+      "private_observation_sha256": "225be213045f1b80a797914dcad92fdd1ad79244fa43e1f0c7aeb0efce1ff7ca",
+      "result": "FAIL",
+      "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "reason": "Legal sealed semantic path did not converge; all source contributions remain unresolved. The failure is preserved, not rerun."
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE_FROM_SEALED_INPUT",
+      "case_id": "H10",
+      "coverage_limitation": null,
+      "evidence_sha256": "cd472f53ce969b0312148cb418bee54b168489b5e1c62d2625ba179ffc4fe03a",
+      "model_calls": 0,
+      "ordinal": 9,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE_FROM_SEALED_INPUT",
+      "case_id": "H11",
+      "coverage_limitation": null,
+      "evidence_sha256": "8c5cf74886b6c53833b5951fba8776f01b8f467b690989a666bfac6faf09e61f",
+      "model_calls": 0,
+      "ordinal": 10,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE_FROM_SEALED_INPUT",
+      "case_id": "H12",
+      "coverage_limitation": null,
+      "evidence_sha256": "85cb3849b250fbe35ffb1969433b31b9c5d7ed3ffd94961c5d34f8aa76edffeb",
+      "model_calls": 0,
+      "ordinal": 11,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE_FROM_SEALED_INPUT",
+      "case_id": "H13",
+      "coverage_limitation": null,
+      "evidence_sha256": "ee5b4ce9229f09636282fb2e2105d60d2dc903e2c520eb49c2cec4496315907a",
+      "model_calls": 0,
+      "ordinal": 12,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE_FROM_SEALED_INPUT",
+      "case_id": "H14",
+      "coverage_limitation": null,
+      "evidence_sha256": "f6041c4fe5c284228f6ed7aa329b0fb574caa75379f376bd96a1e5166d35b4b6",
+      "model_calls": 0,
+      "ordinal": 13,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE_FROM_SEALED_INPUT",
+      "case_id": "H15",
+      "coverage_limitation": null,
+      "evidence_sha256": "4c0f4afa575b11bb7d3fa46e11b17a945e5f8f24d1b0a92f6e90ebbca5563333",
+      "model_calls": 0,
+      "ordinal": 14,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H16",
+      "coverage_limitation": null,
+      "evidence_sha256": "3106b0788170dbd46cf74d9ae74a56dc1df135334988934db41a3836407e9cfd",
+      "model_calls": 0,
+      "ordinal": 15,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H17",
+      "coverage_limitation": null,
+      "evidence_sha256": "dde47180138097bb955add016c4bf4b67c6d59f204f63a35ea827bae534fbe2c",
+      "model_calls": 0,
+      "ordinal": 16,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H18",
+      "coverage_limitation": null,
+      "evidence_sha256": "c5c1c2f6d71b1c63d8e8b24aabb2fd2e50de9435ffad4d75ab14c151538df6c2",
+      "model_calls": 0,
+      "ordinal": 17,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H19",
+      "coverage_limitation": "Current content/handoff linked and missing authority rejected at actual Integration Owner; software Candidate sealing separately real G0",
+      "evidence_sha256": "c21b78013079c599cf704304bf35d56252260dd2fec19289273e115db5aa37d9",
+      "model_calls": 0,
+      "ordinal": 18,
+      "result": "NOT_REACHED",
+      "reason": "Original sealed requirement includes real Candidate Owner seal and gate continuity. Current controlled handoff/integration protection is scoped evidence only; parent's only actual G0 did not reach a Candidate. No fixture seal is substituted."
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H20",
+      "coverage_limitation": null,
+      "evidence_sha256": "72fe9ce5605c66fba1022511b82150c0904ea3865faa7bc9b8d4bd01adeadd6e",
+      "model_calls": 0,
+      "ordinal": 19,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H21",
+      "coverage_limitation": null,
+      "evidence_sha256": "9db527eddca56e9a6b7410a3dec61ec9827d4b28215f3b0578e192f70c498729",
+      "model_calls": 0,
+      "ordinal": 20,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H22",
+      "coverage_limitation": null,
+      "evidence_sha256": "cff3374385a991cd5d7ecf1a078d2d7fdf1df89c808875c942afed788490045d",
+      "model_calls": 0,
+      "ordinal": 21,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "basis_kind": "CONTROLLED_OWNER_FIXTURE",
+      "case_id": "H23",
+      "coverage_limitation": null,
+      "evidence_sha256": "e005cd62c72e2792ef54ab13136d0b341a31efb4af32ca4bedbf6a1544e3aafc",
+      "model_calls": 0,
+      "ordinal": 22,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "case_id": "H24",
+      "model_calls": 0,
+      "ordinal": 23,
+      "reason": "AssertionError",
+      "reason_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result": "PASS_SCOPED_CONTROLLED_OWNER",
+      "evidence_sha256": "dcfe0ad4e0695baf297da1b774ca7e2f4eda9444af92e3ef5904dd90e4d7b914",
+      "first_harness_failure_preserved": true,
+      "duplicate_effect_execution_proof": "NOT_EXECUTED; sealed prohibited-effect branch rejected before effect execution"
+    }
+  ],
+  "counts": {
+    "FAIL": 8,
+    "PARTIAL_NOT_AT_REQUIRED_GATE": 1,
+    "PASS_SCOPED_CONTROLLED_OWNER": 14,
+    "NOT_REACHED": 1
+  },
+  "qualification": "NOT_QUALIFIED",
+  "c3_closure_supported": false,
+  "implementation_tuning": false,
+  "sealed_input_or_expected_semantics_changed": false,
+  "new_business_work_created_by_reviewer": false,
+  "holdout_private_recovery_root": "/data/watt/c3-semantic-convergence-20261009/holdout-final-qualification-20261010",
+  "full_work_qualification_substituted": false,
+  "qualification_boundary": "9 live WIC/IRK/model boundaries with no Work admission; 15 actual Owner control probes; 20 PostgreSQL Watt/Guardian joint negatives. These are separate evidence classes.",
+  "total_logical_calls": 33,
+  "provider_usage": {
+    "input_tokens": 629553,
+    "output_tokens": 159718,
+    "cached_tokens": 167680,
+    "reasoning_tokens": 61467,
+    "total_tokens": 789271
+  },
+  "usage_unknown_request_ids": {
+    "input_tokens": [],
+    "output_tokens": [],
+    "cached_tokens": [],
+    "reasoning_tokens": [],
+    "total_tokens": []
+  },
+  "per_owner_cost": {
+    "FORMATION": {
+      "logical_calls": 19,
+      "usage": {
+        "input_tokens": 400998,
+        "output_tokens": 42073,
+        "cached_tokens": 118912,
+        "reasoning_tokens": 0,
+        "total_tokens": 443071
+      }
+    },
+    "WIC": {
+      "logical_calls": 14,
+      "usage": {
+        "input_tokens": 228555,
+        "output_tokens": 117645,
+        "cached_tokens": 48768,
+        "reasoning_tokens": 61467,
+        "total_tokens": 346200
+      }
+    }
+  },
+  "actual_transport_retry_count_sum": 0,
+  "actual_http_transmission_count": "UNKNOWN; existing retry count recorded, no independent HTTP hook in prepared harness",
+  "monetary_cost": "UNKNOWN",
+  "visible_output_token_count": "UNKNOWN; output_tokens includes reasoning as Provider reports",
+  "guardian_joint": {
+    "nodes": [
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records",
+      "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority",
+      "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects"
+    ],
+    "counts": {
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 20
+    },
+    "exit_code": 0,
+    "actual_image": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+    "container_id": "d644218459eecfc2deaa7ce3dcb5bbacfc9c6bd885d253b51a956b49b9fd705f",
+    "wall_seconds": 233.36276851198636,
+    "model_calls": 0,
+    "qualification_kind": "INDEPENDENT_PG_WATT_GUARDIAN_CONTROLLED_CONTRACT",
+    "sealed_input_not_tuning": true,
+    "authority_unchanged": true,
+    "no_business_or_human_work": true
+  },
+  "holdout_now_exposed_to_independent_reviewer": true,
+  "future_reuse_boundary": "These cases cannot again be claimed unseen independent Holdout. No private case input/oracle shared with implementation agent, but reviewer has observed both oracle and final implementation results. Future qualification needs a newly independent sealed set or explicitly disclosed regression classification."
+}

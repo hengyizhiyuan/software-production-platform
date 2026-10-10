@@ -1,0 +1,76 @@
+{
+  "public_files": {
+    "report.md": {
+      "sha256": "dbe2783ca4c5a9c6e9f4c7c3816ca2dc5327fc4255bb5e6277e69f557e507e47",
+      "bytes": 5278
+    },
+    "qualification-review.json": {
+      "sha256": "96da0e109f5bf377d4195fdb25072b0f7163ad1030699c155344966e4a6095e3",
+      "bytes": 25990
+    },
+    "model-usage.json": {
+      "sha256": "dc79522307a880aa92014528e7bf092d690f0454b7c84f12b5ce2a3918a1be68",
+      "bytes": 31067
+    },
+    "preflight-and-mechanical-failures.json": {
+      "sha256": "976459dfda498bf71505353816d46ac7bbc27fa5b6da1bf4f7e4795ec481f308",
+      "bytes": 779
+    },
+    "mechanical-preflight.json": {
+      "sha256": "f214215dee0ebc8b261aeacb5274b24647e3e5f69578cff6e4fb5f2a1795eb4b",
+      "bytes": 1599
+    },
+    "actual-runtime.json": {
+      "sha256": "bb1e69ab6a9832dc56c50085f9c20a107adbd865886e6fd86c037a7f50c1a7f2",
+      "bytes": 418
+    },
+    "guardian-joint-receipt.json": {
+      "sha256": "41d51e78968574e2ff00e734a5f74bc4ca48a989676ce74209fbb9e3780ad4d4",
+      "bytes": 921
+    },
+    "guardian-joint.log": {
+      "sha256": "cff930f73d8d522edcf28cb9657e5976d2033aa160bbfc4f423c631120355d67",
+      "bytes": 478
+    },
+    "guardian-joint.xml": {
+      "sha256": "81b3ecda4a50a944d1774381ca61ae0b9c7f2a046725d1891a4993997800a576",
+      "bytes": 3749
+    },
+    "owner-probe-results.json": {
+      "sha256": "008a3f5eec8781ccba01100a835166c29a1d7b9a520708d662296b43563988da",
+      "bytes": 4989
+    },
+    "owner-probe-h24-followup.json": {
+      "sha256": "fc9edcbc558203575f21894fdb964f8c0bf8b0bd2454fae19fc7ef5012f43bcd",
+      "bytes": 253
+    },
+    "wall-time.json": {
+      "sha256": "9b5b3923e5863cffc32591a8a0a62a9caeb86cb7c77cf03092e941dd9b79edd3",
+      "bytes": 665
+    },
+    "privacy-and-recovery.json": {
+      "sha256": "6b70914d58f48c65bf3a3127227419e4ef9eab6af7884c96c4c721d2d4fff582",
+      "bytes": 2550
+    }
+  },
+  "private_evidence_root": "/data/watt/c3-semantic-convergence-20261009/holdout-final-qualification-20261010/evidence/private",
+  "sealed_sha256": "770828adeabec942548218c17bc6e9dbb9222ce19df19bc89c260f28ed8f4cf0",
+  "control_sha256": {
+    "holdout_runner.py": "718d6f73c5b8143f8f362f31857d1cfb305792da25cb6eb28c1295541b7577eb",
+    "owner_probes-v2.py": "fa5e9497d2ef4ba8ea146b78e612d09f4487aa4de0aeddd75728e426ef0b1d7d",
+    "seal_public_delivery.py": "f6e047678fc603b29da283ea9fc80929064d2507f50b967a24105df807e32b16",
+    "owner-probe-h24.py": "61eec9314084e7b65667e059cb5195d102c63c5da50e735b920ad9bb1e58f66b",
+    "freeze.json": "fbbcd532941ddfaeaa88d51a562955363d4d57d23a3cd02c35fc2733f5b05486",
+    "owner_probes.py": "b4c6f603cecaed0d97b2c7ce26a8b7f0d91f17dff60d1925eb8260ece39e3d81",
+    "holdout_adapter.py": "0c0318ecb0a86aaf3145760e3174b61db26462d4dd18a1b8934e65e359bf1818",
+    "live_suite.py": "c3204b86bfeda68a0d079558578d4b39d3ada1d2d85e65a7c5cc09ff9b37740c",
+    "actual-imports.json": "9881a587b478febf14342d31e3dd8dc9d02e24226766b85ad402c4744b315779",
+    "finalize_review.py": "ffa7e3690ab0ffbe59c423826f1a7d187b873c2c9b3887d61f8deef258dc3680",
+    "prepare.py": "56e4bbe7b6296eb69339aa046c5d8ba9b8593f27d0ba24e260e824c68eb7c2f4",
+    "mechanical-adapter-change.json": "470dd0e26ad5dcd435c04765dcb4d970e508b1c8828b96af501e194a2516f11b",
+    "prepare-v2.py": "d59298b2e8a249bbece4ea2ed1a2ae37fbb873e7640aa309be167db1619b8fde",
+    "sealed-specification.json": "770828adeabec942548218c17bc6e9dbb9222ce19df19bc89c260f28ed8f4cf0",
+    "guardian_joint.py": "22d7f2b58c5b8391614ba5d1e4649f7adb457f80dc160a4ef1c46ac784a77fa5"
+  },
+  "source_tuning": false
+}

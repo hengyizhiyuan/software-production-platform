@@ -1,0 +1,11 @@
+{
+  "actual_container_id": "7a2e8ae07f2040c1d6006ac3da7730dbd42ac05d84dc6129497d46facffd1275",
+  "actual_image": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "started_at_utc": "2026-10-10T09:33:43.216772318Z",
+  "finished_at_utc": "2026-10-10T09:43:20.595627022Z",
+  "sum_returned_model_call_wall_seconds": 561.6341480253614,
+  "sum_case_wall_seconds": 573.951633270015,
+  "guardian_joint_controller_seconds": 233.36276851198636,
+  "timing_relation": "Joint tests overlapped live suite. Model-call durations are nested inside case/container duration; do not add as total compute.",
+  "resource_cost_money_cpu_peakmemory": "UNKNOWN"
+}

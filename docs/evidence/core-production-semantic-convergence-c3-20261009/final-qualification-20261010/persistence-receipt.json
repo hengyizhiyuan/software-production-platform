@@ -1,0 +1,15 @@
+{
+  "schema": "c3-final-public-persistence-v1",
+  "recorded_at_utc": "2026-10-10T09:58:26.732248+00:00",
+  "archive_sha256": "afafdcd28b91cad87ada95c5ac4f803d15029e988732d55453e2908c0d5cebc5",
+  "public_root": "/data/watt/c3-semantic-convergence-20261009/final-closure-review-20261010/public-delivery",
+  "verified_manifest_files": 941,
+  "result": "C3_PARTIAL_EXACT_ENGINEERING_BLOCKER",
+  "preexisting_running_container_count": 19,
+  "new_qualification_containers_running": false,
+  "ecs_source_head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+  "ecs_main_ref": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+  "production_modified": false,
+  "implementation_changed": false,
+  "private_inputs_in_archive": false
+}

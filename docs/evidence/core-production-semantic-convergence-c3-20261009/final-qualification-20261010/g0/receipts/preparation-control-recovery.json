@@ -1,0 +1,11 @@
+{
+  "recorded_at_utc": "2026-10-10T09:34:29.016268+00:00",
+  "original_control_failure": "NameError_REV_UNBOUND",
+  "boundary": "after fresh migration, before any API/coordinator/worker/tool-host or model/Work",
+  "prior_network_preflight_failure": "TypeError_NULL_IPAM_CONFIG",
+  "historical_failure_time": "UNKNOWN",
+  "models_before_recovery": 0,
+  "works_before_recovery": 0,
+  "recreated_dependencies": false,
+  "application_code_modified": false
+}

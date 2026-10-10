@@ -1,0 +1,34 @@
+{
+  "completed_at_utc": "2026-10-10T09:44:57.816311Z",
+  "http_status": 200,
+  "input_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+  "method": "GET",
+  "path": "/api/works/c703f518-52a2-5531-90d1-e751b809fe68/guardian-assurance",
+  "projection": {
+    "finding_count": 0,
+    "gate": null,
+    "required": false,
+    "status": "NOT_STARTED"
+  },
+  "qualification_claim": "OBSERVATION_ONLY_NOT_WORK_PASS",
+  "request_body_sha256": null,
+  "response_body_sha256": "d2ab9273e572a45a905cc5111f632905b53675dbb6efcc6314a8940b383ca35e",
+  "response_bytes_observed": 71,
+  "response_json_valid": true,
+  "run_id": "9c73b136-b890-4739-90f7-adc208cd5332",
+  "runtime_identity": {
+    "api_base_url": "http://watt-c3-finalg0-api-20261010:8000",
+    "api_service": "watt-c3-finalg0-api-20261010",
+    "captured_at_utc": "2026-10-10T09:34:56.530057+00:00",
+    "database_name": "spg_c3_finalg0_qualification_20261010",
+    "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+    "isolated": true,
+    "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+    "provider_ready": true,
+    "qualification": "C3",
+    "qualification_run": "final-g0",
+    "source_revision": "34e9ca9cc5cd5623a9463b42ba4c26ede061640f"
+  },
+  "schema": "c3-normal-entry-api-observation-v1",
+  "started_at_utc": "2026-10-10T09:44:57.789560Z"
+}

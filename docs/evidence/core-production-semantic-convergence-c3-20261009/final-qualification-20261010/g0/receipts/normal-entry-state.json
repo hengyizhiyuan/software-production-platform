@@ -1,0 +1,62 @@
+{
+  "created_at_utc": "2026-10-10T09:35:05.221830Z",
+  "driver_status": "BOUNDED_OBSERVATION_WINDOW_ENDED",
+  "human_acceptance_written": false,
+  "human_delivery_authorization_written": false,
+  "human_integration_authorization_written": false,
+  "input_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+  "interaction_id": "2a6caa70-dedf-48e4-a31e-1a34b32a4c2a",
+  "latest_observation": {
+    "automatic_progression_state": "STOPPED",
+    "current_production_run_id": null,
+    "current_work_reality_revision_id": "4d674f62-99c6-5fed-ba6e-45f90ca2f9a2",
+    "human_attention_required": false,
+    "interaction_id": "2a6caa70-dedf-48e4-a31e-1a34b32a4c2a",
+    "status": "COMPLETED",
+    "turn_id": "7bfc0169-d032-4082-be1a-2f6958d330e2",
+    "work_complete": false,
+    "work_id": "c703f518-52a2-5531-90d1-e751b809fe68",
+    "work_status": "READY"
+  },
+  "operations": {
+    "create_product": {
+      "confirmed_at_utc": "2026-10-10T09:35:07.591886Z",
+      "path": "/api/products",
+      "request_body_sha256": "ddc36906a6cc558d6beeb4a5386c3b3a680cf5b9b42ef611dfc2ce69a7289c70",
+      "started_at_utc": "2026-10-10T09:35:05.226828Z",
+      "state": "CONFIRMED"
+    },
+    "submit_turn": {
+      "confirmed_at_utc": "2026-10-10T09:35:07.725619Z",
+      "path": "/api/experience/products/49074219-d220-4f2c-9294-1bacb638fff1/turns",
+      "request_body_sha256": "f241c9d0307bb90f2f0285c07219b7f996f63845a313f12ea5c3f6acf89a3212",
+      "started_at_utc": "2026-10-10T09:35:07.596690Z",
+      "state": "CONFIRMED"
+    }
+  },
+  "original_input_file_sha256": "c587f020c43275019b32c49a94ab8559587a01d339e1fe97b2c8e048a386258e",
+  "polls_completed": 100,
+  "product_id": "49074219-d220-4f2c-9294-1bacb638fff1",
+  "product_name": "C3 G0 normal entry 9c73b136-b890-4739-90f7-adc208cd5332",
+  "receipt_sequence": 884,
+  "run_id": "9c73b136-b890-4739-90f7-adc208cd5332",
+  "runtime_identity": {
+    "api_base_url": "http://watt-c3-finalg0-api-20261010:8000",
+    "api_service": "watt-c3-finalg0-api-20261010",
+    "captured_at_utc": "2026-10-10T09:34:56.530057+00:00",
+    "database_name": "spg_c3_finalg0_qualification_20261010",
+    "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+    "isolated": true,
+    "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+    "provider_ready": true,
+    "qualification": "C3",
+    "qualification_run": "final-g0",
+    "source_revision": "34e9ca9cc5cd5623a9463b42ba4c26ede061640f"
+  },
+  "runtime_identity_file_sha256": "177b8fdd52606365dd8091d3e9855d7644324ecd83056a92d52bc9a88dae5123",
+  "schema": "c3-normal-entry-state-v1",
+  "source_record_id": "c7a403a4-866c-4a9b-81b5-868e6cff184c",
+  "turn_id": "7bfc0169-d032-4082-be1a-2f6958d330e2",
+  "updated_at_utc": "2026-10-10T09:45:21.503192Z",
+  "work_id": "c703f518-52a2-5531-90d1-e751b809fe68"
+}

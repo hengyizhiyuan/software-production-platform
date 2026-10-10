@@ -1,0 +1,23 @@
+{
+  "nodes": [
+    "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records",
+    "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority",
+    "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects"
+  ],
+  "counts": {
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 20
+  },
+  "exit_code": 0,
+  "actual_image": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "container_id": "d644218459eecfc2deaa7ce3dcb5bbacfc9c6bd885d253b51a956b49b9fd705f",
+  "wall_seconds": 233.36276851198636,
+  "model_calls": 0,
+  "qualification_kind": "INDEPENDENT_PG_WATT_GUARDIAN_CONTROLLED_CONTRACT",
+  "sealed_input_not_tuning": true,
+  "authority_unchanged": true,
+  "no_business_or_human_work": true
+}

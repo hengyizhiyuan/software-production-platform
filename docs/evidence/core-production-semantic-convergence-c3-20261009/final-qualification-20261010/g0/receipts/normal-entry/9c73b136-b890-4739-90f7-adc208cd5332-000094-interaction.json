@@ -1,0 +1,82 @@
+{
+  "completed_at_utc": "2026-10-10T09:36:15.833011Z",
+  "http_status": 200,
+  "input_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+  "method": "GET",
+  "path": "/api/interactions/2a6caa70-dedf-48e4-a31e-1a34b32a4c2a",
+  "projection": {
+    "condition": "OPEN",
+    "created_at": "2026-10-10T09:35:07.626466Z",
+    "current_work_id": "c703f518-52a2-5531-90d1-e751b809fe68",
+    "governed_revision": {
+      "basis_fingerprint": "fa929f78b4f5ea3f48c4cb1872f23090b18e2ae827f285580087e714e232fd07",
+      "created_at": "2026-10-10T09:35:20.401343Z",
+      "engineering_resource_id": "8549ad9f-1e7d-421b-9941-c582def0e61c",
+      "engineering_scope_id": "671d971f-b62c-520b-aa61-9d2967efbfba",
+      "governance_record_id": "a66ae717-dd3e-5f7d-8fef-adfd103728fd",
+      "previous_revision_id": null,
+      "revision_fingerprint": "0a5428c70977397fb5d2f3cce83b7bc9dbe575453e443753369ff0305d30aa41",
+      "revision_id": "4d674f62-99c6-5fed-ba6e-45f90ca2f9a2",
+      "revision_number": 1,
+      "scope_basis_fingerprint": "b4ca98f3c93943e0a888a7b4b6275d6866e4b8f50fa0d86c0a8341939d1fef89",
+      "source_assessment_id": "eb181736-f1c7-4a1b-a026-4047befbdc5c",
+      "source_baseline_id": "5690e8cc-f674-4363-a6e7-fbda419f5b14",
+      "source_interaction_id": "2a6caa70-dedf-48e4-a31e-1a34b32a4c2a",
+      "source_kind": "INTERACTION_ASSESSMENT",
+      "source_record_ids": [
+        "558836b0-4ec5-4227-b6bf-1046ebaf84c1"
+      ],
+      "source_revision": "da9e4af489b54700715ed4ddd655515bc94d9f45",
+      "work_id": "c703f518-52a2-5531-90d1-e751b809fe68"
+    },
+    "governed_work_id": "c703f518-52a2-5531-90d1-e751b809fe68",
+    "interaction_id": "2a6caa70-dedf-48e4-a31e-1a34b32a4c2a",
+    "latest_assessment": {
+      "assessment_id": "eb181736-f1c7-4a1b-a026-4047befbdc5c",
+      "basis_fingerprint": "fa929f78b4f5ea3f48c4cb1872f23090b18e2ae827f285580087e714e232fd07",
+      "created_at": "2026-10-10T09:35:20.136457Z",
+      "readiness": {
+        "basis_fingerprint": "fa929f78b4f5ea3f48c4cb1872f23090b18e2ae827f285580087e714e232fd07",
+        "profile": "LONG_LIVED_STEERING",
+        "status": "READY"
+      },
+      "semantic_ir": {
+        "basis_fingerprint": "fa929f78b4f5ea3f48c4cb1872f23090b18e2ae827f285580087e714e232fd07",
+        "id": "57f37dcd-69a8-5767-b4f9-5c02984f0dc3",
+        "interaction_id": "2a6caa70-dedf-48e4-a31e-1a34b32a4c2a"
+      }
+    },
+    "latest_assessment_current": false,
+    "new_work_formation_pending": false,
+    "production_admission_state": "WORK_CREATED",
+    "production_request_detected": true,
+    "readiness": {
+      "basis_fingerprint": "fa929f78b4f5ea3f48c4cb1872f23090b18e2ae827f285580087e714e232fd07",
+      "profile": "LONG_LIVED_STEERING",
+      "status": "READY"
+    },
+    "repository_acquisition_state": "READY",
+    "updated_at": "2026-10-10T09:35:20.401343Z"
+  },
+  "qualification_claim": "OBSERVATION_ONLY_NOT_WORK_PASS",
+  "request_body_sha256": null,
+  "response_body_sha256": "97fb0e0e4a1ec5c9dcd60977c35578c31cd1454c93040d4a3317b2933c135d4b",
+  "response_bytes_observed": 38830,
+  "response_json_valid": true,
+  "run_id": "9c73b136-b890-4739-90f7-adc208cd5332",
+  "runtime_identity": {
+    "api_base_url": "http://watt-c3-finalg0-api-20261010:8000",
+    "api_service": "watt-c3-finalg0-api-20261010",
+    "captured_at_utc": "2026-10-10T09:34:56.530057+00:00",
+    "database_name": "spg_c3_finalg0_qualification_20261010",
+    "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+    "isolated": true,
+    "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+    "provider_ready": true,
+    "qualification": "C3",
+    "qualification_run": "final-g0",
+    "source_revision": "34e9ca9cc5cd5623a9463b42ba4c26ede061640f"
+  },
+  "schema": "c3-normal-entry-api-observation-v1",
+  "started_at_utc": "2026-10-10T09:36:15.708436Z"
+}

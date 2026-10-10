@@ -1,0 +1,52 @@
+{
+  "specification_sha256": "770828adeabec942548218c17bc6e9dbb9222ce19df19bc89c260f28ed8f4cf0",
+  "source": "34e9ca9cc5cd5623a9463b42ba4c26ede061640f",
+  "image": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "case_count": 24,
+  "live_ordinals": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "controlled_owner_ordinals": [
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+  ],
+  "max_formation_calls_per_case": 4,
+  "wic_budget": "existing Owner unchanged",
+  "model": "deepseek-flash",
+  "formation_review_reasoning": "none",
+  "max_output_tokens": 16384,
+  "timeout": 120,
+  "implementation_tuning": false,
+  "control_files": {
+    "holdout_runner.py": "718d6f73c5b8143f8f362f31857d1cfb305792da25cb6eb28c1295541b7577eb",
+    "freeze.json": "fbbcd532941ddfaeaa88d51a562955363d4d57d23a3cd02c35fc2733f5b05486",
+    "holdout_adapter.py": "0c0318ecb0a86aaf3145760e3174b61db26462d4dd18a1b8934e65e359bf1818",
+    "live_suite.py": "c3204b86bfeda68a0d079558578d4b39d3ada1d2d85e65a7c5cc09ff9b37740c",
+    "actual-imports.json": "9881a587b478febf14342d31e3dd8dc9d02e24226766b85ad402c4744b315779",
+    "prepare.py": "56e4bbe7b6296eb69339aa046c5d8ba9b8593f27d0ba24e260e824c68eb7c2f4",
+    "mechanical-adapter-change.json": "470dd0e26ad5dcd435c04765dcb4d970e508b1c8828b96af501e194a2516f11b",
+    "prepare-v2.py": "d59298b2e8a249bbece4ea2ed1a2ae37fbb873e7640aa309be167db1619b8fde",
+    "sealed-specification.json": "770828adeabec942548218c17bc6e9dbb9222ce19df19bc89c260f28ed8f4cf0"
+  }
+}

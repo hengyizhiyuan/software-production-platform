@@ -1,0 +1,931 @@
+{
+  "calls": [
+    {
+      "owner": "WIC",
+      "logical_call_id": "WIC:1",
+      "purpose": null,
+      "request_id": "31907b7f-d7ea-40db-bbd8-7841d4cfccf4",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 128,
+        "input_tokens": 14751,
+        "output_tokens": 9969,
+        "reasoning_tokens": 4714,
+        "total_tokens": 24720,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 35.36503183102468,
+        "first_response_event_seconds": 0.9809850089950487,
+        "first_token_seconds": 21.01954194100108,
+        "request_sent_seconds": 0.0018503050087019801
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "27fae0abfe58bb04cd7c6a764107c110e3a5dc00e1884dc5b77cec20ab5d1742",
+      "output_bytes": 21385,
+      "wall_seconds": 35.36589577200357
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:1",
+      "purpose": null,
+      "request_id": "0a0f352a-0b16-4773-805e-ca228b3d6b9e",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 1280,
+        "input_tokens": 20937,
+        "output_tokens": 2016,
+        "reasoning_tokens": 0,
+        "total_tokens": 22953,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 6.953831348975655,
+        "first_response_event_seconds": 0.29763737198663875,
+        "first_token_seconds": 1.0303540889872238,
+        "request_sent_seconds": 0.00017793395090848207
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "0110090629be57dd0b3cd71c03b64ca2d0f4b86114e2bb37fbf4d78817c9315f",
+      "output_bytes": 6270,
+      "wall_seconds": 6.954127716016956
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:2",
+      "purpose": null,
+      "request_id": "7d4dd58b-d3df-4ee8-841b-e768c0c3749f",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 1024,
+        "input_tokens": 20337,
+        "output_tokens": 5176,
+        "reasoning_tokens": 0,
+        "total_tokens": 25513,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 15.515231813013088,
+        "first_response_event_seconds": 0.27871804300229996,
+        "first_token_seconds": 1.0870653740130365,
+        "request_sent_seconds": 0.00020349497208371758
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "a532df6049d66635a322a1c03f3775d7b36e0acacd02423f444514a43c0240c6",
+      "output_bytes": 16413,
+      "wall_seconds": 15.51600508496631
+    },
+    {
+      "owner": "WIC",
+      "logical_call_id": "WIC:1",
+      "purpose": null,
+      "request_id": "9de38244-b74e-4ee2-b352-c02a327aafd8",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 6016,
+        "input_tokens": 14760,
+        "output_tokens": 10405,
+        "reasoning_tokens": 6112,
+        "total_tokens": 25165,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 37.036178190028295,
+        "first_response_event_seconds": 0.4400312090292573,
+        "first_token_seconds": 25.14974294300191,
+        "request_sent_seconds": 0.0019021750194951892
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "fa462aa6386529178705e9317bd06d17f663eb69185ce7a1fcf26870f66636c9",
+      "output_bytes": 14598,
+      "wall_seconds": 37.03732793801464
+    },
+    {
+      "owner": "WIC",
+      "logical_call_id": "WIC:2",
+      "purpose": null,
+      "request_id": "2b44e820-7878-420f-ae68-3f69a2958e59",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 0,
+        "input_tokens": 19284,
+        "output_tokens": 6346,
+        "reasoning_tokens": 2055,
+        "total_tokens": 25630,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 20.493284136988223,
+        "first_response_event_seconds": 0.2232186789624393,
+        "first_token_seconds": 9.901224631990772,
+        "request_sent_seconds": 0.0030499949934892356
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "2dba49ee86b157ba8ed2942a20ba5e64e0df65f25d401145a4b223397bb52119",
+      "output_bytes": 14592,
+      "wall_seconds": 20.49416756205028
+    },
+    {
+      "owner": "WIC",
+      "logical_call_id": "WIC:3",
+      "purpose": null,
+      "request_id": "b43bd13e-6920-4f79-909b-070d4b257f3b",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 256,
+        "input_tokens": 19269,
+        "output_tokens": 4796,
+        "reasoning_tokens": 541,
+        "total_tokens": 24065,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 13.644633014046121,
+        "first_response_event_seconds": 0.24121878005098552,
+        "first_token_seconds": 3.1857995350146666,
+        "request_sent_seconds": 0.0019479180336929858
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "07e67e02f308df5da2a30498a16a8b3006870a17e733b6f0dc7af760dfa7cd00",
+      "output_bytes": 14491,
+      "wall_seconds": 13.645436368009541
+    },
+    {
+      "owner": "WIC",
+      "logical_call_id": "WIC:4",
+      "purpose": null,
+      "request_id": "37b97a8c-8c10-4ab2-b5df-47a45e726d34",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 256,
+        "input_tokens": 19222,
+        "output_tokens": 9218,
+        "reasoning_tokens": 4963,
+        "total_tokens": 28440,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 32.08030170202255,
+        "first_response_event_seconds": 0.6745477070217021,
+        "first_token_seconds": 21.76752272702288,
+        "request_sent_seconds": 0.0047649089829064906
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "5faab3741bbe5a0c0949ee7d9972130469f6208a7f48be295bf79b3db73c9440",
+      "output_bytes": 14490,
+      "wall_seconds": 32.08409850602038
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:1",
+      "purpose": null,
+      "request_id": "30806fc1-a0ba-4d5d-9566-9519c4ee49e9",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 1408,
+        "input_tokens": 20368,
+        "output_tokens": 1594,
+        "reasoning_tokens": 0,
+        "total_tokens": 21962,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 7.209669750009198,
+        "first_response_event_seconds": 0.5932695079827681,
+        "first_token_seconds": 0.8774880319833755,
+        "request_sent_seconds": 0.00022790901130065322
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "decb3be9d4fab8de5c47722977a2f47dbc5a699f24c5fb6f2f635dc1b2aba57d",
+      "output_bytes": 5288,
+      "wall_seconds": 7.209925824950915
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:2",
+      "purpose": null,
+      "request_id": "b3918610-01a5-470a-894b-6dfb77128fd1",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 1024,
+        "input_tokens": 18196,
+        "output_tokens": 4727,
+        "reasoning_tokens": 0,
+        "total_tokens": 22923,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 15.410985505965073,
+        "first_response_event_seconds": 0.29781256400747225,
+        "first_token_seconds": 1.2829194539808668,
+        "request_sent_seconds": 0.00031394901452586055
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "121a5fc73b290c91f701835a87808764b547c9d1c95c3819d048bc607b42589f",
+      "output_bytes": 15573,
+      "wall_seconds": 15.4115995450411
+    },
+    {
+      "owner": "WIC",
+      "logical_call_id": "WIC:1",
+      "purpose": null,
+      "request_id": "f750526a-71fe-4b23-b63d-48aa17099cbc",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 6016,
+        "input_tokens": 14745,
+        "output_tokens": 9544,
+        "reasoning_tokens": 5692,
+        "total_tokens": 24289,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 36.241766628983896,
+        "first_response_event_seconds": 0.36821017699548975,
+        "first_token_seconds": 25.183293565991335,
+        "request_sent_seconds": 0.0034756410168483853
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "f9e5cac4603cc9cdb23fa268d9357af3c478b5196d0e9b2b6ce37c89b21e9ddd",
+      "output_bytes": 14513,
+      "wall_seconds": 36.2428234910476
+    },
+    {
+      "owner": "WIC",
+      "logical_call_id": "WIC:2",
+      "purpose": null,
+      "request_id": "6a61ba8e-9514-43e8-b05a-fefe194cd837",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 0,
+        "input_tokens": 18827,
+        "output_tokens": 5686,
+        "reasoning_tokens": 1760,
+        "total_tokens": 24513,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 18.701952359988354,
+        "first_response_event_seconds": 0.2686885140137747,
+        "first_token_seconds": 8.805751778010745,
+        "request_sent_seconds": 0.0035312589607201517
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "89c21611b32ba8044a3f73fe9eee64d1f3a293d4092e310ac1ac0ededa0c30b1",
+      "output_bytes": 14985,
+      "wall_seconds": 18.702613740984816
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:1",
+      "purpose": null,
+      "request_id": "8052314a-65af-4295-8af1-5290217fc554",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 1280,
+        "input_tokens": 19995,
+        "output_tokens": 2288,
+        "reasoning_tokens": 0,
+        "total_tokens": 22283,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 7.591212255996652,
+        "first_response_event_seconds": 0.39609539299272,
+        "first_token_seconds": 0.7333479740191251,
+        "request_sent_seconds": 0.0003351570339873433
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "01e1c62900e1810ab9e10275104b90e8865437d5d5bae495f58792fddd8ef493",
+      "output_bytes": 7496,
+      "wall_seconds": 7.591601804015227
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:2",
+      "purpose": null,
+      "request_id": "10296140-4da9-4c5c-816c-be2ddf5284b6",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 17152,
+        "input_tokens": 29978,
+        "output_tokens": 2326,
+        "reasoning_tokens": 0,
+        "total_tokens": 32304,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 6.850468577002175,
+        "first_response_event_seconds": 0.32256962900282815,
+        "first_token_seconds": 0.5334234029869549,
+        "request_sent_seconds": 0.00035024102544412017
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "b73b88fda9a302758634126a8b07b7b41fcfb8a71033232c88191d0c2ca6fd5e",
+      "output_bytes": 6836,
+      "wall_seconds": 6.850948149978649
+    },
+    {
+      "owner": "WIC",
+      "logical_call_id": "WIC:1",
+      "purpose": null,
+      "request_id": "52cf7ee5-351e-4f43-b387-6d4d205b4ab1",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 6016,
+        "input_tokens": 14755,
+        "output_tokens": 10724,
+        "reasoning_tokens": 6604,
+        "total_tokens": 25479,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 40.6077414000174,
+        "first_response_event_seconds": 0.37215797300450504,
+        "first_token_seconds": 28.43136188504286,
+        "request_sent_seconds": 0.0028893580310977995
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "c30f3a1a5208cb8c59ee84e32a8beec030a4880f37205b9afdb2b8dcd2d6e1d3",
+      "output_bytes": 13714,
+      "wall_seconds": 40.608879239007365
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:1",
+      "purpose": null,
+      "request_id": "d0b21958-bfbb-46ca-ac85-a7318beb7a95",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 1408,
+        "input_tokens": 21288,
+        "output_tokens": 2003,
+        "reasoning_tokens": 0,
+        "total_tokens": 23291,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 6.650128693028819,
+        "first_response_event_seconds": 0.4477907940163277,
+        "first_token_seconds": 0.7881815380533226,
+        "request_sent_seconds": 0.0003158350009471178
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "590f4ce159b231f326d459eaa829ccf3fe277b22122c5e05682cf4628f07670c",
+      "output_bytes": 5777,
+      "wall_seconds": 6.650529603997711
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:2",
+      "purpose": null,
+      "request_id": "1c2dbd24-6b8a-4534-90f5-ef58d6f54174",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 18304,
+        "input_tokens": 29604,
+        "output_tokens": 2098,
+        "reasoning_tokens": 0,
+        "total_tokens": 31702,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 6.871344243991189,
+        "first_response_event_seconds": 0.289036208007019,
+        "first_token_seconds": 0.8479044800042175,
+        "request_sent_seconds": 0.00030629802495241165
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "17a7b923a813a033db69db65028c325bb5dc63d081ac82c78dde2b4b8a3a6c49",
+      "output_bytes": 6888,
+      "wall_seconds": 6.871821738022845
+    },
+    {
+      "owner": "WIC",
+      "logical_call_id": "WIC:1",
+      "purpose": null,
+      "request_id": "c032785c-c8b7-4d73-bbdd-ace46fc32977",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 6016,
+        "input_tokens": 14759,
+        "output_tokens": 9879,
+        "reasoning_tokens": 6075,
+        "total_tokens": 24638,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 34.445444217999466,
+        "first_response_event_seconds": 0.3759444570168853,
+        "first_token_seconds": 24.166200815001503,
+        "request_sent_seconds": 0.0034656249918043613
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "69a54f42f966a6f170145eb056a55020db4e36ff3ef3dc7dfc78d9436001c53e",
+      "output_bytes": 13450,
+      "wall_seconds": 34.44666956498986
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:1",
+      "purpose": null,
+      "request_id": "84975848-e336-4463-9210-ea68a632d481",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 1280,
+        "input_tokens": 18936,
+        "output_tokens": 2897,
+        "reasoning_tokens": 0,
+        "total_tokens": 21833,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 8.271174845984206,
+        "first_response_event_seconds": 0.404819920018781,
+        "first_token_seconds": 0.5571879809722304,
+        "request_sent_seconds": 0.00026093097403645515
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "0516756d67e7b994f232779b7f9574bfb0eaf4bb7e508b5cca4d3ed933997e11",
+      "output_bytes": 9702,
+      "wall_seconds": 8.271825161995366
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:2",
+      "purpose": null,
+      "request_id": "ab61c0f9-be1f-4ea3-9623-56716f314678",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 16128,
+        "input_tokens": 34183,
+        "output_tokens": 1787,
+        "reasoning_tokens": 0,
+        "total_tokens": 35970,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 6.18892428703839,
+        "first_response_event_seconds": 0.4823541460209526,
+        "first_token_seconds": 1.2698467040318064,
+        "request_sent_seconds": 0.00029858003836125135
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "b5f4e827acab5305dfe4472cc8ef542113b99a5d54c0ecb41a0df1e52243fbb6",
+      "output_bytes": 5970,
+      "wall_seconds": 6.1893088960205205
+    },
+    {
+      "owner": "WIC",
+      "logical_call_id": "WIC:1",
+      "purpose": null,
+      "request_id": "dfad9adb-670f-40e2-b1b4-35d64f8b33b5",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 6016,
+        "input_tokens": 14751,
+        "output_tokens": 8501,
+        "reasoning_tokens": 4945,
+        "total_tokens": 23252,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 32.4598738909699,
+        "first_response_event_seconds": 0.48086214397335425,
+        "first_token_seconds": 21.658076961990446,
+        "request_sent_seconds": 0.003596302994992584
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "471932c5a395e665605c3767033a7b9e908d11475fbd47bff9d245f1174f2196",
+      "output_bytes": 12593,
+      "wall_seconds": 32.46088737400714
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:1",
+      "purpose": null,
+      "request_id": "5459e389-a1aa-4bb7-9ac5-775bf3c047aa",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 1280,
+        "input_tokens": 17949,
+        "output_tokens": 1410,
+        "reasoning_tokens": 0,
+        "total_tokens": 19359,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 5.130332534958143,
+        "first_response_event_seconds": 0.773074796947185,
+        "first_token_seconds": 0.7827310809516348,
+        "request_sent_seconds": 0.00031669094460085034
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "6c9fefaf888afc5012943bb2118729eeef683fc83c4d9fa9ea9ae9dfa3f1f092",
+      "output_bytes": 4320,
+      "wall_seconds": 5.130777607031632
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:2",
+      "purpose": null,
+      "request_id": "8792c4f8-befa-4c20-bd27-b7106ada6fe8",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 15232,
+        "input_tokens": 27071,
+        "output_tokens": 1392,
+        "reasoning_tokens": 0,
+        "total_tokens": 28463,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 5.047534898971207,
+        "first_response_event_seconds": 0.3685412829509005,
+        "first_token_seconds": 1.4032892249524593,
+        "request_sent_seconds": 0.0002637189463712275
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "5a85b7d37bb4f25c8f5695d8652ea95acdbcfadddbf154a75449ade979833c4d",
+      "output_bytes": 4391,
+      "wall_seconds": 5.047979389026295
+    },
+    {
+      "owner": "WIC",
+      "logical_call_id": "WIC:1",
+      "purpose": null,
+      "request_id": "0272f337-4677-4759-939d-46f90a76af95",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 6016,
+        "input_tokens": 14726,
+        "output_tokens": 7718,
+        "reasoning_tokens": 4699,
+        "total_tokens": 22444,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 30.046739289013203,
+        "first_response_event_seconds": 0.41333263501292095,
+        "first_token_seconds": 20.98009622102836,
+        "request_sent_seconds": 0.003336875990498811
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "832ec7d9a3d8ed7fa54da369919f00761524839d646db5d198f09c3e3b9206f2",
+      "output_bytes": 11288,
+      "wall_seconds": 30.048065083043184
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:1",
+      "purpose": null,
+      "request_id": "1539658f-1d14-4e9b-8a11-dcc064ca4e4a",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 1280,
+        "input_tokens": 14077,
+        "output_tokens": 1599,
+        "reasoning_tokens": 0,
+        "total_tokens": 15676,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 6.426427616970614,
+        "first_response_event_seconds": 0.36289194197161123,
+        "first_token_seconds": 0.6723640579730272,
+        "request_sent_seconds": 0.00029035902116447687
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "720d1f072358338c129841a4f4aaff9577c106d6cd0b8b3705ae466732979731",
+      "output_bytes": 5628,
+      "wall_seconds": 6.426893980009481
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:2",
+      "purpose": null,
+      "request_id": "0a83417b-8c99-429c-82cf-c4c95bff8bc1",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 12032,
+        "input_tokens": 23129,
+        "output_tokens": 1519,
+        "reasoning_tokens": 0,
+        "total_tokens": 24648,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 5.631725654995535,
+        "first_response_event_seconds": 0.30555555695900694,
+        "first_token_seconds": 0.6285989199532196,
+        "request_sent_seconds": 0.0002877359511330724
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "99ec7a185801a9ecdc67d4103d47b773af27da6b9c59554ec9267e0d8cd64ed3",
+      "output_bytes": 5539,
+      "wall_seconds": 5.632134936051443
+    },
+    {
+      "owner": "WIC",
+      "logical_call_id": "WIC:1",
+      "purpose": null,
+      "request_id": "cbbebea7-fcd7-467d-92ca-59b1cd2c85ea",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 6016,
+        "input_tokens": 14721,
+        "output_tokens": 12508,
+        "reasoning_tokens": 8189,
+        "total_tokens": 27229,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 43.954960546980146,
+        "first_response_event_seconds": 0.4115829539950937,
+        "first_token_seconds": 33.55372243397869,
+        "request_sent_seconds": 0.0033994269906543195
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "35e1e0c510c66cddef8284047e6c03c7f1fa293c1176a5dee5dc34661d0e7dc2",
+      "output_bytes": 17023,
+      "wall_seconds": 43.95603870198829
+    },
+    {
+      "owner": "WIC",
+      "logical_call_id": "WIC:2",
+      "purpose": null,
+      "request_id": "bac20820-c2a9-4a98-81d5-4ca8789d389c",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 0,
+        "input_tokens": 19261,
+        "output_tokens": 5568,
+        "reasoning_tokens": 1258,
+        "total_tokens": 24829,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 16.493987907015253,
+        "first_response_event_seconds": 0.37406304298201576,
+        "first_token_seconds": 6.5290305109811015,
+        "request_sent_seconds": 0.004117553005926311
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "8113d336f2f8925fd479f783e1c2a8508688d7c920f95620a14cb8802b68aba9",
+      "output_bytes": 16973,
+      "wall_seconds": 16.495116038015112
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:1",
+      "purpose": null,
+      "request_id": "93c0a629-a8fa-407e-816a-5c3780cf5596",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 1280,
+        "input_tokens": 13641,
+        "output_tokens": 947,
+        "reasoning_tokens": 0,
+        "total_tokens": 14588,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 3.659248958050739,
+        "first_response_event_seconds": 0.28205393900861964,
+        "first_token_seconds": 0.9043133480008692,
+        "request_sent_seconds": 0.00030789501033723354
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "46aac5cad43f57b8689aa703a9a1429aa74aafcb06729761b516649acfb8c04a",
+      "output_bytes": 2962,
+      "wall_seconds": 3.659576864039991
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:2",
+      "purpose": null,
+      "request_id": "923e52ad-c7bf-45fc-a37f-afbc4e16c7db",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 1024,
+        "input_tokens": 11883,
+        "output_tokens": 2393,
+        "reasoning_tokens": 0,
+        "total_tokens": 14276,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 8.09838153194869,
+        "first_response_event_seconds": 0.31251611799234524,
+        "first_token_seconds": 0.8241911489749327,
+        "request_sent_seconds": 0.00026286597130820155
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "f3e97218b0d6dee34e2bd6ff378655622492be1f973aa490b191180ccbe03a30",
+      "output_bytes": 7470,
+      "wall_seconds": 8.098932381020859
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:3",
+      "purpose": null,
+      "request_id": "f388abf9-25a0-4b08-9945-52ec3e294453",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 11904,
+        "input_tokens": 17578,
+        "output_tokens": 944,
+        "reasoning_tokens": 0,
+        "total_tokens": 18522,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 3.264736045966856,
+        "first_response_event_seconds": 0.34795366699108854,
+        "first_token_seconds": 0.5548375139478594,
+        "request_sent_seconds": 0.00035446096444502473
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "4226fda2a47bfb319e92c32c333a93d4b16b4867d146a0b241520ce95683222e",
+      "output_bytes": 3040,
+      "wall_seconds": 3.265075667994097
+    },
+    {
+      "owner": "WIC",
+      "logical_call_id": "WIC:1",
+      "purpose": null,
+      "request_id": "14bd5dc2-3d0b-4856-9a13-bbe4a62f1f8f",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 6016,
+        "input_tokens": 14724,
+        "output_tokens": 6783,
+        "reasoning_tokens": 3860,
+        "total_tokens": 21507,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 26.472992949013133,
+        "first_response_event_seconds": 0.32890742004383355,
+        "first_token_seconds": 17.850050822016783,
+        "request_sent_seconds": 0.0030726020340807736
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "5befd605c56379d8b438c0d930fc2106a7d4e2d4e222a321f330c86d46d3d558",
+      "output_bytes": 10790,
+      "wall_seconds": 26.47373815299943
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:1",
+      "purpose": null,
+      "request_id": "3fd0f5c1-38ae-443c-a5ff-4ec13764d0ee",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 1280,
+        "input_tokens": 15580,
+        "output_tokens": 2824,
+        "reasoning_tokens": 0,
+        "total_tokens": 18404,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 10.887040145986248,
+        "first_response_event_seconds": 0.26386516395723447,
+        "first_token_seconds": 1.1541448470088653,
+        "request_sent_seconds": 0.00029865995747968554
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "cacd7eaf09677391c5b4dd5f75decf86c89822f2a2b597c2ee77ee42830e0bb7",
+      "output_bytes": 10099,
+      "wall_seconds": 10.887578236986883
+    },
+    {
+      "owner": "FORMATION",
+      "logical_call_id": "FORMATION:2",
+      "purpose": null,
+      "request_id": "01511afd-4843-4a71-b720-2d9ca616d20a",
+      "provider": "deepseek",
+      "requested_model": "deepseek-flash",
+      "effective_model": "deepseek-flash",
+      "usage": {
+        "cached_tokens": 13312,
+        "input_tokens": 26268,
+        "output_tokens": 2133,
+        "reasoning_tokens": 0,
+        "total_tokens": 28401,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 7.905277203011792,
+        "first_response_event_seconds": 0.3591914499993436,
+        "first_token_seconds": 0.7791085210046731,
+        "request_sent_seconds": 0.0002107509644702077
+      },
+      "transport_retry_count": 0,
+      "output_sha256": "38cfd6d91b8cfb5ca72cd5eb4d72123f29a1cfb9044aa913cb4a6d86403c2927",
+      "output_bytes": 7447,
+      "wall_seconds": 7.905747906013858
+    }
+  ],
+  "aggregates": {
+    "input_tokens": 629553,
+    "output_tokens": 159718,
+    "cached_tokens": 167680,
+    "reasoning_tokens": 61467,
+    "total_tokens": 789271
+  },
+  "per_owner": {
+    "FORMATION": {
+      "logical_calls": 19,
+      "usage": {
+        "input_tokens": 400998,
+        "output_tokens": 42073,
+        "cached_tokens": 118912,
+        "reasoning_tokens": 0,
+        "total_tokens": 443071
+      }
+    },
+    "WIC": {
+      "logical_calls": 14,
+      "usage": {
+        "input_tokens": 228555,
+        "output_tokens": 117645,
+        "cached_tokens": 48768,
+        "reasoning_tokens": 61467,
+        "total_tokens": 346200
+      }
+    }
+  },
+  "unknown": {
+    "input_tokens": [],
+    "output_tokens": [],
+    "cached_tokens": [],
+    "reasoning_tokens": [],
+    "total_tokens": []
+  }
+}

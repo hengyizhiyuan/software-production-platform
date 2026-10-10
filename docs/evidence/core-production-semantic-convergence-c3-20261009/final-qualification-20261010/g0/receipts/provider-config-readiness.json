@@ -1,0 +1,11 @@
+{
+  "base_url": "https://api.deepseek.com",
+  "credential_present": true,
+  "model": "deepseek-flash",
+  "production_attempt_created": false,
+  "provider": "deepseek",
+  "provider_profile": "deepseek-responses:deepseek-flash:high",
+  "provider_request_sent": false,
+  "reasoning_effort": "high",
+  "status": "READY"
+}
