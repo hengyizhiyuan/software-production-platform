@@ -43,7 +43,7 @@ def test_reviewer_prerequisite_sharing_retains_exact_original_source_domains(dri
     revision, ir, inventory, plan = controlled_capacity_case()
     caps = a.fulfillment_capability_contracts()
     owner = a._owner_source_preconditions(revision, ir, inventory, caps,
-        generation_view_contract=p._SOURCE_CONSUMER_INPUT_CONTRACT, review_input_contract=p._REVIEW_INPUT_CONTRACT)
+        generation_view_contract=p._SOURCE_CONSUMER_INPUT_CONTRACT, review_input_contract=p._REVIEW_INPUT_ROUTE_SCOPED_CONTRACT)
     choices = p._formation_binding_choices(inventory, caps, owner)
     view = p._review_input_view(inventory, plan, caps, {
         "existing_owner_source_preconditions": owner, "existing_owner_binding_domains": choices})

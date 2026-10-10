@@ -535,7 +535,7 @@ def _primary_meaning_instructions(owner_preconditions):
          "rejected contribution against original meaning and actual consumer contracts; propose the "
          "lawful contribution(s), not a cosmetic edit. Feedback is a bound failed-review observation, "
          "not a mandated replacement or a new fact."
-         if owner_preconditions.get("review_input_contract") == _REVIEW_INPUT_CONTRACT else "") +
+         if owner_preconditions.get("review_input_contract") in _ROUTE_SCOPED_REVIEW_INPUTS else "") +
         " The source table contains original meaning and geometry, not a fulfillment checklist. "
         "Select only the operations actually required by each contribution. After that semantic choice, "
         "resolve owner_prerequisites_ref to consult the full original Owner record. Its nonrejected "
@@ -962,8 +962,10 @@ def _review_result_identity_slots(inventory, candidate):
 
 
 _REVIEW_INPUT_LEGACY_CONTRACT = "existing-lossless-review-input-v1"
-_REVIEW_INPUT_CONTRACT = "existing-route-scoped-review-input-v2"
-_REVIEW_INPUT_CONTRACTS = {_REVIEW_INPUT_LEGACY_CONTRACT, _REVIEW_INPUT_CONTRACT}
+_REVIEW_INPUT_ROUTE_SCOPED_CONTRACT = "existing-route-scoped-review-input-v2"
+_REVIEW_INPUT_CONTRACT = "existing-independent-comparison-input-v3"
+_ROUTE_SCOPED_REVIEW_INPUTS = {_REVIEW_INPUT_ROUTE_SCOPED_CONTRACT, _REVIEW_INPUT_CONTRACT}
+_REVIEW_INPUT_CONTRACTS = {_REVIEW_INPUT_LEGACY_CONTRACT, *_ROUTE_SCOPED_REVIEW_INPUTS}
 
 
 def _review_input_view(inventory, candidate, capabilities, owner_context):
@@ -976,8 +978,8 @@ def _review_input_view(inventory, candidate, capabilities, owner_context):
     selected_contract = owner_context.get("existing_owner_source_preconditions", {}).get(
         "review_input_contract", _REVIEW_INPUT_CONTRACT)
     original = _review_component_table(inventory, candidate, capabilities,
-        full_fact_payload=selected_contract == _REVIEW_INPUT_CONTRACT,
-        route_scoped=selected_contract == _REVIEW_INPUT_CONTRACT)
+        full_fact_payload=selected_contract in _ROUTE_SCOPED_REVIEW_INPUTS,
+        route_scoped=selected_contract in _ROUTE_SCOPED_REVIEW_INPUTS)
     rows = deepcopy(original)
     contracts = {c["capability"]: c for c in capabilities}
     consumers = {c["capability"]: c for c in _existing_consumer_contracts(capabilities)}
@@ -1031,9 +1033,27 @@ def _review_input_view(inventory, candidate, capabilities, owner_context):
         "existing_consumer_contracts": list(consumers.values()),
         "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
         "components_fingerprint": fulfillment_components_fingerprint(candidate)}
-    if selected_contract == _REVIEW_INPUT_CONTRACT:
+    if selected_contract in _ROUTE_SCOPED_REVIEW_INPUTS:
         payload = {"component_index_table": payload["component_index_table"],
                    **{key:value for key,value in payload.items() if key != "component_index_table"}}
+    if selected_contract == _REVIEW_INPUT_CONTRACT:
+        original_routes = [r.model_dump(mode="json", exclude={"rationale"}) for r in candidate.routes]
+        if canonical_fingerprint({"inventory_fingerprint": inventory["inventory_fingerprint"],
+                "routes": original_routes}) != fulfillment_candidate_fingerprint(candidate):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_INPUT_IDENTITY_DRIFT")
+        # The original canonical fingerprint already excludes rationale. This
+        # is an unchanged semantic view, not a repaired Candidate or a new Wire.
+        payload.pop("existing_owner_binding_domains", None)
+        payload["candidate_representation"] = "EXISTING_CANONICAL_MEANING_WITHOUT_PROPOSER_RATIONALE"
+        payload["untrusted_fulfillment_candidate"] = {
+            "inventory_fingerprint": candidate.inventory_fingerprint,
+            "routes": original_routes}
+        payload["review_basis"] = {
+            "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
+            "components_fingerprint": fulfillment_components_fingerprint(candidate),
+            "proposer_rationale_is_evidence": False,
+            "generation_choice_domains_are_evidence": False,
+            "original_inventory_and_owner_preconditions_retained": True}
     return payload
 
 
@@ -1813,8 +1833,15 @@ class ModelFulfillmentCandidateProvider:
         runtime = self.runtime_factory()
         try:
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
-                instructions=((("The request losslessly shares existing contracts: resolve each "
-                    if (owner_preconditions or {}).get("review_input_contract") == _REVIEW_INPUT_CONTRACT else
+                instructions=((("The independent comparison contains original immutable sources and unchanged canonical routing fields. "
+                    "The fingerprint excludes proposer rationale; no proposer explanation or planning choice "
+                    "list is supplied as evidence. Evaluate original meaning against only actual submitted "
+                    "consumers, declared dependencies and same-source complementary components. All other "
+                    "sources remain separately reviewed; their existence cannot supply an undeclared f "
+                    "proof. No approved outcome or semantic verdict is provided. "
+                    if (owner_preconditions or {}).get("review_input_contract") == _REVIEW_INPUT_CONTRACT else "") +
+                    ("The request losslessly shares existing contracts: resolve each "
+                    if (owner_preconditions or {}).get("review_input_contract") in _ROUTE_SCOPED_REVIEW_INPUTS else
                     "The request uses existing-lossless-review-input-v1: resolve each ") +
                     "existing_capability_contract_ref in existing_capability_contracts by its exact capability, "
                     "and each existing_consumer_contract_ref in existing_consumer_contracts. These references "
@@ -1914,7 +1941,7 @@ class ModelFulfillmentCandidateProvider:
                     "A whole-source reuse cannot conceal a lost semantic component. This review is only "
                     "derived-plan semantic validation, not Assurance, Verification PASS, a fact or Human authority.")),
                 input_text=json.dumps(review_input, ensure_ascii=False),
-                output_schema=_review_output_schema(inventory, candidate, route_scoped=(owner_preconditions or {}).get("review_input_contract") == _REVIEW_INPUT_CONTRACT))
+                output_schema=_review_output_schema(inventory, candidate, route_scoped=(owner_preconditions or {}).get("review_input_contract") in _ROUTE_SCOPED_REVIEW_INPUTS))
             self.last_observation = {"request_id": result.request_id, "provider": result.provider.value,
                 "requested_model": result.requested_model, "effective_model": result.effective_model,
                 "usage": asdict(result.usage), "timing": asdict(result.timing),

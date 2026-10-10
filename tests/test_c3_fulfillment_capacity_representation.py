@@ -153,6 +153,14 @@ def decode_review_input(payload):
         from spg.providers.fulfillment_candidate import _decode_fulfillment_candidate_wire
         return _decode_fulfillment_candidate_wire(json.dumps(payload['untrusted_fulfillment_candidate']),
             inventory,payload['existing_capability_contracts'])
+    if payload.get('candidate_representation') == 'EXISTING_CANONICAL_MEANING_WITHOUT_PROPOSER_RATIONALE':
+        # Only this network-free fixture needs a canonical object to exercise
+        # unchanged predicates. This label is never added to a live response.
+        raw = deepcopy(payload['untrusted_fulfillment_candidate'])
+        for route in raw['routes']:
+            assert 'rationale' not in route
+            route['rationale'] = 'Controlled fixture; proposer rationale not supplied to independent review.'
+        return FulfillmentProjectionCandidate.model_validate(raw)
     return FulfillmentProjectionCandidate.model_validate(payload['untrusted_fulfillment_candidate'])
 
 
