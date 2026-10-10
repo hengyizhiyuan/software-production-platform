@@ -1,0 +1,183 @@
+{
+  "recorded_at_utc": "2026-10-10T09:20:10.211382+00:00",
+  "specialization_result": "FORMATION_AND_REVIEW_CALIBRATION_QUALIFIED",
+  "c3_overall_status": "PARTIAL",
+  "watt_source": {
+    "revision": "34e9ca9cc5cd5623a9463b42ba4c26ede061640f",
+    "tree": "00f053019cf3c1ba0cd43fa1b1fca023ef638a71"
+  },
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "guardian": {
+    "revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+    "tree": "6066a6d6b8d91bec610021409ab320309ed0e437"
+  },
+  "ecf": {
+    "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+  },
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "capabilities_fingerprint": "a2e695783b122373f0ed308a959fa4e3116c4a9df5454dbedd81695071153b17",
+  "source_count": 26,
+  "capability_count": 12,
+  "wire_version": "fulfillment-compact-v1",
+  "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+  "positive": {
+    "result": "ISOLATED_FULFILLMENT_PLAN_QUALIFIED",
+    "logical_calls": 2,
+    "formation_attempts": 1,
+    "feedback_count": 0,
+    "candidate_fingerprint": "ba1324764630f019fdc718833a1a9e10a50ceaf1d2b7fb577b8690e5581edc42",
+    "components_fingerprint": "9fd5b60b067ff793acf5125784670b82fb09d455ab7b1b18c96c2df3dd60138a",
+    "route_count": 35,
+    "binding_states": {
+      "BOUND_PENDING_EVIDENCE": 32,
+      "RETAINED_CONTEXT": 3
+    },
+    "immutable_original_basis": true,
+    "actual_usage": {
+      "input_tokens": 54737,
+      "output_tokens": 8349,
+      "cached_tokens": 15360,
+      "reasoning_tokens": 0,
+      "total_tokens": 63086
+    },
+    "wall_seconds": 26.792658731981646
+  },
+  "negative": {
+    "qualification": "PASS_EXPECTED_REJECTION",
+    "candidate_fingerprint": "cac68104396cc5bb5e313a9069508b80e24db028e6ec70414ea902f96bd2827f",
+    "review_sha256": "b3587767260c7c44f6c7614c2c9be7a578d884457acae06677e4dbce8d8b4ffd",
+    "rejected_components": [
+      {
+        "component_id": "fed7e7d7d43898141016e95ca83db6dff3ca7e9fc83e3c2d40ba3d06dfa84404",
+        "capability": "DENY_DEPLOY",
+        "complete_and_equivalent": true,
+        "nonredundant": false,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "route": 5,
+        "source_ref": "semantic-fact:714a86db-354c-508d-aa51-91a978ca1be3",
+        "reason_sha256": "9c39e22829a2eeb9de61a25c28669d40a155401ef94c834ff31c6fa66288b2cb"
+      },
+      {
+        "component_id": "fed7e7d7d43898141016e95ca83db6dff3ca7e9fc83e3c2d40ba3d06dfa84404",
+        "capability": "DENY_PUBLISH",
+        "complete_and_equivalent": true,
+        "nonredundant": false,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "route": 6,
+        "source_ref": "semantic-fact:714a86db-354c-508d-aa51-91a978ca1be3",
+        "reason_sha256": "85973d7b538b3304844667f5353ea4a26aee33b5b323a84cee3311be924de1b1"
+      },
+      {
+        "component_id": "a4c0699998ee345743fea23496d1f69aa9495cb408b981ebf31a3be4639a9c99",
+        "capability": "DENY_PREVIEW",
+        "complete_and_equivalent": false,
+        "nonredundant": false,
+        "owner_phase_evidence_valid": false,
+        "context_only": false,
+        "route": 21,
+        "source_ref": "ir-constraint:change_scope_exclusions:c7",
+        "reason_sha256": "e8f8c89f500f2f2801ba62216b72c64dd575507735916b3faefa2c5b5d2e80fd"
+      },
+      {
+        "component_id": "a4c0699998ee345743fea23496d1f69aa9495cb408b981ebf31a3be4639a9c99",
+        "capability": "DENY_DEPLOY",
+        "complete_and_equivalent": true,
+        "nonredundant": false,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "route": 22,
+        "source_ref": "ir-constraint:change_scope_exclusions:c7",
+        "reason_sha256": "b8b4362cca0118f433e232801e81de3f271c5c25daa93edeb0a5c2a0cff855c1"
+      },
+      {
+        "component_id": "a4c0699998ee345743fea23496d1f69aa9495cb408b981ebf31a3be4639a9c99",
+        "capability": "DENY_PUBLISH",
+        "complete_and_equivalent": true,
+        "nonredundant": false,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "route": 23,
+        "source_ref": "ir-constraint:change_scope_exclusions:c7",
+        "reason_sha256": "2debe231f87c721eb1bf1b772261d36434f2a3b3432a9e30b82db8cd12f8ecb8"
+      },
+      {
+        "component_id": "d0847fa5901b09fb7748515ed5fd8e0ca32382c19b93f09c7e288534646dd10c",
+        "capability": "DENY_DEPLOY",
+        "complete_and_equivalent": true,
+        "nonredundant": false,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "route": 25,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+        "reason_sha256": "5791da0bb7718909446f25f80761b7eb4398e4d08140c32e9dd4b1be6c9a21d5"
+      },
+      {
+        "component_id": "d0847fa5901b09fb7748515ed5fd8e0ca32382c19b93f09c7e288534646dd10c",
+        "capability": "DENY_PUBLISH",
+        "complete_and_equivalent": true,
+        "nonredundant": false,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "route": 26,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+        "reason_sha256": "ecad132f8d8fa13c84c0f43e415560d6fa82c389166c876d929fea373e85403c"
+      },
+      {
+        "component_id": "b0cc2c9be9a3ad6d564ce5c0bcf809ffa483da56c0f9850d0729a0627c6f655b",
+        "capability": "ARTIFACT_CONTENT",
+        "complete_and_equivalent": true,
+        "nonredundant": false,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "route": 37,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:6",
+        "reason_sha256": "70e037c02b3861f386acd4520cce5ac1be4c4e1040c95778d975b73468c609f3"
+      },
+      {
+        "component_id": "f619bba7d7e8dac25a3b743735109f8b984d282d4833cd90871805ba0f4aa1e3",
+        "capability": "DENY_PREVIEW",
+        "complete_and_equivalent": false,
+        "nonredundant": false,
+        "owner_phase_evidence_valid": false,
+        "context_only": false,
+        "route": 41,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:9",
+        "reason_sha256": "2611047d3b0810abd1cead29663434353397c5f082064b4be7c70ae834e60147"
+      }
+    ],
+    "provider_usage": {
+      "input_tokens": 30547,
+      "output_tokens": 8103,
+      "cached_tokens": 30336,
+      "reasoning_tokens": 0,
+      "total_tokens": 38650
+    },
+    "actual_gate_failure": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH"
+  },
+  "postgresql": {
+    "tests": 46,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 46
+  },
+  "unit_tests": 398,
+  "actual_software_work_created": false,
+  "software_candidate_sealed": false,
+  "human_authority_granted": false,
+  "actual_business_guardian_assurance": "NOT_EXECUTED; independent contract qualification is controlled PostgreSQL/Git fixture evidence",
+  "holdout_opened": false,
+  "production_configuration_changed": false,
+  "original_runtime_profile": "unchanged low; none override is isolated qualification only",
+  "remaining": [
+    "original C3 real G0 to software Candidate/Assurance on final identity remains unexecuted by current instruction",
+    "independent Holdout remains sealed and unexecuted",
+    "qualified Reviewer none is not automatically activated in production"
+  ],
+  "private_recovery_root": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010",
+  "positive_private_case": "semantic-primary-live-1/private/model-observations",
+  "negative_private_case": "preview-negative-final-1/private/model-observations"
+}

@@ -1,0 +1,100 @@
+{
+  "schema": "c3-authorized-capacity-container-v1",
+  "created_observed_at_utc": "2026-10-10T09:02:38.616203+00:00",
+  "source_revision": "650ec904d0e1dca456267b207d2b795511595fe1",
+  "actual_container_id": "1b3a59d07b4786aac5b9cb12b33462e62fff92d6cbfcac0250fddccdb931d05c",
+  "actual_image_id": "sha256:439d1d599e861531654cdb7bb1737a178684ebb8df5f0803ab5eb16e6309148c",
+  "user": "10001:10001",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json",
+      "Destination": "/basis.json",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/review-domains-qualified-20261010/final-image/evidence/actual-imports.json",
+      "Destination": "/qualified-imports.json",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/semantic-domains-live-1/evidence",
+      "Destination": "/c3-evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/semantic-domains-live-1/private/model-observations",
+      "Destination": "/c3-private",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/semantic-domains-live-inputs-1/verify_live_model.py",
+      "Destination": "/probe.py",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    }
+  ],
+  "network_mode": "none",
+  "probe_sha256": "d08307bd19f4fa34a61b9261f31d2f155c295f1a30a1f04d5fa5bd26fcb5b42f",
+  "controller_sha256": "0bce6efe690179a2fb384647f74fc086c6c0ff0ba868a712ac818040ab8f1f49",
+  "source_overlay": false,
+  "business_database_access": false,
+  "new_work_created": false,
+  "existing_services_started_or_modified": false,
+  "mode": "preflight",
+  "recorded_at_utc": "2026-10-10T09:02:42.409032+00:00",
+  "exit_code": 0,
+  "docker_started_at": "2026-10-10T09:02:38.858557112Z",
+  "docker_finished_at": "2026-10-10T09:02:42.332772495Z",
+  "running": false,
+  "preflight": {
+    "preflight": "PASS",
+    "source": "650ec904d0e1dca456267b207d2b795511595fe1",
+    "inventory": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+    "sources": 26,
+    "capabilities": 12,
+    "profiles": {
+      "formation": {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "reasoning_effort": "none",
+        "timeout_seconds": 120.0,
+        "max_output_tokens": 16384,
+        "base_url": "https://api.deepseek.com"
+      },
+      "semantic_review": {
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "reasoning_effort": "none",
+        "timeout_seconds": 120.0,
+        "max_output_tokens": 16384,
+        "base_url": "https://api.deepseek.com"
+      }
+    },
+    "installed_owner_hashes": {
+      "spg": 278,
+      "guardian": 5,
+      "ecf": 5
+    },
+    "wire_metadata": {
+      "provider_wire_version": "fulfillment-compact-v1",
+      "wire_request_fingerprint": "1b7456883b80b66d6882f41abc243b08a7ccc354788e85cf17250aab88f55d9e",
+      "wire_table_fingerprint": "cddd1ffc3429695d19411d42c5d6b741534460496705dbb0a430ff138df9e429",
+      "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40"
+    },
+    "logical_calls": 0
+  }
+}

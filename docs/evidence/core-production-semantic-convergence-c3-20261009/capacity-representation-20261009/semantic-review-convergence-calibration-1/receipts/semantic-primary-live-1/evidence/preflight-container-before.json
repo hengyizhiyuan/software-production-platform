@@ -1,0 +1,58 @@
+{
+  "schema": "c3-authorized-capacity-container-v1",
+  "created_observed_at_utc": "2026-10-10T09:10:20.921575+00:00",
+  "source_revision": "34e9ca9cc5cd5623a9463b42ba4c26ede061640f",
+  "actual_container_id": "0daa5c80e6f5d06add725241912970fb7ba53c2ca1cae5fd464a1cb98eeb0c22",
+  "actual_image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "user": "10001:10001",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/review-primary-qualified-20261010/final-image/evidence/actual-imports.json",
+      "Destination": "/qualified-imports.json",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/semantic-primary-live-1/evidence",
+      "Destination": "/c3-evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/semantic-primary-live-1/private/model-observations",
+      "Destination": "/c3-private",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/semantic-primary-live-inputs-1/verify_live_model.py",
+      "Destination": "/probe.py",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json",
+      "Destination": "/basis.json",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    }
+  ],
+  "network_mode": "none",
+  "probe_sha256": "a70df11487326840c149ab7d7341b326fc75ea838c0ada8c93b8edaa59872a0e",
+  "controller_sha256": "b36dcf0c7bb1fc3e1810001b1dda85631901beb424c8c67fed3dbb50e62282cd",
+  "source_overlay": false,
+  "business_database_access": false,
+  "new_work_created": false,
+  "existing_services_started_or_modified": false,
+  "mode": "preflight"
+}

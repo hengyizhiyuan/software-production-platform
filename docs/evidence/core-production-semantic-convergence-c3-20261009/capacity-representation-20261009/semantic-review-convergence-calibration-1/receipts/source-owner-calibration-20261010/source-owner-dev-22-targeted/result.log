@@ -1,0 +1,16 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input/watt
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 121 items
+
+tests/test_c3_owner_repair_preconditions.py ............................ [ 23%]
+.........................                                                [ 43%]
+tests/test_c3_fulfillment_repair_context.py ............................ [ 66%]
+..                                                                       [ 68%]
+tests/test_c3_fulfillment_wire_feedback.py ............................. [ 92%]
+.........                                                                [100%]
+
+----------------- generated xml file: /c3-evidence/result.xml ------------------
+============================= 121 passed in 12.41s =============================

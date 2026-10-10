@@ -1,0 +1,71 @@
+{
+  "schema": "c3-authorized-capacity-container-v1",
+  "created_observed_at_utc": "2026-10-10T09:12:38.591526+00:00",
+  "source_revision": "34e9ca9cc5cd5623a9463b42ba4c26ede061640f",
+  "actual_container_id": "e3666b68a6f32bdfa5411a4959f38b6a98072821a1502e3ecacba0754704fbd3",
+  "actual_image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "user": "10001:10001",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/review-primary-qualified-20261010/final-image/evidence/actual-imports.json",
+      "Destination": "/qualified-imports.json",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/preview-negative-final-1/evidence",
+      "Destination": "/c3-evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/preview-negative-final-1/private/model-observations",
+      "Destination": "/c3-private",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/preview-negative-final-inputs-1/verify_live_model.py",
+      "Destination": "/probe.py",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/source-ownerprobe-live-1/private/model-observations",
+      "Destination": "/historical-readonly",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json",
+      "Destination": "/basis.json",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    }
+  ],
+  "network_mode": "watt-c3-control-20261009",
+  "probe_sha256": "6a83d9e3f5b21bc14ce5884376e2734f75a7f3ebf187068a2280e31510a0b467",
+  "controller_sha256": "766d2218b83f73c29d68a8a5b46782b354574e32f3dca69d7c856260887364ce",
+  "source_overlay": false,
+  "business_database_access": false,
+  "new_work_created": false,
+  "existing_services_started_or_modified": false,
+  "mode": "live",
+  "recorded_at_utc": "2026-10-10T09:13:09.660603+00:00",
+  "exit_code": 0,
+  "docker_started_at": "2026-10-10T09:12:39.292844276Z",
+  "docker_finished_at": "2026-10-10T09:13:08.999917598Z",
+  "running": false
+}

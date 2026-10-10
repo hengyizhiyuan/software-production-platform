@@ -1,0 +1,12 @@
+{
+  "kind": "AGENT_OBSERVED_TOOL_RECEIPT_NOT_RECONSTRUCTED_SERVER_LOG",
+  "source": "exec tool result d3e640; first qualify_postgresql.py invocation",
+  "failure": "DEFAULT_DOCKER_ADDRESS_POOL_EXHAUSTED",
+  "daemon_message": "could not find an available, non-overlapping IPv4 address pool among the defaults to assign to the network",
+  "source_revision": "c1cb10de3acc1062f949fe934e642307260dcd80",
+  "application_tests_executed": false,
+  "model_requests": 0,
+  "historical_data_mutated": false,
+  "exact_failure_timestamp": "UNKNOWN",
+  "recovery": "independently observe Docker IPAM and kernel routes; create only new internal fixture network in proven nonoverlapping 172.23.0.0/28; no historical network deletion"
+}

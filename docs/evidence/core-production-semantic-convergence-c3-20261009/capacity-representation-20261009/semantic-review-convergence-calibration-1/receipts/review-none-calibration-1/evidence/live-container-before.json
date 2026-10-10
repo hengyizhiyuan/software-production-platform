@@ -1,0 +1,66 @@
+{
+  "schema": "c3-authorized-capacity-container-v1",
+  "created_observed_at_utc": "2026-10-10T08:33:26.189616+00:00",
+  "source_revision": "8c2b3d224e898b3dc8e8220f78f6a6723c158941",
+  "actual_container_id": "b5c3e15c6dd609c73d82da6a9d416b47906ad6937d87610375e479f6f452c0cf",
+  "actual_image_id": "sha256:97a8db7f77c2898a65bdc975bb0f49f0f3350fe3e20c6e3650f4aeb3e54c01fa",
+  "user": "10001:10001",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/review-none-calibration-1/private/model-observations",
+      "Destination": "/c3-private",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/review-none-calibration-inputs-1/verify_live_model.py",
+      "Destination": "/probe.py",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/source-ownerprobe-live-1/private/model-observations",
+      "Destination": "/historical-readonly",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json",
+      "Destination": "/basis.json",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/source-ownerprobe-qualified-20261010/final-image/evidence/actual-imports.json",
+      "Destination": "/qualified-imports.json",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/review-none-calibration-1/evidence",
+      "Destination": "/c3-evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "network_mode": "watt-c3-control-20261009",
+  "probe_sha256": "538b92d1fa753459c37b019923af317fb40eab236d29130a5d36a708df3b27d0",
+  "controller_sha256": "f3372c359f392c547511f32a68c77f527cab3da68264bb3be7fb694d6dbd96bb",
+  "source_overlay": false,
+  "business_database_access": false,
+  "new_work_created": false,
+  "existing_services_started_or_modified": false,
+  "mode": "live"
+}

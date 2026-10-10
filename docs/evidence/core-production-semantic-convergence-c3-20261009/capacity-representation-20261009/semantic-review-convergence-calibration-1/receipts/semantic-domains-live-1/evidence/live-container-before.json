@@ -1,0 +1,58 @@
+{
+  "schema": "c3-authorized-capacity-container-v1",
+  "created_observed_at_utc": "2026-10-10T09:02:43.261432+00:00",
+  "source_revision": "650ec904d0e1dca456267b207d2b795511595fe1",
+  "actual_container_id": "10d64e16fa1bb7a58ba5d713bf120d1a29bb748e0f78575d1a6c3d8ce7f2af1a",
+  "actual_image_id": "sha256:439d1d599e861531654cdb7bb1737a178684ebb8df5f0803ab5eb16e6309148c",
+  "user": "10001:10001",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/semantic-domains-live-inputs-1/verify_live_model.py",
+      "Destination": "/probe.py",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json",
+      "Destination": "/basis.json",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/review-domains-qualified-20261010/final-image/evidence/actual-imports.json",
+      "Destination": "/qualified-imports.json",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/semantic-domains-live-1/evidence",
+      "Destination": "/c3-evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/semantic-domains-live-1/private/model-observations",
+      "Destination": "/c3-private",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "network_mode": "watt-c3-control-20261009",
+  "probe_sha256": "d08307bd19f4fa34a61b9261f31d2f155c295f1a30a1f04d5fa5bd26fcb5b42f",
+  "controller_sha256": "0bce6efe690179a2fb384647f74fc086c6c0ff0ba868a712ac818040ab8f1f49",
+  "source_overlay": false,
+  "business_database_access": false,
+  "new_work_created": false,
+  "existing_services_started_or_modified": false,
+  "mode": "live"
+}

@@ -1,0 +1,10 @@
+{
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "container_id": "bebda0f3955e443882c23b32dbd4596658db3743714cb8c88842e2890b2f3a41",
+  "network": "none",
+  "exit_code": 1,
+  "script_sha256": "7137d798110225c2166276884c63a83c1c59b8c1a25eab04a6c29a1c570dde59",
+  "observed_at_utc": "2026-10-10T09:14:55.507896+00:00",
+  "model_calls": 0,
+  "historical_mount": "readonly"
+}

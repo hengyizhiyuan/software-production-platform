@@ -1,0 +1,45 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input/watt
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 295 items
+
+tests/test_c3_owner_repair_preconditions.py ............................ [  9%]
+.........................                                                [ 17%]
+tests/test_c3_fulfillment_repair_context.py ..................           [ 24%]
+tests/test_c3_fulfillment_wire_feedback.py ............................. [ 33%]
+.........                                                                [ 36%]
+tests/test_c3_fulfillment_capacity_representation.py ................... [ 43%]
+............................F.....                                       [ 54%]
+tests/test_c3_semantic_contract_calibration.py ......................... [ 63%]
+...............                                                          [ 68%]
+tests/test_c3_fulfillment_provider_failures.py .........                 [ 71%]
+tests/test_c3_fulfillment_components.py ..............                   [ 76%]
+tests/test_fulfillment_projection.py .....................               [ 83%]
+tests/test_governed_obligation_fulfillment.py .......                    [ 85%]
+tests/test_c3_fulfillment_stop_projection.py ........................... [ 94%]
+...........                                                              [ 98%]
+tests/test_c3_fulfillment_admission_stop.py ....                         [100%]
+
+=================================== FAILURES ===================================
+_ test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget[stale-review] _
+tests/test_c3_fulfillment_capacity_representation.py:483: in test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget
+    assert len(calls) == 4
+E   AssertionError: assert 2 == 4
+E    +  where 2 = len([{'immutable_inventory': {'work_id': 'c1b89fc1-71e7-40b0-b2bf-f680730215b6', 'work_reality_revision_id': '9505aa99-fc3...d': 'a4a908d6678e6a66120887586927b79d363414acc65fc932966396d913bf1150', 'capability': 'HUMAN_INTEGRATION'}, ...], ...}])
+=============================== warnings summary ===============================
+tests/test_c3_semantic_contract_calibration.py::test_negative_file_component_preserves_original_exclusion_and_requires_real_diff
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+----------------- generated xml file: /c3-evidence/result.xml ------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget[stale-review]
+================== 1 failed, 294 passed, 1 warning in 15.77s ===================
