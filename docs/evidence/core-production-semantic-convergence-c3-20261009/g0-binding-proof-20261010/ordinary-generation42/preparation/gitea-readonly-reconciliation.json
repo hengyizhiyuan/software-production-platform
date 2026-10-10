@@ -1,0 +1,21 @@
+{
+  "state": {
+    "Status": "running",
+    "Running": true,
+    "ExitCode": 0,
+    "OOMKilled": false,
+    "StartedAt": "2026-10-10T21:27:48.548744749Z"
+  },
+  "image": "sha256:071efa747340e5e211213fc79a0b928003bedf9b6b48f61cb32b3c52bfd1e09e",
+  "log_signal_counts": {
+    "listen": 5,
+    "migrat": 0,
+    "permission denied": 0,
+    "panic": 0,
+    "fatal": 0,
+    "failed": 0,
+    "error": 0
+  },
+  "log_bytes": 4703,
+  "raw_private_only": true
+}
