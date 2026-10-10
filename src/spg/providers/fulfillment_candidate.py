@@ -117,6 +117,28 @@ def _fulfillment_wire_schema():
     return _provider_strict_output_schema(_FulfillmentCompactCandidate.model_json_schema())
 
 
+def _formation_output_schema(inventory, capabilities):
+    """A strict subset of existing wire v1 over this request's known identities.
+
+    No semantic classification, renumbering or response repair occurs here.
+    The format fingerprint remains v1; the actual request schema is separately
+    observed. The existing decoder remains authoritative if a Provider ignores
+    these generation constraints.
+    """
+    schema = _fulfillment_wire_schema()
+    route = schema["$defs"]["_FulfillmentCompactRoute"]["properties"]
+    sources = list(range(len(inventory["sources"])))
+    route["s"]["enum"] = sources
+    route["c"]["enum"] = list(range(len(capabilities)))
+    for name, domain in (("f", [i for i,s in enumerate(inventory["sources"]) if s["kind"] == "FACT"]),
+                         ("u", sources), ("t", list(range(len(inventory["exact_target_paths"]))))):
+        if domain:
+            route[name]["items"]["enum"] = domain
+        else:
+            route[name]["maxItems"] = 0
+    return schema
+
+
 def _fulfillment_wire_context(inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
     """Construct a reversible, request-local dictionary from original identities."""
     from spg.domain.change import safe_repository_path
@@ -500,6 +522,7 @@ class ModelFulfillmentCandidateProvider:
         wire_metadata = {key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS}
         runtime = self.runtime_factory()
         try:
+            output_schema = _formation_output_schema(inventory, capabilities)
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
                 instructions=(
                     "You propose a derived fulfillment plan for immutable admitted engineering meaning. "
@@ -593,8 +616,9 @@ class ModelFulfillmentCandidateProvider:
                             for index, entry in enumerate(context["tables"]["capabilities"])],
                         "target_index_table": [{"index": index, "path": path}
                             for index, path in enumerate(context["tables"]["target_paths"])]}}, ensure_ascii=False),
-                output_schema=_fulfillment_wire_schema())
-            self.last_observation = {"request_id": result.request_id,
+                output_schema=output_schema)
+            self.last_observation = {"generation_schema_fingerprint": canonical_fingerprint(output_schema),
+                "request_id": result.request_id,
                 "provider": result.provider.value,
                 "requested_model": result.requested_model, "effective_model": result.effective_model,
                 "usage": asdict(result.usage), "timing": asdict(result.timing),

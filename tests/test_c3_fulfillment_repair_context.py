@@ -209,3 +209,33 @@ def test_critic_comparison_cannot_display_a_substituted_source_quote():
     changed = first.model_copy(update={'component_basis': first.component_basis.model_copy(update={'source_component_quote': 'invented'})})
     with pytest.raises(_FulfillmentWireReceiptIdentityError, match='INPUT_IDENTITY_DRIFT'):
         _review_component_table(inventory, plan.model_copy(update={'routes': (changed, *rest)}), fulfillment_capability_contracts())
+
+
+@pytest.mark.parametrize('scale', ('small', 'medium', 'complex'))
+def test_generation_schema_enforces_original_identity_domains_without_new_wire_version(scale):
+    from spg.providers.fulfillment_candidate import _formation_output_schema, _fulfillment_wire_schema
+    from spg.application.governed_obligations import fulfillment_capability_contracts
+    from spg.domain.governed_obligation import canonical_fingerprint
+    _, _, inventory, _ = controlled_capacity_case(scale)
+    contracts = fulfillment_capability_contracts()
+    original = deepcopy(_fulfillment_wire_schema())
+    schema = _formation_output_schema(inventory, contracts)
+    props = schema['$defs']['_FulfillmentCompactRoute']['properties']
+    assert props['s']['enum'] == list(range(len(inventory['sources'])))
+    assert props['c']['enum'] == list(range(len(contracts)))
+    assert props['f']['items']['enum'] == [i for i,s in enumerate(inventory['sources']) if s['kind'] == 'FACT']
+    assert props['u']['items']['enum'] == props['s']['enum']
+    assert props['t']['items']['enum'] == list(range(len(inventory['exact_target_paths'])))
+    assert schema['properties']['v'] == original['properties']['v']
+    assert _fulfillment_wire_schema() == original
+    assert canonical_fingerprint(schema) != canonical_fingerprint(original)
+
+
+def test_generation_schema_no_fact_domain_requires_empty_f_not_a_new_index_space():
+    from spg.providers.fulfillment_candidate import _formation_output_schema
+    from spg.application.governed_obligations import fulfillment_capability_contracts, fulfillment_inventory
+    revision, ir, _, _ = controlled_capacity_case()
+    revision.engineering_semantic_facts = ()
+    inventory = fulfillment_inventory(revision, ir)
+    props = _formation_output_schema(inventory, fulfillment_capability_contracts())['$defs']['_FulfillmentCompactRoute']['properties']
+    assert props['f']['maxItems'] == 0 and 'enum' not in props['f']['items']
