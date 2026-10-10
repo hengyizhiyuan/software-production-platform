@@ -1,0 +1,1 @@
+{"status": "MISSING_CONTROL_INPUT_BEFORE_ANY_DOCKER_RESOURCE_OR_WORK", "work_created": false, "resources_created": false, "source": "4b5821886aefb81ea24ef475e2d113fc836aa103", "restored_input_sha256": "c587f020c43275019b32c49a94ab8559587a01d339e1fe97b2c8e048a386258e", "original_failure_preserved": true}

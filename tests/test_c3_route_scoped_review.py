@@ -225,7 +225,7 @@ def test_actual_provider_receives_bound_type_evidence_and_exact_id_operands_with
     provider.review(inventory, plan, capabilities=caps, owner_preconditions=owner)
     assert len(captured) == 1
     payload = json.loads(captured[0]["input_text"])
-    assert payload["existing_owner_source_preconditions"]["original_authority_type_projection"] == a._existing_source_type_projection(revision, ir, inventory)
+    assert payload["existing_owner_source_preconditions"]["original_authority_type_projection"] == a._existing_source_type_projection(revision, ir, inventory, include_admission_derivations=True)
     assert payload["exact_response_header"] == {
         "inventory_fingerprint": inventory["inventory_fingerprint"],
         "candidate_fingerprint": a.fulfillment_candidate_fingerprint(plan),
@@ -234,3 +234,68 @@ def test_actual_provider_receives_bound_type_evidence_and_exact_id_operands_with
     assert "No response identity or verdict is supplied" not in captured[0]["instructions"]
     assert "No verdict is supplied" in captured[0]["instructions"]
     assert "not filesystem paths or write grants" in captured[0]["instructions"]
+
+
+@pytest.mark.parametrize("kind,capability", (("FACT", "GIT_DIFF_SCOPE"), ("WORK_CONSTRAINT", "GIT_DIFF_SCOPE"),
+    ("IR_CONSTRAINT", "GIT_DIFF_SCOPE"), ("WORK_CONSTRAINT", "DENY_DEPLOY"), ("IR_CONSTRAINT", "DENY_PUBLISH")))
+def test_feedback_scope_condition_matches_actual_owner_source_and_method(kind, capability):
+    from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+    revision, ir, inventory, plan = controlled_capacity_case("medium")
+    caps = a.fulfillment_capability_contracts()
+    owner = a._owner_source_preconditions(revision, ir, inventory, caps)
+    wire, _ = controlled_wire(inventory, plan, owner_preconditions=owner)
+    ordinal = next(i for i,r in enumerate(wire["routes"]) if inventory["sources"][r["s"]]["kind"] == kind
+        and (kind != "IR_CONSTRAINT" or not capability.startswith("DENY_") or caps[r["c"]]["capability"] == "HUMAN_INTEGRATION"))
+    wire["routes"][ordinal]["c"] = next(i for i,c in enumerate(caps) if c["capability"] == capability)
+    wire["routes"][ordinal]["t"] = []
+    wire["routes"][ordinal]["u"] = []
+    raw = json.dumps(wire)
+    before = deepcopy((wire, owner, inventory))
+    previous = a._owner_repair_context(raw, revision, ir, inventory, caps, validation_feedback=None, owner_preconditions=owner)
+    current = a._owner_repair_context(raw, revision, ir, inventory, caps, validation_feedback=None,
+        owner_preconditions=owner, repair_context_contract="existing-owner-preconditions-v2")
+    old_rows = [r for r in previous["violations"] if r.get("route") == ordinal]
+    new_rows = [r for r in current["violations"] if r.get("route") == ordinal]
+    assert old_rows and len(old_rows) == len(new_rows)
+    for old, new in zip(old_rows, new_rows, strict=True):
+        assert old["owner_operand_observations"]["typed_prerequisites"]["scope_method_requirement"] == "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE"
+        expected = "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE" if kind == "FACT" and capability == "GIT_DIFF_SCOPE" else "NOT_APPLICABLE"
+        assert new["owner_operand_observations"]["typed_prerequisites"]["scope_method_requirement"] == expected
+        normalized = deepcopy(new)
+        normalized["owner_operand_observations"]["typed_prerequisites"]["scope_method_requirement"] = "EXACT_GIT_DIFF_SCOPE_REQUIRES_FACT_RELATION_SCOPE"
+        assert normalized == old
+    assert (wire, owner, inventory) == before
+
+
+def test_current_admission_derivations_preserve_all_exact_origins_without_inventing_support():
+    from spg.domain.intent_realization import SemanticKind
+    revision, ir, inventory, plan = controlled_capacity_case("medium")
+    statement = next(i.statement for i in ir.items if i.kind is SemanticKind.CONSTRAINT)
+    summary, exclusion = "保留用户原有数值和顺序。", "No extra engineering artifact outside the approved boundary."
+    original = ir.current_production[0].model_copy(update={"scope": (summary,), "exclusions": (exclusion,)})
+    production = ir.items[0].model_copy(update={"item_id": "unlisted-authority-origin", "kind": SemanticKind.PRODUCTION_INTENT,
+        "production": original})
+    second = production.model_copy(update={"item_id": "independent-equal-authority-origin"})
+    ir.items = (*ir.items, production, second)
+    # Existing fixture current_production is a snapshot; mirror current items.
+    ir.current_production = (*ir.current_production, original)
+    revision.constraints = (statement, summary, f"Excluded from this Work: {exclusion}", "Unknown historical derivation")
+    inventory = a.fulfillment_inventory(revision, ir, source_revision=inventory["source_revision"], exact_target_paths=inventory["exact_target_paths"])
+    before = deepcopy((vars(revision), vars(ir), inventory))
+    old = a._existing_source_type_projection(revision, ir, inventory)
+    current = a._existing_source_type_projection(revision, ir, inventory, include_admission_derivations=True)
+    rows = current["exact_work_constraint_derivations"]
+    assert {r["existing_admission_derivation"] for r in rows[0]["original_admission_derivations"]} == {"CONSTRAINT_STATEMENT"}
+    assert len(rows[1]["original_admission_derivations"]) == len(rows[2]["original_admission_derivations"]) == 2
+    for origin in rows[2]["original_admission_derivations"]:
+        assert origin["original_value_fingerprint"] == a.canonical_fingerprint(exclusion)
+        assert origin["derived_value_fingerprint"] == a.canonical_fingerprint(revision.constraints[2])
+        assert origin["field"] == "production.exclusions"
+    assert rows[3]["original_admission_derivations"] == [] and rows[3]["unlocated_derivation"] == "UNKNOWN"
+    assert all("original_admission_derivations" not in r for r in old["exact_work_constraint_derivations"])
+    caps = a.fulfillment_capability_contracts()
+    old_owner = a._owner_source_preconditions(revision, ir, inventory, caps, review_input_contract=p._REVIEW_INPUT_SOURCE_TYPED_CONTRACT)
+    new_owner = a._owner_source_preconditions(revision, ir, inventory, caps, review_input_contract=p._REVIEW_INPUT_CONTRACT)
+    assert old_owner["sources"] == new_owner["sources"]  # No new permission/support domain.
+    assert {k:v for k,v in old_owner.items() if k not in {"review_input_contract", "original_authority_type_projection"}} == {k:v for k,v in new_owner.items() if k not in {"review_input_contract", "original_authority_type_projection"}}
+    assert (vars(revision), vars(ir), inventory) == before

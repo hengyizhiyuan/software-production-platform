@@ -1,0 +1,426 @@
+{
+  "qualification": "ZERO_MODEL_UNADMITTED_WIRE_ANALYSIS",
+  "rows": [
+    {
+      "attempt": 1,
+      "wire_bytes": 9871,
+      "wire_sha256": "c8da38c6d2f25d358f81ff7e3d31e5c07c2123952fc2a0a886241d175fe04a1d",
+      "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+      "source_count": 23,
+      "json_valid": false,
+      "json_error": {
+        "reason": "Extra data",
+        "line": 1,
+        "column": 9869,
+        "offset": 9868,
+        "character_category": "Pe"
+      },
+      "complete_prefix_json_exists": true,
+      "suffix_bytes": 1,
+      "prefix_root_type": "dict",
+      "decode_failure": "_FulfillmentWireValidationError:OBLIGATION_FORMATION_WIRE_JSON_INVALID"
+    },
+    {
+      "attempt": 2,
+      "wire_bytes": 8671,
+      "wire_sha256": "2c660532270a8a1967c7245e3326266890f1f240e7f5f15b176d6b5ab8f58c9c",
+      "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+      "source_count": 23,
+      "json_valid": true,
+      "routes": [
+        {
+          "route": 0,
+          "source": 0,
+          "source_ref": "semantic-fact:65c7780c-6b72-5554-a6ff-18ddbfb86c14",
+          "kind": "FACT",
+          "capability": "ARTIFACT_CONTENT",
+          "span": [
+            0,
+            48
+          ],
+          "quote_sha256": "a24b1d48dd8fae804d8b7bf4e25740bf79c8716ebefc7201050f42b27e1296db",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "a073c62bcf72fa5209a144969045ffee50ba19d3e732901e315555fdc0d0615f"
+        },
+        {
+          "route": 1,
+          "source": 1,
+          "source_ref": "semantic-fact:3e5ee27b-2924-5c0c-8928-c935ad0f90d6",
+          "kind": "FACT",
+          "capability": "ARTIFACT_CONTENT",
+          "span": [
+            0,
+            55
+          ],
+          "quote_sha256": "5be6714bf14eea3261e40966c1d1a4039f752f3f376e0320166e32266011c8c4",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "f344713e6a056a5086a36b2fb457ce52992eeecebd256b3a8c94825a51202a21"
+        },
+        {
+          "route": 2,
+          "source": 2,
+          "source_ref": "semantic-fact:95b9e928-2180-574b-aa98-0f0c4af72a16",
+          "kind": "FACT",
+          "capability": "ARTIFACT_CONTENT",
+          "span": [
+            0,
+            48
+          ],
+          "quote_sha256": "a24b1d48dd8fae804d8b7bf4e25740bf79c8716ebefc7201050f42b27e1296db",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "dafabe02cbdb083140910da98bcd7b75d211991e7516c8680b89c3cc71bda0d7"
+        },
+        {
+          "route": 3,
+          "source": 3,
+          "source_ref": "semantic-fact:4e864901-999d-509d-9002-7b4d646b36bd",
+          "kind": "FACT",
+          "capability": "ARTIFACT_CONTENT",
+          "span": [
+            0,
+            55
+          ],
+          "quote_sha256": "5be6714bf14eea3261e40966c1d1a4039f752f3f376e0320166e32266011c8c4",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "2eae4c8cb16e16b1bf65075b113225be51e6dfe307844fecc89e17e6b7786ff8"
+        },
+        {
+          "route": 4,
+          "source": 4,
+          "source_ref": "semantic-fact:48c55681-eb60-524c-b826-89797ec560f2",
+          "kind": "FACT",
+          "capability": "GIT_DIFF_SCOPE",
+          "span": [
+            0,
+            27
+          ],
+          "quote_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "a9e10974d8d80d3da07323c1ade9b43a307205936ab7ae3746a01b890fee2cd1"
+        },
+        {
+          "route": 5,
+          "source": 5,
+          "source_ref": "ir-clause:c64cbc0f-1a1a-5f51-a15c-863861eda4f4:pi-n1-static-page:cl-1",
+          "kind": "IR_CLAUSE",
+          "capability": "RETAIN_CONTEXT",
+          "span": [
+            0,
+            49
+          ],
+          "quote_sha256": "c01616d2fa1687d3f2dbde62f78b2d07c72c8f63034431eb8b263f2cd82e53b1",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "065048800e168504a96f14e11ba1b3e7387cc7023bc3583870093b16e87fefc2"
+        },
+        {
+          "route": 6,
+          "source": 6,
+          "source_ref": "ir-clause:c64cbc0f-1a1a-5f51-a15c-863861eda4f4:pi-n1-static-page:cl-2",
+          "kind": "IR_CLAUSE",
+          "capability": "ARTIFACT_CONTENT",
+          "span": [
+            0,
+            91
+          ],
+          "quote_sha256": "9268cc964f6cb6011eb23204032873bdfbfff04e950cfda4f190d57a1cae73aa",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "f48bdf44b3c02903cdc3e3439a8566201de2f71384cffa23f9b9609c2d0cb2e0"
+        },
+        {
+          "route": 7,
+          "source": 7,
+          "source_ref": "ir-clause:c64cbc0f-1a1a-5f51-a15c-863861eda4f4:pi-n1-static-page:cl-3",
+          "kind": "IR_CLAUSE",
+          "capability": "RETAIN_CONTEXT",
+          "span": [
+            0,
+            48
+          ],
+          "quote_sha256": "763311981a479580e9d52e736ecffbec46cfc41a94a3564badab89c5fa354e60",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "e2379029af6104d13cca86fe617e18621bcbf9a36b5034cef44b8e7e101491a2"
+        },
+        {
+          "route": 8,
+          "source": 8,
+          "source_ref": "ir-clause:c64cbc0f-1a1a-5f51-a15c-863861eda4f4:pi-n1-static-page:cl-4",
+          "kind": "IR_CLAUSE",
+          "capability": "ARTIFACT_CONTENT",
+          "span": [
+            0,
+            132
+          ],
+          "quote_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "7047dfeefadcf7017a9815d17bfe5aa756b329938ec83f7c1e6694f616fbe1e1"
+        },
+        {
+          "route": 9,
+          "source": 9,
+          "source_ref": "ir-constraint:c-only-index:cl-5",
+          "kind": "IR_CONSTRAINT",
+          "capability": "GIT_DIFF_SCOPE",
+          "span": [
+            0,
+            27
+          ],
+          "quote_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "c6da89e8c5f18e48ae8a19d22849537f4d7ccf7e89effc545ace99c0049d9cf9"
+        },
+        {
+          "route": 10,
+          "source": 10,
+          "source_ref": "ir-clause:c64cbc0f-1a1a-5f51-a15c-863861eda4f4:q-verify-heading:cl-6",
+          "kind": "IR_CLAUSE",
+          "capability": "CANDIDATE_SEAL",
+          "span": [
+            0,
+            72
+          ],
+          "quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+          "linked_fact_ordinals": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "support_ordinals": [],
+          "component_id": "228b3498b644fa55b3cbdba12d5e929adf9c49547d7b6123924b780b5000cb1d"
+        },
+        {
+          "route": 11,
+          "source": 11,
+          "source_ref": "ir-clause:c64cbc0f-1a1a-5f51-a15c-863861eda4f4:pi-n1-static-page:cl-6",
+          "kind": "IR_CLAUSE",
+          "capability": "CANDIDATE_SEAL",
+          "span": [
+            0,
+            72
+          ],
+          "quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+          "linked_fact_ordinals": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "support_ordinals": [],
+          "component_id": "1ff0b3ad3eeef97791767fa96c17380627e741167f044a767262ce679535bf37"
+        },
+        {
+          "route": 12,
+          "source": 12,
+          "source_ref": "ir-constraint:c-no-deploy:cl-7",
+          "kind": "IR_CONSTRAINT",
+          "capability": "UNRESOLVED",
+          "span": [
+            0,
+            55
+          ],
+          "quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "3ab567278d3c50c99297700ac67e0ef4dbf1456d34ccf54bc76af56c1f73cd57"
+        },
+        {
+          "route": 13,
+          "source": 12,
+          "source_ref": "ir-constraint:c-no-deploy:cl-7",
+          "kind": "IR_CONSTRAINT",
+          "capability": "GIT_DIFF_SCOPE",
+          "span": [
+            0,
+            55
+          ],
+          "quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "3ab567278d3c50c99297700ac67e0ef4dbf1456d34ccf54bc76af56c1f73cd57"
+        },
+        {
+          "route": 14,
+          "source": 13,
+          "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:0",
+          "kind": "WORK_CONSTRAINT",
+          "capability": "GIT_DIFF_SCOPE",
+          "span": [
+            0,
+            40
+          ],
+          "quote_sha256": "38cb91dcb402cae3f16e0bf72630547561055846d0849554a1a20d03297bcebb",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [
+            9
+          ],
+          "component_id": "45e3a589302e592560830606d2f5eb8bb3f4ecfe9038faac3aa1ee8eb5f9cd3e"
+        },
+        {
+          "route": 15,
+          "source": 14,
+          "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:1",
+          "kind": "WORK_CONSTRAINT",
+          "capability": "UNRESOLVED",
+          "span": [
+            0,
+            55
+          ],
+          "quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "17af930b0f4d4bba69570b6a49b16caf74dee23ebd8edd34255d798118a3101b"
+        },
+        {
+          "route": 16,
+          "source": 15,
+          "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:2",
+          "kind": "WORK_CONSTRAINT",
+          "capability": "ARTIFACT_CONTENT",
+          "span": [
+            0,
+            83
+          ],
+          "quote_sha256": "ea56884490413283823337dc11303d843b3624d5bb1ec774a1ee4f5e37ad3172",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [
+            6
+          ],
+          "component_id": "53e6cd0fe914b3c5f6e0a8fefa505b4fc74c791680b74ca34dc1f55793a23567"
+        },
+        {
+          "route": 17,
+          "source": 16,
+          "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:3",
+          "kind": "WORK_CONSTRAINT",
+          "capability": "ARTIFACT_CONTENT",
+          "span": [
+            0,
+            87
+          ],
+          "quote_sha256": "4d4335a1969ad5b0ec78820d28eafbdca98dfffe4dd96d34bf766f525b7fc5e0",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [
+            8
+          ],
+          "component_id": "a4ddf952c134d19c42281b949df770bbb2f35300593caa2297fd5748861afa88"
+        },
+        {
+          "route": 18,
+          "source": 17,
+          "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:4",
+          "kind": "WORK_CONSTRAINT",
+          "capability": "CANDIDATE_SEAL",
+          "span": [
+            0,
+            77
+          ],
+          "quote_sha256": "11bc51eeda5175d8c3ec5718770bf997b5862a18f2e6b5c63fea2c859872e3f8",
+          "linked_fact_ordinals": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "support_ordinals": [
+            10
+          ],
+          "component_id": "78f8e8f2819d0c1ebb6b29692114f189800b0e58809c3b98a4b8459cceb9f082"
+        },
+        {
+          "route": 19,
+          "source": 18,
+          "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:5",
+          "kind": "WORK_CONSTRAINT",
+          "capability": "UNRESOLVED",
+          "span": [
+            0,
+            39
+          ],
+          "quote_sha256": "507aaa42ced1bdcf5e1e0a05994505f857eff2bf398eb867310852abe4bf9dad",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "06b50efc6e9c81ef77cb2ac9d2b0fb1c7e6f2a2ee68c119951ea6c86f1f7b58a"
+        },
+        {
+          "route": 20,
+          "source": 19,
+          "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:6",
+          "kind": "WORK_CONSTRAINT",
+          "capability": "UNRESOLVED",
+          "span": [
+            0,
+            40
+          ],
+          "quote_sha256": "f1dfea41bf13f350665a03240b08f6491c80243927f1a59c7fdb645902357f0b",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "46466d268653516faf65cab0cd3980c2713a686b0e5c0b3c37094deafc5425c8"
+        },
+        {
+          "route": 21,
+          "source": 20,
+          "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:7",
+          "kind": "WORK_CONSTRAINT",
+          "capability": "UNRESOLVED",
+          "span": [
+            0,
+            42
+          ],
+          "quote_sha256": "3510723f91812ab387575ceb090ab3c5cc024019eb97a99fdef6b41f7c5da26f",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "9cc6301185c9bb939029a65179799619745c6b86d3b46c8c4c66b9da6aa6b3bc"
+        },
+        {
+          "route": 22,
+          "source": 21,
+          "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:8",
+          "kind": "WORK_CONSTRAINT",
+          "capability": "UNRESOLVED",
+          "span": [
+            0,
+            49
+          ],
+          "quote_sha256": "0cbbfe1c1da1d5d28b969fae787f2e3f1e45158c5314b0ef98ec213a62b81ae4",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [],
+          "component_id": "7449c15de7f02f96ec18b84c268294a36e695312dd87a92a6255a256e4aa7abd"
+        },
+        {
+          "route": 23,
+          "source": 22,
+          "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:9",
+          "kind": "WORK_CONSTRAINT",
+          "capability": "GIT_DIFF_SCOPE",
+          "span": [
+            0,
+            66
+          ],
+          "quote_sha256": "94810ee600952fea2c7e0bb65483740c01c5926f3cec9992933edb5417b533e5",
+          "linked_fact_ordinals": [],
+          "support_ordinals": [
+            5,
+            12
+          ],
+          "component_id": "74bc12f583f73d32ac8cf4b97352743940e196c857f54b82c7ed9f66871c2864"
+        }
+      ],
+      "conflicting_pairs": [
+        [
+          12,
+          13
+        ]
+      ]
+    }
+  ]
+}

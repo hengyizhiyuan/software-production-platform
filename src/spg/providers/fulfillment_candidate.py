@@ -535,7 +535,7 @@ def _primary_meaning_instructions(owner_preconditions):
          "the original outcome it describes; do not treat a successful provenance lookup as a "
          "Git-method endorsement. Independently interpret the complete original contribution before "
          "selecting its actual consumers. The type projection selects no capability."
-         if owner_preconditions.get("review_input_contract") == _REVIEW_INPUT_CONTRACT else "") +
+         if owner_preconditions.get("review_input_contract") in _SOURCE_TYPED_REVIEW_INPUTS else "") +
         (" A semantic-component mismatch judges the exact submitted consumer, not merely its source "
          "span or u operands. Consult submitted_consumer_comparison: preserving an erroneous capability "
          "while changing r, u or an unrelated sibling does not repair that mismatch. Re-evaluate every "
@@ -971,8 +971,10 @@ def _review_result_identity_slots(inventory, candidate):
 _REVIEW_INPUT_LEGACY_CONTRACT = "existing-lossless-review-input-v1"
 _REVIEW_INPUT_ROUTE_SCOPED_CONTRACT = "existing-route-scoped-review-input-v2"
 _REVIEW_INPUT_INDEPENDENT_CONTRACT = "existing-independent-comparison-input-v3"
-_REVIEW_INPUT_CONTRACT = "existing-source-typed-comparison-input-v4"
-_INDEPENDENT_REVIEW_INPUTS = {_REVIEW_INPUT_INDEPENDENT_CONTRACT, _REVIEW_INPUT_CONTRACT}
+_REVIEW_INPUT_SOURCE_TYPED_CONTRACT = "existing-source-typed-comparison-input-v4"
+_REVIEW_INPUT_CONTRACT = "existing-admission-source-comparison-input-v5"
+_SOURCE_TYPED_REVIEW_INPUTS = {_REVIEW_INPUT_SOURCE_TYPED_CONTRACT, _REVIEW_INPUT_CONTRACT}
+_INDEPENDENT_REVIEW_INPUTS = {_REVIEW_INPUT_INDEPENDENT_CONTRACT, *_SOURCE_TYPED_REVIEW_INPUTS}
 _ROUTE_SCOPED_REVIEW_INPUTS = {_REVIEW_INPUT_ROUTE_SCOPED_CONTRACT, *_INDEPENDENT_REVIEW_INPUTS}
 _REVIEW_INPUT_CONTRACTS = {_REVIEW_INPUT_LEGACY_CONTRACT, *_ROUTE_SCOPED_REVIEW_INPUTS}
 
@@ -1063,7 +1065,7 @@ def _review_input_view(inventory, candidate, capabilities, owner_context):
             "proposer_rationale_is_evidence": False,
             "generation_choice_domains_are_evidence": False,
             "original_inventory_and_owner_preconditions_retained": True}
-        if selected_contract == _REVIEW_INPUT_CONTRACT:
+        if selected_contract in _SOURCE_TYPED_REVIEW_INPUTS:
             payload["exact_response_header"] = {key: payload[key] for key in (
                 "candidate_fingerprint", "components_fingerprint")}
             payload["exact_response_header"]["inventory_fingerprint"] = inventory["inventory_fingerprint"]
@@ -1857,7 +1859,7 @@ class ModelFulfillmentCandidateProvider:
                     "sources have content methods. Never infer required methods from the selected method "
                     "or from the word scope. This is the existing type contract, not a prescribed verdict. "
                     "Copy exact_response_header literal values without adding prefixes or changing characters. "
-                    if (owner_preconditions or {}).get("review_input_contract") == _REVIEW_INPUT_CONTRACT else "") +
+                    if (owner_preconditions or {}).get("review_input_contract") in _SOURCE_TYPED_REVIEW_INPUTS else "") +
                     ("The independent comparison contains original immutable sources and unchanged canonical routing fields. "
                     "The fingerprint excludes proposer rationale; no proposer explanation or planning choice "
                     "list is supplied as evidence. Evaluate original meaning against only actual submitted "
@@ -1878,7 +1880,7 @@ class ModelFulfillmentCandidateProvider:
                     "The Owner proved exact reconstruction. " +
                     ("Original identity operands ARE supplied. No verdict is supplied; the Owner never "
                      "repairs or backfills an identity or predicate in an observed response. "
-                     if (owner_preconditions or {}).get("review_input_contract") == _REVIEW_INPUT_CONTRACT else
+                     if (owner_preconditions or {}).get("review_input_contract") in _SOURCE_TYPED_REVIEW_INPUTS else
                      "No response identity or verdict is supplied or backfilled. ") +
                     "Produce every required source and component result, not a representative sample. "
                     if joined_review else "") + ("Independently validate a derived fulfillment candidate against the immutable admitted "
