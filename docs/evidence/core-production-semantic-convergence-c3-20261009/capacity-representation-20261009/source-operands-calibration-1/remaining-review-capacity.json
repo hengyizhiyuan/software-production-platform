@@ -1,0 +1,78 @@
+{
+  "schema": "c3-review-capacity-and-semantic-boundary-v1",
+  "source": "8c2b3d224e898b3dc8e8220f78f6a6723c158941",
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "candidate_fingerprint": "cac68104396cc5bb5e313a9069508b80e24db028e6ec70414ea902f96bd2827f",
+  "components_fingerprint": "648e1a31a8f8a8924c59d5e306a11080d8bf3e6d604c1cc0973c483b62a546b5",
+  "candidate_routes": 45,
+  "pre_review_deterministic_status": "PASS",
+  "pre_review_binding_states": {
+    "BOUND_PENDING_EVIDENCE": 42,
+    "RETAINED_CONTEXT": 3
+  },
+  "review_provider_failure": {
+    "provider_failure": {
+      "kind": "INCOMPLETE_RESPONSE",
+      "request_sent": true,
+      "usage_unknown": false,
+      "retryable": true,
+      "provider_status": "incomplete",
+      "termination_reason": "max_output_tokens",
+      "request_id": "0f08fb28-7a50-497b-a39b-8bcd53c7c3c0",
+      "occurred_at": "2026-10-10T08:02:11.134055+00:00"
+    },
+    "usage": {
+      "input_tokens": 20758,
+      "output_tokens": 16384,
+      "cached_tokens": 0,
+      "reasoning_tokens": 16384,
+      "total_tokens": 37142,
+      "unknown": false
+    },
+    "transport_retry_count": 0
+  },
+  "review_request_entity": {
+    "bytes": 65745,
+    "sha256": "1b05c163951e06fa7630f6d2af9618dd2cd11e8ba4aeaa7daabbcd063bef1b9d"
+  },
+  "review_output_identity": {
+    "delta_event_count": 0,
+    "streamed_deltas": {
+      "availability": "UNKNOWN"
+    },
+    "terminal_output": {
+      "availability": "UNKNOWN"
+    }
+  },
+  "profile": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "reasoning_effort": "low",
+    "timeout_seconds": 120.0,
+    "max_output_tokens": 16384,
+    "base_url": "https://api.deepseek.com"
+  },
+  "semantic_review_result": "UNKNOWN_NO_REVIEW_OUTPUT",
+  "assurance": "NOT_EXECUTED",
+  "semantic_concerns": [
+    {
+      "route": 21,
+      "source_ref": "ir-constraint:change_scope_exclusions:c7",
+      "capability": "DENY_PREVIEW",
+      "concern": "PROPOSED_PREVIEW_PROHIBITION_IS_NOT_PROVEN_EQUIVALENT_TO_ORIGINAL_FILE_EXCLUSION",
+      "actual_consumer": "denied_execution_capabilities -> preview.inspect",
+      "disposition": "REQUIRES_INDEPENDENT_SEMANTIC_REVIEW; NOT_ADMITTED"
+    },
+    {
+      "route": 41,
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:9",
+      "capability": "DENY_PREVIEW",
+      "concern": "PROPOSED_PREVIEW_PROHIBITION_IS_NOT_PROVEN_EQUIVALENT_TO_ORIGINAL_FILE_EXCLUSION",
+      "actual_consumer": "denied_execution_capabilities -> preview.inspect",
+      "disposition": "REQUIRES_INDEPENDENT_SEMANTIC_REVIEW; NOT_ADMITTED"
+    }
+  ],
+  "runtime_gate_outcome": "STOPPED_UNRESOLVED_NOT_PASS",
+  "future_model_calls": 0,
+  "production_changed": false
+}

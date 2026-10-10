@@ -1,0 +1,8 @@
+{
+  "kind": "qualification-controller-error",
+  "test_container_exit": 2,
+  "actual_image_id": "sha256:622490f337b10512ee060dcac5ba9249d4c768d756aa4a607ff678223a23bfdf",
+  "cause": "alembic_version absent after test process; test outcomes must be examined; not PASS",
+  "model_calls": 0,
+  "log_sha256": "26cb95370b847814a0a28339b34a4594f4e3acaa052a0bc9b416198a0393f961"
+}

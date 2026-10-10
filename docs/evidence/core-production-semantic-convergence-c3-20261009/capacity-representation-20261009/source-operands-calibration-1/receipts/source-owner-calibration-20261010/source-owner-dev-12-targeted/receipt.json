@@ -1,0 +1,29 @@
+{
+  "schema": "c3-predecode-development-regression-v1",
+  "started_at_utc": "2026-10-10T06:41:29.973151+00:00",
+  "ended_at_utc": "2026-10-10T06:41:40.389964+00:00",
+  "wall_seconds": 10.416813171003014,
+  "counts": {
+    "tests": 87,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 87
+  },
+  "exit_code": 0,
+  "snapshot_sha256": "12f400bb9081aad7292198765b3f295c6b0223a6fe7c5879d211dd78b6f57c3e",
+  "actual_image_id": "sha256:619598878ebef02b80635efb0e991fece07038d9ee8e93ad78d2a1e57beb8377",
+  "actual_container_id": "3547d1bb8b2570265260fae773dbfd71057822f17aa0be04bf33532270e3f417",
+  "network": "none",
+  "source_overlay": true,
+  "model_calls": 0,
+  "original_database_access": false,
+  "production_resources_modified": false,
+  "nodes": [
+    "tests/test_c3_owner_repair_preconditions.py",
+    "tests/test_c3_fulfillment_repair_context.py",
+    "tests/test_c3_fulfillment_wire_feedback.py"
+  ],
+  "controller_sha256": "6ba4b15311987a1d9d8b1bdb3c405b36c8f024c7a794bc6822aa59de0bd45b6f",
+  "claim": "CONTROLLED_REGRESSION_NOT_EXACT_NEW_IMAGE_OR_LIVE_MODEL_QUALIFICATION"
+}

@@ -1,0 +1,283 @@
+{
+  "schema": "c3-existing-typed-owner-root-v1",
+  "model_calls": 0,
+  "owner_writes": 0,
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "typed_observations": [
+    {
+      "source": 2,
+      "source_ref": "semantic-fact:55eeaeb7-4b78-5269-ace0-af79de21770e",
+      "primary_component_required": true,
+      "supporting_reference_does_not_cover_source": true,
+      "original_fact_type": {
+        "relation": "CARDINALITY",
+        "reference_role": null
+      },
+      "ineligible_binding_prerequisites": [
+        {
+          "capability": 1,
+          "codes": [
+            "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SOURCE_IDENTITY_RELATION_MISMATCH"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+          ]
+        }
+      ]
+    },
+    {
+      "source": 21,
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:7",
+      "primary_component_required": true,
+      "supporting_reference_does_not_cover_source": true,
+      "necessary_source_proofs": [
+        {
+          "capability": 1,
+          "minimal_support_sets": [
+            [
+              7,
+              13
+            ],
+            [
+              10,
+              13
+            ]
+          ]
+        },
+        {
+          "capability": 3,
+          "minimal_support_sets": [
+            [
+              7,
+              13
+            ],
+            [
+              10,
+              13
+            ]
+          ]
+        },
+        {
+          "capability": 4,
+          "minimal_support_sets": [
+            [
+              7,
+              13
+            ],
+            [
+              10,
+              13
+            ]
+          ]
+        },
+        {
+          "capability": 5,
+          "minimal_support_sets": [
+            [
+              7,
+              13
+            ],
+            [
+              10,
+              13
+            ]
+          ]
+        }
+      ],
+      "ineligible_binding_prerequisites": [
+        {
+          "capability": 0,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ]
+    },
+    {
+      "source": 22,
+      "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:8",
+      "primary_component_required": true,
+      "supporting_reference_does_not_cover_source": true,
+      "necessary_source_proofs": [
+        {
+          "capability": 1,
+          "minimal_support_sets": [
+            [
+              7,
+              13
+            ],
+            [
+              10,
+              13
+            ]
+          ]
+        },
+        {
+          "capability": 3,
+          "minimal_support_sets": [
+            [
+              7,
+              13
+            ],
+            [
+              10,
+              13
+            ]
+          ]
+        },
+        {
+          "capability": 4,
+          "minimal_support_sets": [
+            [
+              7,
+              13
+            ],
+            [
+              10,
+              13
+            ]
+          ]
+        },
+        {
+          "capability": 5,
+          "minimal_support_sets": [
+            [
+              7,
+              13
+            ],
+            [
+              10,
+              13
+            ]
+          ]
+        }
+      ],
+      "ineligible_binding_prerequisites": [
+        {
+          "capability": 0,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ]
+    }
+  ],
+  "historical_replays": [
+    {
+      "folder": "source-proof-live-4",
+      "terminal_reason": "OBLIGATION_DIFF_SCOPE_INCOMPLETE",
+      "receipt_bytes_sha256": "e9693a162d6353db1c351c8370f59e3dccf9333f35128ed663928656b921df8f",
+      "unchanged_receipts": true,
+      "new_calls": 0
+    },
+    {
+      "folder": "source-operands-live-1",
+      "terminal_reason": "OBLIGATION_FORMATION_WIRE_JSON_INVALID",
+      "receipt_bytes_sha256": "f6d08f43596707407980cfb8848e0c46a1ea318203b40bdf456543740c800435",
+      "unchanged_receipts": true,
+      "new_calls": 0
+    },
+    {
+      "folder": "source-operands2-live-1",
+      "terminal_reason": "OBLIGATION_FORMATION_TRANSPORT_ModelProviderError",
+      "receipt_bytes_sha256": "c9801e667dfc416873556d6d7f7f0e72dc5158ced4a97de42c3de39ccbb867f5",
+      "unchanged_receipts": true,
+      "new_calls": 0
+    },
+    {
+      "folder": "source-review-fixed-live-1",
+      "terminal_reason": "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH",
+      "receipt_bytes_sha256": "ac96d661a9dfc18c312b2d4bf26a97fea0da7c10651e7784815ee7cc4cb54d1e",
+      "unchanged_receipts": true,
+      "new_calls": 0
+    }
+  ],
+  "counterfactual_admission": "NOT_PERFORMED"
+}

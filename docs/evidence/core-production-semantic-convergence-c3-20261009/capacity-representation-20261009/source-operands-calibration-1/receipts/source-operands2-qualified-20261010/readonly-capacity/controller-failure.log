@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/control.py", line 26, in <module>
+    'request_identity_verified':True,'request_entity':identity,'request_id':call['request_id'],
+                                                                            ~~~~^^^^^^^^^^^^^^
+KeyError: 'request_id'

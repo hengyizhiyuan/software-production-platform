@@ -1,0 +1,147 @@
+{
+  "schema": "c3-existing-owner-operands-root-cause-v1",
+  "attempt": 2,
+  "request_receipt_id": "574eddf8-dabf-48ff-ac53-36e717770dca",
+  "response_receipt_id": "ac101293-0c39-4ebf-94c8-e138dfa00ac8",
+  "wire_output_fingerprint": "ab21ad94ac987006da38d9e9440b86a7d38a8266a89e9083c4f0ae01a4d120a0",
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "model_calls": 0,
+  "owner_writes": 0,
+  "historical_candidate_modified": false,
+  "observations": [
+    {
+      "route": 4,
+      "source": 4,
+      "capability": "GIT_DIFF_SCOPE",
+      "observed_target_paths": [],
+      "required_target_paths": [
+        "index.html"
+      ],
+      "observed_support_ordinals": [
+        13
+      ],
+      "necessary_source_proof_alternatives": [
+        [
+          13
+        ]
+      ],
+      "quote_sha256": "f1901b6c4ff6a5096108c39077aea5d20c1d49758d10b1717c4feb54440aab12",
+      "predicate": "OBLIGATION_DIFF_SCOPE_INCOMPLETE"
+    },
+    {
+      "route": 29,
+      "source": 21,
+      "capability": "DENY_DEPLOY",
+      "observed_target_paths": [],
+      "required_target_paths": null,
+      "observed_support_ordinals": [
+        13
+      ],
+      "necessary_source_proof_alternatives": [
+        [
+          7,
+          13
+        ],
+        [
+          10,
+          13
+        ]
+      ],
+      "quote_sha256": "8942f115f1bc6bf65051d307ede98fb645a4837849ed2259d1d3a9fc71a01727",
+      "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+    },
+    {
+      "route": 30,
+      "source": 22,
+      "capability": "DENY_PUBLISH",
+      "observed_target_paths": [],
+      "required_target_paths": null,
+      "observed_support_ordinals": [
+        13
+      ],
+      "necessary_source_proof_alternatives": [
+        [
+          7,
+          13
+        ],
+        [
+          10,
+          13
+        ]
+      ],
+      "quote_sha256": "6208a9265a8563fbb4f6c90881e8d28bd17e6e7b35eb119d05e019163428e3cc",
+      "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+    },
+    {
+      "route": 31,
+      "source": 23,
+      "capability": "GIT_DIFF_SCOPE",
+      "observed_target_paths": [],
+      "required_target_paths": [
+        "index.html"
+      ],
+      "observed_support_ordinals": [
+        7,
+        13
+      ],
+      "necessary_source_proof_alternatives": [
+        [
+          7,
+          13
+        ],
+        [
+          10,
+          13
+        ]
+      ],
+      "quote_sha256": "78ed9b5b222638c5c378aa2d4c06f663d97316d1ba9c2724329e09c976d26097",
+      "predicate": "OBLIGATION_DIFF_SCOPE_INCOMPLETE"
+    },
+    {
+      "route": 32,
+      "source": 24,
+      "capability": "GIT_DIFF_SCOPE",
+      "observed_target_paths": [],
+      "required_target_paths": [
+        "index.html"
+      ],
+      "observed_support_ordinals": [
+        7,
+        13
+      ],
+      "necessary_source_proof_alternatives": [
+        [
+          7,
+          13
+        ],
+        [
+          10,
+          13
+        ]
+      ],
+      "quote_sha256": "b5dfdb26dce5c39506573786ad37eb296c58e68f2e632899b29461b9affd6d83",
+      "predicate": "OBLIGATION_DIFF_SCOPE_INCOMPLETE"
+    }
+  ],
+  "historical_replay": {
+    "terminal_reason": "OBLIGATION_DIFF_SCOPE_INCOMPLETE",
+    "unchanged_receipts": true,
+    "new_calls": 0
+  },
+  "counterfactual": {
+    "structural_predicate_result": "OBLIGATION_FACT_GATE_CORRESPONDENCE_UNPROVEN",
+    "feedback": {
+      "schema": "fulfillment-validation-feedback-v2",
+      "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+      "primary_error": "OBLIGATION_FACT_GATE_CORRESPONDENCE_UNPROVEN",
+      "violations": [],
+      "additional_violation_count": 0,
+      "not_evaluable": [
+        "INDEPENDENT_SEMANTIC_REVIEW",
+        "ACTUAL_OWNER_EVIDENCE",
+        "ASSURANCE"
+      ]
+    },
+    "admission": "NOT_PERFORMED"
+  }
+}

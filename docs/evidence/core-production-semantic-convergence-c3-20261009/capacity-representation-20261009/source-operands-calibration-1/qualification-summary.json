@@ -1,0 +1,74 @@
+{
+  "schema": "c3-source-operands-qualification-v1",
+  "recorded_at_utc": "2026-10-10T08:10:55.786010+00:00",
+  "source": {
+    "revision": "8c2b3d224e898b3dc8e8220f78f6a6723c158941",
+    "tree": "bd24f1b4a459b528737732edce04b7baff7c2152"
+  },
+  "image": "sha256:97a8db7f77c2898a65bdc975bb0f49f0f3350fe3e20c6e3650f4aeb3e54c01fa",
+  "owners": {
+    "watt": {
+      "revision": "8c2b3d224e898b3dc8e8220f78f6a6723c158941",
+      "tree": "bd24f1b4a459b528737732edce04b7baff7c2152"
+    },
+    "guardian": {
+      "revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+      "tree": "6066a6d6b8d91bec610021409ab320309ed0e437"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "unit_counts": {
+    "tests": 378,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 378
+  },
+  "pg_guardian_counts": {
+    "tests": 45,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 45
+  },
+  "migration_head": "20261007_72",
+  "live_result": "STOPPED",
+  "terminal_reason": "OBLIGATION_FORMATION_TRANSPORT_ModelProviderError",
+  "logical_calls": 3,
+  "usage": {
+    "input_tokens": 85146,
+    "output_tokens": 22217,
+    "cached_tokens": 38656,
+    "reasoning_tokens": 16384,
+    "total_tokens": 107363
+  },
+  "formation": 2,
+  "feedback": 1,
+  "binding_states": {
+    "UNRESOLVED": 26
+  },
+  "qualification_boundary": "Isolated real-model fulfillment formation and independent semantic review; no Work/Candidate/Assurance production",
+  "c3_closed": false,
+  "new_work_created": false,
+  "production_modified": false,
+  "historical_owner_mutated": false,
+  "holdout": "SEALED_NOT_OPENED",
+  "review_schema_git_blob": "f04ff02ede1da94a1a3df2663f199bf42730a643",
+  "review_schema_unchanged_from_b33": true,
+  "pre_review_candidate_fingerprint": "cac68104396cc5bb5e313a9069508b80e24db028e6ec70414ea902f96bd2827f",
+  "pre_review_deterministic_status": "PASS",
+  "pre_review_binding_states": {
+    "BOUND_PENDING_EVIDENCE": 42,
+    "RETAINED_CONTEXT": 3
+  },
+  "independent_review_status": "UNKNOWN_NO_REVIEW_OUTPUT",
+  "remaining_blocker": "SEMANTIC_REVIEW_REASONING_CAPACITY_AND_UNCONFIRMED_GATE_CORRESPONDENCE",
+  "ecf_unsupported_source_role": "NEGATIVE_TEST_FIXTURE_ONLY_NOT_RUNTIME_OWNER"
+}

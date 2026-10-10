@@ -1,0 +1,57 @@
+{
+  "schema": "c3-independent-review-capacity-readonly-v1",
+  "model_calls": 0,
+  "owner_writes": 0,
+  "candidate_modified": false,
+  "request_identity_verified": true,
+  "request_entity": {
+    "bytes": 104657,
+    "sha256": "c5bba97c69e69ed1268942a9bd4e21a713d591ef68ac37cbb77979383878334f"
+  },
+  "request_id": "73ae1bef-9874-447f-a4d7-ee09e3283576",
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "candidate_fingerprint": "d8ce5f14633c0d50bbe8cc89ac97bdcfb0b967b10c20da4fc47ca896bd54319f",
+  "components_fingerprint": "304f8e42f9900bf49995f36b0f0a79b92c8b935ce7388440fbabaa21c00d1926",
+  "sources": 26,
+  "routes": 75,
+  "instructions_utf8_bytes": 1651,
+  "input_text_utf8_bytes": 95061,
+  "schema_utf8_bytes": 1523,
+  "standalone_compact_input_section_bytes": {
+    "immutable_inventory": 35835,
+    "untrusted_fulfillment_candidate": 44104,
+    "component_index_table": 8655,
+    "existing_capability_contracts": 2465,
+    "candidate_fingerprint": 66,
+    "components_fingerprint": 66
+  },
+  "section_bytes_not_additive_to_encoded_http_entity": true,
+  "actual_provider_usage": {
+    "input_tokens": 33148,
+    "output_tokens": 16384,
+    "cached_tokens": 0,
+    "reasoning_tokens": 16384,
+    "total_tokens": 49532,
+    "unknown": false
+  },
+  "provider_failure": {
+    "kind": "INCOMPLETE_RESPONSE",
+    "request_sent": true,
+    "usage_unknown": false,
+    "retryable": true,
+    "provider_status": "incomplete",
+    "termination_reason": "max_output_tokens",
+    "request_id": "73ae1bef-9874-447f-a4d7-ee09e3283576",
+    "occurred_at": "2026-10-10T06:59:51.875353+00:00"
+  },
+  "actual_delta_count": 0,
+  "terminal_output_availability": "UNKNOWN",
+  "full_review_results": "NOT_GENERATED",
+  "json_output_overflow_cause": "NOT_SUPPORTED; no visible output",
+  "reasoning_process_or_hidden_tokens_content": "NOT_RECORDED",
+  "root_cause": "Provider low reasoning consumed entire existing output budget before an independent review result",
+  "reasoning_complexity_explanation": "UNKNOWN",
+  "would_input_deduplication_converge": "UNKNOWN",
+  "automatic_retry": "NOT_AUTHORIZED_BY_FAILURE_CONTRACT; nonconverged budget stop",
+  "semantic_criteria_changed": false
+}

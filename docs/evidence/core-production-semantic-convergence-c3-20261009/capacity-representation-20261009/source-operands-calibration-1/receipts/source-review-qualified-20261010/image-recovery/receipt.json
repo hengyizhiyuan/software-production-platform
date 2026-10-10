@@ -1,0 +1,14 @@
+{
+  "schema": "c3-exact-image-recovery-v1",
+  "image_id": "sha256:622490f337b10512ee060dcac5ba9249d4c768d756aa4a607ff678223a23bfdf",
+  "watt_source": "2f7be3bdd6cf7f485ce13414a09ec682d0e55dd6",
+  "archive_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/source-review-qualified-20261010/image-recovery/exact-image.tar.gz",
+  "archive_sha256": "da7af4c4f73178f8aa27750dc5ffedf1ffb0e179696c394c61560552a5765b81",
+  "archive_bytes": 336653777,
+  "started_at_utc": "2026-10-10T07:12:44.512305+00:00",
+  "finished_at_utc": "2026-10-10T07:13:16.542460+00:00",
+  "wall_seconds": 32.03017095802352,
+  "restore_load": "NOT_PERFORMED",
+  "offsite_backup": "NOT_PERFORMED",
+  "controller_sha256": "4516ba7e3cd17af5229be6ee156da3be30af158d2747000e363c48a6e5b0d84b"
+}

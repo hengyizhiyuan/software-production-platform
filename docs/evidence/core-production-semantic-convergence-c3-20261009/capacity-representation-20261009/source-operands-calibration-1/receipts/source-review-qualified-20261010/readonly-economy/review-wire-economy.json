@@ -1,0 +1,47 @@
+{
+  "schema": "c3-independent-review-wire-economy-v1",
+  "model_calls": 0,
+  "candidate_modified": false,
+  "owner_writes": 0,
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "candidate_fingerprint": "d8ce5f14633c0d50bbe8cc89ac97bdcfb0b967b10c20da4fc47ca896bd54319f",
+  "components_fingerprint": "304f8e42f9900bf49995f36b0f0a79b92c8b935ce7388440fbabaa21c00d1926",
+  "sources": 26,
+  "routes": 75,
+  "exact_roundtrip": true,
+  "wire_version": "fulfillment-compact-v1",
+  "original_request_entity": {
+    "bytes": 104657,
+    "sha256": "c5bba97c69e69ed1268942a9bd4e21a713d591ef68ac37cbb77979383878334f"
+  },
+  "counterfactual_request_entity": {
+    "bytes": 76150,
+    "sha256": "1819dcb5d2cc0e8172db317dbeb23c31be53de43b6e82d960c9ec443efbf2a9c"
+  },
+  "original_standalone_section_bytes": {
+    "immutable_inventory": 35835,
+    "untrusted_fulfillment_candidate": 44104,
+    "component_index_table": 8655,
+    "existing_capability_contracts": 2465,
+    "candidate_fingerprint": 66,
+    "components_fingerprint": 66
+  },
+  "compact_standalone_section_bytes": {
+    "immutable_inventory": 35835,
+    "untrusted_fulfillment_candidate": 15815,
+    "candidate_representation": 24,
+    "component_index_table": 8655,
+    "existing_capability_contracts": 2465,
+    "candidate_fingerprint": 66,
+    "components_fingerprint": 66
+  },
+  "schema_utf8_bytes": 1523,
+  "output_schema_unchanged": true,
+  "current_input_text_utf8_bytes": 66605,
+  "original_input_text_utf8_bytes": 95061,
+  "actual_compact_provider_usage": "UNKNOWN; read-only comparison, not a model call",
+  "reasoning_profile": "low",
+  "max_output_tokens": 16384,
+  "convergence": "UNPROVEN_BY_BYTE_REDUCTION",
+  "not_actual_provider_or_qualification_request": true
+}

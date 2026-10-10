@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="2.694" timestamp="2026-10-10T07:12:31.929469+00:00" hostname="cd660208432b"><testcase classname="" name="tests.integration.test_c3_fulfillment_receipts" file="tests/integration/test_c3_fulfillment_receipts.py" time="0.000"><error message="collection failure">/opt/c3-test-deps/_pytest/python.py:508: in importtestmodule
+    mod = import_path(
+/opt/c3-test-deps/_pytest/pathlib.py:596: in import_path
+    importlib.import_module(module_name)
+/usr/local/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1404: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1369: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1340: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+/opt/c3-test-deps/_pytest/assertion/rewrite.py:179: in exec_module
+    source_stat, co = _rewrite_test(fn, self.config)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/c3-test-deps/_pytest/assertion/rewrite.py:348: in _rewrite_test
+    tree = ast.parse(source, filename=strfn)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.13/ast.py:50: in parse
+    return compile(source, filename, mode, flags,
+E     File "/qualification/tests/integration/test_c3_fulfillment_receipts.py", line 210
+E       import json
+E   IndentationError: unexpected indent</error></testcase></testsuite></testsuites>

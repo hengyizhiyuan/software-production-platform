@@ -1,0 +1,306 @@
+{
+  "schema": "c3-source-owner-cost-v1",
+  "recorded_at_utc": "2026-10-10T08:10:55.786010+00:00",
+  "model_validations": [
+    {
+      "path": "source-operands-live-1",
+      "source": "7b1b9ba6d2351c5aaa8fc51acd9b796e246c9096",
+      "result": "STOPPED",
+      "terminal_reason": "OBLIGATION_FORMATION_WIRE_JSON_INVALID",
+      "formation": 2,
+      "feedback": 1,
+      "logical_calls": 2,
+      "usage": {
+        "input_tokens": 58178,
+        "output_tokens": 7091,
+        "cached_tokens": 33664,
+        "reasoning_tokens": 0,
+        "total_tokens": 65269
+      },
+      "wall_seconds": 22.325725903967395,
+      "http_transmissions": 2
+    },
+    {
+      "path": "source-operands2-live-1",
+      "source": "b33e4e1eebfc2ac82523227506da7d66aff2b9f3",
+      "result": "STOPPED",
+      "terminal_reason": "OBLIGATION_FORMATION_TRANSPORT_ModelProviderError",
+      "formation": 1,
+      "feedback": 0,
+      "logical_calls": 2,
+      "usage": {
+        "input_tokens": 55582,
+        "output_tokens": 21466,
+        "cached_tokens": 0,
+        "reasoning_tokens": 16384,
+        "total_tokens": 77048
+      },
+      "wall_seconds": 86.62162307498511,
+      "http_transmissions": 2
+    },
+    {
+      "path": "source-review-fixed-live-1",
+      "source": "68d0c8bed328f289deed0e707d680162010a7278",
+      "result": "STOPPED",
+      "terminal_reason": "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH",
+      "formation": 2,
+      "feedback": 1,
+      "logical_calls": 2,
+      "usage": {
+        "input_tokens": 57807,
+        "output_tokens": 8346,
+        "cached_tokens": 41472,
+        "reasoning_tokens": 0,
+        "total_tokens": 66153
+      },
+      "wall_seconds": 24.719808624999132,
+      "http_transmissions": 2
+    },
+    {
+      "path": "source-typed-live-1",
+      "source": "57825066da24d7f027bc19ee887c98808e40a5f1",
+      "result": "STOPPED",
+      "terminal_reason": "OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY",
+      "formation": 2,
+      "feedback": 1,
+      "logical_calls": 2,
+      "usage": {
+        "input_tokens": 66103,
+        "output_tokens": 6179,
+        "cached_tokens": 37760,
+        "reasoning_tokens": 0,
+        "total_tokens": 72282
+      },
+      "wall_seconds": 21.09479648398701,
+      "http_transmissions": 2
+    },
+    {
+      "path": "source-consumption-live-1",
+      "source": "68457b4847895a1aa7eef6d85d8d40b311404d62",
+      "result": "STOPPED",
+      "terminal_reason": "OBLIGATION_NEGATED_SCOPE_EVIDENCE_OWNER_MISMATCH",
+      "formation": 2,
+      "feedback": 1,
+      "logical_calls": 2,
+      "usage": {
+        "input_tokens": 65438,
+        "output_tokens": 5819,
+        "cached_tokens": 23552,
+        "reasoning_tokens": 0,
+        "total_tokens": 71257
+      },
+      "wall_seconds": 18.963559124036692,
+      "http_transmissions": 2
+    },
+    {
+      "path": "source-ownerprobe-live-1",
+      "source": "8c2b3d224e898b3dc8e8220f78f6a6723c158941",
+      "result": "STOPPED",
+      "terminal_reason": "OBLIGATION_FORMATION_TRANSPORT_ModelProviderError",
+      "formation": 2,
+      "feedback": 1,
+      "logical_calls": 3,
+      "usage": {
+        "input_tokens": 85146,
+        "output_tokens": 22217,
+        "cached_tokens": 38656,
+        "reasoning_tokens": 16384,
+        "total_tokens": 107363
+      },
+      "wall_seconds": 91.52692148997448,
+      "http_transmissions": 3
+    }
+  ],
+  "budget_policy_changed": false,
+  "monetary_cost": "UNKNOWN",
+  "complete_program_cost": "UNKNOWN",
+  "builds": [
+    {
+      "source": "7b1b9ba6d2351c5aaa8fc51acd9b796e246c9096",
+      "image": "sha256:5bccfe765b66b9fc5330c7e3c2622497c751455786ca253c54c325159c8239ec",
+      "wall_seconds": 19.237965282052755
+    },
+    {
+      "source": "b33e4e1eebfc2ac82523227506da7d66aff2b9f3",
+      "image": "sha256:4be336357e37294569070d58073dd9567d1cacffdc4c14bf89cf0f11c40a0b13",
+      "wall_seconds": 19.759184919006657
+    },
+    {
+      "source": "2f7be3bdd6cf7f485ce13414a09ec682d0e55dd6",
+      "image": "sha256:622490f337b10512ee060dcac5ba9249d4c768d756aa4a607ff678223a23bfdf",
+      "wall_seconds": 17.412111063022166
+    },
+    {
+      "source": "68d0c8bed328f289deed0e707d680162010a7278",
+      "image": "sha256:7f61aeb9c918364f2eda52ab5fec4d98705df137f8ce03b57e5889a40515df39",
+      "wall_seconds": 17.20180390297901
+    },
+    {
+      "source": "57825066da24d7f027bc19ee887c98808e40a5f1",
+      "image": "sha256:db844995bf5ca9c1d0db95260a0da21aedaf3ca1d49c13bdb7ab8f8c641f6753",
+      "wall_seconds": 17.222555376996752
+    },
+    {
+      "source": "68457b4847895a1aa7eef6d85d8d40b311404d62",
+      "image": "sha256:d5031990ca500b481b19a10b31b8ab3a4261da55368d3a3b68526a46bf6cb0f2",
+      "wall_seconds": 17.869548525020946
+    },
+    {
+      "source": "8c2b3d224e898b3dc8e8220f78f6a6723c158941",
+      "image": "sha256:97a8db7f77c2898a65bdc975bb0f49f0f3350fe3e20c6e3650f4aeb3e54c01fa",
+      "wall_seconds": 20.456849650014192
+    }
+  ],
+  "tests": [
+    {
+      "receipt": "source-operands-qualified-20261010/final-image/evidence/watt-continuation-receipt.json",
+      "counts": {
+        "tests": 356,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 356
+      },
+      "wall_seconds": 13.596500716987066
+    },
+    {
+      "receipt": "source-operands-qualified-20261010/owner-pg-final/evidence/receipt.json",
+      "counts": {
+        "tests": 45,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 45
+      },
+      "wall_seconds": 187.0369515370112
+    },
+    {
+      "receipt": "source-operands2-qualified-20261010/final-image/evidence/watt-continuation-receipt.json",
+      "counts": {
+        "tests": 356,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 356
+      },
+      "wall_seconds": 16.044957636971958
+    },
+    {
+      "receipt": "source-operands2-qualified-20261010/owner-pg-final/evidence/receipt.json",
+      "counts": {
+        "tests": 45,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 45
+      },
+      "wall_seconds": 194.38499971001875
+    },
+    {
+      "receipt": "source-review-qualified-20261010/final-image/evidence/watt-continuation-receipt.json",
+      "counts": {
+        "tests": 364,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 364
+      },
+      "wall_seconds": 14.418528074980713
+    },
+    {
+      "receipt": "source-review-fixed-qualified-20261010/final-image/evidence/watt-continuation-receipt.json",
+      "counts": {
+        "tests": 364,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 364
+      },
+      "wall_seconds": 13.917348580958787
+    },
+    {
+      "receipt": "source-review-fixed-qualified-20261010/owner-pg-final/evidence/receipt.json",
+      "counts": {
+        "tests": 45,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 45
+      },
+      "wall_seconds": 189.5945798259927
+    },
+    {
+      "receipt": "source-typed-qualified-20261010/final-image/evidence/watt-continuation-receipt.json",
+      "counts": {
+        "tests": 371,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 371
+      },
+      "wall_seconds": 14.936887115007266
+    },
+    {
+      "receipt": "source-typed-qualified-20261010/owner-pg-final/evidence/receipt.json",
+      "counts": {
+        "tests": 45,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 45
+      },
+      "wall_seconds": 238.42664590198547
+    },
+    {
+      "receipt": "source-consumption-qualified-20261010/final-image/evidence/watt-continuation-receipt.json",
+      "counts": {
+        "tests": 375,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 375
+      },
+      "wall_seconds": 14.615974040993024
+    },
+    {
+      "receipt": "source-consumption-qualified-20261010/owner-pg-final/evidence/receipt.json",
+      "counts": {
+        "tests": 45,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 45
+      },
+      "wall_seconds": 188.9526846029912
+    },
+    {
+      "receipt": "source-ownerprobe-qualified-20261010/final-image/evidence/watt-continuation-receipt.json",
+      "counts": {
+        "tests": 378,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 378
+      },
+      "wall_seconds": 19.32150650100084
+    },
+    {
+      "receipt": "source-ownerprobe-qualified-20261010/owner-pg-final/evidence/receipt.json",
+      "counts": {
+        "tests": 45,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 45
+      },
+      "wall_seconds": 193.13920607295586
+    }
+  ],
+  "actual_provider_usage_sum": {
+    "input_tokens": 388254,
+    "output_tokens": 71118,
+    "cached_tokens": 175104,
+    "reasoning_tokens": 32768,
+    "total_tokens": 459372
+  }
+}
