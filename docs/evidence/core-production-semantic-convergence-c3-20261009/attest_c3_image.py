@@ -27,7 +27,7 @@ import sys
 BASE_IMAGE_ID = "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14"
 # Exact current lock includes the independently frozen test-only JSON Schema
 # validator. Dockerfile separately verifies the unchanged dependency-base lock.
-LOCK_SHA256 = "ac853305a52d1daf56df2ca020e984476fb4e58a83cac205e24f0892cd59b8a9"
+LOCK_SHA256 = "ee2c5e90cbda6c67338b9928e437275d80c32f6749f7581305f5be97f6e7f509"
 ARTIFACT_PREFIX = "watt/docs/evidence/core-production-semantic-convergence-c3-20261009/"
 PREFIX_TARGETS = {
     "watt/src/": (Path("/app/src"),),
