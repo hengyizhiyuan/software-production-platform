@@ -1,0 +1,21 @@
+{
+  "append_only_final_receipts": true,
+  "original_partial_snapshot_retained": true,
+  "files": [
+    {
+      "file": "receipt.json",
+      "sha256": "3b2dca11bfcc4fba44fa00ff64970e39873f08e494030ad6d693e61ff750fce7",
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-99/evidence/receipt.json"
+    },
+    {
+      "file": "result.xml",
+      "sha256": "e3734f423e181a958946f87cbeeb483306c3aa25b1683d5d44b20ac3dac7553d",
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-99/evidence/result.xml"
+    },
+    {
+      "file": "result.log",
+      "sha256": "596c6eeddefdb2caa1f179dd857997b2141c8f3d1d8f53cb7fe6ac1244e8e375",
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-99/evidence/result.log"
+    }
+  ]
+}

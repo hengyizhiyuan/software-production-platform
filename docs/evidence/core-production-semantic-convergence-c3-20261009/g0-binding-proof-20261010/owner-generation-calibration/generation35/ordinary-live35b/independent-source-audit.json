@@ -1,0 +1,30 @@
+{
+  "schema": "ordinary-g0-source-and-review-readonly-audit-v1",
+  "reviewer": "existing independent c3_holdout_reviewer (Holdout not read)",
+  "source": "90c369725fe9721b8e7702b71b95c46282de81b2",
+  "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+  "candidate_fingerprint": "0e81db9bb101275b9f3f27325052d5652802425ec8c4ee529f4a0708d1fd8079",
+  "components_fingerprint": "bb02cd2fdda1357f13ceb91c265573f9c10cbf6f9e56cbdb049445353cfa2407",
+  "source_result_count": 19,
+  "component_result_count": 27,
+  "final_source_coverage": "All19 original sources exactly covered, including negation, punctuation and exclusion envelopes",
+  "final_source_provenance": "Source14 Seal u=[5]; original Owner provenance domain and corresponding independent Review retained; f dependencies separate",
+  "source6_and12_diff": "Both original primary requirements name the implementation file. Diff is complementary to retained content proof; strict allowlist authority is existing Fact2, not a new permission",
+  "first_review_limitation": {
+    "sources": [
+      15,
+      16
+    ],
+    "capability": "GIT_DIFF_SCOPE",
+    "observation": "First Review incorrectly marked these extra methods true although primary effect exclusions have no file-range contribution",
+    "actual_admission": false,
+    "reason": "First full plan refused other34 component failures; both extra routes absent in final second plan"
+  },
+  "final_review_independence": "Exact Candidate/components identity, complete19 source and27(component,capability) results; independently persisted pending/observed/validated receipts",
+  "feedback_lineage": "Original feedback bytes and parent receipt matched second pending request",
+  "actual_owner_evidence": "PENDING",
+  "actual_work_or_guardian_pass": false,
+  "holdout_used": false,
+  "model_requests_by_auditor": 0,
+  "historical_mutations": 0
+}

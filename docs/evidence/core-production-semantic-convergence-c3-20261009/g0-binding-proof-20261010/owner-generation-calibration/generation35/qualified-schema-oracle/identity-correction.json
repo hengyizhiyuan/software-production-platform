@@ -1,0 +1,40 @@
+{
+  "corrects_sha256": "d8b12a71d09813f568d25074822216a5873b927b605f60601a8dd4ad561a6d77",
+  "correction": "Distinguish canonical reserialized JSON fingerprint from exact original Wire bytes; no validation result or original Candidate changed",
+  "corrected_result": {
+    "actual_source": "90c369725fe9721b8e7702b71b95c46282de81b2",
+    "actual_image": "sha256:78977b4ba12260857b03f67f2a9912447ba9f75295b44fa6ba8d16c16102db95",
+    "private_input_sha256": "c0523a28e3fb992ed4ae88409b7d7bd8246f78117de3d4af54d67c7a9a3b06ee",
+    "validator_version": "4.26.0",
+    "request_schema_valid": true,
+    "controlled_full19_plan_valid": true,
+    "original34_candidates_rejected_by_new_request_schema": [
+      {
+        "reject": true,
+        "predicate_paths": [
+          [
+            "routes",
+            20
+          ]
+        ],
+        "evidence_boundary": "COUNTERFACTUAL_HEADER_REBOUND_OPERANDS_ONLY",
+        "original_canonical_json_sha256": "0e368be1cf76f8344726162c444813d714d4aa472ef38582d777ecb4b97338aa",
+        "original_wire_sha256": "0af1c36bcab5b3d065dab20a2d044e700cf64795f2f0f499aaf3fff3ca10853b"
+      },
+      {
+        "reject": true,
+        "predicate_paths": [
+          [
+            "routes",
+            20
+          ]
+        ],
+        "evidence_boundary": "COUNTERFACTUAL_HEADER_REBOUND_OPERANDS_ONLY",
+        "original_canonical_json_sha256": "dc4cb60bcec02b9d45a878456810acb1037f34b36cc0bb4568b555a10c917f96",
+        "original_wire_sha256": "1ce8e1ba826b604bbd930453b36b4d6a004c51b3da7f9f9591eb2565cb8f33b8"
+      }
+    ],
+    "model_calls": 0,
+    "not_a_model_success": true
+  }
+}

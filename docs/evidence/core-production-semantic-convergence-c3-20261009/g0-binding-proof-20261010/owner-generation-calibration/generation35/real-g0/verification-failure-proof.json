@@ -1,0 +1,109 @@
+{
+  "schema": "c3-real-g0-verification-failure-v1",
+  "work_id": "d663febd-254e-5c14-a144-0eaadb4d9d0b",
+  "source_revision": "90c369725fe9721b8e7702b71b95c46282de81b2",
+  "image_id": "sha256:78977b4ba12260857b03f67f2a9912447ba9f75295b44fa6ba8d16c16102db95",
+  "owner_export_sha256": "2fcc21556ff2ba5dc0043562697e87c3a1b4997d6c1b241fc7fc8f0f7bb97418",
+  "owner_export_receipt": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation35-qualification-20261010/evidence/owner-export-20261010T185726-8c8796d846a64c0988692d90652b96da.json",
+  "candidate_git_revision": "c70484a0b8fd808c7f287152c79efce478ccaa54",
+  "candidate_tree": "e639dee91f21b203d112e60ff46d39cb35912cff",
+  "blob_sha256": "b4933bfbd26fb41f7efe9a5117ab57a1743d8c5141b843c264926324cc7928a2",
+  "readonly_independent_observation": {
+    "h1_starttags": 1,
+    "p_starttags": 1,
+    "qualification_claim": false,
+    "historical_result_unchanged": true
+  },
+  "fact_checks": [
+    {
+      "fact_id": "d8489958-60c6-5498-b9b8-772da5f677b8",
+      "subject": "index.html.heading_count",
+      "scope": null,
+      "passed": false,
+      "reason": "UNVERIFIABLE_FACT_PLAN",
+      "disposition": "UNVERIFIABLE_CURRENT",
+      "materialization": {
+        "method": null,
+        "repair_attempts": 0,
+        "relation": "CARDINALITY",
+        "scope": null,
+        "work_reality_revision_id": "011483f7-de9d-5275-98ff-ab4c66c163aa",
+        "candidate_revision": "c70484a0b8fd808c7f287152c79efce478ccaa54",
+        "provenance_digest": "6d466bf68dc14c61e9836bb0f4e1fbe00f5ac35d58106d860329a3262c642d5a",
+        "source_record_ids": [
+          "bf7f962c-765e-45cf-aaec-34d884843f78"
+        ]
+      }
+    },
+    {
+      "fact_id": "b1345c20-f2be-51d5-8ca4-43a952f66b30",
+      "subject": "index.html.heading_text",
+      "scope": "index.html",
+      "passed": true,
+      "reason": "EXACT_H1",
+      "disposition": "VERIFIED_CURRENT",
+      "materialization": {
+        "method": "EXACT_H1",
+        "repair_attempts": 1,
+        "relation": "EQUALITY",
+        "scope": null,
+        "work_reality_revision_id": "011483f7-de9d-5275-98ff-ab4c66c163aa",
+        "candidate_revision": "c70484a0b8fd808c7f287152c79efce478ccaa54",
+        "provenance_digest": "6d466bf68dc14c61e9836bb0f4e1fbe00f5ac35d58106d860329a3262c642d5a",
+        "source_record_ids": [
+          "bf7f962c-765e-45cf-aaec-34d884843f78"
+        ]
+      }
+    },
+    {
+      "fact_id": "b2715529-7f78-5806-8846-f64a7d689226",
+      "subject": "index.html.paragraph_count",
+      "scope": null,
+      "passed": false,
+      "reason": "UNVERIFIABLE_FACT_PLAN",
+      "disposition": "UNVERIFIABLE_CURRENT",
+      "materialization": {
+        "method": null,
+        "repair_attempts": 0,
+        "relation": "CARDINALITY",
+        "scope": null,
+        "work_reality_revision_id": "011483f7-de9d-5275-98ff-ab4c66c163aa",
+        "candidate_revision": "c70484a0b8fd808c7f287152c79efce478ccaa54",
+        "provenance_digest": "07bd8a9b7cd02eebe4d387ffd8b0da8e5b555c4f7706400ff717dc50460f9804",
+        "source_record_ids": [
+          "bf7f962c-765e-45cf-aaec-34d884843f78"
+        ]
+      }
+    },
+    {
+      "fact_id": "73dd5efe-2641-5005-8297-1ab11857959e",
+      "subject": "index.html.paragraph_text",
+      "scope": "index.html",
+      "passed": true,
+      "reason": "EXACT_PARAGRAPH",
+      "disposition": "VERIFIED_CURRENT",
+      "materialization": {
+        "method": "EXISTING_EXACT_CHECK",
+        "repair_attempts": 0,
+        "relation": "EQUALITY",
+        "scope": null,
+        "work_reality_revision_id": "011483f7-de9d-5275-98ff-ab4c66c163aa",
+        "candidate_revision": "c70484a0b8fd808c7f287152c79efce478ccaa54",
+        "provenance_digest": "07bd8a9b7cd02eebe4d387ffd8b0da8e5b555c4f7706400ff717dc50460f9804",
+        "source_record_ids": [
+          "bf7f962c-765e-45cf-aaec-34d884843f78"
+        ]
+      }
+    }
+  ],
+  "classifications": {
+    "formation": "VALIDATED_PROJECTION",
+    "native_worker": "PRODUCED",
+    "git_diff": "PASS",
+    "verification": "UNVERIFIABLE_CURRENT_CARDINALITY_PLAN_NOT_REPRESENTABLE",
+    "review": "NO_PROVEN_FALSE_ADMISSION_FOR_THESE_CURRENT_COUNT_FACTS",
+    "candidate": "NOT_SEALED"
+  },
+  "work_mutations": 0,
+  "model_requests": 0
+}

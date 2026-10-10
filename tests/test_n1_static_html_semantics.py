@@ -881,7 +881,7 @@ def test_exact_new_file_count_and_lifecycle_owner_are_distinct(tmp_path: Path) -
     count_id, guard_id = uuid4(), uuid4()
     count = EngineeringSemanticFact(
         id=count_id, subject="new.static.asset", relation=SemanticRelation.CARDINALITY,
-        value=1, scope="new file in accepted source", qualifiers={},
+        value=1, scope=None, qualifiers={},
         authority=SemanticFactAuthority.HUMAN_EXPLICIT,
         epistemic_status=SemanticEpistemicStatus.CONFIRMED,
         provenance=SemanticFactProvenance(source_record_ids=(uuid4(),),
@@ -903,8 +903,18 @@ def test_exact_new_file_count_and_lifecycle_owner_are_distinct(tmp_path: Path) -
     checks = verify_static_html_semantic_facts(
         repository, candidate, contract, refs,
         admitted_facts={str(item.id): item for item in (count, guard)})
+    # A filename and value=1 do not identify the counted object. The former
+    # shortcut would also accept an element count without inspecting the blob.
+    assert checks[0]["passed"] is False
+    assert checks[0]["reason"] == "UNVERIFIABLE_FACT_PLAN"
+    runtime, calls = _count_plan_runtime("EXACT_NEW_FILE_COUNT", count.provenance.source_text)
+    checks = verify_static_html_semantic_facts(
+        repository, candidate, contract, refs,
+        admitted_facts={str(item.id): item for item in (count, guard)},
+        plan_repair=StaticHTMLPlanRepair(lambda: runtime))
     assert checks[0]["passed"] is True
     assert checks[0]["reason"] == "EXACT_NEW_FILE_COUNT"
+    assert len(calls) == 2
     assert checks[1]["passed"] is False
     assert checks[1]["disposition"] == "UNVERIFIABLE_CURRENT"
     assert checks[1]["materialization"]["fact_id"] == str(guard_id)
@@ -1068,3 +1078,189 @@ def test_model_plan_exhaustion_cannot_invent_source_or_pass(tmp_path: Path) -> N
     assert all(row["usage"]["unknown"] is True
                and row["usage"]["total_tokens"] is None
                for row in repair["attempts"])
+
+
+def _count_plan_runtime(method, quote, *, target='index.html'):
+    import json
+    calls = []
+    def generate(**kwargs):
+        calls.append(kwargs)
+        return StructuredModelResult(
+            output_text=json.dumps({'method': method, 'target_path': target, 'source_quote': quote}),
+            provider=ModelProvider.DEEPSEEK, requested_model='controlled-count-fixture',
+            effective_model='controlled-count-fixture', request_id=f'count-{len(calls)}',
+            usage=ModelUsage(unknown=True), timing=ModelTiming())
+    return SimpleNamespace(generate=generate, registry=SimpleNamespace(close=lambda: None)), calls
+
+
+def _admitted_count(source, *, qualifiers=None, value=1, scope=None, subject='not.prelisted.cardinality'):
+    return EngineeringSemanticFact(
+        id=uuid4(), subject=subject, relation=SemanticRelation.CARDINALITY,
+        value=value, scope=scope, qualifiers=qualifiers or {},
+        authority=SemanticFactAuthority.HUMAN_EXPLICIT,
+        epistemic_status=SemanticEpistemicStatus.CONFIRMED,
+        provenance=SemanticFactProvenance(source_record_ids=(uuid4(),), source_text=source,
+            role_origin=SemanticRoleOrigin.EXPLICIT), admitted_work_revision_id=uuid4())
+
+
+@pytest.mark.parametrize('method,source,qualifiers,extra', [
+    ('EXACT_H1_COUNT', 'Only one h1 element is required.', {'level': 'h1'}, ''),
+    ('EXACT_PARAGRAPH_COUNT', 'The page shall contain exactly one paragraph.', {}, '<p>copy</p>'),
+    ('EXACT_PARAGRAPH_COUNT', '正文必须有一个段落。', {}, '<p>copy</p>'),
+    ('EXACT_PARAGRAPH_COUNT', 'Create an HTML file with one h1 and one paragraph.', {}, '<p>copy</p>'),
+    ('EXACT_PARAGRAPH_COUNT', 'Only one introductory text block is needed.', {'element':'p'}, '<p>copy</p>'),
+])
+def test_cardinality_materializes_existing_check_without_subject_alias(tmp_path, method, source, qualifiers, extra):
+    from spg.domain.engineering_semantics import semantic_fact_reference
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS, extra=extra)
+    admitted = _admitted_count(source, qualifiers=qualifiers)
+    reference = semantic_fact_reference(admitted, work_revision_id=admitted.admitted_work_revision_id)
+    original = admitted.model_dump(mode='json')
+    runtime, calls = _count_plan_runtime(method, source)
+    check = verify_static_html_semantic_facts(repository, candidate, contract, (reference,),
+        admitted_facts={str(admitted.id): admitted}, plan_repair=StaticHTMLPlanRepair(lambda: runtime))[0]
+    assert check['passed'] and check['materialization']['method'] == method
+    assert check['materialization']['provenance_checked']
+    assert len(calls) == 2 and admitted.model_dump(mode='json') == original
+    extra = '<h1>wrong second heading</h1>' if method == 'EXACT_H1_COUNT' else '<p>copy</p><p>extra</p>'
+    wrong = _candidate(repository, ITEMS, extra=extra)
+    runtime, calls = _count_plan_runtime(method, source)
+    check = verify_static_html_semantic_facts(repository, wrong, contract, (reference,),
+        admitted_facts={str(admitted.id): admitted}, plan_repair=StaticHTMLPlanRepair(lambda: runtime))[0]
+    assert check['reason'] == method + '_MISMATCH' and check['disposition'] == 'FAILED_CURRENT'
+    assert len(calls) == 2  # A real artifact mismatch is not a plan-repair retry.
+
+
+@pytest.mark.parametrize('method,source,qualifiers,scope,value,quote,target,code', [
+    ('EXACT_NEW_FILE_COUNT', 'One h1 on index.html.', {'level':'h1'}, None, 1, None, 'index.html', 'COUNT_OBJECT_QUALIFIER_MISMATCH'),
+    ('EXACT_H1_COUNT', 'One h1 and one paragraph.', {'element':'p'}, None, 1, None, 'index.html', 'COUNT_OBJECT_QUALIFIER_MISMATCH'),
+    ('EXACT_PARAGRAPH_COUNT', 'One paragraph.', {'level':'h1'}, None, 1, None, 'index.html', 'COUNT_OBJECT_QUALIFIER_MISMATCH'),
+    ('EXACT_PARAGRAPH_COUNT', 'One paragraph.', {'within':'footer'}, None, 1, None, 'index.html', 'COUNT_QUALIFIER_NOT_REPRESENTABLE'),
+    ('EXACT_PARAGRAPH_COUNT', 'One paragraph.', {}, 'footer in index.html', 1, None, 'index.html', 'COUNT_SCOPE_NOT_REPRESENTABLE'),
+    ('EXACT_PARAGRAPH_COUNT', 'Only one paragraph is permitted.', {}, None, 1, 'one paragraph', 'index.html', 'COUNT_SOURCE_COVERAGE_MISMATCH'),
+    ('EXACT_PARAGRAPH_COUNT', 'One paragraph.', {}, None, 1, 'invented approval', 'index.html', 'exact Human source quote'),
+    ('EXACT_PARAGRAPH_COUNT', 'One paragraph.', {}, None, True, None, 'index.html', 'COUNT_RELATION_VALUE_MISMATCH'),
+    ('EXACT_PARAGRAPH_COUNT', 'One paragraph.', {}, None, -1, None, 'index.html', 'COUNT_RELATION_VALUE_MISMATCH'),
+    ('EXACT_PARAGRAPH_COUNT', 'One paragraph.', {}, None, 1, None, 'other.html', 'target path differs'),
+])
+def test_count_plan_rejects_wrong_object_missing_qualifiers_and_source(method, source, qualifiers, scope, value, quote, target, code):
+    from spg.domain.engineering_semantics import semantic_fact_reference
+    from spg.providers.static_html_semantic_verifier import _HTMLPlanCandidate
+    admitted = _admitted_count(source, qualifiers=qualifiers, scope=scope, value=value)
+    reference = semantic_fact_reference(admitted, work_revision_id=admitted.admitted_work_revision_id)
+    plan = _HTMLPlanCandidate(method=method, target_path=target, source_quote=source if quote is None else quote)
+    assert code in StaticHTMLPlanRepair._candidate_problem(plan, reference, source, 'index.html')
+
+
+def test_element_count_never_inherits_one_new_file_success(tmp_path):
+    from spg.domain.engineering_semantics import semantic_fact_reference
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS, extra='<h1>extra</h1>')
+    admitted = _admitted_count('Create index.html with exactly one h1.', qualifiers={'level':'h1'})
+    reference = semantic_fact_reference(admitted, work_revision_id=admitted.admitted_work_revision_id)
+    check = verify_static_html_semantic_facts(repository, candidate, contract, (reference,),
+        admitted_facts={str(admitted.id): admitted})[0]
+    assert check['reason'] == 'UNVERIFIABLE_FACT_PLAN' and not check['passed']
+    runtime, calls = _count_plan_runtime('EXACT_NEW_FILE_COUNT', admitted.provenance.source_text)
+    check = verify_static_html_semantic_facts(repository, candidate, contract, (reference,),
+        admitted_facts={str(admitted.id): admitted}, plan_repair=StaticHTMLPlanRepair(lambda: runtime))[0]
+    assert check['reason'] == 'UNVERIFIABLE_FACT_PLAN' and len(calls) == 2
+    assert 'COUNT_OBJECT_QUALIFIER_MISMATCH' in calls[1]['input_text']
+
+
+def test_count_model_cannot_change_admitted_fact_identity(tmp_path):
+    from spg.domain.engineering_semantics import semantic_fact_reference
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS)
+    admitted = _admitted_count('One h1.', qualifiers={'level':'h1'})
+    reference = semantic_fact_reference(admitted, work_revision_id=admitted.admitted_work_revision_id).model_copy(update={"subject": "changed.subject"})
+    runtime, calls = _count_plan_runtime('EXACT_H1_COUNT', admitted.provenance.source_text)
+    with pytest.raises(ValueError, match='differs from admitted fact'):
+        verify_static_html_semantic_facts(repository, candidate, contract, (reference,),
+            admitted_facts={str(admitted.id):admitted}, plan_repair=StaticHTMLPlanRepair(lambda: runtime))
+
+
+def test_count_unrepresented_unit_and_boolean_qualifier_are_rejected():
+    from spg.domain.engineering_semantics import semantic_fact_reference
+    from spg.providers.static_html_semantic_verifier import _HTMLPlanCandidate
+    admitted = _admitted_count('One h1.', qualifiers={'heading_level': True})
+    ref = semantic_fact_reference(admitted, work_revision_id=admitted.admitted_work_revision_id)
+    plan = _HTMLPlanCandidate(method='EXACT_H1_COUNT', target_path='index.html', source_quote='One h1.')
+    assert StaticHTMLPlanRepair._candidate_problem(plan, ref, 'One h1.', 'index.html') == 'COUNT_OBJECT_QUALIFIER_MISMATCH'
+    ref = ref.model_copy(update={'unit':'words', 'qualifiers':{}})
+    assert StaticHTMLPlanRepair._candidate_problem(plan, ref, 'One h1.', 'index.html') == 'COUNT_UNIT_NOT_REPRESENTABLE'
+
+
+@pytest.mark.parametrize('source,subject,proposal', [
+    ('Exactly one existing file must remain present.', 'retained.asset.count', 'EXACT_NEW_FILE_COUNT'),
+    ('Only one word is required; h1 is merely an example.', 'word.quantity', 'EXACT_H1_COUNT'),
+])
+def test_independent_count_review_refuses_lifecycle_or_example_object_error(tmp_path, source, subject, proposal):
+    import json
+    from spg.domain.engineering_semantics import semantic_fact_reference
+    repository, contract = _fixture(tmp_path)
+    candidate = _candidate(repository, ITEMS)
+    admitted = _admitted_count(source, subject=subject)
+    ref = semantic_fact_reference(admitted, work_revision_id=admitted.admitted_work_revision_id)
+    calls=[]
+    def generate(**kwargs):
+        calls.append(kwargs)
+        method=proposal if len(calls)==1 else 'UNVERIFIABLE'
+        return StructuredModelResult(output_text=json.dumps({'method':method,'target_path':'index.html','source_quote':source}),
+            provider=ModelProvider.DEEPSEEK, requested_model='controlled-independent-count-review',
+            effective_model='controlled-independent-count-review', request_id=f'object-review-{len(calls)}',
+            usage=ModelUsage(unknown=True), timing=ModelTiming())
+    runtime=SimpleNamespace(generate=generate, registry=SimpleNamespace(close=lambda:None))
+    check=verify_static_html_semantic_facts(repository,candidate,contract,(ref,),
+        admitted_facts={str(admitted.id):admitted},plan_repair=StaticHTMLPlanRepair(lambda:runtime))[0]
+    assert check['reason']=='UNVERIFIABLE_FACT_PLAN' and not check['passed'] and len(calls)==2
+    assert 'Independently review' in calls[1]['instructions']
+    assert json.loads(calls[1]['input_text'])['subject']==subject
+    assert check['materialization']['model_repair']['independent_plan_review']
+
+
+@pytest.mark.parametrize("drift", ("basis-wire", "observed-wire", "decoded-proposal", "review-wire", "review-result", "review-attempt", "missing-proposal", "failed-proposal", "fact", "source"))
+def test_count_review_corrects_derived_plan_with_original_receipt_budget(tmp_path, drift):
+    import json
+    from spg.domain.engineering_semantics import semantic_fact_reference
+    from spg.providers.verification_receipts import VerificationCandidateReceipts
+    repository,contract=_fixture(tmp_path);candidate=_candidate(repository,ITEMS,extra='<p>copy</p>')
+    admitted=_admitted_count('One paragraph.');ref=semantic_fact_reference(admitted,work_revision_id=admitted.admitted_work_revision_id)
+    request=SimpleNamespace(verification_identity=uuid4(),snapshot_id=uuid4(),source_baseline_id=contract.source_baseline_id,
+        proposed_commit_identity=candidate,tree_identity=_git(repository,'rev-parse',candidate+'^{tree}'),
+        decision_context_fingerprint='a'*64,semantic_fact_obligations=(ref,),protected_context_obligations=())
+    recorder=VerificationCandidateReceipts(request);calls=[]
+    def generate(**kwargs):
+        calls.append(kwargs)
+        return StructuredModelResult(output_text=json.dumps({'method':'EXACT_NEW_FILE_COUNT' if len(calls)==1 else 'EXACT_PARAGRAPH_COUNT',
+            'target_path':'index.html','source_quote':admitted.provenance.source_text}),
+            provider=ModelProvider.DEEPSEEK,requested_model='controlled-count-review',effective_model='controlled-count-review',
+            request_id=f'bounded-count-{len(calls)}',usage=ModelUsage(unknown=True),timing=ModelTiming())
+    runtime=SimpleNamespace(generate=generate,registry=SimpleNamespace(close=lambda:None))
+    repair=StaticHTMLPlanRepair(lambda:runtime,receipt_recorder=recorder)
+    check=verify_static_html_semantic_facts(repository,candidate,contract,(ref,),
+        admitted_facts={str(admitted.id):admitted},plan_repair=repair)[0]
+    assert check['passed'] and len(calls)==2
+    assert 'Independently review' in calls[1]['instructions']
+    assert [r['attempt'] for r in recorder.records if r['stage']=='MODEL_REQUEST_PENDING']==[1,2]
+    assert all(r['budget_limit']==2 and r['candidate_is_authority'] is False for r in recorder.records)
+    assert recorder.records[-1]['plan_review_role']=='INDEPENDENT_COUNT_PLAN_REVIEW'
+    original=json.dumps(recorder.records,sort_keys=True)
+    repair.runtime_factory=lambda:(_ for _ in ()).throw(AssertionError('no replay calls'))
+    replay=verify_static_html_semantic_facts(repository,candidate,contract,(ref,),
+        admitted_facts={str(admitted.id):admitted},plan_repair=repair)[0]
+    assert replay['passed'] and replay['materialization']['model_repair']['replayed']
+    assert json.dumps(recorder.records,sort_keys=True)==original
+    if drift=='basis-wire':recorder.records[-1]['plan_review_basis']['proposal_wire_sha256']='f'*64
+    elif drift=='observed-wire':recorder.records[1]['candidate_output']+=' '
+    elif drift=='decoded-proposal':recorder.records[2]['candidate_checks'][0]['method']='EXACT_H1_COUNT'
+    elif drift=='review-wire':recorder.records[4]['candidate_output']+=' '
+    elif drift=='review-result':recorder.records[-1]['candidate_checks'][0]['method']='EXACT_NEW_FILE_COUNT'
+    elif drift=='review-attempt':recorder.records[-1]['attempt']=1
+    elif drift=='missing-proposal':recorder.records.pop(2)
+    elif drift=='failed-proposal':recorder.records[2]['failed_predicate']='controlled-failure'
+    elif drift=='fact':ref=ref.model_copy(update={'subject':'changed.fact'})
+    else:admitted=admitted.model_copy(update={'provenance':admitted.provenance.model_copy(update={'source_text':'changed source'})})
+    with pytest.raises(ValueError,match='VERIFICATION_REPLAY_BASIS_MISMATCH'):
+        repair.repair(ref,admitted,'index.html')

@@ -1,0 +1,14 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 14.567523896927014,
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "container_id": "7c5344685adfd5f42c5b2b85929b7182c27b72d397cc712e9b7766598a56b6cb",
+  "source_overlay": true,
+  "snapshot_sha256": "adb695b156aca9dcd135b4c5a666a44f2b38d89f25b6c9a6f1db9ff34dbc9180",
+  "nodes": [
+    "tests/test_c3_generation_projection_economy.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

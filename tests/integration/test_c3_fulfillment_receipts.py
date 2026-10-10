@@ -578,3 +578,39 @@ def test_expanded_candidate_capacity_is_durable_without_repair_authority(postgre
         assert len(rows)==3 and rows[-1].scope==before
         assert ProductStore(uow.session).current_work_reality_revision(work_id)==revision
         assert all(RuntimeStore(uow.session).human_authorization(r.id) is None for r in rows)
+
+
+def test_count_plan_review_role_is_durable_in_existing_native_receipts(postgres_database, tmp_path):
+    """Receipt persistence only; does not claim a counted Fact or Work is accepted."""
+    from types import SimpleNamespace
+    from uuid import uuid4
+    from spg.application.runtime import RuntimeService
+    from spg.providers.verification_receipts import VerificationCandidateReceipts
+    from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+    from tests.integration import test_c1_contract_continuity as c1
+    from tests.test_c3_verification_receipts import response
+    _,work_id,revision,ir,repository,baseline,pwu=c1._admit_c1(postgres_database,tmp_path,'work')
+    attempt=RuntimeService(postgres_database).create_initial_attempt(pwu.id)
+    request=SimpleNamespace(verification_identity=uuid4(),snapshot_id=uuid4(),source_baseline_id=baseline.id,
+        proposed_commit_identity=baseline.repository_revision,tree_identity='b'*40,
+        decision_context_fingerprint='a'*64,semantic_fact_obligations=pwu.completion_contract.semantic_fact_obligations,
+        protected_context_obligations=())
+    args=dict(database=postgres_database,work_id=work_id,work_revision_id=revision.id,pwu_id=pwu.id,attempt_id=attempt.id)
+    recorder=VerificationCandidateReceipts(request,**args)
+    for role in ('COUNT_PLAN_PROPOSAL','INDEPENDENT_COUNT_PLAN_REVIEW'):
+        number=recorder.begin('controlled-count-role')
+        recorder.observed('controlled-count-role',number,response('{"controlled_receipt_only":true}'))
+        recorder.validated('controlled-count-role',number,checks=[{'controlled_receipt_only':True}],
+            terminal=number==2,plan_review_role=role)
+    with postgres_database.unit_of_work() as uow:
+        before=NativeExecutionStore(uow.session).evidence_for_attempt(attempt.id)
+    restored=VerificationCandidateReceipts(request,**args)
+    terminal=restored.completed('controlled-count-role')
+    assert terminal['plan_review_role']=='INDEPENDENT_COUNT_PLAN_REVIEW'
+    assert terminal['attempt']==2 and terminal['budget_limit']==2 and terminal['candidate_is_authority'] is False
+    assert terminal['work_id']==str(work_id) and terminal['attempt_id']==str(attempt.id)
+    with pytest.raises(ValueError,match='ALREADY_TERMINAL'):
+        restored.begin('controlled-count-role')
+    with postgres_database.unit_of_work() as uow:
+        after=NativeExecutionStore(uow.session).evidence_for_attempt(attempt.id)
+    assert before==after and len(before)==6

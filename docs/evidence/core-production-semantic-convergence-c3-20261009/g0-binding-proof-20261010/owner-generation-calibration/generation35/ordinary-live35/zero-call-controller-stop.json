@@ -1,0 +1,12 @@
+{
+  "stage": "DOCKER_MOUNT_PREFLIGHT",
+  "code": "CONTROLLER_REFERENCED_OLD_FILENAME",
+  "missing_filename": "verify_live_model34.py",
+  "correct_actual_filename": "verify_live_model35.py",
+  "preflight_log_sha256": "507e6b2205233f42da1ac1ece8ef80827363ff3a5290a1aad8d015894826474c",
+  "logical_calls": 0,
+  "http_transmissions": 0,
+  "business_work_created": 0,
+  "source_or_gate_modified": false,
+  "repair": "New append-only 35b controller references existing source-matched file"
+}

@@ -1,0 +1,68 @@
+{
+  "validator_version": "4.26.0",
+  "input_sha256": "d77db5345aa3212080f408de0f54fd78e4ac030d5af34fc6dd17e09a77c32749",
+  "results": [
+    {
+      "case": "small",
+      "schema_standard": "Draft2020-12",
+      "schema_valid": true,
+      "positive_results": [
+        true
+      ],
+      "negative_rejected": []
+    },
+    {
+      "case": "medium",
+      "schema_standard": "Draft2020-12",
+      "schema_valid": true,
+      "positive_results": [
+        true
+      ],
+      "negative_rejected": []
+    },
+    {
+      "case": "complex",
+      "schema_standard": "Draft2020-12",
+      "schema_valid": true,
+      "positive_results": [
+        true
+      ],
+      "negative_rejected": []
+    },
+    {
+      "case": "support-[[]]",
+      "schema_standard": "Draft2020-12",
+      "schema_valid": true,
+      "positive_results": [
+        true
+      ],
+      "negative_rejected": [
+        true
+      ]
+    },
+    {
+      "case": "support-[[], [1]]",
+      "schema_standard": "Draft2020-12",
+      "schema_valid": true,
+      "positive_results": [
+        true
+      ],
+      "negative_rejected": [
+        true
+      ]
+    },
+    {
+      "case": "support-[[1]]",
+      "schema_standard": "Draft2020-12",
+      "schema_valid": true,
+      "positive_results": [
+        true
+      ],
+      "negative_rejected": [
+        true
+      ]
+    }
+  ],
+  "model_calls": 0,
+  "qualification": "REQUEST_SCHEMA_STANDARD_AND_CONTROLLED_OPERANDS_ONLY"
+}

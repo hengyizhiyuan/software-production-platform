@@ -164,15 +164,24 @@ class VerificationCandidateReceipts:
         return row
 
     def validated(self, component, attempt, *, predicate=None, feedback=None,
-                  checks=None, terminal=False, refinement_converged=None):
+                  checks=None, terminal=False, refinement_converged=None,
+                  plan_review_role=None, plan_review_basis=None, plan_review_corrected=False):
         row = self._append(component, attempt, "CANDIDATE_VALIDATED",
             failed_predicate=predicate, feedback=feedback,
             candidate_checks=checks, terminal=terminal,
             terminal_reason=predicate if terminal else None,
-            validation_passed=predicate is None)
+            validation_passed=predicate is None,
+            **({} if plan_review_role is None else {"plan_review_role": plan_review_role}),
+            **({} if plan_review_basis is None else {"plan_review_basis": plan_review_basis}),
+            **({} if not plan_review_corrected else {"plan_review_corrected": True}))
         if terminal and self.database is not None and self.work_id is not None:
             prior = [record for record in self.records if record["component"] == component
                 and record["stage"] == "CANDIDATE_VALIDATED" and record.get("failed_predicate")]
+            if plan_review_corrected and not prior:
+                # Contract validation of the original proposal was successful;
+                # the independent review subsequently corrected its semantics.
+                # Record that later observation without rewriting the proposal.
+                prior = [{"failed_predicate": "COUNT_PLAN_SEMANTIC_MAPPING_CORRECTED"}]
             observed = [record for record in self.records if record["component"] == component
                 and record["stage"] == "MODEL_REQUEST_PENDING"]
             completed = [record for record in self.records if record["component"] == component

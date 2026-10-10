@@ -1,0 +1,2 @@
+docker: Error response from daemon: invalid mount config for type "bind": bind source path does not exist: /data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation35-qualified-20261010/verify_live_model34.py.
+See 'docker run --help'.

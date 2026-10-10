@@ -1,0 +1,17 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 22.227868409012444,
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "container_id": "4120597fe10b38338eeee4dc257393b6e179dc89a3cb09999e0ec527c1b0f434",
+  "source_overlay": true,
+  "snapshot_sha256": "7cbfad97d75f569926492600824e3035cb6e520bc29bb1bcd88c71327ccde146",
+  "nodes": [
+    "tests/test_n1_static_html_semantics.py",
+    "tests/test_c3_generation_projection_economy.py",
+    "tests/test_c3_semantic_contract_calibration.py",
+    "tests/test_c3_source_consumer_input.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

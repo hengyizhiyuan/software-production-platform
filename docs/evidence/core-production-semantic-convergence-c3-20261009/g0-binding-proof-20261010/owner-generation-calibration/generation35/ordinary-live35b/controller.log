@@ -1,0 +1,1 @@
+{"result": "ISOLATED_FULFILLMENT_PLAN_QUALIFIED", "terminal_reason": "VALIDATED_PROJECTION", "logical_calls": 4, "formation_attempt_count": 2, "feedback_count": 1, "observed_terminal_usage_sum": {"input_tokens": 223448, "output_tokens": 23210, "cached_tokens": 5632, "reasoning_tokens": 0, "total_tokens": 246658}, "wall_seconds": 72.71083215298131}

@@ -1,0 +1,90 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 422 items
+
+tests/test_c3_generation_projection_economy.py ......................... [  5%]
+.............F...........                                                [ 11%]
+tests/test_c3_fulfillment_capacity_representation.py ................... [ 16%]
+..................................                                       [ 24%]
+tests/test_c3_owner_repair_preconditions.py ............................ [ 31%]
+.........................                                                [ 36%]
+tests/test_c3_generation_owner_domains.py .............................. [ 44%]
+.............................................................            [ 58%]
+tests/test_c3_source_consumer_input.py ...............                   [ 62%]
+tests/test_c3_source_role_contract.py .................                  [ 66%]
+tests/test_c3_fulfillment_repair_context.py ............................ [ 72%]
+..................                                                       [ 77%]
+tests/test_c3_fulfillment_wire_feedback.py ............................. [ 83%]
+.........                                                                [ 86%]
+tests/test_c3_semantic_contract_calibration.py ......................... [ 91%]
+...............                                                          [ 95%]
+tests/test_c3_feedback_observation_capacity.py ..........                [ 97%]
+tests/test_c3_fulfillment_provider_failures.py .........                 [100%]
+
+=================================== FAILURES ===================================
+_ test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[next_request_limit] _
+tests/test_c3_generation_projection_economy.py:493: in test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation
+    assert terminal["stage"]=="MODEL_REQUEST_PENDING"
+E   AssertionError: assert 'CANDIDATE_VALIDATED' == 'MODEL_REQUEST_PENDING'
+E     
+E     - MODEL_REQUEST_PENDING
+E     + CANDIDATE_VALIDATED
+=============================== warnings summary ===============================
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[small]
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[medium]
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[complex]
+  tests/test_c3_generation_projection_economy.py:11: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[small]
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[medium]
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[complex]
+  tests/test_c3_generation_projection_economy.py:182: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize('scale', ['small', 'medium', 'complex'])
+
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[small]
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[medium]
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[complex]
+  tests/test_c3_generation_projection_economy.py:421: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ["small", "medium", "complex"])
+
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[small]
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[medium]
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[complex]
+  tests/test_c3_fulfillment_capacity_representation.py:159: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize('scale', ('small','medium','complex'))
+
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[small]
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[medium]
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[complex]
+  tests/test_c3_fulfillment_capacity_representation.py:224: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers0]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers1]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers2]
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+tests/test_c3_semantic_contract_calibration.py::test_negative_file_component_preserves_original_exclusion_and_requires_real_diff
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_generation_projection_economy.py::test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[next_request_limit]
+================= 1 failed, 421 passed, 19 warnings in 47.97s ==================
