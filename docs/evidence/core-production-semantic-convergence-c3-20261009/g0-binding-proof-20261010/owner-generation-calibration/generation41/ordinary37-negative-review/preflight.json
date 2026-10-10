@@ -1,0 +1,15 @@
+{
+  "schema": "c3-ordinary-negative-independent-review-v1",
+  "basis_sha256": "15152aa2a034ed024e7337abc1964f195ba32b447e59c5e72e7a0bb778fd8616",
+  "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+  "candidate_fingerprint": "2e6a8ea09541ce7bf0eec5bcbff0dc358356d6e0f7869863c7964ebc7e41d294",
+  "components_fingerprint": "0fe9aa61b80d0dc805dabad3fcfc98719736bbf5f07f092799c128cfb956d5e2",
+  "history_modified": false,
+  "work_created": false,
+  "business_database_access": false,
+  "model_calls": 0,
+  "provider_status": "UNKNOWN",
+  "usage": "UNKNOWN",
+  "actual_schema_sha256": "925873b46d6a6f8005275805b8b9ef0aa5e034b89e451d711e646a32373e32fc",
+  "result": "PREFLIGHT_ONLY_NO_REQUEST"
+}
