@@ -101,3 +101,30 @@ def test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_withou
     before=deepcopy(provider._fulfillment_receipts)
     a.form_fulfillment_projection(revision,ir,provider=provider,exact_target_paths=inventory["exact_target_paths"])
     assert provider._fulfillment_receipts==before and len(calls)==3
+
+
+@pytest.mark.parametrize("tamper", ["sha256", "parent"])
+def test_canonical_rejection_next_request_capacity_preserves_parent_identity(monkeypatch, tamper):
+    revision,ir,inventory,plan=controlled_capacity_case()
+    def duplicate(wire):wire["routes"].append(deepcopy(wire["routes"][0]))
+    provider,calls=controlled_model_provider(inventory,plan,wire_change=duplicate)
+    bind=a._bind_repair_feedback
+    def bounded_failure_large_request(*args,**kwargs):
+        data=json.loads(bind(*args,**kwargs));data["controlled_test_padding"]="x"*105000
+        return json.dumps(data,separators=(",",":"))
+    monkeypatch.setattr(a,"_bind_repair_feedback",bounded_failure_large_request)
+    kwargs={"provider":provider,"exact_target_paths":inventory["exact_target_paths"]}
+    result=a.form_fulfillment_projection(revision,ir,**kwargs)
+    assert result[0].formation_receipt["terminal_reason"]=="OBLIGATION_FORMATION_RECEIPT_LIMIT" and len(calls)==1
+    failed=next(r for r in provider._fulfillment_receipts if r["stage"]=="CANDIDATE_VALIDATED")
+    terminal=provider._fulfillment_receipts[-1]
+    assert failed.get("predecode_diagnostics") is None and failed["repair_feedback_bound"]
+    assert terminal["stage"]=="MODEL_REQUEST_PENDING" and terminal["capacity_observation"]
+    before=deepcopy(provider._fulfillment_receipts)
+    a.form_fulfillment_projection(revision,ir,**kwargs)
+    assert provider._fulfillment_receipts==before and len(calls)==1
+    if tamper=="sha256":next(d for d in terminal["capacity_observation"]["dropped_fields"] if d["field"]=="feedback")["sha256"]="0"*64
+    else:terminal["feedback_receipt_id"]="00000000-0000-0000-0000-000000000000"
+    rejected=a.form_fulfillment_projection(revision,ir,**kwargs)
+    assert rejected[0].formation_receipt["terminal_reason"]=="OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT"
+    assert len(calls)==1 and all(b.state=="UNRESOLVED" for b in rejected)

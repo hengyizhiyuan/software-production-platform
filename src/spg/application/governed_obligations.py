@@ -2525,26 +2525,32 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         for next_start in rows:
             if next_start.get("stage") == "MODEL_REQUEST_PENDING" and next_start.get("attempt") == attempt + 1:
-                capacity = next_start.get("capacity_observation")
-                if capacity is not None:
-                    # A verified receipt-capacity terminal never issued the next
-                    # request. Its dropped feedback still binds to this exact
-                    # persisted parent, not another proposal or Attempt.
-                    if (not isinstance(capacity, dict) or not isinstance(capacity.get("dropped_fields"), list)
-                            or any(not isinstance(d, dict) for d in capacity["dropped_fields"])):
-                        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
-                    encoded = json.dumps(feedback, ensure_ascii=False, default=str).encode()
-                    dropped = [d for d in capacity["dropped_fields"] if d.get("field") == "feedback"]
-                    if (len(dropped) != 1 or dropped[0]["bytes"] != len(encoded)
-                            or dropped[0]["sha256"] != sha256(encoded).hexdigest()
-                            or next_start.get("feedback_receipt_id") != row.get("receipt_id")):
-                        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
-                    continue
+                if next_start.get("capacity_observation") is not None:
+                    continue  # All capacity-stopped requests are checked below.
                 if (next_start.get("feedback") != feedback
                         or next_start.get("feedback_receipt_id") != row.get("receipt_id")):
                     raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     for start in rows:
-        if start.get("stage") != "MODEL_REQUEST_PENDING" or not isinstance(start.get("feedback"), str):
+        if start.get("stage") != "MODEL_REQUEST_PENDING":
+            continue
+        capacity = start.get("capacity_observation")
+        if capacity is not None:
+            # The capacity shape was validated above. Both canonical and
+            # predecode parents were independently revalidated on the original
+            # Wire; a missing next-request body never permits identity drift.
+            parents = [r for r in rows if r.get("stage") == "CANDIDATE_VALIDATED"
+                and r.get("attempt") == start.get("attempt", 0) - 1
+                and isinstance(r.get("validation_feedback"), str)]
+            if len(parents) != 1:
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+            encoded = json.dumps(parents[0]["validation_feedback"], ensure_ascii=False, default=str).encode()
+            dropped = [d for d in capacity["dropped_fields"] if d["field"] == "feedback"]
+            if (len(dropped) != 1 or dropped[0]["bytes"] != len(encoded)
+                    or dropped[0]["sha256"] != sha256(encoded).hexdigest()
+                    or start.get("feedback_receipt_id") != parents[0].get("receipt_id")):
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+            continue
+        if not isinstance(start.get("feedback"), str):
             continue
         try:
             feedback = json.loads(start["feedback"])
