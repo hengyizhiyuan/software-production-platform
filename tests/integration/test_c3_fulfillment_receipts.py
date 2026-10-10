@@ -1,5 +1,6 @@
 """C3 Work-owner receipt persistence on exact controlled C1 admission fixtures."""
 from uuid import UUID
+from tests.test_c3_fulfillment_capacity_representation import decode_review_input
 
 import pytest
 
@@ -206,7 +207,6 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
 ):
     """New isolated fixture records only; no historical or live model writes."""
     from copy import deepcopy
-    from tests.test_c3_fulfillment_capacity_representation import decode_review_input
     import json
     from types import SimpleNamespace
     from sqlalchemy import update
