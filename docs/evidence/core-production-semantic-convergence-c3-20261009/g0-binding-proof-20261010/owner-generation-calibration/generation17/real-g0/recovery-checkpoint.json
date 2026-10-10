@@ -1,0 +1,21 @@
+{
+  "schema": "isolated-c3-recovery-v1",
+  "recorded_at_utc": "2026-10-10T14:22:35.549089+00:00",
+  "persistent_private_backup": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation17-recovery-20261010T142101",
+  "work_id": "4af5b2db-716c-51d6-af06-4e1eb510e92b",
+  "original_canonical_sha256": "aad0fa15b3b24c12aa5b4b1099f8fe7ef0d6f7044bbc79ba8650a68ad4c81998",
+  "database_dump_sha256": "1f2d530e917521cb5b5c024f1751f0f864edf6bc14703b195fa7bd867d2f6643",
+  "runtime_archive_sha256": "86f41b400a3bab09efc277b6209c51710f69a76769091db99744ca0a6477bcc4",
+  "original_volumes_retained": true,
+  "names_stopped": [
+    "watt-c3-bindingg0g17-api-20261010",
+    "watt-c3-bindingg0g17-coordinator-20261010",
+    "watt-c3-bindingg0g17-worker-20261010",
+    "watt-c3-bindingg0g17-tool-host-20261010",
+    "watt-c3-bindingg0g17-gitea-20261010",
+    "watt-c3-bindingg0g17-postgres-20261010"
+  ],
+  "production_resources_changed": false,
+  "work_rows_mutated": false,
+  "private_archive_requires_authorized_access": true
+}

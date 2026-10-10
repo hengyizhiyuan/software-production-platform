@@ -235,6 +235,7 @@ class RepositoryCodeVerifier:
                         semantic_checks,
                         references=request.semantic_fact_obligations,
                         admitted_facts=admitted_facts, ir=admitted_ir,
+                        revision=admitted_revision,
                         source_revision=contract.source_revision,
                         exact_target_paths=tuple(target.path for target in contract.exact_targets),
                         fulfillment_bindings=gate_bindings)

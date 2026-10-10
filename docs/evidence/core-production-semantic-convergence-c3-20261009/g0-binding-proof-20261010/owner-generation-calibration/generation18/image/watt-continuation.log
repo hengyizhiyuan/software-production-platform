@@ -1,0 +1,63 @@
+.......................................................................F [ 13%]
+FF..............................F....................................... [ 27%]
+........................................................................ [ 40%]
+........................................................................ [ 54%]
+.............................................F.......................... [ 68%]
+........................................................................ [ 81%]
+........................................................................ [ 95%]
+.........................                                                [100%]
+=================================== FAILURES ===================================
+_ test_compact_representation_preserves_complete_inventory_and_existing_owners[small] _
+tests/test_c3_fulfillment_capacity_representation.py:233: in test_compact_representation_preserves_complete_inventory_and_existing_owners
+    assert len(calls) == 2
+E   AssertionError: assert 4 == 2
+E    +  where 4 = len([{'immutable_inventory': {'work_id': '1de87d12-25ce-480b-bdb7-094f1970e727', 'work_reality_revision_id': '42aa0d05-d9d.....}, ...], 'owner_preconditions_fingerprint': 'dca718ff7c1ec465798fffacb7f369119b4bf3924b39b775b410a385024e1b45', ...}])
+_ test_compact_representation_preserves_complete_inventory_and_existing_owners[medium] _
+tests/test_c3_fulfillment_capacity_representation.py:233: in test_compact_representation_preserves_complete_inventory_and_existing_owners
+    assert len(calls) == 2
+E   AssertionError: assert 4 == 2
+E    +  where 4 = len([{'immutable_inventory': {'work_id': 'b51d1dcc-9776-4a35-8bb7-5fa091e79f0c', 'work_reality_revision_id': 'b2af15b1-3a5.....}, ...], 'owner_preconditions_fingerprint': 'c72c2e78482e9ab6cea010bdc7e1d41acbf1e2606cf0d58acc83d1e1d5b0cdc2', ...}])
+_ test_compact_representation_preserves_complete_inventory_and_existing_owners[complex] _
+tests/test_c3_fulfillment_capacity_representation.py:233: in test_compact_representation_preserves_complete_inventory_and_existing_owners
+    assert len(calls) == 2
+E   AssertionError: assert 4 == 2
+E    +  where 4 = len([{'immutable_inventory': {'work_id': 'f7266d48-b4fa-4f24-a574-627e0e21c3dd', 'work_reality_revision_id': 'ac2bc586-a15.....}, ...], 'owner_preconditions_fingerprint': '901a59dac9762b4a65280fcb3c27cd9a7d39d9e988e0e014b8e95da2969eb670', ...}])
+_ test_compact_nonoverlapping_current_and_future_components_keep_their_original_contributions _
+tests/test_c3_fulfillment_capacity_representation.py:381: in test_compact_nonoverlapping_current_and_future_components_keep_their_original_contributions
+    assert len(calls) == 2 and len(mixed) == 2
+E   AssertionError: assert (4 == 2)
+E    +  where 4 = len([{'immutable_inventory': {'work_id': 'ed8aa391-238e-4e20-97ba-7c64890058d2', 'work_reality_revision_id': '036d7a41-186.....}, ...], 'owner_preconditions_fingerprint': '90ab4c72d5913630115f4d219117e941b3c949a94ce65c9c2983aac850ec832f', ...}])
+______ test_successful_terminal_replay_cannot_drop_initial_proof_context _______
+tests/test_c3_owner_repair_preconditions.py:469: in test_successful_terminal_replay_cannot_drop_initial_proof_context
+    assert all(b.state!='UNRESOLVED' for b in run()) and len(calls)==2
+E   assert (False)
+E    +  where False = all(<generator object test_successful_terminal_replay_cannot_drop_initial_proof_context.<locals>.<genexpr> at 0x7ff764d9e0c0>)
+=============================== warnings summary ===============================
+tests/test_c3_semantic_contract_calibration.py::test_negative_file_component_preserves_original_exclusion_and_requires_real_diff
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers0]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers1]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers2]
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[small]
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[medium]
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[complex]
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_nonoverlapping_current_and_future_components_keep_their_original_contributions
+FAILED tests/test_c3_owner_repair_preconditions.py::test_successful_terminal_replay_cannot_drop_initial_proof_context
+5 failed, 524 passed, 4 warnings in 26.61s

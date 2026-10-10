@@ -344,7 +344,7 @@ def evaluate_continuous_gates(checks, bindings, native_record, *, source_revisio
 
 def evaluate_candidate_handoffs(checks, *, references, admitted_facts, ir,
                                 source_revision: str, exact_target_paths: tuple[str, ...],
-                                fulfillment_bindings=()):
+                                fulfillment_bindings=(), revision=None):
     """Split a mixed acceptance assertion without claiming a seal already exists.
 
     New projections require the assertion's own current check to pass. Future
@@ -364,9 +364,19 @@ def evaluate_candidate_handoffs(checks, *, references, admitted_facts, ir,
             current = tuple(binding for binding in projected if binding.phase is FulfillmentPhase.CURRENT_VERIFICATION)
             future = tuple(binding for binding in projected if binding.phase in {
                 FulfillmentPhase.CANDIDATE_SEAL, FulfillmentPhase.HUMAN_INTEGRATION})
+            seal_only = bool(future and all(binding.phase is FulfillmentPhase.CANDIDATE_SEAL for binding in future)
+                and fulfillment_bindings and (fulfillment_bindings[0].formation_receipt or {}).get("source_role_contract") == "v3")
+            if seal_only and revision is not None:
+                try:
+                    validate_fulfillment_projection(fulfillment_bindings, revision, ir,
+                        source_revision=source_revision, exact_target_paths=exact_target_paths)
+                except (ValueError, TypeError):
+                    seal_only = False
+            else:
+                seal_only = False
             exact = bool(admitted is not None and fact.relation is SemanticRelation.ACCEPTANCE_ASSERTION
                 and current and future and exact_target_paths and ir is not None
-                and all(goal.acceptance_required for goal in ir.current_production)
+                and (all(goal.acceptance_required for goal in ir.current_production) or seal_only)
                 and all(binding.source_revision == source_revision
                         and tuple(binding.target_paths) == tuple(exact_target_paths) for binding in current)
                 and check["passed"] is True)

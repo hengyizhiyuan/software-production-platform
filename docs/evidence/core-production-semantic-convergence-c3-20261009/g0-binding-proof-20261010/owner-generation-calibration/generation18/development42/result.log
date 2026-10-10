@@ -1,0 +1,78 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 203 items
+
+tests/test_c3_generation_owner_domains.py .............................. [ 14%]
+.........................FF....F                                         [ 30%]
+tests/test_c3_source_role_contract.py .................                  [ 38%]
+tests/test_c3_fulfillment_repair_context.py ............................ [ 52%]
+..................                                                       [ 61%]
+tests/test_c3_fulfillment_wire_feedback.py ............................. [ 75%]
+.........                                                                [ 80%]
+tests/test_c3_semantic_contract_calibration.py ......................... [ 92%]
+...............                                                          [100%]
+
+=================================== FAILURES ===================================
+_ test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[wire] _
+tests/test_c3_generation_owner_domains.py:765: in test_v3_final_consumer_revalidates_actual_formation_and_review_lineage
+    validate_fulfillment_projection(altered, revision, ir, exact_target_paths=inv["exact_target_paths"])
+src/spg/application/governed_obligations.py:1222: in validate_fulfillment_projection
+    _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
+src/spg/application/governed_obligations.py:2153: in _validate_wire_feedback_lineage
+    _wire_response_basis(rows, row["attempt"], revision, inventory, capabilities)
+src/spg/application/governed_obligations.py:1628: in _wire_response_basis
+    drift()
+src/spg/application/governed_obligations.py:1591: in drift
+    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+E   spg.providers.fulfillment_candidate._FulfillmentWireReceiptIdentityError: OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT
+_ test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[inventory] _
+tests/test_c3_generation_owner_domains.py:765: in test_v3_final_consumer_revalidates_actual_formation_and_review_lineage
+    validate_fulfillment_projection(altered, revision, ir, exact_target_paths=inv["exact_target_paths"])
+src/spg/application/governed_obligations.py:1222: in validate_fulfillment_projection
+    _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
+src/spg/application/governed_obligations.py:2153: in _validate_wire_feedback_lineage
+    _wire_response_basis(rows, row["attempt"], revision, inventory, capabilities)
+src/spg/application/governed_obligations.py:1610: in _wire_response_basis
+    drift()
+src/spg/application/governed_obligations.py:1591: in drift
+    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+E   spg.providers.fulfillment_candidate._FulfillmentWireReceiptIdentityError: OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT
+_ test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[owner-policy] _
+tests/test_c3_generation_owner_domains.py:765: in test_v3_final_consumer_revalidates_actual_formation_and_review_lineage
+    validate_fulfillment_projection(altered, revision, ir, exact_target_paths=inv["exact_target_paths"])
+src/spg/application/governed_obligations.py:1222: in validate_fulfillment_projection
+    _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
+src/spg/application/governed_obligations.py:2129: in _validate_wire_feedback_lineage
+    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+E   spg.providers.fulfillment_candidate._FulfillmentWireReceiptIdentityError: OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT
+=============================== warnings summary ===============================
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers0]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers1]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers2]
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+tests/test_c3_semantic_contract_calibration.py::test_negative_file_component_preserves_original_exclusion_and_requires_real_diff
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[wire]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[inventory]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[owner-policy]
+================== 3 failed, 200 passed, 4 warnings in 31.82s ==================

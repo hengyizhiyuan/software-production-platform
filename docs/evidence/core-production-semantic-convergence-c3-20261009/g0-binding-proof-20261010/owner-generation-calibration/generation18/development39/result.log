@@ -1,0 +1,67 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 179 items
+
+tests/test_c3_generation_owner_domains.py .............................. [ 16%]
+........                                                                 [ 21%]
+tests/test_c3_source_role_contract.py ..............FFF                  [ 30%]
+tests/test_c3_fulfillment_repair_context.py ............................ [ 46%]
+..................                                                       [ 56%]
+tests/test_c3_fulfillment_wire_feedback.py ............................. [ 72%]
+.........                                                                [ 77%]
+tests/test_c3_semantic_contract_calibration.py ......................... [ 91%]
+...............                                                          [100%]
+
+=================================== FAILURES ===================================
+_ test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay[v1] _
+tests/test_c3_source_role_contract.py:248: in test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay
+    assert request["source_role_contract"] == "v2"
+E   AssertionError: assert 'v3' == 'v2'
+E     
+E     - v2
+E     + v3
+_ test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay[removed] _
+tests/test_c3_source_role_contract.py:248: in test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay
+    assert request["source_role_contract"] == "v2"
+E   AssertionError: assert 'v3' == 'v2'
+E     
+E     - v2
+E     + v3
+_ test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay[unsupported] _
+tests/test_c3_source_role_contract.py:248: in test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay
+    assert request["source_role_contract"] == "v2"
+E   AssertionError: assert 'v3' == 'v2'
+E     
+E     - v2
+E     + v3
+=============================== warnings summary ===============================
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers0]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers1]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers2]
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+tests/test_c3_semantic_contract_calibration.py::test_negative_file_component_preserves_original_exclusion_and_requires_real_diff
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_source_role_contract.py::test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay[v1]
+FAILED tests/test_c3_source_role_contract.py::test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay[removed]
+FAILED tests/test_c3_source_role_contract.py::test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay[unsupported]
+================== 3 failed, 176 passed, 4 warnings in 26.62s ==================

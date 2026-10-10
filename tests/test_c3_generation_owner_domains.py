@@ -766,3 +766,28 @@ def test_v3_final_consumer_revalidates_actual_formation_and_review_lineage(tampe
     altered = (bindings[0].model_copy(update={"formation_receipt": receipt}), *bindings[1:])
     with pytest.raises(ValueError, match="IDENTITY_DRIFT|SEMANTIC_COMPONENT_MISMATCH"):
         validate_fulfillment_projection(altered, revision, ir, exact_target_paths=inv["exact_target_paths"])
+
+
+@pytest.mark.parametrize("failure", [None, "missing-revision", "missing-review", "current-fail"])
+def test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance(failure):
+    from tests.test_c3_fulfillment_components import current_lifecycle_candidate
+    from spg.domain.engineering_semantics import SemanticRelation, semantic_fact_reference
+    from spg.application.governed_obligations import fulfillment_inventory, evaluate_candidate_handoffs
+    revision, ir, _, plan = current_lifecycle_candidate()
+    ir.current_production = tuple(g.model_copy(update={"acceptance_required": False}) for g in ir.current_production)
+    fact = revision.engineering_semantic_facts[0].model_copy(update={"relation": SemanticRelation.ACCEPTANCE_ASSERTION})
+    revision.engineering_semantic_facts = (fact,)
+    inv = fulfillment_inventory(revision, ir)
+    content = plan.routes[0]
+    seal = content.model_copy(update={"capability": "CANDIDATE_SEAL", "target_paths": ()})
+    plan = plan.model_copy(update={"inventory_fingerprint": inv["inventory_fingerprint"], "routes": (content, seal, *plan.routes[1:])})
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+    if failure == "missing-review":
+        receipt = deepcopy(bindings[0].formation_receipt);receipt.pop("semantic_review")
+        bindings = (bindings[0].model_copy(update={"formation_receipt": receipt}), *bindings[1:])
+    check = {"fact_id": str(fact.id), "passed": failure != "current-fail", "disposition": "VERIFIED_CURRENT"}
+    result = evaluate_candidate_handoffs((check,), references=(semantic_fact_reference(fact, work_revision_id=revision.id),),
+        admitted_facts={str(fact.id): fact}, ir=ir, revision=None if failure == "missing-revision" else revision,
+        source_revision=inv["source_revision"], exact_target_paths=inv["exact_target_paths"], fulfillment_bindings=bindings)
+    assert (result[0]["disposition"] == "CURRENT_VERIFIED_FUTURE_GATE_PENDING") is (failure is None)
+    assert result[0]["passed"] is (failure != "current-fail")
