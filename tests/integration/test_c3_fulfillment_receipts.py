@@ -18,6 +18,44 @@ class NeverCallAgain:
         raise AssertionError("A sealed same-basis receipt must be replayed without another model call")
 
 
+def test_calibrated_component_review_persists_replays_and_reaches_independent_guardian(
+    postgres_database, tmp_path, monkeypatch, record_property,
+):
+    from tests.integration import test_c1_contract_continuity as c1
+    from tests.test_c3_semantic_contract_calibration import review as component_review
+    original_review = c1.DeclaredC1SemanticReview.review
+    def calibrated(self, inventory, candidate):
+        original = original_review(self, inventory, candidate)
+        components = component_review(inventory, candidate).component_results
+        return original.model_copy(update={"component_results": components})
+    monkeypatch.setattr(c1.DeclaredC1SemanticReview, "review", calibrated)
+    admitted = c1._admit_c1(postgres_database, tmp_path, "work")
+    _,work_id,revision,ir,_,baseline,pwu=admitted
+    provider=NeverCallAgain()
+    replay=form_fulfillment_projection(revision,ir,provider=provider,database=postgres_database,
+        source_revision=baseline.repository_revision,exact_target_paths=("index.html",))
+    assert provider.calls==0
+    assert replay[0].formation_receipt["semantic_review"]["component_results"]
+    original=pwu.completion_contract.fulfillment_bindings
+    assert [b.model_dump(exclude={"formation_receipt"}) for b in replay]==[b.model_dump(exclude={"formation_receipt"}) for b in original]
+    assert replay[0].formation_receipt["semantic_review"]==original[0].formation_receipt["semantic_review"]
+    assert set(replay[0].formation_receipt["receipt_refs"])==set(original[0].formation_receipt["receipt_refs"])
+    assert {k:v for k,v in replay[0].formation_receipt.items() if k!="elapsed_seconds"}=={
+        k:v for k,v in original[0].formation_receipt.items() if k!="elapsed_seconds"}
+    chain=c1._produce_chain(postgres_database,tmp_path,admitted)
+    projection=c1._assess(chain)
+    assert projection["gate"]=="PASS",projection
+    with postgres_database.unit_of_work() as uow:
+        runtime=RuntimeStore(uow.session)
+        assert runtime.human_authorizations_for_candidate(chain.candidate.id)==()
+        records=runtime.governance_for_subject(replay[0].projection_inventory_fingerprint)
+        assert len(records)==6
+        validated=next(r for r in records if r.scope["stage"]=="SEMANTIC_REVIEW_VALIDATED")
+        assert validated.scope["semantic_review"]["component_results"]==replay[0].formation_receipt["semantic_review"]["component_results"]
+    record_property("qualification_kind","controlled PostgreSQL/Git/Guardian, not real model/G0")
+    record_property("work",str(work_id));record_property("candidate",str(chain.candidate.id))
+
+
 def test_owner_observation_survives_legal_plan_clear_and_preserves_budget(postgres_database, admitted_contract):
     works, work_id, revision, ir, repository, baseline, pwu = admitted_contract
     original = pwu.completion_contract.fulfillment_bindings

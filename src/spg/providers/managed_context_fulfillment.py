@@ -364,6 +364,9 @@ def _future_gate_evidence(bindings, native_record):
 
 
 def _retained_context_route(binding, revision, ir, bindings=()):
+    from spg.application.governed_obligations import calibrated_background_binding_permitted
+    if calibrated_background_binding_permitted(binding, revision, ir, bindings):
+        return True
     from spg.application.governed_obligations import is_context_only_clause
     if binding.source_kind.value == "WORK_CONTEXT":
         return not binding.work_constraint_indices
@@ -402,7 +405,13 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
             contract, references, admitted_facts=admitted_facts, plan_repair=plan_repair)
     routes_by_fact = {str(reference.fact_id): tuple(binding for binding in bindings
         if str(binding.fact_id) == str(reference.fact_id)) for reference in references}
-    content = tuple(reference for reference in references if any(
+    linked_components = {str(reference.fact_id) for reference in references
+        if reference.relation.value == "ACCEPTANCE_ASSERTION"
+        and any(b.phase.value == "CANDIDATE_SEAL" for b in routes_by_fact[str(reference.fact_id)])
+        and any(b.evidence_method == "EXACT_CANDIDATE_CONTENT" for b in routes_by_fact[str(reference.fact_id)])
+        and all(b.component_basis is not None and b.component_basis.linked_fact_refs
+                for b in routes_by_fact[str(reference.fact_id)] if b.evidence_method == "EXACT_CANDIDATE_CONTENT")}
+    content = tuple(reference for reference in references if str(reference.fact_id) not in linked_components and any(
         binding.evidence_method == "EXACT_CANDIDATE_CONTENT" and binding.phase.value == "CURRENT_VERIFICATION"
         for binding in routes_by_fact[str(reference.fact_id)]))
     checked = verify_static_html_semantic_facts(repository, request.proposed_commit_identity,
@@ -411,12 +420,29 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
     changed = _checked_paths(repository, contract.source_revision, request.proposed_commit_identity)
     targets = tuple(target.path for target in contract.exact_targets)
     result = []
-    for reference in references:
+    # Linked components consume completed, identity-bound Fact checks, not raw
+    # checker observations. Resolve this bounded local evidence dependency first;
+    # cycles/missing proofs still fail, and cannot create evidence by ordering.
+    ordered = [ref for ref in references if str(ref.fact_id) not in linked_components]
+    available = {str(ref.fact_id) for ref in ordered}
+    pending = [ref for ref in references if str(ref.fact_id) in linked_components]
+    while pending:
+        ready = [ref for ref in pending if all(link.removeprefix("semantic-fact:") in available
+            for b in routes_by_fact[str(ref.fact_id)] if b.evidence_method == "EXACT_CANDIDATE_CONTENT"
+            for link in b.component_basis.linked_fact_refs)]
+        if not ready:
+            ordered.extend(pending)
+            break
+        ordered.extend(ready)
+        available.update(str(ref.fact_id) for ref in ready)
+        pending = [ref for ref in pending if ref not in ready]
+    for reference in ordered:
         identity = str(reference.fact_id)
         routes = routes_by_fact[identity]
         current = tuple(binding for binding in routes if binding.phase.value == "CURRENT_VERIFICATION")
         check = by_id.get(identity)
         evaluations = []
+        component_evidence = []
         if check is not None:
             evaluations.append(check["passed"] is True)
         for binding in current:
@@ -435,6 +461,14 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
                     and revision.source_revision == baseline.repository_revision
                     and revision.repository_identity == baseline.repository_identity
                     and revision.repository_ref == baseline.repository_ref)
+            elif binding.evidence_method == "EXACT_CANDIDATE_CONTENT" and identity in linked_components:
+                proof = _linked_fact_current_evidence(binding, result)
+                evaluations.append(proof is not None and proof["passed"])
+                if proof is not None:
+                    component_evidence.append({"binding": binding.model_dump(mode="json"),
+                        "evidence_method": "EXACT_LINKED_FACT_CURRENT_EVIDENCE", "passed": proof["passed"],
+                        "linked_fact_evidence": proof["facts"], "candidate_revision": request.proposed_commit_identity,
+                        "candidate_tree": request.tree_identity})
             elif binding.evidence_method != "EXACT_CANDIDATE_CONTENT":
                 evaluations.append(False)
         retained = bool(routes and not current and all(_retained_context_route(binding, revision, ir, bindings)
@@ -455,13 +489,19 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
             "current_evidence_verified": bool(evaluations and all(evaluations)),
             "future_evidence_status": "PENDING_FUTURE_OWNER_GATE" if any(
                 binding.phase.value in {"CANDIDATE_SEAL", "HUMAN_INTEGRATION", "DELIVERY"} for binding in routes) else None}
+        if component_evidence:
+            row["current_component_evidence"] = component_evidence
         if only_continuous:
             row["disposition"] = "UNVERIFIABLE_CURRENT"
         result.append(row)
-    return tuple(result)
+    indexed = {row["fact_id"]: row for row in result}
+    return tuple(indexed[str(ref.fact_id)] for ref in references)
 
 
 def _retained_binding_proof(binding, revision, ir, bindings):
+    from spg.application.governed_obligations import calibrated_background_binding_permitted
+    if calibrated_background_binding_permitted(binding, revision, ir, bindings):
+        return True
     if binding.source_kind.value != "WORK_CONSTRAINT":
         return _retained_context_route(binding, revision, ir, bindings)
     from spg.application.governed_obligations import is_context_only_clause
@@ -539,7 +579,8 @@ def verify_binding_inventory(*, request, task, contract, repository, baseline, r
             baseline, bindings=tuple(pending_content), receipt_recorder=receipt_recorder))
         for result in results:
             if result["disposition"] != "CONTENT_CHECK_REQUIRED": continue
-            matches = [check for check in derived if check["source_ref"] == result["source_ref"]]
+            matches = [check for check in derived if check["source_ref"] == result["source_ref"]
+                and check.get("binding") is not None and canonical_fingerprint(check["binding"]) == result["binding_fingerprint"]]
             result["disposition"] = "VERIFIED_CURRENT" if len(matches) == 1 and matches[0]["coverage"] == "COVERED" else "UNVERIFIABLE"
             result["current_stage_satisfied"] = result["disposition"] == "VERIFIED_CURRENT"
     return tuple(results), tuple(derived)
@@ -552,7 +593,7 @@ def _exact_fact_git_scope(reference, binding, targets, changed):
     scopes/qualifiers require a suitable different consumer and stay unresolved.
     """
     from spg.domain.governed_obligation import exact_file_scope_paths
-    paths = exact_file_scope_paths(reference)
+    paths = exact_file_scope_paths(reference, qualified=binding.component_basis is not None)
     if paths is None:
         return False
     return bool(changed and set(binding.target_paths) == set(paths) and set(targets) == set(paths)

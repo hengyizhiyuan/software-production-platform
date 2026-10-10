@@ -12,7 +12,7 @@ from hashlib import sha256
 import json
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, model_validator, model_serializer
 
 
 class FulfillmentOwner(StrEnum):
@@ -49,8 +49,8 @@ class FulfillmentComponentBasis(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     # Raw candidates may carry inaccurate offsets; the exact locator repairs
     # only a unique immutable quote before admission to a binding.
-    source_span_start: int
-    source_span_end: int
+    source_span_start: StrictInt
+    source_span_end: StrictInt
     source_component_quote: str = Field(min_length=1, max_length=65536)
     linked_fact_refs: tuple[str, ...] = ()
 
@@ -247,6 +247,18 @@ class FulfillmentSemanticSourceReview(BaseModel):
     reason: str = Field(min_length=1, max_length=1000)
 
 
+class FulfillmentSemanticComponentReview(BaseModel):
+    """Independent interpretation check, never Owner evidence or authority."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    component_id: str = Field(pattern=r"^[0-9a-f]{64}$")
+    capability: str = Field(min_length=1)
+    complete_and_equivalent: StrictBool
+    nonredundant: StrictBool
+    owner_phase_evidence_valid: StrictBool
+    context_only: StrictBool
+    reason: str = Field(min_length=1, max_length=1000)
+
+
 class FulfillmentSemanticReviewCandidate(BaseModel):
     """Independent derived-plan semantic validation; no Assurance/authority."""
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -254,6 +266,21 @@ class FulfillmentSemanticReviewCandidate(BaseModel):
     candidate_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     components_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     source_results: tuple[FulfillmentSemanticSourceReview, ...] = Field(min_length=1, max_length=1024)
+    # Absent for historical v1 receipts. Serialization must preserve their shape.
+    component_results: tuple[FulfillmentSemanticComponentReview, ...] | None = Field(default=None, min_length=1, max_length=1024)
+
+    @model_serializer(mode="wrap")
+    def preserve_historical_shape(self, handler):
+        result = handler(self)
+        if self.component_results is None:
+            result.pop("component_results", None)
+        return result
+
+
+def fulfillment_component_id(route, inventory_fingerprint):
+    return canonical_fingerprint({"inventory_fingerprint": inventory_fingerprint,
+        "source_ref": getattr(route, "source_ref", None) or fulfillment_source_ref(route),
+        "component_basis": None if route.component_basis is None else route.component_basis.model_dump(mode="json")})
 
 
 def fulfillment_candidate_fingerprint(candidate) -> str:
@@ -277,16 +304,22 @@ def fulfillment_source_semantic_text(source) -> str:
     return source["payload"]["content"]
 
 
-def exact_file_scope_paths(fact_or_reference) -> tuple[str, ...] | None:
-    """Reuse an unqualified literal file Scope; never derive it from a contract."""
-    if getattr(fact_or_reference.relation, "value", fact_or_reference.relation) != "SCOPE" or fact_or_reference.qualifiers:
+def exact_file_scope_paths(fact_or_reference, *, qualified=False) -> tuple[str, ...] | None:
+    """Reuse literal file Scope, optionally preserving typed exclusivity."""
+    if getattr(fact_or_reference.relation, "value", fact_or_reference.relation) != "SCOPE":
+        return None
+    qualifiers = fact_or_reference.qualifiers
+    # This checker proves exclusive repository-file scope, not arbitrary qualifiers.
+    # Preserve the original qualifier in Fact fingerprints and Owner evidence.
+    if qualifiers and not (qualified and qualifiers == {"exclusive": True}
+            and type(qualifiers["exclusive"]) is bool):
         return None
     value = fact_or_reference.value
     values = (value,) if isinstance(value, str) else tuple(value) if isinstance(value, (tuple, list)) else None
-    if values is None or not all(isinstance(path, str) for path in values) or len(set(values)) != len(values):
+    if not values or not all(isinstance(path, str) for path in values) or len(set(values)) != len(values):
         return None
-    if getattr(fact_or_reference, "unit", None) is not None or (
-            fact_or_reference.scope is not None and fact_or_reference.scope not in values):
+    if getattr(fact_or_reference, "reference_role", None) is not None or getattr(fact_or_reference, "unit", None) is not None or (
+            not qualified and fact_or_reference.scope is not None and fact_or_reference.scope not in values):
         return None
     from spg.domain.change import safe_repository_path
     try:

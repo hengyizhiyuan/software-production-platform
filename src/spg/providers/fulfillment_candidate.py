@@ -17,7 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field, StrictInt, field_validator
 
 from spg.domain.governed_obligation import (FulfillmentProjectionCandidate, FulfillmentSemanticReviewCandidate,
     fulfillment_candidate_fingerprint, fulfillment_components_fingerprint,
-    canonical_fingerprint, fulfillment_source_semantic_text)
+    canonical_fingerprint, fulfillment_source_semantic_text, fulfillment_component_id)
 from spg.domain.model_runtime import ModelPurpose
 
 
@@ -287,7 +287,9 @@ class ModelFulfillmentCandidateProvider:
                     "already satisfied. A current continuous prohibition must bind an actual execution/delivery gate. "
                     "Return only the supplied temporary compact wire. Echo v=1, h=request fingerprint and "
                     "d=table fingerprint exactly. Every route chooses s=source ordinal, c=capability ordinal, "
-                    "a/z=source component start/end character offsets, f=linked FACT source ordinals, "
+                    "a/z=source component character offsets in Python Unicode code points: [a,z), "
+                    "a inclusive, z exclusive. A whole source of length L is [0,L), never [0,L-1). "
+                    "f=linked FACT source ordinals, "
                     "t=target-path ordinals, u=supporting-source ordinals, and r=bounded rationale. "
                     "q=null lets the Owner restore the exact source slice. If exact offsets are uncertain, "
                     "q may be the original exact component quote; the existing unique-quote locator may "
@@ -299,6 +301,13 @@ class ModelFulfillmentCandidateProvider:
                     "losing independent current content requirements, original values, order or scope. "
                     "Represent EVERY supplied source_ref and EVERY work_constraint index, allowing multiple "
                     "routes for mixed meaning, without merging distinct components to shorten output. "
+                    "Same-source same-capability routes require genuinely distinct components, not different rationales "
+                    "for an identical component. RETAIN_CONTEXT and UNRESOLVED are component dispositions, not "
+                    "extra record-preservation routes to append to executable contributions. Do not lose punctuation "
+                    "or silently shorten a source slice. Qualified exclusive file Scope retains its qualifiers and "
+                    "uses exact Git-diff evidence; file/page exclusions are not deployment permissions. A prohibition "
+                    "Fact must cite its exact negative clause with the same actual gate; do not fabricate a typed effect "
+                    "or assign preview prohibition when the original contribution does not require it. "
                     "The Owner restores each WORK_CONSTRAINT source's own index; other sources have no constraint index. "
                     "Supporting source ordinals cite exact "
                     "original typed clauses needed for a continuous or future Work-constraint gate. IR_ITEM "
@@ -366,12 +375,17 @@ class ModelFulfillmentCandidateProvider:
                     "their own exact current content verification and all governance components. No independent content "
                     "requirement may be replaced by unrelated Fact evidence, delayed as authorization, or retained as "
                     "context. Production.exclusions derivations must preserve their original values and exact original "
-                    "negative typed clause effects; do not infer permissions from absence of logs. Reject missing, "
+                    "negative clause meaning; absent typed effects must remain absent. Do not infer permissions from absence of logs. Reject missing, "
                     "wrong or unsupported semantic correspondence. UNRESOLVED preserves uncertainty. Return only the "
-                    "review candidate with exact supplied fingerprints and one result per source. This review is only "
+                    "review candidate with exact supplied fingerprints and one result per source, plus one "
+                    "component_results entry per supplied (component_id, capability). Verify component nonredundancy, "
+                    "exact meaning, all qualifiers, legitimate context-only disposition and actual Owner/Phase/Evidence "
+                    "sufficiency. A whole-source reuse cannot conceal a lost semantic component. This review is only "
                     "derived-plan semantic validation, not Assurance, Verification PASS, a fact or Human authority."),
                 input_text=json.dumps({"immutable_inventory": inventory,
                     "untrusted_fulfillment_candidate": candidate.model_dump(mode="json"),
+                    "component_index_table": [{"component_id": fulfillment_component_id(route, inventory["inventory_fingerprint"]),
+                        "capability": route.capability} for route in candidate.routes],
                     "existing_capability_contracts": capabilities,
                     "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
                     "components_fingerprint": fulfillment_components_fingerprint(candidate)}, ensure_ascii=False),

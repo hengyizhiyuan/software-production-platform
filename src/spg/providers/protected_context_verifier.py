@@ -54,7 +54,7 @@ def _content_component(binding):
 
 
 def _current_contributions(obligation, bindings):
-    from spg.domain.governed_obligation import fulfillment_source_ref
+    from spg.domain.governed_obligation import fulfillment_source_ref, fulfillment_component_id
     output = []
     for binding in bindings:
         if binding.evidence_method != "EXACT_CANDIDATE_CONTENT" or binding.phase.value != "CURRENT_VERIFICATION":
@@ -64,6 +64,10 @@ def _current_contributions(obligation, bindings):
             obligation.context_class == "APPROVED_CONSTRAINT"
             and obligation.semantic_key == f"greenfield-constraint:{index}"
             for index in binding.work_constraint_indices)
+        if obligation.context_class == "DERIVED_VERIFICATION_OBLIGATION" and ":component:" in obligation.semantic_key:
+            matches = obligation.semantic_key == ref + ":component:" + fulfillment_component_id(
+                binding,
+                binding.projection_inventory_fingerprint)
         if not matches:
             continue
         basis = _content_component(binding)
@@ -115,7 +119,7 @@ class StaticProtectedContextVerifier:
     @staticmethod
     def _derived_obligations(bindings, package_fingerprint):
         from spg.domain.production_intelligence import ProtectedContextObligation
-        from spg.domain.governed_obligation import fulfillment_source_ref
+        from spg.domain.governed_obligation import fulfillment_source_ref, fulfillment_component_id
         selected = []
         for binding in bindings:
             if binding.evidence_method != "EXACT_CANDIDATE_CONTENT" or binding.phase.value != "CURRENT_VERIFICATION":
@@ -127,7 +131,10 @@ class StaticProtectedContextVerifier:
                 "source_record_ids": [str(identity) for identity in binding.source_record_ids],
                 "current_component_basis": _content_component(binding)}, ensure_ascii=False)
             selected.append(ProtectedContextObligation(context_class="DERIVED_VERIFICATION_OBLIGATION",
-                semantic_key=fulfillment_source_ref(binding), source_ref=fulfillment_source_ref(binding),
+                semantic_key=(fulfillment_source_ref(binding) + ":component:" + fulfillment_component_id(
+                    binding,
+                    binding.projection_inventory_fingerprint) if sum(fulfillment_source_ref(b) == fulfillment_source_ref(binding)
+                    for b in bindings) > 1 else fulfillment_source_ref(binding)), source_ref=fulfillment_source_ref(binding),
                 source_revision=str(binding.work_reality_revision_id), authority="WATT_WORK_DERIVED_CHECK",
                 content=content, content_digest=sha256(content.encode()).hexdigest(), package_fingerprint=package_fingerprint))
         return tuple(selected)
@@ -315,6 +322,7 @@ class StaticProtectedContextVerifier:
             if runtime is not None:
                 runtime.registry.close()
         checks = []
+        derived_by_key = {(item.context_class, item.semantic_key): binding for item, binding in zip(selected, derived_bindings)}
         for check in observed.checks:
             obligation = expected[(check.context_class, check.semantic_key)]
             checks.append({**obligation.model_dump(mode="json"),
@@ -328,4 +336,6 @@ class StaticProtectedContextVerifier:
                 "source_component_evidence": contributions[(check.context_class, check.semantic_key)],
                 "model": {"provider": response.provider.value, "effective_model": response.effective_model,
                     "request_id": response.request_id, "usage": asdict(response.usage)}})
+            if (check.context_class, check.semantic_key) in derived_by_key:
+                checks[-1]["binding"] = derived_by_key[(check.context_class, check.semantic_key)].model_dump(mode="json")
         return checks
