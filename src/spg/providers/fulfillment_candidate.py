@@ -235,6 +235,26 @@ def _formation_binding_choices(inventory, capabilities, owner_preconditions):
     return result
 
 
+def _formation_provenance_operands(choices, capabilities):
+    """Present the existing conditional proof operands at their point of use.
+
+    No support is selected or inserted. Minimal alternatives are copied from
+    the binding Owner; their union is a necessary field domain, not a proof
+    that an arbitrary combination is valid. The original Owner checks every
+    supplied support again, including polarity and exact correspondence.
+    """
+    result = []
+    for proof in choices["necessary_source_proofs"]:
+        index = proof["capability"]
+        alternatives = deepcopy(proof["minimal_support_sets"])
+        result.append({"c": index, "capability": capabilities[index]["capability"],
+            "u_required_alternatives": alternatives,
+            "u_allowed_original_source_ordinals": sorted({i for s in alternatives for i in s}),
+            "selection_rule": "SELECT_ONE_ENTAILED_PROOF; ALL_SELECTED_SUPPORTS_MUST_BE_VALID; "
+                "NO_DERIVED_SIBLING_OR_SELF_SUPPORT; NO_PERMISSION_OR_SEMANTIC_APPROVAL"})
+    return result
+
+
 def _formation_inventory_view(inventory):
     """Lossless request-only sharing under existing IR/item identities.
 
@@ -854,6 +874,13 @@ class ModelFulfillmentCandidateProvider:
                         inventory, capabilities, owner_preconditions), strict=True):
                     source["necessary_capability_domain"] = choices["candidate_capabilities"]
                     source["domain_meaning"] = choices["semantic_selection"]
+                    source["conditional_provenance_operands"] = _formation_provenance_operands(choices, capabilities)
+                    original = owner_preconditions["sources"][source["index"]]
+                    if "whole_source_context_only" in original:
+                        source["existing_context_prerequisites"] = {"whole_source_context_only":
+                            original["whole_source_context_only"], "meaning": "OWNER_STRUCTURAL_ELIGIBILITY_ONLY; INDEPENDENT_REVIEW_REQUIRED"}
+                    if "whole_source_context_retention" in choices:
+                        source["whole_source_context_retention"] = deepcopy(choices["whole_source_context_retention"])
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
                 instructions=(
                     "You propose a derived fulfillment plan for immutable admitted engineering meaning. "
@@ -886,7 +913,14 @@ class ModelFulfillmentCandidateProvider:
                     "the FIRST proposal too. Read each necessary_source_proofs entry as a conditional: IF you "
                     "independently choose that capability for this component, THEN u must contain every member "
                     "of one semantically correct proof alternative. The entry is not a request to emit that "
-                    "capability. Multiple structurally eligible gates do not mean the requirement forbids all "
+                    "capability. The same conditional_provenance_operands are joined beside each original "
+                    "source in source_index_table: use the u ordinals there for the capability you choose, "
+                    "not a Fact link, a sibling derived Work Constraint or the source's own s. "
+                    "Every selected u member must be in that capability's original-source domain AND satisfy "
+                    "the corresponding Owner predicate. Do not concatenate every proof alternative. "
+                    "In particular a future-stage proof cannot include a negated clause simply because "
+                    "it belongs to the same production item. These are operand prerequisites, never "
+                    "semantic approval. Multiple structurally eligible gates do not mean the requirement forbids all "
                     "their effects. Select capabilities from this component's actual admitted meaning, never "
                     "by enumerating eligible proof entries or importing the union of meanings in supporting sources. "
                     "First read source_index_table[s]."

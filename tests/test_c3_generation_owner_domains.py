@@ -23,6 +23,55 @@ def case():
     return revision, ir, inventory, plan, capabilities, preconditions
 
 
+def test_point_of_use_provenance_does_not_import_derived_constraints_or_select_supports():
+    from spg.providers.fulfillment_candidate import _formation_provenance_operands
+    from spg.application.governed_obligations import validate_projection_candidate
+    revision, ir, inventory, plan, capabilities, preconditions = case()
+    before = deepcopy(preconditions)
+    index = next(i for i,s in enumerate(inventory["sources"]) if s["kind"] == "WORK_CONSTRAINT")
+    choices = _formation_binding_choices(inventory, capabilities, preconditions)[index]
+    operands = _formation_provenance_operands(choices, capabilities)
+    assert operands
+    for observed, original in zip(operands, choices["necessary_source_proofs"], strict=True):
+        assert observed["u_required_alternatives"] == original["minimal_support_sets"]
+        assert observed["u_allowed_original_source_ordinals"] == sorted({i for p in original["minimal_support_sets"] for i in p})
+        assert index not in observed["u_allowed_original_source_ordinals"]
+        assert "NO_PERMISSION_OR_SEMANTIC_APPROVAL" in observed["selection_rule"]
+    substituted = plan.model_copy(update={"routes": tuple(r.model_copy(update={
+        "supporting_source_refs": (inventory["sources"][index]["source_ref"],)})
+        if r.source_ref == inventory["sources"][index]["source_ref"] else r for r in plan.routes)})
+    with pytest.raises(ValueError, match="SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"):
+        validate_projection_candidate(substituted, revision, ir, inventory, allow_review_pending=True)
+    assert preconditions == before
+
+
+def test_future_provenance_domain_excludes_negative_sibling_and_owner_rejects_it():
+    from spg.application.governed_obligations import fulfillment_inventory, validate_projection_candidate
+    from spg.providers.fulfillment_candidate import _formation_provenance_operands
+    revision, ir, _, plan, capabilities, _ = case()
+    original = "Leave a reviewable artifact for the Candidate gate."
+    goal = ir.current_production[0].model_copy(update={"scope": (original,)})
+    ir.current_production = (goal,)
+    ir.items = tuple(i.model_copy(update={"production": goal}) if i.production else i for i in ir.items)
+    revision.constraints = (original,)
+    inventory = fulfillment_inventory(revision, ir)
+    preconditions = _owner_source_preconditions(revision, ir, inventory, capabilities)
+    index = next(i for i,s in enumerate(inventory["sources"]) if s["kind"] == "WORK_CONSTRAINT")
+    negative = next(i for i,s in enumerate(inventory["sources"]) if s.get("clause_id") == "original-clause")
+    rows = _formation_provenance_operands(_formation_binding_choices(inventory, capabilities, preconditions)[index], capabilities)
+    seal = next(r for r in rows if r["capability"] == "CANDIDATE_SEAL")
+    assert negative not in seal["u_allowed_original_source_ordinals"]
+    from spg.domain.governed_obligation import FulfillmentRouteCandidate, FulfillmentComponentBasis
+    from spg.application.governed_obligations import _projection_binding
+    route = FulfillmentRouteCandidate(source_ref=inventory["sources"][index]["source_ref"],
+        capability="CANDIDATE_SEAL", work_constraint_indices=(0,),
+        supporting_source_refs=tuple(inventory["sources"][i]["source_ref"] for i in [*seal["u_required_alternatives"][0], negative]),
+        component_basis=FulfillmentComponentBasis(source_span_start=0, source_span_end=len(original), source_component_quote=original),
+        rationale="Negative sibling deliberately supplied as invalid future proof.")
+    with pytest.raises(ValueError, match="FUTURE_PHASE_SOURCE_UNPROVEN"):
+        _projection_binding(revision, ir, inventory, route, allow_calibrated=True, source_contract="v2")
+
+
 def test_request_schema_only_excludes_existing_owner_rejections_and_preserves_unresolved():
     _, _, inventory, _, capabilities, preconditions = case()
     original = deepcopy(_fulfillment_wire_schema())

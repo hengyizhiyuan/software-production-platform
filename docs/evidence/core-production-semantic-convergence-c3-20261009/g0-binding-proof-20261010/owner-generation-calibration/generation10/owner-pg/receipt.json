@@ -1,0 +1,55 @@
+{
+  "schema": "c3-semantic-owner-pg-regression-v1",
+  "started_at_utc": "2026-10-10T12:30:59.298228+00:00",
+  "ended_at_utc": "2026-10-10T12:34:25.093194+00:00",
+  "wall_seconds": 205.7949502489646,
+  "counts": {
+    "tests": 46,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 46
+  },
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "d251482328fc213210f73f489f019496c8bf6771",
+      "tree": "88191de52936f94d8284ef126e74e682ae07f2de"
+    },
+    "guardian": {
+      "revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+      "tree": "6066a6d6b8d91bec610021409ab320309ed0e437"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:661fb2af5feccadaddda00720d6a4f509bcdfa70ca8d46b52bdce98e8f7c7f6f",
+  "actual_container_id": "ee872778a956269603629dba0e6c0d618f748d557c1d2d0c05ef5c2c55a807d5",
+  "actual_postgres_image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+  "actual_postgres_container_id": "56c95044ea58d316079d7827387338fc178fafa374884640bcd288fe106e12d5",
+  "database_name": "c1_contract_continuity",
+  "migration_head": "20261007_72",
+  "network_internal": true,
+  "nodes": [
+    "tests/integration/test_c3_fulfillment_receipts.py",
+    "tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian",
+    "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records",
+    "tests/integration/test_c1_contract_continuity.py::test_real_delivery_authorization_entrypoints_deny_prohibited_effects",
+    "tests/integration/test_c1_contract_continuity.py::test_guardian_contract_rejects_fabricated_future_human_authority"
+  ],
+  "source_or_test_overlay": false,
+  "credentials_independently_generated": true,
+  "live_model_calls": 0,
+  "actual_ai_work_created": 0,
+  "fixture_only": true,
+  "original_database_access": false,
+  "existing_services_started": false,
+  "controller_sha256": "1c462fe3bf52640f26d20a8cab0044c0178d31c5c033dba3fa9f81d751bfd98e",
+  "claim": "ISOLATED_PG_OWNER_PERSISTENCE_AND_STATE_REGRESSION_NOT_REAL_G0"
+}
