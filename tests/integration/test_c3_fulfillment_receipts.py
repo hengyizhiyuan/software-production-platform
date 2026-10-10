@@ -1,6 +1,7 @@
 """C3 Work-owner receipt persistence on exact controlled C1 admission fixtures."""
 from uuid import UUID
 from tests.test_c3_fulfillment_capacity_representation import decode_review_input
+from spg.providers.fulfillment_candidate import _restore_formation_inventory_view
 
 import pytest
 
@@ -31,7 +32,7 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
     calls, reviews = [], []
     def generate(**request):
         payload = json.loads(request['input_text']); calls.append(payload)
-        inventory = payload['immutable_inventory']
+        inventory = _restore_formation_inventory_view(payload['immutable_inventory'], payload.get('existing_ir_item_table', {}))
         if 'untrusted_fulfillment_candidate' in payload:
             candidate = decode_review_input(payload)
             verdict = review(inventory, candidate)
@@ -175,7 +176,7 @@ def test_actual_compact_observation_replays_from_postgresql_without_repeating_fo
     def generate(**request):
         payload = json.loads(request["input_text"])
         calls.append(payload)
-        inventory = payload["immutable_inventory"]
+        inventory = _restore_formation_inventory_view(payload["immutable_inventory"], payload.get('existing_ir_item_table', {}))
         if "untrusted_fulfillment_candidate" in payload:
             from spg.domain.governed_obligation import FulfillmentProjectionCandidate
             plan = decode_review_input(payload)
@@ -277,7 +278,7 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
     def generate(**request):
         payload = json.loads(request['input_text'])
         calls.append(payload)
-        inventory = payload['immutable_inventory']
+        inventory = _restore_formation_inventory_view(payload['immutable_inventory'], payload.get('existing_ir_item_table', {}))
         inventories.append(inventory)
         if 'untrusted_fulfillment_candidate' in payload:
             plan = decode_review_input(payload)

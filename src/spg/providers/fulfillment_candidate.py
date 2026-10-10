@@ -551,6 +551,23 @@ def _review_component_table(inventory, candidate, capabilities):
     return rows
 
 
+def _review_result_identity_slots(inventory, candidate):
+    """Existing result identities in canonical order, without any judgement.
+
+    These are deterministic request operands, not completed review results.
+    The critic still fills every predicate/reason and the Owner validates the
+    untouched response, including duplicate/missing identities.
+    """
+    sources = [{"source_ref": source["source_ref"]} for source in inventory["sources"]]
+    components = [{"component_id": fulfillment_component_id(route, inventory["inventory_fingerprint"]),
+                   "capability": route.capability} for route in candidate.routes]
+    identities = [(r["component_id"], r["capability"]) for r in components]
+    if len(set(identities)) != len(identities):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_INPUT_IDENTITY_DRIFT")
+    return {"source_result_count": len(sources), "source_results": sources,
+            "component_result_count": len(components), "component_results": components}
+
+
 def _review_output_schema(inventory, candidate):
     """Request only existing review identities; no semantic answer is supplied.
 
@@ -1021,7 +1038,12 @@ class ModelFulfillmentCandidateProvider:
                     "the exact original slice, never missing meaning. The Owner already proved an exact round "
                     "trip to the canonical candidate; you still independently judge every component. "
                     "component_index_table corresponds to wire route order and supplies the original exact "
-                    "component_id/capability for each result. Return exactly one source result per inventory "
+                    "component_id/capability for each result. required_result_identity_slots supplies the "
+                    "complete canonical source_results/component_results identity skeleton and literal counts. "
+                    "Copy each identity exactly once in its supplied order and fill the existing reason and "
+                    "judgement fields independently; do not add another result when the same capability occurs "
+                    "in a different source or revisit a result after comparing a sibling. The skeleton supplies "
+                    "NO verdict, evidence or approval. Return exactly one source result per inventory "
                     "source, with no duplicate source_ref, and exactly one result per component table entry. "
                     "Judge ONLY the fixed submitted candidate whose fingerprint is supplied. You cannot "
                     "remove a route, treat it as already rejected, repair it in reason, or pretend another "
@@ -1057,6 +1079,7 @@ class ModelFulfillmentCandidateProvider:
                     "sufficiency. A whole-source reuse cannot conceal a lost semantic component. This review is only "
                     "derived-plan semantic validation, not Assurance, Verification PASS, a fact or Human authority."),
                 input_text=json.dumps({"immutable_inventory": inventory,
+                    "required_result_identity_slots": _review_result_identity_slots(inventory, candidate),
                     "component_index_table": _review_component_table(inventory, candidate, capabilities),
                     **_review_candidate_representation(inventory,candidate,capabilities),
                     "existing_capability_contracts": capabilities,

@@ -248,6 +248,26 @@ def test_wrong_review_identity_and_real_semantic_rejection_still_fail_without_ba
         validate_projection_candidate(plan, revision, ir, inventory, semantic_review=rejected)
 
 
+def test_review_identity_skeleton_contains_no_verdict_and_duplicates_still_fail():
+    from spg.providers.fulfillment_candidate import _review_result_identity_slots
+    from spg.domain.governed_obligation import fulfillment_component_id
+    from spg.application.governed_obligations import validate_projection_candidate
+    from tests.test_c3_semantic_contract_calibration import review
+    revision, ir, inventory, plan, _, _ = case()
+    original = deepcopy(plan.model_dump(mode="json"))
+    slots = _review_result_identity_slots(inventory, plan)
+    assert slots["source_results"] == [{"source_ref": s["source_ref"]} for s in inventory["sources"]]
+    assert slots["component_results"] == [{"component_id": fulfillment_component_id(r, inventory["inventory_fingerprint"]),
+                                         "capability": r.capability} for r in plan.routes]
+    assert slots["source_result_count"] == len(inventory["sources"])
+    assert slots["component_result_count"] == len(plan.routes)
+    verdict = review(inventory, plan)
+    duplicated = verdict.model_copy(update={"component_results": (*verdict.component_results, verdict.component_results[0])})
+    with pytest.raises(ValueError, match="COMPONENT_REVIEW_IDENTITY_DRIFT"):
+        validate_projection_candidate(plan, revision, ir, inventory, semantic_review=duplicated)
+    assert plan.model_dump(mode="json") == original
+
+
 def test_legacy_review_shape_is_not_rewritten_by_generation_constraints():
     from spg.providers.fulfillment_candidate import _review_output_schema
     from spg.domain.governed_obligation import FulfillmentSemanticReviewCandidate
