@@ -10,7 +10,7 @@ from spg.application.governed_obligations import form_fulfillment_projection, fu
 from spg.domain.governed_obligation import fulfillment_source_ref
 from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
 from spg.infrastructure.model_runtime import ModelFailureKind, ModelProviderError
-from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider, provider_failure_observation, _REVIEW_INPUT_CONTRACT
+from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider, provider_failure_observation
 from tests.test_c3_fulfillment_components import current_lifecycle_candidate
 from tests.test_fulfillment_projection import basis, Oracle
 
@@ -23,6 +23,8 @@ class ControlledRuntime:
         self.calls += 1
         if isinstance(self.output, Exception):
             raise self.output
+        if callable(self.output):
+            return self.output(**kwargs)
         return self.output
 
     def close(self):
@@ -112,18 +114,16 @@ def test_terminal_failure_preserves_exact_sources_and_same_basis_never_reopens_c
     runtimes = [failure_runtime]
     if phase == "SEMANTIC_REVIEW":
         from tests.test_c3_fulfillment_capacity_representation import controlled_wire
-        from spg.application.governed_obligations import _owner_source_preconditions, fulfillment_capability_contracts
-        wire, _context = controlled_wire(inventory, plan, owner_preconditions=
-            _owner_source_preconditions(revision, ir, inventory, fulfillment_capability_contracts(),
-                generation_view_contract="existing-lossless-source-consumer-input-v3",
-                raw_operand_observation_contract="existing-original-wire-owner-operands-v1",
-                review_input_contract=_REVIEW_INPUT_CONTRACT,
-                semantic_selection_input_contract="existing-primary-meaning-owner-reference-v2",
-                generation_prerequisite_contract="existing-owner-binding-generation-v2"))
-        formation_runtime = ControlledRuntime(StructuredModelResult(output_text=json.dumps(wire),
-            provider=ModelProvider.DEEPSEEK, requested_model="controlled", effective_model="controlled",
-            request_id="request-controlled-formation", usage=ModelUsage(total_tokens=17),
-            timing=ModelTiming(completed_seconds=0.1)))
+        def formation_result(**request):
+            payload = json.loads(request["input_text"])
+            wire, _context = controlled_wire(inventory, plan,
+                feedback=payload.get("same_basis_validation_feedback"),
+                owner_preconditions=payload["owner_source_preconditions"])
+            return StructuredModelResult(output_text=json.dumps(wire),
+                provider=ModelProvider.DEEPSEEK, requested_model="controlled", effective_model="controlled",
+                request_id="request-controlled-formation", usage=ModelUsage(total_tokens=17),
+                timing=ModelTiming(completed_seconds=0.1))
+        formation_runtime = ControlledRuntime(formation_result)
         runtimes.insert(0, formation_runtime)
     pending_runtimes = iter(runtimes)
     provider = ModelFulfillmentCandidateProvider(lambda: next(pending_runtimes))
