@@ -1,0 +1,1 @@
+{"result": "COUNTERFACTUAL_SEMANTIC_PROOF_QUALIFIED", "terminal_reason": "COUNTERFACTUAL_ONLY_NOT_FORMATION_PASS", "logical_calls": 2, "formation_attempt_count": 0, "feedback_count": 0, "observed_terminal_usage_sum": {"input_tokens": 74470, "output_tokens": 12155, "cached_tokens": 2176, "reasoning_tokens": 0, "total_tokens": 86625}, "wall_seconds": 40.24774761201115}

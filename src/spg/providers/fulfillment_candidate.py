@@ -210,7 +210,9 @@ def _formation_source_table(context, *, inventory=None):
     for index, (entry, text) in enumerate(zip(context["tables"]["sources"], context["source_texts"], strict=True)):
         if sha256(text.encode()).hexdigest() != entry["text_sha256"] or len(text) != entry["text_length"]:
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_SOURCE_TABLE_IDENTITY_DRIFT")
-        row = {"index": index, **entry, "primary_semantic_text": text}
+        row = {"index": index, **entry, "primary_semantic_text": text,
+            "whole_source_basis": {"a": 0, "z": len(text), "q": None},
+            "basis_role": "EXACT_TEXT_GEOMETRY_ONLY; NOT_A_COMPONENT_OR_CAPABILITY_PROPOSAL"}
         if inventory is not None:
             source = inventory["sources"][index]
             if source["source_ref"] != entry["source_ref"] or source["kind"] != entry["kind"]:
@@ -385,8 +387,8 @@ def _existing_consumer_contracts(capabilities):
             "Check original content components against exact Candidate revision/tree and source witnesses or independently verified linked Facts.",
             "Does not authorize execution effects, seal a Candidate, or prove future Human acceptance."),
         "EXACT_GIT_DIFF_SCOPE": ("EXACT_CHANGED_PATH_SET", (_checked_paths, evaluate_constraint_routes),
-            "Compare actual Git changed paths from exact source baseline to Candidate with original authorized write scope and forbidden paths.",
-            "Does not prove permission to deploy, publish, preview, or any execution effect."),
+            "Compare the complete actual Git changed-path set, including file additions, deletions and modifications, from exact source baseline to Candidate with the original exclusive authorized write scope and forbidden paths. Any changed file outside that set fails; the Native SourceVector write scope must match the same exact target set.",
+            "Does not prove behavior inside an allowed file, the number of rendered screens, or permission to deploy, publish, preview, or any execution effect."),
         "EXACT_PERMISSION_GATE": ("ENFORCED_EFFECT_PERMISSION", (evaluate_constraint_routes,
             evaluate_continuous_gates, assert_delivery_effect_permitted),
             "Check exact Native capability grants, original prohibition references and armed effect gates; continuous obligations require applicable Owner audit.",
@@ -819,6 +821,13 @@ class ModelFulfillmentCandidateProvider:
                     "q=null lets the Owner restore the exact source slice. If exact offsets are uncertain, "
                     "q may be the original exact component quote; the existing unique-quote locator may "
                     "correct offsets, but repeated or invented quotes cannot establish an ambiguous location. "
+                    "whole_source_basis supplies exact geometry for the whole original source. You may "
+                    "choose that basis for consumers that legitimately share the whole qualified contribution; "
+                    "it is not a proposed component or a semantic approval. Otherwise quote an exact contiguous "
+                    "component in q rather than guessing its offsets. Keep shared negation, conjunctions and "
+                    "qualifiers within the declared bases; a bare action word loses its governing context. "
+                    "Multiple different consumers can share one original basis when independently warranted, "
+                    "but a whole-source basis must not hide missing semantics or an unsupported consumer. "
                     "Choose all component boundaries and semantic links yourself; the Owner only expands metadata. "
                     "For a FACT source, authoritative_semantic_fact is the admitted meaning: keep its original "
                     "relation, value, scope, qualifiers and authority. Its primary_semantic_text is the exact "
@@ -841,6 +850,12 @@ class ModelFulfillmentCandidateProvider:
                     "source already states the allowlist. A request to verify content belongs to current content "
                     "Verification; a request to leave a reviewable Candidate belongs to the actual Candidate gate. "
                     "Keep those components separate and cite only original sources that entail each one. "
+                    "Interpret an exclusion relative to the complete admitted production target and qualified "
+                    "Scope, not an isolated noun. Existing Git Diff scope can reject any additional file outside "
+                    "the exclusive target set, even if there is no capability named after that file's business "
+                    "purpose. It cannot prove arbitrary content or behavior inside permitted files: those "
+                    "contributions need their own applicable consumer or remain UNRESOLVED. Do not infer a "
+                    "new execution prohibition from a repository output restriction. "
                     "If a clause expresses several requirements, all component spans together must cover its "
                     "operators, conjunctions and qualifiers too. Overlap is allowed for shared grammatical "
                     "context, but never silently omit part of the original text. "

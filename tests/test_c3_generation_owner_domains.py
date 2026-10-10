@@ -267,3 +267,22 @@ def test_review_request_judges_fixed_plan_after_source_consumer_comparison():
     # This describes an independent verdict; no new repair or admission output.
     assert set(schema["properties"]) == {"inventory_fingerprint", "candidate_fingerprint",
         "components_fingerprint", "source_results", "component_results"}
+
+
+def test_source_geometry_view_cannot_change_components_or_relax_lost_operators():
+    from spg.providers.fulfillment_candidate import _formation_source_table
+    from spg.domain.governed_obligation import fulfillment_source_semantic_text
+    _, _, inventory, _, capabilities, preconditions = case()
+    before = deepcopy(inventory)
+    context = _fulfillment_wire_context(inventory, capabilities, owner_preconditions=preconditions)
+    rows = _formation_source_table(context, inventory=inventory)
+    for source, row in zip(inventory["sources"], rows, strict=True):
+        assert row["whole_source_basis"] == {"a": 0, "z": len(fulfillment_source_semantic_text(source)), "q": None}
+        assert "NOT_A_COMPONENT" in row["basis_role"]
+        assert "capability" not in row["whole_source_basis"]
+    assert inventory == before
+    # Geometry is a read-only view, not an automatic extension of a model span.
+    inv, caps, _, wire = wire_case(preconditions)
+    wire["routes"][0]["a"] = 1
+    with pytest.raises(_FulfillmentWireValidationError, match="SOURCE_CONTRIBUTION_LOST"):
+        _decode_fulfillment_candidate_wire(json.dumps(wire), inv, caps, owner_preconditions=preconditions)
