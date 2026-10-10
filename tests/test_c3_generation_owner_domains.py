@@ -320,6 +320,10 @@ def test_generation_requires_original_quote_for_partial_components_without_chang
     schema = _formation_output_schema(inventory, capabilities, owner_preconditions=preconditions)
     for branch in schema["properties"]["routes"]["items"]["anyOf"]:
         guards = branch["anyOf"]
+        if len(guards) == 1:
+            assert guards[0]["properties"]["q"]["type"] == "string"
+            assert guards[0]["properties"]["q"]["maxLength"] == branch["properties"]["z"]["maximum"] - 1
+            continue
         assert guards[0]["properties"]["a"]["enum"] == [0]
         length, = guards[0]["properties"]["z"]["enum"]
         assert guards == [
@@ -390,3 +394,48 @@ def test_shared_schema_fields_preserve_exact_original_wire_restrictions():
     assert canonical["f"]["items"]["enum"] == [i for i,s in enumerate(inventory["sources"]) if s["kind"] == "FACT"]
     assert canonical["t"]["items"]["enum"] == list(range(len(inventory["exact_target_paths"])))
     assert schema["$defs"]["_FulfillmentCompactRoute"]["additionalProperties"] is False
+
+
+def test_whole_required_constraint_retention_observes_owner_without_discarding_partial_background():
+    from spg.application.governed_obligations import _projection_binding
+    revision, ir, inventory, plan, capabilities, preconditions = case()
+    source = next(s for s in inventory["sources"] if s["kind"] == "WORK_CONSTRAINT")
+    ordinal = inventory["sources"].index(source)
+    row = preconditions["sources"][ordinal]["whole_source_context_retention"]
+    assert not row["whole_source_eligible"] and row["required_support_alternatives"] == []
+    original = next(r for r in plan.routes if r.source_ref == source["source_ref"])
+    with pytest.raises(ValueError, match="SOURCE_CORRESPONDENCE_UNPROVEN"):
+        _projection_binding(revision, ir, inventory, original.model_copy(update={"capability": "RETAIN_CONTEXT"}), allow_calibrated=True)
+    branches = _formation_output_schema(inventory, capabilities, owner_preconditions=preconditions)["properties"]["routes"]["items"]["anyOf"]
+    retained = next(b for b in branches if ordinal in b["properties"]["s"]["enum"] and row["capability"] in b["properties"]["c"]["enum"])
+    assert retained["anyOf"] == [{"properties": {"q": {"type": "string", "minLength": 1, "maxLength": len(source["payload"]["content"]) - 1}}}]
+    # Historical v4 requests still recompute exactly their original fields.
+    historical = _owner_source_preconditions(revision, ir, inventory, capabilities, typed_prerequisite_contract="existing-owner-typed-prerequisites-v4")
+    assert all("whole_source_context_retention" not in r for r in historical["sources"])
+
+
+def test_corresponding_observed_context_constraint_keeps_legal_whole_retention():
+    from spg.application.governed_obligations import fulfillment_inventory, _projection_binding
+    from spg.domain.governed_obligation import FulfillmentRouteCandidate
+    from spg.domain.intent_realization import SemanticKind
+    from spg.domain.interaction_actions import ActionSpeechAct
+    revision, ir, _, _, capabilities, _ = case()
+    text = "The repository owner recorded an observational background convention."
+    item = ir.items[0].model_copy(update={"item_id": "observed-background", "kind": SemanticKind.FACT,
+        "statement": text, "production": None, "action": None, "requires_human": False})
+    clause = ir.clauses[0].model_copy(update={"semantic_item_ids": (item.item_id,), "clause_id": "observed-background-clause",
+        "source_text": text, "modality": "ASSERTION", "polarity": "AFFIRMATIVE", "requested_effects": (),
+        "speech_act": ActionSpeechAct.DISCUSSION})
+    ir.items = (*ir.items, item); ir.clauses = (*ir.clauses, clause)
+    revision.constraints = (*revision.constraints, text)
+    inventory = fulfillment_inventory(revision, ir)
+    preconditions = _owner_source_preconditions(revision, ir, inventory, capabilities)
+    source = next(s for s in inventory["sources"] if s["kind"] == "WORK_CONSTRAINT" and s["payload"]["content"] == text)
+    row = preconditions["sources"][inventory["sources"].index(source)]["whole_source_context_retention"]
+    assert row["whole_source_eligible"] and row["required_support_alternatives"]
+    refs = tuple(inventory["sources"][i]["source_ref"] for i in row["required_support_alternatives"][0])
+    route = FulfillmentRouteCandidate(source_ref=source["source_ref"], capability="RETAIN_CONTEXT",
+        work_constraint_indices=(source["index"],), supporting_source_refs=refs,
+        component_basis={"source_span_start": 0, "source_span_end": len(text), "source_component_quote": text},
+        rationale="Controlled Owner context prerequisite, not a real admission.")
+    assert _projection_binding(revision, ir, inventory, route, allow_calibrated=True).state == "RETAINED_CONTEXT"

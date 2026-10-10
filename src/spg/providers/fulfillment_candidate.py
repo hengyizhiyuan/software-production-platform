@@ -147,15 +147,23 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
             length = len(fulfillment_source_semantic_text(source))
             operands = {}
             for capability in row["candidate_capabilities"]:
+                context = row.get("whole_source_context_retention")
+                partial_context_only = bool(context and capability == context["capability"]
+                    and not context["whole_source_eligible"])
+                if partial_context_only and length <= 1:
+                    continue
                 proof = next((p for p in row["necessary_source_proofs"] if p["capability"] == capability), None)
                 support = tuple(sorted({i for alternative in proof["minimal_support_sets"] for i in alternative})) if proof else None
                 minimum = min(len(s) for s in proof["minimal_support_sets"]) if proof else None
-                operands.setdefault((support, minimum), []).append(capability)
-            for (support, minimum), allowed in operands.items():
-                key = (length, tuple(allowed), support, minimum)
+                if context and capability == context["capability"] and context["whole_source_eligible"]:
+                    support = tuple(sorted({i for alternative in context["required_support_alternatives"] for i in alternative}))
+                    minimum = min(len(s) for s in context["required_support_alternatives"])
+                operands.setdefault((support, minimum, partial_context_only), []).append(capability)
+            for (support, minimum, partial_context_only), allowed in operands.items():
+                key = (length, tuple(allowed), support, minimum, partial_context_only)
                 groups.setdefault(key, []).append(row["source"])
         branches = []
-        for (length, allowed, support, minimum), sources in groups.items():
+        for (length, allowed, support, minimum, partial_context_only), sources in groups.items():
             branch = deepcopy(schema["$defs"]["_FulfillmentCompactRoute"])
             branch["properties"]["s"]["enum"] = sources
             branch["properties"]["c"]["enum"] = list(allowed)
@@ -170,6 +178,12 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
                 {"properties": {"q": {"type": "null"}, "a": {"enum": [0]}, "z": {"enum": [length]}}},
                 {"properties": {"q": {"type": "string", "minLength": 1}}},
             ]
+            if partial_context_only:
+                # The binding Owner cannot retain this entire required
+                # constraint. Keep legal mixed-source partial background open
+                # to the existing component and independent Review checks.
+                branch["anyOf"] = [{"properties": {"q": {
+                    "type": "string", "minLength": 1, "maxLength": length - 1}}}]
             if support is not None:
                 branch["properties"]["u"]["items"]["enum"] = list(support)
                 branch["properties"]["u"]["minItems"] = minimum
@@ -214,6 +228,8 @@ def _formation_binding_choices(inventory, capabilities, owner_preconditions):
         result.append({"source": index, "source_ref": source["source_ref"],
             "candidate_capabilities": [i for i in range(len(capabilities)) if i not in indices],
             "necessary_source_proofs": deepcopy(row.get("necessary_source_proofs", [])),
+            **({"whole_source_context_retention": deepcopy(row["whole_source_context_retention"])}
+               if "whole_source_context_retention" in row else {}),
             "rejected_prerequisites": deepcopy(rejected),
             "semantic_selection": "UNPROVEN; SELECT_FROM_ORIGINAL_COMPONENT; NO_PERMISSION_OR_EVIDENCE"})
     return result
@@ -916,6 +932,12 @@ class ModelFulfillmentCandidateProvider:
                     "qualifiers within the declared bases; a bare action word loses its governing context. "
                     "Multiple different consumers can share one original basis when independently warranted, "
                     "but a whole-source basis must not hide missing semantics or an unsupported consumer. "
+                    "whole_source_context_retention reports the existing binding Owner's necessary provenance "
+                    "check for Work Constraints. If whole_source_eligible=false, do not retain the whole "
+                    "constraint as context, alone or alongside an executable binding. This is not optional "
+                    "background: choose a lawful required binding or UNRESOLVED. A genuinely distinct partial "
+                    "background component may still be proposed with its exact quote, with all current meaning "
+                    "separately bound and independently reviewed. Eligibility supplies no semantic approval. "
                     "Choose all component boundaries and semantic links yourself; the Owner only expands metadata. "
                     "For a FACT source, authoritative_semantic_fact is the admitted meaning: keep its original "
                     "relation, value, scope, qualifiers and authority. Its primary_semantic_text is the exact "
