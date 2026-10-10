@@ -1,0 +1,1513 @@
+..............F............FF...........F........F...................... [ 70%]
+.....................F.FF...FF                                           [100%]
+=================================== FAILURES ===================================
+_ test_distinct_unresolved_component_is_preserved_and_runtime_admission_stops __
+
+    def test_distinct_unresolved_component_is_preserved_and_runtime_admission_stops():
+        rev,ir,inv,plan=mixed_source("UNRESOLVED")
+>       result=form_fulfillment_projection(rev,ir,provider=ComponentOracle([plan]))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_c3_semantic_contract_calibration.py:130: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/application/governed_obligations.py:1459: in form_fulfillment_projection
+    return _form_fulfillment_projection(revision, ir, **arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1624: in _form_fulfillment_projection
+    return finish(candidate, reason, passed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1503: in finish
+    return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1269: in unresolved_projection
+    bindings = validate_projection_candidate(FulfillmentProjectionCandidate(
+src/spg/application/governed_obligations.py:1061: in validate_projection_candidate
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+src/spg/application/governed_obligations.py:1061: in <genexpr>
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+revision = namespace(id=UUID('914ac519-13e2-4b36-8450-3846d3448352'), work_id=UUID('17eedf09-8b03-4f92-ba11-41bdc52e0721'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+ir = namespace(id=UUID('1607105d-b055-4c0f-b838-e059d2468ecc'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False)
+inventory = {'work_id': '17eedf09-8b03-4f92-ba11-41bdc52e0721', 'work_reality_revision_id': '914ac519-13e2-4b36-8450-3846d3448352'...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'semantic_ir_id': '1607105d-b055-4c0f-b838-e059d2468ecc', ...}
+route = FulfillmentRouteCandidate(source_ref='work-constraint:914ac519-13e2-4b36-8450-3846d3448352:0', capability='UNRESOLVED'...straint_indices=(0,), target_paths=(), supporting_source_refs=(), rationale='UNRESOLVED_BINDING', component_basis=None)
+reviewed_background_refs = frozenset(), allow_calibrated = False
+background_components = frozenset()
+
+    def _projection_binding(revision, ir, inventory, route, *, reviewed_background_refs=(),
+                            allow_calibrated=False, background_components=()):
+        source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
+        if source is None:
+            raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
+        component, owner, phase, method, gate = _capability_tuple(route.capability)
+        from spg.domain.governed_obligation import fulfillment_component_id
+        partial_background = fulfillment_component_id(route, inventory["inventory_fingerprint"]) in background_components
+        if len(set(route.work_constraint_indices)) != len(route.work_constraint_indices) or any(
+                index < 0 or index >= len(revision.constraints) for index in route.work_constraint_indices):
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_REFERENCE_INVALID")
+        if len(set(route.target_paths)) != len(route.target_paths) or set(route.target_paths) - set(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_SCOPE_EXPANSION")
+        if method == "EXACT_GIT_DIFF_SCOPE" and tuple(route.target_paths) != tuple(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_DIFF_SCOPE_INCOMPLETE")
+        if source["kind"] == "WORK_CONSTRAINT":
+            if route.work_constraint_indices != (source["index"],):
+                raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        elif route.work_constraint_indices:
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        if len(set(route.supporting_source_refs)) != len(route.supporting_source_refs) or any(
+                ref not in {entry["source_ref"] for entry in inventory["sources"]}
+                for ref in route.supporting_source_refs):
+            raise ValueError("OBLIGATION_SUPPORTING_SOURCE_SUBSTITUTED")
+        if method == "EXACT_CANDIDATE_CONTENT" and not route.target_paths:
+            raise ValueError("OBLIGATION_CONTENT_TARGET_UNRESOLVED")
+        state = "UNRESOLVED" if owner is FulfillmentOwner.UNRESOLVED else (
+            "RETAINED_CONTEXT" if phase is FulfillmentPhase.CONTEXT_RETENTION else "BOUND_PENDING_EVIDENCE")
+        common = dict(component=component, owner=owner, phase=phase, evidence_method=method,
+            gate_ref=gate, source_revision=inventory["source_revision"], target_paths=route.target_paths,
+            projection_inventory_fingerprint=inventory["inventory_fingerprint"],
+            work_constraint_indices=route.work_constraint_indices,
+            supporting_source_refs=route.supporting_source_refs, state=state,
+            component_basis=route.component_basis)
+        if source["kind"] in {"WORK_CONSTRAINT", "WORK_CONTEXT", "IR_ITEM"}:
+            if source["kind"] == "IR_ITEM":
+                item = next(item for item in ir.items if item.item_id == source["item_id"])
+                origins = {p.origin for p in item.provenance}
+                if state == "RETAINED_CONTEXT" and (item.kind is not SemanticKind.FACT
+                        or item.action is not None or item.production is not None
+                        or item.requires_human or origins != {SemanticOrigin.REPOSITORY_OBSERVED}):
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_NOT_OBSERVED_CONTEXT")
+                if state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_CAPABILITY_UNRESOLVED")
+                records = tuple(dict.fromkeys(p.source_record_id for p in item.provenance if p.source_record_id is not None))
+                quote = item.statement
+                provenance = [p.model_dump(mode="json") for p in item.provenance]
+                item_id = item.item_id
+            else:
+                records = tuple(revision.source_record_ids)
+                quote = source["payload"]["content"]
+                provenance = {"work_reality_revision_id": str(revision.id),
+                              "source_record_ids": [str(value) for value in records]}
+                item_id = str(source["index"])
+                if source["kind"] == "WORK_CONTEXT" and state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT")
+                if source["kind"] == "WORK_CONSTRAINT":
+                    supporting = [entry for entry in inventory["sources"] if entry["source_ref"] in route.supporting_source_refs]
+                    clauses = [next(c for c in ir.clauses if c.clause_id == entry["clause_id"])
+                               for entry in supporting if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
+                    if not work_constraint_sources_correspond(ir, quote, supporting, component=component,
+                            phase=phase, semantic_component_declared=route.component_basis is not None,
+                            calibrated=allow_calibrated):
+>                       raise ValueError("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
+E                       ValueError: OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN
+
+src/spg/application/governed_obligations.py:741: ValueError
+_ test_semantic_mismatch_is_bounded_and_same_basis_does_not_repeat_either_call _
+
+    def test_semantic_mismatch_is_bounded_and_same_basis_does_not_repeat_either_call():
+        revision,ir,inventory,plan=current_lifecycle_candidate()
+        oracle=ReviewedOracle([plan,plan],reviews=(False,False))
+>       result=form_fulfillment_projection(revision,ir,provider=oracle)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_c3_fulfillment_components.py:88: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/application/governed_obligations.py:1459: in form_fulfillment_projection
+    return _form_fulfillment_projection(revision, ir, **arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1624: in _form_fulfillment_projection
+    return finish(candidate, reason, passed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1503: in finish
+    return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1269: in unresolved_projection
+    bindings = validate_projection_candidate(FulfillmentProjectionCandidate(
+src/spg/application/governed_obligations.py:1061: in validate_projection_candidate
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+src/spg/application/governed_obligations.py:1061: in <genexpr>
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+revision = namespace(id=UUID('144071f4-0fd2-4b48-9813-f9beb9b09741'), work_id=UUID('dc3237f8-c914-4c01-8ecf-ed9151d085e8'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+ir = namespace(id=UUID('40eea3d6-20fb-4e07-bc85-f76a31e39f4d'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False)
+inventory = {'work_id': 'dc3237f8-c914-4c01-8ecf-ed9151d085e8', 'work_reality_revision_id': '144071f4-0fd2-4b48-9813-f9beb9b09741'...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'semantic_ir_id': '40eea3d6-20fb-4e07-bc85-f76a31e39f4d', ...}
+route = FulfillmentRouteCandidate(source_ref='work-constraint:144071f4-0fd2-4b48-9813-f9beb9b09741:0', capability='UNRESOLVED'..., target_paths=(), supporting_source_refs=(), rationale='OBLIGATION_SEMANTIC_COMPONENT_MISMATCH', component_basis=None)
+reviewed_background_refs = frozenset(), allow_calibrated = False
+background_components = frozenset()
+
+    def _projection_binding(revision, ir, inventory, route, *, reviewed_background_refs=(),
+                            allow_calibrated=False, background_components=()):
+        source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
+        if source is None:
+            raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
+        component, owner, phase, method, gate = _capability_tuple(route.capability)
+        from spg.domain.governed_obligation import fulfillment_component_id
+        partial_background = fulfillment_component_id(route, inventory["inventory_fingerprint"]) in background_components
+        if len(set(route.work_constraint_indices)) != len(route.work_constraint_indices) or any(
+                index < 0 or index >= len(revision.constraints) for index in route.work_constraint_indices):
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_REFERENCE_INVALID")
+        if len(set(route.target_paths)) != len(route.target_paths) or set(route.target_paths) - set(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_SCOPE_EXPANSION")
+        if method == "EXACT_GIT_DIFF_SCOPE" and tuple(route.target_paths) != tuple(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_DIFF_SCOPE_INCOMPLETE")
+        if source["kind"] == "WORK_CONSTRAINT":
+            if route.work_constraint_indices != (source["index"],):
+                raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        elif route.work_constraint_indices:
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        if len(set(route.supporting_source_refs)) != len(route.supporting_source_refs) or any(
+                ref not in {entry["source_ref"] for entry in inventory["sources"]}
+                for ref in route.supporting_source_refs):
+            raise ValueError("OBLIGATION_SUPPORTING_SOURCE_SUBSTITUTED")
+        if method == "EXACT_CANDIDATE_CONTENT" and not route.target_paths:
+            raise ValueError("OBLIGATION_CONTENT_TARGET_UNRESOLVED")
+        state = "UNRESOLVED" if owner is FulfillmentOwner.UNRESOLVED else (
+            "RETAINED_CONTEXT" if phase is FulfillmentPhase.CONTEXT_RETENTION else "BOUND_PENDING_EVIDENCE")
+        common = dict(component=component, owner=owner, phase=phase, evidence_method=method,
+            gate_ref=gate, source_revision=inventory["source_revision"], target_paths=route.target_paths,
+            projection_inventory_fingerprint=inventory["inventory_fingerprint"],
+            work_constraint_indices=route.work_constraint_indices,
+            supporting_source_refs=route.supporting_source_refs, state=state,
+            component_basis=route.component_basis)
+        if source["kind"] in {"WORK_CONSTRAINT", "WORK_CONTEXT", "IR_ITEM"}:
+            if source["kind"] == "IR_ITEM":
+                item = next(item for item in ir.items if item.item_id == source["item_id"])
+                origins = {p.origin for p in item.provenance}
+                if state == "RETAINED_CONTEXT" and (item.kind is not SemanticKind.FACT
+                        or item.action is not None or item.production is not None
+                        or item.requires_human or origins != {SemanticOrigin.REPOSITORY_OBSERVED}):
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_NOT_OBSERVED_CONTEXT")
+                if state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_CAPABILITY_UNRESOLVED")
+                records = tuple(dict.fromkeys(p.source_record_id for p in item.provenance if p.source_record_id is not None))
+                quote = item.statement
+                provenance = [p.model_dump(mode="json") for p in item.provenance]
+                item_id = item.item_id
+            else:
+                records = tuple(revision.source_record_ids)
+                quote = source["payload"]["content"]
+                provenance = {"work_reality_revision_id": str(revision.id),
+                              "source_record_ids": [str(value) for value in records]}
+                item_id = str(source["index"])
+                if source["kind"] == "WORK_CONTEXT" and state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT")
+                if source["kind"] == "WORK_CONSTRAINT":
+                    supporting = [entry for entry in inventory["sources"] if entry["source_ref"] in route.supporting_source_refs]
+                    clauses = [next(c for c in ir.clauses if c.clause_id == entry["clause_id"])
+                               for entry in supporting if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
+                    if not work_constraint_sources_correspond(ir, quote, supporting, component=component,
+                            phase=phase, semantic_component_declared=route.component_basis is not None,
+                            calibrated=allow_calibrated):
+>                       raise ValueError("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
+E                       ValueError: OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN
+
+src/spg/application/governed_obligations.py:741: ValueError
+_______ test_review_pending_outcome_unknown_is_not_repeated_after_resume _______
+
+revision = namespace(id=UUID('3fd3186d-e9b4-4049-9a77-ab1d7bdb878a'), work_id=UUID('75f8733e-d3a3-4f8c-836f-34fade2394b4'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+ir = namespace(id=UUID('58a7ade5-f2f8-4cd2-9da6-7666c2bff352'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False)
+provider = <test_c3_fulfillment_components.ReviewedOracle object at 0x7f2b8ae00cd0>
+database = None, source_revision = None, exact_target_paths = ()
+_started = 462890.549616221
+
+    def _form_fulfillment_projection(revision, ir, *, provider, database=None,
+                                    source_revision=None, exact_target_paths=(), _started=None):
+        """Two cumulative candidates on one basis, with recoverable Owner receipts."""
+        inventory = fulfillment_inventory(revision, ir, source_revision=source_revision,
+                                          exact_target_paths=exact_target_paths)
+        if not hasattr(provider, "_fulfillment_receipts"):
+            provider._fulfillment_receipts = []
+        recorder = FulfillmentFormationReceipts(revision, inventory, database=database,
+                                               memory=provider._fulfillment_receipts)
+        started = monotonic() if _started is None else _started
+        capabilities = fulfillment_capability_contracts()
+        def finish(candidate, reason, passed):
+            rows = recorder.records()
+            semantic_review = next((row.get("semantic_review") for row in reversed(rows)
+                if row["stage"] == "CANDIDATE_VALIDATED" and row.get("validation_passed")), None)
+            review_row = next((row for row in reversed(rows) if row["stage"] == "SEMANTIC_REVIEW_VALIDATED"
+                and row.get("validation_passed") and row.get("semantic_review") == semantic_review), None)
+            capability_fingerprint = canonical_fingerprint(capabilities) if semantic_review is None else (
+                None if review_row is None else review_row.get("capabilities_fingerprint"))
+            if semantic_review is not None and capability_fingerprint != canonical_fingerprint(capabilities):
+                raise ValueError("OBLIGATION_SEMANTIC_REVIEW_CAPABILITIES_DRIFT")
+            receipt = {"owner": "WORK_FULFILLMENT_PROJECTION", "inventory_fingerprint": inventory["inventory_fingerprint"],
+                "source_revision": inventory["source_revision"], "work_reality_revision_id": str(revision.id),
+                "exact_target_paths": inventory["exact_target_paths"], "bounded_feedback_limit": 1,
+                "candidate_attempt_limit": 2, "semantic_review_calls_per_candidate_limit": 1, "maximum_model_calls": 4,
+                "semantic_review": semantic_review, "capabilities_fingerprint": capability_fingerprint,
+                "semantic_review_receipt_refs": [f"work-plan-receipt:{row['receipt_id']}" for row in rows if row["stage"].startswith("SEMANTIC_REVIEW_")],
+                "provider_call_count": sum(row["stage"] in {"MODEL_REQUEST_PENDING", "SEMANTIC_REVIEW_PENDING"} for row in rows),
+                "observed_model_call_count": sum(row["stage"] in {"MODEL_RESPONSE_OBSERVED", "SEMANTIC_REVIEW_OBSERVED"}
+                    and isinstance(row.get("model"), dict) and not row["model"].get("fixture", False) for row in rows),
+                "attempt_count": sum(row["stage"] == "MODEL_REQUEST_PENDING" for row in rows),
+                "receipt_refs": [f"work-plan-receipt:{row['receipt_id']}" for row in rows],
+                "candidate_attempts": list(rows), "terminal_reason": reason,
+                "unresolved_source_refs": [] if passed else [source["source_ref"] for source in inventory["sources"]],
+                "elapsed_seconds": monotonic() - started,
+                "meaning": "derived binding only; no evidence PASS, authority or effect"}
+            if not passed or candidate is None:
+                return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
+            bindings = validate_projection_candidate(candidate, revision, ir, inventory, semantic_review=semantic_review)
+            return (bindings[0].model_copy(update={"formation_receipt": receipt}), *bindings[1:])
+        rows = recorder.records()
+        terminal = next((row for row in reversed(rows) if row.get("terminal")), None)
+        if terminal is not None:
+            candidate = None if terminal.get("candidate") is None else FulfillmentProjectionCandidate.model_validate(terminal["candidate"])
+            return finish(candidate, terminal.get("terminal_reason", "OBLIGATION_FORMATION_TERMINAL"), terminal.get("validation_passed", False))
+        pending = [row for row in rows if row["stage"] == "MODEL_REQUEST_PENDING"]
+        validated = {row["attempt"] for row in rows if row["stage"] == "CANDIDATE_VALIDATED"}
+        incomplete = next((row for row in pending if row["attempt"] not in validated), None)
+        if incomplete is not None and not any(row["attempt"] == incomplete["attempt"] and row["stage"] == "MODEL_RESPONSE_OBSERVED" for row in rows):
+            recorder.append("FORMATION_STOPPED", incomplete["attempt"], terminal=True,
+                validation_passed=False, terminal_reason="OBLIGATION_FORMATION_PENDING_OUTCOME_UNKNOWN")
+            return finish(None, "OBLIGATION_FORMATION_PENDING_OUTCOME_UNKNOWN", False)
+        feedback = next((row.get("validation_feedback", row.get("failed_predicate")) for row in reversed(rows) if row["stage"] == "CANDIDATE_VALIDATED"), None)
+        next_attempt = incomplete["attempt"] if incomplete is not None else len(pending) + 1
+        for attempt in range(next_attempt, 3):
+            candidate = None
+            semantic_review = None
+            failure_stage = "MODEL_REQUEST"
+            try:
+                observed_row = next((row for row in reversed(recorder.records()) if row["attempt"] == attempt and row["stage"] == "MODEL_RESPONSE_OBSERVED"), None)
+                if observed_row is not None:
+                    observed = observed_row.get("candidate")
+                    raw_output = observed_row.get("candidate_output")
+                    from spg.providers.fulfillment_candidate import _FULFILLMENT_WIRE_METADATA_KEYS
+                    starts = [row for row in recorder.records() if row["attempt"] == attempt
+                        and row["stage"] == "MODEL_REQUEST_PENDING"]
+                    compact_receipt = (any(key in observed_row for key in _FULFILLMENT_WIRE_METADATA_KEYS)
+                        or any(key in row for row in starts for key in _FULFILLMENT_WIRE_METADATA_KEYS))
+                    if compact_receipt:
+                        from spg.providers.fulfillment_candidate import (
+                            _decode_fulfillment_candidate_wire,
+                            _FulfillmentWireReceiptIdentityError)
+                        if len(starts) != 1 or any(starts[0].get(key) != observed_row.get(key)
+                                for key in _FULFILLMENT_WIRE_METADATA_KEYS):
+                            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_RECEIPT_IDENTITY_DRIFT")
+                        observed = _decode_fulfillment_candidate_wire(
+                            observed if observed is not None else raw_output, inventory, capabilities,
+                            validation_feedback=starts[0].get("feedback"), wire_metadata=observed_row)
+                    elif observed is None and raw_output is not None:
+                        # Unmarked historical receipts keep their canonical contract.
+                        observed = json.loads(raw_output)
+                    if observed is None:
+                        raise ValueError("OBLIGATION_FORMATION_CANDIDATE_NOT_RETAINED")
+                else:
+                    metadata_builder = getattr(provider, "form_wire_metadata", None)
+                    wire_metadata = metadata_builder(inventory, capabilities, validation_feedback=feedback) if callable(metadata_builder) else {}
+                    recorder.append("MODEL_REQUEST_PENDING", attempt, feedback=feedback, **wire_metadata)
+                    import inspect
+                    accepts_callback = "receipt_callback" in inspect.signature(provider.form).parameters
+                    def observed_callback(**values):
+                        recorder.append("MODEL_RESPONSE_OBSERVED", attempt, **values)
+                    arguments = {"validation_feedback": feedback}
+                    if accepts_callback:
+                        arguments["receipt_callback"] = observed_callback
+                    observed = provider.form(inventory, capabilities, **arguments)
+                    if not accepts_callback:
+                        recorder.append("MODEL_RESPONSE_OBSERVED", attempt,
+                            candidate=observed.model_dump(mode="json") if isinstance(observed, FulfillmentProjectionCandidate) else observed,
+                            model=getattr(provider, "last_observation", None))
+                candidate = observed if isinstance(observed, FulfillmentProjectionCandidate) else FulfillmentProjectionCandidate.model_validate(observed)
+                raw_candidate = candidate
+                candidate, adjustments = locate_projection_components(candidate, inventory)
+                if adjustments:
+                    prior_location = next((row for row in reversed(recorder.records()) if row["attempt"] == attempt
+                        and row["stage"] == "CANDIDATE_LOCATED"), None)
+                    located = {"raw_candidate_fingerprint": fulfillment_candidate_fingerprint(raw_candidate),
+                        "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
+                        "locator_adjustments": list(adjustments)}
+                    if prior_location is None:
+                        recorder.append("CANDIDATE_LOCATED", attempt, **located)
+                    elif any(prior_location.get(key) != value for key, value in located.items()):
+                        raise ValueError("OBLIGATION_COMPONENT_LOCATOR_RECEIPT_DRIFT")
+                validate_projection_candidate(candidate, revision, ir, inventory, allow_review_pending=True)
+                failure_stage = "SEMANTIC_REVIEW"
+>               semantic_review = _review_fulfillment_candidate(provider, candidate, inventory, recorder, attempt, capabilities)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+src/spg/application/governed_obligations.py:1580: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+provider = <test_c3_fulfillment_components.ReviewedOracle object at 0x7f2b8ae00cd0>
+candidate = FulfillmentProjectionCandidate(inventory_fingerprint='0bba59d39df3d67423fdaf6621be961ab005efa8396b71c4bb889bfbe93bc8d6...is(source_span_start=0, source_span_end=25, source_component_quote='Retained governed context', linked_fact_refs=()))))
+inventory = {'work_id': '75f8733e-d3a3-4f8c-836f-34fade2394b4', 'work_reality_revision_id': '3fd3186d-e9b4-4049-9a77-ab1d7bdb878a'...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'semantic_ir_id': '58a7ade5-f2f8-4cd2-9da6-7666c2bff352', ...}
+recorder = <spg.application.governed_obligations.FulfillmentFormationReceipts object at 0x7f2b8ab20250>
+attempt = 1
+capabilities = [{'capability': 'ARTIFACT_CONTENT', 'component': 'artifact-content', 'owner': 'VERIFICATION', 'phase': 'CURRENT_VERIFI...ty': 'DENY_PUBLISH', 'component': 'publish', 'owner': 'DELIVERY_GATE', 'phase': 'CONTINUOUS_FROM_ADMISSION', ...}, ...]
+
+    def _review_fulfillment_candidate(provider, candidate, inventory, recorder, attempt, capabilities):
+        if not any(route.component_basis is not None for route in candidate.routes):
+            return None
+        if not hasattr(provider, "review"):
+            raise ValueError("OBLIGATION_SEMANTIC_REVIEW_UNAVAILABLE")
+        rows = recorder.records()
+        validated = next((row for row in reversed(rows) if row["attempt"] == attempt
+            and row["stage"] == "SEMANTIC_REVIEW_VALIDATED"), None)
+        if validated is not None:
+            if validated.get("capabilities_fingerprint") != canonical_fingerprint(capabilities):
+                raise ValueError("OBLIGATION_SEMANTIC_REVIEW_CAPABILITIES_DRIFT")
+            if not validated.get("validation_passed"):
+                raise ValueError(validated.get("failed_predicate", "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH"))
+            result = FulfillmentSemanticReviewCandidate.model_validate(validated["semantic_review"])
+            validate_projection_components(candidate, inventory, semantic_review=result)
+            return result.model_dump(mode="json")
+        observed = next((row for row in reversed(rows) if row["attempt"] == attempt
+            and row["stage"] == "SEMANTIC_REVIEW_OBSERVED"), None)
+        if observed is None:
+            if any(row["attempt"] == attempt and row["stage"] == "SEMANTIC_REVIEW_PENDING" for row in rows):
+>               raise FulfillmentReviewOutcomeUnknown("OBLIGATION_SEMANTIC_REVIEW_PENDING_OUTCOME_UNKNOWN")
+E               spg.application.governed_obligations.FulfillmentReviewOutcomeUnknown: OBLIGATION_SEMANTIC_REVIEW_PENDING_OUTCOME_UNKNOWN
+
+src/spg/application/governed_obligations.py:1414: FulfillmentReviewOutcomeUnknown
+
+During handling of the above exception, another exception occurred:
+
+    def test_review_pending_outcome_unknown_is_not_repeated_after_resume():
+        revision,ir,inventory,plan=current_lifecycle_candidate()
+        oracle=ReviewedOracle([])
+        oracle._fulfillment_receipts=[]
+        recorder=FulfillmentFormationReceipts(revision,inventory,memory=oracle._fulfillment_receipts)
+        recorder.append("MODEL_REQUEST_PENDING",1)
+        recorder.append("MODEL_RESPONSE_OBSERVED",1,candidate=plan.model_dump(mode="json"))
+        recorder.append("SEMANTIC_REVIEW_PENDING",1)
+>       result=form_fulfillment_projection(revision,ir,provider=oracle)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_c3_fulfillment_components.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/application/governed_obligations.py:1459: in form_fulfillment_projection
+    return _form_fulfillment_projection(revision, ir, **arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1604: in _form_fulfillment_projection
+    return finish(None, reason, False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1503: in finish
+    return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1269: in unresolved_projection
+    bindings = validate_projection_candidate(FulfillmentProjectionCandidate(
+src/spg/application/governed_obligations.py:1061: in validate_projection_candidate
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+src/spg/application/governed_obligations.py:1061: in <genexpr>
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+revision = namespace(id=UUID('3fd3186d-e9b4-4049-9a77-ab1d7bdb878a'), work_id=UUID('75f8733e-d3a3-4f8c-836f-34fade2394b4'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+ir = namespace(id=UUID('58a7ade5-f2f8-4cd2-9da6-7666c2bff352'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False)
+inventory = {'work_id': '75f8733e-d3a3-4f8c-836f-34fade2394b4', 'work_reality_revision_id': '3fd3186d-e9b4-4049-9a77-ab1d7bdb878a'...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'semantic_ir_id': '58a7ade5-f2f8-4cd2-9da6-7666c2bff352', ...}
+route = FulfillmentRouteCandidate(source_ref='work-constraint:3fd3186d-e9b4-4049-9a77-ab1d7bdb878a:0', capability='UNRESOLVED'...rting_source_refs=(), rationale='OBLIGATION_FORMATION_TRANSPORT_FulfillmentReviewOutcomeUnknown', component_basis=None)
+reviewed_background_refs = frozenset(), allow_calibrated = False
+background_components = frozenset()
+
+    def _projection_binding(revision, ir, inventory, route, *, reviewed_background_refs=(),
+                            allow_calibrated=False, background_components=()):
+        source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
+        if source is None:
+            raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
+        component, owner, phase, method, gate = _capability_tuple(route.capability)
+        from spg.domain.governed_obligation import fulfillment_component_id
+        partial_background = fulfillment_component_id(route, inventory["inventory_fingerprint"]) in background_components
+        if len(set(route.work_constraint_indices)) != len(route.work_constraint_indices) or any(
+                index < 0 or index >= len(revision.constraints) for index in route.work_constraint_indices):
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_REFERENCE_INVALID")
+        if len(set(route.target_paths)) != len(route.target_paths) or set(route.target_paths) - set(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_SCOPE_EXPANSION")
+        if method == "EXACT_GIT_DIFF_SCOPE" and tuple(route.target_paths) != tuple(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_DIFF_SCOPE_INCOMPLETE")
+        if source["kind"] == "WORK_CONSTRAINT":
+            if route.work_constraint_indices != (source["index"],):
+                raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        elif route.work_constraint_indices:
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        if len(set(route.supporting_source_refs)) != len(route.supporting_source_refs) or any(
+                ref not in {entry["source_ref"] for entry in inventory["sources"]}
+                for ref in route.supporting_source_refs):
+            raise ValueError("OBLIGATION_SUPPORTING_SOURCE_SUBSTITUTED")
+        if method == "EXACT_CANDIDATE_CONTENT" and not route.target_paths:
+            raise ValueError("OBLIGATION_CONTENT_TARGET_UNRESOLVED")
+        state = "UNRESOLVED" if owner is FulfillmentOwner.UNRESOLVED else (
+            "RETAINED_CONTEXT" if phase is FulfillmentPhase.CONTEXT_RETENTION else "BOUND_PENDING_EVIDENCE")
+        common = dict(component=component, owner=owner, phase=phase, evidence_method=method,
+            gate_ref=gate, source_revision=inventory["source_revision"], target_paths=route.target_paths,
+            projection_inventory_fingerprint=inventory["inventory_fingerprint"],
+            work_constraint_indices=route.work_constraint_indices,
+            supporting_source_refs=route.supporting_source_refs, state=state,
+            component_basis=route.component_basis)
+        if source["kind"] in {"WORK_CONSTRAINT", "WORK_CONTEXT", "IR_ITEM"}:
+            if source["kind"] == "IR_ITEM":
+                item = next(item for item in ir.items if item.item_id == source["item_id"])
+                origins = {p.origin for p in item.provenance}
+                if state == "RETAINED_CONTEXT" and (item.kind is not SemanticKind.FACT
+                        or item.action is not None or item.production is not None
+                        or item.requires_human or origins != {SemanticOrigin.REPOSITORY_OBSERVED}):
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_NOT_OBSERVED_CONTEXT")
+                if state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_CAPABILITY_UNRESOLVED")
+                records = tuple(dict.fromkeys(p.source_record_id for p in item.provenance if p.source_record_id is not None))
+                quote = item.statement
+                provenance = [p.model_dump(mode="json") for p in item.provenance]
+                item_id = item.item_id
+            else:
+                records = tuple(revision.source_record_ids)
+                quote = source["payload"]["content"]
+                provenance = {"work_reality_revision_id": str(revision.id),
+                              "source_record_ids": [str(value) for value in records]}
+                item_id = str(source["index"])
+                if source["kind"] == "WORK_CONTEXT" and state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT")
+                if source["kind"] == "WORK_CONSTRAINT":
+                    supporting = [entry for entry in inventory["sources"] if entry["source_ref"] in route.supporting_source_refs]
+                    clauses = [next(c for c in ir.clauses if c.clause_id == entry["clause_id"])
+                               for entry in supporting if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
+                    if not work_constraint_sources_correspond(ir, quote, supporting, component=component,
+                            phase=phase, semantic_component_declared=route.component_basis is not None,
+                            calibrated=allow_calibrated):
+>                       raise ValueError("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
+E                       ValueError: OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN
+
+src/spg/application/governed_obligations.py:741: ValueError
+_ test_complete_typed_inventory_needs_no_provider_and_partial_never_disappears _
+
+revision = namespace(id=UUID('c431d900-97ad-478b-98c9-dec1cebba6c3'), work_id=UUID('2c031c97-a1f4-4049-9154-36c404ab6dc8'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+ir = namespace(id=UUID('8e84bfe6-fcb8-4d9f-84b7-4ad84d89d72a'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False)
+inventory = {'work_id': '2c031c97-a1f4-4049-9154-36c404ab6dc8', 'work_reality_revision_id': 'c431d900-97ad-478b-98c9-dec1cebba6c3'...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'semantic_ir_id': '8e84bfe6-fcb8-4d9f-84b7-4ad84d89d72a', ...}
+
+    def deterministic_fulfillment_projection(revision, ir, inventory):
+        """Reuse only existing typed relation/effect contracts, never classify prose."""
+        from spg.domain.governed_obligation import FulfillmentRouteCandidate
+        from spg.domain.engineering_semantics import SemanticRelation, SemanticReferenceRole
+        routes = []
+        by_source = {}
+        for source in inventory["sources"]:
+            methods = ["UNRESOLVED"]
+            supporting = ()
+            if source["kind"] == "FACT":
+                fact = next(fact for fact in revision.engineering_semantic_facts if str(fact.id) == source["fact_id"])
+                if fact.epistemic_status.value != "UNRESOLVED":
+                    if fact.relation is SemanticRelation.REFERENCE:
+                        if fact.reference_role is SemanticReferenceRole.PROJECT_REPOSITORY:
+                            methods = ["PRODUCT_SOURCE_IDENTITY"]
+                        elif (fact.reference_role is SemanticReferenceRole.EXTERNAL_REFERENCE
+                                or (fact.provenance.governed_provenance and all(p.origin is SemanticOrigin.REPOSITORY_OBSERVED
+                                    for p in fact.provenance.governed_provenance))):
+                            methods = ["RETAIN_CONTEXT"]
+                    elif fact.relation is SemanticRelation.SCOPE and exact_file_scope_paths(fact) is not None and set(exact_file_scope_paths(fact)) == set(inventory["exact_target_paths"]):
+                        methods = ["GIT_DIFF_SCOPE"]
+                    elif fact.relation in {SemanticRelation.EQUALITY, SemanticRelation.CARDINALITY,
+                            SemanticRelation.ORDERED_COMPONENT, SemanticRelation.BOUND, SemanticRelation.COMPARISON,
+                            SemanticRelation.MAPPING, SemanticRelation.PRECEDENCE} and inventory["exact_target_paths"]:
+                        methods = ["ARTIFACT_CONTENT"]
+            elif source["kind"] in {"IR_CONSTRAINT", "IR_CLAUSE"}:
+                clause = next(clause for clause in ir.clauses if clause.clause_id == source["clause_id"])
+                if clause.requested_effects and all(effect in _TYPED_EFFECT_ROUTES for effect in clause.requested_effects):
+                    methods = []
+                    for effect in clause.requested_effects:
+                        component, owner, gate, phase, method, _ = _TYPED_EFFECT_ROUTES[effect]
+                        methods.append(next(key for key, value in FULFILLMENT_CAPABILITIES.items()
+                            if value == (component, owner, phase, method, gate)))
+                    methods = list(dict.fromkeys(methods))
+                elif is_context_only_clause(revision, ir, source["item_id"], source["clause_id"]):
+                    methods = ["RETAIN_CONTEXT"]
+            elif source["kind"] == "IR_ITEM":
+                item = next(item for item in ir.items if item.item_id == source["item_id"])
+                if item.kind is SemanticKind.FACT and item.action is None and item.production is None and not item.requires_human and all(
+                        p.origin is SemanticOrigin.REPOSITORY_OBSERVED for p in item.provenance):
+                    methods = ["RETAIN_CONTEXT"]
+            elif source["kind"] == "WORK_CONTEXT":
+                methods = ["RETAIN_CONTEXT"]
+            elif source["kind"] == "WORK_CONSTRAINT":
+                matches = [entry for entry in inventory["sources"] if entry["kind"] in {"IR_CONSTRAINT", "IR_CLAUSE"}
+                    and entry["payload"]["item"]["statement"] == source["payload"]["content"]]
+                if matches and all(by_source.get(entry["source_ref"], ["UNRESOLVED"]) != ["UNRESOLVED"] for entry in matches):
+                    methods = list(dict.fromkeys(method for entry in matches for method in by_source[entry["source_ref"]]))
+                    supporting = tuple(entry["source_ref"] for entry in matches)
+            by_source[source["source_ref"]] = methods
+            routes.extend(FulfillmentRouteCandidate(source_ref=source["source_ref"], capability=method,
+                work_constraint_indices=(source["index"],) if source["kind"] == "WORK_CONSTRAINT" else (),
+                target_paths=tuple(inventory["exact_target_paths"]) if method in {"ARTIFACT_CONTENT", "GIT_DIFF_SCOPE"} else (),
+                supporting_source_refs=supporting,
+                rationale="Existing typed relation/effect contract; unsupported meaning retained unresolved.") for method in methods)
+        candidate = FulfillmentProjectionCandidate(inventory_fingerprint=inventory["inventory_fingerprint"], routes=tuple(routes))
+        try:
+>           return validate_projection_candidate(candidate, revision, ir, inventory)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+src/spg/application/governed_obligations.py:1258: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/application/governed_obligations.py:1061: in validate_projection_candidate
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+src/spg/application/governed_obligations.py:1061: in <genexpr>
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+revision = namespace(id=UUID('c431d900-97ad-478b-98c9-dec1cebba6c3'), work_id=UUID('2c031c97-a1f4-4049-9154-36c404ab6dc8'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+ir = namespace(id=UUID('8e84bfe6-fcb8-4d9f-84b7-4ad84d89d72a'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False)
+inventory = {'work_id': '2c031c97-a1f4-4049-9154-36c404ab6dc8', 'work_reality_revision_id': 'c431d900-97ad-478b-98c9-dec1cebba6c3'...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'semantic_ir_id': '8e84bfe6-fcb8-4d9f-84b7-4ad84d89d72a', ...}
+route = FulfillmentRouteCandidate(source_ref='work-constraint:c431d900-97ad-478b-98c9-dec1cebba6c3:0', capability='UNRESOLVED'...), rationale='Existing typed relation/effect contract; unsupported meaning retained unresolved.', component_basis=None)
+reviewed_background_refs = frozenset(), allow_calibrated = False
+background_components = frozenset()
+
+    def _projection_binding(revision, ir, inventory, route, *, reviewed_background_refs=(),
+                            allow_calibrated=False, background_components=()):
+        source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
+        if source is None:
+            raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
+        component, owner, phase, method, gate = _capability_tuple(route.capability)
+        from spg.domain.governed_obligation import fulfillment_component_id
+        partial_background = fulfillment_component_id(route, inventory["inventory_fingerprint"]) in background_components
+        if len(set(route.work_constraint_indices)) != len(route.work_constraint_indices) or any(
+                index < 0 or index >= len(revision.constraints) for index in route.work_constraint_indices):
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_REFERENCE_INVALID")
+        if len(set(route.target_paths)) != len(route.target_paths) or set(route.target_paths) - set(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_SCOPE_EXPANSION")
+        if method == "EXACT_GIT_DIFF_SCOPE" and tuple(route.target_paths) != tuple(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_DIFF_SCOPE_INCOMPLETE")
+        if source["kind"] == "WORK_CONSTRAINT":
+            if route.work_constraint_indices != (source["index"],):
+                raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        elif route.work_constraint_indices:
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        if len(set(route.supporting_source_refs)) != len(route.supporting_source_refs) or any(
+                ref not in {entry["source_ref"] for entry in inventory["sources"]}
+                for ref in route.supporting_source_refs):
+            raise ValueError("OBLIGATION_SUPPORTING_SOURCE_SUBSTITUTED")
+        if method == "EXACT_CANDIDATE_CONTENT" and not route.target_paths:
+            raise ValueError("OBLIGATION_CONTENT_TARGET_UNRESOLVED")
+        state = "UNRESOLVED" if owner is FulfillmentOwner.UNRESOLVED else (
+            "RETAINED_CONTEXT" if phase is FulfillmentPhase.CONTEXT_RETENTION else "BOUND_PENDING_EVIDENCE")
+        common = dict(component=component, owner=owner, phase=phase, evidence_method=method,
+            gate_ref=gate, source_revision=inventory["source_revision"], target_paths=route.target_paths,
+            projection_inventory_fingerprint=inventory["inventory_fingerprint"],
+            work_constraint_indices=route.work_constraint_indices,
+            supporting_source_refs=route.supporting_source_refs, state=state,
+            component_basis=route.component_basis)
+        if source["kind"] in {"WORK_CONSTRAINT", "WORK_CONTEXT", "IR_ITEM"}:
+            if source["kind"] == "IR_ITEM":
+                item = next(item for item in ir.items if item.item_id == source["item_id"])
+                origins = {p.origin for p in item.provenance}
+                if state == "RETAINED_CONTEXT" and (item.kind is not SemanticKind.FACT
+                        or item.action is not None or item.production is not None
+                        or item.requires_human or origins != {SemanticOrigin.REPOSITORY_OBSERVED}):
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_NOT_OBSERVED_CONTEXT")
+                if state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_CAPABILITY_UNRESOLVED")
+                records = tuple(dict.fromkeys(p.source_record_id for p in item.provenance if p.source_record_id is not None))
+                quote = item.statement
+                provenance = [p.model_dump(mode="json") for p in item.provenance]
+                item_id = item.item_id
+            else:
+                records = tuple(revision.source_record_ids)
+                quote = source["payload"]["content"]
+                provenance = {"work_reality_revision_id": str(revision.id),
+                              "source_record_ids": [str(value) for value in records]}
+                item_id = str(source["index"])
+                if source["kind"] == "WORK_CONTEXT" and state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT")
+                if source["kind"] == "WORK_CONSTRAINT":
+                    supporting = [entry for entry in inventory["sources"] if entry["source_ref"] in route.supporting_source_refs]
+                    clauses = [next(c for c in ir.clauses if c.clause_id == entry["clause_id"])
+                               for entry in supporting if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
+                    if not work_constraint_sources_correspond(ir, quote, supporting, component=component,
+                            phase=phase, semantic_component_declared=route.component_basis is not None,
+                            calibrated=allow_calibrated):
+>                       raise ValueError("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
+E                       ValueError: OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN
+
+src/spg/application/governed_obligations.py:741: ValueError
+
+During handling of the above exception, another exception occurred:
+
+    def test_complete_typed_inventory_needs_no_provider_and_partial_never_disappears():
+        revision, ir = basis()
+        assessment = SimpleNamespace(id=revision.source_assessment_id, semantic_ir=ir)
+        oracle = Oracle([])
+        assert all(b.state != "UNRESOLVED" for b in admitted_fulfillment_bindings(revision, assessment, provider=oracle))
+        assert oracle.calls == []
+        ir.clauses = (ir.clauses[0].model_copy(update={"requested_effects": ()}),)
+>       bindings = admitted_fulfillment_bindings(revision, assessment)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_fulfillment_projection.py:113: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/application/governed_obligations.py:132: in admitted_fulfillment_bindings
+    typed = deterministic_fulfillment_projection(revision, ir, inventory)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1261: in deterministic_fulfillment_projection
+    return unresolved_projection(revision, ir, inventory, reason="OBLIGATION_TYPED_CONTRACT_NOT_COMPLETE")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1269: in unresolved_projection
+    bindings = validate_projection_candidate(FulfillmentProjectionCandidate(
+src/spg/application/governed_obligations.py:1061: in validate_projection_candidate
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+src/spg/application/governed_obligations.py:1061: in <genexpr>
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+revision = namespace(id=UUID('c431d900-97ad-478b-98c9-dec1cebba6c3'), work_id=UUID('2c031c97-a1f4-4049-9154-36c404ab6dc8'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+ir = namespace(id=UUID('8e84bfe6-fcb8-4d9f-84b7-4ad84d89d72a'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False)
+inventory = {'work_id': '2c031c97-a1f4-4049-9154-36c404ab6dc8', 'work_reality_revision_id': 'c431d900-97ad-478b-98c9-dec1cebba6c3'...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'semantic_ir_id': '8e84bfe6-fcb8-4d9f-84b7-4ad84d89d72a', ...}
+route = FulfillmentRouteCandidate(source_ref='work-constraint:c431d900-97ad-478b-98c9-dec1cebba6c3:0', capability='UNRESOLVED'..., target_paths=(), supporting_source_refs=(), rationale='OBLIGATION_TYPED_CONTRACT_NOT_COMPLETE', component_basis=None)
+reviewed_background_refs = frozenset(), allow_calibrated = False
+background_components = frozenset()
+
+    def _projection_binding(revision, ir, inventory, route, *, reviewed_background_refs=(),
+                            allow_calibrated=False, background_components=()):
+        source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
+        if source is None:
+            raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
+        component, owner, phase, method, gate = _capability_tuple(route.capability)
+        from spg.domain.governed_obligation import fulfillment_component_id
+        partial_background = fulfillment_component_id(route, inventory["inventory_fingerprint"]) in background_components
+        if len(set(route.work_constraint_indices)) != len(route.work_constraint_indices) or any(
+                index < 0 or index >= len(revision.constraints) for index in route.work_constraint_indices):
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_REFERENCE_INVALID")
+        if len(set(route.target_paths)) != len(route.target_paths) or set(route.target_paths) - set(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_SCOPE_EXPANSION")
+        if method == "EXACT_GIT_DIFF_SCOPE" and tuple(route.target_paths) != tuple(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_DIFF_SCOPE_INCOMPLETE")
+        if source["kind"] == "WORK_CONSTRAINT":
+            if route.work_constraint_indices != (source["index"],):
+                raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        elif route.work_constraint_indices:
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        if len(set(route.supporting_source_refs)) != len(route.supporting_source_refs) or any(
+                ref not in {entry["source_ref"] for entry in inventory["sources"]}
+                for ref in route.supporting_source_refs):
+            raise ValueError("OBLIGATION_SUPPORTING_SOURCE_SUBSTITUTED")
+        if method == "EXACT_CANDIDATE_CONTENT" and not route.target_paths:
+            raise ValueError("OBLIGATION_CONTENT_TARGET_UNRESOLVED")
+        state = "UNRESOLVED" if owner is FulfillmentOwner.UNRESOLVED else (
+            "RETAINED_CONTEXT" if phase is FulfillmentPhase.CONTEXT_RETENTION else "BOUND_PENDING_EVIDENCE")
+        common = dict(component=component, owner=owner, phase=phase, evidence_method=method,
+            gate_ref=gate, source_revision=inventory["source_revision"], target_paths=route.target_paths,
+            projection_inventory_fingerprint=inventory["inventory_fingerprint"],
+            work_constraint_indices=route.work_constraint_indices,
+            supporting_source_refs=route.supporting_source_refs, state=state,
+            component_basis=route.component_basis)
+        if source["kind"] in {"WORK_CONSTRAINT", "WORK_CONTEXT", "IR_ITEM"}:
+            if source["kind"] == "IR_ITEM":
+                item = next(item for item in ir.items if item.item_id == source["item_id"])
+                origins = {p.origin for p in item.provenance}
+                if state == "RETAINED_CONTEXT" and (item.kind is not SemanticKind.FACT
+                        or item.action is not None or item.production is not None
+                        or item.requires_human or origins != {SemanticOrigin.REPOSITORY_OBSERVED}):
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_NOT_OBSERVED_CONTEXT")
+                if state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_CAPABILITY_UNRESOLVED")
+                records = tuple(dict.fromkeys(p.source_record_id for p in item.provenance if p.source_record_id is not None))
+                quote = item.statement
+                provenance = [p.model_dump(mode="json") for p in item.provenance]
+                item_id = item.item_id
+            else:
+                records = tuple(revision.source_record_ids)
+                quote = source["payload"]["content"]
+                provenance = {"work_reality_revision_id": str(revision.id),
+                              "source_record_ids": [str(value) for value in records]}
+                item_id = str(source["index"])
+                if source["kind"] == "WORK_CONTEXT" and state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT")
+                if source["kind"] == "WORK_CONSTRAINT":
+                    supporting = [entry for entry in inventory["sources"] if entry["source_ref"] in route.supporting_source_refs]
+                    clauses = [next(c for c in ir.clauses if c.clause_id == entry["clause_id"])
+                               for entry in supporting if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
+                    if not work_constraint_sources_correspond(ir, quote, supporting, component=component,
+                            phase=phase, semantic_component_declared=route.component_basis is not None,
+                            calibrated=allow_calibrated):
+>                       raise ValueError("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
+E                       ValueError: OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN
+
+src/spg/application/governed_obligations.py:741: ValueError
+_______ test_pending_unknown_and_transport_failure_do_not_blindly_retry ________
+
+self = <test_fulfillment_projection.Oracle object at 0x7f2b8ae011d0>
+inventory = {'work_id': '6222c149-a1ef-44a9-8126-d5a96538aa47', 'work_reality_revision_id': '58c45357-800a-461e-9cea-939048c90285'...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'semantic_ir_id': '4abf91da-a95a-40cc-896a-2cbbed22cb03', ...}
+capabilities = [{'capability': 'ARTIFACT_CONTENT', 'component': 'artifact-content', 'owner': 'VERIFICATION', 'phase': 'CURRENT_VERIFI...ty': 'DENY_PUBLISH', 'component': 'publish', 'owner': 'DELIVERY_GATE', 'phase': 'CONTINUOUS_FROM_ADMISSION', ...}, ...]
+validation_feedback = None
+
+    def form(self, inventory, capabilities, *, validation_feedback=None):
+        self.calls.append(validation_feedback)
+        output = self.outputs.pop(0)
+        if isinstance(output, Exception):
+>           raise output
+E           TimeoutError
+
+tests/test_fulfillment_projection.py:80: TimeoutError
+
+During handling of the above exception, another exception occurred:
+
+    def test_pending_unknown_and_transport_failure_do_not_blindly_retry():
+        revision, ir = basis()
+        inventory = fulfillment_inventory(revision, ir)
+        oracle = Oracle([TimeoutError()])
+>       result = form_fulfillment_projection(revision, ir, provider=oracle)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_fulfillment_projection.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/application/governed_obligations.py:1459: in form_fulfillment_projection
+    return _form_fulfillment_projection(revision, ir, **arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1604: in _form_fulfillment_projection
+    return finish(None, reason, False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1503: in finish
+    return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1269: in unresolved_projection
+    bindings = validate_projection_candidate(FulfillmentProjectionCandidate(
+src/spg/application/governed_obligations.py:1061: in validate_projection_candidate
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+src/spg/application/governed_obligations.py:1061: in <genexpr>
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+revision = namespace(id=UUID('58c45357-800a-461e-9cea-939048c90285'), work_id=UUID('6222c149-a1ef-44a9-8126-d5a96538aa47'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+ir = namespace(id=UUID('4abf91da-a95a-40cc-896a-2cbbed22cb03'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False)
+inventory = {'work_id': '6222c149-a1ef-44a9-8126-d5a96538aa47', 'work_reality_revision_id': '58c45357-800a-461e-9cea-939048c90285'...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'semantic_ir_id': '4abf91da-a95a-40cc-896a-2cbbed22cb03', ...}
+route = FulfillmentRouteCandidate(source_ref='work-constraint:58c45357-800a-461e-9cea-939048c90285:0', capability='UNRESOLVED'...get_paths=(), supporting_source_refs=(), rationale='OBLIGATION_FORMATION_TRANSPORT_TimeoutError', component_basis=None)
+reviewed_background_refs = frozenset(), allow_calibrated = False
+background_components = frozenset()
+
+    def _projection_binding(revision, ir, inventory, route, *, reviewed_background_refs=(),
+                            allow_calibrated=False, background_components=()):
+        source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
+        if source is None:
+            raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
+        component, owner, phase, method, gate = _capability_tuple(route.capability)
+        from spg.domain.governed_obligation import fulfillment_component_id
+        partial_background = fulfillment_component_id(route, inventory["inventory_fingerprint"]) in background_components
+        if len(set(route.work_constraint_indices)) != len(route.work_constraint_indices) or any(
+                index < 0 or index >= len(revision.constraints) for index in route.work_constraint_indices):
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_REFERENCE_INVALID")
+        if len(set(route.target_paths)) != len(route.target_paths) or set(route.target_paths) - set(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_SCOPE_EXPANSION")
+        if method == "EXACT_GIT_DIFF_SCOPE" and tuple(route.target_paths) != tuple(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_DIFF_SCOPE_INCOMPLETE")
+        if source["kind"] == "WORK_CONSTRAINT":
+            if route.work_constraint_indices != (source["index"],):
+                raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        elif route.work_constraint_indices:
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        if len(set(route.supporting_source_refs)) != len(route.supporting_source_refs) or any(
+                ref not in {entry["source_ref"] for entry in inventory["sources"]}
+                for ref in route.supporting_source_refs):
+            raise ValueError("OBLIGATION_SUPPORTING_SOURCE_SUBSTITUTED")
+        if method == "EXACT_CANDIDATE_CONTENT" and not route.target_paths:
+            raise ValueError("OBLIGATION_CONTENT_TARGET_UNRESOLVED")
+        state = "UNRESOLVED" if owner is FulfillmentOwner.UNRESOLVED else (
+            "RETAINED_CONTEXT" if phase is FulfillmentPhase.CONTEXT_RETENTION else "BOUND_PENDING_EVIDENCE")
+        common = dict(component=component, owner=owner, phase=phase, evidence_method=method,
+            gate_ref=gate, source_revision=inventory["source_revision"], target_paths=route.target_paths,
+            projection_inventory_fingerprint=inventory["inventory_fingerprint"],
+            work_constraint_indices=route.work_constraint_indices,
+            supporting_source_refs=route.supporting_source_refs, state=state,
+            component_basis=route.component_basis)
+        if source["kind"] in {"WORK_CONSTRAINT", "WORK_CONTEXT", "IR_ITEM"}:
+            if source["kind"] == "IR_ITEM":
+                item = next(item for item in ir.items if item.item_id == source["item_id"])
+                origins = {p.origin for p in item.provenance}
+                if state == "RETAINED_CONTEXT" and (item.kind is not SemanticKind.FACT
+                        or item.action is not None or item.production is not None
+                        or item.requires_human or origins != {SemanticOrigin.REPOSITORY_OBSERVED}):
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_NOT_OBSERVED_CONTEXT")
+                if state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_CAPABILITY_UNRESOLVED")
+                records = tuple(dict.fromkeys(p.source_record_id for p in item.provenance if p.source_record_id is not None))
+                quote = item.statement
+                provenance = [p.model_dump(mode="json") for p in item.provenance]
+                item_id = item.item_id
+            else:
+                records = tuple(revision.source_record_ids)
+                quote = source["payload"]["content"]
+                provenance = {"work_reality_revision_id": str(revision.id),
+                              "source_record_ids": [str(value) for value in records]}
+                item_id = str(source["index"])
+                if source["kind"] == "WORK_CONTEXT" and state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT")
+                if source["kind"] == "WORK_CONSTRAINT":
+                    supporting = [entry for entry in inventory["sources"] if entry["source_ref"] in route.supporting_source_refs]
+                    clauses = [next(c for c in ir.clauses if c.clause_id == entry["clause_id"])
+                               for entry in supporting if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
+                    if not work_constraint_sources_correspond(ir, quote, supporting, component=component,
+                            phase=phase, semantic_component_declared=route.component_basis is not None,
+                            calibrated=allow_calibrated):
+>                       raise ValueError("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
+E                       ValueError: OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN
+
+src/spg/application/governed_obligations.py:741: ValueError
+____ test_compact_wire_size_does_not_hide_expanded_payload_capacity_failure ____
+
+    def test_compact_wire_size_does_not_hide_expanded_payload_capacity_failure():
+        from spg.providers.fulfillment_candidate import _decode_fulfillment_candidate_wire
+        revision, ir = basis()
+        revision.context_facts = tuple(f"Controlled context {index}: " + chr(65 + index) * 60000 for index in range(3))
+        inventory = fulfillment_inventory(revision, ir)
+        canonical = candidate(revision, ir, inventory)
+        sources = {source["source_ref"]: source for source in inventory["sources"]}
+        canonical = canonical.model_copy(update={"routes": tuple(route.model_copy(update={
+            "component_basis": FulfillmentComponentBasis(source_span_start=0,
+                source_span_end=len(fulfillment_source_semantic_text(sources[route.source_ref])),
+                source_component_quote=fulfillment_source_semantic_text(sources[route.source_ref]))
+        }) for route in canonical.routes)})
+        wire, context = controlled_wire(inventory, canonical)
+        assert len(json.dumps(wire).encode()) < 65536 < len(canonical.model_dump_json().encode())
+        with pytest.raises(ValueError, match="EXPANDED_RECEIPT_LIMIT"):
+            _decode_fulfillment_candidate_wire(json.dumps(wire), inventory,
+                fulfillment_capability_contracts(), wire_metadata=context)
+        provider, calls = controlled_model_provider(inventory, canonical)
+>       result = form_fulfillment_projection(revision, ir, provider=provider,
+            source_revision=inventory["source_revision"], exact_target_paths=inventory["exact_target_paths"])
+
+tests/test_c3_fulfillment_capacity_representation.py:399: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/application/governed_obligations.py:1459: in form_fulfillment_projection
+    return _form_fulfillment_projection(revision, ir, **arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1624: in _form_fulfillment_projection
+    return finish(candidate, reason, passed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1503: in finish
+    return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1269: in unresolved_projection
+    bindings = validate_projection_candidate(FulfillmentProjectionCandidate(
+src/spg/application/governed_obligations.py:1061: in validate_projection_candidate
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+src/spg/application/governed_obligations.py:1061: in <genexpr>
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+revision = namespace(id=UUID('4fd80f77-6f92-4163-87d3-87ac0920abb4'), work_id=UUID('72267e50-877b-4ab9-96fe-ad1e121fd9ec'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+ir = namespace(id=UUID('fbb3679c-a32f-46aa-b83e-8a5ca61a7cb5'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False)
+inventory = {'work_id': '72267e50-877b-4ab9-96fe-ad1e121fd9ec', 'work_reality_revision_id': '4fd80f77-6f92-4163-87d3-87ac0920abb4'...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'semantic_ir_id': 'fbb3679c-a32f-46aa-b83e-8a5ca61a7cb5', ...}
+route = FulfillmentRouteCandidate(source_ref='work-constraint:4fd80f77-6f92-4163-87d3-87ac0920abb4:0', capability='UNRESOLVED'...get_paths=(), supporting_source_refs=(), rationale='OBLIGATION_FORMATION_EXPANDED_RECEIPT_LIMIT', component_basis=None)
+reviewed_background_refs = frozenset(), allow_calibrated = False
+background_components = frozenset()
+
+    def _projection_binding(revision, ir, inventory, route, *, reviewed_background_refs=(),
+                            allow_calibrated=False, background_components=()):
+        source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
+        if source is None:
+            raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
+        component, owner, phase, method, gate = _capability_tuple(route.capability)
+        from spg.domain.governed_obligation import fulfillment_component_id
+        partial_background = fulfillment_component_id(route, inventory["inventory_fingerprint"]) in background_components
+        if len(set(route.work_constraint_indices)) != len(route.work_constraint_indices) or any(
+                index < 0 or index >= len(revision.constraints) for index in route.work_constraint_indices):
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_REFERENCE_INVALID")
+        if len(set(route.target_paths)) != len(route.target_paths) or set(route.target_paths) - set(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_SCOPE_EXPANSION")
+        if method == "EXACT_GIT_DIFF_SCOPE" and tuple(route.target_paths) != tuple(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_DIFF_SCOPE_INCOMPLETE")
+        if source["kind"] == "WORK_CONSTRAINT":
+            if route.work_constraint_indices != (source["index"],):
+                raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        elif route.work_constraint_indices:
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        if len(set(route.supporting_source_refs)) != len(route.supporting_source_refs) or any(
+                ref not in {entry["source_ref"] for entry in inventory["sources"]}
+                for ref in route.supporting_source_refs):
+            raise ValueError("OBLIGATION_SUPPORTING_SOURCE_SUBSTITUTED")
+        if method == "EXACT_CANDIDATE_CONTENT" and not route.target_paths:
+            raise ValueError("OBLIGATION_CONTENT_TARGET_UNRESOLVED")
+        state = "UNRESOLVED" if owner is FulfillmentOwner.UNRESOLVED else (
+            "RETAINED_CONTEXT" if phase is FulfillmentPhase.CONTEXT_RETENTION else "BOUND_PENDING_EVIDENCE")
+        common = dict(component=component, owner=owner, phase=phase, evidence_method=method,
+            gate_ref=gate, source_revision=inventory["source_revision"], target_paths=route.target_paths,
+            projection_inventory_fingerprint=inventory["inventory_fingerprint"],
+            work_constraint_indices=route.work_constraint_indices,
+            supporting_source_refs=route.supporting_source_refs, state=state,
+            component_basis=route.component_basis)
+        if source["kind"] in {"WORK_CONSTRAINT", "WORK_CONTEXT", "IR_ITEM"}:
+            if source["kind"] == "IR_ITEM":
+                item = next(item for item in ir.items if item.item_id == source["item_id"])
+                origins = {p.origin for p in item.provenance}
+                if state == "RETAINED_CONTEXT" and (item.kind is not SemanticKind.FACT
+                        or item.action is not None or item.production is not None
+                        or item.requires_human or origins != {SemanticOrigin.REPOSITORY_OBSERVED}):
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_NOT_OBSERVED_CONTEXT")
+                if state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_CAPABILITY_UNRESOLVED")
+                records = tuple(dict.fromkeys(p.source_record_id for p in item.provenance if p.source_record_id is not None))
+                quote = item.statement
+                provenance = [p.model_dump(mode="json") for p in item.provenance]
+                item_id = item.item_id
+            else:
+                records = tuple(revision.source_record_ids)
+                quote = source["payload"]["content"]
+                provenance = {"work_reality_revision_id": str(revision.id),
+                              "source_record_ids": [str(value) for value in records]}
+                item_id = str(source["index"])
+                if source["kind"] == "WORK_CONTEXT" and state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT")
+                if source["kind"] == "WORK_CONSTRAINT":
+                    supporting = [entry for entry in inventory["sources"] if entry["source_ref"] in route.supporting_source_refs]
+                    clauses = [next(c for c in ir.clauses if c.clause_id == entry["clause_id"])
+                               for entry in supporting if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
+                    if not work_constraint_sources_correspond(ir, quote, supporting, component=component,
+                            phase=phase, semantic_component_declared=route.component_basis is not None,
+                            calibrated=allow_calibrated):
+>                       raise ValueError("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
+E                       ValueError: OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN
+
+src/spg/application/governed_obligations.py:741: ValueError
+_ test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget[false-review] _
+
+failure = 'false-review'
+
+    @pytest.mark.parametrize("failure", ("false-review", "stale-review"))
+    def test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget(failure):
+        revision, ir, inventory, plan = controlled_capacity_case()
+        review_change = (lambda review: review.update(candidate_fingerprint="0" * 64)) if failure == "stale-review" else None
+        provider, calls = controlled_model_provider(inventory, plan,
+            equivalent=failure != "false-review", review_change=review_change)
+>       result = form_fulfillment_projection(revision, ir, provider=provider,
+            exact_target_paths=inventory["exact_target_paths"])
+
+tests/test_c3_fulfillment_capacity_representation.py:436: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/application/governed_obligations.py:1459: in form_fulfillment_projection
+    return _form_fulfillment_projection(revision, ir, **arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1624: in _form_fulfillment_projection
+    return finish(candidate, reason, passed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1503: in finish
+    return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1269: in unresolved_projection
+    bindings = validate_projection_candidate(FulfillmentProjectionCandidate(
+src/spg/application/governed_obligations.py:1061: in validate_projection_candidate
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+src/spg/application/governed_obligations.py:1061: in <genexpr>
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+revision = namespace(id=UUID('bc983309-472a-4a53-bf6a-75d11a45b5d4'), work_id=UUID('92bf7035-670b-4f6d-bf3b-1a7d8d7ad8c6'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+ir = namespace(id=UUID('cc37a5fc-4409-4de7-aefd-4a577c35f573'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False)
+inventory = {'work_id': '92bf7035-670b-4f6d-bf3b-1a7d8d7ad8c6', 'work_reality_revision_id': 'bc983309-472a-4a53-bf6a-75d11a45b5d4'...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'semantic_ir_id': 'cc37a5fc-4409-4de7-aefd-4a577c35f573', ...}
+route = FulfillmentRouteCandidate(source_ref='work-constraint:bc983309-472a-4a53-bf6a-75d11a45b5d4:0', capability='UNRESOLVED'..., target_paths=(), supporting_source_refs=(), rationale='OBLIGATION_SEMANTIC_COMPONENT_MISMATCH', component_basis=None)
+reviewed_background_refs = frozenset(), allow_calibrated = False
+background_components = frozenset()
+
+    def _projection_binding(revision, ir, inventory, route, *, reviewed_background_refs=(),
+                            allow_calibrated=False, background_components=()):
+        source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
+        if source is None:
+            raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
+        component, owner, phase, method, gate = _capability_tuple(route.capability)
+        from spg.domain.governed_obligation import fulfillment_component_id
+        partial_background = fulfillment_component_id(route, inventory["inventory_fingerprint"]) in background_components
+        if len(set(route.work_constraint_indices)) != len(route.work_constraint_indices) or any(
+                index < 0 or index >= len(revision.constraints) for index in route.work_constraint_indices):
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_REFERENCE_INVALID")
+        if len(set(route.target_paths)) != len(route.target_paths) or set(route.target_paths) - set(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_SCOPE_EXPANSION")
+        if method == "EXACT_GIT_DIFF_SCOPE" and tuple(route.target_paths) != tuple(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_DIFF_SCOPE_INCOMPLETE")
+        if source["kind"] == "WORK_CONSTRAINT":
+            if route.work_constraint_indices != (source["index"],):
+                raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        elif route.work_constraint_indices:
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        if len(set(route.supporting_source_refs)) != len(route.supporting_source_refs) or any(
+                ref not in {entry["source_ref"] for entry in inventory["sources"]}
+                for ref in route.supporting_source_refs):
+            raise ValueError("OBLIGATION_SUPPORTING_SOURCE_SUBSTITUTED")
+        if method == "EXACT_CANDIDATE_CONTENT" and not route.target_paths:
+            raise ValueError("OBLIGATION_CONTENT_TARGET_UNRESOLVED")
+        state = "UNRESOLVED" if owner is FulfillmentOwner.UNRESOLVED else (
+            "RETAINED_CONTEXT" if phase is FulfillmentPhase.CONTEXT_RETENTION else "BOUND_PENDING_EVIDENCE")
+        common = dict(component=component, owner=owner, phase=phase, evidence_method=method,
+            gate_ref=gate, source_revision=inventory["source_revision"], target_paths=route.target_paths,
+            projection_inventory_fingerprint=inventory["inventory_fingerprint"],
+            work_constraint_indices=route.work_constraint_indices,
+            supporting_source_refs=route.supporting_source_refs, state=state,
+            component_basis=route.component_basis)
+        if source["kind"] in {"WORK_CONSTRAINT", "WORK_CONTEXT", "IR_ITEM"}:
+            if source["kind"] == "IR_ITEM":
+                item = next(item for item in ir.items if item.item_id == source["item_id"])
+                origins = {p.origin for p in item.provenance}
+                if state == "RETAINED_CONTEXT" and (item.kind is not SemanticKind.FACT
+                        or item.action is not None or item.production is not None
+                        or item.requires_human or origins != {SemanticOrigin.REPOSITORY_OBSERVED}):
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_NOT_OBSERVED_CONTEXT")
+                if state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_CAPABILITY_UNRESOLVED")
+                records = tuple(dict.fromkeys(p.source_record_id for p in item.provenance if p.source_record_id is not None))
+                quote = item.statement
+                provenance = [p.model_dump(mode="json") for p in item.provenance]
+                item_id = item.item_id
+            else:
+                records = tuple(revision.source_record_ids)
+                quote = source["payload"]["content"]
+                provenance = {"work_reality_revision_id": str(revision.id),
+                              "source_record_ids": [str(value) for value in records]}
+                item_id = str(source["index"])
+                if source["kind"] == "WORK_CONTEXT" and state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT")
+                if source["kind"] == "WORK_CONSTRAINT":
+                    supporting = [entry for entry in inventory["sources"] if entry["source_ref"] in route.supporting_source_refs]
+                    clauses = [next(c for c in ir.clauses if c.clause_id == entry["clause_id"])
+                               for entry in supporting if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
+                    if not work_constraint_sources_correspond(ir, quote, supporting, component=component,
+                            phase=phase, semantic_component_declared=route.component_basis is not None,
+                            calibrated=allow_calibrated):
+>                       raise ValueError("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
+E                       ValueError: OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN
+
+src/spg/application/governed_obligations.py:741: ValueError
+_ test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget[stale-review] _
+
+failure = 'stale-review'
+
+    @pytest.mark.parametrize("failure", ("false-review", "stale-review"))
+    def test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget(failure):
+        revision, ir, inventory, plan = controlled_capacity_case()
+        review_change = (lambda review: review.update(candidate_fingerprint="0" * 64)) if failure == "stale-review" else None
+        provider, calls = controlled_model_provider(inventory, plan,
+            equivalent=failure != "false-review", review_change=review_change)
+>       result = form_fulfillment_projection(revision, ir, provider=provider,
+            exact_target_paths=inventory["exact_target_paths"])
+
+tests/test_c3_fulfillment_capacity_representation.py:436: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/application/governed_obligations.py:1459: in form_fulfillment_projection
+    return _form_fulfillment_projection(revision, ir, **arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1624: in _form_fulfillment_projection
+    return finish(candidate, reason, passed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1503: in finish
+    return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1269: in unresolved_projection
+    bindings = validate_projection_candidate(FulfillmentProjectionCandidate(
+src/spg/application/governed_obligations.py:1061: in validate_projection_candidate
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+src/spg/application/governed_obligations.py:1061: in <genexpr>
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+revision = namespace(id=UUID('0a04fd32-35cb-4e73-a43b-aada1257182e'), work_id=UUID('98f9435c-9a9c-4885-b576-9b1f2ff4d2c8'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+ir = namespace(id=UUID('4d4fb595-a930-45f5-8219-6c418a73a940'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False)
+inventory = {'work_id': '98f9435c-9a9c-4885-b576-9b1f2ff4d2c8', 'work_reality_revision_id': '0a04fd32-35cb-4e73-a43b-aada1257182e'...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'semantic_ir_id': '4d4fb595-a930-45f5-8219-6c418a73a940', ...}
+route = FulfillmentRouteCandidate(source_ref='work-constraint:0a04fd32-35cb-4e73-a43b-aada1257182e:0', capability='UNRESOLVED'...arget_paths=(), supporting_source_refs=(), rationale='OBLIGATION_SEMANTIC_REVIEW_IDENTITY_DRIFT', component_basis=None)
+reviewed_background_refs = frozenset(), allow_calibrated = False
+background_components = frozenset()
+
+    def _projection_binding(revision, ir, inventory, route, *, reviewed_background_refs=(),
+                            allow_calibrated=False, background_components=()):
+        source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
+        if source is None:
+            raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
+        component, owner, phase, method, gate = _capability_tuple(route.capability)
+        from spg.domain.governed_obligation import fulfillment_component_id
+        partial_background = fulfillment_component_id(route, inventory["inventory_fingerprint"]) in background_components
+        if len(set(route.work_constraint_indices)) != len(route.work_constraint_indices) or any(
+                index < 0 or index >= len(revision.constraints) for index in route.work_constraint_indices):
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_REFERENCE_INVALID")
+        if len(set(route.target_paths)) != len(route.target_paths) or set(route.target_paths) - set(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_SCOPE_EXPANSION")
+        if method == "EXACT_GIT_DIFF_SCOPE" and tuple(route.target_paths) != tuple(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_DIFF_SCOPE_INCOMPLETE")
+        if source["kind"] == "WORK_CONSTRAINT":
+            if route.work_constraint_indices != (source["index"],):
+                raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        elif route.work_constraint_indices:
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        if len(set(route.supporting_source_refs)) != len(route.supporting_source_refs) or any(
+                ref not in {entry["source_ref"] for entry in inventory["sources"]}
+                for ref in route.supporting_source_refs):
+            raise ValueError("OBLIGATION_SUPPORTING_SOURCE_SUBSTITUTED")
+        if method == "EXACT_CANDIDATE_CONTENT" and not route.target_paths:
+            raise ValueError("OBLIGATION_CONTENT_TARGET_UNRESOLVED")
+        state = "UNRESOLVED" if owner is FulfillmentOwner.UNRESOLVED else (
+            "RETAINED_CONTEXT" if phase is FulfillmentPhase.CONTEXT_RETENTION else "BOUND_PENDING_EVIDENCE")
+        common = dict(component=component, owner=owner, phase=phase, evidence_method=method,
+            gate_ref=gate, source_revision=inventory["source_revision"], target_paths=route.target_paths,
+            projection_inventory_fingerprint=inventory["inventory_fingerprint"],
+            work_constraint_indices=route.work_constraint_indices,
+            supporting_source_refs=route.supporting_source_refs, state=state,
+            component_basis=route.component_basis)
+        if source["kind"] in {"WORK_CONSTRAINT", "WORK_CONTEXT", "IR_ITEM"}:
+            if source["kind"] == "IR_ITEM":
+                item = next(item for item in ir.items if item.item_id == source["item_id"])
+                origins = {p.origin for p in item.provenance}
+                if state == "RETAINED_CONTEXT" and (item.kind is not SemanticKind.FACT
+                        or item.action is not None or item.production is not None
+                        or item.requires_human or origins != {SemanticOrigin.REPOSITORY_OBSERVED}):
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_NOT_OBSERVED_CONTEXT")
+                if state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_CAPABILITY_UNRESOLVED")
+                records = tuple(dict.fromkeys(p.source_record_id for p in item.provenance if p.source_record_id is not None))
+                quote = item.statement
+                provenance = [p.model_dump(mode="json") for p in item.provenance]
+                item_id = item.item_id
+            else:
+                records = tuple(revision.source_record_ids)
+                quote = source["payload"]["content"]
+                provenance = {"work_reality_revision_id": str(revision.id),
+                              "source_record_ids": [str(value) for value in records]}
+                item_id = str(source["index"])
+                if source["kind"] == "WORK_CONTEXT" and state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT")
+                if source["kind"] == "WORK_CONSTRAINT":
+                    supporting = [entry for entry in inventory["sources"] if entry["source_ref"] in route.supporting_source_refs]
+                    clauses = [next(c for c in ir.clauses if c.clause_id == entry["clause_id"])
+                               for entry in supporting if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
+                    if not work_constraint_sources_correspond(ir, quote, supporting, component=component,
+                            phase=phase, semantic_component_declared=route.component_basis is not None,
+                            calibrated=allow_calibrated):
+>                       raise ValueError("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
+E                       ValueError: OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN
+
+src/spg/application/governed_obligations.py:741: ValueError
+_ test_complete_pending_wire_metadata_cannot_replay_a_fully_unmarked_observation _
+
+revision = namespace(id=UUID('86db8de6-b628-4334-9140-bea2e06a974c'), work_id=UUID('d4af0dbc-6887-440b-a931-e10e099a0606'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+ir = namespace(id=UUID('6e595009-14e7-439d-806b-19b3e9961cb8'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False)
+provider = <spg.providers.fulfillment_candidate.ModelFulfillmentCandidateProvider object at 0x7f2b8ac34230>
+database = None, source_revision = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+exact_target_paths = ['index.html'], _started = 462893.876210224
+
+    def _form_fulfillment_projection(revision, ir, *, provider, database=None,
+                                    source_revision=None, exact_target_paths=(), _started=None):
+        """Two cumulative candidates on one basis, with recoverable Owner receipts."""
+        inventory = fulfillment_inventory(revision, ir, source_revision=source_revision,
+                                          exact_target_paths=exact_target_paths)
+        if not hasattr(provider, "_fulfillment_receipts"):
+            provider._fulfillment_receipts = []
+        recorder = FulfillmentFormationReceipts(revision, inventory, database=database,
+                                               memory=provider._fulfillment_receipts)
+        started = monotonic() if _started is None else _started
+        capabilities = fulfillment_capability_contracts()
+        def finish(candidate, reason, passed):
+            rows = recorder.records()
+            semantic_review = next((row.get("semantic_review") for row in reversed(rows)
+                if row["stage"] == "CANDIDATE_VALIDATED" and row.get("validation_passed")), None)
+            review_row = next((row for row in reversed(rows) if row["stage"] == "SEMANTIC_REVIEW_VALIDATED"
+                and row.get("validation_passed") and row.get("semantic_review") == semantic_review), None)
+            capability_fingerprint = canonical_fingerprint(capabilities) if semantic_review is None else (
+                None if review_row is None else review_row.get("capabilities_fingerprint"))
+            if semantic_review is not None and capability_fingerprint != canonical_fingerprint(capabilities):
+                raise ValueError("OBLIGATION_SEMANTIC_REVIEW_CAPABILITIES_DRIFT")
+            receipt = {"owner": "WORK_FULFILLMENT_PROJECTION", "inventory_fingerprint": inventory["inventory_fingerprint"],
+                "source_revision": inventory["source_revision"], "work_reality_revision_id": str(revision.id),
+                "exact_target_paths": inventory["exact_target_paths"], "bounded_feedback_limit": 1,
+                "candidate_attempt_limit": 2, "semantic_review_calls_per_candidate_limit": 1, "maximum_model_calls": 4,
+                "semantic_review": semantic_review, "capabilities_fingerprint": capability_fingerprint,
+                "semantic_review_receipt_refs": [f"work-plan-receipt:{row['receipt_id']}" for row in rows if row["stage"].startswith("SEMANTIC_REVIEW_")],
+                "provider_call_count": sum(row["stage"] in {"MODEL_REQUEST_PENDING", "SEMANTIC_REVIEW_PENDING"} for row in rows),
+                "observed_model_call_count": sum(row["stage"] in {"MODEL_RESPONSE_OBSERVED", "SEMANTIC_REVIEW_OBSERVED"}
+                    and isinstance(row.get("model"), dict) and not row["model"].get("fixture", False) for row in rows),
+                "attempt_count": sum(row["stage"] == "MODEL_REQUEST_PENDING" for row in rows),
+                "receipt_refs": [f"work-plan-receipt:{row['receipt_id']}" for row in rows],
+                "candidate_attempts": list(rows), "terminal_reason": reason,
+                "unresolved_source_refs": [] if passed else [source["source_ref"] for source in inventory["sources"]],
+                "elapsed_seconds": monotonic() - started,
+                "meaning": "derived binding only; no evidence PASS, authority or effect"}
+            if not passed or candidate is None:
+                return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
+            bindings = validate_projection_candidate(candidate, revision, ir, inventory, semantic_review=semantic_review)
+            return (bindings[0].model_copy(update={"formation_receipt": receipt}), *bindings[1:])
+        rows = recorder.records()
+        terminal = next((row for row in reversed(rows) if row.get("terminal")), None)
+        if terminal is not None:
+            candidate = None if terminal.get("candidate") is None else FulfillmentProjectionCandidate.model_validate(terminal["candidate"])
+            return finish(candidate, terminal.get("terminal_reason", "OBLIGATION_FORMATION_TERMINAL"), terminal.get("validation_passed", False))
+        pending = [row for row in rows if row["stage"] == "MODEL_REQUEST_PENDING"]
+        validated = {row["attempt"] for row in rows if row["stage"] == "CANDIDATE_VALIDATED"}
+        incomplete = next((row for row in pending if row["attempt"] not in validated), None)
+        if incomplete is not None and not any(row["attempt"] == incomplete["attempt"] and row["stage"] == "MODEL_RESPONSE_OBSERVED" for row in rows):
+            recorder.append("FORMATION_STOPPED", incomplete["attempt"], terminal=True,
+                validation_passed=False, terminal_reason="OBLIGATION_FORMATION_PENDING_OUTCOME_UNKNOWN")
+            return finish(None, "OBLIGATION_FORMATION_PENDING_OUTCOME_UNKNOWN", False)
+        feedback = next((row.get("validation_feedback", row.get("failed_predicate")) for row in reversed(rows) if row["stage"] == "CANDIDATE_VALIDATED"), None)
+        next_attempt = incomplete["attempt"] if incomplete is not None else len(pending) + 1
+        for attempt in range(next_attempt, 3):
+            candidate = None
+            semantic_review = None
+            failure_stage = "MODEL_REQUEST"
+            try:
+                observed_row = next((row for row in reversed(recorder.records()) if row["attempt"] == attempt and row["stage"] == "MODEL_RESPONSE_OBSERVED"), None)
+                if observed_row is not None:
+                    observed = observed_row.get("candidate")
+                    raw_output = observed_row.get("candidate_output")
+                    from spg.providers.fulfillment_candidate import _FULFILLMENT_WIRE_METADATA_KEYS
+                    starts = [row for row in recorder.records() if row["attempt"] == attempt
+                        and row["stage"] == "MODEL_REQUEST_PENDING"]
+                    compact_receipt = (any(key in observed_row for key in _FULFILLMENT_WIRE_METADATA_KEYS)
+                        or any(key in row for row in starts for key in _FULFILLMENT_WIRE_METADATA_KEYS))
+                    if compact_receipt:
+                        from spg.providers.fulfillment_candidate import (
+                            _decode_fulfillment_candidate_wire,
+                            _FulfillmentWireReceiptIdentityError)
+                        if len(starts) != 1 or any(starts[0].get(key) != observed_row.get(key)
+                                for key in _FULFILLMENT_WIRE_METADATA_KEYS):
+>                           raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_RECEIPT_IDENTITY_DRIFT")
+E                           spg.providers.fulfillment_candidate._FulfillmentWireReceiptIdentityError: OBLIGATION_FORMATION_WIRE_RECEIPT_IDENTITY_DRIFT
+
+src/spg/application/governed_obligations.py:1540: _FulfillmentWireReceiptIdentityError
+
+During handling of the above exception, another exception occurred:
+
+    def test_complete_pending_wire_metadata_cannot_replay_a_fully_unmarked_observation():
+        revision, ir, inventory, plan = controlled_capacity_case()
+        provider, calls = controlled_model_provider(inventory, plan)
+        provider._fulfillment_receipts = []
+        recorder = FulfillmentFormationReceipts(revision, inventory, memory=provider._fulfillment_receipts)
+        metadata = provider.form_wire_metadata(inventory, fulfillment_capability_contracts())
+        recorder.append("MODEL_REQUEST_PENDING", 1, feedback=None, **metadata)
+        wire, _ = controlled_wire(inventory, plan)
+        recorder.append("MODEL_RESPONSE_OBSERVED", 1, candidate_output=json.dumps(wire),
+            model={"request_id": "controlled-marker-loss", "fixture": True})
+        assert not any(key in recorder.records()[-1] for key in metadata)
+>       result = form_fulfillment_projection(revision, ir, provider=provider,
+            source_revision=inventory["source_revision"], exact_target_paths=inventory["exact_target_paths"])
+
+tests/test_c3_fulfillment_capacity_representation.py:521: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/application/governed_obligations.py:1459: in form_fulfillment_projection
+    return _form_fulfillment_projection(revision, ir, **arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1604: in _form_fulfillment_projection
+    return finish(None, reason, False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1503: in finish
+    return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1269: in unresolved_projection
+    bindings = validate_projection_candidate(FulfillmentProjectionCandidate(
+src/spg/application/governed_obligations.py:1061: in validate_projection_candidate
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+src/spg/application/governed_obligations.py:1061: in <genexpr>
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+revision = namespace(id=UUID('86db8de6-b628-4334-9140-bea2e06a974c'), work_id=UUID('d4af0dbc-6887-440b-a931-e10e099a0606'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+ir = namespace(id=UUID('6e595009-14e7-439d-806b-19b3e9961cb8'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False)
+inventory = {'work_id': 'd4af0dbc-6887-440b-a931-e10e099a0606', 'work_reality_revision_id': '86db8de6-b628-4334-9140-bea2e06a974c'...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'semantic_ir_id': '6e595009-14e7-439d-806b-19b3e9961cb8', ...}
+route = FulfillmentRouteCandidate(source_ref='work-constraint:86db8de6-b628-4334-9140-bea2e06a974c:0', capability='UNRESOLVED'...aths=(), supporting_source_refs=(), rationale='OBLIGATION_FORMATION_WIRE_RECEIPT_IDENTITY_DRIFT', component_basis=None)
+reviewed_background_refs = frozenset(), allow_calibrated = False
+background_components = frozenset()
+
+    def _projection_binding(revision, ir, inventory, route, *, reviewed_background_refs=(),
+                            allow_calibrated=False, background_components=()):
+        source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
+        if source is None:
+            raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
+        component, owner, phase, method, gate = _capability_tuple(route.capability)
+        from spg.domain.governed_obligation import fulfillment_component_id
+        partial_background = fulfillment_component_id(route, inventory["inventory_fingerprint"]) in background_components
+        if len(set(route.work_constraint_indices)) != len(route.work_constraint_indices) or any(
+                index < 0 or index >= len(revision.constraints) for index in route.work_constraint_indices):
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_REFERENCE_INVALID")
+        if len(set(route.target_paths)) != len(route.target_paths) or set(route.target_paths) - set(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_SCOPE_EXPANSION")
+        if method == "EXACT_GIT_DIFF_SCOPE" and tuple(route.target_paths) != tuple(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_DIFF_SCOPE_INCOMPLETE")
+        if source["kind"] == "WORK_CONSTRAINT":
+            if route.work_constraint_indices != (source["index"],):
+                raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        elif route.work_constraint_indices:
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        if len(set(route.supporting_source_refs)) != len(route.supporting_source_refs) or any(
+                ref not in {entry["source_ref"] for entry in inventory["sources"]}
+                for ref in route.supporting_source_refs):
+            raise ValueError("OBLIGATION_SUPPORTING_SOURCE_SUBSTITUTED")
+        if method == "EXACT_CANDIDATE_CONTENT" and not route.target_paths:
+            raise ValueError("OBLIGATION_CONTENT_TARGET_UNRESOLVED")
+        state = "UNRESOLVED" if owner is FulfillmentOwner.UNRESOLVED else (
+            "RETAINED_CONTEXT" if phase is FulfillmentPhase.CONTEXT_RETENTION else "BOUND_PENDING_EVIDENCE")
+        common = dict(component=component, owner=owner, phase=phase, evidence_method=method,
+            gate_ref=gate, source_revision=inventory["source_revision"], target_paths=route.target_paths,
+            projection_inventory_fingerprint=inventory["inventory_fingerprint"],
+            work_constraint_indices=route.work_constraint_indices,
+            supporting_source_refs=route.supporting_source_refs, state=state,
+            component_basis=route.component_basis)
+        if source["kind"] in {"WORK_CONSTRAINT", "WORK_CONTEXT", "IR_ITEM"}:
+            if source["kind"] == "IR_ITEM":
+                item = next(item for item in ir.items if item.item_id == source["item_id"])
+                origins = {p.origin for p in item.provenance}
+                if state == "RETAINED_CONTEXT" and (item.kind is not SemanticKind.FACT
+                        or item.action is not None or item.production is not None
+                        or item.requires_human or origins != {SemanticOrigin.REPOSITORY_OBSERVED}):
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_NOT_OBSERVED_CONTEXT")
+                if state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_CAPABILITY_UNRESOLVED")
+                records = tuple(dict.fromkeys(p.source_record_id for p in item.provenance if p.source_record_id is not None))
+                quote = item.statement
+                provenance = [p.model_dump(mode="json") for p in item.provenance]
+                item_id = item.item_id
+            else:
+                records = tuple(revision.source_record_ids)
+                quote = source["payload"]["content"]
+                provenance = {"work_reality_revision_id": str(revision.id),
+                              "source_record_ids": [str(value) for value in records]}
+                item_id = str(source["index"])
+                if source["kind"] == "WORK_CONTEXT" and state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT")
+                if source["kind"] == "WORK_CONSTRAINT":
+                    supporting = [entry for entry in inventory["sources"] if entry["source_ref"] in route.supporting_source_refs]
+                    clauses = [next(c for c in ir.clauses if c.clause_id == entry["clause_id"])
+                               for entry in supporting if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
+                    if not work_constraint_sources_correspond(ir, quote, supporting, component=component,
+                            phase=phase, semantic_component_declared=route.component_basis is not None,
+                            calibrated=allow_calibrated):
+>                       raise ValueError("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
+E                       ValueError: OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN
+
+src/spg/application/governed_obligations.py:741: ValueError
+_ test_expanded_observation_capacity_stop_returns_unresolved_and_replays_without_calls _
+
+    def test_expanded_observation_capacity_stop_returns_unresolved_and_replays_without_calls():
+        revision, ir = basis()
+        # Each immutable synthetic source fits the existing component quote bound.
+        # Their full canonical candidate together exceeds the Owner receipt bound.
+        revision.context_facts = tuple(
+            f"Controlled retained context {index}: " + chr(65 + index) * 60000
+            for index in range(3)
+        )
+        inventory = fulfillment_inventory(revision, ir)
+        plan = candidate(revision, ir, inventory)
+        by_ref = {source["source_ref"]: source for source in inventory["sources"]}
+        plan = plan.model_copy(update={
+            "routes": tuple(
+                route.model_copy(update={
+                    "component_basis": FulfillmentComponentBasis(
+                        source_span_start=0,
+                        source_span_end=len(fulfillment_source_semantic_text(by_ref[route.source_ref])),
+                        source_component_quote=fulfillment_source_semantic_text(by_ref[route.source_ref]),
+                    )
+                })
+                for route in plan.routes
+            )
+        })
+        assert len(json.dumps(plan.model_dump(mode="json"), ensure_ascii=False).encode()) > 131072
+        original_facts = tuple(f.model_dump(mode="json") for f in revision.engineering_semantic_facts)
+        oracle = ReviewedOracle([plan])
+        first_error = None
+        first_result = None
+        try:
+            first_result = form_fulfillment_projection(revision, ir, provider=oracle)
+        except ValueError as error:
+            first_error = str(error)
+    
+        rows = oracle._fulfillment_receipts
+        terminal = next(row for row in rows if row.get("terminal"))
+        assert terminal["stage"] == "MODEL_RESPONSE_OBSERVED"
+        assert terminal["terminal_reason"] == "OBLIGATION_FORMATION_RECEIPT_LIMIT"
+        assert terminal["validation_passed"] is False
+        assert "candidate" not in terminal and "candidate_output" not in terminal
+        assert len(oracle.calls) == 1 and oracle.review_calls == 0
+        before_replay = tuple(dict(row) for row in rows)
+>       replay = form_fulfillment_projection(revision, ir, provider=oracle)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_c3_fulfillment_capacity_representation.py:578: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/application/governed_obligations.py:1459: in form_fulfillment_projection
+    return _form_fulfillment_projection(revision, ir, **arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1510: in _form_fulfillment_projection
+    return finish(candidate, terminal.get("terminal_reason", "OBLIGATION_FORMATION_TERMINAL"), terminal.get("validation_passed", False))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1503: in finish
+    return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/governed_obligations.py:1269: in unresolved_projection
+    bindings = validate_projection_candidate(FulfillmentProjectionCandidate(
+src/spg/application/governed_obligations.py:1061: in validate_projection_candidate
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+src/spg/application/governed_obligations.py:1061: in <genexpr>
+    bindings = tuple(_projection_binding(revision, ir, inventory, route,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+revision = namespace(id=UUID('088a1350-640e-4a73-94b1-2101f0480cef'), work_id=UUID('61a09f5f-42cf-4360-a232-280d8935b26b'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+ir = namespace(id=UUID('3d60bdf8-77e2-4560-80bc-e0da863ebdd3'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False)
+inventory = {'work_id': '61a09f5f-42cf-4360-a232-280d8935b26b', 'work_reality_revision_id': '088a1350-640e-4a73-94b1-2101f0480cef'...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'semantic_ir_id': '3d60bdf8-77e2-4560-80bc-e0da863ebdd3', ...}
+route = FulfillmentRouteCandidate(source_ref='work-constraint:088a1350-640e-4a73-94b1-2101f0480cef:0', capability='UNRESOLVED'...(0,), target_paths=(), supporting_source_refs=(), rationale='OBLIGATION_FORMATION_RECEIPT_LIMIT', component_basis=None)
+reviewed_background_refs = frozenset(), allow_calibrated = False
+background_components = frozenset()
+
+    def _projection_binding(revision, ir, inventory, route, *, reviewed_background_refs=(),
+                            allow_calibrated=False, background_components=()):
+        source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
+        if source is None:
+            raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
+        component, owner, phase, method, gate = _capability_tuple(route.capability)
+        from spg.domain.governed_obligation import fulfillment_component_id
+        partial_background = fulfillment_component_id(route, inventory["inventory_fingerprint"]) in background_components
+        if len(set(route.work_constraint_indices)) != len(route.work_constraint_indices) or any(
+                index < 0 or index >= len(revision.constraints) for index in route.work_constraint_indices):
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_REFERENCE_INVALID")
+        if len(set(route.target_paths)) != len(route.target_paths) or set(route.target_paths) - set(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_SCOPE_EXPANSION")
+        if method == "EXACT_GIT_DIFF_SCOPE" and tuple(route.target_paths) != tuple(inventory["exact_target_paths"]):
+            raise ValueError("OBLIGATION_DIFF_SCOPE_INCOMPLETE")
+        if source["kind"] == "WORK_CONSTRAINT":
+            if route.work_constraint_indices != (source["index"],):
+                raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        elif route.work_constraint_indices:
+            raise ValueError("OBLIGATION_WORK_CONSTRAINT_SOURCE_MISMATCH")
+        if len(set(route.supporting_source_refs)) != len(route.supporting_source_refs) or any(
+                ref not in {entry["source_ref"] for entry in inventory["sources"]}
+                for ref in route.supporting_source_refs):
+            raise ValueError("OBLIGATION_SUPPORTING_SOURCE_SUBSTITUTED")
+        if method == "EXACT_CANDIDATE_CONTENT" and not route.target_paths:
+            raise ValueError("OBLIGATION_CONTENT_TARGET_UNRESOLVED")
+        state = "UNRESOLVED" if owner is FulfillmentOwner.UNRESOLVED else (
+            "RETAINED_CONTEXT" if phase is FulfillmentPhase.CONTEXT_RETENTION else "BOUND_PENDING_EVIDENCE")
+        common = dict(component=component, owner=owner, phase=phase, evidence_method=method,
+            gate_ref=gate, source_revision=inventory["source_revision"], target_paths=route.target_paths,
+            projection_inventory_fingerprint=inventory["inventory_fingerprint"],
+            work_constraint_indices=route.work_constraint_indices,
+            supporting_source_refs=route.supporting_source_refs, state=state,
+            component_basis=route.component_basis)
+        if source["kind"] in {"WORK_CONSTRAINT", "WORK_CONTEXT", "IR_ITEM"}:
+            if source["kind"] == "IR_ITEM":
+                item = next(item for item in ir.items if item.item_id == source["item_id"])
+                origins = {p.origin for p in item.provenance}
+                if state == "RETAINED_CONTEXT" and (item.kind is not SemanticKind.FACT
+                        or item.action is not None or item.production is not None
+                        or item.requires_human or origins != {SemanticOrigin.REPOSITORY_OBSERVED}):
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_NOT_OBSERVED_CONTEXT")
+                if state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_UNLINKED_ITEM_CAPABILITY_UNRESOLVED")
+                records = tuple(dict.fromkeys(p.source_record_id for p in item.provenance if p.source_record_id is not None))
+                quote = item.statement
+                provenance = [p.model_dump(mode="json") for p in item.provenance]
+                item_id = item.item_id
+            else:
+                records = tuple(revision.source_record_ids)
+                quote = source["payload"]["content"]
+                provenance = {"work_reality_revision_id": str(revision.id),
+                              "source_record_ids": [str(value) for value in records]}
+                item_id = str(source["index"])
+                if source["kind"] == "WORK_CONTEXT" and state not in {"UNRESOLVED", "RETAINED_CONTEXT"}:
+                    raise ValueError("OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT")
+                if source["kind"] == "WORK_CONSTRAINT":
+                    supporting = [entry for entry in inventory["sources"] if entry["source_ref"] in route.supporting_source_refs]
+                    clauses = [next(c for c in ir.clauses if c.clause_id == entry["clause_id"])
+                               for entry in supporting if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
+                    if not work_constraint_sources_correspond(ir, quote, supporting, component=component,
+                            phase=phase, semantic_component_declared=route.component_basis is not None,
+                            calibrated=allow_calibrated):
+>                       raise ValueError("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
+E                       ValueError: OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN
+
+src/spg/application/governed_obligations.py:741: ValueError
+=========================== short test summary info ============================
+FAILED tests/test_c3_semantic_contract_calibration.py::test_distinct_unresolved_component_is_preserved_and_runtime_admission_stops
+FAILED tests/test_c3_fulfillment_components.py::test_semantic_mismatch_is_bounded_and_same_basis_does_not_repeat_either_call
+FAILED tests/test_c3_fulfillment_components.py::test_review_pending_outcome_unknown_is_not_repeated_after_resume
+FAILED tests/test_fulfillment_projection.py::test_complete_typed_inventory_needs_no_provider_and_partial_never_disappears
+FAILED tests/test_fulfillment_projection.py::test_pending_unknown_and_transport_failure_do_not_blindly_retry
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_wire_size_does_not_hide_expanded_payload_capacity_failure
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget[false-review]
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_compact_restore_never_grants_its_own_semantic_review_or_resets_budget[stale-review]
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_complete_pending_wire_metadata_cannot_replay_a_fully_unmarked_observation
+FAILED tests/test_c3_fulfillment_capacity_representation.py::test_expanded_observation_capacity_stop_returns_unresolved_and_replays_without_calls

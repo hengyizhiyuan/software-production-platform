@@ -1,0 +1,36 @@
+{
+  "schema": "c3-semantic-owner-pg-regression-v1",
+  "started_at_utc": "2026-10-10T00:27:46.259041+00:00",
+  "ended_at_utc": "2026-10-10T00:28:02.030648+00:00",
+  "wall_seconds": 15.771586527000181,
+  "counts": {
+    "tests": 5,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 4
+  },
+  "exit_code": 1,
+  "sources": {
+    "qualification": "DEVELOPMENT_OVERLAY"
+  },
+  "actual_image_id": "sha256:7a4ac00e3599bda2dbcebe46b15dd0b45f3be86552021023ebd288eb732f7b35",
+  "actual_container_id": "83c94487842d17fc764f052bf95d7b6ea62e1a7218612d63e03cb55714ea3958",
+  "actual_postgres_image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+  "actual_postgres_container_id": "6408d330b4244d90bd556ffecf024528038f8e45b4391721f84da784c7cac665",
+  "database_name": "c1_contract_continuity",
+  "migration_head": "20261007_72",
+  "network_internal": true,
+  "nodes": [
+    "tests/integration/test_c3_fulfillment_receipts.py"
+  ],
+  "source_or_test_overlay": true,
+  "credentials_independently_generated": true,
+  "live_model_calls": 0,
+  "actual_ai_work_created": 0,
+  "fixture_only": true,
+  "original_database_access": false,
+  "existing_services_started": false,
+  "controller_sha256": "6607ba2084d9e02ccfb21718651ee497650eea3451fdd3f875629df820d3302f",
+  "claim": "ISOLATED_PG_OWNER_PERSISTENCE_AND_STATE_REGRESSION_NOT_REAL_G0"
+}

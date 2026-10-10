@@ -1,0 +1,21 @@
+..................F                                                      [100%]
+=================================== FAILURES ===================================
+_ test_same_source_same_capability_components_each_require_actual_owner_proof __
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_same_source_same_capabili0')
+
+    def test_same_source_same_capability_components_each_require_actual_owner_proof(tmp_path):
+        req,records,ids=same_capability_basis()
+        assert assess(tmp_path,req,records).gate is Gate.PASS
+        metadata=records[req.verification_refs[0]]['evidence']['metadata']
+        metadata['protected_context_checks'][0]['current_component_evidence'].pop()
+>       assert assess(tmp_path,req,records).gate is Gate.BLOCKED
+E       AssertionError: assert <Gate.PASS: 'PASS'> is <Gate.BLOCKED: 'BLOCKED'>
+E        +  where <Gate.PASS: 'PASS'> = AssuranceResult(contract_version='watt-guardian-software-assurance-v1', result_id=UUID('c54fa1c9-563c-48ba-b5cf-afe028...authorization_state='NOT_AUTHORIZED', assessed_at=datetime.datetime(2026, 10, 10, 0, 34, 50, 433297, tzinfo=TzInfo(0))).gate
+E        +    where AssuranceResult(contract_version='watt-guardian-software-assurance-v1', result_id=UUID('c54fa1c9-563c-48ba-b5cf-afe028...authorization_state='NOT_AUTHORIZED', assessed_at=datetime.datetime(2026, 10, 10, 0, 34, 50, 433297, tzinfo=TzInfo(0))) = assess(PosixPath('/tmp/pytest-of-root/pytest-0/test_same_source_same_capabili0'), AssuranceRequest(contract_version='watt-guardian-software-assurance-v1', evidence_contract_version='governed-obligatio...), prior_finding_ids=(), submitted_at=datetime.datetime(2026, 10, 10, 0, 34, 50, 367067, tzinfo=datetime.timezone.utc)), {'candidate:21b662b9-7f51-4124-83f8-54c247c4e085': {'id': '21b662b9-7f51-4124-83f8-54c247c4e085', 'condition': 'SEALED...ne_id': '654527b2-cb24-4ee3-a795-e2d4c9094968', 'production_run_id': '9b48f9c4-c957-497c-a3c5-f242881ea825', ...}, ...})
+E        +  and   <Gate.BLOCKED: 'BLOCKED'> = Gate.BLOCKED
+
+tests/test_c3_component_calibration.py:199: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_c3_component_calibration.py::test_same_source_same_capability_components_each_require_actual_owner_proof
+1 failed, 18 passed in 2.00s

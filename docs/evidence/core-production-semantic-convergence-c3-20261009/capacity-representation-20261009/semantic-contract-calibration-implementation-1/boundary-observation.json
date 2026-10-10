@@ -1,0 +1,16 @@
+{
+  "captured_at_utc": "2026-10-10T01:00:53.482935+00:00",
+  "main_mutation_performed": false,
+  "watt_remote_main": "5b7bf217937d7e002c0264c3fe9fdd518dba152c",
+  "guardian_remote_main": "cda2e744ee9027a223a4173faeb9c28829b99a71",
+  "ecs_main_ref": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+  "ecs_existing_checkout_head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+  "ecs_existing_checkout_ref": "refs/heads/codex/admin-work-ai-diagnostic-export-ecs",
+  "default_local_branch": "feature/production-environment-foundation",
+  "holdout_opened": false,
+  "real_model_calls": 0,
+  "real_g0_created": 0,
+  "historical_owner_records_written": false,
+  "qualified_pg_container_final_state": "exited",
+  "qualification_source_overlay": false
+}

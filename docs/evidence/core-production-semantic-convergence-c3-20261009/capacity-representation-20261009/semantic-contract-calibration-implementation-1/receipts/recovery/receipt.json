@@ -1,0 +1,33 @@
+{
+  "source": "a91442c21ed487b10d8dc38023b0807787a29648",
+  "sources": {
+    "watt": {
+      "revision": "a91442c21ed487b10d8dc38023b0807787a29648",
+      "tree": "80778b67a7147902d10e9f14d669150e6df6d809"
+    },
+    "guardian": {
+      "revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+      "tree": "6066a6d6b8d91bec610021409ab320309ed0e437"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:90f2cd847ad891fda6ca95b5736c84b680c9d58bd6a3203bf0ea31c970da0f16",
+  "path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/image-recovery-final/exact-image.tar.gz",
+  "sha256": "a23a1148a3d246a7e364d67cef7030c6da91acc290b214cedadc8f70bf3f3f9e",
+  "bytes": 293170097,
+  "mode": "0600",
+  "started_at_utc": "2026-10-10T00:53:52.250012Z",
+  "ended_at_utc": "2026-10-10T00:56:26.287800Z",
+  "wall_seconds": 154.03778255096404,
+  "restore_test": "NOT_PERFORMED",
+  "offsite_copy": "NOT_PERFORMED",
+  "production_resource_mutation": false,
+  "controller_sha256": "5e05ec48d747118a4e2ad7b5590c38e02626e6bdd16f18fe582ae78c2f8d7153"
+}

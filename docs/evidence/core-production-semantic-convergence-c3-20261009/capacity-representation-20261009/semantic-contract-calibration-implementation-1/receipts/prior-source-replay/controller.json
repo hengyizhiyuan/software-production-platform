@@ -1,0 +1,98 @@
+{
+  "started_at_utc": "2026-10-10T00:41:15.624556+00:00",
+  "ended_at_utc": "2026-10-10T00:41:19.429930+00:00",
+  "actual_image": "sha256:f6141032b504195805ac00c93a2d18a88b5b26dae6a618c84141346a2c513e6e",
+  "actual_container": "b675ef7d793af49040f46a4690d88f2341bf07dca371a2993f53fda7a2d79339",
+  "sources": {
+    "watt": {
+      "revision": "62d2ebfea2a575e5c3f859785d0fcd01eeda3d93",
+      "tree": "5c8c1b63d0830899d5fe2179594c478f1c920396"
+    },
+    "guardian": {
+      "revision": "79b53b344197e11d1c4a792c812784fbbde54969",
+      "tree": "a8eb6d54baec649024226e7f65c62b1f8c9442f6"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "inputs_before": {
+    "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json": "9b013274f1a6daafc776297a302c52c8247cd2fd5ec9c5b99a83279fd2ee8e2c",
+    "/data/watt/c3-semantic-convergence-20261009/capacity-representation-20261009/semantic-contract-calibration-1-run2/private/read-only-original-candidate.json": "e9020a908ba354c2e12ab4db297b32b7d17041fd12e4180a740f39d9fb42c9b5",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/final-inputs/replay_retained_candidate.py": "f4705e4ff59dcf5f3a2f7ca41259a5abcb133797e454a58a970e709453b6ac62"
+  },
+  "inputs_after": {
+    "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json": "9b013274f1a6daafc776297a302c52c8247cd2fd5ec9c5b99a83279fd2ee8e2c",
+    "/data/watt/c3-semantic-convergence-20261009/capacity-representation-20261009/semantic-contract-calibration-1-run2/private/read-only-original-candidate.json": "e9020a908ba354c2e12ab4db297b32b7d17041fd12e4180a740f39d9fb42c9b5",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/final-inputs/replay_retained_candidate.py": "f4705e4ff59dcf5f3a2f7ca41259a5abcb133797e454a58a970e709453b6ac62"
+  },
+  "immutable_inputs": true,
+  "exit_code": 0,
+  "wall_seconds": 3.8054192190174945,
+  "network": "none",
+  "database_access": false,
+  "model_calls": 0,
+  "output_owner": "dedicated root-owned diagnostic directory, no existing permission changed",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/retained-replay-2",
+      "Destination": "/evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/public-delivery-c3-final/retry-1/g0-owner-2/20261009T130020024208Z-2fc7b990c1b54846a25bd067bc94b849-canonical-work.json",
+      "Destination": "/basis.json",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/capacity-representation-20261009/semantic-contract-calibration-1-run2/private/read-only-original-candidate.json",
+      "Destination": "/candidate.json",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/final-inputs/replay_retained_candidate.py",
+      "Destination": "/replay.py",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    }
+  ],
+  "environment_names": [
+    "PATH",
+    "GPG_KEY",
+    "PYTHON_VERSION",
+    "PYTHON_SHA256",
+    "PYTHONDONTWRITEBYTECODE",
+    "PYTHONUNBUFFERED",
+    "UV_COMPILE_BYTECODE",
+    "UV_LINK_MODE",
+    "UV_PROJECT_ENVIRONMENT",
+    "SPG_RUNTIME_REVISION",
+    "C3_WATT_TREE",
+    "C3_GUARDIAN_REVISION",
+    "C3_GUARDIAN_TREE",
+    "C3_ECF_REVISION",
+    "C3_ECF_TREE",
+    "C3_ECF_UNSUPPORTED_REVISION",
+    "C3_ECF_UNSUPPORTED_TREE",
+    "C3_BASE_IMAGE_REF",
+    "C3_BASE_IMAGE_ID",
+    "PYTHONPATH",
+    "C1_ECF_CURRENT_MAIN_SOURCE"
+  ]
+}

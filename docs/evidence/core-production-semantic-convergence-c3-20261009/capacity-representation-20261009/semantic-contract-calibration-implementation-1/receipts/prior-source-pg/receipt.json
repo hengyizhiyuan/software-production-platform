@@ -1,0 +1,51 @@
+{
+  "schema": "c3-semantic-owner-pg-regression-v1",
+  "started_at_utc": "2026-10-10T00:40:03.990217+00:00",
+  "ended_at_utc": "2026-10-10T00:40:26.725778+00:00",
+  "wall_seconds": 22.735586160968523,
+  "counts": {
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 5
+  },
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "62d2ebfea2a575e5c3f859785d0fcd01eeda3d93",
+      "tree": "5c8c1b63d0830899d5fe2179594c478f1c920396"
+    },
+    "guardian": {
+      "revision": "79b53b344197e11d1c4a792c812784fbbde54969",
+      "tree": "a8eb6d54baec649024226e7f65c62b1f8c9442f6"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:f6141032b504195805ac00c93a2d18a88b5b26dae6a618c84141346a2c513e6e",
+  "actual_container_id": "7a8605cb21e88e0ff64982c75bf6f6a6863351bbf985781eb7b22be06d8f05a3",
+  "actual_postgres_image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+  "actual_postgres_container_id": "22d13462dca6fde9c5f28da4e3ec8adce31bdf0d91d75c9f55d4e2c652fae89a",
+  "database_name": "c1_contract_continuity",
+  "migration_head": "20261007_72",
+  "network_internal": true,
+  "nodes": [
+    "tests/integration/test_c3_fulfillment_receipts.py"
+  ],
+  "source_or_test_overlay": false,
+  "credentials_independently_generated": true,
+  "live_model_calls": 0,
+  "actual_ai_work_created": 0,
+  "fixture_only": true,
+  "original_database_access": false,
+  "existing_services_started": false,
+  "controller_sha256": "3a290a3138018ecd61fcaada066ea9fefeeca10f2623351ca10b22f588e73a70",
+  "claim": "ISOLATED_PG_OWNER_PERSISTENCE_AND_STATE_REGRESSION_NOT_REAL_G0"
+}

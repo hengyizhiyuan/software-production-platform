@@ -1,0 +1,57 @@
+{
+  "schema": "c3-exact-image-build-v1",
+  "started_at_utc": "2026-10-10T00:37:21.966199+00:00",
+  "ended_at_utc": "2026-10-10T00:37:38.935660+00:00",
+  "wall_seconds": 16.969508025969844,
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "62d2ebfea2a575e5c3f859785d0fcd01eeda3d93",
+      "tree": "5c8c1b63d0830899d5fe2179594c478f1c920396"
+    },
+    "guardian": {
+      "revision": "79b53b344197e11d1c4a792c812784fbbde54969",
+      "tree": "a8eb6d54baec649024226e7f65c62b1f8c9442f6"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "command": [
+    "docker",
+    "build",
+    "--network=none",
+    "--build-arg",
+    "BASE_IMAGE=watt-c3-continuation-dependency-base:6c1f48e-20261009",
+    "--build-arg",
+    "WATT_REVISION=62d2ebfea2a575e5c3f859785d0fcd01eeda3d93",
+    "--build-arg",
+    "WATT_TREE=5c8c1b63d0830899d5fe2179594c478f1c920396",
+    "--build-arg",
+    "GUARDIAN_REVISION=79b53b344197e11d1c4a792c812784fbbde54969",
+    "--build-arg",
+    "GUARDIAN_TREE=a8eb6d54baec649024226e7f65c62b1f8c9442f6",
+    "--build-arg",
+    "ECF_REVISION=5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "--build-arg",
+    "ECF_TREE=878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "-f",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/final-image/context/watt/docs/evidence/core-production-semantic-convergence-c3-20261009/Dockerfile.c3",
+    "-t",
+    "watt-c3-calibration:62d2ebf",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/final-image/context"
+  ],
+  "source_overlay": false,
+  "real_model_calls": 0,
+  "scope": "C3 Option A component/source/evidence calibration and unchanged authority budgets; no model requests, real G0 or Holdout",
+  "image": {
+    "Id": "sha256:f6141032b504195805ac00c93a2d18a88b5b26dae6a618c84141346a2c513e6e",
+    "RepoDigests": [],
+    "Created": "2026-10-10T08:37:31.937261786+08:00"
+  }
+}

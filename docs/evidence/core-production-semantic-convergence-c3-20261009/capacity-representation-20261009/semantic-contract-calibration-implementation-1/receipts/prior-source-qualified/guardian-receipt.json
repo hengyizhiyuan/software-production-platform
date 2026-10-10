@@ -1,0 +1,44 @@
+{
+  "started_at_utc": "2026-10-10T00:40:00.334315+00:00",
+  "ended_at_utc": "2026-10-10T00:40:13.546274+00:00",
+  "wall_seconds": 13.212013580021448,
+  "counts": {
+    "tests": 154,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 154
+  },
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "62d2ebfea2a575e5c3f859785d0fcd01eeda3d93",
+      "tree": "5c8c1b63d0830899d5fe2179594c478f1c920396"
+    },
+    "guardian": {
+      "revision": "79b53b344197e11d1c4a792c812784fbbde54969",
+      "tree": "a8eb6d54baec649024226e7f65c62b1f8c9442f6"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image": "sha256:f6141032b504195805ac00c93a2d18a88b5b26dae6a618c84141346a2c513e6e",
+  "actual_container": "d7687f952895b3b4b9c38b1eddb050e7ad69bc0da05a9977cf0750fb7549669a",
+  "runtime_source_overlay": false,
+  "test_inputs": "Exact Guardian Git archive from frozen build manifest",
+  "nodes": [
+    "tests/test_c3_component_calibration.py",
+    "tests/test_c3_phase_evidence.py",
+    "tests/test_c1_governed_evidence_continuity.py",
+    "tests/test_governed_obligation_evidence.py"
+  ],
+  "network": "none",
+  "model_calls": 0,
+  "claim": "Controlled independent Owner evidence regressions, not live Assurance"
+}

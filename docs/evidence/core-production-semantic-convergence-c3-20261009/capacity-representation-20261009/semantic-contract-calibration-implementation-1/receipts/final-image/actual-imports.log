@@ -1,0 +1,1 @@
+{"actual_package_counts": {"ecf": 5, "guardian": 5, "pytest": null, "spg": 278}, "build_input_count": 1097, "receipt_path": "/c3-evidence/actual-imports.json", "scope": "actual-installed-imports", "status": "PASS"}

@@ -1,0 +1,64 @@
+{
+  "schema": "c3-continuation-exact-image-regression-v1",
+  "started_at_utc": "2026-10-10T00:37:41.133111+00:00",
+  "ended_at_utc": "2026-10-10T00:37:49.994445+00:00",
+  "wall_seconds": 8.861339990980923,
+  "sources": {
+    "watt": {
+      "revision": "62d2ebfea2a575e5c3f859785d0fcd01eeda3d93",
+      "tree": "5c8c1b63d0830899d5fe2179594c478f1c920396"
+    },
+    "guardian": {
+      "revision": "79b53b344197e11d1c4a792c812784fbbde54969",
+      "tree": "a8eb6d54baec649024226e7f65c62b1f8c9442f6"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "image_id": "sha256:f6141032b504195805ac00c93a2d18a88b5b26dae6a618c84141346a2c513e6e",
+  "actual_container_id": "8acfe31e8e8f7daaa888903da625b62dadc614b9ef0db93dbb941701821712aa",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "junit_family=legacy",
+    "tests/test_c3_fulfillment_capacity_representation.py",
+    "tests/test_fulfillment_projection.py",
+    "tests/test_c3_fulfillment_components.py",
+    "tests/test_c3_admitted_source_facets.py",
+    "tests/test_c3_fulfillment_provider_failures.py",
+    "tests/test_c3_fulfillment_admission_stop.py",
+    "tests/test_c3_provider_http_metadata.py",
+    "tests/test_model_runtime.py",
+    "tests/test_guardian_assurance_adapter.py",
+    "tests/test_c3_evidence_projection.py",
+    "tests/test_governed_obligation_fulfillment.py",
+    "tests/test_c3_semantic_contract_calibration.py",
+    "-m",
+    "not real_container",
+    "--tb=short",
+    "--junitxml=/c3-evidence/watt-continuation.xml"
+  ],
+  "counts": {
+    "tests": 226,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 226
+  },
+  "exit_code": 0,
+  "source_overlay": false,
+  "live_model_calls": 0,
+  "real_ai_work_created": 0,
+  "business_database_access": false,
+  "proof_boundary": "Deterministic isolated regressions only; not real G0, Provider recovery, Guardian live Assurance, Holdout or Human Acceptance"
+}
