@@ -182,3 +182,30 @@ def test_consumer_semantics_are_existing_tool_contracts_not_subject_aliases():
     assert len(contracts) == 1
     tool = next(t for t in PUBLIC_NATIVE_TOOL_CONTRACTS if t['identity'] == 'preview.inspect')
     assert contracts[0]['tool_contract'] == tool
+
+
+@pytest.mark.parametrize('scale', ('small', 'medium', 'complex'))
+def test_critic_comparison_table_is_exact_and_does_not_infer_semantic_verdicts(scale):
+    from spg.providers.fulfillment_candidate import _review_component_table
+    from spg.application.governed_obligations import fulfillment_capability_contracts
+    from spg.domain.governed_obligation import fulfillment_component_id
+    revision, ir, inventory, plan = controlled_capacity_case(scale)
+    rows = _review_component_table(inventory, plan, fulfillment_capability_contracts())
+    assert len(rows) == len(plan.routes)
+    for ordinal, (row, route) in enumerate(zip(rows, plan.routes, strict=True)):
+        assert row['route'] == ordinal and row['source_ref'] == route.source_ref
+        assert row['component_id'] == fulfillment_component_id(route, inventory['inventory_fingerprint'])
+        assert row['original_component_text'] == route.component_basis.source_component_quote
+        assert row['source_span'] == [route.component_basis.source_span_start, route.component_basis.source_span_end]
+        assert row['target_paths'] == list(route.target_paths)
+        assert 'rationale' not in row and 'passed' not in row
+
+
+def test_critic_comparison_cannot_display_a_substituted_source_quote():
+    from spg.providers.fulfillment_candidate import _review_component_table, _FulfillmentWireReceiptIdentityError
+    from spg.application.governed_obligations import fulfillment_capability_contracts
+    _, _, inventory, plan = controlled_capacity_case()
+    first, *rest = plan.routes
+    changed = first.model_copy(update={'component_basis': first.component_basis.model_copy(update={'source_component_quote': 'invented'})})
+    with pytest.raises(_FulfillmentWireReceiptIdentityError, match='INPUT_IDENTITY_DRIFT'):
+        _review_component_table(inventory, plan.model_copy(update={'routes': (changed, *rest)}), fulfillment_capability_contracts())
