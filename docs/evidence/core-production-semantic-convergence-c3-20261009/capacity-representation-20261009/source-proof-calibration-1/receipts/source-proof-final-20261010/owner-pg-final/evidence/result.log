@@ -1,0 +1,45 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /qualification
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 39 items
+
+tests/integration/test_c3_fulfillment_receipts.py ...FF............      [ 43%]
+tests/integration/test_c1_contract_continuity.py ......................  [100%]
+
+=================================== FAILURES ===================================
+_ test_actual_compact_observation_replays_from_postgresql_without_repeating_formation[work] _
+tests/integration/test_c3_fulfillment_receipts.py:158: in test_actual_compact_observation_replays_from_postgresql_without_repeating_formation
+    c1._admit_c1(postgres_database, tmp_path, route)
+tests/integration/test_c1_contract_continuity.py:478: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py:150: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py:1132: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
+E   ValueError: OBLIGATION_PROJECTION_UNRESOLVED
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+_ test_actual_compact_observation_replays_from_postgresql_without_repeating_formation[steering] _
+tests/integration/test_c3_fulfillment_receipts.py:158: in test_actual_compact_observation_replays_from_postgresql_without_repeating_formation
+    c1._admit_c1(postgres_database, tmp_path, route)
+tests/integration/test_c1_contract_continuity.py:470: in _admit_c1
+    bridge.admit_cycle(bridge.materialize_request(admitted.work_id))
+/opt/spg-venv/lib/python3.13/site-packages/spg/application/steering_production.py:383: in admit_cycle
+    plan, completion_contract, horizon, objective = self._production_contract(request)
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/spg/application/steering_production.py:505: in _production_contract
+    self._stop_unresolved_fulfillment(request, baseline, fulfillment_bindings)
+/opt/spg-venv/lib/python3.13/site-packages/spg/application/steering_production.py:638: in _stop_unresolved_fulfillment
+    raise FulfillmentProjectionNotReady(observation_id, scope)
+E   spg.application.steering_production.FulfillmentProjectionNotReady: OBLIGATION_PROJECTION_UNRESOLVED
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+----------------- generated xml file: /c3-evidence/result.xml ------------------
+=========================== short test summary info ============================
+FAILED tests/integration/test_c3_fulfillment_receipts.py::test_actual_compact_observation_replays_from_postgresql_without_repeating_formation[work]
+FAILED tests/integration/test_c3_fulfillment_receipts.py::test_actual_compact_observation_replays_from_postgresql_without_repeating_formation[steering]
+=================== 2 failed, 37 passed in 214.92s (0:03:34) ===================

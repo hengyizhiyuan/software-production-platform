@@ -1,0 +1,68 @@
+{
+  "schema": "c3-continuation-exact-image-regression-v1",
+  "started_at_utc": "2026-10-10T06:10:26.471140+00:00",
+  "ended_at_utc": "2026-10-10T06:10:39.916554+00:00",
+  "wall_seconds": 13.445416002010461,
+  "sources": {
+    "watt": {
+      "revision": "89b1fbeab99ecc1a474a81ab64a787928c6441e9",
+      "tree": "178bb8b19a265d3c7c0ccee6e42e0732de4a75b7"
+    },
+    "guardian": {
+      "revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+      "tree": "6066a6d6b8d91bec610021409ab320309ed0e437"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "image_id": "sha256:9c994e49e88a4f2cab0d960b07c3866f6520a9ccd61ebbff9c2bf998b3605f7a",
+  "actual_container_id": "d7edf4774a9ce9e6802de587a9d8b438ab85743b7b671323d894ef8dcaea7efb",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "junit_family=legacy",
+    "tests/test_c3_fulfillment_capacity_representation.py",
+    "tests/test_fulfillment_projection.py",
+    "tests/test_c3_fulfillment_components.py",
+    "tests/test_c3_admitted_source_facets.py",
+    "tests/test_c3_fulfillment_provider_failures.py",
+    "tests/test_c3_fulfillment_admission_stop.py",
+    "tests/test_c3_provider_http_metadata.py",
+    "tests/test_model_runtime.py",
+    "tests/test_guardian_assurance_adapter.py",
+    "tests/test_c3_evidence_projection.py",
+    "tests/test_governed_obligation_fulfillment.py",
+    "tests/test_c3_semantic_contract_calibration.py",
+    "tests/test_c3_fulfillment_wire_feedback.py",
+    "tests/test_c3_fulfillment_stop_projection.py",
+    "tests/test_c3_fulfillment_repair_context.py",
+    "tests/test_c3_owner_repair_preconditions.py",
+    "-m",
+    "not real_container",
+    "--tb=short",
+    "--junitxml=/c3-evidence/watt-continuation.xml"
+  ],
+  "counts": {
+    "tests": 345,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 345
+  },
+  "exit_code": 0,
+  "source_overlay": false,
+  "live_model_calls": 0,
+  "real_ai_work_created": 0,
+  "business_database_access": false,
+  "proof_boundary": "Deterministic isolated regressions only; not real G0, Provider recovery, Guardian live Assurance, Holdout or Human Acceptance"
+}

@@ -1,0 +1,494 @@
+{
+  "schema": "c3-exact-wire-failure-readonly-v1",
+  "model_calls": 0,
+  "candidate_modified": false,
+  "candidate_admitted": false,
+  "attempts": [
+    {
+      "attempt": 1,
+      "wire_sha256": "13e6168cd8e5e7af98a6af2605909d950aaef892f4db87dca4461e33e0f2b5c6",
+      "request_receipt_id": "623211d7-fa0a-4dcf-ac39-6933aac5fec5",
+      "response_receipt_id": "bd3482f7-a2ef-4faa-b43a-111224ae6f2d",
+      "owner_preconditions_fingerprint": "6a0a7c2bb381efd43d543096065c5f1d27dfd6c92b7336194623815d3d1d7246",
+      "json_status": "INVALID",
+      "stable_parser_message": "Extra data",
+      "line": 1,
+      "column": 14409,
+      "character_offset": 14408,
+      "unexpected_code_point": 125,
+      "syntax_context_sha256": "ab0a314f04cfa56fef979fd43e90fd7beaed5fbc65e5a21921cbcd9a73a2c816",
+      "output_ends_with_closing_brace": true,
+      "complete_json_tree": "NOT_EVALUABLE",
+      "semantic_checks": "NOT_EVALUABLE"
+    },
+    {
+      "attempt": 2,
+      "wire_sha256": "34f53ade1a5d9bb26cb24e6ecac2e29c83e67471e7476fbdd2403f4a1f6e97c0",
+      "request_receipt_id": "e7dec530-c3e9-4a5a-8c00-96536d5377b4",
+      "response_receipt_id": "b4d24b8b-f97d-47e4-b005-303c2b8e24de",
+      "owner_preconditions_fingerprint": "6a0a7c2bb381efd43d543096065c5f1d27dfd6c92b7336194623815d3d1d7246",
+      "json_status": "VALID",
+      "route_count": 75,
+      "invalid_fact_references": [
+        {
+          "route": 10,
+          "source": 7,
+          "capability": 0,
+          "invalid_fact_reference": 7,
+          "actual_kind": "IR_CLAUSE"
+        },
+        {
+          "route": 11,
+          "source": 7,
+          "capability": 1,
+          "invalid_fact_reference": 7,
+          "actual_kind": "IR_CLAUSE"
+        },
+        {
+          "route": 13,
+          "source": 9,
+          "capability": 0,
+          "invalid_fact_reference": 9,
+          "actual_kind": "IR_CONSTRAINT"
+        },
+        {
+          "route": 14,
+          "source": 10,
+          "capability": 0,
+          "invalid_fact_reference": 10,
+          "actual_kind": "IR_CLAUSE"
+        },
+        {
+          "route": 15,
+          "source": 11,
+          "capability": 1,
+          "invalid_fact_reference": 11,
+          "actual_kind": "IR_CONSTRAINT"
+        },
+        {
+          "route": 16,
+          "source": 11,
+          "capability": 6,
+          "invalid_fact_reference": 11,
+          "actual_kind": "IR_CONSTRAINT"
+        },
+        {
+          "route": 17,
+          "source": 11,
+          "capability": 7,
+          "invalid_fact_reference": 11,
+          "actual_kind": "IR_CONSTRAINT"
+        },
+        {
+          "route": 18,
+          "source": 11,
+          "capability": 8,
+          "invalid_fact_reference": 11,
+          "actual_kind": "IR_CONSTRAINT"
+        },
+        {
+          "route": 19,
+          "source": 11,
+          "capability": 9,
+          "invalid_fact_reference": 11,
+          "actual_kind": "IR_CONSTRAINT"
+        },
+        {
+          "route": 20,
+          "source": 12,
+          "capability": 0,
+          "invalid_fact_reference": 12,
+          "actual_kind": "IR_CONSTRAINT"
+        },
+        {
+          "route": 21,
+          "source": 12,
+          "capability": 6,
+          "invalid_fact_reference": 12,
+          "actual_kind": "IR_CONSTRAINT"
+        },
+        {
+          "route": 22,
+          "source": 13,
+          "capability": 1,
+          "invalid_fact_reference": 13,
+          "actual_kind": "IR_CONSTRAINT"
+        },
+        {
+          "route": 23,
+          "source": 13,
+          "capability": 4,
+          "invalid_fact_reference": 13,
+          "actual_kind": "IR_CONSTRAINT"
+        },
+        {
+          "route": 24,
+          "source": 13,
+          "capability": 5,
+          "invalid_fact_reference": 13,
+          "actual_kind": "IR_CONSTRAINT"
+        },
+        {
+          "route": 25,
+          "source": 14,
+          "capability": 1,
+          "invalid_fact_reference": 14,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 26,
+          "source": 14,
+          "capability": 4,
+          "invalid_fact_reference": 14,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 27,
+          "source": 14,
+          "capability": 5,
+          "invalid_fact_reference": 14,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 28,
+          "source": 14,
+          "capability": 6,
+          "invalid_fact_reference": 14,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 29,
+          "source": 14,
+          "capability": 7,
+          "invalid_fact_reference": 14,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 30,
+          "source": 14,
+          "capability": 8,
+          "invalid_fact_reference": 14,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 31,
+          "source": 14,
+          "capability": 9,
+          "invalid_fact_reference": 14,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 32,
+          "source": 15,
+          "capability": 0,
+          "invalid_fact_reference": 15,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 33,
+          "source": 15,
+          "capability": 1,
+          "invalid_fact_reference": 15,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 34,
+          "source": 15,
+          "capability": 6,
+          "invalid_fact_reference": 15,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 35,
+          "source": 15,
+          "capability": 7,
+          "invalid_fact_reference": 15,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 36,
+          "source": 15,
+          "capability": 8,
+          "invalid_fact_reference": 15,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 37,
+          "source": 15,
+          "capability": 9,
+          "invalid_fact_reference": 15,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 38,
+          "source": 16,
+          "capability": 0,
+          "invalid_fact_reference": 16,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 39,
+          "source": 16,
+          "capability": 1,
+          "invalid_fact_reference": 16,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 40,
+          "source": 16,
+          "capability": 6,
+          "invalid_fact_reference": 16,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 41,
+          "source": 16,
+          "capability": 7,
+          "invalid_fact_reference": 16,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 42,
+          "source": 16,
+          "capability": 8,
+          "invalid_fact_reference": 16,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 43,
+          "source": 16,
+          "capability": 9,
+          "invalid_fact_reference": 16,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 44,
+          "source": 17,
+          "capability": 0,
+          "invalid_fact_reference": 17,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 45,
+          "source": 17,
+          "capability": 1,
+          "invalid_fact_reference": 17,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 46,
+          "source": 17,
+          "capability": 6,
+          "invalid_fact_reference": 17,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 47,
+          "source": 17,
+          "capability": 7,
+          "invalid_fact_reference": 17,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 48,
+          "source": 17,
+          "capability": 8,
+          "invalid_fact_reference": 17,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 49,
+          "source": 17,
+          "capability": 9,
+          "invalid_fact_reference": 17,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 50,
+          "source": 18,
+          "capability": 0,
+          "invalid_fact_reference": 18,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 51,
+          "source": 18,
+          "capability": 1,
+          "invalid_fact_reference": 18,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 52,
+          "source": 18,
+          "capability": 6,
+          "invalid_fact_reference": 18,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 53,
+          "source": 18,
+          "capability": 7,
+          "invalid_fact_reference": 18,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 54,
+          "source": 18,
+          "capability": 8,
+          "invalid_fact_reference": 18,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 55,
+          "source": 18,
+          "capability": 9,
+          "invalid_fact_reference": 18,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 56,
+          "source": 19,
+          "capability": 0,
+          "invalid_fact_reference": 19,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 57,
+          "source": 19,
+          "capability": 1,
+          "invalid_fact_reference": 19,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 58,
+          "source": 19,
+          "capability": 6,
+          "invalid_fact_reference": 19,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 59,
+          "source": 19,
+          "capability": 7,
+          "invalid_fact_reference": 19,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 60,
+          "source": 19,
+          "capability": 8,
+          "invalid_fact_reference": 19,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 61,
+          "source": 19,
+          "capability": 9,
+          "invalid_fact_reference": 19,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 62,
+          "source": 20,
+          "capability": 0,
+          "invalid_fact_reference": 20,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 63,
+          "source": 20,
+          "capability": 1,
+          "invalid_fact_reference": 20,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 64,
+          "source": 20,
+          "capability": 6,
+          "invalid_fact_reference": 20,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 65,
+          "source": 20,
+          "capability": 7,
+          "invalid_fact_reference": 20,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 66,
+          "source": 20,
+          "capability": 8,
+          "invalid_fact_reference": 20,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 67,
+          "source": 20,
+          "capability": 9,
+          "invalid_fact_reference": 20,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 68,
+          "source": 21,
+          "capability": 1,
+          "invalid_fact_reference": 21,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 69,
+          "source": 21,
+          "capability": 4,
+          "invalid_fact_reference": 21,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 70,
+          "source": 22,
+          "capability": 1,
+          "invalid_fact_reference": 22,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 71,
+          "source": 22,
+          "capability": 5,
+          "invalid_fact_reference": 22,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 72,
+          "source": 23,
+          "capability": 1,
+          "invalid_fact_reference": 23,
+          "actual_kind": "WORK_CONSTRAINT"
+        },
+        {
+          "route": 73,
+          "source": 24,
+          "capability": 1,
+          "invalid_fact_reference": 24,
+          "actual_kind": "WORK_CONSTRAINT"
+        }
+      ],
+      "copied_primary_source_into_f": 72,
+      "all_primary_sources_present": true,
+      "capability_frequencies": {
+        "ARTIFACT_CONTENT": 14,
+        "GIT_DIFF_SCOPE": 17,
+        "PRODUCT_SOURCE_IDENTITY": 0,
+        "DENY_PREVIEW": 1,
+        "DENY_DEPLOY": 3,
+        "DENY_PUBLISH": 3,
+        "CANDIDATE_SEAL": 10,
+        "HUMAN_INTEGRATION": 8,
+        "HUMAN_DELIVERY_DEPLOY": 8,
+        "HUMAN_DELIVERY_PUBLISH": 8,
+        "RETAIN_CONTEXT": 3,
+        "UNRESOLVED": 0
+      },
+      "full_plan_and_semantic_equivalence": "NOT_EVALUABLE; canonical decode rejected"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema": "c3-legacy-syntax-observation-review-v1",
+  "model_calls": 0,
+  "original_candidate_modified": false,
+  "prefix_admitted": false,
+  "wire_sha256": "13e6168cd8e5e7af98a6af2605909d950aaef892f4db87dca4461e33e0f2b5c6",
+  "prefix_span": [
+    0,
+    14408
+  ],
+  "prefix_sha256": "0773b8d93bf98797fcd49971f3d800a744fd4734574bd42aba1569fe71d39bcd",
+  "trailing_bytes": 1,
+  "independent_raw_field_observations": {
+    "violations": [],
+    "additional_violation_count": 0,
+    "not_evaluable": [
+      "CANONICAL_COMPONENT_VALIDATION",
+      "OWNER_PHASE_EVIDENCE",
+      "INDEPENDENT_SEMANTIC_REVIEW",
+      "ACTUAL_OWNER_EVIDENCE",
+      "ASSURANCE"
+    ],
+    "coverage_not_evaluable_sources": []
+  },
+  "historical_terminal_replay": {
+    "unchanged": true,
+    "reason": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+    "new_calls": 0
+  },
+  "claim": "Read-only original complete-value field observations; not repaired Candidate or historical success"
+}

@@ -1,0 +1,1406 @@
+{
+  "schema": "c3-source-proof-readonly-review-v1",
+  "model_calls": 0,
+  "original_candidate_modified": false,
+  "owner_writes": 0,
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "original_owner_preconditions": {
+    "contract": "existing-owner-source-prerequisites-v1",
+    "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+    "work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+    "source_revision": "465038ded6cf4ba335a11577de76acb1dea55b76",
+    "capabilities_fingerprint": "a2e695783b122373f0ed308a959fa4e3116c4a9df5454dbedd81695071153b17",
+    "sources": [
+      {
+        "source": 0,
+        "source_ref": "semantic-fact:db105ff8-4eb8-5d2d-b46a-a67ae008766d",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true
+      },
+      {
+        "source": 1,
+        "source_ref": "semantic-fact:a1b3a5fe-dec1-5f72-a806-5f66955bdb58",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true
+      },
+      {
+        "source": 2,
+        "source_ref": "semantic-fact:55eeaeb7-4b78-5269-ace0-af79de21770e",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true
+      },
+      {
+        "source": 3,
+        "source_ref": "semantic-fact:ebcfeb68-75c8-5c8e-8a5c-37fbb3d471ba",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "necessary_evidence_method": "EXACT_GIT_DIFF_SCOPE"
+      },
+      {
+        "source": 4,
+        "source_ref": "semantic-fact:714a86db-354c-508d-aa51-91a978ca1be3",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "necessary_source_proofs": [
+          {
+            "capability": 1,
+            "minimal_support_sets": [
+              [
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 3,
+            "minimal_support_sets": [
+              [
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 4,
+            "minimal_support_sets": [
+              [
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 5,
+            "minimal_support_sets": [
+              [
+                13
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "source": 5,
+        "source_ref": "semantic-fact:d5fb1b5b-bc33-5aef-ad06-78b5599d1fcc",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true
+      },
+      {
+        "source": 6,
+        "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c1",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "polarity": "AFFIRMATIVE",
+        "temporal_scope": "CURRENT",
+        "speech_act": "DISCUSSION",
+        "whole_source_context_only": true,
+        "partial_context_rule": "DISTINCT_CURRENT_COMPONENT_AND_INDEPENDENT_SEMANTIC_REVIEW_REQUIRED"
+      },
+      {
+        "source": 7,
+        "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "polarity": "AFFIRMATIVE",
+        "temporal_scope": "CURRENT",
+        "speech_act": "EXPLICIT_REQUEST",
+        "whole_source_context_only": false,
+        "partial_context_rule": "DISTINCT_CURRENT_COMPONENT_AND_INDEPENDENT_SEMANTIC_REVIEW_REQUIRED"
+      },
+      {
+        "source": 8,
+        "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c3",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "polarity": "AFFIRMATIVE",
+        "temporal_scope": "CURRENT",
+        "speech_act": "DISCUSSION",
+        "whole_source_context_only": true,
+        "partial_context_rule": "DISTINCT_CURRENT_COMPONENT_AND_INDEPENDENT_SEMANTIC_REVIEW_REQUIRED"
+      },
+      {
+        "source": 9,
+        "source_ref": "ir-constraint:page_content_spec:c4",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "polarity": "AFFIRMATIVE",
+        "temporal_scope": "CURRENT",
+        "speech_act": "EXPLICIT_REQUEST",
+        "whole_source_context_only": false,
+        "partial_context_rule": "DISTINCT_CURRENT_COMPONENT_AND_INDEPENDENT_SEMANTIC_REVIEW_REQUIRED"
+      },
+      {
+        "source": 10,
+        "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "polarity": "AFFIRMATIVE",
+        "temporal_scope": "CURRENT",
+        "speech_act": "EXPLICIT_REQUEST",
+        "whole_source_context_only": false,
+        "partial_context_rule": "DISTINCT_CURRENT_COMPONENT_AND_INDEPENDENT_SEMANTIC_REVIEW_REQUIRED"
+      },
+      {
+        "source": 11,
+        "source_ref": "ir-constraint:change_scope_exclusions:c5",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "polarity": "AFFIRMATIVE",
+        "temporal_scope": "CURRENT",
+        "speech_act": "EXPLICIT_REQUEST",
+        "whole_source_context_only": false,
+        "partial_context_rule": "DISTINCT_CURRENT_COMPONENT_AND_INDEPENDENT_SEMANTIC_REVIEW_REQUIRED"
+      },
+      {
+        "source": 12,
+        "source_ref": "ir-constraint:verification_and_candidate:c6",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "polarity": "AFFIRMATIVE",
+        "temporal_scope": "CURRENT",
+        "speech_act": "EXPLICIT_REQUEST",
+        "whole_source_context_only": false,
+        "partial_context_rule": "DISTINCT_CURRENT_COMPONENT_AND_INDEPENDENT_SEMANTIC_REVIEW_REQUIRED"
+      },
+      {
+        "source": 13,
+        "source_ref": "ir-constraint:change_scope_exclusions:c7",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "polarity": "NEGATED",
+        "temporal_scope": "CURRENT",
+        "speech_act": "EXPLICIT_REQUEST",
+        "whole_source_context_only": false,
+        "partial_context_rule": "DISTINCT_CURRENT_COMPONENT_AND_INDEPENDENT_SEMANTIC_REVIEW_REQUIRED"
+      },
+      {
+        "source": 14,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "necessary_source_proofs": [
+          {
+            "capability": 0,
+            "minimal_support_sets": [
+              [
+                11
+              ],
+              [
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 1,
+            "minimal_support_sets": [
+              [
+                11
+              ],
+              [
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 3,
+            "minimal_support_sets": [
+              [
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 4,
+            "minimal_support_sets": [
+              [
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 5,
+            "minimal_support_sets": [
+              [
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 6,
+            "minimal_support_sets": [
+              [
+                11
+              ]
+            ]
+          },
+          {
+            "capability": 7,
+            "minimal_support_sets": [
+              [
+                11
+              ]
+            ]
+          },
+          {
+            "capability": 8,
+            "minimal_support_sets": [
+              [
+                11
+              ]
+            ]
+          },
+          {
+            "capability": 9,
+            "minimal_support_sets": [
+              [
+                11
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "source": 15,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:1",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "necessary_source_proofs": [
+          {
+            "capability": 0,
+            "minimal_support_sets": [
+              [
+                9
+              ]
+            ]
+          },
+          {
+            "capability": 1,
+            "minimal_support_sets": [
+              [
+                9
+              ]
+            ]
+          },
+          {
+            "capability": 6,
+            "minimal_support_sets": [
+              [
+                9
+              ]
+            ]
+          },
+          {
+            "capability": 7,
+            "minimal_support_sets": [
+              [
+                9
+              ]
+            ]
+          },
+          {
+            "capability": 8,
+            "minimal_support_sets": [
+              [
+                9
+              ]
+            ]
+          },
+          {
+            "capability": 9,
+            "minimal_support_sets": [
+              [
+                9
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "source": 16,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:2",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "necessary_source_proofs": [
+          {
+            "capability": 0,
+            "minimal_support_sets": [
+              [
+                12
+              ]
+            ]
+          },
+          {
+            "capability": 1,
+            "minimal_support_sets": [
+              [
+                12
+              ]
+            ]
+          },
+          {
+            "capability": 6,
+            "minimal_support_sets": [
+              [
+                12
+              ]
+            ]
+          },
+          {
+            "capability": 7,
+            "minimal_support_sets": [
+              [
+                12
+              ]
+            ]
+          },
+          {
+            "capability": 8,
+            "minimal_support_sets": [
+              [
+                12
+              ]
+            ]
+          },
+          {
+            "capability": 9,
+            "minimal_support_sets": [
+              [
+                12
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "source": 17,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:3",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "necessary_source_proofs": [
+          {
+            "capability": 0,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 1,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 6,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 7,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 8,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 9,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "source": 18,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:4",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "necessary_source_proofs": [
+          {
+            "capability": 0,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 1,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 6,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 7,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 8,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 9,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "source": 19,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:5",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "necessary_source_proofs": [
+          {
+            "capability": 0,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 1,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 6,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 7,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 8,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 9,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "source": 20,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:6",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "necessary_source_proofs": [
+          {
+            "capability": 0,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 1,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 6,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 7,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 8,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          },
+          {
+            "capability": 9,
+            "minimal_support_sets": [
+              [
+                7
+              ],
+              [
+                10
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "source": 21,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:7",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "necessary_source_proofs": [
+          {
+            "capability": 1,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 3,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 4,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 5,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "source": 22,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:8",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "necessary_source_proofs": [
+          {
+            "capability": 1,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 3,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 4,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 5,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "source": 23,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:9",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "necessary_source_proofs": [
+          {
+            "capability": 1,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 3,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 4,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 5,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "source": 24,
+        "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:10",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true,
+        "necessary_source_proofs": [
+          {
+            "capability": 1,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 3,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 4,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          },
+          {
+            "capability": 5,
+            "minimal_support_sets": [
+              [
+                7,
+                13
+              ],
+              [
+                10,
+                13
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "source": 25,
+        "source_ref": "work-context:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+        "primary_component_required": true,
+        "supporting_reference_does_not_cover_source": true
+      }
+    ],
+    "component_rule": "COMPLETE_OWN_SOURCE_SPANS; NO_CONFLICTING_DISPOSITION_FOR_SAME_COMPONENT",
+    "meaning": "NECESSARY_PROVENANCE_ONLY; SEMANTIC_MATCH_AND_COMPLETE_PLAN_UNPROVEN; NO_PERMISSION_OR_EVIDENCE_PASS"
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "wire_sha256": "c3fcd17c248e9d2015f480aee79e824bcc77c90b146974137d8be908c7d3da50",
+      "source_proof_observations": [
+        {
+          "route": 4,
+          "source": 4,
+          "capability": "DENY_DEPLOY",
+          "selected_supports": [],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              13
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 5,
+          "source": 4,
+          "capability": "DENY_PUBLISH",
+          "selected_supports": [],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              13
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 19,
+          "source": 14,
+          "capability": "GIT_DIFF_SCOPE",
+          "selected_supports": [],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              11
+            ],
+            [
+              13
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 20,
+          "source": 14,
+          "capability": "DENY_DEPLOY",
+          "selected_supports": [
+            4
+          ],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              13
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 21,
+          "source": 14,
+          "capability": "DENY_PUBLISH",
+          "selected_supports": [
+            4
+          ],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              13
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 22,
+          "source": 15,
+          "capability": "ARTIFACT_CONTENT",
+          "selected_supports": [],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              9
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 23,
+          "source": 16,
+          "capability": "ARTIFACT_CONTENT",
+          "selected_supports": [],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              12
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 24,
+          "source": 16,
+          "capability": "CANDIDATE_SEAL",
+          "selected_supports": [],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              12
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 25,
+          "source": 17,
+          "capability": "GIT_DIFF_SCOPE",
+          "selected_supports": [],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              7
+            ],
+            [
+              10
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 26,
+          "source": 18,
+          "capability": "ARTIFACT_CONTENT",
+          "selected_supports": [],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              7
+            ],
+            [
+              10
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 27,
+          "source": 19,
+          "capability": "ARTIFACT_CONTENT",
+          "selected_supports": [],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              7
+            ],
+            [
+              10
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 28,
+          "source": 20,
+          "capability": "CANDIDATE_SEAL",
+          "selected_supports": [],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              7
+            ],
+            [
+              10
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 29,
+          "source": 21,
+          "capability": "DENY_DEPLOY",
+          "selected_supports": [
+            4
+          ],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              7,
+              13
+            ],
+            [
+              10,
+              13
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 30,
+          "source": 22,
+          "capability": "DENY_PUBLISH",
+          "selected_supports": [
+            4
+          ],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              7,
+              13
+            ],
+            [
+              10,
+              13
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        }
+      ]
+    },
+    {
+      "attempt": 2,
+      "wire_sha256": "ab6b9914b74198bb8dc94f2705a1396a3dabc20eb706423e11a56bd7d7ea9cb9",
+      "source_proof_observations": [
+        {
+          "route": 4,
+          "source": 4,
+          "capability": "DENY_DEPLOY",
+          "selected_supports": [],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              13
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 5,
+          "source": 4,
+          "capability": "DENY_PUBLISH",
+          "selected_supports": [],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              13
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 18,
+          "source": 14,
+          "capability": "GIT_DIFF_SCOPE",
+          "selected_supports": [
+            11,
+            13
+          ],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              11
+            ],
+            [
+              13
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 19,
+          "source": 14,
+          "capability": "DENY_DEPLOY",
+          "selected_supports": [
+            4
+          ],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              13
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 20,
+          "source": 14,
+          "capability": "DENY_PUBLISH",
+          "selected_supports": [
+            4
+          ],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              13
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 22,
+          "source": 15,
+          "capability": "ARTIFACT_CONTENT",
+          "selected_supports": [
+            9
+          ],
+          "is_minimal_eligible_source_proof": true,
+          "eligible_minimal_proofs": [
+            [
+              9
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 23,
+          "source": 16,
+          "capability": "ARTIFACT_CONTENT",
+          "selected_supports": [
+            12
+          ],
+          "is_minimal_eligible_source_proof": true,
+          "eligible_minimal_proofs": [
+            [
+              12
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 24,
+          "source": 16,
+          "capability": "CANDIDATE_SEAL",
+          "selected_supports": [
+            12
+          ],
+          "is_minimal_eligible_source_proof": true,
+          "eligible_minimal_proofs": [
+            [
+              12
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 25,
+          "source": 17,
+          "capability": "GIT_DIFF_SCOPE",
+          "selected_supports": [
+            7,
+            10
+          ],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              7
+            ],
+            [
+              10
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 26,
+          "source": 17,
+          "capability": "ARTIFACT_CONTENT",
+          "selected_supports": [
+            7,
+            10
+          ],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              7
+            ],
+            [
+              10
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 27,
+          "source": 18,
+          "capability": "ARTIFACT_CONTENT",
+          "selected_supports": [
+            7,
+            10
+          ],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              7
+            ],
+            [
+              10
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 28,
+          "source": 19,
+          "capability": "ARTIFACT_CONTENT",
+          "selected_supports": [
+            7,
+            10
+          ],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              7
+            ],
+            [
+              10
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 29,
+          "source": 20,
+          "capability": "CANDIDATE_SEAL",
+          "selected_supports": [
+            7,
+            10
+          ],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              7
+            ],
+            [
+              10
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 30,
+          "source": 21,
+          "capability": "DENY_DEPLOY",
+          "selected_supports": [
+            4
+          ],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              7,
+              13
+            ],
+            [
+              10,
+              13
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        },
+        {
+          "route": 31,
+          "source": 22,
+          "capability": "DENY_PUBLISH",
+          "selected_supports": [
+            4
+          ],
+          "is_minimal_eligible_source_proof": false,
+          "eligible_minimal_proofs": [
+            [
+              7,
+              13
+            ],
+            [
+              10,
+              13
+            ]
+          ],
+          "semantic_equivalence": "NOT_EVALUATED; structural eligibility is not semantic proof"
+        }
+      ]
+    }
+  ],
+  "legacy_terminal_replay": {
+    "unchanged": true,
+    "reason": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+    "new_calls": 0
+  }
+}

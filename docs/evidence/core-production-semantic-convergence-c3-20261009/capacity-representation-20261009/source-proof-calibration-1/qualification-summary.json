@@ -1,0 +1,51 @@
+{
+  "source": {
+    "revision": "530ea434f04045212608ed97eb2a43817d1e35cd",
+    "tree": "c777a2864a4ad25388285916ca77ef2affd99907"
+  },
+  "image": "sha256:381e71e4ba7653675be5a3a8240762cacb11f283f2df1a6e1c35aa51efa1ae23",
+  "owners": {
+    "watt": {
+      "revision": "530ea434f04045212608ed97eb2a43817d1e35cd",
+      "tree": "c777a2864a4ad25388285916ca77ef2affd99907"
+    },
+    "guardian": {
+      "revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+      "tree": "6066a6d6b8d91bec610021409ab320309ed0e437"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "unit": {
+    "tests": 347,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 347
+  },
+  "pg": {
+    "tests": 45,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 45
+  },
+  "live_result": "STOPPED",
+  "terminal_reason": "OBLIGATION_DIFF_SCOPE_INCOMPLETE",
+  "live_usage": {
+    "input_tokens": 55009,
+    "output_tokens": 4383,
+    "cached_tokens": 33408,
+    "reasoning_tokens": 0,
+    "total_tokens": 59392
+  },
+  "c3_status": "PARTIAL",
+  "real_g0": "NOT_STARTED",
+  "holdout": "SEALED_NOT_OPENED"
+}
