@@ -100,6 +100,22 @@ def test_request_schema_only_excludes_existing_owner_rejections_and_preserves_un
             assert i not in observed[negative["source"]]
 
 
+def test_formation_identity_echo_is_exact_and_invalid_echo_is_never_recovered():
+    _, _, inventory, _, capabilities, preconditions = case()
+    context = _fulfillment_wire_context(inventory, capabilities, owner_preconditions=preconditions)
+    metadata = {k: context[k] for k in ("wire_request_fingerprint", "wire_table_fingerprint")}
+    schema = _formation_output_schema(inventory, capabilities, owner_preconditions=preconditions, wire_metadata=metadata)
+    assert schema["properties"]["h"]["enum"] == [context["wire_request_fingerprint"]]
+    assert schema["properties"]["d"]["enum"] == [context["wire_table_fingerprint"]]
+    _, _, _, wire = wire_case(preconditions)
+    for bad in (wire["d"][:20] + wire["d"], "0" * 64):
+        changed = deepcopy(wire);changed["d"] = bad
+        with pytest.raises(ValueError, match="WIRE_SCHEMA_INVALID|WIRE_BASIS_DRIFT"):
+            _decode_fulfillment_candidate_wire(json.dumps(changed), inventory, capabilities, owner_preconditions=preconditions)
+        assert changed["d"] == bad
+    assert "enum" not in _fulfillment_wire_schema()["properties"]["d"]
+
+
 @pytest.mark.parametrize("field", ["inventory", "capabilities", "source_identity", "source_ordinal", "unresolved"])
 def test_request_constraints_cannot_change_their_original_identity_or_hide_unresolved(field):
     _, _, inventory, _, capabilities, preconditions = case()

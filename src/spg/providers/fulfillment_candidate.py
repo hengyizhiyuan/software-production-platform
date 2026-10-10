@@ -117,7 +117,7 @@ def _fulfillment_wire_schema():
     return _provider_strict_output_schema(_FulfillmentCompactCandidate.model_json_schema())
 
 
-def _formation_output_schema(inventory, capabilities, *, owner_preconditions=None):
+def _formation_output_schema(inventory, capabilities, *, owner_preconditions=None, wire_metadata=None):
     """A strict subset of existing wire v1 over this request's known identities.
 
     No semantic classification, renumbering or response repair occurs here.
@@ -126,6 +126,14 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
     these generation constraints.
     """
     schema = _fulfillment_wire_schema()
+    if wire_metadata is not None:
+        # Identity copying is not semantic reasoning. Keep the existing Wire
+        # fields and strict response validation; never fill an invalid echo.
+        for field, key in (("h", "wire_request_fingerprint"), ("d", "wire_table_fingerprint")):
+            value = wire_metadata[key]
+            if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_BASIS_DRIFT")
+            schema["properties"][field]["enum"] = [value]
     route = schema["$defs"]["_FulfillmentCompactRoute"]["properties"]
     sources = list(range(len(inventory["sources"])))
     route["s"]["enum"] = sources
@@ -866,7 +874,8 @@ class ModelFulfillmentCandidateProvider:
         wire_metadata = {key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS}
         runtime = self.runtime_factory()
         try:
-            output_schema = _formation_output_schema(inventory, capabilities, owner_preconditions=owner_preconditions)
+            output_schema = _formation_output_schema(inventory, capabilities, owner_preconditions=owner_preconditions,
+                wire_metadata=wire_metadata)
             inventory_view, existing_ir_items = _formation_inventory_view(inventory)
             source_table = _formation_source_table(context, inventory=inventory)
             if owner_preconditions is not None:
@@ -894,9 +903,21 @@ class ModelFulfillmentCandidateProvider:
                     "continuous prohibitions, Candidate sealing, future Human permission and contextual facts. "
                     "A Fact is not necessarily an execution obligation. A future Human gate is pending, never "
                     "already satisfied. A current continuous prohibition must bind an actual execution/delivery gate. "
+                    "This is a plan BEFORE execution: BOUND_PENDING_EVIDENCE means a lawful method and phase "
+                    "are bound while actual evidence will be required at that Owner's gate. The consumer view's "
+                    "actual_evidence_present=false does not mean that its available capability is missing. "
+                    "Do not choose UNRESOLVED merely because the page, Git diff, sealed Candidate or future "
+                    "decision has not yet been produced. Choose it when original meaning, lawful source "
+                    "correspondence or available consumer capability cannot be established. Do not invent "
+                    "the missing evidence or assert any requirement already fulfilled. Nonexecutable "
+                    "description can retain context only where original Owner eligibility and independent "
+                    "Review permit it; neither that nor pending evidence weakens a current requirement. "
                     "The entire response must be exactly one valid JSON object matching the supplied compact "
                     "wire schema, with no markdown, second value or trailing delimiters. Echo v=1, h=request fingerprint and "
                     "d=table fingerprint exactly. Every route chooses s=source ordinal, c=capability ordinal, "
+                    "Copy v/h/d exactly from temporary_wire.exact_response_header. These are indivisible "
+                    "identity strings; never reconstruct, abbreviate, concatenate or edit them. The revised "
+                    "request has its own h; d stays bound to the original complete inventory table. "
                     "a/z=source component character offsets in Python Unicode code points: [a,z), "
                     "a inclusive, z exclusive. A whole source of length L is [0,L), never [0,L-1). "
                     "f=linked FACT source ordinals, "
@@ -1029,6 +1050,8 @@ class ModelFulfillmentCandidateProvider:
                     **({"owner_source_preconditions": owner_preconditions} if owner_preconditions is not None else {}),
                     "same_basis_validation_feedback": context["validation_feedback"],
                     "temporary_wire": {**wire_metadata,
+                        "exact_response_header": {"v": 1, "h": wire_metadata["wire_request_fingerprint"],
+                            "d": wire_metadata["wire_table_fingerprint"]},
                         "f_allowed_source_ordinals": [index for index, source in enumerate(inventory["sources"])
                             if source["kind"] == "FACT"],
                         "source_index_table": source_table,
