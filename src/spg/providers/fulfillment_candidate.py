@@ -156,12 +156,15 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
             operands = {}
             for capability in row["candidate_capabilities"]:
                 context = row.get("whole_source_context_retention")
+                reviewed = row.get("reviewed_background_prerequisites")
                 partial_context_only = bool(capabilities[capability]["capability"] == "RETAIN_CONTEXT" and (
                     context and not context["whole_source_eligible"]
                     # The full-plan reviewed-background path can retain an
                     # affirmative production description even when it is not
                     # directly typed context. Negation has no such exception.
-                    or row.get("whole_source_context_only") is False and row.get("polarity") == "NEGATED"))
+                    or row.get("whole_source_context_only") is False and (
+                        reviewed is not None and not reviewed["conditional_source_eligible"]
+                        or reviewed is None and row.get("polarity") == "NEGATED")))
                 if partial_context_only and length <= 1:
                     continue
                 proof = next((p for p in row["necessary_source_proofs"] if p["capability"] == capability), None)
@@ -245,6 +248,8 @@ def _formation_binding_choices(inventory, capabilities, owner_preconditions):
             **({"whole_source_context_only": row["whole_source_context_only"]}
                if "whole_source_context_only" in row else {}),
             **({"polarity": row["polarity"]} if "polarity" in row else {}),
+            **({"reviewed_background_prerequisites": deepcopy(row["reviewed_background_prerequisites"])}
+               if "reviewed_background_prerequisites" in row else {}),
             "rejected_prerequisites": deepcopy(rejected),
             "semantic_selection": "UNPROVEN; SELECT_FROM_ORIGINAL_COMPONENT; NO_PERMISSION_OR_EVIDENCE"})
     return result
@@ -901,6 +906,8 @@ class ModelFulfillmentCandidateProvider:
                             "conditional_whole_plan_retention": "An affirmative production description may be retained through the existing full-plan Review only if its original current Fact requirements and sibling production requests retain their separate lawful consumers. Current negated clauses cannot use this exception. Independent semantic comparison must establish that no required contribution was turned into background."}
                     if "whole_source_context_retention" in choices:
                         source["whole_source_context_retention"] = deepcopy(choices["whole_source_context_retention"])
+                    if "reviewed_background_prerequisites" in choices:
+                        source["reviewed_background_prerequisites"] = deepcopy(choices["reviewed_background_prerequisites"])
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
                 instructions=(
                     "You propose a derived fulfillment plan for immutable admitted engineering meaning. "
@@ -982,6 +989,11 @@ class ModelFulfillmentCandidateProvider:
                     "of the existing reviewed-background path for affirmative production descriptions. "
                     "That path requires all original current Facts and sibling requests to keep their lawful "
                     "consumers and an independent Review to confirm the proposed background meaning. "
+                    "reviewed_background_prerequisites gives exact necessary references for that existing "
+                    "conditional path: bind every listed current Fact separately and at least one listed "
+                    "sibling current request to its lawful current consumer. conditional_source_eligible=true "
+                    "means the method is available for a semantically legitimate description, not approval "
+                    "to retain a required outcome. False means that whole-source exception is unavailable. "
                     "All selected supports must legitimately "
                     "correspond; do not add same-clause references merely because their text looks similar. "
                     "That old proposal is not authority and must not be admitted or blindly copied. Preserve "

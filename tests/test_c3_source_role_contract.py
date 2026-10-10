@@ -71,6 +71,14 @@ def test_generation_domain_preserves_legal_reviewed_whole_background_not_just_ty
     prerequisites = _owner_source_preconditions(revision, ir, inventory, capabilities)
     ordinal = next(i for i,s in enumerate(inventory['sources']) if s.get('clause_id') == 'description')
     assert prerequisites['sources'][ordinal]['whole_source_context_only'] is False
+    conditional = prerequisites['sources'][ordinal]['reviewed_background_prerequisites']
+    assert conditional['conditional_source_eligible'] is True
+    assert conditional['required_current_fact_refs'] == ['semantic-fact:' + str(f.id) for f in revision.engineering_semantic_facts if f.is_current]
+    assert conditional['required_one_current_request_ref_from']
+    assert conditional['independent_full_plan_and_component_review_required'] is True
+    historical = _owner_source_preconditions(revision, ir, inventory, capabilities,
+        typed_prerequisite_contract='existing-owner-typed-prerequisites-v5')
+    assert all('reviewed_background_prerequisites' not in r for r in historical['sources'])
     schema = _formation_output_schema(inventory, capabilities, owner_preconditions=prerequisites)
     retain = next(i for i,c in enumerate(capabilities) if c['capability'] == 'RETAIN_CONTEXT')
     branch = next(b for b in schema['properties']['routes']['items']['anyOf']
@@ -78,6 +86,34 @@ def test_generation_domain_preserves_legal_reviewed_whole_background_not_just_ty
     assert {'properties': {'q': {'type': 'null'}, 'a': {'enum': [0]}, 'z': {'enum': [len(description)]}}} in branch['anyOf']
     result = validate_projection_candidate(plan, revision, ir, inventory, semantic_review=review(inventory,plan))
     assert any(b.state == 'RETAINED_CONTEXT' for b in result)
+
+
+def test_conditional_background_availability_does_not_admit_missing_current_fact_consumers():
+    revision, ir, inventory, plan = shared_item_case()
+    changed = plan.model_copy(update={'routes': tuple(r.model_copy(update={
+        'capability': 'UNRESOLVED','target_paths': ()}) if r.source_ref.startswith('semantic-fact:') else r for r in plan.routes)})
+    with pytest.raises(ValueError, match='CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY'):
+        validate_projection_candidate(changed,revision,ir,inventory,allow_review_pending=True)
+
+
+def test_located_coverage_feedback_reports_exact_gap_without_repairing_candidate():
+    from spg.application.governed_obligations import projection_validation_feedback
+    from hashlib import sha256
+    revision, ir, inventory, plan = shared_item_case()
+    original = next(r for r in plan.routes if r.capability == 'ARTIFACT_CONTENT' and r.source_ref.startswith('ir-clause:'))
+    basis = original.component_basis
+    changed = original.model_copy(update={'component_basis':basis.model_copy(update={
+        'source_span_start':1,'source_component_quote':basis.source_component_quote[1:]})})
+    candidate = plan.model_copy(update={'routes':tuple(changed if r == original else r for r in plan.routes)})
+    before = candidate.model_dump_json()
+    data=json.loads(projection_validation_feedback(candidate,revision,ir,inventory,'OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST',include_coverage=True))
+    gap=next(v for v in data['violations'] if v['code']=='OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST')
+    assert gap['uncovered_codepoint_ranges']==[[0,1]] and gap['additional_uncovered_range_count']==0
+    assert gap['original_text_sha256']==sha256(basis.source_component_quote.encode()).hexdigest()
+    assert candidate.model_dump_json()==before
+    old=json.loads(projection_validation_feedback(candidate,revision,ir,inventory,'OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST'))
+    assert 'coverage_observation_contract' not in old
+    assert all('uncovered_codepoint_ranges' not in v for v in old['violations'])
 
 
 def test_same_item_clause_proves_two_roles_but_affirmative_or_future_cannot_prove_prohibition():

@@ -129,7 +129,7 @@ def test_incomplete_feedback_checkpoint_resumes_only_remaining_calls_on_original
     assert result[0].formation_receipt['attempt_count'] == 2
 
 
-def repair_case(scale='small', interrupt=False):
+def repair_case(scale='small', interrupt=False, coverage_failure=False):
     revision, ir, inventory, plan = controlled_capacity_case(scale)
     calls, wires = [], []
     def generate(**request):
@@ -144,16 +144,34 @@ def repair_case(scale='small', interrupt=False):
             feedback = payload.get('same_basis_validation_feedback')
             wire, _ = controlled_wire(inventory, plan, feedback=feedback, owner_preconditions=payload.get("owner_source_preconditions"))
             if feedback is None:
-                wire['routes'].append(deepcopy(wire['routes'][0]))
+                if coverage_failure:
+                    ordinal = next(i for i, s in enumerate(inventory['sources'])
+                        if s.get('clause_id') == 'original-clause')
+                    from spg.domain.governed_obligation import fulfillment_source_semantic_text
+                    original = fulfillment_source_semantic_text(inventory['sources'][ordinal])
+                    for row in wire['routes']:
+                        if row['s'] == ordinal:
+                            # Raw geometry differs: the existing unique-quote
+                            # locator must run before coverage is evaluable.
+                            row['a'] = 0
+                            row['q'] = original[1:]
+                else:
+                    wire['routes'].append(deepcopy(wire['routes'][0]))
             else:
                 data = json.loads(feedback)
                 assert data['untrusted_previous_wire'] == wires[0]
-                assert json.loads(wires[0])['routes'][-1] == json.loads(wires[0])['routes'][0]
+                if coverage_failure:
+                    assert data['coverage_observation_contract'] == 'existing-located-coverage-feedback-v1'
+                    gap = next(v for v in data['violations'] if 'uncovered_codepoint_ranges' in v)
+                    assert gap['uncovered_codepoint_ranges'] == [[0, 1]]
+                    assert data['primary_error'] == 'OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST'
+                else:
+                    assert json.loads(wires[0])['routes'][-1] == json.loads(wires[0])['routes'][0]
+                    assert data['primary_error'] == 'OBLIGATION_PROJECTION_DUPLICATE_ROUTE'
                 binding = data['repair_feedback_binding']
                 assert binding['wire_output_fingerprint'] == sha256(wires[0].encode()).hexdigest()
                 assert binding['inventory_fingerprint'] == inventory['inventory_fingerprint']
                 assert binding['candidate_fingerprint'] is not None
-                assert data['primary_error'] == 'OBLIGATION_PROJECTION_DUPLICATE_ROUTE'
             output = json.dumps(wire, ensure_ascii=False)
             wires.append(output)
         return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
@@ -171,6 +189,37 @@ def repair_case(scale='small', interrupt=False):
         return form_fulfillment_projection(revision, ir, provider=provider,
             source_revision=inventory['source_revision'], exact_target_paths=inventory['exact_target_paths'])
     return provider, calls, wires, run
+
+
+def test_located_gap_checkpoint_resumes_only_remaining_calls_and_preserves_original_receipts():
+    provider, calls, wires, run = repair_case(interrupt=True, coverage_failure=True)
+    with pytest.raises(Checkpoint): run()
+    frozen = deepcopy(list(provider._fulfillment_receipts))
+    provider._fulfillment_receipts = list(provider._fulfillment_receipts)
+    result = run()
+    assert all(b.state != 'UNRESOLVED' for b in result)
+    assert len(calls) == 3 and len(wires) == 2
+    assert provider._fulfillment_receipts[:len(frozen)] == frozen
+    run()
+    assert len(calls) == 3
+
+
+@pytest.mark.parametrize('tamper', ('range', 'source-hash', 'contract'))
+def test_located_gap_feedback_drift_is_rejected_before_any_repair_request(tamper):
+    provider, calls, wires, run = repair_case(interrupt=True, coverage_failure=True)
+    with pytest.raises(Checkpoint): run()
+    provider._fulfillment_receipts = list(provider._fulfillment_receipts)
+    failed = next(r for r in provider._fulfillment_receipts if r['stage'] == 'CANDIDATE_VALIDATED')
+    payload = json.loads(failed['validation_feedback'])
+    gap = next(v for v in payload['violations'] if 'uncovered_codepoint_ranges' in v)
+    if tamper == 'range': gap['uncovered_codepoint_ranges'] = [[0, 2]]
+    elif tamper == 'source-hash': gap['original_text_sha256'] = '0' * 64
+    else: payload.pop('coverage_observation_contract')
+    failed['validation_feedback'] = json.dumps(payload, separators=(',', ':'))
+    result = run()
+    assert all(b.state == 'UNRESOLVED' for b in result)
+    assert len(calls) == 1 and len(wires) == 1
+    assert result[0].formation_receipt['terminal_reason'] == 'OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
 
 
 @pytest.mark.parametrize('scale', ('small','medium','complex'))
