@@ -1,0 +1,219 @@
+{
+  "schema": "c3-fresh-independent-holdout-final-v1",
+  "reviewed_at_utc": "2026-10-10T10:51:06.668966+00:00",
+  "freeze": {
+    "source_revision": "bbe4b8e7be4e4651d46333c17c6e5e7b25cc3369",
+    "source_tree": "0c6ce7fddd06f2dcfe72fb71d5b07ccb2be2074b",
+    "application_image_id": "sha256:209ce4dea95bba9e8c8191b5409f3d9063a93a2ac5c55ca88552cf97ae504bf1",
+    "guardian_revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+    "guardian_tree": "6066a6d6b8d91bec610021409ab320309ed0e437",
+    "ecf_revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "ecf_tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "isolated_c3_runtime_root": "/data/watt/c3-semantic-convergence-20261009",
+    "database_identity": {
+      "database_name": "c3_independent_holdout_20261009",
+      "host": "127.0.0.1",
+      "container": "watt-c3-freshholdout-pg-20261010"
+    },
+    "freeze_authorization_reference": "Human explicit continuation 2026-10-10; parent approved mechanical execution bounds",
+    "explicitly_authorized_after_freeze": true,
+    "sealed_specification_sha256": "662a22145c91d7bb1f284b0ba5feff08a8d4d8e0746704abaf9c08248838f82c"
+  },
+  "seal": {
+    "schema": "c3-independent-fresh-holdout-v1",
+    "sha256": "662a22145c91d7bb1f284b0ba5feff08a8d4d8e0746704abaf9c08248838f82c",
+    "sealed_at_utc": "2026-10-10T10:42:25.143947+00:00",
+    "case_count": 8,
+    "live_case_count": 4,
+    "owner_control_case_count": 4,
+    "frozen_source": "bbe4b8e7be4e4651d46333c17c6e5e7b25cc3369",
+    "frozen_image": "sha256:209ce4dea95bba9e8c8191b5409f3d9063a93a2ac5c55ca88552cf97ae504bf1",
+    "pre_execution": true,
+    "private_input_not_shared_with_implementation": true,
+    "old_holdout_unchanged": true
+  },
+  "sealed_specification_sha256": "662a22145c91d7bb1f284b0ba5feff08a8d4d8e0746704abaf9c08248838f82c",
+  "case_count": 8,
+  "results": [
+    {
+      "case_id": "F01",
+      "result": "FAIL",
+      "actual_logical_calls": 4,
+      "owner_call_counts": {
+        "WIC": 1,
+        "FORMATION": 2,
+        "SEMANTIC_REVIEW": 1
+      },
+      "binding_states": {
+        "UNRESOLVED": 22
+      },
+      "predicates": [
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "failed_predicate": "OBLIGATION_CANDIDATE_SCHEMA_INVALID",
+          "terminal_reason": null,
+          "receipt_id": "889c5f92-c84e-4022-8272-86e59680c7b0",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "96d5f501414cbe0760d6e85c6711fd300fad4423cdf1c0334107b9b4ad9bacfa",
+          "components_fingerprint": null,
+          "validation_passed": false,
+          "terminal": false
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 2,
+          "failed_predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "terminal_reason": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "receipt_id": "2b0e5cca-0013-472a-8501-0ee435a567ba",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "96d5f501414cbe0760d6e85c6711fd300fad4423cdf1c0334107b9b4ad9bacfa",
+          "components_fingerprint": null,
+          "validation_passed": false,
+          "terminal": true
+        }
+      ],
+      "owner_stages": {
+        "MODEL_REQUEST_PENDING": 2,
+        "MODEL_RESPONSE_OBSERVED": 2,
+        "SEMANTIC_REVIEW_PENDING": 1,
+        "SEMANTIC_REVIEW_OBSERVED": 1,
+        "CANDIDATE_VALIDATED": 2
+      },
+      "original_semantic_facts_unchanged": true,
+      "original_semantic_ir_unchanged": true,
+      "work_admission_claimed": false,
+      "assurance_pass_claimed": false,
+      "observation_sha256": "0585356fbc82c844078b711a534cfca5ff324ba31d47a75289f6888e846a6af6",
+      "wall_seconds": 73.77593240101123,
+      "qualification_boundary": "Actual WIC/IRK and Formation/Review in unadmitted qualification basis; no Product accepted source, Work, Worker, Candidate Seal or business Guardian Assurance.",
+      "review_result": "First Formation reached independent Review; subsequent schema validation rejected its response. Second Formation deterministically rejected before Review. No independent Review PASS claimed."
+    },
+    {
+      "case_id": "F02",
+      "result": "NOT_RUN",
+      "reason": "SAME_LEGAL_BRANCH_SYSTEMIC_FAILURE_STOP",
+      "actual_logical_calls": 0
+    },
+    {
+      "case_id": "F03",
+      "result": "NOT_RUN",
+      "reason": "SAME_LEGAL_BRANCH_SYSTEMIC_FAILURE_STOP",
+      "actual_logical_calls": 0
+    },
+    {
+      "case_id": "F04",
+      "result": "PARTIAL_TRUTHFUL_STOP_NOT_AT_REQUIRED_GATE",
+      "actual_logical_calls": 4,
+      "owner_call_counts": {
+        "WIC": 2,
+        "FORMATION": 2
+      },
+      "binding_states": {
+        "UNRESOLVED": 10
+      },
+      "predicates": [
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "failed_predicate": "OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED",
+          "terminal_reason": null,
+          "receipt_id": "2dba35dc-fb75-4103-a507-304a315edece",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "bcef683a987cb3f208a169c2f73f49a6e10ddc23462ab16217c3c1ec583651ce",
+          "components_fingerprint": null,
+          "validation_passed": false,
+          "terminal": false
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 2,
+          "failed_predicate": "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE",
+          "terminal_reason": "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE",
+          "receipt_id": "9176e6c0-115d-4f06-a59c-e88506c4d7ef",
+          "candidate_fingerprint": null,
+          "inventory_fingerprint": "bcef683a987cb3f208a169c2f73f49a6e10ddc23462ab16217c3c1ec583651ce",
+          "components_fingerprint": null,
+          "validation_passed": false,
+          "terminal": true
+        }
+      ],
+      "owner_stages": {
+        "MODEL_REQUEST_PENDING": 2,
+        "MODEL_RESPONSE_OBSERVED": 2,
+        "CANDIDATE_VALIDATED": 2
+      },
+      "original_semantic_facts_unchanged": true,
+      "original_semantic_ir_unchanged": true,
+      "work_admission_claimed": false,
+      "assurance_pass_claimed": false,
+      "observation_sha256": "cd5d8c0619f75ea3d967314f9746b0c588acb065397f3cbad5eaf7e05ccf2354",
+      "wall_seconds": 87.62433413398685,
+      "qualification_boundary": "Actual WIC/IRK and Formation/Review in unadmitted qualification basis; no Product accepted source, Work, Worker, Candidate Seal or business Guardian Assurance.",
+      "reason": "Positive request and absence of authority retained, but Formation stopped UNRESOLVED before required effect/authorization boundary; earlier failure does not qualify that gate."
+    },
+    {
+      "case_id": "F05",
+      "evidence_sha256": "b7577bfe276d79b5c3b1810de41bd1549fe00d5fa79ce24e5b0c3548354e7af4",
+      "model_calls": 0,
+      "probe_count": 3,
+      "real_software_production_claim": false,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "case_id": "F06",
+      "evidence_sha256": "600d61a9a580b17207e3e7f75be7a56c53f49f68bffb3feb481298038e07f2bb",
+      "model_calls": 0,
+      "probe_count": 3,
+      "real_software_production_claim": false,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "case_id": "F07",
+      "evidence_sha256": "5fb782e4d3c01087a9256fdee0d241c3c90101d7ef3de13239401c98cc5a1a9c",
+      "model_calls": 0,
+      "probe_count": 6,
+      "real_software_production_claim": false,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "actual_software_candidate_seal": "PENDING_REAL_G0_EVIDENCE",
+      "case_id": "F08",
+      "evidence_sha256": "4cfd3b23f969d07ffe60129b0f549eff4cabd65b36fa19a8f6c04a6df66d88fa",
+      "independent_guardian_joint_required": true,
+      "model_calls": 0,
+      "result": "PASS_SCOPED_SOURCE_ADAPTER_GUARDIAN_REQUIRED",
+      "independent_guardian_joint_result": "46_PASS_CONTROLLED_CONTRACT; frozen identity matched",
+      "software_guardian_assurance": "NOT_REACHED"
+    }
+  ],
+  "counts": {
+    "FAIL": 1,
+    "NOT_RUN": 2,
+    "PARTIAL_TRUTHFUL_STOP_NOT_AT_REQUIRED_GATE": 1,
+    "PASS_SCOPED_CONTROLLED_OWNER": 3,
+    "PASS_SCOPED_SOURCE_ADAPTER_GUARDIAN_REQUIRED": 1
+  },
+  "qualification": "NOT_QUALIFIED",
+  "c3_closure_supported": false,
+  "private_source_oracle_shared_with_implementer": false,
+  "source_or_expected_semantics_tuned": false,
+  "old_holdout_changed_or_repeated": false,
+  "new_business_work_created": false,
+  "actual_model_calls": 8,
+  "owner_call_counts": {
+    "WIC": 3,
+    "FORMATION": 4,
+    "SEMANTIC_REVIEW": 1
+  },
+  "actual_usage": {
+    "input_tokens": 194885,
+    "output_tokens": 45224,
+    "cached_tokens": 54528,
+    "reasoning_tokens": 17201,
+    "total_tokens": 240109
+  },
+  "future_unseen_holdout_claim": "INVALID_AFTER_THIS_EXECUTION; these eight sealed scenarios are now exposed qualification records",
+  "private_recovery_root": "/data/watt/c3-semantic-convergence-20261009/fresh-holdout-binding-20261010",
+  "full_work_candidate_or_guardian_pass_substituted": false
+}

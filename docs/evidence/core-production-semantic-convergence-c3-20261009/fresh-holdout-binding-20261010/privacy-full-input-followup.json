@@ -1,0 +1,9 @@
+{
+  "checked_at_utc": "2026-10-10T10:51:56.834370+00:00",
+  "full_input_records_compared": 4,
+  "full_input_hits": 0,
+  "previous_scan_preserved": true,
+  "mechanical_scan_correction": "Original helper enumerated input/human_input/human_text, but sealed field is input_text. This zero-model followup checks all four actual full input_text values; original scan retained. Secret/nonce scan remains separately valid.",
+  "model_calls": 0,
+  "source_or_oracle_changes": false
+}

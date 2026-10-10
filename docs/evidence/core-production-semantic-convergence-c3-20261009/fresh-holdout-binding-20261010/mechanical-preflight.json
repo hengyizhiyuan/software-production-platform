@@ -1,0 +1,35 @@
+{
+  "specification_sha256": "662a22145c91d7bb1f284b0ba5feff08a8d4d8e0746704abaf9c08248838f82c",
+  "source": "bbe4b8e7be4e4651d46333c17c6e5e7b25cc3369",
+  "image": "sha256:209ce4dea95bba9e8c8191b5409f3d9063a93a2ac5c55ca88552cf97ae504bf1",
+  "case_count": 8,
+  "live_ordinals": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "controlled_owner_ordinals": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "max_formation_calls_per_case": 4,
+  "wic_budget": "existing Owner unchanged",
+  "model": "deepseek-flash",
+  "formation_review_reasoning": "none",
+  "max_output_tokens": 16384,
+  "timeout": 120,
+  "implementation_tuning": false,
+  "control_files": {
+    "holdout_runner.py": "21f4f570941be43143720f43f98e57a6c9e4e69d685a08b1212143ac857c350f",
+    "freeze.json": "fc14c031e7f1ba7d3dd1f96c7fef099b6eae8481fdce6788c356b161c8a9a260",
+    "holdout_adapter.py": "0c0318ecb0a86aaf3145760e3174b61db26462d4dd18a1b8934e65e359bf1818",
+    "live_suite.py": "a6ee0d2abf92f2422367b0bc8f922b68bd9f100711f88bedb8e1d395e8c19d82",
+    "actual-imports.json": "80daff3b7a95e0c1192333d87502895429b63c67cc9b2ec566789bdddb944019",
+    "seal.json": "52baee21b8451e9ed5db37f959c6115c45811cfadf42bfeadea1b5a31d55fc9a",
+    "prepare.py": "ae4ec578b6bb8f1da59b16010e10e62634fda6790f4fbcb11607fd20e91d43fd",
+    "sealed-specification.json": "662a22145c91d7bb1f284b0ba5feff08a8d4d8e0746704abaf9c08248838f82c"
+  }
+}

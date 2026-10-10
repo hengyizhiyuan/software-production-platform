@@ -1548,7 +1548,7 @@ def _bind_wire_diagnostics(error, rows, attempt, revision, inventory, capabiliti
 
 
 def _owner_source_preconditions(revision, ir, inventory, capabilities, *, include_syntax_observations=True,
-                                syntax_observation_contract="complete-value-owner-observations-v1",
+                                syntax_observation_contract="complete-value-owner-observations-v2",
                                 include_operand_observations=True, include_typed_observations=True,
                                 typed_prerequisite_contract="existing-owner-typed-prerequisites-v4"):
     """Necessary proof sets from existing Owner predicates, never route proposals.
@@ -1929,7 +1929,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if preconditions is not None and (not isinstance(preconditions, dict)
                 or preconditions.get("syntax_observation_contract") not in (
-                    None, "complete-value-observations-v1", "complete-value-owner-observations-v1")
+                    None, "complete-value-observations-v1", "complete-value-owner-observations-v1", "complete-value-owner-observations-v2")
                 or preconditions.get("operand_observation_contract") not in (None, "existing-owner-operands-v1")
                 or preconditions.get("typed_prerequisite_contract") not in (None, "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4")):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")

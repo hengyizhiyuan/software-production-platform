@@ -1,0 +1,56 @@
+{
+  "schema": "c3-fresh-independent-public-delivery-v1",
+  "source": "bbe4b8e7be4e4651d46333c17c6e5e7b25cc3369",
+  "private_recovery_root": "/data/watt/c3-semantic-convergence-20261009/fresh-holdout-binding-20261010",
+  "sealed_sha256": "662a22145c91d7bb1f284b0ba5feff08a8d4d8e0746704abaf9c08248838f82c",
+  "public_files": {
+    "report.md": {
+      "sha256": "996c410ff58fae5cf9dea21c77f28dd85a3e41954039b945dcb766ec5c694a24",
+      "bytes": 4485
+    },
+    "qualification-review.json": {
+      "sha256": "c93cc271ee4d6c69a85c6efec6b71985a9c19f31d6e8918bb4ab1401d4c7e904",
+      "bytes": 9021
+    },
+    "model-usage.json": {
+      "sha256": "821e9d525961c5fc72eb49578f37c2ce9e85d97bc46111a96a47f4bc7ee506e6",
+      "bytes": 9792
+    },
+    "wall-time.json": {
+      "sha256": "2137a4f10bc1b00fb03d0b384f9e5f87d1123872dc8d4cab613c11265df74ecd",
+      "bytes": 1847
+    },
+    "owner-evidence-followup.json": {
+      "sha256": "6897ac3bcaa9b26ba9580fe54358e94ad761aca43d7dd832f029ff3065c1b996",
+      "bytes": 1978
+    },
+    "resource-retention.json": {
+      "sha256": "029fbfee1a256fb4eaf29f1aa6ab37a58f1c66932bdbeaf2f7b6f9bc79e4c48d",
+      "bytes": 2074
+    },
+    "receipt-continuity-manifest.json": {
+      "sha256": "d2711d8803267742d29248a9755d4b2db700450338b5c8e534fe9a8f2f459c07",
+      "bytes": 12216
+    },
+    "mechanical-preflight.json": {
+      "sha256": "d3dcdba061d5be70bfdcf3b3ac63f29009c7e7dd90ecc3bdb0de757e56b43c9b",
+      "bytes": 1362
+    },
+    "actual-runtime.json": {
+      "sha256": "c86ec8d8fe3ce9e69f39ec9ec5a1d0e9d73f695c484481837cb8a483998eb80f",
+      "bytes": 418
+    },
+    "live-observations.json": {
+      "sha256": "441301654eb7af86498a1b88e050cf03cd9319e996bba8cf8488dc33be6f463b",
+      "bytes": 9724
+    },
+    "owner-probe-results.json": {
+      "sha256": "b65056fdbabae38e3226ea1b8a7f8d7fbe493616a7aee1cde5ac7d31f893824f",
+      "bytes": 1375
+    },
+    "privacy-scan.json": {
+      "sha256": "97c9f8c64cf8e03dce6ed639e4981ddc22623265ca6c273a1dca35d0bd31b8c4",
+      "bytes": 733
+    }
+  }
+}

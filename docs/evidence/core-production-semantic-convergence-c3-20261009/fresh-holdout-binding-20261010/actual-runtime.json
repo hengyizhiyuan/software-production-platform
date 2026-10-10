@@ -1,0 +1,9 @@
+{
+  "container_id": "9777583d75765f66ca30869770777921c140e2ad34b6a63aa14a9f151339629c",
+  "actual_image_id": "sha256:209ce4dea95bba9e8c8191b5409f3d9063a93a2ac5c55ca88552cf97ae504bf1",
+  "exit_code": 0,
+  "source": "bbe4b8e7be4e4651d46333c17c6e5e7b25cc3369",
+  "new_database_name": "c3_independent_holdout_20261009",
+  "new_postgres_container": "watt-c3-freshholdout-pg-20261010",
+  "no_business_work_or_effect": true
+}

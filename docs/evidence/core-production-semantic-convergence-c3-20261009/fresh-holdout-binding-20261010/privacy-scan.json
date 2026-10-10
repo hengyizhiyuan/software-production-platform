@@ -1,0 +1,21 @@
+{
+  "checked_at_utc": "2026-10-10T10:51:31.877918+00:00",
+  "public_files": [
+    "report.md",
+    "qualification-review.json",
+    "model-usage.json",
+    "wall-time.json",
+    "owner-evidence-followup.json",
+    "resource-retention.json",
+    "receipt-continuity-manifest.json",
+    "mechanical-preflight.json",
+    "actual-runtime.json",
+    "live-observations.json",
+    "owner-probe-results.json"
+  ],
+  "secret_or_private_input_hits": 0,
+  "credential_values_printed": false,
+  "raw_prompts_candidates_or_oracles_exported": false,
+  "private_values_compared_count": 3,
+  "scope": "Exact env credential values, private qualification nonce and full sealed human input, plus API key pattern scan. Not a claim of universal DLP."
+}

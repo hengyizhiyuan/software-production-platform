@@ -117,7 +117,7 @@ def _fulfillment_wire_schema():
     return _provider_strict_output_schema(_FulfillmentCompactCandidate.model_json_schema())
 
 
-def _formation_output_schema(inventory, capabilities):
+def _formation_output_schema(inventory, capabilities, *, owner_preconditions=None):
     """A strict subset of existing wire v1 over this request's known identities.
 
     No semantic classification, renumbering or response repair occurs here.
@@ -136,7 +136,55 @@ def _formation_output_schema(inventory, capabilities):
             route[name]["items"]["enum"] = domain
         else:
             route[name]["maxItems"] = 0
+    if owner_preconditions is not None:
+        # Restrict generation to prerequisites already enforced by the Owner.
+        # These are necessary conditions, not inferred semantic routes. Keep
+        # unresolved available and the original shared source ordinal space.
+        choices = _formation_binding_choices(inventory, capabilities, owner_preconditions)
+        groups = {}
+        for row in choices:
+            groups.setdefault(tuple(row["candidate_capabilities"]), []).append(row["source"])
+        branches = []
+        for allowed, sources in groups.items():
+            branch = deepcopy(schema["$defs"]["_FulfillmentCompactRoute"])
+            branch["properties"]["s"]["enum"] = sources
+            branch["properties"]["c"]["enum"] = list(allowed)
+            branches.append(branch)
+        schema["properties"]["routes"]["items"] = {"anyOf": branches}
     return schema
+
+
+def _formation_binding_choices(inventory, capabilities, owner_preconditions):
+    """Join original identities to existing necessary restrictions, no verdict.
+
+    The model still selects semantic components, capability and provenance.
+    A choice absent from the rejected prerequisites is NOT permission, proof
+    of semantic equivalence or observed evidence. This same view is used to
+    constrain request generation without changing the authoritative wire v1.
+    """
+    if (owner_preconditions.get("inventory_fingerprint") != inventory["inventory_fingerprint"]
+            or owner_preconditions.get("capabilities_fingerprint") != canonical_fingerprint(capabilities)):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_OWNER_PRECONDITION_IDENTITY_DRIFT")
+    rows = owner_preconditions.get("sources", [])
+    if len(rows) != len(inventory["sources"]):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_OWNER_PRECONDITION_IDENTITY_DRIFT")
+    result = []
+    for index, (source, row) in enumerate(zip(inventory["sources"], rows, strict=True)):
+        if row.get("source") != index or row.get("source_ref") != source["source_ref"]:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_OWNER_PRECONDITION_IDENTITY_DRIFT")
+        rejected = row.get("ineligible_binding_prerequisites", [])
+        indices = {entry["capability"] for entry in rejected}
+        if any(type(i) is not int or not 0 <= i < len(capabilities) for i in indices):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_OWNER_PRECONDITION_IDENTITY_DRIFT")
+        unresolved = {i for i,c in enumerate(capabilities) if c["capability"] == "UNRESOLVED"}
+        if indices & unresolved:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_OWNER_PRECONDITION_IDENTITY_DRIFT")
+        result.append({"source": index, "source_ref": source["source_ref"],
+            "candidate_capabilities": [i for i in range(len(capabilities)) if i not in indices],
+            "necessary_source_proofs": deepcopy(row.get("necessary_source_proofs", [])),
+            "rejected_prerequisites": deepcopy(rejected),
+            "semantic_selection": "UNPROVEN; SELECT_FROM_ORIGINAL_COMPONENT; NO_PERMISSION_OR_EVIDENCE"})
+    return result
 
 
 def _formation_source_table(context):
@@ -199,7 +247,7 @@ def _wire_json_object(pairs):
     return result
 
 
-def _fulfillment_wire_diagnostics(wire, inventory, context):
+def _fulfillment_wire_diagnostics(wire, inventory, context, *, detailed=False):
     """Evaluate independent wire predicates without admitting a partial plan.
 
     No semantic classification or quote relocation occurs here. An explicit
@@ -243,9 +291,22 @@ def _fulfillment_wire_diagnostics(wire, inventory, context):
         else:
             unlocated.add(route.s)
     for source, text in enumerate(context["source_texts"]):
-        if source not in unlocated and any(not char.isspace() and offset not in covered.get(source, ())
-                                          for offset, char in enumerate(text)):
-            add("OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST", source=source)
+        missing = [offset for offset, char in enumerate(text)
+            if not char.isspace() and offset not in covered.get(source, ())]
+        if source not in unlocated and missing:
+            observation = {}
+            if detailed:
+                ranges = []
+                for offset in missing:
+                    if ranges and ranges[-1][1] == offset:
+                        ranges[-1][1] += 1
+                    else:
+                        ranges.append([offset, offset + 1])
+                observation = {"uncovered_codepoint_ranges": ranges,
+                    "original_text_sha256": context["tables"]["sources"][source]["text_sha256"],
+                    "observed_source_route_indices": [i for i,r in enumerate(wire.routes) if r.s == source],
+                    "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"}
+            add("OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST", source=source, **observation)
     return {"violations": failures[:64], "additional_violation_count": max(0, len(failures)-64),
         "not_evaluable": ["CANONICAL_COMPONENT_VALIDATION", "OWNER_PHASE_EVIDENCE",
             "INDEPENDENT_SEMANTIC_REVIEW", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"],
@@ -414,7 +475,8 @@ def _fulfillment_wire_route_observations(output, inventory, capabilities, *, val
         wire = _FulfillmentCompactCandidate.model_validate(json.loads(output, object_pairs_hook=_wire_json_object))
     except json.JSONDecodeError as error:
         if (error.msg != "Extra data" or owner_preconditions is None
-                or owner_preconditions.get("syntax_observation_contract") != "complete-value-owner-observations-v1"):
+                or owner_preconditions.get("syntax_observation_contract") not in {
+                    "complete-value-owner-observations-v1", "complete-value-owner-observations-v2"}):
             return (), ["RAW_ROUTE_OWNER_PRECONDITIONS"]
         try:
             value, _ = json.JSONDecoder(object_pairs_hook=_wire_json_object).raw_decode(output, len(output)-len(output.lstrip()))
@@ -456,6 +518,7 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
         "wire_output_fingerprint": raw_fingerprint,
         "inventory_fingerprint": inventory["inventory_fingerprint"],
         **{key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS}}
+    detailed = (owner_preconditions or {}).get("syntax_observation_contract") == "complete-value-owner-observations-v2"
     try:
         if isinstance(output, str):
             output = json.loads(output, object_pairs_hook=_wire_json_object)
@@ -466,9 +529,23 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
                 "OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID")
         violations = [{"code": code}]
         additional = 0
+        if detailed:
+            from pydantic import ValidationError
+            if isinstance(error, ValidationError):
+                # No input values, model rationale, arbitrary messages or raw
+                # payload fragments enter this bound diagnostic. Locations and
+                # stable validator types refer to the original unadmitted wire.
+                allowed_fields = set(_FulfillmentCompactRoute.model_fields) | set(_FulfillmentCompactCandidate.model_fields)
+                observations = []
+                for item in error.errors(include_url=False, include_context=False, include_input=False):
+                    location = [part if type(part) is int or part in allowed_fields else "UNKNOWN_FIELD"
+                        for part in item["loc"]]
+                    observations.append({"predicate": item["type"], "location": location})
+                violations[0]["schema_observations"] = observations[:64]
+                violations[0]["additional_schema_observation_count"] = max(0, len(observations)-64)
         if (isinstance(error, json.JSONDecodeError) and owner_preconditions is not None
                 and owner_preconditions.get("syntax_observation_contract") in {
-                    "complete-value-observations-v1", "complete-value-owner-observations-v1"}):
+                    "complete-value-observations-v1", "complete-value-owner-observations-v1", "complete-value-owner-observations-v2"}):
             observation = {"line": error.lineno, "column": error.colno,
                 "character_offset": error.pos, "reason": "EXTRA_DATA" if error.msg == "Extra data" else "INVALID_SYNTAX"}
             violations[0]["json_parse_observation"] = observation
@@ -482,7 +559,7 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
                     observed = _FulfillmentCompactCandidate.model_validate(prefix)
                     if observed.h != context["wire_request_fingerprint"] or observed.d != context["wire_table_fingerprint"]:
                         raise ValueError("OBLIGATION_FORMATION_WIRE_BASIS_DRIFT")
-                    predicates = _fulfillment_wire_diagnostics(observed, inventory, context)
+                    predicates = _fulfillment_wire_diagnostics(observed, inventory, context, detailed=detailed)
                     observation.update(complete_value_range=[begin,end],
                         complete_value_sha256=sha256(output[begin:end].encode()).hexdigest(),
                         trailing_bytes=len(output[end:].encode()), disposition="UNADMITTED_SYNTAX_OBSERVATION")
@@ -501,7 +578,7 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
             "violations": [{"code": code}], "additional_violation_count": 0,
             "not_evaluable": ["WIRE_ROUTE_VALIDATION", "CANONICAL_COMPONENT_VALIDATION",
                 "OWNER_PHASE_EVIDENCE", "INDEPENDENT_SEMANTIC_REVIEW", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"]})
-    diagnostics = _fulfillment_wire_diagnostics(wire, inventory, context)
+    diagnostics = _fulfillment_wire_diagnostics(wire, inventory, context, detailed=detailed)
     if diagnostics["violations"]:
         raise _FulfillmentWireValidationError(diagnostics["violations"][0]["code"],
             {**diagnostic_basis, **diagnostics})
@@ -582,7 +659,13 @@ class ModelFulfillmentCandidateProvider:
         wire_metadata = {key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS}
         runtime = self.runtime_factory()
         try:
-            output_schema = _formation_output_schema(inventory, capabilities)
+            output_schema = _formation_output_schema(inventory, capabilities, owner_preconditions=owner_preconditions)
+            source_table = _formation_source_table(context)
+            if owner_preconditions is not None:
+                for source, choices in zip(source_table, _formation_binding_choices(
+                        inventory, capabilities, owner_preconditions), strict=True):
+                    source["necessary_capability_domain"] = choices["candidate_capabilities"]
+                    source["domain_meaning"] = choices["semantic_selection"]
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
                 instructions=(
                     "You propose a derived fulfillment plan for immutable admitted engineering meaning. "
@@ -633,7 +716,11 @@ class ModelFulfillmentCandidateProvider:
                     "Borrowing a negative support cannot turn an affirmative primary clause into "
                     "a prohibition. File-change scope does not imply prohibitions on unrelated external effects. "
                     "Never attach whole-source UNRESOLVED or RETAIN_CONTEXT over an already bound component. "
-                    "A current explicit request is not background merely because it also explains the Work. "
+                    "A current executable requirement is not background merely because another source or Fact "
+                    "already expresses an equivalent requirement. Distinct source identities require their own "
+                    "legal component bindings. Nonexecutable description may be retained only under the existing "
+                    "Owner prerequisites and independent component Review; an explicit request label alone "
+                    "does not turn every descriptive word into a content check. "
                     "All selected supports must legitimately "
                     "correspond; do not add same-clause references merely because their text looks similar. "
                     "That old proposal is not authority and must not be admitted or blindly copied. Preserve "
@@ -652,6 +739,16 @@ class ModelFulfillmentCandidateProvider:
                     "losing independent current content requirements, original values, order or scope. "
                     "Represent EVERY supplied source_ref and EVERY work_constraint index, allowing multiple "
                     "routes for mixed meaning, without merging distinct components to shorten output. "
+                    "The source table's necessary_capability_domain excludes bindings rejected by existing Owner "
+                    "predicates. Select meaning yourself within that domain; it is not a recommended route. "
+                    "Do not send a prohibition to a future authorization gate. Use the consumer's exact operation: "
+                    "a changed-file restriction is verified by actual Git Diff, irrespective of whether a separate "
+                    "source already states the allowlist. A request to verify content belongs to current content "
+                    "Verification; a request to leave a reviewable Candidate belongs to the actual Candidate gate. "
+                    "Keep those components separate and cite only original sources that entail each one. "
+                    "If a clause expresses several requirements, all component spans together must cover its "
+                    "operators, conjunctions and qualifiers too. Overlap is allowed for shared grammatical "
+                    "context, but never silently omit part of the original text. "
                     "Same-source same-capability routes require genuinely distinct components, not different rationales "
                     "for an identical component. RETAIN_CONTEXT and UNRESOLVED are component dispositions, not "
                     "extra record-preservation routes to append to executable contributions. Do not lose punctuation "
@@ -679,8 +776,9 @@ class ModelFulfillmentCandidateProvider:
                     "temporary_wire": {**wire_metadata,
                         "f_allowed_source_ordinals": [index for index, source in enumerate(inventory["sources"])
                             if source["kind"] == "FACT"],
-                        "source_index_table": _formation_source_table(context),
-                        "capability_index_table": [{"index": index, "capability": entry["capability"]}
+                        "source_index_table": source_table,
+                        "capability_index_table": [{"index": index, "capability": entry["capability"],
+                            "owner": entry["owner"], "phase": entry["phase"], "evidence_method": entry["evidence_method"]}
                             for index, entry in enumerate(context["tables"]["capabilities"])],
                         "target_index_table": [{"index": index, "path": path}
                             for index, path in enumerate(context["tables"]["target_paths"])]}}, ensure_ascii=False),

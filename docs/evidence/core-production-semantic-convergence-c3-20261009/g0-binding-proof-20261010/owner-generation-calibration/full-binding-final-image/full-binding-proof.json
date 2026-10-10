@@ -1,0 +1,366 @@
+{
+  "schema": "c3-g0-full-lawful-binding-control-v1",
+  "captured_at_utc": "2026-10-10T10:37:17.440965+00:00",
+  "basis_sha256": "4ed82eb189d3c6d8edab7cc9bd8df3451e4d4cee0b82c58d7e146e8892518797",
+  "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+  "historical_candidate_fingerprint": "17f7d497b13b792d85ea7192e2255ea825166800ea6c51d944fbf2bef8383e3f",
+  "counterfactual_plan_fingerprint": "faddcada1831251c501897817b3bea90068c90cfbd4138f887859a5d1c76cd88",
+  "source_count": 20,
+  "original_routes": 29,
+  "controlled_bindings": 25,
+  "result": "FULL_OWNER_CONTRACT_BINDING_AND_REPLAY_CONTROL_PASS",
+  "real_model_calls": 0,
+  "new_work": 0,
+  "history_changes": 0,
+  "actual_semantic_review": false,
+  "claim_boundary": "Controlled hand-authored contract proof; no model success, runtime fulfilment, Guardian or Work completion implied.",
+  "changes": [
+    {
+      "original_route": 6,
+      "disposition": "counterfactual_remove_nonrequired_seal_proposal",
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+      "retained_required_source_routes": true
+    },
+    {
+      "original_route": 9,
+      "disposition": "counterfactual_remove_nonrequired_seal_proposal",
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c4",
+      "retained_required_source_routes": true
+    },
+    {
+      "original_route": 11,
+      "disposition": "counterfactual_remove_nonrequired_seal_proposal",
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c5",
+      "retained_required_source_routes": true
+    },
+    {
+      "original_route": 12,
+      "disposition": "counterfactual_exact_component_or_support",
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c6",
+      "capability": "ARTIFACT_CONTENT"
+    },
+    {
+      "original_route": 13,
+      "disposition": "counterfactual_exact_component_or_support",
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c6",
+      "capability": "CANDIDATE_SEAL"
+    },
+    {
+      "original_route": 21,
+      "disposition": "counterfactual_exact_component_or_support",
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:3",
+      "capability": "ARTIFACT_CONTENT"
+    },
+    {
+      "original_route": 22,
+      "disposition": "counterfactual_remove_nonrequired_seal_proposal",
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:3",
+      "retained_required_source_routes": true
+    },
+    {
+      "original_route": 23,
+      "disposition": "counterfactual_exact_component_or_support",
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:4",
+      "capability": "CANDIDATE_SEAL"
+    }
+  ],
+  "negative_controls": [
+    {
+      "control": "wrong_inventory",
+      "result": "REJECT",
+      "predicate": "OBLIGATION_PROJECTION_STALE_BASIS"
+    },
+    {
+      "control": "missing_original_source",
+      "result": "REJECT",
+      "predicate": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE"
+    },
+    {
+      "control": "wrong_effect_scope",
+      "result": "REJECT",
+      "predicate": "OBLIGATION_SCOPE_EXPANSION"
+    },
+    {
+      "control": "hidden_current_fact",
+      "result": "REJECT",
+      "predicate": "OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY"
+    },
+    {
+      "control": "affirmative_prohibition_proof",
+      "result": "REJECT",
+      "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+    }
+  ],
+  "source_coverage": [
+    {
+      "source_ref": "semantic-fact:1a4d882e-16a3-55da-a034-e4b8ff4a781d",
+      "kind": "FACT",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts"
+        }
+      ]
+    },
+    {
+      "source_ref": "semantic-fact:418f0b05-f833-586f-af19-6277d63a5260",
+      "kind": "FACT",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts"
+        }
+      ]
+    },
+    {
+      "source_ref": "semantic-fact:ceb4834d-8454-5cfc-850b-c2f44563920c",
+      "kind": "FACT",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope"
+        }
+      ]
+    },
+    {
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c1",
+      "kind": "IR_CLAUSE",
+      "bindings": [
+        {
+          "owner": "PRODUCT_SOURCE",
+          "phase": "CONTEXT_RETENTION",
+          "method": "RETAIN_AUTHORITATIVE_CONTEXT",
+          "gate": "work-reality:retained"
+        }
+      ]
+    },
+    {
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+      "kind": "IR_CLAUSE",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts"
+        },
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope"
+        }
+      ]
+    },
+    {
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c3",
+      "kind": "IR_CLAUSE",
+      "bindings": [
+        {
+          "owner": "PRODUCT_SOURCE",
+          "phase": "CONTEXT_RETENTION",
+          "method": "RETAIN_AUTHORITATIVE_CONTEXT",
+          "gate": "work-reality:retained"
+        }
+      ]
+    },
+    {
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c4",
+      "kind": "IR_CLAUSE",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts"
+        }
+      ]
+    },
+    {
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c5",
+      "kind": "IR_CLAUSE",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope"
+        }
+      ]
+    },
+    {
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c6",
+      "kind": "IR_CLAUSE",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts"
+        },
+        {
+          "owner": "CANDIDATE",
+          "phase": "CANDIDATE_SEAL",
+          "method": "EXACT_SEALED_CANDIDATE",
+          "gate": "candidate-owner:sealed-after-verification"
+        }
+      ]
+    },
+    {
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7",
+      "kind": "IR_CLAUSE",
+      "bindings": [
+        {
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "cloud-delivery:human-authorization-required"
+        },
+        {
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "remote-delivery:human-authorization-required"
+        },
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope"
+        }
+      ]
+    },
+    {
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:0",
+      "kind": "WORK_CONSTRAINT",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts"
+        },
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope"
+        }
+      ]
+    },
+    {
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:1",
+      "kind": "WORK_CONSTRAINT",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts"
+        }
+      ]
+    },
+    {
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:2",
+      "kind": "WORK_CONSTRAINT",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts"
+        }
+      ]
+    },
+    {
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:3",
+      "kind": "WORK_CONSTRAINT",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "gate": "code-verification:semantic-facts"
+        }
+      ]
+    },
+    {
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:4",
+      "kind": "WORK_CONSTRAINT",
+      "bindings": [
+        {
+          "owner": "CANDIDATE",
+          "phase": "CANDIDATE_SEAL",
+          "method": "EXACT_SEALED_CANDIDATE",
+          "gate": "candidate-owner:sealed-after-verification"
+        }
+      ]
+    },
+    {
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:5",
+      "kind": "WORK_CONSTRAINT",
+      "bindings": [
+        {
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "cloud-delivery:human-authorization-required"
+        }
+      ]
+    },
+    {
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:6",
+      "kind": "WORK_CONSTRAINT",
+      "bindings": [
+        {
+          "owner": "DELIVERY_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "method": "EXACT_PERMISSION_GATE",
+          "gate": "remote-delivery:human-authorization-required"
+        }
+      ]
+    },
+    {
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:7",
+      "kind": "WORK_CONSTRAINT",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope"
+        }
+      ]
+    },
+    {
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:8",
+      "kind": "WORK_CONSTRAINT",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope"
+        }
+      ]
+    },
+    {
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:9",
+      "kind": "WORK_CONSTRAINT",
+      "bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "gate": "code-verification:path-scope"
+        }
+      ]
+    }
+  ]
+}

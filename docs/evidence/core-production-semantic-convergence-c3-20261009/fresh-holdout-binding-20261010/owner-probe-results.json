@@ -1,0 +1,39 @@
+{
+  "all_declared_controls_not_semantic_model_success": true,
+  "results": [
+    {
+      "case_id": "F05",
+      "evidence_sha256": "b7577bfe276d79b5c3b1810de41bd1549fe00d5fa79ce24e5b0c3548354e7af4",
+      "model_calls": 0,
+      "probe_count": 3,
+      "real_software_production_claim": false,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "case_id": "F06",
+      "evidence_sha256": "600d61a9a580b17207e3e7f75be7a56c53f49f68bffb3feb481298038e07f2bb",
+      "model_calls": 0,
+      "probe_count": 3,
+      "real_software_production_claim": false,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "case_id": "F07",
+      "evidence_sha256": "5fb782e4d3c01087a9256fdee0d241c3c90101d7ef3de13239401c98cc5a1a9c",
+      "model_calls": 0,
+      "probe_count": 6,
+      "real_software_production_claim": false,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "actual_software_candidate_seal": "PENDING_REAL_G0_EVIDENCE",
+      "case_id": "F08",
+      "evidence_sha256": "4cfd3b23f969d07ffe60129b0f549eff4cabd65b36fa19a8f6c04a6df66d88fa",
+      "independent_guardian_joint_required": true,
+      "model_calls": 0,
+      "result": "PASS_SCOPED_SOURCE_ADAPTER_GUARDIAN_REQUIRED"
+    }
+  ],
+  "schema": "c3-fresh-independent-owner-controls-v1",
+  "sealed_sha256": "662a22145c91d7bb1f284b0ba5feff08a8d4d8e0746704abaf9c08248838f82c"
+}

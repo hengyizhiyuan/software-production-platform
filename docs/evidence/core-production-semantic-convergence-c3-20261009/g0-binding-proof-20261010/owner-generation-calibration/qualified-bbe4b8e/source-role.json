@@ -1,0 +1,29 @@
+{
+  "exit_code": 0,
+  "actual_image_id": "sha256:209ce4dea95bba9e8c8191b5409f3d9063a93a2ac5c55ca88552cf97ae504bf1",
+  "actual_container_id": "e3eebd4cf9627664e86a18ff7f14ff000900dc142bab39a35a6cddae6a48bfdc",
+  "sources": {
+    "watt": {
+      "revision": "bbe4b8e7be4e4651d46333c17c6e5e7b25cc3369",
+      "tree": "0c6ce7fddd06f2dcfe72fb71d5b07ccb2be2074b"
+    },
+    "guardian": {
+      "revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+      "tree": "6066a6d6b8d91bec610021409ab320309ed0e437"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "source_overlay": false,
+  "model_calls": 0,
+  "wall_seconds": 6.349355229001958,
+  "nodes": [
+    "tests/test_c3_source_role_contract.py"
+  ]
+}

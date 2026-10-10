@@ -1,0 +1,26 @@
+{
+  "archive_sha256": "75173d39f388442817ae849b41f0c7a84b89245dca91bc37e1f3229bc653cbcc",
+  "archive_bytes": 15279,
+  "public_file_count": 14,
+  "public_files": [
+    "report.md",
+    "qualification-review.json",
+    "model-usage.json",
+    "wall-time.json",
+    "owner-evidence-followup.json",
+    "resource-retention.json",
+    "receipt-continuity-manifest.json",
+    "mechanical-preflight.json",
+    "actual-runtime.json",
+    "live-observations.json",
+    "owner-probe-results.json",
+    "privacy-scan.json",
+    "public-manifest.json",
+    "privacy-full-input-followup.json"
+  ],
+  "private_recovery_root": "/data/watt/c3-semantic-convergence-20261009/fresh-holdout-binding-20261010",
+  "all_privacy_hits": 0,
+  "original_archive_retained": true,
+  "public_manifest_does_not_cover_followup": true,
+  "followup_sha256": "1ed64ec1ec00b07dec61d5473841809da3ac348c846750403b2f75e0c50fbb2b"
+}

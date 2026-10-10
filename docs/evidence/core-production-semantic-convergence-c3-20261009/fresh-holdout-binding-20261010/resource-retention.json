@@ -1,0 +1,48 @@
+{
+  "checked_at_utc": "2026-10-10T10:51:06.667970+00:00",
+  "resources": [
+    {
+      "name": "watt-c3-freshholdout-pg-20261010",
+      "id": "45df745752c52dacff6efb71fbb6e3c6fc792d8d2efd63b20fc02da08518789c",
+      "actual_image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+      "status": "exited",
+      "exit_code": 0,
+      "started_at": "2026-10-10T10:43:07.108802077Z",
+      "finished_at": "2026-10-10T10:51:06.434249291Z"
+    },
+    {
+      "name": "watt-c3-freshholdout-live-20261010",
+      "id": "9777583d75765f66ca30869770777921c140e2ad34b6a63aa14a9f151339629c",
+      "actual_image_id": "sha256:209ce4dea95bba9e8c8191b5409f3d9063a93a2ac5c55ca88552cf97ae504bf1",
+      "status": "exited",
+      "exit_code": 0,
+      "started_at": "2026-10-10T10:43:15.754339083Z",
+      "finished_at": "2026-10-10T10:46:00.674723302Z"
+    },
+    {
+      "name": "watt-c3-freshholdout-migrate-20261010",
+      "id": "7e79b4c3520e2ad441a104849b731019750d97e3d20d5cb62b8bdf45dc866960",
+      "actual_image_id": "sha256:209ce4dea95bba9e8c8191b5409f3d9063a93a2ac5c55ca88552cf97ae504bf1",
+      "status": "exited",
+      "exit_code": 0,
+      "started_at": "2026-10-10T10:43:09.599426252Z",
+      "finished_at": "2026-10-10T10:43:15.506998098Z"
+    },
+    {
+      "name": "watt-c3-freshholdout-owner-probes-20261010",
+      "id": "643ddd698de76075c039e8752b5e0289db739de5aada12b9a7a3c5801bdd1352",
+      "actual_image_id": "sha256:209ce4dea95bba9e8c8191b5409f3d9063a93a2ac5c55ca88552cf97ae504bf1",
+      "status": "exited",
+      "exit_code": 0,
+      "started_at": "2026-10-10T10:45:42.615025667Z",
+      "finished_at": "2026-10-10T10:45:47.057325509Z"
+    }
+  ],
+  "only_reviewer_pg_stopped": true,
+  "network_retained": "watt-c3-freshholdout-net-20261010",
+  "subnet": "172.23.0.160/28",
+  "volume_retained": "watt-c3-freshholdout-pg-20261010",
+  "private_recovery_root": "/data/watt/c3-semantic-convergence-20261009/fresh-holdout-binding-20261010",
+  "original_services_touched": false,
+  "public_copy_does_not_include_private_inputs": true
+}
