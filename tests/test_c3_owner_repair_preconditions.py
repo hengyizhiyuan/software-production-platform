@@ -175,6 +175,49 @@ def test_old_typed_v1_prerequisites_preserve_the_original_operand_and_retention_
     assert not any(r['capability']==retained for r in old['sources'][0]['ineligible_binding_prerequisites'])
 
 
+def test_actual_fact_owner_restriction_is_observed_without_a_second_routing_rule(monkeypatch):
+    from spg.application import governed_obligations as owner
+    revision,ir,inventory,_=controlled_capacity_case()
+    caps=fulfillment_capability_contracts();original=owner._projection_binding;observed=[]
+    def actual_owner(*args,**kwargs):
+        route=args[3]
+        if route.source_ref==inventory['sources'][0]['source_ref'] and route.capability=='ARTIFACT_CONTENT':
+            observed.append(route)
+            raise ValueError('OBLIGATION_CONTROLLED_OWNER_RESTRICTION')
+        return original(*args,**kwargs)
+    monkeypatch.setattr(owner,'_projection_binding',actual_owner)
+    before=deepcopy(vars(revision))
+    preconditions=owner._owner_source_preconditions(revision,ir,inventory,caps)
+    content=next(i for i,c in enumerate(caps) if c['capability']=='ARTIFACT_CONTENT')
+    assert next(r for r in preconditions['sources'][0]['ineligible_binding_prerequisites'] if r['capability']==content)['codes']==[
+        'OBLIGATION_CONTROLLED_OWNER_RESTRICTION']
+    assert observed and vars(revision)==before
+
+
+def test_negative_scope_and_literal_file_scope_use_actual_fact_owner_prerequisites():
+    from tests.test_c3_semantic_contract_calibration import negative_fact_plan
+    revision,ir,inventory,_=negative_fact_plan()
+    caps=fulfillment_capability_contracts();preconditions=_owner_source_preconditions(revision,ir,inventory,caps)
+    content=next(i for i,c in enumerate(caps) if c['capability']=='ARTIFACT_CONTENT')
+    source=next(i for i,s in enumerate(inventory['sources']) if s['kind']=='FACT')
+    rejection=next(r for r in preconditions['sources'][source]['ineligible_binding_prerequisites'] if r['capability']==content)
+    assert rejection['codes']==['OBLIGATION_NEGATED_SCOPE_EVIDENCE_OWNER_MISMATCH']
+    revision,ir,inventory,_=controlled_capacity_case()
+    preconditions=_owner_source_preconditions(revision,ir,inventory,caps)
+    source=next(i for i,s in enumerate(inventory['sources']) if s['kind']=='FACT' and s['payload']['relation']=='SCOPE')
+    assert next(r for r in preconditions['sources'][source]['ineligible_binding_prerequisites'] if r['capability']==content)['codes']==[
+        'OBLIGATION_FILE_SCOPE_OWNER_MISMATCH']
+
+
+def test_typed_v2_shape_remains_recomputable_without_new_fact_consumer_observations():
+    from tests.test_c3_semantic_contract_calibration import negative_fact_plan
+    revision,ir,inventory,_=negative_fact_plan();caps=fulfillment_capability_contracts()
+    old=_owner_source_preconditions(revision,ir,inventory,caps,typed_prerequisite_contract='existing-owner-typed-prerequisites-v2')
+    content=next(i for i,c in enumerate(caps) if c['capability']=='ARTIFACT_CONTENT')
+    source=next(i for i,s in enumerate(inventory['sources']) if s['kind']=='FACT')
+    assert not any(r['capability']==content for r in old['sources'][source]['ineligible_binding_prerequisites'])
+
+
 @pytest.mark.parametrize('tamper', (None,'owner-source','owner-errors','remove-owner-context','owner-marker','remove-both','legacy-feedback'))
 def test_bound_feedback_repairs_once_or_stops_drift_without_review(tamper):
     revision,ir,inventory,plan=controlled_capacity_case()
