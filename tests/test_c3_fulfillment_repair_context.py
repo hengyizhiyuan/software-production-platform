@@ -31,7 +31,7 @@ def repair_case(scale='small', interrupt=False):
             domains = payload['temporary_wire']['f_allowed_source_ordinals']
             assert domains == [i for i, s in enumerate(inventory['sources']) if s['kind'] == 'FACT']
             feedback = payload.get('same_basis_validation_feedback')
-            wire, _ = controlled_wire(inventory, plan, feedback=feedback)
+            wire, _ = controlled_wire(inventory, plan, feedback=feedback, owner_preconditions=payload.get("owner_source_preconditions"))
             if feedback is None:
                 wire['routes'].append(deepcopy(wire['routes'][0]))
             else:

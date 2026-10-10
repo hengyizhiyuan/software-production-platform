@@ -116,11 +116,11 @@ def controlled_capacity_case(scale="small"):
     return revision, ir, inventory, plan
 
 
-def controlled_wire(inventory, plan, *, feedback=None):
+def controlled_wire(inventory, plan, *, feedback=None, owner_preconditions=None):
     """Mechanical test encoder, not an alternative runtime formation path."""
     from spg.providers.fulfillment_candidate import _fulfillment_wire_context
     capabilities = fulfillment_capability_contracts()
-    context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=feedback)
+    context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=feedback, owner_preconditions=owner_preconditions)
     sources = {source["source_ref"]: index for index, source in enumerate(inventory["sources"])}
     capability_indices = {entry["capability"]: index for index, entry in enumerate(capabilities)}
     paths = {path: index for index, path in enumerate(inventory["exact_target_paths"])}
@@ -156,7 +156,7 @@ def controlled_model_provider(inventory, plan, *, equivalent=True, review_change
                 review_change(review)
             output = json.dumps(review, ensure_ascii=False)
         else:
-            wire, _ = controlled_wire(inventory, plan, feedback=payload.get("same_basis_validation_feedback"))
+            wire, _ = controlled_wire(inventory, plan, feedback=payload.get("same_basis_validation_feedback"), owner_preconditions=payload.get("owner_source_preconditions"))
             if wire_change:
                 wire_change(wire)
             output = json.dumps(wire, ensure_ascii=False)

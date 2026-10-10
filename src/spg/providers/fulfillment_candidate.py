@@ -117,7 +117,7 @@ def _fulfillment_wire_schema():
     return _provider_strict_output_schema(_FulfillmentCompactCandidate.model_json_schema())
 
 
-def _fulfillment_wire_context(inventory, capabilities, *, validation_feedback=None):
+def _fulfillment_wire_context(inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
     """Construct a reversible, request-local dictionary from original identities."""
     from spg.domain.change import safe_repository_path
     from spg.providers.verification_receipts import _safe_value
@@ -141,12 +141,17 @@ def _fulfillment_wire_context(inventory, capabilities, *, validation_feedback=No
     table_fingerprint = canonical_fingerprint(tables)
     schema_fingerprint = canonical_fingerprint(_fulfillment_wire_schema())
     feedback = _safe_value(validation_feedback)
+    preconditions = _safe_value(owner_preconditions)
+    if preconditions != owner_preconditions:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_OWNER_PRECONDITION_IDENTITY_DRIFT")
     request_fingerprint = canonical_fingerprint({"operation": "work-fulfillment-formation",
         "wire_version": _FULFILLMENT_WIRE_VERSION,
         "inventory_fingerprint": inventory["inventory_fingerprint"],
         "capabilities_fingerprint": canonical_fingerprint(capabilities),
         "table_fingerprint": table_fingerprint, "schema_fingerprint": schema_fingerprint,
-        "same_basis_validation_feedback": feedback})
+        "same_basis_validation_feedback": feedback,
+        **({"owner_source_preconditions_fingerprint": canonical_fingerprint(preconditions)}
+            if preconditions is not None else {})})
     return {"provider_wire_version": _FULFILLMENT_WIRE_VERSION,
         "wire_request_fingerprint": request_fingerprint,
         "wire_table_fingerprint": table_fingerprint, "wire_schema_fingerprint": schema_fingerprint,
@@ -240,13 +245,13 @@ def _expand_fulfillment_wire_route(route, inventory, capabilities, context):
             "linked_fact_refs": tuple(sources[index]["source_ref"] for index in route.f)})
 
 
-def _fulfillment_wire_route_observations(output, inventory, capabilities, *, validation_feedback=None):
+def _fulfillment_wire_route_observations(output, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
     """Read exact raw routes for Owner diagnostics, never a partial Candidate.
 
     Identity/schema failures make every route non-evaluable. A malformed route
     cannot provide proof for another route. Full-plan validation is unchanged.
     """
-    context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback)
+    context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
     try:
         wire = _FulfillmentCompactCandidate.model_validate(json.loads(output, object_pairs_hook=_wire_json_object))
     except ValueError:
@@ -270,10 +275,10 @@ def _fulfillment_wire_route_observations(output, inventory, capabilities, *, val
 
 
 def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
-        validation_feedback=None, wire_metadata=None):
+                                     validation_feedback=None, wire_metadata=None, owner_preconditions=None):
     """Expand only metadata; all semantic route choices remain model candidates."""
     from spg.providers.verification_receipts import _safe_output, _safe_value
-    context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback)
+    context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
     if wire_metadata is not None and any(wire_metadata.get(key) != context[key]
             for key in _FULFILLMENT_WIRE_METADATA_KEYS):
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_RECEIPT_IDENTITY_DRIFT")
@@ -372,13 +377,13 @@ class ModelFulfillmentCandidateProvider:
             return WattModelRuntime(registry, PurposeProfileRouter({ModelPurpose.STEERING_SEMANTIC: profile}))
         return cls(runtime_factory)
 
-    def form_wire_metadata(self, inventory, capabilities, *, validation_feedback=None):
-        context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback)
+    def form_wire_metadata(self, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
+        context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
         return {key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS}
 
-    def form(self, inventory, capabilities, *, validation_feedback=None, receipt_callback=None):
+    def form(self, inventory, capabilities, *, validation_feedback=None, receipt_callback=None, owner_preconditions=None):
         self.last_observation = None
-        context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback)
+        context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
         wire_metadata = {key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS}
         runtime = self.runtime_factory()
         try:
@@ -406,6 +411,11 @@ class ModelFulfillmentCandidateProvider:
                     "source still needs its own s routes with complete [a,z) coverage. Equal original text "
                     "does not merge distinct source identities. Consult owner_repair_context when supplied: "
                     "its exact correspondence origins and evidence prerequisites are necessary conditions, "
+                    "Consult owner_source_preconditions before the FIRST proposal too. Its minimal support sets "
+                    "describe admissible provenance proofs, not semantic matches or preselected routes. Choose a "
+                    "semantically correct set; a FACT in f does not replace original clause supports in u. "
+                    "Never attach whole-source UNRESOLVED or RETAIN_CONTEXT over an already bound component. "
+                    "A current explicit request is not background merely because it also explains the Work. "
                     "not pre-approved routes, evidence or authority. All selected supports must legitimately "
                     "correspond; do not add same-clause references merely because their text looks similar. "
                     "That old proposal is not authority and must not be admitted or blindly copied. Preserve "
@@ -442,6 +452,7 @@ class ModelFulfillmentCandidateProvider:
                     "clause cannot supply one. Never broaden effect permits, facts or Human authority."),
                 input_text=json.dumps({"immutable_inventory": inventory,
                     "existing_capability_contracts": capabilities,
+                    **({"owner_source_preconditions": owner_preconditions} if owner_preconditions is not None else {}),
                     "same_basis_validation_feedback": context["validation_feedback"],
                     "temporary_wire": {**wire_metadata,
                         "f_allowed_source_ordinals": [index for index, source in enumerate(inventory["sources"])
@@ -470,7 +481,7 @@ class ModelFulfillmentCandidateProvider:
             if safe_output is None:
                 raise ValueError("OBLIGATION_FORMATION_RECEIPT_LIMIT")
             return _decode_fulfillment_candidate_wire(safe_output, inventory, capabilities,
-                validation_feedback=validation_feedback, wire_metadata=wire_metadata)
+                validation_feedback=validation_feedback, wire_metadata=wire_metadata, owner_preconditions=owner_preconditions)
         except Exception as error:
             failure = provider_failure_observation(error)
             if failure is not None:

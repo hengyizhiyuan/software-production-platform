@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import pytest
 
 from spg.application.governed_obligations import (
-    _owner_repair_context, _projection_binding, fulfillment_capability_contracts,
+    _owner_repair_context, _owner_source_preconditions, _projection_binding, fulfillment_capability_contracts,
     form_fulfillment_projection, fulfillment_inventory, work_constraint_sources_correspond,
 )
 from spg.domain.governed_obligation import FulfillmentProjectionCandidate
@@ -20,8 +20,8 @@ from tests.test_c3_fulfillment_capacity_representation import controlled_capacit
 from tests.test_c3_semantic_contract_calibration import review
 
 
-def invalid_proposal(inventory, plan, feedback=None):
-    wire, _ = controlled_wire(inventory, plan, feedback=feedback)
+def invalid_proposal(inventory, plan, feedback=None, owner_preconditions=None):
+    wire, _ = controlled_wire(inventory, plan, feedback=feedback, owner_preconditions=owner_preconditions)
     refs = {s['source_ref']: i for i, s in enumerate(inventory['sources'])}
     removed = next(i for i,s in enumerate(inventory['sources']) if s['kind']=='IR_CONSTRAINT')
     # The source remains cited as supporting provenance but has no own route.
@@ -107,17 +107,22 @@ def test_bound_feedback_repairs_once_or_stops_drift_without_review(tamper):
             output=review(inventory,candidate).model_dump_json()
         else:
             feedback=payload.get('same_basis_validation_feedback')
-            if feedback is None: wire,*_=invalid_proposal(inventory,plan)
+            if feedback is None: wire,*_=invalid_proposal(inventory,plan,owner_preconditions=payload.get("owner_source_preconditions"))
             else:
                 data=json.loads(feedback)
                 if tamper!='legacy-feedback':
                     assert data['owner_repair_context']['inventory_fingerprint']==inventory['inventory_fingerprint']
                 assert data['repair_feedback_binding']['wire_output_fingerprint']==sha256(data['untrusted_previous_wire'].encode()).hexdigest()
-                wire,_=controlled_wire(inventory,plan,feedback=feedback)
+                wire,_=controlled_wire(inventory,plan,feedback=feedback,owner_preconditions=payload.get("owner_source_preconditions"))
             output=json.dumps(wire,ensure_ascii=False)
         return StructuredModelResult(output_text=output,provider=ModelProvider.DEEPSEEK,requested_model='controlled-owner-repair',
             effective_model='controlled-owner-repair',request_id=str(len(calls)),usage=ModelUsage(),timing=ModelTiming(),retry_count=0)
     provider=ModelFulfillmentCandidateProvider(lambda:SimpleNamespace(generate=generate,close=lambda:None))
+    if tamper=='legacy-feedback':
+        original_form=provider.form
+        def legacy_form(inventory,capabilities,*,validation_feedback=None,receipt_callback=None):
+            return original_form(inventory,capabilities,validation_feedback=validation_feedback,receipt_callback=receipt_callback)
+        provider.form=legacy_form
     provider._fulfillment_receipts=Memory()
     def run(): return form_fulfillment_projection(revision,ir,provider=provider,
         source_revision=inventory['source_revision'],exact_target_paths=inventory['exact_target_paths'])
@@ -158,3 +163,68 @@ def test_bound_feedback_repairs_once_or_stops_drift_without_review(tamper):
         before=deepcopy(provider._fulfillment_receipts)
         run()
         assert len(calls)==3 and provider._fulfillment_receipts==before
+
+
+@pytest.mark.parametrize('scale', ('small','medium','complex'))
+def test_initial_source_proofs_match_existing_owner_and_keep_future_gate(scale):
+    revision,ir,inventory,plan=controlled_capacity_case(scale)
+    before=deepcopy(inventory)
+    context=_owner_source_preconditions(revision,ir,inventory,fulfillment_capability_contracts())
+    for row in context['sources']:
+        for proof in row.get('necessary_source_proofs',[]):
+            capability=fulfillment_capability_contracts()[proof['capability']]['capability']
+            route=next((r for r in plan.routes if r.source_ref==row['source_ref'] and r.capability==capability),None)
+            if route is None:continue  # structural eligibility is NOT a semantic proposal
+            for indices in proof['minimal_support_sets']:
+                supported=route.model_copy(update={'supporting_source_refs':tuple(inventory['sources'][i]['source_ref'] for i in indices)})
+                binding=_projection_binding(revision,ir,inventory,supported,allow_calibrated=True)
+                assert binding.state=='BOUND_PENDING_EVIDENCE'
+                if capability=='HUMAN_INTEGRATION':assert binding.phase.value=='HUMAN_INTEGRATION'
+    assert inventory==before and 'NO_PERMISSION_OR_EVIDENCE_PASS' in context['meaning']
+
+
+@pytest.mark.parametrize('bad', ('missing','fact-instead-of-clause','affirmative','future','wrong-record'))
+def test_negative_fact_proofs_do_not_license_missing_or_ineligible_origin(bad):
+    from tests.test_c3_semantic_contract_calibration import negative_fact_plan
+    revision,ir,inventory,plan=negative_fact_plan()
+    source=next(s for s in inventory['sources'] if s['kind']=='FACT')
+    route=next(r for r in plan.routes if r.source_ref==source['source_ref'])
+    if bad=='missing':route=route.model_copy(update={'supporting_source_refs':()})
+    elif bad=='fact-instead-of-clause':route=route.model_copy(update={'supporting_source_refs':(source['source_ref'],)})
+    else:
+        changes={'affirmative':{'polarity':'AFFIRMATIVE'},'future':{'temporal_scope':'FUTURE'},
+            'wrong-record':{'source_record_id':revision.work_id}}
+        ir.clauses=(ir.clauses[0].model_copy(update=changes[bad]),)
+    with pytest.raises(ValueError,match='PERMISSION_REQUIRES_EXACT_CLAUSE'):
+        _projection_binding(revision,ir,inventory,route,allow_calibrated=True)
+    context=_owner_source_preconditions(revision,ir,inventory,fulfillment_capability_contracts())
+    row=next(r for r in context['sources'] if r['source_ref']==source['source_ref'])
+    deploy=next(i for i,c in enumerate(fulfillment_capability_contracts()) if c['capability']=='DENY_DEPLOY')
+    proofs=[p for p in row.get('necessary_source_proofs',[]) if p['capability']==deploy]
+    assert bool(proofs)==(bad in ('missing','fact-instead-of-clause'))
+
+
+@pytest.mark.parametrize('tamper', ('contents','remove-one','remove-both'))
+def test_initial_preconditions_are_bound_to_wire_attempt_and_replay(tamper):
+    from tests.test_c3_fulfillment_capacity_representation import controlled_model_provider
+    revision,ir,inventory,plan=controlled_capacity_case()
+    provider,calls=controlled_model_provider(inventory,plan)
+    original=provider.form
+    class Checkpoint(BaseException):pass
+    def interrupted(*args,receipt_callback=None,**kwargs):
+        def observed(**values):
+            receipt_callback(**values)
+            raise Checkpoint()
+        return original(*args,receipt_callback=observed,**kwargs)
+    provider.form=interrupted
+    def run():return form_fulfillment_projection(revision,ir,provider=provider,
+        source_revision=inventory['source_revision'],exact_target_paths=inventory['exact_target_paths'])
+    with pytest.raises(Checkpoint):run()
+    assert calls[0]['owner_source_preconditions']['inventory_fingerprint']==inventory['inventory_fingerprint']
+    for row in provider._fulfillment_receipts:
+        if row['stage'] not in ('MODEL_REQUEST_PENDING','MODEL_RESPONSE_OBSERVED'):continue
+        if tamper=='contents':row['owner_source_preconditions']['sources'][0]['source']=999
+        elif tamper=='remove-both' or row['stage']=='MODEL_RESPONSE_OBSERVED':row.pop('owner_source_preconditions')
+    result=run()
+    assert len(calls)==1 and all(b.state=='UNRESOLVED' for b in result)
+    assert result[0].formation_receipt['terminal_reason']=='OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'

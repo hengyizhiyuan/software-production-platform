@@ -129,8 +129,8 @@ def test_actual_compact_observation_replays_from_postgresql_without_repeating_fo
             output = declared.review(inventory, plan).model_dump_json()
         else:
             plan = declared.form(inventory, payload["existing_capability_contracts"],
-                validation_feedback=payload.get("same_basis_validation_feedback"))
-            wire, _ = controlled_wire(inventory, plan, feedback=payload.get("same_basis_validation_feedback"))
+                validation_feedback=payload.get("same_basis_validation_feedback"), owner_preconditions=payload.get("owner_source_preconditions"))
+            wire, _ = controlled_wire(inventory, plan, feedback=payload.get("same_basis_validation_feedback"), owner_preconditions=payload.get("owner_source_preconditions"))
             output = json.dumps(wire, ensure_ascii=False)
         return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
             requested_model="controlled-pg-no-network", effective_model="controlled-pg-no-network",
@@ -199,7 +199,7 @@ def test_actual_compact_observation_replays_from_postgresql_without_repeating_fo
     record_property("receipt_ids", json.dumps([row.scope["receipt_id"] for row in rows]))
 
 
-@pytest.mark.parametrize('tamper', (None, 'feedback', 'response-receipt', 'scope-inventory', 'owner-precondition'))
+@pytest.mark.parametrize('tamper', (None, 'feedback', 'response-receipt', 'scope-inventory', 'owner-precondition', 'initial-prerequisite'))
 @pytest.mark.parametrize('failure_kind', ('predecode', 'canonical'))
 def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
     postgres_database, tmp_path, monkeypatch, record_property, tamper, failure_kind,
@@ -233,7 +233,7 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
             output = result.model_dump_json()
         else:
             plan = declared.form(inventory, payload['existing_capability_contracts'])
-            wire, _ = controlled_wire(inventory, plan, feedback=payload.get('same_basis_validation_feedback'))
+            wire, _ = controlled_wire(inventory, plan, feedback=payload.get('same_basis_validation_feedback'), owner_preconditions=payload.get('owner_source_preconditions'))
             if len(calls) == 1:
                 if failure_kind == 'canonical':
                     wire['routes'].append(deepcopy(wire['routes'][0]))
@@ -289,6 +289,11 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
                 changed = json.loads(scope['validation_feedback'])
                 changed['owner_repair_context']['source_preconditions'][0]['primary_component_required'] = False
                 scope['validation_feedback'] = json.dumps(changed)
+            elif tamper == 'initial-prerequisite':
+                for original in records[:2]:
+                    changed=deepcopy(original.scope)
+                    changed['owner_source_preconditions']['sources'][0]['source']=999
+                    uow.session.execute(update(governance_records).where(governance_records.c.id == original.id).values(scope=changed))
             else:
                 changed = json.loads(scope['validation_feedback'])
                 changed['repair_feedback_binding']['response_receipt_id'] = str(work_id)

@@ -39,7 +39,7 @@ def provider_for_case(inventory, plan, *, checkpoint=None, repeat=False):
             restored = FulfillmentProjectionCandidate.model_validate(payload['untrusted_fulfillment_candidate'])
             output = review(inventory, restored).model_dump_json()
         else:
-            wire, _ = controlled_wire(inventory, plan, feedback=payload.get('same_basis_validation_feedback'))
+            wire, _ = controlled_wire(inventory, plan, feedback=payload.get('same_basis_validation_feedback'), owner_preconditions=payload.get('owner_source_preconditions'))
             if len(calls) == 1 or repeat:
                 invalid_references(wire, inventory)
             output = json.dumps(wire, ensure_ascii=False)

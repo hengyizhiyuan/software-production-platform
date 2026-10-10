@@ -112,7 +112,9 @@ def test_terminal_failure_preserves_exact_sources_and_same_basis_never_reopens_c
     runtimes = [failure_runtime]
     if phase == "SEMANTIC_REVIEW":
         from tests.test_c3_fulfillment_capacity_representation import controlled_wire
-        wire, _context = controlled_wire(inventory, plan)
+        from spg.application.governed_obligations import _owner_source_preconditions, fulfillment_capability_contracts
+        wire, _context = controlled_wire(inventory, plan, owner_preconditions=
+            _owner_source_preconditions(revision, ir, inventory, fulfillment_capability_contracts()))
         formation_runtime = ControlledRuntime(StructuredModelResult(output_text=json.dumps(wire),
             provider=ModelProvider.DEEPSEEK, requested_model="controlled", effective_model="controlled",
             request_id="request-controlled-formation", usage=ModelUsage(total_tokens=17),
