@@ -1,0 +1,489 @@
+{
+  "schema": "c3-option-a-bounded-live-v1",
+  "started_at_utc": "2026-10-10T02:35:00.568565+00:00",
+  "application_source": "a91442c21ed487b10d8dc38023b0807787a29648",
+  "application_tree": "80778b67a7147902d10e9f14d669150e6df6d809",
+  "guardian_source": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+  "ecf_source": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "authorization": "Human C3 Option A bounded live approval, 2026-10-10",
+  "logical_calls": 2,
+  "calls": [
+    {
+      "operation": "formation",
+      "formation_attempt": 1,
+      "started_at_utc": "2026-10-10T02:35:00.698023+00:00",
+      "stages": [
+        {
+          "stage": "provider_request_queued",
+          "at_utc": "2026-10-10T02:35:00.707608+00:00"
+        },
+        {
+          "stage": "provider_request_sent",
+          "at_utc": "2026-10-10T02:35:00.708669+00:00"
+        },
+        {
+          "stage": "provider_response_accepted",
+          "at_utc": "2026-10-10T02:35:01.055321+00:00"
+        },
+        {
+          "stage": "provider_first_response_event",
+          "at_utc": "2026-10-10T02:35:01.057327+00:00"
+        },
+        {
+          "stage": "provider_first_token",
+          "at_utc": "2026-10-10T02:35:01.736159+00:00"
+        }
+      ],
+      "http_requests": [
+        {
+          "at_utc": "2026-10-10T02:35:00.710679+00:00",
+          "bytes": 55129,
+          "sha256": "377701ea56eec3c497815a39db65bf247814b6b7c9fa2a0769d3539e56d4bad5"
+        }
+      ],
+      "http_responses": [
+        {
+          "at_utc": "2026-10-10T02:35:01.054339+00:00",
+          "status_code": 200,
+          "request_id": null
+        }
+      ],
+      "terminal_events": [
+        {
+          "at_utc": "2026-10-10T02:35:09.834400+00:00",
+          "event": "response.completed",
+          "status": "completed",
+          "response_id": "299cd390-9f47-41af-b27f-1bcded4d6c06",
+          "actual_usage_numeric_fields": {
+            "input_tokens": 17588,
+            "input_tokens_details": {
+              "cached_tokens": 0
+            },
+            "output_tokens": 2758,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 20346
+          },
+          "termination_reason": null
+        }
+      ],
+      "usage": {
+        "input_tokens": 17588,
+        "output_tokens": 2758,
+        "cached_tokens": 0,
+        "reasoning_tokens": 0,
+        "total_tokens": 20346,
+        "unknown": false
+      },
+      "provider_status": "completed",
+      "feedback": null,
+      "request_entity": {
+        "bytes": 55129,
+        "sha256": "377701ea56eec3c497815a39db65bf247814b6b7c9fa2a0769d3539e56d4bad5"
+      },
+      "provider_status_source": "Frozen Runtime validates actual completed terminal",
+      "request_id": "299cd390-9f47-41af-b27f-1bcded4d6c06",
+      "timing": {
+        "request_sent_seconds": 0.001309509971179068,
+        "first_response_event_seconds": 0.3499765419983305,
+        "first_token_seconds": 1.0287979759741575,
+        "completed_seconds": 9.12883448600769
+      },
+      "transport_retry_count": 0,
+      "effective_model": "deepseek-flash",
+      "output_bytes": 8852,
+      "output_sha256": "c60c7f4d1060017a8ddbdd289105350bbfa4aefca0a94f3845d9cc496d83267b",
+      "output_observation": {
+        "candidate_output_sha256": "c60c7f4d1060017a8ddbdd289105350bbfa4aefca0a94f3845d9cc496d83267b",
+        "candidate_output_bytes": 8852,
+        "candidate_retained": true,
+        "model": {
+          "request_id": "299cd390-9f47-41af-b27f-1bcded4d6c06",
+          "provider": "deepseek",
+          "requested_model": "deepseek-flash",
+          "effective_model": "deepseek-flash",
+          "usage": {
+            "input_tokens": 17588,
+            "output_tokens": 2758,
+            "cached_tokens": 0,
+            "reasoning_tokens": 0,
+            "total_tokens": 20346,
+            "unknown": false
+          },
+          "timing": {
+            "request_sent_seconds": 0.001309509971179068,
+            "first_response_event_seconds": 0.3499765419983305,
+            "first_token_seconds": 1.0287979759741575,
+            "completed_seconds": 9.12883448600769
+          },
+          "transport_retry_count": 0,
+          "output_sha256": "c60c7f4d1060017a8ddbdd289105350bbfa4aefca0a94f3845d9cc496d83267b",
+          "output_bytes": 8852
+        },
+        "provider_wire_version": "fulfillment-compact-v1",
+        "wire_request_fingerprint": "4b995573e01820631e063d0108388140be8576c3ac385a38da88d8ee87ea62d4",
+        "wire_table_fingerprint": "cddd1ffc3429695d19411d42c5d6b741534460496705dbb0a430ff138df9e429",
+        "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40"
+      },
+      "provider_or_output_exception_type": "ValueError",
+      "ended_at_utc": "2026-10-10T02:35:09.846106+00:00",
+      "wall_seconds": 9.147083193005528
+    },
+    {
+      "operation": "formation",
+      "formation_attempt": 2,
+      "started_at_utc": "2026-10-10T02:35:09.859566+00:00",
+      "stages": [
+        {
+          "stage": "provider_request_queued",
+          "at_utc": "2026-10-10T02:35:09.873157+00:00"
+        },
+        {
+          "stage": "provider_request_sent",
+          "at_utc": "2026-10-10T02:35:09.874964+00:00"
+        },
+        {
+          "stage": "provider_response_accepted",
+          "at_utc": "2026-10-10T02:35:10.155487+00:00"
+        },
+        {
+          "stage": "provider_first_response_event",
+          "at_utc": "2026-10-10T02:35:10.158698+00:00"
+        },
+        {
+          "stage": "provider_first_token",
+          "at_utc": "2026-10-10T02:35:10.751930+00:00"
+        }
+      ],
+      "http_requests": [
+        {
+          "at_utc": "2026-10-10T02:35:09.880827+00:00",
+          "bytes": 55532,
+          "sha256": "6eade4f0beacedec3b45b411d280bac7e3ef985d5a365dc2da1847ed57788b54"
+        }
+      ],
+      "http_responses": [
+        {
+          "at_utc": "2026-10-10T02:35:10.153450+00:00",
+          "status_code": 200,
+          "request_id": null
+        }
+      ],
+      "terminal_events": [
+        {
+          "at_utc": "2026-10-10T02:35:16.660107+00:00",
+          "event": "response.completed",
+          "status": "completed",
+          "response_id": "0b45eaa3-9f96-42e6-8a23-b6f2d2ab72e4",
+          "actual_usage_numeric_fields": {
+            "input_tokens": 17718,
+            "input_tokens_details": {
+              "cached_tokens": 14336
+            },
+            "output_tokens": 1883,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 19601
+          },
+          "termination_reason": null
+        }
+      ],
+      "usage": {
+        "input_tokens": 17718,
+        "output_tokens": 1883,
+        "cached_tokens": 14336,
+        "reasoning_tokens": 0,
+        "total_tokens": 19601,
+        "unknown": false
+      },
+      "provider_status": "completed",
+      "feedback": {
+        "schema": "fulfillment-validation-feedback-v2",
+        "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+        "primary_error": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+        "violations": [],
+        "additional_violation_count": 0,
+        "not_evaluable": [
+          "INDEPENDENT_SEMANTIC_REVIEW",
+          "ACTUAL_OWNER_EVIDENCE",
+          "ASSURANCE"
+        ]
+      },
+      "request_entity": {
+        "bytes": 55532,
+        "sha256": "6eade4f0beacedec3b45b411d280bac7e3ef985d5a365dc2da1847ed57788b54"
+      },
+      "provider_status_source": "Frozen Runtime validates actual completed terminal",
+      "request_id": "0b45eaa3-9f96-42e6-8a23-b6f2d2ab72e4",
+      "timing": {
+        "request_sent_seconds": 0.0020033579785376787,
+        "first_response_event_seconds": 0.28573645796859637,
+        "first_token_seconds": 0.87897272198461,
+        "completed_seconds": 6.790194633998908
+      },
+      "transport_retry_count": 0,
+      "effective_model": "deepseek-flash",
+      "output_bytes": 5794,
+      "output_sha256": "98b70541f2b10f3f00a04ba797d0e393781a4143ecac0af109c4d31f437132df",
+      "output_observation": {
+        "candidate_output_sha256": "98b70541f2b10f3f00a04ba797d0e393781a4143ecac0af109c4d31f437132df",
+        "candidate_output_bytes": 5794,
+        "candidate_retained": true,
+        "model": {
+          "request_id": "0b45eaa3-9f96-42e6-8a23-b6f2d2ab72e4",
+          "provider": "deepseek",
+          "requested_model": "deepseek-flash",
+          "effective_model": "deepseek-flash",
+          "usage": {
+            "input_tokens": 17718,
+            "output_tokens": 1883,
+            "cached_tokens": 14336,
+            "reasoning_tokens": 0,
+            "total_tokens": 19601,
+            "unknown": false
+          },
+          "timing": {
+            "request_sent_seconds": 0.0020033579785376787,
+            "first_response_event_seconds": 0.28573645796859637,
+            "first_token_seconds": 0.87897272198461,
+            "completed_seconds": 6.790194633998908
+          },
+          "transport_retry_count": 0,
+          "output_sha256": "98b70541f2b10f3f00a04ba797d0e393781a4143ecac0af109c4d31f437132df",
+          "output_bytes": 5794
+        },
+        "provider_wire_version": "fulfillment-compact-v1",
+        "wire_request_fingerprint": "1fa3cfae082bc36921b271fdd6388e390b966ae4b6965a3e3cbb824bb92ad279",
+        "wire_table_fingerprint": "cddd1ffc3429695d19411d42c5d6b741534460496705dbb0a430ff138df9e429",
+        "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40"
+      },
+      "provider_or_output_exception_type": "ValueError",
+      "ended_at_utc": "2026-10-10T02:35:16.680100+00:00",
+      "wall_seconds": 6.818657964991871
+    }
+  ],
+  "formation_attempts": [],
+  "owner_observations": [
+    {
+      "receipt_id": "6a4d8566-278f-4cff-b664-1c0f5dd59e59",
+      "stage": "MODEL_REQUEST_PENDING",
+      "attempt": 1,
+      "work_id": "048189aa-0613-5307-b6f4-c430e7977f93",
+      "work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+      "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+      "source_revision": "465038ded6cf4ba335a11577de76acb1dea55b76",
+      "recorded_at_utc": "2026-10-10T02:35:00.694183+00:00",
+      "budget_limit": 2
+    },
+    {
+      "receipt_id": "0b225a13-29df-4068-aca7-25aa56323a33",
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "attempt": 1,
+      "work_id": "048189aa-0613-5307-b6f4-c430e7977f93",
+      "work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+      "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+      "source_revision": "465038ded6cf4ba335a11577de76acb1dea55b76",
+      "recorded_at_utc": "2026-10-10T02:35:09.840336+00:00",
+      "budget_limit": 2
+    },
+    {
+      "receipt_id": "d1d48aae-5c34-413d-9fe4-4f99b1b54a11",
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 1,
+      "work_id": "048189aa-0613-5307-b6f4-c430e7977f93",
+      "work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+      "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+      "source_revision": "465038ded6cf4ba335a11577de76acb1dea55b76",
+      "recorded_at_utc": "2026-10-10T02:35:09.847479+00:00",
+      "budget_limit": 2,
+      "failed_predicate": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+      "validation_passed": false,
+      "terminal": false,
+      "terminal_reason": null,
+      "validation_feedback": {
+        "schema": "fulfillment-validation-feedback-v2",
+        "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+        "primary_error": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+        "violations": [],
+        "additional_violation_count": 0,
+        "not_evaluable": [
+          "INDEPENDENT_SEMANTIC_REVIEW",
+          "ACTUAL_OWNER_EVIDENCE",
+          "ASSURANCE"
+        ]
+      }
+    },
+    {
+      "receipt_id": "ea37df56-a342-448c-bd06-67b74e055a19",
+      "stage": "MODEL_REQUEST_PENDING",
+      "attempt": 2,
+      "work_id": "048189aa-0613-5307-b6f4-c430e7977f93",
+      "work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+      "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+      "source_revision": "465038ded6cf4ba335a11577de76acb1dea55b76",
+      "recorded_at_utc": "2026-10-10T02:35:09.854144+00:00",
+      "budget_limit": 2
+    },
+    {
+      "receipt_id": "f2165107-35a2-42de-bbd8-10803108fe17",
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "attempt": 2,
+      "work_id": "048189aa-0613-5307-b6f4-c430e7977f93",
+      "work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+      "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+      "source_revision": "465038ded6cf4ba335a11577de76acb1dea55b76",
+      "recorded_at_utc": "2026-10-10T02:35:16.670350+00:00",
+      "budget_limit": 2
+    },
+    {
+      "receipt_id": "b90673cc-d6f9-44c8-bdfc-9e8825a56c58",
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 2,
+      "work_id": "048189aa-0613-5307-b6f4-c430e7977f93",
+      "work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+      "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+      "source_revision": "465038ded6cf4ba335a11577de76acb1dea55b76",
+      "recorded_at_utc": "2026-10-10T02:35:16.682670+00:00",
+      "budget_limit": 2,
+      "failed_predicate": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+      "validation_passed": false,
+      "terminal": true,
+      "terminal_reason": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+      "validation_feedback": {
+        "schema": "fulfillment-validation-feedback-v2",
+        "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+        "primary_error": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+        "violations": [],
+        "additional_violation_count": 0,
+        "not_evaluable": [
+          "INDEPENDENT_SEMANTIC_REVIEW",
+          "ACTUAL_OWNER_EVIDENCE",
+          "ASSURANCE"
+        ]
+      }
+    }
+  ],
+  "new_work_created": false,
+  "business_database_access": false,
+  "historical_owner_mutated": false,
+  "holdout_opened": false,
+  "production_configuration_mutated": false,
+  "c3_status": "PARTIAL",
+  "formation_candidate_limit": 2,
+  "feedback_limit": 1,
+  "logical_call_limit": 4,
+  "transport_policy": "Frozen Runtime: at most one fresh connection replay only before any response event/output; no extra retry",
+  "qualification_boundary": "Derived fulfillment formation and independent semantic review only; no Work/Candidate seal, content Verification, Guardian Assurance or Human authority",
+  "private_artifacts": [
+    {
+      "name": "immutable-inventory.json",
+      "sha256": "2efad43b2f96bb8738667bffd6111e4aeee332fef611e968b0fa8330defad88f",
+      "bytes": 49181,
+      "public_content": false
+    },
+    {
+      "name": "capability-contracts.json",
+      "sha256": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+      "bytes": 2971,
+      "public_content": false
+    },
+    {
+      "name": "formation-1-safe-wire.txt",
+      "sha256": "c60c7f4d1060017a8ddbdd289105350bbfa4aefca0a94f3845d9cc496d83267b",
+      "bytes": 8852,
+      "public_content": false
+    },
+    {
+      "name": "formation-2-safe-wire.txt",
+      "sha256": "98b70541f2b10f3f00a04ba797d0e393781a4143ecac0af109c4d31f437132df",
+      "bytes": 5794,
+      "public_content": false
+    },
+    {
+      "name": "formation-owner-observations.json",
+      "sha256": "1b4086918812396a9c6e7727ab51af0efd44d94a53d988c4e6297ee9ae108a19",
+      "bytes": 26766,
+      "public_content": false
+    },
+    {
+      "name": "final-derived-projection.json",
+      "sha256": "dedb0aca6b303c90b5705bd96ec4bad03470f8c4d9e1d45ceb079f9d63e43d8f",
+      "bytes": 62173,
+      "public_content": false
+    }
+  ],
+  "result": "STOPPED",
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "source_count": 26,
+  "capability_count": 12,
+  "capabilities_fingerprint": "a2e695783b122373f0ed308a959fa4e3116c4a9df5454dbedd81695071153b17",
+  "basis_sha256": "9b013274f1a6daafc776297a302c52c8247cd2fd5ec9c5b99a83279fd2ee8e2c",
+  "installed_owner_hashes": {
+    "status": "PASS",
+    "counts": {
+      "spg": 278,
+      "guardian": 5,
+      "ecf": 5
+    },
+    "attestation_sha256": "d28d6924095851996f94b83e21545fd294b2bc9197fa5a9bae0492be4122060f"
+  },
+  "work_id": "048189aa-0613-5307-b6f4-c430e7977f93",
+  "work_reality_revision_id": "332a3a38-8719-580c-a1a2-c331ae14a5ae",
+  "profiles": {
+    "formation": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "reasoning_effort": "none",
+      "timeout_seconds": 120.0,
+      "max_output_tokens": 16384,
+      "base_url": "https://api.deepseek.com"
+    },
+    "semantic_review": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "reasoning_effort": "low",
+      "timeout_seconds": 120.0,
+      "max_output_tokens": 16384,
+      "base_url": "https://api.deepseek.com"
+    }
+  },
+  "preflight": "PASS_LOCAL_NO_HTTP",
+  "initial_wire_metadata": {
+    "provider_wire_version": "fulfillment-compact-v1",
+    "wire_request_fingerprint": "4b995573e01820631e063d0108388140be8576c3ac385a38da88d8ee87ea62d4",
+    "wire_table_fingerprint": "cddd1ffc3429695d19411d42c5d6b741534460496705dbb0a430ff138df9e429",
+    "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40"
+  },
+  "terminal_reason": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+  "binding_states": {
+    "UNRESOLVED": 26
+  },
+  "provider_call_count": 2,
+  "observed_model_call_count": 2,
+  "formation_attempt_count": 2,
+  "feedback_count": 1,
+  "immutable_basis_in_memory": true,
+  "ended_at_utc": "2026-10-10T02:35:16.709012+00:00",
+  "wall_seconds": 16.140484872972593,
+  "observed_terminal_usage_sum": {
+    "input_tokens": 35306,
+    "output_tokens": 4641,
+    "cached_tokens": 14336,
+    "reasoning_tokens": 0,
+    "total_tokens": 39947
+  },
+  "http_transmissions": 2,
+  "transport_recovery_stages": 0,
+  "visible_json_token_count": "UNKNOWN",
+  "monetary_cost": "UNKNOWN",
+  "runtime_or_assurance_pass": false,
+  "all_transmission_usage": {
+    "input_tokens": 35306,
+    "output_tokens": 4641,
+    "cached_tokens": 14336,
+    "reasoning_tokens": 0,
+    "total_tokens": 39947
+  }
+}

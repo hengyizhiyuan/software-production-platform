@@ -1,0 +1,38 @@
+{
+  "schema": "c3-option-a-diagnostic-authorization-v1",
+  "authority": "Human user instruction: C3 Option A real model bounded convergence validation",
+  "date": "2026-10-10",
+  "source": "a91442c21ed487b10d8dc38023b0807787a29648",
+  "guardian": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+  "ecf": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "image": "sha256:90f2cd847ad891fda6ca95b5736c84b680c9d58bd6a3203bf0ea31c970da0f16",
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "source_count": 26,
+  "capability_count": 12,
+  "formation": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "reasoning_effort": "none",
+    "timeout_seconds": 120.0,
+    "max_output_tokens": 16384,
+    "base_url": "https://api.deepseek.com"
+  },
+  "semantic_review": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "reasoning_effort": "low",
+    "timeout_seconds": 120.0,
+    "max_output_tokens": 16384,
+    "base_url": "https://api.deepseek.com"
+  },
+  "max_formation_candidates": 2,
+  "max_structured_feedback": 1,
+  "max_logical_calls": 4,
+  "transport_policy": "Frozen Runtime: at most one fresh connection replay only before any response event/output; no extra retry",
+  "integration_authorization": false,
+  "delivery_acceptance": false,
+  "new_work_authorization": false,
+  "holdout_authorization": false,
+  "production_mutation_authorization": false,
+  "executed_then_stopped": true
+}

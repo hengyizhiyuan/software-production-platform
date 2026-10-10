@@ -1,0 +1,2007 @@
+{
+  "schema": "c3-option-a-readonly-wire-diagnostics-v1",
+  "recorded_at_utc": "2026-10-10T02:38:24.737868+00:00",
+  "source": "a91442c21ed487b10d8dc38023b0807787a29648",
+  "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+  "capabilities_fingerprint": "a2e695783b122373f0ed308a959fa4e3116c4a9df5454dbedd81695071153b17",
+  "inputs_before": {
+    "immutable-inventory.json": "2efad43b2f96bb8738667bffd6111e4aeee332fef611e968b0fa8330defad88f",
+    "capability-contracts.json": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+    "formation-owner-observations.json": "1b4086918812396a9c6e7727ab51af0efd44d94a53d988c4e6297ee9ae108a19",
+    "formation-1-safe-wire.txt": "c60c7f4d1060017a8ddbdd289105350bbfa4aefca0a94f3845d9cc496d83267b",
+    "formation-2-safe-wire.txt": "98b70541f2b10f3f00a04ba797d0e393781a4143ecac0af109c4d31f437132df"
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "raw_response_sha256": "c60c7f4d1060017a8ddbdd289105350bbfa4aefca0a94f3845d9cc496d83267b",
+      "wire_schema": "PASS",
+      "request_fingerprint_match": true,
+      "table_fingerprint_match": true,
+      "route_count": 37,
+      "routes": [
+        {
+          "route": 0,
+          "source_ordinal": 0,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "da515b08425a019c01132b30e7efe0a23bf80b9fd23c7a3fd5395c459538c1ab",
+          "span": [
+            0,
+            48
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:db105ff8-4eb8-5d2d-b46a-a67ae008766d",
+          "source_kind": "FACT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "a24b1d48dd8fae804d8b7bf4e25740bf79c8716ebefc7201050f42b27e1296db",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "f1a76734f3239a573c3facdd7f88d960a01d8eeb48e303cf9aed7897f3c95852",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 1,
+          "source_ordinal": 1,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "65a62df4200d992f0aef5cb9ab8359dcb62891f82db75396b1dedd0a1a796401",
+          "span": [
+            0,
+            55
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:a1b3a5fe-dec1-5f72-a806-5f66955bdb58",
+          "source_kind": "FACT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "5be6714bf14eea3261e40966c1d1a4039f752f3f376e0320166e32266011c8c4",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "0e951f21d94bf9b18032b7f0f5a21896c5936c5eb2d897a380cfae4d8c1ff027",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 2,
+          "source_ordinal": 2,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "38fb0ca0bd6b7981425217d8961408c37dc5e8137ed545e3570dd920fd25d468",
+          "span": [
+            0,
+            48
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:55eeaeb7-4b78-5269-ace0-af79de21770e",
+          "source_kind": "FACT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "9499d59538a154249d74cf83f71eedb58e1b98a4f88a9f74cd7b92dbe9e117bf",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "b49a9c3a88f93a77fe73898afbfd160df79488579f018b0824d8ee05fd6ff2cf",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 3,
+          "source_ordinal": 2,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "8fb6f3ff444ad52c3940393bf62914474e1b783456d8f9659f502da407a0f545",
+          "span": [
+            0,
+            48
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:55eeaeb7-4b78-5269-ace0-af79de21770e",
+          "source_kind": "FACT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "9499d59538a154249d74cf83f71eedb58e1b98a4f88a9f74cd7b92dbe9e117bf",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "b49a9c3a88f93a77fe73898afbfd160df79488579f018b0824d8ee05fd6ff2cf",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 4,
+          "source_ordinal": 3,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "9a7481aef3f2ae3c8c66a56b42e3334a53766529627602c5b2c3cccf1f0391cc",
+          "span": [
+            0,
+            26
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:ebcfeb68-75c8-5c8e-8a5c-37fbb3d471ba",
+          "source_kind": "FACT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "34da954957f63d650152a43706d27ed781f8c21b024606451681fadc7a52a81b",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "4b5cc762f0dd94278cfc113608e96213e4b6bcf4ed51d48331bcd1d6418c59b3",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 5,
+          "source_ordinal": 4,
+          "capability_ordinal": 4,
+          "raw_wire_route_fingerprint": "70d2fec26a40059754148478e3c74042252a2d06c20c366e52e0aada3045dd78",
+          "span": [
+            0,
+            54
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:714a86db-354c-508d-aa51-91a978ca1be3",
+          "source_kind": "FACT",
+          "capability": "DENY_DEPLOY",
+          "quote_sha256": "f1901b6c4ff6a5096108c39077aea5d20c1d49758d10b1717c4feb54440aab12",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "d341c0d697fdb80e4b2f19bbb79d295a85ee31d0b49d8dd7c07277e6ba2a2f03",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 6,
+          "source_ordinal": 4,
+          "capability_ordinal": 5,
+          "raw_wire_route_fingerprint": "d2d9c8f0e9a03dac815afaad1d94b1a4d912a70250b70f04aab673657916c9cf",
+          "span": [
+            0,
+            54
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:714a86db-354c-508d-aa51-91a978ca1be3",
+          "source_kind": "FACT",
+          "capability": "DENY_PUBLISH",
+          "quote_sha256": "f1901b6c4ff6a5096108c39077aea5d20c1d49758d10b1717c4feb54440aab12",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "d341c0d697fdb80e4b2f19bbb79d295a85ee31d0b49d8dd7c07277e6ba2a2f03",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 7,
+          "source_ordinal": 4,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "0325043651371dff31643b67a1b33d81406a1bf2f2558c2332f4cb7497255999",
+          "span": [
+            0,
+            54
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:714a86db-354c-508d-aa51-91a978ca1be3",
+          "source_kind": "FACT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "f1901b6c4ff6a5096108c39077aea5d20c1d49758d10b1717c4feb54440aab12",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "d341c0d697fdb80e4b2f19bbb79d295a85ee31d0b49d8dd7c07277e6ba2a2f03",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 8,
+          "source_ordinal": 5,
+          "capability_ordinal": 7,
+          "raw_wire_route_fingerprint": "beb0b28cee593cc9d4e25fff57e7526b679a0322155a6c65411e1ca8a7776f79",
+          "span": [
+            0,
+            72
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:d5fb1b5b-bc33-5aef-ad06-78b5599d1fcc",
+          "source_kind": "FACT",
+          "capability": "HUMAN_INTEGRATION",
+          "quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "1a9909418b67f4182f1b8a4a4a67d8a6ed77cf1ebb9892a5f5cb295bf01aa8fa",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 9,
+          "source_ordinal": 5,
+          "capability_ordinal": 6,
+          "raw_wire_route_fingerprint": "5aba37ed67506af66989f907da98db0237f5dee663c0f108ab10fcd162153fad",
+          "span": [
+            0,
+            72
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:d5fb1b5b-bc33-5aef-ad06-78b5599d1fcc",
+          "source_kind": "FACT",
+          "capability": "CANDIDATE_SEAL",
+          "quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "1a9909418b67f4182f1b8a4a4a67d8a6ed77cf1ebb9892a5f5cb295bf01aa8fa",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 10,
+          "source_ordinal": 5,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "8133a6a67bcd30c4006c2355c57d2f9154b4618ccc7ebde3b7381d3352bcba32",
+          "span": [
+            0,
+            72
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:d5fb1b5b-bc33-5aef-ad06-78b5599d1fcc",
+          "source_kind": "FACT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "1a9909418b67f4182f1b8a4a4a67d8a6ed77cf1ebb9892a5f5cb295bf01aa8fa",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 11,
+          "source_ordinal": 6,
+          "capability_ordinal": 10,
+          "raw_wire_route_fingerprint": "81758164779381b7210267243f34666bfabc46e92b15ab64ddb7b9f85c0a9cfd",
+          "span": [
+            0,
+            49
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c1",
+          "source_kind": "IR_CLAUSE",
+          "capability": "RETAIN_CONTEXT",
+          "quote_sha256": "c01616d2fa1687d3f2dbde62f78b2d07c72c8f63034431eb8b263f2cd82e53b1",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "77df12c5e7d60cb8fce11c3d4f6a0249147b04b7cf186491d463590575d47e41",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 12,
+          "source_ordinal": 7,
+          "capability_ordinal": 2,
+          "raw_wire_route_fingerprint": "ce9d4f6ab3e1db7310b2c512dcad37c04f7dff0ba0a0617f5a1486f2c308652e",
+          "span": [
+            0,
+            91
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+          "source_kind": "IR_CLAUSE",
+          "capability": "PRODUCT_SOURCE_IDENTITY",
+          "quote_sha256": "9268cc964f6cb6011eb23204032873bdfbfff04e950cfda4f190d57a1cae73aa",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "f5c46458f0103327d4d4b026afa590b713aac839a64fa1154b59a04bbc4d3fe0",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 13,
+          "source_ordinal": 7,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "388422b90358b580698551a645ea233dc19d69ca991715d9741d2c03a3ee6cda",
+          "span": [
+            0,
+            91
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+          "source_kind": "IR_CLAUSE",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "9268cc964f6cb6011eb23204032873bdfbfff04e950cfda4f190d57a1cae73aa",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "f5c46458f0103327d4d4b026afa590b713aac839a64fa1154b59a04bbc4d3fe0",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 14,
+          "source_ordinal": 8,
+          "capability_ordinal": 10,
+          "raw_wire_route_fingerprint": "8d651e1910dbd5cf6bc9c53180b6e62fe9f2245c9ec9c7309ee13a95390bfc50",
+          "span": [
+            0,
+            48
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c3",
+          "source_kind": "IR_CLAUSE",
+          "capability": "RETAIN_CONTEXT",
+          "quote_sha256": "763311981a479580e9d52e736ecffbec46cfc41a94a3564badab89c5fa354e60",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "76f379115f96bd8109906531a6c3635ddc4067bfb1774e267641cbf5b8ea218e",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 15,
+          "source_ordinal": 9,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "67e3b27cba5f4191ac1df47cb4d6c2057cd00bb4efabaacf318e5b762befc6c2",
+          "span": [
+            0,
+            132
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "ir-constraint:page_content_spec:c4",
+          "source_kind": "IR_CONSTRAINT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "2db92731070cd5047cf36798c56a388d455a37eaee1a380241cf0f837d461d07",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 16,
+          "source_ordinal": 10,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "c8f645cd99116249c7c5b8b0bcb83a51b74c89bbaccc2362699d00b2af069d38",
+          "span": [
+            0,
+            132
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4",
+          "source_kind": "IR_CLAUSE",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "ab7d524a4096bcd074462ab00a5a67a1c0f6af4b1137c0d061608ab853ab4649",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 17,
+          "source_ordinal": 11,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "741afa4d09b25cbb6fabac485d0db44fa658bdb083ba94e6cb7e42618bf5d865",
+          "span": [
+            0,
+            27
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "ir-constraint:change_scope_exclusions:c5",
+          "source_kind": "IR_CONSTRAINT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "34269edbaf873aa2ce6c8c5acd4ba1662d9a6755895f13f9f4ef817e0dd106c5",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 18,
+          "source_ordinal": 12,
+          "capability_ordinal": 6,
+          "raw_wire_route_fingerprint": "2162abd67142161d77eaf39dba203aea22efc03f6c3da8cf58bd253496890e2a",
+          "span": [
+            0,
+            72
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "ir-constraint:verification_and_candidate:c6",
+          "source_kind": "IR_CONSTRAINT",
+          "capability": "CANDIDATE_SEAL",
+          "quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "70d25c53fd344ddc791d7891467d861cf12df750121012168e281b4d03b2a635",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 19,
+          "source_ordinal": 12,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "1cd50e59b305cb8ffda7ad56bd990ae84c264c78d0cfae9018a929036077a16b",
+          "span": [
+            0,
+            72
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "ir-constraint:verification_and_candidate:c6",
+          "source_kind": "IR_CONSTRAINT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "70d25c53fd344ddc791d7891467d861cf12df750121012168e281b4d03b2a635",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 20,
+          "source_ordinal": 13,
+          "capability_ordinal": 4,
+          "raw_wire_route_fingerprint": "47587d3885150f74b8af3e3862caa96060481da6637a72832656a84b9442abda",
+          "span": [
+            0,
+            55
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "ir-constraint:change_scope_exclusions:c7",
+          "source_kind": "IR_CONSTRAINT",
+          "capability": "DENY_DEPLOY",
+          "quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "a4c0699998ee345743fea23496d1f69aa9495cb408b981ebf31a3be4639a9c99",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 21,
+          "source_ordinal": 13,
+          "capability_ordinal": 5,
+          "raw_wire_route_fingerprint": "690a57340cae60c6ca98e1290b8aacbcbcf08cf5b481624af33e21033a42e58f",
+          "span": [
+            0,
+            55
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "ir-constraint:change_scope_exclusions:c7",
+          "source_kind": "IR_CONSTRAINT",
+          "capability": "DENY_PUBLISH",
+          "quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "a4c0699998ee345743fea23496d1f69aa9495cb408b981ebf31a3be4639a9c99",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 22,
+          "source_ordinal": 13,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "d6fa63be7e7bf0b93ff32758b1e9686a97d8e114625b63bb265cceebb4e9b6f6",
+          "span": [
+            0,
+            55
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "ir-constraint:change_scope_exclusions:c7",
+          "source_kind": "IR_CONSTRAINT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "a4c0699998ee345743fea23496d1f69aa9495cb408b981ebf31a3be4639a9c99",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 23,
+          "source_ordinal": 14,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "9d657262952cb5f2aac1d7c8ef87ee3b0ea4a0f26de689e131454dd54622e234",
+          "span": [
+            0,
+            118
+          ],
+          "fact_ordinals": [
+            3,
+            4
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "2a93a703143070e96fc0283568638cab2e4f0578ffaeaa6e5f402f1b57bd7a2d",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "c55965f3dacf427392e09bdd8767c837cdb1c401400897417a685eda8d40b84d",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 24,
+          "source_ordinal": 15,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "772ca6cc2affec8df233a57d478d3d746441880e0d2c40a0e178a5e7c621f161",
+          "span": [
+            0,
+            150
+          ],
+          "fact_ordinals": [
+            0,
+            1
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:1",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "25cda18c05430072bd03de90f709ccbcd7ed442e13e2a0016eec0fc01376f11e",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "8934ba9b692e2f40bcab662f9269bf22dc83d0aacec6d748fb85cb10b81e75a1",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 25,
+          "source_ordinal": 16,
+          "capability_ordinal": 6,
+          "raw_wire_route_fingerprint": "5961528d9a1537d535ace285f6d7cf1cb236bb928af6623ea69e266345c6e406",
+          "span": [
+            0,
+            105
+          ],
+          "fact_ordinals": [
+            5
+          ],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:2",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "CANDIDATE_SEAL",
+          "quote_sha256": "0208047eed9c2a50373c9b2a7385f09db576d3fe9b004857318afb27d987b2d6",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "43ed3d7cb4f1ed498e4386fabed62395cc6475b8800fbc6bc765374e8ff859ae",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 26,
+          "source_ordinal": 16,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "a3d26c155ca15ef06fde80c2041a5d4b42557145fa66bb98bc02be2f4baed9d9",
+          "span": [
+            0,
+            105
+          ],
+          "fact_ordinals": [
+            5
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:2",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "0208047eed9c2a50373c9b2a7385f09db576d3fe9b004857318afb27d987b2d6",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "43ed3d7cb4f1ed498e4386fabed62395cc6475b8800fbc6bc765374e8ff859ae",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 27,
+          "source_ordinal": 17,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "602c8b2f11e611cac360d1619fe4557c82f683c728e92bca8c93ca331565f8a2",
+          "span": [
+            0,
+            36
+          ],
+          "fact_ordinals": [
+            2
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:3",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "4c8f9cc2526ec0774a0c506e438015f2b5497a6dddd8555a8c190799817249fc",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "cdb131200726ef9f876f41e73e4ba1860a05db09dcd680503859f4aed89b6967",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 28,
+          "source_ordinal": 17,
+          "capability_ordinal": 2,
+          "raw_wire_route_fingerprint": "5e5874573e1998f561055f1ae9017bd9278b226f3acebe1cdf9948c0c47e5d78",
+          "span": [
+            0,
+            36
+          ],
+          "fact_ordinals": [
+            2
+          ],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:3",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "PRODUCT_SOURCE_IDENTITY",
+          "quote_sha256": "4c8f9cc2526ec0774a0c506e438015f2b5497a6dddd8555a8c190799817249fc",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "cdb131200726ef9f876f41e73e4ba1860a05db09dcd680503859f4aed89b6967",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 29,
+          "source_ordinal": 18,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "8d819ba6688837b103f8cd9255addcbefa0a6cc7cdd35864253110fd6648a118",
+          "span": [
+            0,
+            55
+          ],
+          "fact_ordinals": [
+            0,
+            1
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:4",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "3dd9700096bcb0a76177c2c46dafbaec7d6488e34affa439ed83c3cef45690d8",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "7cd856624c30364729aeeb128f8deded2f922a7ab94e341ac5207f31f7cfd431",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 30,
+          "source_ordinal": 19,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "55f5cfd4602d23974ebe34860c9229d9a342930c826460307fe1e64f63d77ff8",
+          "span": [
+            0,
+            52
+          ],
+          "fact_ordinals": [
+            5
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:5",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "64a9ece99667f4965fb3e20c787256f7fa050a6f769496e7519389f03eedfb0d",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "83b47a660daa8038fa69392f57f005c3f7d8823d87f9296aff391a0986f81c9a",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 31,
+          "source_ordinal": 20,
+          "capability_ordinal": 6,
+          "raw_wire_route_fingerprint": "bc4528a8c2f0618a8e15e25d01ebde40ec64afa7bf11af1ab6f3745fb76de28d",
+          "span": [
+            0,
+            28
+          ],
+          "fact_ordinals": [
+            5
+          ],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:6",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "CANDIDATE_SEAL",
+          "quote_sha256": "68850b39fce33f0f7eae04aa6915746e229d512ac008b9ca47422aeb27a00d3a",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "bb4242839d88bb2eb38ea0be6d2360753037c48bf4541bcba414c1b44fd1ac02",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 32,
+          "source_ordinal": 21,
+          "capability_ordinal": 4,
+          "raw_wire_route_fingerprint": "eea7fc7b3d19ddad6271d8da399db369c9a5e63d314b6571eb51aaacc0c79f92",
+          "span": [
+            0,
+            31
+          ],
+          "fact_ordinals": [
+            4
+          ],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:7",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "DENY_DEPLOY",
+          "quote_sha256": "8942f115f1bc6bf65051d307ede98fb645a4837849ed2259d1d3a9fc71a01727",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "2e83696a8715c79f02818f5ea49a174057ed179a0f590804b2e130779f00496a",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 33,
+          "source_ordinal": 22,
+          "capability_ordinal": 5,
+          "raw_wire_route_fingerprint": "1062383a0805aa50e75f3e041ee1d1e1ce8421b7fe486bc36668d3f0fd689390",
+          "span": [
+            0,
+            32
+          ],
+          "fact_ordinals": [
+            4
+          ],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:8",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "DENY_PUBLISH",
+          "quote_sha256": "6208a9265a8563fbb4f6c90881e8d28bd17e6e7b35eb119d05e019163428e3cc",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "488784ec9cea27d096b21ef7a897f95ca58821f1c451c2b65ba927cc34bf5bc9",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 34,
+          "source_ordinal": 23,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "40131d591016135b59c69eca7ce04cc076c676bed266865284c0224aa3200474",
+          "span": [
+            0,
+            34
+          ],
+          "fact_ordinals": [
+            4
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:9",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "78ed9b5b222638c5c378aa2d4c06f663d97316d1ba9c2724329e09c976d26097",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "5f5148cef4df4b7a377fc5a281ef9f7bd30dc4294223ee96b5e21662ef49def7",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 35,
+          "source_ordinal": 24,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "ade90602ce9965bfba270421cae764bf9a86288b3234f925c9d7e581ecd392f9",
+          "span": [
+            0,
+            41
+          ],
+          "fact_ordinals": [
+            4
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:10",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "b5dfdb26dce5c39506573786ad37eb296c58e68f2e632899b29461b9affd6d83",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "13f4b94da28f08268db6daf59f27892164d09d462e7b1799539fc879ba2446f0",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 36,
+          "source_ordinal": 25,
+          "capability_ordinal": 10,
+          "raw_wire_route_fingerprint": "0600cfdb215348f39b36f46290c5c90393d7865ea0d14bd5554f83d97e4ac07f",
+          "span": [
+            0,
+            127
+          ],
+          "fact_ordinals": [
+            6,
+            8
+          ],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "work-context:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+          "source_kind": "WORK_CONTEXT",
+          "capability": "RETAIN_CONTEXT",
+          "quote_sha256": "55cb0ba03f6e5f21b18e9f8281cace84f4812f963314b9b1dc4886fdc05e21bd",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "de784a1bebf91eaf6a953572eb9368700be8a74780042bd0251035dc441f7a0b",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        }
+      ],
+      "independently_evaluable_wire_errors": [
+        {
+          "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+          "route": 36,
+          "source_ordinal": 25,
+          "capability": "RETAIN_CONTEXT",
+          "invalid_fact_ordinal": 6,
+          "actual_source_kind": "IR_CLAUSE",
+          "actual_source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c1"
+        },
+        {
+          "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+          "route": 36,
+          "source_ordinal": 25,
+          "capability": "RETAIN_CONTEXT",
+          "invalid_fact_ordinal": 8,
+          "actual_source_kind": "IR_CLAUSE",
+          "actual_source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c3"
+        }
+      ],
+      "not_evaluable": [
+        "CANONICAL_CANDIDATE",
+        "COMPONENT_SEMANTIC_EQUIVALENCE",
+        "SOURCE_OWNER_CORRESPONDENCE",
+        "INDEPENDENT_SEMANTIC_REVIEW",
+        "ACTUAL_PERMISSION_AND_EVIDENCE",
+        "ASSURANCE"
+      ],
+      "actual_feedback": null,
+      "wire_error_counts": {
+        "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID": 2
+      },
+      "raw_span_source_observations": [
+        {
+          "source_ordinal": 0,
+          "source_ref": "semantic-fact:db105ff8-4eb8-5d2d-b46a-a67ae008766d",
+          "source_kind": "FACT",
+          "text_length": 48,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 1,
+          "source_ref": "semantic-fact:a1b3a5fe-dec1-5f72-a806-5f66955bdb58",
+          "source_kind": "FACT",
+          "text_length": 55,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 2,
+          "source_ref": "semantic-fact:55eeaeb7-4b78-5269-ace0-af79de21770e",
+          "source_kind": "FACT",
+          "text_length": 48,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 3,
+          "source_ref": "semantic-fact:ebcfeb68-75c8-5c8e-8a5c-37fbb3d471ba",
+          "source_kind": "FACT",
+          "text_length": 26,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 4,
+          "source_ref": "semantic-fact:714a86db-354c-508d-aa51-91a978ca1be3",
+          "source_kind": "FACT",
+          "text_length": 54,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 5,
+          "source_ref": "semantic-fact:d5fb1b5b-bc33-5aef-ad06-78b5599d1fcc",
+          "source_kind": "FACT",
+          "text_length": 72,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 6,
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c1",
+          "source_kind": "IR_CLAUSE",
+          "text_length": 49,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 7,
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+          "source_kind": "IR_CLAUSE",
+          "text_length": 91,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 8,
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c3",
+          "source_kind": "IR_CLAUSE",
+          "text_length": 48,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 9,
+          "source_ref": "ir-constraint:page_content_spec:c4",
+          "source_kind": "IR_CONSTRAINT",
+          "text_length": 132,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 10,
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4",
+          "source_kind": "IR_CLAUSE",
+          "text_length": 132,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 11,
+          "source_ref": "ir-constraint:change_scope_exclusions:c5",
+          "source_kind": "IR_CONSTRAINT",
+          "text_length": 27,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 12,
+          "source_ref": "ir-constraint:verification_and_candidate:c6",
+          "source_kind": "IR_CONSTRAINT",
+          "text_length": 72,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 13,
+          "source_ref": "ir-constraint:change_scope_exclusions:c7",
+          "source_kind": "IR_CONSTRAINT",
+          "text_length": 55,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 14,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 118,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 15,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:1",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 150,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 16,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:2",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 105,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 17,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:3",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 36,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 18,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:4",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 55,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 19,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:5",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 52,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 20,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:6",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 28,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 21,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:7",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 31,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 22,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:8",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 32,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 23,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:9",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 34,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 24,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:10",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 41,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 25,
+          "source_ref": "work-context:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+          "source_kind": "WORK_CONTEXT",
+          "text_length": 127,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        }
+      ]
+    },
+    {
+      "attempt": 2,
+      "raw_response_sha256": "98b70541f2b10f3f00a04ba797d0e393781a4143ecac0af109c4d31f437132df",
+      "wire_schema": "PASS",
+      "request_fingerprint_match": true,
+      "table_fingerprint_match": true,
+      "route_count": 28,
+      "routes": [
+        {
+          "route": 0,
+          "source_ordinal": 0,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "2552d6e9f7da92987d6599f525f7450eaa8541f9358ad7dfd65e752e6ad545f1",
+          "span": [
+            0,
+            48
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:db105ff8-4eb8-5d2d-b46a-a67ae008766d",
+          "source_kind": "FACT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "a24b1d48dd8fae804d8b7bf4e25740bf79c8716ebefc7201050f42b27e1296db",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "f1a76734f3239a573c3facdd7f88d960a01d8eeb48e303cf9aed7897f3c95852",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 1,
+          "source_ordinal": 1,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "7adb7af7c9f6902e2b81d977c277c7e2c651f7e4f053edc46f0992ed24753931",
+          "span": [
+            0,
+            55
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:a1b3a5fe-dec1-5f72-a806-5f66955bdb58",
+          "source_kind": "FACT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "5be6714bf14eea3261e40966c1d1a4039f752f3f376e0320166e32266011c8c4",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "0e951f21d94bf9b18032b7f0f5a21896c5936c5eb2d897a380cfae4d8c1ff027",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 2,
+          "source_ordinal": 2,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "1e9267fd4460652a27791bfd4edf8e4aed83009af7bca160fb888db0d0281b7c",
+          "span": [
+            0,
+            48
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:55eeaeb7-4b78-5269-ace0-af79de21770e",
+          "source_kind": "FACT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "9499d59538a154249d74cf83f71eedb58e1b98a4f88a9f74cd7b92dbe9e117bf",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "b49a9c3a88f93a77fe73898afbfd160df79488579f018b0824d8ee05fd6ff2cf",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 3,
+          "source_ordinal": 3,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "acc99ea14fdfccca669fb5c334ae98c936809f21e5f96b7dd4cb4bf888dd4d4d",
+          "span": [
+            0,
+            26
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:ebcfeb68-75c8-5c8e-8a5c-37fbb3d471ba",
+          "source_kind": "FACT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "34da954957f63d650152a43706d27ed781f8c21b024606451681fadc7a52a81b",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "4b5cc762f0dd94278cfc113608e96213e4b6bcf4ed51d48331bcd1d6418c59b3",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 4,
+          "source_ordinal": 4,
+          "capability_ordinal": 4,
+          "raw_wire_route_fingerprint": "e4c0cef8bffbd77e5f20d328151c14e6a9a972134d162f69076c79bc07100f7e",
+          "span": [
+            0,
+            19
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [
+            3
+          ],
+          "source_ref": "semantic-fact:714a86db-354c-508d-aa51-91a978ca1be3",
+          "source_kind": "FACT",
+          "capability": "DENY_DEPLOY",
+          "quote_sha256": "70c253662fd4d976bcd9ef3df3a45d9c6dce350c1dd877318d0dfc5eca44d7b3",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "a2182bda8f740dea39f264e15ffbbac1ab9379b38510cc93b2c89bb8ea846e69",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 5,
+          "source_ordinal": 4,
+          "capability_ordinal": 5,
+          "raw_wire_route_fingerprint": "d79a3be596fcf24ccd462e8e2b4a05914e882fa8d7dff8cafb0750798561dcd6",
+          "span": [
+            0,
+            19
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [
+            3
+          ],
+          "source_ref": "semantic-fact:714a86db-354c-508d-aa51-91a978ca1be3",
+          "source_kind": "FACT",
+          "capability": "DENY_PUBLISH",
+          "quote_sha256": "70c253662fd4d976bcd9ef3df3a45d9c6dce350c1dd877318d0dfc5eca44d7b3",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "a2182bda8f740dea39f264e15ffbbac1ab9379b38510cc93b2c89bb8ea846e69",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 6,
+          "source_ordinal": 4,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "53e203373423c2bf6bc50b9a7ee789ba3288f83c8f02551b8158a3e923f57cf4",
+          "span": [
+            20,
+            30
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [
+            3
+          ],
+          "source_ref": "semantic-fact:714a86db-354c-508d-aa51-91a978ca1be3",
+          "source_kind": "FACT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "c009e986c0d4e871cbc718f2f0add0c34b2f2de9530a9df66d11e9bbdf00b007",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "c148240df14944763a4630b3e6cd42d28f767a986457144de4775f1793c9b1de",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 7,
+          "source_ordinal": 4,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "480ddda51868c50febf178be9e3c698a3aad6e8280673f305067cf1028a85065",
+          "span": [
+            36,
+            54
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [
+            3
+          ],
+          "source_ref": "semantic-fact:714a86db-354c-508d-aa51-91a978ca1be3",
+          "source_kind": "FACT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "c4107df8c754ab6c4a459b8a328563c22eafc525bba8999173e21ce8aaee8ee7",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "65d31522f3734cb7e7c4c7f2eb47d29bef08acee0fa690e40a30f790e3c7116e",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 8,
+          "source_ordinal": 5,
+          "capability_ordinal": 6,
+          "raw_wire_route_fingerprint": "e03dda3e8f5b80872540b04ff1fcc31a9ce8c2e45e382e68234c7af7e5403888",
+          "span": [
+            0,
+            72
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "semantic-fact:d5fb1b5b-bc33-5aef-ad06-78b5599d1fcc",
+          "source_kind": "FACT",
+          "capability": "CANDIDATE_SEAL",
+          "quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "1a9909418b67f4182f1b8a4a4a67d8a6ed77cf1ebb9892a5f5cb295bf01aa8fa",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 9,
+          "source_ordinal": 5,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "7d8579dad036487f73cb665f8ce1d74f7b55443d1aa637e0acf73eedc2e16ede",
+          "span": [
+            0,
+            38
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [
+            0,
+            1
+          ],
+          "source_ref": "semantic-fact:d5fb1b5b-bc33-5aef-ad06-78b5599d1fcc",
+          "source_kind": "FACT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "e65354fbc5d49d2076d02167b521fa705d16e8ac76a6bba58dfbca2336976985",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "253978b92b6f2bb478150e5ca7dfe6d06e274222318b36d91cf04f8b4484b2b7",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 10,
+          "source_ordinal": 15,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "5a717a90cbc8d280ad9529abf0df1d353551c88976f77a9cd755a847bb7e2d0b",
+          "span": [
+            0,
+            150
+          ],
+          "fact_ordinals": [
+            0,
+            1
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:1",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "25cda18c05430072bd03de90f709ccbcd7ed442e13e2a0016eec0fc01376f11e",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "8934ba9b692e2f40bcab662f9269bf22dc83d0aacec6d748fb85cb10b81e75a1",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 11,
+          "source_ordinal": 14,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "2dae219a7b8d1ccfa908c4ede5f043d5061fc2c0e1f1e5ede0dd38e155dc8854",
+          "span": [
+            0,
+            118
+          ],
+          "fact_ordinals": [
+            3,
+            4
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "2a93a703143070e96fc0283568638cab2e4f0578ffaeaa6e5f402f1b57bd7a2d",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "c55965f3dacf427392e09bdd8767c837cdb1c401400897417a685eda8d40b84d",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 12,
+          "source_ordinal": 17,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "a4a06c0f9756b730a62bb4ec45d6c1b54d19581aa08e8aa3eaaadfa291a01676",
+          "span": [
+            0,
+            36
+          ],
+          "fact_ordinals": [
+            2
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:3",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "4c8f9cc2526ec0774a0c506e438015f2b5497a6dddd8555a8c190799817249fc",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "cdb131200726ef9f876f41e73e4ba1860a05db09dcd680503859f4aed89b6967",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 13,
+          "source_ordinal": 18,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "4fdbb6cd61143183735609cb3beab6a161fa004654ddb9e80bebc16c67a618ab",
+          "span": [
+            0,
+            55
+          ],
+          "fact_ordinals": [
+            0,
+            1
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:4",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "3dd9700096bcb0a76177c2c46dafbaec7d6488e34affa439ed83c3cef45690d8",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "7cd856624c30364729aeeb128f8deded2f922a7ab94e341ac5207f31f7cfd431",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 14,
+          "source_ordinal": 19,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "e7214da3d5ab14d29cb93caa1c273f3b868a76383946af464af01ada0e9fd566",
+          "span": [
+            0,
+            52
+          ],
+          "fact_ordinals": [
+            5
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:5",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "64a9ece99667f4965fb3e20c787256f7fa050a6f769496e7519389f03eedfb0d",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "83b47a660daa8038fa69392f57f005c3f7d8823d87f9296aff391a0986f81c9a",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 15,
+          "source_ordinal": 20,
+          "capability_ordinal": 6,
+          "raw_wire_route_fingerprint": "7a4bc79aceda53f1798bca86fc7bc5d6d454bf8a0febb21ffb46772a3707c2b5",
+          "span": [
+            0,
+            28
+          ],
+          "fact_ordinals": [
+            5
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:6",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "CANDIDATE_SEAL",
+          "quote_sha256": "68850b39fce33f0f7eae04aa6915746e229d512ac008b9ca47422aeb27a00d3a",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "bb4242839d88bb2eb38ea0be6d2360753037c48bf4541bcba414c1b44fd1ac02",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 16,
+          "source_ordinal": 21,
+          "capability_ordinal": 4,
+          "raw_wire_route_fingerprint": "8fb9927d71fdd305ccb5e5ab1edd746d7cb4f6aed45066b78cb14cc3c9215213",
+          "span": [
+            0,
+            31
+          ],
+          "fact_ordinals": [
+            4
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:7",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "DENY_DEPLOY",
+          "quote_sha256": "8942f115f1bc6bf65051d307ede98fb645a4837849ed2259d1d3a9fc71a01727",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "2e83696a8715c79f02818f5ea49a174057ed179a0f590804b2e130779f00496a",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 17,
+          "source_ordinal": 22,
+          "capability_ordinal": 5,
+          "raw_wire_route_fingerprint": "4974cacf0b6f1ac761c06463f7f9641ac44012f3a03ecfe5650b11e295bed9fd",
+          "span": [
+            0,
+            32
+          ],
+          "fact_ordinals": [
+            4
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:8",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "DENY_PUBLISH",
+          "quote_sha256": "6208a9265a8563fbb4f6c90881e8d28bd17e6e7b35eb119d05e019163428e3cc",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "488784ec9cea27d096b21ef7a897f95ca58821f1c451c2b65ba927cc34bf5bc9",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 18,
+          "source_ordinal": 23,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "df490cc0c59b3f39545b56638c6a06e6e65ee58ac18c2a72fb353c5b6c9ea1f4",
+          "span": [
+            0,
+            34
+          ],
+          "fact_ordinals": [
+            4
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:9",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "78ed9b5b222638c5c378aa2d4c06f663d97316d1ba9c2724329e09c976d26097",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "5f5148cef4df4b7a377fc5a281ef9f7bd30dc4294223ee96b5e21662ef49def7",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 19,
+          "source_ordinal": 24,
+          "capability_ordinal": 1,
+          "raw_wire_route_fingerprint": "6c9ac556b28ce8b4f875129acdad6d48b11d6185ade1bdeede95b34242c8b140",
+          "span": [
+            0,
+            41
+          ],
+          "fact_ordinals": [
+            4
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:10",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "GIT_DIFF_SCOPE",
+          "quote_sha256": "b5dfdb26dce5c39506573786ad37eb296c58e68f2e632899b29461b9affd6d83",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "13f4b94da28f08268db6daf59f27892164d09d462e7b1799539fc879ba2446f0",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 20,
+          "source_ordinal": 16,
+          "capability_ordinal": 0,
+          "raw_wire_route_fingerprint": "244301d46c99fa6af3c52b881e00ab040886d615caf0fadb39c4ccbab5600fbd",
+          "span": [
+            0,
+            63
+          ],
+          "fact_ordinals": [
+            5
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:2",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "ARTIFACT_CONTENT",
+          "quote_sha256": "2b934c44f41a1ab6e45f3af2c2571adf79ca48332346c6fa2858f41b47da904c",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "1ac6677cab10048f282a3e2478d84d3b04ce119c06eae3e3fc0e844100b71cbc",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 21,
+          "source_ordinal": 16,
+          "capability_ordinal": 6,
+          "raw_wire_route_fingerprint": "36a0ee60cbccb0d4dc29b79aa168edb9c7dcf2fa69581287854030f90a36eda0",
+          "span": [
+            62,
+            105
+          ],
+          "fact_ordinals": [
+            5
+          ],
+          "target_ordinals": [
+            0
+          ],
+          "support_ordinals": [],
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:2",
+          "source_kind": "WORK_CONSTRAINT",
+          "capability": "CANDIDATE_SEAL",
+          "quote_sha256": "5c9f529d44c87f4cb26a8737d7a611dddcb6115df709aded79631529091e3814",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "ec3ea776d4434d4198ce223e6cf1439af98d4317ca7413379faeda8dda1cd681",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 22,
+          "source_ordinal": 25,
+          "capability_ordinal": 10,
+          "raw_wire_route_fingerprint": "00177796c2f5c0e52802d27d52a8b5c0f72b1e1af28c4838ddb71374caaa63e5",
+          "span": [
+            0,
+            127
+          ],
+          "fact_ordinals": [
+            6,
+            8
+          ],
+          "target_ordinals": [],
+          "support_ordinals": [
+            6,
+            8
+          ],
+          "source_ref": "work-context:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+          "source_kind": "WORK_CONTEXT",
+          "capability": "RETAIN_CONTEXT",
+          "quote_sha256": "55cb0ba03f6e5f21b18e9f8281cace84f4812f963314b9b1dc4886fdc05e21bd",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "de784a1bebf91eaf6a953572eb9368700be8a74780042bd0251035dc441f7a0b",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 23,
+          "source_ordinal": 6,
+          "capability_ordinal": 10,
+          "raw_wire_route_fingerprint": "11a1ee838bd93b98499a0b75412bb7a5e305f2b7fc39f26ab59ef1178e35bf43",
+          "span": [
+            0,
+            49
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c1",
+          "source_kind": "IR_CLAUSE",
+          "capability": "RETAIN_CONTEXT",
+          "quote_sha256": "c01616d2fa1687d3f2dbde62f78b2d07c72c8f63034431eb8b263f2cd82e53b1",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "77df12c5e7d60cb8fce11c3d4f6a0249147b04b7cf186491d463590575d47e41",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 24,
+          "source_ordinal": 7,
+          "capability_ordinal": 10,
+          "raw_wire_route_fingerprint": "083eb52168122b7ec004f35ed902b555be4d3602855902d0d7fe3c9aa616e2b0",
+          "span": [
+            0,
+            91
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+          "source_kind": "IR_CLAUSE",
+          "capability": "RETAIN_CONTEXT",
+          "quote_sha256": "9268cc964f6cb6011eb23204032873bdfbfff04e950cfda4f190d57a1cae73aa",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "f5c46458f0103327d4d4b026afa590b713aac839a64fa1154b59a04bbc4d3fe0",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 25,
+          "source_ordinal": 8,
+          "capability_ordinal": 10,
+          "raw_wire_route_fingerprint": "715ed8af1eefa3b1adcdb5c64eca2b57c87b2b04dfd498f6d36e4bb16e287fc5",
+          "span": [
+            0,
+            48
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c3",
+          "source_kind": "IR_CLAUSE",
+          "capability": "RETAIN_CONTEXT",
+          "quote_sha256": "763311981a479580e9d52e736ecffbec46cfc41a94a3564badab89c5fa354e60",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "76f379115f96bd8109906531a6c3635ddc4067bfb1774e267641cbf5b8ea218e",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 26,
+          "source_ordinal": 11,
+          "capability_ordinal": 10,
+          "raw_wire_route_fingerprint": "bc1317c365e83cd0247a5c1df77f62af9cd0c6ba42c7048b08bdf9334574a405",
+          "span": [
+            0,
+            27
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "ir-constraint:change_scope_exclusions:c5",
+          "source_kind": "IR_CONSTRAINT",
+          "capability": "RETAIN_CONTEXT",
+          "quote_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "34269edbaf873aa2ce6c8c5acd4ba1662d9a6755895f13f9f4ef817e0dd106c5",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        },
+        {
+          "route": 27,
+          "source_ordinal": 13,
+          "capability_ordinal": 10,
+          "raw_wire_route_fingerprint": "cff5200467e641f30cf298cf2925da8e05c7afcf6424d17cd23c0e5129298f1c",
+          "span": [
+            0,
+            55
+          ],
+          "fact_ordinals": [],
+          "target_ordinals": [],
+          "support_ordinals": [],
+          "source_ref": "ir-constraint:change_scope_exclusions:c7",
+          "source_kind": "IR_CONSTRAINT",
+          "capability": "RETAIN_CONTEXT",
+          "quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+          "slice_currently_exact": true,
+          "diagnostic_proposed_component_fingerprint": "a4c0699998ee345743fea23496d1f69aa9495cb408b981ebf31a3be4639a9c99",
+          "component_identity_status": "RAW_PROPOSAL_ONLY_NOT_CONSTRUCTED_OR_VALIDATED"
+        }
+      ],
+      "independently_evaluable_wire_errors": [
+        {
+          "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+          "route": 22,
+          "source_ordinal": 25,
+          "capability": "RETAIN_CONTEXT",
+          "invalid_fact_ordinal": 6,
+          "actual_source_kind": "IR_CLAUSE",
+          "actual_source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c1"
+        },
+        {
+          "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+          "route": 22,
+          "source_ordinal": 25,
+          "capability": "RETAIN_CONTEXT",
+          "invalid_fact_ordinal": 8,
+          "actual_source_kind": "IR_CLAUSE",
+          "actual_source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c3"
+        }
+      ],
+      "not_evaluable": [
+        "CANONICAL_CANDIDATE",
+        "COMPONENT_SEMANTIC_EQUIVALENCE",
+        "SOURCE_OWNER_CORRESPONDENCE",
+        "INDEPENDENT_SEMANTIC_REVIEW",
+        "ACTUAL_PERMISSION_AND_EVIDENCE",
+        "ASSURANCE"
+      ],
+      "actual_feedback": {
+        "schema": "fulfillment-validation-feedback-v2",
+        "inventory_fingerprint": "7c67a051be3bfa873767a417ead82e9c8e43888d42ded7592de1d945f9e99dcf",
+        "primary_error": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+        "violations": [],
+        "additional_violation_count": 0,
+        "not_evaluable": [
+          "INDEPENDENT_SEMANTIC_REVIEW",
+          "ACTUAL_OWNER_EVIDENCE",
+          "ASSURANCE"
+        ]
+      },
+      "wire_error_counts": {
+        "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID": 2
+      },
+      "raw_span_source_observations": [
+        {
+          "source_ordinal": 0,
+          "source_ref": "semantic-fact:db105ff8-4eb8-5d2d-b46a-a67ae008766d",
+          "source_kind": "FACT",
+          "text_length": 48,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 1,
+          "source_ref": "semantic-fact:a1b3a5fe-dec1-5f72-a806-5f66955bdb58",
+          "source_kind": "FACT",
+          "text_length": 55,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 2,
+          "source_ref": "semantic-fact:55eeaeb7-4b78-5269-ace0-af79de21770e",
+          "source_kind": "FACT",
+          "text_length": 48,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 3,
+          "source_ref": "semantic-fact:ebcfeb68-75c8-5c8e-8a5c-37fbb3d471ba",
+          "source_kind": "FACT",
+          "text_length": 26,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 4,
+          "source_ref": "semantic-fact:714a86db-354c-508d-aa51-91a978ca1be3",
+          "source_kind": "FACT",
+          "text_length": 54,
+          "covered_nonwhitespace": false,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 5,
+          "source_ref": "semantic-fact:d5fb1b5b-bc33-5aef-ad06-78b5599d1fcc",
+          "source_kind": "FACT",
+          "text_length": 72,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 6,
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c1",
+          "source_kind": "IR_CLAUSE",
+          "text_length": 49,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 7,
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c2",
+          "source_kind": "IR_CLAUSE",
+          "text_length": 91,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 8,
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:work_kind_code_work:c3",
+          "source_kind": "IR_CLAUSE",
+          "text_length": 48,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 9,
+          "source_ref": "ir-constraint:page_content_spec:c4",
+          "source_kind": "IR_CONSTRAINT",
+          "text_length": 132,
+          "covered_nonwhitespace": false,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 10,
+          "source_ref": "ir-clause:ceddc1a3-ba0d-5672-adae-85afc5309e67:prod_index_html_n1:c4",
+          "source_kind": "IR_CLAUSE",
+          "text_length": 132,
+          "covered_nonwhitespace": false,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 11,
+          "source_ref": "ir-constraint:change_scope_exclusions:c5",
+          "source_kind": "IR_CONSTRAINT",
+          "text_length": 27,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 12,
+          "source_ref": "ir-constraint:verification_and_candidate:c6",
+          "source_kind": "IR_CONSTRAINT",
+          "text_length": 72,
+          "covered_nonwhitespace": false,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 13,
+          "source_ref": "ir-constraint:change_scope_exclusions:c7",
+          "source_kind": "IR_CONSTRAINT",
+          "text_length": 55,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 14,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 118,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 15,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:1",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 150,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 16,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:2",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 105,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 17,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:3",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 36,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 18,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:4",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 55,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 19,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:5",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 52,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 20,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:6",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 28,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 21,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:7",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 31,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 22,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:8",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 32,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 23,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:9",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 34,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 24,
+          "source_ref": "work-constraint:332a3a38-8719-580c-a1a2-c331ae14a5ae:10",
+          "source_kind": "WORK_CONSTRAINT",
+          "text_length": 41,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        },
+        {
+          "source_ordinal": 25,
+          "source_ref": "work-context:332a3a38-8719-580c-a1a2-c331ae14a5ae:0",
+          "source_kind": "WORK_CONTEXT",
+          "text_length": 127,
+          "covered_nonwhitespace": true,
+          "meaning": "raw slice observation only, not semantic coverage"
+        }
+      ]
+    }
+  ],
+  "private_text_published": false,
+  "candidate_repaired": false,
+  "model_calls": 0,
+  "diagnostic_is_admission": false,
+  "inputs_after": {
+    "immutable-inventory.json": "2efad43b2f96bb8738667bffd6111e4aeee332fef611e968b0fa8330defad88f",
+    "capability-contracts.json": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+    "formation-owner-observations.json": "1b4086918812396a9c6e7727ab51af0efd44d94a53d988c4e6297ee9ae108a19",
+    "formation-1-safe-wire.txt": "c60c7f4d1060017a8ddbdd289105350bbfa4aefca0a94f3845d9cc496d83267b",
+    "formation-2-safe-wire.txt": "98b70541f2b10f3f00a04ba797d0e393781a4143ecac0af109c4d31f437132df"
+  },
+  "immutable_inputs": true
+}

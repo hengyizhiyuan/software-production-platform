@@ -1,0 +1,82 @@
+{
+  "schema": "c3-option-a-public-delivery-v1",
+  "files": [
+    {
+      "file": "analyze_retained_wire.py",
+      "bytes": 6171,
+      "sha256": "320ae33674b95dc9cd98c2ca93b164b843ee405a92bd6208fbba6f9c4dee0d3c"
+    },
+    {
+      "file": "architecture-lead-submission.md",
+      "bytes": 2221,
+      "sha256": "2a1bf7c308b0f612e489cc1c848e2444cf256a819d666dee280fd17178ef6f7b"
+    },
+    {
+      "file": "artifact-integrity-review.json",
+      "bytes": 1208,
+      "sha256": "01e1ab2e6184495105492405706af82d3dc626bf8e14f9c279f573d8a6b9b842"
+    },
+    {
+      "file": "authorization.json",
+      "bytes": 1455,
+      "sha256": "1fb3904156d4d9e15940cdc2044085ed78bb548f58298688af798cf16c5867e9"
+    },
+    {
+      "file": "execution-started.json",
+      "bytes": 386,
+      "sha256": "ad851a5cbb029cdd0fddf6348f40ec8fb0a49b4313e4e18dc3e2521d62e52923"
+    },
+    {
+      "file": "live-container-before.json",
+      "bytes": 2274,
+      "sha256": "bfa7e6eee481dc02da303ef872e9d723c9fbe8a8b63d2ebb4fae78caa263cdde"
+    },
+    {
+      "file": "live-container.json",
+      "bytes": 2484,
+      "sha256": "df911d401351ef8e2a07a7aef9285f489dd7b4e28e28f343ec6569d9905bcb20"
+    },
+    {
+      "file": "live-result.json",
+      "bytes": 18480,
+      "sha256": "2d6c7c697bab787a9805fb1d71efb37c428113301fea26667ba913ac6eb516c8"
+    },
+    {
+      "file": "preflight-container-before.json",
+      "bytes": 2259,
+      "sha256": "128c7bf1431d58397a6049dfce8a7cab9bb3ff481c9197f89067a041984d81ea"
+    },
+    {
+      "file": "preflight-container.json",
+      "bytes": 3735,
+      "sha256": "242f054ed5f9894f2e2ad7cf2fca584e402bf31948c123cf7152b598ef6137c3"
+    },
+    {
+      "file": "receipt-manifest.json",
+      "bytes": 2490,
+      "sha256": "de79cea6170a161cc643e01b70523e2513db32878308a49d4a7726d2357be898"
+    },
+    {
+      "file": "retained-wire-analysis.json",
+      "bytes": 81322,
+      "sha256": "ea3e7f59e127b61059f9b508254f69437bab48b1d306dfd103968b4ba42e98f4"
+    },
+    {
+      "file": "review.md",
+      "bytes": 9366,
+      "sha256": "d6825629e3868943b407ba4e56d2636e3793d17e3d468862de92773796ab8129"
+    },
+    {
+      "file": "run_authorized_verification.py",
+      "bytes": 8310,
+      "sha256": "ed0b836343d7c517dfaa591fef388831e212480f2c4eec6775b669f6ddfb57a5"
+    },
+    {
+      "file": "verify_live_model.py",
+      "bytes": 23274,
+      "sha256": "38a2a02ae48e85c154f93a133b5621cc8e28611217cf2ada7b494c3f7413a611"
+    }
+  ],
+  "private_model_content_included": false,
+  "persistent_directory": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/public-delivery"
+}

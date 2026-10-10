@@ -1,0 +1,48 @@
+{
+  "schema": "c3-option-a-live-public-receipts-v1",
+  "files": [
+    {
+      "file": "preflight-container-before.json",
+      "sha256": "128c7bf1431d58397a6049dfce8a7cab9bb3ff481c9197f89067a041984d81ea",
+      "bytes": 2259,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/evidence/preflight-container-before.json"
+    },
+    {
+      "file": "preflight-container.json",
+      "sha256": "242f054ed5f9894f2e2ad7cf2fca584e402bf31948c123cf7152b598ef6137c3",
+      "bytes": 3735,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/evidence/preflight-container.json"
+    },
+    {
+      "file": "live-container-before.json",
+      "sha256": "bfa7e6eee481dc02da303ef872e9d723c9fbe8a8b63d2ebb4fae78caa263cdde",
+      "bytes": 2274,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/evidence/live-container-before.json"
+    },
+    {
+      "file": "live-container.json",
+      "sha256": "df911d401351ef8e2a07a7aef9285f489dd7b4e28e28f343ec6569d9905bcb20",
+      "bytes": 2484,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/evidence/live-container.json"
+    },
+    {
+      "file": "live-result.json",
+      "sha256": "2d6c7c697bab787a9805fb1d71efb37c428113301fea26667ba913ac6eb516c8",
+      "bytes": 18480,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/evidence/live-result.json"
+    },
+    {
+      "file": "execution-started.json",
+      "sha256": "ad851a5cbb029cdd0fddf6348f40ec8fb0a49b4313e4e18dc3e2521d62e52923",
+      "bytes": 386,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/execution-started.json"
+    },
+    {
+      "file": "retained-wire-analysis.json",
+      "sha256": "ea3e7f59e127b61059f9b508254f69437bab48b1d306dfd103968b4ba42e98f4",
+      "bytes": 81322,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/option-a-live-bounded-1/readonly-analysis-1/retained-wire-analysis.json"
+    }
+  ],
+  "private_model_content_included": false
+}
