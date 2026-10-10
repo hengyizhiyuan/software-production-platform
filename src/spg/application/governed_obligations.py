@@ -478,7 +478,7 @@ def _current_fact_source_overlaps_clause(revision, quote):
     return False
 
 
-def _reviewed_background_context_refs(candidate, revision, ir, inventory):
+def _reviewed_background_context_refs(candidate, revision, ir, inventory, *, source_contract="v2"):
     """Only a reviewed exact background contribution may be retained.
 
     CURRENT is a source time, not proof that every descriptive span is an
@@ -497,14 +497,28 @@ def _reviewed_background_context_refs(candidate, revision, ir, inventory):
         basis = route.component_basis
         if (item.kind is not SemanticKind.PRODUCTION_INTENT or item.production is None
                 or not item.production.current or item.action is not None or item.requires_human
-                or clause.modality != "ASSERTION" or clause.polarity != "AFFIRMATIVE"
-                or clause.temporal_scope != "CURRENT" or clause.speech_act is not ActionSpeechAct.DISCUSSION
-                or clause.requested_effects or basis is None or basis.linked_fact_refs
+                or clause.polarity != "AFFIRMATIVE" or clause.temporal_scope != "CURRENT"
+                or basis is None or basis.linked_fact_refs
                 or basis.source_span_start != 0 or basis.source_span_end != len(clause.source_text)
                 or basis.source_component_quote != clause.source_text):
             continue
-        if _current_fact_source_overlaps_clause(revision, clause.source_text):
-            continue
+        if source_contract == "v1":
+            if (clause.modality != "ASSERTION" or clause.speech_act is not ActionSpeechAct.DISCUSSION
+                    or clause.requested_effects or _current_fact_source_overlaps_clause(revision, clause.source_text)):
+                continue
+        else:
+            # Provenance may quote a whole turn. It is not an extra content
+            # obligation for every substring. The accepted current Facts must
+            # keep separate current consumers; semantic context disposition
+            # is still subject to independent component Review, never this test.
+            if (clause.modality not in {"ASSERTION", "REQUEST"}
+                    or clause.speech_act not in {ActionSpeechAct.DISCUSSION, ActionSpeechAct.EXPLICIT_REQUEST}
+                    or set(clause.requested_effects) - {"PRODUCTION_INTENT"}
+                    or any(fact.is_current and not any(
+                        r.source_ref == "semantic-fact:" + str(fact.id)
+                        and r.capability not in {"RETAIN_CONTEXT", "UNRESOLVED"}
+                        for r in candidate.routes) for fact in revision.engineering_semantic_facts)):
+                continue
         for current in candidate.routes:
             sibling = by_ref.get(current.source_ref)
             if (current.capability not in {"ARTIFACT_CONTENT", "GIT_DIFF_SCOPE", "PRODUCT_SOURCE_IDENTITY"}
@@ -541,7 +555,8 @@ def _reviewed_background_clause_retained(revision, ir, item_id, clause_id, bindi
                 or plan.inventory_fingerprint != inventory["inventory_fingerprint"]):
             return False
         validate_projection_components(plan, inventory, semantic_review=receipt.get("semantic_review"))
-        return f"ir-clause:{ir.id}:{item_id}:{clause_id}" in _reviewed_background_context_refs(plan, revision, ir, inventory)
+        return f"ir-clause:{ir.id}:{item_id}:{clause_id}" in _reviewed_background_context_refs(
+            plan, revision, ir, inventory, source_contract=receipt.get("source_role_contract", "v1"))
     except (KeyError, ValueError, TypeError, IndexError):
         return False
 
@@ -676,7 +691,7 @@ def _capability_tuple(name):
 
 
 def _projection_binding(revision, ir, inventory, route, *, reviewed_background_refs=(),
-                        allow_calibrated=False, background_components=()):
+                        allow_calibrated=False, background_components=(), source_contract="v2"):
     source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
     if source is None:
         raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
@@ -737,7 +752,7 @@ def _projection_binding(revision, ir, inventory, route, *, reviewed_background_r
                            for entry in supporting if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
                 if state != "UNRESOLVED" and not work_constraint_sources_correspond(ir, quote, supporting, component=component,
                         phase=phase, semantic_component_declared=route.component_basis is not None,
-                        calibrated=allow_calibrated):
+                        calibrated=allow_calibrated, source_contract=source_contract):
                     raise ValueError("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
                 if state == "RETAINED_CONTEXT":
                     if not partial_background and (not supporting or not all(entry["kind"] == "IR_CLAUSE" and is_context_only_clause(
@@ -875,7 +890,7 @@ def _work_constraint_exclusion_sources(ir, quote, entries):
         for value in item.production.exclusions if quote == f"Excluded from this Work: {value}"]
 
 
-def work_constraint_sources_correspond(ir, quote, entries, *, component, phase, semantic_component_declared=False, calibrated=False):
+def work_constraint_sources_correspond(ir, quote, entries, *, component, phase, semantic_component_declared=False, calibrated=False, source_contract="v2"):
     """Prove exact original source support, never classify wrapper vocabulary."""
     if entries and all(_work_constraint_direct_source(ir, quote, entry) for entry in entries):
         return True
@@ -884,7 +899,14 @@ def work_constraint_sources_correspond(ir, quote, entries, *, component, phase, 
         return False
     values = {value for _, value in production_values}
     production_refs = {entry["source_ref"] for entry, _ in production_values}
-    others = [entry for entry in entries if entry["source_ref"] not in production_refs]
+    if source_contract == "v1":
+        others = [entry for entry in entries if entry["source_ref"] not in production_refs]
+    else:
+        # A clause can prove both its item's production derivation and its own
+        # prohibition. Evidence roles are not disjoint source identities.
+        others = [entry for entry in entries if entry["source_ref"] not in production_refs or (
+            entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}
+            and next(c for c in ir.clauses if c.clause_id == entry["clause_id"]).polarity == "NEGATED")]
     if (phase is not FulfillmentPhase.CONTINUOUS_FROM_ADMISSION
             and not (calibrated and semantic_component_declared and phase is FulfillmentPhase.CURRENT_VERIFICATION
                      and component == "git-diff-scope")) or not others:
@@ -1039,7 +1061,7 @@ def _fact_gate_correspondence_missing(route, candidate, inventory):
         other.source_ref == ref and other.capability == route.capability for other in candidate.routes))
 
 
-def validate_projection_candidate(candidate, revision, ir, inventory, *, semantic_review=None, allow_review_pending=False):
+def validate_projection_candidate(candidate, revision, ir, inventory, *, semantic_review=None, allow_review_pending=False, source_contract="v2"):
     if candidate.inventory_fingerprint != inventory["inventory_fingerprint"]:
         raise ValueError("OBLIGATION_PROJECTION_STALE_BASIS")
     from spg.domain.governed_obligation import fulfillment_component_id
@@ -1098,18 +1120,18 @@ def validate_projection_candidate(candidate, revision, ir, inventory, *, semanti
             if not future_only and not component_declared and "ARTIFACT_CONTENT" not in methods:
                 raise ValueError("OBLIGATION_MIXED_FACT_CURRENT_COMPONENT_LOST")
     validate_projection_components(candidate, inventory, semantic_review=semantic_review, allow_review_pending=allow_review_pending)
-    reviewed_background_refs = _reviewed_background_context_refs(candidate, revision, ir, inventory)
+    reviewed_background_refs = _reviewed_background_context_refs(candidate, revision, ir, inventory, source_contract=source_contract)
     partial_background = _partial_background_components(candidate, revision, ir, inventory)
     bindings = tuple(_projection_binding(revision, ir, inventory, route,
         reviewed_background_refs=reviewed_background_refs, allow_calibrated=route.component_basis is not None,
-        background_components=partial_background) for route in candidate.routes)
+        background_components=partial_background, source_contract=source_contract) for route in candidate.routes)
     legacy_ids = [(route.source_ref, route.capability) for route in candidate.routes]
-    calibrated = len(set(legacy_ids)) != len(legacy_ids) or bool(partial_background)
+    calibrated = len(set(legacy_ids)) != len(legacy_ids) or bool(partial_background) or (source_contract == "v2" and bool(reviewed_background_refs))
     for route in candidate.routes:
         methods = {r.capability for r in candidate.routes if r.source_ref == route.source_ref}
         calibrated |= bool(methods & {"UNRESOLVED", "RETAIN_CONTEXT"} and len(methods) > 1)
         try:
-            _projection_binding(revision, ir, inventory, route, reviewed_background_refs=reviewed_background_refs)
+            _projection_binding(revision, ir, inventory, route, reviewed_background_refs=reviewed_background_refs, source_contract=source_contract)
         except ValueError:
             calibrated = True
     if calibrated and not allow_review_pending and (
@@ -1145,7 +1167,8 @@ def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=N
         raise ValueError("OBLIGATION_SEMANTIC_REVIEW_CAPABILITIES_DRIFT")
     expected = validate_projection_candidate(FulfillmentProjectionCandidate(
         inventory_fingerprint=first.projection_inventory_fingerprint, routes=tuple(routes)), revision, ir, inventory,
-        semantic_review=None if first.formation_receipt is None else first.formation_receipt.get("semantic_review"))
+        semantic_review=None if first.formation_receipt is None else first.formation_receipt.get("semantic_review"),
+        source_contract=(first.formation_receipt or {}).get("source_role_contract", "v1"))
     for actual, wanted in zip(bindings, expected):
         if actual.model_dump(exclude={"formation_receipt"}) != wanted.model_dump(exclude={"formation_receipt"}):
             raise ValueError("OBLIGATION_GATE_BINDING_DRIFT")
@@ -1154,7 +1177,7 @@ def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=N
 
 
 def projection_validation_feedback(candidate, revision, ir, inventory, primary_error, *, wire_diagnostics=None,
-                                   semantic_observation=None):
+                                   semantic_observation=None, source_contract="v2"):
     """Bounded observations on one immutable candidate, never a patched plan.
 
     Only independently evaluable predicates are collected; consumer execution
@@ -1186,7 +1209,7 @@ def projection_validation_feedback(candidate, revision, ir, inventory, primary_e
                 component_id=fulfillment_component_id(r, inventory["inventory_fingerprint"]))
         if row not in failures: failures.append(row)
     if candidate is not None:
-        background = _reviewed_background_context_refs(candidate, revision, ir, inventory)
+        background = _reviewed_background_context_refs(candidate, revision, ir, inventory, source_contract=source_contract)
         partial = _partial_background_components(candidate, revision, ir, inventory)
         for index, route in enumerate(candidate.routes):
             key = (fulfillment_component_id(route, inventory["inventory_fingerprint"]), route.capability)
@@ -1197,7 +1220,7 @@ def projection_validation_feedback(candidate, revision, ir, inventory, primary_e
                 continue
             try:
                 _projection_binding(revision, ir, inventory, route, reviewed_background_refs=background,
-                    allow_calibrated=route.component_basis is not None, background_components=partial)
+                    allow_calibrated=route.component_basis is not None, background_components=partial, source_contract=source_contract)
             except ValueError as error:
                 add(stable(error), index)
             basis = route.component_basis
@@ -1517,7 +1540,7 @@ def _bind_wire_diagnostics(error, rows, attempt, revision, inventory, capabiliti
 def _owner_source_preconditions(revision, ir, inventory, capabilities, *, include_syntax_observations=True,
                                 syntax_observation_contract="complete-value-owner-observations-v1",
                                 include_operand_observations=True, include_typed_observations=True,
-                                typed_prerequisite_contract="existing-owner-typed-prerequisites-v3"):
+                                typed_prerequisite_contract="existing-owner-typed-prerequisites-v4"):
     """Necessary proof sets from existing Owner predicates, never route proposals.
 
     The semantic boundary still chooses components and which eligible origin
@@ -1527,6 +1550,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
     from types import SimpleNamespace
     sources = inventory["sources"]
     clauses = {c.clause_id: c for c in ir.clauses}
+    source_contract = "v2" if include_typed_observations and typed_prerequisite_contract == "existing-owner-typed-prerequisites-v4" else "v1"
     rows = []
     for index, source in enumerate(sources):
         row = {"source": index, "source_ref": source["source_ref"],
@@ -1558,11 +1582,15 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                 proposed_sets = direct + [[j,k] for j,entry in enumerate(sources) if entry["source_ref"] in origins
                     for k,other in enumerate(sources) if other["source_ref"] not in origins
                     and other["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
+                if source_contract == "v2":
+                    proposed_sets += [[j] for j, entry in enumerate(sources) if entry["source_ref"] in origins]
+                    proposed_sets += [[j,k] for j,entry in enumerate(sources) if entry["source_ref"] in origins
+                        for k,other in enumerate(sources) if k != j and other["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
                 for indices in proposed_sets:
                     entries = [sources[j] for j in indices]
                     original_clauses = [clauses[e["clause_id"]] for e in entries if e["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
                     if not work_constraint_sources_correspond(ir, quote, entries, component=component, phase=phase,
-                            semantic_component_declared=True, calibrated=True):
+                            semantic_component_declared=True, calibrated=True, source_contract=source_contract):
                         continue
                     if (phase is FulfillmentPhase.CONTINUOUS_FROM_ADMISSION
                             and not any(c.polarity == "NEGATED" and c.temporal_scope == "CURRENT" for c in original_clauses)):
@@ -1591,7 +1619,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                     failure = _fact_evidence_method_failure(fact, method)
                     if failure:
                         codes.append(failure)
-                    if (typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3"}
+                    if (typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4"}
                             and method == "RETAIN_AUTHORITATIVE_CONTEXT" and not _fact_context_retention_eligible(fact)):
                         codes.append("OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY")
                     if (phase in {FulfillmentPhase.CANDIDATE_SEAL, FulfillmentPhase.HUMAN_INTEGRATION,
@@ -1611,7 +1639,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                 if codes:
                     rejected.append({"capability": cap_index, "codes": codes})
             row["ineligible_binding_prerequisites"] = rejected
-            if source["kind"] == "FACT" and typed_prerequisite_contract == "existing-owner-typed-prerequisites-v3":
+            if source["kind"] == "FACT" and typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4"}:
                 # Observe the actual side-effect-free Fact consumer rather than
                 # maintain a second, incomplete list of its typed restrictions.
                 # Probe operands establish only necessary structural eligibility.
@@ -1668,7 +1696,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                 for index, contract in enumerate(capabilities)
                 if _capability_tuple(contract["capability"])[3] == "EXACT_CANDIDATE_CONTENT"]
                 if include_typed_observations and typed_prerequisite_contract in {
-                    "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3"} else []),
+                    "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4"} else []),
             "support_operand_rule": "EACH_MINIMAL_SUPPORT_SET_IS_A_CONJUNCTION; SETS_ARE_ALTERNATIVES. "
                 "For a derived Work constraint, the production origin proves derivation and the current "
                 "negative clause proves the prohibition. One cannot substitute for the other. "
@@ -1693,8 +1721,9 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
     observations, unavailable = _fulfillment_wire_route_observations(raw, inventory, capabilities,
         validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
     diagnostic_view = SimpleNamespace(routes=tuple(route for _, _, route in observations))
+    source_contract = "v2" if (owner_preconditions or {}).get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v4" else "v1"
     evaluated = json.loads(projection_validation_feedback(diagnostic_view, revision, ir, inventory,
-        "OBLIGATION_OWNER_PRECONDITIONS_UNPROVEN"))
+        "OBLIGATION_OWNER_PRECONDITIONS_UNPROVEN", source_contract=source_contract))
     if ((owner_preconditions or {}).get("operand_observation_contract") == "existing-owner-operands-v1"
             and not unavailable):
         from spg.domain.governed_obligation import fulfillment_component_id
@@ -1738,7 +1767,7 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
                             "semantic_target_selection": "NOT_EVALUATED"}
                 primary = next(r for r in owner_preconditions["sources"] if r["source_ref"] == route.source_ref)
                 if owner_preconditions.get("typed_prerequisite_contract") in {
-                        "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3"}:
+                        "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4"}:
                     details["typed_prerequisites"] = {
                         "source_kind": next(s["kind"] for s in inventory["sources"] if s["source_ref"] == route.source_ref),
                         "original_fact_type": primary.get("original_fact_type"),
@@ -1882,11 +1911,17 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                 and row.get("semantic_feedback_contract") != "existing-independent-review-feedback-v1"):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         preconditions = row.get("owner_source_preconditions")
+        if row.get("stage") == "MODEL_REQUEST_PENDING" and row.get("source_role_contract") not in (None, "v1", "v2"):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+        if row.get("stage") == "MODEL_REQUEST_PENDING" and preconditions is not None and (
+                (row.get("source_role_contract", "v1") == "v2") !=
+                (preconditions.get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v4")):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if preconditions is not None and (not isinstance(preconditions, dict)
                 or preconditions.get("syntax_observation_contract") not in (
                     None, "complete-value-observations-v1", "complete-value-owner-observations-v1")
                 or preconditions.get("operand_observation_contract") not in (None, "existing-owner-operands-v1")
-                or preconditions.get("typed_prerequisite_contract") not in (None, "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3")):
+                or preconditions.get("typed_prerequisite_contract") not in (None, "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4")):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if row.get("owner_source_preconditions") is not None and (
                 row.get("stage") not in {"MODEL_REQUEST_PENDING", "MODEL_RESPONSE_OBSERVED"}
@@ -1955,10 +1990,11 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     deterministic_error = None
                     try:
                         original, _ = locate_projection_components(original, inventory)
-                        validate_projection_candidate(original, revision, ir, inventory, allow_review_pending=True)
+                        historical_source_contract = "v2" if (start.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v4" else "v1"
+                        validate_projection_candidate(original, revision, ir, inventory, allow_review_pending=True, source_contract=historical_source_contract)
                     except ValueError as error:
                         deterministic_error = json.loads(projection_validation_feedback(
-                            original, revision, ir, inventory, error))["primary_error"]
+                            original, revision, ir, inventory, error, source_contract=historical_source_contract))["primary_error"]
                     if deterministic_error is not None and row.get("failed_predicate") != deterministic_error:
                         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
                     if row.get("candidate") != original.model_dump(mode="json"):
@@ -1966,7 +2002,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     semantic_observation = (_semantic_repair_observation(rows, attempt, original, inventory, capabilities)
                         if row.get("semantic_feedback_contract") is not None else None)
                     expected_feedback = projection_validation_feedback(original, revision, ir, inventory, row.get("failed_predicate"),
-                        semantic_observation=semantic_observation)
+                        semantic_observation=semantic_observation, source_contract=historical_source_contract)
                     expected_feedback = _bind_repair_feedback(expected_feedback, rows, attempt,
                         revision, inventory, capabilities, original, ir=ir,
                         include_owner_preconditions=row.get("owner_repair_context_bound") is True)
@@ -2137,6 +2173,11 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                                            memory=provider._fulfillment_receipts)
     started = monotonic() if _started is None else _started
     capabilities = fulfillment_capability_contracts()
+    initial_rows = recorder.records()
+    initial_request = next((r for r in initial_rows if r["stage"] == "MODEL_REQUEST_PENDING"), None)
+    source_contract = "v2" if initial_request is None else initial_request.get("source_role_contract", "v1")
+    if source_contract not in {"v1", "v2"}:
+        raise ValueError("OBLIGATION_SOURCE_ROLE_CONTRACT_UNSUPPORTED")
     def finish(candidate, reason, passed):
         rows = recorder.records()
         semantic_review = next((row.get("semantic_review") for row in reversed(rows)
@@ -2147,7 +2188,8 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
             None if review_row is None else review_row.get("capabilities_fingerprint"))
         if semantic_review is not None and capability_fingerprint != canonical_fingerprint(capabilities):
             raise ValueError("OBLIGATION_SEMANTIC_REVIEW_CAPABILITIES_DRIFT")
-        receipt = {"owner": "WORK_FULFILLMENT_PROJECTION", "inventory_fingerprint": inventory["inventory_fingerprint"],
+        receipt = {"owner": "WORK_FULFILLMENT_PROJECTION", "source_role_contract": source_contract,
+            "inventory_fingerprint": inventory["inventory_fingerprint"],
             "source_revision": inventory["source_revision"], "work_reality_revision_id": str(revision.id),
             "exact_target_paths": inventory["exact_target_paths"], "bounded_feedback_limit": 1,
             "candidate_attempt_limit": 2, "semantic_review_calls_per_candidate_limit": 1, "maximum_model_calls": 4,
@@ -2164,7 +2206,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
             "meaning": "derived binding only; no evidence PASS, authority or effect"}
         if not passed or candidate is None:
             return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
-        bindings = validate_projection_candidate(candidate, revision, ir, inventory, semantic_review=semantic_review)
+        bindings = validate_projection_candidate(candidate, revision, ir, inventory, semantic_review=semantic_review, source_contract=source_contract)
         return (bindings[0].model_copy(update={"formation_receipt": receipt}), *bindings[1:])
     def stop_identity(reason):
         current = recorder.records()
@@ -2231,9 +2273,16 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                 form_parameters = inspect.signature(provider.form).parameters
                 supports_preconditions = ("owner_preconditions" in form_parameters
                     or any(p.kind is inspect.Parameter.VAR_KEYWORD for p in form_parameters.values()))
-                precondition_arguments = ({"owner_preconditions": _owner_source_preconditions(revision, ir, inventory, capabilities)}
+                precondition_arguments = ({"owner_preconditions": _owner_source_preconditions(revision, ir, inventory, capabilities,
+                    typed_prerequisite_contract=("existing-owner-typed-prerequisites-v4" if source_contract == "v2"
+                        else "existing-owner-typed-prerequisites-v3"))}
                     if supports_preconditions and callable(metadata_builder)
                     and "owner_preconditions" in inspect.signature(metadata_builder).parameters else {})
+                if initial_request is None and precondition_arguments:
+                    # A legacy adapter may deliberately omit typed observations.
+                    # Bind validation to the contract actually sent, not the default.
+                    source_contract = ("v2" if precondition_arguments["owner_preconditions"].get(
+                        "typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v4" else "v1")
                 wire_metadata = metadata_builder(inventory, capabilities, validation_feedback=feedback,
                     **precondition_arguments) if callable(metadata_builder) else {}
                 owner_contract = {"owner_repair_context_contract": "existing-owner-preconditions-v1"} if wire_metadata else {}
@@ -2241,7 +2290,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     owner_contract["owner_source_preconditions"] = precondition_arguments["owner_preconditions"]
                 parents = [row for row in recorder.records() if row["stage"] == "CANDIDATE_VALIDATED"
                     and row["attempt"] == attempt - 1 and row.get("validation_feedback") is not None]
-                recorder.append("MODEL_REQUEST_PENDING", attempt, feedback=feedback, **wire_metadata, **owner_contract,
+                recorder.append("MODEL_REQUEST_PENDING", attempt, feedback=feedback, source_role_contract=source_contract, **wire_metadata, **owner_contract,
                     **({"feedback_receipt_id": parents[0]["receipt_id"]} if len(parents) == 1 else {}))
                 accepts_callback = "receipt_callback" in inspect.signature(provider.form).parameters
                 def observed_callback(**values):
@@ -2269,10 +2318,10 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     recorder.append("CANDIDATE_LOCATED", attempt, **located)
                 elif any(prior_location.get(key) != value for key, value in located.items()):
                     raise ValueError("OBLIGATION_COMPONENT_LOCATOR_RECEIPT_DRIFT")
-            validate_projection_candidate(candidate, revision, ir, inventory, allow_review_pending=True)
+            validate_projection_candidate(candidate, revision, ir, inventory, allow_review_pending=True, source_contract=source_contract)
             failure_stage = "SEMANTIC_REVIEW"
             semantic_review = _review_fulfillment_candidate(provider, candidate, inventory, recorder, attempt, capabilities)
-            bindings = validate_projection_candidate(candidate, revision, ir, inventory, semantic_review=semantic_review)
+            bindings = validate_projection_candidate(candidate, revision, ir, inventory, semantic_review=semantic_review, source_contract=source_contract)
             passed = not any(binding.state == "UNRESOLVED" for binding in bindings)
             reason = "VALIDATED_PROJECTION" if passed else "UNRESOLVED_BINDING"
         except FulfillmentReceiptCapacityStop:
@@ -2295,7 +2344,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                 except _FulfillmentWireReceiptIdentityError as drift:
                     return stop_identity(str(drift))
             feedback = projection_validation_feedback(candidate, revision, ir, inventory, error,
-                wire_diagnostics=wire_diagnostics, semantic_observation=semantic_observation)
+                wire_diagnostics=wire_diagnostics, semantic_observation=semantic_observation, source_contract=source_contract)
             responses = [row for row in recorder.records() if row.get("stage") == "MODEL_RESPONSE_OBSERVED"
                 and row.get("attempt") == attempt]
             if (len(responses) == 1 and responses[0].get("provider_wire_version") is not None

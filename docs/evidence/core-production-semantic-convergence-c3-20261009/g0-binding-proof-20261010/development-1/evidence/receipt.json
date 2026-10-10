@@ -1,0 +1,16 @@
+{
+  "started_at_utc": "2026-10-10T10:19:20.758570+00:00",
+  "ended_at_utc": "2026-10-10T10:19:31.046921+00:00",
+  "wall_seconds": 10.288388386950828,
+  "exit_code": 1,
+  "counts": {
+    "tests": 104,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0
+  },
+  "snapshot_sha256": "a28181c3723c8e9951287f82af1148a802e1b04a3d704eb6783939258bf42152",
+  "source_overlay": true,
+  "claim": "DEVELOPMENT_CONTROLLED_TESTS_NOT_FINAL_IMAGE_OR_LIVE_MODEL",
+  "model_calls": 0
+}

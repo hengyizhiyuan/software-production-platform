@@ -1,0 +1,24 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 104 items
+
+tests/test_c3_source_role_contract.py .......                            [  6%]
+tests/test_c3_owner_repair_preconditions.py ............................ [ 33%]
+....................F....                                                [ 57%]
+tests/test_c3_fulfillment_repair_context.py ............................ [ 84%]
+..                                                                       [ 86%]
+tests/test_c3_fulfillment_components.py ..............                   [100%]
+
+=================================== FAILURES ===================================
+_____ test_old_operandless_receipts_replay_without_feedback_identity_drift _____
+tests/test_c3_owner_repair_preconditions.py:440: in test_old_operandless_receipts_replay_without_feedback_identity_drift
+    assert all(b.state!='UNRESOLVED' for b in run()) and len(calls)==2
+E   assert (False)
+E    +  where False = all(<generator object test_old_operandless_receipts_replay_without_feedback_identity_drift.<locals>.<genexpr> at 0x7fe87922c040>)
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_owner_repair_preconditions.py::test_old_operandless_receipts_replay_without_feedback_identity_drift
+======================== 1 failed, 103 passed in 7.14s =========================

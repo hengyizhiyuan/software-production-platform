@@ -1,0 +1,262 @@
+{
+  "schema": "c3-g0-binding-expressibility-proof-v1",
+  "recorded_at_utc": "2026-10-10T10:12:23.869126+00:00",
+  "work_id": "c703f518-52a2-5531-90d1-e751b809fe68",
+  "work_reality_revision": "4d674f62-99c6-5fed-ba6e-45f90ca2f9a2",
+  "basis_sha256": "4ed82eb189d3c6d8edab7cc9bd8df3451e4d4cee0b82c58d7e146e8892518797",
+  "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+  "original_candidate_fingerprint": "17f7d497b13b792d85ea7192e2255ea825166800ea6c51d944fbf2bef8383e3f",
+  "model_calls": 0,
+  "database_writes": 0,
+  "historical_candidate_changes": 0,
+  "counterfactual_controls_are_not_validated_model_candidates": true,
+  "results": [
+    {
+      "route": 3,
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c1",
+      "original_capability": "RETAIN_CONTEXT",
+      "original_owner_result": {
+        "result": "REJECT",
+        "predicate": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY"
+      },
+      "quote_sha256": "c01616d2fa1687d3f2dbde62f78b2d07c72c8f63034431eb8b263f2cd82e53b1",
+      "control_scope": "single binding predicates only; no semantic verdict, runtime evidence, model or Work success",
+      "original_clause_types": {
+        "modality": "REQUEST",
+        "speech_act": "EXPLICIT_REQUEST",
+        "polarity": "AFFIRMATIVE",
+        "temporal_scope": "CURRENT",
+        "requested_effects": [
+          "PRODUCTION_INTENT"
+        ]
+      },
+      "fact_provenance_overlap": true,
+      "all_current_facts_have_separate_nonretained_routes": true,
+      "semantic_requirement": "qualification description retained without deleting the separately bound current software requirements; independent semantic proof required"
+    },
+    {
+      "route": 7,
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c3",
+      "original_capability": "RETAIN_CONTEXT",
+      "original_owner_result": {
+        "result": "REJECT",
+        "predicate": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY"
+      },
+      "quote_sha256": "763311981a479580e9d52e736ecffbec46cfc41a94a3564badab89c5fa354e60",
+      "control_scope": "single binding predicates only; no semantic verdict, runtime evidence, model or Work success",
+      "original_clause_types": {
+        "modality": "ASSERTION",
+        "speech_act": "DISCUSSION",
+        "polarity": "AFFIRMATIVE",
+        "temporal_scope": "CURRENT",
+        "requested_effects": []
+      },
+      "fact_provenance_overlap": true,
+      "all_current_facts_have_separate_nonretained_routes": true,
+      "semantic_requirement": "qualification description retained without deleting the separately bound current software requirements; independent semantic proof required"
+    },
+    {
+      "route": 22,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:3",
+      "original_capability": "CANDIDATE_SEAL",
+      "original_owner_result": {
+        "result": "REJECT",
+        "predicate": "OBLIGATION_FUTURE_PHASE_SOURCE_UNPROVEN"
+      },
+      "quote_sha256": "8e01cebbc09313b668880a07b78a954acb7239d95c94a5ceca18229b46e090b7",
+      "control_scope": "single binding predicates only; no semantic verdict, runtime evidence, model or Work success",
+      "exact_affirmative_support_control": {
+        "result": "CONTROLLED_BINDING_PREDICATES_PASS",
+        "owner": "CANDIDATE",
+        "phase": "CANDIDATE_SEAL",
+        "evidence_method": "EXACT_SEALED_CANDIDATE",
+        "gate": "candidate-owner:sealed-after-verification",
+        "state": "BOUND_PENDING_EVIDENCE"
+      },
+      "current_content_verification_control": {
+        "result": "CONTROLLED_BINDING_PREDICATES_PASS",
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_CANDIDATE_CONTENT",
+        "gate": "code-verification:semantic-facts",
+        "state": "BOUND_PENDING_EVIDENCE"
+      },
+      "semantic_requirement": "current exact content verification; candidate seal alone is insufficient"
+    },
+    {
+      "route": 23,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:4",
+      "original_capability": "CANDIDATE_SEAL",
+      "original_owner_result": {
+        "result": "REJECT",
+        "predicate": "OBLIGATION_FUTURE_PHASE_SOURCE_UNPROVEN"
+      },
+      "quote_sha256": "8ce9edd76d1047c068d23e69cb604e9160e5e8f29ebb5724934a4dc389e7b43b",
+      "control_scope": "single binding predicates only; no semantic verdict, runtime evidence, model or Work success",
+      "exact_affirmative_support_control": {
+        "result": "CONTROLLED_BINDING_PREDICATES_PASS",
+        "owner": "CANDIDATE",
+        "phase": "CANDIDATE_SEAL",
+        "evidence_method": "EXACT_SEALED_CANDIDATE",
+        "gate": "candidate-owner:sealed-after-verification",
+        "state": "BOUND_PENDING_EVIDENCE"
+      },
+      "semantic_requirement": "candidate seal; no Human acceptance or integration implied"
+    },
+    {
+      "route": 24,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:5",
+      "original_capability": "DENY_DEPLOY",
+      "original_owner_result": {
+        "result": "REJECT",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+      },
+      "quote_sha256": "8f73931419beb5ccb80dbdd5aa3aa609513cff870ae39d6181a04d0b4fb9b1bd",
+      "control_scope": "single binding predicates only; no semantic verdict, runtime evidence, model or Work success",
+      "all_original_clause_support_subsets": {
+        "evaluated": 127,
+        "accepted": 0,
+        "errors": {
+          "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN": 127
+        },
+        "source_domain": "all original clause source refs; Fact refs cannot satisfy required Clause provenance"
+      },
+      "dual_role_source_proof": {
+        "selected_refs": [
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+        ],
+        "production_origin_refs": [
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+        ],
+        "remaining_negative_proof_refs_after_existing_subtraction": [],
+        "negative_clause_is_same_item": true
+      }
+    },
+    {
+      "route": 25,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:6",
+      "original_capability": "DENY_PUBLISH",
+      "original_owner_result": {
+        "result": "REJECT",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+      },
+      "quote_sha256": "5b7cd03090c3931b77a8929c4e8aab12368a7f8fcb5d941b155013aac44be6fd",
+      "control_scope": "single binding predicates only; no semantic verdict, runtime evidence, model or Work success",
+      "all_original_clause_support_subsets": {
+        "evaluated": 127,
+        "accepted": 0,
+        "errors": {
+          "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN": 127
+        },
+        "source_domain": "all original clause source refs; Fact refs cannot satisfy required Clause provenance"
+      },
+      "dual_role_source_proof": {
+        "selected_refs": [
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+        ],
+        "production_origin_refs": [
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+        ],
+        "remaining_negative_proof_refs_after_existing_subtraction": [],
+        "negative_clause_is_same_item": true
+      }
+    },
+    {
+      "route": 26,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:7",
+      "original_capability": "GIT_DIFF_SCOPE",
+      "original_owner_result": {
+        "result": "REJECT",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+      },
+      "quote_sha256": "f4ac13cca0d423ad937ecc4a038f27ecd1c4dc9a5341f38e2e105e75e5212c70",
+      "control_scope": "single binding predicates only; no semantic verdict, runtime evidence, model or Work success",
+      "all_original_clause_support_subsets": {
+        "evaluated": 127,
+        "accepted": 0,
+        "errors": {
+          "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN": 127
+        },
+        "source_domain": "all original clause source refs; Fact refs cannot satisfy required Clause provenance"
+      },
+      "dual_role_source_proof": {
+        "selected_refs": [
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+        ],
+        "production_origin_refs": [
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+        ],
+        "remaining_negative_proof_refs_after_existing_subtraction": [],
+        "negative_clause_is_same_item": true
+      }
+    },
+    {
+      "route": 27,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:8",
+      "original_capability": "GIT_DIFF_SCOPE",
+      "original_owner_result": {
+        "result": "REJECT",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+      },
+      "quote_sha256": "30be8ccff910af828c3d85055e1d85174fc6b88badab9739d1b2c0b7eee4b539",
+      "control_scope": "single binding predicates only; no semantic verdict, runtime evidence, model or Work success",
+      "all_original_clause_support_subsets": {
+        "evaluated": 127,
+        "accepted": 0,
+        "errors": {
+          "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN": 127
+        },
+        "source_domain": "all original clause source refs; Fact refs cannot satisfy required Clause provenance"
+      },
+      "dual_role_source_proof": {
+        "selected_refs": [
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+        ],
+        "production_origin_refs": [
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+        ],
+        "remaining_negative_proof_refs_after_existing_subtraction": [],
+        "negative_clause_is_same_item": true
+      }
+    },
+    {
+      "route": 28,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:9",
+      "original_capability": "GIT_DIFF_SCOPE",
+      "original_owner_result": {
+        "result": "REJECT",
+        "predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+      },
+      "quote_sha256": "004b72093fd66ae733ee1a1cca7656711f366342515834915ad640afa1916f41",
+      "control_scope": "single binding predicates only; no semantic verdict, runtime evidence, model or Work success",
+      "all_original_clause_support_subsets": {
+        "evaluated": 127,
+        "accepted": 0,
+        "errors": {
+          "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN": 127
+        },
+        "source_domain": "all original clause source refs; Fact refs cannot satisfy required Clause provenance"
+      },
+      "dual_role_source_proof": {
+        "selected_refs": [
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+        ],
+        "production_origin_refs": [
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+          "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+        ],
+        "remaining_negative_proof_refs_after_existing_subtraction": [],
+        "negative_clause_is_same_item": true
+      }
+    }
+  ]
+}

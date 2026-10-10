@@ -1,0 +1,16 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 105 items
+
+tests/test_c3_source_role_contract.py ........                           [  7%]
+tests/test_c3_owner_repair_preconditions.py ............................ [ 34%]
+.........................                                                [ 58%]
+tests/test_c3_fulfillment_repair_context.py ............................ [ 84%]
+..                                                                       [ 86%]
+tests/test_c3_fulfillment_components.py ..............                   [100%]
+
+--------------------- generated xml file: /out/result.xml ----------------------
+============================= 105 passed in 10.71s =============================

@@ -179,9 +179,10 @@ def test_consumer_semantics_are_existing_tool_contracts_not_subject_aliases():
     from spg.application.governed_obligations import fulfillment_capability_contracts
     from spg.executor.tools import PUBLIC_NATIVE_TOOL_CONTRACTS
     contracts = _existing_consumer_contracts(fulfillment_capability_contracts())
-    assert len(contracts) == 1
+    native = [c for c in contracts if 'tool_contract' in c]
+    assert len(native) == 1
     tool = next(t for t in PUBLIC_NATIVE_TOOL_CONTRACTS if t['identity'] == 'preview.inspect')
-    assert contracts[0]['tool_contract'] == tool
+    assert native[0]['tool_contract'] == tool
 
 
 @pytest.mark.parametrize('scale', ('small', 'medium', 'complex'))

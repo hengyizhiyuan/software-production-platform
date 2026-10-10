@@ -278,11 +278,59 @@ def _expand_fulfillment_wire_route(route, inventory, capabilities, context):
 
 
 def _existing_consumer_contracts(capabilities):
-    """Project existing gated tool contracts, never classify Human wording."""
+    """Project actual consumer operations; this view is not execution evidence.
+
+    The proposer and independent critic use the same existing consumer view.
+    Source digests bind it to implementation, not a semantic judgement about
+    the current Human request. No capability or permission is added here.
+    """
     from spg.executor.tools import PUBLIC_NATIVE_TOOL_CONTRACTS
     tools = {item["identity"]: item for item in PUBLIC_NATIVE_TOOL_CONTRACTS}
+    import inspect
+    from hashlib import sha256
+    from spg.application.governed_obligations import (
+        evaluate_constraint_routes, evaluate_continuous_gates,
+        assert_delivery_effect_permitted, evaluate_candidate_handoffs)
+    from spg.providers.managed_context_fulfillment import verify_binding_inventory, _checked_paths
+    from spg.providers.protected_context_verifier import StaticProtectedContextVerifier
+    methods = {
+        "EXACT_CANDIDATE_CONTENT": ("CURRENT_CANDIDATE_CONTENT", (verify_binding_inventory,
+            StaticProtectedContextVerifier.verify_fulfillment_bindings),
+            "Check original content components against exact Candidate revision/tree and source witnesses or independently verified linked Facts.",
+            "Does not authorize execution effects, seal a Candidate, or prove future Human acceptance."),
+        "EXACT_GIT_DIFF_SCOPE": ("EXACT_CHANGED_PATH_SET", (_checked_paths, evaluate_constraint_routes),
+            "Compare actual Git changed paths from exact source baseline to Candidate with original authorized write scope and forbidden paths.",
+            "Does not prove permission to deploy, publish, preview, or any execution effect."),
+        "EXACT_PERMISSION_GATE": ("ENFORCED_EFFECT_PERMISSION", (evaluate_constraint_routes,
+            evaluate_continuous_gates, assert_delivery_effect_permitted),
+            "Check exact Native capability grants, original prohibition references and armed effect gates; continuous obligations require applicable Owner audit.",
+            "Does not prove HTML content, Git path scope, or Human authorization. Missing complete audit is not proof of no illegal effect."),
+        "EXACT_SEALED_CANDIDATE": ("FUTURE_CANDIDATE_SEAL_GATE", (evaluate_candidate_handoffs, verify_binding_inventory),
+            "Keep exact original obligation pending at Candidate Owner seal-after-verification gate; require actual sealed Candidate at that phase.",
+            "Does not itself verify requested content, perform current Verification, or supply Integration/Acceptance authorization."),
+        "EXACT_HUMAN_AUTHORIZATION": ("FUTURE_HUMAN_AUTHORITY_GATE", (evaluate_candidate_handoffs, assert_delivery_effect_permitted),
+            "Keep obligation pending at its exact existing Human Integration or Delivery gate; only real Owner authorization can discharge it.",
+            "Does not supply current content evidence or imply an authorization already exists."),
+        "EXACT_PRODUCT_SOURCE_IDENTITY": ("EXACT_AUTHORITY_SOURCE_IDENTITY", (verify_binding_inventory,),
+            "Require original Product Source Owner revision, tree and provenance evidence on the exact bound source.",
+            "Does not prove product content or invent an accepted source."),
+        "RETAIN_AUTHORITATIVE_CONTEXT": ("RETAIN_ORIGINAL_NONEXECUTABLE_CONTEXT", (verify_binding_inventory,),
+            "Retain original context identity without declaring an execution obligation satisfied; current contributions keep separate applicable bindings and independent Review.",
+            "Cannot erase a current requirement, permission restriction, or unresolved obligation."),
+    }
     result = []
     for capability in capabilities:
+        method = methods.get(capability["evidence_method"])
+        if method is not None:
+            operation, functions, proves, limitations = method
+            result.append({"capability": capability["capability"], "gate_ref": capability["gate_ref"],
+                "owner": capability["owner"], "phase": capability["phase"],
+                "contract_owner": "EXISTING_FULFILLMENT_CONSUMER",
+                "enforced_decision": {"operation": operation},
+                "consumer_sources": [{"callable": function.__module__ + "." + function.__qualname__,
+                    "source_sha256": sha256(inspect.getsource(function).encode()).hexdigest()} for function in functions],
+                "evidence_requirement": proves, "does_not_prove": limitations,
+                "actual_evidence_present": False})
         gate = capability["gate_ref"]
         prefix, suffix = "execution-capability:", ":denied"
         if not (gate.startswith(prefix) and gate.endswith(suffix)):
@@ -290,10 +338,12 @@ def _existing_consumer_contracts(capabilities):
         operation = gate[len(prefix):-len(suffix)]
         if operation not in tools:
             raise ValueError("OBLIGATION_CONSUMER_CONTRACT_UNAVAILABLE")
-        result.append({"capability": capability["capability"], "gate_ref": gate,
-            "owner": capability["owner"], "contract_owner": "NATIVE_TOOL_REGISTRY",
-            "enforced_decision": {"operation": "DENY_TOOL", "tool_identity": operation},
-            "tool_contract": tools[operation]})
+        entry = next((row for row in result if row["capability"] == capability["capability"]), None)
+        if entry is None:
+            raise ValueError("OBLIGATION_CONSUMER_CONTRACT_UNAVAILABLE")
+        entry["native_tool_contract_owner"] = "NATIVE_TOOL_REGISTRY"
+        entry["enforced_decision"].update({"operation": "DENY_TOOL", "tool_identity": operation})
+        entry["tool_contract"] = tools[operation]
     return result
 
 
