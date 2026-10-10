@@ -1,0 +1,228 @@
+{
+  "files": [
+    {
+      "file": "image/actual-imports.json",
+      "sha256": "699bf9de71e97a6b398208b97f59d54d719f0b9dc1ff4ff53bb46dcba4cba4ae",
+      "bytes": 434913,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/final-image/evidence/actual-imports.json"
+    },
+    {
+      "file": "image/actual-imports.log",
+      "sha256": "da9e0fff69285202782987fe19ff821eae51fd05624af1ebb45ed5a9ea0bbc3a",
+      "bytes": 215,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/final-image/evidence/actual-imports.log"
+    },
+    {
+      "file": "image/build-input-identity.json",
+      "sha256": "87d29179e4c973a5e1782bbf5418e254f2bae97a8c09fcbc797529ad67d32541",
+      "bytes": 130585,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/final-image/evidence/build-input-identity.json"
+    },
+    {
+      "file": "image/build.json",
+      "sha256": "39a2833056c62a7efeb535b139978531fcd91a5556df073043f56d9c2f82b48a",
+      "bytes": 2287,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/final-image/evidence/build.json"
+    },
+    {
+      "file": "image/build.log",
+      "sha256": "21a4ee5b151f39e3f461bd2369906b994c09902af32a072c32f4f021a67ca438",
+      "bytes": 261384,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/final-image/evidence/build.log"
+    },
+    {
+      "file": "image/frozen-inputs.json",
+      "sha256": "af938e8bc05105c1e0de9a1a1a920c1b5e94175ba607ef8cdc069807def633fc",
+      "bytes": 75758,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/final-image/evidence/frozen-inputs.json"
+    },
+    {
+      "file": "image/watt-continuation-receipt.json",
+      "sha256": "c440a4242e79fe69979f95177e2bd3d6346d6c073f8494e15bda6ad5d15cfdf8",
+      "bytes": 2557,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/final-image/evidence/watt-continuation-receipt.json"
+    },
+    {
+      "file": "image/watt-continuation.log",
+      "sha256": "fd995c86d3c6afc3fbb811eb98e5d85db1d251ecf7f686986f4ad60dceb670db",
+      "bytes": 3468,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/final-image/evidence/watt-continuation.log"
+    },
+    {
+      "file": "image/watt-continuation.xml",
+      "sha256": "fe2ab23f0dbf97225b25500f90480ad06f4c57d804c50c48d9aa9027de576037",
+      "bytes": 127106,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/final-image/evidence/watt-continuation.xml"
+    },
+    {
+      "file": "ordinary-live21/actual-container-identity.json",
+      "sha256": "2d2d0f04bc367c42f7389de31a63088b6405314ce518db6bb8f14f25f199f2e9",
+      "bytes": 2121,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/ordinary-g0-live-21/evidence/actual-container-identity.json"
+    },
+    {
+      "file": "ordinary-live21/controller.log",
+      "sha256": "1aefda97c7e28c863198828a3be15308b11b59d6515ec1cee3b49cb56b6bee54",
+      "bytes": 334,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/ordinary-g0-live-21/evidence/controller.log"
+    },
+    {
+      "file": "ordinary-live21/live-result.json",
+      "sha256": "060fa9b0b88b0d421debc36337609ac5c572c862809c863d54216f6ff0036587",
+      "bytes": 225197,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/ordinary-g0-live-21/evidence/live-result.json"
+    },
+    {
+      "file": "ordinary-live21/preflight.log",
+      "sha256": "1ef5edf4678cc902b6742d01a466d76569778ff481ab02e375df6cce448f006f",
+      "bytes": 1028,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/ordinary-g0-live-21/evidence/preflight.log"
+    },
+    {
+      "file": "owner-pg/receipt.json",
+      "sha256": "0dd1cd53e3a114648eccbdd5d57c0b5e48a5a6c7394c3b4f50d5fa4ccdc23802",
+      "bytes": 2380,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/owner-pg-generation21-subnet1/evidence/receipt.json"
+    },
+    {
+      "file": "owner-pg/result.log",
+      "sha256": "acea805496867aba00ee3a9e05e0c5140c7682ad49d36c9d53627535799ac698",
+      "bytes": 638,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/owner-pg-generation21-subnet1/evidence/result.log"
+    },
+    {
+      "file": "owner-pg/result.xml",
+      "sha256": "64945af8453f4a8a15b20a56de7f516700ebdbc7dd594d4e41f74f043dcd6ec4",
+      "bytes": 24547,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/owner-pg-generation21-subnet1/evidence/result.xml"
+    },
+    {
+      "file": "source-probe/container-identity.json",
+      "sha256": "f8d8dc3bbd6f88a6d366fd1accfa84d6f33d6d2c637ba0ee850046d54c7d12d6",
+      "bytes": 316,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/source-probe/evidence/container-identity.json"
+    },
+    {
+      "file": "source-probe/probe.log",
+      "sha256": "c8050d745443e41b68124088236ae77f3a92c003bf32acb3a0a95c536644b534",
+      "bytes": 148,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/source-probe/evidence/probe.log"
+    },
+    {
+      "file": "source-probe/source-probe.json",
+      "sha256": "6ccb05539b2d3c29215e85ea82999a5b4a9020e3af34bc317236618e03990dae",
+      "bytes": 66976,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/source-probe/evidence/source-probe.json"
+    },
+    {
+      "file": "source-probe-2/container-identity.json",
+      "sha256": "e472d145c77a6b904a2ebf27e59b4a22182b0aa76e6f1e5ee5259d36bcd06501",
+      "bytes": 316,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/source-probe-2/evidence/container-identity.json"
+    },
+    {
+      "file": "source-probe-2/lawful-binding-proof.json",
+      "sha256": "1c45d4044e76f8efe9020ee173016fcacc8dd1f47dbaa6de84093320b40a395e",
+      "bytes": 19186,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/source-probe-2/evidence/lawful-binding-proof.json"
+    },
+    {
+      "file": "source-probe-2/probe.log",
+      "sha256": "c82b60508dae522731e6cb0388c7b24b51d6e9d0e373e7734fea251c7e7fd5db",
+      "bytes": 550,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/source-probe-2/evidence/probe.log"
+    },
+    {
+      "file": "historical-replay/container-identity.json",
+      "sha256": "c83389b6f73892199852765a15f8128bc1b1cde197f20e71ed5f24a0ff798f09",
+      "bytes": 316,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/historical-replay/evidence/container-identity.json"
+    },
+    {
+      "file": "historical-replay/historical-v9-replay.json",
+      "sha256": "60ab8300e314cd4f6cf66e7146638abac3b9dcc13862639f18ec6c24baf6f563",
+      "bytes": 686,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/historical-replay/evidence/historical-v9-replay.json"
+    },
+    {
+      "file": "historical-replay/probe.log",
+      "sha256": "9a2c27627635e858c15f1c54f37773a7d199d565e2a9e02ea827b02ca9cb4518",
+      "bytes": 660,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/historical-replay/evidence/probe.log"
+    },
+    {
+      "file": "natural-source-regression/receipt.json",
+      "sha256": "24e9fb96dc6fc713658e54a1cfb262c55325f93b16de0904ab82105e569334e8",
+      "bytes": 365,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/natural-source-regression/evidence/receipt.json"
+    },
+    {
+      "file": "natural-source-regression/result.log",
+      "sha256": "1f28fc3a5c240f9d9f5ea0aef13962c5352c37dab96d4a04b2bf2e57fc4c6113",
+      "bytes": 476,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/natural-source-regression/evidence/result.log"
+    },
+    {
+      "file": "natural-source-regression/result.xml",
+      "sha256": "2f24ed878e9512dd6ebb781ecfe1a062153191db17c235a754a068b9afeeaae8",
+      "bytes": 400,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation21-qualified-20261010/natural-source-regression/evidence/result.xml"
+    },
+    {
+      "file": "development48/receipt.json",
+      "sha256": "3c8ba57edabf0aa075696eb44d437747ee422975f3a7b7290e831034fd4cbd73",
+      "bytes": 806,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-48/evidence/receipt.json"
+    },
+    {
+      "file": "development48/result.log",
+      "sha256": "9203320bb025d4a03b5bdf132bb293581a3313fd254ab9e45fa01bebf0ec9486",
+      "bytes": 6332,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-48/evidence/result.log"
+    },
+    {
+      "file": "development48/result.xml",
+      "sha256": "3476e723738fb634103dfa11090e523910a7aedafa37d537c5fcfdc491e9e48d",
+      "bytes": 57238,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-48/evidence/result.xml"
+    },
+    {
+      "file": "development49/receipt.json",
+      "sha256": "fbb389f49df33db26dc5915008c844f0898a12c327d12384d7995a4c997f6437",
+      "bytes": 807,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-49/evidence/receipt.json"
+    },
+    {
+      "file": "development49/result.log",
+      "sha256": "ee2d64c3d62384fd217a78a8dfda102c62d00faf08cd6eaf1216e44319877bf1",
+      "bytes": 5490,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-49/evidence/result.log"
+    },
+    {
+      "file": "development49/result.xml",
+      "sha256": "4b924c241dcc5a731ad8a706047ee7f64a83a79dce4f86e611e2a6e5a72e318a",
+      "bytes": 56466,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-49/evidence/result.xml"
+    },
+    {
+      "file": "development50/receipt.json",
+      "sha256": "5c6263a14b0ff2ca83271450d69435f3ca27ce92496d83cf1a58ff3f19742227",
+      "bytes": 805,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-50/evidence/receipt.json"
+    },
+    {
+      "file": "development50/result.log",
+      "sha256": "4fbbc5ef8346dde03e4b40f4a548b61a506f2c21dc5b586edc4c43a48648b03a",
+      "bytes": 5490,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-50/evidence/result.log"
+    },
+    {
+      "file": "development50/result.xml",
+      "sha256": "20357c25187b183fe81c2db0f7813af9ca6666977da8bd0e4a421e316df51a34",
+      "bytes": 57129,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-50/evidence/result.xml"
+    }
+  ],
+  "archive_sha256": "6c8d3ceccc07388c690603afcb270e6d34c71b6dbfe189d430c1b39dafd74459",
+  "private_artifacts_included": false
+}

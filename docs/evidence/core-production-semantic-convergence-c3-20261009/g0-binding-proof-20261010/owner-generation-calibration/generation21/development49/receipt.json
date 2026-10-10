@@ -1,0 +1,20 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 28.404850799997803,
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "container_id": "b479f31360e1108c6f96f59669cd02f35db4b9d65c869c044c5add7f05b0e4b1",
+  "source_overlay": true,
+  "snapshot_sha256": "5e149becfb13878e498f9bc50c4b97cd810b4500fa59014b595a0402f6052559",
+  "nodes": [
+    "tests/test_c3_fulfillment_capacity_representation.py",
+    "tests/test_c3_owner_repair_preconditions.py",
+    "tests/test_c3_generation_owner_domains.py",
+    "tests/test_c3_source_role_contract.py",
+    "tests/test_c3_fulfillment_repair_context.py",
+    "tests/test_c3_fulfillment_wire_feedback.py",
+    "tests/test_c3_semantic_contract_calibration.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

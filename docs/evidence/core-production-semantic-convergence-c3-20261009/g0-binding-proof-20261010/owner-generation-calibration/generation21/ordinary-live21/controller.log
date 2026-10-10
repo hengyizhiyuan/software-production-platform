@@ -1,0 +1,1 @@
+{"result": "STOPPED", "terminal_reason": "OBLIGATION_PROJECTION_UNRESOLVED", "logical_calls": 3, "formation_attempt_count": 2, "feedback_count": 1, "observed_terminal_usage_sum": {"input_tokens": 201280, "output_tokens": 9888, "cached_tokens": 6144, "reasoning_tokens": 0, "total_tokens": 211168}, "wall_seconds": 38.057371596980374}

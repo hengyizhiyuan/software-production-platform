@@ -23,6 +23,156 @@ def case():
     return revision, ir, inventory, plan, capabilities, preconditions
 
 
+def mixed_current_proof_case(*, self_reference=False):
+    from spg.domain.engineering_semantics import SemanticRelation
+    from spg.domain.governed_obligation import FulfillmentProjectionCandidate
+    from spg.application.governed_obligations import fulfillment_inventory
+    from tests.test_c3_fulfillment_capacity_representation import controlled_capacity_case
+    revision, ir, _, plan = controlled_capacity_case("medium")
+    fact = revision.engineering_semantic_facts[0]
+    fact = fact.model_copy(update={"relation": SemanticRelation.ACCEPTANCE_ASSERTION})
+    revision.engineering_semantic_facts = (fact, *revision.engineering_semantic_facts[1:])
+    inventory = fulfillment_inventory(revision, ir, source_revision=revision.source_revision,
+        exact_target_paths=("index.html", "notes.html"))
+    route = next(r for r in plan.routes if r.source_ref == "semantic-fact:" + str(fact.id))
+    dependency = fact if self_reference else revision.engineering_semantic_facts[2]
+    route = route.model_copy(update={"component_basis": route.component_basis.model_copy(update={
+        "linked_fact_refs": ("semantic-fact:" + str(dependency.id),)})})
+    seal = route.model_copy(update={"capability": "CANDIDATE_SEAL", "target_paths": ()})
+    plan = FulfillmentProjectionCandidate(inventory_fingerprint=inventory["inventory_fingerprint"],
+        routes=tuple(route if r.source_ref == route.source_ref else r for r in plan.routes) + (seal,))
+    owner = _owner_source_preconditions(revision, ir, inventory, fulfillment_capability_contracts())
+    return revision, ir, inventory, plan, owner
+
+
+def test_mixed_acceptance_self_proof_rejected_before_review_and_feedback_binds_original_component():
+    from spg.application.governed_obligations import validate_projection_candidate, projection_validation_feedback
+    revision, ir, inventory, plan, owner = mixed_current_proof_case(self_reference=True)
+    original = plan.model_dump(mode="json")
+    with pytest.raises(ValueError, match="LINKED_FACT_DEPENDENCY_UNFULFILLABLE"):
+        validate_projection_candidate(plan, revision, ir, inventory, allow_review_pending=True,
+            source_contract="v3", owner_preconditions=owner)
+    feedback = json.loads(projection_validation_feedback(plan, revision, ir, inventory,
+        "OBLIGATION_LINKED_FACT_DEPENDENCY_UNFULFILLABLE", source_contract="v3", owner_preconditions=owner))
+    row = next(r for r in feedback["violations"] if r["code"] == "OBLIGATION_LINKED_FACT_DEPENDENCY_UNFULFILLABLE")
+    assert row["declared_fact_dependencies"] == [plan.routes[row["route"]].source_ref]
+    assert feedback["current_fact_dependency_contract"] == "existing-mixed-acceptance-current-proof-v1"
+    assert plan.model_dump(mode="json") == original
+    # A frozen historical policy still replays its original predicates.
+    legacy = dict(owner, typed_prerequisite_contract="existing-owner-typed-prerequisites-v10")
+    validate_projection_candidate(plan, revision, ir, inventory, allow_review_pending=True,
+        source_contract="v3", owner_preconditions=legacy)
+
+
+@pytest.mark.parametrize("failure", [None, "wrong-target", "missing-current-proof", "cycle"])
+def test_actual_linked_acceptance_prerequisites_use_exact_current_proofs(failure):
+    from spg.application.governed_obligations import validate_projection_candidate
+    revision, ir, inventory, plan, owner = mixed_current_proof_case()
+    if failure:
+        from spg.providers.managed_context_fulfillment import linked_component_dependency_failures
+        from spg.application.governed_obligations import _projection_binding
+        bindings = tuple(_projection_binding(revision, ir, inventory, r, allow_calibrated=True,
+            source_contract="v3") for r in plan.routes)
+        dependency = str(revision.engineering_semantic_facts[2].id)
+        if failure == "wrong-target":
+            bindings = tuple(b.model_copy(update={"target_paths":
+                ("notes.html",) if str(b.fact_id) == dependency else ("index.html",)})
+                if str(b.fact_id) in {dependency, str(revision.engineering_semantic_facts[0].id)}
+                and b.phase.value == "CURRENT_VERIFICATION" else b for b in bindings)
+        elif failure == "missing-current-proof":
+            bindings = tuple(b for b in bindings if str(b.fact_id) != dependency)
+        else:
+            from spg.domain.engineering_semantics import SemanticRelation
+            other = revision.engineering_semantic_facts[2].model_copy(update={"relation": SemanticRelation.ACCEPTANCE_ASSERTION})
+            revision.engineering_semantic_facts = (*revision.engineering_semantic_facts[:2], other,
+                *revision.engineering_semantic_facts[3:])
+            content = next(b for b in bindings if str(b.fact_id) == dependency)
+            content = content.model_copy(update={"component_basis":content.component_basis.model_copy(update={
+                "linked_fact_refs":("semantic-fact:" + str(revision.engineering_semantic_facts[0].id),)})})
+            seal = next(b for b in bindings if str(b.fact_id) == str(revision.engineering_semantic_facts[0].id)
+                and b.phase.value == "CANDIDATE_SEAL")
+            bindings = tuple(content if str(b.fact_id) == dependency else b for b in bindings) + (
+                seal.model_copy(update={"fact_id":other.id}),)
+        assert linked_component_dependency_failures(revision.engineering_semantic_facts, bindings)
+    else:
+        validate_projection_candidate(plan, revision, ir, inventory, allow_review_pending=True,
+            source_contract="v3", owner_preconditions=owner)
+
+
+def test_direct_content_fact_self_reference_does_not_create_mixed_acceptance_dependency():
+    from spg.application.governed_obligations import _projection_binding
+    from spg.providers.managed_context_fulfillment import linked_component_dependencies, linked_component_dependency_failures
+    revision, ir, inventory, plan, _, _ = case()
+    bindings = tuple(_projection_binding(revision, ir, inventory, r, allow_calibrated=True,
+        source_contract="v3") for r in plan.routes if r.source_ref.startswith("semantic-fact:"))
+    assert linked_component_dependencies(revision.engineering_semantic_facts, bindings) == {}
+    assert linked_component_dependency_failures(revision.engineering_semantic_facts, bindings) == {}
+
+
+def test_review_expands_only_declared_proofs_and_diff_contract_does_not_prove_creation():
+    from spg.providers.fulfillment_candidate import _review_component_table
+    revision, ir, inventory, plan, _ = mixed_current_proof_case()
+    table = _review_component_table(inventory, plan, fulfillment_capability_contracts())
+    row = next(r for r in table if r["source_ref"] == plan.routes[0].source_ref and r["capability"] == "ARTIFACT_CONTENT")
+    assert [r["source_ref"] for r in row["declared_fact_evidence_operands"]] == row["linked_fact_refs"]
+    assert all(r["source_ref"] != row["source_ref"] for r in row["declared_fact_evidence_operands"])
+    assert {r["capability"] for r in row["same_source_component_routes"]} == {"ARTIFACT_CONTENT", "CANDIDATE_SEAL"}
+    diff = next(r for r in table if r["capability"] == "GIT_DIFF_SCOPE")
+    assert "Does not prove behavior" in diff["consumer_operation_contract"]["does_not_prove"]
+
+
+def test_linked_acceptance_multi_component_targets_are_checked_per_binding_not_cross_joined():
+    from spg.application.governed_obligations import _projection_binding
+    from spg.providers.managed_context_fulfillment import linked_component_dependency_failures
+    revision, ir, inventory, plan, _ = mixed_current_proof_case()
+    bindings = tuple(_projection_binding(revision, ir, inventory, r, allow_calibrated=True,
+        source_contract="v3") for r in plan.routes)
+    mixed = str(revision.engineering_semantic_facts[0].id)
+    first = next(b for b in bindings if str(b.fact_id) == mixed and b.phase.value == "CURRENT_VERIFICATION")
+    bindings = tuple(b.model_copy(update={"target_paths":(revision.engineering_semantic_facts[
+        2 if str(b.fact_id) == str(revision.engineering_semantic_facts[2].id) else 1].scope,)})
+        if str(b.fact_id) in {str(revision.engineering_semantic_facts[1].id), str(revision.engineering_semantic_facts[2].id)} else b
+        for b in bindings)
+    second = first.model_copy(update={"target_paths": ("notes.html",),
+        "component_basis":first.component_basis.model_copy(update={"linked_fact_refs":(
+            "semantic-fact:" + str(revision.engineering_semantic_facts[1].id),)})})
+    assert linked_component_dependency_failures(revision.engineering_semantic_facts, (*bindings, second)) == {}
+    wrong = second.model_copy(update={"target_paths": ("index.html",)})
+    assert linked_component_dependency_failures(revision.engineering_semantic_facts, (*bindings, wrong))
+
+
+def test_linked_proof_path_prerequisite_does_not_rewrite_descriptive_original_scope():
+    from spg.application.governed_obligations import _projection_binding
+    from spg.providers.managed_context_fulfillment import linked_component_dependency_failures
+    revision, ir, inventory, plan, _ = mixed_current_proof_case()
+    bindings = tuple(_projection_binding(revision, ir, inventory, r, allow_calibrated=True,
+        source_contract="v3") for r in plan.routes)
+    original = revision.engineering_semantic_facts[2]
+    original = original.model_copy(update={"scope":"the approved visible content of the requested page"})
+    facts = (*revision.engineering_semantic_facts[:2], original, *revision.engineering_semantic_facts[3:])
+    assert linked_component_dependency_failures(facts, bindings) == {}
+    assert original.scope == "the approved visible content of the requested page"
+
+
+def test_multiple_unfulfillable_dependencies_have_stable_authoritative_fact_order():
+    from spg.application.governed_obligations import _projection_binding
+    from spg.providers.managed_context_fulfillment import linked_component_dependency_failures
+    from spg.domain.engineering_semantics import SemanticRelation
+    revision, ir, inventory, plan, _ = mixed_current_proof_case(self_reference=True)
+    bindings = tuple(_projection_binding(revision, ir, inventory, r, allow_calibrated=True,
+        source_contract="v3") for r in plan.routes)
+    other = revision.engineering_semantic_facts[2].model_copy(update={"relation":SemanticRelation.ACCEPTANCE_ASSERTION})
+    facts = (*revision.engineering_semantic_facts[:2], other, *revision.engineering_semantic_facts[3:])
+    content = next(b for b in bindings if b.fact_id == other.id)
+    content = content.model_copy(update={"component_basis":content.component_basis.model_copy(update={
+        "linked_fact_refs":("semantic-fact:" + str(other.id),)})})
+    seal = next(b for b in bindings if b.phase.value == "CANDIDATE_SEAL" and b.fact_id == facts[0].id)
+    bindings = tuple(content if b.fact_id == other.id else b for b in bindings) + (seal.model_copy(update={"fact_id":other.id}),)
+    expected = [str(facts[0].id), str(other.id)]
+    assert list(linked_component_dependency_failures(facts, bindings)) == expected
+    assert list(linked_component_dependency_failures(facts, tuple(reversed(bindings)))) == expected
+
+
 def test_point_of_use_provenance_does_not_import_derived_constraints_or_select_supports():
     from spg.providers.fulfillment_candidate import _formation_provenance_operands
     from spg.application.governed_obligations import validate_projection_candidate
@@ -415,7 +565,7 @@ def test_generation_requires_original_quote_for_partial_components_without_chang
         length, = guards[0]["properties"]["z"]["enum"]
         assert guards == [
             {"properties": {"q": {"type": "null"}, "a": {"enum": [0]}, "z": {"enum": [length]}}},
-            {"properties": {"q": {"type": "string", "minLength": 1, "maxLength": length - 1}}},
+            {"properties": {"q": {"type": "string", "minLength": 1}}},
         ]
     # This request guard cannot supply text, extend spans, or admit a route.
     inv, caps, _, wire = wire_case(preconditions)
@@ -833,6 +983,8 @@ def test_v9_scope_does_not_inherit_negative_sibling_from_shared_human_record():
 @pytest.mark.parametrize("disposition", ["RETAIN_CONTEXT", "UNRESOLVED"])
 def test_v10_generation_excludes_only_contradictory_whole_component_dispositions(disposition):
     revision, ir, inventory, plan, caps, current = case()
+    current = _owner_source_preconditions(revision, ir, inventory, caps,
+        typed_prerequisite_contract="existing-owner-typed-prerequisites-v10")
     legacy = _owner_source_preconditions(revision, ir, inventory, caps,
         typed_prerequisite_contract="existing-owner-typed-prerequisites-v9")
     old = _formation_output_schema(inventory, caps, owner_preconditions=legacy)

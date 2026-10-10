@@ -1,0 +1,8 @@
+{
+  "actual_image": "sha256:e2efe32e96dc6b88c006a249edb69739918c329ad61ad5cd1bb12c48435ad904",
+  "container_id": "3dee0f064add3ff2f75c08fe48fa82c9698148e9921bf70e5498c91bd556785d",
+  "source_overlay": false,
+  "source": "8f0136929122b027bc34c0c971f1d9e5d2f19e01",
+  "model_calls": 0,
+  "original_db_access": false
+}

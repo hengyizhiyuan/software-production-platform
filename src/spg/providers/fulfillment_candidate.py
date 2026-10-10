@@ -218,7 +218,7 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
                     "$ref": "#/$defs/_FulfillmentCompactRoute/properties/u"}
             branches.append(branch)
         schema["properties"]["routes"]["items"] = {"anyOf": branches}
-        if owner_preconditions.get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v10":
+        if owner_preconditions.get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"}:
             # Project the canonical component-disposition invariant into new
             # generation. This rejects only contradictory whole-component
             # choices, never chooses a semantic route or grants a Gate.
@@ -227,9 +227,13 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
             for source, text in enumerate(_fulfillment_wire_context(inventory, capabilities, owner_preconditions=owner_preconditions)["source_texts"]):
                 for disposition in exclusive:
                     def whole(capability_schema):
+                        quote_schema = {"type": "null"}
+                        if owner_preconditions.get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v11":
+                            quote_schema = {"anyOf": [{"type": "null"}, {"type": "string",
+                                "minLength": len(text), "maxLength": len(text)}]}
                         return {"contains": {"type": "object", "properties": {
                             "s": {"enum": [source]}, "c": capability_schema,
-                            "a": {"enum": [0]}, "z": {"enum": [len(text)]}, "q": {"type": "null"}}}}
+                            "a": {"enum": [0]}, "z": {"enum": [len(text)]}, "q": quote_schema}}}
                     rules.append({"not": {"allOf": [whole({"enum": [disposition]}),
                         whole({"enum": [i for i in range(len(capabilities)) if i != disposition]})]}})
             schema["properties"]["routes"]["allOf"] = rules
@@ -631,6 +635,17 @@ def _review_component_table(inventory, candidate, capabilities):
             row["original_text_role"] = "EXACT_FACT_PROVENANCE; NOT_A_NEW_PARENT_INTENT_OR_CAPABILITY"
         if route.capability in consumers:
             row["consumer_operation_contract"] = consumers[route.capability]
+        row["declared_fact_evidence_operands"] = [{
+            "source_ref": ref, "original_fact": {key: deepcopy(sources[ref]["payload"].get(key))
+                for key in ("fact_id", "relation", "value", "scope", "qualifiers")},
+            "submitted_fact_routes": [{"capability": r.capability,
+                "target_paths": list(r.target_paths),
+                "linked_fact_refs": [] if r.component_basis is None else list(r.component_basis.linked_fact_refs),
+                "consumer_binding": contracts[r.capability]}
+                for r in candidate.routes if r.source_ref == ref]}
+            for ref in row["linked_fact_refs"]]
+        row["same_source_component_routes"] = [{"component_id": fulfillment_component_id(r, inventory["inventory_fingerprint"]),
+            "capability": r.capability} for r in candidate.routes if r.source_ref == route.source_ref]
         rows.append(row)
     return rows
 
@@ -754,7 +769,7 @@ def _fulfillment_wire_route_observations(output, inventory, capabilities, *, val
             unavailable.append(index)
         else:
             observations.append((index, raw.model_dump(mode="json"), route))
-    if ((owner_preconditions or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"}
+    if ((owner_preconditions or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"}
             and not syntax_unavailable and len(expanded) == len(wire.routes)):
         # Coverage failure does not make exact identity/quote location
         # unknowable. Observe the complete original Wire, never an isolated
@@ -980,6 +995,15 @@ class ModelFulfillmentCandidateProvider:
                     "t=target-path ordinals, u=supporting-source ordinals, and r=bounded rationale. "
                     "The field domains use the SAME source ordinals, not a new index space. f may contain "
                     "only entries listed in f_allowed_source_ordinals; do not copy s into f by default. "
+                    "A mixed ACCEPTANCE_ASSERTION with content and Candidate Seal consumes completed current "
+                    "content proofs from its explicit f Facts. Its self reference or a dependency cycle cannot "
+                    "provide a completed proof. Every referenced proof needs its own exact current content "
+                    "route and matching target. Ordinary direct content Facts are checked against Candidate "
+                    "source; do not apply the mixed acceptance dependency rule to every Fact. "
+                    "A source requesting an implementation must preserve the implementation outcome through "
+                    "ARTIFACT_CONTENT, possibly with explicit semantically sufficient f proofs. GIT_DIFF_SCOPE "
+                    "checks changed paths only, never whether the requested implementation exists. u links "
+                    "provenance and cannot substitute for a missing declared current proof. "
                     "Non-Fact supporting clauses belong in u, never f. On feedback, inspect the bound "
                     "untrusted_previous_wire and its identified failures before proposing a complete new plan. "
                     "u is provenance support, NEVER a component disposition for the referenced source: each "
@@ -1250,7 +1274,17 @@ class ModelFulfillmentCandidateProvider:
                     "If nonredundant=false, explain the actual competing same-source component in reason, "
                     "not simply that the source is context. Verify "
                     "exact meaning, all qualifiers, legitimate context-only disposition and actual Owner/Phase/Evidence "
-                    "sufficiency. A whole-source reuse cannot conceal a lost semantic component. This review is only "
+                    "sufficiency. Judge positive implementation outcomes as strictly as prohibitions: a "
+                    "Git Diff route proves only changed paths, not creation, behavior or number of artifacts. "
+                    "A mixed creation/scope contribution needs complementary outcome and scope checks, or an "
+                    "explicit, semantically sufficient linked current Fact proof using the content consumer. "
+                    "declared_fact_evidence_operands expands only the submitted f links and their exact "
+                    "proposed proofs. Never borrow undeclared sibling Facts or treat u provenance as completed "
+                    "verification. For mixed ACCEPTANCE_ASSERTION content plus Seal, those linked proofs "
+                    "must be independently available without self/cyclic dependency. Source equivalence across "
+                    "the inventory does not itself establish that dependency. same_source_component_routes "
+                    "shows complementary consumers to judge jointly, never permission to drop a component. "
+                    "A whole-source reuse cannot conceal a lost semantic component. This review is only "
                     "derived-plan semantic validation, not Assurance, Verification PASS, a fact or Human authority."),
                 input_text=json.dumps({"immutable_inventory": inventory,
                     **review_owner_context,

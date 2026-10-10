@@ -391,6 +391,62 @@ def _retained_context_route(binding, revision, ir, bindings=()):
                 observed and all(p.origin.value == "REPOSITORY_OBSERVED" for p in observed))
 
 
+def linked_component_dependencies(facts, bindings):
+    """Describe the existing linked acceptance consumer, not semantic approval.
+
+    Equality checks consume Candidate source directly even if a proposal carries
+    a redundant self reference. Only the mixed acceptance consumer below needs
+    completed linked Fact checks. Share that exact classification with admission.
+    """
+    result = {}
+    for fact in facts:
+        identity = str(getattr(fact, "fact_id", None) or fact.id)
+        routes = tuple(b for b in bindings if str(b.fact_id) == identity)
+        content = tuple(b for b in routes if b.evidence_method == "EXACT_CANDIDATE_CONTENT")
+        if (fact.relation.value == "ACCEPTANCE_ASSERTION"
+                and any(b.phase.value == "CANDIDATE_SEAL" for b in routes)
+                and content and all(b.component_basis is not None
+                                    and b.component_basis.linked_fact_refs for b in content)):
+            result[identity] = tuple(dict.fromkeys(link.removeprefix("semantic-fact:")
+                for b in content for link in b.component_basis.linked_fact_refs))
+    return result
+
+
+def linked_component_dependency_failures(facts, bindings):
+    """Necessary proof availability; never predict actual Verification PASS."""
+    dependencies = linked_component_dependencies(facts, bindings)
+    by_id = {str(getattr(f, "fact_id", None) or f.id): f for f in facts}
+    pending = set(dependencies)
+    available = set(by_id) - pending
+    failed = {}
+    for identity, links in dependencies.items():
+        consumers = [b for b in bindings if str(b.fact_id) == identity
+            and b.phase.value == "CURRENT_VERIFICATION"
+            and b.evidence_method == "EXACT_CANDIDATE_CONTENT"]
+        for consumer in consumers:
+            for ref in consumer.component_basis.linked_fact_refs:
+                link = ref.removeprefix("semantic-fact:")
+                proofs = [b for b in bindings if str(b.fact_id) == link
+                    and b.phase.value == "CURRENT_VERIFICATION"
+                    and b.evidence_method == "EXACT_CANDIDATE_CONTENT"]
+                if (link not in by_id or len(proofs) != 1
+                        or proofs[0].work_reality_revision_id != consumer.work_reality_revision_id
+                        or proofs[0].source_revision != consumer.source_revision
+                        or not set(consumer.target_paths) & set(proofs[0].target_paths)):
+                    failed[identity] = "OBLIGATION_LINKED_FACT_CURRENT_PROOF_UNAVAILABLE"
+    while pending:
+        ready = {identity for identity in pending if identity not in failed
+                 and set(dependencies[identity]) <= available}
+        if not ready:
+            for identity in dependencies:
+                if identity in pending:
+                    failed.setdefault(identity, "OBLIGATION_LINKED_FACT_DEPENDENCY_UNFULFILLABLE")
+            break
+        available.update(ready)
+        pending -= ready
+    return {identity: failed[identity] for identity in dependencies if identity in failed}
+
+
 def verify_fulfillment_fact_routes(*, repository, request, contract, references,
         admitted_facts, revision, ir, baseline, bindings, plan_repair):
     """Consume typed projected Fact roles while preserving all current checks.
@@ -405,12 +461,8 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
             contract, references, admitted_facts=admitted_facts, plan_repair=plan_repair)
     routes_by_fact = {str(reference.fact_id): tuple(binding for binding in bindings
         if str(binding.fact_id) == str(reference.fact_id)) for reference in references}
-    linked_components = {str(reference.fact_id) for reference in references
-        if reference.relation.value == "ACCEPTANCE_ASSERTION"
-        and any(b.phase.value == "CANDIDATE_SEAL" for b in routes_by_fact[str(reference.fact_id)])
-        and any(b.evidence_method == "EXACT_CANDIDATE_CONTENT" for b in routes_by_fact[str(reference.fact_id)])
-        and all(b.component_basis is not None and b.component_basis.linked_fact_refs
-                for b in routes_by_fact[str(reference.fact_id)] if b.evidence_method == "EXACT_CANDIDATE_CONTENT")}
+    dependencies = linked_component_dependencies(references, bindings)
+    linked_components = set(dependencies)
     content = tuple(reference for reference in references if str(reference.fact_id) not in linked_components and any(
         binding.evidence_method == "EXACT_CANDIDATE_CONTENT" and binding.phase.value == "CURRENT_VERIFICATION"
         for binding in routes_by_fact[str(reference.fact_id)]))

@@ -1127,10 +1127,28 @@ def _source_evidence_method_failure(source, method):
 
 
 def _route_owner_method_failure(route, inventory, owner_preconditions):
-    if (owner_preconditions or {}).get("typed_prerequisite_contract") != "existing-owner-typed-prerequisites-v10":
+    if (owner_preconditions or {}).get("typed_prerequisite_contract") not in {"existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"}:
         return None
     source = next((s for s in inventory["sources"] if s["source_ref"] == route.source_ref), None)
     return None if source is None else _source_evidence_method_failure(source, _capability_tuple(route.capability)[3])
+
+
+def _projection_dependency_observations(candidate, revision, ir, inventory, *, source_contract):
+    """Reuse the actual consumer's necessary linked-proof conditions.
+
+    A partial invalid plan cannot establish dependencies. Feedback records that
+    boundary rather than borrowing proofs from a different source or candidate.
+    """
+    from spg.providers.managed_context_fulfillment import linked_component_dependency_failures
+    try:
+        background = _reviewed_background_context_refs(candidate, revision, ir, inventory, source_contract=source_contract)
+        partial = _partial_background_components(candidate, revision, ir, inventory)
+        bindings = tuple(_projection_binding(revision, ir, inventory, route,
+            reviewed_background_refs=background, allow_calibrated=route.component_basis is not None,
+            background_components=partial, source_contract=source_contract) for route in candidate.routes)
+    except ValueError:
+        return None
+    return linked_component_dependency_failures(revision.engineering_semantic_facts, bindings)
 
 
 def validate_projection_candidate(candidate, revision, ir, inventory, *, semantic_review=None, allow_review_pending=False, source_contract="v2", owner_preconditions=None):
@@ -1209,6 +1227,11 @@ def validate_projection_candidate(candidate, revision, ir, inventory, *, semanti
     bindings = tuple(_projection_binding(revision, ir, inventory, route,
         reviewed_background_refs=reviewed_background_refs, allow_calibrated=route.component_basis is not None,
         background_components=partial_background, source_contract=source_contract) for route in candidate.routes)
+    if (owner_preconditions or {}).get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v11":
+        from spg.providers.managed_context_fulfillment import linked_component_dependency_failures
+        dependency_failures = linked_component_dependency_failures(revision.engineering_semantic_facts, bindings)
+        if dependency_failures:
+            raise ValueError(next(iter(dependency_failures.values())))
     legacy_ids = [(route.source_ref, route.capability) for route in candidate.routes]
     legacy_background_refs = (_reviewed_background_context_refs(candidate, revision, ir, inventory, source_contract="v1")
         if source_contract in {"v2", "v3"} else reviewed_background_refs)
@@ -1338,6 +1361,7 @@ def projection_validation_feedback(candidate, revision, ir, inventory, primary_e
             "wire_diagnostic_binding": {**wire_diagnostics["binding"],
                 "diagnostic_fingerprint": wire_diagnostics["diagnostic_fingerprint"]}}, separators=(",", ":"))
     failures = []
+    dependency_not_evaluable = False
     refs = {s["source_ref"]: index for index, s in enumerate(inventory["sources"])}
     seen = set()
     def add(code, route=None, source=None):
@@ -1390,6 +1414,16 @@ def projection_validation_feedback(candidate, revision, ir, inventory, primary_e
                             for i, r in ((peer, other), (index, route))]
                         failures[-1]["predicate"] = "SAME_ORIGINAL_COMPONENT_CANNOT_HAVE_EXECUTION_AND_CONTEXT_OR_UNRESOLVED_DISPOSITIONS"
                         failures[-1]["repair_boundary"] = "MODEL_SELECTS_LAWFUL_DISPOSITION_OR_DISTINCT_COMPONENTS; NO_AUTOMATIC_DELETION_OR_SEMANTIC_APPROVAL"
+        if (owner_preconditions or {}).get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v11":
+            dependency_failures = _projection_dependency_observations(candidate, revision, ir, inventory,
+                source_contract=source_contract)
+            dependency_not_evaluable = dependency_failures is None
+            for identity, code in (dependency_failures or {}).items():
+                for index, route in enumerate(candidate.routes):
+                    if route.source_ref == "semantic-fact:" + identity and route.capability == "ARTIFACT_CONTENT":
+                        add(code, index)
+                        failures[-1].update(declared_fact_dependencies=list(route.component_basis.linked_fact_refs),
+                            predicate="EXISTING_MIXED_ACCEPTANCE_CONSUMER_REQUIRES_COMPLETED_EXACT_CURRENT_FACT_PROOFS; NO_CYCLES_OR_IMPLICIT_SIBLINGS")
         for source, entry in enumerate(inventory["sources"]):
             routes = [r for r in candidate.routes if r.source_ref == entry["source_ref"]]
             if not routes:
@@ -1447,9 +1481,12 @@ def projection_validation_feedback(candidate, revision, ir, inventory, primary_e
     return json.dumps({"schema": "fulfillment-validation-feedback-v2", "inventory_fingerprint": inventory["inventory_fingerprint"],
         **({"completion_observation_contract": "existing-bounded-completion-feedback-v1"} if include_unresolved else {}),
         **({"component_disposition_feedback_contract": "existing-component-exclusivity-v1"} if include_conflict_relations else {}),
+        **({"current_fact_dependency_contract": "existing-mixed-acceptance-current-proof-v1"}
+           if (owner_preconditions or {}).get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v11" else {}),
         **({"coverage_observation_contract": "existing-located-coverage-feedback-v1"} if include_coverage else {}),
         "primary_error": primary, "violations": failures[:64], "additional_violation_count": max(0, len(failures)-64),
         "not_evaluable": (["INDEPENDENT_SEMANTIC_REVIEW"] if semantic_observation is None or not identity_valid else [])
+            + (["LINKED_FACT_CURRENT_PROOF_PREREQUISITES"] if dependency_not_evaluable else [])
             + ["ACTUAL_OWNER_EVIDENCE", "ASSURANCE"],
         **({"semantic_review_feedback_binding": semantic_observation} if semantic_observation is not None else {})}, separators=(",", ":"))
 
@@ -1714,7 +1751,7 @@ def _bind_wire_diagnostics(error, rows, attempt, revision, inventory, capabiliti
 def _owner_source_preconditions(revision, ir, inventory, capabilities, *, include_syntax_observations=True,
                                 syntax_observation_contract="complete-value-owner-observations-v2",
                                 include_operand_observations=True, include_typed_observations=True,
-                                typed_prerequisite_contract="existing-owner-typed-prerequisites-v10"):
+                                typed_prerequisite_contract="existing-owner-typed-prerequisites-v11"):
     """Necessary proof sets from existing Owner predicates, never route proposals.
 
     The semantic boundary still chooses components and which eligible origin
@@ -1724,7 +1761,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
     from types import SimpleNamespace
     sources = inventory["sources"]
     clauses = {c.clause_id: c for c in ir.clauses}
-    source_contract = "v3" if include_typed_observations and typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"} else "v2" if include_typed_observations and typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"} else "v1"
+    source_contract = "v3" if include_typed_observations and typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v2" if include_typed_observations and typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v1"
     rows = []
     for index, source in enumerate(sources):
         row = {"source": index, "source_ref": source["source_ref"],
@@ -1735,7 +1772,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                 speech_act=clause.speech_act,
                 whole_source_context_only=is_context_only_clause(revision, ir, source["item_id"], source["clause_id"]),
                 partial_context_rule="DISTINCT_CURRENT_COMPONENT_AND_INDEPENDENT_SEMANTIC_REVIEW_REQUIRED")
-        if (include_typed_observations and typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"}
+        if (include_typed_observations and typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"}
                 and source["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}):
             from spg.domain.interaction_actions import ActionSpeechAct
             item = next(i for i in ir.items if i.item_id == source["item_id"])
@@ -1752,7 +1789,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                 "independent_full_plan_and_component_review_required": True,
                 "status": "NECESSARY_EXISTING_OWNER_CONDITIONS; NO_DISPOSITION_OR_EVIDENCE_APPROVAL",
             }
-        if include_typed_observations and typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"} and source["kind"] == "WORK_CONSTRAINT":
+        if include_typed_observations and typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} and source["kind"] == "WORK_CONSTRAINT":
             # Whole retained constraints need the same original observed
             # context provenance that the existing binding Owner requires.
             # Partial mixed background remains independently reviewable.
@@ -1829,7 +1866,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
             for cap_index, contract in enumerate(capabilities):
                 _, _, phase, method, _ = _capability_tuple(contract["capability"])
                 codes = []
-                if typed_prerequisite_contract == "existing-owner-typed-prerequisites-v10":
+                if typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"}:
                     failure = _source_evidence_method_failure(source, method)
                     if failure:
                         codes.append(failure)
@@ -1839,7 +1876,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                     failure = _fact_evidence_method_failure(fact, method)
                     if failure:
                         codes.append(failure)
-                    if (typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"}
+                    if (typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"}
                             and method == "RETAIN_AUTHORITATIVE_CONTEXT" and not _fact_context_retention_eligible(fact)):
                         codes.append("OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY")
                     if (phase in {FulfillmentPhase.CANDIDATE_SEAL, FulfillmentPhase.HUMAN_INTEGRATION,
@@ -1859,7 +1896,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                 if codes:
                     rejected.append({"capability": cap_index, "codes": codes})
             row["ineligible_binding_prerequisites"] = rejected
-            if source["kind"] == "FACT" and typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"}:
+            if source["kind"] == "FACT" and typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"}:
                 # Observe the actual side-effect-free Fact consumer rather than
                 # maintain a second, incomplete list of its typed restrictions.
                 # Probe operands establish only necessary structural eligibility.
@@ -1899,6 +1936,14 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                 "support citation or rationale. A current prohibition cannot become a future permission. "
                 "Choose a legal semantic treatment; never rewrite the admitted Fact or borrow authority."}
            if include_typed_observations else {}),
+        **({"current_fact_dependency_contract": "existing-mixed-acceptance-current-proof-v1",
+            "current_fact_dependency_rule": "Only the existing mixed ACCEPTANCE_ASSERTION content plus Seal "
+                "consumer requires completed explicit linked Fact checks. Those proofs must have one exact "
+                "current content route, matching source/version/target, and no self or cyclic dependency. "
+                "Ordinary direct content consumers do not become linked acceptance consumers through a "
+                "redundant self reference. Provenance support is not completed evidence. These necessary "
+                "conditions never prove semantic sufficiency or actual content PASS."}
+           if include_typed_observations and typed_prerequisite_contract == "existing-owner-typed-prerequisites-v11" else {}),
         **({"operand_observation_contract": "existing-owner-operands-v1",
             "fact_support_route_rule": "A negative Fact bound to a permission gate or Git Diff must cite "
                 "original supporting clauses whose own primary routes include the SAME capability. "
@@ -1917,7 +1962,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                 for index, contract in enumerate(capabilities)
                 if _capability_tuple(contract["capability"])[3] == "EXACT_CANDIDATE_CONTENT"]
                 if include_typed_observations and typed_prerequisite_contract in {
-                    "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"} else []),
+                    "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else []),
             "support_operand_rule": "EACH_MINIMAL_SUPPORT_SET_IS_A_CONJUNCTION; SETS_ARE_ALTERNATIVES. "
                 "For a derived Work constraint, the production origin proves derivation and the current "
                 "negative clause proves the prohibition. One cannot substitute for the other. "
@@ -1943,7 +1988,7 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
         validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
     located_view = None
     if (not unavailable and (owner_preconditions or {}).get("typed_prerequisite_contract")
-            in {"existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"}):
+            in {"existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"}):
         # A schema/identity-valid complete Wire may be observed even when
         # source coverage failed before canonical Candidate admission.
         located_view = FulfillmentProjectionCandidate(inventory_fingerprint=inventory["inventory_fingerprint"],
@@ -1968,9 +2013,10 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
         unavailable = []
         located_view = restored
     diagnostic_view = SimpleNamespace(routes=tuple(route for _, _, route in observations))
-    source_contract = "v3" if (owner_preconditions or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"} else "v2" if (owner_preconditions or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"} else "v1"
+    source_contract = "v3" if (owner_preconditions or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v2" if (owner_preconditions or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v1"
     evaluated = json.loads(projection_validation_feedback(diagnostic_view, revision, ir, inventory,
-        "OBLIGATION_OWNER_PRECONDITIONS_UNPROVEN", source_contract=source_contract))
+        "OBLIGATION_OWNER_PRECONDITIONS_UNPROVEN", source_contract=source_contract,
+        owner_preconditions=owner_preconditions if (owner_preconditions or {}).get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v11" else None))
     if ((owner_preconditions or {}).get("operand_observation_contract") == "existing-owner-operands-v1"
             and not unavailable):
         from spg.domain.governed_obligation import fulfillment_component_id
@@ -2014,7 +2060,7 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
                             "semantic_target_selection": "NOT_EVALUATED"}
                 primary = next(r for r in owner_preconditions["sources"] if r["source_ref"] == route.source_ref)
                 if owner_preconditions.get("typed_prerequisite_contract") in {
-                        "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"}:
+                        "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"}:
                     details["typed_prerequisites"] = {
                         "source_kind": next(s["kind"] for s in inventory["sources"] if s["source_ref"] == route.source_ref),
                         "original_fact_type": primary.get("original_fact_type"),
@@ -2096,7 +2142,7 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
     return {"inventory_fingerprint": inventory["inventory_fingerprint"],
         **({"located_component_observation_contract": "existing-complete-wire-location-feedback-v1",
             **({"location_status": "UNADMITTED_COMPLETE_WIRE_OBSERVATION; COVERAGE_AND_SEMANTIC_ADMISSION_NOT_GRANTED"}
-                if (owner_preconditions or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"} else {}),
+                if (owner_preconditions or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else {}),
             "located_components": component_observations,
             "coverage_if_context_routes_removed": context_removal_observations} if located_view is not None else {}),
         "status": "UNADMITTED_OWNER_PRECONDITION_OBSERVATIONS",
@@ -2196,17 +2242,17 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if row.get("stage") == "MODEL_REQUEST_PENDING" and (
                 (row.get("source_role_contract") == "v3") !=
-                (isinstance(preconditions, dict) and preconditions.get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"})):
+                (isinstance(preconditions, dict) and preconditions.get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"})):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if row.get("stage") == "MODEL_REQUEST_PENDING" and isinstance(preconditions, dict) and (
                 (row.get("source_role_contract", "v1") in {"v2", "v3"}) !=
-                (preconditions.get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"})):
+                (preconditions.get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"})):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if preconditions is not None and (not isinstance(preconditions, dict)
                 or preconditions.get("syntax_observation_contract") not in (
                     None, "complete-value-observations-v1", "complete-value-owner-observations-v1", "complete-value-owner-observations-v2")
                 or preconditions.get("operand_observation_contract") not in (None, "existing-owner-operands-v1")
-                or preconditions.get("typed_prerequisite_contract") not in (None, "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10")):
+                or preconditions.get("typed_prerequisite_contract") not in (None, "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11")):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if row.get("owner_source_preconditions") is not None and (
                 row.get("stage") not in {"MODEL_REQUEST_PENDING", "MODEL_RESPONSE_OBSERVED"}
@@ -2275,7 +2321,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     deterministic_error = None
                     try:
                         original, _ = locate_projection_components(original, inventory)
-                        historical_source_contract = "v3" if (start.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"} else "v2" if (start.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"} else "v1"
+                        historical_source_contract = "v3" if (start.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v2" if (start.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v1"
                         validate_projection_candidate(original, revision, ir, inventory, allow_review_pending=True, source_contract=historical_source_contract, owner_preconditions=start.get("owner_source_preconditions"))
                     except ValueError as error:
                         deterministic_error = json.loads(projection_validation_feedback(
@@ -2289,8 +2335,8 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     expected_feedback = projection_validation_feedback(original, revision, ir, inventory, row.get("failed_predicate"),
                         semantic_observation=semantic_observation, source_contract=historical_source_contract, owner_preconditions=start.get("owner_source_preconditions"),
                         include_unresolved=start.get("completion_feedback_contract") == "existing-bounded-completion-feedback-v1",
-                        include_conflict_relations=(start.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v10",
-                        include_coverage=(start.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"})
+                        include_conflict_relations=(start.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"},
+                        include_coverage=(start.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"})
                     expected_feedback = _bind_repair_feedback(expected_feedback, rows, attempt,
                         revision, inventory, capabilities, original, ir=ir,
                         include_owner_preconditions=row.get("owner_repair_context_bound") is True)
@@ -2611,15 +2657,15 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                 supports_preconditions = ("owner_preconditions" in form_parameters
                     or any(p.kind is inspect.Parameter.VAR_KEYWORD for p in form_parameters.values()))
                 precondition_arguments = ({"owner_preconditions": _owner_source_preconditions(revision, ir, inventory, capabilities,
-                    typed_prerequisite_contract=((initial_request.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract", "existing-owner-typed-prerequisites-v10") if initial_request is not None and source_contract == "v3" else "existing-owner-typed-prerequisites-v10" if initial_request is None else
+                    typed_prerequisite_contract=((initial_request.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract", "existing-owner-typed-prerequisites-v11") if initial_request is not None and source_contract == "v3" else "existing-owner-typed-prerequisites-v11" if initial_request is None else
                         "existing-owner-typed-prerequisites-v8" if source_contract == "v2" else "existing-owner-typed-prerequisites-v3"))}
                     if supports_preconditions and callable(metadata_builder)
                     and "owner_preconditions" in inspect.signature(metadata_builder).parameters else {})
                 if initial_request is None and precondition_arguments:
                     # A legacy adapter may deliberately omit typed observations.
                     # Bind validation to the contract actually sent, not the default.
-                    source_contract = ("v3" if precondition_arguments["owner_preconditions"].get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"} else "v2" if precondition_arguments["owner_preconditions"].get(
-                        "typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"} else "v1")
+                    source_contract = ("v3" if precondition_arguments["owner_preconditions"].get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v2" if precondition_arguments["owner_preconditions"].get(
+                        "typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v1")
                 wire_metadata = metadata_builder(inventory, capabilities, validation_feedback=feedback,
                     **precondition_arguments) if callable(metadata_builder) else {}
                 owner_contract = {"owner_repair_context_contract": "existing-owner-preconditions-v1"} if wire_metadata else {}
@@ -2698,11 +2744,11 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                 wire_diagnostics=wire_diagnostics, semantic_observation=semantic_observation, source_contract=source_contract,
                 owner_preconditions=next((r.get("owner_source_preconditions") for r in recorder.records() if r.get("stage") == "MODEL_REQUEST_PENDING" and r.get("attempt") == attempt), None),
                 include_conflict_relations=any(row.get("stage") == "MODEL_REQUEST_PENDING" and row.get("attempt") == attempt
-                    and (row.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v10" for row in recorder.records()),
+                    and (row.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} for row in recorder.records()),
                 include_unresolved=any(row.get("stage") == "MODEL_REQUEST_PENDING" and row.get("attempt") == attempt
                     and row.get("completion_feedback_contract") == "existing-bounded-completion-feedback-v1" for row in recorder.records()),
                 include_coverage=any(row.get("stage") == "MODEL_REQUEST_PENDING" and row.get("attempt") == attempt
-                    and (row.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"} for row in recorder.records()))
+                    and (row.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} for row in recorder.records()))
             responses = [row for row in recorder.records() if row.get("stage") == "MODEL_RESPONSE_OBSERVED"
                 and row.get("attempt") == attempt]
             if (len(responses) == 1 and responses[0].get("provider_wire_version") is not None
