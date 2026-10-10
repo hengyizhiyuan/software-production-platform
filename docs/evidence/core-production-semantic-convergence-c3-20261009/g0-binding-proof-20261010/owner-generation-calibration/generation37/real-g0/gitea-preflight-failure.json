@@ -1,0 +1,19 @@
+{
+  "container_id": "9d3ff11979ea3274958db205172c3251604296e1e2c3003c13359f9d91b0c8aa",
+  "image_id": "sha256:071efa747340e5e211213fc79a0b928003bedf9b6b48f61cb32b3c52bfd1e09e",
+  "state": {
+    "Status": "running",
+    "Running": true,
+    "Restarting": false,
+    "OOMKilled": false,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "2026-10-10T19:29:31.402038996Z",
+    "FinishedAt": "0001-01-01T00:00:00Z"
+  },
+  "configured_memory": 536870912,
+  "configured_pids": 256,
+  "work_created": false,
+  "model_calls": 0,
+  "normal_entry_started": false
+}

@@ -1,0 +1,88 @@
+{
+  "conclusion": "CONTRACT_REVIEW_ONLY; C3_CLOSURE_NOT_ESTABLISHED",
+  "historical_findings": {
+    "actual_worker_candidate_verification_assurance": "NOT_REACHED",
+    "feedback_to_second_pending_bytes_and_parent_identity": "EXACT_MATCH",
+    "first_candidate_fingerprint": "88eed6a0810a3adea9a2c4888c96f45bd6c8952d30a889a352b2a05b7a66adc8",
+    "first_failed_source_ordinals": [
+      3,
+      8,
+      10,
+      11,
+      12,
+      13
+    ],
+    "first_semantic_rejection": "CORRECT_FOR_SUBMITTED_CONSUMERS",
+    "internal_model_copy_and_reasoning_cause": "UNKNOWN",
+    "lawful_expression": "Existing ARTIFACT_CONTENT can express original Work Constraint content; actual direct content or explicit semantically sufficient current Fact evidence is still required. Necessary provenance alternatives do not grant semantic approval.",
+    "second_additional_semantic_defect": "Source10-12 submitted Git routes remained; corresponding Critic reasons described Content despite those routes. Correcting an unrelated identity alone would not prove semantic validity.",
+    "second_candidate_fingerprint": "2e6a8ea09541ce7bf0eec5bcbff0dc358356d6e0f7869863c7964ebc7e41d294",
+    "second_failed_predicate": "OBLIGATION_COMPONENT_REVIEW_IDENTITY_DRIFT",
+    "second_identity_error_source": 6,
+    "source10_12_issue": "GIT_DIFF_SCOPE cannot prove the original content contributions; merely adding f or changing u cannot repair that submitted consumer.",
+    "source13_issue": "Reviewable Candidate contribution belongs to existing Candidate Owner Gate, not Git Diff."
+  },
+  "historical_identity": {
+    "actual_image": "sha256:18a0e4454195c043aa2a5354a8be53a4c35bdf54e529dfd479b95275ff6c85b4",
+    "ecf_revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "guardian_revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+    "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+    "raw_export_sha256": "15152aa2a034ed024e7337abc1964f195ba32b447e59c5e72e7a0bb778fd8616",
+    "source_count": 19,
+    "watt_source": "7820ec05ca20b2421f99c82eaf906cf539eb05f6",
+    "work_id": "411ea9e0-3bf7-58e2-aa9d-5eabf8d59bab",
+    "work_reality_revision_id": "d0f91d5a-a260-58ec-a55c-a3672013dd49"
+  },
+  "observed_at_utc": "2026-10-10T20:02:34.276476Z",
+  "recoverable_artifacts": {
+    "analysis_json_sha256": "bc0e67aa7c5b699b05195bf0eab208defed9df674a29327a6d4d342f69340ba0",
+    "analysis_script_sha256": "d589f898a12b3076cacf22f4f25d0299a63f2b5849985d018bbcd11862262d7a",
+    "private_root": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/private/independent-source-binding-audit-20261011",
+    "semantic_findings_sha256": "cad90846fede70083d16200771b0cc794d548e0fec3148a78edaafdbac9e99d8"
+  },
+  "reviewer_effects": {
+    "holdout_read_or_unsealed": false,
+    "model_calls": 0,
+    "product_code_or_history_modified": false,
+    "production_changed": false,
+    "work_created_or_modified": false
+  },
+  "schema": "independent-ordinary-source-consumer-review-v1",
+  "scope": "ORDINARY_G0_ONLY; READ_ONLY_PRODUCT_CODE_AND_HISTORICAL_OWNER_EVIDENCE",
+  "uncommitted_code_review": {
+    "actual_linked_fact_consumer": "Requires actual passed/current-evidence Fact row, exact Work/Source and effective path within both binding target paths. Proposed f and independent semantic review are not substituted for those proofs.",
+    "base_head": "7820ec05ca20b2421f99c82eaf906cf539eb05f6",
+    "confirmed_additional_defects": [],
+    "corrected_findings": [
+      "Legacy v1 complete Fact operand/instruction drift is now confined to new v2 marker.",
+      "Scoped equality actual count=1 qualifier now has exact primitive compatibility and immutable source retention."
+    ],
+    "file_sha256": {
+      "src/spg/application/governed_obligations.py": "5a1a5801bf74f0d3ba407a2743b23c38daa011cdc75c63cde038f7c7c638cf95",
+      "src/spg/providers/fulfillment_candidate.py": "ae6d6368883c2d905a87cc03c7028039f34ab136e024f1e6411d3e95bf9ba27b",
+      "src/spg/providers/static_html_semantic_verifier.py": "f15c771b88cdb9c048ff73372ab4a8056532a839af5b0321443ceb7dde130f46"
+    },
+    "gate_review": "No canonical Review/Wire change, verdict preselection, authority expansion, partial admission or budget reset observed. New schema singleton slots are copying geometry only; actual consumer boundaries remain visible when schema descriptions are not retained by Provider.",
+    "regression_receipt_from_parent": {
+      "independently_executed_by_this_reviewer": false,
+      "name": "development112",
+      "reported_pass_count": 84
+    },
+    "remaining_qualification": "Affected installed/PostgreSQL and exact new normal Work, actual content verification/Seal/Guardian remain required; this audit grants none.",
+    "scope_repair_review": "Original descriptive Scope and qualifiers remain immutable. Derived exact target requires authorized contract, original complete Fact/provenance, deterministic type/qualifier checks and separate stateless second plan review within existing two-attempt bound. Replay binds proposal/Review Wire, observed receipt, Fact/source SHA and complete target contract SHA."
+  },
+  "zero_model_independent_analysis": {
+    "candidate_fingerprint": "1d88959f668e6a2176b22c410828215a6ba41a5b0e570babffc663ba5078f78f",
+    "canonical_structural_binding_count": 22,
+    "components_fingerprint": "cb70270cb0d3244fe4620e62439538167befc4b951fbb891e09c510ab853e6f2",
+    "historical_candidate_repaired_or_admitted": false,
+    "new_structural_plan_route_count": 22,
+    "not_evaluated": [
+      "INDEPENDENT_RUNTIME_SEMANTIC_REVIEW",
+      "ACTUAL_CANDIDATE_CONTENT_EVIDENCE",
+      "ACTUAL_CANDIDATE_SEAL",
+      "GUARDIAN_ASSURANCE"
+    ],
+    "result": "REPRESENTABLE_REVIEW_PENDING_ONLY"
+  }
+}

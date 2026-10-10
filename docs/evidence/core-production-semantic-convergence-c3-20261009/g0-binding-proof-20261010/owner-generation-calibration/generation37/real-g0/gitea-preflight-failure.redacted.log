@@ -1,0 +1,42 @@
+2026/10/10 19:29:32 cmd/web.go:263:runWeb() [I] Starting Gitea on PID: 7
+2026/10/10 19:29:33 cmd/web.go:115:showWebStartupMessage() [I] Gitea version: 1.27.3 built with go1.26.7-X:jsonv2 : bindata, timetzdata, 
+2026/10/10 19:29:33 cmd/web.go:116:showWebStartupMessage() [I] * RunMode: prod
+2026/10/10 19:29:33 cmd/web.go:117:showWebStartupMessage() [I] * AppPath: /usr/local/bin/gitea
+2026/10/10 19:29:33 cmd/web.go:118:showWebStartupMessage() [I] * WorkPath: /var/lib/gitea
+2026/10/10 19:29:33 cmd/web.go:119:showWebStartupMessage() [I] * CustomPath: /var/lib/gitea/custom
+2026/10/10 19:29:33 cmd/web.go:120:showWebStartupMessage() [I] * ConfigFile: /etc/gitea/app.ini
+2026/10/10 19:29:33 cmd/web.go:121:showWebStartupMessage() [I] Prepare to run web server
+2026/10/10 19:29:33 routers/init.go:117:InitWebInstalled() [I] Git version: 2.54.0 (home: /var/lib/gitea/home)
+2026/10/10 19:29:34 modules/storage/storage.go:227:initAttachments() [I] Initialising Attachment storage with type: local
+2026/10/10 19:29:34 modules/storage/local.go:48:NewLocalStorage() [I] Creating new Local Storage at /var/lib/gitea/data/attachments
+2026/10/10 19:29:34 modules/storage/storage.go:217:initAvatars() [I] Initialising Avatar storage with type: local
+2026/10/10 19:29:34 modules/storage/local.go:48:NewLocalStorage() [I] Creating new Local Storage at /var/lib/gitea/data/avatars
+2026/10/10 19:29:34 modules/storage/storage.go:243:initRepoAvatars() [I] Initialising Repository Avatar storage with type: local
+2026/10/10 19:29:34 modules/storage/local.go:48:NewLocalStorage() [I] Creating new Local Storage at /var/lib/gitea/data/repo-avatars
+2026/10/10 19:29:34 modules/storage/storage.go:249:initRepoArchives() [I] Initialising Repository Archive storage with type: local
+2026/10/10 19:29:34 modules/storage/local.go:48:NewLocalStorage() [I] Creating new Local Storage at /var/lib/gitea/repo-archive
+2026/10/10 19:29:34 modules/storage/storage.go:259:initPackages() [I] Initialising Packages storage with type: local
+2026/10/10 19:29:34 modules/storage/local.go:48:NewLocalStorage() [I] Creating new Local Storage at /var/lib/gitea/packages
+2026/10/10 19:29:34 modules/storage/storage.go:270:initActions() [I] Initialising Actions storage with type: local
+2026/10/10 19:29:34 modules/storage/local.go:48:NewLocalStorage() [I] Creating new Local Storage at /var/lib/gitea/actions_log
+2026/10/10 19:29:34 modules/storage/storage.go:274:initActions() [I] Initialising ActionsArtifacts storage with type: local
+2026/10/10 19:29:34 modules/storage/local.go:48:NewLocalStorage() [I] Creating new Local Storage at /var/lib/gitea/actions_artifacts
+2026/10/10 19:29:34 routers/common/db.go:22:InitDBEngine() [I] Beginning ORM engine initialization.
+2026/10/10 19:29:34 routers/common/db.go:29:InitDBEngine() [I] ORM engine initialization attempt #1/10...
+2026/10/10 19:29:34 cmd/web.go:205:serveInstalled() [I] PING DATABASE sqlite3
+2026/10/10 19:30:15 routers/init.go:138:InitWebInstalled() [I] ORM engine initialization successful!
+2026/10/10 19:30:17 routers/init.go:86:syncAppConfForGit() [I] AppPath changed from '' to '/usr/local/bin/gitea'
+2026/10/10 19:30:17 routers/init.go:91:syncAppConfForGit() [I] CustomConf changed from '' to '/etc/gitea/app.ini'
+2026/10/10 19:30:17 routers/init.go:97:syncAppConfForGit() [I] re-sync repository hooks ...
+2026/10/10 19:30:17 .../indexer/issues/indexer.go:78:InitIssueIndexer.1() [I] PID 7: Initializing Issue Indexer: bleve
+2026/10/10 19:30:17 routers/init.go:100:syncAppConfForGit() [I] re-write ssh public keys ...
+2026/10/10 19:30:17 .../indexer/stats/indexer.go:41:populateRepoIndexer() [I] Populating the repo stats indexer with existing repositories
+2026/10/10 19:30:17 .../indexer/issues/indexer.go:155:InitIssueIndexer.2() [I] Issue Indexer Initialization took 54.79035ms
+2026/10/10 19:30:18 modules/ssh/ssh.go:376:Listen() [I] Adding SSH host key: /var/lib/gitea/ssh/gitea.rsa
+2026/10/10 19:30:18 modules/ssh/ssh.go:376:Listen() [I] Adding SSH host key: /var/lib/gitea/ssh/gitea.ecdsa
+2026/10/10 19:30:18 modules/ssh/ssh.go:376:Listen() [I] Adding SSH host key: /var/lib/gitea/ssh/gitea.ed25519
+2026/10/10 19:30:18 modules/ssh/init.go:27:Init() [I] SSH server started on ":2222". Ciphers: default, key exchange algorithms: default, MACs: default
+2026/10/10 19:30:18 modules/graceful/server.go:52:NewServer() [I] Starting new SSH server: tcp::2222 on PID: 7
+2026/10/10 19:30:19 cmd/web.go:329:listen() [I] Listen: http://0.0.0.0:3000
+2026/10/10 19:30:19 cmd/web.go:333:listen() [I] AppURL(ROOT_URL): http://watt-c3-bindingg0g37-gitea-20261010:3000/
+2026/10/10 19:30:19 modules/graceful/server.go:52:NewServer() [I] Starting new Web server: tcp:0.0.0.0:3000 on PID: 7

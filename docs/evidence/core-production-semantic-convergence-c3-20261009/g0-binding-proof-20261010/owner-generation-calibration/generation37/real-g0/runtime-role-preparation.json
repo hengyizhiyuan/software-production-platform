@@ -1,0 +1,230 @@
+{
+  "recorded_at_utc": "2026-10-10T19:32:30.210088+00:00",
+  "roles": [
+    {
+      "role": "tool-host",
+      "name": "watt-c3-bindingg0g37-tool-host-20261010",
+      "container_id": "78d08a44a9eafe690f12e166648c0d0139e02208a0a193b791a8b16f5ebc9a29",
+      "image_id": "sha256:18a0e4454195c043aa2a5354a8be53a4c35bdf54e529dfd479b95275ff6c85b4",
+      "mounts": [
+        {
+          "Type": "volume",
+          "Name": "watt-c3-bindingg0g37-workspaces-20261010",
+          "Source": "/data/docker/volumes/watt-c3-bindingg0g37-workspaces-20261010/_data",
+          "Destination": "/var/lib/spg/native-workspaces",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": true,
+          "Propagation": ""
+        },
+        {
+          "Type": "bind",
+          "Source": "/var/run/docker.sock",
+          "Destination": "/var/run/docker.sock",
+          "Mode": "",
+          "RW": true,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/receipts",
+          "Destination": "/var/lib/spg/native-tool-receipts",
+          "Mode": "",
+          "RW": true,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/app",
+          "Destination": "/var/lib/spg",
+          "Mode": "",
+          "RW": false,
+          "Propagation": "rprivate"
+        }
+      ],
+      "labels": {
+        "org.opencontainers.image.revision": "7820ec05ca20b2421f99c82eaf906cf539eb05f6",
+        "watt.c3.base-image-id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+        "watt.c3.ecf-revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+        "watt.c3.ecf-tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+        "watt.c3.ecf-unsupported-revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+        "watt.c3.guardian-revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+        "watt.c3.guardian-tree": "6066a6d6b8d91bec610021409ab320309ed0e437",
+        "watt.c3.source-tree": "56cbb29b639d38ab1bb0ef668693b4119ff4e817",
+        "watt.production": "false",
+        "watt.qualification": "C3-binding-g0"
+      },
+      "user": "10001:10001",
+      "networks": [
+        "watt-c3-bindingg0g37-control-20261010",
+        "watt-c3-bindingg0g37-executor-20261010"
+      ],
+      "ports": {},
+      "read_only_root": true
+    },
+    {
+      "role": "api",
+      "name": "watt-c3-bindingg0g37-api-20261010",
+      "container_id": "ca485a152c592a02bf967df4b063bff7838fb46b1df24029bfe7a6e4632a9a09",
+      "image_id": "sha256:18a0e4454195c043aa2a5354a8be53a4c35bdf54e529dfd479b95275ff6c85b4",
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/var/run/docker.sock",
+          "Destination": "/var/run/docker.sock",
+          "Mode": "",
+          "RW": true,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/app",
+          "Destination": "/var/lib/spg",
+          "Mode": "",
+          "RW": true,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "volume",
+          "Name": "watt-c3-bindingg0g37-workspaces-20261010",
+          "Source": "/data/docker/volumes/watt-c3-bindingg0g37-workspaces-20261010/_data",
+          "Destination": "/var/lib/spg/native-workspaces",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": true,
+          "Propagation": ""
+        }
+      ],
+      "labels": {
+        "org.opencontainers.image.revision": "7820ec05ca20b2421f99c82eaf906cf539eb05f6",
+        "watt.c3.base-image-id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+        "watt.c3.ecf-revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+        "watt.c3.ecf-tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+        "watt.c3.ecf-unsupported-revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+        "watt.c3.guardian-revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+        "watt.c3.guardian-tree": "6066a6d6b8d91bec610021409ab320309ed0e437",
+        "watt.c3.source-tree": "56cbb29b639d38ab1bb0ef668693b4119ff4e817",
+        "watt.production": "false",
+        "watt.qualification": "C3-binding-g0"
+      },
+      "user": "10001:10001",
+      "networks": [
+        "watt-c3-bindingg0g37-control-20261010",
+        "watt-c3-bindingg0g37-executor-20261010"
+      ],
+      "ports": {
+        "8000/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "18311"
+          }
+        ]
+      },
+      "read_only_root": true
+    },
+    {
+      "role": "coordinator",
+      "name": "watt-c3-bindingg0g37-coordinator-20261010",
+      "container_id": "f91f0aaec8baae59476a2fb11a70d9fcf9a6b64fa2334323168f951df88e360a",
+      "image_id": "sha256:18a0e4454195c043aa2a5354a8be53a4c35bdf54e529dfd479b95275ff6c85b4",
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/app",
+          "Destination": "/var/lib/spg",
+          "Mode": "",
+          "RW": true,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "volume",
+          "Name": "watt-c3-bindingg0g37-workspaces-20261010",
+          "Source": "/data/docker/volumes/watt-c3-bindingg0g37-workspaces-20261010/_data",
+          "Destination": "/var/lib/spg/native-workspaces",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": true,
+          "Propagation": ""
+        }
+      ],
+      "labels": {
+        "org.opencontainers.image.revision": "7820ec05ca20b2421f99c82eaf906cf539eb05f6",
+        "watt.c3.base-image-id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+        "watt.c3.ecf-revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+        "watt.c3.ecf-tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+        "watt.c3.ecf-unsupported-revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+        "watt.c3.guardian-revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+        "watt.c3.guardian-tree": "6066a6d6b8d91bec610021409ab320309ed0e437",
+        "watt.c3.source-tree": "56cbb29b639d38ab1bb0ef668693b4119ff4e817",
+        "watt.production": "false",
+        "watt.qualification": "C3-binding-g0"
+      },
+      "user": "10001:10001",
+      "networks": [
+        "watt-c3-bindingg0g37-control-20261010",
+        "watt-c3-bindingg0g37-executor-20261010"
+      ],
+      "ports": {},
+      "read_only_root": true
+    },
+    {
+      "role": "worker",
+      "name": "watt-c3-bindingg0g37-worker-20261010",
+      "container_id": "a426b20a4c528c8a30890e6d55f79347324903ae04f9d8d6e5ed6ab33c69358e",
+      "image_id": "sha256:18a0e4454195c043aa2a5354a8be53a4c35bdf54e529dfd479b95275ff6c85b4",
+      "mounts": [
+        {
+          "Type": "bind",
+          "Source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/app",
+          "Destination": "/var/lib/spg",
+          "Mode": "",
+          "RW": true,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "volume",
+          "Name": "watt-c3-bindingg0g37-workspaces-20261010",
+          "Source": "/data/docker/volumes/watt-c3-bindingg0g37-workspaces-20261010/_data",
+          "Destination": "/var/lib/spg/native-workspaces",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": true,
+          "Propagation": ""
+        }
+      ],
+      "labels": {
+        "org.opencontainers.image.revision": "7820ec05ca20b2421f99c82eaf906cf539eb05f6",
+        "watt.c3.base-image-id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+        "watt.c3.ecf-revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+        "watt.c3.ecf-tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+        "watt.c3.ecf-unsupported-revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+        "watt.c3.guardian-revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+        "watt.c3.guardian-tree": "6066a6d6b8d91bec610021409ab320309ed0e437",
+        "watt.c3.source-tree": "56cbb29b639d38ab1bb0ef668693b4119ff4e817",
+        "watt.production": "false",
+        "watt.qualification": "C3-binding-g0"
+      },
+      "user": "10001:10001",
+      "networks": [
+        "watt-c3-bindingg0g37-control-20261010",
+        "watt-c3-bindingg0g37-executor-20261010"
+      ],
+      "ports": {},
+      "read_only_root": true
+    }
+  ],
+  "source": "7820ec05ca20b2421f99c82eaf906cf539eb05f6",
+  "tree": "56cbb29b639d38ab1bb0ef668693b4119ff4e817",
+  "image_id": "sha256:18a0e4454195c043aa2a5354a8be53a4c35bdf54e529dfd479b95275ff6c85b4",
+  "database": "spg_c3_bindingg0g37_qualification_20261010",
+  "migration": "20261007_72",
+  "isolated_wic_formation_review_reasoning": "none",
+  "native_worker_reasoning": "high",
+  "max_output_tokens": 16384,
+  "timeout_seconds": 120,
+  "production_modified": false,
+  "old_resources_started": false,
+  "model_calls": 0,
+  "works_created": 0,
+  "control_sha256": "069935fefb9a18ddce4eb68b6e7e1aa211bf7489ef0c476cc060ada8ff6ec3a6"
+}

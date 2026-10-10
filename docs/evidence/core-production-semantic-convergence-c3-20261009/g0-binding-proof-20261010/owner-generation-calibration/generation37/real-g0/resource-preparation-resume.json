@@ -1,0 +1,14 @@
+{
+  "recorded_at_utc": "2026-10-10T19:31:31.903331+00:00",
+  "code": "GITEA_CURRENT_HEALTH_CONFIRMED_AFTER_INITIAL_READY_FAILURE",
+  "gitea_current_running": true,
+  "gitea_admin_users_before_create": 0,
+  "migration_not_attempted": true,
+  "app_roles_not_created": true,
+  "work_created": false,
+  "model_calls": 0,
+  "original_failure_preserved": true,
+  "source": "7820ec05ca20b2421f99c82eaf906cf539eb05f6",
+  "image": "sha256:18a0e4454195c043aa2a5354a8be53a4c35bdf54e529dfd479b95275ff6c85b4",
+  "controller_sha256": "069935fefb9a18ddce4eb68b6e7e1aa211bf7489ef0c476cc060ada8ff6ec3a6"
+}

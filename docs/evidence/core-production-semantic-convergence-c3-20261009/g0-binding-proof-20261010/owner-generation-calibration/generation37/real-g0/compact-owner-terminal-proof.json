@@ -1,0 +1,553 @@
+{
+  "work_id": "411ea9e0-3bf7-58e2-aa9d-5eabf8d59bab",
+  "counts": {
+    "attempt_preparations": 0,
+    "baseline_candidates": 0,
+    "checkpoint_bundles": 0,
+    "completion_evaluations": 0,
+    "context_packages": 0,
+    "effect_receipts": 0,
+    "engineering_resource_bindings": 1,
+    "engineering_resources": 1,
+    "engineering_scopes": 1,
+    "event_outbox": 0,
+    "execution_allocations": 0,
+    "execution_attempts": 0,
+    "execution_control_requests": 0,
+    "execution_dispatches": 0,
+    "execution_effects": 0,
+    "execution_events": 0,
+    "execution_evidence": 0,
+    "execution_recovery_cases": 0,
+    "execution_resource_envelopes": 0,
+    "execution_resource_usage": 0,
+    "execution_sessions": 0,
+    "execution_source_members": 0,
+    "execution_source_vectors": 0,
+    "execution_steps": 0,
+    "execution_workspaces": 0,
+    "executor_leases": 0,
+    "executor_queue": 0,
+    "executor_worker_events": 0,
+    "executor_worker_registrations": 0,
+    "governance_records": 15,
+    "human_authorizations": 0,
+    "interaction_assessments": 1,
+    "interaction_records": 1,
+    "interaction_turn_obligations": 1,
+    "interaction_turn_realization_refinements": 0,
+    "interaction_turn_realizations": 1,
+    "interaction_turn_semantic_envelopes": 1,
+    "interaction_turns": 1,
+    "native_attempt_bindings": 0,
+    "native_attempt_states": 0,
+    "plan_revisions": 0,
+    "product_interactions": 1,
+    "product_managed_sources": 1,
+    "product_source_promotion_intents": 0,
+    "product_source_versions": 1,
+    "product_works": 1,
+    "product_workspace_interactions": 1,
+    "production_admissibility_records": 0,
+    "production_runs": 0,
+    "production_snapshots": 1,
+    "production_work_units": 0,
+    "proposed_repository_snapshots": 0,
+    "provider_execution_reports": 0,
+    "pwu_contract_versions": 0,
+    "repository_integration_effects": 0,
+    "repository_observations": 0,
+    "result_ready_claims": 0,
+    "runtime_commits": 0,
+    "self_refine_actions": 2,
+    "self_refine_events": 2,
+    "semantic_step_results": 1,
+    "software_product_assets": 1,
+    "software_products": 1,
+    "steering_decisions": 1,
+    "steering_history_events": 1,
+    "steering_plan_revisions": 1,
+    "steering_plans": 1,
+    "steering_steps": 4,
+    "transition_history": 0,
+    "verification_records": 0,
+    "work_convergence_observations": 2,
+    "work_delivery_acceptances": 0,
+    "work_delivery_manifests": 0,
+    "work_delivery_runtimes": 0,
+    "work_delivery_targets": 0,
+    "work_product_references": 0,
+    "work_reality_revisions": 1,
+    "work_runtime_bindings": 0,
+    "work_source_bases": 1
+  },
+  "governance": [
+    {
+      "governance_row_id": "b74dc8b2-f94c-5dd8-b29e-834493691dbe",
+      "codes": []
+    },
+    {
+      "receipt_id": "2beb5334-b482-4c22-88d9-13e81c47c88f",
+      "stage": "MODEL_REQUEST_PENDING",
+      "attempt": 1,
+      "budget_limit": 2,
+      "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+      "governance_row_id": "fef58b27-14dc-479f-84c8-a2672e6473b9",
+      "codes": []
+    },
+    {
+      "receipt_id": "90167a4e-cb32-43e3-b188-74efb1dc421c",
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "attempt": 1,
+      "budget_limit": 2,
+      "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+      "governance_row_id": "d3e5b523-1fcf-4b52-a669-48313d0d9f68",
+      "codes": []
+    },
+    {
+      "receipt_id": "16a076be-dcca-43af-8f00-09998b6b892d",
+      "stage": "CANDIDATE_LOCATED",
+      "attempt": 1,
+      "budget_limit": 2,
+      "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+      "candidate_fingerprint": "88eed6a0810a3adea9a2c4888c96f45bd6c8952d30a889a352b2a05b7a66adc8",
+      "governance_row_id": "f2b87a2e-1c0f-452f-8861-84aecfa6cf87",
+      "codes": []
+    },
+    {
+      "receipt_id": "6e8122f0-50e2-4d50-b627-1ae8f4245363",
+      "stage": "SEMANTIC_REVIEW_PENDING",
+      "attempt": 1,
+      "budget_limit": 2,
+      "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+      "candidate_fingerprint": "88eed6a0810a3adea9a2c4888c96f45bd6c8952d30a889a352b2a05b7a66adc8",
+      "components_fingerprint": "aef63fc469388639c4718172102f70267acbfc3bab91c5bfafc7255d34406e59",
+      "governance_row_id": "1bc34d7b-45ba-468c-8152-698bbc6112c5",
+      "codes": []
+    },
+    {
+      "receipt_id": "d013d27d-18da-4d3d-b325-9b8be9dbfd52",
+      "stage": "SEMANTIC_REVIEW_OBSERVED",
+      "attempt": 1,
+      "budget_limit": 2,
+      "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+      "governance_row_id": "bebf22fe-4653-4a0d-b292-0ed1c86cd22d",
+      "codes": []
+    },
+    {
+      "receipt_id": "0798a3b3-c3e7-4083-bb9a-84a367e129ff",
+      "stage": "SEMANTIC_REVIEW_VALIDATED",
+      "attempt": 1,
+      "budget_limit": 2,
+      "failed_predicate": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+      "validation_passed": false,
+      "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+      "governance_row_id": "38ca6d6d-6f40-4829-bd2d-ccfca66649b0",
+      "codes": [
+        "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH"
+      ]
+    },
+    {
+      "receipt_id": "68b0e7d1-80f6-408f-beba-f58239cdec9c",
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 1,
+      "budget_limit": 2,
+      "failed_predicate": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+      "terminal": false,
+      "terminal_reason": null,
+      "validation_passed": false,
+      "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+      "repair_feedback_bound": true,
+      "governance_row_id": "0ee04bf1-8c0c-4eee-b025-6e10b2d1fab2",
+      "codes": [
+        "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH"
+      ]
+    },
+    {
+      "receipt_id": "ba490bf1-633c-4e1a-a794-499d15c39d7d",
+      "stage": "MODEL_REQUEST_PENDING",
+      "attempt": 2,
+      "budget_limit": 2,
+      "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+      "governance_row_id": "67d54198-ed7c-4a95-85b2-eab2a92b237e",
+      "codes": []
+    },
+    {
+      "receipt_id": "6c28d74a-752c-4762-a273-320d90d1c421",
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "attempt": 2,
+      "budget_limit": 2,
+      "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+      "governance_row_id": "5650c67d-89f1-4065-8485-73345430ab26",
+      "codes": []
+    },
+    {
+      "receipt_id": "bcd89150-04b8-425b-8537-9a90ba943416",
+      "stage": "CANDIDATE_LOCATED",
+      "attempt": 2,
+      "budget_limit": 2,
+      "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+      "candidate_fingerprint": "2e6a8ea09541ce7bf0eec5bcbff0dc358356d6e0f7869863c7964ebc7e41d294",
+      "governance_row_id": "37c6164a-e565-494d-8856-c5f6075b5f8b",
+      "codes": []
+    },
+    {
+      "receipt_id": "c755d608-c2da-4920-840e-b08f1f430982",
+      "stage": "SEMANTIC_REVIEW_PENDING",
+      "attempt": 2,
+      "budget_limit": 2,
+      "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+      "candidate_fingerprint": "2e6a8ea09541ce7bf0eec5bcbff0dc358356d6e0f7869863c7964ebc7e41d294",
+      "components_fingerprint": "0fe9aa61b80d0dc805dabad3fcfc98719736bbf5f07f092799c128cfb956d5e2",
+      "governance_row_id": "c064f162-bdcc-4d98-8873-8fffb67ed536",
+      "codes": []
+    },
+    {
+      "receipt_id": "4d718fe0-f7f6-4684-a0f1-22d56784ac95",
+      "stage": "SEMANTIC_REVIEW_OBSERVED",
+      "attempt": 2,
+      "budget_limit": 2,
+      "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+      "governance_row_id": "e06a9f49-a55b-4ec8-bfdb-81b2ac5e48b6",
+      "codes": []
+    },
+    {
+      "receipt_id": "5a4a16b6-d4d2-4662-afb4-381ae1217eb2",
+      "stage": "SEMANTIC_REVIEW_VALIDATED",
+      "attempt": 2,
+      "budget_limit": 2,
+      "failed_predicate": "OBLIGATION_COMPONENT_REVIEW_IDENTITY_DRIFT",
+      "validation_passed": false,
+      "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+      "governance_row_id": "89bc571c-64d8-4ffe-89b0-42d8de8b12d4",
+      "codes": [
+        "OBLIGATION_COMPONENT_REVIEW_IDENTITY_DRIFT"
+      ]
+    },
+    {
+      "receipt_id": "6c0eb9de-471e-4685-8483-2eb0133661c8",
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 2,
+      "budget_limit": 2,
+      "failed_predicate": "OBLIGATION_COMPONENT_REVIEW_IDENTITY_DRIFT",
+      "terminal": true,
+      "terminal_reason": "OBLIGATION_COMPONENT_REVIEW_IDENTITY_DRIFT",
+      "validation_passed": false,
+      "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+      "repair_feedback_bound": true,
+      "governance_row_id": "854c4770-189b-45e1-8c97-652a63a6914a",
+      "codes": [
+        "OBLIGATION_COMPONENT_REVIEW_IDENTITY_DRIFT"
+      ]
+    }
+  ],
+  "usage_observations": [
+    {
+      "path": "/governance_records/rows/2/scope/model/usage",
+      "usage": {
+        "cached_tokens": 1792,
+        "input_tokens": 30929,
+        "output_tokens": 1966,
+        "reasoning_tokens": 0,
+        "total_tokens": 32895,
+        "unknown": false
+      }
+    },
+    {
+      "path": "/governance_records/rows/5/scope/model/usage",
+      "usage": {
+        "cached_tokens": 1536,
+        "input_tokens": 43919,
+        "output_tokens": 5381,
+        "reasoning_tokens": 0,
+        "total_tokens": 49300,
+        "unknown": false
+      }
+    },
+    {
+      "path": "/governance_records/rows/9/scope/model/usage",
+      "usage": {
+        "cached_tokens": 1920,
+        "input_tokens": 43826,
+        "output_tokens": 2445,
+        "reasoning_tokens": 0,
+        "total_tokens": 46271,
+        "unknown": false
+      }
+    },
+    {
+      "path": "/governance_records/rows/12/scope/model/usage",
+      "usage": {
+        "cached_tokens": 2304,
+        "input_tokens": 42744,
+        "output_tokens": 5378,
+        "reasoning_tokens": 0,
+        "total_tokens": 48122,
+        "unknown": false
+      }
+    },
+    {
+      "path": "/product_works/rows/0/production_plan_proposal/fulfillment_formation_receipts/1/model/usage",
+      "usage": {
+        "cached_tokens": 1792,
+        "input_tokens": 30929,
+        "output_tokens": 1966,
+        "reasoning_tokens": 0,
+        "total_tokens": 32895,
+        "unknown": false
+      }
+    },
+    {
+      "path": "/product_works/rows/0/production_plan_proposal/fulfillment_formation_receipts/4/model/usage",
+      "usage": {
+        "cached_tokens": 1536,
+        "input_tokens": 43919,
+        "output_tokens": 5381,
+        "reasoning_tokens": 0,
+        "total_tokens": 49300,
+        "unknown": false
+      }
+    },
+    {
+      "path": "/product_works/rows/0/production_plan_proposal/fulfillment_formation_receipts/8/model/usage",
+      "usage": {
+        "cached_tokens": 1920,
+        "input_tokens": 43826,
+        "output_tokens": 2445,
+        "reasoning_tokens": 0,
+        "total_tokens": 46271,
+        "unknown": false
+      }
+    },
+    {
+      "path": "/product_works/rows/0/production_plan_proposal/fulfillment_formation_receipts/11/model/usage",
+      "usage": {
+        "cached_tokens": 2304,
+        "input_tokens": 42744,
+        "output_tokens": 5378,
+        "reasoning_tokens": 0,
+        "total_tokens": 48122,
+        "unknown": false
+      }
+    },
+    {
+      "path": "/self_refine_events/rows/0/model_token_usage",
+      "usage": {
+        "cached_tokens": 3328,
+        "input_tokens": 11565,
+        "output_tokens": 1918,
+        "reasoning_tokens": 0,
+        "total_tokens": 13483,
+        "unknown": false
+      }
+    },
+    {
+      "path": "/self_refine_events/rows/1/model_token_usage",
+      "usage": {
+        "total_tokens": 176588,
+        "unknown": false
+      }
+    }
+  ],
+  "semantic_step_results": [
+    {
+      "id": "62dd8b68-7310-4850-8428-0ec44b497ad9",
+      "keys": [
+        "authority_assessment",
+        "basis_fingerprint",
+        "bounded_summary",
+        "completion_satisfied",
+        "created_at",
+        "decisions",
+        "derived_constraints",
+        "evidence_refs",
+        "human_attention_recommendation",
+        "human_decision_need",
+        "id",
+        "material_direction_fingerprint",
+        "proposed_production",
+        "reasoning_provider_identity",
+        "result_kind",
+        "steering_plan_revision_id",
+        "step_id",
+        "step_type",
+        "unresolved_questions",
+        "work_id"
+      ],
+      "codes": [],
+      "status": null,
+      "result": null,
+      "state": null,
+      "result_kind": "DESIGN_DIRECTION",
+      "step_type": "DESIGN",
+      "completion_satisfied": true,
+      "failure_family": null,
+      "final_result": null,
+      "work_resume_result": null
+    }
+  ],
+  "work_convergence_observations": [
+    {
+      "id": "a2c818eb-b939-4cf1-b576-d596c10719c1",
+      "keys": [
+        "attempts",
+        "boundary",
+        "candidate_identity",
+        "compute_cost",
+        "condition",
+        "created_at",
+        "elapsed_seconds",
+        "evidence",
+        "failure_signature",
+        "human_intervention_count",
+        "id",
+        "intent_identity",
+        "missing_acceptance",
+        "model_cost",
+        "no_progress_count",
+        "predecessor_id",
+        "previous_repair_class",
+        "reality_identity",
+        "sequence",
+        "token_usage",
+        "work_id"
+      ],
+      "codes": [],
+      "status": null,
+      "result": null,
+      "state": null,
+      "result_kind": null,
+      "step_type": null,
+      "completion_satisfied": null,
+      "failure_family": null,
+      "final_result": null,
+      "work_resume_result": null
+    },
+    {
+      "id": "ea309754-8736-40fe-8c2c-8569e1a113b7",
+      "keys": [
+        "attempts",
+        "boundary",
+        "candidate_identity",
+        "compute_cost",
+        "condition",
+        "created_at",
+        "elapsed_seconds",
+        "evidence",
+        "failure_signature",
+        "human_intervention_count",
+        "id",
+        "intent_identity",
+        "missing_acceptance",
+        "model_cost",
+        "no_progress_count",
+        "predecessor_id",
+        "previous_repair_class",
+        "reality_identity",
+        "sequence",
+        "token_usage",
+        "work_id"
+      ],
+      "codes": [],
+      "status": null,
+      "result": null,
+      "state": null,
+      "result_kind": null,
+      "step_type": null,
+      "completion_satisfied": null,
+      "failure_family": null,
+      "final_result": null,
+      "work_resume_result": null
+    }
+  ],
+  "self_refine_events": [
+    {
+      "id": "70008645-cf35-4830-b7c4-7d97007f1666",
+      "keys": [
+        "affected_component",
+        "budget_decision",
+        "compute_overhead",
+        "created_at",
+        "diagnosis_summary",
+        "diagnostic_evidence",
+        "evidence_references",
+        "expected_reality",
+        "extra_elapsed_seconds",
+        "failure_family",
+        "failure_signature",
+        "final_result",
+        "id",
+        "known_failure_match",
+        "model_token_usage",
+        "observation_confidence",
+        "observed_reality",
+        "operation_id",
+        "platform_improvement_candidate_ref",
+        "refinement_class",
+        "repair_hypothesis",
+        "repairability",
+        "root_cause_classification",
+        "semantic_version",
+        "signal_kind",
+        "status",
+        "updated_at",
+        "work_id",
+        "work_resume_result"
+      ],
+      "codes": [],
+      "status": "VERIFIED",
+      "result": null,
+      "state": null,
+      "result_kind": null,
+      "step_type": null,
+      "completion_satisfied": null,
+      "failure_family": "CANDIDATE_INCONSISTENT",
+      "final_result": "LOCAL_OBLIGATION_RECOVERED",
+      "work_resume_result": "RESUMED"
+    },
+    {
+      "id": "68cee690-9665-4fbc-bb1d-1e092b89176a",
+      "keys": [
+        "affected_component",
+        "budget_decision",
+        "compute_overhead",
+        "created_at",
+        "diagnosis_summary",
+        "diagnostic_evidence",
+        "evidence_references",
+        "expected_reality",
+        "extra_elapsed_seconds",
+        "failure_family",
+        "failure_signature",
+        "final_result",
+        "id",
+        "known_failure_match",
+        "model_token_usage",
+        "observation_confidence",
+        "observed_reality",
+        "operation_id",
+        "platform_improvement_candidate_ref",
+        "refinement_class",
+        "repair_hypothesis",
+        "repairability",
+        "root_cause_classification",
+        "semantic_version",
+        "signal_kind",
+        "status",
+        "updated_at",
+        "work_id",
+        "work_resume_result"
+      ],
+      "codes": [],
+      "status": "MITIGATED",
+      "result": null,
+      "state": null,
+      "result_kind": null,
+      "step_type": null,
+      "completion_satisfied": null,
+      "failure_family": "CONTRACT_MISMATCH",
+      "final_result": "ESCALATED",
+      "work_resume_result": "NOT_RESUMED"
+    }
+  ]
+}

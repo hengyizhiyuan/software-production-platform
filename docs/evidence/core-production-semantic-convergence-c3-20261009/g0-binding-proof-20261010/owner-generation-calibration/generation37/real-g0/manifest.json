@@ -1,0 +1,55 @@
+{
+  "private_artifacts_included": false,
+  "files": [
+    {
+      "file": "compact-owner-terminal-proof.json",
+      "sha256": "440f8047d09e41fa341914341e4d8b4029de28c79f5442046b3dfebf40434b4d",
+      "source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/evidence/compact-owner-terminal-proof.json"
+    },
+    {
+      "file": "independent-ordinary37-source-consumer-review-20261011.json",
+      "sha256": "b35055fbd3773c14a99b1c07169a54dd302df76b2b43cae45742393286b7e216",
+      "source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/evidence/independent-ordinary37-source-consumer-review-20261011.json"
+    },
+    {
+      "file": "preparation-preflight.json",
+      "sha256": "666e46acfde9b2e781429d6504cb483e33097d06bd4bcc0d6c541a3efd6e733a",
+      "source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/evidence/preparation-preflight.json"
+    },
+    {
+      "file": "worker-root-preflight.json",
+      "sha256": "65d2d507bfea1bdb49fcbfe1974fb161f7117bd8e5a3649487acbe6184f514c6",
+      "source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/evidence/worker-root-preflight.json"
+    },
+    {
+      "file": "runtime-role-preparation.json",
+      "sha256": "bf4ecf2bdbd24c955407883f8328ca3d2d95fb46bbcd6a9a6a8687cc4c803f1c",
+      "source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/evidence/runtime-role-preparation.json"
+    },
+    {
+      "file": "migration.json",
+      "sha256": "34ce5f4cc500df0b7b3098d0c291cf6eae2b860ac647e350a3fc6cb668b1c004",
+      "source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/evidence/migration.json"
+    },
+    {
+      "file": "driver-runtime-identity.json",
+      "sha256": "ce6e700d4c643fcdeeaaaca60b6625409722e0f284c978d07b952976ff26dfd2",
+      "source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/evidence/driver-runtime-identity.json"
+    },
+    {
+      "file": "resource-preparation-resume.json",
+      "sha256": "685205dbfb90fccc4d0dd887187081a0f48b4da5ea48d803a3900194f640132e",
+      "source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/evidence/resource-preparation-resume.json"
+    },
+    {
+      "file": "gitea-preflight-failure.json",
+      "sha256": "589fdb6fbf23f332877ca1bd31846264581cf520faeab8a7b46378b5eff4495c",
+      "source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/evidence/gitea-preflight-failure.json"
+    },
+    {
+      "file": "gitea-preflight-failure.redacted.log",
+      "sha256": "dec0f733f4bf236393dfded63bd22a6c5418642e23f6b70126f7f7ced04a78ab",
+      "source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation37-qualification-20261010/evidence/gitea-preflight-failure.redacted.log"
+    }
+  ]
+}
