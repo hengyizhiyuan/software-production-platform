@@ -13,6 +13,68 @@ from tests.integration.test_c1_contract_continuity import admitted_contract, c1_
 pytestmark = pytest.mark.postgresql
 
 
+def test_wire_feedback_capacity_stop_is_bounded_durable_and_never_reopens(postgres_database, tmp_path, monkeypatch):
+    import json
+    from copy import deepcopy
+    from types import SimpleNamespace
+    from spg.application import governed_obligations as app
+    from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+    from spg.infrastructure.persistence.interaction_store import InteractionStore
+    from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+    from tests.integration import test_c1_contract_continuity as c1
+    from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+    declared=c1.DeclaredC1Fulfillment();calls=[];inventories=[]
+    def generate(**request):
+        payload=json.loads(request['input_text']);calls.append(payload)
+        assert 'untrusted_fulfillment_candidate' not in payload
+        inventory=_restore_formation_inventory_view(payload['immutable_inventory'],payload.get('existing_ir_item_table',{}))
+        inventories.append(inventory)
+        plan=declared.form(inventory,payload['existing_capability_contracts'])
+        wire,_=controlled_wire(inventory,plan,owner_preconditions=payload.get('owner_source_preconditions'))
+        route=deepcopy(wire['routes'][0])
+        route.update(c=next(i for i,c in enumerate(app.fulfillment_capability_contracts()) if c['capability']=='UNRESOLVED'),f=[],t=[],u=[])
+        wire['routes'].append(route)
+        return StructuredModelResult(output_text=json.dumps(wire),provider=ModelProvider.DEEPSEEK,
+            requested_model='controlled-pg-capacity',effective_model='controlled-pg-capacity',
+            request_id='controlled-pg-capacity-1',usage=ModelUsage(),timing=ModelTiming(),retry_count=0)
+    provider=ModelFulfillmentCandidateProvider(lambda:SimpleNamespace(generate=generate,close=lambda:None))
+    monkeypatch.setattr(c1,'DeclaredC1Fulfillment',lambda:provider)
+    bind=app._bind_repair_feedback
+    def large_feedback(*args,**kwargs):
+        value=json.loads(bind(*args,**kwargs));value['controlled_observation_padding']='x'*140000
+        return json.dumps(value,separators=(',',':'))
+    monkeypatch.setattr(app,'_bind_repair_feedback',large_feedback)
+    class AfterDurableCapacity(BaseException):pass
+    append=app.FulfillmentFormationReceipts.append
+    def checkpoint(self,*args,**kwargs):
+        try:return append(self,*args,**kwargs)
+        except app.FulfillmentReceiptCapacityStop:raise AfterDurableCapacity()
+    monkeypatch.setattr(app.FulfillmentFormationReceipts,'append',checkpoint)
+    with pytest.raises(AfterDurableCapacity):c1._admit_c1(postgres_database,tmp_path,'work')
+    monkeypatch.setattr(app.FulfillmentFormationReceipts,'append',append)
+    inventory=inventories[-1];work_id=UUID(inventory['work_id']);fingerprint=inventory['inventory_fingerprint']
+    with postgres_database.unit_of_work() as uow:
+        revision=ProductStore(uow.session).current_work_reality_revision(work_id)
+        ir=InteractionStore(uow.session).assessment(revision.source_assessment_id).semantic_ir
+        rows=RuntimeStore(uow.session).governance_for_subject(fingerprint)
+        original=[deepcopy(r.scope) for r in rows]
+        terminal=next(r for r in original if r.get('terminal'))
+        assert terminal['terminal_reason']=='OBLIGATION_FORMATION_RECEIPT_LIMIT'
+        assert terminal['validation_passed'] is False and 'validation_feedback' not in terminal
+        assert terminal['capacity_observation']['disposition'].startswith('PAYLOAD_NOT_RETAINED')
+        assert all(len(json.dumps(r,ensure_ascii=False,default=str).encode())<=131072 for r in original)
+    never=NeverCallAgain()
+    replay=app.form_fulfillment_projection(revision,ir,provider=never,database=postgres_database,
+        source_revision=inventory['source_revision'],exact_target_paths=inventory['exact_target_paths'])
+    assert never.calls==0 and len(calls)==1
+    assert all(b.state=='UNRESOLVED' for b in replay)
+    assert replay[0].formation_receipt['terminal_reason']=='OBLIGATION_FORMATION_RECEIPT_LIMIT'
+    with postgres_database.unit_of_work() as uow:
+        runtime=RuntimeStore(uow.session);rows=runtime.governance_for_subject(fingerprint)
+        assert [r.scope for r in rows]==original
+        assert all(runtime.human_authorization(r.id) is None for r in rows)
+
+
 class NeverCallAgain:
     def __init__(self): self.calls = 0
     def form(self, inventory, capabilities, *, validation_feedback=None):

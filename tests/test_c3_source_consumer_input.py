@@ -132,7 +132,7 @@ def test_new_view_is_receipt_bound_and_replay_does_not_generate_again():
     assert len(calls) == 2
 
 
-@pytest.mark.parametrize("legacy", [False, True])
+@pytest.mark.parametrize("legacy", [False, True, "v1"])
 def test_interrupted_feedback_retains_initial_request_view_and_original_receipts(monkeypatch, legacy):
     import spg.application.governed_obligations as app
     revision, ir, inventory, plan = controlled_capacity_case()
@@ -146,7 +146,7 @@ def test_interrupted_feedback_retains_initial_request_view_and_original_receipts
     source_preconditions = app._owner_source_preconditions
     if legacy:
         def frozen_view(*args, **kwargs):
-            kwargs["generation_view_contract"] = None
+            kwargs["generation_view_contract"] = "existing-lossless-source-consumer-input-v1" if legacy == "v1" else None
             return source_preconditions(*args, **kwargs)
         monkeypatch.setattr(app, "_owner_source_preconditions", frozen_view)
     append = app.FulfillmentFormationReceipts.append
@@ -170,8 +170,8 @@ def test_interrupted_feedback_retains_initial_request_view_and_original_receipts
     assert len(starts) == 2
     for entry in starts:
         assert entry["owner_source_preconditions"].get("generation_view_contract") == (
-            None if legacy else _SOURCE_CONSUMER_INPUT_CONTRACT)
-    assert ("owner_rows_location" in calls[1]) is (not legacy)
+            "existing-lossless-source-consumer-input-v1" if legacy == "v1" else None if legacy else _SOURCE_CONSUMER_INPUT_CONTRACT)
+    assert ("owner_rows_location" in calls[1]) is (not legacy or legacy == "v1")
     assert calls[1]["owner_source_preconditions"] == calls[0]["owner_source_preconditions"]
     assert starts[1]["feedback_receipt_id"] == next(r["receipt_id"] for r in original
         if r["stage"] == "CANDIDATE_VALIDATED")

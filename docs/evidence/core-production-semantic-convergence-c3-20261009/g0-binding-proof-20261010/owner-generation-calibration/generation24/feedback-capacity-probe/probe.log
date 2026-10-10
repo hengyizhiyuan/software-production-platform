@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/probe.py", line 31, in <module>
+    row=rec.append('CANDIDATE_VALIDATED',1,candidate=c.model_dump(mode='json'),failed_predicate='OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION',validation_feedback=feedback,validation_passed=False,terminal=False,repair_feedback_bound=True,owner_repair_context_bound=True)
+  File "/dev-input/src/spg/application/governed_obligations.py", line 1705, in append
+    raise FulfillmentReceiptCapacityStop("OBLIGATION_FORMATION_RECEIPT_LIMIT")
+spg.application.governed_obligations.FulfillmentReceiptCapacityStop: OBLIGATION_FORMATION_RECEIPT_LIMIT

@@ -1,0 +1,23 @@
+{
+  "schema": "ordinary-original-wire-feedback-capacity-probe-v1",
+  "original_receipts_sha256": "459f426b3b0b6627d794a77a8a195c5bb4201ee1cac0e9bc3b107a5002f1a304",
+  "original_basis_sha256": "aad0fa15b3b24c12aa5b4b1099f8fe7ef0d6f7044bbc79ba8650a68ad4c81998",
+  "original_candidate_fingerprint": "e0f04fb24852d68f8342360bc0ff6a283329edee08c99cca0ef42feb901035a7",
+  "original_route_count": 91,
+  "historical_replay": "UNCHANGED_ROWS_TRUE_CAPACITY_STOP_ZERO_CALLS",
+  "historical_runtime_observed_stop_not_rewritten": true,
+  "original_persisted_row_bytes": 146634,
+  "original_feedback_json_string_bytes": 144540,
+  "counterfactual_new_feedback_json_string_bytes": 128036,
+  "counterfactual_new_receipt_bytes": 130292,
+  "new_receipt_bound": 131072,
+  "new_lineage_revalidation": "PASS_EXACT_COPY_REQUEST_RECEIPTS_ONLY",
+  "predicate_count": 64,
+  "additional_violation_count": 5,
+  "model_calls": 0,
+  "business_work_mutations": 0,
+  "candidate_admitted": false,
+  "independent_review": "NOT_EXECUTED",
+  "assurance_pass": false,
+  "counterfactual_copy_not_a_real_model_result": true
+}

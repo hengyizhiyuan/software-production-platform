@@ -1,0 +1,7 @@
+{"feedback_fields": {"schema": 36, "inventory_fingerprint": 66, "completion_observation_contract": 41, "component_disposition_feedback_contract": 35, "current_fact_dependency_contract": 44, "coverage_observation_contract": 39, "primary_error": 47, "violations": 33450, "additional_violation_count": 1, "not_evaluable": 112, "untrusted_previous_wire": 19982, "repair_feedback_binding": 1229, "owner_repair_context": 79335}, "owner_fields": {"inventory_fingerprint": 66, "operand_observation_reference_contract": 37, "route_operand_observations": 23392, "located_component_observation_contract": 45, "location_status": 83, "located_components": 28618, "coverage_if_context_routes_removed": 4173, "status": 44, "violations": 15135, "additional_violation_count": 1, "raw_routes_not_evaluable": 2, "source_preconditions": 6856, "not_evaluable": 96, "instruction": 403}}
+Traceback (most recent call last):
+  File "/probe.py", line 32, in <module>
+    row=rec.append('CANDIDATE_VALIDATED',1,**a._rejected_candidate_receipt_values(c,feedback,rec.records()[0]),failed_predicate='OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION',validation_feedback=feedback,validation_passed=False,terminal=False,repair_feedback_bound=True,owner_repair_context_bound=True)
+  File "/dev-input/src/spg/application/governed_obligations.py", line 1705, in append
+    raise FulfillmentReceiptCapacityStop("OBLIGATION_FORMATION_RECEIPT_LIMIT")
+spg.application.governed_obligations.FulfillmentReceiptCapacityStop: OBLIGATION_FORMATION_RECEIPT_LIMIT

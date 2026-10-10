@@ -1,0 +1,153 @@
+{
+  "schema": "c3-feedback-convergence-live-v1",
+  "started_at_utc": "2026-10-10T16:05:50.969438+00:00",
+  "application_source": "712334cee78ba1aba696ace52cf0af471ff13763",
+  "application_tree": "52150499fd056a74a628f762aa21f36cb0a159f2",
+  "guardian_source": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+  "ecf_source": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "authorization": "Human 2026-10-10 continuation: prove ordinary G0 lawful bindings, targeted repair and validation to C3 closure; no Holdout tuning",
+  "logical_calls": 0,
+  "calls": [],
+  "formation_attempts": [],
+  "owner_observations": [
+    {
+      "receipt_id": "c1d57f11-6246-4b7c-b1da-b044e4188c66",
+      "stage": "MODEL_REQUEST_PENDING",
+      "attempt": 1,
+      "work_id": "4af5b2db-716c-51d6-af06-4e1eb510e92b",
+      "work_reality_revision_id": "f1f690bd-4005-5104-a8a9-cb5563a3204c",
+      "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+      "source_revision": "0fbf5f553f8470f11b78a76e96f3eb59d4fb2ef1",
+      "recorded_at_utc": "2026-10-10T16:05:51.263184+00:00",
+      "budget_limit": 2
+    },
+    {
+      "receipt_id": "a721b700-d7cf-4a08-b1cb-14c524ed5471",
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 1,
+      "work_id": "4af5b2db-716c-51d6-af06-4e1eb510e92b",
+      "work_reality_revision_id": "f1f690bd-4005-5104-a8a9-cb5563a3204c",
+      "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+      "source_revision": "0fbf5f553f8470f11b78a76e96f3eb59d4fb2ef1",
+      "recorded_at_utc": "2026-10-10T16:05:51.276937+00:00",
+      "budget_limit": 2,
+      "failed_predicate": "OBLIGATION_FORMATION_TRANSPORT_AssertionError",
+      "terminal": true,
+      "validation_passed": false,
+      "terminal_reason": "OBLIGATION_FORMATION_TRANSPORT_AssertionError",
+      "failure_stage": "MODEL_REQUEST"
+    }
+  ],
+  "new_work_created": false,
+  "business_database_access": false,
+  "historical_owner_mutated": false,
+  "holdout_opened": false,
+  "production_configuration_mutated": false,
+  "c3_status": "PARTIAL",
+  "formation_candidate_limit": 2,
+  "feedback_limit": 1,
+  "logical_call_limit": 4,
+  "transport_policy": "Frozen Runtime: at most one fresh connection replay only before any response event/output; no extra retry",
+  "qualification_boundary": "Derived fulfillment formation and independent semantic review only; no Work/Candidate seal, content Verification, Guardian Assurance or Human authority",
+  "private_artifacts": [
+    {
+      "name": "immutable-inventory.json",
+      "sha256": "f890af6ea4a85e481b03ea0e638651a61c9513042ad88761f6049f41ea895e85",
+      "bytes": 54101,
+      "public_content": false
+    },
+    {
+      "name": "capability-contracts.json",
+      "sha256": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+      "bytes": 2971,
+      "public_content": false
+    },
+    {
+      "name": "formation-owner-observations.json",
+      "sha256": "325355762ae9461d15739fbe59ab4077414bf34f01c676f1bfc332de9ab23177",
+      "bytes": 63751,
+      "public_content": false
+    },
+    {
+      "name": "final-derived-projection.json",
+      "sha256": "4225f17e1c4cc3e9990f062af3f8e3b807d7ca7eda7544a7c29de5032a8d7a85",
+      "bytes": 101659,
+      "public_content": false
+    }
+  ],
+  "result": "HARNESS_OR_PREFLIGHT_STOP",
+  "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+  "source_count": 19,
+  "capability_count": 12,
+  "capabilities_fingerprint": "a2e695783b122373f0ed308a959fa4e3116c4a9df5454dbedd81695071153b17",
+  "basis_sha256": "aad0fa15b3b24c12aa5b4b1099f8fe7ef0d6f7044bbc79ba8650a68ad4c81998",
+  "installed_owner_hashes": {
+    "status": "PASS",
+    "counts": {
+      "spg": 278,
+      "guardian": 5,
+      "ecf": 5
+    },
+    "attestation_sha256": "e7998d940d3a4090d4ec8389c1de42b5a710f62afba856f2651207ffacaf48a0"
+  },
+  "work_id": "4af5b2db-716c-51d6-af06-4e1eb510e92b",
+  "work_reality_revision_id": "f1f690bd-4005-5104-a8a9-cb5563a3204c",
+  "profiles": {
+    "formation": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "reasoning_effort": "none",
+      "timeout_seconds": 120.0,
+      "max_output_tokens": 16384,
+      "base_url": "https://api.deepseek.com"
+    },
+    "semantic_review": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "reasoning_effort": "none",
+      "timeout_seconds": 120.0,
+      "max_output_tokens": 16384,
+      "base_url": "https://api.deepseek.com"
+    }
+  },
+  "owner_source_preconditions_fingerprint": "47e8120b92eab433076382bfc82a5ef28ba050c84d6d4e8565c99be2e14b5e88",
+  "preflight": "PASS_LOCAL_NO_HTTP",
+  "initial_wire_metadata": {
+    "provider_wire_version": "fulfillment-compact-v1",
+    "wire_request_fingerprint": "d751cf7b0736ca95f7811af393012bc9ed08b414390bc9349cf9cc971b940173",
+    "wire_table_fingerprint": "048f904412dfb311c264e4af5c9c006febcbe6563c32e92989ee486cf6566eeb",
+    "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40"
+  },
+  "terminal_reason": "OBLIGATION_FORMATION_TRANSPORT_AssertionError",
+  "binding_states": {
+    "UNRESOLVED": 19
+  },
+  "provider_call_count": 1,
+  "observed_model_call_count": 0,
+  "formation_attempt_count": 1,
+  "feedback_count": 0,
+  "immutable_basis_in_memory": true,
+  "exception_type": "AssertionError",
+  "failed_predicate": null,
+  "ended_at_utc": "2026-10-10T16:05:51.308387+00:00",
+  "wall_seconds": 0.3389873160049319,
+  "observed_terminal_usage_sum": {
+    "input_tokens": "UNKNOWN",
+    "output_tokens": "UNKNOWN",
+    "cached_tokens": "UNKNOWN",
+    "reasoning_tokens": "UNKNOWN",
+    "total_tokens": "UNKNOWN"
+  },
+  "http_transmissions": 0,
+  "transport_recovery_stages": 0,
+  "visible_json_token_count": "UNKNOWN",
+  "monetary_cost": "UNKNOWN",
+  "runtime_or_assurance_pass": false,
+  "all_transmission_usage": {
+    "input_tokens": "UNKNOWN",
+    "output_tokens": "UNKNOWN",
+    "cached_tokens": "UNKNOWN",
+    "reasoning_tokens": "UNKNOWN",
+    "total_tokens": "UNKNOWN"
+  }
+}

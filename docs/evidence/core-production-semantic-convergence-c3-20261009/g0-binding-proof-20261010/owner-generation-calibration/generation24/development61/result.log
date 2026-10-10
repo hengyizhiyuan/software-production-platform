@@ -1,0 +1,23 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 15 items
+
+tests/test_c3_feedback_observation_capacity.py .F                        [ 13%]
+tests/test_c3_source_consumer_input.py .............                     [100%]
+
+=================================== FAILURES ===================================
+____ test_wire_bound_capacity_stop_keeps_original_reason_and_never_reopens _____
+tests/test_c3_feedback_observation_capacity.py:54: in test_wire_bound_capacity_stop_keeps_original_reason_and_never_reopens
+    assert result[0].formation_receipt['terminal_reason']=='OBLIGATION_FORMATION_RECEIPT_LIMIT', rejected_frames
+E   AssertionError: []
+E   assert 'OBLIGATION_F...DENTITY_DRIFT' == 'OBLIGATION_F...RECEIPT_LIMIT'
+E     
+E     - OBLIGATION_FORMATION_RECEIPT_LIMIT
+E     + OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_feedback_observation_capacity.py::test_wire_bound_capacity_stop_keeps_original_reason_and_never_reopens
+========================= 1 failed, 14 passed in 5.91s =========================

@@ -1,0 +1,15 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 10.661017864011228,
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "container_id": "296f0580ec6f32d9bd8846976b3f0dcf0327ba0810868f8479aa0f0b12e9c52b",
+  "source_overlay": true,
+  "snapshot_sha256": "bb15b93241da5556cddef7c71b9eb2ab7b4dbf054911bdcab9d8106998a15db6",
+  "nodes": [
+    "tests/test_c3_feedback_observation_capacity.py",
+    "tests/test_c3_source_consumer_input.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

@@ -1,0 +1,7 @@
+{
+  "image": "sha256:270ae0c46dff3372bc87d64e46f6b495cbc706041737b6834c72d7614ac12cc6",
+  "container": "00646e74bf4bfffd381f990ede520f0a896e27d056e93f206edab51a0c757226",
+  "source_overlay": false,
+  "exit_code": 0,
+  "provider_calls": 0
+}

@@ -1,0 +1,1 @@
+{"result": "STOPPED", "terminal_reason": "OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT", "logical_calls": 1, "formation_attempt_count": 1, "feedback_count": 0, "observed_terminal_usage_sum": {"input_tokens": 52530, "output_tokens": 5865, "cached_tokens": 0, "reasoning_tokens": 0, "total_tokens": 58395}, "wall_seconds": 19.907808229967486}

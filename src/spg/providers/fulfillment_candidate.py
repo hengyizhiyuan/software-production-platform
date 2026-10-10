@@ -370,7 +370,9 @@ def _formation_source_table(context, *, inventory=None):
     return rows
 
 
-_SOURCE_CONSUMER_INPUT_CONTRACT = "existing-lossless-source-consumer-input-v1"
+_SOURCE_CONSUMER_INPUT_CONTRACT = "existing-lossless-source-consumer-input-v2"
+_SOURCE_CONSUMER_LEGACY_CONTRACT = "existing-lossless-source-consumer-input-v1"
+_SOURCE_CONSUMER_FEEDBACK_CONTRACT = _SOURCE_CONSUMER_INPUT_CONTRACT
 _SOURCE_CONSUMER_INSTRUCTIONS = (
     "Propose one complete derived fulfillment Candidate for the immutable admitted inventory. "
     "You select semantic contributions and their existing consumers; you cannot change admitted "
@@ -457,7 +459,8 @@ def _source_consumer_input(inventory, capabilities, context, owner_preconditions
     The original preconditions are kept once and exact references checked.
     Wire v1 and the admitted inventory remain untouched.
     """
-    if owner_preconditions.get("generation_view_contract") != _SOURCE_CONSUMER_INPUT_CONTRACT:
+    if owner_preconditions.get("generation_view_contract") not in {
+            _SOURCE_CONSUMER_INPUT_CONTRACT, _SOURCE_CONSUMER_LEGACY_CONTRACT}:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     inventory_view, items = _formation_inventory_view(inventory)
     choices = _formation_binding_choices(inventory, capabilities, owner_preconditions)
@@ -1063,7 +1066,8 @@ class ModelFulfillmentCandidateProvider:
                 wire_metadata=wire_metadata)
             inventory_view, existing_ir_items = _formation_inventory_view(inventory)
             source_table = _formation_source_table(context, inventory=inventory)
-            joined_view = (owner_preconditions or {}).get("generation_view_contract") == _SOURCE_CONSUMER_INPUT_CONTRACT
+            joined_view = (owner_preconditions or {}).get("generation_view_contract") in {
+                _SOURCE_CONSUMER_INPUT_CONTRACT, _SOURCE_CONSUMER_LEGACY_CONTRACT}
             if owner_preconditions is not None:
                 for source, choices in zip(source_table, _formation_binding_choices(
                         inventory, capabilities, owner_preconditions), strict=True):
@@ -1080,7 +1084,16 @@ class ModelFulfillmentCandidateProvider:
                     if "reviewed_background_prerequisites" in choices:
                         source["reviewed_background_prerequisites"] = deepcopy(choices["reviewed_background_prerequisites"])
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
-                instructions=(_SOURCE_CONSUMER_INSTRUCTIONS if joined_view else (
+                instructions=((_SOURCE_CONSUMER_INSTRUCTIONS + (
+                    " The capability domain and Schema branches are ALTERNATIVE necessary field domains, "
+                    "not obligations to enumerate. Return only consumers actually entailed by each source's "
+                    "meaning. Never append UNRESOLVED as a fallback to an already executable component, "
+                    "or RETAIN_CONTEXT as an archival duplicate. Preserve legitimate distinct components "
+                    "and complementary consumers; do not choose by list order or omit an uncertain requirement. "
+                    "Feedback may group repeated identical predicates by route and list all conflicting peers; "
+                    "operand observations are referenced by exact original route ordinal within that feedback. "
+                    "These references do not select a correction or supply evidence."
+                    if (owner_preconditions or {}).get("generation_view_contract") == _SOURCE_CONSUMER_FEEDBACK_CONTRACT else "")) if joined_view else (
                     "You propose a derived fulfillment plan for immutable admitted engineering meaning. "
                     "If an inventory source payload has existing_ir_item_ref, resolve it in existing_ir_item_table: "
                     "this is the same exact original IR/item identity shared by its clauses, not an omitted "

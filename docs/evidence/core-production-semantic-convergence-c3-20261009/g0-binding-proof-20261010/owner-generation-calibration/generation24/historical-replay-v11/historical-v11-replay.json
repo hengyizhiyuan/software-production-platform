@@ -1,0 +1,14 @@
+{
+  "schema": "exact-historical-v11-feedback-replay-v1",
+  "source": "712334cee78ba1aba696ace52cf0af471ff13763",
+  "actual_image": "sha256:270ae0c46dff3372bc87d64e46f6b495cbc706041737b6834c72d7614ac12cc6",
+  "original_receipts_sha256": "7f661eaf5256634f5edfac97829e649656af1a99b7701692c378c5f7b45fe9ad",
+  "basis_sha256": "aad0fa15b3b24c12aa5b4b1099f8fe7ef0d6f7044bbc79ba8650a68ad4c81998",
+  "result": "PASS_ORIGINAL_TERMINAL_AND_BYTE_IDENTICAL_FEEDBACK",
+  "terminal_reason": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+  "original_rows_unchanged": true,
+  "provider_calls": 0,
+  "original_db_access": false,
+  "business_work_created": 0,
+  "not_a_real_work_qualification": true
+}

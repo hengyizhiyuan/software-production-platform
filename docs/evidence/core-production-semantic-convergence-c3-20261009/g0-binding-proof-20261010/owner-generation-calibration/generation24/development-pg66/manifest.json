@@ -1,0 +1,24 @@
+{
+  "files": [
+    {
+      "file": "result.log",
+      "sha256": "f4fcc93af0b1a20b9e27c4d37d5a67cc9000e4a3663a41e48111ac8894b5c914",
+      "bytes": 472,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-pg66/evidence/result.log"
+    },
+    {
+      "file": "receipt.json",
+      "sha256": "6703b5eefa74dbb6a696f0e05d5bcbff3964581dc6ea509d1fcc7612dcac3950",
+      "bytes": 2067,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-pg66/evidence/receipt.json"
+    },
+    {
+      "file": "result.xml",
+      "sha256": "d869e586204de8b93ad45e695b8a7d64c930cc2e6b235c0b8f2d76afa7052c07",
+      "bytes": 476,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-pg66/evidence/result.xml"
+    }
+  ],
+  "source_overlay": true,
+  "qualification_claim": false
+}

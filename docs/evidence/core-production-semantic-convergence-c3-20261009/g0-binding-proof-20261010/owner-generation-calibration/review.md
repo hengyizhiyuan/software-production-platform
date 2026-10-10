@@ -297,3 +297,48 @@ Recovery: safe source/code/receipts in this branch generation22; private origina
 Source7f9462b30acf751642dfc7c09ac5e2b047c03ea3/treec34142b80d4c4b658823c9b6f05371d6faddafdf/image sha256:87491aaf510493645e97964232f938f0b596f7987541f52757b266cfaf9c506b built from exact archives in16.993215222seconds. Installed qualification:566PASS/1FAIL,32.703103160seconds, no models/Work/oldDB. No Provider call was allowed because this gate failed.
 
 The failed test preconstructed a frozen no-marker Wire, then invoked the new default request representation, so correct identity validation rejected it before the intended Semantic Review transport failure. The fixture must bind its candidate to the same generation_view_contract actually sent; actual request/Wire/Review gates remain strict. Only this test input was corrected; production implementation, model profile, budget and Owner predicates are unchanged. Development58 targeted Provider failures plus request-view regressions:21PASS,9.019203070seconds, zero models/business Work. Actual Provider transport terminal classification, sensitive-value exclusion, same-basis no-extra-call replay and old/new request identity remain covered. Original failed567-test receipt is retained. Next freeze/build is required to qualify the corrected installed suite and exact final identity; old failed image is not declared qualified.
+
+
+## Generation24 actual failure and bounded feedback-capacity repair (2026-10-11)
+
+Exact source712334cee78ba1aba696ace52cf0af471ff13763/tree52150499fd056a74a628f762aa21f36cb0a159f2/image sha256:270ae0c46dff3372bc87d64e46f6b495cbc706041737b6834c72d7614ac12cc6:567 installed deterministic PASS and47 fresh PostgreSQL/Guardian PASS. Guardian76c1e87 and ECF5aa4f88 unchanged; migration20261007_72. No source overlays qualified this image. Historical v11 replay preserves original terminal, feedback bytes and rows without Provider/old-DB access.
+
+The first diagnostic controller expected the old request marker and failed locally with zero model calls. The corrected controller retained the same exact image and used a separate24b attempt. Actual24b:one completed HTTP200 Formation,91routes,zero Review,zero second request;52530input/5865output/0reasoning/58395total actual tokens,19.115 Provider seconds and19.907808 controller seconds. All19sources were proposed UNRESOLVED;9 also enumerated their entire available capability domain. These are observed model mapping failures. Internal generation causes and Provider JSON-Schema enforcement remain UNKNOWN. No Reviewer ran, so this trial contains no Review wrong release.
+
+The contract correctly rejected contradictory dispositions. A separate confirmed implementation defect then blocked feedback: the persisted failed row was146634bytes (existing maximum131072), containing144540bytes of encoded feedback despite removing its expanded Candidate. Recovery compared a dropped Candidate with the reconstructed original and incorrectly reported identity drift. The original actual failure and all private bytes remain preserved; current read-only replay identifies the original capacity stop without modifying rows or making a call.
+
+### Each source's lawful consumer, not an automatically supplied repair
+
+| Source ordinal | Lawful binding boundary | Actual24b failure classification |
+|---|---|---|
+|0,1|Exact content Fact, Candidate content verification|Content plus same-component UNRESOLVED conflicts: model mapping|
+|2|Exact admitted positive target Scope, complete Git Diff|Scope plus UNRESOLVED conflicts; no unrelated negative-sibling proof allowed|
+|3|Original current content references plus future Candidate Seal|Self-reference or future Human action cannot prove current content; mapping/evidence rejection|
+|4,11|Full original negative basis with complementary effect prohibitions and complete Git allowlist|Enumerated dispositions, DENY_PREVIEW and UNRESOLVED do not prove original effects; mapping rejection|
+|5,7|Original purpose/classification retained only with lawful current software consumers and independent Review|Unresolved plus executable/context alternatives conflict; no proven lawful Owner refusal|
+|6|Actual software creation/content; Git scope may complement but cannot replace it|Whole RETAIN/UNRESOLVED cannot replace implementation; model mapping|
+|8|Required current content, original source authority|Git/context alternatives do not establish content|
+|9|Qualified Git scope with original qualifiers/exclusivity|Unentailed content/context alternatives are not scope evidence|
+|10|Current content and corresponding future Seal|Git or a request for Seal does not prove sealed Candidate|
+|12,13|Derived creation/content with exact original affirmative source support|Descriptive Scope or inherited unrelated prohibitions cannot supply source proof|
+|14|Derived Candidate condition with exact original acceptance source and Seal Gate|Future state must remain pending; missing/borrowed source does not supply proof|
+|15,16|Each derived prohibition with its own exact original negative source and actual effect Gate|Parent-source identity does not authorize unrelated prohibition or preview mapping|
+|17,18|Each file exclusion with exact original negative source and complete Diff allowlist|Content witness cannot replace Git change evidence|
+
+This table records consumer requirements, not actual verification results or fabricated evidence. The earlier generation21 Review wrong releases (Git-only creation and self-referencing acceptance evidence) remain separately documented and corrected. No controlled plan, source availability or zero-Review run is represented as semantic approval.
+
+### Narrow repair within existing request, Wire and receipts
+
+New requests use existing-lossless-source-consumer-input-v2; Wire v1, original inventory/Fact components, Owner authority, budgets, one feedback/two candidates and independent Review gates stay unchanged. The request clarifies that capability domains are alternatives, not a required enumeration, without choosing methods for a case. Original v1/no-marker requests and feedback remain byte-compatible on recovery.
+
+For v2, repeated predicates are grouped by stable code/source/route identity; every conflicting peer remains referenced to the complete retained original Wire and exact located-component table. Repeated operand observations are represented once per original route. Rejected expanded Candidate may be recovered only through the existing exact Wire/inventory/Work/Source/Attempt/request/response/candidate/component fingerprints; successful Admission still retains full Candidate. Feedback is fully reconstructed and compared on recovery; no candidate is edited or promoted.
+
+If capacity still exceeds the unchanged limit, a bounded terminal stop records safe identity, original serialized size/hash and explicitly missing payload fields. Missing bodies are not proof and permit neither repair replay, budget reopening nor PASS. Historical over-capacity rows remain unchanged. A zero-call counterfactual representation of the original91routes measures128036bytes of encoded feedback and130292bytes of failed receipt, preserving route semantics and all failure peers; this is capacity evidence only, not a new real model result.
+
+Development59:362PASS. Development60:361PASS/1FAIL and61:14PASS/1FAIL preserved the same new capacity-stub replay gap, subsequently corrected in the existing second lineage check. Development62:15PASS;63 and64:17PASS;65:23PASS. These source-overlay regressions made zero model calls or business Work mutations. Seven exact reference identity substitutions reject; old v1 feedback, all conflict peers, terminal no-call recovery and capacity integrity remain protected. Independent reviewer performed only code/test review, found no further confirmed defect, and did not read Holdout.
+
+Safe receipts: generation24/manifest.json in this branch. Complete private originals and retained image/test data: /data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation24-qualified-20261010; development59-65 under /data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010. Private Human/Provider/Candidate bodies are excluded from Git.
+
+C3 is not closed by these results. Next gates: affected PostgreSQL persistence, exact new archive/image regressions, bounded ordinary-source real Formation/Review, then exact normal-entry G0 and independent sealed Holdout. No production/main/historical Owner modification or Human approval is inferred.
+
+Affected fresh PostgreSQL capacity persistence development66:1PASS,14.051646seconds, migration20261007_72, zero model/oldDB access. Earlier development-pg65 stopped at fixture setup because the development source overlay omitted alembic.ini/migrations, before invoking the new test; raw sanitized failure is preserved and that exact isolated PG stopped. The corrected development-only snapshot includes unchanged tracked migration/configuration inputs. This is source-overlay persistence proof, not final installed-image qualification.
