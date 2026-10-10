@@ -204,7 +204,7 @@ def test_negative_fact_proofs_do_not_license_missing_or_ineligible_origin(bad):
     assert bool(proofs)==(bad in ('missing','fact-instead-of-clause'))
 
 
-@pytest.mark.parametrize('tamper', ('contents','remove-one','remove-both'))
+@pytest.mark.parametrize('tamper', ('contents','remove-one','remove-both','operands','unknown-operands'))
 def test_initial_preconditions_are_bound_to_wire_attempt_and_replay(tamper):
     from tests.test_c3_fulfillment_capacity_representation import controlled_model_provider
     revision,ir,inventory,plan=controlled_capacity_case()
@@ -224,10 +224,110 @@ def test_initial_preconditions_are_bound_to_wire_attempt_and_replay(tamper):
     for row in provider._fulfillment_receipts:
         if row['stage'] not in ('MODEL_REQUEST_PENDING','MODEL_RESPONSE_OBSERVED'):continue
         if tamper=='contents':row['owner_source_preconditions']['sources'][0]['source']=999
+        elif tamper=='operands':row['owner_source_preconditions']['capability_operand_requirements'][0]['target_operand']['required_ordinals']=[]
+        elif tamper=='unknown-operands':row['owner_source_preconditions']['operand_observation_contract']='unknown'
         elif tamper=='remove-both' or row['stage']=='MODEL_RESPONSE_OBSERVED':row.pop('owner_source_preconditions')
     result=run()
     assert len(calls)==1 and all(b.state=='UNRESOLVED' for b in result)
     assert result[0].formation_receipt['terminal_reason']=='OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
+
+
+@pytest.mark.parametrize('scale', ('small','medium','complex'))
+def test_diff_operands_report_complete_allowlist_not_prohibition_rationale(scale):
+    revision,ir,inventory,plan=controlled_capacity_case(scale)
+    caps=fulfillment_capability_contracts()
+    prerequisites=_owner_source_preconditions(revision,ir,inventory,caps)
+    wire,_=controlled_wire(inventory,plan,owner_preconditions=prerequisites)
+    ordinal=next(i for i,r in enumerate(wire['routes']) if caps[r['c']]['capability']=='GIT_DIFF_SCOPE')
+    wire['routes'][ordinal]['t']=[]
+    wire['routes'][ordinal]['r']='The explanation refers to the correct paths but supplies no operands.'
+    raw=json.dumps(wire)
+    context=_owner_repair_context(raw,revision,ir,inventory,caps,validation_feedback=None,owner_preconditions=prerequisites)
+    failure=next(v for v in context['violations'] if v.get('route')==ordinal)
+    assert failure['code']=='OBLIGATION_DIFF_SCOPE_INCOMPLETE'
+    operands=failure['owner_operand_observations']['target_operand']
+    expected=list(range(len(inventory['exact_target_paths'])))
+    assert operands['required_ordinals']==operands['missing_ordinals']==expected
+    assert operands['observed_ordinals']==[] and not operands['matches']
+    assert json.loads(raw)==wire  # diagnostic did not repair the untrusted proposal
+    route=plan.routes[ordinal].model_copy(update={'target_paths':()})
+    with pytest.raises(ValueError,match='DIFF_SCOPE_INCOMPLETE'):
+        _projection_binding(revision,ir,inventory,route,allow_calibrated=True)
+
+
+@pytest.mark.parametrize('capability', ('DENY_DEPLOY','GIT_DIFF_SCOPE'))
+def test_derived_exclusion_requires_production_origin_and_current_negative_clause(capability):
+    from spg.domain.intent_realization import SemanticKind
+    from spg.domain.governed_obligation import FulfillmentRouteCandidate, FulfillmentComponentBasis
+    from tests.test_c3_semantic_contract_calibration import negative_fact_plan
+    revision,ir,_,_=negative_fact_plan()
+    production=ir.items[0].model_copy(update={'item_id':'novel-production','kind':SemanticKind.PRODUCTION_INTENT,
+        'production':ir.current_production[0].model_copy(update={'exclusions':('a protected external effect',)})})
+    production_clause=ir.clauses[0].model_copy(update={'clause_id':'novel-production-request',
+        'semantic_item_ids':(production.item_id,),'polarity':'AFFIRMATIVE'})
+    ir.items=(*ir.items,production);ir.clauses=(*ir.clauses,production_clause)
+    quote='Excluded from this Work: a protected external effect'
+    revision.constraints=(quote,)
+    inventory=fulfillment_inventory(revision,ir)
+    sources=inventory['sources'];caps=fulfillment_capability_contracts()
+    primary=next(s for s in sources if s['kind']=='WORK_CONSTRAINT')
+    negative=next(s for s in sources if s['kind']=='IR_CONSTRAINT' and s['clause_id']==ir.clauses[0].clause_id)
+    origin=next(s for s in sources if s['kind']=='IR_CLAUSE' and s['clause_id']==production_clause.clause_id)
+    route=FulfillmentRouteCandidate(source_ref=primary['source_ref'],capability=capability,
+        work_constraint_indices=(0,),target_paths=tuple(inventory['exact_target_paths']) if capability=='GIT_DIFF_SCOPE' else (),
+        supporting_source_refs=(negative['source_ref'],),rationale='The prohibition alone is not the derivation proof.',
+        component_basis=FulfillmentComponentBasis(source_span_start=0,source_span_end=len(quote),source_component_quote=quote,linked_fact_refs=()))
+    plan=FulfillmentProjectionCandidate(inventory_fingerprint=inventory['inventory_fingerprint'],routes=(route,))
+    prerequisites=_owner_source_preconditions(revision,ir,inventory,caps)
+    wire,_=controlled_wire(inventory,plan,owner_preconditions=prerequisites)
+    context=_owner_repair_context(json.dumps(wire),revision,ir,inventory,caps,validation_feedback=None,owner_preconditions=prerequisites)
+    failure=next(v for v in context['violations'] if v.get('route')==0)
+    assert failure['code']=='OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN'
+    missing=failure['owner_operand_observations']['support_operand']['missing_members_by_alternative']
+    origin_ordinal=sources.index(origin)
+    assert missing and all(origin_ordinal in alternative for alternative in missing)
+    with pytest.raises(ValueError,match='CORRESPONDENCE_UNPROVEN'):
+        _projection_binding(revision,ir,inventory,route,allow_calibrated=True)
+    corrected=route.model_copy(update={'supporting_source_refs':(origin['source_ref'],negative['source_ref'])})
+    assert _projection_binding(revision,ir,inventory,corrected,allow_calibrated=True).state=='BOUND_PENDING_EVIDENCE'
+
+
+def test_old_operandless_receipts_replay_without_feedback_identity_drift(monkeypatch):
+    import spg.application.governed_obligations as owner
+    from tests.test_c3_fulfillment_capacity_representation import controlled_model_provider
+    revision,ir,inventory,plan=controlled_capacity_case()
+    original=owner._owner_source_preconditions
+    def legacy(*args,**kwargs):
+        kwargs['include_operand_observations']=False
+        return original(*args,**kwargs)
+    provider,calls=controlled_model_provider(inventory,plan)
+    def run():return form_fulfillment_projection(revision,ir,provider=provider,
+        source_revision=inventory['source_revision'],exact_target_paths=inventory['exact_target_paths'])
+    with monkeypatch.context() as patch:
+        patch.setattr(owner,'_owner_source_preconditions',legacy)
+        assert all(b.state!='UNRESOLVED' for b in run())
+    before=deepcopy(provider._fulfillment_receipts)
+    assert all(b.state!='UNRESOLVED' for b in run()) and len(calls)==2
+    assert provider._fulfillment_receipts==before
+
+
+def test_fact_gate_correspondence_is_visible_before_unrelated_route_errors_are_fixed():
+    from tests.test_c3_semantic_contract_calibration import negative_git_plan
+    revision,ir,inventory,plan=negative_git_plan()
+    caps=fulfillment_capability_contracts()
+    fact=next(i for i,r in enumerate(plan.routes) if r.source_ref.startswith('semantic-fact:'))
+    routes=tuple(r.model_copy(update={'target_paths':()}) if i==fact else
+        r.model_copy(update={'capability':'DENY_DEPLOY','target_paths':()}) if r.capability=='GIT_DIFF_SCOPE' else r
+        for i,r in enumerate(plan.routes))
+    plan=plan.model_copy(update={'routes':routes})
+    preconditions=_owner_source_preconditions(revision,ir,inventory,caps)
+    wire,_=controlled_wire(inventory,plan,owner_preconditions=preconditions)
+    context=_owner_repair_context(json.dumps(wire),revision,ir,inventory,caps,validation_feedback=None,owner_preconditions=preconditions)
+    codes={v['code'] for v in context['violations'] if v.get('route')==fact}
+    assert {'OBLIGATION_DIFF_SCOPE_INCOMPLETE','OBLIGATION_FACT_GATE_CORRESPONDENCE_UNPROVEN'}<=codes
+    failure=next(v for v in context['violations'] if v['code']=='OBLIGATION_FACT_GATE_CORRESPONDENCE_UNPROVEN')
+    assert failure['missing_same_capability_source_ordinals']
+    assert 'ACTUAL_OWNER_EVIDENCE' in context['not_evaluable']
 
 
 def test_successful_terminal_replay_cannot_drop_initial_proof_context():

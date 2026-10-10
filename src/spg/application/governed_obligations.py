@@ -1013,6 +1013,17 @@ def _partial_background_components(candidate, revision, ir, inventory):
     return frozenset(result)
 
 
+def _fact_gate_correspondence_missing(route, candidate, inventory):
+    """Same predicate for admission and unadmitted Owner observations."""
+    source = next(s for s in inventory["sources"] if s["source_ref"] == route.source_ref)
+    negative_git = (source["kind"] == "FACT" and route.capability == "GIT_DIFF_SCOPE"
+        and source["payload"]["qualifiers"].get("negated") is True)
+    if source["kind"] != "FACT" or not (route.capability in {"DENY_PREVIEW", "DENY_DEPLOY", "DENY_PUBLISH"} or negative_git):
+        return ()
+    return tuple(ref for ref in route.supporting_source_refs if not any(
+        other.source_ref == ref and other.capability == route.capability for other in candidate.routes))
+
+
 def validate_projection_candidate(candidate, revision, ir, inventory, *, semantic_review=None, allow_review_pending=False):
     if candidate.inventory_fingerprint != inventory["inventory_fingerprint"]:
         raise ValueError("OBLIGATION_PROJECTION_STALE_BASIS")
@@ -1091,13 +1102,8 @@ def validate_projection_candidate(candidate, revision, ir, inventory, *, semanti
         raise ValueError("OBLIGATION_COMPONENT_REVIEW_REQUIRED")
     # A Fact prohibition cites an actual clause route with the same Owner/Gate.
     for route in candidate.routes:
-        source = next(s for s in inventory["sources"] if s["source_ref"] == route.source_ref)
-        negative_git = (source["kind"] == "FACT" and route.capability == "GIT_DIFF_SCOPE"
-            and source["payload"]["qualifiers"].get("negated") is True)
-        if source["kind"] == "FACT" and (route.capability in {"DENY_PREVIEW", "DENY_DEPLOY", "DENY_PUBLISH"} or negative_git):
-            if not all(any(other.source_ref == ref and other.capability == route.capability
-                           for other in candidate.routes) for ref in route.supporting_source_refs):
-                raise ValueError("OBLIGATION_FACT_GATE_CORRESPONDENCE_UNPROVEN")
+        if _fact_gate_correspondence_missing(route, candidate, inventory):
+            raise ValueError("OBLIGATION_FACT_GATE_CORRESPONDENCE_UNPROVEN")
     return bindings
 
 
@@ -1463,7 +1469,8 @@ def _bind_wire_diagnostics(error, rows, attempt, revision, inventory, capabiliti
 
 
 def _owner_source_preconditions(revision, ir, inventory, capabilities, *, include_syntax_observations=True,
-                                syntax_observation_contract="complete-value-owner-observations-v1"):
+                                syntax_observation_contract="complete-value-owner-observations-v1",
+                                include_operand_observations=True):
     """Necessary proof sets from existing Owner predicates, never route proposals.
 
     The semantic boundary still chooses components and which eligible origin
@@ -1529,6 +1536,23 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
         rows.append(row)
     return {"contract": "existing-owner-source-prerequisites-v1", "inventory_fingerprint": inventory["inventory_fingerprint"],
         **({"syntax_observation_contract": syntax_observation_contract} if include_syntax_observations else {}),
+        **({"operand_observation_contract": "existing-owner-operands-v1",
+            "fact_support_route_rule": "A negative Fact bound to a permission gate or Git Diff must cite "
+                "original supporting clauses whose own primary routes include the SAME capability. "
+                "A supporting citation alone does not bind that clause to the gate.",
+            "capability_operand_requirements": [
+                {"capability": index, "evidence_method": _capability_tuple(contract["capability"])[3],
+                 "target_operand": {"field": "t", "relation": "EXACT_ORDERED_SET",
+                    "required_ordinals": list(range(len(inventory["exact_target_paths"]))),
+                    "meaning": "COMPLETE_ADMITTED_CHANGE_ALLOWLIST; NOT_EXCLUDED_PATHS_OR_EFFECTS"}}
+                for index, contract in enumerate(capabilities)
+                if _capability_tuple(contract["capability"])[3] == "EXACT_GIT_DIFF_SCOPE"],
+            "support_operand_rule": "EACH_MINIMAL_SUPPORT_SET_IS_A_CONJUNCTION; SETS_ARE_ALTERNATIVES. "
+                "For a derived Work constraint, the production origin proves derivation and the current "
+                "negative clause proves the prohibition. One cannot substitute for the other. "
+                "An eligible proof does not establish semantic equivalence or allow unrelated extra supports. "
+                "Select meaning and components yourself; rationale does not supply missing wire operands."}
+           if include_operand_observations else {}),
         "work_reality_revision_id": str(revision.id), "source_revision": inventory["source_revision"],
         "capabilities_fingerprint": canonical_fingerprint(capabilities), "sources": rows,
         "component_rule": "COMPLETE_OWN_SOURCE_SPANS; NO_CONFLICTING_DISPOSITION_FOR_SAME_COMPONENT",
@@ -1549,6 +1573,16 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
     diagnostic_view = SimpleNamespace(routes=tuple(route for _, _, route in observations))
     evaluated = json.loads(projection_validation_feedback(diagnostic_view, revision, ir, inventory,
         "OBLIGATION_OWNER_PRECONDITIONS_UNPROVEN"))
+    if ((owner_preconditions or {}).get("operand_observation_contract") == "existing-owner-operands-v1"
+            and not unavailable):
+        from spg.domain.governed_obligation import fulfillment_component_id
+        for ordinal, (_, _, route) in enumerate(observations):
+            missing = _fact_gate_correspondence_missing(route, diagnostic_view, inventory)
+            if missing:
+                evaluated["violations"].append({"code": "OBLIGATION_FACT_GATE_CORRESPONDENCE_UNPROVEN",
+                    "route": ordinal, "source": next(i for i,s in enumerate(inventory["sources"]) if s["source_ref"] == route.source_ref),
+                    "component_id": fulfillment_component_id(route, inventory["inventory_fingerprint"]),
+                    "missing_same_capability_source_ordinals": [next(i for i,s in enumerate(inventory["sources"]) if s["source_ref"] == ref) for ref in missing]})
     failures = []
     for failure in evaluated["violations"]:
         if unavailable and failure["code"] in {
@@ -1558,13 +1592,38 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
             # eligibility. The full plan must be evaluated after valid decode.
             continue
         if "route" in failure:
-            index, wire_route, _ = observations[failure["route"]]
+            index, wire_route, route = observations[failure["route"]]
             failure.update(route=index, raw_route_fingerprint=canonical_fingerprint(wire_route))
+            if (owner_preconditions or {}).get("operand_observation_contract") == "existing-owner-operands-v1":
+                requirements = owner_preconditions["capability_operand_requirements"]
+                cap_index = next(i for i,c in enumerate(capabilities) if c["capability"] == route.capability)
+                required = next((r for r in requirements if r["capability"] == cap_index), None)
+                details = {"capability": cap_index, "evidence_method": _capability_tuple(route.capability)[3],
+                    "disposition": "NECESSARY_OPERANDS_ONLY; SEMANTIC_MATCH_AND_EVIDENCE_NOT_EVALUATED"}
+                if required is not None:
+                    expected = required["target_operand"]["required_ordinals"]
+                    details["target_operand"] = {**required["target_operand"],
+                        "observed_ordinals": wire_route["t"],
+                        "missing_ordinals": [i for i in expected if i not in wire_route["t"]],
+                        "unexpected_ordinals": [i for i in wire_route["t"] if i not in expected],
+                        "matches": wire_route["t"] == expected}
+                primary = next(r for r in owner_preconditions["sources"] if r["source_ref"] == route.source_ref)
+                proof = next((p for p in primary.get("necessary_source_proofs", []) if p["capability"] == cap_index), None)
+                if proof is not None:
+                    selected = wire_route["u"]
+                    details["support_operand"] = {"field": "u", "observed_ordinals": selected,
+                        "relation": "ALL_REQUIRED_PROOF_MEMBERS; ALTERNATIVE_PROOF_SETS",
+                        "minimal_support_sets": proof["minimal_support_sets"],
+                        "missing_members_by_alternative": [[i for i in s if i not in selected]
+                            for s in proof["minimal_support_sets"]],
+                        "semantic_equivalence": "NOT_EVALUATED"}
+                failure["owner_operand_observations"] = details
         # Invalid raw routes must not be reported as absent sources: the
         # authoritative raw coverage diagnostics already identify that boundary.
         elif unavailable:
             continue
         failures.append(failure)
+    additional_count = evaluated["additional_violation_count"] + max(0, len(failures) - 64)
     sources = inventory["sources"]
     refs = {entry["source_ref"]: index for index, entry in enumerate(sources)}
     prerequisites = []
@@ -1593,7 +1652,7 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
         prerequisites.append(row)
     return {"inventory_fingerprint": inventory["inventory_fingerprint"],
         "status": "UNADMITTED_OWNER_PRECONDITION_OBSERVATIONS",
-        "violations": failures, "additional_violation_count": evaluated["additional_violation_count"],
+        "violations": failures[:64], "additional_violation_count": additional_count,
         "raw_routes_not_evaluable": unavailable, "source_preconditions": prerequisites,
         "not_evaluable": ["COMPLETE_PLAN_ADMISSION", "INDEPENDENT_SEMANTIC_REVIEW", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"]
             + (["OWNER_BACKGROUND_CROSS_ROUTE_PRECONDITIONS"] if unavailable else []),
@@ -1636,13 +1695,15 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
         preconditions = row.get("owner_source_preconditions")
         if preconditions is not None and (not isinstance(preconditions, dict)
                 or preconditions.get("syntax_observation_contract") not in (
-                    None, "complete-value-observations-v1", "complete-value-owner-observations-v1")):
+                    None, "complete-value-observations-v1", "complete-value-owner-observations-v1")
+                or preconditions.get("operand_observation_contract") not in (None, "existing-owner-operands-v1")):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if row.get("owner_source_preconditions") is not None and (
                 row.get("stage") not in {"MODEL_REQUEST_PENDING", "MODEL_RESPONSE_OBSERVED"}
                 or preconditions != _owner_source_preconditions(revision, ir, inventory, capabilities,
                     include_syntax_observations=preconditions.get("syntax_observation_contract") is not None,
-                    syntax_observation_contract=preconditions.get("syntax_observation_contract"))):
+                    syntax_observation_contract=preconditions.get("syntax_observation_contract"),
+                    include_operand_observations=preconditions.get("operand_observation_contract") is not None)):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if (row.get("stage") == "MODEL_RESPONSE_OBSERVED" and row.get("candidate_retained") is True
                 and any(key in row for key in _FULFILLMENT_WIRE_METADATA_KEYS)):
