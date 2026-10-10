@@ -29,17 +29,19 @@ def test_request_schema_only_excludes_existing_owner_rejections_and_preserves_un
     schema = _formation_output_schema(inventory, capabilities, owner_preconditions=preconditions)
     branches = schema["properties"]["routes"]["items"]["anyOf"]
     unresolved = next(i for i,c in enumerate(capabilities) if c["capability"] == "UNRESOLVED")
-    observed = {}
+    observed, pairs = {}, set()
     for branch in branches:
         assert branch["additionalProperties"] is False
         assert branch["required"] == original["$defs"]["_FulfillmentCompactRoute"]["required"]
         for source in branch["properties"]["s"]["enum"]:
-            assert source not in observed
-            observed[source] = branch["properties"]["c"]["enum"]
+            for capability in branch["properties"]["c"]["enum"]:
+                assert (source, capability) not in pairs
+                pairs.add((source, capability))
+            observed.setdefault(source, []).extend(branch["properties"]["c"]["enum"])
     assert set(observed) == set(range(len(inventory["sources"])))
     for row in preconditions["sources"]:
         rejected = {r["capability"] for r in row["ineligible_binding_prerequisites"]}
-        assert observed[row["source"]] == [i for i in range(len(capabilities)) if i not in rejected]
+        assert sorted(observed[row["source"]]) == [i for i in range(len(capabilities)) if i not in rejected]
         assert unresolved in observed[row["source"]]
     assert _fulfillment_wire_schema() == original
     assert schema["properties"]["v"] == original["properties"]["v"]
@@ -146,3 +148,57 @@ def test_v2_feedback_replay_preserves_original_attempt_and_does_not_call_model_a
     count = len(calls)
     run()
     assert len(calls) == count and provider._fulfillment_receipts == rows
+
+
+def test_generation_bounds_and_support_domains_reuse_exact_original_owner_operands():
+    from spg.domain.governed_obligation import fulfillment_source_semantic_text
+    _, _, inventory, _, capabilities, preconditions = case()
+    schema = _formation_output_schema(inventory, capabilities, owner_preconditions=preconditions)
+    for branch in schema["properties"]["routes"]["items"]["anyOf"]:
+        props = branch["properties"]
+        for source_index in props["s"]["enum"]:
+            length = len(fulfillment_source_semantic_text(inventory["sources"][source_index]))
+            assert props["a"]["minimum"] == 0 and props["a"]["maximum"] == length - 1
+            assert props["z"]["minimum"] == 1 and props["z"]["maximum"] == length
+            row = preconditions["sources"][source_index]
+            for capability in props["c"]["enum"]:
+                proof = next((p for p in row.get("necessary_source_proofs", []) if p["capability"] == capability), None)
+                if proof:
+                    assert props["u"]["items"]["enum"] == sorted({i for alternative in proof["minimal_support_sets"] for i in alternative})
+                    assert props["u"]["minItems"] == min(len(alternative) for alternative in proof["minimal_support_sets"])
+                else:
+                    assert "minItems" not in props["u"]
+    # No fabricated witness, source or span is emitted by request constraints.
+    assert not {"approved", "covered", "passed"} & schema.keys()
+
+
+def test_fact_semantic_reference_is_distinct_from_broad_provenance_for_proposer_and_critic():
+    from spg.providers.fulfillment_candidate import _formation_source_table, _review_component_table
+    _, _, inventory, plan, capabilities, preconditions = case()
+    before = deepcopy(inventory)
+    context = _fulfillment_wire_context(inventory, capabilities, owner_preconditions=preconditions)
+    table = _formation_source_table(context, inventory=inventory)
+    comparison = _review_component_table(inventory, plan, capabilities)
+    for source, row in zip(inventory["sources"], table, strict=True):
+        if source["kind"] != "FACT":
+            assert "authoritative_semantic_fact" not in row
+            continue
+        assert row["authoritative_semantic_fact"] == source["payload"]
+        assert row["primary_semantic_text"] == source["provenance"]["source_text"]
+        assert "NOT_A_NEW_PARENT_INTENT" in row["original_text_role"]
+        # A broad parent quote is kept exactly; no synthetic Fact text replaces it.
+        assert "internal review exercise" in row["primary_semantic_text"]
+        critic = [r for r in comparison if r["source_ref"] == source["source_ref"]]
+        assert critic and all(r["authoritative_semantic_fact"] == source["payload"] for r in critic)
+        row["authoritative_semantic_fact"]["value"] = "untrusted change to derived view"
+    assert inventory == before
+
+
+def test_invented_source_kind_in_original_fact_view_is_rejected():
+    from spg.providers.fulfillment_candidate import _formation_source_table
+    _, _, inventory, _, capabilities, preconditions = case()
+    context = _fulfillment_wire_context(inventory, capabilities, owner_preconditions=preconditions)
+    substituted = deepcopy(inventory)
+    substituted["sources"][0]["kind"] = "WORK_CONSTRAINT"
+    with pytest.raises(_FulfillmentWireReceiptIdentityError, match="SOURCE_TABLE_IDENTITY_DRIFT"):
+        _formation_source_table(context, inventory=substituted)

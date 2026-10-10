@@ -1,0 +1,186 @@
+{
+  "schema": "c3-feedback-convergence-live-v1",
+  "started_at_utc": "2026-10-10T10:59:17.547133+00:00",
+  "application_source": "4289341c1aa1565777ee629050aef7ee2b9f8a55",
+  "application_tree": "7719cb40b5a828b72497e148d4814f15efbdd730",
+  "guardian_source": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+  "ecf_source": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "authorization": "Human 2026-10-10 continuation: prove ordinary G0 lawful bindings, targeted repair and validation to C3 closure; no Holdout tuning",
+  "logical_calls": 1,
+  "calls": [
+    {
+      "operation": "formation",
+      "formation_attempt": 1,
+      "started_at_utc": "2026-10-10T10:59:17.822970+00:00",
+      "stages": [
+        {
+          "stage": "provider_request_queued",
+          "at_utc": "2026-10-10T10:59:17.868529+00:00"
+        },
+        {
+          "stage": "provider_request_sent",
+          "at_utc": "2026-10-10T10:59:17.869836+00:00"
+        }
+      ],
+      "http_requests": [],
+      "http_responses": [],
+      "terminal_events": [],
+      "usage": "UNKNOWN",
+      "provider_status": "UNKNOWN",
+      "feedback": null,
+      "request_entity": {
+        "bytes": 95880,
+        "sha256": "ff15ea3368a33820999c465d53ba61dffc568e1cc9c33a97d45b601ea8d1ef78",
+        "generation_schema_bytes": 7455,
+        "instructions_bytes": 8517,
+        "input_bytes": 77221,
+        "input_token_count_by_component": "UNKNOWN"
+      },
+      "exception_type": "AssertionError",
+      "failure_observation": null,
+      "provider_or_output_exception_type": "AssertionError",
+      "ended_at_utc": "2026-10-10T10:59:17.874499+00:00",
+      "wall_seconds": 0.050681805005297065
+    }
+  ],
+  "formation_attempts": [],
+  "owner_observations": [
+    {
+      "receipt_id": "2ff0b799-fab0-4c4f-8b4e-a05e789212af",
+      "stage": "MODEL_REQUEST_PENDING",
+      "attempt": 1,
+      "work_id": "c703f518-52a2-5531-90d1-e751b809fe68",
+      "work_reality_revision_id": "4d674f62-99c6-5fed-ba6e-45f90ca2f9a2",
+      "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+      "source_revision": "da9e4af489b54700715ed4ddd655515bc94d9f45",
+      "recorded_at_utc": "2026-10-10T10:59:17.815438+00:00",
+      "budget_limit": 2
+    },
+    {
+      "receipt_id": "b46009cd-18cf-42d3-bb67-ca1873a8fab6",
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 1,
+      "work_id": "c703f518-52a2-5531-90d1-e751b809fe68",
+      "work_reality_revision_id": "4d674f62-99c6-5fed-ba6e-45f90ca2f9a2",
+      "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+      "source_revision": "da9e4af489b54700715ed4ddd655515bc94d9f45",
+      "recorded_at_utc": "2026-10-10T10:59:17.876313+00:00",
+      "budget_limit": 2,
+      "failed_predicate": "OBLIGATION_FORMATION_TRANSPORT_AssertionError",
+      "terminal": true,
+      "validation_passed": false,
+      "terminal_reason": "OBLIGATION_FORMATION_TRANSPORT_AssertionError",
+      "failure_stage": "MODEL_REQUEST"
+    }
+  ],
+  "new_work_created": false,
+  "business_database_access": false,
+  "historical_owner_mutated": false,
+  "holdout_opened": false,
+  "production_configuration_mutated": false,
+  "c3_status": "PARTIAL",
+  "formation_candidate_limit": 2,
+  "feedback_limit": 1,
+  "logical_call_limit": 4,
+  "transport_policy": "Frozen Runtime: at most one fresh connection replay only before any response event/output; no extra retry",
+  "qualification_boundary": "Derived fulfillment formation and independent semantic review only; no Work/Candidate seal, content Verification, Guardian Assurance or Human authority",
+  "private_artifacts": [
+    {
+      "name": "immutable-inventory.json",
+      "sha256": "c118207057466f9b77816ac63e9aba2f2ba71b95c2ab75b7a4032b35c6ef2eab",
+      "bytes": 40737,
+      "public_content": false
+    },
+    {
+      "name": "capability-contracts.json",
+      "sha256": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+      "bytes": 2971,
+      "public_content": false
+    },
+    {
+      "name": "formation-owner-observations.json",
+      "sha256": "6696f413726c74f9e0a5a5cbd880ef048065aec3a470caacfe9b071e6f10bfb2",
+      "bytes": 59224,
+      "public_content": false
+    },
+    {
+      "name": "final-derived-projection.json",
+      "sha256": "594327d148bc43f3a1c2335b71103c4f9cbcaa121ee8e684fd823725e292e96b",
+      "bytes": 99822,
+      "public_content": false
+    }
+  ],
+  "result": "STOPPED",
+  "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+  "source_count": 20,
+  "capability_count": 12,
+  "capabilities_fingerprint": "a2e695783b122373f0ed308a959fa4e3116c4a9df5454dbedd81695071153b17",
+  "basis_sha256": "4ed82eb189d3c6d8edab7cc9bd8df3451e4d4cee0b82c58d7e146e8892518797",
+  "installed_owner_hashes": {
+    "status": "PASS",
+    "counts": {
+      "spg": 278,
+      "guardian": 5,
+      "ecf": 5
+    },
+    "attestation_sha256": "6409426261eee0907303ff994df7fef57a5c4a3feb202ac490603f2520e8770c"
+  },
+  "work_id": "c703f518-52a2-5531-90d1-e751b809fe68",
+  "work_reality_revision_id": "4d674f62-99c6-5fed-ba6e-45f90ca2f9a2",
+  "profiles": {
+    "formation": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "reasoning_effort": "none",
+      "timeout_seconds": 120.0,
+      "max_output_tokens": 16384,
+      "base_url": "https://api.deepseek.com"
+    },
+    "semantic_review": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "reasoning_effort": "none",
+      "timeout_seconds": 120.0,
+      "max_output_tokens": 16384,
+      "base_url": "https://api.deepseek.com"
+    }
+  },
+  "owner_source_preconditions_fingerprint": "97fe3e83b11b88b0b7090c9813b32718c55afb13babc6692ef827429d1992cf8",
+  "preflight": "PASS_LOCAL_NO_HTTP",
+  "initial_wire_metadata": {
+    "provider_wire_version": "fulfillment-compact-v1",
+    "wire_request_fingerprint": "af5ddbce50dfbe4da36e43c25270442c07770a60ddb1c164c1b6b60f9e3dc717",
+    "wire_table_fingerprint": "b0f54fa3a389afb1877181996ff2da20c87e4cb7ea8148c9547499cb2630dbf3",
+    "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40"
+  },
+  "terminal_reason": "OBLIGATION_FORMATION_TRANSPORT_AssertionError",
+  "binding_states": {
+    "UNRESOLVED": 20
+  },
+  "provider_call_count": 1,
+  "observed_model_call_count": 0,
+  "formation_attempt_count": 1,
+  "feedback_count": 0,
+  "immutable_basis_in_memory": true,
+  "ended_at_utc": "2026-10-10T10:59:17.907048+00:00",
+  "wall_seconds": 0.3599654540303163,
+  "observed_terminal_usage_sum": {
+    "input_tokens": "UNKNOWN",
+    "output_tokens": "UNKNOWN",
+    "cached_tokens": "UNKNOWN",
+    "reasoning_tokens": "UNKNOWN",
+    "total_tokens": "UNKNOWN"
+  },
+  "http_transmissions": 0,
+  "transport_recovery_stages": 0,
+  "visible_json_token_count": "UNKNOWN",
+  "monetary_cost": "UNKNOWN",
+  "runtime_or_assurance_pass": false,
+  "all_transmission_usage": {
+    "input_tokens": "UNKNOWN",
+    "output_tokens": "UNKNOWN",
+    "cached_tokens": "UNKNOWN",
+    "reasoning_tokens": "UNKNOWN",
+    "total_tokens": "UNKNOWN"
+  }
+}
