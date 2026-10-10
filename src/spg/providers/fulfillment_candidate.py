@@ -144,6 +144,13 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
             route[name]["items"]["enum"] = domain
         else:
             route[name]["maxItems"] = 0
+    if (owner_preconditions or {}).get("generation_view_contract") == "existing-lossless-source-consumer-input-v3":
+        # The canonical format/identity domains stay strict. Semantic and
+        # source-specific necessities remain in the complete Owner input and
+        # are independently enforced before Review and again at consumers.
+        # Do not duplicate that projection as dozens of alternative schemas.
+        _formation_binding_choices(inventory, capabilities, owner_preconditions)
+        return schema
     if owner_preconditions is not None:
         # Restrict generation to prerequisites already enforced by the Owner.
         # These are necessary conditions, not inferred semantic routes. Keep
@@ -370,9 +377,9 @@ def _formation_source_table(context, *, inventory=None):
     return rows
 
 
-_SOURCE_CONSUMER_INPUT_CONTRACT = "existing-lossless-source-consumer-input-v2"
+_SOURCE_CONSUMER_INPUT_CONTRACT = "existing-lossless-source-consumer-input-v3"
 _SOURCE_CONSUMER_LEGACY_CONTRACT = "existing-lossless-source-consumer-input-v1"
-_SOURCE_CONSUMER_FEEDBACK_CONTRACT = _SOURCE_CONSUMER_INPUT_CONTRACT
+_SOURCE_CONSUMER_FEEDBACK_CONTRACTS = {"existing-lossless-source-consumer-input-v2", _SOURCE_CONSUMER_INPUT_CONTRACT}
 _SOURCE_CONSUMER_INSTRUCTIONS = (
     "Propose one complete derived fulfillment Candidate for the immutable admitted inventory. "
     "You select semantic contributions and their existing consumers; you cannot change admitted "
@@ -460,7 +467,7 @@ def _source_consumer_input(inventory, capabilities, context, owner_preconditions
     Wire v1 and the admitted inventory remain untouched.
     """
     if owner_preconditions.get("generation_view_contract") not in {
-            _SOURCE_CONSUMER_INPUT_CONTRACT, _SOURCE_CONSUMER_LEGACY_CONTRACT}:
+            _SOURCE_CONSUMER_INPUT_CONTRACT, "existing-lossless-source-consumer-input-v2", _SOURCE_CONSUMER_LEGACY_CONTRACT}:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     inventory_view, items = _formation_inventory_view(inventory)
     choices = _formation_binding_choices(inventory, capabilities, owner_preconditions)
@@ -468,6 +475,10 @@ def _source_consumer_input(inventory, capabilities, context, owner_preconditions
     for row, choice, original in zip(rows, choices, owner_preconditions["sources"], strict=True):
         row["necessary_capability_domain"] = choice["candidate_capabilities"]
         row["owner_prerequisites_ref"] = row["index"]
+        if owner_preconditions.get("generation_view_contract") == _SOURCE_CONSUMER_INPUT_CONTRACT:
+            # Reuse exact necessary proof alternatives beside the original
+            # source; never select or insert a supporting reference for it.
+            row["conditional_provenance_operands"] = _formation_provenance_operands(choice, capabilities)
         if original["source"] != row["index"] or original["source_ref"] != row["source_ref"]:
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_OWNER_PRECONDITION_IDENTITY_DRIFT")
     header = deepcopy(owner_preconditions)
@@ -994,7 +1005,19 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
     expanded = candidate.model_dump_json()
     safe_expanded, _digest, _count = _safe_output(expanded)
     if safe_expanded is None:
-        raise ValueError("OBLIGATION_FORMATION_EXPANDED_RECEIPT_LIMIT")
+        code = "OBLIGATION_FORMATION_EXPANDED_RECEIPT_LIMIT"
+        if (owner_preconditions or {}).get("generation_view_contract") == "existing-lossless-source-consumer-input-v3":
+            # Observe the unchanged retained Wire; do not admit the oversized
+            # expanded Candidate or lose independently evaluable Owner errors.
+            from spg.providers.verification_receipts import MAX_CANDIDATE_BYTES
+            raise _FulfillmentWireValidationError(code, {**diagnostic_basis,
+                "violations":[{"code":code,"expanded_bytes":_count,
+                    "expanded_sha256":_digest,"limit_bytes":MAX_CANDIDATE_BYTES,
+                    "expanded_candidate_retained":False}],
+                "additional_violation_count":0,
+                "not_evaluable":["CANONICAL_CANDIDATE_ADMISSION", "INDEPENDENT_SEMANTIC_REVIEW",
+                    "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"]})
+        raise ValueError(code)
     if safe_expanded != expanded:
         raise ValueError("OBLIGATION_FORMATION_EXPANDED_SECRET_BACKFILL")
     return candidate
@@ -1067,7 +1090,7 @@ class ModelFulfillmentCandidateProvider:
             inventory_view, existing_ir_items = _formation_inventory_view(inventory)
             source_table = _formation_source_table(context, inventory=inventory)
             joined_view = (owner_preconditions or {}).get("generation_view_contract") in {
-                _SOURCE_CONSUMER_INPUT_CONTRACT, _SOURCE_CONSUMER_LEGACY_CONTRACT}
+                _SOURCE_CONSUMER_INPUT_CONTRACT, "existing-lossless-source-consumer-input-v2", _SOURCE_CONSUMER_LEGACY_CONTRACT}
             if owner_preconditions is not None:
                 for source, choices in zip(source_table, _formation_binding_choices(
                         inventory, capabilities, owner_preconditions), strict=True):
@@ -1093,7 +1116,7 @@ class ModelFulfillmentCandidateProvider:
                     "Feedback may group repeated identical predicates by route and list all conflicting peers; "
                     "operand observations are referenced by exact original route ordinal within that feedback. "
                     "These references do not select a correction or supply evidence."
-                    if (owner_preconditions or {}).get("generation_view_contract") == _SOURCE_CONSUMER_FEEDBACK_CONTRACT else "")) if joined_view else (
+                    if (owner_preconditions or {}).get("generation_view_contract") in _SOURCE_CONSUMER_FEEDBACK_CONTRACTS else "")) if joined_view else (
                     "You propose a derived fulfillment plan for immutable admitted engineering meaning. "
                     "If an inventory source payload has existing_ir_item_ref, resolve it in existing_ir_item_table: "
                     "this is the same exact original IR/item identity shared by its clauses, not an omitted "

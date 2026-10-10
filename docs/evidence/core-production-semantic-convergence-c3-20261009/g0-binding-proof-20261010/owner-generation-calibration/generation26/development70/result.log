@@ -1,0 +1,21 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 2 items
+
+tests/test_c3_generation_projection_economy.py F.                        [100%]
+
+=================================== FAILURES ===================================
+_ test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[feedback_fits] _
+tests/test_c3_generation_projection_economy.py:57: in test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation
+    assert failed["failed_predicate"]=="OBLIGATION_FORMATION_EXPANDED_RECEIPT_LIMIT"
+E   AssertionError: assert 'OBLIGATION_F...CHEMA_INVALID' == 'OBLIGATION_F...RECEIPT_LIMIT'
+E     
+E     - OBLIGATION_FORMATION_EXPANDED_RECEIPT_LIMIT
+E     + OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_generation_projection_economy.py::test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[feedback_fits]
+========================= 1 failed, 1 passed in 4.60s ==========================

@@ -1,0 +1,656 @@
+{
+  "schema": "actual-provider-request-schema-response-conformance-v1",
+  "source": "a86a8ca91b2be85fedf7693b1c9778a98fef72f2",
+  "actual_image": "sha256:ef0ce65c85226662108726235c9fc26c85fab88da23d1108fef22ead3349064b",
+  "live_receipt_sha256": "d2476885b9dccf85fa7c798142ca25cad3ee1d5b9b1f436bed05d1e88c440cfa",
+  "validator": "jsonschema4.26.0 Draft202012Validator",
+  "actual_responses": [
+    {
+      "operation": "formation",
+      "formation_attempt": 1,
+      "schema_sha256": "7a0e261241b0b7ebea362e2ff6ef48f193942fd86c63fb0fea737dba420a4462",
+      "actual_wire_sha256": "c56320bbe847aeb50283db69fc0f7af766187057a25bacbe0bd991a4e4fa8e8d",
+      "result": "NONCONFORMANT",
+      "failure_predicates": [
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            1
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            3
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            32
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            48
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            56
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            64
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            71
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            82
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            93
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            104
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            110
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            116
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            122
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            128
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            5,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            7,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            9,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            10,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            11,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            12,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            13,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            14,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            15,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            16,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            17,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            18,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            19,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            20,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            21,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            22,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            23,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            24,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            25,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            26,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            27,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            28,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            29,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            30,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            31,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            32,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            33,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            34,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            35,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            36,
+            "not"
+          ]
+        },
+        {
+          "validator": "not",
+          "instance_path": [
+            "routes"
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "allOf",
+            37,
+            "not"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "formation",
+      "formation_attempt": 2,
+      "schema_sha256": "af296d48260e658f215ad90de604bc871e5ec4134273211dacf07df17454f082",
+      "actual_wire_sha256": "7cbce63e36fb945d657a0896ca76508d3f603a8e7686176c607b58fbf041a231",
+      "result": "NONCONFORMANT",
+      "failure_predicates": [
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            12
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            13
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        },
+        {
+          "validator": "anyOf",
+          "instance_path": [
+            "routes",
+            14
+          ],
+          "schema_path": [
+            "properties",
+            "routes",
+            "items",
+            "anyOf"
+          ]
+        }
+      ]
+    }
+  ],
+  "additional_model_calls": 0,
+  "new_work_created": 0,
+  "private_input_or_output_published": false,
+  "provider_internal_keyword_enforcement": "UNKNOWN; this proves only observed response conformance",
+  "not_an_assurance_pass": true
+}

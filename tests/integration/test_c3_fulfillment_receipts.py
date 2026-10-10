@@ -458,3 +458,66 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
     record_property('inventory_fingerprint',fingerprint)
     record_property('feedback_receipt_id',original_scope['receipt_id'])
     record_property('logical_stub_calls',len(calls))
+
+
+@pytest.mark.parametrize("tamper", [False, True])
+def test_expanded_candidate_capacity_is_durable_without_repair_authority(postgres_database, tmp_path, monkeypatch, tamper):
+    """Real isolated persistence of a rejected expanded controlled proposal."""
+    from copy import deepcopy
+    import json
+    from types import SimpleNamespace
+    from sqlalchemy import update
+    from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+    from spg.infrastructure.persistence.interaction_store import InteractionStore
+    from spg.infrastructure.persistence.runtime_store import governance_records
+    from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+    from spg.providers.verification_receipts import MAX_CANDIDATE_BYTES
+    from tests.integration import test_c1_contract_continuity as c1
+    from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+    declared=c1.DeclaredC1Fulfillment();calls=[];inventories=[]
+    def generate(**request):
+        payload=json.loads(request["input_text"]);calls.append(payload)
+        assert "untrusted_fulfillment_candidate" not in payload
+        inventory=_restore_formation_inventory_view(payload["immutable_inventory"],payload.get("existing_ir_item_table",{}));inventories.append(inventory)
+        plan=declared.form(inventory,payload["existing_capability_contracts"])
+        wire,_=controlled_wire(inventory,plan,owner_preconditions=payload.get("owner_source_preconditions"))
+        count=64
+        base=plan.model_copy(update={"routes":tuple(plan.routes[i%len(plan.routes)].model_copy(update={"rationale":""}) for i in range(count))})
+        size=(MAX_CANDIDATE_BYTES+128-len(base.model_dump_json().encode()))//count+1
+        assert 0<size<=1000
+        wire["routes"]=[{**deepcopy(wire["routes"][i%len(wire["routes"])]),"r":"x"*size} for i in range(count)]
+        output=json.dumps(wire,ensure_ascii=False)
+        assert len(output.encode())<=MAX_CANDIDATE_BYTES
+        return StructuredModelResult(output_text=output,provider=ModelProvider.DEEPSEEK,
+            requested_model="controlled-pg-expanded-capacity",effective_model="controlled-pg-expanded-capacity",
+            request_id="controlled-pg-expanded-capacity-1",usage=ModelUsage(),timing=ModelTiming(),retry_count=0)
+    provider=ModelFulfillmentCandidateProvider(lambda:SimpleNamespace(generate=generate,close=lambda:None))
+    monkeypatch.setattr(c1,"DeclaredC1Fulfillment",lambda:provider)
+    with pytest.raises(ValueError,match="OBLIGATION_COMPONENT_INVENTORY_INCOMPLETE"):
+        c1._admit_c1(postgres_database,tmp_path,"work")
+    inventory=inventories[-1];fingerprint=inventory["inventory_fingerprint"];work_id=UUID(inventory["work_id"])
+    with postgres_database.unit_of_work() as uow:
+        revision=ProductStore(uow.session).current_work_reality_revision(work_id)
+        ir=InteractionStore(uow.session).assessment(revision.source_assessment_id).semantic_ir
+        records=RuntimeStore(uow.session).governance_for_subject(fingerprint)
+        assert [r.scope["stage"] for r in records]==["MODEL_REQUEST_PENDING","MODEL_RESPONSE_OBSERVED","CANDIDATE_VALIDATED"]
+        failed=records[-1];scope=deepcopy(failed.scope)
+        assert scope["failed_predicate"]=="OBLIGATION_FORMATION_EXPANDED_RECEIPT_LIMIT"
+        assert scope["terminal_reason"]=="OBLIGATION_FORMATION_RECEIPT_LIMIT"
+        assert scope.get("candidate") is None and not scope["validation_passed"]
+        assert scope["capacity_observation"]["original_row_bytes"]>131072
+        assert records[1].scope["candidate_output"] and "validation_feedback" not in scope
+        if tamper:
+            scope["capacity_observation"]["original_row_sha256"]="invalid"
+            uow.session.execute(update(governance_records).where(governance_records.c.id==failed.id).values(scope=scope));uow.commit()
+    before=deepcopy(scope)
+    for _ in range(2):
+        result=form_fulfillment_projection(revision,ir,provider=provider,database=postgres_database,
+            source_revision=inventory["source_revision"],exact_target_paths=inventory["exact_target_paths"])
+        assert all(b.state=="UNRESOLVED" for b in result) and len(calls)==1
+        assert result[0].formation_receipt["terminal_reason"]==("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT" if tamper else "OBLIGATION_FORMATION_RECEIPT_LIMIT")
+    with postgres_database.unit_of_work() as uow:
+        rows=RuntimeStore(uow.session).governance_for_subject(fingerprint)
+        assert len(rows)==3 and rows[-1].scope==before
+        assert ProductStore(uow.session).current_work_reality_revision(work_id)==revision
+        assert all(RuntimeStore(uow.session).human_authorization(r.id) is None for r in rows)

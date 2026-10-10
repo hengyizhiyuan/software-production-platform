@@ -1,0 +1,19 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 1 item
+
+tests/test_c3_generation_projection_economy.py F                         [100%]
+
+=================================== FAILURES ===================================
+_ test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation _
+tests/test_c3_generation_projection_economy.py:50: in test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation
+    assert "validation_feedback" in failed, failed.get("capacity_observation")
+E   AssertionError: {'schema': 'existing-owner-receipt-capacity-stop-v1', 'original_row_bytes': 161421, 'original_row_sha256': '81b3771c64...ecode_diagnostics', 'bytes': 2211, 'sha256': 'b104fe9187607fb964c72c3136e54cb4277c33a6b48525ea1aa243017e48db84'}], ...}
+E   assert 'validation_feedback' in {'schema': 'work-fulfillment-formation-receipt-v1', 'receipt_id': '7e7b37b1-78d9-451e-8bba-e2633afef194', 'owner': 'WORK_FULFILLMENT_PROJECTION', 'stage': 'CANDIDATE_VALIDATED', ...}
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_generation_projection_economy.py::test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation
+============================== 1 failed in 4.26s ===============================

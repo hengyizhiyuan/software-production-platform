@@ -1,0 +1,19 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 2 items
+
+tests/test_c3_generation_projection_economy.py F.                        [100%]
+
+=================================== FAILURES ===================================
+_ test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[feedback_fits] _
+tests/test_c3_generation_projection_economy.py:75: in test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation
+    assert len(calls)==3 and result[0].formation_receipt["terminal_reason"]=="VALIDATED_PROJECTION"
+E   AssertionError: assert (1 == 3)
+E    +  where 1 = len([{'immutable_inventory': {'work_id': 'ee6b17e8-0159-4279-9b04-d7bb2592c7af', 'work_reality_revision_id': '793cacfd-15b...livery:human-authorization-required', 'owner': 'DELIVERY_GATE', 'phase': 'CONTINUOUS_FROM_ADMISSION', ...}, ...], ...}])
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_generation_projection_economy.py::test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[feedback_fits]
+========================= 1 failed, 1 passed in 4.56s ==========================

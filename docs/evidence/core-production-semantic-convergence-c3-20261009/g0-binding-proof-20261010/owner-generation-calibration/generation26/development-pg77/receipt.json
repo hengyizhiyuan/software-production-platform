@@ -1,0 +1,52 @@
+{
+  "schema": "c3-semantic-owner-pg-regression-v1",
+  "started_at_utc": "2026-10-10T16:54:45.091040+00:00",
+  "ended_at_utc": "2026-10-10T16:54:58.359757+00:00",
+  "wall_seconds": 13.268684230046347,
+  "counts": {
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 2
+  },
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "712334cee78ba1aba696ace52cf0af471ff13763",
+      "tree": "52150499fd056a74a628f762aa21f36cb0a159f2"
+    },
+    "guardian": {
+      "revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+      "tree": "6066a6d6b8d91bec610021409ab320309ed0e437"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:270ae0c46dff3372bc87d64e46f6b495cbc706041737b6834c72d7614ac12cc6",
+  "actual_container_id": "22353be68799697466da7ba96ab07184cbbd63354c42754b4bf999a38c3d230a",
+  "actual_postgres_image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+  "actual_postgres_container_id": "120bc35415b9ea2129e54bdffa279651ae108d9d6c23d5bb102dd5b5c5361576",
+  "database_name": "c1_contract_continuity",
+  "migration_head": "20261007_72",
+  "network_internal": true,
+  "nodes": [
+    "tests/integration/test_c3_fulfillment_receipts.py::test_expanded_candidate_capacity_is_durable_without_repair_authority"
+  ],
+  "source_or_test_overlay": true,
+  "overlay_manifest_sha256": "6b8ae3a8e3a2b7a55f321d1a9a93701f88ff12d58dcd4f5567239cdfb6fa91c9",
+  "credentials_independently_generated": true,
+  "live_model_calls": 0,
+  "actual_ai_work_created": 0,
+  "fixture_only": true,
+  "original_database_access": false,
+  "existing_services_started": false,
+  "controller_sha256": "0aafda2c6b5b45b606a6f4f5c7bc7eb7863f5c75ee823f28970929aa38db40e3",
+  "claim": "ISOLATED_PG_OWNER_PERSISTENCE_AND_STATE_REGRESSION_NOT_REAL_G0"
+}

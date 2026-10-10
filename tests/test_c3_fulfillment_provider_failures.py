@@ -115,7 +115,7 @@ def test_terminal_failure_preserves_exact_sources_and_same_basis_never_reopens_c
         from spg.application.governed_obligations import _owner_source_preconditions, fulfillment_capability_contracts
         wire, _context = controlled_wire(inventory, plan, owner_preconditions=
             _owner_source_preconditions(revision, ir, inventory, fulfillment_capability_contracts(),
-                generation_view_contract="existing-lossless-source-consumer-input-v2"))
+                generation_view_contract="existing-lossless-source-consumer-input-v3"))
         formation_runtime = ControlledRuntime(StructuredModelResult(output_text=json.dumps(wire),
             provider=ModelProvider.DEEPSEEK, requested_model="controlled", effective_model="controlled",
             request_id="request-controlled-formation", usage=ModelUsage(total_tokens=17),

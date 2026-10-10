@@ -1507,7 +1507,7 @@ def projection_validation_feedback(candidate, revision, ir, inventory, primary_e
                     add("OBLIGATION_SEMANTIC_COMPONENT_MISMATCH", expected_components[(row.component_id, row.capability)])
                     failures[-1].update(capability=row.capability, failed_review_predicates=predicates, review_reason=row.reason)
         semantic_observation = {k:v for k,v in semantic_observation.items() if k != "review"}
-    if (owner_preconditions or {}).get("generation_view_contract") == "existing-lossless-source-consumer-input-v2":
+    if (owner_preconditions or {}).get("generation_view_contract") in {"existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3"}:
         failures = _group_repeated_feedback_predicates(failures)
         for failure in failures:
             if "conflicting_routes" in failure:
@@ -1810,7 +1810,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
     actually proves their meaning. Structural eligibility is not equivalence,
     evidence satisfaction, independent review or authority.
     """
-    if generation_view_contract not in (None, "existing-lossless-source-consumer-input-v1", "existing-lossless-source-consumer-input-v2"):
+    if generation_view_contract not in (None, "existing-lossless-source-consumer-input-v1", "existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3"):
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     from types import SimpleNamespace
     sources = inventory["sources"]
@@ -2195,7 +2195,7 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
                 "original_text_sha256": sha256(text.encode()).hexdigest(),
                 "disposition": "COUNTERFACTUAL_GEOMETRY_ONLY; NO_ROUTE_REMOVAL_OR_REPAIR_PROPOSED; SEMANTIC_DISPOSITION_NOT_EVALUATED"})
     operand_observations = {}
-    compact_feedback = (owner_preconditions or {}).get("generation_view_contract") == "existing-lossless-source-consumer-input-v2"
+    compact_feedback = (owner_preconditions or {}).get("generation_view_contract") in {"existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3"}
     if compact_feedback:
         for failure in failures:
             details = failure.pop("owner_operand_observations", None)
@@ -2253,7 +2253,7 @@ def _rejected_candidate_receipt_values(candidate, feedback, request):
     only a rejected, identity-bound observation and grants no authority.
     """
     if (candidate is None or (request.get("owner_source_preconditions") or {}).get(
-            "generation_view_contract") != "existing-lossless-source-consumer-input-v2"):
+            "generation_view_contract") not in {"existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3"}):
         return {"candidate":None if candidate is None else candidate.model_dump(mode="json")}
     binding = json.loads(feedback).get("repair_feedback_binding")
     if binding is None:
@@ -2372,7 +2372,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                 or preconditions.get("syntax_observation_contract") not in (
                     None, "complete-value-observations-v1", "complete-value-owner-observations-v1", "complete-value-owner-observations-v2")
                 or preconditions.get("operand_observation_contract") not in (None, "existing-owner-operands-v1")
-                or preconditions.get("generation_view_contract") not in (None, "existing-lossless-source-consumer-input-v1", "existing-lossless-source-consumer-input-v2")
+                or preconditions.get("generation_view_contract") not in (None, "existing-lossless-source-consumer-input-v1", "existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3")
                 or preconditions.get("typed_prerequisite_contract") not in (None, "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11")):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if row.get("owner_source_preconditions") is not None and (
@@ -2464,7 +2464,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                             "candidate_fingerprint":fulfillment_candidate_fingerprint(original),
                             "components_fingerprint":fulfillment_components_fingerprint(original)}
                         if (row.get("candidate") is not None or row.get("validation_passed") is not False
-                                or (start.get("owner_source_preconditions") or {}).get("generation_view_contract") != "existing-lossless-source-consumer-input-v2"
+                                or (start.get("owner_source_preconditions") or {}).get("generation_view_contract") not in {"existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3"}
                                 or reference != expected_reference):
                             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
                     elif capacity_stop:
@@ -2525,6 +2525,21 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         for next_start in rows:
             if next_start.get("stage") == "MODEL_REQUEST_PENDING" and next_start.get("attempt") == attempt + 1:
+                capacity = next_start.get("capacity_observation")
+                if capacity is not None:
+                    # A verified receipt-capacity terminal never issued the next
+                    # request. Its dropped feedback still binds to this exact
+                    # persisted parent, not another proposal or Attempt.
+                    if (not isinstance(capacity, dict) or not isinstance(capacity.get("dropped_fields"), list)
+                            or any(not isinstance(d, dict) for d in capacity["dropped_fields"])):
+                        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                    encoded = json.dumps(feedback, ensure_ascii=False, default=str).encode()
+                    dropped = [d for d in capacity["dropped_fields"] if d.get("field") == "feedback"]
+                    if (len(dropped) != 1 or dropped[0]["bytes"] != len(encoded)
+                            or dropped[0]["sha256"] != sha256(encoded).hexdigest()
+                            or next_start.get("feedback_receipt_id") != row.get("receipt_id")):
+                        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                    continue
                 if (next_start.get("feedback") != feedback
                         or next_start.get("feedback_receipt_id") != row.get("receipt_id")):
                     raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
@@ -2805,7 +2820,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     typed_prerequisite_contract=((initial_request.get("owner_source_preconditions") or {}).get("typed_prerequisite_contract", "existing-owner-typed-prerequisites-v11") if initial_request is not None and source_contract == "v3" else "existing-owner-typed-prerequisites-v11" if initial_request is None else
                         "existing-owner-typed-prerequisites-v8" if source_contract == "v2" else "existing-owner-typed-prerequisites-v3"),
                     generation_view_contract=((initial_request.get("owner_source_preconditions") or {}).get("generation_view_contract")
-                        if initial_request is not None else "existing-lossless-source-consumer-input-v2"))}
+                        if initial_request is not None else "existing-lossless-source-consumer-input-v3"))}
                     if supports_preconditions and callable(metadata_builder)
                     and "owner_preconditions" in inspect.signature(metadata_builder).parameters else {})
                 if initial_request is None and precondition_arguments:

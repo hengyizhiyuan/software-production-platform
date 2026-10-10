@@ -1,0 +1,1 @@
+{"result": "STOPPED", "terminal_reason": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN", "logical_calls": 2, "formation_attempt_count": 2, "feedback_count": 1, "observed_terminal_usage_sum": {"input_tokens": 105498, "output_tokens": 9525, "cached_tokens": 2688, "reasoning_tokens": 0, "total_tokens": 115023}, "wall_seconds": 31.170699214038905}

@@ -1,0 +1,18 @@
+{
+  "schema": "capacity-diagnostic-metadata-correction-v1",
+  "superseded_receipt": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation26-qualified-20261010/original-wire-capacity-probe-2/evidence/proof.json",
+  "superseded_sha256": "992e631a36e67a0c272deb195671f484a201ce31e56c69d39a06d0c134612657",
+  "incorrect_field": "expanded_limit_unchanged",
+  "previous_label": 131072,
+  "correct_candidate_limit_bytes": 65536,
+  "separate_owner_receipt_row_limit_bytes": 131072,
+  "original_expanded_bytes": 69565,
+  "original_wire_sha256": "c56320bbe847aeb50283db69fc0f7af766187057a25bacbe0bd991a4e4fa8e8d",
+  "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+  "attempt": 1,
+  "request_receipt_id": "e4753322-8b36-4c29-8f40-f20fddff2989",
+  "original_receipt_retained": true,
+  "model_calls": 0,
+  "work_created": 0,
+  "candidate_admitted": false
+}

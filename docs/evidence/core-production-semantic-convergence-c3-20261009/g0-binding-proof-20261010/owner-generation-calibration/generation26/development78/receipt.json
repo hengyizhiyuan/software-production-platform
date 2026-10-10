@@ -1,0 +1,14 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 7.644995360984467,
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "container_id": "a6118f008b1ee3009b7442332a64f355ea0f7eb852dac46c60bba13766500404",
+  "source_overlay": true,
+  "snapshot_sha256": "7723af2a172741c60ff3d230febf06ddc43e1a88853225acb96863821fc88b41",
+  "nodes": [
+    "tests/test_c3_generation_projection_economy.py::test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}
