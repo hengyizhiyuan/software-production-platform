@@ -1900,7 +1900,8 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                                 include_operand_observations=True, include_typed_observations=True,
                                 typed_prerequisite_contract="existing-owner-typed-prerequisites-v11",
                                 generation_view_contract=None, raw_operand_observation_contract=None,
-                                review_input_contract=None, semantic_selection_input_contract=None):
+                                review_input_contract=None, semantic_selection_input_contract=None,
+                                generation_prerequisite_contract=None):
     """Necessary proof sets from existing Owner predicates, never route proposals.
 
     The semantic boundary still chooses components and which eligible origin
@@ -1916,6 +1917,12 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
     if semantic_selection_input_contract not in (None, "existing-primary-meaning-owner-reference-v1", "existing-primary-meaning-owner-reference-v2"):
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     if semantic_selection_input_contract is not None and generation_view_contract != "existing-lossless-source-consumer-input-v3":
+        raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
+    if (generation_prerequisite_contract not in (None, "existing-owner-binding-generation-v1")
+            or generation_prerequisite_contract is not None and (
+                semantic_selection_input_contract != "existing-primary-meaning-owner-reference-v2"
+                or not include_typed_observations
+                or typed_prerequisite_contract != "existing-owner-typed-prerequisites-v11")):
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     from types import SimpleNamespace
     sources = inventory["sources"]
@@ -2095,6 +2102,8 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
         **({"review_input_contract": review_input_contract} if review_input_contract is not None else {}),
         **({"semantic_selection_input_contract": semantic_selection_input_contract}
            if semantic_selection_input_contract is not None else {}),
+        **({"generation_prerequisite_contract": generation_prerequisite_contract}
+           if generation_prerequisite_contract is not None else {}),
         **({"generation_view_contract": generation_view_contract} if generation_view_contract is not None else {}),
         **({"syntax_observation_contract": syntax_observation_contract} if include_syntax_observations else {}),
         **({"typed_prerequisite_contract": typed_prerequisite_contract,
@@ -2554,6 +2563,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                 or preconditions.get("raw_operand_observation_contract") not in (None, "existing-original-wire-owner-operands-v1")
                 or preconditions.get("review_input_contract") not in (None, "existing-lossless-review-input-v1", "existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3", "existing-source-typed-comparison-input-v4", "existing-admission-source-comparison-input-v5")
                 or preconditions.get("semantic_selection_input_contract") not in (None, "existing-primary-meaning-owner-reference-v1", "existing-primary-meaning-owner-reference-v2")
+                or preconditions.get("generation_prerequisite_contract") not in (None, "existing-owner-binding-generation-v1")
                 or preconditions.get("generation_view_contract") not in (None, "existing-lossless-source-consumer-input-v1", "existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3")
                 or preconditions.get("typed_prerequisite_contract") not in (None, "existing-owner-typed-prerequisites-v1", "existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11")):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
@@ -2568,7 +2578,8 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     generation_view_contract=preconditions.get("generation_view_contract"),
                     raw_operand_observation_contract=preconditions.get("raw_operand_observation_contract"),
                     review_input_contract=preconditions.get("review_input_contract"),
-                    semantic_selection_input_contract=preconditions.get("semantic_selection_input_contract"))):
+                    semantic_selection_input_contract=preconditions.get("semantic_selection_input_contract"),
+                    generation_prerequisite_contract=preconditions.get("generation_prerequisite_contract"))):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if (row.get("stage") == "MODEL_RESPONSE_OBSERVED" and row.get("candidate_retained") is True
                 and any(key in row for key in _FULFILLMENT_WIRE_METADATA_KEYS)):
@@ -3074,12 +3085,20 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     review_input_contract=((initial_request.get("owner_source_preconditions") or {}).get("review_input_contract")
                         if initial_request is not None else "existing-admission-source-comparison-input-v5"),
                     semantic_selection_input_contract=((initial_request.get("owner_source_preconditions") or {}).get("semantic_selection_input_contract")
-                        if initial_request is not None else "existing-primary-meaning-owner-reference-v2"))}
+                        if initial_request is not None else "existing-primary-meaning-owner-reference-v2"),
+                    generation_prerequisite_contract=((initial_request.get("owner_source_preconditions") or {}).get("generation_prerequisite_contract")
+                        if initial_request is not None else None))}
                     if supports_preconditions and callable(metadata_builder)
                     and "owner_preconditions" in inspect.signature(metadata_builder).parameters else {})
                 if initial_request is None and precondition_arguments:
                     # A legacy adapter may deliberately omit typed observations.
                     # Bind validation to the contract actually sent, not the default.
+                    actual_preconditions = precondition_arguments["owner_preconditions"]
+                    if (actual_preconditions.get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v11"
+                            and actual_preconditions.get("semantic_selection_input_contract") == "existing-primary-meaning-owner-reference-v2"):
+                        # Opt in only after the adapter has returned its actual
+                        # Owner contract. Never upgrade a legacy/replayed request.
+                        actual_preconditions["generation_prerequisite_contract"] = "existing-owner-binding-generation-v1"
                     source_contract = ("v3" if precondition_arguments["owner_preconditions"].get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v2" if precondition_arguments["owner_preconditions"].get(
                         "typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v1")
                 wire_metadata = metadata_builder(inventory, capabilities, validation_feedback=feedback,

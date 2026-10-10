@@ -1,0 +1,86 @@
+{
+  "archive_sha256": "c6fec43351ad81d409622d8d962bcb0f09eded391a0a66025c25ea1ac29a052d",
+  "files": [
+    {
+      "file": "development124/receipt.json",
+      "sha256": "9a7acb5abe2ed19db141cf074960158ca6c9f46f11a68d86fcdaf7a4bc2aa7e5",
+      "bytes": 962,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-124/evidence/receipt.json"
+    },
+    {
+      "file": "development124/result.log",
+      "sha256": "a6765a2d75e38466a92b8a1c0b980407498a08883945196a70c01f9f493f0e72",
+      "bytes": 11544,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-124/evidence/result.log"
+    },
+    {
+      "file": "development124/result.xml",
+      "sha256": "03f26e74da11cbe42db08a887a965623fb63c5b54b606848d0ed3e475e64d9df",
+      "bytes": 78000,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-124/evidence/result.xml"
+    },
+    {
+      "file": "development125/receipt.json",
+      "sha256": "5d5974eee2428a4ddc5ffc9cdf6486a8118042e61dbceed3422f56115a2c9fab",
+      "bytes": 961,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-125/evidence/receipt.json"
+    },
+    {
+      "file": "development125/result.log",
+      "sha256": "d37c44e06af43a024095361b2c0c6654f20a1cf087675f4523adeeba386f8562",
+      "bytes": 79663,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-125/evidence/result.log"
+    },
+    {
+      "file": "development125/result.xml",
+      "sha256": "b0415b3f7557caeb164daeb0b7f2d1c29d1b756c864b23010a7f0bcc3fa694cf",
+      "bytes": 134597,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-125/evidence/result.xml"
+    },
+    {
+      "file": "development126/receipt.json",
+      "sha256": "4208934ce7b65f07766d59c32c41e3c6846f57dc614af2abf4f148078487cbe7",
+      "bytes": 961,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-126/evidence/receipt.json"
+    },
+    {
+      "file": "development126/result.log",
+      "sha256": "21a682c384bc56693de5219875bf5e450fb24adb01a26e4479238abcdddd3c10",
+      "bytes": 8313,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-126/evidence/result.log"
+    },
+    {
+      "file": "development126/result.xml",
+      "sha256": "a8016db1735188050ff4ea8dce2351c0478f7800c7b8620ad12f5aa1c8e4cef3",
+      "bytes": 75132,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-126/evidence/result.xml"
+    },
+    {
+      "file": "development127/receipt.json",
+      "sha256": "4fedad0f4a980c71066f475344d919ab875d28b7f437698926b3af8b96dd9b7c",
+      "bytes": 962,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-127/evidence/receipt.json"
+    },
+    {
+      "file": "development127/result.log",
+      "sha256": "9dc2523170fe8957fa74c431d2c1e19a400a364793ccf99c6ad587f6ed94da38",
+      "bytes": 8313,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-127/evidence/result.log"
+    },
+    {
+      "file": "development127/result.xml",
+      "sha256": "135c2bad19994dcfff52b3acef920522cc39e0ee7f809e306974b4eb3eb827eb",
+      "bytes": 75487,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/g0-binding-proof-20261010/development-127/evidence/result.xml"
+    },
+    {
+      "file": "test-dependencies.json",
+      "sha256": "e07306c38a73bd4c4bc76ecfd83181b450bca7bea168a1e24b3d3fac33866267",
+      "bytes": 1643,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation43-test-deps-20261010/manifest.json"
+    }
+  ],
+  "live_model_calls": 0,
+  "history_mutations": 0,
+  "qualification_claim": false
+}

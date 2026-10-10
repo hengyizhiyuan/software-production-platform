@@ -1,0 +1,234 @@
+{
+  "items": [
+    {
+      "id": "pi_n1_g0_page",
+      "kind": "PRODUCTION_INTENT",
+      "requires_human": false,
+      "has_action": false,
+      "action_type": null,
+      "current_production": true
+    },
+    {
+      "id": "c_only_index",
+      "kind": "CONSTRAINT",
+      "requires_human": false,
+      "has_action": false,
+      "action_type": null,
+      "current_production": null
+    },
+    {
+      "id": "req_verify",
+      "kind": "OPERATIONAL_ACTION",
+      "requires_human": false,
+      "has_action": true,
+      "action_type": null,
+      "current_production": null
+    },
+    {
+      "id": "ex_none",
+      "kind": "CONSTRAINT",
+      "requires_human": false,
+      "has_action": false,
+      "action_type": null,
+      "current_production": null
+    }
+  ],
+  "affected_source_preconditions": [
+    {
+      "ineligible_binding_prerequisites": [
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SOURCE_EVIDENCE_METHOD_REQUIRES_ADMITTED_FACT"
+          ]
+        },
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        }
+      ],
+      "partial_context_rule": "DISTINCT_CURRENT_COMPONENT_AND_INDEPENDENT_SEMANTIC_REVIEW_REQUIRED",
+      "polarity": "AFFIRMATIVE",
+      "primary_component_required": true,
+      "reviewed_background_prerequisites": {
+        "conditional_source_eligible": false,
+        "independent_full_plan_and_component_review_required": true,
+        "required_current_fact_refs": [
+          "semantic-fact:b39ea8ad-5c36-5faf-9222-4d34ef6b52fc",
+          "semantic-fact:48d53689-5a66-55b2-b1f0-dcd7d3ae0e48",
+          "semantic-fact:f4170564-0af7-5ed7-8395-2f43a28081be",
+          "semantic-fact:db032252-0b73-500d-9721-441285ce08da"
+        ],
+        "required_one_current_request_ref_from": [
+          "ir-clause:5e5b6d8d-6a83-5060-9171-7a9121693af3:pi_n1_g0_page:cl_2",
+          "ir-clause:5e5b6d8d-6a83-5060-9171-7a9121693af3:pi_n1_g0_page:cl_4"
+        ],
+        "status": "NECESSARY_EXISTING_OWNER_CONDITIONS; NO_DISPOSITION_OR_EVIDENCE_APPROVAL"
+      },
+      "source": 4,
+      "source_ref": "ir-clause:5e5b6d8d-6a83-5060-9171-7a9121693af3:pi_n1_g0_page:cl_1",
+      "speech_act": "EXPLICIT_REQUEST",
+      "supporting_reference_does_not_cover_source": true,
+      "temporal_scope": "CURRENT",
+      "whole_source_context_only": false
+    },
+    {
+      "ineligible_binding_prerequisites": [
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SOURCE_EVIDENCE_METHOD_REQUIRES_ADMITTED_FACT"
+          ]
+        },
+        {
+          "capability": 3,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 4,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        },
+        {
+          "capability": 5,
+          "codes": [
+            "OBLIGATION_PERMISSION_POLARITY_CONFLICT"
+          ]
+        }
+      ],
+      "partial_context_rule": "DISTINCT_CURRENT_COMPONENT_AND_INDEPENDENT_SEMANTIC_REVIEW_REQUIRED",
+      "polarity": "AFFIRMATIVE",
+      "primary_component_required": true,
+      "reviewed_background_prerequisites": {
+        "conditional_source_eligible": false,
+        "independent_full_plan_and_component_review_required": true,
+        "required_current_fact_refs": [
+          "semantic-fact:b39ea8ad-5c36-5faf-9222-4d34ef6b52fc",
+          "semantic-fact:48d53689-5a66-55b2-b1f0-dcd7d3ae0e48",
+          "semantic-fact:f4170564-0af7-5ed7-8395-2f43a28081be",
+          "semantic-fact:db032252-0b73-500d-9721-441285ce08da"
+        ],
+        "required_one_current_request_ref_from": [],
+        "status": "NECESSARY_EXISTING_OWNER_CONDITIONS; NO_DISPOSITION_OR_EVIDENCE_APPROVAL"
+      },
+      "source": 9,
+      "source_ref": "ir-clause:5e5b6d8d-6a83-5060-9171-7a9121693af3:req_verify:cl_6",
+      "speech_act": "EXPLICIT_REQUEST",
+      "supporting_reference_does_not_cover_source": true,
+      "temporal_scope": "CURRENT",
+      "whole_source_context_only": false
+    },
+    {
+      "ineligible_binding_prerequisites": [
+        {
+          "capability": 2,
+          "codes": [
+            "OBLIGATION_SOURCE_EVIDENCE_METHOD_REQUIRES_ADMITTED_FACT"
+          ]
+        },
+        {
+          "capability": 6,
+          "codes": [
+            "OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION"
+          ]
+        },
+        {
+          "capability": 7,
+          "codes": [
+            "OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION"
+          ]
+        },
+        {
+          "capability": 8,
+          "codes": [
+            "OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION"
+          ]
+        },
+        {
+          "capability": 9,
+          "codes": [
+            "OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION"
+          ]
+        }
+      ],
+      "partial_context_rule": "DISTINCT_CURRENT_COMPONENT_AND_INDEPENDENT_SEMANTIC_REVIEW_REQUIRED",
+      "polarity": "NEGATED",
+      "primary_component_required": true,
+      "reviewed_background_prerequisites": {
+        "conditional_source_eligible": false,
+        "independent_full_plan_and_component_review_required": true,
+        "required_current_fact_refs": [
+          "semantic-fact:b39ea8ad-5c36-5faf-9222-4d34ef6b52fc",
+          "semantic-fact:48d53689-5a66-55b2-b1f0-dcd7d3ae0e48",
+          "semantic-fact:f4170564-0af7-5ed7-8395-2f43a28081be",
+          "semantic-fact:db032252-0b73-500d-9721-441285ce08da"
+        ],
+        "required_one_current_request_ref_from": [],
+        "status": "NECESSARY_EXISTING_OWNER_CONDITIONS; NO_DISPOSITION_OR_EVIDENCE_APPROVAL"
+      },
+      "source": 10,
+      "source_ref": "ir-constraint:ex_none:cl_7",
+      "speech_act": "EXPLICIT_REQUEST",
+      "supporting_reference_does_not_cover_source": true,
+      "temporal_scope": "CURRENT",
+      "whole_source_context_only": false
+    }
+  ],
+  "feedback_codes_first": [
+    {
+      "code": "OBLIGATION_FORMATION_WIRE_JSON_INVALID",
+      "json_parse_observation": {
+        "line": 1,
+        "column": 6265,
+        "character_offset": 6264,
+        "reason": "EXTRA_DATA",
+        "complete_value_range": [
+          0,
+          6264
+        ],
+        "complete_value_sha256": "aed287b916a72462a6336622b8d809250f7e1c0e31b12b16939ab27aab9f83cf",
+        "trailing_bytes": 1,
+        "disposition": "UNADMITTED_SYNTAX_OBSERVATION"
+      }
+    },
+    {
+      "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+      "field": "f",
+      "referenced_source": 4,
+      "expected_kind": "FACT",
+      "actual_kind": "IR_CLAUSE",
+      "route": 17,
+      "source": 13,
+      "capability": 0,
+      "raw_route_fingerprint": "dd799e67fc375ef19b800ee6ee1d6a96f4ecdb0d6d90946f6e68b0028cdd7314"
+    },
+    {
+      "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+      "field": "f",
+      "referenced_source": 7,
+      "expected_kind": "FACT",
+      "actual_kind": "IR_CLAUSE",
+      "route": 19,
+      "source": 14,
+      "capability": 0,
+      "raw_route_fingerprint": "ca243cf57bc85974b9f6351d754a142108ae0237601b7cae41ca150154d00339"
+    }
+  ]
+}

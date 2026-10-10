@@ -1,0 +1,477 @@
+{
+  "work_id": "f94d5d8b-0f9d-5046-85b5-bf206cbc2899",
+  "inventory_fingerprint": "dddddf753d0e752c80eddd6b993374dba178ddd04cd005f50cec5576335023a5",
+  "source_count": 19,
+  "source": "2170ec5fd9b4bb930c3d0d1e2143c9b52b311b5b",
+  "model_calls": 0,
+  "historical_changes": 0,
+  "wire_lineage_verified": true,
+  "attempts": [
+    {
+      "attempt": 1,
+      "receipt_id": "e38abcc0-12fc-48b2-ad0a-c12e792c2845",
+      "wire_sha256": "8423da240fc0bb57b4668c38f4a55159647ed5e17bfce674222c253aa778b9cc",
+      "bytes": 6265,
+      "usage": {
+        "cached_tokens": 1792,
+        "input_tokens": 36040,
+        "output_tokens": 2203,
+        "reasoning_tokens": 0,
+        "total_tokens": 38243,
+        "unknown": false
+      },
+      "formal_json_valid": false,
+      "json_error": {
+        "message": "Extra data",
+        "position": 6264
+      },
+      "unaccepted_prefix": {
+        "end": 6264,
+        "trailing_characters": 1,
+        "trailing_structure_only": true,
+        "route_count": 25
+      }
+    },
+    {
+      "attempt": 2,
+      "receipt_id": "fc5a08f1-4170-4f31-ad59-11d061cb3115",
+      "wire_sha256": "a0e7791729159b9e7169e98f5f612ba6042f932a01fa2856a8d037dfa5895069",
+      "bytes": 8255,
+      "usage": {
+        "cached_tokens": 2176,
+        "input_tokens": 44102,
+        "output_tokens": 2244,
+        "reasoning_tokens": 0,
+        "total_tokens": 46346,
+        "unknown": false
+      },
+      "formal_json_valid": true,
+      "routes": 25,
+      "failed_predicate": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+      "violations": [
+        {
+          "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+          "route": 4,
+          "source": 4,
+          "component_id": "a2155dcd215bac60cd9e842735b1efe4a0f15a85dbc2d01f39429c0e8fe87bf4"
+        },
+        {
+          "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+          "route": 10,
+          "source": 9,
+          "component_id": "5f18a590cfefabbf7543a2d2dc544ad8ce6967af30be2ffc917a9c518abd7032"
+        }
+      ],
+      "affected_components": [
+        {
+          "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+          "route": 4,
+          "source_ordinal": 4,
+          "source_ref": "ir-clause:5e5b6d8d-6a83-5060-9171-7a9121693af3:pi_n1_g0_page:cl_1",
+          "source_kind": "IR_CLAUSE",
+          "capability": "RETAIN_CONTEXT",
+          "component_id": "a2155dcd215bac60cd9e842735b1efe4a0f15a85dbc2d01f39429c0e8fe87bf4",
+          "whole_source": true,
+          "quote_sha256": "c01616d2fa1687d3f2dbde62f78b2d07c72c8f63034431eb8b263f2cd82e53b1",
+          "item_kind": "PRODUCTION_INTENT",
+          "item_id": "pi_n1_g0_page",
+          "clause_id": "cl_1",
+          "modality": "REQUEST",
+          "temporal_scope": "CURRENT",
+          "polarity": "AFFIRMATIVE",
+          "speech_act": "EXPLICIT_REQUEST",
+          "requested_effects": [
+            "PRODUCTION_GOAL"
+          ],
+          "existing_context_only_eligible": false,
+          "existing_reviewed_background_eligible": false,
+          "source_facts_overlapping": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+          "route": 10,
+          "source_ordinal": 9,
+          "source_ref": "ir-clause:5e5b6d8d-6a83-5060-9171-7a9121693af3:req_verify:cl_6",
+          "source_kind": "IR_CLAUSE",
+          "capability": "UNRESOLVED",
+          "component_id": "5f18a590cfefabbf7543a2d2dc544ad8ce6967af30be2ffc917a9c518abd7032",
+          "whole_source": true,
+          "quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+          "item_kind": "OPERATIONAL_ACTION",
+          "item_id": "req_verify",
+          "clause_id": "cl_6",
+          "modality": "REQUEST",
+          "temporal_scope": "CURRENT",
+          "polarity": "AFFIRMATIVE",
+          "speech_act": "EXPLICIT_REQUEST",
+          "requested_effects": [
+            "VERIFY",
+            "LEAVE_REVIEWABLE_CANDIDATE"
+          ],
+          "existing_context_only_eligible": false,
+          "existing_reviewed_background_eligible": false,
+          "source_facts_overlapping": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ]
+    }
+  ],
+  "candidate_source_routes": [
+    {
+      "source": 0,
+      "kind": "FACT",
+      "item_id": null,
+      "clause_id": null,
+      "text_sha256": "9499d59538a154249d74cf83f71eedb58e1b98a4f88a9f74cd7b92dbe9e117bf",
+      "routes": [
+        {
+          "route": 0,
+          "capability": "ARTIFACT_CONTENT",
+          "support_sources": [],
+          "linked_facts": 1
+        }
+      ]
+    },
+    {
+      "source": 1,
+      "kind": "FACT",
+      "item_id": null,
+      "clause_id": null,
+      "text_sha256": "a24b1d48dd8fae804d8b7bf4e25740bf79c8716ebefc7201050f42b27e1296db",
+      "routes": [
+        {
+          "route": 1,
+          "capability": "ARTIFACT_CONTENT",
+          "support_sources": [],
+          "linked_facts": 1
+        }
+      ]
+    },
+    {
+      "source": 2,
+      "kind": "FACT",
+      "item_id": null,
+      "clause_id": null,
+      "text_sha256": "5be6714bf14eea3261e40966c1d1a4039f752f3f376e0320166e32266011c8c4",
+      "routes": [
+        {
+          "route": 2,
+          "capability": "ARTIFACT_CONTENT",
+          "support_sources": [],
+          "linked_facts": 1
+        }
+      ]
+    },
+    {
+      "source": 3,
+      "kind": "FACT",
+      "item_id": null,
+      "clause_id": null,
+      "text_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+      "routes": [
+        {
+          "route": 3,
+          "capability": "GIT_DIFF_SCOPE",
+          "support_sources": [],
+          "linked_facts": 1
+        }
+      ]
+    },
+    {
+      "source": 4,
+      "kind": "IR_CLAUSE",
+      "item_id": "pi_n1_g0_page",
+      "clause_id": "cl_1",
+      "text_sha256": "c01616d2fa1687d3f2dbde62f78b2d07c72c8f63034431eb8b263f2cd82e53b1",
+      "routes": [
+        {
+          "route": 4,
+          "capability": "RETAIN_CONTEXT",
+          "support_sources": [],
+          "linked_facts": 0
+        }
+      ]
+    },
+    {
+      "source": 5,
+      "kind": "IR_CLAUSE",
+      "item_id": "pi_n1_g0_page",
+      "clause_id": "cl_2",
+      "text_sha256": "9268cc964f6cb6011eb23204032873bdfbfff04e950cfda4f190d57a1cae73aa",
+      "routes": [
+        {
+          "route": 5,
+          "capability": "ARTIFACT_CONTENT",
+          "support_sources": [],
+          "linked_facts": 1
+        },
+        {
+          "route": 6,
+          "capability": "GIT_DIFF_SCOPE",
+          "support_sources": [],
+          "linked_facts": 0
+        }
+      ]
+    },
+    {
+      "source": 6,
+      "kind": "IR_CLAUSE",
+      "item_id": "pi_n1_g0_page",
+      "clause_id": "cl_3",
+      "text_sha256": "763311981a479580e9d52e736ecffbec46cfc41a94a3564badab89c5fa354e60",
+      "routes": [
+        {
+          "route": 7,
+          "capability": "RETAIN_CONTEXT",
+          "support_sources": [],
+          "linked_facts": 0
+        }
+      ]
+    },
+    {
+      "source": 7,
+      "kind": "IR_CLAUSE",
+      "item_id": "pi_n1_g0_page",
+      "clause_id": "cl_4",
+      "text_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+      "routes": [
+        {
+          "route": 8,
+          "capability": "ARTIFACT_CONTENT",
+          "support_sources": [],
+          "linked_facts": 2
+        }
+      ]
+    },
+    {
+      "source": 8,
+      "kind": "IR_CONSTRAINT",
+      "item_id": "c_only_index",
+      "clause_id": "cl_5",
+      "text_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+      "routes": [
+        {
+          "route": 9,
+          "capability": "GIT_DIFF_SCOPE",
+          "support_sources": [],
+          "linked_facts": 0
+        }
+      ]
+    },
+    {
+      "source": 9,
+      "kind": "IR_CLAUSE",
+      "item_id": "req_verify",
+      "clause_id": "cl_6",
+      "text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "routes": [
+        {
+          "route": 10,
+          "capability": "UNRESOLVED",
+          "support_sources": [],
+          "linked_facts": 0
+        }
+      ]
+    },
+    {
+      "source": 10,
+      "kind": "IR_CONSTRAINT",
+      "item_id": "ex_none",
+      "clause_id": "cl_7",
+      "text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "routes": [
+        {
+          "route": 11,
+          "capability": "DENY_PREVIEW",
+          "support_sources": [],
+          "linked_facts": 0
+        },
+        {
+          "route": 12,
+          "capability": "DENY_DEPLOY",
+          "support_sources": [],
+          "linked_facts": 0
+        },
+        {
+          "route": 13,
+          "capability": "DENY_PUBLISH",
+          "support_sources": [],
+          "linked_facts": 0
+        }
+      ]
+    },
+    {
+      "source": 11,
+      "kind": "WORK_CONSTRAINT",
+      "item_id": null,
+      "clause_id": null,
+      "text_sha256": "baec25b635739010cd01d3e510fda83a4976962cf6dd719640e56f9c73124dfa",
+      "routes": [
+        {
+          "route": 14,
+          "capability": "GIT_DIFF_SCOPE",
+          "support_sources": [
+            8
+          ],
+          "linked_facts": 0
+        }
+      ]
+    },
+    {
+      "source": 12,
+      "kind": "WORK_CONSTRAINT",
+      "item_id": null,
+      "clause_id": null,
+      "text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "routes": [
+        {
+          "route": 15,
+          "capability": "DENY_DEPLOY",
+          "support_sources": [
+            10
+          ],
+          "linked_facts": 0
+        },
+        {
+          "route": 16,
+          "capability": "DENY_PUBLISH",
+          "support_sources": [
+            10
+          ],
+          "linked_facts": 0
+        }
+      ]
+    },
+    {
+      "source": 13,
+      "kind": "WORK_CONSTRAINT",
+      "item_id": null,
+      "clause_id": null,
+      "text_sha256": "e639067994dce5d291035a5976008da5c67baeaa421dc27584dd55e57d19c224",
+      "routes": [
+        {
+          "route": 17,
+          "capability": "ARTIFACT_CONTENT",
+          "support_sources": [
+            4
+          ],
+          "linked_facts": 1
+        },
+        {
+          "route": 18,
+          "capability": "GIT_DIFF_SCOPE",
+          "support_sources": [
+            4
+          ],
+          "linked_facts": 0
+        }
+      ]
+    },
+    {
+      "source": 14,
+      "kind": "WORK_CONSTRAINT",
+      "item_id": null,
+      "clause_id": null,
+      "text_sha256": "ccac146e60fd6dfeb9afa1f014c3febaa221b08d840b5b41a33c0b472631f90b",
+      "routes": [
+        {
+          "route": 19,
+          "capability": "ARTIFACT_CONTENT",
+          "support_sources": [
+            5
+          ],
+          "linked_facts": 2
+        },
+        {
+          "route": 20,
+          "capability": "GIT_DIFF_SCOPE",
+          "support_sources": [
+            5
+          ],
+          "linked_facts": 0
+        }
+      ]
+    },
+    {
+      "source": 15,
+      "kind": "WORK_CONSTRAINT",
+      "item_id": null,
+      "clause_id": null,
+      "text_sha256": "5577e77f1035d1a0960c99cdc44761e92fa7f6a95f2140e881eb62c722ce246c",
+      "routes": [
+        {
+          "route": 21,
+          "capability": "DENY_DEPLOY",
+          "support_sources": [
+            4,
+            10
+          ],
+          "linked_facts": 0
+        }
+      ]
+    },
+    {
+      "source": 16,
+      "kind": "WORK_CONSTRAINT",
+      "item_id": null,
+      "clause_id": null,
+      "text_sha256": "75decd71cd127e9006eafc189dfbc102c1fbfa19fbd5c6c7fd34d2c3c246f5d7",
+      "routes": [
+        {
+          "route": 22,
+          "capability": "DENY_PUBLISH",
+          "support_sources": [
+            5,
+            10
+          ],
+          "linked_facts": 0
+        }
+      ]
+    },
+    {
+      "source": 17,
+      "kind": "WORK_CONSTRAINT",
+      "item_id": null,
+      "clause_id": null,
+      "text_sha256": "07e3b3c0e75b6d7005cbce24d0132991c692cefb989fdc443a62f094344b7bcd",
+      "routes": [
+        {
+          "route": 23,
+          "capability": "GIT_DIFF_SCOPE",
+          "support_sources": [
+            6,
+            10
+          ],
+          "linked_facts": 0
+        }
+      ]
+    },
+    {
+      "source": 18,
+      "kind": "WORK_CONSTRAINT",
+      "item_id": null,
+      "clause_id": null,
+      "text_sha256": "637c543b527c3150f22cee6f0b25f971c0fb5b38a904d2bffa7bc9b71da0f6f2",
+      "routes": [
+        {
+          "route": 24,
+          "capability": "GIT_DIFF_SCOPE",
+          "support_sources": [
+            7,
+            10
+          ],
+          "linked_facts": 0
+        }
+      ]
+    }
+  ]
+}

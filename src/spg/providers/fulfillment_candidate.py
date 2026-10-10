@@ -158,7 +158,9 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
         # Do not duplicate that projection as dozens of alternative schemas.
         choices = _formation_binding_choices(inventory, capabilities, owner_preconditions)
         if owner_preconditions.get("semantic_selection_input_contract") == _PRIMARY_MEANING_INPUT_CONTRACT:
-            schema["properties"]["routes"]["items"] = _qualified_operand_generation_schema(inventory, capabilities, choices)
+            schema["properties"]["routes"]["items"] = _qualified_operand_generation_schema(
+                inventory, capabilities, choices, enforce_owner_prerequisites=owner_preconditions.get(
+                    "generation_prerequisite_contract") == "existing-owner-binding-generation-v1")
             route["q"]["description"] = (
                 "Null copies the exact full original [0,L) basis. Otherwise this exact original "
                 "contiguous quote, not a/z, determines the located contribution. To repair its "
@@ -264,7 +266,23 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
     return schema
 
 
-def _qualified_operand_generation_schema(inventory, capabilities, choices):
+def _whole_source_retention_prerequisite(choice):
+    """Existing structural eligibility, never a semantic disposition verdict."""
+    if choice.get("whole_source_context_only") is True:
+        return True
+    background = choice.get("reviewed_background_prerequisites")
+    if background is not None and background.get("conditional_source_eligible") is True:
+        return True
+    if (choice.get("whole_source_context_only") is False and background is not None
+            and background.get("conditional_source_eligible") is False):
+        return False
+    retained = choice.get("whole_source_context_retention")
+    if retained is not None and type(retained.get("whole_source_eligible")) is bool:
+        return retained["whole_source_eligible"]
+    return None
+
+
+def _qualified_operand_generation_schema(inventory, capabilities, choices, *, enforce_owner_prerequisites=False):
     """Request a subset of existing Wire operands, never choose semantic routes.
 
     Geometry depends only on original source identity; proof operands depend
@@ -308,8 +326,25 @@ def _qualified_operand_generation_schema(inventory, capabilities, choices):
                     operand["maxItems"] = 0
                 branch["properties"]["u"] = operand
             provenance.append(branch)
-    return {"allOf": [{"$ref": "#/$defs/_FulfillmentCompactRoute"},
-                       {"anyOf": geometry}, {"anyOf": provenance}]}
+    conditions = [{"$ref": "#/$defs/_FulfillmentCompactRoute"},
+                  {"anyOf": geometry}, {"anyOf": provenance}]
+    if enforce_owner_prerequisites:
+        domains, partial_background = {}, {}
+        for source, choice in zip(inventory["sources"], choices, strict=True):
+            domains.setdefault(tuple(choice["candidate_capabilities"]), []).append(choice["source"])
+            if _whole_source_retention_prerequisite(choice) is False:
+                partial_background.setdefault(len(fulfillment_source_semantic_text(source)), []).append(choice["source"])
+        # Reuse only actual Owner exclusions. The model still selects semantic
+        # components and consumers; a nonexcluded method is not approved.
+        conditions.append({"anyOf": [{"properties": {"s": {"enum": indices},
+            "c": {"enum": list(domain)}}} for domain, indices in domains.items()]})
+        retained = next(i for i, c in enumerate(capabilities) if c["capability"] == "RETAIN_CONTEXT")
+        for length, indices in partial_background.items():
+            conditions.append({"anyOf": [
+                {"not": {"properties": {"s": {"enum": indices}, "c": {"enum": [retained]}}}},
+                {"properties": {"q": {"type": "string", "minLength": 1, "maxLength": length - 1}}},
+            ]})
+    return {"allOf": conditions}
 
 
 def _formation_binding_choices(inventory, capabilities, owner_preconditions):

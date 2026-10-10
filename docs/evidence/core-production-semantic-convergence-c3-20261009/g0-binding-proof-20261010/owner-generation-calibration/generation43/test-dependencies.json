@@ -1,0 +1,41 @@
+{
+  "scope": "TEST_ONLY_JSON_SCHEMA_REFERENCE_VALIDATOR; NO_PRODUCTION_PROVIDER_DEPENDENCY_CHANGED",
+  "original_test_dependencies_sha256": "beefa9671df14d21f2763a4e85841962f10af824a37caf6c679555166b13b9a6",
+  "wheels": [
+    {
+      "wheel": "attrs-26.1.0-py3-none-any.whl",
+      "sha256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+      "bytes": 67548
+    },
+    {
+      "wheel": "jsonschema-4.25.1-py3-none-any.whl",
+      "sha256": "3fba0169e345c7175110351d456342c364814cfcf3b964ba4587f22915230a63",
+      "bytes": 90040
+    },
+    {
+      "wheel": "jsonschema_specifications-2025.9.1-py3-none-any.whl",
+      "sha256": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe",
+      "bytes": 18437
+    },
+    {
+      "wheel": "referencing-0.37.0-py3-none-any.whl",
+      "sha256": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231",
+      "bytes": 26766
+    },
+    {
+      "wheel": "rpds_py-2026.9.1-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "sha256": "7868b85224291c6cb6759f9b5adb9745f486d226f62b16a614dd5a2a5ab2b35b",
+      "bytes": 370794
+    },
+    {
+      "wheel": "typing_extensions-4.16.0-py3-none-any.whl",
+      "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "bytes": 45571
+    }
+  ],
+  "overlapping_files": [],
+  "archive_sha256": "5ca95c93c411aba858e73a491e7328a16d27ebc33ac70d426378673f2cd37473",
+  "archive": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation43-test-deps-20261010/c3-schema-test-deps.tar",
+  "model_calls": 0,
+  "work_created": false
+}
