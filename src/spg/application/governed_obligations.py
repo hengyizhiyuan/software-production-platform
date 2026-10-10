@@ -1125,7 +1125,7 @@ def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=N
         raise ValueError("OBLIGATION_PROJECTION_UNRESOLVED")
 
 
-def projection_validation_feedback(candidate, revision, ir, inventory, primary_error):
+def projection_validation_feedback(candidate, revision, ir, inventory, primary_error, *, wire_diagnostics=None):
     """Bounded observations on one immutable candidate, never a patched plan.
 
     Only independently evaluable predicates are collected; consumer execution
@@ -1136,6 +1136,15 @@ def projection_validation_feedback(candidate, revision, ir, inventory, primary_e
         match = re.search(r"\bOBLIGATION_[A-Z0-9_]+\b", str(error))
         return match.group() if match else "OBLIGATION_CANDIDATE_SCHEMA_INVALID"
     primary = stable(primary_error)
+    if wire_diagnostics is not None:
+        return json.dumps({"schema": "fulfillment-validation-feedback-v2",
+            "inventory_fingerprint": inventory["inventory_fingerprint"], "primary_error": primary,
+            "violations": wire_diagnostics["violations"],
+            "additional_violation_count": wire_diagnostics["additional_violation_count"],
+            "not_evaluable": wire_diagnostics["not_evaluable"],
+            "coverage_not_evaluable_sources": wire_diagnostics.get("coverage_not_evaluable_sources", []),
+            "wire_diagnostic_binding": {**wire_diagnostics["binding"],
+                "diagnostic_fingerprint": wire_diagnostics["diagnostic_fingerprint"]}}, separators=(",", ":"))
     failures = []
     refs = {s["source_ref"]: index for index, s in enumerate(inventory["sources"])}
     seen = set()
@@ -1307,6 +1316,10 @@ class FulfillmentFormationReceipts:
                     if record.decision_type == "WORK_FULFILLMENT_OBSERVATION"
                     and record.authority_identity == "work-governance:derived-candidate-observation"
                     and record.subject_type == "WORK_FULFILLMENT_BASIS")
+            # The authoritative query already scoped the subject. A corrupt
+            # scope fingerprint must remain visible to identity validation,
+            # not disappear and reopen a model/budget slot.
+            return rows
         return tuple(row for row in rows if row.get("inventory_fingerprint") == self.inventory["inventory_fingerprint"])
 
     def append(self, stage, attempt, **values):
@@ -1377,6 +1390,132 @@ class FulfillmentFormationReceipts:
             raise ValueError("OBLIGATION_FORMATION_PENDING_OR_TERMINAL")
         if len(pending) >= 2 or attempt != len(pending) + 1:
             raise ValueError("OBLIGATION_FORMATION_BUDGET_EXHAUSTED")
+
+
+def _wire_response_basis(rows, attempt, revision, inventory, capabilities):
+    """Bind unadmitted wire to existing durable request/response observations."""
+    from spg.providers.fulfillment_candidate import (
+        _FULFILLMENT_WIRE_METADATA_KEYS, _fulfillment_wire_context, _FulfillmentWireReceiptIdentityError)
+    def drift():
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    starts = [row for row in rows if row.get("stage") == "MODEL_REQUEST_PENDING" and row.get("attempt") == attempt]
+    observed = [row for row in rows if row.get("stage") == "MODEL_RESPONSE_OBSERVED" and row.get("attempt") == attempt]
+    if len(starts) != 1 or len(observed) != 1 or type(attempt) is not int or attempt not in (1, 2):
+        drift()
+    start, response = starts[0], observed[0]
+    basis = {"work_id": str(revision.work_id), "work_reality_revision_id": str(revision.id),
+        "inventory_fingerprint": inventory["inventory_fingerprint"],
+        "source_revision": inventory["source_revision"], "exact_target_paths": inventory["exact_target_paths"]}
+    if (any(row.get(key) != value for row in (start, response) for key, value in basis.items())
+            or any(type(row.get("attempt")) is not int or row["attempt"] != attempt for row in (start, response))):
+        drift()
+    ids = [row.get("receipt_id") for row in rows]
+    if (not isinstance(start.get("receipt_id"), str) or not isinstance(response.get("receipt_id"), str)
+            or ids.count(start["receipt_id"]) != 1 or ids.count(response["receipt_id"]) != 1):
+        drift()
+    context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=start.get("feedback"))
+    if any(row.get(key) != context[key] for row in (start, response) for key in _FULFILLMENT_WIRE_METADATA_KEYS):
+        drift()
+    raw = response.get("candidate_output")
+    if not isinstance(raw, str) or response.get("candidate_retained") is not True:
+        drift()
+    raw_bytes = raw.encode("utf-8")
+    output_fingerprint = sha256(raw_bytes).hexdigest()
+    if response.get("candidate_output_sha256") != output_fingerprint or response.get("candidate_output_bytes") != len(raw_bytes):
+        drift()
+    model = response.get("model")
+    if isinstance(model, dict) and any(model.get(key, wanted) != wanted for key, wanted in
+            (("output_sha256", output_fingerprint), ("output_bytes", len(raw_bytes)))):
+        drift()
+    return raw, {**basis, "attempt": attempt, "wire_output_fingerprint": output_fingerprint,
+        "request_receipt_id": start["receipt_id"], "response_receipt_id": response["receipt_id"],
+        **{key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS}}
+
+
+def _bind_wire_diagnostics(error, rows, attempt, revision, inventory, capabilities):
+    from spg.providers.fulfillment_candidate import _FULFILLMENT_WIRE_METADATA_KEYS, _FulfillmentWireReceiptIdentityError
+    from spg.providers.verification_receipts import _safe_value
+    _, binding = _wire_response_basis(rows, attempt, revision, inventory, capabilities)
+    diagnostics = error.diagnostics
+    if (any(diagnostics.get(key) != binding[key] for key in
+            ("wire_output_fingerprint", "inventory_fingerprint", *_FULFILLMENT_WIRE_METADATA_KEYS))
+            or _safe_value(diagnostics) != diagnostics):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    bound = {**diagnostics, "binding": binding}
+    return {**bound, "diagnostic_fingerprint": canonical_fingerprint(bound)}
+
+
+def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities):
+    """Recompute new diagnostics; legacy sealed receipts remain historical.
+
+    No wire repair or request is performed. Both terminal replay and a next
+    candidate consume the same bound feedback, never another attempt's output.
+    """
+    from spg.providers.fulfillment_candidate import (
+        _decode_fulfillment_candidate_wire, _FulfillmentWireValidationError, _FulfillmentWireReceiptIdentityError)
+    expected = {"work_id": str(revision.work_id), "work_reality_revision_id": str(revision.id),
+        "inventory_fingerprint": inventory["inventory_fingerprint"],
+        "source_revision": inventory["source_revision"], "exact_target_paths": inventory["exact_target_paths"],
+        "owner": "WORK_FULFILLMENT_PROJECTION", "schema": "work-fulfillment-formation-receipt-v1"}
+    if (any(row.get(key) != value for row in rows for key, value in expected.items())
+            or any(type(row.get("attempt")) is not int or row["attempt"] not in (1, 2) for row in rows)):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    receipt_ids = [row.get("receipt_id") for row in rows]
+    if any(not isinstance(value, str) or not value for value in receipt_ids) or len(set(receipt_ids)) != len(receipt_ids):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    for row in rows:
+        diagnostics = row.get("predecode_diagnostics")
+        if diagnostics is None:
+            if row.get("validation_feedback") is not None and not isinstance(row["validation_feedback"], str):
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+            try:
+                feedback = json.loads(row.get("validation_feedback") or "null")
+            except ValueError:
+                feedback = None
+            if isinstance(feedback, dict) and "wire_diagnostic_binding" in feedback:
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+            continue
+        attempt = row.get("attempt")
+        if (row.get("stage") != "CANDIDATE_VALIDATED" or row.get("candidate") is not None
+                or row.get("validation_passed") is not False
+                or sum(r.get("stage") == "CANDIDATE_VALIDATED" and r.get("attempt") == attempt for r in rows) != 1):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+        raw, _ = _wire_response_basis(rows, attempt, revision, inventory, capabilities)
+        start = next(r for r in rows if r.get("stage") == "MODEL_REQUEST_PENDING" and r.get("attempt") == attempt)
+        response = next(r for r in rows if r.get("stage") == "MODEL_RESPONSE_OBSERVED" and r.get("attempt") == attempt)
+        try:
+            _decode_fulfillment_candidate_wire(raw, inventory, capabilities,
+                validation_feedback=start.get("feedback"), wire_metadata=response)
+        except _FulfillmentWireValidationError as error:
+            bound = _bind_wire_diagnostics(error, rows, attempt, revision, inventory, capabilities)
+            feedback = projection_validation_feedback(None, revision, ir, inventory, error, wire_diagnostics=bound)
+            if (diagnostics != bound or row.get("validation_feedback") != feedback
+                    or row.get("failed_predicate") != str(error)
+                    or any(row.get(key) != bound["binding"][key] for key in
+                        ("work_id", "work_reality_revision_id", "source_revision", "inventory_fingerprint", "exact_target_paths"))):
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+        except ValueError as error:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT") from error
+        else:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+        for next_start in rows:
+            if next_start.get("stage") == "MODEL_REQUEST_PENDING" and next_start.get("attempt") == attempt + 1:
+                if (next_start.get("feedback") != feedback
+                        or next_start.get("feedback_receipt_id") != row.get("receipt_id")):
+                    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    for start in rows:
+        if start.get("stage") != "MODEL_REQUEST_PENDING" or not isinstance(start.get("feedback"), str):
+            continue
+        try:
+            feedback = json.loads(start["feedback"])
+        except ValueError:
+            continue  # Existing canonical/legacy feedback may be an error code.
+        if isinstance(feedback, dict) and "wire_diagnostic_binding" in feedback:
+            parents = [r for r in rows if r.get("stage") == "CANDIDATE_VALIDATED"
+                and r.get("predecode_diagnostics") is not None and r.get("attempt") == start.get("attempt", 0) - 1
+                and r.get("validation_feedback") == start["feedback"]]
+            if len(parents) != 1 or start.get("feedback_receipt_id") != parents[0].get("receipt_id"):
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
 
 
 def plan_with_formation_receipts(database, work_id, plan, *, inventory_fingerprint=None):
@@ -1517,7 +1656,20 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
             return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
         bindings = validate_projection_candidate(candidate, revision, ir, inventory, semantic_review=semantic_review)
         return (bindings[0].model_copy(update={"formation_receipt": receipt}), *bindings[1:])
+    def stop_identity(reason):
+        current = recorder.records()
+        if not any(row.get("terminal") for row in current):
+            attempt = max((row["attempt"] for row in current
+                if type(row.get("attempt")) is int and row["attempt"] in (1, 2)), default=1)
+            recorder.append("FORMATION_STOPPED", attempt, terminal=True, validation_passed=False,
+                terminal_reason=reason, failure_stage="WIRE_FEEDBACK_IDENTITY")
+        return finish(None, reason, False)
     rows = recorder.records()
+    from spg.providers.fulfillment_candidate import _FulfillmentWireReceiptIdentityError, _FulfillmentWireValidationError
+    try:
+        _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
+    except _FulfillmentWireReceiptIdentityError as error:
+        return stop_identity(str(error))
     terminal = next((row for row in reversed(rows) if row.get("terminal")), None)
     if terminal is not None:
         candidate = None if terminal.get("candidate") is None else FulfillmentProjectionCandidate.model_validate(terminal["candidate"])
@@ -1536,6 +1688,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
         semantic_review = None
         failure_stage = "MODEL_REQUEST"
         try:
+            _validate_wire_feedback_lineage(recorder.records(), revision, ir, inventory, capabilities)
             observed_row = next((row for row in reversed(recorder.records()) if row["attempt"] == attempt and row["stage"] == "MODEL_RESPONSE_OBSERVED"), None)
             if observed_row is not None:
                 observed = observed_row.get("candidate")
@@ -1552,6 +1705,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     if len(starts) != 1 or any(starts[0].get(key) != observed_row.get(key)
                             for key in _FULFILLMENT_WIRE_METADATA_KEYS):
                         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_RECEIPT_IDENTITY_DRIFT")
+                    _wire_response_basis(recorder.records(), attempt, revision, inventory, capabilities)
                     observed = _decode_fulfillment_candidate_wire(
                         observed if observed is not None else raw_output, inventory, capabilities,
                         validation_feedback=starts[0].get("feedback"), wire_metadata=observed_row)
@@ -1563,7 +1717,10 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
             else:
                 metadata_builder = getattr(provider, "form_wire_metadata", None)
                 wire_metadata = metadata_builder(inventory, capabilities, validation_feedback=feedback) if callable(metadata_builder) else {}
-                recorder.append("MODEL_REQUEST_PENDING", attempt, feedback=feedback, **wire_metadata)
+                parents = [row for row in recorder.records() if row["stage"] == "CANDIDATE_VALIDATED"
+                    and row["attempt"] == attempt - 1 and row.get("predecode_diagnostics") is not None]
+                recorder.append("MODEL_REQUEST_PENDING", attempt, feedback=feedback, **wire_metadata,
+                    **({"feedback_receipt_id": parents[0]["receipt_id"]} if len(parents) == 1 else {}))
                 import inspect
                 accepts_callback = "receipt_callback" in inspect.signature(provider.form).parameters
                 def observed_callback(**values):
@@ -1572,6 +1729,8 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                 if accepts_callback:
                     arguments["receipt_callback"] = observed_callback
                 observed = provider.form(inventory, capabilities, **arguments)
+                if wire_metadata:
+                    _wire_response_basis(recorder.records(), attempt, revision, inventory, capabilities)
                 if not accepts_callback:
                     recorder.append("MODEL_RESPONSE_OBSERVED", attempt,
                         candidate=observed.model_dump(mode="json") if isinstance(observed, FulfillmentProjectionCandidate) else observed,
@@ -1597,12 +1756,23 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
             reason = "VALIDATED_PROJECTION" if passed else "UNRESOLVED_BINDING"
         except FulfillmentReceiptCapacityStop:
             raise
+        except _FulfillmentWireReceiptIdentityError as error:
+            return stop_identity(str(error))
         except ValueError as error:
-            feedback = projection_validation_feedback(candidate, revision, ir, inventory, error)
+            wire_diagnostics = None
+            if isinstance(error, _FulfillmentWireValidationError):
+                try:
+                    wire_diagnostics = _bind_wire_diagnostics(error, recorder.records(), attempt,
+                        revision, inventory, capabilities)
+                except _FulfillmentWireReceiptIdentityError as drift:
+                    return stop_identity(str(drift))
+            feedback = projection_validation_feedback(candidate, revision, ir, inventory, error,
+                wire_diagnostics=wire_diagnostics)
             passed, reason = False, json.loads(feedback)["primary_error"]
             recorder.append("CANDIDATE_VALIDATED", attempt, candidate=None if candidate is None else candidate.model_dump(mode="json"),
                 semantic_review=semantic_review, failed_predicate=reason, validation_feedback=feedback, validation_passed=False, terminal=attempt == 2,
-                terminal_reason=reason if attempt == 2 else None)
+                terminal_reason=reason if attempt == 2 else None,
+                **({"predecode_diagnostics": wire_diagnostics} if wire_diagnostics is not None else {}))
             if attempt < 2:
                 continue
         except Exception as error:

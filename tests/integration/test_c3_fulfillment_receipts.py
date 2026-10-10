@@ -197,3 +197,111 @@ def test_actual_compact_observation_replays_from_postgresql_without_repeating_fo
     record_property("inventory_fingerprint", fingerprint)
     record_property("logical_stub_calls", len(calls))
     record_property("receipt_ids", json.dumps([row.scope["receipt_id"] for row in rows]))
+
+
+@pytest.mark.parametrize('tamper', (None, 'feedback', 'response-receipt', 'scope-inventory'))
+def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
+    postgres_database, tmp_path, monkeypatch, record_property, tamper,
+):
+    """New isolated fixture records only; no historical or live model writes."""
+    from copy import deepcopy
+    import json
+    from types import SimpleNamespace
+    from sqlalchemy import update
+    from spg.application.governed_obligations import FulfillmentFormationReceipts
+    from spg.domain.governed_obligation import FulfillmentProjectionCandidate
+    from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+    from spg.infrastructure.persistence.interaction_store import InteractionStore
+    from spg.infrastructure.persistence.runtime_store import governance_records
+    from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+    from tests.integration import test_c1_contract_continuity as c1
+    from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+    from tests.test_c3_semantic_contract_calibration import review as component_review
+
+    declared = c1.DeclaredC1Fulfillment()
+    calls, inventories = [], []
+    def generate(**request):
+        payload = json.loads(request['input_text'])
+        calls.append(payload)
+        inventory = payload['immutable_inventory']
+        inventories.append(inventory)
+        if 'untrusted_fulfillment_candidate' in payload:
+            plan = FulfillmentProjectionCandidate.model_validate(payload['untrusted_fulfillment_candidate'])
+            result = declared.review(inventory, plan).model_copy(update={
+                'component_results': component_review(inventory, plan).component_results})
+            output = result.model_dump_json()
+        else:
+            plan = declared.form(inventory, payload['existing_capability_contracts'])
+            wire, _ = controlled_wire(inventory, plan, feedback=payload.get('same_basis_validation_feedback'))
+            if len(calls) == 1:
+                wire['routes'][0]['f'] = [i for i,s in enumerate(inventory['sources'])
+                                         if s['kind'] in {'IR_CLAUSE','IR_CONSTRAINT'}][:2]
+                assert len(wire['routes'][0]['f']) == 2
+            output = json.dumps(wire, ensure_ascii=False)
+        return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
+            requested_model='controlled-pg-feedback', effective_model='controlled-pg-feedback',
+            request_id=f'controlled-pg-feedback-{len(calls)}', usage=ModelUsage(), timing=ModelTiming(), retry_count=0)
+    provider = ModelFulfillmentCandidateProvider(lambda: SimpleNamespace(generate=generate, close=lambda: None))
+    original_append = FulfillmentFormationReceipts.append
+    class AfterDurableFeedback(BaseException):
+        pass
+    interrupted = False
+    def append(self, stage, attempt, **values):
+        nonlocal interrupted
+        row = original_append(self, stage, attempt, **values)
+        if stage == 'CANDIDATE_VALIDATED' and attempt == 1 and not interrupted:
+            interrupted = True
+            raise AfterDurableFeedback()
+        return row
+    monkeypatch.setattr(FulfillmentFormationReceipts, 'append', append)
+    monkeypatch.setattr(c1, 'DeclaredC1Fulfillment', lambda: provider)
+    with pytest.raises(AfterDurableFeedback): c1._admit_c1(postgres_database, tmp_path, 'work')
+    inventory = inventories[-1]
+    fingerprint = inventory['inventory_fingerprint']
+    work_id = UUID(inventory['work_id'])
+    with postgres_database.unit_of_work() as uow:
+        product = ProductStore(uow.session)
+        revision = product.current_work_reality_revision(work_id)
+        ir = InteractionStore(uow.session).assessment(revision.source_assessment_id).semantic_ir
+        records = RuntimeStore(uow.session).governance_for_subject(fingerprint)
+        assert [r.scope['stage'] for r in records] == ['MODEL_REQUEST_PENDING','MODEL_RESPONSE_OBSERVED','CANDIDATE_VALIDATED']
+        failed = records[-1]
+        original_scope = deepcopy(failed.scope)
+        binding = original_scope['predecode_diagnostics']['binding']
+        assert binding['response_receipt_id'] == records[1].scope['receipt_id']
+        assert binding['request_receipt_id'] == records[0].scope['receipt_id']
+        if tamper:
+            scope = deepcopy(original_scope)
+            if tamper == 'feedback': scope['validation_feedback'] += ' '
+            elif tamper == 'scope-inventory': scope['inventory_fingerprint'] = '0'*64
+            else: scope['predecode_diagnostics']['binding']['response_receipt_id'] = str(work_id)
+            # Deliberate corruption of this freshly created isolated fixture.
+            uow.session.execute(update(governance_records).where(governance_records.c.id == failed.id).values(scope=scope))
+            uow.commit()
+    assert len(calls) == 1
+    result = form_fulfillment_projection(revision, ir, provider=provider, database=postgres_database,
+        source_revision=inventory['source_revision'], exact_target_paths=inventory['exact_target_paths'])
+    receipt = result[0].formation_receipt
+    if tamper:
+        assert len(calls) == 1 and all(b.state == 'UNRESOLVED' for b in result)
+        assert receipt['terminal_reason'] == 'OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
+    else:
+        assert len(calls) == 3 and all(b.state != 'UNRESOLVED' for b in result)
+        assert calls[1]['same_basis_validation_feedback'] == original_scope['validation_feedback']
+        start = next(r for r in receipt['candidate_attempts'] if r['stage']=='MODEL_REQUEST_PENDING' and r['attempt']==2)
+        assert start['feedback_receipt_id'] == original_scope['receipt_id']
+    before_count = len(calls)
+    form_fulfillment_projection(revision, ir, provider=provider, database=postgres_database,
+        source_revision=inventory['source_revision'], exact_target_paths=inventory['exact_target_paths'])
+    assert len(calls) == before_count
+    with postgres_database.unit_of_work() as uow:
+        runtime = RuntimeStore(uow.session)
+        assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
+        rows = runtime.governance_for_subject(fingerprint)
+        assert all(runtime.human_authorization(row.id) is None for row in rows)
+    record_property('qualification_kind','isolated PostgreSQL predecode feedback recovery, not live model/G0')
+    record_property('tamper',str(tamper))
+    record_property('work',str(work_id))
+    record_property('inventory_fingerprint',fingerprint)
+    record_property('feedback_receipt_id',original_scope['receipt_id'])
+    record_property('logical_stub_calls',len(calls))

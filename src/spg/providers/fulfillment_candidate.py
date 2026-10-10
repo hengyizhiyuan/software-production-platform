@@ -76,6 +76,13 @@ class _FulfillmentWireReceiptIdentityError(RuntimeError):
     """Owner receipt drift is not a model-candidate repair opportunity."""
 
 
+class _FulfillmentWireValidationError(ValueError):
+    """Unadmitted wire observations; never repaired routes or component IDs."""
+    def __init__(self, code, diagnostics):
+        super().__init__(code)
+        self.diagnostics = diagnostics
+
+
 class _FulfillmentCompactRoute(BaseModel):
     """Ephemeral ordinals over this exact input; never an admitted binding."""
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -155,6 +162,59 @@ def _wire_json_object(pairs):
     return result
 
 
+def _fulfillment_wire_diagnostics(wire, inventory, context):
+    """Evaluate independent wire predicates without admitting a partial plan.
+
+    No semantic classification or quote relocation occurs here. An explicit
+    quote requiring the existing locator makes raw coverage non-evaluable.
+    """
+    sources, paths = inventory["sources"], context["tables"]["target_paths"]
+    failures, covered, unlocated = [], {}, set()
+    def add(code, index=None, **values):
+        row = {"code": code, **values}
+        if index is not None:
+            route = wire.routes[index]
+            row.update(route=index, source=route.s, capability=route.c,
+                raw_route_fingerprint=canonical_fingerprint(route.model_dump(mode="json")))
+        if row not in failures:
+            failures.append(row)
+    for index, route in enumerate(wire.routes):
+        if route.s >= len(sources) or route.c >= len(context["tables"]["capabilities"]):
+            add("OBLIGATION_FORMATION_WIRE_SOURCE_OR_CAPABILITY_INDEX_INVALID", index)
+        for field, kind, size in (("f", "FACT", len(sources)), ("t", "TARGET", len(paths)),
+                                  ("u", "SUPPORT", len(sources))):
+            values = getattr(route, field)
+            if len(set(values)) != len(values):
+                add("OBLIGATION_FORMATION_WIRE_" + kind + "_INDEX_INVALID", index,
+                    field=field, condition="DUPLICATE_INDEX")
+            for value in values:
+                if not 0 <= value < size:
+                    add("OBLIGATION_FORMATION_WIRE_" + kind + "_INDEX_INVALID", index,
+                        field=field, referenced_source=value, condition="OUT_OF_RANGE")
+                elif field == "f" and sources[value]["kind"] != "FACT":
+                    add("OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID", index,
+                        field=field, referenced_source=value, expected_kind="FACT",
+                        actual_kind=sources[value]["kind"])
+        if route.s >= len(sources):
+            continue
+        text = context["source_texts"][route.s]
+        valid_span = 0 <= route.a < route.z <= len(text)
+        if route.q is None and not valid_span:
+            add("OBLIGATION_FORMATION_WIRE_SPAN_INVALID", index, field="a/z")
+        elif valid_span and (route.q is None or route.q == text[route.a:route.z]):
+            covered.setdefault(route.s, set()).update(range(route.a, route.z))
+        else:
+            unlocated.add(route.s)
+    for source, text in enumerate(context["source_texts"]):
+        if source not in unlocated and any(not char.isspace() and offset not in covered.get(source, ())
+                                          for offset, char in enumerate(text)):
+            add("OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST", source=source)
+    return {"violations": failures[:64], "additional_violation_count": max(0, len(failures)-64),
+        "not_evaluable": ["CANONICAL_COMPONENT_VALIDATION", "OWNER_PHASE_EVIDENCE",
+            "INDEPENDENT_SEMANTIC_REVIEW", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"],
+        "coverage_not_evaluable_sources": sorted(unlocated)}
+
+
 def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
         validation_feedback=None, wire_metadata=None):
     """Expand only metadata; all semantic route choices remain model candidates."""
@@ -163,11 +223,34 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
     if wire_metadata is not None and any(wire_metadata.get(key) != context[key]
             for key in _FULFILLMENT_WIRE_METADATA_KEYS):
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_RECEIPT_IDENTITY_DRIFT")
-    if isinstance(output, str):
-        output = json.loads(output, object_pairs_hook=_wire_json_object)
-    wire = _FulfillmentCompactCandidate.model_validate(output)
+    raw_fingerprint = (sha256(output.encode("utf-8")).hexdigest() if isinstance(output, str)
+                       else canonical_fingerprint(output))
+    diagnostic_basis = {"schema": "fulfillment-wire-diagnostics-v1",
+        "wire_output_fingerprint": raw_fingerprint,
+        "inventory_fingerprint": inventory["inventory_fingerprint"],
+        **{key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS}}
+    try:
+        if isinstance(output, str):
+            output = json.loads(output, object_pairs_hook=_wire_json_object)
+        wire = _FulfillmentCompactCandidate.model_validate(output)
+    except ValueError as error:
+        code = (str(error) if str(error) == "OBLIGATION_FORMATION_WIRE_DUPLICATE_KEY" else
+                "OBLIGATION_FORMATION_WIRE_JSON_INVALID" if isinstance(error, json.JSONDecodeError) else
+                "OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID")
+        raise _FulfillmentWireValidationError(code, {**diagnostic_basis,
+            "violations": [{"code": code}], "additional_violation_count": 0,
+            "not_evaluable": ["WIRE_ROUTE_VALIDATION", "CANONICAL_COMPONENT_VALIDATION",
+                "OWNER_PHASE_EVIDENCE", "INDEPENDENT_SEMANTIC_REVIEW", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"]}) from error
     if wire.h != context["wire_request_fingerprint"] or wire.d != context["wire_table_fingerprint"]:
-        raise ValueError("OBLIGATION_FORMATION_WIRE_BASIS_DRIFT")
+        code = "OBLIGATION_FORMATION_WIRE_BASIS_DRIFT"
+        raise _FulfillmentWireValidationError(code, {**diagnostic_basis,
+            "violations": [{"code": code}], "additional_violation_count": 0,
+            "not_evaluable": ["WIRE_ROUTE_VALIDATION", "CANONICAL_COMPONENT_VALIDATION",
+                "OWNER_PHASE_EVIDENCE", "INDEPENDENT_SEMANTIC_REVIEW", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"]})
+    diagnostics = _fulfillment_wire_diagnostics(wire, inventory, context)
+    if diagnostics["violations"]:
+        raise _FulfillmentWireValidationError(diagnostics["violations"][0]["code"],
+            {**diagnostic_basis, **diagnostics})
     sources, paths = inventory["sources"], context["tables"]["target_paths"]
     def indices(values, size, kind):
         if len(set(values)) != len(values) or any(value < 0 or value >= size for value in values):
