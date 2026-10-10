@@ -1,0 +1,25 @@
+{
+  "schema": "c3-lossless-request-representation-measurement-v1",
+  "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+  "source_count": 20,
+  "capability_count": 12,
+  "live_model_calls": 0,
+  "source_overlay": true,
+  "actual_provider_tokens": "UNKNOWN_NO_CALL",
+  "input_bytes": 68898,
+  "generation_schema_bytes": 35678,
+  "instructions_bytes": 10598,
+  "exact_inventory_reconstruction": true,
+  "existing_ir_item_count": 1,
+  "original_ir_item_occurrences": 7,
+  "old_observed_request_sections": {
+    "generation_schema_bytes": 40862,
+    "instructions_bytes": 10330,
+    "input_bytes": 81604,
+    "input_token_count_by_component": "UNKNOWN"
+  },
+  "known_request_section_bytes_before": 132796,
+  "known_request_section_bytes_after": 115174,
+  "byte_reduction": 17622,
+  "claim": "LOSSLESS_STRUCTURAL_REPRESENTATION_ONLY; SEMANTIC_CONVERGENCE_EFFECT_UNKNOWN_UNTIL_LIVE_QUALIFICATION"
+}

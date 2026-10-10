@@ -155,7 +155,14 @@ def test_generation_bounds_and_support_domains_reuse_exact_original_owner_operan
     _, _, inventory, _, capabilities, preconditions = case()
     schema = _formation_output_schema(inventory, capabilities, owner_preconditions=preconditions)
     for branch in schema["properties"]["routes"]["items"]["anyOf"]:
-        props = branch["properties"]
+        props = {}
+        for field, value in branch["properties"].items():
+            if "$ref" in value:
+                original = schema
+                for key in value["$ref"][2:].split("/"): original = original[key]
+                props[field] = original
+            else:
+                props[field] = value
         for source_index in props["s"]["enum"]:
             length = len(fulfillment_source_semantic_text(inventory["sources"][source_index]))
             assert props["a"]["minimum"] == 0 and props["a"]["maximum"] == length - 1
@@ -286,3 +293,53 @@ def test_source_geometry_view_cannot_change_components_or_relax_lost_operators()
     wire["routes"][0]["a"] = 1
     with pytest.raises(_FulfillmentWireValidationError, match="SOURCE_CONTRIBUTION_LOST"):
         _decode_fulfillment_candidate_wire(json.dumps(wire), inv, caps, owner_preconditions=preconditions)
+
+
+def test_shared_existing_ir_items_round_trip_every_admitted_semantic_field():
+    from spg.providers.fulfillment_candidate import _formation_inventory_view, _restore_formation_inventory_view
+    _, _, inventory, _, _, _ = case()
+    original = deepcopy(inventory)
+    view, items = _formation_inventory_view(inventory)
+    assert items and len(items) < sum("item" in s["payload"] for s in inventory["sources"])
+    assert _restore_formation_inventory_view(view, items) == original
+    assert inventory == original
+    assert [s["source_ref"] for s in view["sources"]] == [s["source_ref"] for s in original["sources"]]
+    assert view["inventory_fingerprint"] == original["inventory_fingerprint"]
+    # Original clause text/polarity/scope and Fact payloads are unchanged.
+    for before, after in zip(original["sources"], view["sources"], strict=True):
+        if "clause" in before["payload"]:
+            assert after["payload"]["clause"] == before["payload"]["clause"]
+        if before["kind"] == "FACT": assert after == before
+    changed = deepcopy(items)
+    key = next(iter(changed));changed[key]["item_id"] = "invented-new-item"
+    with pytest.raises(_FulfillmentWireReceiptIdentityError, match="IR_ITEM_IDENTITY_DRIFT"):
+        _restore_formation_inventory_view(view, changed)
+    with pytest.raises(_FulfillmentWireReceiptIdentityError, match="IR_ITEM_IDENTITY_DRIFT"):
+        _restore_formation_inventory_view(view, {})
+
+
+def test_conflicting_existing_ir_item_records_fail_before_model_call():
+    from spg.providers.fulfillment_candidate import _formation_inventory_view
+    _, _, inventory, _, _, _ = case()
+    changed = deepcopy(inventory)
+    items = [s["payload"]["item"] for s in changed["sources"] if "item" in s["payload"]]
+    assert len(items) > 1
+    items[-1]["statement"] = "Different original authority under the same identity"
+    with pytest.raises(_FulfillmentWireReceiptIdentityError, match="IR_ITEM_IDENTITY_DRIFT"):
+        _formation_inventory_view(changed)
+
+
+def test_shared_schema_fields_preserve_exact_original_wire_restrictions():
+    _, _, inventory, _, capabilities, preconditions = case()
+    schema = _formation_output_schema(inventory, capabilities, owner_preconditions=preconditions)
+    canonical = schema["$defs"]["_FulfillmentCompactRoute"]["properties"]
+    for branch in schema["properties"]["routes"]["items"]["anyOf"]:
+        for field in ("q", "f", "t", "r"):
+            ref = branch["properties"][field]["$ref"]
+            target = schema
+            for key in ref[2:].split("/"): target = target[key]
+            assert target == canonical[field]
+    # Fact-only ordinals, exact paths, quote limits and schema closure survive.
+    assert canonical["f"]["items"]["enum"] == [i for i,s in enumerate(inventory["sources"]) if s["kind"] == "FACT"]
+    assert canonical["t"]["items"]["enum"] == list(range(len(inventory["exact_target_paths"])))
+    assert schema["$defs"]["_FulfillmentCompactRoute"]["additionalProperties"] is False

@@ -166,6 +166,14 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
             if support is not None:
                 branch["properties"]["u"]["items"]["enum"] = list(support)
                 branch["properties"]["u"]["minItems"] = minimum
+            # Reuse identical schema fields, not another semantic/index space.
+            # Each branch still has the same required fields and constraints.
+            for field in ("q", "f", "t", "r"):
+                branch["properties"][field] = {
+                    "$ref": "#/$defs/_FulfillmentCompactRoute/properties/" + field}
+            if support is None:
+                branch["properties"]["u"] = {
+                    "$ref": "#/$defs/_FulfillmentCompactRoute/properties/u"}
             branches.append(branch)
         schema["properties"]["routes"]["items"] = {"anyOf": branches}
     return schema
@@ -202,6 +210,56 @@ def _formation_binding_choices(inventory, capabilities, owner_preconditions):
             "rejected_prerequisites": deepcopy(rejected),
             "semantic_selection": "UNPROVEN; SELECT_FROM_ORIGINAL_COMPONENT; NO_PERMISSION_OR_EVIDENCE"})
     return result
+
+
+def _formation_inventory_view(inventory):
+    """Lossless request-only sharing under existing IR/item identities.
+
+    The same original item is repeated in every admitted clause. It is neither
+    multiple meanings nor multiple authority records. Keep it once, preserve
+    each source and clause, then require exact reconstruction before inference.
+    Wire ordinals, inventory identity, semantic fields and receipts stay intact.
+    """
+    view = deepcopy(inventory)
+    items = {}
+    for source in view["sources"]:
+        payload = source.get("payload", {})
+        item = payload.get("item")
+        if not isinstance(item, dict) or not isinstance(item.get("item_id"), str):
+            continue
+        ir_id = payload.get("ir_id", inventory.get("semantic_ir_id"))
+        if not isinstance(ir_id, str) or source.get("item_id") != item["item_id"]:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_IR_ITEM_IDENTITY_DRIFT")
+        key = ir_id + ":" + item["item_id"]
+        if "existing_ir_item_ref" in payload or key in items and items[key] != item:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_IR_ITEM_IDENTITY_DRIFT")
+        items[key] = item
+        del payload["item"]
+        payload["existing_ir_item_ref"] = key
+    if _restore_formation_inventory_view(view, items) != inventory:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_IR_ITEM_IDENTITY_DRIFT")
+    return view, items
+
+
+def _restore_formation_inventory_view(view, items):
+    """Reconstruct only for input integrity; never consume model output here."""
+    restored = deepcopy(view)
+    used = set()
+    for source in restored["sources"]:
+        payload = source.get("payload", {})
+        if "existing_ir_item_ref" not in payload:
+            continue
+        key = payload.pop("existing_ir_item_ref")
+        item = items.get(key)
+        if ("item" in payload or not isinstance(item, dict)
+                or key != payload.get("ir_id", restored.get("semantic_ir_id", "")) + ":" + item.get("item_id", "")
+                or source.get("item_id") != item.get("item_id")):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_IR_ITEM_IDENTITY_DRIFT")
+        payload["item"] = deepcopy(item)
+        used.add(key)
+    if used != set(items):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_IR_ITEM_IDENTITY_DRIFT")
+    return restored
 
 
 def _formation_source_table(context, *, inventory=None):
@@ -749,6 +807,7 @@ class ModelFulfillmentCandidateProvider:
         runtime = self.runtime_factory()
         try:
             output_schema = _formation_output_schema(inventory, capabilities, owner_preconditions=owner_preconditions)
+            inventory_view, existing_ir_items = _formation_inventory_view(inventory)
             source_table = _formation_source_table(context, inventory=inventory)
             if owner_preconditions is not None:
                 for source, choices in zip(source_table, _formation_binding_choices(
@@ -758,6 +817,9 @@ class ModelFulfillmentCandidateProvider:
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
                 instructions=(
                     "You propose a derived fulfillment plan for immutable admitted engineering meaning. "
+                    "If an inventory source payload has existing_ir_item_ref, resolve it in existing_ir_item_table: "
+                    "this is the same exact original IR/item identity shared by its clauses, not an omitted "
+                    "fact or a new source ordinal. The Owner proved exact reconstruction of the inventory. "
                     "Use the original Fact relation/value/order/scope/qualifiers and governed clause meaning, "
                     "provenance, authority and production context. Subject spelling is not a routing vocabulary. "
                     "Do not reinterpret or replace accepted meaning from raw Human quotes. Quotes identify "
@@ -878,7 +940,8 @@ class ModelFulfillmentCandidateProvider:
                     "candidate content; lifecycle constraints must not be sent to source-string witnesses. "
                     "A negative CURRENT clause may establish a prohibition; a future/hypothetical/affirmative "
                     "clause cannot supply one. Never broaden effect permits, facts or Human authority."),
-                input_text=json.dumps({"immutable_inventory": inventory,
+                input_text=json.dumps({"immutable_inventory": inventory_view,
+                    **({"existing_ir_item_table": existing_ir_items} if existing_ir_items else {}),
                     "existing_capability_contracts": capabilities,
                     "existing_consumer_contracts": _existing_consumer_contracts(capabilities),
                     **({"owner_source_preconditions": owner_preconditions} if owner_preconditions is not None else {}),

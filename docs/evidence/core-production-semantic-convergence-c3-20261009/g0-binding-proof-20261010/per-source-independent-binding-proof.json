@@ -1,0 +1,946 @@
+{
+  "schema": "c3-ordinary-g0-per-source-binding-proof-v1",
+  "source": "98fbb9113081b97dd8570f5e5001dfe06463fe6e",
+  "image": "sha256:0ed75fb4a66332d65b27dc70a331a9bb016ea84e6d9107dacd2d708b380751c7",
+  "original_work_id": "c703f518-52a2-5531-90d1-e751b809fe68",
+  "inventory_fingerprint": "08e8423786f0cc864fa6d9f846be66a8ac0f015dcc95b49bb0c2448bd9cd408f",
+  "candidate_origin": "DECLARED_ENGINEER_CONTROLLED_COUNTERFACTUAL_NOT_HISTORICAL_OR_MODEL_CANDIDATE",
+  "candidate_fingerprint": "faddcada1831251c501897817b3bea90068c90cfbd4138f887859a5d1c76cd88",
+  "component_fingerprint": "1ac1ac1f89f2f52a1fb6c357ff6d40a4980f6da6fbcdb6ae7f3091fa4ef1ad3b",
+  "independent_review_response_id": "81eb82be-72ad-47b5-af19-fabd606830a5",
+  "independent_review_output_sha256": "da6fb74a1a0620a9249ebe23ad5d76adaf840acd3a5f5917d65787adb6a43b59",
+  "actual_source_count": 20,
+  "actual_binding_count": 25,
+  "bindings": [
+    {
+      "route": 0,
+      "source_ref": "semantic-fact:1a4d882e-16a3-55da-a034-e4b8ff4a781d",
+      "capability": "ARTIFACT_CONTENT",
+      "component_id": "d3fb216d095302c24dcb1f1a9c3f692bea2214651568c6aaaedab2fc47de6123",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [],
+      "supporting_source_refs": [],
+      "basis": {
+        "start": 0,
+        "end": 48,
+        "quote_sha256": "a24b1d48dd8fae804d8b7bf4e25740bf79c8716ebefc7201050f42b27e1296db",
+        "linked_fact_refs": [
+          "semantic-fact:1a4d882e-16a3-55da-a034-e4b8ff4a781d"
+        ]
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "1216d24dfa416af3b6810bf1b06fb60ea30d1ee699bc31af15c988c99068d721"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_CANDIDATE_CONTENT",
+        "gate_ref": "code-verification:semantic-facts"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 1,
+      "source_ref": "semantic-fact:418f0b05-f833-586f-af19-6277d63a5260",
+      "capability": "ARTIFACT_CONTENT",
+      "component_id": "892dcdc461a692ebaa81a88d64dd50595fe59a0571c4b861e17dc7eada476fce",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [],
+      "supporting_source_refs": [],
+      "basis": {
+        "start": 0,
+        "end": 480,
+        "quote_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+        "linked_fact_refs": [
+          "semantic-fact:418f0b05-f833-586f-af19-6277d63a5260"
+        ]
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "1c54adc710064283384bbba911854871c5743a9ea1055c533f37c4d0616f3818"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_CANDIDATE_CONTENT",
+        "gate_ref": "code-verification:semantic-facts"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 2,
+      "source_ref": "semantic-fact:ceb4834d-8454-5cfc-850b-c2f44563920c",
+      "capability": "GIT_DIFF_SCOPE",
+      "component_id": "0c30e9a87823e13071f3954d3a7ed431686127b06c2076651d5efe8e4dcbdcde",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [],
+      "supporting_source_refs": [],
+      "basis": {
+        "start": 0,
+        "end": 27,
+        "quote_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+        "linked_fact_refs": [
+          "semantic-fact:ceb4834d-8454-5cfc-850b-c2f44563920c"
+        ]
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "7c15892fadde99247db793665c97c4111942ebfffdf64a5fec996b66f6ae1722"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+        "gate_ref": "code-verification:path-scope"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 3,
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c1",
+      "capability": "RETAIN_CONTEXT",
+      "component_id": "dcdf7c6e760b4f89f1cde685fbba8a5ca9fe9764c9ccd06b43ed49af20603211",
+      "target_paths": [],
+      "work_constraint_indices": [],
+      "supporting_source_refs": [],
+      "basis": {
+        "start": 0,
+        "end": 49,
+        "quote_sha256": "c01616d2fa1687d3f2dbde62f78b2d07c72c8f63034431eb8b263f2cd82e53b1",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": true,
+        "reason_sha256": "83fa3f1b00da3f56f1632e6f7f35c2bc3dd52d4180990ddb6ec14957b7f80b2e"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "PRODUCT_SOURCE",
+        "phase": "CONTEXT_RETENTION",
+        "evidence_method": "RETAIN_AUTHORITATIVE_CONTEXT",
+        "gate_ref": "work-reality:retained"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "RETAINED_CONTEXT"
+    },
+    {
+      "route": 4,
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+      "capability": "ARTIFACT_CONTENT",
+      "component_id": "9b4a946b53b38c16275dc7c9c0e6d4d616e106473ea6daf0c37f45119f87c907",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [],
+      "supporting_source_refs": [],
+      "basis": {
+        "start": 0,
+        "end": 91,
+        "quote_sha256": "9268cc964f6cb6011eb23204032873bdfbfff04e950cfda4f190d57a1cae73aa",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "dfdc994f79702bd02d5cef0fae651b01cbd142883d91092a873ae15e21cda0cd"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_CANDIDATE_CONTENT",
+        "gate_ref": "code-verification:semantic-facts"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 5,
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+      "capability": "GIT_DIFF_SCOPE",
+      "component_id": "9b4a946b53b38c16275dc7c9c0e6d4d616e106473ea6daf0c37f45119f87c907",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [],
+      "supporting_source_refs": [],
+      "basis": {
+        "start": 0,
+        "end": 91,
+        "quote_sha256": "9268cc964f6cb6011eb23204032873bdfbfff04e950cfda4f190d57a1cae73aa",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "f086415039c3ac8eca337e9268592dd347b195670cc0f70b7a2a4a2544f3d8a1"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+        "gate_ref": "code-verification:path-scope"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 6,
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c3",
+      "capability": "RETAIN_CONTEXT",
+      "component_id": "e62a65cd425287c5c4003be012a3fd91cbca7d53ae88e70708da7970fea9a3b1",
+      "target_paths": [],
+      "work_constraint_indices": [],
+      "supporting_source_refs": [],
+      "basis": {
+        "start": 0,
+        "end": 48,
+        "quote_sha256": "763311981a479580e9d52e736ecffbec46cfc41a94a3564badab89c5fa354e60",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": true,
+        "reason_sha256": "05badf07884ef174d6a22543da3d0adec9e7ff2916d925e430ea985e516c9978"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "PRODUCT_SOURCE",
+        "phase": "CONTEXT_RETENTION",
+        "evidence_method": "RETAIN_AUTHORITATIVE_CONTEXT",
+        "gate_ref": "work-reality:retained"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "RETAINED_CONTEXT"
+    },
+    {
+      "route": 7,
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c4",
+      "capability": "ARTIFACT_CONTENT",
+      "component_id": "5900e248cbccb15be1bc5243a7f3dcdc65b5aed5da8da7aaad43dbfd8e17cdb2",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [],
+      "supporting_source_refs": [],
+      "basis": {
+        "start": 0,
+        "end": 132,
+        "quote_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "147bcec146c331d89c5cfb5e3a7e3266851220a5b5a30b3d0882bbd8cfe8a913"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_CANDIDATE_CONTENT",
+        "gate_ref": "code-verification:semantic-facts"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 8,
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c5",
+      "capability": "GIT_DIFF_SCOPE",
+      "component_id": "efd6ecbe275f81d176ba80255d96b2b6961103ebb3b1f05b25d2008887ef3c2b",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [],
+      "supporting_source_refs": [],
+      "basis": {
+        "start": 0,
+        "end": 27,
+        "quote_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "ae0b5c6849435f7a9ae8ef81bfa99b78a007542e2453b78ce0f5615e3ea4af0c"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+        "gate_ref": "code-verification:path-scope"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 9,
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c6",
+      "capability": "ARTIFACT_CONTENT",
+      "component_id": "116d1280bf7499f145a372fe0a77a77128e7e5f56f487976d3294dea1ede72dd",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [],
+      "supporting_source_refs": [],
+      "basis": {
+        "start": 0,
+        "end": 38,
+        "quote_sha256": "e65354fbc5d49d2076d02167b521fa705d16e8ac76a6bba58dfbca2336976985",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "8089308f18746e9f3cb28b29540f21eba3e2e6e4ea67a8367bd9d9d84ccc64ba"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_CANDIDATE_CONTENT",
+        "gate_ref": "code-verification:semantic-facts"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 10,
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c6",
+      "capability": "CANDIDATE_SEAL",
+      "component_id": "fa9207aa24133768f6419a5af0cdeee602a9b8c78ce495de882c9d468a41380c",
+      "target_paths": [],
+      "work_constraint_indices": [],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c1",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c3",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c4",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c5",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c6",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+      ],
+      "basis": {
+        "start": 38,
+        "end": 72,
+        "quote_sha256": "f5f975a3bfde6a5f8346455d433e60443cc405cf8b6cd5ef8a262e3fcd110a29",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "aec5261729bede730bc6812e63f34a67b32882052ff95bda877f6c06e34b8b25"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "CANDIDATE",
+        "phase": "CANDIDATE_SEAL",
+        "evidence_method": "EXACT_SEALED_CANDIDATE",
+        "gate_ref": "candidate-owner:sealed-after-verification"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 11,
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7",
+      "capability": "DENY_DEPLOY",
+      "component_id": "3ebefd6698b8191498362908a4f8d05589526442f071cca506ecdd8ce1e36958",
+      "target_paths": [],
+      "work_constraint_indices": [],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+      ],
+      "basis": {
+        "start": 0,
+        "end": 55,
+        "quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "396190463e42e7790dd55c2d2782e4a1a365d099259c485dcb7a7850686a7529"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "DELIVERY_GATE",
+        "phase": "CONTINUOUS_FROM_ADMISSION",
+        "evidence_method": "EXACT_PERMISSION_GATE",
+        "gate_ref": "cloud-delivery:human-authorization-required"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 12,
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7",
+      "capability": "DENY_PUBLISH",
+      "component_id": "3ebefd6698b8191498362908a4f8d05589526442f071cca506ecdd8ce1e36958",
+      "target_paths": [],
+      "work_constraint_indices": [],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+      ],
+      "basis": {
+        "start": 0,
+        "end": 55,
+        "quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "32b2b6366f729cfe9d7c53fd6b18d06db9ee54e356a1d9176ecd595096f9749b"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "DELIVERY_GATE",
+        "phase": "CONTINUOUS_FROM_ADMISSION",
+        "evidence_method": "EXACT_PERMISSION_GATE",
+        "gate_ref": "remote-delivery:human-authorization-required"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 13,
+      "source_ref": "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7",
+      "capability": "GIT_DIFF_SCOPE",
+      "component_id": "3ebefd6698b8191498362908a4f8d05589526442f071cca506ecdd8ce1e36958",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+      ],
+      "basis": {
+        "start": 0,
+        "end": 55,
+        "quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "c8b685256e69aeaa4bf0428825d412f7908b1b6756502659c5b26df4f60a5893"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+        "gate_ref": "code-verification:path-scope"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 14,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:0",
+      "capability": "ARTIFACT_CONTENT",
+      "component_id": "7df4e8d586474875d0660a3c5f2ff39e88041ba79c0b8dc02cb536757cbe441e",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [
+        0
+      ],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c1",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c3",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c4",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c5",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c6",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+      ],
+      "basis": {
+        "start": 0,
+        "end": 56,
+        "quote_sha256": "c8d3b37850fa8031a0b3347ab608230f8ebaa159e9f9444180f1778d436f1b16",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "439c975685b6faaf4661e67527c23a3a67d12c48b1e995a2820b1a08f008b120"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_CANDIDATE_CONTENT",
+        "gate_ref": "code-verification:semantic-facts"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 15,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:0",
+      "capability": "GIT_DIFF_SCOPE",
+      "component_id": "7df4e8d586474875d0660a3c5f2ff39e88041ba79c0b8dc02cb536757cbe441e",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [
+        0
+      ],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c1",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c3",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c4",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c5",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c6",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+      ],
+      "basis": {
+        "start": 0,
+        "end": 56,
+        "quote_sha256": "c8d3b37850fa8031a0b3347ab608230f8ebaa159e9f9444180f1778d436f1b16",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "792ce03796a61474c80207b2fa8e9f248542048c57fa7449b034f4c163ccbf84"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+        "gate_ref": "code-verification:path-scope"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 16,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:1",
+      "capability": "ARTIFACT_CONTENT",
+      "component_id": "47fee76679b4b3064acc2db740490763d37bd545149e3b156231a9f2be6bc513",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [
+        1
+      ],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c1",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c3",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c4",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c5",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c6",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+      ],
+      "basis": {
+        "start": 0,
+        "end": 21,
+        "quote_sha256": "1aef351d67807691bd534955cbe17082da410f4a2fb9e867d24afaf98c4b0630",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "cff339308bfbd4401e7b7fc3f601f532df4a89caf1931ce01f8c1a98a2decfb8"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_CANDIDATE_CONTENT",
+        "gate_ref": "code-verification:semantic-facts"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 17,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:2",
+      "capability": "ARTIFACT_CONTENT",
+      "component_id": "a540569f12a013b8c50d22248851f94f734069768589fd9ead8fe9cd2ae33e45",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [
+        2
+      ],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c1",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c2",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c3",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c4",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c5",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c6",
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+      ],
+      "basis": {
+        "start": 0,
+        "end": 33,
+        "quote_sha256": "e2c22a2bfc43481c026ab01650336a1dab8635907436d6a34b9cca33cc0bdc89",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "1f0cd645b9a8012283369a364510b867d47ad20774859d9fad05ee4bf6796ade"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_CANDIDATE_CONTENT",
+        "gate_ref": "code-verification:semantic-facts"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 18,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:3",
+      "capability": "ARTIFACT_CONTENT",
+      "component_id": "42be937d912a22a6663273d13d193e2614f372aef7b5e998b46c097aa864fce4",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [
+        3
+      ],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c6"
+      ],
+      "basis": {
+        "start": 0,
+        "end": 48,
+        "quote_sha256": "8e01cebbc09313b668880a07b78a954acb7239d95c94a5ceca18229b46e090b7",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "877c336c5c528c41ae8f86120961b60a68b3c49a7c1a3a864e2cd3dbafde4276"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_CANDIDATE_CONTENT",
+        "gate_ref": "code-verification:semantic-facts"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 19,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:4",
+      "capability": "CANDIDATE_SEAL",
+      "component_id": "db78f90fbfed51ac2abaea82f8f877e1c6252904e447b29a2fa95f4127e7164b",
+      "target_paths": [],
+      "work_constraint_indices": [
+        4
+      ],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c6"
+      ],
+      "basis": {
+        "start": 0,
+        "end": 39,
+        "quote_sha256": "8ce9edd76d1047c068d23e69cb604e9160e5e8f29ebb5724934a4dc389e7b43b",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "f270cda935fc1bdf8c8da98547ae9e5570770057cd49c6469968fe8a0d2e035a"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "CANDIDATE",
+        "phase": "CANDIDATE_SEAL",
+        "evidence_method": "EXACT_SEALED_CANDIDATE",
+        "gate_ref": "candidate-owner:sealed-after-verification"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 20,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:5",
+      "capability": "DENY_DEPLOY",
+      "component_id": "d88b7f341994a47eba78aac0c5a9a4058e55802b1761c4bfc9d22bb09aa782b9",
+      "target_paths": [],
+      "work_constraint_indices": [
+        5
+      ],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+      ],
+      "basis": {
+        "start": 0,
+        "end": 36,
+        "quote_sha256": "8f73931419beb5ccb80dbdd5aa3aa609513cff870ae39d6181a04d0b4fb9b1bd",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "c61f941a1df6e45eba131e17fc21bd955e0ffafadc7cd1027149bbf039036c27"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "DELIVERY_GATE",
+        "phase": "CONTINUOUS_FROM_ADMISSION",
+        "evidence_method": "EXACT_PERMISSION_GATE",
+        "gate_ref": "cloud-delivery:human-authorization-required"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 21,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:6",
+      "capability": "DENY_PUBLISH",
+      "component_id": "125db868c7a95c49b6e8b3ba614b11b03cce9fec2cd9f0b8e35eb93dfae857cf",
+      "target_paths": [],
+      "work_constraint_indices": [
+        6
+      ],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+      ],
+      "basis": {
+        "start": 0,
+        "end": 37,
+        "quote_sha256": "5b7cd03090c3931b77a8929c4e8aab12368a7f8fcb5d941b155013aac44be6fd",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "9d08b427dfcd8ed7c2d2efd9056cdd6afa5ea093e3c14918a6f8d59df44e311a"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "DELIVERY_GATE",
+        "phase": "CONTINUOUS_FROM_ADMISSION",
+        "evidence_method": "EXACT_PERMISSION_GATE",
+        "gate_ref": "remote-delivery:human-authorization-required"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 22,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:7",
+      "capability": "GIT_DIFF_SCOPE",
+      "component_id": "ee23ad30fb29125b778a5e1e3cc0cf5f096522a46b1ed3a48443b91e93f16401",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [
+        7
+      ],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+      ],
+      "basis": {
+        "start": 0,
+        "end": 42,
+        "quote_sha256": "f4ac13cca0d423ad937ecc4a038f27ecd1c4dc9a5341f38e2e105e75e5212c70",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "3c4b36d884947aff313e83946a3d04c1cf66fe0a31e7190185bf960b21f11c18"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+        "gate_ref": "code-verification:path-scope"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 23,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:8",
+      "capability": "GIT_DIFF_SCOPE",
+      "component_id": "2d5250529bb9efb5dd9f8f6fdf19ae19d2526e536d15a378e7c8109c96a3fb66",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [
+        8
+      ],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+      ],
+      "basis": {
+        "start": 0,
+        "end": 46,
+        "quote_sha256": "30be8ccff910af828c3d85055e1d85174fc6b88badab9739d1b2c0b7eee4b539",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "a4794bd5c5cd4fcbeb1acb37ef3c7c175ee94d190e96295e3b215e5b3403e452"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+        "gate_ref": "code-verification:path-scope"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    },
+    {
+      "route": 24,
+      "source_ref": "work-constraint:4d674f62-99c6-5fed-ba6e-45f90ca2f9a2:9",
+      "capability": "GIT_DIFF_SCOPE",
+      "component_id": "0b313cc03109b6b6f1f794d89cd59143b9aaa31a53d3ebfc1eff155101c0baff",
+      "target_paths": [
+        "index.html"
+      ],
+      "work_constraint_indices": [
+        9
+      ],
+      "supporting_source_refs": [
+        "ir-clause:57f37dcd-69a8-5767-b4f9-5c02984f0dc3:n1_production:c7"
+      ],
+      "basis": {
+        "start": 0,
+        "end": 56,
+        "quote_sha256": "004b72093fd66ae733ee1a1cca7656711f366342515834915ad640afa1916f41",
+        "linked_fact_refs": []
+      },
+      "source_review_complete_and_equivalent": true,
+      "component_review": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false,
+        "reason_sha256": "1db2ba4030e23b4826e620a7ec137ac487240a706c1fed33c7b9088c41b1ac38"
+      },
+      "proof_boundary": "EXACT_ORIGINAL_SOURCE_TO_EXISTING_CONSUMER_BINDING; NOT_ACTUAL_FULFILLMENT_EVIDENCE_OR_WORK_PASS",
+      "consumer_contract": {
+        "owner": "VERIFICATION",
+        "phase": "CURRENT_VERIFICATION",
+        "evidence_method": "EXACT_GIT_DIFF_SCOPE",
+        "gate_ref": "code-verification:path-scope"
+      },
+      "actual_fulfillment_status": "NOT_EXECUTED_BY_DIAGNOSTIC",
+      "derived_binding_state": "BOUND_PENDING_EVIDENCE"
+    }
+  ],
+  "historical_candidate_modified": false,
+  "actual_source_coverage": "DETERMINISTIC_AND_INDEPENDENT_REVIEW_PASS",
+  "public_human_input_or_private_reason_included": false,
+  "remaining_obligations": [
+    "MODEL_FORMATION_CONVERGENCE",
+    "REAL_G0_PRODUCTION_TO_CANDIDATE_AND_APPLICABLE_GUARDIAN",
+    "INDEPENDENT_UNSEEN_QUALIFICATION"
+  ]
+}
