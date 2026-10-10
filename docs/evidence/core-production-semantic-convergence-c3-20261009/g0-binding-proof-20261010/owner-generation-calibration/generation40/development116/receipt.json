@@ -1,0 +1,14 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 17.857466076966375,
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "container_id": "f5ef8ca428602fa781020b936587d7e03fe1e50caef1b85ddcec9b94cbef85df",
+  "source_overlay": true,
+  "snapshot_sha256": "91b3dc6641aa388b976f5d345d92d44c2d92a8d26df1a6ee1c3193c58846f0e2",
+  "nodes": [
+    "tests/test_c3_fulfillment_provider_failures.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

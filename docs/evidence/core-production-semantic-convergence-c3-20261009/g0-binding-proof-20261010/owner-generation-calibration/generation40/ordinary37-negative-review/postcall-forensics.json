@@ -1,0 +1,76 @@
+{
+  "qualification": "UNVALIDATED_WIRE_FORENSICS_NOT_SEMANTIC_QUALIFICATION",
+  "real_model_calls": 0,
+  "review_output_sha256": "3c70ee2ca37bf345f2c852caaa5f070ac805080dfc1d3c67d541e4b872903fd5",
+  "schema_failure": {
+    "schema": "existing-review-schema-observations-v1",
+    "review_output_sha256": "3c70ee2ca37bf345f2c852caaa5f070ac805080dfc1d3c67d541e4b872903fd5",
+    "review_output_bytes": 16127,
+    "inventory_fingerprint": "4ff42fb04918efff1679c15d83fe786838093a23d6cc86b0a7762362b2c10d80",
+    "candidate_fingerprint": "2e6a8ea09541ce7bf0eec5bcbff0dc358356d6e0f7869863c7964ebc7e41d294",
+    "components_fingerprint": "0fe9aa61b80d0dc805dabad3fcfc98719736bbf5f07f092799c128cfb956d5e2",
+    "schema_errors": [
+      {
+        "type": "string_pattern_mismatch",
+        "location": [
+          "candidate_fingerprint"
+        ]
+      }
+    ],
+    "additional_schema_error_count": 0,
+    "required_component_count": 22,
+    "observed_component_count": 22,
+    "missing_component_route_indices": [],
+    "not_evaluable": [
+      "INDEPENDENT_SEMANTIC_EQUIVALENCE",
+      "ACTUAL_OWNER_EVIDENCE",
+      "ASSURANCE"
+    ],
+    "repair_boundary": "INVALID_CRITIC_RESPONSE_IS_NOT_A_REJECTED_SEMANTIC_MAPPING; NO_VERDICT_BACKFILL"
+  },
+  "exact_component_identity_count": 22,
+  "wrong_source_wire_observations": [
+    {
+      "route": 13,
+      "source": 10,
+      "capability": "GIT_DIFF_SCOPE",
+      "exact_identity_present": true,
+      "predicates": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false
+      },
+      "reason_bytes": 211,
+      "reason_sha256": "8372cf64c7687ca31c4f4a527dfb3dbda0d8e505bd3a9d84061949dfffc96c7d"
+    },
+    {
+      "route": 14,
+      "source": 11,
+      "capability": "GIT_DIFF_SCOPE",
+      "exact_identity_present": true,
+      "predicates": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false
+      },
+      "reason_bytes": 224,
+      "reason_sha256": "17aaa70a17ce4611132a595d6b60f2795636c2f284fdee198264407c210a87bd"
+    },
+    {
+      "route": 15,
+      "source": 12,
+      "capability": "GIT_DIFF_SCOPE",
+      "exact_identity_present": true,
+      "predicates": {
+        "complete_and_equivalent": true,
+        "nonredundant": true,
+        "owner_phase_evidence_valid": true,
+        "context_only": false
+      },
+      "reason_bytes": 221,
+      "reason_sha256": "32d34f8159737d9ea7ecef09fb937ac2937391ae4f296474d345be7683f48379"
+    }
+  ]
+}
