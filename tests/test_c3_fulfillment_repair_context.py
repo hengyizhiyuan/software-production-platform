@@ -287,7 +287,12 @@ def test_original_proposal_or_feedback_identity_drift_stops_before_another_reque
     payload = json.loads(failed['validation_feedback'])
     if tamper == 'wire': payload['untrusted_previous_wire'] += ' '
     elif tamper == 'binding': payload['repair_feedback_binding']['response_receipt_id'] = 'wrong-original'
-    elif tamper == 'candidate': failed['candidate']['routes'][0]['rationale'] = 'substituted'
+    elif tamper == 'candidate':
+        if failed.get('candidate') is None:
+            # v2 rejects replacement of the original-Wire-only Candidate reference.
+            failed['candidate'] = {'routes':[{'rationale':'substituted'}]}
+        else:
+            failed['candidate']['routes'][0]['rationale'] = 'substituted'
     elif tamper == 'remove-context':
         payload.pop('repair_feedback_binding');payload.pop('untrusted_previous_wire')
     elif tamper == 'predicate': failed['failed_predicate'] = 'OBLIGATION_DIFF_SCOPE_INCOMPLETE'

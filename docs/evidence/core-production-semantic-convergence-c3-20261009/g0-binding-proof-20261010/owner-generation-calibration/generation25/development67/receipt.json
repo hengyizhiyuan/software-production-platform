@@ -1,0 +1,14 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 8.496109848027118,
+  "image_id": "sha256:697b80141e1a11a70111166a1bb66db674457f8461ce9bea5fa21affebdbcbec",
+  "container_id": "200337aa85499cf5e982a05f8d4d9ad79de0613f6143cacd08dd88730a55804d",
+  "source_overlay": true,
+  "snapshot_sha256": "5c8111eec3c698209b32906015aafbdb287e7e66a1bb608d3a6fbf559f9c8db9",
+  "nodes": [
+    "tests/test_c3_fulfillment_repair_context.py::test_original_proposal_or_feedback_identity_drift_stops_before_another_request"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}
