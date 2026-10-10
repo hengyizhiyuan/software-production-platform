@@ -1,0 +1,10 @@
+{
+  "image": "sha256:8e18fc7a399cb1be1059b1020d4420e6004aee5b545de8950fd699b6ddf1f035",
+  "container": "14f1b01801feb862a70e1e2d369e3f09a63106767571f41209012330cd65d748",
+  "source": "435b2e4c757064e3067c0bb903b24e11f6b1bcab",
+  "source_tree": "98a1f422cb177ee424bea28ffb545e8e17ee6d52",
+  "network": "none",
+  "exit_code": 0,
+  "model_calls": 0,
+  "historical_permissions_changed": false
+}

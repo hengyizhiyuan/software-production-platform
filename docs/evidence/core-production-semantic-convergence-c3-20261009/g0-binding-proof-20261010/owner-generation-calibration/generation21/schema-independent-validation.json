@@ -1,0 +1,44 @@
+{
+  "validator": "jsonschema 4.26.0 Draft202012Validator",
+  "input_sha256": "95eab40fba9bf3160d15721b50489edbc79abaac51f338d7ad1f394a5aee4392",
+  "results": [
+    {
+      "scale": "small",
+      "full_request_schema_valid": true,
+      "controlled_complete_wire_valid": true,
+      "whole_context_and_execution_rejected": true,
+      "whole_unresolved_and_execution_rejected": true,
+      "content_and_seal_allowed": true,
+      "distinct_continuous_gates_allowed": true,
+      "proper_partial_disposition_not_blanket_rejected": true,
+      "whole_string_operand_rejected": true
+    },
+    {
+      "scale": "medium",
+      "full_request_schema_valid": true,
+      "controlled_complete_wire_valid": true,
+      "whole_context_and_execution_rejected": true,
+      "whole_unresolved_and_execution_rejected": true,
+      "content_and_seal_allowed": true,
+      "distinct_continuous_gates_allowed": true,
+      "proper_partial_disposition_not_blanket_rejected": true,
+      "whole_string_operand_rejected": true
+    },
+    {
+      "scale": "complex",
+      "full_request_schema_valid": true,
+      "controlled_complete_wire_valid": true,
+      "whole_context_and_execution_rejected": true,
+      "whole_unresolved_and_execution_rejected": true,
+      "content_and_seal_allowed": true,
+      "distinct_continuous_gates_allowed": true,
+      "proper_partial_disposition_not_blanket_rejected": true,
+      "whole_string_operand_rejected": true
+    }
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "source_overlay": true,
+  "qualification_claim": false,
+  "provider_schema_enforcement": "UNKNOWN_REQUIRES_BOUNDED_LIVE_ATTESTATION"
+}

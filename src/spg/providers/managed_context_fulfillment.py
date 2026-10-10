@@ -554,7 +554,8 @@ def verify_binding_inventory(*, request, task, contract, repository, baseline, r
                 and check.get("passed") is True]
             status = ("GATED_CONTINUOUS" if method == "EXACT_PERMISSION_GATE" else "VERIFIED_CURRENT") if len(matches) == 1 else "UNVERIFIABLE"
         elif method == "EXACT_PRODUCT_SOURCE_IDENTITY":
-            matches = [check for check in semantic_checks if check.get("fact_id") == str(binding.fact_id)
+            matches = [check for check in semantic_checks if binding.source_kind.value == "FACT"
+                and binding.fact_id is not None and check.get("fact_id") == str(binding.fact_id)
                 and check.get("current_evidence_verified") is True]
             status = "VERIFIED_CURRENT" if len(matches) == 1 else "UNVERIFIABLE"
         elif method == "EXACT_SEALED_CANDIDATE":

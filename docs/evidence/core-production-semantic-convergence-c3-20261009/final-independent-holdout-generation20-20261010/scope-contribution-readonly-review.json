@@ -1,0 +1,28 @@
+{
+  "conclusion": "No confirmed permission or evidence weakening found in the reviewed change",
+  "confirmed_properties": [
+    "v3 shared Human record alone no longer proves Fact-to-negative-Clause contribution; unchanged original text must correspond",
+    "Literal Scope matching the complete Task target tuple may use the existing direct Fact consumer without unrelated negative support",
+    "Text contribution is necessary provenance only; full components and independent Review still determine semantic validity",
+    "Actual Scope/Seal consumers revalidate exact projection and durable Formation/Review lineage",
+    "Known typed effects, Human Integration authority, cumulative budgets and historical v1/v2/v8 remain unchanged"
+  ],
+  "evidence_boundary": {
+    "holdout_inputs_used_for_implementation_review": false,
+    "model_calls": 0,
+    "review_method": "read-only source diff and related regression assertions",
+    "runtime_qualification_claimed": false,
+    "tests_executed_by_reviewer": 0
+  },
+  "image_id": "sha256:8e18fc7a399cb1be1059b1020d4420e6004aee5b545de8950fd699b6ddf1f035",
+  "private_recovery_root": "/data/watt/c3-semantic-convergence-20261009/final-independent-holdout-generation20-20261010",
+  "reported_parent_regression_status": "536 installed directed checks PASS; PostgreSQL47 and ordinary-source probes pending when requested",
+  "required_next_gate": "Wait for actual final exact-source G0 and PostgreSQL qualification; independent sealed execution remains pending",
+  "review_scope": "Narrow ordinary-G0 provenance/Scope repair; no Holdout-based tuning",
+  "reviewed_at_utc": "2026-10-10T14:43:37.680076+00:00",
+  "schema": "c3-independent-readonly-scope-contribution-review-v1",
+  "sealed_package_metadata_file": "seal.json",
+  "sealed_specification_sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0",
+  "source_revision": "435b2e4c757064e3067c0bb903b24e11f6b1bcab",
+  "source_tree": "98a1f422cb177ee424bea28ffb545e8e17ee6d52"
+}

@@ -415,7 +415,7 @@ def test_generation_requires_original_quote_for_partial_components_without_chang
         length, = guards[0]["properties"]["z"]["enum"]
         assert guards == [
             {"properties": {"q": {"type": "null"}, "a": {"enum": [0]}, "z": {"enum": [length]}}},
-            {"properties": {"q": {"type": "string", "minLength": 1}}},
+            {"properties": {"q": {"type": "string", "minLength": 1, "maxLength": length - 1}}},
         ]
     # This request guard cannot supply text, extend spans, or admit a route.
     inv, caps, _, wire = wire_case(preconditions)
@@ -828,3 +828,136 @@ def test_v9_scope_does_not_inherit_negative_sibling_from_shared_human_record():
         rationale="Controlled positive Scope preserves original contribution.")
     assert _projection_binding(revision, ir, inv, route, allow_calibrated=True, source_contract="v3").evidence_method == "EXACT_GIT_DIFF_SCOPE"
     assert fact.qualifiers == {"only_artifact": True}
+
+
+@pytest.mark.parametrize("disposition", ["RETAIN_CONTEXT", "UNRESOLVED"])
+def test_v10_generation_excludes_only_contradictory_whole_component_dispositions(disposition):
+    revision, ir, inventory, plan, caps, current = case()
+    legacy = _owner_source_preconditions(revision, ir, inventory, caps,
+        typed_prerequisite_contract="existing-owner-typed-prerequisites-v9")
+    old = _formation_output_schema(inventory, caps, owner_preconditions=legacy)
+    new = _formation_output_schema(inventory, caps, owner_preconditions=current)
+    assert current["typed_prerequisite_contract"] == "existing-owner-typed-prerequisites-v10"
+    assert "allOf" not in old["properties"]["routes"]
+    rules = new["properties"]["routes"]["allOf"]
+    exclusive = [i for i,c in enumerate(caps) if c["capability"] in {"RETAIN_CONTEXT", "UNRESOLVED"}]
+    assert len(rules) == len(inventory["sources"]) * len(exclusive)
+    d = next(i for i,c in enumerate(caps) if c["capability"] == disposition)
+    from spg.domain.governed_obligation import fulfillment_source_semantic_text
+    for i, source in enumerate(inventory["sources"]):
+        pair = next(rule["not"]["allOf"] for rule in rules
+            if rule["not"]["allOf"][0]["contains"]["properties"]["s"]["enum"] == [i]
+            and rule["not"]["allOf"][0]["contains"]["properties"]["c"]["enum"] == [d])
+        first,other = [entry["contains"]["properties"] for entry in pair]
+        assert first["a"] == other["a"] == {"enum":[0]}
+        assert first["z"] == other["z"] == {"enum":[len(fulfillment_source_semantic_text(source))]}
+        assert first["q"] == other["q"] == {"type":"null"}
+        assert other["c"]["enum"] == [j for j in range(len(caps)) if j != d]
+    # Current content + future Seal, or two continuous effect checks, remain
+    # legal alternatives. No execution capability is made mutually exclusive
+    # with another execution capability. Proper partial components stay open.
+    assert all(caps[p["not"]["allOf"][0]["contains"]["properties"]["c"]["enum"][0]]["capability"]
+        in {"RETAIN_CONTEXT","UNRESOLVED"} for p in rules)
+    assert new["properties"]["v"] == old["properties"]["v"]
+    assert _fulfillment_wire_schema()["properties"]["routes"].get("allOf") is None
+
+
+def test_v10_feedback_identifies_both_original_conflicting_routes_without_selecting_a_repair():
+    from spg.application.governed_obligations import projection_validation_feedback
+    revision, ir, inventory, plan, _, _ = case()
+    original = plan.routes[0]
+    contradictory = original.model_copy(update={"capability":"RETAIN_CONTEXT","target_paths":()})
+    changed = plan.model_copy(update={"routes":(*plan.routes, contradictory)})
+    before = changed.model_dump(mode="json")
+    legacy = json.loads(projection_validation_feedback(changed,revision,ir,inventory,
+        "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",source_contract="v3"))
+    observed = json.loads(projection_validation_feedback(changed,revision,ir,inventory,
+        "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",source_contract="v3",include_conflict_relations=True))
+    row = next(v for v in observed["violations"] if v["code"] == "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION")
+    assert [(r["route"],r["capability"]) for r in row["conflicting_routes"]] == [(0,original.capability),(len(plan.routes),"RETAIN_CONTEXT")]
+    assert "NO_AUTOMATIC_DELETION" in row["repair_boundary"]
+    assert "INDEPENDENT_SEMANTIC_REVIEW" in observed["not_evaluable"]
+    assert all("conflicting_routes" not in v for v in legacy["violations"])
+    assert "component_disposition_feedback_contract" not in legacy
+    assert changed.model_dump(mode="json") == before
+
+
+@pytest.mark.parametrize("legacy", [False, True])
+def test_v10_and_historical_v9_conflict_stop_replay_preserves_budget_receipts_and_peer_identity(monkeypatch,legacy):
+    import spg.application.governed_obligations as app
+    from tests.test_c3_fulfillment_capacity_representation import controlled_capacity_case, controlled_model_provider
+    revision,ir,inventory,plan = controlled_capacity_case()
+    caps = fulfillment_capability_contracts()
+    def contradictory(wire):
+        row = deepcopy(wire["routes"][0]);row.update(c=next(i for i,c in enumerate(caps) if c["capability"]=="RETAIN_CONTEXT"),t=[])
+        wire["routes"].append(row)
+    provider,calls = controlled_model_provider(inventory,plan,wire_change=contradictory)
+    original = app._owner_source_preconditions
+    if legacy:
+        def historical(*args,**kwargs):
+            kwargs["typed_prerequisite_contract"]="existing-owner-typed-prerequisites-v9"
+            return original(*args,**kwargs)
+        monkeypatch.setattr(app,"_owner_source_preconditions",historical)
+    result = app.form_fulfillment_projection(revision,ir,provider=provider,source_revision=inventory["source_revision"],exact_target_paths=inventory["exact_target_paths"])
+    assert result[0].formation_receipt["terminal_reason"]=="OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION"
+    assert len(calls)==2
+    rows=provider._fulfillment_receipts;before=deepcopy(rows)
+    monkeypatch.setattr(app,"_owner_source_preconditions",original)
+    replay = app.form_fulfillment_projection(revision,ir,provider=provider,source_revision=inventory["source_revision"],exact_target_paths=inventory["exact_target_paths"])
+    assert replay[0].formation_receipt["terminal_reason"]=="OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION"
+    assert rows==before and len(calls)==2
+    feedback = next(r for r in rows if r["stage"]=="CANDIDATE_VALIDATED")["validation_feedback"]
+    decoded=json.loads(feedback)
+    if legacy:
+        assert "component_disposition_feedback_contract" not in decoded
+    else:
+        conflict=next(v for v in decoded["violations"] if v["code"]=="OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION")
+        conflict["conflicting_routes"][0]["route"]+=1
+        next(r for r in rows if r["stage"]=="CANDIDATE_VALIDATED")["validation_feedback"]=json.dumps(decoded,separators=(",",":"))
+        stopped=app.form_fulfillment_projection(revision,ir,provider=provider,source_revision=inventory["source_revision"],exact_target_paths=inventory["exact_target_paths"])
+        assert stopped[0].formation_receipt["terminal_reason"]=="OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT"
+        assert len(calls)==2
+
+
+def test_v10_source_method_prerequisite_does_not_ban_natural_source_admission_or_change_v9():
+    from spg.application.governed_obligations import validate_projection_candidate, projection_validation_feedback
+    revision,ir,inventory,plan,caps,current=case()
+    clause=next(s for s in inventory['sources'] if s.get('clause_id')=='description')
+    source_cap=next(i for i,c in enumerate(caps) if c['capability']=='PRODUCT_SOURCE_IDENTITY')
+    old=_owner_source_preconditions(revision,ir,inventory,caps,typed_prerequisite_contract='existing-owner-typed-prerequisites-v9')
+    index=inventory['sources'].index(clause)
+    assert not any(r['capability']==source_cap for r in old['sources'][index]['ineligible_binding_prerequisites'])
+    rejected=next(r for r in current['sources'][index]['ineligible_binding_prerequisites'] if r['capability']==source_cap)
+    assert rejected['codes']==['OBLIGATION_SOURCE_EVIDENCE_METHOD_REQUIRES_ADMITTED_FACT']
+    changed=plan.model_copy(update={'routes':tuple(r.model_copy(update={'capability':'PRODUCT_SOURCE_IDENTITY','target_paths':()})
+        if r.source_ref==clause['source_ref'] else r for r in plan.routes)})
+    # The old representation is still evaluated with its actual frozen policy.
+    validate_projection_candidate(changed,revision,ir,inventory,allow_review_pending=True,source_contract='v3',owner_preconditions=old)
+    with pytest.raises(ValueError,match='SOURCE_EVIDENCE_METHOD_REQUIRES_ADMITTED_FACT'):
+        validate_projection_candidate(changed,revision,ir,inventory,allow_review_pending=True,source_contract='v3',owner_preconditions=current)
+    feedback=json.loads(projection_validation_feedback(changed,revision,ir,inventory,
+        'OBLIGATION_SOURCE_EVIDENCE_METHOD_REQUIRES_ADMITTED_FACT',source_contract='v3',owner_preconditions=current))
+    assert any(r['code']=='OBLIGATION_SOURCE_EVIDENCE_METHOD_REQUIRES_ADMITTED_FACT' and r['source']==index for r in feedback['violations'])
+    assert any(r['capability']=='UNRESOLVED' for r in caps)
+    assert clause['source_ref'] in {r.source_ref for r in changed.routes}
+
+
+@pytest.mark.parametrize('failure',[None,'non-fact','missing-id'])
+def test_actual_source_method_never_accepts_none_identity_as_owner_evidence(failure):
+    from types import SimpleNamespace
+    from spg.application.governed_obligations import _projection_binding
+    from spg.providers.managed_context_fulfillment import verify_binding_inventory
+    from spg.domain.governed_obligation import FulfillmentSourceKind
+    from tests.test_c3_fulfillment_capacity_representation import controlled_capacity_case
+    revision,ir,inventory,plan=controlled_capacity_case()
+    route=next(r for r in plan.routes if r.capability=='PRODUCT_SOURCE_IDENTITY')
+    binding=_projection_binding(revision,ir,inventory,route,allow_calibrated=True,source_contract='v3')
+    if failure=='non-fact':
+        binding=binding.model_copy(update={'source_kind':FulfillmentSourceKind.IR_CLAUSE,'fact_id':None,
+            'clause_id':ir.clauses[0].clause_id,'constraint_item_id':ir.items[0].item_id,'semantic_ir_id':ir.id})
+    if failure=='missing-id': binding=binding.model_copy(update={'fact_id':None})
+    rows,_=verify_binding_inventory(request=SimpleNamespace(proposed_commit_identity='a'*40,tree_identity='b'*40),
+        task=None,contract=None,repository=None,baseline=None,revision=revision,ir=ir,bindings=(binding,),
+        semantic_checks=({'fact_id':str(binding.fact_id),'current_evidence_verified':True},),protected_checks=(),
+        static_verifier=None,receipt_recorder=None,native_record=None)
+    assert rows[0]['disposition']==('VERIFIED_CURRENT' if failure is None else 'UNVERIFIABLE')

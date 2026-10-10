@@ -193,6 +193,12 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
                 {"properties": {"q": {"type": "null"}, "a": {"enum": [0]}, "z": {"enum": [length]}}},
                 {"properties": {"q": {"type": "string", "minLength": 1}}},
             ]
+            if (owner_preconditions or {}).get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v10":
+                # Existing Wire v1 has one exact whole-source operand. New
+                # generation uses q=null for it; strings identify proper parts.
+                # No original text, component or semantic choice is removed.
+                branch["anyOf"] = branch["anyOf"][:1] + ([{"properties": {"q": {
+                    "type": "string", "minLength": 1, "maxLength": length - 1}}}] if length > 1 else [])
             if partial_context_only:
                 # The binding Owner cannot retain this entire required
                 # constraint. Keep legal mixed-source partial background open
@@ -212,6 +218,21 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
                     "$ref": "#/$defs/_FulfillmentCompactRoute/properties/u"}
             branches.append(branch)
         schema["properties"]["routes"]["items"] = {"anyOf": branches}
+        if owner_preconditions.get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v10":
+            # Project the canonical component-disposition invariant into new
+            # generation. This rejects only contradictory whole-component
+            # choices, never chooses a semantic route or grants a Gate.
+            exclusive = [i for i,c in enumerate(capabilities) if c["capability"] in {"RETAIN_CONTEXT", "UNRESOLVED"}]
+            rules = []
+            for source, text in enumerate(_fulfillment_wire_context(inventory, capabilities, owner_preconditions=owner_preconditions)["source_texts"]):
+                for disposition in exclusive:
+                    def whole(capability_schema):
+                        return {"contains": {"type": "object", "properties": {
+                            "s": {"enum": [source]}, "c": capability_schema,
+                            "a": {"enum": [0]}, "z": {"enum": [len(text)]}, "q": {"type": "null"}}}}
+                    rules.append({"not": {"allOf": [whole({"enum": [disposition]}),
+                        whole({"enum": [i for i in range(len(capabilities)) if i != disposition]})]}})
+            schema["properties"]["routes"]["allOf"] = rules
     return schema
 
 
@@ -733,7 +754,7 @@ def _fulfillment_wire_route_observations(output, inventory, capabilities, *, val
             unavailable.append(index)
         else:
             observations.append((index, raw.model_dump(mode="json"), route))
-    if ((owner_preconditions or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9"}
+    if ((owner_preconditions or {}).get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"}
             and not syntax_unavailable and len(expanded) == len(wire.routes)):
         # Coverage failure does not make exact identity/quote location
         # unknowable. Observe the complete original Wire, never an isolated

@@ -197,7 +197,7 @@ def controlled_model_provider(inventory, plan, *, equivalent=True, review_change
             restored = decode_review_input(payload)
             review = controlled_review(inventory, restored, equivalent=equivalent).model_dump(mode="json")
             if (payload.get("existing_owner_source_preconditions") or {}).get(
-                    "typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v9":
+                    "typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10"}:
                 from tests.test_c3_semantic_contract_calibration import review as component_review
                 components = component_review(inventory, restored).component_results
                 review["component_results"] = [row.model_copy(update={"complete_and_equivalent": equivalent}).model_dump(mode="json")

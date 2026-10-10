@@ -1,0 +1,53 @@
+{
+  "actual_image_observation": {
+    "actual_container_imports": "PENDING_EXECUTION",
+    "actual_image_id": "sha256:8e18fc7a399cb1be1059b1020d4420e6004aee5b545de8950fd699b6ddf1f035",
+    "ecf_revision_label": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "guardian_revision_label": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+    "method": "actual Docker image inspect",
+    "source_revision_label": "435b2e4c757064e3067c0bb903b24e11f6b1bcab",
+    "source_tree_label": "98a1f422cb177ee424bea28ffb545e8e17ee6d52"
+  },
+  "case_count": 8,
+  "control_sha256": {
+    "holdout_adapter.py": "0c0318ecb0a86aaf3145760e3174b61db26462d4dd18a1b8934e65e359bf1818",
+    "holdout_runner.py": "ef8fe306e1bd0b568bc1e3ebb9a418c23d872ec4321f82b89aa852e91d7366f3"
+  },
+  "controlled_owner_case_count": 4,
+  "coverage_categories": [
+    "content obligations",
+    "file and change scope",
+    "continuous prohibited effects",
+    "future Human Gate",
+    "context retention",
+    "missing independent evidence",
+    "wrong Source version",
+    "unauthorized actual effect permit"
+  ],
+  "execution_requires_parent_final_g0_and_pg_gate_result": true,
+  "freeze": {
+    "application_image_id": "sha256:8e18fc7a399cb1be1059b1020d4420e6004aee5b545de8950fd699b6ddf1f035",
+    "ecf_revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "ecf_tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "guardian_revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+    "guardian_tree": "6066a6d6b8d91bec610021409ab320309ed0e437",
+    "source_revision": "435b2e4c757064e3067c0bb903b24e11f6b1bcab",
+    "source_tree": "98a1f422cb177ee424bea28ffb545e8e17ee6d52"
+  },
+  "live_semantic_case_count": 4,
+  "maximum_formation_owner_logical_calls": 16,
+  "mechanical_controls": "Original real Owner consumers only; adapters formed from sealed recipes without oracle changes. Any unmappable control remains NOT_EVALUABLE.",
+  "model_calls": 0,
+  "previous_package_preserved": true,
+  "previous_seal_sha256": "a7ed5542f76e26de78db4ad5c11ebf0249bb3214e7c70a4a7a6055b556887092",
+  "private_cases_and_oracle_unchanged": true,
+  "private_recovery_root": "/data/watt/c3-semantic-convergence-20261009/final-independent-holdout-generation20-20261010",
+  "resources_created": "private sealed files only; no container/network/database/model call",
+  "same_private_case_inventory_sha256": "ea3a73609afc6283aa6aaf3d6cf443108bdb8ee3e4497d304e2beeb246693ab3",
+  "schema": "c3-independent-new-seal-metadata-v1",
+  "sealed_at_utc": "2026-10-10T14:43:37.680076+00:00",
+  "sealed_specification_bytes": 11320,
+  "sealed_specification_sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0",
+  "self_refine_limit": "Only original one feedback within each Formation case; no added retries",
+  "status": "SEALED_REBOUND_NOT_EXECUTED"
+}
