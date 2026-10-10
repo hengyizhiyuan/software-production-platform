@@ -416,7 +416,12 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
         if failure_kind == 'predecode':
             assert any('OBLIGATION_CONTENT_TARGET_UNRESOLVED' in f['failed_predicates']
                 for f in raw_operands['violations'])
-        assert 'ASSURANCE' in raw_operands['not_evaluable']
+        if failure_kind == 'complete-prefix':
+            assert raw_operands['violations'] == []
+            assert 'ORIGINAL_WIRE_OWNER_OPERANDS' in raw_operands['not_evaluable']
+        else:
+            assert 'ASSURANCE' in raw_operands['not_evaluable']
+        assert 'ASSURANCE' in feedback['owner_repair_context']['not_evaluable']
         if tamper:
             scope = deepcopy(original_scope)
             if tamper == 'feedback': scope['validation_feedback'] += ' '
