@@ -1,0 +1,16 @@
+{
+  "instructions_bytes": 6741,
+  "input_bytes": 80058,
+  "schema_bytes": 65540,
+  "input_sections": {
+    "immutable_inventory": 17729,
+    "existing_ir_item_table": 3721,
+    "existing_capability_contracts": 2608,
+    "existing_consumer_contracts": 11512,
+    "owner_source_preconditions": 29234,
+    "owner_rows_location": 61,
+    "same_basis_validation_feedback": 4,
+    "temporary_wire": 14955
+  },
+  "model_calls": 0
+}

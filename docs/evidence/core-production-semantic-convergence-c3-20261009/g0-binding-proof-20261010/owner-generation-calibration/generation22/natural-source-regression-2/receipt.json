@@ -1,0 +1,10 @@
+{
+  "source": "614d6fb1ef95df3e73bc8fe5b14cbf0c13433aac",
+  "actual_image": "sha256:8dc7c0e2ddfa83a49207717055423617dedfcfa1ca84607f0ad6f1d8ab8cf0ee",
+  "container_id": "eee7d311b814f1b69cf38a1362f094fb761330be49ad0dbac49ba9953954bc12",
+  "source_overlay": false,
+  "models": 0,
+  "business_work_created": 0,
+  "exit_code": 0,
+  "wall_seconds": 8.279319091001526
+}

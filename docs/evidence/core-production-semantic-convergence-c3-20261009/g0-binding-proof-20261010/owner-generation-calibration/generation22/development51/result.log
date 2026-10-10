@@ -1,0 +1,76 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 335 items
+
+tests/test_c3_fulfillment_capacity_representation.py ................... [  5%]
+..................................                                       [ 15%]
+tests/test_c3_owner_repair_preconditions.py ............................ [ 24%]
+.........................                                                [ 31%]
+tests/test_c3_generation_owner_domains.py .....F........................ [ 40%]
+...F......................................................               [ 57%]
+tests/test_c3_source_role_contract.py .................                  [ 62%]
+tests/test_c3_fulfillment_repair_context.py ............................ [ 71%]
+..................                                                       [ 76%]
+tests/test_c3_fulfillment_wire_feedback.py ............................. [ 85%]
+.........                                                                [ 88%]
+tests/test_c3_semantic_contract_calibration.py ......................... [ 95%]
+...............                                                          [100%]
+
+=================================== FAILURES ===================================
+_ test_direct_content_fact_self_reference_does_not_create_mixed_acceptance_dependency _
+tests/test_c3_generation_owner_domains.py:104: in test_direct_content_fact_self_reference_does_not_create_mixed_acceptance_dependency
+    bindings = tuple(_projection_binding(revision, ir, inventory, r, allow_calibrated=True,
+tests/test_c3_generation_owner_domains.py:104: in <genexpr>
+    bindings = tuple(_projection_binding(revision, ir, inventory, r, allow_calibrated=True,
+src/spg/application/governed_obligations.py:873: in _projection_binding
+    raise ValueError("OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY")
+E   ValueError: OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY
+_ test_generation_requires_original_quote_for_partial_components_without_changing_wire_v1 _
+tests/test_c3_generation_owner_domains.py:512: in test_generation_requires_original_quote_for_partial_components_without_changing_wire_v1
+    assert guards == [
+E   AssertionError: assert [{'properties...Length': 1}}}] == [{'properties...ngth': 119}}}]
+E     
+E     At index 1 diff: {'properties': {'q': {'type': 'string', 'minLength': 1}}} != {'properties': {'q': {'type': 'string', 'minLength': 1, 'maxLength': 119}}}
+E     Use -v to get more diff
+=============================== warnings summary ===============================
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[small]
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[medium]
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[complex]
+  tests/test_c3_fulfillment_capacity_representation.py:155: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize('scale', ('small','medium','complex'))
+
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[small]
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[medium]
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[complex]
+  tests/test_c3_fulfillment_capacity_representation.py:220: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers0]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers1]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers2]
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+tests/test_c3_semantic_contract_calibration.py::test_negative_file_component_preserves_original_exclusion_and_requires_real_diff
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_generation_owner_domains.py::test_direct_content_fact_self_reference_does_not_create_mixed_acceptance_dependency
+FAILED tests/test_c3_generation_owner_domains.py::test_generation_requires_original_quote_for_partial_components_without_changing_wire_v1
+================= 2 failed, 333 passed, 10 warnings in 26.09s ==================

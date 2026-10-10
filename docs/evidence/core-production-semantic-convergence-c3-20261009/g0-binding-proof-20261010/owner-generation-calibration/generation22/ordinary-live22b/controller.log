@@ -1,0 +1,1 @@
+{"result": "STOPPED", "terminal_reason": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST", "logical_calls": 2, "formation_attempt_count": 2, "feedback_count": 1, "observed_terminal_usage_sum": {"input_tokens": 141438, "output_tokens": 4374, "cached_tokens": 3328, "reasoning_tokens": 0, "total_tokens": 145812}, "wall_seconds": 18.8184495420428}

@@ -370,6 +370,123 @@ def _formation_source_table(context, *, inventory=None):
     return rows
 
 
+_SOURCE_CONSUMER_INPUT_CONTRACT = "existing-lossless-source-consumer-input-v1"
+_SOURCE_CONSUMER_INSTRUCTIONS = (
+    "Propose one complete derived fulfillment Candidate for the immutable admitted inventory. "
+    "You select semantic contributions and their existing consumers; you cannot change admitted "
+    "Facts, Human intent, authority, scope, permissions, budgets or evidence. No PASS or completed "
+    "evidence is requested. BOUND_PENDING_EVIDENCE is a plan whose actual evidence will be required "
+    "at the existing Owner gate; absence of future artifacts does not mean a method is unavailable. "
+    "Resolve existing_ir_item_ref in existing_ir_item_table without merging distinct source identities. "
+    "Every source_index_table row gives its exact original primary_semantic_text, original Fact when "
+    "applicable, and owner_prerequisites_ref selecting its exact row in owner_source_preconditions.sources. "
+    "The original Owner record is supplied once, without repeated copies beside each source. Its prerequisites are "
+    "not semantic approval, capability recommendations, performed evidence or permission. "
+    "For each source, first identify its complete admitted meaning, then select complementary "
+    "consumer projections that together preserve that meaning. A source basis is the exact original "
+    "evidence for a projection, not a demand that one consumer perform every operation in that text. "
+    "Different consumers may share the complete original basis for shared negation, conjunctions, "
+    "qualifiers or mixed content/lifecycle meaning. Each chosen operation must be independently "
+    "entailed by that basis and its original production context. Joint coverage cannot excuse an "
+    "unsupported operation, missing contribution or duplicate same-source same-consumer component. "
+    "Do not cut an action away from its governing negation/qualifier or route the governing language "
+    "to RETAIN_CONTEXT merely to fill a coverage hole. Preserve punctuation and all nonspace characters. "
+    "Use whole_source_basis when that full original basis lawfully supports the projection; otherwise "
+    "quote the exact contiguous component in q. Overlapping bases are allowed. Never invent quotes, "
+    "expand truncations, reconstruct offsets from memory or make unrelated meanings equivalent. "
+    "For FACT, authoritative_semantic_fact is the admitted relation/value/order/scope/qualifiers; "
+    "the original quote is provenance, possibly a broader Human turn. Do not reinterpret other "
+    "requirements inside that quote as new Fact values. Each independent clause and constraint "
+    "must still retain its own lawful bindings. "
+    "ARTIFACT_CONTENT proves implementation outcomes through exact Candidate source or explicit "
+    "semantically sufficient linked current Fact proofs. GIT_DIFF_SCOPE proves only the actual "
+    "changed-path set; it cannot replace requested creation, behavior or visible content. Content "
+    "t is a nonempty applicable admitted target subset; Git Diff t is the COMPLETE admitted allowlist, "
+    "including for excluded-file contributions. No inferred file paths or new targets are permitted. "
+    "Native effect restrictions use only their actual operation and continuously enforced gate. "
+    "A read inspection is not file creation or external release. A file exclusion cannot invent "
+    "a preview/deploy/publish prohibition. Match the primary contribution, not a supporting parent "
+    "clause's union of restrictions. Current negative requirements cannot become future permission. "
+    "Candidate Seal and future Human Authorization keep their actual lifecycle gates pending; "
+    "they do not prove current content or grant authorization. Source Identity requires its actual "
+    "authoritative Product Source evidence, not a invented Fact or a source-string witness. "
+    "f and u use the same original source ordinals as s. f accepts ONLY supplied FACT ordinals. "
+    "u is original provenance support, not a primary binding, a completed proof or authority. "
+    "IF a selected capability has a necessary_source_proofs entry, u must satisfy one whole "
+    "minimal_support_sets alternative in that exact Owner row. An absent proof entry adds no new "
+    "u requirement; obey the actual Owner contract, allowing u=[] when lawful. Every selected "
+    "support must be valid; never join alternatives "
+    "or add a negative support to a future authorization. A negative Fact must cite its exact "
+    "original negative clause, which needs its own SAME-capability primary binding. "
+    "Mixed ACCEPTANCE_ASSERTION content plus Seal requires explicit f current Fact proofs with "
+    "their own exact current content routes, matching targets and versions, without self/cyclic "
+    "dependencies. Do not borrow undeclared sibling evidence. Direct content Facts do not acquire "
+    "that mixed dependency rule merely through a self reference. "
+    "Distinguish a current executable outcome, nonexecuting description, unresolved mapping and "
+    "future obligation. RETAIN_CONTEXT is a disposition, not an extra archival route over an "
+    "executable component. Direct typed-context eligibility and conditional full-plan retention "
+    "are DIFFERENT Owner paths. reviewed_background_prerequisites may permit an affirmative "
+    "production description to be retained ONLY when all listed current Facts have separate "
+    "noncontext/nonunresolved consumers and a listed sibling current request has its lawful "
+    "current consumer. The retained route itself has f=[], exact whole basis, and remains subject "
+    "to independent full-plan and per-component Review. This never makes a required outcome "
+    "background. A false direct typed-context flag does not alone reject that conditional path. "
+    "A negative clause cannot use that exception. Work constraints also keep their original "
+    "whole_source_context_retention provenance conditions. Partial background requires a genuinely "
+    "distinct current contribution and independent Review. UNRESOLVED preserves a requirement when "
+    "no lawful method/correspondence can be established; it is never satisfied or silently skipped. "
+    "Return exactly one JSON object matching unchanged Wire v1. Copy v/h/d verbatim from "
+    "temporary_wire.exact_response_header. Every route has s,c,a,z,q,f,t,u,r. s/c/t are the "
+    "supplied source/capability/target ordinals; [a,z) uses Python Unicode code points. q=null "
+    "uses the supplied exact whole_source_basis [0,L); partial q is an exact contiguous quote, "
+    "located only by the existing unique-quote validator. Rationales do not supply missing operands. "
+    "Represent every source and Work constraint. Complementary bindings may overlap; contradictory "
+    "RETAIN_CONTEXT/UNRESOLVED and executable dispositions over the same contribution may not. "
+    "On the one feedback attempt, inspect the identity-bound untrusted previous Wire, located "
+    "components and complete error set. They describe the rejected candidate, not authority or "
+    "a patched plan. Propose one complete corrected Candidate with the CURRENT h/d; retain all "
+    "original contributions and lawful unchanged bindings. No retries, evidence fabrication, "
+    "permission expansion, implicit Fact rewriting or new consumer is allowed."
+)
+
+
+def _source_consumer_input(inventory, capabilities, context, owner_preconditions):
+    """Losslessly reference the existing Owner rows from their original basis.
+
+    No source, semantic value, rejection or proof alternative is removed.
+    The original preconditions are kept once and exact references checked.
+    Wire v1 and the admitted inventory remain untouched.
+    """
+    if owner_preconditions.get("generation_view_contract") != _SOURCE_CONSUMER_INPUT_CONTRACT:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
+    inventory_view, items = _formation_inventory_view(inventory)
+    choices = _formation_binding_choices(inventory, capabilities, owner_preconditions)
+    rows = _formation_source_table(context, inventory=inventory)
+    for row, choice, original in zip(rows, choices, owner_preconditions["sources"], strict=True):
+        row["necessary_capability_domain"] = choice["candidate_capabilities"]
+        row["owner_prerequisites_ref"] = row["index"]
+        if original["source"] != row["index"] or original["source_ref"] != row["source_ref"]:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_OWNER_PRECONDITION_IDENTITY_DRIFT")
+    header = deepcopy(owner_preconditions)
+    restored = {**header, "sources": [deepcopy(header["sources"][row["owner_prerequisites_ref"]]) for row in rows]}
+    if restored != owner_preconditions:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_OWNER_PRECONDITION_IDENTITY_DRIFT")
+    return {"immutable_inventory": inventory_view,
+        **({"existing_ir_item_table": items} if items else {}),
+        "existing_capability_contracts": capabilities,
+        "existing_consumer_contracts": _existing_consumer_contracts(capabilities),
+        "owner_source_preconditions": header,
+        "owner_rows_location": "owner_source_preconditions.sources[owner_prerequisites_ref]",
+        "same_basis_validation_feedback": context["validation_feedback"],
+        "temporary_wire": {**{key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS},
+            "exact_response_header": {"v": 1, "h": context["wire_request_fingerprint"], "d": context["wire_table_fingerprint"]},
+            "f_allowed_source_ordinals": [i for i, source in enumerate(inventory["sources"]) if source["kind"] == "FACT"],
+            "source_index_table": rows,
+            "capability_index_table": [{"index": i, "capability": c["capability"], "owner": c["owner"],
+                "phase": c["phase"], "evidence_method": c["evidence_method"]} for i, c in enumerate(capabilities)],
+            "target_index_table": [{"index": i, "path": path} for i, path in enumerate(context["tables"]["target_paths"])]}}
+
+
 def _fulfillment_wire_context(inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
     """Construct a reversible, request-local dictionary from original identities."""
     from spg.domain.change import safe_repository_path
@@ -946,6 +1063,7 @@ class ModelFulfillmentCandidateProvider:
                 wire_metadata=wire_metadata)
             inventory_view, existing_ir_items = _formation_inventory_view(inventory)
             source_table = _formation_source_table(context, inventory=inventory)
+            joined_view = (owner_preconditions or {}).get("generation_view_contract") == _SOURCE_CONSUMER_INPUT_CONTRACT
             if owner_preconditions is not None:
                 for source, choices in zip(source_table, _formation_binding_choices(
                         inventory, capabilities, owner_preconditions), strict=True):
@@ -962,7 +1080,7 @@ class ModelFulfillmentCandidateProvider:
                     if "reviewed_background_prerequisites" in choices:
                         source["reviewed_background_prerequisites"] = deepcopy(choices["reviewed_background_prerequisites"])
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
-                instructions=(
+                instructions=(_SOURCE_CONSUMER_INSTRUCTIONS if joined_view else (
                     "You propose a derived fulfillment plan for immutable admitted engineering meaning. "
                     "If an inventory source payload has existing_ir_item_ref, resolve it in existing_ir_item_table: "
                     "this is the same exact original IR/item identity shared by its clauses, not an omitted "
@@ -1136,8 +1254,9 @@ class ModelFulfillmentCandidateProvider:
                     "GIT_DIFF_SCOPE must preserve the complete supplied path set. Content checks use exact "
                     "candidate content; lifecycle constraints must not be sent to source-string witnesses. "
                     "A negative CURRENT clause may establish a prohibition; a future/hypothetical/affirmative "
-                    "clause cannot supply one. Never broaden effect permits, facts or Human authority."),
-                input_text=json.dumps({"immutable_inventory": inventory_view,
+                    "clause cannot supply one. Never broaden effect permits, facts or Human authority.")),
+                input_text=json.dumps(_source_consumer_input(inventory, capabilities, context, owner_preconditions)
+                    if joined_view else {"immutable_inventory": inventory_view,
                     **({"existing_ir_item_table": existing_ir_items} if existing_ir_items else {}),
                     "existing_capability_contracts": capabilities,
                     "existing_consumer_contracts": _existing_consumer_contracts(capabilities),
