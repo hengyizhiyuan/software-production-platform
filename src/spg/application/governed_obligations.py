@@ -845,19 +845,26 @@ def _projection_binding(revision, ir, inventory, route, *, reviewed_background_r
         source_record_ids=(clause.source_record_id,), source_quote=clause.source_text, **common)
 
 
-def work_constraint_sources_correspond(ir, quote, entries, *, component, phase, semantic_component_declared=False, calibrated=False):
-    """Prove exact original source support, never classify wrapper vocabulary."""
-    def direct(entry):
-        if entry["kind"] not in {"IR_CLAUSE", "IR_CONSTRAINT"}:
-            return False
-        item = next(i for i in ir.items if i.item_id == entry["item_id"])
-        return quote == item.statement or quote == entry["payload"]["clause"]["source_text"] or (
-            item.production is not None and quote in item.production.scope)
-    if entries and all(direct(entry) for entry in entries):
-        return True
-    production_values = [(entry, value) for entry in entries if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}
+def _work_constraint_direct_source(ir, quote, entry):
+    """Existing exact correspondence predicate, shared with repair diagnostics."""
+    if entry["kind"] not in {"IR_CLAUSE", "IR_CONSTRAINT"}:
+        return False
+    item = next(i for i in ir.items if i.item_id == entry["item_id"])
+    return quote == item.statement or quote == entry["payload"]["clause"]["source_text"] or (
+        item.production is not None and quote in item.production.scope)
+
+
+def _work_constraint_exclusion_sources(ir, quote, entries):
+    return [(entry, value) for entry in entries if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}
         for item in ir.items if item.item_id == entry["item_id"] and item.production is not None
         for value in item.production.exclusions if quote == f"Excluded from this Work: {value}"]
+
+
+def work_constraint_sources_correspond(ir, quote, entries, *, component, phase, semantic_component_declared=False, calibrated=False):
+    """Prove exact original source support, never classify wrapper vocabulary."""
+    if entries and all(_work_constraint_direct_source(ir, quote, entry) for entry in entries):
+        return True
+    production_values = _work_constraint_exclusion_sources(ir, quote, entries)
     if not production_values:
         return False
     values = {value for _, value in production_values}
@@ -1403,6 +1410,10 @@ def _wire_response_basis(rows, attempt, revision, inventory, capabilities):
     if len(starts) != 1 or len(observed) != 1 or type(attempt) is not int or attempt not in (1, 2):
         drift()
     start, response = starts[0], observed[0]
+    owner_contract = start.get("owner_repair_context_contract")
+    if (response.get("owner_repair_context_contract") != owner_contract
+            or owner_contract not in (None, "existing-owner-preconditions-v1")):
+        drift()
     basis = {"work_id": str(revision.work_id), "work_reality_revision_id": str(revision.id),
         "inventory_fingerprint": inventory["inventory_fingerprint"],
         "source_revision": inventory["source_revision"], "exact_target_paths": inventory["exact_target_paths"]}
@@ -1429,6 +1440,7 @@ def _wire_response_basis(rows, attempt, revision, inventory, capabilities):
         drift()
     return raw, {**basis, "attempt": attempt, "wire_output_fingerprint": output_fingerprint,
         "request_receipt_id": start["receipt_id"], "response_receipt_id": response["receipt_id"],
+        **({"owner_repair_context_contract": owner_contract} if owner_contract is not None else {}),
         **{key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS}}
 
 
@@ -1445,7 +1457,73 @@ def _bind_wire_diagnostics(error, rows, attempt, revision, inventory, capabiliti
     return {**bound, "diagnostic_fingerprint": canonical_fingerprint(bound)}
 
 
-def _bind_repair_feedback(feedback, rows, attempt, revision, inventory, capabilities, candidate):
+def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validation_feedback):
+    """Expose existing Owner prerequisites on the exact unadmitted proposal.
+
+    Supporting provenance is not primary-source component coverage. These
+    observations neither propose routes nor grant evidence, review or authority.
+    Invalid/unlocated raw routes stay non-evaluable instead of being repaired.
+    """
+    from types import SimpleNamespace
+    from spg.providers.fulfillment_candidate import _fulfillment_wire_route_observations
+    observations, unavailable = _fulfillment_wire_route_observations(raw, inventory, capabilities,
+        validation_feedback=validation_feedback)
+    diagnostic_view = SimpleNamespace(routes=tuple(route for _, _, route in observations))
+    evaluated = json.loads(projection_validation_feedback(diagnostic_view, revision, ir, inventory,
+        "OBLIGATION_OWNER_PRECONDITIONS_UNPROVEN"))
+    failures = []
+    for failure in evaluated["violations"]:
+        if unavailable and failure["code"] in {
+                "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+                "OBLIGATION_REQUIRED_CONSTRAINT_CANNOT_BE_CONTEXT_ONLY"}:
+            # A malformed sibling cannot prove or disprove mixed background
+            # eligibility. The full plan must be evaluated after valid decode.
+            continue
+        if "route" in failure:
+            index, wire_route, _ = observations[failure["route"]]
+            failure.update(route=index, raw_route_fingerprint=canonical_fingerprint(wire_route))
+        # Invalid raw routes must not be reported as absent sources: the
+        # authoritative raw coverage diagnostics already identify that boundary.
+        elif unavailable:
+            continue
+        failures.append(failure)
+    sources = inventory["sources"]
+    refs = {entry["source_ref"]: index for index, entry in enumerate(sources)}
+    prerequisites = []
+    for index, source in enumerate(sources):
+        row = {"source": index, "source_ref": source["source_ref"],
+            "primary_component_required": True,
+            "supporting_reference_does_not_cover_source": True}
+        if source["kind"] == "WORK_CONSTRAINT":
+            quote = source["payload"]["content"]
+            row.update(exact_corresponding_source_ordinals=[refs[e["source_ref"]] for e in sources
+                    if _work_constraint_direct_source(ir, quote, e)],
+                exact_exclusion_derivation_source_ordinals=sorted({refs[e["source_ref"]]
+                    for e, _ in _work_constraint_exclusion_sources(ir, quote, sources)}),
+                correspondence_rule="ALL_SELECTED_SUPPORTS_MUST_PROVE_EXACT_CORRESPONDENCE_OR_EXISTING_EXCLUSION_DERIVATION",
+                exclusion_rule="ORIGINAL_PRODUCTION_EXCLUSION_AND_CURRENT_NEGATIVE_CLAUSE_WITH_COMPATIBLE_COMPONENT_AND_PHASE",
+                permission_rule="CURRENT_NEGATIVE_ORIGINAL_CLAUSE_REQUIRED",
+                future_gate_rule="AFFIRMATIVE_ORIGINAL_CLAUSE_AND_EXISTING_LIFECYCLE_GATE_REQUIRED")
+        if source["kind"] == "FACT":
+            fact = next(f for f in revision.engineering_semantic_facts if str(f.id) == source["fact_id"])
+            paths = exact_file_scope_paths(fact, qualified=True) if fact.relation.value == "SCOPE" else None
+            if paths is not None and set(paths) == set(inventory["exact_target_paths"]):
+                row["necessary_evidence_method"] = "EXACT_GIT_DIFF_SCOPE"
+            if fact.relation.value == "SCOPE" and fact.qualifiers.get("negated") is True:
+                row["necessary_evidence_methods"] = ["EXACT_GIT_DIFF_SCOPE", "EXACT_PERMISSION_GATE"]
+                row["permission_rule"] = "EXACT_HUMAN_NEGATIVE_CURRENT_CLAUSE_WITH_FACT_PROVENANCE_AND_COMPATIBLE_GATE_REQUIRED"
+        prerequisites.append(row)
+    return {"inventory_fingerprint": inventory["inventory_fingerprint"],
+        "status": "UNADMITTED_OWNER_PRECONDITION_OBSERVATIONS",
+        "violations": failures, "additional_violation_count": evaluated["additional_violation_count"],
+        "raw_routes_not_evaluable": unavailable, "source_preconditions": prerequisites,
+        "not_evaluable": ["COMPLETE_PLAN_ADMISSION", "INDEPENDENT_SEMANTIC_REVIEW", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"]
+            + (["OWNER_BACKGROUND_CROSS_ROUTE_PRECONDITIONS"] if unavailable else []),
+        "instruction": "Select semantic components yourself. Every source needs its own complete component spans even when cited in u. Exact text equality does not merge source identities. The listed origins are necessary correspondence prerequisites, not evidence or permission. Do not add unrelated supports; do not change meaning or copy another source's scope. Revalidate the complete new proposal through existing gates."}
+
+
+def _bind_repair_feedback(feedback, rows, attempt, revision, inventory, capabilities, candidate, *, ir=None,
+                          include_owner_preconditions=False):
     """Return the exact untrusted proposal with feedback, never a repaired plan.
 
     A route ordinal/hash without its original proposal is not actionable repair
@@ -1458,6 +1536,10 @@ def _bind_repair_feedback(feedback, rows, attempt, revision, inventory, capabili
     payload = json.loads(feedback)
     payload.update(untrusted_previous_wire=raw, repair_feedback_binding={**binding,
         "candidate_fingerprint": None if candidate is None else fulfillment_candidate_fingerprint(candidate)})
+    if include_owner_preconditions:
+        start = next(row for row in rows if row["stage"] == "MODEL_REQUEST_PENDING" and row["attempt"] == attempt)
+        payload["owner_repair_context"] = _owner_repair_context(raw, revision, ir, inventory, capabilities,
+            validation_feedback=start.get("feedback"))
     if _safe_value(payload) != payload:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     return json.dumps(payload, separators=(",", ":"))
@@ -1489,6 +1571,12 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                 raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT") from error
             if (not isinstance(bound_feedback, dict) or "repair_feedback_binding" not in bound_feedback
                     or "untrusted_previous_wire" not in bound_feedback):
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+            if (row.get("owner_repair_context_bound") is True) != ("owner_repair_context" in bound_feedback):
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+            start = next((r for r in rows if r.get("stage") == "MODEL_REQUEST_PENDING"
+                and r.get("attempt") == row.get("attempt")), {})
+            if start.get("owner_repair_context_contract") is not None and row.get("owner_repair_context_bound") is not True:
                 raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         diagnostics = row.get("predecode_diagnostics")
         if diagnostics is None:
@@ -1524,7 +1612,8 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
                     expected_feedback = projection_validation_feedback(original, revision, ir, inventory, row.get("failed_predicate"))
                     expected_feedback = _bind_repair_feedback(expected_feedback, rows, attempt,
-                        revision, inventory, capabilities, original)
+                        revision, inventory, capabilities, original, ir=ir,
+                        include_owner_preconditions=row.get("owner_repair_context_bound") is True)
                     if row.get("validation_feedback") != expected_feedback:
                         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
                 except ValueError as error:
@@ -1551,7 +1640,8 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
             except ValueError as drift:
                 raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT") from drift
             if isinstance(retained_feedback, dict) and "repair_feedback_binding" in retained_feedback:
-                feedback = _bind_repair_feedback(feedback, rows, attempt, revision, inventory, capabilities, None)
+                feedback = _bind_repair_feedback(feedback, rows, attempt, revision, inventory, capabilities, None,
+                    ir=ir, include_owner_preconditions=row.get("owner_repair_context_bound") is True)
             if (diagnostics != bound or row.get("validation_feedback") != feedback
                     or row.get("failed_predicate") != str(error)
                     or any(row.get(key) != bound["binding"][key] for key in
@@ -1780,14 +1870,15 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
             else:
                 metadata_builder = getattr(provider, "form_wire_metadata", None)
                 wire_metadata = metadata_builder(inventory, capabilities, validation_feedback=feedback) if callable(metadata_builder) else {}
+                owner_contract = {"owner_repair_context_contract": "existing-owner-preconditions-v1"} if wire_metadata else {}
                 parents = [row for row in recorder.records() if row["stage"] == "CANDIDATE_VALIDATED"
                     and row["attempt"] == attempt - 1 and row.get("validation_feedback") is not None]
-                recorder.append("MODEL_REQUEST_PENDING", attempt, feedback=feedback, **wire_metadata,
+                recorder.append("MODEL_REQUEST_PENDING", attempt, feedback=feedback, **wire_metadata, **owner_contract,
                     **({"feedback_receipt_id": parents[0]["receipt_id"]} if len(parents) == 1 else {}))
                 import inspect
                 accepts_callback = "receipt_callback" in inspect.signature(provider.form).parameters
                 def observed_callback(**values):
-                    recorder.append("MODEL_RESPONSE_OBSERVED", attempt, **values)
+                    recorder.append("MODEL_RESPONSE_OBSERVED", attempt, **values, **owner_contract)
                 arguments = {"validation_feedback": feedback}
                 if accepts_callback:
                     arguments["receipt_callback"] = observed_callback
@@ -1837,7 +1928,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     and (candidate is not None or wire_diagnostics is not None)):
                 try:
                     feedback = _bind_repair_feedback(feedback, recorder.records(), attempt,
-                        revision, inventory, capabilities, candidate)
+                        revision, inventory, capabilities, candidate, ir=ir, include_owner_preconditions=True)
                 except _FulfillmentWireReceiptIdentityError as drift:
                     return stop_identity(str(drift))
             passed, reason = False, json.loads(feedback)["primary_error"]
@@ -1845,6 +1936,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                 semantic_review=semantic_review, failed_predicate=reason, validation_feedback=feedback, validation_passed=False, terminal=attempt == 2,
                 terminal_reason=reason if attempt == 2 else None,
                 **({"repair_feedback_bound": True} if "repair_feedback_binding" in json.loads(feedback) else {}),
+                **({"owner_repair_context_bound": True} if "owner_repair_context" in json.loads(feedback) else {}),
                 **({"predecode_diagnostics": wire_diagnostics} if wire_diagnostics is not None else {}))
             if attempt < 2:
                 continue

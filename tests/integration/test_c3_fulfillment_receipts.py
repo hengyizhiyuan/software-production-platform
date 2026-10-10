@@ -199,7 +199,7 @@ def test_actual_compact_observation_replays_from_postgresql_without_repeating_fo
     record_property("receipt_ids", json.dumps([row.scope["receipt_id"] for row in rows]))
 
 
-@pytest.mark.parametrize('tamper', (None, 'feedback', 'response-receipt', 'scope-inventory'))
+@pytest.mark.parametrize('tamper', (None, 'feedback', 'response-receipt', 'scope-inventory', 'owner-precondition'))
 @pytest.mark.parametrize('failure_kind', ('predecode', 'canonical'))
 def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
     postgres_database, tmp_path, monkeypatch, record_property, tamper, failure_kind,
@@ -277,12 +277,18 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
         original_scope = deepcopy(failed.scope)
         feedback = json.loads(original_scope['validation_feedback'])
         binding = feedback['repair_feedback_binding']
+        assert original_scope['owner_repair_context_bound']
+        assert feedback['owner_repair_context']['inventory_fingerprint'] == fingerprint
         assert binding['response_receipt_id'] == records[1].scope['receipt_id']
         assert binding['request_receipt_id'] == records[0].scope['receipt_id']
         if tamper:
             scope = deepcopy(original_scope)
             if tamper == 'feedback': scope['validation_feedback'] += ' '
             elif tamper == 'scope-inventory': scope['inventory_fingerprint'] = '0'*64
+            elif tamper == 'owner-precondition':
+                changed = json.loads(scope['validation_feedback'])
+                changed['owner_repair_context']['source_preconditions'][0]['primary_component_required'] = False
+                scope['validation_feedback'] = json.dumps(changed)
             else:
                 changed = json.loads(scope['validation_feedback'])
                 changed['repair_feedback_binding']['response_receipt_id'] = str(work_id)

@@ -215,6 +215,60 @@ def _fulfillment_wire_diagnostics(wire, inventory, context):
         "coverage_not_evaluable_sources": sorted(unlocated)}
 
 
+def _expand_fulfillment_wire_route(route, inventory, capabilities, context):
+    """Expand one structurally valid route without admitting a plan."""
+    sources, paths = inventory["sources"], context["tables"]["target_paths"]
+    if route.s >= len(sources) or route.c >= len(capabilities):
+        raise ValueError("OBLIGATION_FORMATION_WIRE_SOURCE_OR_CAPABILITY_INDEX_INVALID")
+    for values, size, kind in ((route.f, len(sources), "FACT"),
+                              (route.t, len(paths), "TARGET"), (route.u, len(sources), "SUPPORT")):
+        if len(set(values)) != len(values) or any(value < 0 or value >= size for value in values):
+            raise ValueError("OBLIGATION_FORMATION_WIRE_" + kind + "_INDEX_INVALID")
+    if any(sources[index]["kind"] != "FACT" for index in route.f):
+        raise ValueError("OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID")
+    source, text = sources[route.s], context["source_texts"][route.s]
+    if route.q is None and not 0 <= route.a < route.z <= len(text):
+        raise ValueError("OBLIGATION_FORMATION_WIRE_SPAN_INVALID")
+    from spg.domain.governed_obligation import FulfillmentRouteCandidate
+    return FulfillmentRouteCandidate(source_ref=source["source_ref"],
+        capability=capabilities[route.c]["capability"],
+        work_constraint_indices=(source["index"],) if source["kind"] == "WORK_CONSTRAINT" else (),
+        target_paths=tuple(paths[index] for index in route.t),
+        supporting_source_refs=tuple(sources[index]["source_ref"] for index in route.u),
+        rationale=route.r, component_basis={"source_span_start": route.a,
+            "source_span_end": route.z, "source_component_quote": text[route.a:route.z] if route.q is None else route.q,
+            "linked_fact_refs": tuple(sources[index]["source_ref"] for index in route.f)})
+
+
+def _fulfillment_wire_route_observations(output, inventory, capabilities, *, validation_feedback=None):
+    """Read exact raw routes for Owner diagnostics, never a partial Candidate.
+
+    Identity/schema failures make every route non-evaluable. A malformed route
+    cannot provide proof for another route. Full-plan validation is unchanged.
+    """
+    context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback)
+    try:
+        wire = _FulfillmentCompactCandidate.model_validate(json.loads(output, object_pairs_hook=_wire_json_object))
+    except ValueError:
+        return (), ["RAW_ROUTE_OWNER_PRECONDITIONS"]
+    if wire.h != context["wire_request_fingerprint"] or wire.d != context["wire_table_fingerprint"]:
+        return (), ["RAW_ROUTE_OWNER_PRECONDITIONS"]
+    observations, unavailable = [], []
+    for index, raw in enumerate(wire.routes):
+        try:
+            route = _expand_fulfillment_wire_route(raw, inventory, capabilities, context)
+            text = context["source_texts"][raw.s]
+            # Quote relocation requires the complete candidate's existing
+            # locator; do not invent a location in the diagnostic view.
+            if not 0 <= raw.a < raw.z <= len(text) or route.component_basis.source_component_quote != text[raw.a:raw.z]:
+                raise ValueError("OBLIGATION_COMPONENT_SOURCE_QUOTE_DRIFT")
+        except ValueError:
+            unavailable.append(index)
+        else:
+            observations.append((index, raw.model_dump(mode="json"), route))
+    return tuple(observations), unavailable
+
+
 def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
         validation_feedback=None, wire_metadata=None):
     """Expand only metadata; all semantic route choices remain model candidates."""
@@ -251,37 +305,7 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
     if diagnostics["violations"]:
         raise _FulfillmentWireValidationError(diagnostics["violations"][0]["code"],
             {**diagnostic_basis, **diagnostics})
-    sources, paths = inventory["sources"], context["tables"]["target_paths"]
-    def indices(values, size, kind):
-        if len(set(values)) != len(values) or any(value < 0 or value >= size for value in values):
-            raise ValueError("OBLIGATION_FORMATION_WIRE_" + kind + "_INDEX_INVALID")
-        return values
-    routes = []
-    for route in wire.routes:
-        if route.s >= len(sources) or route.c >= len(capabilities):
-            raise ValueError("OBLIGATION_FORMATION_WIRE_SOURCE_OR_CAPABILITY_INDEX_INVALID")
-        source, text = sources[route.s], context["source_texts"][route.s]
-        facts = indices(route.f, len(sources), "FACT")
-        targets = indices(route.t, len(paths), "TARGET")
-        supports = indices(route.u, len(sources), "SUPPORT")
-        if any(sources[index]["kind"] != "FACT" for index in facts):
-            raise ValueError("OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID")
-        if route.q is None:
-            if not 0 <= route.a < route.z <= len(text):
-                raise ValueError("OBLIGATION_FORMATION_WIRE_SPAN_INVALID")
-            quote = text[route.a:route.z]
-        else:
-            # Exact quote location, including any unique-offset correction, is
-            # handled by the existing common locator after this pure expansion.
-            quote = route.q
-        routes.append({"source_ref": source["source_ref"],
-            "capability": capabilities[route.c]["capability"],
-            "work_constraint_indices": (source["index"],) if source["kind"] == "WORK_CONSTRAINT" else (),
-            "target_paths": tuple(paths[index] for index in targets),
-            "supporting_source_refs": tuple(sources[index]["source_ref"] for index in supports),
-            "rationale": route.r, "component_basis": {"source_span_start": route.a,
-                "source_span_end": route.z, "source_component_quote": quote,
-                "linked_fact_refs": tuple(sources[index]["source_ref"] for index in facts)}})
+    routes = [_expand_fulfillment_wire_route(route, inventory, capabilities, context) for route in wire.routes]
     candidate = FulfillmentProjectionCandidate(inventory_fingerprint=inventory["inventory_fingerprint"], routes=tuple(routes))
     payload = candidate.model_dump(mode="json")
     # Compare decoded values before JSON escaping can hide a known secret.
@@ -378,6 +402,12 @@ class ModelFulfillmentCandidateProvider:
                     "only entries listed in f_allowed_source_ordinals; do not copy s into f by default. "
                     "Non-Fact supporting clauses belong in u, never f. On feedback, inspect the bound "
                     "untrusted_previous_wire and its identified failures before proposing a complete new plan. "
+                    "u is provenance support, NEVER a component disposition for the referenced source: each "
+                    "source still needs its own s routes with complete [a,z) coverage. Equal original text "
+                    "does not merge distinct source identities. Consult owner_repair_context when supplied: "
+                    "its exact correspondence origins and evidence prerequisites are necessary conditions, "
+                    "not pre-approved routes, evidence or authority. All selected supports must legitimately "
+                    "correspond; do not add same-clause references merely because their text looks similar. "
                     "That old proposal is not authority and must not be admitted or blindly copied. Preserve "
                     "all original requirements; correct the failed predicates without introducing new errors. "
                     "Echo the CURRENT h/d from temporary_wire, not those of the previous proposal. "
