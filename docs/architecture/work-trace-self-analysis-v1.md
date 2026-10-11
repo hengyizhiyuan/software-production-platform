@@ -217,6 +217,8 @@ resource ledger.
 
 ### Read delivery through the existing Native context assembler
 
+Original page coverage is tracked by exact returned ranges; large fields become
+READ only after contiguous coverage, never across an unread hole.
 Whole nested field values in lookup examples are bounded; PRESENT fields above
 the limit retain digest/size/read-required metadata and must be read through the
 original evidence tool. Per-string redaction alone did not bound nested contracts.
@@ -274,3 +276,5 @@ A real historical export + live configured model + exact Work Git objects provid
 an offline historical capability check; it is distinct from deployed ECS UI/runtime
 qualification. Production deployment requires separate authorization and exact
 source/storage/configuration checks. C3 closure is neither changed nor qualified.
+
+The timeline also admits the existing runtime-commit Owner `committed_at` field, with the same observed-byte, identity, chronology and timestamp equality gates. Rejection feedback includes bounded original rejected values at reported locations; it never supplies automatic edits or invents quotations, and preserves the retained immutable draft.

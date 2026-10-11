@@ -63,7 +63,7 @@ class TimelineItem(ObservedFact):
                    "FAILURE", "RECOVERY_REFINEMENT", "FINAL_STATE"]
     timestamp: str | None = Field(default=None, description="Original event time only. Composite stage summaries have no single timestamp. Dated entries must be ordered chronologically, regardless of stage.")
     timestamp_evidence_id: UUID | None = Field(default=None, description="Observed original Owner record whose time is used; must be cited. Other citations of a dated event must be explicitly associated with this record.")
-    timestamp_field: Literal["created_at", "updated_at", "started_at", "finished_at", "sealed_at", "assessed_at", "timestamp"] | None = Field(default=None, description="Exact top-level original Owner timestamp field, not an invented stage-wide time.")
+    timestamp_field: Literal["created_at", "updated_at", "started_at", "finished_at", "sealed_at", "assessed_at", "committed_at", "timestamp"] | None = Field(default=None, description="Exact top-level original Owner timestamp field, not an invented stage-wide time.")
     time_interpretation: str | None = Field(default=None, description="For dated entries use ORIGINAL_OWNER_TIME_BOUNDARY or the exact evidence.read time_boundaries[timestamp_field]; presentation derives from the validated original field. Creation time cannot establish later snapshot state or recovery completion. Undated entries use null.")
 
     @model_validator(mode="after")

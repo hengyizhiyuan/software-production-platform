@@ -59,7 +59,7 @@ DIRECT_REFERENCE_FIELDS = {"receipt_ref": "native-receipt", "receipt_id": "nativ
 def time_boundary(field):
     meaning = {"created_at": "记录创建", "updated_at": "记录最后更新",
                "started_at": "记录的开始", "finished_at": "记录的结束",
-               "sealed_at": "候选封存", "assessed_at": "保证评估", "timestamp": "Owner 记录的事件"}[field]
+               "sealed_at": "候选封存", "assessed_at": "保证评估", "committed_at": "运行时提交", "timestamp": "Owner 记录的事件"}[field]
     return f"此时间仅表示{meaning}时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。"
 
 
@@ -121,6 +121,7 @@ class EvidenceCatalog:
         self.values: dict[str, object] = {}
         self.observed: set[str] = set()
         self.observed_excerpts: dict[str, list[str]] = {}
+        self.observed_ranges: dict[str, list[tuple[int, int]]] = {}
         self.checks: dict[str, dict] = {}
         self.inspections: dict[str, dict] = {}
         self.add("capture", "/capture", snapshot.get("capture", {}))
@@ -164,6 +165,16 @@ class EvidenceCatalog:
         self.values[evidence_id] = value
         return evidence_id
 
+    def _range_read(self, evidence_id, start, end):
+        frontier = start
+        for left, right in sorted(self.observed_ranges.get(evidence_id, [])):
+            if left > frontier:
+                break
+            frontier = max(frontier, right)
+            if frontier >= end:
+                return True
+        return False
+
     def index(self, group=None, query=None, offset=0, limit=30):
         if offset < 0 or limit < 1 or limit > 40:
             raise ValueError("index requires offset >= 0 and 1 <= limit <= 40")
@@ -177,6 +188,7 @@ class EvidenceCatalog:
             eid = row["evidence_id"]
             self.observed.add(eid)
             self.observed_excerpts.setdefault(eid, []).append(row["body"][:300])
+            self.observed_ranges.setdefault(eid, []).append((0, min(300, len(row["body"]))))
         return {"total": len(rows), "offset": offset, "next_offset":
                 offset + limit if offset + limit < len(rows) else None,
                 "items": [{k: v for k, v in row.items() if k != "body"}
@@ -190,6 +202,7 @@ class EvidenceCatalog:
         if _observe:
             self.observed.add(evidence_id)
             self.observed_excerpts.setdefault(evidence_id, []).append(body[offset:offset + limit])
+            self.observed_ranges.setdefault(evidence_id, []).append((offset, min(len(body), offset + limit)))
         return {k: v for k, v in row.items() if k != "body"} | {
             "content": body[offset:offset + limit], "offset": offset,
             "total_characters": len(body), "next_offset":
@@ -198,7 +211,7 @@ class EvidenceCatalog:
                      "DERIVED_SCOPE_LOOKUP_NOT_OWNER_FACT" if row["group"] in {"evidence_check", "evidence_inspection"} else "UNTRUSTED_EVIDENCE_ONLY",
             "related_records": self.related(evidence_id),
             "time_boundaries": {k: time_boundary(k) for k in
-                ("created_at", "updated_at", "started_at", "finished_at", "sealed_at", "assessed_at", "timestamp")
+                ("created_at", "updated_at", "started_at", "finished_at", "sealed_at", "assessed_at", "committed_at", "timestamp")
                 if isinstance(self.values[evidence_id], dict) and isinstance(self.values[evidence_id].get(k), str)},
         }
 
@@ -306,7 +319,7 @@ class EvidenceCatalog:
                 child = value[key]
                 state = ("REDACTED" if isinstance(child, str) and child.startswith("[REDACTED") else
                          "EMPTY" if child is None or child == "" or child == [] or child == {} else "PRESENT")
-                already_read = any(fragment in excerpt for excerpt in self.observed_excerpts.get(eid, []))
+                already_read = self._range_read(eid, start.start(), end)
                 if (len(fragment) > 3000 or len(fragment) > remaining) and not already_read:
                     fields.append({"field": "/" + key.replace("~", "~0").replace("/", "~1"),
                                    "availability": state, "read_status": "NOT_READ_CAPACITY", "characters": len(fragment)})
@@ -318,6 +331,7 @@ class EvidenceCatalog:
                 remaining -= len(fragment)
                 self.observed.add(eid)
                 self.observed_excerpts.setdefault(eid, []).append(fragment)
+                self.observed_ranges.setdefault(eid, []).append((start.start(), end))
                 fields.append({"field": "/" + key.replace("~", "~0").replace("/", "~1"),
                                "availability": state, "read_status": "READ", "original_excerpt": fragment})
             if not isinstance(value, dict):
@@ -325,6 +339,7 @@ class EvidenceCatalog:
                 remaining -= len(part)
                 self.observed.add(eid)
                 self.observed_excerpts.setdefault(eid, []).append(part)
+                self.observed_ranges.setdefault(eid, []).append((0, len(part)))
                 fields.append({"field": "", "read_status": "READ" if part == body else "PARTIAL_READ", "original_excerpt": part})
             rows.append({"evidence_id": eid, "group": row["group"], "pointer": row["pointer"],
                          "fields": fields, "semantics": row["semantics"]})
@@ -994,6 +1009,21 @@ class AnalysisTools:
                         if isinstance(refs, list) and any(ref not in known for ref in refs):
                             issues.append({"location": [section, index, "finding_ids"],
                                            "type": "UNKNOWN_FINDING_REFERENCE"})
+                # Return the exact rejected value at each reported location so
+                # same-draft correction does not require rereading the entire
+                # report. This supplies no edits or invented Owner quotations.
+                feedback_bytes = 0
+                for issue in issues:
+                    value = candidate
+                    try:
+                        for part in issue.get("location", []):
+                            value = value[part]
+                    except (KeyError, TypeError, IndexError):
+                        continue
+                    encoded = text(public_report_candidate(value)).encode()
+                    if len(encoded) <= 2000 and feedback_bytes + len(encoded) <= 8000:
+                        issue["rejected_value"] = public_report_candidate(value)
+                        feedback_bytes += len(encoded)
             condition = EffectCondition.FAILED
             if identity.startswith("analysis."):
                 self.verification_receipts.append(output)

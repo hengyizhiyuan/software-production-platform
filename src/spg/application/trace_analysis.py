@@ -88,6 +88,8 @@ or refinement records exist, findings must cite those original Owner records.
 Drafts can be read through evidence.read(draft_id) for explicit correction, but
 are model proposals and cannot be cited as historical facts. Verification returns
 multiple citation errors together: correct all reported locations in one revise.
+Use the feedback's rejected_value and the already observed original excerpts for
+correction. Read the draft only when the exact value needed was not returned.
 Use evidence_reality as the required initial cross-owner review. Reconcile each
 family in evidence_assessments with the seeded check_id and exact availability.
 Producer semantics in every evidence record define what its surface can prove:
@@ -145,6 +147,16 @@ fields are recorded diagnoses, not independent evidence of model regeneration;
 inspect producer source and actual calls before claiming a retry occurred.
 The following boundaries apply to ALL report sections, including recommendations,
 regression_scenario, immediate_recovery and deferred_items, not only findings:
+- Limit a causal hypothesis to the conditional mechanism producing the observed
+  failure. Do not append a claim that recovery executed a replacement recipe,
+  regeneration or a specific number of inference calls. A recovery status proves
+  its recorded outcome only. Executed recovery actions/counts belong in fact and
+  require their own observed original steps/effects, not policy budgets or plans.
+- For a tool failure, include the relevant parameters actually read from its
+  explicitly linked original effect in fact, not just the receipt's error message.
+  An inspection of existing parameters must not be described as unavailable.
+- Do not call a digest or evidence path the only available evidence. A bounded
+  lookup cannot prove uniqueness or exhaust all historical storage locations.
 - A final diff proves final net changes, not the absence of intermediate/external
   mutations. Do not infer that rollback is unnecessary solely from a final diff.
 - Never promise one-shot convergence. Require permissions/budget-bound recovery OR

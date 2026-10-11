@@ -354,6 +354,7 @@ def test_native_refinement_patches_retained_report_and_rechecks_all_gates(tmp_pa
             elif len(self.requests) == 2:
                 failure = req.previous_results[-1]["output"]
                 assert failure["valid_finding_ids"] == ["missing-raw"]
+                assert next(i for i in failure["issues"] if i.get("location") == ["deferred_items", 0, "finding_ids"])["rejected_value"] == ["abbreviated-invalid-id"]
                 assert any(issue.get("location") == ["deferred_items", 0, "finding_ids"] for issue in failure["issues"])
                 proposal = ToolCallProposal(proposal_index=0, tool_identity="analysis.revise", arguments={
                     "draft_id": failure["draft_id"], "edits": [{"op": "replace", "path": "/deferred_items/0/finding_ids", "value": ["missing-raw"]}]})
@@ -1003,3 +1004,30 @@ def test_field_lookup_bounds_whole_nested_values_without_denoting_absence():
     assert value["visibility"]=="NOT_RETURNED_CAPACITY" and value["serialized_bytes"]>1500
     assert len(json.dumps(result).encode())<10000
     assert value["read_required"]["evidence_id"] not in c.observed
+
+
+@pytest.mark.parametrize("hole",[False,True])
+def test_large_original_field_paging_tracks_real_coverage_without_unread_holes(hole):
+    c=EvidenceCatalog(snapshot())
+    eid=c.add("execution_effects","/fixture/large-parameters",{"id":str(uuid4()),
+        "semantic_input":{"argv":["arbitrary-command","x"*30000]}})
+    first=c.inspect(eid)
+    field=lambda value:next(f for r in value["records"] if r["evidence_id"]==eid for f in r["fields"] if f["field"]=="/semantic_input")
+    assert field(first)["read_status"]=="NOT_READ_CAPACITY"
+    c.read(eid,offset=0,limit=16000)
+    c.read(eid,offset=16001 if hole else 16000,limit=24000)
+    final=field(c.inspect(eid))
+    assert final["read_status"]==("NOT_READ_CAPACITY" if hole else "READ")
+    if not hole:assert final["previous_original_read"] is True
+
+
+def test_runtime_commit_time_uses_only_observed_original_owner_field():
+    c,r,_=timed_report()
+    eid=c.add("runtime_commit","/fixture/runtime-commit",{"id":str(uuid4()),"committed_at":"2026-10-05T12:00:00+00:00"})
+    c.read(eid)
+    r["timeline"]=[{"stage":"FINAL_STATE","statement":"Recorded runtime commit", "citations":[{"evidence_id":eid,"quote":"committed_at"}],"timestamp":c.values[eid]["committed_at"],"timestamp_evidence_id":eid,"timestamp_field":"committed_at","time_interpretation":"ORIGINAL_OWNER_TIME_BOUNDARY"}]
+    output=c.materialize_boundaries(AnalysisReport.model_validate(r))
+    assert "运行时提交" in output.timeline[0].time_interpretation
+    r["timeline"][0]["timestamp"]="2026-10-05T13:00:00+00:00"
+    with pytest.raises(ValueError,match="TIMELINE_TIME_DOES_NOT_MATCH_OWNER_FIELD"):
+        c.materialize_boundaries(AnalysisReport.model_validate(r))
