@@ -72,7 +72,8 @@ class Finding(AnalysisRecord):
     classification: IssueClass
     epistemic_status: Literal["ROOT_CAUSE_HYPOTHESIS", "UNKNOWN"]
     fact: ObservedFact
-    analysis: str = Field(min_length=1, max_length=4000)
+    analysis: str = Field(min_length=1, max_length=4000,
+        description="ROOT_CAUSE_HYPOTHESIS must start with '假设：' and use conditional causal language. Owner diagnosis/expected/rejected-behavior lists are not proof of executed effects or an unavailable candidate's contents.")
     repository_citations: tuple[Citation, ...] = Field(default=(), max_length=8)
     uncertainty: str = Field(min_length=1, max_length=2000)
     recommendation: str = Field(min_length=1, max_length=3000)
@@ -98,6 +99,8 @@ class Finding(AnalysisRecord):
             raise ValueError("handling must preserve the issue classification boundary")
         if not self.repository_citations and self.epistemic_status != "UNKNOWN":
             raise ValueError("a root cause hypothesis requires repository evidence")
+        if self.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and not self.analysis.startswith("假设："):
+            raise ValueError("CAUSAL_HYPOTHESIS_MUST_BE_EXPLICIT; begin analysis with 假设： and do not promote diagnoses to executed facts")
         if self.regression_qualification != REGRESSION_CRITERIA[self.classification]:
             raise ValueError("REGRESSION_CRITERION_MUST_MATCH_GOVERNED_OUTCOME: " + REGRESSION_CRITERIA[self.classification])
         if self.scope_check_ids and (self.classification != IssueClass.UNKNOWN or self.epistemic_status != "UNKNOWN"):

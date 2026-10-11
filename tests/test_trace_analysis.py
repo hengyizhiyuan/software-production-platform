@@ -633,3 +633,20 @@ def test_random_failure_regression_qualifies_handling_not_zero_future_errors():
         AnalysisReport.model_validate(r)
     f["regression_qualification"] = REGRESSION_CRITERIA[IssueClass.RUNTIME_MODEL_VARIANCE]
     AnalysisReport.model_validate(r)
+
+
+def test_diagnostic_expected_behavior_does_not_become_execution_receipt():
+    catalog, events, _ = associated_incident_catalog()
+    semantics = catalog.read(events[0])["semantics"]
+    assert semantics["surface"] == "OWNER_REFINEMENT_DIAGNOSIS"
+    assert semantics["field_roles"]["diagnostic_evidence"] == "DIAGNOSIS_NOT_EXECUTION_RECEIPT"
+    assert semantics["field_roles"]["expected_reality"] == "EXPECTED_NOT_OBSERVED"
+    assert "do not establish executed file changes" in semantics["boundary"]
+    r = report(catalog)
+    f = r["findings"][0]
+    f.update(epistemic_status="ROOT_CAUSE_HYPOTHESIS", repository_citations=[{
+        "evidence_id": str(uuid4()), "quote": "comparison"}], analysis="A proposed constraint definitely executed")
+    with pytest.raises(ValueError, match="CAUSAL_HYPOTHESIS_MUST_BE_EXPLICIT"):
+        AnalysisReport.model_validate(r)
+    f["analysis"] = "假设：可能与候选理解偏差相关；没有原始执行证据时保留 UNKNOWN。"
+    AnalysisReport.model_validate(r)

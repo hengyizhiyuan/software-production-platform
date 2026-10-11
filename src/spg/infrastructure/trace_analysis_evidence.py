@@ -67,6 +67,15 @@ def source_semantics(group, value, repository):
             families.append("PREVIEW_HTTP")
         return {"surface": "GUARDIAN_ASSURANCE", "families": families,
                 "boundary": "Only actual HTTP evidence entries prove preview status/digest. Gate PASS alone does not prove browser rendering or client persistence."}
+    if group == "self_refine_events":
+        if isinstance(value, dict) and any(key in value for key in RELATION_FIELDS):
+            families.append("EXECUTION_RELATIONSHIP")
+        return {"surface": "OWNER_REFINEMENT_DIAGNOSIS", "families": families,
+                "field_roles": {"diagnostic_evidence": "DIAGNOSIS_NOT_EXECUTION_RECEIPT",
+                                "expected_reality": "EXPECTED_NOT_OBSERVED",
+                                "observed_reality": "OWNER_RECORDED_OBSERVATION",
+                                "repair_hypothesis": "UNVERIFIED_HYPOTHESIS"},
+                "boundary": "Signals and recovery are recorded Owner diagnoses. Required/rejected/expected behavior lists do not establish executed file changes or the contents of an unavailable rejected candidate. Execution receipts and exact candidate source/diff are separate observations; causal interpretation remains hypothetical."}
     if not repository and isinstance(value, dict) and any(key in value for key in RELATION_FIELDS):
         families.append("EXECUTION_RELATIONSHIP")
     return {"surface": "COMMITTED_REPOSITORY" if repository else "ORIGINAL_OWNER_OR_PROJECTION",

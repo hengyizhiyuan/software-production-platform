@@ -115,6 +115,13 @@ UNKNOWN; refer to exact gap group/field in uncertainty without broadening its sc
 Copy regression_qualification exactly from the classification criterion in schema;
 put the concrete adversarial/recovery case in regression_scenario. Validate recovery
 or governed termination within permissions/budget, never zero future model errors.
+Owner refinement diagnoses are not execution receipts. In particular, required,
+rejected or expected behaviors name a diagnostic/governance boundary, not proof
+that files were changed or that an unavailable rejected candidate contained each
+listed behavior. State the recorded signal in fact; start causal analysis with
+'假设：', use conditional language, and leave candidate contents UNKNOWN without
+the corresponding exact source/diff or executed-effect observations. Keep semantic
+proposal/contract stages distinct from production code execution.
 """
 
 
