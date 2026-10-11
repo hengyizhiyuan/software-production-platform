@@ -87,20 +87,45 @@ def test_real_guardian_covers_each_required_pwu_not_root_context(
         unit = SimpleNamespace(id=uuid4(), source_baseline_id=uuid4(), verified_output_baseline_id=uuid4(),
             condition=WorkUnitCondition.SATISFIED, current_execution_generation=1,
             parent_baseline_ids=(), reconciliation_evidence={"parents": ["qualified-a", "qualified-b"]} if index else None,
-            completion_contract=SimpleNamespace(task_contract=task, required_outputs=(path,), required_changes=()))
-        record = SimpleNamespace(id=uuid4(), proposed_commit_identity=revision, tree_identity=tree,
+            completion_contract=SimpleNamespace(task_contract=task, required_outputs=(path,), required_changes=(),
+                verification_obligations=("PATH_SCOPE",)))
+        record = SimpleNamespace(id=uuid4(), proposed_snapshot_id=uuid4(), work_unit_id=unit.id,
+            completion_evaluation_id=uuid4(), obligation="PATH_SCOPE",
+            proposed_commit_identity=revision, tree_identity=tree,
             plan_revision_id=plan_id, source_baseline_id=unit.source_baseline_id,
             result=SimpleNamespace(value="PASS"), evidence=SimpleNamespace(metadata={"decision_context": {
                 "package_fingerprint": fingerprint,
-                "protected_obligations": [{**vars(obligation), "coverage":
+                "protected_obligations": [{**vars(obligation), "package_fingerprint":fingerprint, "coverage":
                     "UNVERIFIED" if index and missing_second_coverage else "COVERED"}]}}))
+        # The fixture supplies exact Owner readback, not only Watt's COVERED label.
+        identity = {**vars(obligation), "package_fingerprint":fingerprint,
+            "coverage":"UNVERIFIED" if index and missing_second_coverage else "COVERED"}
+        record.evidence.metadata["protected_context_checks"] = [{**identity,
+            "candidate_revision":revision,"candidate_tree":tree}]
+        payload = {"id":str(record.id),"result":"PASS","proposed_commit_identity":revision,
+            "tree_identity":tree,"evidence":{"metadata":record.evidence.metadata}}
+        record.model_dump = lambda mode="json", payload=payload: payload
         tasks.append(task); units.append(unit); records.append(record)
     work = SimpleNamespace(engineering_scope_id=scope_id, current_work_reality_revision_id=uuid4(),
         desired_outcome="Home and details are available", constraints=())
     binding = SimpleNamespace(work_unit_id=units[0].id, plan_revision_id=plan_id)
     product = SimpleNamespace(work=lambda _: work, scope_for_work=lambda _: SimpleNamespace(id=scope_id),
         runtime_binding=lambda _: binding)
-    runtime = SimpleNamespace(baseline_candidate=lambda _: SimpleNamespace(plan_revision_id=plan_id, satisfied_work_unit_ids=[unit.id for unit in units]),
+    admitted_id = uuid4()
+    terminal = records[-1]
+    admitted = SimpleNamespace(outcome=SimpleNamespace(value="ADMISSIBLE"), basis_fingerprint="d"*64,
+        proposed_snapshot_id=terminal.proposed_snapshot_id, work_unit_id=units[-1].id,
+        plan_revision_id=plan_id, source_baseline_id=units[-1].source_baseline_id,
+        completion_evaluation_id=terminal.completion_evaluation_id,
+        obligation_results=(SimpleNamespace(obligation="PATH_SCOPE", applicable=True, admissible=True,
+            result=terminal.result, verification_record_id=terminal.id),))
+    candidate = SimpleNamespace(plan_revision_id=plan_id, satisfied_work_unit_ids=[unit.id for unit in units],
+        proposed_snapshot_id=terminal.proposed_snapshot_id, production_admissibility_id=admitted_id,
+        production_admissibility_basis_fingerprint="d"*64, verification_record_ids=(terminal.id,))
+    runtime = SimpleNamespace(baseline_candidate=lambda _: candidate,
+        proposed_snapshot=lambda _: SimpleNamespace(id=terminal.proposed_snapshot_id, work_unit_id=units[-1].id),
+        production_admissibility=lambda _: admitted,
+        verification_record=lambda identity: next((r for r in records if r.id==identity),None),
         plan_revision=lambda _: SimpleNamespace(id=plan_id, revision_number=1), work_units_for_plan=lambda _: units,
         snapshot=lambda _: SimpleNamespace(repository_revision=revision, repository_tree_identity=tree),
         verification_records_for_work_unit=lambda identity: (records[[u.id for u in units].index(identity)],),
@@ -127,7 +152,7 @@ def test_real_guardian_covers_each_required_pwu_not_root_context(
     result = client.assess_ready_preview(preview)
     assert len(result["result_refs"]) == 2
     assert result["required_pwu_ids"] == [str(unit.id) for unit in units]
-    assert result["gate"] == ("BLOCKED" if missing_second_coverage else "PASS")
+    assert result["gate"] == ("BLOCKED" if missing_second_coverage else "PASS"), result
     assert result["status"] == ("BLOCKED" if missing_second_coverage else "PASS")
     assert client.passed(work_id, candidate_id) is (not missing_second_coverage)
     assert len(list((owner.root / "requests").glob("*.json"))) == 2

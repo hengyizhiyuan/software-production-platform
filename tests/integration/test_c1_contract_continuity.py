@@ -594,6 +594,33 @@ def test_both_actual_admission_paths_reach_independent_guardian(chain, record_pr
         "verification_ids":','.join(str(item.id) for item in chain.records)}.items():
         record_property(name, str(value))
 
+def test_guardian_uses_sealed_proof_without_rejecting_historical_failure(chain):
+    """A historical verdict is preserved, not silently folded into current proof."""
+    from datetime import timedelta
+    from hashlib import sha256
+    from spg.infrastructure.persistence.runtime_store import RuntimeStore
+    record = chain.records[0]
+    identity = uuid4()
+    values = record.model_dump(mode="python")
+    values.update(id=identity, result="FAIL", provider={"provider_identity":"fixture:historical",
+        "provider_version":"v0"}, evidence=record.evidence.model_dump(mode="json"),
+        basis_fingerprint=sha256(identity.bytes).hexdigest(),
+        created_at=record.created_at-timedelta(seconds=1))
+    with chain.database.unit_of_work() as uow:
+        RuntimeStore(uow.session).insert_verification_record(values)
+        uow.commit()
+    projection = _assess(chain)
+    assert projection["gate"] == "PASS", projection
+    request = _saved_assurance_request(chain)
+    serialized = request.model_dump_json()
+    assert f"verification:{identity}" not in serialized
+    assert all(f"verification:{r.id}" in serialized for r in chain.records)
+    with chain.database.unit_of_work() as uow:
+        history = RuntimeStore(uow.session).verification_record(identity)
+        assert history.result is VerificationResultValue.FAIL
+        assert RuntimeStore(uow.session).baseline_candidate(chain.candidate.id) == chain.candidate
+
+
 def _request_for_actual_snapshot(chain, **changes):
     from spg.domain.verification import VerificationCapabilityRequest
     task = chain.pwu.completion_contract.task_contract

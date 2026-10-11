@@ -73,6 +73,45 @@ def _protected_context_for_guardian(task, verification_records) -> tuple:
     return tuple(projected)
 
 
+def _candidate_pwu_verifications(runtime, candidate, unit, plan, revision, tree):
+    """Use the sealed Candidate's exact admitted proof, never all its history."""
+    proposed = runtime.proposed_snapshot(candidate.proposed_snapshot_id)
+    if proposed is None:
+        raise ProductInvariantViolation("Guardian requires exact Candidate proposal")
+    if proposed.work_unit_id != unit.id:
+        # Other graph PWUs retain their existing independently published-output
+        # checks; the terminal Candidate cannot authorize another PWU's proof.
+        return tuple(record for record in runtime.verification_records_for_work_unit(unit.id)
+            if record.proposed_commit_identity == revision and record.tree_identity == tree
+            and record.plan_revision_id == plan.id
+            and record.source_baseline_id == unit.source_baseline_id)
+    admitted = runtime.production_admissibility(candidate.production_admissibility_id)
+    required = tuple(dict.fromkeys(unit.completion_contract.verification_obligations))
+    if (admitted is None or admitted.outcome.value != "ADMISSIBLE"
+            or admitted.basis_fingerprint != candidate.production_admissibility_basis_fingerprint
+            or admitted.proposed_snapshot_id != proposed.id
+            or admitted.work_unit_id != unit.id or admitted.plan_revision_id != plan.id
+            or admitted.source_baseline_id != unit.source_baseline_id
+            or tuple(item.obligation for item in admitted.obligation_results) != required
+            or any(not item.applicable or not item.admissible or item.result is None
+                or item.result.value != "PASS" for item in admitted.obligation_results)
+            or tuple(item.verification_record_id for item in admitted.obligation_results)
+                != candidate.verification_record_ids):
+        raise ProductInvariantViolation("Guardian requires exact Candidate admissibility proof")
+    records = tuple(runtime.verification_record(identity) for identity in candidate.verification_record_ids)
+    if (not records or len(set(candidate.verification_record_ids)) != len(records)
+            or any(record is None or record.result.value != "PASS"
+                or record.obligation != obligation
+                or record.proposed_snapshot_id != proposed.id
+                or record.work_unit_id != unit.id or record.plan_revision_id != plan.id
+                or record.source_baseline_id != unit.source_baseline_id
+                or record.completion_evaluation_id != admitted.completion_evaluation_id
+                or record.proposed_commit_identity != revision or record.tree_identity != tree
+                for obligation, record in zip(required, records, strict=True))):
+        raise ProductInvariantViolation("Guardian requires exact qualified PWU Verification")
+    return records
+
+
 class GuardianAssuranceClient:
     """Submit immutable governed effects; consume an exact Guardian result."""
 
@@ -281,10 +320,8 @@ class GuardianAssuranceClient:
                         runtime.snapshot(unit.verified_output_baseline_id))
                     revision = session.repository_revision if output is None else output.repository_revision
                     tree = session.repository_tree if output is None else output.repository_tree_identity
-                    records = tuple(record for record in runtime.verification_records_for_work_unit(unit.id)
-                        if record.proposed_commit_identity == revision and record.tree_identity == tree
-                        and record.plan_revision_id == plan.id
-                        and record.source_baseline_id == unit.source_baseline_id)
+                    records = _candidate_pwu_verifications(
+                        runtime, candidate_record, unit, plan, revision, tree)
                     if not records or any(record.result.value != "PASS" for record in records):
                         raise ProductInvariantViolation("Guardian requires exact qualified PWU Verification")
                     refs = [f"production-plan:{plan.id}:version:{plan.revision_number}",
