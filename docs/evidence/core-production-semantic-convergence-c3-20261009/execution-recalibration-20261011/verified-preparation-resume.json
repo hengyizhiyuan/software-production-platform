@@ -1,0 +1,31 @@
+{
+  "recorded_at_utc": "2026-10-11T02:51:18.494488+00:00",
+  "source": "5cd33c9bf8a3aaa7e237d267dd09638025ad47ee",
+  "image": "sha256:c87016e8fb5f73599b633ca6bf25e4ae77fa22901d202d45684cb71e7cc02446",
+  "resources": [
+    {
+      "name": "watt-c3-bindingg0g53-postgres-20261010",
+      "id": "2fe9801bb0ea1888423f50d8e980d48e91b56964fc528e0076c87aa917b57964",
+      "image": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+      "started_at": "2026-10-11T02:47:24.429600425Z"
+    },
+    {
+      "name": "watt-c3-bindingg0g53-gitea-20261010",
+      "id": "40451a32bc8c49b8b5ad5339811fb96adde1247fdde792e84e730d68086eabe6",
+      "image": "sha256:071efa747340e5e211213fc79a0b928003bedf9b6b48f61cb32b3c52bfd1e09e",
+      "started_at": "2026-10-11T02:47:44.411423746Z"
+    }
+  ],
+  "gitea_current_health": "pass",
+  "initial_stop_preserved": true,
+  "historical_startup_delay_root_cause": "UNKNOWN",
+  "existing_admin_absent": true,
+  "database_public_tables": 0,
+  "remaining_effects": "create isolated administrator; migrate new isolated database; start four new isolated roles; attest imports and readiness",
+  "recreated_resources": false,
+  "restarted_resources": false,
+  "model_calls": 0,
+  "works_created": 0,
+  "original_controller_sha256": "b79d2ee22f03740bf73fc7347622114d173840f2ad466bf7795089731db46640",
+  "resume_controller_sha256": "12255cce7196b11a32b99c85447ce821d205f590aeaa7f4130b64621665fc6ab"
+}

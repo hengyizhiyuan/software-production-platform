@@ -1,0 +1,18 @@
+{
+  "g53-real-g0-review.json": {
+    "sha256": "0acde19569c70a6f5eb3d1ceb890e217180377b735af93bb84a19b50e3101d77",
+    "persistent_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation53-qualification-20261010/evidence/real-g0-recalibration-review.json"
+  },
+  "g53-source-consumer-full-plan-classification.json": {
+    "sha256": "7837a27459297c9be3e4dc6e64d07f29053e448fed0e2c3ba12232cbbd938342",
+    "persistent_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation53-qualification-20261010/source-consumer-classification-full-plan/evidence/classification.json"
+  },
+  "g53-observer-stop-checkpoint.json": {
+    "sha256": "ce8d79fb2488395342ea24e72be8d6806480e2cfebfafeee73d64f141b6e5d6e",
+    "persistent_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation53-qualification-20261010/evidence/observer-stop-checkpoint.json"
+  },
+  "g53-normal-entry-runner.json": {
+    "sha256": "54b7d01555d4510cfe77434b9516bce9dc5bb969a922d3c35fe1e29f344ebbad",
+    "persistent_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation53-qualification-20261010/evidence/normal-entry-runner.json"
+  }
+}

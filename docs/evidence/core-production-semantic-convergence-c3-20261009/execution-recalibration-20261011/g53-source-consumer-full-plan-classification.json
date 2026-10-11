@@ -1,0 +1,136 @@
+{
+  "application_source": "5cd33c9bf8a3aaa7e237d267dd09638025ad47ee",
+  "image": "sha256:c87016e8fb5f73599b633ca6bf25e4ae77fa22901d202d45684cb71e7cc02446",
+  "work_id": "109d783b-4632-5251-9470-276bdfa45e99",
+  "reality_id": "2ae54e34-7c04-5e40-a8f4-d15e2f4cbfdb",
+  "inventory_fingerprint": "852b025ed68014f6a7d4603d032c4526dda626b458b644a21a6be6aaca00a8fa",
+  "source_count": 25,
+  "source_snapshot_sha256": "0b52cb64e504fcd8637d438d16e970add613b1c3a195a21bfa2e0fe38ebb5f90",
+  "attempts": [
+    {
+      "attempt": 1,
+      "candidate_fingerprint": "f04e6c062aaf1e83d33236602993c4a719bef4700895453f792a1757b199023c",
+      "routes": 27,
+      "full_plan_background_eligible_refs": [
+        "ir-clause:b786433a-487c-5f48-b634-2d5ed0b5932a:n1_g0_production:c1",
+        "ir-clause:b786433a-487c-5f48-b634-2d5ed0b5932a:n1_g0_production:c3"
+      ],
+      "wire_output_sha256": "81cff7a95e23977034d8c4417f77835343a15b191c40cae12e28731a89bfecfa",
+      "request_receipt_id": "d8fb49d0-3cb8-4e1e-bb2e-11b2aa7b7c77",
+      "response_receipt_id": "375f06ac-97c7-42aa-958a-445fd04fa435",
+      "feedback_received": false,
+      "feedback_bound": false,
+      "problems": [
+        {
+          "route": 3,
+          "source": 3,
+          "source_ref": "semantic-fact:86444b12-df17-5a46-9ff8-b8fa9eafbac5",
+          "source_kind": "FACT",
+          "proposed_capability": "GIT_DIFF_SCOPE",
+          "code": "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH",
+          "fact_relation": "BOUND",
+          "fact_subject": "change.scope",
+          "fact_value_sha256": "3a86fe4bf5023ef10a5b20238946c4a045e9edf600be47b97a0ea8ca5e563708",
+          "fact_qualifier_keys": [],
+          "already_rejected_in_generation_prerequisites": {
+            "capability": 1,
+            "codes": [
+              "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH"
+            ]
+          },
+          "structurally_expressible_alternatives": [
+            "ARTIFACT_CONTENT",
+            "UNRESOLVED"
+          ],
+          "alternative_semantic_equivalence": "NOT_JUDGED",
+          "not_actual_evidence": true
+        }
+      ],
+      "usage": {
+        "cached_tokens": 1024,
+        "input_tokens": 46046,
+        "output_tokens": 2868,
+        "reasoning_tokens": 0,
+        "total_tokens": 48914,
+        "unknown": false
+      }
+    },
+    {
+      "attempt": 2,
+      "candidate_fingerprint": "1f8e18fc93214ff52d9e236270e9988cb986849c11d29662c71507a5c962dfdd",
+      "routes": 28,
+      "full_plan_background_eligible_refs": [
+        "ir-clause:b786433a-487c-5f48-b634-2d5ed0b5932a:n1_g0_production:c1",
+        "ir-clause:b786433a-487c-5f48-b634-2d5ed0b5932a:n1_g0_production:c3"
+      ],
+      "wire_output_sha256": "f4cad79f978f185f43013d6685ef480e7ed4306257d01d17b5201cf323d3b4de",
+      "request_receipt_id": "149e1499-1152-4481-9349-eafed6670d6c",
+      "response_receipt_id": "d3cddca6-13fa-428f-bfc6-74744dd39f33",
+      "feedback_received": true,
+      "feedback_bound": true,
+      "problems": [
+        {
+          "route": 1,
+          "source": 0,
+          "source_ref": "semantic-fact:b6be6ae9-a892-5591-b26c-25f1e95c0946",
+          "source_kind": "FACT",
+          "proposed_capability": "CANDIDATE_SEAL",
+          "code": "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED",
+          "fact_relation": "SCOPE",
+          "fact_subject": "production.objective",
+          "fact_value_sha256": "ae9abaa18db99a83986366438893eae1eaeba7c5118a454740ffee1d464ad066",
+          "fact_qualifier_keys": [],
+          "already_rejected_in_generation_prerequisites": {
+            "capability": 6,
+            "codes": [
+              "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED"
+            ]
+          },
+          "structurally_expressible_alternatives": [
+            "ARTIFACT_CONTENT",
+            "UNRESOLVED"
+          ],
+          "alternative_semantic_equivalence": "NOT_JUDGED",
+          "not_actual_evidence": true
+        },
+        {
+          "route": 4,
+          "source": 3,
+          "source_ref": "semantic-fact:86444b12-df17-5a46-9ff8-b8fa9eafbac5",
+          "source_kind": "FACT",
+          "proposed_capability": "GIT_DIFF_SCOPE",
+          "code": "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH",
+          "fact_relation": "BOUND",
+          "fact_subject": "change.scope",
+          "fact_value_sha256": "3a86fe4bf5023ef10a5b20238946c4a045e9edf600be47b97a0ea8ca5e563708",
+          "fact_qualifier_keys": [],
+          "already_rejected_in_generation_prerequisites": {
+            "capability": 1,
+            "codes": [
+              "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH"
+            ]
+          },
+          "structurally_expressible_alternatives": [
+            "ARTIFACT_CONTENT",
+            "UNRESOLVED"
+          ],
+          "alternative_semantic_equivalence": "NOT_JUDGED",
+          "not_actual_evidence": true
+        }
+      ],
+      "usage": {
+        "cached_tokens": 2560,
+        "input_tokens": 59822,
+        "output_tokens": 3034,
+        "reasoning_tokens": 0,
+        "total_tokens": 62856,
+        "unknown": false
+      }
+    }
+  ],
+  "new_model_calls": 0,
+  "historical_mutations": 0,
+  "independent_review_calls": 0,
+  "read_only_owner_proof": true,
+  "candidate_admission": false
+}

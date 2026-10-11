@@ -25,7 +25,7 @@
 | 停止、恢复、观测 | UNRESOLVED在Runtime前BLOCKED、真实状态投影、Provider安全分类、旧收据重放和预算连续性已实现。旧 UNKNOWN 不被当前修复追认。 |
 | 实际执行环境基础 | C2/既有真实 Worker与Git产物证明明确范围；当前镜像已核验安装身份和受控预检。最终C3 Worker全链仍需新G0。 |
 
-上述八条是实现轨道，不是八项完整真实生产 PASS。新反馈/排除来源契约的最终 PostgreSQL 持久化资格仍待执行；之前G51的43项PG结果不冒称覆盖本次新源码。
+上述八条是实现轨道，不是八项完整真实生产 PASS。最终 PostgreSQL/Owner 持久化资格现已在同一冻结源码上44/44通过；之前G51的43项结果不代替本次新源码收据。
 
 已修复的原始类别包括：真实IR未进入完整义务库存、静态源码证据被错误用于治理要求、Greenfield被要求提供不存在的旧实现引文、停机事实没有进入正确状态投影、来源支持被误当组件覆盖、排除来源不能合法接入已有当前内容消费者、独立Review机械错误没有进入现有下一次Review槽。它们都保留原来源、阶段、权限、收据和预算。
 
@@ -67,3 +67,15 @@
  canonical规则为 [AI-native Development Execution Principles §13](../../../architecture/ai-native-development-execution-principles.md#13-ai-non-determinism-principle-and-execution-discipline)，Architecture Principles、AI_context和既有Governance入口只简要导航；Program ADR保持其原Owner和固定版本。
 
 本次Source、完整build/import/regression收据位于ECS `/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation53-qualified-20261010/`。公开评估和收据提交既有C3远端分支，私有库存、原Wire及凭据不入Git。恢复以实际SHA、持久路径和原Owner记录核对，不宣称异地备份或实际restore已资格。
+
+## 7. 后续资格检查点
+
+最终PostgreSQL/Guardian与反馈恢复检查44/44 PASS，0 FAIL/ERROR/SKIP，577.785秒；同一5cd33c9 / c87016镜像，独立Fixture数据库迁移20261007_72，无真实模型或业务Work。四份必要历史检查点零调用重放通过，原终态和收据未改变。
+
+隔离Gitea在原就绪窗口未通过，随后当前真实健康检查PASS；原停止记录及UNKNOWN原因保留。证明管理员尚未创建、数据库尚未迁移、无Work及角色后，续接原检查点剩余准备，未重建或重启已有资源。四角色实际导入/镜像及Worker预检PASS。这是资源准备收敛，不是模型或语义契约修复。
+
+普通G0结果现为 **Formation接纳前失败**，详见 [本次来源与消费者复核](ordinary53-failure-triage.md) 和 [真实运行收据](g53-real-g0-review.json)。25项新库存、两次Formation、一次原有反馈；两次Provider均completed，没有容量或传输失败，未调用独立Review，未产生PWU、Worker执行或Candidate。封存Holdout仍未解封。这不改变80%规划估算或宣告C3 Closure。
+
+该试次发现文件边界被接纳为BOUND，而现有Diff绑定只容许SCOPE的共同消费缺口。第二候选同时保留当前内容与未来Seal；不能仅因CURRENT_FACT_CANNOT_BE_DEFERRED就判定它把当前义务全部延后。需要按完整Fact语义与实际Gate复核，其语义合法性尚未得到独立Review。不得将这些情况一律归为模型偏差，也不得因候选完整就接纳。
+
+下一项工程动作是现有Fact→消费方法适用性与阶段检查的窄范围校准，先证明合法表达及必要拒绝，再运行定向回归；不为BOUND、文件名或单个Subject追加Alias。没有有效修复或条件变化前不再创建相同Work。根目录AGENTS.md仅导航到同一规范，避免未来开发读取不到原则；未增加重复架构正文。

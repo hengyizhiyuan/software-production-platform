@@ -1,0 +1,52 @@
+{
+  "schema": "c3-semantic-owner-pg-regression-v1",
+  "started_at_utc": "2026-10-11T02:43:01.204039+00:00",
+  "ended_at_utc": "2026-10-11T02:52:38.989378+00:00",
+  "wall_seconds": 577.7853346570628,
+  "counts": {
+    "tests": 44,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 44
+  },
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "5cd33c9bf8a3aaa7e237d267dd09638025ad47ee",
+      "tree": "a35b32b1c06d51b6a26b9026d840ef17fc449165"
+    },
+    "guardian": {
+      "revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+      "tree": "6066a6d6b8d91bec610021409ab320309ed0e437"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:c87016e8fb5f73599b633ca6bf25e4ae77fa22901d202d45684cb71e7cc02446",
+  "actual_container_id": "1fd145a8ed4899af1c62bbf8d04d5de4a7bd4bfa8a32e65f80ac1bcb8060998e",
+  "actual_postgres_image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+  "actual_postgres_container_id": "4d90930a548397361823314f102c4ee9cd81cadb9404ece2a99bbd7dc3c2ca33",
+  "database_name": "c1_contract_continuity",
+  "migration_head": "20261007_72",
+  "network_internal": true,
+  "nodes": [
+    "tests/integration/test_c3_fulfillment_receipts.py",
+    "tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian"
+  ],
+  "source_or_test_overlay": false,
+  "credentials_independently_generated": true,
+  "live_model_calls": 0,
+  "actual_ai_work_created": 0,
+  "fixture_only": true,
+  "original_database_access": false,
+  "existing_services_started": false,
+  "controller_sha256": "c34611fb5b37e102e94f46aeaf60a41c8bde31abde7f201ebdbe36969a31af7e",
+  "claim": "ISOLATED_PG_OWNER_PERSISTENCE_AND_STATE_REGRESSION_NOT_REAL_G0"
+}

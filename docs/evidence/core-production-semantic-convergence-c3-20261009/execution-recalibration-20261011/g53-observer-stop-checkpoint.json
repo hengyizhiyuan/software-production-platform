@@ -1,0 +1,10 @@
+{
+  "observed_at_utc": "2026-10-11T03:09:06.239026+00:00",
+  "work_id": "109d783b-4632-5251-9470-276bdfa45e99",
+  "normal_entry_state_sha256": "8a31fe7e27636ff3c226fa595e09748775b5fab112c873205eee5e7bd1615cb1",
+  "polls_completed": 80,
+  "reason": "Authoritative second Formation terminal failure already captured; ending read-only control observation, not retrying or changing Work",
+  "work_changed": false,
+  "new_model_calls": 0,
+  "qualification_pass": false
+}

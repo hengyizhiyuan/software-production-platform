@@ -1,0 +1,17 @@
+{
+  "schema": "c3-isolated-preparation-stop-v1",
+  "recorded_at_utc": "2026-10-11T02:51:11.337991+00:00",
+  "failure_code": "NEW_GITEA_NOT_READY",
+  "original_controller_sha256": "b79d2ee22f03740bf73fc7347622114d173840f2ad466bf7795089731db46640",
+  "original_private_failure_log_sha256": "ed00cc0c5a2fd1e2c0b8eda8a1862e61dd6ac13a1adc8a2b29e02cd5dcf43c86",
+  "original_log_mtime_utc": "2026-10-11T02:48:37.319681+00:00",
+  "initial_readiness_probe_result": "NOT_READY_WITHIN_EXISTING_WINDOW",
+  "startup_root_cause": "UNKNOWN",
+  "source": "5cd33c9bf8a3aaa7e237d267dd09638025ad47ee",
+  "image": "sha256:c87016e8fb5f73599b633ca6bf25e4ae77fa22901d202d45684cb71e7cc02446",
+  "work_created": false,
+  "model_calls": 0,
+  "qualification_pass": false,
+  "actual_initial_container_health": "UNKNOWN",
+  "receipt_written_after_original_stop": true
+}
