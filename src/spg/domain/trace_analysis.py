@@ -74,7 +74,7 @@ class AnalysisReport(AnalysisRecord):
     actual_execution_path: ObservedFact
     current_state: ObservedFact
     timeline: tuple[TimelineItem, ...] = Field(min_length=1, max_length=80)
-    findings: tuple[Finding, ...] = Field(min_length=1, max_length=30)
+    findings: tuple[Finding, ...] = Field(default=(), max_length=30)
     immediate_recovery: tuple[Recommendation, ...] = Field(default=(), max_length=20)
     self_refine_opportunities: tuple[Recommendation, ...] = Field(default=(), max_length=20)
     platform_improvements: tuple[Recommendation, ...] = Field(default=(), max_length=20)

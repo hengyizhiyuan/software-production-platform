@@ -69,7 +69,7 @@ alone is insufficient.
 `analysis.submit` checks report schema, Work identity, unique findings, recommendation
 lineage, class/handling consistency, observed evidence UUIDs, exact quotes in
 actually returned excerpts and repository provenance for root cause hypotheses.
-Failure is a no-external-effect receipt returned through Native Kernel's existing
+Rejected report drafts are retained by digest; bounded explicit remove/replace edits through `analysis.revise` rerun every gate. Public tool schemas declare the report structure and actual paging limits. Failure is a no-external-effect receipt returned through Native Kernel's existing
 bounded refinement mechanism. Final RESULT_READY must name the successfully
 verified report digest. An arbitrary model terminal claim cannot publish a report.
 
@@ -90,7 +90,7 @@ No new Guardian PASS or original Work PASS is inferred from a valid report.
 - Same request UUID/purpose returns its saved result without recapture/inference;
   changed purpose with reused identity is rejected. Failures are also idempotent.
 - One investigation per API storage root is allowed across processes. Default
-  limits are 12 inference submissions, 48 tools and 360 seconds; configuration
+  limits are 12 inference submissions, 48 tools and 600 seconds; configuration
   ceilings are 24, 96 and 900. Native envelope and outer timeout both apply.
 - Requests, frozen snapshots, catalog, audit events and checkpoints use existing
   immutable ContentAddressedStorage under `native_executor_storage_root/trace-analysis`.

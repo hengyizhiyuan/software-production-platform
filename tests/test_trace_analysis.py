@@ -279,3 +279,54 @@ def test_investigation_tools_still_require_exact_grants(tmp_path):
         tool_identity="file.write", arguments={"path": "src/x.py", "content": "bad"})})
     with pytest.raises(NativeExecutionConflict, match="not registered"):
         asyncio.run(tools.execute(req))
+
+
+def test_native_refinement_patches_retained_report_and_rechecks_all_gates(tmp_path):
+    s, snap, _ = service(tmp_path)
+    class PatchingModel(NativeModel):
+        async def infer(self, req):
+            self.requests.append(req)
+            if len(self.requests) == 1:
+                candidate = report(self.catalog)
+                candidate["deferred_items"][0]["finding_ids"] = ["abbreviated-invalid-id"]
+                proposal = ToolCallProposal(proposal_index=0, tool_identity="analysis.submit", arguments={"report": candidate})
+            elif len(self.requests) == 2:
+                failure = req.previous_results[-1]["output"]
+                assert failure["valid_finding_ids"] == ["missing-raw"]
+                assert any(issue.get("location") == ["deferred_items", 0, "finding_ids"] for issue in failure["issues"])
+                proposal = ToolCallProposal(proposal_index=0, tool_identity="analysis.revise", arguments={
+                    "draft_id": failure["draft_id"], "edits": [{"op": "replace", "path": "/deferred_items/0/finding_ids", "value": ["missing-raw"]}]})
+            else:
+                return InferenceResponse(action=InferenceAction.RESULT_READY, summary="Verified retained report",
+                    working_plan=req.working_plan, result_claim={"output_vector": {
+                        "report_digest": req.previous_results[-1]["output"]["report_digest"]}})
+            return InferenceResponse(action=InferenceAction.CONTINUE, summary="Bounded report refinement",
+                                     working_plan=req.working_plan, tool_calls=(proposal,))
+    model = PatchingModel(snap)
+    s.inference_factory = lambda: model
+    trigger = AnalysisTrigger(request_id=uuid4(), rationale="Investigate")
+    r = asyncio.run(s.analyze("human:owner", uuid4_from(snap), trigger))
+    assert r["status"] == "COMPLETED" and len(model.requests) == 3
+    assert len(r["draft_digests"]) == 2
+    detail = s.read("human:owner", uuid4_from(snap), trigger.request_id, detail=True)
+    assert any(d["deferred_items"][0]["finding_ids"] == ["abbreviated-invalid-id"] for d in detail["report_drafts"].values())
+    assert detail["report"]["deferred_items"][0]["finding_ids"] == ["missing-raw"]
+    assert detail["report"]["findings"][0]["analysis"] == "Exact invalid text unavailable"
+
+
+def test_public_tool_contract_exposes_report_schema_and_actual_bounds():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    contracts = {t["identity"]: t["input_schema"] for t in AnalysisTools(EvidenceCatalog(snapshot()), {}).registry().contracts()}
+    assert contracts["evidence.index"]["properties"]["limit"]["maximum"] == 40
+    assert contracts["repository.read"]["properties"]["lines"]["maximum"] == 200
+    report_schema = contracts["analysis.submit"]
+    assert "Finding" in report_schema["$defs"]
+    assert report_schema["properties"]["report"]["additionalProperties"] is False
+
+
+def test_wrong_snapshot_is_retained_as_failure_before_model(tmp_path):
+    s, snap, model = service(tmp_path)
+    s.exporter.snapshot = snapshot()
+    r = asyncio.run(s.analyze("human:owner", uuid4_from(snap), AnalysisTrigger(request_id=uuid4(), rationale="Investigate")))
+    assert r["status"] == "FAILED" and r["failure"]["reason_code"] == "ANALYSIS_SNAPSHOT_WORK_MISMATCH"
+    assert not model.requests

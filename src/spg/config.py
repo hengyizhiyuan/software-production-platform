@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     admin_enabled: bool = False
     trace_analysis_max_inferences: int = Field(default=12, ge=2, le=24)
     trace_analysis_max_tools: int = Field(default=48, ge=4, le=96)
-    trace_analysis_timeout_seconds: int = Field(default=360, ge=30, le=900)
+    trace_analysis_timeout_seconds: int = Field(default=600, ge=30, le=900)
     admin_node_id: str | None = None
     admin_region: str | None = None
     admin_host_name: str | None = None

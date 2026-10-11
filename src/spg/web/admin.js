@@ -25,6 +25,13 @@
     notice(`${mode==='compact'?'精简':'完整'}诊断${file?'文件':'包'}已下载；采集边界与脱敏记录见 evidence-manifest.json。`);
   }
   function route() { return location.pathname.split('/')[2] || 'overview'; }
+  function analysisRequestId() {
+    // randomUUID is unavailable on the existing HTTP ECS origin.
+    if(typeof crypto.randomUUID==='function')return crypto.randomUUID();
+    const b=new Uint8Array(16);crypto.getRandomValues(b);b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;
+    const h=Array.from(b,x=>x.toString(16).padStart(2,'0')).join('');
+    return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;
+  }
   async function analysisPage(workId) {
     const r=await api(`/api/admin/works/${encodeURIComponent(workId)}/analyses`);
     content.innerHTML=heading('用 Watt 分析 Work Trace','由你发起工程调查。报告区分事实、根因假设与建议，供人工审查。')+
@@ -293,7 +300,7 @@
   document.addEventListener('submit',async event => {const f = event.target;if (!(f instanceof HTMLFormElement)) return;event.preventDefault();const data = new FormData(f);try {if (f.hasAttribute('data-admin-login')) {await api('/auth/session',{method:'POST',body:{token:data.get('token')}});f.reset();await render();return;}
       if(f.hasAttribute('data-trace-analysis-form')) {
         const button=f.querySelector('button[type="submit"]'),workId=f.dataset.traceAnalysisForm;
-        const requestId=f.dataset.analysisRequestId || crypto.randomUUID();f.dataset.analysisRequestId=requestId;
+        const requestId=f.dataset.analysisRequestId || analysisRequestId();f.dataset.analysisRequestId=requestId;
         button.disabled=true;button.textContent='Watt 正在读取证据并分析…';
         try {const a=await api(`/api/admin/works/${encodeURIComponent(workId)}/analyses`,{method:'POST',body:{request_id:requestId,rationale:data.get('rationale')}});analysisResult(a);}
         catch(error){button.disabled=false;button.textContent='读取本次请求结果 / 重试';throw error;}

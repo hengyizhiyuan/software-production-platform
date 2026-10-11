@@ -6,7 +6,7 @@ function surface(route='/admin',authorization=true,run=null,trace=null,extra={})
  const overview={watt_revision:'d'.repeat(40),quality:{campaigns:[],runs:[],cases:[],clusters:[]},assurance:{mode:'REQUIRED',store_observed:true,results:[],quality_evaluations:[]},operations:{state:'CURRENT',node:{node_id:'i-exact',hostname:'host',region:'cn-wulanchabu',observed_at:new Date().toISOString(),cpu_percent:5,cpu_count:4,memory:{used_bytes:1000,total_bytes:2000},disk:{used_bytes:1000,total_bytes:10000,free_bytes:9000},network:{eth0:{rx_bytes:100,tx_bytes:200}},uptime_seconds:3600},production:{workers:[worker],queue:[],queue_depth:0,active_executions:0,available_slots:1},services:[{service:'api',state:'running',health:'healthy',node_id:'i-exact'}],storage:{docker:{categories:[]},note:'scopes'},topology:{nodes:[{id:'i-exact',hostname:'host',region:'cn-wulanchabu'}],service_placements:[{service:'api',health:'healthy',node_id:'i-exact'}]}}};
  const downloads=[];
  const context={URLSearchParams,URL:{createObjectURL:()=> 'blob:diagnostic',revokeObjectURL(){}},document:{querySelector:s=>nodes[s],querySelectorAll:()=>[],createElement:()=>({click(){downloads.push(this.download)},remove(){}}),body:{appendChild(){}},addEventListener:(k,f)=>listeners[k]=f},window:{addEventListener(){}},location:{pathname:route,search:trace?(trace.work?'?kind=work&entity=ordinary-work':'?case=historical-case'):run?'?run='+run.id:''},history:{pushState(){}},setTimeout(){},console,HTMLFormElement:class {},FormData:class {},async fetch(url,opts){calls.push([url,opts]);const data=extra[url] || (trace && url.includes('/trace')?trace:run && url.startsWith('/api/admin/runs/') ? run : url==='/api/admin/overview'?overview:url==='/api/admin/arena'?{experiments:[],preferences:[],learning_signals:[],promotion_decisions:[]}:url==='/api/admin/operations/history'?[]:{});return{ok:authorization&&!data._httpStatus,status:data._httpStatus|| (authorization?200:401),json:async()=>data,blob:async()=>Buffer.from('fixture')};}};
- vm.runInNewContext(source,context);return{nodes,listeners,calls,downloads,overview,ready:()=>new Promise(r=>setImmediate(r))};
+ vm.runInNewContext(source,context);return{nodes,listeners,calls,downloads,overview,context,ready:()=>new Promise(r=>setImmediate(r))};
 }
 test('Admin uses existing authenticated session and dedicated navigation',async()=>{const s=surface();await s.ready();assert.equal(s.calls[0][0],'/auth/session');assert.match(s.nodes['#admin-content'].innerHTML,/总览|概览/);assert.doesNotMatch(s.nodes['#admin-content'].innerHTML,/data-quadrant/);});
 test('Unauthenticated Admin does not load owner data',async()=>{const s=surface('/admin',false);await s.ready();assert.match(s.nodes['#admin-content'].innerHTML,/登录 Watt Admin/);assert.equal(s.calls.length,1);});
@@ -94,4 +94,19 @@ test('Analysis report escapes model text and preserves failed analysis evidence'
  await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
  const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/未形成合格报告/);assert.match(h,/下载报告与执行证据/);
  assert.match(h,/&lt;script&gt;/);assert.doesNotMatch(h,/<script>bad/);
+});
+
+
+test('Analysis submission generates a UUID on the existing HTTP origin and reuses it',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses';
+ const response={work_id:'ordinary-work',request_id:'req',status:'FAILED',report:null};
+ const s=surface('/admin',true,null,null,{[path]:response});await s.ready();
+ s.context.crypto={getRandomValues(b){b.fill(23);return b;}};
+ s.context.FormData=class {get(){return 'Inspect historical Work';}};
+ const f=new s.context.HTMLFormElement();f.dataset={traceAnalysisForm:'ordinary-work'};
+ f.hasAttribute=name=>name==='data-trace-analysis-form';const button={};f.querySelector=()=>button;
+ await s.listeners.submit({target:f,preventDefault(){}});
+ const request=JSON.parse(s.calls.at(-1)[1].body);assert.match(request.request_id,/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+ await s.listeners.submit({target:f,preventDefault(){}});
+ assert.equal(JSON.parse(s.calls.at(-1)[1].body).request_id,request.request_id);
 });

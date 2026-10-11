@@ -7,6 +7,7 @@ from pathlib import Path, PurePosixPath
 import re
 import subprocess
 from uuid import NAMESPACE_URL, UUID, uuid5
+from copy import deepcopy
 
 from spg.domain.native_execution import EffectCondition, ToolExecutionResult, canonical_digest
 from spg.domain.trace_analysis import AnalysisReport
@@ -17,6 +18,23 @@ from spg.infrastructure.git_workspace import GitExactReality
 
 def text(value):
     return json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2, default=str)
+
+
+def public_report_candidate(value):
+    """Keep the declared public engineering rationale, suppress hidden reasoning."""
+    redactor = Redactor(text_limit=40000)
+    clean = redactor.clean(value)
+    if isinstance(value, dict) and isinstance(value.get("findings"), list):
+        for index, finding in enumerate(value["findings"]):
+            if isinstance(finding, dict) and isinstance(finding.get("analysis"), str):
+                clean["findings"][index]["analysis"] = redactor.clean(finding["analysis"])
+    return clean
+
+
+class CitationRejected(ValueError):
+    def __init__(self, reason, location, evidence_id):
+        super().__init__(reason)
+        self.location, self.evidence_id = location, str(evidence_id)
 
 
 class EvidenceCatalog:
@@ -123,23 +141,25 @@ class EvidenceCatalog:
     def validate(self, report: AnalysisReport):
         if str(report.work_id) != str(self.snapshot["work_id"]):
             raise ValueError("REPORT_WORK_ID_MISMATCH")
-        def citation(c, *, repository=False):
+        def citation(c, location, *, repository=False):
             row = self.records.get(str(c.evidence_id))
             if not row or str(c.evidence_id) not in self.observed:
-                raise ValueError("CITATION_NOT_OBSERVED")
+                raise CitationRejected("CITATION_NOT_OBSERVED", location, c.evidence_id)
             if not any(c.quote in excerpt for excerpt in self.observed_excerpts.get(str(c.evidence_id), [])):
-                raise ValueError("CITATION_QUOTE_MISMATCH")
+                raise CitationRejected("CITATION_QUOTE_MISMATCH", location, c.evidence_id)
             if repository and not row["repository"]:
-                raise ValueError("REPOSITORY_CITATION_REQUIRED")
-        facts = [report.original_objective, report.expected_outcome,
-                 report.actual_execution_path, report.current_state, *report.timeline,
-                 *(finding.fact for finding in report.findings)]
-        for fact in facts:
-            for c in fact.citations:
-                citation(c)
-        for finding in report.findings:
-            for c in finding.repository_citations:
-                citation(c, repository=True)
+                raise CitationRejected("REPOSITORY_CITATION_REQUIRED", location, c.evidence_id)
+        facts = [(name, getattr(report, name)) for name in (
+            "original_objective", "expected_outcome", "actual_execution_path", "current_state")]
+        facts += [(("timeline", i), fact) for i, fact in enumerate(report.timeline)]
+        facts += [(("findings", i, "fact"), finding.fact) for i, finding in enumerate(report.findings)]
+        for name, fact in facts:
+            prefix = list(name) if isinstance(name, tuple) else [name]
+            for i, c in enumerate(fact.citations):
+                citation(c, prefix + ["citations", i])
+        for index, finding in enumerate(report.findings):
+            for i, c in enumerate(finding.repository_citations):
+                citation(c, ["findings", index, "repository_citations", i], repository=True)
         # This is citation/structure verification. It cannot prove that prose
         # follows logically from the quotes or promote hypotheses to findings.
 
@@ -257,6 +277,7 @@ class AnalysisTools:
         self.accepted_report = None
         self.accepted_digest = None
         self.verification_receipts = []
+        self.drafts = {}
 
     def registry(self):
         definitions = (
@@ -277,17 +298,42 @@ class AnalysisTools:
              ["repository", "baseline_repository"]),
             ("analysis.submit", "Verify a structured advisory report. Failures return bounded feedback for same-contract Self-Refine. Use the supplied JSON schema.",
              {"report": {"type": "object"}}, ["report"]),
+            ("analysis.revise", "Explicitly correct a retained rejected report using bounded remove/replace JSON Pointer edits. Revalidate the entire report without regenerating it. This changes advisory artifacts only.",
+             {"draft_id": {"type": "string"}, "edits": {"type": "array", "minItems": 1, "maxItems": 24,
+              "items": {"type": "object", "properties": {"op": {"enum": ["remove", "replace"]},
+                        "path": {"type": "string"}, "value": {}},
+                        "required": ["op", "path"], "additionalProperties": False}}}, ["draft_id", "edits"]),
         )
+        def schema(identity, props, required):
+            props = deepcopy(props)
+            result = {"type": "object", "properties": props, "required": required,
+                      "additionalProperties": False}
+            if identity == "evidence.index":
+                props["offset"]["minimum"] = 0
+                props["limit"].update(minimum=1, maximum=40)
+            if identity == "evidence.read":
+                props["offset"]["minimum"] = 0
+                props["limit"].update(minimum=1, maximum=24000)
+            if identity == "repository.read":
+                props["start_line"]["minimum"] = 1
+                props["lines"].update(minimum=1, maximum=200)
+            if identity == "repository.search":
+                props["query"].update(minLength=1, maxLength=200)
+            if identity == "analysis.submit":
+                report_schema = AnalysisReport.model_json_schema()
+                result["$defs"] = report_schema.pop("$defs")
+                props["report"] = report_schema
+            return result
         return NativeToolRegistry(tuple(ToolDefinition(
             identity=identity, version="1", description=description,
-            input_schema={"type": "object", "properties": props, "required": required,
-                          "additionalProperties": False},
-            effect_classification="READ" if identity != "analysis.submit" else "LOCAL_EVIDENCE",
+            input_schema=schema(identity, props, required),
+            effect_classification="LOCAL_EVIDENCE" if identity.startswith("analysis.") else "READ",
             handler=self.execute,
         ) for identity, description, props, required in definitions))
 
     async def execute(self, request):
         identity, args = request.proposal.tool_identity, request.proposal.arguments
+        draft_id, candidate = None, None
         try:
             if identity == "evidence.index":
                 output = self.catalog.index(**args)
@@ -304,8 +350,39 @@ class AnalysisTools:
                 eid = self.catalog.add("repository", f"repository/{repo.key}/{canonical_digest(value)}",
                                        value, repository=True)
                 output = self.catalog.read(eid, limit=24000)
-            elif identity == "analysis.submit":
-                report = AnalysisReport.model_validate(args["report"])
+            elif identity in {"analysis.submit", "analysis.revise"}:
+                if identity == "analysis.submit":
+                    candidate = args["report"]
+                else:
+                    candidate = deepcopy(self.drafts[args["draft_id"]])
+                    edits = args["edits"]
+                    if not 1 <= len(edits) <= 24:
+                        raise ValueError("REPORT_EDIT_CAPACITY_EXCEEDED")
+                    for edit in edits:
+                        if set(edit) - {"op", "path", "value"} or edit["op"] not in {"remove", "replace"}:
+                            raise ValueError("REPORT_EDIT_NOT_ADMITTED")
+                        path = edit["path"]
+                        if not isinstance(path, str) or not path.startswith("/") or len(path) > 300:
+                            raise ValueError("REPORT_EDIT_POINTER_INVALID")
+                        parts = [p.replace("~1", "/").replace("~0", "~") for p in path[1:].split("/")]
+                        parent = candidate
+                        for part in parts[:-1]:
+                            parent = parent[int(part)] if isinstance(parent, list) and part.isdigit() else parent[part]
+                        last = int(parts[-1]) if isinstance(parent, list) and parts[-1].isdigit() else parts[-1]
+                        if edit["op"] == "remove":
+                            del parent[last]
+                        else:
+                            # Replace must reference an existing field; it never
+                            # inserts a new path or changes source repositories.
+                            parent[last]
+                            parent[last] = edit["value"]
+                if not isinstance(candidate, dict):
+                    raise ValueError("REPORT_DRAFT_NOT_OBJECT")
+                if len(text(candidate).encode()) > 128000:
+                    raise ValueError("REPORT_DRAFT_CAPACITY_EXCEEDED")
+                draft_id = str(uuid5(NAMESPACE_URL, f"analysis-draft:{self.catalog.digest}:{canonical_digest(candidate)}"))
+                self.drafts[draft_id] = deepcopy(candidate)
+                report = AnalysisReport.model_validate(candidate)
                 self.catalog.validate(report)
                 self.accepted_report = report.model_dump(mode="json")
                 self.accepted_digest = canonical_digest(self.accepted_report)
@@ -318,16 +395,33 @@ class AnalysisTools:
                 raise ValueError("TOOL_NOT_ADMITTED")
             condition = EffectCondition.SETTLED
         except (ValueError, KeyError, TypeError, UnicodeError, IndexError) as error:
-            self.accepted_report = None if identity == "analysis.submit" else self.accepted_report
+            self.accepted_report = None if identity.startswith("analysis.") else self.accepted_report
             if hasattr(error, "errors"):
-                issues = [{"location": list(item["loc"]), "type": item["type"]}
+                issues = [{"location": list(item["loc"]), "type": item["type"],
+                           "reason": Redactor(text_limit=300).clean(item["msg"])}
                           for item in error.errors(include_input=False, include_context=False)[:12]]
             else:
-                issues = [{"type": type(error).__name__, "reason": str(error)[:160]}]
+                issues = [{"type": type(error).__name__, "reason": Redactor(text_limit=300).clean(str(error))}]
+                if isinstance(error, CitationRejected):
+                    issues[0].update(location=error.location, evidence_id=error.evidence_id)
             output = {"verification": "FAIL", "issues": issues,
                       "effect_observed": False, "repair": "Same contract only; preserve UNKNOWN and permissions."}
+            if draft_id:
+                output["draft_id"] = draft_id
+                # Give exact same-candidate lineage feedback without inventing,
+                # normalizing, or automatically repairing finding identifiers.
+                findings = candidate.get("findings")
+                known = [f.get("finding_id") for f in findings if isinstance(f, dict)] if isinstance(findings, list) else []
+                output["valid_finding_ids"] = known[:30]
+                for section in ("immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"):
+                    items = candidate.get(section)
+                    for index, item in enumerate(items if isinstance(items, list) else []):
+                        refs = item.get("finding_ids") if isinstance(item, dict) else None
+                        if isinstance(refs, list) and any(ref not in known for ref in refs):
+                            issues.append({"location": [section, index, "finding_ids"],
+                                           "type": "UNKNOWN_FINDING_REFERENCE"})
             condition = EffectCondition.FAILED
-            if identity == "analysis.submit":
+            if identity.startswith("analysis."):
                 self.verification_receipts.append(output)
         return ToolExecutionResult(delivery_id=request.delivery_id, tool_identity=identity,
                                    condition=condition, output=output,

@@ -34,7 +34,7 @@ from spg.evaluation.work_registry import WorkRegistryService
 from spg.executor.kernel import NativeExecutorKernel
 from spg.infrastructure.executor_runtime.local_storage import ContentAddressedStorage
 from spg.infrastructure.trace_analysis_evidence import (
-    AnalysisTools, EvidenceCatalog, RepositorySnapshot, text,
+    AnalysisTools, EvidenceCatalog, RepositorySnapshot, text, public_report_candidate,
 )
 
 
@@ -58,7 +58,10 @@ recommendations. Explicitly discuss missing raw logs and snapshot/source limits.
 No automatic evolution actions. Verification checks structure and quotations,
 not semantic truth. Report all eight timeline stages when observed; explain
 unobserved stages in missing_evidence. Call analysis.submit with a report matching
-report_schema. On FAIL use bounded same-contract refinement. Only after successful
+report_schema. On FAIL use analysis.revise against its draft_id and exact error
+locations; correct the retained draft with explicit bounded edits, not a complete
+regeneration. Recommendation finding_ids must exactly match full finding_id
+strings, not abbreviated aliases. Only after successful
 submission return RESULT_READY with result_claim.output_vector.report_digest
 equal to the submission receipt; evidence_ids may be empty. Otherwise return
 UNABLE_TO_COMPLETE with observed limitations. Do not fabricate ECF READY, Guardian
@@ -82,6 +85,10 @@ class AnalysisJournal:
         # Existing redaction handles source/provider/tool secrets. Analysis prose
         # is kept under report fields only; never collect hidden model reasoning.
         cleaned = Redactor(text_limit=40000).clean(payload)
+        if kind == "TOOL_STARTED":
+            proposal = payload.get("request", {}).get("proposal", {})
+            if proposal.get("tool_identity") == "analysis.submit":
+                cleaned["request"]["proposal"]["arguments"]["report"] = public_report_candidate(proposal["arguments"].get("report"))
         digest, _ = self.storage.put_json(self.namespace + "/events", {
             "kind": kind, "at": datetime.now(UTC).isoformat(), "payload": cleaned,
         })
@@ -119,15 +126,17 @@ class AnalysisJournal:
         if result and result.condition.value == "FAILED":
             event = {"event_id": str(effect_id), "operation_id": str(self.binding.attempt_id),
                      "failure_family": "ANALYSIS_EVIDENCE_OR_REPORT_REJECTED",
+                     "tool_identity": request.proposal.tool_identity,
                      "status": "OPEN", "repairability": "AUTONOMOUSLY_REPAIRABLE",
                      "result": "NO_EXTERNAL_EFFECT; SAME_CONTRACT_RETRY_ONLY"}
             self.repairs.insert(0, event)
             self.append("LOCAL_REFINEMENT_FEEDBACK", event)
             return RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
-        if result and request.proposal.tool_identity == "analysis.submit":
+        if result and request.proposal.tool_identity.startswith("analysis."):
             for event in self.repairs:
-                event["status"] = "VERIFIED"
-                event["result"] = "REPORT_CITATIONS_AND_STRUCTURE_RECOVERED"
+                if str(event.get("tool_identity", "")).startswith("analysis."):
+                    event["status"] = "VERIFIED"
+                    event["result"] = "REPORT_CITATIONS_AND_STRUCTURE_RECOVERED"
         return None
 
     def recent_repair_reality(self):
@@ -212,6 +221,8 @@ class TraceAnalysisService:
                                            for d in record.get("event_digests", [])]
             if record.get("catalog_digest"):
                 record["evidence_catalog"] = self.storage.get_json(ns + "/catalog", record["catalog_digest"])
+            record["report_drafts"] = {draft_id: self.storage.get_json(ns + "/drafts", digest)
+                                      for draft_id, digest in record.get("draft_digests", {}).items()}
         return record
 
     def list(self, owner, work_id):
@@ -431,6 +442,11 @@ class TraceAnalysisService:
                     "snapshot_digest": catalog.digest, "records": catalog.records,
                     "observed_ids": sorted(catalog.observed)})
                 record["catalog_digest"] = digest
+            record["draft_digests"] = {}
+            if tools:
+                for draft_id, candidate in tools.drafts.items():
+                    digest, _ = self.storage.put_json(ns + "/drafts", public_report_candidate(candidate))
+                    record["draft_digests"][draft_id] = digest
             self._save(record)
             lock.unlink(missing_ok=True)
         return record
