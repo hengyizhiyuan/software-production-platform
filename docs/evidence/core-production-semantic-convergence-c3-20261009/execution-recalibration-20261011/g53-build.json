@@ -1,0 +1,57 @@
+{
+  "schema": "c3-exact-image-build-v1",
+  "started_at_utc": "2026-10-11T02:10:18.028537+00:00",
+  "ended_at_utc": "2026-10-11T02:12:10.718462+00:00",
+  "wall_seconds": 112.6899925499456,
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "5cd33c9bf8a3aaa7e237d267dd09638025ad47ee",
+      "tree": "a35b32b1c06d51b6a26b9026d840ef17fc449165"
+    },
+    "guardian": {
+      "revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+      "tree": "6066a6d6b8d91bec610021409ab320309ed0e437"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "command": [
+    "docker",
+    "build",
+    "--network=none",
+    "--build-arg",
+    "BASE_IMAGE=watt-c3-continuation-dependency-base:6c1f48e-20261009",
+    "--build-arg",
+    "WATT_REVISION=5cd33c9bf8a3aaa7e237d267dd09638025ad47ee",
+    "--build-arg",
+    "WATT_TREE=a35b32b1c06d51b6a26b9026d840ef17fc449165",
+    "--build-arg",
+    "GUARDIAN_REVISION=76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+    "--build-arg",
+    "GUARDIAN_TREE=6066a6d6b8d91bec610021409ab320309ed0e437",
+    "--build-arg",
+    "ECF_REVISION=5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "--build-arg",
+    "ECF_TREE=878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "-f",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation53-qualified-20261010/final-image/context/watt/docs/evidence/core-production-semantic-convergence-c3-20261009/Dockerfile.c3",
+    "-t",
+    "watt-c3-source-owner:5cd33c9",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation53-qualified-20261010/final-image/context"
+  ],
+  "source_overlay": false,
+  "real_model_calls": 0,
+  "scope": "C3 source consumer, exclusion evidence and exact critic repair binding; actual adapter contract negotiation with immutable historical receipts; unchanged Wire schema, authority and budgets; no model requests, real G0 or Holdout",
+  "image": {
+    "Id": "sha256:c87016e8fb5f73599b633ca6bf25e4ae77fa22901d202d45684cb71e7cc02446",
+    "RepoDigests": [],
+    "Created": "2026-10-11T10:11:41.661830268+08:00"
+  }
+}

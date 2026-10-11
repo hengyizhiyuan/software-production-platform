@@ -18,6 +18,17 @@ This document defines how substantial Watt capabilities should be developed
 with AI. It is a development-governance principle, not a new Watt Runtime
 module, domain role, lifecycle, schema, or feature contract.
 
+**Current collaboration amendment — Human-approved, 2026-10-11:** Watt
+development is conducted by the Human Governor and the AI collaborator. A
+separate Architecture Lead actor or approval step is no longer required.
+The AI collaborator retains architecture-boundary review, Repository Reality
+analysis and implementation responsibilities; material authority, scope and
+acceptance decisions remain Human-owned. Earlier role descriptions below
+record the previous collaboration model. They do not create a current waiting
+gate. Guardian and independent qualification reviewers retain their product
+and evidence independence. Section 13 is the canonical current rule for
+probabilistic model behavior and development prioritization.
+
 The terms `Architecture Lead AI` and `AI Executor` describe responsibilities in
 the development collaboration. `Architecture Lead AI` does not revive the
 retired `Design Lead AI` product-component name and does not imply final Human
@@ -416,3 +427,105 @@ Future capabilities
 
 No implementation, MVP scope expansion, or new product architecture is
 authorized by this record.
+
+## 13. AI Non-Determinism Principle and Execution Discipline
+
+### 13.1 Authority and objective
+
+This Watt development rule applies the Program's Accepted
+[ADR-0002 at version 1e2c1fdf37d9252c0a9bd480fc2ff15c88d0fee1](https://github.com/hengyizhiyuan/software-production-system/blob/1e2c1fdf37d9252c0a9bd480fc2ff15c88d0fee1/docs/04-decisions/ADR-0002-STOCHASTIC-NATIVE-ENGINEERING.md).
+The Program owns the architecture invariant; this section defines Watt's
+execution responsibilities without replacing the ADR or any Owner contract.
+
+Watt MUST assume that LLM output is probabilistic, first-pass correctness is
+not guaranteed and bounded candidate failure is expected. Its objective is to
+reliably absorb uncertainty and converge toward acceptable production results.
+Eliminating every possible model error is not a prerequisite for production.
+
+Reuse determinism for identity, provenance, version, contract, authority,
+effect permits, evidence integrity and admission gates. Use intelligence for
+open semantic interpretation and candidate methods. Lawful equivalent outputs
+need not share wording, reasoning, task order or implementation. Necessary
+content, constraints, evidence and permissions remain strict.
+
+Generation yields a Candidate. Existing Owner validation, bounded convergence
+and governed admission decide whether it can advance. This principle creates
+no new runtime role, coordinator, retry budget or authority.
+
+### 13.2 Runtime recovery versus system evolution
+
+| Failure class | Evidence needed | Default response |
+| --- | --- | --- |
+| A — Runtime Model Variance | The required meaning is expressible under the existing contract, inputs and authority are intact, and the candidate differs, omits a required component or violates a repairable output contract. | Existing Owner-specific Self-Refine, repair, regeneration or permitted retry on the same exact basis and remaining budget. Optional information cannot become a new mandatory gate. |
+| B — System Capability Defect | A lawful requirement cannot be represented, a consumer rejects a demonstrably lawful binding, actual evidence cannot reach its Owner, or recovery loses identity, budget or effect continuity. | A minimal common-root engineering correction in the existing Owner, followed by affected regression and production qualification. A model failure alone is not this proof. |
+| C — Governance Blocker | Authority is absent, a required source/version/evidence is invalid or unavailable, or engineering reality/effect integrity is compromised. | Block the corresponding admission or acceptance. Recover authentic evidence or await its lawful Owner; do not regenerate authority or turn UNKNOWN into PASS. |
+
+A single observation may cross boundaries. For example, a wrong Review verdict
+is candidate variance if the existing validation and feedback can reject and
+repair it; accepting that verdict despite demonstrably invalid evidence is a
+system or governance defect. Classify the actual failed predicate and the
+current authoritative state, rather than the visible error label.
+
+Before changing platform code, establish whether a lawful result is
+expressible and the existing bounded recovery received actionable feedback.
+Correct a shared loss of feedback or consumer capability when proven; do not
+encode the answer to one example. Candidate rejection does not itself mean
+that admitted Engineering Truth has been corrupted.
+
+Retry and regeneration remain subject to existing transport-result certainty,
+attempt and cumulative budgets. They cannot repeat uncertain effects, erase
+prior attempts, create authority, rewrite facts or weaken Guardian. A failed
+bounded trial remains failed; it does not prohibit subsequent engineering
+repair justified by new evidence.
+
+### 13.3 Error prioritization
+
+| Priority | Meaning | Execution rule |
+| --- | --- | --- |
+| P0 | The admitted production journey cannot progress safely to its required boundary. | First determine the exact blocker and restore the lawful production loop. |
+| P1 | A proven reusable representation, evidence, Owner or recovery capability is missing. | Fix the smallest common seam needed by the journey, without a parallel system. |
+| P2 | Reliability, cost, breadth or quality improvement beyond the required qualified behavior. | Record and schedule after blocking capability is restored, unless it is an existing acceptance obligation. |
+| P3 | Cosmetic wording, local diagnostic presentation or optional metadata. | Defer during critical capability work unless it prevents correct diagnosis or recovery. |
+
+Priority does not authorize unsafe promotion. A required evidence or authority
+gate remains blocking regardless of development priority. Do not require
+theoretical completeness or a perfect first candidate before attempting the
+authorized representative production journey.
+
+### 13.4 Proportionate regression
+
+* Local change: validate the changed invariant and its immediate failure paths.
+* Grouped changes: run focused contract and persistence regression across the
+  affected Owners and recovery boundaries.
+* Architecture or responsibility change: run the broader applicable regression
+  and representative real production qualification.
+* Stable delivery revision: perform its required exact-source/image gates once;
+  repeat an affected gate only for an identified regression or new source input.
+* Documentation-only changes do not invalidate a frozen runtime image. Record
+  the application revision separately from a later evidence/document commit.
+
+Use the [existing regression governance](watt-regression-protection-and-golden-journey-governance.md)
+to protect common invariants at the lowest-cost reliable layer. Test count,
+diagnostic detail and repeated historical replays are not production outcomes.
+Do not run a large suite after every minor adjustment or require another live
+historical diagnostic when current qualification can test the same boundary.
+
+### 13.5 Production closure and mission review
+
+The development target is the governed loop:
+
+```text
+Intent → Context → Contract → Candidate → Verification → Acceptance
+```
+
+Each stage uses actual source, evidence and its lawful Owner. Verification and
+Guardian remain independent of the generating model. Human Acceptance remains
+a real Human decision; a mission may stop at a specified Candidate/Assurance
+boundary with later Human gates pending. Neither fixtures nor document changes
+complete that loop.
+
+Every material model-capability task must identify permitted variance,
+immutable engineering/authority boundaries, the existing validation and
+bounded-recovery Owner, its termination conditions, static-special-case risk,
+and the representative real and negative qualification needed. Do not expand
+the mission merely to eliminate remaining possible model errors.

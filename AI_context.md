@@ -1,5 +1,15 @@
 # AI-Native Software Production Platform
 
+> Current development entry (2026-10-11): Human Governor and the AI collaborator
+> jointly conduct Watt development; no separate Architecture Lead approval gate
+> is required. Apply the canonical
+> [AI Non-Determinism Principle and Execution Discipline](docs/architecture/ai-native-development-execution-principles.md#13-ai-non-determinism-principle-and-execution-discipline):
+> model variance uses bounded Owner recovery; proven capability defects justify
+> engineering correction; authority/evidence failures remain blocking. C3 status
+> is recorded in its
+> [current execution-recalibration evidence](docs/evidence/core-production-semantic-convergence-c3-20261009/execution-recalibration-20261011/assessment-and-execution-plan.md), independently of
+> historical closure entries below.
+
 > Runtime transition note (2026-09-24): the active source and deployment
 > profiles use the Watt Native Executor with API-key model providers. Historical
 > Codex SDK milestones below describe preserved past evidence, not a selectable
