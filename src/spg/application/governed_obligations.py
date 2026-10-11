@@ -1530,7 +1530,7 @@ def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=N
                 if (sha256(raw_review.encode()).hexdigest() != observed.get("review_output_sha256")
                         or len(raw_review.encode()) != observed.get("review_output_bytes") or observed.get("review_retained") is not True):
                     raise ValueError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
-                observed_review = FulfillmentSemanticReviewCandidate.model_validate_json(raw_review).model_dump(mode="json")
+                observed_review = _review_wire_representation(raw_review)
             else:
                 observed_review = observed.get("semantic_review")
             if observed_review != receipt.get("semantic_review"):
@@ -2716,6 +2716,20 @@ def _rejected_candidate_receipt_values(candidate, feedback, request):
         "components_fingerprint":fulfillment_components_fingerprint(candidate)}}
 
 
+def _review_wire_representation(output):
+    """Restore only declared optional defaults, preserving explicit Wire values.
+
+    Callers bind original bytes before this derived comparison. Do not use
+    model coercion here: e.g. a string verdict must not equal a stored boolean.
+    """
+    retained = json.loads(output)
+    for source in retained.get("source_results", []):
+        for check in source.get("consumption_checks") or ():
+            check.setdefault("target_paths", [])
+            check.setdefault("source_component_quote", None)
+    return retained
+
+
 def _semantic_repair_observation(rows, attempt, candidate, inventory, capabilities):
     """Only a rejected, persisted independent Review may feed semantic repair."""
     from spg.providers.fulfillment_candidate import _FulfillmentWireReceiptIdentityError
@@ -2762,7 +2776,7 @@ def _semantic_repair_observation(rows, attempt, candidate, inventory, capabiliti
         # optional defaults. The original Wire remains bound above by its
         # exact digest/length; compare the same existing typed contract here.
         # This does not change the output, verdict, or rejected Candidate.
-        retained = FulfillmentSemanticReviewCandidate.model_validate_json(output).model_dump(mode="json")
+        retained = _review_wire_representation(output)
     if retained != validated.get("semantic_review"):
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     review = FulfillmentSemanticReviewCandidate.model_validate(retained)

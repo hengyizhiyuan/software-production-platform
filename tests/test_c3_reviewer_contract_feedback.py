@@ -123,6 +123,16 @@ def test_optional_defaults_cannot_turn_a_rejected_semantic_verdict_into_acceptan
     assert len(calls) == 4
 
 
+def test_wire_comparison_restores_defaults_without_coercing_explicit_verdicts():
+    raw = {'source_results': [{'complete_and_equivalent': 'false',
+        'consumption_checks': [{'target_paths': ['original.html']}]}]}
+    restored = a._review_wire_representation(json.dumps(raw))
+    assert restored['source_results'][0]['complete_and_equivalent'] == 'false'
+    assert restored['source_results'][0]['consumption_checks'] == [{
+        'target_paths': ['original.html'], 'source_component_quote': None}]
+    assert raw['source_results'][0]['consumption_checks'] == [{'target_paths': ['original.html']}]
+
+
 @pytest.mark.parametrize('change', ('context', 'fingerprint', 'wire', 'inventory',
     'attempt', 'receipt', 'review-wire', 'observed-context', 'model-context', 'missing-context'))
 def test_feedback_drift_stops_recovery_without_another_call(change):
