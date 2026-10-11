@@ -83,7 +83,7 @@ class NeverCallAgain:
         raise AssertionError("A sealed same-basis receipt must be replayed without another model call")
 
 
-@pytest.mark.parametrize('first_failure', ('semantic', 'semantic-jsonb-order', 'semantic-framed', 'incomplete', 'critic-schema', 'critic-json', 'consumption-proof'))
+@pytest.mark.parametrize('first_failure', ('semantic', 'semantic-jsonb-order', 'semantic-framed', 'incomplete', 'critic-schema', 'critic-json', 'consumption-proof', 'critic-duplicate'))
 def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql(postgres_database, tmp_path, monkeypatch, first_failure):
     import json
     from types import SimpleNamespace
@@ -111,6 +111,12 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
             if not reviews and first_failure == 'consumption-proof':
                 raw = verdict.model_dump(mode="json")
                 raw["source_results"][0]["consumption_checks"][0]["route_indices"] = []
+                verdict = type(verdict).model_validate(raw)
+            if not reviews and first_failure == 'critic-duplicate':
+                from copy import deepcopy
+                raw = verdict.model_dump(mode='json')
+                raw['source_results'][0]['consumption_checks'].append(
+                    deepcopy(raw['source_results'][0]['consumption_checks'][0]))
                 verdict = type(verdict).model_validate(raw)
             reviews.append(verdict)
             output = verdict.model_dump_json()
@@ -144,10 +150,12 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
         if first_failure.startswith('semantic'):
             assert feedback['semantic_review_feedback_binding']['observed_receipt_id'] == observed['receipt_id']
             assert feedback['violations'][0]['review_reason'] == 'Controlled rejected interpretation.'
-        elif first_failure == 'consumption-proof':
-            assert feedback['primary_error'] == 'OBLIGATION_SOURCE_CONSUMPTION_ROUTE_REQUIRED'
+        elif first_failure in ('consumption-proof', 'critic-duplicate'):
+            assert feedback['primary_error'] == ('OBLIGATION_SOURCE_CONSUMPTION_ROUTE_REQUIRED'
+                if first_failure == 'consumption-proof' else 'OBLIGATION_SOURCE_CONSUMPTION_DUPLICATE')
             violations = [v for v in feedback['violations'] if 'source_consumption_comparison' in v]
-            assert violations and violations[0]['source_consumption_comparison']['check'] == 0
+            assert violations and violations[0]['source_consumption_comparison']['check'] == (
+                0 if first_failure == 'consumption-proof' else 1)
             assert feedback['semantic_review_feedback_binding']['observed_receipt_id'] == observed['receipt_id']
             assert failed['terminal'] is False
         elif first_failure.startswith('critic-'):
@@ -168,6 +176,13 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
             assert failed['terminal'] is False
             assert feedback['repair_feedback_binding']['completion_feedback_contract'] == 'existing-bounded-completion-feedback-v1'
         count = len(records)
+        if first_failure in ('consumption-proof', 'critic-duplicate', 'critic-schema', 'critic-json'):
+            from spg.domain.governed_obligation import canonical_fingerprint
+            second = next(r.scope for r in records if r.scope['stage'] == 'SEMANTIC_REVIEW_PENDING' and r.scope['attempt'] == 2)
+            bound = calls[3]['existing_bound_reviewer_feedback']
+            assert second['review_repair_context'] == bound
+            assert second['review_repair_context_fingerprint'] == canonical_fingerprint(bound)
+            assert bound['previous_review_binding']['observed_receipt_id'] == observed['receipt_id']
         if first_failure == 'semantic-framed':
             from spg.providers.fulfillment_candidate import _fulfillment_wire_value
             formations = [r.scope for r in records if r.scope['stage'] == 'MODEL_RESPONSE_OBSERVED']
@@ -205,7 +220,7 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
         restored=RuntimeStore(uow.session).governance_for_subject(fingerprint)
         assert len(restored)==count
         assert [r.scope for r in restored]==[r.scope for r in records]
-    if first_failure.startswith('critic-'):
+    if first_failure in ('critic-schema', 'critic-json'):
         from copy import deepcopy
         from sqlalchemy import update
         from spg.infrastructure.persistence.runtime_store import governance_records

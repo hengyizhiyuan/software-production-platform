@@ -894,7 +894,8 @@ def _existing_consumer_contracts(capabilities):
     from spg.providers.protected_context_verifier import StaticProtectedContextVerifier
     methods = {
         "EXACT_CANDIDATE_CONTENT": ("CURRENT_CANDIDATE_CONTENT", (verify_binding_inventory,
-            StaticProtectedContextVerifier.verify_fulfillment_bindings),
+            StaticProtectedContextVerifier.verify_fulfillment_bindings,
+            StaticProtectedContextVerifier.verify),
             "Check original artifact outcomes against exact Candidate revision/tree and implementation-file source witnesses or independently verified linked Facts. A requested implementation is an outcome to prove from the resulting artifact; it does not require a separate permission capability for the act of producing it. Keep any exclusive file-change constraint at the distinct exact Git Diff consumer. Missing implementation or incomplete behavior must fail content Verification.",
             "Does not authorize execution effects, seal a Candidate, or prove future Human acceptance."),
         "EXACT_GIT_DIFF_SCOPE": ("EXACT_CHANGED_PATH_SET", (_checked_paths, evaluate_constraint_routes),
@@ -930,6 +931,32 @@ def _existing_consumer_contracts(capabilities):
                     "source_sha256": sha256(inspect.getsource(function).encode()).hexdigest()} for function in functions],
                 "evidence_requirement": proves, "does_not_prove": limitations,
                 "actual_evidence_present": False})
+            if capability["evidence_method"] == "EXACT_CANDIDATE_CONTENT":
+                # Describe the actual existing fallback, not an extra checker
+                # or a prediction that its future model judgement will pass.
+                # Direct immutable Clause/Work content is a lawful input: f is
+                # an alternative explicit proof dependency, not a universal
+                # prerequisite for checking implementation outcomes.
+                result[-1]["source_evidence_contract"] = {
+                    "owner": "EXISTING_STATIC_PROTECTED_CONTEXT_VERIFIER",
+                    "inputs": ["EXACT_CANDIDATE_REVISION_AND_TREE",
+                        "COMPLETE_BOUNDED_REGULAR_STATIC_BLOBS",
+                        "BASELINE_TO_CANDIDATE_GIT_NAME_STATUS",
+                        "ORIGINAL_SOURCE_AND_ASSIGNED_CURRENT_COMPONENT",
+                        "TASK_SCOPE_CONSTRAINTS_AND_EXCLUSIONS"],
+                    "direct_source_without_linked_facts": True,
+                    "planned_checks": ["REQUESTED_IMPLEMENTATION_OUTCOME",
+                        "IMPLEMENTATION_FILE_PRESENCE",
+                        "ORIGINAL_LITERAL_CONTENT", "STATIC_STRUCTURE",
+                        "SOURCE_ESTABLISHABLE_BEHAVIOR_AND_EXCLUSIONS"],
+                    "proof_requirement": "EXACT_IMPLEMENTATION_BLOB_WITNESSES; "
+                        "UNVERIFIABLE_WHEN_STATIC_SOURCE_IS_INSUFFICIENT",
+                    "not_established_by_this_contract": ["ACTUAL_VERIFICATION_PASS",
+                        "ARBITRARY_RUNTIME_BEHAVIOR", "RENDERED_SCREEN_COUNT",
+                        "EXECUTION_PERMISSION", "FUTURE_GOVERNANCE_ACTION"],
+                    "page_equals_file": "NOT_ASSUMED",
+                    "scope_exclusivity": "SEPARATE_COMPLETE_GIT_DIFF_OWNER",
+                }
         gate = capability["gate_ref"]
         prefix, suffix = "execution-capability:", ":denied"
         if not (gate.startswith(prefix) and gate.endswith(suffix)):
@@ -1308,6 +1335,8 @@ def _review_output_schema(inventory, candidate, *, route_scoped=False, source_co
             "Optional exact original [start,end) slice; null reuses that slice losslessly from the bound inventory. "
             "Unicode character offsets, exclusive end; never expand or repair a span.")
         if consumer_operand_checks:
+            source_entry["properties"]["consumption_checks"]["uniqueItems"] = True
+            check["properties"]["route_indices"]["uniqueItems"] = True
             # Task identity operands are authoritative. Off-scope requirements
             # remain in original quotes and false/UNRESOLVED judgements; a
             # critic cannot invent an executable target. Null quote reuses the
@@ -2031,7 +2060,8 @@ class ModelFulfillmentCandidateProvider:
             runtime.close()
 
 
-    def review(self, inventory, candidate, *, capabilities, receipt_callback=None, owner_preconditions=None):
+    def review(self, inventory, candidate, *, capabilities, receipt_callback=None, owner_preconditions=None,
+               review_feedback=None):
         """One independent semantic review; no review retry or authority verdict."""
         from spg.providers.semantic_wire import _provider_strict_output_schema
         self.last_observation = None
@@ -2052,6 +2082,27 @@ class ModelFulfillmentCandidateProvider:
                 "existing_consumer_contracts": _existing_consumer_contracts(capabilities),
                 "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
                 "components_fingerprint": fulfillment_components_fingerprint(candidate)})
+        feedback_fingerprint = None
+        if review_feedback is not None:
+            # The application Owner reconstructs the persisted lineage. The
+            # Provider independently checks the current request operands before
+            # exposing that rejected observation to the existing second critic.
+            current = review_feedback.get("current_formation_wire_binding", {}) if isinstance(review_feedback, dict) else {}
+            expected = {"inventory_fingerprint": inventory["inventory_fingerprint"],
+                "work_id": inventory["work_id"],
+                "work_reality_revision_id": inventory["work_reality_revision_id"],
+                "source_revision": inventory["source_revision"],
+                "exact_target_paths": inventory["exact_target_paths"], "attempt": 2,
+                "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
+                "components_fingerprint": fulfillment_components_fingerprint(candidate)}
+            if (not isinstance(review_feedback, dict)
+                    or review_feedback.get("contract") != "existing-independent-review-feedback-v1"
+                    or any(current.get(k) != v for k, v in expected.items())
+                    or not review_feedback.get("rejected_previous_mechanical_checks")):
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+            feedback_fingerprint = canonical_fingerprint(review_feedback)
+            review_input["existing_bound_reviewer_feedback"] = review_feedback
+            review_input["review_repair_context_fingerprint"] = feedback_fingerprint
         runtime = self.runtime_factory()
         try:
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
@@ -2214,9 +2265,27 @@ class ModelFulfillmentCandidateProvider:
                        "method cannot prove the original meaning; explain that semantic insufficiency. "
                        "Empty route_indices means an actually absent match only. Do not expand a required "
                        "method merely because another source with related provenance was rejected. "
+                       "A consumption check identifies one required consumer over its exact source span, "
+                       "not a new predicate identified only by prose. When the same existing method can "
+                       "jointly prove several original meanings over that span, use one joint check and "
+                       "preserve every meaning in the source judgement. To distinguish separate meanings, "
+                       "use their exact original subspans; never emit duplicate full-span checks or call "
+                       "a matching consumer absent merely because its semantics are insufficient. Read "
+                       "source_evidence_contract: direct original content does not require f, and static "
+                       "structure and implementation outcomes are supported where exact source witnesses "
+                       "can establish them. No actual content result or arbitrary runtime capability is "
+                       "supplied. Do not equate pages with files or invent an unsubmitted interpretation. "
                        "Neither a matching route nor a future gate supplies completed execution evidence."
                        if (owner_preconditions or {}).get("review_source_consumption_contract") ==
-                           "existing-source-consumption-proof-v2" else "")),
+                           "existing-source-consumption-proof-v2" else "")
+                    + (" The existing_bound_reviewer_feedback contains recomputed mechanical failures "
+                       "of the previous critic, bound to its original Wire, inventory, Attempt and persisted "
+                       "receipts. It supplies no correct semantic answer or approved requirement. Previous "
+                       "route ordinals refer only to the previous Candidate. Independently inspect the "
+                       "current exact Candidate and source inventory, produce all current result identities, "
+                       "and reject real semantic defects. Do not copy rejected absence claims, duplicate "
+                       "checks, invented text or old verdicts into the current review."
+                       if review_feedback is not None else "")),
                 input_text=json.dumps(review_input, ensure_ascii=False),
                 output_schema=_review_output_schema(inventory, candidate,
                     route_scoped=(owner_preconditions or {}).get("review_input_contract") in _ROUTE_SCOPED_REVIEW_INPUTS,
@@ -2230,6 +2299,8 @@ class ModelFulfillmentCandidateProvider:
                 "transport_retry_count": result.retry_count,
                 "output_sha256": sha256(result.output_text.encode()).hexdigest(),
                 "output_bytes": len(result.output_text.encode())}
+            if feedback_fingerprint is not None:
+                self.last_observation["review_repair_context_fingerprint"] = feedback_fingerprint
             if getattr(result, "output_evidence", None) is not None:
                 self.last_observation["output_evidence"] = result.output_evidence
             output, digest, count, privacy_failure = (
