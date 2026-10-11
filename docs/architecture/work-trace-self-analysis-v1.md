@@ -278,3 +278,5 @@ qualification. Production deployment requires separate authorization and exact
 source/storage/configuration checks. C3 closure is neither changed nor qualified.
 
 The timeline also admits the existing runtime-commit Owner `committed_at` field, with the same observed-byte, identity, chronology and timestamp equality gates. Rejection feedback includes bounded original rejected values at reported locations; it never supplies automatic edits or invents quotations, and preserves the retained immutable draft.
+
+Original inspections reuse exact previously returned field ranges and deduplicate only byte-identical projections of the same producer Owner identity. Projection metadata grants no citation authority to unread aliases; conflicting bytes remain separately inspectable. Planning feedback now reserves half the existing Native tool/inference envelope for report submission, revision and terminal result. The 12/48/600 resource envelope is unchanged.

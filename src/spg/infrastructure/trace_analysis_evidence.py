@@ -288,6 +288,7 @@ class EvidenceCatalog:
             raise ValueError("INSPECTION_REQUIRES_ORIGINAL_OWNER")
         selected, frontier, edges = [subject_evidence_id], [subject_evidence_id], []
         omitted = set()
+        projections = {}
         for _depth in range(2):
             following = []
             for source_id in frontier:
@@ -296,6 +297,12 @@ class EvidenceCatalog:
                         continue
                     relation = self.association(source_id, eid)
                     if relation["status"] != "RELATED":
+                        continue
+                    equivalent = next((prior for prior in selected
+                        if self.association(prior, eid).get("basis") == "SAME_OWNER_IDENTITY_PROJECTION"
+                        and self.records[prior]["body"] == row["body"]), None)
+                    if equivalent:
+                        projections[eid] = equivalent
                         continue
                     if len(selected) >= 12:
                         omitted.add(eid)
@@ -324,7 +331,7 @@ class EvidenceCatalog:
                     fields.append({"field": "/" + key.replace("~", "~0").replace("/", "~1"),
                                    "availability": state, "read_status": "NOT_READ_CAPACITY", "characters": len(fragment)})
                     continue
-                if already_read and (len(fragment) > 3000 or len(fragment) > remaining):
+                if already_read:
                     fields.append({"field": "/" + key.replace("~", "~0").replace("/", "~1"),
                                    "availability": state, "read_status": "READ", "previous_original_read": True})
                     continue
@@ -344,6 +351,7 @@ class EvidenceCatalog:
             rows.append({"evidence_id": eid, "group": row["group"], "pointer": row["pointer"],
                          "fields": fields, "semantics": row["semantics"]})
         result = {"subject_evidence_id": subject_evidence_id, "records": rows, "edges": edges,
+                  "identical_owner_projections": projections,
                   "omitted_records": sorted(omitted), "scope": "EXPLICIT_EXPORTED_OWNER_REFERENCES_UP_TO_TWO_HOPS",
                   "boundary": "Retrieval links are not causal proof or transitive incident identity; absence in one record does not establish absence in another."}
         unread = [(r["evidence_id"], f["field"]) for r in rows for f in r["fields"] if f["read_status"] != "READ"]
@@ -623,11 +631,11 @@ class EvidenceCatalog:
                           if f["field"] in critical and f["read_status"] != "READ"]
                 if (unread or inspection["omitted_records"]) and finding.epistemic_status != "UNKNOWN":
                     errors.append(CitationRejected("UNREAD_LINKED_OWNER_FIELDS_REQUIRE_UNKNOWN_OR_ORIGINAL_READ", ["findings", index, "epistemic_status"], subject_id))
-                inspected_groups = {r["group"] for r in inspection["records"]}
+                inspected_groups = {OWNER_GROUP_PROJECTIONS.get(r["group"], r["group"]) for r in inspection["records"]}
                 for field in ("scope_check_ids", "uncertainty_check_ids"):
                     for cid in getattr(finding, field):
                         check = self.checks.get(str(cid))
-                        if check and check["group"] and check["group"] not in inspected_groups:
+                        if check and check["group"] and OWNER_GROUP_PROJECTIONS.get(check["group"], check["group"]) not in inspected_groups:
                             errors.append(CitationRejected("CHECK_OWNER_SCOPE_NOT_ASSOCIATED_WITH_FINDING; split unrelated Owner gaps", ["findings", index, field], subject_id))
             if subject_id not in self.observed:
                 errors.append(CitationRejected("FINDING_SUBJECT_NOT_OBSERVED", ["findings", index, "subject_evidence_id"], subject_id))

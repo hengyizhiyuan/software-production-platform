@@ -28,7 +28,7 @@ def snapshot(work_id=None):
 def report(catalog):
     row = next(r for r in catalog.records.values() if r["group"] == "work")
     catalog.read(row["evidence_id"])
-    inspection = catalog.inspect(row["evidence_id"])
+    inspection = next((item for item in catalog.inspections.values() if item["subject_evidence_id"] == row["evidence_id"]), None) or catalog.inspect(row["evidence_id"])
     fact = {"statement": "Work is completed", "citations": [
         {"evidence_id": row["evidence_id"], "quote": "COMPLETED"}]}
     return {"work_id": catalog.snapshot["work_id"], "original_objective": fact,
@@ -72,6 +72,7 @@ class NativeModel:
     """Scripted test model; never represented as live-model qualification."""
     def __init__(self, snap, *, reject_first=False, bad_terminal=False):
         self.catalog = EvidenceCatalog(snap)
+        self.catalog.seed()  # Mirror the original initial inspection returned by the service.
         self.reject_first, self.bad_terminal = reject_first, bad_terminal
         self.requests = []
 
@@ -866,7 +867,7 @@ def test_recovery_projection_preserves_owner_identity_and_semantics():
     assert c.association(original, projected)["basis"] == "SAME_OWNER_IDENTITY_PROJECTION"
     assert c.association(original, unrelated)["status"] == "NOT_ESTABLISHED"
     assert c.records[original]["semantics"] == c.records[projected]["semantics"]
-    assert projected in {r["evidence_id"] for r in c.inspect(original)["records"]}
+    assert c.inspect(original)["identical_owner_projections"][projected] == original
 
 
 @pytest.mark.parametrize("family", ["DELIVERY_TRANSFER", "PREVIEW_HTTP", "EXECUTION_RELATIONSHIP"])
@@ -1031,3 +1032,26 @@ def test_runtime_commit_time_uses_only_observed_original_owner_field():
     r["timeline"][0]["timestamp"]="2026-10-05T13:00:00+00:00"
     with pytest.raises(ValueError,match="TIMELINE_TIME_DOES_NOT_MATCH_OWNER_FIELD"):
         c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+def test_inspection_reuses_only_actually_read_original_fields():
+    c=EvidenceCatalog(snapshot());eid=c.add("execution_effects","/fixture/commands",{"id":str(uuid4()),"semantic_input":{"argv":["generic-command","--flag"],"cwd":"."}})
+    first=c.inspect(eid);before=list(c.observed_excerpts[eid]);second=c.inspect(eid)
+    field=lambda result:next(f for r in result["records"] if r["evidence_id"]==eid for f in r["fields"] if f["field"]=="/semantic_input")
+    assert "generic-command" in field(first)["original_excerpt"]
+    assert field(second)["read_status"]=="READ" and field(second)["previous_original_read"] is True
+    assert "original_excerpt" not in field(second) and c.observed_excerpts[eid]==before
+    other=c.add("execution_effects","/fixture/unread",{"id":str(uuid4()),"semantic_input":{"argv":["different-command"]}})
+    assert "different-command" in next(f for r in c.inspect(other)["records"] if r["evidence_id"]==other for f in r["fields"] if f["field"]=="/semantic_input")["original_excerpt"]
+
+
+def test_identical_owner_projection_deduplication_never_grants_unread_alias_authority():
+    c=EvidenceCatalog(snapshot());value={"id":str(uuid4()),"signal":"arbitrary-signal","status":"VERIFIED"}
+    original=c.add("self_refine_events","/fixture/original",value);alias=c.add("recovery","/fixture/alias",value)
+    inspected=c.inspect(original)
+    assert [r["evidence_id"] for r in inspected["records"]]==[original]
+    assert inspected["identical_owner_projections"]=={alias:original}
+    assert alias not in c.observed and c.association(original,alias)["basis"]=="SAME_OWNER_IDENTITY_PROJECTION"
+    conflicting=c.add("recovery","/fixture/conflict",dict(value,status="FAILED"))
+    inspected=c.inspect(original)
+    assert conflicting in [r["evidence_id"] for r in inspected["records"]]
