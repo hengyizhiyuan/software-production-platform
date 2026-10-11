@@ -1,0 +1,28 @@
+{
+  "completed_at_utc": "2026-10-11T06:56:37.799648Z",
+  "input_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9",
+  "method": "POST",
+  "path": "/api/products",
+  "qualification_claim": "OBSERVATION_ONLY_NOT_WORK_PASS",
+  "request_body_sha256": "773f9ebd5185e26a706bf7b9e0be9b9bc0196d9dd3bade93da2a5bb66a8a57fa",
+  "response_body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "response_bytes_observed": 0,
+  "response_json_valid": false,
+  "run_id": "44e827d3-127d-4abc-b5bb-f488b7dcc8aa",
+  "runtime_identity": {
+    "api_base_url": "http://watt-c3-bindingg0g60-api-20261010:8000",
+    "api_service": "watt-c3-bindingg0g60-api-20261010",
+    "captured_at_utc": "2026-10-11T06:55:34.730050+00:00",
+    "database_name": "spg_c3_bindingg0g60_qualification_20261010",
+    "image_id": "sha256:f04fd82180952051b85f7678f05c110b5e6cff84a097a58e24aa3d8c67f047e5",
+    "isolated": true,
+    "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+    "provider_ready": true,
+    "qualification": "C3",
+    "qualification_run": "final-g0",
+    "source_revision": "9f9c94d8ebba6138d8e818ea5d368c4a376ad788"
+  },
+  "schema": "c3-normal-entry-api-observation-v1",
+  "started_at_utc": "2026-10-11T06:56:17.516792Z",
+  "transport_error_type": "TimeoutError"
+}

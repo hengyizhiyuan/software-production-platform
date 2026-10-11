@@ -1,0 +1,25 @@
+{
+  "recorded_at_utc": "2026-10-11T06:58:48.723446+00:00",
+  "run_id": "44e827d3-127d-4abc-b5bb-f488b7dcc8aa",
+  "product_name_matched": true,
+  "matching_products": [
+    {
+      "id": "dc3fe735-9137-42d5-904c-ea8c4adaf217",
+      "created_at": "2026-10-11T06:56:17.876017+00:00"
+    }
+  ],
+  "operations": {
+    "create_product": {
+      "path": "/api/products",
+      "request_body_sha256": "773f9ebd5185e26a706bf7b9e0be9b9bc0196d9dd3bade93da2a5bb66a8a57fa",
+      "started_at_utc": "2026-10-11T06:56:17.422936Z",
+      "state": "UNKNOWN_OUTCOME"
+    },
+    "submit_turn": {
+      "state": "NOT_ATTEMPTED"
+    }
+  },
+  "mutation_requests": 0,
+  "new_work_created": false,
+  "qualification_claim": "READONLY_OUTCOME_RECONCILIATION_NOT_WORK_PASS"
+}

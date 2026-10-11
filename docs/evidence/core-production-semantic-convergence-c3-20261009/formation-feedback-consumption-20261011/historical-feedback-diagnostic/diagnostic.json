@@ -1,0 +1,212 @@
+{
+  "source_revision": "881c2c303083be149594f9d79659a037853e302e",
+  "actual_image": "sha256:5b396a0edbdf230cbe1a9b0099fa2b13b8dee2cae504b96f53af1c55e6f5d7f9",
+  "work_id": "c1c0a944-4626-5ebb-9507-9dbd8aab4974",
+  "inventory_fingerprint": "6908ea702c03019f2a47adb3c90e54b124cb16358d7a609e8b19ed34724fed9b",
+  "attempts": [
+    {
+      "attempt": 1,
+      "request_receipt_id": "6bd4a79f-a3df-4f94-8eaa-a0b20b5da80b",
+      "response_receipt_id": "b13ac0cd-e309-4c8c-ad14-eb96a43ec84c",
+      "historical_provider_request_id": "25fa8a05-5b74-43f3-84d3-ddfd6dde4739",
+      "source_sha256": "fa51683da2110c206cca363fd25acc52e956461f2f3bdfb6fd644e80dd71f18f",
+      "constructed_input_sha256": "91d44513504061e91b14fbc21e79893dadec7aecfd2e7429eac5cc6f1d6f4cfb",
+      "constructed_instructions_sha256": "7f134cb029856913f73edebc8a906f1cd94d19c177b7d9d933905cda0bd7d381",
+      "input_utf8_bytes": 82112,
+      "instructions_utf8_bytes": 12487,
+      "schema_bytes": 9211,
+      "provider_compacted_schema_bytes": 8031,
+      "constructed_payload_field_bytes": {
+        "immutable_inventory": 12934,
+        "existing_ir_item_table": 4153,
+        "existing_capability_contracts": 2608,
+        "existing_consumer_contracts": 12602,
+        "owner_source_preconditions": 38515,
+        "owner_rows_location": 61,
+        "same_basis_validation_feedback": 4,
+        "temporary_wire": 10917,
+        "semantic_selection_input_contract": 45
+      },
+      "feedback_exactly_delivered_to_generate_boundary": true,
+      "feedback_type_at_boundary": "NoneType",
+      "request_schema_matches_historical_receipt": true,
+      "input_during_historical_http_send": "NO_INDEPENDENT_RAW_HTTP_RECEIPT; RECONSTRUCTED_FROM_EXACT_SOURCE_AND_PERSISTED_ARGUMENTS",
+      "failure_on_original_wire_decode": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "historical_actual_usage": {
+        "cached_tokens": 2176,
+        "input_tokens": 35479,
+        "output_tokens": 2506,
+        "reasoning_tokens": 0,
+        "total_tokens": 37985,
+        "unknown": false
+      }
+    },
+    {
+      "attempt": 2,
+      "request_receipt_id": "4baeb97d-ffc4-46a9-bbf8-38cc30af2fc7",
+      "response_receipt_id": "760f23d1-d1fa-4c27-b040-365554ea6dda",
+      "historical_provider_request_id": "5276ca7e-cccf-4f2b-87aa-694f716977f8",
+      "source_sha256": "fa51683da2110c206cca363fd25acc52e956461f2f3bdfb6fd644e80dd71f18f",
+      "constructed_input_sha256": "84eb535d2e5814b5366db66752e54beb3a9b9aec8ca2d35d716a2d48e845bfa5",
+      "constructed_instructions_sha256": "7f134cb029856913f73edebc8a906f1cd94d19c177b7d9d933905cda0bd7d381",
+      "input_utf8_bytes": 116045,
+      "instructions_utf8_bytes": 12487,
+      "schema_bytes": 9211,
+      "provider_compacted_schema_bytes": 8031,
+      "constructed_payload_field_bytes": {
+        "immutable_inventory": 12934,
+        "existing_ir_item_table": 4153,
+        "existing_capability_contracts": 2608,
+        "existing_consumer_contracts": 12602,
+        "owner_source_preconditions": 38515,
+        "owner_rows_location": 61,
+        "same_basis_validation_feedback": 33937,
+        "temporary_wire": 10917,
+        "semantic_selection_input_contract": 45
+      },
+      "feedback_exactly_delivered_to_generate_boundary": true,
+      "feedback_type_at_boundary": "str",
+      "request_schema_matches_historical_receipt": true,
+      "input_during_historical_http_send": "NO_INDEPENDENT_RAW_HTTP_RECEIPT; RECONSTRUCTED_FROM_EXACT_SOURCE_AND_PERSISTED_ARGUMENTS",
+      "failure_on_original_wire_decode": null,
+      "historical_actual_usage": {
+        "cached_tokens": 2432,
+        "input_tokens": 48154,
+        "output_tokens": 2605,
+        "reasoning_tokens": 0,
+        "total_tokens": 50759,
+        "unknown": false
+      },
+      "feedback_sha256": "19c43b6bef8706e1cf34b4b4c2022e3eb83e5a2be5f0d17dcac1ca4f6437b701",
+      "feedback_utf8_bytes": 31741,
+      "feedback_json_string_value_bytes": 33937,
+      "feedback_encoded_as_json_string": true,
+      "feedback_decodable": true,
+      "feedback_binding": {
+        "work_id": "c1c0a944-4626-5ebb-9507-9dbd8aab4974",
+        "work_reality_revision_id": "a2a5f56d-0add-5bd8-aa7b-f0b83d6dd4a2",
+        "inventory_fingerprint": "6908ea702c03019f2a47adb3c90e54b124cb16358d7a609e8b19ed34724fed9b",
+        "source_revision": "37c2ff226ea0381e34f06537ee5adfdce600016b",
+        "exact_target_paths": [
+          "index.html"
+        ],
+        "attempt": 1,
+        "wire_output_fingerprint": "3611d3f98e05145ff2994ff6e3463db96bec43a4bd7484f1a916077c36912fa6",
+        "request_receipt_id": "6bd4a79f-a3df-4f94-8eaa-a0b20b5da80b",
+        "response_receipt_id": "b13ac0cd-e309-4c8c-ad14-eb96a43ec84c",
+        "owner_repair_context_contract": "existing-owner-preconditions-v2",
+        "completion_feedback_contract": "existing-bounded-completion-feedback-v1",
+        "owner_source_preconditions_fingerprint": "ccba54a7cba5a307d424f7b9c898dd1c0c9d7f89a72acfb1f41852db00f17e32",
+        "wire_presentation": {
+          "contract": "existing-lossless-json-frame-v1",
+          "representation": "ORIGINAL_JSON_VALUE",
+          "original_wire_sha256": "3611d3f98e05145ff2994ff6e3463db96bec43a4bd7484f1a916077c36912fa6",
+          "original_wire_bytes": 8844,
+          "inner_character_range": [
+            0,
+            8844
+          ],
+          "inner_utf8_byte_range": [
+            0,
+            8844
+          ],
+          "inner_sha256": "3611d3f98e05145ff2994ff6e3463db96bec43a4bd7484f1a916077c36912fa6",
+          "inner_bytes": 8844,
+          "disposition": "DERIVED_REPRESENTATION_ONLY; ALL_VALIDATION_AND_AUTHORITY_GATES_REQUIRED"
+        },
+        "provider_wire_version": "fulfillment-compact-v1",
+        "wire_request_fingerprint": "964822164540a786c7423532a254495ce981745dada8b2bdae7757cca284c946",
+        "wire_table_fingerprint": "b4a6e9748269a0db9bf54f9806f2ff5fea8f2b1731f5f5f5df104e15a4b7a126",
+        "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+        "candidate_fingerprint": null
+      },
+      "feedback_has_original_owner_context": true,
+      "instruction_explicitly_requires_feedback_inspection": true,
+      "instruction_explicitly_separates_u_from_f": true,
+      "repeated_operand_failures": [
+        {
+          "source": 11,
+          "original_failed_predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "previous_operands": {
+            "s": 11,
+            "c": 6,
+            "u": [],
+            "t": [
+              0
+            ]
+          },
+          "second_operands": [
+            {
+              "route": 15,
+              "s": 11,
+              "c": 6,
+              "u": [],
+              "t": [
+                0
+              ]
+            }
+          ],
+          "correspondence_prerequisites": {
+            "observed_ordinals": [],
+            "minimal_support_sets": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                4
+              ],
+              [
+                5
+              ]
+            ],
+            "allowed_original_source_ordinals": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ]
+          }
+        },
+        {
+          "source": 17,
+          "original_failed_predicate": "OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT",
+          "previous_operands": {
+            "s": 17,
+            "c": 0,
+            "u": [],
+            "t": [
+              0
+            ]
+          },
+          "second_operands": [
+            {
+              "route": 21,
+              "s": 17,
+              "c": 0,
+              "u": [],
+              "t": [
+                0
+              ]
+            }
+          ],
+          "correspondence_prerequisites": null
+        }
+      ],
+      "model_internal_reason_for_nonconsumption": "UNKNOWN"
+    }
+  ],
+  "new_model_calls": 0,
+  "historical_mutations": 0,
+  "qualification": "READONLY_FEEDBACK_CONSUMPTION_DIAGNOSTIC_NOT_G0_PASS"
+}

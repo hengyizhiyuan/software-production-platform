@@ -1,0 +1,23 @@
+{
+  "recorded_at_utc": "2026-10-11T07:20:21.997808+00:00",
+  "database": "spg_c3_bindingg0g60_qualification_20261010",
+  "scope": "ENTIRE_NEW_ISOLATED_DATABASE_FOR_THIS_SINGLE_G0_NOT_PRODUCTION",
+  "actual_readonly_counts": {
+    "software_products": 1,
+    "product_works": 1,
+    "production_runs": 0,
+    "production_work_units": 0,
+    "execution_attempts": 0,
+    "provider_execution_reports": 0,
+    "verification_records": 0,
+    "baseline_candidates": 0,
+    "human_authorizations": 0,
+    "runtime_commits": 0,
+    "repository_integration_effects": 0,
+    "work_delivery_manifests": 0
+  },
+  "query_exit_code": 0,
+  "model_calls": 0,
+  "owner_mutations": 0,
+  "coverage_limit": "Authoritative database records only; does not claim complete external side-effect audit"
+}

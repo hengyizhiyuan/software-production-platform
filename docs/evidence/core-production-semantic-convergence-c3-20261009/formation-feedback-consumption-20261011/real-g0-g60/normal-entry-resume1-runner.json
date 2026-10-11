@@ -1,0 +1,21 @@
+{
+  "recorded_at_utc": "2026-10-11T07:09:38.101510+00:00",
+  "exit_code": 137,
+  "work_id": "d75b35a4-0862-5df7-abdf-0441c63d29d1",
+  "product_id": "dc3fe735-9137-42d5-904c-ea8c4adaf217",
+  "interaction_id": "0d062b9b-679b-4553-bc80-715aa23ede89",
+  "driver_status": null,
+  "latest_observation": {
+    "automatic_progression_state": "STOPPED",
+    "current_production_run_id": null,
+    "current_work_reality_revision_id": "b13da71d-6734-5f39-bb48-a76988dffa16",
+    "human_attention_required": false,
+    "interaction_id": "0d062b9b-679b-4553-bc80-715aa23ede89",
+    "status": "COMPLETED",
+    "turn_id": "4f0e1e3d-1830-4d4e-a90a-5ed14c65dd08",
+    "work_complete": false,
+    "work_id": "d75b35a4-0862-5df7-abdf-0441c63d29d1",
+    "work_status": "READY"
+  },
+  "qualification_claim": "OBSERVATION_ONLY_NOT_WORK_PASS"
+}

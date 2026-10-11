@@ -1,0 +1,17 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 152.21788164391182,
+  "image_id": "sha256:5b396a0edbdf230cbe1a9b0099fa2b13b8dee2cae504b96f53af1c55e6f5d7f9",
+  "container_id": "8e2e74bd2fb519f6bfff7a07de4fcc8c8c962def8a4aa946fbbae61f81c828d7",
+  "source_overlay": true,
+  "snapshot_sha256": "12aa24f537293fb3cf75f2132d5d1d7f47a68933c257ab9b3c06648ee9be2d81",
+  "nodes": [
+    "tests/test_c3_formation_repair_consumption.py",
+    "tests/test_c3_fulfillment_wire_feedback.py",
+    "tests/test_c3_reviewed_fact_method_applicability.py",
+    "tests/test_c3_source_consumption_proof.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

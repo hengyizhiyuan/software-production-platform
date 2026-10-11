@@ -1,0 +1,42 @@
+{
+  "work_id": "d75b35a4-0862-5df7-abdf-0441c63d29d1",
+  "work_reality_revision_id": "b13da71d-6734-5f39-bb48-a76988dffa16",
+  "source_assessment_id": "017f3510-8b18-4c5c-b9a2-1f20e3dbba5c",
+  "original_constraints_unchanged": true,
+  "owner_snapshot_sha256": "0f6a456f7925a7f1027ff2e722cda2e6b404a762477f7aee0d9810a4cc60d44a",
+  "records": [
+    {
+      "work_constraint_index": 5,
+      "source_ref": "work-constraint:b13da71d-6734-5f39-bb48-a76988dffa16:5",
+      "work_constraint_sha256": "5577e77f1035d1a0960c99cdc44761e92fa7f6a95f2140e881eb62c722ce246c",
+      "exact_admission_derivations": [
+        {
+          "semantic_ir_id": "9b396caf-3589-55d6-986e-46af5d23cd38",
+          "ir_item_id": "pi-index-html-qualification",
+          "field": "production.exclusions",
+          "original_index": 0,
+          "original_exclusion_value": "Deployment",
+          "value_sha256": "870a8ffd98f4f2bd5041ee4cebde82de4bdeb253fac88c5469a2f15f15614186"
+        }
+      ]
+    },
+    {
+      "work_constraint_index": 6,
+      "source_ref": "work-constraint:b13da71d-6734-5f39-bb48-a76988dffa16:6",
+      "work_constraint_sha256": "75decd71cd127e9006eafc189dfbc102c1fbfa19fbd5c6c7fd34d2c3c246f5d7",
+      "exact_admission_derivations": [
+        {
+          "semantic_ir_id": "9b396caf-3589-55d6-986e-46af5d23cd38",
+          "ir_item_id": "pi-index-html-qualification",
+          "field": "production.exclusions",
+          "original_index": 1,
+          "original_exclusion_value": "Publishing",
+          "value_sha256": "26c81739396ded64cabd5481d0302c3529a2e34eff31057461fc02dbcc936ec1"
+        }
+      ]
+    }
+  ],
+  "qualification": "READONLY_PRIMARY_SOURCE_ORIGIN_PROOF_NOT_CANDIDATE_ADMISSION",
+  "model_calls": 0,
+  "work_mutations": 0
+}

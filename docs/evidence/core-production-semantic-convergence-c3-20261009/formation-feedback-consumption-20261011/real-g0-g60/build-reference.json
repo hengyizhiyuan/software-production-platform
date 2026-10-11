@@ -1,0 +1,57 @@
+{
+  "schema": "c3-exact-image-build-v1",
+  "started_at_utc": "2026-10-11T06:40:16.200485+00:00",
+  "ended_at_utc": "2026-10-11T06:44:09.688053+00:00",
+  "wall_seconds": 233.4876825530082,
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "9f9c94d8ebba6138d8e818ea5d368c4a376ad788",
+      "tree": "60811093c9a7cdf209d3d18a93ec2c2996cf7b26"
+    },
+    "guardian": {
+      "revision": "88f5ac35a6d48fb1aace24f94a2100708864e0be",
+      "tree": "e9e1d88889dff69979a79e4c2638d036a1dfcc6b"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "command": [
+    "docker",
+    "build",
+    "--network=none",
+    "--build-arg",
+    "BASE_IMAGE=watt-c3-continuation-dependency-base:6c1f48e-20261009",
+    "--build-arg",
+    "WATT_REVISION=9f9c94d8ebba6138d8e818ea5d368c4a376ad788",
+    "--build-arg",
+    "WATT_TREE=60811093c9a7cdf209d3d18a93ec2c2996cf7b26",
+    "--build-arg",
+    "GUARDIAN_REVISION=88f5ac35a6d48fb1aace24f94a2100708864e0be",
+    "--build-arg",
+    "GUARDIAN_TREE=e9e1d88889dff69979a79e4c2638d036a1dfcc6b",
+    "--build-arg",
+    "ECF_REVISION=5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "--build-arg",
+    "ECF_TREE=878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "-f",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation60-qualified-20261010/final-image/context/watt/docs/evidence/core-production-semantic-convergence-c3-20261009/Dockerfile.c3",
+    "-t",
+    "watt-c3-source-owner:9f9c94d",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation60-qualified-20261010/final-image/context"
+  ],
+  "source_overlay": false,
+  "real_model_calls": 0,
+  "scope": "C3 existing bounded Formation feedback consumption guidance and safe request identity observation; unchanged Wire, source contracts, validator, budgets, permissions and Owners; deterministic qualification only",
+  "image": {
+    "Id": "sha256:f04fd82180952051b85f7678f05c110b5e6cff84a097a58e24aa3d8c67f047e5",
+    "RepoDigests": [],
+    "Created": "2026-10-11T14:43:21.194163648+08:00"
+  }
+}

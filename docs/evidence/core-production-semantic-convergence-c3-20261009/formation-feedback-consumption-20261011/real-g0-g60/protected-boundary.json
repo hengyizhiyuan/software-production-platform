@@ -1,0 +1,11 @@
+{
+  "recorded_at_utc": "2026-10-11T07:17:38.440262+00:00",
+  "production_checkout_head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+  "production_main_ref": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+  "production_refs_unchanged": true,
+  "historical_g57_export_sha256": "fa51683da2110c206cca363fd25acc52e956461f2f3bdfb6fd644e80dd71f18f",
+  "historical_g57_export_bytes_unchanged": true,
+  "new_database": "spg_c3_bindingg0g60_qualification_20261010",
+  "production_mutations_by_this_task": false,
+  "holdout_unsealed": false
+}

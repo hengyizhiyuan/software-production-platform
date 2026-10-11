@@ -1,0 +1,12 @@
+{
+  "files": [
+    {
+      "file": "real-g0-g60/direct-isolated-stage-counts.json",
+      "sha256": "acfbd83fdf61e355d556283035f2849a13d4d20cf9b5a233c53985d7efdb56b1",
+      "bytes": 778,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation60-qualification-20261010/evidence/direct-isolated-stage-counts.json"
+    }
+  ],
+  "archive_sha256": "87a9f9dde5770b691bf624b98aa3d1c5c46f420421d02eb9f62d640959c8a0cc",
+  "private_artifacts_included": false
+}

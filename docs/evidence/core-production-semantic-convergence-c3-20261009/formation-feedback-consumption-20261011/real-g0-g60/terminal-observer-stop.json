@@ -1,0 +1,15 @@
+{
+  "recorded_at_utc": "2026-10-11T07:09:38.067122+00:00",
+  "work_id": "d75b35a4-0862-5df7-abdf-0441c63d29d1",
+  "automatic_stop_observed": true,
+  "terminal_receipt_id": "f9c1d69a-99b6-4759-a1d1-bf931451cb1c",
+  "terminal_reason": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+  "owner_snapshot_sha256": "0f6a456f7925a7f1027ff2e722cda2e6b404a762477f7aee0d9810a4cc60d44a",
+  "observer_container_id": "d9b3a0d8f760661b732f88369d236a4bc6590b4c5e14fda8ba2f8dcbc2cd14b4",
+  "observer_previously_running": true,
+  "action": "stop only completed trial GET observer after authoritative terminal export",
+  "work_cancelled": false,
+  "api_worker_coordinator_unchanged": true,
+  "provider_interruption_claim": false,
+  "qualification_claim": "FAILED_SEMANTIC_REVIEW_NOT_WORK_PASS"
+}

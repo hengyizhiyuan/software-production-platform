@@ -1,0 +1,16 @@
+{
+  "recorded_at_utc": "2026-10-11T06:59:32.346918+00:00",
+  "original_driver_status": "POST_OUTCOME_REQUIRES_READ_ONLY_RECONCILIATION",
+  "original_transport_error": "TimeoutError",
+  "original_state_sha256": "a47ff9580efb3d3644a33a378d6a7fb2a80e2aa007cbe729393d36697547db0c",
+  "product_id": "dc3fe735-9137-42d5-904c-ea8c4adaf217",
+  "run_id": "44e827d3-127d-4abc-b5bb-f488b7dcc8aa",
+  "source": "9f9c94d8ebba6138d8e818ea5d368c4a376ad788",
+  "image": "sha256:f04fd82180952051b85f7678f05c110b5e6cff84a097a58e24aa3d8c67f047e5",
+  "create_product_repeated": false,
+  "submit_turn_previously_attempted": false,
+  "recovery": "Existing normal entry exact Product read-only reconciliation; submit only previously unattempted Turn; continue same original qualification",
+  "timeout_budget_changed": false,
+  "maximum_total_new_work": 1,
+  "human_authorization_written": false
+}

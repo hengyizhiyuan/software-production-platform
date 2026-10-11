@@ -1,0 +1,17 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 119 items
+
+tests/test_c3_formation_repair_consumption.py ........                   [  6%]
+tests/test_c3_fulfillment_wire_feedback.py ............................. [ 31%]
+.............                                                            [ 42%]
+tests/test_c3_reviewed_fact_method_applicability.py .................... [ 58%]
+..............                                                           [ 70%]
+tests/test_c3_source_consumption_proof.py .............................. [ 95%]
+.....                                                                    [100%]
+
+--------------------- generated xml file: /out/result.xml ----------------------
+======================= 119 passed in 124.80s (0:02:04) ========================

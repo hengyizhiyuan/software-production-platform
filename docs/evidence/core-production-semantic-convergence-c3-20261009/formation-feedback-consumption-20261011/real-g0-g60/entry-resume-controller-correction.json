@@ -1,0 +1,7 @@
+{
+  "initial_failure": "NameError_credentials_before_docker_run",
+  "source_code_unchanged": true,
+  "failed_controller_work_mutations": 0,
+  "failed_controller_model_calls": 0,
+  "repeated_product_creation": false
+}

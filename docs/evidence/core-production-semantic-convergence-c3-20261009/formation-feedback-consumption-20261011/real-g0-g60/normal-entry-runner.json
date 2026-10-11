@@ -1,0 +1,12 @@
+{
+  "schema": "c3-real-g0-once-execution-v1",
+  "started_at_utc": "2026-10-11T06:56:07.058933+00:00",
+  "source": "9f9c94d8ebba6138d8e818ea5d368c4a376ad788",
+  "image": "sha256:f04fd82180952051b85f7678f05c110b5e6cff84a097a58e24aa3d8c67f047e5",
+  "maximum_new_work": 1,
+  "authorization": "Human 2026-10-11: Formation feedback consumption and minimal recovery task; execute one real G0 on final exact source/image; preserve production/history; no Human Integration/Acceptance/Delivery authority",
+  "driver_sha256": "f8c96d0b862f105d6dee3c7b0e10b21e56644119d4a1d4f4d9b7d38885da0e9f",
+  "ended_at_utc": "2026-10-11T06:56:42.130699+00:00",
+  "exit_code": 2,
+  "qualification_claim": "OBSERVATION_ONLY_NOT_WORK_PASS"
+}

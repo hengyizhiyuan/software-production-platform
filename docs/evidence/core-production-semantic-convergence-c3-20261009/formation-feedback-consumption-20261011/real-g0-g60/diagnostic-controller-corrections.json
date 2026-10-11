@@ -1,0 +1,9 @@
+{
+  "recorded_at_utc": "2026-10-11T07:17:38.452295+00:00",
+  "failed_diagnostic1": "Invalid byte-identical replay assertion; actual request hash retained, reconstructed input byte identity unproved",
+  "superseded_diagnostic2": "Only top-level Review fingerprints checked; final diagnostic also checks all component/capability identities",
+  "authoritative_final_assessment": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation60-qualification-20261010/feedback-convergence-review-3/evidence/convergence-review.json",
+  "application_source_changed_by_diagnostics": false,
+  "model_calls_by_diagnostics": 0,
+  "owner_mutations_by_diagnostics": 0
+}
