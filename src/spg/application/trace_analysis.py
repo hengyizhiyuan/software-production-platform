@@ -52,6 +52,11 @@ Distinguish recovered incidents from current blockers and later unrelated demand
 Classify model variance, capability defect, governance issue or UNKNOWN. Valid
 citations are observed evidence UUIDs with verbatim short quotes. Root causes are
 hypotheses requiring repository citations; absent code/evidence means UNKNOWN.
+For each causal mechanism, read/search its relevant producer implementation and
+cite an EXACT_SOURCE_EXCERPT. A final Work diff is supplemental net-change evidence,
+not implementation evidence for a Watt validator or diagnostic producer. Read the
+actual condition that records a signal; do not infer candidate rejection, required
+regeneration or mutation from a recording condition or diagnostic label alone.
 Give fact, analysis, uncertainty, recommendation and regression qualification for
 each finding. Provide recovery, Self-Refine, platform improvement and deferred
 recommendations. Explicitly discuss missing raw logs and snapshot/source limits.

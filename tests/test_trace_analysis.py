@@ -1055,3 +1055,17 @@ def test_identical_owner_projection_deduplication_never_grants_unread_alias_auth
     conflicting=c.add("recovery","/fixture/conflict",dict(value,status="FAILED"))
     inspected=c.inspect(original)
     assert conflicting in [r["evidence_id"] for r in inspected["records"]]
+
+
+@pytest.mark.parametrize("operation",["read","search","diff"])
+def test_root_cause_requires_implementation_excerpt_not_only_final_net_changes(operation):
+    c=EvidenceCatalog(snapshot());r=report(c)
+    base={"repository":"arbitrary-repository","revision":"a"*40}
+    value=base|({"path":"src/example.py","blob":"b"*40,"content":"10: record_signal(condition)"} if operation=="read" else {"matches":"a:src/example.py:10: record_signal(condition)"} if operation=="search" else {"changed_paths":["src/example.py"],"patch":"+record_signal(condition)"})
+    eid=c.add("repository","/fixture/source",value,repository=True);c.read(eid)
+    r["findings"][0].update(epistemic_status="ROOT_CAUSE_HYPOTHESIS",analysis="假设：若该条件成立，则该实现可能产生诊断；历史实现身份保持 UNKNOWN。",repository_citations=[{"evidence_id":eid,"quote":"record_signal(condition)"}])
+    if operation=="diff":
+        with pytest.raises(ValueError,match="ROOT_CAUSE_REQUIRES_IMPLEMENTATION_EXCERPT"):
+            c.materialize_boundaries(AnalysisReport.model_validate(r))
+    else:
+        c.materialize_boundaries(AnalysisReport.model_validate(r))

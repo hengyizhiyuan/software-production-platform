@@ -103,7 +103,13 @@ def source_semantics(group, value, repository):
                                 "platform_improvement_candidate_ref": "PROPOSAL_REFERENCE_NOT_VERIFIED_DEFECT"},
                 "boundary": "Signals and recovery are recorded Owner diagnoses. Required/rejected/expected behavior lists do not establish executed file changes or the contents of an unavailable rejected candidate. Budget attempt_count and convergence fields do not independently prove model call counts or successful regeneration; inspect original steps/calls and producer source. Execution receipts and exact candidate source/diff are separate observations; causal interpretation remains hypothetical. Known-match/recurring labels and proposal references alone do not establish repeated executions, a reproducible failure or an implementation defect."}
     if repository:
+        source_kind = ("EXACT_SOURCE_EXCERPT" if isinstance(value, dict) and
+            (all(k in value for k in ("repository", "revision", "path", "blob", "content")) or
+             all(k in value for k in ("repository", "revision", "matches"))) else
+            "FINAL_NET_DIFF" if isinstance(value, dict) and "changed_paths" in value else
+            "UNCLASSIFIED_COMPARISON")
         return {"surface": "COMMITTED_REPOSITORY", "families": families,
+                "source_kind": source_kind,
                 "boundary": "Exact source at the declared revision is comparison evidence, not historical Worker identity. A final diff proves net changes between the two commits, not the absence of intermediate mutations or external effects; it alone cannot justify rollback decisions or a regeneration history."}
     if not repository and isinstance(value, dict) and any(key in value for key in RELATION_FIELDS):
         families.append("EXECUTION_RELATIONSHIP")
@@ -659,6 +665,10 @@ class EvidenceCatalog:
                     citation(c, ["findings", index, "repository_citations", i], repository=True)
                 except CitationRejected as error:
                     errors.append(error)
+            if (finding.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and
+                    not any(self.records.get(str(c.evidence_id), {}).get("semantics", {}).get("source_kind") ==
+                            "EXACT_SOURCE_EXCERPT" for c in finding.repository_citations)):
+                errors.append(CitationRejected("ROOT_CAUSE_REQUIRES_IMPLEMENTATION_EXCERPT; read/search the relevant producer implementation or retain UNKNOWN; a final diff alone cannot establish its mechanism", ["findings", index, "repository_citations"], subject_id))
         findings = {f.finding_id: f for f in report.findings}
         for section in ("immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"):
             for index, item in enumerate(getattr(report, section)):

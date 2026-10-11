@@ -89,7 +89,8 @@ class Finding(AnalysisRecord):
     fact: ObservedFact
     analysis: str = Field(min_length=1, max_length=4000,
         description="ROOT_CAUSE_HYPOTHESIS must start with '假设：若' and use conditional causal language. Owner diagnosis/expected/rejected-behavior lists are not proof of executed effects or an unavailable candidate's contents.")
-    repository_citations: tuple[Citation, ...] = Field(default=(), max_length=8)
+    repository_citations: tuple[Citation, ...] = Field(default=(), max_length=8,
+        description="Root cause hypotheses require an observed EXACT_SOURCE_EXCERPT from repository.read/search of the relevant implementation. A final diff proves net changes only and cannot alone ground a validation/recording mechanism. Keep the cause UNKNOWN without implementation evidence.")
     uncertainty: str = Field(min_length=1, max_length=12000,
         description="Use INSPECTED_OWNER_BOUNDARY. The verifier derives presentation text only from the registered subject inspection and uncertainty_check_ids. Exact canonical boundary text is also accepted. No free-form absence claims.")
     recommendation: str = Field(min_length=1, max_length=3000)
