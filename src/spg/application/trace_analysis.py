@@ -62,6 +62,9 @@ Distinguish collection presence/non-emptiness in a producer condition from a
 behavior being executed or a listed violation actually occurring. Explain the
 literal read condition; a populated diagnostic list does not prove its entries
 occurred. Repository content contains exact source text with separate line metadata.
+Identify the enclosing implementation correctly: a caller's exception handler is
+not a handler inside the called parser. Keep fact.statement as a substantive
+observation of cited original fields. Boundary markers are never fact statements.
 Give fact, analysis, uncertainty, recommendation and regression qualification for
 each finding. Provide recovery, Self-Refine, platform improvement and deferred
 recommendations. Explicitly discuss missing raw logs and snapshot/source limits.

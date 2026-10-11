@@ -58,6 +58,12 @@ class ObservedFact(AnalysisRecord):
     evidence_family: EvidenceFamily = Field(default=EvidenceFamily.OWNER_RECORD,
         description="Declare PREVIEW_HTTP for preview GET/status/digest claims, DELIVERY_TRANSFER for download audits, EXECUTION_RELATIONSHIP for identity linkage. Citation text from another surface cannot prove this fact.")
 
+    @model_validator(mode="after")
+    def fact_requires_original_observation(self):
+        if self.statement.strip() in {"CHECKED_FIELD_SCOPE", "INSPECTED_OWNER_BOUNDARY", "ORIGINAL_OWNER_TIME_BOUNDARY"}:
+            raise ValueError("FACT_REQUIRES_ORIGINAL_OBSERVATION; boundary markers belong only to checked analysis/uncertainty/assessment fields. Describe the cited original positive fields, not a placeholder; factual prose is never automatically repaired.")
+        return self
+
 
 class TimelineItem(ObservedFact):
     stage: Literal["INTENT", "CONTEXT", "PLANNING", "EXECUTION", "VERIFICATION",

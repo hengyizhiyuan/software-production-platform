@@ -264,6 +264,17 @@ def test_root_cause_and_governance_classification_are_not_promoted_without_evide
         AnalysisReport.model_validate(r)
 
 
+@pytest.mark.parametrize("marker", ["CHECKED_FIELD_SCOPE", "INSPECTED_OWNER_BOUNDARY", "ORIGINAL_OWNER_TIME_BOUNDARY"])
+def test_scope_presentation_marker_cannot_replace_original_fact(marker):
+    c = EvidenceCatalog(snapshot())
+    r = report(c)
+    r["findings"][0]["fact"]["statement"] = marker
+    with pytest.raises(ValueError, match="FACT_REQUIRES_ORIGINAL_OBSERVATION"):
+        AnalysisReport.model_validate(r)
+    r["findings"][0]["fact"]["statement"] = "Original Work state is COMPLETED"
+    c.validate(AnalysisReport.model_validate(r))
+
+
 def test_exact_repository_read_ignores_dirty_worktree_and_denies_secrets(tmp_path):
     import subprocess
     def git(*args):
