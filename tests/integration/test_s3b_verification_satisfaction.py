@@ -412,6 +412,33 @@ def test_s3b_09_verification_unknown(
     assert result.admissibility.outcome is ProductionAdmissibilityOutcome.NOT_ADMISSIBLE
 
 
+def test_corrected_verifier_version_appends_proof_without_rewriting_failed_subject(
+    postgres_database: Database, git_repository: Path, tmp_path: Path,
+) -> None:
+    facts = _build(postgres_database, git_repository, tmp_path)
+    snapshot = _snapshot(facts)
+    failed = facts.verification.verify_obligation(snapshot.id, OBLIGATION_A,
+        _provider({OBLIGATION_A: VerificationResultValue.FAIL}, version="old-consumer"))
+    blocked = facts.verification.evaluate_admissibility(snapshot.id)
+    assert blocked.admissibility.outcome is ProductionAdmissibilityOutcome.NOT_ADMISSIBLE
+    corrected_provider = _provider({OBLIGATION_A: VerificationResultValue.PASS}, version="corrected-consumer")
+    corrected = facts.verification.verify_obligation(snapshot.id, OBLIGATION_A, corrected_provider)
+    assert corrected.id != failed.id and corrected.proposed_snapshot_id == failed.proposed_snapshot_id
+    assert corrected.tree_identity == failed.tree_identity
+    assert facts.verification.verify_obligation(snapshot.id, OBLIGATION_A, corrected_provider) == corrected
+    for obligation in facts.spine.work_unit.completion_contract.verification_obligations:
+        if obligation != OBLIGATION_A:
+            facts.verification.verify_obligation(snapshot.id, obligation,
+                _provider({obligation: VerificationResultValue.PASS}, version="corrected-consumer"))
+    admitted = facts.verification.evaluate_admissibility(snapshot.id)
+    assert admitted.admissibility.outcome is ProductionAdmissibilityOutcome.ADMISSIBLE
+    with postgres_database.unit_of_work() as uow:
+        store = RuntimeStore(uow.session)
+        assert store.verification_record(failed.id) == failed
+        assert store.production_admissibility_by_basis(blocked.admissibility.basis_fingerprint) == blocked.admissibility
+    assert admitted.work_unit.condition is WorkUnitCondition.SATISFIED
+
+
 def test_s3b_10_missing_verification_blocks_satisfaction(
     postgres_database: Database,
     git_repository: Path,

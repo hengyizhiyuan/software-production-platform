@@ -480,10 +480,10 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
         if str(binding.fact_id) == str(reference.fact_id)) for reference in references}
     dependencies = linked_component_dependencies(references, bindings)
     linked_components = set(dependencies)
-    # A reviewed open content SCOPE, or a mixed Fact, has a current
-    # content contribution. A mixed Fact also has a separate
-    # pending Candidate gate. Consume its exact current component through the
-    # existing content Owner, never ask a static checker to prove future Seal.
+    # A reviewed current content binding selects the existing content Owner.
+    # The original relation/Scope or presence of a future gate must not select
+    # a different consumer. Keep directly executable checks as additional
+    # evidence; an actual content mismatch cannot be repaired by a model verdict.
     from spg.application.governed_obligations import (
         _FACT_METHOD_APPLICABILITY_CONTRACTS, validate_fulfillment_projection)
     receipt = (bindings[0].formation_receipt or {}) if bindings else {}
@@ -492,10 +492,13 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
         for row in receipt.get("candidate_attempts", ()) if row.get("stage") == "MODEL_REQUEST_PENDING")
     component_facts = {identity for identity, routes in routes_by_fact.items()
         if negotiated and identity not in linked_components
-        and (any(b.phase.value == "CANDIDATE_SEAL" for b in routes)
-            or next(ref for ref in references if str(ref.fact_id) == identity).relation.value == "SCOPE")
         and any(b.phase.value == "CURRENT_VERIFICATION" and b.evidence_method == "EXACT_CANDIDATE_CONTENT"
             and b.component_basis is not None for b in routes)}
+    direct_checks = verify_static_html_semantic_facts(repository, request.proposed_commit_identity,
+        contract, tuple(ref for ref in references if str(ref.fact_id) in component_facts),
+        admitted_facts=admitted_facts, plan_repair=None)
+    direct_checks = tuple(check for check in direct_checks
+        if check["disposition"] != "UNVERIFIABLE_CURRENT")
     component_checks = ()
     if component_facts:
         validate_fulfillment_projection(bindings, revision, ir,
@@ -511,7 +514,7 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
         for binding in routes_by_fact[str(reference.fact_id)]))
     checked = verify_static_html_semantic_facts(repository, request.proposed_commit_identity,
         contract, content, admitted_facts=admitted_facts, plan_repair=plan_repair)
-    by_id = {check["fact_id"]: check for check in checked}
+    by_id = {check["fact_id"]: check for check in (*checked, *direct_checks)}
     changed = _checked_paths(repository, contract.source_revision, request.proposed_commit_identity)
     targets = tuple(target.path for target in contract.exact_targets)
     result = []

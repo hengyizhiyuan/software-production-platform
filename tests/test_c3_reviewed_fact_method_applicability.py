@@ -180,7 +180,8 @@ def test_existing_model_boundary_negotiates_persists_and_replays_same_contract_w
 
 @pytest.mark.parametrize('seal', (True, False))
 @pytest.mark.parametrize('content', ('correct', 'wrong', 'missing-consumer', 'missing-source'))
-def test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal(tmp_path, content, seal):
+@pytest.mark.parametrize('relation', (SemanticRelation.SCOPE, SemanticRelation.EQUALITY))
+def test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal(tmp_path, content, seal, relation):
     import subprocess
     from types import SimpleNamespace
     from uuid import uuid4
@@ -189,6 +190,10 @@ def test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_futur
     from spg.providers.protected_context_verifier import StaticProtectedContextVerifier
     from spg.infrastructure.model_runtime import StructuredModelResult, ModelProvider, ModelUsage, ModelTiming
     rev, ir, inv, plan = case(mixed=True)
+    original = rev.engineering_semantic_facts[0]
+    rev.engineering_semantic_facts = (original.model_copy(update={
+        'relation': relation, 'scope': 'qualified current production',
+        'qualifiers': {'count': '1'}}), *rev.engineering_semantic_facts[1:])
     if not seal:
         plan = plan.model_copy(update={'routes': tuple(r for r in plan.routes if r.capability != 'CANDIDATE_SEAL')})
     def git(*args):
@@ -256,6 +261,71 @@ def test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_futur
         assert len(result[0]['current_component_evidence'])==1
         assert result[0]['current_component_evidence'][0]['candidate_revision']==candidate
         assert all(b['phase']=='CURRENT_VERIFICATION' for b in verification_calls[0]['assigned_fulfillment_bindings'])
+
+
+@pytest.mark.parametrize('content', ('correct', 'wrong'))
+def test_reviewed_current_binding_keeps_direct_content_rejection_despite_model_pass(tmp_path, content):
+    """Independent witness presence must not override a mechanical mismatch."""
+    import subprocess
+    import json
+    from types import SimpleNamespace
+    from uuid import uuid4
+    from spg.domain.engineering_semantics import semantic_fact_reference
+    from spg.providers.managed_context_fulfillment import verify_fulfillment_fact_routes
+    from spg.providers.protected_context_verifier import StaticProtectedContextVerifier
+    from spg.infrastructure.model_runtime import StructuredModelResult, ModelProvider, ModelUsage, ModelTiming
+    rev, ir, inv, plan = case(mixed=True)
+    fact = rev.engineering_semantic_facts[0]
+    rev.engineering_semantic_facts = (fact.model_copy(update={
+        'relation': SemanticRelation.EQUALITY, 'scope': 'index.html',
+        'value': 'Exact requested visible content', 'qualifiers': {'element': 'h1'}}),
+        *rev.engineering_semantic_facts[1:])
+    plan = plan.model_copy(update={'routes': tuple(r for r in plan.routes if r.capability != 'CANDIDATE_SEAL')})
+    def git(*args):
+        return subprocess.check_output(['git', '-C', str(tmp_path), *args], text=True).strip()
+    git('init', '-q')
+    git('-c', 'user.name=Qualification', '-c', 'user.email=qualification@example.invalid',
+        'commit', '--allow-empty', '-qm', 'baseline')
+    baseline = git('rev-parse', 'HEAD'); rev.source_revision = baseline
+    inv = a.fulfillment_inventory(rev, ir, source_revision=baseline, exact_target_paths=inv['exact_target_paths'])
+    plan = plan.model_copy(update={'inventory_fingerprint': inv['inventory_fingerprint']})
+    provider, _ = controlled_model_provider(inv, plan)
+    bindings = a.form_fulfillment_projection(rev, ir, provider=provider,
+        source_revision=baseline, exact_target_paths=inv['exact_target_paths'])
+    (tmp_path/'index.html').write_text('<h1>' + ('Exact requested visible content' if content == 'correct'
+        else 'Wrong content') + '</h1>', encoding='utf-8')
+    git('add', 'index.html')
+    git('-c', 'user.name=Qualification', '-c', 'user.email=qualification@example.invalid', 'commit', '-qm', 'candidate')
+    ref = semantic_fact_reference(rev.engineering_semantic_facts[0], work_revision_id=rev.id)
+    request = SimpleNamespace(proposed_commit_identity=git('rev-parse', 'HEAD'), tree_identity=git('rev-parse', 'HEAD^{tree}'),
+        verification_identity=uuid4(), snapshot_id=uuid4(), source_baseline_id=uuid4(),
+        decision_context_fingerprint='a'*64, semantic_fact_obligations=(ref,),
+        fulfillment_bindings=bindings, protected_context_obligations=())
+    task = SimpleNamespace(task_contract_id=uuid4(), objective='controlled goal', scope='controlled scope',
+        constraints=(), out_of_scope=(), decision_context=SimpleNamespace(
+            package_fingerprint=request.decision_context_fingerprint, protected_obligations=()))
+    contract = SimpleNamespace(source_revision=baseline, allowed_areas=(),
+        exact_targets=(SimpleNamespace(path='index.html'),))
+    calls = []
+    def runtime_factory():
+        def generate(**kwargs):
+            payload = json.loads(kwargs['input_text']); calls.append(payload)
+            checks = [{'context_class': o['context_class'], 'semantic_key': o['semantic_key'],
+                'disposition': 'SATISFIED', 'reason': 'Controlled inaccurate semantic approval',
+                'witnesses': [{'path': 'index.html', 'quote': payload['candidate_sources']['index.html']}]}
+                for o in payload['protected_obligations']]
+            return StructuredModelResult(output_text=json.dumps({'checks': checks}), provider=ModelProvider.DEEPSEEK,
+                requested_model='controlled', effective_model='controlled', request_id='controlled-direct',
+                usage=ModelUsage(unknown=True), timing=ModelTiming())
+        return SimpleNamespace(generate=generate, registry=SimpleNamespace(close=lambda: None))
+    result = verify_fulfillment_fact_routes(repository=tmp_path, request=request, contract=contract,
+        references=(ref,), admitted_facts={str(ref.fact_id): rev.engineering_semantic_facts[0]},
+        revision=rev, ir=ir, baseline=SimpleNamespace(repository_revision=baseline), bindings=bindings,
+        plan_repair=None, static_verifier=StaticProtectedContextVerifier(runtime_factory), task=task)
+    assert result[0]['passed'] is (content == 'correct')
+    assert result[0]['materialization']['repair_attempts'] == 0
+    assert len(calls) == 1 and result[0]['current_component_evidence'][0]['passed'] is True
+    assert result[0]['future_evidence_status'] is None
 
 
 @pytest.mark.parametrize('drift', (None,'missing-revision','wrong-tree','wrong-source','wrong-target','missing-digest'))
