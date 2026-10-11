@@ -1,0 +1,13 @@
+{
+  "qualification": "EXACT_INSTALLED_IMAGE_ZERO_MODEL_HISTORICAL_TERMINAL_REPLAY",
+  "work_id": "a3938a73-9da7-5ba3-9056-6df739122a99",
+  "snapshot_sha256": "a4bc8434d2afa99f3a383266d8f8d65147bb7cc4be02d83297eb31a8b6c81676",
+  "inventory_fingerprint": "718ebcd5f83d2d6c49c0e0184bd2e52a5288b936f4b06b05c811c3bcbb288023",
+  "historical_terminal_reason": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+  "historical_receipts_unchanged": true,
+  "historical_marker_upgrade_rejected": true,
+  "model_calls": 0,
+  "work_mutations": 0,
+  "source_overlay": false,
+  "independent_semantic_review": false
+}

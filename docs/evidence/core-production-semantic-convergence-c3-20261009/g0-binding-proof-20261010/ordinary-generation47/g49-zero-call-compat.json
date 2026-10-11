@@ -1,0 +1,116 @@
+{
+  "mode": "overlay",
+  "actual_model_calls": 0,
+  "network": "none",
+  "original_basis_sha256": "363db92ebe6c8530436a33d90044ff34af44d156ce3c74a89825ad608e465217",
+  "inventory_fingerprint": "1155ee88bc3e3e7a8d72dd85556fb1e2d863d1f78e0db3450b5639f3e017a4f2",
+  "candidate_fingerprint": "af319906542f62517d28c4c7983dfe19a296d3f559c55461b299d51753e5b50d",
+  "original_owner_fingerprint": "6f1f963a6494e6b0cec585d22418e604cbd3605d5a4613cf0fd5ad87ac56451a",
+  "captures": {
+    "input_text": {
+      "sha256": "b7a33a3a820079df5f7ad07fd1ecdfa2465223f60f2858f75bb4120dbf1b2711",
+      "bytes": 127534
+    },
+    "instructions": {
+      "sha256": "06277bd27627b16f0948c49afa83d969dbc8a31c2fe0651306e469ce9f5e19f9",
+      "bytes": 10628
+    },
+    "output_schema": {
+      "sha256": "fbde434ca03e8ad1ceb38a87cf8d7975e5ca534057bdbbb479efb8ca7969ceea",
+      "bytes": 75934
+    }
+  },
+  "new_marker_reference_lossless": true,
+  "new_marker_captures": {
+    "input_text": {
+      "sha256": "7f3b81f8412b7a7158b0077909c81d1f9fdb455eccd82418567be35cccabceb8",
+      "bytes": 135906
+    },
+    "instructions": {
+      "sha256": "8a6344156c7dca78d2ba4456a469257ea797cd2be803ec88c38c26f005789fd5",
+      "bytes": 11668
+    },
+    "output_schema": {
+      "sha256": "9b600870de0f56442ac09e57b66d600165aa32fbe828696f87fe77f5d9e9b206",
+      "bytes": 122692
+    }
+  },
+  "counterfactual": {
+    "result": "OBLIGATION_FACT_SCOPE_VALUE_MISMATCH",
+    "proposals": [
+      {
+        "source": 3,
+        "source_ref": "semantic-fact:dce2d768-250d-548b-9427-d2078bfbf63c",
+        "route_index": 25,
+        "capability": "GIT_DIFF_SCOPE",
+        "method": "EXACT_GIT_DIFF_SCOPE",
+        "phase": "CURRENT_VERIFICATION",
+        "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+        "linked_fact_refs": [],
+        "support_refs": [
+          "ir-constraint:c-4:cl-7"
+        ],
+        "original_quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6"
+      },
+      {
+        "source": 9,
+        "source_ref": "ir-constraint:c-3:cl-6",
+        "route_index": 26,
+        "capability": "ARTIFACT_CONTENT",
+        "method": "EXACT_CANDIDATE_CONTENT",
+        "phase": "CURRENT_VERIFICATION",
+        "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+        "linked_fact_refs": [
+          "semantic-fact:493b7684-7510-5948-b80c-ee96f551962e",
+          "semantic-fact:0148028d-8d24-5c92-9506-19c56976bf5a"
+        ],
+        "support_refs": [
+          "ir-constraint:c-3:cl-6"
+        ],
+        "original_quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb"
+      },
+      {
+        "source": 13,
+        "source_ref": "work-constraint:2512755e-fc60-540d-b35b-40c257b5b2c7:2",
+        "route_index": 27,
+        "capability": "ARTIFACT_CONTENT",
+        "method": "EXACT_CANDIDATE_CONTENT",
+        "phase": "CURRENT_VERIFICATION",
+        "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+        "linked_fact_refs": [
+          "semantic-fact:493b7684-7510-5948-b80c-ee96f551962e",
+          "semantic-fact:0148028d-8d24-5c92-9506-19c56976bf5a"
+        ],
+        "support_refs": [
+          "ir-constraint:c-3:cl-6"
+        ],
+        "original_quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb"
+      }
+    ],
+    "route_count": 28,
+    "candidate_fingerprint": "d95e9e60fbcbe65fd5b327fc4864ba9c8e41d8700e3ce7f9f54c83546b221f98",
+    "historical_candidate_fingerprint_unchanged": "af319906542f62517d28c4c7983dfe19a296d3f559c55461b299d51753e5b50d",
+    "semantic_review_generated": false,
+    "actual_owner_evidence_generated": false,
+    "admitted": false,
+    "new_facts": false,
+    "new_permissions": false
+  },
+  "new_marker_owner_fingerprint": "4ba3ae8d4f00626e2d7a7ef412349aef12cd34cd9c1f4062f54813969bfbc9bc",
+  "legacy_exact_comparison": {
+    "input_text": true,
+    "instructions": true,
+    "output_schema": true
+  },
+  "original_actual_request_comparison": {
+    "input_text": true,
+    "instructions": true,
+    "output_schema": true
+  },
+  "overlay_files": {
+    "domain.py": "6374f4cd6b71bc01fdac6778afe7b11dc68acd4e30dcdc179e002d3ecf4b868c",
+    "application.py": "8c47de4d56eb6af9221ab33f0160542d496345c17a487647fbdd1e3da6ef014e",
+    "provider.py": "da094e59ac15e293420a844f33a86f8256657f79367b745eb6087d66c1df4e2b"
+  },
+  "result": "ZERO_CALL_COMPATIBILITY_AND_NECESSARY_OWNER_PROOF"
+}

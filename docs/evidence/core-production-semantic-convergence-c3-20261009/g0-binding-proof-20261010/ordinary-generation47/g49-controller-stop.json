@@ -1,0 +1,21 @@
+{
+  "result": "CONTROLLER_PRE_PROVIDER_PERMISSION_STOP",
+  "qualification_id": "1c0c6dcd-b445-4b6c-94b1-c52b68273047",
+  "actual_model_calls": 0,
+  "actual_http_transmissions": 0,
+  "provider_initialized": false,
+  "review_wire_exists": false,
+  "source": "8becd1ff3f8389ebeb401794ca44f8bce9adac19",
+  "tree": "555553b66a10aeeb6e6e289412d8514c404b76ec",
+  "actual_image": "sha256:dd811c2b993ee421c94269af2e975effa0642b86155cd3a392e9c61ea6aed5c1",
+  "container_id": "3bed1fdbde7c8daf4fcd66688deab679084e414df72df163523b64c2ca17fb78",
+  "private_log_sha256": "8448a3da9882aaabd4c70c03e81d309d4fb96d8c20ca3db36697d3e502c0a5a3",
+  "started_file_owner_uid": 0,
+  "started_file_owner_gid": 0,
+  "started_file_mode": "0o600",
+  "execution_uid": 10001,
+  "failure_boundary": "Read independent qualification identity before Settings/provider factory initialization",
+  "semantic_result": "NOT_EVALUABLE",
+  "budget_used": 0,
+  "history_modified": false
+}

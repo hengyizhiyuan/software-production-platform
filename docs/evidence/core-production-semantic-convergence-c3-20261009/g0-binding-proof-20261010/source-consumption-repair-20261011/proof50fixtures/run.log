@@ -1,0 +1,18 @@
+........................................................................ [ 28%]
+........................................................................ [ 56%]
+........................................................................ [ 85%]
+......................................                                   [100%]
+=============================== warnings summary ===============================
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers0]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers1]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers2]
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+254 passed, 3 warnings in 164.60s (0:02:44)

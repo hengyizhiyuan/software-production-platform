@@ -1,0 +1,105 @@
+{
+  "snapshot_sha256": "363db92ebe6c8530436a33d90044ff34af44d156ce3c74a89825ad608e465217",
+  "inventory_fingerprint": "1155ee88bc3e3e7a8d72dd85556fb1e2d863d1f78e0db3450b5639f3e017a4f2",
+  "original_candidate_fingerprint": "af319906542f62517d28c4c7983dfe19a296d3f559c55461b299d51753e5b50d",
+  "results": [
+    {
+      "source": 3,
+      "source_ref": "semantic-fact:dce2d768-250d-548b-9427-d2078bfbf63c",
+      "capability": "GIT_DIFF_SCOPE",
+      "original_quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+      "linked_fact_refs": [],
+      "support_refs": [
+        "ir-constraint:c-4:cl-7"
+      ],
+      "predicate": "PASS_NECESSARY_OWNER_BINDING_ONLY",
+      "owner": "VERIFICATION",
+      "method": "EXACT_GIT_DIFF_SCOPE",
+      "phase": "CURRENT_VERIFICATION",
+      "state": "BOUND_PENDING_EVIDENCE",
+      "negative_provenance_qualified": true,
+      "literal_scope_path_count": 4,
+      "literal_scope_equals_fact_values": true,
+      "literal_scope_equals_authorized_targets": false,
+      "qualifiers_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "scope_value_sha256": "e5ae883873ae141180b3fff297dc23a61187f53a8bfe09300c14729600df749e",
+      "prohibition_conditions": {
+        "same_support_as_original_deny": true,
+        "scope_relation": true,
+        "confirmed": true,
+        "human_explicit": true,
+        "negative_clause": true,
+        "current_clause": true,
+        "source_record_matches_fact": true,
+        "human_clause_item": true,
+        "original_contribution_substring": true
+      },
+      "legacy_marker_absent_predicate": "OBLIGATION_FACT_SCOPE_VALUE_MISMATCH"
+    },
+    {
+      "source": 9,
+      "source_ref": "ir-constraint:c-3:cl-6",
+      "capability": "ARTIFACT_CONTENT",
+      "original_quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+      "linked_fact_refs": [
+        "semantic-fact:493b7684-7510-5948-b80c-ee96f551962e",
+        "semantic-fact:0148028d-8d24-5c92-9506-19c56976bf5a"
+      ],
+      "support_refs": [
+        "ir-constraint:c-3:cl-6"
+      ],
+      "predicate": "PASS_NECESSARY_OWNER_BINDING_ONLY",
+      "owner": "VERIFICATION",
+      "method": "EXACT_CANDIDATE_CONTENT",
+      "phase": "CURRENT_VERIFICATION",
+      "state": "BOUND_PENDING_EVIDENCE",
+      "legacy_marker_absent_predicate": "PASS_NECESSARY_OWNER_BINDING_ONLY"
+    },
+    {
+      "source": 13,
+      "source_ref": "work-constraint:2512755e-fc60-540d-b35b-40c257b5b2c7:2",
+      "capability": "ARTIFACT_CONTENT",
+      "original_quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+      "linked_fact_refs": [
+        "semantic-fact:493b7684-7510-5948-b80c-ee96f551962e",
+        "semantic-fact:0148028d-8d24-5c92-9506-19c56976bf5a"
+      ],
+      "support_refs": [
+        "ir-constraint:c-3:cl-6"
+      ],
+      "predicate": "PASS_NECESSARY_OWNER_BINDING_ONLY",
+      "owner": "VERIFICATION",
+      "method": "EXACT_CANDIDATE_CONTENT",
+      "phase": "CURRENT_VERIFICATION",
+      "state": "BOUND_PENDING_EVIDENCE",
+      "legacy_marker_absent_predicate": "PASS_NECESSARY_OWNER_BINDING_ONLY"
+    }
+  ],
+  "actual_model_calls": 0,
+  "http_requests": 0,
+  "review_generated": false,
+  "actual_evidence_generated": false,
+  "history_mutated": false,
+  "full_semantic_qualification": false,
+  "full_28_route_plan": {
+    "result": "PASS_NECESSARY_OWNER_PLAN_REVIEW_AND_ACTUAL_EVIDENCE_PENDING",
+    "route_count": 28,
+    "candidate_fingerprint": "d95e9e60fbcbe65fd5b327fc4864ba9c8e41d8700e3ce7f9f54c83546b221f98",
+    "original_candidate_unchanged": "af319906542f62517d28c4c7983dfe19a296d3f559c55461b299d51753e5b50d",
+    "new_owner_fingerprint": "9b01aea7cb5acba3cea167d929db5ebad508da3453e6fda9373b4ba53c06fc98",
+    "admitted": false,
+    "semantic_review_generated": false,
+    "actual_evidence_generated": false
+  },
+  "overlay_files": {
+    "domain.py": "6374f4cd6b71bc01fdac6778afe7b11dc68acd4e30dcdc179e002d3ecf4b868c",
+    "application.py": "fb92ea766a6e98ef2528ef1e135e334726f0f9b3b36071b18fbee06537e1c831",
+    "consumer.py": "8009413b2a502d222c65418a51c6f2512fe761bfe443a656c98d061c740e6b5e",
+    "provider.py": "918b818af66a70197896aca97772bebc9a162041d4c13d90684633e9c5e06184"
+  },
+  "base_image": "sha256:dd811c2b993ee421c94269af2e975effa0642b86155cd3a392e9c61ea6aed5c1",
+  "source_overlay_qualified_image": false
+}

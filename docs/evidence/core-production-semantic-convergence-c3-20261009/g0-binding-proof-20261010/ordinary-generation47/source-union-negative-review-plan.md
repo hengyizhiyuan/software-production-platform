@@ -47,3 +47,11 @@ New independent root:
 - `evidence/`: preflight identities, actual Docker image/container observation, safe live result including all source/component predicates, usage and stop reason.
 
 The original snapshot remains at the ordinary47 persistent Owner export. Preparation and controlled checks do not establish runtime semantic PASS, C3 Closure, Human authorization or Assurance.
+
+## Generation49 mechanical identity update
+
+Generation48 preparation is retained. The test-only fixture revision is now `8becd1ff3f8389ebeb401794ca44f8bce9adac19`, tree `555553b66a10aeeb6e6e289412d8514c404b76ec`, actual image `sha256:dd811c2b993ee421c94269af2e975effa0642b86155cd3a392e9c61ea6aed5c1`. Git comparison confirms that the sole changed file is the Provider-failure test; application/build/dependency inputs are unchanged.
+
+New recovery root uses `g0-binding-generation49-qualified-20261010/ordinary47-source-union-negative-review`. Its network-disabled, credential-free preflight exited 0 on that actual Docker image. The original inventory, all twenty sources, twenty-five routes and candidate fingerprint match exactly; the original and freshly derived Owner fingerprints remain separately recorded. Preflight receipt SHA256 is `48be97b6840c361101917d265f1795301d5e4a6663c73b7707e9dc88687a1530`.
+
+No model call occurred. Installed/PG receipts and parent readiness remain required before the one live Review. Qualification predicates and budgets have not changed. The safe preparation receipt is `negative-review-generation49-preparation.json` beside this document.

@@ -1,0 +1,21 @@
+......................F..........                                        [100%]
+=================================== FAILURES ===================================
+_ test_negative_scope_values_never_become_positive_allowlist_and_actual_diff_stays_exact _
+tests/test_c3_source_consumption_proof.py:232: in test_negative_scope_values_never_become_positive_allowlist_and_actual_diff_stays_exact
+    assert _exact_fact_git_scope(reference, binding, ("index.html",), ("index.html",),
+E   AssertionError: assert False
+E    +  where False = <function _exact_fact_git_scope at 0x7f05f0c65080>(SemanticFactReference(fact_id=UUID('d216c856-a23e-435e-a19b-e0f8438d409b'), subject='unchanged-excluded-paths', relati...<SemanticEpistemicStatus.CONFIRMED: 'CONFIRMED'>, source_work_revision_id=UUID('9a2e3835-15b4-41bd-beaa-6bf455c14ebc')), FulfillmentBinding(fact_id=UUID('d216c856-a23e-435e-a19b-e0f8438d409b'), source_kind=<FulfillmentSourceKind.FACT: 'FAC... boundary.', linked_fact_refs=('semantic-fact:d216c856-a23e-435e-a19b-e0f8438d409b',)), state='BOUND_PENDING_EVIDENCE'), ('index.html',), ('index.html',), revision=namespace(id=UUID('9a2e3835-15b4-41bd-beaa-6bf455c14ebc'), work_id=UUID('fa18896c-5eb4-43de-8c05-b9bc82af0077'), sourc...bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', source_revision='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), ir=namespace(id=UUID('9ae9cd99-48c5-4d2a-823e-204a5a463d14'), items=(SemanticItem(item_id='governed-boundary', kind=<Sema...nce_required=True, delivery_authorized=False, unresolved=(), unresolved_arguments=()),), legacy_typed_projection=False), bindings=(FulfillmentBinding(fact_id=UUID('a03f9bf7-8c0d-4dcb-85f2-c41c1ddee3f2'), source_kind=<FulfillmentSourceKind.FACT: 'FA... source_component_quote='后续集成必须等待 Human 明确授权；现在仅准备可审查的候选。', linked_fact_refs=()), state='BOUND_PENDING_EVIDENCE'), ...))
+=============================== warnings summary ===============================
+tests/test_c3_semantic_contract_calibration.py::test_negative_file_component_preserves_original_exclusion_and_requires_real_diff
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_c3_source_consumption_proof.py::test_negative_scope_values_never_become_positive_allowlist_and_actual_diff_stays_exact
+1 failed, 32 passed, 1 warning in 15.05s

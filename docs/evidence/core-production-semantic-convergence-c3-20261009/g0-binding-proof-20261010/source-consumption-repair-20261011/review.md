@@ -1,0 +1,46 @@
+# Ordinary G0 Source Consumption Repair — active engineering checkpoint
+
+Status: IN PROGRESS; C3 remains PARTIAL. No new G0 or Holdout executed for this repair.
+
+## Grounded root cause
+
+The isolated generation49 independent review of the immutable generation47 unadmitted plan returned all-positive source/component judgments. Source3 lacked its own Git scope consumer; Source9 and Source13 lacked current content consumers. Actual private review reasons borrowed unsubmitted global routes and future Seal preconditions. Input fields were present. This is a newly observed Review false release, not a historical Review event: the original generation47 attempt stopped before Review.
+
+Source4 is an affirmative nominal/background production description, not an extra HTML title. Its conditional background disposition must remain lawful when actual current Facts are protected. The earlier contract refusal and the new model/Review errors are distinct.
+
+## Minimal seam
+
+The existing independent Review proposes source-consumption checks: exact original [start,end), optional exact quote (null reuses the bound slice), required existing capability/method/phase/paths, and actual existing route indices. The unchanged Formation Wire, Fact IDs and inventory remain authoritative. Owner validates actual route coverage and component-local declared f dependencies; provenance u and future gate preconditions are not current proof. No semantic keyword inference or preselected verdict is inserted. Positive source judgments without the required proof fail.
+
+This representation is opt-in via request-bound `review_source_consumption_contract=existing-source-consumption-proof-v1`, using the current v5 Review input. Old canonical Review records and schema are preserved without the marker. New markers, Review results and repair feedback remain attached to the original request/Attempt/receipt identity. No new Owner, coordinator, Formation stage, permission, Wire revision or budget is introduced.
+
+## Qualification boundaries
+
+Structured references prove correspondence, not semantic correctness of the critic's proposed required capability. Independent source and component equivalence judgments remain mandatory. The known ordinary negative candidate must be rejected for Source3/9/13 while Source4 stays lawful before a new ordinary G0 is started. The sealed Holdout is not implementation input.
+
+Development regressions use declared overlays and cannot qualify the final image. First directed run: 107/108 PASS; one test expected a nonexistent error classification while the actual existing semantic rejection was correct. Immutable failure receipt retained. Corrected directed run plus two component-local proof negatives: 110/110 PASS. Wider regression and fresh isolated PostgreSQL validation are running; exact installed-image qualification is still pending.
+
+## Recoverable locations
+
+All historical generation47/49 private inputs and provider receipts remain on the ECS persistent C3 root. Development receipts: `/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/binding-boundaries-proof50a-20261011`, `binding-boundaries-proof50b-20261011`, `binding-boundaries-proof50full-20261011` and `source-consumption-pg-dev50-20261011`. Public sanitized results are versioned alongside this review. Original Work, Human Decisions, production main and services remain unchanged.
+
+## Scope polarity and persisted consumer correction
+
+The ordinary47 original Source3 is confirmed Human-explicit SCOPE with exact negative Clause10 provenance. The old Scope predicate parsed its four prohibition values as a positive repository allowlist and rejected a necessary lawful Git consumer before negative disposition. New request-bound source-consumption requests reuse the existing negative-source proof and Task exact targets; old requests retain their original refusal. No Fact value, qualifier, quote, target or authority changes.
+
+The actual Scope consumer revalidates the entire projection, independent Review, original Wire and receipt lineage. It reads the formation receipt from the first binding, as the existing persistence contract requires, and requires the particular binding to belong to that validated plan. Missing provenance, wrong source/revision, expanded paths and missing complete receipts remain refusals. Directed scope regression: 33/33 PASS before the final binding-membership and missing-receipt negatives; the latter are included in exact-image qualification.
+
+The independent zero-call 28-route counterfactual proves lawful necessary bindings for Source3/9/13 and full-plan structural eligibility. It is not a real generated/admitted candidate or independent Review success.
+
+## Preserved development failures
+
+- `proof50full`: 774/828 PASS, 54 failures. Controlled legacy model fixtures omitted the newly required proof; one UNRESOLVED disposition was prematurely reclassified. Fixtures now derive proofs from the actual request. Explicit UNRESOLVED remains an accurate disposition and is blocked by the existing runtime admission gate, never counted fulfilled.
+- `proof50fixtures`: 254/254 PASS for those affected boundaries.
+- `pg-dev50`: 42/43 PASS; the one UNRESOLVED classification failure used the earlier immutable code snapshot. The new durable consumption-proof rejection/feedback lineage test passed. Fresh exact-image PostgreSQL qualification is required.
+- `proof50scope`: six fixture construction failures used a nonexistent modality enum; corrected to the lawful existing REQUEST enum.
+- `proof50scope2/3/4`: each retained one actual-consumer refusal and helped isolate the existing first-binding receipt convention; no authority or evidence bypass was introduced.
+- `proof50scope5`: 33/33 PASS. All prior failures and their exact input hashes remain preserved.
+
+## Frozen implementation
+
+Watt source `9c8463c10c7c04b9f429663ad4b5ad368d69722d`, tree `00f84c8691c69439cb463aba56bb7c88af9aa09f`. Guardian `76c1e87a1b29d151f4ed949748e3298f2169c5b1`; ECF `5aa4f8833c359c15bd059eda5972aa3915bcc18c`. Installed-image, fresh PostgreSQL, ordinary negative Review and real G0 qualifications remain pending at this checkpoint. No old test result qualifies this frozen implementation by itself.

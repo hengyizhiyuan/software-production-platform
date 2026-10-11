@@ -1,0 +1,27 @@
+................F....................................................... [ 66%]
+....................................                                     [100%]
+=================================== FAILURES ===================================
+___ test_negative_semantic_verdict_remains_failure_without_fabricated_checks ___
+tests/test_c3_source_consumption_proof.py:105: in test_negative_semantic_verdict_remains_failure_without_fabricated_checks
+    with pytest.raises(ValueError, match="SEMANTIC_SOURCE_MISMATCH"): validate(plan, inv, raw)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'SEMANTIC_SOURCE_MISMATCH'
+E     Actual message: 'OBLIGATION_SEMANTIC_COMPONENT_MISMATCH'
+=============================== warnings summary ===============================
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[small]
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[medium]
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[complex]
+  tests/test_c3_fulfillment_capacity_representation.py:167: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize('scale', ('small','medium','complex'))
+
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[small]
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[medium]
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[complex]
+  tests/test_c3_fulfillment_capacity_representation.py:237: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_c3_source_consumption_proof.py::test_negative_semantic_verdict_remains_failure_without_fabricated_checks
+1 failed, 107 passed, 6 warnings in 45.31s

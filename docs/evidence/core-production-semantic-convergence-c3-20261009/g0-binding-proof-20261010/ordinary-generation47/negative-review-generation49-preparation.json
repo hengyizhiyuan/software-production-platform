@@ -1,0 +1,27 @@
+{
+  "status": "MECHANICAL_REBIND_PREFLIGHT_PASS_NO_MODEL",
+  "source": "8becd1ff3f8389ebeb401794ca44f8bce9adac19",
+  "tree": "555553b66a10aeeb6e6e289412d8514c404b76ec",
+  "actual_image": "sha256:dd811c2b993ee421c94269af2e975effa0642b86155cd3a392e9c61ea6aed5c1",
+  "predecessor": "generation48/ordinary47-source-union-negative-review/control/preparation.json",
+  "preflight_sha256": "48be97b6840c361101917d265f1795301d5e4a6663c73b7707e9dc88687a1530",
+  "candidate_fingerprint": "af319906542f62517d28c4c7983dfe19a296d3f559c55461b299d51753e5b50d",
+  "inventory_fingerprint": "1155ee88bc3e3e7a8d72dd85556fb1e2d863d1f78e0db3450b5639f3e017a4f2",
+  "model_calls": 0,
+  "source_count": 20,
+  "route_count": 25,
+  "network": "none",
+  "provider_credentials_mounted": false,
+  "original_owner_preconditions_fingerprint": "c0098e595d4b7f9d119cb2fa3cd3208d02e7464bcebde0270e17b1786e83d4ab",
+  "review_owner_preconditions_fingerprint": "6f1f963a6494e6b0cec585d22418e604cbd3605d5a4613cf0fd5ad87ac56451a",
+  "files": [
+    {
+      "name": "negative_review47_union.py",
+      "sha256": "a04c1b9760f6a8b3b6109bef96bc200faef7b0d1865c56c88678c6d5f3a9ca9a"
+    },
+    {
+      "name": "launch_review.py",
+      "sha256": "75d119ed23c765af37101ecdb5cded99ca8a90337cad84075fc5ab8e752da7d4"
+    }
+  ]
+}

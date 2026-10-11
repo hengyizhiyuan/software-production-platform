@@ -1,0 +1,20 @@
+{
+  "scope": "CONTROLLED_BOUNDARY_REGRESSION_NO_MODEL_NO_WORK",
+  "source_overlay": true,
+  "exit_code": 0,
+  "wall_seconds": 59.22642334899865,
+  "counts": {
+    "tests": 110,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "input_sha256": {
+    "src/spg/application/governed_obligations.py": "8c47de4d56eb6af9221ab33f0160542d496345c17a487647fbdd1e3da6ef014e",
+    "src/spg/providers/fulfillment_candidate.py": "ddeb86704fdf9cfc4c9818218a07d55ac2c5645833365aa6573ca32e74d5cbba",
+    "src/spg/domain/governed_obligation.py": "6374f4cd6b71bc01fdac6778afe7b11dc68acd4e30dcdc179e002d3ecf4b868c",
+    "tests/test_c3_source_consumption_proof.py": "5b005f749b8024b9ea34b53a7da5072a572f1bff08bc7d37b43f7d73ecef64a3",
+    "tests/test_c3_fulfillment_capacity_representation.py": "345fca9927bdf3510f8e29ab017e9bec861fd2140b696b1dddff3e62b317b8fd",
+    "tests/test_c3_generation_binding_prerequisites.py": "8ad53b9ca8287dae6e60b45d0f9cd6986d9c95669c0d1ee22b4edbe60db728d5"
+  }
+}

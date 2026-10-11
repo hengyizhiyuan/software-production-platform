@@ -1,0 +1,487 @@
+........................................................................ [  8%]
+...................................................................FFF.. [ 17%]
+..FFFFF....FFF.......F.................................................. [ 26%]
+...............FFFFFF................................................... [ 34%]
+....................F................................................... [ 43%]
+...........................................................FFF.......... [ 52%]
+........................................................................ [ 60%]
+...........F.........................FFFFFFFFFFF..FFFFFFFFFFFFFFFF...... [ 69%]
+........................................................................ [ 78%]
+........................................................................ [ 86%]
+........................................................................ [ 95%]
+........................FFFF........                                     [100%]
+=================================== FAILURES ===================================
+_ test_incomplete_legal_candidate_can_use_one_existing_feedback_and_replay_never_reexecutes _
+tests/test_c3_fulfillment_repair_context.py:71: in test_incomplete_legal_candidate_can_use_one_existing_feedback_and_replay_never_reexecutes
+    assert all(b.state != 'UNRESOLVED' for b in result)
+E   assert False
+E    +  where False = all(<generator object test_incomplete_legal_candidate_can_use_one_existing_feedback_and_replay_never_reexecutes.<locals>.<genexpr> at 0x7feafc1ddf20>)
+_________ test_second_incomplete_candidate_stops_without_budget_reset __________
+tests/test_c3_fulfillment_repair_context.py:83: in test_second_incomplete_candidate_stops_without_budget_reset
+    assert result[0].formation_receipt['terminal_reason'] == 'OBLIGATION_PROJECTION_UNRESOLVED'
+E   AssertionError: assert 'OBLIGATION_S...ROOF_REQUIRED' == 'OBLIGATION_P...ON_UNRESOLVED'
+E     
+E     - OBLIGATION_PROJECTION_UNRESOLVED
+E     + OBLIGATION_SOURCE_CONSUMPTION_PROOF_REQUIRED
+______ test_real_unknown_authority_does_not_open_probability_repair_slot _______
+tests/test_c3_fulfillment_repair_context.py:93: in test_real_unknown_authority_does_not_open_probability_repair_slot
+    assert result[0].formation_receipt['terminal_reason'] == 'UNRESOLVED_BINDING'
+E   AssertionError: assert 'OBLIGATION_U...ACT_PROMOTION' == 'UNRESOLVED_BINDING'
+E     
+E     - UNRESOLVED_BINDING
+E     + OBLIGATION_UNRESOLVED_FACT_PROMOTION
+_ test_incomplete_feedback_checkpoint_resumes_only_remaining_calls_on_original_basis _
+tests/test_c3_fulfillment_repair_context.py:126: in test_incomplete_feedback_checkpoint_resumes_only_remaining_calls_on_original_basis
+    assert all(b.state != 'UNRESOLVED' for b in result)
+E   assert False
+E    +  where False = all(<generator object test_incomplete_feedback_checkpoint_resumes_only_remaining_calls_on_original_basis.<locals>.<genexpr> at 0x7feafcc37100>)
+_ test_located_gap_checkpoint_resumes_only_remaining_calls_and_preserves_original_receipts _
+tests/test_c3_fulfillment_repair_context.py:201: in test_located_gap_checkpoint_resumes_only_remaining_calls_and_preserves_original_receipts
+    assert all(b.state != 'UNRESOLVED' for b in result)
+E   assert False
+E    +  where False = all(<generator object test_located_gap_checkpoint_resumes_only_remaining_calls_and_preserves_original_receipts.<locals>.<genexpr> at 0x7feafcd43850>)
+_ test_predecode_coverage_feedback_observes_full_wire_without_admitting_candidate _
+tests/test_c3_fulfillment_repair_context.py:223: in test_predecode_coverage_feedback_observes_full_wire_without_admitting_candidate
+    assert all(b.state!='UNRESOLVED' for b in result) and len(calls)==3
+E   assert (False)
+E    +  where False = all(<generator object test_predecode_coverage_feedback_observes_full_wire_without_admitting_candidate.<locals>.<genexpr> at 0x7feafc217d30>)
+_ test_historical_located_feedback_replays_exact_bytes_without_new_calls[existing-owner-typed-prerequisites-v6] _
+tests/test_c3_fulfillment_repair_context.py:237: in test_historical_located_feedback_replays_exact_bytes_without_new_calls
+    assert all(b.state!='UNRESOLVED' for b in run())
+E   assert False
+E    +  where False = all(<generator object test_historical_located_feedback_replays_exact_bytes_without_new_calls.<locals>.<genexpr> at 0x7feafc9cf100>)
+_ test_historical_located_feedback_replays_exact_bytes_without_new_calls[existing-owner-typed-prerequisites-v7] _
+tests/test_c3_fulfillment_repair_context.py:237: in test_historical_located_feedback_replays_exact_bytes_without_new_calls
+    assert all(b.state!='UNRESOLVED' for b in run())
+E   assert False
+E    +  where False = all(<generator object test_historical_located_feedback_replays_exact_bytes_without_new_calls.<locals>.<genexpr> at 0x7feafca98a00>)
+_ test_bound_original_proposal_is_available_to_one_repair_and_independent_review[small] _
+tests/test_c3_fulfillment_repair_context.py:270: in test_bound_original_proposal_is_available_to_one_repair_and_independent_review
+    assert len(calls) == 3 and all(b.state != 'UNRESOLVED' for b in result)
+E   AssertionError: assert (3 == 3 and False)
+E    +  where 3 = len([{'immutable_inventory': {'work_id': 'a6a19ff0-21c0-494f-9e30-6d959f453e9d', 'work_reality_revision_id': '27b12b5a-e31...'item_id': 'repo-observation', 'kind': 'FACT', 'statement': 'Repository observed record', 'subject': None, ...}}, ...}])
+E    +  and   False = all(<generator object test_bound_original_proposal_is_available_to_one_repair_and_independent_review.<locals>.<genexpr> at 0x7feafc9f1970>)
+_ test_bound_original_proposal_is_available_to_one_repair_and_independent_review[medium] _
+tests/test_c3_fulfillment_repair_context.py:270: in test_bound_original_proposal_is_available_to_one_repair_and_independent_review
+    assert len(calls) == 3 and all(b.state != 'UNRESOLVED' for b in result)
+E   AssertionError: assert (3 == 3 and False)
+E    +  where 3 = len([{'immutable_inventory': {'work_id': '70573464-ef9a-4ce6-a7cc-81d7c4d24d83', 'work_reality_revision_id': '6942b7e1-1b7...'item_id': 'repo-observation', 'kind': 'FACT', 'statement': 'Repository observed record', 'subject': None, ...}}, ...}])
+E    +  and   False = all(<generator object test_bound_original_proposal_is_available_to_one_repair_and_independent_review.<locals>.<genexpr> at 0x7feafc208450>)
+_ test_bound_original_proposal_is_available_to_one_repair_and_independent_review[complex] _
+tests/test_c3_fulfillment_repair_context.py:270: in test_bound_original_proposal_is_available_to_one_repair_and_independent_review
+    assert len(calls) == 3 and all(b.state != 'UNRESOLVED' for b in result)
+E   AssertionError: assert (3 == 3 and False)
+E    +  where 3 = len([{'immutable_inventory': {'work_id': '3447b8a6-c40e-40bb-9794-c3058ee971d2', 'work_reality_revision_id': 'b944effe-4c9...'item_id': 'repo-observation', 'kind': 'FACT', 'statement': 'Repository observed record', 'subject': None, ...}}, ...}])
+E    +  and   False = all(<generator object test_bound_original_proposal_is_available_to_one_repair_and_independent_review.<locals>.<genexpr> at 0x7feafc9ed220>)
+____ test_independent_semantic_rejection_reaches_bound_feedback_and_replay _____
+tests/test_c3_fulfillment_repair_context.py:355: in test_independent_semantic_rejection_reaches_bound_feedback_and_replay
+    assert len(calls) == 4 and all(b.state != 'UNRESOLVED' for b in result)
+E   AssertionError: assert (4 == 4 and False)
+E    +  where 4 = len([{'immutable_inventory': {'work_id': 'c3968ecc-0ef3-4d25-9b32-a7820bfabdc5', 'work_reality_revision_id': '81ea5c35-e5a...d': 'governed-boundary', 'kind': 'CONSTRAINT', 'statement': 'External release forbidden', 'subject': None, ...}}, ...}])
+E    +  and   False = all(<generator object test_independent_semantic_rejection_reaches_bound_feedback_and_replay.<locals>.<genexpr> at 0x7feafccecee0>)
+_ test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review[small] _
+tests/test_c3_fulfillment_wire_feedback.py:136: in test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review
+    assert all(b.state != 'UNRESOLVED' for b in bindings)
+E   assert False
+E    +  where False = all(<generator object test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review.<locals>.<genexpr> at 0x7feafc98ca00>)
+_ test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review[medium] _
+tests/test_c3_fulfillment_wire_feedback.py:136: in test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review
+    assert all(b.state != 'UNRESOLVED' for b in bindings)
+E   assert False
+E    +  where False = all(<generator object test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review.<locals>.<genexpr> at 0x7feafc1df1d0>)
+_ test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review[complex] _
+tests/test_c3_fulfillment_wire_feedback.py:136: in test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review
+    assert all(b.state != 'UNRESOLVED' for b in bindings)
+E   assert False
+E    +  where False = all(<generator object test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review.<locals>.<genexpr> at 0x7feafc20b780>)
+_ test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls[first-observation] _
+tests/test_c3_fulfillment_wire_feedback.py:167: in test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls
+    assert all(b.state != 'UNRESOLVED' for b in result) and len(calls) == 3
+E   assert (False)
+E    +  where False = all(<generator object test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls.<locals>.<genexpr> at 0x7feafc915490>)
+_ test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls[first-validation] _
+tests/test_c3_fulfillment_wire_feedback.py:167: in test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls
+    assert all(b.state != 'UNRESOLVED' for b in result) and len(calls) == 3
+E   assert (False)
+E    +  where False = all(<generator object test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls.<locals>.<genexpr> at 0x7feafccee0c0>)
+_ test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls[second-observation] _
+tests/test_c3_fulfillment_wire_feedback.py:167: in test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls
+    assert all(b.state != 'UNRESOLVED' for b in result) and len(calls) == 3
+E   assert (False)
+E    +  where False = all(<generator object test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls.<locals>.<genexpr> at 0x7feafc1885f0>)
+_____ test_bound_feedback_repairs_once_or_stops_drift_without_review[None] _____
+tests/test_c3_owner_repair_preconditions.py:292: in test_bound_feedback_repairs_once_or_stops_drift_without_review
+    assert len(calls)==3 and all(b.state!='UNRESOLVED' for b in result)
+E   AssertionError: assert (3 == 3 and False)
+E    +  where 3 = len([{'immutable_inventory': {'work_id': 'e7892d2a-7144-49d2-bdec-a502d0f9c652', 'work_reality_revision_id': '2618be19-237...'item_id': 'repo-observation', 'kind': 'FACT', 'statement': 'Repository observed record', 'subject': None, ...}}, ...}])
+E    +  and   False = all(<generator object test_bound_feedback_repairs_once_or_stops_drift_without_review.<locals>.<genexpr> at 0x7feafc9a7440>)
+_ test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay[v1] _
+tests/test_c3_source_role_contract.py:245: in test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay
+    assert all(b.state != "UNRESOLVED" for b in run())
+E   assert False
+E    +  where False = all(<generator object test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay.<locals>.<genexpr> at 0x7feafcc352f0>)
+_ test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay[removed] _
+tests/test_c3_source_role_contract.py:245: in test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay
+    assert all(b.state != "UNRESOLVED" for b in run())
+E   assert False
+E    +  where False = all(<generator object test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay.<locals>.<genexpr> at 0x7feafcd25d80>)
+_ test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay[unsupported] _
+tests/test_c3_source_role_contract.py:245: in test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay
+    assert all(b.state != "UNRESOLVED" for b in run())
+E   assert False
+E    +  where False = all(<generator object test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay.<locals>.<genexpr> at 0x7feafc9f2740>)
+_ test_v2_feedback_replay_preserves_original_attempt_and_does_not_call_model_again _
+tests/test_c3_generation_owner_domains.py:376: in test_v2_feedback_replay_preserves_original_attempt_and_does_not_call_model_again
+    assert all(b.state != "UNRESOLVED" for b in run())
+E   assert False
+E    +  where False = all(<generator object test_v2_feedback_replay_preserves_original_attempt_and_does_not_call_model_again.<locals>.<genexpr> at 0x7feafccc1630>)
+_ test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection[None] __
+tests/test_c3_generation_owner_domains.py:840: in test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafccc2f60>)
+_ test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection[missing-review] _
+tests/test_c3_generation_owner_domains.py:840: in test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafccac930>)
+_ test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection[negative-review] _
+tests/test_c3_generation_owner_domains.py:840: in test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafc3b0380>)
+_ test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection[wrong-capabilities] _
+tests/test_c3_generation_owner_domains.py:840: in test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafbea25a0>)
+_ test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection[wrong-revision] _
+tests/test_c3_generation_owner_domains.py:840: in test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafc9a5560>)
+_ test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection[marker-only] _
+tests/test_c3_generation_owner_domains.py:840: in test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafccf0450>)
+_ test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection[wrong-diff] _
+tests/test_c3_generation_owner_domains.py:840: in test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafccf6810>)
+__ test_v3_seal_reaches_both_actual_consumers_without_human_acceptance[None] ___
+tests/test_c3_generation_owner_domains.py:866: in test_v3_seal_reaches_both_actual_consumers_without_human_acceptance
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafcc99630>)
+_ test_v3_seal_reaches_both_actual_consumers_without_human_acceptance[missing-review] _
+tests/test_c3_generation_owner_domains.py:866: in test_v3_seal_reaches_both_actual_consumers_without_human_acceptance
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafca9f510>)
+_ test_v3_seal_reaches_both_actual_consumers_without_human_acceptance[marker-only] _
+tests/test_c3_generation_owner_domains.py:866: in test_v3_seal_reaches_both_actual_consumers_without_human_acceptance
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafca07b90>)
+_ test_v3_seal_reaches_both_actual_consumers_without_human_acceptance[missing-native-gate] _
+tests/test_c3_generation_owner_domains.py:866: in test_v3_seal_reaches_both_actual_consumers_without_human_acceptance
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafc1deb50>)
+_ test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[wire] _
+tests/test_c3_generation_owner_domains.py:902: in test_v3_final_consumer_revalidates_actual_formation_and_review_lineage
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafc589d80>)
+_ test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[inventory] _
+tests/test_c3_generation_owner_domains.py:902: in test_v3_final_consumer_revalidates_actual_formation_and_review_lineage
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafc34e810>)
+_ test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[attempt] _
+tests/test_c3_generation_owner_domains.py:902: in test_v3_final_consumer_revalidates_actual_formation_and_review_lineage
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafbea24d0>)
+_ test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[review-output] _
+tests/test_c3_generation_owner_domains.py:902: in test_v3_final_consumer_revalidates_actual_formation_and_review_lineage
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafc7b1a40>)
+_ test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[review-row] _
+tests/test_c3_generation_owner_domains.py:902: in test_v3_final_consumer_revalidates_actual_formation_and_review_lineage
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafca9e810>)
+_ test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[receipt-removal] _
+tests/test_c3_generation_owner_domains.py:902: in test_v3_final_consumer_revalidates_actual_formation_and_review_lineage
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafc975ff0>)
+_ test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[owner-policy] _
+tests/test_c3_generation_owner_domains.py:902: in test_v3_final_consumer_revalidates_actual_formation_and_review_lineage
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafc5893c0>)
+_ test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[review-pending-capabilities] _
+tests/test_c3_generation_owner_domains.py:902: in test_v3_final_consumer_revalidates_actual_formation_and_review_lineage
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafc9a4fb0>)
+_ test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[review-observed-capabilities] _
+tests/test_c3_generation_owner_domains.py:902: in test_v3_final_consumer_revalidates_actual_formation_and_review_lineage
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafc3b0a00>)
+_ test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[review-validated-capabilities] _
+tests/test_c3_generation_owner_domains.py:902: in test_v3_final_consumer_revalidates_actual_formation_and_review_lineage
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafccc3850>)
+___ test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance[None] ____
+tests/test_c3_generation_owner_domains.py:934: in test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafbf9cba0>)
+_ test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance[missing-revision] _
+tests/test_c3_generation_owner_domains.py:934: in test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafcd560c0>)
+_ test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance[missing-review] _
+tests/test_c3_generation_owner_domains.py:934: in test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafc9746c0>)
+_ test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance[current-fail] _
+tests/test_c3_generation_owner_domains.py:934: in test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafc3b18a0>)
+_ test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance[mixed-delivery] _
+tests/test_c3_generation_owner_domains.py:934: in test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafc9f0a00>)
+_ test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance[mixed-integration] _
+tests/test_c3_generation_owner_domains.py:934: in test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance
+    bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_owner_domains.py:774: in _controlled_v3_binding_receipt
+    assert all(b.state != "UNRESOLVED" for b in result)
+E   assert False
+E    +  where False = all(<generator object _controlled_v3_binding_receipt.<locals>.<genexpr> at 0x7feafc98e9b0>)
+_ test_framed_feedback_recovery_preserves_original_attempt_and_model_budget[None] _
+tests/test_c3_wire_presentation.py:103: in test_framed_feedback_recovery_preserves_original_attempt_and_model_budget
+    assert all(b.state != "UNRESOLVED" for b in result) and len(calls) == 3
+E   assert (False)
+E    +  where False = all(<generator object test_framed_feedback_recovery_preserves_original_attempt_and_model_budget.<locals>.<genexpr> at 0x7feafc8c41e0>)
+_ test_framed_feedback_recovery_preserves_original_attempt_and_model_budget[first-observation] _
+tests/test_c3_wire_presentation.py:103: in test_framed_feedback_recovery_preserves_original_attempt_and_model_budget
+    assert all(b.state != "UNRESOLVED" for b in result) and len(calls) == 3
+E   assert (False)
+E    +  where False = all(<generator object test_framed_feedback_recovery_preserves_original_attempt_and_model_budget.<locals>.<genexpr> at 0x7feafbf9cee0>)
+_ test_framed_feedback_recovery_preserves_original_attempt_and_model_budget[first-validation] _
+tests/test_c3_wire_presentation.py:103: in test_framed_feedback_recovery_preserves_original_attempt_and_model_budget
+    assert all(b.state != "UNRESOLVED" for b in result) and len(calls) == 3
+E   assert (False)
+E    +  where False = all(<generator object test_framed_feedback_recovery_preserves_original_attempt_and_model_budget.<locals>.<genexpr> at 0x7feafc9ec2b0>)
+_ test_framed_feedback_recovery_preserves_original_attempt_and_model_budget[second-observation] _
+tests/test_c3_wire_presentation.py:103: in test_framed_feedback_recovery_preserves_original_attempt_and_model_budget
+    assert all(b.state != "UNRESOLVED" for b in result) and len(calls) == 3
+E   assert (False)
+E    +  where False = all(<generator object test_framed_feedback_recovery_preserves_original_attempt_and_model_budget.<locals>.<genexpr> at 0x7feafc1ddcb0>)
+=============================== warnings summary ===============================
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[small]
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[medium]
+tests/test_c3_fulfillment_capacity_representation.py::test_independent_review_reuses_wire_without_losing_any_component[complex]
+  tests/test_c3_fulfillment_capacity_representation.py:167: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize('scale', ('small','medium','complex'))
+
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[small]
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[medium]
+tests/test_c3_fulfillment_capacity_representation.py::test_compact_representation_preserves_complete_inventory_and_existing_owners[complex]
+  tests/test_c3_fulfillment_capacity_representation.py:237: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+
+tests/test_c3_semantic_contract_calibration.py::test_negative_file_component_preserves_original_exclusion_and_requires_real_diff
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers0]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers1]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers2]
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[small]
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[medium]
+tests/test_c3_generation_projection_economy.py::test_independent_review_shares_contracts_without_losing_components_or_semantics[complex]
+  tests/test_c3_generation_projection_economy.py:11: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[small]
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[medium]
+tests/test_c3_generation_projection_economy.py::test_primary_meaning_view_keeps_complete_owner_choices_without_duplicating_a_checklist[complex]
+  tests/test_c3_generation_projection_economy.py:182: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize('scale', ['small', 'medium', 'complex'])
+
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[small]
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[medium]
+tests/test_c3_generation_projection_economy.py::test_new_request_reuses_canonical_domains_and_full_owner_proofs[complex]
+  tests/test_c3_generation_projection_economy.py:421: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ["small", "medium", "complex"])
+
+tests/test_c3_route_scoped_review.py::test_independent_comparison_preserves_all_meaning_but_proposer_claims_cannot_change_request[small]
+tests/test_c3_route_scoped_review.py::test_independent_comparison_preserves_all_meaning_but_proposer_claims_cannot_change_request[medium]
+tests/test_c3_route_scoped_review.py::test_independent_comparison_preserves_all_meaning_but_proposer_claims_cannot_change_request[complex]
+  tests/test_c3_route_scoped_review.py:96: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_c3_fulfillment_repair_context.py::test_incomplete_legal_candidate_can_use_one_existing_feedback_and_replay_never_reexecutes
+FAILED tests/test_c3_fulfillment_repair_context.py::test_second_incomplete_candidate_stops_without_budget_reset
+FAILED tests/test_c3_fulfillment_repair_context.py::test_real_unknown_authority_does_not_open_probability_repair_slot
+FAILED tests/test_c3_fulfillment_repair_context.py::test_incomplete_feedback_checkpoint_resumes_only_remaining_calls_on_original_basis
+FAILED tests/test_c3_fulfillment_repair_context.py::test_located_gap_checkpoint_resumes_only_remaining_calls_and_preserves_original_receipts
+FAILED tests/test_c3_fulfillment_repair_context.py::test_predecode_coverage_feedback_observes_full_wire_without_admitting_candidate
+FAILED tests/test_c3_fulfillment_repair_context.py::test_historical_located_feedback_replays_exact_bytes_without_new_calls[existing-owner-typed-prerequisites-v6]
+FAILED tests/test_c3_fulfillment_repair_context.py::test_historical_located_feedback_replays_exact_bytes_without_new_calls[existing-owner-typed-prerequisites-v7]
+FAILED tests/test_c3_fulfillment_repair_context.py::test_bound_original_proposal_is_available_to_one_repair_and_independent_review[small]
+FAILED tests/test_c3_fulfillment_repair_context.py::test_bound_original_proposal_is_available_to_one_repair_and_independent_review[medium]
+FAILED tests/test_c3_fulfillment_repair_context.py::test_bound_original_proposal_is_available_to_one_repair_and_independent_review[complex]
+FAILED tests/test_c3_fulfillment_repair_context.py::test_independent_semantic_rejection_reaches_bound_feedback_and_replay
+FAILED tests/test_c3_fulfillment_wire_feedback.py::test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review[small]
+FAILED tests/test_c3_fulfillment_wire_feedback.py::test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review[medium]
+FAILED tests/test_c3_fulfillment_wire_feedback.py::test_predecode_feedback_can_reach_a_new_valid_candidate_and_independent_review[complex]
+FAILED tests/test_c3_fulfillment_wire_feedback.py::test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls[first-observation]
+FAILED tests/test_c3_fulfillment_wire_feedback.py::test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls[first-validation]
+FAILED tests/test_c3_fulfillment_wire_feedback.py::test_checkpoint_recovery_reuses_original_output_and_feedback_without_extra_calls[second-observation]
+FAILED tests/test_c3_owner_repair_preconditions.py::test_bound_feedback_repairs_once_or_stops_drift_without_review[None]
+FAILED tests/test_c3_source_role_contract.py::test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay[v1]
+FAILED tests/test_c3_source_role_contract.py::test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay[removed]
+FAILED tests/test_c3_source_role_contract.py::test_source_role_contract_is_bound_to_original_wire_preconditions_on_replay[unsupported]
+FAILED tests/test_c3_generation_owner_domains.py::test_v2_feedback_replay_preserves_original_attempt_and_does_not_call_model_again
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection[None]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection[missing-review]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection[negative-review]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection[wrong-capabilities]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection[wrong-revision]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection[marker-only]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_actual_scope_consumer_requires_full_reviewed_exact_projection[wrong-diff]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_seal_reaches_both_actual_consumers_without_human_acceptance[None]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_seal_reaches_both_actual_consumers_without_human_acceptance[missing-review]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_seal_reaches_both_actual_consumers_without_human_acceptance[marker-only]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_seal_reaches_both_actual_consumers_without_human_acceptance[missing-native-gate]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[wire]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[inventory]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[attempt]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[review-output]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[review-row]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[receipt-removal]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[owner-policy]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[review-pending-capabilities]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[review-observed-capabilities]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[review-validated-capabilities]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance[None]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance[missing-revision]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance[missing-review]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance[current-fail]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance[mixed-delivery]
+FAILED tests/test_c3_generation_owner_domains.py::test_v3_mixed_fact_handoff_uses_actual_seal_not_future_acceptance[mixed-integration]
+FAILED tests/test_c3_wire_presentation.py::test_framed_feedback_recovery_preserves_original_attempt_and_model_budget[None]
+FAILED tests/test_c3_wire_presentation.py::test_framed_feedback_recovery_preserves_original_attempt_and_model_budget[first-observation]
+FAILED tests/test_c3_wire_presentation.py::test_framed_feedback_recovery_preserves_original_attempt_and_model_budget[first-validation]
+FAILED tests/test_c3_wire_presentation.py::test_framed_feedback_recovery_preserves_original_attempt_and_model_budget[second-observation]
+54 failed, 774 passed, 22 warnings in 375.79s (0:06:15)

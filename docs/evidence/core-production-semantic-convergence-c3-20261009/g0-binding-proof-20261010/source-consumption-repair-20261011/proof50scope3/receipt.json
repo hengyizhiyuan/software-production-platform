@@ -1,0 +1,22 @@
+{
+  "scope": "CONTROLLED_BOUNDARY_REGRESSION_NO_MODEL_NO_WORK",
+  "source_overlay": true,
+  "exit_code": 1,
+  "wall_seconds": 29.868733578012325,
+  "counts": {
+    "tests": 33,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0
+  },
+  "input_sha256": {
+    "src/spg/application/governed_obligations.py": "fb92ea766a6e98ef2528ef1e135e334726f0f9b3b36071b18fbee06537e1c831",
+    "src/spg/providers/fulfillment_candidate.py": "918b818af66a70197896aca97772bebc9a162041d4c13d90684633e9c5e06184",
+    "src/spg/domain/governed_obligation.py": "6374f4cd6b71bc01fdac6778afe7b11dc68acd4e30dcdc179e002d3ecf4b868c",
+    "tests/test_c3_source_consumption_proof.py": "a46ba2199b6aa0b7614bec6e910bd23843a13dc630b8c5563e9019390eaa5f36",
+    "tests/test_c3_fulfillment_capacity_representation.py": "345fca9927bdf3510f8e29ab017e9bec861fd2140b696b1dddff3e62b317b8fd",
+    "tests/test_c3_generation_binding_prerequisites.py": "8ad53b9ca8287dae6e60b45d0f9cd6986d9c95669c0d1ee22b4edbe60db728d5",
+    "src/spg/providers/managed_context_fulfillment.py": "8009413b2a502d222c65418a51c6f2512fe761bfe443a656c98d061c740e6b5e",
+    "tests/test_c3_fulfillment_repair_context.py": "bc2be7fa7bbe8400284ff9d1639362f6fb42ddee6ac5aafaa12d6542787ca63f"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "qualification_id": "1c0c6dcd-b445-4b6c-94b1-c52b68273047",
+  "review_attempt": 1,
+  "original_start_sha256": "678b2b49802f4a1cf7ed1dcd9cbb4182d44277689be2044c122f09ad22332fed",
+  "original_container_id": "3bed1fdbde7c8daf4fcd66688deab679084e414df72df163523b64c2ca17fb78",
+  "previous_model_calls": 0,
+  "previous_http_transmissions": 0,
+  "source": "8becd1ff3f8389ebeb401794ca44f8bce9adac19",
+  "tree": "555553b66a10aeeb6e6e289412d8514c404b76ec",
+  "actual_image": "sha256:dd811c2b993ee421c94269af2e975effa0642b86155cd3a392e9c61ea6aed5c1",
+  "original_inventory_fingerprint": "1155ee88bc3e3e7a8d72dd85556fb1e2d863d1f78e0db3450b5639f3e017a4f2",
+  "original_candidate_fingerprint": "af319906542f62517d28c4c7983dfe19a296d3f559c55461b299d51753e5b50d",
+  "unchanged_controller_sha256": "a04c1b9760f6a8b3b6109bef96bc200faef7b0d1865c56c88678c6d5f3a9ca9a",
+  "change": "Ownership only: independent qualification identity file to UID/GID10001; original bytes and qualification identity unchanged",
+  "maximum_logical_calls": 1,
+  "semantic_changes": false
+}
