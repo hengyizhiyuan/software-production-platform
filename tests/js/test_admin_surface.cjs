@@ -127,3 +127,19 @@ test('Analysis v2 renders scoped gaps safely and still reads legacy reports',asy
  await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
  assert.match(s.nodes['#admin-content'].innerHTML,/legacy limitation/);
 });
+
+test('Analysis v3 shows subject and governed regression scenario with escaping',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-v3';
+ const fact={statement:'Observed',citations:[]};
+ const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
+  timeline:[],findings:[{finding_id:'incident',classification:'UNKNOWN',epistemic_status:'UNKNOWN',fact,
+   subject_evidence_id:'<subject>',analysis:'bounded',repository_citations:[],uncertainty:'unknown',
+   recommendation:'review',regression_qualification:'governed handling',regression_scenario:'<script>bad()</script>'}],
+  immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],deferred_items:[],missing_evidence:[]};
+ const a={work_id:'ordinary-work',request_id:'request-v3',status:'COMPLETED',report};
+ const s=surface('/admin',true,null,null,{[path]:a});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v3',analysisTarget:'ordinary-work'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;
+ assert.match(h,/主体证据 &lt;subject&gt;/);assert.match(h,/回归场景：&lt;script&gt;/);
+ assert.doesNotMatch(h,/<script>bad/);
+});

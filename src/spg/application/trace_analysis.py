@@ -97,6 +97,24 @@ PRESENT cannot be called missing; a bounded or
 redacted export permits INCOMPLETE_CAPTURE, never platform-wide absence. Not
 reading available records is a review limitation, not missing evidence. Keep
 runtime comparison provenance and other investigation limitations in uncertainty.
+Each finding must declare subject_evidence_id and cite that exact original record.
+Additional fact citations must be the same Owner identity/projection or an explicit
+Owner reference to/from that subject. Shared Work, attempt, component, failure code
+or time cannot establish incident identity. evidence.read returns related_records;
+read those original records before quoting them. Do not attach an unrelated failure
+as background in fact.citations; keep comparisons in uncertainty instead.
+Every missing_evidence statement and OWNER_RECORD assessment statement must copy
+the matching evidence.check bounded_conclusion verbatim. A finding ABOUT missing
+capture fields must declare scope_check_ids, be UNKNOWN, and set analysis to those
+bounded_conclusion strings joined by a newline. Missing one checked field does not
+establish absence of a full response, another Owner or historical/platform storage.
+Each gap check_id must be linked to a scoped finding; do not place an unbounded
+absence finding elsewhere while keeping only a scoped gap in the report footer.
+For incident hypotheses, describe known failure receipts and leave raw-cause detail
+UNKNOWN; refer to exact gap group/field in uncertainty without broadening its scope.
+Copy regression_qualification exactly from the classification criterion in schema;
+put the concrete adversarial/recovery case in regression_scenario. Validate recovery
+or governed termination within permissions/budget, never zero future model errors.
 """
 
 

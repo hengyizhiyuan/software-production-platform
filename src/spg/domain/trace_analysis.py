@@ -17,6 +17,14 @@ class IssueClass(StrEnum):
     UNKNOWN = "UNKNOWN"
 
 
+REGRESSION_CRITERIA = {
+    IssueClass.RUNTIME_MODEL_VARIANCE: "在既有权限和预算内恢复，或受治理地终止；不要求未来随机失败次数为零。",
+    IssueClass.SYSTEM_CAPABILITY_DEFECT: "在已准入范围内验证能力修复，保留证据、权限与来源门禁。",
+    IssueClass.GOVERNANCE_ISSUE: "拒绝越权或证据无效的动作并按契约升级，不以绕过门禁作为通过。",
+    IssueClass.UNKNOWN: "核对原始记录、关联与已检查范围；证据不足时保留 UNKNOWN，不扩大结论。",
+}
+
+
 class Citation(AnalysisRecord):
     evidence_id: UUID
     quote: str = Field(min_length=1, max_length=1200)
@@ -58,6 +66,9 @@ class TimelineItem(ObservedFact):
 
 class Finding(AnalysisRecord):
     finding_id: str = Field(min_length=1, max_length=80)
+    subject_evidence_id: UUID = Field(description="Original Owner record this finding is about. Fact citations must be this record or explicitly linked records; shared Work/attempt, similar errors or timestamps do not establish the same incident.")
+    scope_check_ids: tuple[UUID, ...] = Field(default=(), max_length=4,
+        description="For findings about unavailable fields, cite performed checks. Such findings are UNKNOWN and analysis must copy their bounded_conclusion values joined by a newline. Do not use them to infer global/history absence.")
     classification: IssueClass
     epistemic_status: Literal["ROOT_CAUSE_HYPOTHESIS", "UNKNOWN"]
     fact: ObservedFact
@@ -70,7 +81,10 @@ class Finding(AnalysisRecord):
         "Required mapping: RUNTIME_MODEL_VARIANCE -> SELF_REFINE_RETRY_REGENERATE; "
         "SYSTEM_CAPABILITY_DEFECT -> EVOLUTION_WORK_PROPOSAL; "
         "GOVERNANCE_ISSUE -> BLOCK_AND_ESCALATE; UNKNOWN -> INVESTIGATE.")
-    regression_qualification: str = Field(min_length=1, max_length=3000)
+    regression_scenario: str = Field(default="", max_length=2000,
+        description="Describe an adversarial/recovery scenario, not a promise of zero future failures.")
+    regression_qualification: str = Field(min_length=1, max_length=3000,
+        description="Copy the criterion for classification exactly: " + str({k.value: v for k, v in REGRESSION_CRITERIA.items()}))
 
     @model_validator(mode="after")
     def preserve_governance_boundary(self):
@@ -84,6 +98,10 @@ class Finding(AnalysisRecord):
             raise ValueError("handling must preserve the issue classification boundary")
         if not self.repository_citations and self.epistemic_status != "UNKNOWN":
             raise ValueError("a root cause hypothesis requires repository evidence")
+        if self.regression_qualification != REGRESSION_CRITERIA[self.classification]:
+            raise ValueError("REGRESSION_CRITERION_MUST_MATCH_GOVERNED_OUTCOME: " + REGRESSION_CRITERIA[self.classification])
+        if self.scope_check_ids and (self.classification != IssueClass.UNKNOWN or self.epistemic_status != "UNKNOWN"):
+            raise ValueError("checked capture limitations cannot establish a platform defect or root cause")
         return self
 
 
@@ -93,7 +111,7 @@ class Recommendation(AnalysisRecord):
 
 
 class AnalysisReport(AnalysisRecord):
-    schema_version: Literal["watt-trace-analysis-report-v2"] = "watt-trace-analysis-report-v2"
+    schema_version: Literal["watt-trace-analysis-report-v3"] = "watt-trace-analysis-report-v3"
     work_id: UUID
     original_objective: ObservedFact
     expected_outcome: ObservedFact

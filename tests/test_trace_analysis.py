@@ -9,7 +9,7 @@ import pytest
 from spg.application.trace_analysis import TraceAnalysisService
 from spg.config import Settings
 from spg.domain.native_execution import InferenceAction, InferenceResponse, ToolCallProposal, canonical_digest
-from spg.domain.trace_analysis import AnalysisReport, AnalysisTrigger
+from spg.domain.trace_analysis import AnalysisReport, AnalysisTrigger, REGRESSION_CRITERIA, IssueClass
 from spg.evaluation.contracts import QualityError
 from spg.infrastructure.trace_analysis_evidence import EvidenceCatalog, RepositorySnapshot
 
@@ -34,10 +34,11 @@ def report(catalog):
             "expected_outcome": fact, "actual_execution_path": fact, "current_state": fact,
             "timeline": [dict(fact, stage="FINAL_STATE", timestamp=None)],
             "findings": [{"finding_id": "missing-raw", "classification": "UNKNOWN",
+                "subject_evidence_id": row["evidence_id"],
                 "epistemic_status": "UNKNOWN", "fact": fact, "analysis": "Exact invalid text unavailable",
                 "repository_citations": [], "uncertainty": "No raw provider output",
                 "recommendation": "Inspect existing owner evidence", "handling": "INVESTIGATE",
-                "regression_qualification": "Preserve UNKNOWN when raw evidence is absent"}],
+                "regression_qualification": REGRESSION_CRITERIA[IssueClass.UNKNOWN]}],
             "deferred_items": [{"statement": "Raw log investigation", "finding_ids": ["missing-raw"]}],
             "evidence_assessments": [{"family": c["family"], "check_id": c["check_id"],
                 "availability": c["availability"], "statement": "Snapshot scope reviewed"}
@@ -339,7 +340,7 @@ def test_decoded_json_quote_requires_the_exact_observed_encoded_fragment():
     quote = 'line one\n"line two"'
     eid = catalog.add("fixture", "/encoded", {"message": quote, "tail": "unseen\nvalue"})
     catalog.read(eid, limit=45)
-    r = report(catalog)
+    r = json.loads(json.dumps(report(catalog)))
     r["current_state"]["citations"] = [{"evidence_id": eid, "quote": quote}]
     catalog.validate(AnalysisReport.model_validate(r))
     r["current_state"]["citations"][0]["quote"] = "unseen\nvalue"
@@ -372,6 +373,7 @@ def test_original_incident_cannot_be_omitted_with_empty_findings():
     catalog.read(eid)
     r["findings"][0]["fact"] = {"statement": "Failed schema decision; raw invalid text unknown",
         "citations": [{"evidence_id": eid, "quote": "NATIVE_DECISION_SCHEMA_REJECTED"}]}
+    r["findings"][0]["subject_evidence_id"] = eid
     catalog.validate(AnalysisReport.model_validate(r))
 
 
@@ -510,10 +512,11 @@ def test_absence_is_snapshot_scoped_and_redaction_preserves_unknown():
     assert check["availability"] == "NOT_OBSERVED_IN_CAPTURE"
     assert check["scope"] == "FROZEN_EXPORTED_OWNER_RECORDS_ONLY"
     r = report(catalog)
-    r["missing_evidence"] = [{"statement": "Raw response not observed in this captured group",
+    r["missing_evidence"] = [{"statement": check["bounded_conclusion"],
         "family": "OWNER_RECORD", "check_id": check["check_id"], "availability": check["availability"]}]
-    r["evidence_assessments"].append({"statement": "Additional field reviewed", "family": "OWNER_RECORD",
+    r["evidence_assessments"].append({"statement": check["bounded_conclusion"], "family": "OWNER_RECORD",
         "check_id": check["check_id"], "availability": check["availability"]})
+    r["findings"][0].update(scope_check_ids=[check["check_id"]], analysis=check["bounded_conclusion"])
     catalog.validate(AnalysisReport.model_validate(r))
     snap = evidence_snapshot()
     snap["lifecycle"]["advanced"]["owners"]["execution_steps"][0]["result_payload"]["raw_response"] = "[REDACTED_FIELD]"
@@ -549,3 +552,84 @@ def test_wrong_selector_root_is_not_false_negative_evidence():
     with pytest.raises(ValueError, match="CHECK_SELECTOR_ROOT_NOT_IN_RECORD_SCHEMA"):
         catalog.check("OWNER_RECORD", group="execution_sessions", field="/misspelled_pwu_id")
     assert catalog.check("EXECUTION_RELATIONSHIP", group="execution_sessions", field="/pwu_id")["availability"] == "PRESENT"
+
+
+def associated_incident_catalog():
+    snap = snapshot()
+    receipt_a, receipt_b, incident_a, incident_b, attempt = (str(uuid4()) for _ in range(5))
+    owners = snap["lifecycle"]["advanced"]["owners"]
+    owners["self_refine_events"] = [dict(id=incident, operation_id=attempt,
+        affected_component="arbitrary-tool", failure_family="SAME_FAILURE",
+        diagnostic_evidence={"receipt_ref": "native-receipt:" + receipt})
+        for incident, receipt in [(incident_a, receipt_a), (incident_b, receipt_b)]]
+    owners["effect_receipts"] = [dict(id=receipt, condition="FAILED", output={"message": "same failure"})
+                                  for receipt in [receipt_a, receipt_b]]
+    catalog = EvidenceCatalog(snap)
+    events = [eid for eid, row in catalog.records.items() if row["group"] == "self_refine_events"]
+    receipts = [eid for eid, row in catalog.records.items() if row["group"] == "effect_receipts"]
+    return catalog, events, receipts
+
+
+def test_same_attempt_same_error_cannot_join_distinct_incidents():
+    catalog, events, receipts = associated_incident_catalog()
+    r = json.loads(json.dumps(report(catalog)))
+    for eid in events + receipts:
+        catalog.read(eid)
+    f = r["findings"][0]
+    f["subject_evidence_id"] = events[0]
+    f["fact"] = {"statement": "Recorded failure", "citations": [
+        {"evidence_id": events[0], "quote": "SAME_FAILURE"},
+        {"evidence_id": receipts[0], "quote": "same failure"}]}
+    catalog.validate(AnalysisReport.model_validate(r))
+    assert catalog.association(events[0], receipts[0])["basis"] == "EXPLICIT_OWNER_REFERENCE"
+    assert catalog.association(receipts[0], events[0])["status"] == "RELATED"
+    f["fact"]["citations"][1]["evidence_id"] = events[1]
+    f["fact"]["citations"][1]["quote"] = "SAME_FAILURE"
+    with pytest.raises(ValueError, match="OWNER_ASSOCIATION_NOT_ESTABLISHED"):
+        catalog.validate(AnalysisReport.model_validate(r))
+    f["fact"]["citations"][1] = {"evidence_id": receipts[1], "quote": "same failure"}
+    with pytest.raises(ValueError, match="OWNER_ASSOCIATION_NOT_ESTABLISHED"):
+        catalog.validate(AnalysisReport.model_validate(r))
+
+
+def test_related_record_metadata_does_not_observe_unread_body():
+    catalog, events, receipts = associated_incident_catalog()
+    detail = catalog.read(events[0])
+    assert receipts[0] in {r["evidence_id"] for r in detail["related_records"]["items"]}
+    assert receipts[0] not in catalog.observed
+    r = json.loads(json.dumps(report(catalog)))
+    f = r["findings"][0]
+    f["subject_evidence_id"] = events[0]
+    f["fact"]["citations"] = [{"evidence_id": events[0], "quote": "SAME_FAILURE"},
+                              {"evidence_id": receipts[0], "quote": "same failure"}]
+    with pytest.raises(ValueError, match="CITATION_NOT_OBSERVED"):
+        catalog.validate(AnalysisReport.model_validate(r))
+
+
+def test_checked_field_cannot_be_promoted_to_missing_whole_response_or_history():
+    catalog = EvidenceCatalog(evidence_snapshot())
+    check = catalog.check("OWNER_RECORD", group="execution_steps", field="/result_payload/raw_response")
+    r = json.loads(json.dumps(report(catalog)))
+    f = r["findings"][0]
+    f.update(scope_check_ids=[check["check_id"]], analysis=check["bounded_conclusion"])
+    r["missing_evidence"] = [{"statement": check["bounded_conclusion"], "family": "OWNER_RECORD",
+        "check_id": check["check_id"], "availability": check["availability"]}]
+    catalog.validate(AnalysisReport.model_validate(r))
+    f["analysis"] = "Watt never stores raw responses anywhere"
+    with pytest.raises(ValueError, match="CAPTURE_CONCLUSION_MUST_COPY_CHECKED_BOUNDARY"):
+        catalog.validate(AnalysisReport.model_validate(r))
+    f["analysis"] = check["bounded_conclusion"]
+    r["missing_evidence"][0]["statement"] = "All historical provider response bodies are missing"
+    with pytest.raises(ValueError, match="MISSING_EVIDENCE_MUST_COPY_BOUNDED_CONCLUSION"):
+        catalog.validate(AnalysisReport.model_validate(r))
+
+
+def test_random_failure_regression_qualifies_handling_not_zero_future_errors():
+    r = report(EvidenceCatalog(snapshot()))
+    f = r["findings"][0]
+    f.update(classification="RUNTIME_MODEL_VARIANCE", handling="SELF_REFINE_RETRY_REGENERATE",
+             regression_qualification="No model failure may ever recur")
+    with pytest.raises(ValueError, match="REGRESSION_CRITERION_MUST_MATCH_GOVERNED_OUTCOME"):
+        AnalysisReport.model_validate(r)
+    f["regression_qualification"] = REGRESSION_CRITERIA[IssueClass.RUNTIME_MODEL_VARIANCE]
+    AnalysisReport.model_validate(r)

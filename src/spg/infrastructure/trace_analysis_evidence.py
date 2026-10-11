@@ -43,6 +43,15 @@ class CitationRejected(ValueError):
 RELATION_FIELDS = {"pwu_id": "PWU", "work_unit_id": "PWU", "session_id": "SESSION",
                    "attempt_id": "ATTEMPT", "work_id": "WORK", "candidate_id": "CANDIDATE"}
 
+# Only producer-declared references establish incident association. A shared
+# attempt/Work, error text or timestamp cannot distinguish incidents in that scope.
+RECORD_NAMESPACES = {"effect_receipts": "native-receipt", "execution_steps": "native-inference-step",
+                     "tool_effects": "native-effect", "execution_sessions": "native-session",
+                     "execution_attempts": "native-attempt"}
+DIRECT_REFERENCE_FIELDS = {"receipt_ref": "native-receipt", "receipt_id": "native-receipt",
+                          "inference_step_ref": "native-inference-step", "inference_step_id": "native-inference-step",
+                          "effect_ref": "native-effect", "effect_id": "native-effect"}
+
 
 def source_semantics(group, value, repository):
     families = ["OWNER_RECORD"]
@@ -147,7 +156,63 @@ class EvidenceCatalog:
             offset + limit if offset + limit < len(body) else None,
             "trust": "MODEL_PROPOSAL_NOT_OWNER_EVIDENCE" if row["group"] == "analysis_draft" else
                      "DERIVED_SCOPE_LOOKUP_NOT_OWNER_FACT" if row["group"] == "evidence_check" else "UNTRUSTED_EVIDENCE_ONLY",
+            "related_records": self.related(evidence_id),
         }
+
+    def _references(self, evidence_id):
+        value = self.values[evidence_id]
+        if not isinstance(value, dict):
+            return []
+        references = []
+        for key in ("evidence_references",):
+            for i, token in enumerate(value.get(key, []) if isinstance(value.get(key), list) else []):
+                if isinstance(token, str):
+                    references.append(("/" + key + "/" + str(i), token))
+        for prefix, body in (("", value), ("/diagnostic_evidence", value.get("diagnostic_evidence")),
+                             ("/observed_reality", value.get("observed_reality"))):
+            if isinstance(body, dict):
+                for key, namespace in DIRECT_REFERENCE_FIELDS.items():
+                    token = body.get(key)
+                    if isinstance(token, str):
+                        references.append((prefix + "/" + key, token if token.startswith(namespace + ":") else namespace + ":" + token))
+        return references
+
+    def association(self, subject_evidence_id, evidence_id):
+        subject_evidence_id, evidence_id = str(subject_evidence_id), str(evidence_id)
+        subject, other = self.records.get(subject_evidence_id), self.records.get(evidence_id)
+        excluded = {"repository", "analysis_draft", "evidence_check"}
+        if not subject or not other or subject["group"] in excluded or other["group"] in excluded:
+            return {"status": "NOT_ESTABLISHED", "basis": "ORIGINAL_OWNER_RECORDS_REQUIRED"}
+        if subject_evidence_id == evidence_id:
+            return {"status": "RELATED", "basis": "SAME_ORIGINAL_RECORD"}
+        a, b = self.values[subject_evidence_id], self.values[evidence_id]
+        if subject["group"] == other["group"] and isinstance(a, dict) and isinstance(b, dict) and a.get("id") and a.get("id") == b.get("id"):
+            return {"status": "RELATED", "basis": "SAME_OWNER_IDENTITY_PROJECTION"}
+        if {subject["group"], other["group"]} <= {"capture", "limits"}:
+            return {"status": "RELATED", "basis": "SAME_CAPTURE_METADATA"}
+        for source_id, target_id in ((subject_evidence_id, evidence_id), (evidence_id, subject_evidence_id)):
+            target = self.records[target_id]
+            value = self.values[target_id]
+            namespace = RECORD_NAMESPACES.get(target["group"])
+            if namespace and isinstance(value, dict) and value.get("id"):
+                identity = namespace + ":" + str(value["id"])
+                for pointer, token in self._references(source_id):
+                    if token == identity:
+                        return {"status": "RELATED", "basis": "EXPLICIT_OWNER_REFERENCE",
+                                "source_evidence_id": source_id, "reference_pointer": pointer,
+                                "target_evidence_id": target_id, "reference": token}
+        return {"status": "NOT_ESTABLISHED", "basis": "NO_EXPLICIT_OWNER_REFERENCE",
+                "limitation": "Shared Work/attempt/component/error/timestamp is not incident identity."}
+
+    def related(self, evidence_id):
+        # This lookup is metadata, never an observation of an unread record body.
+        if self.records[evidence_id]["group"] not in {"self_refine_events", "effect_receipts", "execution_steps"}:
+            return {"items": [], "truncated": False}
+        items = [{"evidence_id": eid, "group": row["group"], "association": relation}
+                 for eid, row in self.records.items() if eid != evidence_id
+                 and (relation := self.association(evidence_id, eid))["status"] == "RELATED"]
+        return {"items": items[:8], "truncated": len(items) > 8,
+                "rule": "Read original linked records before quoting. These are recorded links, not causal proof."}
 
     def check(self, family, group=None, field=None):
         """Bounded original-snapshot search, before any assertion of absence.
@@ -233,6 +298,11 @@ class EvidenceCatalog:
                   "limitation": "No match is limited to this export and selector. Unread or uncaptured evidence cannot prove historical/system absence. HTTP preview, download transfer and browser/client observations are distinct."}
         # Return only bounded examples, even if a field references a large body.
         result = Redactor(text_limit=1500).clean(result)
+        result["bounded_conclusion"] = (
+            f"仅在冻结导出 {self.digest} 中检查 family={family}, group={group or '(producer scope)'}, "
+            f"field={field or '(family observations)'}：availability={result['availability']}，"
+            f"匹配 {result['total_matches']} 项，扫描 {result['searched_records']} 条记录。"
+            "这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。")
         eid = self.add("evidence_check", f"checks/{canonical_digest(result)}", result)
         result = dict(result, check_id=eid)
         self.checks[eid] = result
@@ -321,6 +391,19 @@ class EvidenceCatalog:
                 except CitationRejected as error:
                     errors.append(error)
         for index, finding in enumerate(report.findings):
+            subject_id = str(finding.subject_evidence_id)
+            if subject_id not in self.observed:
+                errors.append(CitationRejected("FINDING_SUBJECT_NOT_OBSERVED", ["findings", index, "subject_evidence_id"], subject_id))
+            if subject_id not in {str(c.evidence_id) for c in finding.fact.citations}:
+                errors.append(CitationRejected("FINDING_REQUIRES_SUBJECT_CITATION", ["findings", index, "fact", "citations"], subject_id))
+            for i, c in enumerate(finding.fact.citations):
+                if self.association(subject_id, c.evidence_id)["status"] != "RELATED":
+                    errors.append(CitationRejected("CITATION_OWNER_ASSOCIATION_NOT_ESTABLISHED: choose same subject or explicit Owner reference", ["findings", index, "fact", "citations", i], c.evidence_id))
+            if finding.scope_check_ids:
+                checks = [self.checks.get(str(cid)) for cid in finding.scope_check_ids]
+                if (any(not c or c["availability"] == "PRESENT" for c in checks)
+                        or finding.analysis != "\n".join(c["bounded_conclusion"] for c in checks if c)):
+                    errors.append(CitationRejected("CAPTURE_CONCLUSION_MUST_COPY_CHECKED_BOUNDARY", ["findings", index, "analysis"], subject_id))
             for i, c in enumerate(finding.repository_citations):
                 try:
                     citation(c, ["findings", index, "repository_citations", i], repository=True)
@@ -332,22 +415,28 @@ class EvidenceCatalog:
                              "location": item.location, "evidence_id": item.evidence_id}
                             for item in errors[:12]]
             raise error
-        reviewed = set()
+        reviewed, reviewed_checks = set(), set()
         for assessment in report.evidence_assessments:
             check = self.checks.get(str(assessment.check_id))
             if (not check or check["family"] != assessment.family.value
                     or check["availability"] != assessment.availability
+                    or (assessment.family.value == "OWNER_RECORD" and assessment.statement != check["bounded_conclusion"])
                     or (assessment.family.value != "OWNER_RECORD" and (check["group"] or check["field"]))):
                 raise ValueError("EVIDENCE_ASSESSMENT_MUST_MATCH_SEEDED_FAMILY_LOOKUP")
-            if assessment.family.value in reviewed:
+            if str(assessment.check_id) in reviewed_checks or (assessment.family.value != "OWNER_RECORD" and assessment.family.value in reviewed):
                 raise ValueError("DUPLICATE_EVIDENCE_ASSESSMENT")
             reviewed.add(assessment.family.value)
+            reviewed_checks.add(str(assessment.check_id))
         if not {"PREVIEW_HTTP", "DELIVERY_TRANSFER", "EXECUTION_RELATIONSHIP"}.issubset(reviewed):
             raise ValueError("EVIDENCE_FAMILY_RECONCILIATION_REQUIRED")
         for gap in report.missing_evidence:
             check = self.checks.get(str(gap.check_id))
             if (not check or check["family"] != gap.family.value or check["availability"] != gap.availability):
                 raise ValueError("MISSING_EVIDENCE_CONTRADICTS_LOOKUP_OR_UNCHECKED; PRESENT cannot be missing")
+            if gap.statement != check["bounded_conclusion"]:
+                raise ValueError("MISSING_EVIDENCE_MUST_COPY_BOUNDED_CONCLUSION; copy evidence.check bounded_conclusion exactly")
+            if str(gap.check_id) not in {str(cid) for finding in report.findings for cid in finding.scope_check_ids}:
+                raise ValueError("MISSING_EVIDENCE_REQUIRES_SCOPED_FINDING")
         failure_ids = {eid for eid, row in self.records.items()
                        if (row["group"] in {"execution_steps", "effect_receipts"}
                            and row["condition"] == "FAILED") or row["group"] == "self_refine_events"}
