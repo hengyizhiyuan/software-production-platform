@@ -61,7 +61,18 @@ class ObservedFact(AnalysisRecord):
 class TimelineItem(ObservedFact):
     stage: Literal["INTENT", "CONTEXT", "PLANNING", "EXECUTION", "VERIFICATION",
                    "FAILURE", "RECOVERY_REFINEMENT", "FINAL_STATE"]
-    timestamp: str | None = None
+    timestamp: str | None = Field(default=None, description="Original event time only. Composite stage summaries have no single timestamp. Dated entries must be ordered chronologically, regardless of stage.")
+    timestamp_evidence_id: UUID | None = Field(default=None, description="Observed original Owner record whose time is used; must be cited. Other citations of a dated event must be explicitly associated with this record.")
+    timestamp_field: Literal["created_at", "updated_at", "started_at", "finished_at", "sealed_at", "assessed_at", "timestamp"] | None = Field(default=None, description="Exact top-level original Owner timestamp field, not an invented stage-wide time.")
+
+    @model_validator(mode="after")
+    def recorded_time_requires_source(self):
+        if self.timestamp is None:
+            if self.timestamp_evidence_id is not None or self.timestamp_field is not None:
+                raise ValueError("TIMELINE_SUMMARY_HAS_NO_SINGLE_EVENT_TIME")
+        elif self.timestamp_evidence_id is None or self.timestamp_field is None:
+            raise ValueError("TIMELINE_TIME_REQUIRES_ORIGINAL_OWNER_FIELD")
+        return self
 
 
 class Finding(AnalysisRecord):

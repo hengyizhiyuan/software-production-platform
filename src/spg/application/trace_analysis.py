@@ -66,7 +66,7 @@ submission return RESULT_READY with result_claim.output_vector.report_digest
 equal to the submission receipt; evidence_ids may be empty. Otherwise return
 UNABLE_TO_COMPLETE with observed limitations. Do not fabricate ECF READY, Guardian
 approval, production context, missing failure text or historical code identity.
-Keep the report concise: normally eight timeline entries and at most six findings.
+Keep the report concise: normally eight to twelve timeline entries and at most six findings.
 Use short exact quotations and short paragraphs; a report is not a transcript.
 Use exactly the provided schema fields; do not add extra fields or aliases.
 Submit a substantive investigation after reading the original incidents and code;
@@ -122,6 +122,34 @@ listed behavior. State the recorded signal in fact; start causal analysis with
 '假设：', use conditional language, and leave candidate contents UNKNOWN without
 the corresponding exact source/diff or executed-effect observations. Keep semantic
 proposal/contract stages distinct from production code execution.
+Build a chronological timeline, not a fixed stage-order list. For each dated item,
+cite its timestamp_evidence_id and exact top-level timestamp_field from an observed
+original Owner record. Do not assign one incident's timestamp to several distinct
+failures. Split distinct events into entries; composite stage summaries must have
+timestamp, timestamp_evidence_id and timestamp_field null. Do not count semantic
+scope diagnostics as executed-code failures. Budget/convergence/attempt_count
+fields are recorded diagnoses, not independent evidence of model regeneration;
+inspect producer source and actual calls before claiming a retry occurred.
+The following boundaries apply to ALL report sections, including recommendations,
+regression_scenario, immediate_recovery and deferred_items, not only findings:
+- A final diff proves final net changes, not the absence of intermediate/external
+  mutations. Do not infer that rollback is unnecessary solely from a final diff.
+- Never promise one-shot convergence. Require permissions/budget-bound recovery OR
+  governed termination in every proposed scenario. Distinguish an observed single
+  successful retry from a universal retry guarantee or a not-yet-implemented policy.
+- A download client's UNAVAILABLE state does not establish whether browser render
+  evidence exists. Use a performed, surface-specific field check for each absence
+  claim; if not checked, state that it was not investigated, not that it is absent.
+- Delivery authorization and Human acceptance have different Owner records. Read
+  existing records and precise identity links; an authorization reference cannot
+  substitute for an acceptance decision, nor does a redacted Guardian field deny
+  a readable acceptance elsewhere.
+- Recover historical response details only IF existing retained bytes can be found.
+  Future logging cannot reconstruct discarded historical responses. If unavailable,
+  keep the historical cause UNKNOWN; controlled future capture is a proposal only.
+- Inspect existing tool descriptions, rejection feedback and capabilities before
+  suggesting they are missing. Proposed improvements are unverified proposals,
+  not proven system defects or executable instructions.
 """
 
 

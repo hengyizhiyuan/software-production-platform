@@ -75,10 +75,13 @@ def source_semantics(group, value, repository):
                                 "expected_reality": "EXPECTED_NOT_OBSERVED",
                                 "observed_reality": "OWNER_RECORDED_OBSERVATION",
                                 "repair_hypothesis": "UNVERIFIED_HYPOTHESIS"},
-                "boundary": "Signals and recovery are recorded Owner diagnoses. Required/rejected/expected behavior lists do not establish executed file changes or the contents of an unavailable rejected candidate. Execution receipts and exact candidate source/diff are separate observations; causal interpretation remains hypothetical."}
+                "boundary": "Signals and recovery are recorded Owner diagnoses. Required/rejected/expected behavior lists do not establish executed file changes or the contents of an unavailable rejected candidate. Budget attempt_count and convergence fields do not independently prove model call counts or successful regeneration; inspect original steps/calls and producer source. Execution receipts and exact candidate source/diff are separate observations; causal interpretation remains hypothetical."}
+    if repository:
+        return {"surface": "COMMITTED_REPOSITORY", "families": families,
+                "boundary": "Exact source at the declared revision is comparison evidence, not historical Worker identity. A final diff proves net changes between the two commits, not the absence of intermediate mutations or external effects; it alone cannot justify rollback decisions or a regeneration history."}
     if not repository and isinstance(value, dict) and any(key in value for key in RELATION_FIELDS):
         families.append("EXECUTION_RELATIONSHIP")
-    return {"surface": "COMMITTED_REPOSITORY" if repository else "ORIGINAL_OWNER_OR_PROJECTION",
+    return {"surface": "ORIGINAL_OWNER_OR_PROJECTION",
             "families": families, "boundary": "A projection is not an independent event. Identifiers prove recorded links, not lifecycle completion."}
 
 
@@ -399,6 +402,40 @@ class EvidenceCatalog:
                                                prefix + ["citations", i], c.evidence_id)
                 except CitationRejected as error:
                     errors.append(error)
+        previous_time = None
+        for index, item in enumerate(report.timeline):
+            if item.timestamp is None:
+                continue
+            subject_id = str(item.timestamp_evidence_id)
+            row = self.records.get(subject_id)
+            value = self.values.get(subject_id)
+            prefix = ["timeline", index]
+            if (subject_id not in self.observed or not row or row["repository"]
+                    or row["group"] in {"analysis_draft", "evidence_check"}
+                    or not isinstance(value, dict)):
+                errors.append(CitationRejected("TIMELINE_TIME_REQUIRES_ORIGINAL_OWNER", prefix + ["timestamp_evidence_id"], subject_id))
+                continue
+            recorded = value.get(item.timestamp_field)
+            try:
+                actual = datetime.fromisoformat(item.timestamp.replace("Z", "+00:00"))
+                expected = datetime.fromisoformat(recorded.replace("Z", "+00:00"))
+                if actual.utcoffset() is None or expected.utcoffset() is None or actual != expected:
+                    raise ValueError("timestamp mismatch")
+            except (ValueError, TypeError, AttributeError):
+                errors.append(CitationRejected("TIMELINE_TIME_DOES_NOT_MATCH_OWNER_FIELD", prefix + ["timestamp"], subject_id))
+                continue
+            # A timestamp also needs to have been returned to the model. Index
+            # metadata or an unread tail cannot establish an event time.
+            if not any(recorded in excerpt for excerpt in self.observed_excerpts.get(subject_id, [])):
+                errors.append(CitationRejected("TIMELINE_TIME_NOT_OBSERVED", prefix + ["timestamp"], subject_id))
+            if subject_id not in {str(c.evidence_id) for c in item.citations}:
+                errors.append(CitationRejected("TIMELINE_TIME_SOURCE_MUST_BE_CITED", prefix + ["citations"], subject_id))
+            for i, c in enumerate(item.citations):
+                if self.association(subject_id, c.evidence_id)["status"] != "RELATED":
+                    errors.append(CitationRejected("TIMELINE_DISTINCT_EVENTS_REQUIRE_SEPARATE_ENTRIES_OR_UNDATED_SUMMARY", prefix + ["citations", i], c.evidence_id))
+            if previous_time is not None and actual < previous_time:
+                errors.append(CitationRejected("TIMELINE_EVENTS_MUST_BE_CHRONOLOGICAL", prefix + ["timestamp"], subject_id))
+            previous_time = actual
         for index, finding in enumerate(report.findings):
             subject_id = str(finding.subject_evidence_id)
             if subject_id not in self.observed:

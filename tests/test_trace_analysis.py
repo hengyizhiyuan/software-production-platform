@@ -116,6 +116,60 @@ def uuid4_from(snap):
     return UUID(snap["work_id"])
 
 
+def timed_report():
+    catalog = EvidenceCatalog(snapshot())
+    candidate = report(catalog)
+    event_ids = []
+    for index, timestamp in enumerate(("2026-10-05T16:58:12+00:00", "2026-10-05T16:59:24+00:00")):
+        eid = catalog.add("execution_events", f"/fixture/events/{index}",
+                          {"id": str(uuid4()), "created_at": timestamp, "signal": "FAILED"})
+        catalog.read(eid)
+        event_ids.append(eid)
+    candidate["timeline"] = [{"stage": "FAILURE", "statement": "Recorded failure",
+        "citations": [{"evidence_id": eid, "quote": "FAILED"}],
+        "timestamp": catalog.values[eid]["created_at"],
+        "timestamp_evidence_id": eid, "timestamp_field": "created_at"} for eid in event_ids]
+    return catalog, candidate, event_ids
+
+
+def test_timeline_times_are_original_observed_and_chronological():
+    catalog, candidate, _ = timed_report()
+    # Equivalent timezone representations identify the same original instant.
+    candidate["timeline"][0]["timestamp"] = "2026-10-06T00:58:12+08:00"
+    catalog.validate(AnalysisReport.model_validate(candidate))
+    candidate["timeline"].reverse()
+    with pytest.raises(ValueError, match="TIMELINE_EVENTS_MUST_BE_CHRONOLOGICAL"):
+        catalog.validate(AnalysisReport.model_validate(candidate))
+
+
+def test_one_incident_time_cannot_be_attached_to_another_incident():
+    catalog, candidate, ids = timed_report()
+    candidate["timeline"][0]["citations"].append({"evidence_id": ids[1], "quote": "FAILED"})
+    with pytest.raises(ValueError, match="TIMELINE_DISTINCT_EVENTS_REQUIRE_SEPARATE_ENTRIES"):
+        catalog.validate(AnalysisReport.model_validate(candidate))
+    # An explicit undated composite is legal, without pretending a shared time.
+    candidate["timeline"][0].update(timestamp=None, timestamp_evidence_id=None, timestamp_field=None)
+    catalog.validate(AnalysisReport.model_validate(candidate))
+
+
+@pytest.mark.parametrize("timestamp", ["2026-10-05T16:58:13+00:00", "2026-10-05T16:58:12", "not-a-time"])
+def test_timeline_rejects_wrong_or_unzoned_original_time(timestamp):
+    catalog, candidate, _ = timed_report()
+    candidate["timeline"][0]["timestamp"] = timestamp
+    with pytest.raises(ValueError, match="TIMELINE_TIME_DOES_NOT_MATCH_OWNER_FIELD"):
+        catalog.validate(AnalysisReport.model_validate(candidate))
+
+
+def test_timeline_unread_time_and_missing_source_are_rejected():
+    catalog, candidate, ids = timed_report()
+    catalog.observed_excerpts[ids[0]] = ["FAILED"]
+    with pytest.raises(ValueError, match="TIMELINE_TIME_NOT_OBSERVED"):
+        catalog.validate(AnalysisReport.model_validate(candidate))
+    candidate["timeline"][0].pop("timestamp_evidence_id")
+    with pytest.raises(ValueError, match="TIMELINE_TIME_REQUIRES_ORIGINAL_OWNER_FIELD"):
+        AnalysisReport.model_validate(candidate)
+
+
 def test_report_rejection_enters_existing_native_bounded_refinement(tmp_path):
     s, snap, model = service(tmp_path, reject_first=True)
     r = asyncio.run(s.analyze("human:owner", uuid4_from(snap), AnalysisTrigger(request_id=uuid4(), rationale="Investigate")))
