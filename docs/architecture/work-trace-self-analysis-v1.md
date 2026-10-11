@@ -181,7 +181,7 @@ The gate is independent of any Work identity, command name or scenario wording.
 Dated entries copy the exact producer-time boundary into `time_interpretation`,
 also shown in Admin. Refinement creation time cannot timestamp later VERIFIED or
 recovered state; use its original update record or an undated snapshot summary.
-Existing saved v1/v2/v3/v4 reports remain readable without migration or rewriting.
+Existing saved v1/v2/v3/v4/v5 reports remain readable without migration or rewriting.
 
 ### Recommendation subjects and conditional mechanisms (report v5)
 
@@ -196,6 +196,20 @@ that requires original execution observations. Both `recovery` and
 `self_refine_events` are verified projections of the same producer rows and use
 the same identity, diagnosis and timestamp boundaries. Initial context selection
 reserves space within the existing ECF budget; omitted excerpts are not marked read.
+
+### Checked boundary presentation (report v6)
+
+The Native model can use `INSPECTED_OWNER_BOUNDARY`, `CHECKED_FIELD_SCOPE` and
+`ORIGINAL_OWNER_TIME_BOUNDARY` for derived scope/timestamp presentation. The
+verifier resolves these only after validating original read receipts, exact
+subjects, field checks, availability, event times and associations. Original
+model drafts remain immutable. Facts, causal hypotheses, classifications,
+recommendations, timestamps and identifiers are never automatically repaired.
+The output presents canonical text from the performed checks, reducing repeated
+machine-text copying without admitting arbitrary absence claims. PRESENT still
+cannot become missing; unread critical fields still require UNKNOWN. Classifier
+labels/proposal references in a refinement diagnosis alone cannot establish a
+system capability defect or reproducibility. Budgets and permissions are unchanged.
 
 ## Admin and storage
 

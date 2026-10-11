@@ -97,8 +97,11 @@ def source_semantics(group, value, repository):
                 "field_roles": {"diagnostic_evidence": "DIAGNOSIS_NOT_EXECUTION_RECEIPT",
                                 "expected_reality": "EXPECTED_NOT_OBSERVED",
                                 "observed_reality": "OWNER_RECORDED_OBSERVATION",
-                                "repair_hypothesis": "UNVERIFIED_HYPOTHESIS"},
-                "boundary": "Signals and recovery are recorded Owner diagnoses. Required/rejected/expected behavior lists do not establish executed file changes or the contents of an unavailable rejected candidate. Budget attempt_count and convergence fields do not independently prove model call counts or successful regeneration; inspect original steps/calls and producer source. Execution receipts and exact candidate source/diff are separate observations; causal interpretation remains hypothetical."}
+                                "repair_hypothesis": "UNVERIFIED_HYPOTHESIS",
+                                "known_failure_match": "OWNER_CLASSIFIER_LABEL_NOT_RECURRENCE_PROOF",
+                                "refinement_class": "OWNER_CLASSIFIER_LABEL_NOT_CAPABILITY_DEFECT_PROOF",
+                                "platform_improvement_candidate_ref": "PROPOSAL_REFERENCE_NOT_VERIFIED_DEFECT"},
+                "boundary": "Signals and recovery are recorded Owner diagnoses. Required/rejected/expected behavior lists do not establish executed file changes or the contents of an unavailable rejected candidate. Budget attempt_count and convergence fields do not independently prove model call counts or successful regeneration; inspect original steps/calls and producer source. Execution receipts and exact candidate source/diff are separate observations; causal interpretation remains hypothetical. Known-match/recurring labels and proposal references alone do not establish repeated executions, a reproducible failure or an implementation defect."}
     if repository:
         return {"surface": "COMMITTED_REPOSITORY", "families": families,
                 "boundary": "Exact source at the declared revision is comparison evidence, not historical Worker identity. A final diff proves net changes between the two commits, not the absence of intermediate mutations or external effects; it alone cannot justify rollback decisions or a regeneration history."}
@@ -548,7 +551,7 @@ class EvidenceCatalog:
                 errors.append(CitationRejected("TIMELINE_TIME_REQUIRES_ORIGINAL_OWNER", prefix + ["timestamp_evidence_id"], subject_id))
                 continue
             recorded = value.get(item.timestamp_field)
-            if item.time_interpretation != time_boundary(item.timestamp_field):
+            if item.time_interpretation not in {time_boundary(item.timestamp_field), "ORIGINAL_OWNER_TIME_BOUNDARY"}:
                 errors.append(CitationRejected("TIMELINE_REQUIRES_EXACT_TIME_BOUNDARY", prefix + ["time_interpretation"], subject_id))
             if item.timestamp_field == "created_at" and OWNER_GROUP_PROJECTIONS.get(row["group"], row["group"]) == "self_refine_events":
                 later_state = [value.get(k) for k in ("status", "final_result", "work_resume_result")]
@@ -584,7 +587,7 @@ class EvidenceCatalog:
             else:
                 checks = [self.checks.get(str(cid)) for cid in finding.uncertainty_check_ids]
                 expected = "\n".join([inspection["bounded_conclusion"]] + [c["bounded_conclusion"] for c in checks if c])
-                if any(c is None for c in checks) or finding.uncertainty != expected:
+                if any(c is None for c in checks) or finding.uncertainty not in {expected, "INSPECTED_OWNER_BOUNDARY"}:
                     errors.append(CitationRejected("UNCERTAINTY_MUST_COPY_INSPECTION_AND_CHECK_BOUNDARIES", ["findings", index, "uncertainty"], subject_id))
                 critical = {"/semantic_input", "/output", "/result_payload", "/diagnostic_evidence"}
                 unread = [f for r in inspection["records"] for f in r["fields"]
@@ -604,10 +607,15 @@ class EvidenceCatalog:
             for i, c in enumerate(finding.fact.citations):
                 if self.association(subject_id, c.evidence_id)["status"] != "RELATED":
                     errors.append(CitationRejected("CITATION_OWNER_ASSOCIATION_NOT_ESTABLISHED: choose same subject or explicit Owner reference", ["findings", index, "fact", "citations", i], c.evidence_id))
+            if (finding.classification.value == "SYSTEM_CAPABILITY_DEFECT" and
+                    all(self.records.get(str(c.evidence_id), {}).get("semantics", {}).get("surface") ==
+                        "OWNER_REFINEMENT_DIAGNOSIS" for c in finding.fact.citations)):
+                errors.append(CitationRejected("DIAGNOSIS_METADATA_ALONE_CANNOT_ESTABLISH_CAPABILITY_DEFECT; read original contract/failure observations or keep UNKNOWN", ["findings", index, "classification"], subject_id))
             if finding.scope_check_ids:
                 checks = [self.checks.get(str(cid)) for cid in finding.scope_check_ids]
-                if (any(not c or c["availability"] == "PRESENT" for c in checks)
-                        or finding.analysis != "\n".join(c["bounded_conclusion"] for c in checks if c)):
+                if any(not c or c["availability"] == "PRESENT" for c in checks):
+                    errors.append(CitationRejected("PRESENT_CHECK_CANNOT_SUPPORT_MISSING_FIELD_FINDING; use uncertainty_check_ids for present evidence, or check its precise unavailable field with OWNER_RECORD", ["findings", index, "scope_check_ids"], subject_id))
+                if finding.analysis not in {"CHECKED_FIELD_SCOPE", "\n".join(c["bounded_conclusion"] for c in checks if c)}:
                     errors.append(CitationRejected("CAPTURE_CONCLUSION_MUST_COPY_CHECKED_BOUNDARY", ["findings", index, "analysis"], subject_id))
             for i, c in enumerate(finding.repository_citations):
                 try:
@@ -647,7 +655,7 @@ class EvidenceCatalog:
             check = self.checks.get(str(assessment.check_id))
             if (not check or check["family"] != assessment.family.value
                     or check["availability"] != assessment.availability
-                    or (assessment.family.value == "OWNER_RECORD" and assessment.statement != check["bounded_conclusion"])
+                    or assessment.statement not in {"CHECKED_FIELD_SCOPE", check["bounded_conclusion"]}
                     or (assessment.family.value != "OWNER_RECORD" and (check["group"] or check["field"]))):
                 raise ValueError("EVIDENCE_ASSESSMENT_MUST_MATCH_SEEDED_FAMILY_LOOKUP")
             if str(assessment.check_id) in reviewed_checks or (assessment.family.value != "OWNER_RECORD" and assessment.family.value in reviewed):
@@ -660,7 +668,7 @@ class EvidenceCatalog:
             check = self.checks.get(str(gap.check_id))
             if (not check or check["family"] != gap.family.value or check["availability"] != gap.availability):
                 raise ValueError("MISSING_EVIDENCE_CONTRADICTS_LOOKUP_OR_UNCHECKED; PRESENT cannot be missing")
-            if gap.statement != check["bounded_conclusion"]:
+            if gap.statement not in {"CHECKED_FIELD_SCOPE", check["bounded_conclusion"]}:
                 raise ValueError("MISSING_EVIDENCE_MUST_COPY_BOUNDED_CONCLUSION; copy evidence.check bounded_conclusion exactly")
             if str(gap.check_id) not in {str(cid) for finding in report.findings for cid in finding.scope_check_ids}:
                 raise ValueError("MISSING_EVIDENCE_REQUIRES_SCOPED_FINDING")
@@ -672,6 +680,29 @@ class EvidenceCatalog:
             raise ValueError("OBSERVED_INCIDENT_REQUIRES_FINDING_WITH_ORIGINAL_OWNER_CITATION")
         # This is citation/structure verification. It cannot prove that prose
         # follows logically from the quotes or promote hypotheses to findings.
+
+
+    def materialize_boundaries(self, report):
+        """Presentation from already-validated receipts, never repair prose/IDs.
+
+        Preserve the original model draft. Factual claims, classifications,
+        references, recommendations and causal hypotheses are never rewritten.
+        """
+        self.validate(report)
+        findings = []
+        for f in report.findings:
+            inspection = self.inspections[str(f.inspection_id)]
+            updates = {"uncertainty": "\n".join([inspection["bounded_conclusion"]] +
+                [self.checks[str(cid)]["bounded_conclusion"] for cid in f.uncertainty_check_ids])}
+            if f.scope_check_ids:
+                updates["analysis"] = "\n".join(self.checks[str(cid)]["bounded_conclusion"] for cid in f.scope_check_ids)
+            findings.append(f.model_copy(update=updates))
+        result = report.model_copy(update={"findings": tuple(findings),
+            "timeline": tuple(t.model_copy(update={"time_interpretation": time_boundary(t.timestamp_field)}) if t.timestamp is not None else t for t in report.timeline),
+            "evidence_assessments": tuple(a.model_copy(update={"statement": self.checks[str(a.check_id)]["bounded_conclusion"]}) for a in report.evidence_assessments),
+            "missing_evidence": tuple(g.model_copy(update={"statement": self.checks[str(g.check_id)]["bounded_conclusion"]}) for g in report.missing_evidence)})
+        self.validate(result)
+        return result
 
 
 class RepositorySnapshot:
@@ -904,7 +935,7 @@ class AnalysisTools:
                                             public_report_candidate(candidate))
                 self.drafts[draft_id] = deepcopy(candidate)
                 report = AnalysisReport.model_validate(candidate)
-                self.catalog.validate(report)
+                report = self.catalog.materialize_boundaries(report)
                 self.accepted_report = report.model_dump(mode="json")
                 self.accepted_digest = canonical_digest(self.accepted_report)
                 output = {"verification": "CITATIONS_AND_STRUCTURE_PASS",

@@ -64,7 +64,7 @@ class TimelineItem(ObservedFact):
     timestamp: str | None = Field(default=None, description="Original event time only. Composite stage summaries have no single timestamp. Dated entries must be ordered chronologically, regardless of stage.")
     timestamp_evidence_id: UUID | None = Field(default=None, description="Observed original Owner record whose time is used; must be cited. Other citations of a dated event must be explicitly associated with this record.")
     timestamp_field: Literal["created_at", "updated_at", "started_at", "finished_at", "sealed_at", "assessed_at", "timestamp"] | None = Field(default=None, description="Exact top-level original Owner timestamp field, not an invented stage-wide time.")
-    time_interpretation: str | None = Field(default=None, description="For dated entries copy the exact evidence.read time_boundaries[timestamp_field]. Creation time cannot establish later snapshot state or recovery completion. Undated entries use null.")
+    time_interpretation: str | None = Field(default=None, description="For dated entries use ORIGINAL_OWNER_TIME_BOUNDARY or the exact evidence.read time_boundaries[timestamp_field]; presentation derives from the validated original field. Creation time cannot establish later snapshot state or recovery completion. Undated entries use null.")
 
     @model_validator(mode="after")
     def recorded_time_requires_source(self):
@@ -83,7 +83,7 @@ class Finding(AnalysisRecord):
     uncertainty_check_ids: tuple[UUID, ...] = Field(default=(), max_length=4,
         description="Performed field checks relevant to this finding's uncertainty. Do not infer whole-response or historical absence from them.")
     scope_check_ids: tuple[UUID, ...] = Field(default=(), max_length=4,
-        description="For findings about unavailable fields, cite performed checks. Such findings are UNKNOWN and analysis must copy their bounded_conclusion values joined by a newline. Do not use them to infer global/history absence.")
+        description="For findings about unavailable fields, cite performed checks. Such findings are UNKNOWN and analysis must be CHECKED_FIELD_SCOPE or the exact checked bounded_conclusion. PRESENT checks cannot establish a missing field. Do not use them to infer global/history absence.")
     classification: IssueClass
     epistemic_status: Literal["ROOT_CAUSE_HYPOTHESIS", "UNKNOWN"]
     fact: ObservedFact
@@ -91,7 +91,7 @@ class Finding(AnalysisRecord):
         description="ROOT_CAUSE_HYPOTHESIS must start with '假设：若' and use conditional causal language. Owner diagnosis/expected/rejected-behavior lists are not proof of executed effects or an unavailable candidate's contents.")
     repository_citations: tuple[Citation, ...] = Field(default=(), max_length=8)
     uncertainty: str = Field(min_length=1, max_length=12000,
-        description="Copy inspection.bounded_conclusion, followed by each uncertainty_check_ids evidence.check bounded_conclusion, joined by newline. No free-form absence claims. Unread, redacted, empty and unexported are distinct.")
+        description="Use INSPECTED_OWNER_BOUNDARY. The verifier derives presentation text only from the registered subject inspection and uncertainty_check_ids. Exact canonical boundary text is also accepted. No free-form absence claims.")
     recommendation: str = Field(min_length=1, max_length=3000)
     handling: Literal["SELF_REFINE_RETRY_REGENERATE", "EVOLUTION_WORK_PROPOSAL",
                       "BLOCK_AND_ESCALATE", "INVESTIGATE"] = Field(description=
@@ -131,7 +131,7 @@ class Recommendation(AnalysisRecord):
 
 
 class AnalysisReport(AnalysisRecord):
-    schema_version: Literal["watt-trace-analysis-report-v5"] = "watt-trace-analysis-report-v5"
+    schema_version: Literal["watt-trace-analysis-report-v6"] = "watt-trace-analysis-report-v6"
     work_id: UUID
     original_objective: ObservedFact
     expected_outcome: ObservedFact
@@ -144,9 +144,9 @@ class AnalysisReport(AnalysisRecord):
     platform_improvements: tuple[Recommendation, ...] = Field(default=(), max_length=20)
     deferred_items: tuple[Recommendation, ...] = Field(default=(), max_length=20)
     evidence_assessments: tuple[EvidenceAssessment, ...] = Field(max_length=8,
-        description="Reconcile every family in the seeded evidence_reality summary with its exact check_id and availability. These are snapshot observations, not completeness or causal truth.")
+        description="Reconcile every family with its exact check_id and availability. Use CHECKED_FIELD_SCOPE as statement; presentation derives from that performed check. These are snapshot observations, not completeness or causal truth.")
     missing_evidence: tuple[EvidenceGap, ...] = Field(default=(), max_length=60,
-        description="Every absence/incompleteness claim needs a prior evidence.check receipt for the same family. PRESENT evidence cannot be called missing; NOT_OBSERVED is limited to the checked snapshot scope. Put source/comparison limitations in uncertainty, not invented absence claims.")
+        description="Use CHECKED_FIELD_SCOPE; the verifier materializes its performed check boundary. Every absence/incompleteness claim needs a prior evidence.check receipt for the same family. PRESENT evidence cannot be called missing; NOT_OBSERVED is limited to the checked snapshot scope. Put source/comparison limitations in uncertainty, not invented absence claims.")
 
     @model_validator(mode="after")
     def recommendation_lineage(self):

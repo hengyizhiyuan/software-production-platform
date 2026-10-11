@@ -68,6 +68,10 @@ UNABLE_TO_COMPLETE with observed limitations. Do not fabricate ECF READY, Guardi
 approval, production context, missing failure text or historical code identity.
 Keep the report concise: normally eight to twelve timeline entries and at most six findings.
 Use short exact quotations and short paragraphs; a report is not a transcript.
+Prioritize the observed production incidents and the evidence needed for their
+causes. Do not turn unrelated redacted billing/token/metadata fields into causal
+findings. Keep such inspection limits in checked uncertainty; investigate further
+only if they affect the requested engineering diagnosis.
 Use exactly the provided schema fields; do not add extra fields or aliases.
 Submit a substantive investigation after reading the original incidents and code;
 do not submit a calibration report or placeholder statements. If original failure
@@ -103,9 +107,9 @@ Owner reference to/from that subject. Shared Work, attempt, component, failure c
 or time cannot establish incident identity. evidence.read returns related_records;
 read those original records before quoting them. Do not attach an unrelated failure
 as background in fact.citations; keep comparisons in uncertainty instead.
-Every missing_evidence statement and OWNER_RECORD assessment statement must copy
-the matching evidence.check bounded_conclusion verbatim. A finding ABOUT missing
-capture fields must declare scope_check_ids, be UNKNOWN, and set analysis to those
+Every missing_evidence statement and OWNER_RECORD assessment statement must use
+CHECKED_FIELD_SCOPE or the matching evidence.check bounded_conclusion verbatim. A finding ABOUT missing
+capture fields must declare scope_check_ids, be UNKNOWN, and set analysis to CHECKED_FIELD_SCOPE or those
 bounded_conclusion strings joined by a newline. Missing one checked field does not
 establish absence of a full response, another Owner or historical/platform storage.
 Each gap check_id must be linked to a scoped finding; do not place an unbounded
@@ -150,14 +154,28 @@ regression_scenario, immediate_recovery and deferred_items, not only findings:
 - Inspect existing tool descriptions, rejection feedback and capabilities before
   suggesting they are missing. Proposed improvements are unverified proposals,
   not proven system defects or executable instructions.
-Report v5 requires evidence.inspect for EVERY finding's exact subject; a read or
+Report v6 requires evidence.inspect for EVERY finding's exact subject; a read or
 index snippet alone is insufficient. Inspection reads linked ORIGINAL Owner fields
 along explicit references, including receipt->effect semantic_input and parameters.
 Use returned field excerpts as observations. Read NOT_READ_CAPACITY fields through
 evidence.read and inspect again before a hypothesis, or retain UNKNOWN. Do not
 equate the absence of parameters in a receipt with their absence in linked effects.
-Copy inspection_id. uncertainty must be exactly inspection.bounded_conclusion
-followed by each uncertainty_check_ids check.bounded_conclusion joined by newline.
+Copy inspection_id and use uncertainty='INSPECTED_OWNER_BOUNDARY'. For a scoped
+UNKNOWN finding use analysis='CHECKED_FIELD_SCOPE'. For evidence_assessments and
+missing_evidence use statement='CHECKED_FIELD_SCOPE'. The verifier derives only
+these boundary presentation fields from registered, performed reads/checks; it
+never repairs factual prose, hypotheses, classifications or references. Exact
+canonical boundary strings also remain accepted. No need to copy long receipts.
+PRESENT check receipts are not missing evidence: keep positive EMPTY actions or
+UNAVAILABLE client states as observed facts, use uncertainty_check_ids for their
+existing audit object, or check the exact unavailable field with OWNER_RECORD.
+Do not use scope_check_ids/missing_evidence with a PRESENT check.
+known_failure_match, refinement_class and platform_improvement_candidate_ref are
+Owner classifier/proposal metadata, not proof of repeated executions, a reproducible
+failure or a system capability defect. A capability defect needs original contract
+and failure observations plus a concrete implementation mechanism. Diagnosis-only
+facts must stay UNKNOWN or an explicit model-variance hypothesis; do not classify
+them SYSTEM_CAPABILITY_DEFECT merely because the labels suggest recurrence.
 Keep missing/unexported/redacted/empty/unread claims ONLY in these canonical checked
 boundaries and missing_evidence. Do not repeat such absence assertions in fact,
 analysis, scenario, recommendation or deferred prose. Describe the positive recorded
@@ -166,8 +184,10 @@ Every scope_check_ids / uncertainty_check_ids group must occur in that subject's
 explicit Owner inspection. Split unrelated Owner gaps into separate findings;
 do not combine a Guardian redaction and an unrelated inference field under one
 subject. Use UNKNOWN scope findings where required, without changing incident causes.
-For each dated timeline item, copy evidence.read time_boundaries[timestamp_field]
-into time_interpretation. created_at is RECORD CREATION, not recovery completion;
+For each dated timeline item use time_interpretation='ORIGINAL_OWNER_TIME_BOUNDARY'
+(or the exact evidence.read time boundary). The verifier presents the original
+field's boundary after checking the actual time and event references; it never
+changes the timestamp or statement. created_at is RECORD CREATION, not recovery completion;
 use updated_at for a recorded later update, or put recovered snapshot state in an
 undated recovery summary. A current VERIFIED status alone does not timestamp its
 transition. Do not describe a completed recovery at the record's creation time.

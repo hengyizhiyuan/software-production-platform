@@ -43,7 +43,7 @@ def report(catalog):
                 "regression_qualification": REGRESSION_CRITERIA[IssueClass.UNKNOWN]}],
             "deferred_items": [{"statement": "Raw log investigation", "evidence_family": "OWNER_RECORD", "finding_ids": ["missing-raw"]}],
             "evidence_assessments": [{"family": c["family"], "check_id": c["check_id"],
-                "availability": c["availability"], "statement": "Snapshot scope reviewed"}
+                "availability": c["availability"], "statement": c["bounded_conclusion"]}
                 for c in catalog.reality()["families"]], "missing_evidence": []}
 
 
@@ -905,3 +905,73 @@ def test_transfer_recommendation_accepts_its_own_audit_subject():
             "citations":[{"evidence_id":eid, "quote":"UNAVAILABLE"}]})
     r["deferred_items"][0].update(evidence_family="DELIVERY_TRANSFER", statement="Evaluate client receipt observations")
     c.validate(AnalysisReport.model_validate(r))
+
+
+def test_checked_boundary_markers_materialize_only_verified_receipts():
+    c = EvidenceCatalog(snapshot())
+    r = report(c)
+    r["findings"][0]["uncertainty"] = "INSPECTED_OWNER_BOUNDARY"
+    for a in r["evidence_assessments"]:a["statement"] = "CHECKED_FIELD_SCOPE"
+    original = json.loads(json.dumps(r))
+    materialized = c.materialize_boundaries(AnalysisReport.model_validate(r)).model_dump(mode="json")
+    assert r == original
+    assert materialized["findings"][0]["fact"] == original["findings"][0]["fact"] | {"evidence_family":"OWNER_RECORD"}
+    assert materialized["findings"][0]["analysis"] == original["findings"][0]["analysis"]
+    assert materialized["deferred_items"] == original["deferred_items"]
+    assert "本次关联读取仅限冻结导出" in materialized["findings"][0]["uncertainty"]
+    for a in materialized["evidence_assessments"]:assert a["statement"] == c.checks[a["check_id"]]["bounded_conclusion"]
+    r["findings"][0]["inspection_id"] = str(uuid4())
+    with pytest.raises(ValueError, match="FINDING_REQUIRES_SUBJECT_OWNER_INSPECTION"):
+        c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+def test_checked_markers_do_not_allow_present_evidence_to_be_called_missing():
+    c = EvidenceCatalog(evidence_snapshot())
+    r = report(c)
+    eid = next(eid for eid,row in c.records.items() if row["group"] == "served_delivery")
+    inspection = c.inspect(eid);check = c.check("DELIVERY_TRANSFER")
+    r["findings"][0].update(subject_evidence_id=eid, inspection_id=inspection["inspection_id"],
+        uncertainty="INSPECTED_OWNER_BOUNDARY", scope_check_ids=[check["check_id"]],
+        analysis="CHECKED_FIELD_SCOPE", fact={"statement":"Existing audit", "citations":[{"evidence_id":eid,"quote":"UNAVAILABLE"}]})
+    with pytest.raises(ValueError, match="PRESENT_CHECK_CANNOT_SUPPORT_MISSING_FIELD_FINDING"):
+        c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+@pytest.mark.parametrize("group", ["self_refine_events", "recovery"])
+def test_classifier_metadata_alone_cannot_promote_a_system_defect(group):
+    c = EvidenceCatalog(snapshot());r = report(c)
+    eid = c.add(group, "/fixture/diagnosis", {"id":str(uuid4()),"known_failure_match":True,
+        "refinement_class":"DEGRADING_OR_RECURRING_REFINEMENT", "platform_improvement_candidate_ref":"proposal:example"})
+    inspection=c.inspect(eid)
+    r["findings"][0].update(subject_evidence_id=eid,inspection_id=inspection["inspection_id"],
+        uncertainty="INSPECTED_OWNER_BOUNDARY",classification="SYSTEM_CAPABILITY_DEFECT",
+        handling="EVOLUTION_WORK_PROPOSAL",regression_qualification=REGRESSION_CRITERIA[IssueClass.SYSTEM_CAPABILITY_DEFECT],
+        fact={"statement":"Recorded classifier metadata", "citations":[{"evidence_id":eid,"quote":"DEGRADING_OR_RECURRING_REFINEMENT"}]})
+    with pytest.raises(ValueError, match="DIAGNOSIS_METADATA_ALONE_CANNOT_ESTABLISH_CAPABILITY_DEFECT"):
+        c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+def test_time_marker_does_not_change_an_event_or_hide_recovery_creation_error():
+    c,r,_=timed_report()
+    for t in r["timeline"]:t["time_interpretation"]="ORIGINAL_OWNER_TIME_BOUNDARY"
+    output=c.materialize_boundaries(AnalysisReport.model_validate(r)).model_dump(mode="json")
+    for old,new in zip(r["timeline"],output["timeline"]):
+        assert old["timestamp"]==new["timestamp"] and old["statement"]==new["statement"]
+        assert new["time_interpretation"]==time_boundary(old["timestamp_field"])
+
+
+def test_unknown_gap_markers_keep_the_exact_performed_field_scope():
+    c=EvidenceCatalog(evidence_snapshot());r=report(c)
+    eid=next(eid for eid,row in c.records.items() if row["group"]=="execution_steps")
+    inspection=c.inspect(eid);check=c.check("OWNER_RECORD",group="execution_steps",field="/result_payload/raw_response")
+    r["findings"][0].update(subject_evidence_id=eid,inspection_id=inspection["inspection_id"],
+        uncertainty="INSPECTED_OWNER_BOUNDARY",scope_check_ids=[check["check_id"]],analysis="CHECKED_FIELD_SCOPE",
+        fact={"statement":"Owner payload inspected", "citations":[{"evidence_id":eid,"quote":"result_payload"}]})
+    r["missing_evidence"]=[{"statement":"CHECKED_FIELD_SCOPE","family":"OWNER_RECORD", "check_id":check["check_id"],"availability":check["availability"]}]
+    r["evidence_assessments"].append({"statement":"CHECKED_FIELD_SCOPE","family":"OWNER_RECORD","check_id":check["check_id"],"availability":check["availability"]})
+    output=c.materialize_boundaries(AnalysisReport.model_validate(r)).model_dump(mode="json")
+    assert output["findings"][0]["analysis"]==check["bounded_conclusion"]
+    assert output["missing_evidence"][0]["statement"]==check["bounded_conclusion"]
+    r["evidence_assessments"][0]["statement"]="This proves all historical responses are available"
+    with pytest.raises(ValueError,match="EVIDENCE_ASSESSMENT_MUST_MATCH_SEEDED_FAMILY_LOOKUP"):
+        c.materialize_boundaries(AnalysisReport.model_validate(r))
