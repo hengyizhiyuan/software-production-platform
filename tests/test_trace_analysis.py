@@ -804,10 +804,11 @@ def test_creation_time_requires_snapshot_state_boundary():
         c.validate(AnalysisReport.model_validate(r))
 
 
-def test_refinement_created_at_does_not_timestamp_later_recovered_status():
+@pytest.mark.parametrize("group", ["self_refine_events", "recovery"])
+def test_refinement_created_at_does_not_timestamp_later_recovered_status(group):
     c = EvidenceCatalog(snapshot())
     r = report(c)
-    eid = c.add("self_refine_events", "/fixture/recovery", {"id": str(uuid4()),
+    eid = c.add(group, "/fixture/recovery", {"id": str(uuid4()),
         "created_at": "2026-10-05T10:00:00+00:00", "updated_at": "2026-10-05T10:01:00+00:00",
         "status": "VERIFIED", "final_result": "LOCAL_OBLIGATION_RECOVERED"})
     c.read(eid)
@@ -853,3 +854,15 @@ def test_seed_stays_in_context_budget_and_does_not_observe_omitted_bodies():
     assert omitted
     assert not any(eid in catalog.observed for eid in omitted)
     assert catalog.index(group="self_refine_events")["total"] == 20
+
+
+def test_recovery_projection_preserves_owner_identity_and_semantics():
+    c = EvidenceCatalog(snapshot())
+    value = {"id": str(uuid4()), "diagnostic_evidence": {"signal": "example"}}
+    original = c.add("self_refine_events", "/fixture/original", value)
+    projected = c.add("recovery", "/fixture/projected", value)
+    unrelated = c.add("recovery", "/fixture/other", dict(value, id=str(uuid4())))
+    assert c.association(original, projected)["basis"] == "SAME_OWNER_IDENTITY_PROJECTION"
+    assert c.association(original, unrelated)["status"] == "NOT_ESTABLISHED"
+    assert c.records[original]["semantics"] == c.records[projected]["semantics"]
+    assert projected in {r["evidence_id"] for r in c.inspect(original)["records"]}

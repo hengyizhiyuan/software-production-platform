@@ -48,6 +48,9 @@ RELATION_FIELDS = {"pwu_id": "PWU", "work_unit_id": "PWU", "session_id": "SESSIO
 RECORD_NAMESPACES = {"effect_receipts": "native-receipt", "execution_steps": "native-inference-step",
                      "execution_effects": "native-effect", "tool_effects": "native-effect", "execution_sessions": "native-session",
                      "execution_attempts": "native-attempt"}
+# production_trace exports these same Owner rows in both surfaces.
+OWNER_GROUP_PROJECTIONS = {"recovery": "self_refine_events"}
+
 DIRECT_REFERENCE_FIELDS = {"receipt_ref": "native-receipt", "receipt_id": "native-receipt",
                           "inference_step_ref": "native-inference-step", "inference_step_id": "native-inference-step",
                           "effect_ref": "native-effect", "effect_id": "native-effect"}
@@ -72,6 +75,7 @@ ABSENCE_PROSE = re.compile(
 
 
 def source_semantics(group, value, repository):
+    group = OWNER_GROUP_PROJECTIONS.get(group, group)
     families = ["OWNER_RECORD"]
     if group in {"evidence_check", "evidence_inspection", "analysis_draft"}:
         return {"surface": "DERIVED_SCOPE_LOOKUP" if group == "evidence_check" else
@@ -222,7 +226,8 @@ class EvidenceCatalog:
         if subject_evidence_id == evidence_id:
             return {"status": "RELATED", "basis": "SAME_ORIGINAL_RECORD"}
         a, b = self.values[subject_evidence_id], self.values[evidence_id]
-        same_owner = (subject["group"] == other["group"] or
+        same_owner = (OWNER_GROUP_PROJECTIONS.get(subject["group"], subject["group"]) ==
+                      OWNER_GROUP_PROJECTIONS.get(other["group"], other["group"]) or
                       RECORD_NAMESPACES.get(subject["group"]) is not None and
                       RECORD_NAMESPACES.get(subject["group"]) == RECORD_NAMESPACES.get(other["group"]))
         if same_owner and isinstance(a, dict) and isinstance(b, dict) and a.get("id") and a.get("id") == b.get("id"):
@@ -245,7 +250,7 @@ class EvidenceCatalog:
 
     def related(self, evidence_id):
         # This lookup is metadata, never an observation of an unread record body.
-        if self.records[evidence_id]["group"] not in {"self_refine_events", *RECORD_NAMESPACES}:
+        if OWNER_GROUP_PROJECTIONS.get(self.records[evidence_id]["group"], self.records[evidence_id]["group"]) not in {"self_refine_events", *RECORD_NAMESPACES}:
             return {"items": [], "truncated": False}
         items = [{"evidence_id": eid, "group": row["group"], "association": relation}
                  for eid, row in self.records.items() if eid != evidence_id
@@ -545,7 +550,7 @@ class EvidenceCatalog:
             recorded = value.get(item.timestamp_field)
             if item.time_interpretation != time_boundary(item.timestamp_field):
                 errors.append(CitationRejected("TIMELINE_REQUIRES_EXACT_TIME_BOUNDARY", prefix + ["time_interpretation"], subject_id))
-            if item.timestamp_field == "created_at" and row["group"] == "self_refine_events":
+            if item.timestamp_field == "created_at" and OWNER_GROUP_PROJECTIONS.get(row["group"], row["group"]) == "self_refine_events":
                 later_state = [value.get(k) for k in ("status", "final_result", "work_resume_result")]
                 if (item.stage == "RECOVERY_REFINEMENT" or any(isinstance(state, str) and state and
                         (state in item.statement or any(state in c.quote for c in item.citations))
