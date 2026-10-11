@@ -485,10 +485,10 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
     # pending Candidate gate. Consume its exact current component through the
     # existing content Owner, never ask a static checker to prove future Seal.
     from spg.application.governed_obligations import (
-        _FACT_METHOD_APPLICABILITY, validate_fulfillment_projection)
+        _FACT_METHOD_APPLICABILITY_CONTRACTS, validate_fulfillment_projection)
     receipt = (bindings[0].formation_receipt or {}) if bindings else {}
     negotiated = any((row.get("owner_source_preconditions") or {}).get(
-        "fact_method_applicability_contract") == _FACT_METHOD_APPLICABILITY
+        "fact_method_applicability_contract") in _FACT_METHOD_APPLICABILITY_CONTRACTS
         for row in receipt.get("candidate_attempts", ()) if row.get("stage") == "MODEL_REQUEST_PENDING")
     component_facts = {identity for identity, routes in routes_by_fact.items()
         if negotiated and identity not in linked_components
@@ -748,7 +748,8 @@ def _exact_fact_git_scope(reference, binding, targets, changed, *, revision=None
         # The negative value remains the original exclusion. The authorized
         # target set is supplied by the Task, not reinterpreted from that value.
         # Full projection validation has re-proved source/qualifier meaning,
-        # exact literal-value equality or exact negative-clause correspondence,
+        # exact literal operands or reviewed unchanged source-expression meaning,
+        # or exact negative-clause correspondence,
         # independent Review and the original Task allowlist.
         paths = binding.target_paths
     if paths is None:

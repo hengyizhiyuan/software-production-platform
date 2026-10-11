@@ -84,7 +84,8 @@ class NeverCallAgain:
 
 
 @pytest.mark.parametrize('admission', ('work', 'steering'))
-def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls(postgres_database, tmp_path, monkeypatch, admission):
+@pytest.mark.parametrize('fact_shape', ('literal-bound', 'semantic-scope'))
+def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls(postgres_database, tmp_path, monkeypatch, admission, fact_shape):
     import json
     from copy import deepcopy
     from types import SimpleNamespace
@@ -101,8 +102,10 @@ def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_ca
             candidate = super().interpret(basis)
             original = candidate.semantic_fact_candidates[0]
             bound = original.model_copy(update={'candidate_id': 'controlled-file-bound',
-                'subject': 'controlled.repository.bound', 'relation': SemanticRelation.BOUND,
-                'value': 'index.html', 'scope': None, 'qualifiers': {}, 'source_text': c1.CONSTRAINTS[0]})
+                'subject': 'controlled.repository.bound',
+                'relation': SemanticRelation.BOUND if fact_shape == 'literal-bound' else SemanticRelation.SCOPE,
+                'value': 'index.html' if fact_shape == 'literal-bound' else 'index.html only',
+                'scope': None, 'qualifiers': {}, 'source_text': c1.CONSTRAINTS[0]})
             return candidate.model_copy(update={'semantic_fact_candidates': (*candidate.semantic_fact_candidates, bound)})
     monkeypatch.setattr(c1, 'DeclaredC1Meaning', OriginalBoundMeaning)
     calls = []
@@ -114,7 +117,7 @@ def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_ca
             output = fixture_review_proof(inv, plan, review(inv, plan), payload).model_dump_json()
         else:
             plan = declared.form(inv, payload['existing_capability_contracts'])
-            bounded = {s['source_ref'] for s in inv['sources'] if s['kind'] == 'FACT' and s['payload']['relation'] == 'BOUND'}
+            bounded = {s['source_ref'] for s in inv['sources'] if s['kind'] == 'FACT' and s['payload']['subject'] == 'controlled.repository.bound'}
             routes = tuple(r.model_copy(update={'capability': 'GIT_DIFF_SCOPE', 'component_basis':
                 r.component_basis.model_copy(update={'linked_fact_refs': ()})}) if r.source_ref in bounded
                 else r.model_copy(update={'component_basis': r.component_basis.model_copy(update={
@@ -130,7 +133,7 @@ def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_ca
     monkeypatch.setattr(c1, 'DeclaredC1Fulfillment', lambda: provider)
     admitted = c1._admit_c1(postgres_database, tmp_path, admission)
     _, work_id, revision, ir, _, baseline, pwu = admitted
-    original = next(f for f in revision.engineering_semantic_facts if f.relation is SemanticRelation.BOUND)
+    original = next(f for f in revision.engineering_semantic_facts if f.subject == 'controlled.repository.bound')
     binding = next(b for b in pwu.completion_contract.fulfillment_bindings if b.fact_id == original.id)
     assert binding.evidence_method == 'EXACT_GIT_DIFF_SCOPE' and binding.state == 'BOUND_PENDING_EVIDENCE'
     assert len(calls) == 2

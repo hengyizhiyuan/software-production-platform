@@ -71,6 +71,50 @@ def test_literal_operand_observation_cannot_retype_fact_or_make_numeric_bound_a_
         assert literal_file_scope_value_paths(boundary.model_copy(update=change), proposed_method=True) is None
 
 
+@pytest.mark.parametrize('relation', (SemanticRelation.SCOPE, SemanticRelation.BOUND))
+@pytest.mark.parametrize('expression', ('index.html only', 'Confine changes to the authorized file.', '修改范围仅限目标文件'))
+def test_file_boundary_expression_is_reviewed_not_normalized_to_a_filename(relation, expression):
+    rev, ir, inv, plan = case(relation)
+    boundary = next(f for f in rev.engineering_semantic_facts if f.relation is relation)
+    rev.engineering_semantic_facts = tuple(f.model_copy(update={'value': expression}) if f.id == boundary.id
+        else f for f in rev.engineering_semantic_facts)
+    inv = a.fulfillment_inventory(rev, ir, exact_target_paths=inv['exact_target_paths'])
+    plan = plan.model_copy(update={'inventory_fingerprint': inv['inventory_fingerprint']})
+    before = deepcopy(rev.engineering_semantic_facts)
+    own = preconditions(rev, ir, inv)
+    proposed = a.validate_projection_candidate(plan, rev, ir, inv, source_contract='v3',
+        owner_preconditions=own, allow_review_pending=True)
+    assert next(b for b in proposed if b.fact_id == boundary.id).target_paths == tuple(inv['exact_target_paths'])
+    with pytest.raises(ValueError, match='REVIEW_REQUIRED'):
+        a.validate_projection_candidate(plan, rev, ir, inv, source_contract='v3', owner_preconditions=own)
+    approved = verdict(inv, plan)
+    assert a.validate_projection_candidate(plan, rev, ir, inv, source_contract='v3',
+        owner_preconditions=own, semantic_review=approved)
+    rejected = deepcopy(approved)
+    for row in rejected['source_results']:
+        if row['source_ref'] == 'semantic-fact:'+str(boundary.id):row['complete_and_equivalent'] = False
+    with pytest.raises(ValueError, match='OBLIGATION_'):
+        a.validate_projection_candidate(plan, rev, ir, inv, source_contract='v3',
+            owner_preconditions=own, semantic_review=rejected)
+    assert rev.engineering_semantic_facts == before
+
+
+def test_original_negotiated_contract_keeps_its_literal_scope_boundary():
+    rev, ir, inv, plan = case(SemanticRelation.SCOPE)
+    boundary = next(f for f in rev.engineering_semantic_facts if f.relation is SemanticRelation.SCOPE)
+    rev.engineering_semantic_facts = tuple(f.model_copy(update={'value':'index.html only'}) if f.id == boundary.id
+        else f for f in rev.engineering_semantic_facts)
+    inv = a.fulfillment_inventory(rev, ir, exact_target_paths=inv['exact_target_paths'])
+    plan = plan.model_copy(update={'inventory_fingerprint':inv['inventory_fingerprint']})
+    old = a._owner_source_preconditions(rev, ir, inv, a.fulfillment_capability_contracts(),
+        review_input_contract='existing-admission-source-comparison-input-v5',
+        review_source_consumption_contract='existing-source-consumption-proof-v2',
+        fact_method_applicability_contract='existing-reviewed-fact-method-applicability-v1')
+    with pytest.raises(ValueError, match='FACT_SCOPE_VALUE_MISMATCH'):
+        a.validate_projection_candidate(plan, rev, ir, inv, source_contract='v3',
+            owner_preconditions=old, allow_review_pending=True)
+
+
 def test_current_content_and_future_seal_are_joint_and_require_independent_review():
     rev, ir, inv, plan = case(mixed=True)
     own = preconditions(rev, ir, inv)

@@ -732,7 +732,9 @@ def _capability_tuple(name):
     return route
 
 
-_FACT_METHOD_APPLICABILITY = "existing-reviewed-fact-method-applicability-v1"
+_FACT_METHOD_APPLICABILITY = "existing-reviewed-fact-method-applicability-v2"
+_FACT_METHOD_APPLICABILITY_CONTRACTS = {
+    "existing-reviewed-fact-method-applicability-v1", _FACT_METHOD_APPLICABILITY}
 
 
 def _fact_method_arguments(preconditions, candidate=None):
@@ -828,9 +830,19 @@ def _projection_binding(revision, ir, inventory, route, *, reviewed_background_r
             source_record_ids=records, source_quote=quote, **common)
     if source["kind"] == "FACT":
         fact = next(fact for fact in revision.engineering_semantic_facts if str(fact.id) == source["fact_id"])
-        reviewed_method = (fact_method_applicability_contract == _FACT_METHOD_APPLICABILITY
+        reviewed_method = (fact_method_applicability_contract in _FACT_METHOD_APPLICABILITY_CONTRACTS
             and source_contract == "v3" and source_consumption_contract == _SOURCE_CONSUMPTION_CONTRACT
             and allow_calibrated and route.component_basis is not None)
+        from spg.domain.governed_obligation import literal_file_scope_value_paths
+        # A safe string is not necessarily an atomic file name. The admitted
+        # value may express a file boundary in natural language. Propose only
+        # the already frozen Task operands; the unchanged original expression,
+        # its full qualifiers and its component require independent Review.
+        # This is method eligibility, never a path grant or fulfilled evidence.
+        reviewed_diff_proposal = (reviewed_method and fact_method_applicability_contract == _FACT_METHOD_APPLICABILITY
+            and method == "EXACT_GIT_DIFF_SCOPE"
+            and literal_file_scope_value_paths(fact, proposed_method=True) is not None
+            and tuple(route.target_paths) == tuple(inventory["exact_target_paths"]))
         if phase is FulfillmentPhase.CONTINUOUS_FROM_ADMISSION:
             # A Boolean Fact alone cannot invent the effect's semantic identity.
             # Bind new continuous routes to the admitted typed clause instead.
@@ -876,7 +888,8 @@ def _projection_binding(revision, ir, inventory, route, *, reviewed_background_r
                     revision, ir, inventory, fact, route, source_contract=source_contract)):
             from spg.domain.governed_obligation import literal_file_scope_value_paths
             original_scope_paths = literal_file_scope_value_paths(fact, proposed_method=reviewed_method)
-            if original_scope_paths is not None and tuple(route.target_paths) != tuple(original_scope_paths):
+            if (original_scope_paths is not None and not reviewed_diff_proposal
+                    and tuple(route.target_paths) != tuple(original_scope_paths)):
                 raise ValueError("OBLIGATION_FACT_SCOPE_VALUE_MISMATCH")
         method_failure = _fact_evidence_method_failure(fact, method, reviewed_method=reviewed_method)
         if method_failure:
@@ -889,7 +902,8 @@ def _projection_binding(revision, ir, inventory, route, *, reviewed_background_r
                 raise ValueError("OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED")
             negative_consumption = (source_contract == "v3"
                 and source_consumption_contract in _SOURCE_CONSUMPTION_CONTRACTS and negative_scope)
-            if original_paths is not None and not negative_consumption and set(route.target_paths) != set(original_paths):
+            if (original_paths is not None and not negative_consumption and not reviewed_diff_proposal
+                    and set(route.target_paths) != set(original_paths)):
                 raise ValueError("OBLIGATION_FACT_SCOPE_VALUE_MISMATCH")
             if negative_scope:
                 values = (fact.value,) if isinstance(fact.value, str) else fact.value if isinstance(fact.value, (list, tuple)) else ()
@@ -2130,7 +2144,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
     actually proves their meaning. Structural eligibility is not equivalence,
     evidence satisfaction, independent review or authority.
     """
-    if fact_method_applicability_contract not in (None, _FACT_METHOD_APPLICABILITY):
+    if fact_method_applicability_contract is not None and fact_method_applicability_contract not in _FACT_METHOD_APPLICABILITY_CONTRACTS:
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     if fact_method_applicability_contract is not None and (
             typed_prerequisite_contract != "existing-owner-typed-prerequisites-v11"
@@ -2284,7 +2298,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                 if source["kind"] == "FACT":
                     row["original_fact_type"] = {"relation": fact.relation.value,
                         "reference_role": fact.reference_role.value if fact.reference_role else None}
-                    failure = _fact_evidence_method_failure(fact, method, reviewed_method=fact_method_applicability_contract == _FACT_METHOD_APPLICABILITY)
+                    failure = _fact_evidence_method_failure(fact, method, reviewed_method=fact_method_applicability_contract in _FACT_METHOD_APPLICABILITY_CONTRACTS)
                     if failure:
                         codes.append(failure)
                     if (typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"}
@@ -2292,7 +2306,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                         codes.append("OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY")
                     if (phase in {FulfillmentPhase.CANDIDATE_SEAL, FulfillmentPhase.HUMAN_INTEGRATION,
                                   FulfillmentPhase.DELIVERY} and fact.relation.value != "ACCEPTANCE_ASSERTION"
-                            and not (fact_method_applicability_contract == _FACT_METHOD_APPLICABILITY
+                            and not (fact_method_applicability_contract in _FACT_METHOD_APPLICABILITY_CONTRACTS
                                 and phase is FulfillmentPhase.CANDIDATE_SEAL)):
                         codes.append("OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED")
                 if (source["kind"] == "WORK_CONSTRAINT"
