@@ -602,7 +602,8 @@ def test_guardian_uses_sealed_proof_without_rejecting_historical_failure(chain):
     record = chain.records[0]
     identity = uuid4()
     values = record.model_dump(mode="python")
-    values.update(id=identity, result="FAIL", provider={"provider_identity":"fixture:historical",
+    values.pop("provider")
+    values.update(id=identity, result="FAIL", provider_binding={"provider_identity":"fixture:historical",
         "provider_version":"v0"}, evidence=record.evidence.model_dump(mode="json"),
         basis_fingerprint=sha256(identity.bytes).hexdigest(),
         created_at=record.created_at-timedelta(seconds=1))
