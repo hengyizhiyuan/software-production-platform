@@ -1,0 +1,40 @@
+{
+  "schema": "c3-built-image-attestation-v1",
+  "scope": "actual-installed-imports",
+  "sources": {
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    },
+    "guardian": {
+      "revision": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+      "tree": "6066a6d6b8d91bec610021409ab320309ed0e437"
+    },
+    "watt": {
+      "revision": "41635093b03b729d07816a77049409c96ec05ac1",
+      "tree": "37a442bd15e53d5d6168c4a7423ff0bd6806a068"
+    }
+  },
+  "status": "PASS",
+  "caller_observed_image_id": "sha256:bd3814062d20ea15a5fef1b191f56658de3724300402733ba129876509e3b30a",
+  "captured_at_utc": "2026-10-11T01:59:48.133130+00:00",
+  "uid": 10001,
+  "gid": 10001,
+  "manifest_sha256": "31ebd6b6845d271e404cabca24412c44a2a4209ed3cde71b68a3a3580f7137af",
+  "package_versions": {
+    "alembic": "1.19.1",
+    "httpx": "UNKNOWN: distribution metadata unavailable",
+    "psycopg": "3.3.4",
+    "pydantic": "2.13.4",
+    "pytest": "9.1.1",
+    "spg-runtime": "0.1.0",
+    "sqlalchemy": "2.0.52"
+  },
+  "not_runtime_or_work_qualification": true,
+  "actual_imports_receipt_sha256": "b55caed1532e2427ed7d139a8df230e41587284a2bd88753b6a51d0d1c052cc4",
+  "persisted_full_receipt": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation52-qualified-20261010/final-image/evidence/actual-imports.json"
+}

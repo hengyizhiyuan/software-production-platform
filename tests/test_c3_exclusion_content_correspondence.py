@@ -89,3 +89,32 @@ def test_generation_uses_the_same_source_predicate_but_does_not_select_a_method(
     assert proof['minimal_support_sets']
     assert current['exclusion_content_contract'] == CONTRACT
     assert 'selected_capability' not in current['sources'][index]
+
+
+@pytest.mark.parametrize('legacy', (False, True))
+def test_current_exclusion_contract_is_negotiated_after_actual_adapter_contract(monkeypatch, legacy):
+    from copy import deepcopy
+    from tests.test_c3_fulfillment_capacity_representation import (
+        controlled_capacity_case, controlled_model_provider)
+    rev, ir, inv, plan = controlled_capacity_case()
+    provider, calls = controlled_model_provider(inv, plan)
+    original = a._owner_source_preconditions
+    incoming = []
+    def adapter(*args, **kwargs):
+        incoming.append(kwargs.get('exclusion_content_contract'))
+        if legacy:
+            kwargs['include_typed_observations'] = False
+        return original(*args, **kwargs)
+    with monkeypatch.context() as patch:
+        patch.setattr(a, '_owner_source_preconditions', adapter)
+        result = a.form_fulfillment_projection(rev, ir, provider=provider,
+            source_revision=inv['source_revision'], exact_target_paths=inv['exact_target_paths'])
+    assert all(b.state != 'UNRESOLVED' for b in result)
+    assert incoming[0] is None
+    request = next(r for r in provider._fulfillment_receipts if r['stage'] == 'MODEL_REQUEST_PENDING')
+    assert request['owner_source_preconditions'].get('exclusion_content_contract') == (None if legacy else CONTRACT)
+    frozen = deepcopy(provider._fulfillment_receipts)
+    result = a.form_fulfillment_projection(rev, ir, provider=provider,
+        source_revision=inv['source_revision'], exact_target_paths=inv['exact_target_paths'])
+    assert all(b.state != 'UNRESOLVED' for b in result)
+    assert provider._fulfillment_receipts == frozen and len(calls) == 2

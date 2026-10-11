@@ -3524,8 +3524,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                         if initial_request is not None else _SOURCE_CONSUMPTION_CONTRACT
                         if getattr(provider, "supports_source_consumption_proof", False) else None),
                     exclusion_content_contract=((initial_request.get("owner_source_preconditions") or {}).get("exclusion_content_contract")
-                        if initial_request is not None else "existing-current-exclusion-content-correspondence-v1"
-                        if getattr(provider, "supports_source_consumption_proof", False) else None))}
+                        if initial_request is not None else None))}
                     if supports_preconditions and callable(metadata_builder)
                     and "owner_preconditions" in inspect.signature(metadata_builder).parameters else {})
                 if initial_request is None and precondition_arguments:
@@ -3537,6 +3536,28 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                         # Opt in only after the adapter has returned its actual
                         # Owner contract. Never upgrade a legacy/replayed request.
                         actual_preconditions["generation_prerequisite_contract"] = "existing-owner-binding-generation-v2"
+                    if (actual_preconditions.get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v11"
+                            and actual_preconditions.get("review_input_contract") == "existing-admission-source-comparison-input-v5"
+                            and actual_preconditions.get("review_source_consumption_contract") == _SOURCE_CONSUMPTION_CONTRACT
+                            and getattr(provider, "supports_source_consumption_proof", False)):
+                        # Negotiate against the actual returned Owner contract,
+                        # just like generation prerequisites above. Do not pass
+                        # a current-only marker into a legacy adapter or upgrade
+                        # any persisted request. Rebuild the same proof domains
+                        # so the marker and necessary binding sets stay bound.
+                        actual_preconditions = _owner_source_preconditions(revision, ir, inventory, capabilities,
+                            include_syntax_observations=actual_preconditions.get("syntax_observation_contract") is not None,
+                            syntax_observation_contract=actual_preconditions.get("syntax_observation_contract"),
+                            include_operand_observations=actual_preconditions.get("operand_observation_contract") is not None,
+                            include_typed_observations=True,
+                            **{key: actual_preconditions.get(key) for key in (
+                                "typed_prerequisite_contract", "generation_view_contract",
+                                "raw_operand_observation_contract", "review_input_contract",
+                                "semantic_selection_input_contract", "generation_prerequisite_contract",
+                                "source_context_contract", "wire_presentation_contract",
+                                "review_source_consumption_contract")},
+                            exclusion_content_contract="existing-current-exclusion-content-correspondence-v1")
+                        precondition_arguments["owner_preconditions"] = actual_preconditions
                     source_contract = ("v3" if precondition_arguments["owner_preconditions"].get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v2" if precondition_arguments["owner_preconditions"].get(
                         "typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v1")
                 wire_metadata = metadata_builder(inventory, capabilities, validation_feedback=feedback,

@@ -1,0 +1,25 @@
+{
+  "scope": "CONTROLLED_BOUNDARY_REGRESSION_NO_MODEL_NO_WORK",
+  "source_overlay": true,
+  "exit_code": 0,
+  "wall_seconds": 75.07349681505002,
+  "counts": {
+    "tests": 35,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "input_sha256": {
+    "tests/test_c3_exclusion_content_correspondence.py": "5a59515c2ee94336a840ba801f098d464c40cb5c10b42bdd1d30c310bbee5000",
+    "tests/test_c3_reviewer_contract_feedback.py": "c34056e7c13897f9343c0009349d87726c2bf618ae55cd61c93c63dc88d7eb56",
+    "tests/test_c3_fulfillment_wire_feedback.py": "01e2cd4a63de9b31303f1eaa90a684c95ef28a5cf59595665a2c14fa9e0709f6",
+    "src/spg/application/governed_obligations.py": "2048b4069eab1ed574594a5e5ecc01f87f1bcb5f27483b100f850abc252149c0",
+    "src/spg/providers/fulfillment_candidate.py": "ab23b6eae681ec2d1f20427d2546a20b2cfba8db57f848a0e9da1fef96f3b5e4",
+    "src/spg/domain/governed_obligation.py": "6374f4cd6b71bc01fdac6778afe7b11dc68acd4e30dcdc179e002d3ecf4b868c",
+    "tests/test_c3_source_consumption_proof.py": "c6498664a805ddfd253efd55fb65c60783a53700827bee4321c95703f7ee7eac",
+    "tests/test_c3_fulfillment_capacity_representation.py": "a34e18cf83587406648c8837fe84f4514c9c37e4050ab2ef292c297ab125df05",
+    "tests/test_c3_generation_binding_prerequisites.py": "8ad53b9ca8287dae6e60b45d0f9cd6986d9c95669c0d1ee22b4edbe60db728d5",
+    "src/spg/providers/managed_context_fulfillment.py": "2ddb9110b949d66429332ee03bb37941ea549807c76e6fcd323111ff91d86950",
+    "tests/test_c3_fulfillment_repair_context.py": "bc2be7fa7bbe8400284ff9d1639362f6fb42ddee6ac5aafaa12d6542787ca63f"
+  }
+}
