@@ -44,3 +44,9 @@ The independent zero-call 28-route counterfactual proves lawful necessary bindin
 ## Frozen implementation
 
 Watt source `9c8463c10c7c04b9f429663ad4b5ad368d69722d`, tree `00f84c8691c69439cb463aba56bb7c88af9aa09f`. Guardian `76c1e87a1b29d151f4ed949748e3298f2169c5b1`; ECF `5aa4f8833c359c15bd059eda5972aa3915bcc18c`. Installed-image, fresh PostgreSQL, ordinary negative Review and real G0 qualifications remain pending at this checkpoint. No old test result qualifies this frozen implementation by itself.
+
+## Installed-image checkpoint
+
+The exact generation50 image `sha256:04316cb489231f0d470c570d2dc912806f1423fab386019e108ee513ab047f9b` completed **835/835 PASS**, zero failures/errors/skips, no source/test overlays. Build wall105.131s; regression wall365.522s. JUnit SHA256 `412b74d9a1409084dd23219b72b188f97d0a85c7c9d83862fb67844624f08440`. Actual installed Watt/Guardian/ECF imports match the frozen source identities. History41/42/46/47 zero-call replay passed with original terminal reasons and receipts unchanged, and retrospective marker upgrades rejected. Full sanitized artifacts and hashes are in `../owner-generation-calibration/generation50/manifest.json`.
+
+Fresh PostgreSQL, actual negative Review, real G0 and sealed Holdout remain pending here. This checkpoint qualifies controlled engineering boundaries only and does not close C3.

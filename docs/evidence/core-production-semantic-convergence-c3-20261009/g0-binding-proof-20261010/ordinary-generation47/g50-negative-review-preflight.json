@@ -1,0 +1,94 @@
+{
+  "schema": "c3-ordinary47-union-negative-independent-review-v1",
+  "basis_sha256": "363db92ebe6c8530436a33d90044ff34af44d156ce3c74a89825ad608e465217",
+  "inventory_fingerprint": "1155ee88bc3e3e7a8d72dd85556fb1e2d863d1f78e0db3450b5639f3e017a4f2",
+  "candidate_fingerprint": "af319906542f62517d28c4c7983dfe19a296d3f559c55461b299d51753e5b50d",
+  "components_fingerprint": "8d3b27f449402d381e817e5b35ee04e60f31e6479735626e3a4eae335cd46874",
+  "history_modified": false,
+  "work_created": false,
+  "business_database_access": false,
+  "model_calls": 0,
+  "provider_status": "UNKNOWN",
+  "usage": "UNKNOWN",
+  "actual_schema_sha256": "058001df418df11b4eb55488f4d15421227d8e886369623336c12e90c2189b60",
+  "original_wire_sha256": "b31cb68cee675ba4438550fd9d7929a2b92d4497ca8532c8ca91f2680fdf6fc8",
+  "original_inner_wire_sha256": "8a6d4009c5c3d4c0f7161037a08d933dd9c41503ffeb1d494249d55ec74b8971",
+  "original_owner_preconditions_fingerprint": "c0098e595d4b7f9d119cb2fa3cd3208d02e7464bcebde0270e17b1786e83d4ab",
+  "review_owner_preconditions_fingerprint": "9b01aea7cb5acba3cea167d929db5ebad508da3453e6fda9373b4ba53c06fc98",
+  "qualification_source": "9c8463c10c7c04b9f429663ad4b5ad368d69722d",
+  "qualification_tree": "00f84c8691c69439cb463aba56bb7c88af9aa09f",
+  "qualification_image": "sha256:04316cb489231f0d470c570d2dc912806f1423fab386019e108ee513ab047f9b",
+  "history_candidate_admitted": false,
+  "formation_calls": 0,
+  "source_count": 20,
+  "route_count": 25,
+  "original_attempt": 2,
+  "original_pending_owner_row_id": "0f68a230-14cc-42ed-b178-940c8e3a403a",
+  "original_observed_owner_row_id": "0820dfee-ce26-458a-8125-30767665a908",
+  "original_pending_receipt_id": "191ada30-d153-41b2-af60-1d3ece40dba1",
+  "original_observed_receipt_id": "022a6792-2eb4-4f93-9f1a-5af09a3c1e57",
+  "original_work": "0707d46d-c00c-566c-96b4-255ff81a722d",
+  "original_work_reality": "2512755e-fc60-540d-b35b-40c257b5b2c7",
+  "result": "PREFLIGHT_ONLY_NO_REQUEST",
+  "preflight_capture": {
+    "input_text": {
+      "bytes": 136758,
+      "sha256": "845f832443f12dc1865b687726f422f0af2489a7792f7842aa9d182ea35c36b2"
+    },
+    "instructions": {
+      "bytes": 11668,
+      "sha256": "8a6344156c7dca78d2ba4456a469257ea797cd2be803ec88c38c26f005789fd5"
+    },
+    "output_schema": {
+      "bytes": 123296,
+      "sha256": "316c3d8e7f6fbe50b9bd892ecaa5a35d6f48d9c64721af523a487eb5e1e51dcd"
+    }
+  },
+  "source_proof_eligible_routes": {
+    "3": {
+      "route_indices": [
+        3,
+        4
+      ],
+      "capabilities": [
+        "DENY_DEPLOY",
+        "DENY_PUBLISH"
+      ],
+      "linked_fact_refs": [],
+      "source_ref": "semantic-fact:dce2d768-250d-548b-9427-d2078bfbf63c"
+    },
+    "4": {
+      "route_indices": [
+        5
+      ],
+      "capabilities": [
+        "RETAIN_CONTEXT"
+      ],
+      "linked_fact_refs": [],
+      "source_ref": "ir-clause:13408e62-98eb-58dc-b53a-7f18d14b9fdd:pi-1:cl-1"
+    },
+    "9": {
+      "route_indices": [
+        10
+      ],
+      "capabilities": [
+        "CANDIDATE_SEAL"
+      ],
+      "linked_fact_refs": [],
+      "source_ref": "ir-constraint:c-3:cl-6"
+    },
+    "13": {
+      "route_indices": [
+        16
+      ],
+      "capabilities": [
+        "CANDIDATE_SEAL"
+      ],
+      "linked_fact_refs": [],
+      "source_ref": "work-constraint:2512755e-fc60-540d-b35b-40c257b5b2c7:2"
+    }
+  },
+  "preflight_network": "none",
+  "http_requests": 0,
+  "review_source_consumption_contract": "existing-source-consumption-proof-v1"
+}

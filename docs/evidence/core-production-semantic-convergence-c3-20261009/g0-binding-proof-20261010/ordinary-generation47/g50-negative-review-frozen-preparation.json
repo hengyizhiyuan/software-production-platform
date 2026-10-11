@@ -1,0 +1,18 @@
+{
+  "schema": "c3-ordinary47-frozen-negative-review-preparation-v1",
+  "generation": 50,
+  "source": "9c8463c10c7c04b9f429663ad4b5ad368d69722d",
+  "tree": "00f84c8691c69439cb463aba56bb7c88af9aa09f",
+  "image": "sha256:04316cb489231f0d470c570d2dc912806f1423fab386019e108ee513ab047f9b",
+  "guardian": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+  "ecf": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "status": "PREFLIGHT_PASS_MODEL_EXECUTION_WAITING_INSTALLED_AND_POSTGRESQL_GATES",
+  "preflight_controller_sha256": "6eb2c05a3a9f88fa8106b2f2343d84368f5a6fa25fb441c64a4034996eae9217",
+  "live_controller_sha256": "aab82c58fe9a29afa3324fb0b35687eef63ba9859858fd5301a9c51b6ca36c8e",
+  "live_controller_delta": "PUBLIC_RESULT_ONLY_ALLOWLIST_UNTRUSTED_SOURCE_CAPABILITY_METHOD_NAMES; REQUEST_SCHEMA_AND_INPUT_UNCHANGED",
+  "freeze_sha256": "22d0d254c2b6e3c6d2956f12126ad53fdd0f9a64ef2d471e87ca847b85a7bf2e",
+  "launcher_sha256": "7c6b78e7a908b5b805e2cc7ff60aacc2a8964ae8fb665400d8276ac7c9c2b245",
+  "actual_model_calls": 0,
+  "http_requests": 0,
+  "holdout_read": false
+}
