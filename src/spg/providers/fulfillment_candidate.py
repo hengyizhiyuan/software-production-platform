@@ -1086,8 +1086,9 @@ def _review_result_identity_slots(inventory, candidate):
     """Existing result identities in canonical order, without any judgement.
 
     These are deterministic request operands, not completed review results.
-    The critic still fills every predicate/reason and the Owner validates the
-    untouched response, including duplicate/missing identities.
+    The critic fills every predicate/reason. Request-local null operands reuse
+    these exact slots; explicit wrong identities and missing results remain
+    failures, and original response bytes are retained.
     """
     sources = [{"source_ref": source["source_ref"]} for source in inventory["sources"]]
     components = [{"component_id": fulfillment_component_id(route, inventory["inventory_fingerprint"]),
@@ -1284,11 +1285,12 @@ def _restore_review_owner_domains(rows, owner):
     return restored
 
 
-def _review_schema_failure_observation(output, inventory, candidate):
+def _review_schema_failure_observation(output, inventory, candidate, binding=None, request_id=None):
     """Only syntax/schema/identity observations on an unchanged critic wire.
 
-    No Boolean in an invalid response is used as semantic evidence. Missing
-    identities are reported, never supplied to make the response admissible.
+    No Boolean in an invalid response is used as semantic evidence. Only
+    explicit null operands may reuse proven request-local identity slots;
+    missing or wrong identities are never repaired.
     """
     from pydantic import ValidationError
     allowed_fields = set()
@@ -1300,7 +1302,7 @@ def _review_schema_failure_observation(output, inventory, candidate):
             for value in node: fields_from_schema(value)
     fields_from_schema(FulfillmentSemanticReviewCandidate.model_json_schema())
     try:
-        raw = json.loads(output, object_pairs_hook=_wire_json_object)
+        raw = _resolve_review_identities(output, inventory, candidate, binding, request_id)
         FulfillmentSemanticReviewCandidate.model_validate(raw)
     except (ValueError, TypeError) as error:
         fields = ([{"type": e["type"], "location": [part if type(part) is int or part in allowed_fields
@@ -1329,6 +1331,95 @@ def _review_schema_failure_observation(output, inventory, candidate):
         "not_evaluable": ["INDEPENDENT_SEMANTIC_EQUIVALENCE", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"],
         "repair_boundary": "INVALID_CRITIC_RESPONSE_IS_NOT_A_REJECTED_SEMANTIC_MAPPING; NO_VERDICT_BACKFILL"}
 
+
+
+
+def _review_reuse_instructions(instructions, reuse):
+    if not reuse:
+        return instructions
+    return instructions.replace(
+        "Copy exact_response_header literal values without adding prefixes or changing characters. ",
+        "The response fingerprint fields reuse exact_response_header through null operands. ").replace(
+        "Copy each identity exactly once in its supplied order and fill the existing reason and ",
+        "Use null identity operands in the supplied order and fill the existing reason and ").replace(
+        "Return the unchanged canonical review schema, ",
+        "Return the existing review result shape with request-bound null identity operands, ")
+
+def _review_identity_binding(inventory, candidate, output, request_id):
+    """Request-local binding of existing ordered result slots, never a verdict."""
+    slots = _review_result_identity_slots(inventory, candidate)
+    return {"inventory_fingerprint": inventory["inventory_fingerprint"],
+        "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
+        "components_fingerprint": fulfillment_components_fingerprint(candidate),
+        "result_slots_fingerprint": canonical_fingerprint(slots),
+        "review_output_sha256": sha256(output.encode()).hexdigest(),
+        "review_output_bytes": len(output.encode()), "model_request_id": request_id}
+
+
+def _resolve_review_identities(output, inventory, candidate, binding=None, request_id=None):
+    """Null explicitly reuses the bound slot. Never repair an explicit identity.
+
+    Existing canonical responses remain unchanged. Request-local null operands
+    are admitted only with an exact raw-response/request/slot binding, then
+    expanded to the unchanged canonical Owner contract. No boolean is supplied.
+    """
+    if binding is not None and (not request_id
+            or binding != _review_identity_binding(inventory, candidate, output, request_id)):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT")
+    raw = json.loads(output, object_pairs_hook=_wire_json_object)
+    if binding is None:
+        return raw
+    slots = _review_result_identity_slots(inventory, candidate)
+    if not isinstance(raw, dict):
+        raise ValueError("OBLIGATION_SEMANTIC_REVIEW_RESULT_SLOTS_INVALID")
+    uses_slots = any(field in raw and raw[field] is None for field in (
+        "inventory_fingerprint", "candidate_fingerprint", "components_fingerprint")) or any(
+        key in row and row[key] is None
+        for field, keys in (("source_results", ("source_ref",)),
+                            ("component_results", ("component_id", "capability")))
+        for row in (raw.get(field) or ()) if isinstance(row, dict) for key in keys)
+    if not uses_slots:
+        return raw  # Historical explicit identities retain set-based canonical validation.
+    for field, expected in (("inventory_fingerprint", inventory["inventory_fingerprint"]),
+            ("candidate_fingerprint", fulfillment_candidate_fingerprint(candidate)),
+            ("components_fingerprint", fulfillment_components_fingerprint(candidate))):
+        if field not in raw:
+            raise ValueError("OBLIGATION_SEMANTIC_REVIEW_RESULT_SLOTS_INVALID")
+        if raw[field] is None:
+            raw[field] = expected
+        elif raw[field] != expected:
+            raise ValueError("OBLIGATION_SEMANTIC_REVIEW_RESULT_SLOTS_INVALID")
+    for field in ("source_results", "component_results"):
+        rows = raw.get(field)
+        if not isinstance(rows, list) or len(rows) != len(slots[field]):
+            raise ValueError("OBLIGATION_SEMANTIC_REVIEW_RESULT_SLOTS_INVALID")
+        for row, expected in zip(rows, slots[field], strict=True):
+            if not isinstance(row, dict):
+                raise ValueError("OBLIGATION_SEMANTIC_REVIEW_RESULT_SLOTS_INVALID")
+            for key, identity in expected.items():
+                if key not in row:
+                    raise ValueError("OBLIGATION_SEMANTIC_REVIEW_RESULT_SLOTS_INVALID")
+                if row[key] is None:
+                    row[key] = identity
+                elif row[key] != identity:
+                    raise ValueError("OBLIGATION_SEMANTIC_REVIEW_RESULT_SLOTS_INVALID")
+    return raw
+
+
+def _review_generation_schema(inventory, candidate, **kwargs):
+    """Reuse existing positional identities without asking the model to copy IDs."""
+    schema = _review_output_schema(inventory, candidate, **kwargs)
+    if not kwargs.get("route_scoped"):
+        return schema
+    for key in ("inventory_fingerprint", "candidate_fingerprint", "components_fingerprint"):
+        schema["properties"][key] = {"type": "null", "description": "Null reuses the exact request identity."}
+    for field, keys in (("source_results", ("source_ref",)),
+                        ("component_results", ("component_id", "capability"))):
+        for entry in schema["properties"][field]["prefixItems"]:
+            for key in keys:
+                entry["properties"][key] = {"type": "null", "description":
+                    "Null reuses this exact ordered result slot identity; never choose another source or component."}
+    return schema
 
 def _review_output_schema(inventory, candidate, *, route_scoped=False, source_consumption=False,
                           consumer_operand_checks=False):
@@ -2134,10 +2225,16 @@ class ModelFulfillmentCandidateProvider:
             feedback_fingerprint = canonical_fingerprint(review_feedback)
             review_input["existing_bound_reviewer_feedback"] = review_feedback
             review_input["review_repair_context_fingerprint"] = feedback_fingerprint
+        identity_reuse = (owner_preconditions or {}).get("review_input_contract") in _ROUTE_SCOPED_REVIEW_INPUTS
         runtime = self.runtime_factory()
         try:
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
-                instructions=((("For EACH original source compare its COMPLETE meaning to the UNION of its "
+                instructions=_review_reuse_instructions((("Identity operands are fixed by this request, not generated semantic judgments. "
+                    "Return null for the three fingerprint fields, every source_ref, component_id and capability "
+                    "in the existing ordered result slots. Watt binds those nulls losslessly to this exact request. "
+                    "Keep source_results and component_results in supplied order, with every verdict and reason "
+                    "independently filled. Never omit a result or use another slot. This supplies no semantic answer. "
+                    if identity_reuse else "") + ((("For EACH original source compare its COMPLETE meaning to the UNION of its "
                     "actual submitted consumers. Future sealing is not current content verification; denying "
                     "one operation is not a file-change or other-operation check. Reject missing complementary "
                     "responsibilities even if their words occur in another source. The conditional background "
@@ -2316,9 +2413,9 @@ class ModelFulfillmentCandidateProvider:
                        "current exact Candidate and source inventory, produce all current result identities, "
                        "and reject real semantic defects. Do not copy rejected absence claims, duplicate "
                        "checks, invented text or old verdicts into the current review."
-                       if review_feedback is not None else "")),
+                       if review_feedback is not None else ""))), identity_reuse),
                 input_text=json.dumps(review_input, ensure_ascii=False),
-                output_schema=_review_output_schema(inventory, candidate,
+                output_schema=_review_generation_schema(inventory, candidate,
                     route_scoped=(owner_preconditions or {}).get("review_input_contract") in _ROUTE_SCOPED_REVIEW_INPUTS,
                     source_consumption=(owner_preconditions or {}).get("review_source_consumption_contract") in {
                         "existing-source-consumption-proof-v1", "existing-source-consumption-proof-v2"},
@@ -2336,18 +2433,22 @@ class ModelFulfillmentCandidateProvider:
                 self.last_observation["output_evidence"] = result.output_evidence
             output, digest, count, privacy_failure = (
                 _safe_fulfillment_response_output(result.output_text))
+            identity_binding = (_review_identity_binding(inventory, candidate, output, result.request_id)
+                if identity_reuse and output is not None else None)
             if receipt_callback is not None:
                 receipt_callback(review_output=output, review_output_sha256=digest, review_output_bytes=count,
-                    review_retained=output is not None, model=self.last_observation)
+                    review_retained=output is not None, model=self.last_observation,
+                    **({"review_identity_binding": identity_binding} if identity_binding is not None else {}))
             if privacy_failure is not None:
                 raise ValueError("OBLIGATION_SEMANTIC_REVIEW_" + privacy_failure)
             if output is None:
                 raise ValueError("OBLIGATION_SEMANTIC_REVIEW_RECEIPT_LIMIT")
             if joined_review:
-                diagnostic = _review_schema_failure_observation(output, inventory, candidate)
+                diagnostic = _review_schema_failure_observation(output, inventory, candidate, identity_binding, result.request_id)
                 if diagnostic is not None:
                     raise _FulfillmentReviewValidationError(diagnostic)
-            return FulfillmentSemanticReviewCandidate.model_validate_json(output)
+            return FulfillmentSemanticReviewCandidate.model_validate(
+                _resolve_review_identities(output, inventory, candidate, identity_binding, result.request_id))
         except Exception as error:
             failure = provider_failure_observation(error)
             if failure is not None:

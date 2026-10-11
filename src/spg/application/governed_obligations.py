@@ -1530,7 +1530,7 @@ def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=N
                 if (sha256(raw_review.encode()).hexdigest() != observed.get("review_output_sha256")
                         or len(raw_review.encode()) != observed.get("review_output_bytes") or observed.get("review_retained") is not True):
                     raise ValueError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
-                observed_review = _review_wire_representation(raw_review)
+                observed_review = _review_wire_representation(raw_review, inventory=inventory, candidate=original, observed=observed)
             else:
                 observed_review = observed.get("semantic_review")
             if observed_review != receipt.get("semantic_review"):
@@ -2716,13 +2716,16 @@ def _rejected_candidate_receipt_values(candidate, feedback, request):
         "components_fingerprint":fulfillment_components_fingerprint(candidate)}}
 
 
-def _review_wire_representation(output):
+def _review_wire_representation(output, *, inventory=None, candidate=None, observed=None):
     """Restore only declared optional defaults, preserving explicit Wire values.
 
     Callers bind original bytes before this derived comparison. Do not use
     model coercion here: e.g. a string verdict must not equal a stored boolean.
     """
-    retained = json.loads(output)
+    from spg.providers.fulfillment_candidate import _resolve_review_identities
+    binding = (observed or {}).get("review_identity_binding")
+    retained = (_resolve_review_identities(output, inventory, candidate, binding,
+        (observed.get("model") or {}).get("request_id")) if binding is not None else json.loads(output))
     for source in retained.get("source_results", []):
         for check in source.get("consumption_checks") or ():
             check.setdefault("target_paths", [])
@@ -2757,7 +2760,8 @@ def _semantic_repair_observation(rows, attempt, candidate, inventory, capabiliti
     if validated.get("review_contract_failure") is not None:
         from spg.providers.fulfillment_candidate import _review_schema_failure_observation
         start = single("MODEL_REQUEST_PENDING")
-        diagnostic = (_review_schema_failure_observation(output, inventory, candidate)
+        diagnostic = (_review_schema_failure_observation(output, inventory, candidate,
+                observed.get("review_identity_binding"), (observed.get("model") or {}).get("request_id"))
             if isinstance(output, str) else None)
         if ((start.get("owner_source_preconditions") or {}).get("review_input_contract") not in {"existing-lossless-review-input-v1", "existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3", "existing-source-typed-comparison-input-v4", "existing-admission-source-comparison-input-v5"}
                 or diagnostic is None or diagnostic != validated["review_contract_failure"]
@@ -2776,7 +2780,7 @@ def _semantic_repair_observation(rows, attempt, candidate, inventory, capabiliti
         # optional defaults. The original Wire remains bound above by its
         # exact digest/length; compare the same existing typed contract here.
         # This does not change the output, verdict, or rejected Candidate.
-        retained = _review_wire_representation(output)
+        retained = _review_wire_representation(output, inventory=inventory, candidate=candidate, observed=observed)
     if retained != validated.get("semantic_review"):
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     review = FulfillmentSemanticReviewCandidate.model_validate(retained)
@@ -3174,7 +3178,8 @@ def _record_review_contract_failure(error, recorder, attempt, inventory, candida
             or sha256(output.encode()).hexdigest() != observed.get("review_output_sha256")
             or len(output.encode()) != observed.get("review_output_bytes")
             or observed.get("capabilities_fingerprint") != canonical_fingerprint(capabilities)
-            or _review_schema_failure_observation(output, inventory, candidate) != error.diagnostics):
+            or _review_schema_failure_observation(output, inventory, candidate,
+                observed.get("review_identity_binding"), (observed.get("model") or {}).get("request_id")) != error.diagnostics):
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     recorder.append("SEMANTIC_REVIEW_VALIDATED", attempt, capabilities_fingerprint=canonical_fingerprint(capabilities),
         validation_passed=False, failed_predicate=str(error), review_contract_failure=error.diagnostics,
@@ -3270,6 +3275,30 @@ def _validate_review_repair_receipts(rows, revision, inventory, capabilities):
     for pending in rows:
         if pending.get("stage") != "SEMANTIC_REVIEW_PENDING":
             continue
+        identity_observations = [r for r in rows if r.get("stage") == "SEMANTIC_REVIEW_OBSERVED"
+            and r.get("attempt") == pending.get("attempt") and r.get("review_identity_binding") is not None]
+        if identity_observations:
+            from spg.providers.fulfillment_candidate import _review_result_identity_slots, _resolve_review_identities
+            attempt = pending.get("attempt")
+            starts = [r for r in rows if r.get("stage") == "MODEL_REQUEST_PENDING" and r.get("attempt") == attempt]
+            if len(starts) != 1 or len(identity_observations) != 1:
+                drift()
+            raw, _ = _wire_response_basis(rows, attempt, revision, inventory, capabilities)
+            current = _decode_fulfillment_candidate_wire(raw, inventory, capabilities,
+                validation_feedback=starts[0].get("feedback"), owner_preconditions=starts[0].get("owner_source_preconditions"))
+            current, _ = locate_projection_components(current, inventory)
+            if (pending.get("review_result_identity_slots") != _review_result_identity_slots(inventory, current)
+                    or pending.get("candidate_fingerprint") != fulfillment_candidate_fingerprint(current)
+                    or pending.get("components_fingerprint") != fulfillment_components_fingerprint(current)):
+                drift()
+            observed = identity_observations[0]
+            try:
+                _resolve_review_identities(observed["review_output"], inventory, current,
+                    observed["review_identity_binding"], (observed.get("model") or {}).get("request_id"))
+            except _FulfillmentWireReceiptIdentityError:
+                raise
+            except ValueError:
+                pass  # Correctly rejected malformed critic; diagnostics/replay still validate it.
         if not {"review_repair_context", "review_repair_context_fingerprint"}.intersection(pending):
             if any(r.get("stage") == "SEMANTIC_REVIEW_OBSERVED" and r.get("attempt") == pending.get("attempt")
                     and ("review_repair_context_fingerprint" in r
@@ -3331,7 +3360,9 @@ def _review_fulfillment_candidate(provider, candidate, inventory, recorder, atte
         parameters = inspect.signature(provider.review).parameters
         review_feedback = (_review_repair_context(rows, attempt, revision, inventory, capabilities, candidate)
             if revision is not None and "review_feedback" in parameters else None)
+        from spg.providers.fulfillment_candidate import _review_result_identity_slots
         recorder.append("SEMANTIC_REVIEW_PENDING", attempt,
+            review_result_identity_slots=_review_result_identity_slots(inventory, candidate),
             capabilities_fingerprint=canonical_fingerprint(capabilities),
             candidate_fingerprint=fulfillment_candidate_fingerprint(candidate),
             components_fingerprint=fulfillment_components_fingerprint(candidate),
@@ -3378,7 +3409,8 @@ def _review_fulfillment_candidate(provider, candidate, inventory, recorder, atte
             raise ValueError("OBLIGATION_SEMANTIC_REVIEW_NOT_RETAINED")
     try:
         result = (response if isinstance(response, FulfillmentSemanticReviewCandidate) else
-            FulfillmentSemanticReviewCandidate.model_validate_json(response) if isinstance(response, str) else
+            FulfillmentSemanticReviewCandidate.model_validate(_review_wire_representation(response, inventory=inventory,
+                candidate=candidate, observed=observed)) if isinstance(response, str) else
             FulfillmentSemanticReviewCandidate.model_validate(response))
     except ValueError:
         from spg.providers.fulfillment_candidate import _review_schema_failure_observation, _FulfillmentReviewValidationError
@@ -3387,7 +3419,8 @@ def _review_fulfillment_candidate(provider, candidate, inventory, recorder, atte
             raise
         actual = next(row for row in recorder.records() if row["stage"] == "SEMANTIC_REVIEW_OBSERVED" and row["attempt"] == attempt)
         output = actual.get("review_output")
-        diagnostic = _review_schema_failure_observation(output, inventory, candidate) if isinstance(output, str) else None
+        diagnostic = _review_schema_failure_observation(output, inventory, candidate,
+                actual.get("review_identity_binding"), (actual.get("model") or {}).get("request_id")) if isinstance(output, str) else None
         if diagnostic is None:
             raise
         error = _FulfillmentReviewValidationError(diagnostic)

@@ -167,7 +167,7 @@ def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_ca
         assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
 
 
-@pytest.mark.parametrize('first_failure', ('semantic', 'semantic-optional-defaults', 'semantic-jsonb-order', 'semantic-framed', 'incomplete', 'critic-schema', 'critic-json', 'consumption-proof', 'critic-duplicate'))
+@pytest.mark.parametrize('first_failure', ('semantic', 'semantic-optional-defaults', 'semantic-jsonb-order', 'semantic-identity-slots', 'semantic-framed', 'incomplete', 'critic-schema', 'critic-json', 'consumption-proof', 'critic-duplicate'))
 def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql(postgres_database, tmp_path, monkeypatch, first_failure):
     import json
     from types import SimpleNamespace
@@ -204,6 +204,9 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
                 verdict = type(verdict).model_validate(raw)
             reviews.append(verdict)
             output = verdict.model_dump_json()
+            if first_failure == 'semantic-identity-slots':
+                from tests.test_c3_review_identity_binding import null_identities
+                output = json.dumps(null_identities(json.loads(output)))
             if first_failure == 'semantic-optional-defaults':
                 raw = json.loads(output)
                 omitted = 0
