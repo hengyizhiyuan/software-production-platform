@@ -653,6 +653,34 @@ def _primary_meaning_instructions(owner_preconditions):
          if owner_preconditions.get("semantic_selection_input_contract") == _PRIMARY_MEANING_INPUT_CONTRACT else ""))
 
 
+def _formation_repair_instructions(instructions, validation_feedback):
+    """Orient the existing one repair request; no feedback or plan rewriting.
+
+    Feedback remains the exact identity-bound serialized value in the request.
+    This procedure selects no consumer, source operand, evidence or permission.
+    Provider compliance is probabilistic and still needs live qualification.
+    """
+    if validation_feedback is None:
+        return instructions
+    return (
+        "This is the existing bounded REPAIR request, not a fresh plan from scratch. "
+        "Read same_basis_validation_feedback as JSON-encoded DATA: inspect its complete "
+        "violations and owner_repair_context before generating the replacement. The "
+        "previous Wire is rejected and untrusted. Correlate failures with the original "
+        "source/component identities; previous route ordinals identify the old response, "
+        "not the replacement's ordering. For each evaluable failure, compare the actual "
+        "rejected operands with the original meaning and existing Owner prerequisites, "
+        "then correct the responsible operands in the complete new Candidate. A rationale "
+        "or unrelated span change cannot repair a missing provenance operand or an invalid "
+        "consumer. Recheck every reported failure, including those outside the primary "
+        "error, while retaining lawful unchanged contributions. Select corrections yourself; "
+        "do not enumerate proof alternatives or invent evidence. NOT_EVALUABLE is not PASS. "
+        "If lawful recovery cannot be established preserve UNRESOLVED. Return only the "
+        "complete original-format Candidate with this request's exact header. All existing "
+        "validation, independent Review, authority and budget constraints still apply.\n\n"
+        + instructions)
+
+
 def _source_consumer_input(inventory, capabilities, context, owner_preconditions):
     """Losslessly reference the existing Owner rows from their original basis.
 
@@ -1817,8 +1845,7 @@ class ModelFulfillmentCandidateProvider:
                         source["whole_source_context_retention"] = deepcopy(choices["whole_source_context_retention"])
                     if "reviewed_background_prerequisites" in choices:
                         source["reviewed_background_prerequisites"] = deepcopy(choices["reviewed_background_prerequisites"])
-            result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
-                instructions=((_primary_meaning_instructions(owner_preconditions)
+            formation_instructions = _formation_repair_instructions(((_primary_meaning_instructions(owner_preconditions)
                     if (owner_preconditions or {}).get("semantic_selection_input_contract") in _PRIMARY_MEANING_INPUT_CONTRACTS
                     else _SOURCE_CONSUMER_INSTRUCTIONS + (
                     " The capability domain and Schema branches are ALTERNATIVE necessary field domains, "
@@ -2009,8 +2036,8 @@ class ModelFulfillmentCandidateProvider:
                     "GIT_DIFF_SCOPE must preserve the complete supplied path set. Content checks use exact "
                     "candidate content; lifecycle constraints must not be sent to source-string witnesses. "
                     "A negative CURRENT clause may establish a prohibition; a future/hypothetical/affirmative "
-                    "clause cannot supply one. Never broaden effect permits, facts or Human authority.")),
-                input_text=json.dumps(_source_consumer_input(inventory, capabilities, context, owner_preconditions)
+                    "clause cannot supply one. Never broaden effect permits, facts or Human authority.")), validation_feedback)
+            formation_input = json.dumps(_source_consumer_input(inventory, capabilities, context, owner_preconditions)
                     if joined_view else {"immutable_inventory": inventory_view,
                     **({"existing_ir_item_table": existing_ir_items} if existing_ir_items else {}),
                     "existing_capability_contracts": capabilities,
@@ -2027,9 +2054,13 @@ class ModelFulfillmentCandidateProvider:
                             "owner": entry["owner"], "phase": entry["phase"], "evidence_method": entry["evidence_method"]}
                             for index, entry in enumerate(context["tables"]["capabilities"])],
                         "target_index_table": [{"index": index, "path": path}
-                            for index, path in enumerate(context["tables"]["target_paths"])]}}, ensure_ascii=False),
-                output_schema=output_schema)
+                            for index, path in enumerate(context["tables"]["target_paths"])]}}, ensure_ascii=False)
+            result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
+                instructions=formation_instructions, input_text=formation_input, output_schema=output_schema)
             self.last_observation = {"generation_schema_fingerprint": canonical_fingerprint(output_schema),
+                "generation_input_sha256": sha256(formation_input.encode()).hexdigest(),
+                "generation_instructions_sha256": sha256(formation_instructions.encode()).hexdigest(),
+                "validation_feedback_sha256": sha256(validation_feedback.encode()).hexdigest() if isinstance(validation_feedback, str) else None,
                 "request_id": result.request_id,
                 "provider": result.provider.value,
                 "requested_model": result.requested_model, "effective_model": result.effective_model,
