@@ -672,7 +672,19 @@ def _exact_fact_git_scope(reference, binding, targets, changed, *, revision=None
     from spg.domain.governed_obligation import exact_file_scope_paths
     paths = exact_file_scope_paths(reference, qualified=binding.component_basis is not None)
     calibrated = any((b.formation_receipt or {}).get("source_role_contract") == "v3" for b in bindings)
-    if paths is None and (reference.qualifiers == {"negated": True} or calibrated) and binding.component_basis is not None:
+    source_consumption = any((row.get("owner_source_preconditions") or {}).get(
+        "review_source_consumption_contract") == "existing-source-consumption-proof-v1"
+        for row in ((bindings[0].formation_receipt or {}) if bindings else {}).get("candidate_attempts", ())
+        if row.get("stage") == "MODEL_REQUEST_PENDING")
+    if source_consumption:
+        if revision is None or ir is None or binding not in bindings:
+            return False
+        from spg.domain.engineering_semantics import semantic_fact_reference
+        original = next((fact for fact in revision.engineering_semantic_facts if fact.id == binding.fact_id), None)
+        if original is None or (reference != original and
+                reference != semantic_fact_reference(original, work_revision_id=revision.id)):
+            return False
+    if (paths is None or source_consumption) and (reference.qualifiers == {"negated": True} or calibrated) and binding.component_basis is not None:
         if revision is None or ir is None:
             return False
         from spg.application.governed_obligations import validate_fulfillment_projection

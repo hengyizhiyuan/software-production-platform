@@ -1,4 +1,5 @@
 """Repair sees the original untrusted proposal; no intelligent success claim."""
+from tests.test_c3_source_consumption_proof import fixture_review_proof
 from copy import deepcopy
 from tests.test_c3_fulfillment_capacity_representation import decode_review_input
 from hashlib import sha256
@@ -36,7 +37,8 @@ def incomplete_case(*, remains_unresolved=False, authority_unknown=False, interr
     def generate(**request):
         payload = json.loads(request['input_text']);calls.append(payload)
         if 'untrusted_fulfillment_candidate' in payload:
-            output = review(inventory, decode_review_input(payload)).model_dump_json()
+            decoded = decode_review_input(payload)
+            output = fixture_review_proof(inventory, decoded, review(inventory, decoded), payload).model_dump_json()
         else:
             feedback = payload.get('same_basis_validation_feedback')
             selected = pending if feedback is None or remains_unresolved else plan
@@ -137,7 +139,7 @@ def repair_case(scale='small', interrupt=False, coverage_failure=False, predecod
         calls.append(payload)
         if 'untrusted_fulfillment_candidate' in payload:
             candidate = decode_review_input(payload)
-            output = review(inventory, candidate).model_dump_json()
+            output = fixture_review_proof(inventory, candidate, review(inventory, candidate), payload).model_dump_json()
         else:
             domains = payload['temporary_wire']['f_allowed_source_ordinals']
             assert domains == [i for i, s in enumerate(inventory['sources']) if s['kind'] == 'FACT']
@@ -321,7 +323,7 @@ def semantic_repair_case(interrupt=False):
                 'complete_and_equivalent': False, 'owner_phase_evidence_valid': False,
                 'reason': 'External release prohibition does not entail denying local artifact inspection.'})
                 if row.capability == 'DENY_PREVIEW' else row for row in verdict.component_results)})
-            output = verdict.model_dump_json()
+            output = fixture_review_proof(inventory, candidate, verdict, payload).model_dump_json()
         else:
             feedback = payload.get('same_basis_validation_feedback')
             if feedback:

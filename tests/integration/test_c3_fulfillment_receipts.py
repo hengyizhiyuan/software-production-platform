@@ -1,5 +1,6 @@
 """C3 Work-owner receipt persistence on exact controlled C1 admission fixtures."""
 from uuid import UUID
+from tests.test_c3_source_consumption_proof import fixture_review_proof
 from tests.test_c3_fulfillment_capacity_representation import decode_review_input
 from spg.providers.fulfillment_candidate import _restore_formation_inventory_view
 
@@ -82,7 +83,7 @@ class NeverCallAgain:
         raise AssertionError("A sealed same-basis receipt must be replayed without another model call")
 
 
-@pytest.mark.parametrize('first_failure', ('semantic', 'semantic-jsonb-order', 'semantic-framed', 'incomplete', 'critic-schema', 'critic-json'))
+@pytest.mark.parametrize('first_failure', ('semantic', 'semantic-jsonb-order', 'semantic-framed', 'incomplete', 'critic-schema', 'critic-json', 'consumption-proof'))
 def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql(postgres_database, tmp_path, monkeypatch, first_failure):
     import json
     from types import SimpleNamespace
@@ -98,7 +99,7 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
         inventory = _restore_formation_inventory_view(payload['immutable_inventory'], payload.get('existing_ir_item_table', {}))
         if 'untrusted_fulfillment_candidate' in payload:
             candidate = decode_review_input(payload)
-            verdict = review(inventory, candidate)
+            verdict = fixture_review_proof(inventory, candidate, review(inventory, candidate), payload)
             if not reviews and first_failure.startswith('semantic'):
                 first, *rest = verdict.component_results
                 verdict = verdict.model_copy(update={'component_results': (
@@ -107,6 +108,10 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
                 first = verdict.component_results[0]
                 verdict = verdict.model_copy(update={'component_results': (
                     first.model_copy(update={'component_id': first.component_id[:48]}),)})
+            if not reviews and first_failure == 'consumption-proof':
+                raw = verdict.model_dump(mode="json")
+                raw["source_results"][0]["consumption_checks"][0]["route_indices"] = []
+                verdict = type(verdict).model_validate(raw)
             reviews.append(verdict)
             output = verdict.model_dump_json()
             if len(reviews) == 1 and first_failure == 'critic-json':
@@ -139,6 +144,12 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
         if first_failure.startswith('semantic'):
             assert feedback['semantic_review_feedback_binding']['observed_receipt_id'] == observed['receipt_id']
             assert feedback['violations'][0]['review_reason'] == 'Controlled rejected interpretation.'
+        elif first_failure == 'consumption-proof':
+            assert feedback['primary_error'] == 'OBLIGATION_SOURCE_CONSUMPTION_ROUTE_REQUIRED'
+            violations = [v for v in feedback['violations'] if 'source_consumption_comparison' in v]
+            assert violations and violations[0]['source_consumption_comparison']['check'] == 0
+            assert feedback['semantic_review_feedback_binding']['observed_receipt_id'] == observed['receipt_id']
+            assert failed['terminal'] is False
         elif first_failure.startswith('critic-'):
             from hashlib import sha256
             assert feedback['primary_error'] == 'OBLIGATION_SEMANTIC_REVIEW_SCHEMA_INVALID'
@@ -322,7 +333,7 @@ def test_actual_compact_observation_replays_from_postgresql_without_repeating_fo
         if "untrusted_fulfillment_candidate" in payload:
             from spg.domain.governed_obligation import FulfillmentProjectionCandidate
             plan = decode_review_input(payload)
-            output = declared.review(inventory, plan).model_dump_json()
+            output = fixture_review_proof(inventory, plan, declared.review(inventory, plan), payload).model_dump_json()
         else:
             plan = declared.form(inventory, payload["existing_capability_contracts"],
                 validation_feedback=payload.get("same_basis_validation_feedback"))
@@ -426,7 +437,7 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
             plan = decode_review_input(payload)
             result = declared.review(inventory, plan).model_copy(update={
                 'component_results': component_review(inventory, plan).component_results})
-            output = result.model_dump_json()
+            output = fixture_review_proof(inventory, plan, result, payload).model_dump_json()
         else:
             plan = declared.form(inventory, payload['existing_capability_contracts'])
             wire, _ = controlled_wire(inventory, plan, feedback=payload.get('same_basis_validation_feedback'), owner_preconditions=payload.get('owner_source_preconditions'))

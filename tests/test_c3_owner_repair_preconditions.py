@@ -1,4 +1,5 @@
 """Exact-source coverage and existing Owner prerequisites; no live success."""
+from tests.test_c3_source_consumption_proof import fixture_review_proof
 from copy import deepcopy
 from tests.test_c3_fulfillment_capacity_representation import decode_review_input
 from hashlib import sha256
@@ -231,7 +232,7 @@ def test_bound_feedback_repairs_once_or_stops_drift_without_review(tamper):
         payload=json.loads(request['input_text']);calls.append(payload)
         if 'untrusted_fulfillment_candidate' in payload:
             candidate=decode_review_input(payload)
-            output=review(inventory,candidate).model_dump_json()
+            output=fixture_review_proof(inventory,candidate,review(inventory,candidate),payload).model_dump_json()
         else:
             feedback=payload.get('same_basis_validation_feedback')
             if feedback is None: wire,*_=invalid_proposal(inventory,plan,owner_preconditions=payload.get("owner_source_preconditions"))

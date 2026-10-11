@@ -240,11 +240,32 @@ class FulfillmentProjectionCandidate(BaseModel):
     routes: tuple[FulfillmentRouteCandidate, ...] = Field(min_length=1, max_length=1024)
 
 
+class FulfillmentSourceConsumptionCheck(BaseModel):
+    """Critic-proposed consumption witness, never a Fact or performed evidence."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    source_span_start: StrictInt = Field(ge=0)
+    source_span_end: StrictInt = Field(gt=0)
+    source_component_quote: str | None = Field(default=None, min_length=1)
+    required_capability: str = Field(min_length=1)
+    required_evidence_method: str = Field(min_length=1)
+    required_phase: FulfillmentPhase
+    target_paths: tuple[str, ...] = ()
+    route_indices: tuple[StrictInt, ...] = Field(max_length=1024)
+
+
 class FulfillmentSemanticSourceReview(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     source_ref: str = Field(min_length=1)
     complete_and_equivalent: bool
     reason: str = Field(min_length=1, max_length=1000)
+    consumption_checks: tuple[FulfillmentSourceConsumptionCheck, ...] | None = Field(default=None, max_length=1024)
+
+    @model_serializer(mode="wrap")
+    def preserve_historical_shape(self, handler):
+        result = handler(self)
+        if self.consumption_checks is None:
+            result.pop("consumption_checks", None)
+        return result
 
 
 class FulfillmentSemanticComponentReview(BaseModel):

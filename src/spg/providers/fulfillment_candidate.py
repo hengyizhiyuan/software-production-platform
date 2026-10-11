@@ -1145,6 +1145,21 @@ def _review_input_view(inventory, candidate, capabilities, owner_context):
             payload["exact_response_header"] = {key: payload[key] for key in (
                 "candidate_fingerprint", "components_fingerprint")}
             payload["exact_response_header"]["inventory_fingerprint"] = inventory["inventory_fingerprint"]
+    if owner_context.get("existing_owner_source_preconditions", {}).get(
+            "review_source_consumption_contract") == "existing-source-consumption-proof-v1":
+        comparisons = []
+        for source in inventory["sources"]:
+            own = [row for row in rows if row["source_ref"] == source["source_ref"]]
+            comparisons.append({"source_ref": source["source_ref"],
+                "original_semantic_source_ref": source["source_ref"],
+                "original_semantic_text": fulfillment_source_semantic_text(source),
+                "original_semantic_text_character_count": len(fulfillment_source_semantic_text(source)),
+                "own_actual_consumer_indices": [i for i, row in enumerate(rows)
+                                                if row["source_ref"] == source["source_ref"]],
+                "declared_fact_proof_refs": sorted({ref for row in own for ref in row["linked_fact_refs"]}),
+                "provenance_is_a_consumption_proof": False,
+                "future_gate_precondition_is_a_current_proof": False})
+        payload = {"source_consumer_comparison_table": comparisons, **payload}
     return payload
 
 
@@ -1242,7 +1257,7 @@ def _review_schema_failure_observation(output, inventory, candidate):
         "repair_boundary": "INVALID_CRITIC_RESPONSE_IS_NOT_A_REJECTED_SEMANTIC_MAPPING; NO_VERDICT_BACKFILL"}
 
 
-def _review_output_schema(inventory, candidate, *, route_scoped=False):
+def _review_output_schema(inventory, candidate, *, route_scoped=False, source_consumption=False):
     """Request only existing review identities; no semantic answer is supplied.
 
     The canonical review and historical receipt shapes stay unchanged. The
@@ -1251,6 +1266,28 @@ def _review_output_schema(inventory, candidate, *, route_scoped=False):
     """
     from spg.providers.semantic_wire import _provider_strict_output_schema
     schema = _provider_strict_output_schema(FulfillmentSemanticReviewCandidate.model_json_schema())
+    source_entry = schema["$defs"]["FulfillmentSemanticSourceReview"]
+    if not source_consumption:
+        source_entry["properties"].pop("consumption_checks", None)
+        source_entry["required"] = [key for key in source_entry["required"] if key != "consumption_checks"]
+        schema["$defs"].pop("FulfillmentSourceConsumptionCheck", None)
+        schema["$defs"].pop("FulfillmentPhase", None)
+    else:
+        source_entry["properties"]["consumption_checks"] = {
+            "type": "array", "items": {"$ref": "#/$defs/FulfillmentSourceConsumptionCheck"},
+            "maxItems": 1024,
+            "description": "First identify each original source contribution and its required existing consumer. "
+                "Bind only actual own routes or explicitly declared Fact proof routes. Missing proof means "
+                "complete_and_equivalent=false; do not invent a consumer or treat a future gate as current evidence."}
+        check = schema["$defs"]["FulfillmentSourceConsumptionCheck"]
+        from spg.application.governed_obligations import fulfillment_capability_contracts
+        contracts = fulfillment_capability_contracts()
+        check["properties"]["required_capability"]["enum"] = [row["capability"] for row in contracts]
+        check["properties"]["required_evidence_method"]["enum"] = sorted({row["evidence_method"] for row in contracts})
+        check["properties"]["route_indices"]["items"].update(minimum=0, maximum=max(0, len(candidate.routes)-1))
+        check["properties"]["source_component_quote"]["description"] = (
+            "Optional exact original [start,end) slice; null reuses that slice losslessly from the bound inventory. "
+            "Unicode character offsets, exclusive end; never expand or repair a span.")
     # The response is a judgement of the fixed submitted plan, not a repaired
     # plan described by the critic. Put a concise source/consumer comparison
     # before the verdict in this request only. Historical serialization and
@@ -1329,6 +1366,18 @@ def _review_output_schema(inventory, candidate, *, route_scoped=False):
         for source in inventory["sources"]:
             entry = deepcopy(schema["$defs"]["FulfillmentSemanticSourceReview"])
             entry["properties"]["source_ref"]["enum"] = [source["source_ref"]]
+            if source_consumption:
+                own = [r for r in candidate.routes if r.source_ref == source["source_ref"]]
+                declared = {ref for r in own if r.component_basis is not None
+                            for ref in r.component_basis.linked_fact_refs}
+                eligible = [i for i, r in enumerate(candidate.routes)
+                            if r.source_ref == source["source_ref"] or r.source_ref in declared]
+                bound_check = deepcopy(schema["$defs"]["FulfillmentSourceConsumptionCheck"])
+                text_length = len(fulfillment_source_semantic_text(source))
+                bound_check["properties"]["source_span_start"]["maximum"] = max(0, text_length-1)
+                bound_check["properties"]["source_span_end"]["maximum"] = text_length
+                bound_check["properties"]["route_indices"]["items"]["enum"] = eligible
+                entry["properties"]["consumption_checks"]["items"] = bound_check
             sources.append(entry)
         schema["properties"]["source_results"] = {"type": "array", "prefixItems": sources,
             "items": False, "minItems": len(sources), "maxItems": len(sources)}
@@ -1336,7 +1385,8 @@ def _review_output_schema(inventory, candidate, *, route_scoped=False):
         # each original source. This is still one independent logical review.
         fields = schema["properties"]
         schema["properties"] = {k: fields[k] for k in ("inventory_fingerprint", "candidate_fingerprint",
-            "components_fingerprint", "component_results", "source_results")}
+            "components_fingerprint", *( ("source_results", "component_results") if source_consumption
+                else ("component_results", "source_results") ))}
         schema["required"] = list(schema["properties"])
     return schema
 
@@ -1644,6 +1694,7 @@ def _safe_fulfillment_response_output(text, *, owner_preconditions=None):
 
 
 class ModelFulfillmentCandidateProvider:
+    supports_source_consumption_proof = True
     def __init__(self, runtime_factory):
         self.runtime_factory = runtime_factory
         self.last_observation = None
@@ -2096,9 +2147,25 @@ class ModelFulfillmentCandidateProvider:
                     "the inventory does not itself establish that dependency. same_source_component_routes "
                     "shows complementary consumers to judge jointly, never permission to drop a component. "
                     "A whole-source reuse cannot conceal a lost semantic component. This review is only "
-                    "derived-plan semantic validation, not Assurance, Verification PASS, a fact or Human authority.")),
+                    "derived-plan semantic validation, not Assurance, Verification PASS, a fact or Human authority.")
+                    + (" Source-consumption proof: judge each FULL original source first. For each distinct meaning, "
+                       "return consumption_checks with exact original Unicode [start,end), the required existing "
+                       "capability/method/phase/target_paths and actual route_indices. Null quote reuses the exact "
+                       "bound source slice, not an inferred or repaired text. Multiple complementary methods may "
+                       "reference overlapping spans. Every non-whitespace original character must remain covered "
+                       "in a positive source verdict. Missing consumers must be shown with empty route_indices "
+                       "and a false source verdict. Propose requirements from the original text, not by copying "
+                       "whatever consumer the candidate happens to supply. A future seal precondition is not "
+                       "a current content check. u provenance and other sources' routes are not consumption proof; "
+                       "only own routes and explicitly submitted f Fact dependencies are eligible. Do not infer "
+                       "unsubmitted global dependencies or claim future proof is already performed. These checks "
+                       "are critic proposals, not evidence of execution or authority."
+                       if (owner_preconditions or {}).get("review_source_consumption_contract") ==
+                           "existing-source-consumption-proof-v1" else "")),
                 input_text=json.dumps(review_input, ensure_ascii=False),
-                output_schema=_review_output_schema(inventory, candidate, route_scoped=(owner_preconditions or {}).get("review_input_contract") in _ROUTE_SCOPED_REVIEW_INPUTS))
+                output_schema=_review_output_schema(inventory, candidate,
+                    route_scoped=(owner_preconditions or {}).get("review_input_contract") in _ROUTE_SCOPED_REVIEW_INPUTS,
+                    source_consumption=(owner_preconditions or {}).get("review_source_consumption_contract") == "existing-source-consumption-proof-v1"))
             self.last_observation = {"request_id": result.request_id, "provider": result.provider.value,
                 "requested_model": result.requested_model, "effective_model": result.effective_model,
                 "usage": asdict(result.usage), "timing": asdict(result.timing),

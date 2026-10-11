@@ -1,4 +1,5 @@
 """Generation restrictions reuse Owner predicates; they cannot grant a PASS."""
+from tests.test_c3_source_consumption_proof import fixture_review_proof
 import json
 from copy import deepcopy
 from hashlib import sha256
@@ -760,7 +761,8 @@ def _controlled_v3_binding_receipt(revision, ir, inventory, plan):
     def generate(**request):
         payload = json.loads(request["input_text"])
         if "untrusted_fulfillment_candidate" in payload:
-            output = review(inventory, decode_review_input(payload)).model_dump_json()
+            decoded = decode_review_input(payload)
+            output = fixture_review_proof(inventory, decoded, review(inventory, decoded), payload).model_dump_json()
         else:
             wire, _ = controlled_wire(inventory, plan, feedback=payload.get("same_basis_validation_feedback"),
                 owner_preconditions=payload.get("owner_source_preconditions"))
