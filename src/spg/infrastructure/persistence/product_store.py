@@ -596,6 +596,8 @@ class ProductStore:
             ),
             latest_event=event,
             extra={
+                "verification_record_ids": [None if item.get("id") is None else str(item["id"])
+                    for item in verification_rows],
                 "proposed_commit_identity": (
                     None if proposed is None else proposed["proposed_commit_identity"]
                 ),

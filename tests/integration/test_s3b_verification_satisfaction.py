@@ -449,6 +449,13 @@ def test_corrected_verifier_version_appends_proof_without_rewriting_failed_subje
             work_unit_id=facts.spine.work_unit.id, production_run_id=facts.spine.run.id))
         assert summary.admissibility_id == admitted.admissibility.id
         assert summary.admissibility_outcome == "ADMISSIBLE"
+        from spg.application.steering_decision import _current_verification_references
+        from spg.domain.steering import RealityReference, RealityReferenceKind
+        current_refs, blockers = _current_verification_references(summary,
+            RuntimeStore(uow.session).verification_records_for_snapshot(snapshot.id),
+            RealityReference(kind=RealityReferenceKind.COMPLETION, identity=snapshot.completion_evaluation_id))
+        assert blockers == () and failed.id not in {ref.identity for ref in current_refs}
+        assert corrected.id in {ref.identity for ref in current_refs}
         assert summary.verification_results and all(result == "PASS" for result in summary.verification_results)
         # Corrupt only this isolated fixture's proof reference. The projection
         # cannot obtain a PASS from a missing or mismatched Owner record.

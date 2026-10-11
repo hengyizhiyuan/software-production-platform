@@ -37,6 +37,26 @@ from spg.infrastructure.persistence.guided_design_store import GuidedDesignStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 
 
+def _current_verification_references(summary, records, fallback):
+    """Bind current results to exact Owner IDs; retain history separately."""
+    by_id = {str(record.id): record for record in records}
+    identities = summary.extra.get("verification_record_ids")
+    if identities is None:
+        identities = tuple(str(record.id) for record in records)
+    if len(identities) != len(summary.verification_results):
+        return (), (fallback,)
+    current, failing = [], []
+    for identity, result in zip(identities, summary.verification_results, strict=True):
+        record = by_id.get(str(identity))
+        reference = (fallback if record is None else RealityReference(
+            kind=RealityReferenceKind.VERIFICATION, identity=record.id))
+        if record is not None:
+            current.append(reference)
+        if record is None or result != "PASS" or record.result.value != "PASS":
+            failing.append(reference)
+    return tuple(current), tuple(dict.fromkeys(failing))
+
+
 class PlanFrameAssembler:
     """Assemble an ephemeral frame from existing authoritative stores."""
 
@@ -165,18 +185,23 @@ class PlanFrameAssembler:
                     RealityReferenceKind.COMPLETION,
                     summary.completion_id,
                 )
-                verification_refs: tuple[RealityReference, ...] = ()
+                verification_records = ()
                 if summary.proposed_snapshot_id is not None:
+                    verification_records = runtime.verification_records_for_snapshot(
+                        summary.proposed_snapshot_id
+                    )
                     verification_refs = tuple(
                         RealityReference(
                             kind=RealityReferenceKind.VERIFICATION,
                             identity=record.id,
                         )
-                        for record in runtime.verification_records_for_snapshot(
-                            summary.proposed_snapshot_id
-                        )
+                        for record in verification_records
                     )
                     runtime_refs.extend(verification_refs)
+                verification_refs, failing_verification_refs = _current_verification_references(
+                    summary,
+                    verification_records,
+                    completion_ref or RealityReference(kind=RealityReferenceKind.WORK, identity=work.id))
                 self._append_optional_ref(
                     runtime_refs,
                     RealityReferenceKind.CANDIDATE,
@@ -206,15 +231,6 @@ class PlanFrameAssembler:
                             reality_refs=(completion_ref,),
                         )
                     )
-                failing_verification_refs = tuple(
-                    reference
-                    for reference, result in zip(
-                        verification_refs,
-                        summary.verification_results,
-                        strict=True,
-                    )
-                    if result != "PASS"
-                )
                 if failing_verification_refs:
                     blockers.append(
                         PlanFrameBlocker(
@@ -271,6 +287,8 @@ class PlanFrameAssembler:
                     completion_ref
                     and summary.completion_outcome == "PRODUCED"
                     and verification_refs
+                    and summary.verification_results
+                    and not failing_verification_refs
                     and all(result == "PASS" for result in summary.verification_results)
                     and not current_result_may_be_insufficient
                 )
