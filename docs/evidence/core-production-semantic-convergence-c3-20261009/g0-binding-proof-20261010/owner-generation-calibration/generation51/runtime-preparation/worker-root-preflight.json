@@ -1,0 +1,23 @@
+{
+  "captured_at_utc": "2026-10-11T01:20:56.978087+00:00",
+  "worker_container": "e92767222710",
+  "probe_pid": 25,
+  "main_process_uid": "Uid:\t10001\t10001\t10001\t10001",
+  "main_process_gid": "Gid:\t10001\t10001\t10001\t10001",
+  "mount_namespace": "mnt:[4026537042]",
+  "workspace_path": "/var/lib/spg/native-workspaces",
+  "workspace_root_device": 64785,
+  "workspace_root_inode": 4592382,
+  "probe_write_succeeded": true,
+  "probe_removed": true,
+  "probe_device": 64785,
+  "probe_uid": 10001,
+  "probe_gid": 10001,
+  "configured_workspace_root": "/var/lib/spg/native-workspaces",
+  "configured_native_workspace_root": "/var/lib/spg/native-workspaces",
+  "source_revision": "4bc94dff1881cd7ca4b6334ad087ac8d698dba2d",
+  "tree": "b62f235643d88c000ad0ebf0cc2b699e45b55832",
+  "model_requests": 0,
+  "business_work_created": false,
+  "scope": "actual Worker container root readiness; no Task manifest yet"
+}

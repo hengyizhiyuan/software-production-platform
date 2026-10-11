@@ -1,0 +1,25 @@
+{
+  "scope": "PREPARATION_ONLY_NO_WORK_NO_MODEL",
+  "artifacts": [
+    {
+      "file": "runtime-role-preparation.json",
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation51-qualification-20261010/evidence/runtime-role-preparation.json",
+      "sha256": "2a777cc4b5e8f7fed135d02be0b0064235b5075ff19befaa458b86b56f3fa88b"
+    },
+    {
+      "file": "verified-preparation-resume.json",
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation51-qualification-20261010/evidence/verified-preparation-resume.json",
+      "sha256": "51b3853961815afa4bea1cb8b9efad12f6cb5fc9e32bf681d4aa5f533bcfda58"
+    },
+    {
+      "file": "preparation-gitea-stop.json",
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation51-qualification-20261010/evidence/preparation-gitea-stop.json",
+      "sha256": "473f40f7c3206f7b5600de8932c42ffc6c8bc95590b75ff865b59f3c4dc2293c"
+    },
+    {
+      "file": "worker-root-preflight.json",
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation51-qualification-20261010/evidence/worker-root-preflight.json",
+      "sha256": "c19808eadeda0819d2a075faa8316c5c3d1014ab08a20f714a4ddb041fec0963"
+    }
+  ]
+}

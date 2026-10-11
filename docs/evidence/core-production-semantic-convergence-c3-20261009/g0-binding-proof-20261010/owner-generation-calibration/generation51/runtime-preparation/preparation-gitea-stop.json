@@ -1,0 +1,12 @@
+{
+  "stage": "INITIAL_ISOLATED_RESOURCE_PREPARATION",
+  "initial_stop": "NEW_GITEA_NOT_READY",
+  "initial_delay_root_cause": "UNKNOWN",
+  "original_wait_bound_seconds": 30,
+  "current_read_only_health": "pass",
+  "new_work_created": false,
+  "model_calls": 0,
+  "resource_recreated": false,
+  "production_modified": false,
+  "observed_at_utc": "2026-10-11T01:18:22.125551+00:00"
+}

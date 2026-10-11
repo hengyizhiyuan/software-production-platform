@@ -1,0 +1,92 @@
+{
+  "source": "4bc94dff1881cd7ca4b6334ad087ac8d698dba2d",
+  "actual_image": "sha256:650eef3692c961d0612e4fd830b6dd55aef04ce8ea10243000d197e77f478944",
+  "artifacts": [
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/prebuild-failure-1.json",
+      "public_file": "prebuild-failure-1.json",
+      "sha256": "e3a86bea5eaa3817a7bd25b87987a851031042af956361a044df4bf62f1939ed"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/final-image/evidence/build.json",
+      "public_file": "final-image/evidence/build.json",
+      "sha256": "aaf58b1ed10d198c3b368421b883bf181eddc4b533e62e554ec5b0ff2899455a"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/final-image/evidence/build.log",
+      "public_file": "final-image/evidence/build.log",
+      "sha256": "a41ede75c63f2a840fc481f10c3acc4ea5d612de49d52ea54610e8cfe7c94ad0"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/final-image/evidence/build-input-identity.json",
+      "public_file": "final-image/evidence/build-input-identity.json",
+      "sha256": "343c609c984c451b5ac4f6c02232897b493b0b1847af33f7cf121461d9e6150b"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/final-image/evidence/frozen-inputs.json",
+      "public_file": "final-image/evidence/frozen-inputs.json",
+      "sha256": "1a33f7e8275478523b93c5a542607487fbd2afc28b5273bc33aeedf9bd6bd124"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/final-image/evidence/actual-imports.json",
+      "public_file": "final-image/evidence/actual-imports.json",
+      "sha256": "b9151f369ef2ecc529cde6b9ac5aa223550dee317e5fdc6c7afb5c6c2333fd91"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/final-image/evidence/actual-imports.log",
+      "public_file": "final-image/evidence/actual-imports.log",
+      "sha256": "5eb8390cfb1a9ae0b8a576fbd35b3d792e6d38ea4f1401956511bd1d8fbee79b"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/final-image/evidence/watt-continuation-receipt.json",
+      "public_file": "final-image/evidence/watt-continuation-receipt.json",
+      "sha256": "55b501e950695cd2d0a4beb18be518d440bdb92ef71a1a63089ac7bb5d1b8a89"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/final-image/evidence/watt-continuation.log",
+      "public_file": "final-image/evidence/watt-continuation.log",
+      "sha256": "01774be1b21212c14b55dd01976199bb28daeea31beb041100b52bcc489a4443"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/final-image/evidence/watt-continuation.xml",
+      "public_file": "final-image/evidence/watt-continuation.xml",
+      "sha256": "b8ffae65e78d9b420f1002bd46c38497f46a4e4401f8068f1ceb32bd17be35a2"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/historical41-proof/evidence/proof.json",
+      "public_file": "historical41-proof/evidence/proof.json",
+      "sha256": "148512af065f73492e69bf82d62c800efbfdd395308ac2891dd0d3b009d3abce"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/historical42-replay/evidence/replay.json",
+      "public_file": "historical42-replay/evidence/replay.json",
+      "sha256": "a3b1cc5ef096358304e8320339d43b7fae86e79b1fe20b0e8f2ee2d5494b3941"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/historical46-replay/evidence/replay.json",
+      "public_file": "historical46-replay/evidence/replay.json",
+      "sha256": "66e2cb05da54a86002aa9db4ec1500f85a09f367c0d3caaa34491dd7a3199795"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/historical47-replay/evidence/replay.json",
+      "public_file": "historical47-replay/evidence/replay.json",
+      "sha256": "e9082b1db9eaf946365c9c3e4cc78a5862c24466fa78da5e6a1f933d6403529e"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/owner-pg-generation51/evidence/receipt.json",
+      "public_file": "owner-pg-generation51/evidence/receipt.json",
+      "sha256": "026ef4ea635a418496cfd54580273d9076e8539fea6f183346c73bb9d77d1aab"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/owner-pg-generation51/evidence/result.xml",
+      "public_file": "owner-pg-generation51/evidence/result.xml",
+      "sha256": "c5f96142e7589b893f9b9bb1d923e9e5cdc7c12c56b76bf4a1ccd9261e6c7354"
+    },
+    {
+      "persistent_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/owner-pg-generation51/evidence/result.log",
+      "public_file": "owner-pg-generation51/evidence/result.log",
+      "sha256": "fe8423b7976d2ab070f89e9aa040c5beb13988e4b0896e28d2477e7f1b7d3f56"
+    }
+  ],
+  "scope": "EXACT_INSTALLED_842_PG_43_AND_HISTORICAL_ZERO_CALL_REPLAY; NOT_REAL_G0_OR_HOLDOUT"
+}

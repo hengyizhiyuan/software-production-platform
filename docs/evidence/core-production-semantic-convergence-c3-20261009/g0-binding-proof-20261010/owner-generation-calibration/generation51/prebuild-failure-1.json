@@ -1,0 +1,14 @@
+{
+  "schema": "c3-exact-build-preparation-stop-v1",
+  "stage": "PRE_BUILD_INPUT_IDENTITY",
+  "failure": "RETAINED_TEST_DEPENDENCY_ARCHIVE_NOT_UPLOADED",
+  "docker_build_started": false,
+  "actual_image": null,
+  "model_calls": 0,
+  "work_created": 0,
+  "source": "4bc94dff1881cd7ca4b6334ad087ac8d698dba2d",
+  "repair": "COPY_EXISTING_FIXED_HASH_DEPENDENCY_ARCHIVE",
+  "dependency_sha256": "5ca95c93c411aba858e73a491e7328a16d27ebc33ac70d426378673f2cd37473",
+  "preserved_prebuild_directory": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation51-qualified-20261010/final-image-prebuild-failure-1",
+  "time_utc": "2026-10-11T01:11:23.914501+00:00"
+}

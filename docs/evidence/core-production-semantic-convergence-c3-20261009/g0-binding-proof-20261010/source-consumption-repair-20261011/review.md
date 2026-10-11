@@ -69,3 +69,11 @@ The independent model still selects the required method and semantic subdivision
 Development `proof51a`: 120/128 PASS, eight failures from a controlled capacity adapter recognizing v1 only. The fixture now consumes the actual v1/v2 request marker. `proof51b`: 128/128 PASS after that correction. Both are overlay development, not exact-image qualification. Final directed run includes explicit invalid-critic feedback classification; receipt pending. Historical failures are retained. This is an active engineering checkpoint, not C3 CLOSED.
 
 Final directed development: `proof51c`, 129/129 PASS, 95.128485 seconds; original failure and both positive receipts retained. Exact installed image and fresh PostgreSQL qualification follow; no new model call or G0 at this checkpoint.
+
+## Generation51 exact readiness
+
+Frozen Watt `4bc94dff1881cd7ca4b6334ad087ac8d698dba2d`, tree `b62f235643d88c000ad0ebf0cc2b699e45b55832`, image `sha256:650eef3692c961d0612e4fd830b6dd55aef04ce8ea10243000d197e77f478944`: exact installed 842/842 PASS and fresh PostgreSQL 43/43 PASS; no failures, errors, skips or overlays. Migration `20261007_72`, unchanged qualified Guardian/ECF. Four historical zero-call replays preserve the original receipts, budgets and terminal results and reject retrospective proof upgrades.
+
+The isolated normal G0 environment is prepared with exact four-role imports and actual writable Worker root proof, but no Work/model request has occurred. Original Gitea startup readiness stop is preserved; later independently observed health allowed only previously unapplied preparation effects, without rebuilding/restarting resources or changing the waiting bound. Original startup delay cause remains UNKNOWN.
+
+The sole prepared independent negative Review is now authorized against this matching readiness. All source verdicts and mechanical witnesses must qualify before ordinary real G0; Holdout remains sealed. Public receipts are in `../owner-generation-calibration/generation51/`. This establishes execution readiness, not C3 Closure.
