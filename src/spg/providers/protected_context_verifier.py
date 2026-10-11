@@ -111,10 +111,25 @@ class StaticProtectedContextVerifier:
         return bool(not contract.allowed_areas and contract.exact_targets
             and all(PurePosixPath(t.path).suffix in suffixes for t in contract.exact_targets))
 
-    def verify_fulfillment_bindings(self, request, task, contract, repository, baseline, *, bindings, receipt_recorder=None):
+    def verify_fulfillment_bindings(self, request, task, contract, repository, baseline, *, bindings, receipt_recorder=None, fulfillment_bindings=None):
         selected = self._derived_obligations(bindings, request.decision_context_fingerprint)
+        from spg.domain.governed_obligation import fulfillment_source_ref
+        source_refs = {fulfillment_source_ref(binding) for binding in bindings}
+        responsibility_plan = tuple(binding for binding in
+            (bindings if fulfillment_bindings is None else fulfillment_bindings)
+            if fulfillment_source_ref(binding) in source_refs)
+        if any(binding not in responsibility_plan for binding in bindings):
+            raise ValueError("OBLIGATION_CURRENT_COMPONENT_NOT_ASSIGNED")
+        source_fields = ("source_kind", "fact_id", "fact_fingerprint", "semantic_ir_id",
+            "constraint_item_id", "constraint_clause_id", "constraint_fingerprint",
+            "work_reality_revision_id", "source_revision", "source_quote",
+            "provenance_fingerprint", "source_record_ids", "projection_inventory_fingerprint")
+        for binding in responsibility_plan:
+            current = next(b for b in bindings if fulfillment_source_ref(b) == fulfillment_source_ref(binding))
+            if any(getattr(binding, key) != getattr(current, key) for key in source_fields):
+                raise ValueError("OBLIGATION_RESPONSIBILITY_SOURCE_MISMATCH")
         return self.verify(request, task, contract, repository, baseline, obligations=selected,
-            receipt_recorder=receipt_recorder, fulfillment_bindings=bindings, derived_bindings=bindings)
+            receipt_recorder=receipt_recorder, fulfillment_bindings=responsibility_plan, derived_bindings=bindings)
 
     @staticmethod
     def _derived_obligations(bindings, package_fingerprint):
@@ -212,6 +227,10 @@ class StaticProtectedContextVerifier:
             "Scope, qualifiers, provenance and authority; preserve every applicable current restriction. "
             "Other phase/Owner components remain separate pending gates; never prove Human decisions, permits "
             "or Candidate sealing by source text. A pending component does not excuse wrong current content. "
+            "The responsibility plan may assign the same exact source span to both current content and a later "
+            "Owner. Inspect all matching assigned bindings; do not demand that the content witness prove the "
+            "separately assigned lifecycle outcome, and do not treat that pending outcome as completed. "
+            "If no exact separate binding exists, do not invent one or waive part of the current requirement. "
             "Return one check per exact context_class/semantic_key. Judge whether this bounded PWU "
             "implements its approved contribution consistently with Product Intent, invariants and decisions; "
             "do not require one incremental PWU to implement unrelated future Product scope. "
@@ -231,7 +250,9 @@ class StaticProtectedContextVerifier:
         )
         recorder = receipt_recorder or VerificationCandidateReceipts(request)
         component = ("protected-context" if not derived_bindings else "fulfillment-content:" + sha256(
-            json.dumps([binding.model_dump(mode="json") for binding in derived_bindings], sort_keys=True).encode()).hexdigest())
+            json.dumps({"selected": [binding.model_dump(mode="json") for binding in derived_bindings],
+                "responsibility_plan": [binding.model_dump(mode="json") for binding in fulfillment_bindings]},
+                sort_keys=True).encode()).hexdigest())
         expected = {(item.context_class, item.semantic_key): item for item in selected}
         previous_checks = tuple(Check.model_validate(c) for c in recorder.previous_checks(component))
         model_attempts = []

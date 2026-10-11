@@ -20,7 +20,7 @@ class ContractDrivenRepositoryVerifier:
         self.documentation = RepositoryArtifactVerifier(database)
         self._binding = VerificationProviderBinding(
             provider_identity="provider:contract-driven-repository",
-            provider_version="v3-reviewed-current-content" if context_verifier is not None else "v1",
+            provider_version="v4-reviewed-responsibility-plan" if context_verifier is not None else "v1",
         )
 
     @property

@@ -508,7 +508,8 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
             and b.phase.value == "CURRENT_VERIFICATION" and b.evidence_method == "EXACT_CANDIDATE_CONTENT")
         if static_verifier is not None and task is not None and static_verifier.supports(contract):
             component_checks = static_verifier.verify_fulfillment_bindings(request, task, contract, repository,
-                contract.source_revision, bindings=current_components, receipt_recorder=receipt_recorder)
+                contract.source_revision, bindings=current_components, receipt_recorder=receipt_recorder,
+                fulfillment_bindings=bindings)
     content = tuple(reference for reference in references if str(reference.fact_id) not in linked_components | component_facts and any(
         binding.evidence_method == "EXACT_CANDIDATE_CONTENT" and binding.phase.value == "CURRENT_VERIFICATION"
         for binding in routes_by_fact[str(reference.fact_id)]))
@@ -685,7 +686,8 @@ def verify_binding_inventory(*, request, task, contract, repository, baseline, r
         if static_verifier is None or not static_verifier.supports(contract):
             raise ValueError("OBLIGATION_CURRENT_CONTENT_CONSUMER_UNAVAILABLE")
         derived = (*derived, *static_verifier.verify_fulfillment_bindings(request, task, contract, repository,
-            baseline, bindings=tuple(pending_content), receipt_recorder=receipt_recorder))
+            baseline, bindings=tuple(pending_content), receipt_recorder=receipt_recorder,
+            fulfillment_bindings=bindings))
         for result in results:
             if result["disposition"] != "CONTENT_CHECK_REQUIRED": continue
             matches = [check for check in derived if check["source_ref"] == result["source_ref"]

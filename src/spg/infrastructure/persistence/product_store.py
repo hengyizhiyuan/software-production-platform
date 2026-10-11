@@ -543,7 +543,19 @@ class ProductStore:
         completion = None if attempt is None else self._summary_first(completion_evaluations, completion_evaluations.c.attempt_id, attempt['id'], order=('created_at',), descending=True)
         proposed = None if completion is None else self._summary_first(proposed_repository_snapshots, proposed_repository_snapshots.c.completion_evaluation_id, completion['id'])
         verification_rows = () if proposed is None else self._summary_rows(verification_records, verification_records.c.proposed_snapshot_id, (proposed['id'],), order=('created_at','id'))
-        admissibility = None if proposed is None else self._summary_first(production_admissibility_records, production_admissibility_records.c.proposed_snapshot_id, proposed['id'])
+        admissibility = None if proposed is None else self._summary_first(
+            production_admissibility_records, production_admissibility_records.c.proposed_snapshot_id,
+            proposed['id'], order=('created_at', 'id'), descending=True)
+        if admissibility is not None:
+            # Project the latest Owner decision's exact proof selection. Old
+            # FAIL records remain immutable history, not current retry signals.
+            by_id = {str(row['id']): row for row in verification_rows}
+            current_rows = []
+            for proof in admissibility['obligation_results']:
+                row = by_id.get(str(proof.get('verification_record_id')))
+                current_rows.append(row if row is not None and row['obligation'] == proof['obligation']
+                    else {'obligation': proof['obligation'], 'result': 'UNKNOWN'})
+            verification_rows = current_rows
         candidate = self._summary_first(baseline_candidates, baseline_candidates.c.production_run_id, binding.production_run_id, order=('sealed_at',), descending=True)
         authorization = None if candidate is None else self._summary_first(human_authorizations, human_authorizations.c.candidate_id, candidate['id'], order=('authorized_at',), descending=True)
         effect = None if candidate is None else self._summary_first(repository_integration_effects, repository_integration_effects.c.candidate_id, candidate['id'], order=('prepared_at',), descending=True)

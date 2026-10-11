@@ -412,8 +412,9 @@ def test_s3b_09_verification_unknown(
     assert result.admissibility.outcome is ProductionAdmissibilityOutcome.NOT_ADMISSIBLE
 
 
+@pytest.mark.parametrize("cached", (False, True))
 def test_corrected_verifier_version_appends_proof_without_rewriting_failed_subject(
-    postgres_database: Database, git_repository: Path, tmp_path: Path,
+    postgres_database: Database, git_repository: Path, tmp_path: Path, cached: bool,
 ) -> None:
     facts = _build(postgres_database, git_repository, tmp_path)
     snapshot = _snapshot(facts)
@@ -437,6 +438,34 @@ def test_corrected_verifier_version_appends_proof_without_rewriting_failed_subje
         assert store.verification_record(failed.id) == failed
         assert store.production_admissibility_by_basis(blocked.admissibility.basis_fingerprint) == blocked.admissibility
     assert admitted.work_unit.condition is WorkUnitCondition.SATISFIED
+    from types import SimpleNamespace
+    from spg.infrastructure.persistence.product_store import ProductStore
+    with postgres_database.unit_of_work() as uow:
+        projection = ProductStore(uow.session)
+        if cached:
+            projection._summary_data = {table.name: list(uow.session.execute(select(table)).mappings())
+                for table in metadata.sorted_tables}
+        summary = projection.runtime_summary(SimpleNamespace(
+            work_unit_id=facts.spine.work_unit.id, production_run_id=facts.spine.run.id))
+        assert summary.admissibility_id == admitted.admissibility.id
+        assert summary.admissibility_outcome == "ADMISSIBLE"
+        assert summary.verification_results and all(result == "PASS" for result in summary.verification_results)
+        # Corrupt only this isolated fixture's proof reference. The projection
+        # cannot obtain a PASS from a missing or mismatched Owner record.
+        from sqlalchemy import update
+        from uuid import uuid4
+        proofs = [item.model_dump(mode="json") for item in admitted.admissibility.obligation_results]
+        proofs[0]["verification_record_id"] = str(uuid4())
+        uow.session.execute(update(production_admissibility_records).where(
+            production_admissibility_records.c.id == admitted.admissibility.id).values(obligation_results=proofs))
+        projection = ProductStore(uow.session)
+        if cached:
+            projection._summary_data = {table.name: list(uow.session.execute(select(table)).mappings())
+                for table in metadata.sorted_tables}
+        broken = projection.runtime_summary(SimpleNamespace(
+            work_unit_id=facts.spine.work_unit.id, production_run_id=facts.spine.run.id))
+        assert broken.verification_results[0] == "UNKNOWN"
+        assert store.verification_record(failed.id) == failed
 
 
 def test_s3b_10_missing_verification_blocks_satisfaction(

@@ -260,7 +260,12 @@ def test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_futur
         assert verification_calls[0]['immutable_fact_references'] == [ref.model_dump(mode='json')]
         assert len(result[0]['current_component_evidence'])==1
         assert result[0]['current_component_evidence'][0]['candidate_revision']==candidate
-        assert all(b['phase']=='CURRENT_VERIFICATION' for b in verification_calls[0]['assigned_fulfillment_bindings'])
+        from spg.domain.governed_obligation import fulfillment_source_ref
+        assigned = verification_calls[0]['assigned_fulfillment_bindings']
+        assert assigned == [b.model_dump(mode='json') for b in bindings
+            if fulfillment_source_ref(b) == 'semantic-fact:' + str(ref.fact_id)]
+        assert any(b['phase'] == 'CANDIDATE_SEAL' for b in assigned) is seal
+        assert len(verification_calls[0]['protected_obligations']) == 1
 
 
 @pytest.mark.parametrize('content', ('correct', 'wrong'))

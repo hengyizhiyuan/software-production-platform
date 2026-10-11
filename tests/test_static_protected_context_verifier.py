@@ -127,3 +127,70 @@ def test_wire_repair_cannot_upgrade_a_contradiction(subject):
     with pytest.raises(ValueError,match='REPAIR_CHANGED_JUDGMENT'):
         StaticProtectedContextVerifier(lambda:runtime).verify(request,task,contract,repo,base)
     assert len(calls)==2
+
+
+@pytest.mark.parametrize("future_gate", (True, False))
+def test_current_consumer_receives_same_source_lifecycle_plan_without_claiming_seal(subject, future_gate):
+    from copy import deepcopy
+    from tests.test_c3_reviewed_fact_method_applicability import case, preconditions, verdict
+    from spg.application import governed_obligations as admission
+    from spg.domain.governed_obligation import fulfillment_source_ref
+    from spg.domain.engineering_semantics import semantic_fact_reference
+    from spg.domain.model_runtime import ModelUsage
+    repo, baseline, request, task, contract = subject
+    revision, ir, inventory, proposal = case(mixed=True)
+    plan = admission.validate_projection_candidate(proposal, revision, ir, inventory,
+        source_contract="v3", owner_preconditions=preconditions(revision, ir, inventory),
+        semantic_review=verdict(inventory, proposal))
+    current = plan[0]
+    future = plan[1]
+    # Immutable test fixture source identity is bound to the exact test Git.
+    current = current.model_copy(update={"source_revision": baseline})
+    future = future.model_copy(update={"source_revision": baseline})
+    reference = semantic_fact_reference(revision.engineering_semantic_facts[0], work_revision_id=revision.id)
+    request = request.model_copy(update={"semantic_fact_obligations": (reference,)})
+    full_plan = (current, future) if future_gate else (current,)
+    before = deepcopy(full_plan)
+    calls = []
+    def generate(**kwargs):
+        payload = json.loads(kwargs["input_text"]); calls.append(payload)
+        matching = [b for b in payload["assigned_fulfillment_bindings"]
+            if b["fact_id"] == str(current.fact_id) and b["phase"] == "CANDIDATE_SEAL"]
+        checks = [{"context_class": item["context_class"], "semantic_key": item["semantic_key"],
+            "disposition": "SATISFIED" if matching else "UNVERIFIABLE",
+            "reason": "Current content inspected; the separate Candidate gate remains pending" if matching
+                else "No separate lifecycle responsibility has been supplied",
+            "witnesses": [{"path": "index.html", "quote": "Company Home"}] if matching else []}
+            for item in payload["protected_obligations"]]
+        return SimpleNamespace(output_text=json.dumps({"checks": checks}), provider=SimpleNamespace(value="test"),
+            effective_model="test", request_id="same-source-plan", usage=ModelUsage())
+    runtime = SimpleNamespace(generate=generate, registry=SimpleNamespace(close=lambda: None))
+    verifier = StaticProtectedContextVerifier(lambda: runtime)
+    checked = verifier.verify_fulfillment_bindings(request, task, contract, repo, baseline,
+        bindings=(current,), fulfillment_bindings=full_plan)
+    assert checked[0]["coverage"] == ("COVERED" if future_gate else "UNVERIFIED")
+    assert full_plan == before and len(calls) == 1
+    assert calls[0]["assigned_fulfillment_bindings"] == [b.model_dump(mode="json") for b in full_plan]
+    assert len(calls[0]["protected_obligations"]) == 1
+    assert checked[0]["binding"] == current.model_dump(mode="json")
+    with pytest.raises(ValueError, match="CURRENT_COMPONENT_NOT_ASSIGNED"):
+        verifier.verify_fulfillment_bindings(request, task, contract, repo, baseline,
+            bindings=(current,), fulfillment_bindings=())
+
+
+@pytest.mark.parametrize("drift", ("source_revision", "work_reality_revision_id", "source_quote", "provenance_fingerprint"))
+def test_related_future_binding_cannot_substitute_original_source(subject, drift):
+    from tests.test_c3_reviewed_fact_method_applicability import case, preconditions, verdict
+    from spg.application import governed_obligations as admission
+    repo, baseline, request, task, contract = subject
+    revision, ir, inventory, proposal = case(mixed=True)
+    plan = admission.validate_projection_candidate(proposal, revision, ir, inventory,
+        source_contract="v3", owner_preconditions=preconditions(revision, ir, inventory),
+        semantic_review=verdict(inventory, proposal))
+    invalid = plan[1].model_copy(update={drift: uuid4() if drift == "work_reality_revision_id" else "different"})
+    calls = []
+    verifier = StaticProtectedContextVerifier(lambda: calls.append(True))
+    with pytest.raises(ValueError, match="RESPONSIBILITY_SOURCE_MISMATCH"):
+        verifier.verify_fulfillment_bindings(request, task, contract, repo, baseline,
+            bindings=(plan[0],), fulfillment_bindings=(plan[0], invalid))
+    assert calls == []

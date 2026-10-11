@@ -69,7 +69,7 @@ class RepositoryCodeVerifier:
         self.timeout_seconds = timeout_seconds
         self._binding = VerificationProviderBinding(
             provider_identity="provider:repository-code-contract",
-            provider_version="v2-reviewed-current-content" if context_verifier is not None else "v1",
+            provider_version="v3-reviewed-responsibility-plan" if context_verifier is not None else "v1",
         )
 
     @property
