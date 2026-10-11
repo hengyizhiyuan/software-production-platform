@@ -212,3 +212,32 @@ def test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_futur
         assert len(result[0]['current_component_evidence'])==1
         assert result[0]['current_component_evidence'][0]['candidate_revision']==candidate
         assert all(b['phase']=='CURRENT_VERIFICATION' for b in verification_calls[0]['assigned_fulfillment_bindings'])
+
+
+@pytest.mark.parametrize('drift', (None,'missing-revision','wrong-tree','wrong-source','wrong-target','missing-digest'))
+def test_linked_current_fact_target_requires_exact_versioned_source_witness_without_rewriting_scope(drift):
+    from types import SimpleNamespace
+    from spg.providers.managed_context_fulfillment import _linked_fact_current_evidence
+    rev, ir, inv, plan=case(mixed=True)
+    producer=a.validate_projection_candidate(plan,rev,ir,inv,source_contract='v3',
+        owner_preconditions=preconditions(rev,ir,inv),semantic_review=verdict(inv,plan))[0]
+    ref='semantic-fact:'+str(producer.fact_id)
+    consumer=SimpleNamespace(component_basis=SimpleNamespace(linked_fact_refs=(ref,)),
+        work_reality_revision_id=rev.id,source_revision=producer.source_revision,target_paths=producer.target_paths)
+    candidate='c'*40;tree='d'*40;target=producer.target_paths[0]
+    witness={'binding':producer.model_dump(mode='json'),'passed':True,
+        'evidence_method':'EXACT_CANDIDATE_SOURCE_WITNESS','source_revision':producer.source_revision,
+        'candidate_revision':candidate,'candidate_tree':tree,
+        'witnesses':[{'path':target,'quote':'actual checked source'}],'observed_source_digests':{target:'a'*64}}
+    row={'fact_id':str(producer.fact_id),'scope':None,'passed':True,'current_evidence_verified':True,
+        'fulfillment_bindings':[producer.model_dump(mode='json')],'candidate_revision':candidate,'candidate_tree':tree,
+        'current_component_evidence':[witness]}
+    if drift=='missing-revision':row['candidate_revision']=None;witness['candidate_revision']=None
+    elif drift=='wrong-tree':witness['candidate_tree']='e'*40
+    elif drift=='wrong-source':witness['source_revision']='e'*40
+    elif drift=='wrong-target':witness['witnesses'][0]['path']='elsewhere.html'
+    elif drift=='missing-digest':witness['observed_source_digests']={}
+    proof=_linked_fact_current_evidence(consumer,(row,))
+    assert proof['passed'] is (drift is None)
+    assert row['scope'] is None
+    if drift is None:assert proof['facts'][0]['target_path']==target

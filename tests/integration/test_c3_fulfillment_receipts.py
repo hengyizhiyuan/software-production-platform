@@ -749,3 +749,74 @@ def test_count_plan_review_role_is_durable_in_existing_native_receipts(postgres_
     with postgres_database.unit_of_work() as uow:
         after=NativeExecutionStore(uow.session).evidence_for_attempt(attempt.id)
     assert before==after and len(before)==6
+
+
+@pytest.mark.parametrize('admission', ('work', 'steering'))
+def test_reviewed_open_current_scope_reaches_exact_candidate_and_independent_guardian(postgres_database, tmp_path, monkeypatch, admission):
+    import json
+    from types import SimpleNamespace
+    from spg.domain.engineering_semantics import SemanticRelation
+    from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+    from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+    from tests.integration import test_c1_contract_continuity as c1
+    from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+    from tests.test_c3_semantic_contract_calibration import review
+    meaning=c1.DeclaredC1Meaning;declared=c1.DeclaredC1Fulfillment()
+    class OpenScopeMeaning(meaning):
+        def interpret(self,basis):
+            candidate=super().interpret(basis);original=candidate.semantic_fact_candidates[0]
+            goal=original.model_copy(update={'candidate_id':'controlled-open-goal',
+                'subject':'controlled.open.current.goal','relation':SemanticRelation.SCOPE,
+                'value':'Create index.html','scope':None,'qualifiers':{},'source_text':'Create index.html'})
+            return candidate.model_copy(update={'semantic_fact_candidates':(*candidate.semantic_fact_candidates,goal)})
+    monkeypatch.setattr(c1,'DeclaredC1Meaning',OpenScopeMeaning)
+    formation_calls=[];content_calls=[]
+    def formation(**request):
+        payload=json.loads(request['input_text']);formation_calls.append(payload)
+        inv=_restore_formation_inventory_view(payload['immutable_inventory'],payload.get('existing_ir_item_table',{}))
+        if 'untrusted_fulfillment_candidate' in payload:
+            plan=decode_review_input(payload)
+            output=fixture_review_proof(inv,plan,review(inv,plan),payload).model_dump_json()
+        else:
+            plan=declared.form(inv,payload['existing_capability_contracts'])
+            open_refs={x['source_ref'] for x in inv['sources'] if x['kind']=='FACT' and x['payload']['relation']=='SCOPE'}
+            plan=plan.model_copy(update={'routes':tuple(r.model_copy(update={'component_basis':r.component_basis.model_copy(
+                update={'linked_fact_refs':()})}) if r.source_ref in open_refs else r for r in plan.routes)})
+            wire,_=controlled_wire(inv,plan,owner_preconditions=payload.get('owner_source_preconditions'))
+            output=json.dumps(wire)
+        return StructuredModelResult(output_text=output,provider=ModelProvider.DEEPSEEK,
+            requested_model='controlled-open-scope',effective_model='controlled-open-scope',
+            request_id=f'controlled-open-scope-{len(formation_calls)}',usage=ModelUsage(unknown=True),timing=ModelTiming())
+    provider=ModelFulfillmentCandidateProvider(lambda:SimpleNamespace(generate=formation,close=lambda:None))
+    monkeypatch.setattr(c1,'DeclaredC1Fulfillment',lambda:provider)
+    def content_runtime():
+        def generate(**request):
+            payload=json.loads(request['input_text']);content_calls.append(payload)
+            assert len(payload['immutable_fact_references'])==1
+            assert payload['immutable_fact_references'][0]['relation']=='SCOPE'
+            assert payload['immutable_fact_references'][0]['value']=='Create index.html'
+            body=payload['candidate_sources']['index.html'];assert body==c1.CONTENT
+            checks=[{'context_class':o['context_class'],'semantic_key':o['semantic_key'],
+                'disposition':'SATISFIED','reason':'Controlled oracle observes the exact static page',
+                'witnesses':[{'path':'index.html','quote':body}]} for o in payload['protected_obligations']]
+            return StructuredModelResult(output_text=json.dumps({'checks':checks}),provider=ModelProvider.DEEPSEEK,
+                requested_model='controlled-content',effective_model='controlled-content',request_id='controlled-content',
+                usage=ModelUsage(unknown=True),timing=ModelTiming())
+        return SimpleNamespace(generate=generate,registry=SimpleNamespace(close=lambda:None))
+    monkeypatch.setattr(c1,'_never_generate',content_runtime)
+    admitted=c1._admit_c1(postgres_database,tmp_path,admission)
+    chain=c1._produce_chain(postgres_database,tmp_path,admitted);projection=c1._assess(chain)
+    assert projection['gate']=='PASS',projection
+    assert len(formation_calls)==2 and len(content_calls)==1
+    scope=next(f for f in chain.revision.engineering_semantic_facts if f.relation is SemanticRelation.SCOPE)
+    checks=next(r.evidence.metadata['static_html_semantic_checks'] for r in chain.records
+        if 'static_html_semantic_checks' in r.evidence.metadata)
+    row=next(r for r in checks if r.get('fact_id')==str(scope.id))
+    assert row['passed'] and row['current_evidence_verified'] and row['future_evidence_status'] is None
+    proof=row['current_component_evidence'][0]
+    assert proof['evidence_method']=='EXACT_CANDIDATE_SOURCE_WITNESS'
+    assert proof['candidate_revision']==chain.candidate.proposed_commit_identity
+    assert proof['candidate_tree']==chain.candidate.proposed_tree_identity
+    assert proof['witnesses'] and proof['verification_candidate_receipts']
+    with postgres_database.unit_of_work() as uow:
+        assert ProductStore(uow.session).current_work_reality_revision(chain.work_id)==chain.revision

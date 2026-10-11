@@ -103,14 +103,30 @@ def _linked_fact_current_evidence(binding, semantic_checks):
                   and route.get("evidence_method") == "EXACT_CANDIDATE_CONTENT"
                   and route.get("work_reality_revision_id") == str(binding.work_reality_revision_id)
                   and route.get("source_revision") == binding.source_revision]
+        target = row.get("scope")
+        if len(routes) == 1 and target not in routes[0].get("target_paths", ()):
+            witnesses = [e for e in row.get("current_component_evidence", ())
+                if e.get("binding") == routes[0] and e.get("passed") is True
+                and e.get("evidence_method") == "EXACT_CANDIDATE_SOURCE_WITNESS"
+                and e.get("source_revision") == binding.source_revision
+                and isinstance(row.get("candidate_revision"), str) and row.get("candidate_revision")
+                and isinstance(row.get("candidate_tree"), str) and row.get("candidate_tree")
+                and e.get("candidate_revision") == row.get("candidate_revision")
+                and e.get("candidate_tree") == row.get("candidate_tree")
+                and e.get("witnesses") and all(w.get("quote") and len(str(
+                    (e.get("observed_source_digests") or {}).get(w.get("path"), ""))) == 64
+                    for w in e["witnesses"])]
+            paths = ({w.get("path") for w in witnesses[0]["witnesses"]}
+                if len(witnesses) == 1 else set())
+            target = next(iter(paths)) if len(paths) == 1 else None
         if (row.get("passed") is not True or row.get("current_evidence_verified") is not True
-                or len(routes) != 1 or row.get("scope") not in binding.target_paths
-                or row.get("scope") not in routes[0].get("target_paths", ())):
+                or len(routes) != 1 or target not in binding.target_paths
+                or target not in routes[0].get("target_paths", ())):
             return {"passed": False, "facts": []}
         facts.append({"source_ref": ref, "fact_id": row["fact_id"],
             "fact_fingerprint": routes[0].get("fact_fingerprint"),
             "work_reality_revision_id": str(binding.work_reality_revision_id),
-            "source_revision": binding.source_revision, "target_path": row["scope"],
+            "source_revision": binding.source_revision, "target_path": target,
             "passed": True, "current_evidence_verified": True})
     return {"passed": True, "facts": facts}
 
@@ -574,6 +590,7 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
             "reason": (check["reason"] if check is not None else "EXACT_TYPED_FULFILLMENT_EVIDENCE"
                        if passed else "UNVERIFIABLE_FACT_OWNER_EVIDENCE"),
             "fulfillment_bindings": [binding.model_dump(mode="json") for binding in routes],
+            "candidate_revision": request.proposed_commit_identity, "candidate_tree": request.tree_identity,
             "current_evidence_verified": bool(evaluations and all(evaluations)),
             "future_evidence_status": "PENDING_FUTURE_OWNER_GATE" if any(
                 binding.phase.value in {"CANDIDATE_SEAL", "HUMAN_INTEGRATION", "DELIVERY"} for binding in routes) else None}
