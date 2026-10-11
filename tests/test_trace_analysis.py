@@ -1092,3 +1092,13 @@ def test_causal_mechanism_cannot_silently_promote_recovery_actions(phrase):
     c=EvidenceCatalog(snapshot());r=report(c);r["findings"][0].update(epistemic_status="ROOT_CAUSE_HYPOTHESIS",analysis="假设：若条件成立，则"+phrase,repository_citations=[{"evidence_id":str(uuid4()),"quote":"implementation"}])
     with pytest.raises(ValueError,match="CAUSE_MECHANISM_CANNOT_ASSERT_RECOVERY_ACTION"):
         AnalysisReport.model_validate(r)
+
+
+@pytest.mark.parametrize("group",["plan_history","production_work_units"])
+def test_original_planning_records_cannot_be_omitted_from_timeline(group):
+    c=EvidenceCatalog(snapshot());r=report(c);eid=c.add(group,"/fixture/planning",{"id":str(uuid4()),"objective":"arbitrary objective"})
+    assert eid in c.seed()["planning_stage_targets"]
+    with pytest.raises(ValueError,match="OBSERVED_PLANNING_STAGE_MUST_BE_RECONSTRUCTED"):
+        c.materialize_boundaries(AnalysisReport.model_validate(r))
+    c.read(eid);r["timeline"].insert(0,{"stage":"PLANNING","statement":"Recorded planning objective", "citations":[{"evidence_id":eid,"quote":"arbitrary objective"}]})
+    c.materialize_boundaries(AnalysisReport.model_validate(r))

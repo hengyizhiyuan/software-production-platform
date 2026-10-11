@@ -508,6 +508,8 @@ class EvidenceCatalog:
                    for row in self.records.values()
                    if row["group"] in {"capture", "intent", "limits"}]
         seed = {"snapshot_digest": self.digest, "groups": groups,
+                "planning_stage_targets": [eid for eid, row in self.records.items()
+                    if row["group"] in {"plan_history", "production_work_units"}][:3],
                 "execution_stage_targets": [eid for eid, row in self.records.items()
                     if row["group"] in {"execution_effects", "effect_receipts", "execution_steps"}
                     and isinstance(self.values[eid], dict) and self.values[eid].get("condition") in {"SETTLED", "COMPLETED"}][:3],
@@ -598,6 +600,9 @@ class EvidenceCatalog:
                 and isinstance(self.values[eid], dict) and self.values[eid].get("condition") in {"SETTLED", "COMPLETED"}
                 for eid, row in self.records.items()) and not any(t.stage == "EXECUTION" for t in report.timeline)):
             errors.append(CitationRejected("OBSERVED_EXECUTION_STAGE_MUST_BE_RECONSTRUCTED; inspect settled/completed original records", ["timeline"], report.work_id))
+        if (any(row["group"] in {"plan_history", "production_work_units"} for row in self.records.values())
+                and not any(t.stage == "PLANNING" for t in report.timeline)):
+            errors.append(CitationRejected("OBSERVED_PLANNING_STAGE_MUST_BE_RECONSTRUCTED; inspect original plan/PWU records", ["timeline"], report.work_id))
         previous_time = None
         for index, item in enumerate(report.timeline):
             if item.timestamp is None:
@@ -686,7 +691,7 @@ class EvidenceCatalog:
             if (finding.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and
                     not any(self.records.get(str(c.evidence_id), {}).get("semantics", {}).get("source_kind") ==
                             "EXACT_IMPLEMENTATION_READ" for c in finding.repository_citations)):
-                errors.append(CitationRejected("ROOT_CAUSE_REQUIRES_IMPLEMENTATION_EXCERPT; read/search the relevant producer implementation or retain UNKNOWN; a final diff alone cannot establish its mechanism", ["findings", index, "repository_citations"], subject_id))
+                errors.append(CitationRejected("ROOT_CAUSE_REQUIRES_IMPLEMENTATION_EXCERPT; use repository.read for surrounding producer control flow or retain UNKNOWN; search only locates code and a final diff cannot establish its mechanism", ["findings", index, "repository_citations"], subject_id))
         findings = {f.finding_id: f for f in report.findings}
         for section in ("immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"):
             for index, item in enumerate(getattr(report, section)):

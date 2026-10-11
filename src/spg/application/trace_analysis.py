@@ -131,6 +131,8 @@ actual read implementation branch. Empty/missing input, invalid syntax and inval
 fields can have distinct codes; do not apply one observed code to all branches.
 When execution_stage_targets are present, inspect a relevant original settled
 effect/completed step and include an EXECUTION entry describing what actually ran.
+When planning_stage_targets are present, inspect the original plan/PWU records and
+include a PLANNING entry. A recorded graph or PWU is not an execution outcome.
 Each finding must declare subject_evidence_id and cite that exact original record.
 Additional fact citations must be the same Owner identity/projection or an explicit
 Owner reference to/from that subject. Shared Work, attempt, component, failure code
