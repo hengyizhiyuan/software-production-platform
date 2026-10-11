@@ -84,7 +84,7 @@ class NeverCallAgain:
 
 
 @pytest.mark.parametrize('admission', ('work', 'steering'))
-@pytest.mark.parametrize('fact_shape', ('literal-bound', 'semantic-scope'))
+@pytest.mark.parametrize('fact_shape', ('literal-bound', 'semantic-scope', 'semantic-scope-wire-defaults'))
 def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls(postgres_database, tmp_path, monkeypatch, admission, fact_shape):
     import json
     from copy import deepcopy
@@ -115,6 +115,15 @@ def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_ca
         if 'untrusted_fulfillment_candidate' in payload:
             plan = decode_review_input(payload)
             output = fixture_review_proof(inv, plan, review(inv, plan), payload).model_dump_json()
+            if fact_shape == 'semantic-scope-wire-defaults':
+                raw = json.loads(output)
+                omitted = 0
+                for source in raw['source_results']:
+                    for check in source.get('consumption_checks') or ():
+                        if check.get('target_paths') == []:
+                            check.pop('target_paths'); omitted += 1
+                assert omitted > 0
+                output = json.dumps(raw)
         else:
             plan = declared.form(inv, payload['existing_capability_contracts'])
             bounded = {s['source_ref'] for s in inv['sources'] if s['kind'] == 'FACT' and s['payload']['subject'] == 'controlled.repository.bound'}
@@ -158,7 +167,7 @@ def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_ca
         assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
 
 
-@pytest.mark.parametrize('first_failure', ('semantic', 'semantic-jsonb-order', 'semantic-framed', 'incomplete', 'critic-schema', 'critic-json', 'consumption-proof', 'critic-duplicate'))
+@pytest.mark.parametrize('first_failure', ('semantic', 'semantic-optional-defaults', 'semantic-jsonb-order', 'semantic-framed', 'incomplete', 'critic-schema', 'critic-json', 'consumption-proof', 'critic-duplicate'))
 def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql(postgres_database, tmp_path, monkeypatch, first_failure):
     import json
     from types import SimpleNamespace
@@ -195,6 +204,15 @@ def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
                 verdict = type(verdict).model_validate(raw)
             reviews.append(verdict)
             output = verdict.model_dump_json()
+            if first_failure == 'semantic-optional-defaults':
+                raw = json.loads(output)
+                omitted = 0
+                for source in raw['source_results']:
+                    for check in source.get('consumption_checks') or ():
+                        if check.get('target_paths') == []:
+                            check.pop('target_paths'); omitted += 1
+                assert omitted > 0
+                output = json.dumps(raw)
             if len(reviews) == 1 and first_failure == 'critic-json':
                 output = '{'
         else:

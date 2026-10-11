@@ -16,7 +16,7 @@ from tests.test_c3_source_consumption_proof import fixture_review_proof
 from tests.test_c3_fulfillment_wire_feedback import Checkpoint
 
 
-def run_case(*, checkpoint=False, semantic_only=False):
+def run_case(*, checkpoint=False, semantic_only=False, omit_optional_defaults=False):
     rev, ir, inv, plan = controlled_capacity_case()
     calls = []
     def generate(**request):
@@ -31,6 +31,13 @@ def run_case(*, checkpoint=False, semantic_only=False):
                 else:
                     result['source_results'][0]['consumption_checks'].append(
                         deepcopy(result['source_results'][0]['consumption_checks'][0]))
+            if omit_optional_defaults:
+                for source in result['source_results']:
+                    for check in source.get('consumption_checks') or ():
+                        if check.get('target_paths') == []:
+                            check.pop('target_paths')
+                        if check.get('source_component_quote') is None:
+                            check.pop('source_component_quote', None)
             output = json.dumps(result)
         else:
             wire, _ = controlled_wire(inv, plan,
@@ -85,6 +92,33 @@ def test_semantic_disagreement_is_not_rewritten_as_a_critic_contract_defect():
     assert len(calls) == 4
     assert 'existing_bound_reviewer_feedback' not in calls[3]
     assert not any(r.get('review_repair_context') for r in provider._fulfillment_receipts)
+
+
+def test_rejected_review_optional_defaults_preserve_wire_identity_and_bounded_repair():
+    rev, ir, inv, provider, calls, execute = run_case(omit_optional_defaults=True)
+    result = execute()
+    assert all(b.state != 'UNRESOLVED' for b in result)
+    assert len(calls) == 4
+    rows = provider._fulfillment_receipts
+    a._validate_wire_feedback_lineage(rows, rev, ir, inv, a.fulfillment_capability_contracts())
+    observed = next(r for r in rows if r['stage'] == 'SEMANTIC_REVIEW_OBSERVED')
+    raw = observed['review_output']
+    assert sha256(raw.encode()).hexdigest() == observed['review_output_sha256']
+    before = deepcopy(rows)
+    observed['review_output_sha256'] = '0' * 64
+    with pytest.raises(p._FulfillmentWireReceiptIdentityError, match='IDENTITY_DRIFT'):
+        a._validate_wire_feedback_lineage(rows, rev, ir, inv, a.fulfillment_capability_contracts())
+    assert before != rows and len(calls) == 4
+
+
+def test_optional_defaults_cannot_turn_a_rejected_semantic_verdict_into_acceptance():
+    _, _, _, provider, calls, execute = run_case(semantic_only=True, omit_optional_defaults=True)
+    execute()
+    first = next(r for r in provider._fulfillment_receipts if r['stage'] == 'CANDIDATE_VALIDATED')
+    assert first['validation_passed'] is False
+    assert first['failed_predicate'] == 'OBLIGATION_SEMANTIC_COMPONENT_MISMATCH'
+    assert first['repair_feedback_bound'] is True
+    assert len(calls) == 4
 
 
 @pytest.mark.parametrize('change', ('context', 'fingerprint', 'wire', 'inventory',

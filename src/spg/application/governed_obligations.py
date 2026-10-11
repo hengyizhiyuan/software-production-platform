@@ -2758,7 +2758,11 @@ def _semantic_repair_observation(rows, attempt, candidate, inventory, capabiliti
             "validated_receipt_id": validated["receipt_id"], "review_output_sha256": observed["review_output_sha256"],
             "failed_predicate": validated["failed_predicate"]}
     if output is not None:
-        retained = json.loads(output)
+        # The receipt Owner persists the typed representation, including
+        # optional defaults. The original Wire remains bound above by its
+        # exact digest/length; compare the same existing typed contract here.
+        # This does not change the output, verdict, or rejected Candidate.
+        retained = FulfillmentSemanticReviewCandidate.model_validate_json(output).model_dump(mode="json")
     if retained != validated.get("semantic_review"):
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     review = FulfillmentSemanticReviewCandidate.model_validate(retained)
