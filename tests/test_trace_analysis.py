@@ -1212,3 +1212,81 @@ def test_time_rejection_returns_bounded_exact_draft_entry_without_changing_it():
     assert tools.drafts[result.output["draft_id"]]["timeline"][0]==entry
     assert tools.accepted_report is None
     assert sum(len(json.dumps(i.get(k),ensure_ascii=False).encode()) for i in result.output["issues"] for k in ["rejected_value","rejected_context"] if k in i)<8500
+
+
+@pytest.mark.parametrize("pointer,expected", [
+    ("/input/argv/1", "--random-option"), ("/input/cwd", "nested"),
+    ("/a~1b/~0key/0", "escaped-field")])
+def test_nested_original_field_read_preserves_exact_bytes_and_does_not_read_parent(pointer, expected):
+    c=EvidenceCatalog(snapshot())
+    value={"huge": "x"*40000, "input":{"argv":["arbitrary-command","--random-option"],"cwd":"nested"}, "a/b":{"~key":["escaped-field"]}}
+    eid=c.add("execution_effects","/fixture/nested",value)
+    read=c.read(eid,field=pointer)
+    left,right=read["original_body_range"]
+    assert json.loads(read["content"])==expected
+    assert read["content"]==c.records[eid]["body"][left:right]
+    assert not c._range_read(eid,0,len(c.records[eid]["body"]))
+    with pytest.raises(ValueError,match="READ_FIELD_NOT_FOUND"):
+        c.read(eid,field="/missing/field")
+    with pytest.raises(ValueError,match="READ_FIELD_INVALID_ESCAPE"):
+        c.read(eid,field="/a~2b")
+
+
+def test_nested_original_paging_requires_contiguous_observed_range():
+    c=EvidenceCatalog(snapshot());eid=c.add("execution_steps","/fixture/paging",{"payload":{"value":"abcdefghij"},"unrelated":"x"*40000})
+    a=c.read(eid,field="/payload/value",limit=5)
+    b=c.read(eid,field="/payload/value",offset=6,limit=10)
+    assert not c._range_read(eid,a["original_body_range"][0],b["original_body_range"][1])
+    c.read(eid,field="/payload/value",offset=5,limit=1)
+    assert c._range_read(eid,a["original_body_range"][0],b["original_body_range"][1])
+
+
+def test_original_tool_identities_read_within_large_request_without_marking_it_read():
+    c=EvidenceCatalog(snapshot());eid=c.add("execution_steps","/fixture/request",{"request_payload":{"available_tools":[{"identity":"original.inspect","schema":{"description":"x"*70000}}]}})
+    result=c.inspect(eid)
+    fields=next(r["fields"] for r in result["records"] if r["evidence_id"]==eid)
+    parent=next(f for f in fields if f["field"]=="/request_payload")
+    nested=next(f for f in fields if f["field"]=="/request_payload/available_tools/0/identity")
+    assert parent["read_status"]=="NOT_READ_CAPACITY"
+    assert json.loads(nested["original_excerpt"])=="original.inspect"
+    assert "not an executed effect" in nested["authority_boundary"]
+    assert not c._range_read(eid,0,len(c.records[eid]["body"]))
+
+
+@pytest.mark.parametrize("tool", ["analyst.inspect", "evidence.read", "repository.read"])
+def test_analyst_tools_do_not_become_historical_recovery_authority(tool):
+    c=EvidenceCatalog(snapshot());r=report(c);c.investigation_tool_identities={tool}
+    r["findings"][0]["recommendation"]="Use "+tool+" as an admitted recovery capability"
+    with pytest.raises(ValueError,match="INVESTIGATION_TOOLS_CANNOT_SUPPLY_HISTORICAL_RECOVERY_AUTHORITY"):
+        c.materialize_boundaries(AnalysisReport.model_validate(r))
+    r["findings"][0]["recommendation"]="Use only capabilities admitted by the original task contract; inspect unknown grants first"
+    c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+def test_analyst_tool_reference_needs_cited_inspected_original_definition():
+    c=EvidenceCatalog(snapshot());r=report(c);tool="arbitrary.inspect";c.investigation_tool_identities={tool}
+    eid=c.add("execution_steps","/fixture/request",{"id":str(uuid4()),"request_payload":{"available_tools":[{"identity":tool}],"large":"x"*40000}})
+    f=r["findings"][0];f.update(subject_evidence_id=eid,inspection_id=c.inspect(eid)["inspection_id"],uncertainty="INSPECTED_OWNER_BOUNDARY",fact={"statement":"Original offered tool definition, permissions still require contract check","citations":[{"evidence_id":eid,"quote":tool}]},recommendation="If original contract grants allow, use "+tool)
+    c.materialize_boundaries(AnalysisReport.model_validate(r))
+    c.observed_ranges[eid]=[]
+    with pytest.raises(ValueError,match="INVESTIGATION_TOOLS_CANNOT_SUPPLY_HISTORICAL_RECOVERY_AUTHORITY"):
+        c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+@pytest.mark.parametrize("subtype", ["arbitrary_failure_alpha", "arbitrary_failure_beta"])
+def test_captured_issue_subtype_cannot_become_output_of_all_exception_branches(subtype):
+    c=EvidenceCatalog(snapshot());r=report(c)
+    eid=c.add("execution_steps","/fixture/diagnostics",{"id":str(uuid4()),"result_payload":{"validation_issues":[{"type":subtype,"location":[]}]}})
+    code=c.add("repository","/fixture/source",{"repository":"source","revision":"a"*40,"path":"src/adapter.py","blob":"b"*40,"content":"issues = diagnostic_from(error)"},repository=True);c.read(code)
+    f=r["findings"][0];f.update(subject_evidence_id=eid,inspection_id=c.inspect(eid)["inspection_id"],uncertainty="INSPECTED_OWNER_BOUNDARY",fact={"statement":"Observed subtype "+subtype,"citations":[{"evidence_id":eid,"quote":subtype}]},epistemic_status="ROOT_CAUSE_HYPOTHESIS",analysis="假设：若不同异常进入该分支，则输出 "+subtype,repository_citations=[{"evidence_id":code,"quote":"diagnostic_from(error)"}])
+    with pytest.raises(ValueError,match="CAPTURED_DIAGNOSTIC_LITERAL_IS_NOT_A_GENERAL_MECHANISM_OUTPUT"):
+        c.materialize_boundaries(AnalysisReport.model_validate(r))
+    f["analysis"]="假设：若异常进入该分支，则诊断助手按实际异常生成类型和位置。"
+    c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+def test_unknown_cannot_hide_unsupported_conditional_producer_mechanism():
+    c=EvidenceCatalog(snapshot());r=report(c)
+    r["findings"][0]["analysis"]="假设：若未读取的实现求差，则产生这个信号。"
+    with pytest.raises(ValueError,match="UNKNOWN_CANNOT_BYPASS_CAUSAL_SOURCE_REQUIREMENT"):
+        AnalysisReport.model_validate(r)

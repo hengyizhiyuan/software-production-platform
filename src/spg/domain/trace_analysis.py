@@ -123,6 +123,8 @@ class Finding(AnalysisRecord):
             raise ValueError("handling must preserve the issue classification boundary")
         if not self.repository_citations and self.epistemic_status != "UNKNOWN":
             raise ValueError("a root cause hypothesis requires repository evidence")
+        if self.epistemic_status == "UNKNOWN" and self.analysis.startswith("假设：若"):
+            raise ValueError("UNKNOWN_CANNOT_BYPASS_CAUSAL_SOURCE_REQUIREMENT; describe recorded metadata and limits only, or use ROOT_CAUSE_HYPOTHESIS with exact implementation evidence")
         if self.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and not self.analysis.startswith("假设：若"):
             raise ValueError("CAUSAL_HYPOTHESIS_MUST_BE_EXPLICIT; begin analysis with 假设：若, state a conditional mechanism, and do not promote diagnoses or repair plans to performed actions")
         if self.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and re.search(r"重做|重新生成|重新推理|替代配方|\b(?:regenerat\w*|retr(?:y|ied|ies)|replacement\s+recipe)\b", self.analysis, re.I):

@@ -264,6 +264,22 @@ actual replacement recipe/tool/command that ran. Only report a performed repair
 recipe as fact when original execution receipts establish it; otherwise keep that
 recipe UNKNOWN and describe it as a conditional proposal. Do not write a subsequent
 repair plan as an observed historical action in analysis or recommendations.
+Original request_payload.available_tools belongs to the historical producer, while
+this investigation's registry belongs to the current analyst. They do not grant
+each other permissions. Inspection returns bounded original nested tool identities;
+use evidence.read(field=JSON_POINTER) for exact nested values/command arguments in
+large payloads. A field read never marks its parent or unrelated tail as read.
+Offered tool definitions do not prove an executed effect or an automatic current
+permission grant. Recovery recommendations must use the original contract-admitted
+capabilities; without inspected associated original authority keep permission UNKNOWN.
+Do not substitute current investigation tools as already-admitted production tools.
+UNKNOWN analysis describes original metadata and boundaries, never a conditional
+producer mechanism without source evidence. To explain that mechanism, read the
+producer implementation and use ROOT_CAUSE_HYPOTHESIS. Captured validation_issues
+subtype/location belong in observed facts, not in a general conditional mechanism;
+exception branches and diagnostic projection helpers can produce different issues.
+Classification by reason_code/diagnostic fields does not reconstruct unavailable raw
+model text or its detailed cause. Keep those unavailable details UNKNOWN.
 Concise recommendations must address their cited findings' actual subjects, not
 another logging surface. Review all sections against original linked observations
 before submission; structural verification is not a substitute for this review.

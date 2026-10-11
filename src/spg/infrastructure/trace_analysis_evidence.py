@@ -118,6 +118,49 @@ def source_semantics(group, value, repository):
             "families": families, "boundary": "A projection is not an independent event. Identifiers prove recorded links, not lifecycle completion."}
 
 
+def json_field_range(body, pointer):
+    """Locate a JSON Pointer in original serialization without recomposing it."""
+    if not isinstance(pointer, str) or not pointer.startswith("/") or len(pointer) > 500:
+        raise ValueError("READ_FIELD_REQUIRES_JSON_POINTER")
+    decoder = json.JSONDecoder()
+    start, end = 0, len(body)
+    for token in pointer[1:].split("/"):
+        if re.search(r"~(?![01])", token):
+            raise ValueError("READ_FIELD_INVALID_ESCAPE")
+        key = token.replace("~1", "/").replace("~0", "~")
+        while start < end and body[start].isspace():
+            start += 1
+        kind, cursor, found, index = body[start:start + 1], start + 1, None, 0
+        if kind not in {"{", "["}:
+            raise ValueError("READ_FIELD_NOT_FOUND")
+        while cursor < end:
+            while cursor < end and (body[cursor].isspace() or body[cursor] == ","):
+                cursor += 1
+            if body[cursor:cursor + 1] in {"}", "]", ""}:
+                break
+            if kind == "{":
+                name, cursor = decoder.raw_decode(body, cursor)
+                while body[cursor].isspace():
+                    cursor += 1
+                if body[cursor] != ":":
+                    raise ValueError("READ_FIELD_INVALID_JSON")
+                cursor += 1
+            else:
+                name = str(index)
+                index += 1
+            while body[cursor].isspace():
+                cursor += 1
+            value_start = cursor
+            _, cursor = decoder.raw_decode(body, cursor)
+            if name == key:
+                found = value_start, cursor
+                break
+        if found is None:
+            raise ValueError("READ_FIELD_NOT_FOUND")
+        start, end = found
+    return start, end
+
+
 class EvidenceCatalog:
     """Exact snapshot references; model text never acquires instruction authority."""
 
@@ -131,6 +174,7 @@ class EvidenceCatalog:
         self.observed_ranges: dict[str, list[tuple[int, int]]] = {}
         self.checks: dict[str, dict] = {}
         self.inspections: dict[str, dict] = {}
+        self.investigation_tool_identities: set[str] = set()
         self.add("capture", "/capture", snapshot.get("capture", {}))
         self.add("work", "/lifecycle/work", snapshot["lifecycle"].get("work", {}))
         self.add("intent", "/lifecycle/first_human_input",
@@ -201,19 +245,22 @@ class EvidenceCatalog:
                 "items": [{k: v for k, v in row.items() if k != "body"}
                           | {"excerpt": row["body"][:300]} for row in selected]}
 
-    def read(self, evidence_id: str, offset=0, limit=16000, *, _observe=True):
+    def read(self, evidence_id: str, offset=0, limit=16000, *, field=None, _observe=True):
         if offset < 0 or limit < 1 or limit > 24000:
             raise ValueError("read requires offset >= 0 and 1 <= limit <= 24000")
         row = self.records[evidence_id]
         body = row["body"]
+        left, right = json_field_range(body, field) if field is not None else (0, len(body))
+        start, end = min(right, left + offset), min(right, left + offset + limit)
         if _observe:
             self.observed.add(evidence_id)
-            self.observed_excerpts.setdefault(evidence_id, []).append(body[offset:offset + limit])
-            self.observed_ranges.setdefault(evidence_id, []).append((offset, min(len(body), offset + limit)))
+            self.observed_excerpts.setdefault(evidence_id, []).append(body[start:end])
+            self.observed_ranges.setdefault(evidence_id, []).append((start, end))
         return {k: v for k, v in row.items() if k != "body"} | {
-            "content": body[offset:offset + limit], "offset": offset,
-            "total_characters": len(body), "next_offset":
-            offset + limit if offset + limit < len(body) else None,
+            "content": body[start:end], "offset": offset, "field": field,
+            "original_body_range": [start, end],
+            "total_characters": right - left, "next_offset":
+            offset + limit if offset + limit < right - left else None,
             "trust": "MODEL_PROPOSAL_NOT_OWNER_EVIDENCE" if row["group"] == "analysis_draft" else
                      "DERIVED_SCOPE_LOOKUP_NOT_OWNER_FACT" if row["group"] in {"evidence_check", "evidence_inspection"} else "UNTRUSTED_EVIDENCE_ONLY",
             "related_records": self.related(evidence_id),
@@ -355,6 +402,20 @@ class EvidenceCatalog:
                 self.observed_excerpts.setdefault(eid, []).append(part)
                 self.observed_ranges.setdefault(eid, []).append((0, len(part)))
                 fields.append({"field": "", "read_status": "READ" if part == body else "PARTIAL_READ", "original_excerpt": part})
+            payload = value.get("request_payload") if isinstance(value, dict) else None
+            if isinstance(payload, dict):
+                for i, tool in enumerate(payload.get("available_tools", []) if isinstance(payload.get("available_tools"), list) else []):
+                    if not isinstance(tool, dict) or not isinstance(tool.get("identity"), str):
+                        continue
+                    pointer = f"/request_payload/available_tools/{i}/identity"
+                    left, right = json_field_range(body, pointer)
+                    if right - left > 3000 or right - left > remaining:
+                        fields.append({"field": pointer, "availability": "PRESENT", "read_status": "NOT_READ_CAPACITY"})
+                        continue
+                    remaining -= right - left
+                    fragment = self.read(eid, field=pointer, limit=3000)["content"]
+                    fields.append({"field": pointer, "availability": "PRESENT", "read_status": "READ",
+                        "original_excerpt": fragment, "authority_boundary": "ORIGINAL_OFFERED_TOOL_DEFINITION; not an executed effect or an automatic permission grant"})
             rows.append({"evidence_id": eid, "group": row["group"], "pointer": row["pointer"],
                          "fields": fields, "semantics": row["semantics"]})
         result = {"subject_evidence_id": subject_evidence_id, "records": rows, "edges": edges,
@@ -695,7 +756,47 @@ class EvidenceCatalog:
                     not any(self.records.get(str(c.evidence_id), {}).get("semantics", {}).get("source_kind") ==
                             "EXACT_IMPLEMENTATION_READ" for c in finding.repository_citations)):
                 errors.append(CitationRejected("ROOT_CAUSE_REQUIRES_IMPLEMENTATION_EXCERPT; use repository.read for surrounding producer control flow or retain UNKNOWN; search only locates code and a final diff cannot establish its mechanism", ["findings", index, "repository_citations"], subject_id))
+            if finding.epistemic_status == "ROOT_CAUSE_HYPOTHESIS":
+                for c in finding.fact.citations:
+                    value = self.values.get(str(c.evidence_id), {})
+                    if not isinstance(value, dict):
+                        continue
+                    payloads = [value.get(name) for name in ("result_payload", "output", "diagnostic_evidence")]
+                    for payload in payloads:
+                        if not isinstance(payload, dict):
+                            continue
+                        issues = payload.get("validation_issues", [])
+                        for issue in issues if isinstance(issues, list) else []:
+                            subtype = issue.get("type") if isinstance(issue, dict) else None
+                            if isinstance(subtype, str) and subtype and subtype in finding.analysis:
+                                errors.append(CitationRejected("CAPTURED_DIAGNOSTIC_LITERAL_IS_NOT_A_GENERAL_MECHANISM_OUTPUT; keep observed issue subtype/location in fact and explain the variable exception-to-issues mapping from source", ["findings", index, "analysis"], c.evidence_id))
         findings = {f.finding_id: f for f in report.findings}
+        def recovery_tools_supported(finding, prose, location):
+            for tool in self.investigation_tool_identities:
+                if not re.search(r"(?<![\w.])" + re.escape(tool) + r"(?![\w.])", prose):
+                    continue
+                inspection = self.inspections.get(str(finding.inspection_id), {})
+                inspected = {r["evidence_id"] for r in inspection.get("records", [])}
+                supported = False
+                for c in finding.fact.citations:
+                    eid = str(c.evidence_id)
+                    value = self.values.get(eid, {})
+                    payload = value.get("request_payload", {}) if isinstance(value, dict) else {}
+                    definitions = payload.get("available_tools", []) if isinstance(payload, dict) else []
+                    if eid not in inspected or not isinstance(definitions, list):
+                        continue
+                    for i, definition in enumerate(definitions):
+                        if isinstance(definition, dict) and definition.get("identity") == tool:
+                            left, right = json_field_range(self.records[eid]["body"], f"/request_payload/available_tools/{i}/identity")
+                            supported |= self._range_read(eid, left, right)
+                if not supported:
+                    errors.append(CitationRejected("INVESTIGATION_TOOLS_CANNOT_SUPPLY_HISTORICAL_RECOVERY_AUTHORITY; cite and inspect the associated original offered tools, or propose a contract-admitted recovery without naming current investigation tools", location, finding.subject_evidence_id))
+        for index, finding in enumerate(report.findings):
+            recovery_tools_supported(finding, finding.recommendation, ["findings", index, "recommendation"])
+        for section in ("immediate_recovery", "self_refine_opportunities"):
+            for index, item in enumerate(getattr(report, section)):
+                for fid in item.finding_ids:
+                    recovery_tools_supported(findings[fid], item.statement, [section, index, "statement"])
         def diagnostic_without_failure_observation(finding):
             subject = self.records.get(str(finding.subject_evidence_id), {})
             if subject.get("semantics", {}).get("surface") != "OWNER_REFINEMENT_DIAGNOSIS":
@@ -922,7 +1023,7 @@ class AnalysisTools:
               "offset": {"type": "integer"}, "limit": {"type": "integer"}}, []),
             ("evidence.read", "Read an evidence UUID, retaining exact source and digest; page long content.",
              {"evidence_id": {"type": "string"}, "offset": {"type": "integer"},
-              "limit": {"type": "integer"}}, ["evidence_id"]),
+              "limit": {"type": "integer"}, "field": {"type": "string", "description": "Optional JSON Pointer relative to this original record; page its exact value without reading an unrelated large parent"}}, ["evidence_id"]),
             ("evidence.inspect", "Read original linked Owner fields along explicit references (up to two hops). Returns inspection_id and canonical bounded_conclusion for finding uncertainty. READ, PRESENT, REDACTED, EMPTY and NOT_READ_CAPACITY are distinct. It does not infer historical absence or transitive fact association. Page unread originals with evidence.read, then inspect again; keep UNKNOWN if required fields cannot be read.",
              {"subject_evidence_id": {"type": "string"}}, ["subject_evidence_id"]),
             ("evidence.check", "Check original snapshot evidence before absence claims. PREVIEW_HTTP and DELIVERY_TRANSFER fix their producer scope; EXECUTION_RELATIONSHIP enumerates actual identifier links. OWNER_RECORD requires a captured group and JSON Pointer field (/* enumerates record fields). No-match never proves global/historical absence.",
@@ -970,6 +1071,7 @@ class AnalysisTools:
                 result["$defs"] = report_schema.pop("$defs")
                 props["report"] = report_schema
             return result
+        self.catalog.investigation_tool_identities = {row[0] for row in definitions}
         return NativeToolRegistry(tuple(ToolDefinition(
             identity=identity, version="1", description=description,
             input_schema=schema(identity, props, required),
