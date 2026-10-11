@@ -69,6 +69,12 @@ approval, production context, missing failure text or historical code identity.
 Keep the report concise: normally eight timeline entries and at most six findings.
 Use short exact quotations and short paragraphs; a report is not a transcript.
 Use exactly the provided schema fields; do not add extra fields or aliases.
+Submit a substantive investigation after reading the original incidents and code;
+do not submit a calibration report or placeholder statements. If original failure
+or refinement records exist, findings must cite those original Owner records.
+Drafts can be read through evidence.read(draft_id) for explicit correction, but
+are model proposals and cannot be cited as historical facts. Verification returns
+multiple citation errors together: correct all reported locations in one revise.
 """
 
 

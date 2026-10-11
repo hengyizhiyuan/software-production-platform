@@ -69,7 +69,16 @@ alone is insufficient.
 `analysis.submit` checks report schema, Work identity, unique findings, recommendation
 lineage, class/handling consistency, observed evidence UUIDs, exact quotes in
 actually returned excerpts and repository provenance for root cause hypotheses.
-Rejected report drafts are retained by digest; bounded explicit remove/replace edits through `analysis.revise` rerun every gate. Public tool schemas declare the report structure and actual paging limits. Failure is a no-external-effect receipt returned through Native Kernel's existing
+Rejected report drafts are retained by digest and can be read through
+`evidence.read(draft_id)`. They are labelled MODEL_PROPOSAL_NOT_OWNER_EVIDENCE and
+cannot be cited as historical observations. Bounded explicit remove/replace edits
+through `analysis.revise` rerun every gate. Citation verification returns up to
+12 failures together; exact decoded JSON string fragments are accepted only when
+their exact encoded fragment was actually returned. Original failed step/receipt
+or Self-Refine records require at least one finding citing an original incident
+Owner. This coverage check does not prove incident completeness or semantic truth.
+Public tool schemas declare the report structure and actual paging limits.
+Failure is a no-external-effect receipt returned through Native Kernel's existing
 bounded refinement mechanism. Final RESULT_READY must name the successfully
 verified report digest. An arbitrary model terminal claim cannot publish a report.
 
@@ -115,6 +124,8 @@ No new Guardian PASS or original Work PASS is inferred from a valid report.
    but a failed investigation is not a successful self-understanding qualification.
 6. Model calls use API credentials/configured Native provider. This phase does not
    qualify distributed scheduling, process-crash continuation or autonomous recovery.
+   The existing adapter runs blocking provider HTTP in a thread; an outer timeout
+   records interruption but does not prove the in-flight provider thread stopped.
 7. Existing model adapters persist normalized decisions and transport metadata;
    this feature cannot reconstruct raw response bodies that they never saved.
 

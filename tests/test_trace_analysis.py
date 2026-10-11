@@ -330,3 +330,71 @@ def test_wrong_snapshot_is_retained_as_failure_before_model(tmp_path):
     r = asyncio.run(s.analyze("human:owner", uuid4_from(snap), AnalysisTrigger(request_id=uuid4(), rationale="Investigate")))
     assert r["status"] == "FAILED" and r["failure"]["reason_code"] == "ANALYSIS_SNAPSHOT_WORK_MISMATCH"
     assert not model.requests
+
+
+def test_decoded_json_quote_requires_the_exact_observed_encoded_fragment():
+    catalog = EvidenceCatalog(snapshot())
+    quote = 'line one\n"line two"'
+    eid = catalog.add("fixture", "/encoded", {"message": quote, "tail": "unseen\nvalue"})
+    catalog.read(eid, limit=45)
+    r = report(catalog)
+    r["current_state"]["citations"] = [{"evidence_id": eid, "quote": quote}]
+    catalog.validate(AnalysisReport.model_validate(r))
+    r["current_state"]["citations"][0]["quote"] = "unseen\nvalue"
+    with pytest.raises(ValueError, match="CITATION_QUOTE_MISMATCH"):
+        catalog.validate(AnalysisReport.model_validate(r))
+
+
+def test_all_bounded_citation_errors_are_returned_together():
+    catalog = EvidenceCatalog(snapshot())
+    r = report(catalog)
+    # Independent copies: changing one shared fixture fact must not change all.
+    r = json.loads(json.dumps(r))
+    r["original_objective"]["citations"][0]["quote"] = "fabricated first"
+    r["current_state"]["citations"][0]["quote"] = "fabricated second"
+    with pytest.raises(ValueError) as caught:
+        catalog.validate(AnalysisReport.model_validate(r))
+    assert [i["location"][0] for i in caught.value.issues] == ["original_objective", "current_state"]
+
+
+def test_original_incident_cannot_be_omitted_with_empty_findings():
+    snap = snapshot()
+    snap["lifecycle"]["advanced"]["owners"]["execution_steps"][0]["condition"] = "FAILED"
+    catalog = EvidenceCatalog(snap)
+    r = report(catalog)
+    r.update(findings=[], deferred_items=[])
+    with pytest.raises(ValueError, match="OBSERVED_INCIDENT_REQUIRES_FINDING"):
+        catalog.validate(AnalysisReport.model_validate(r))
+    r = report(catalog)
+    eid = next(eid for eid, row in catalog.records.items() if row["group"] == "execution_steps")
+    catalog.read(eid)
+    r["findings"][0]["fact"] = {"statement": "Failed schema decision; raw invalid text unknown",
+        "citations": [{"evidence_id": eid, "quote": "NATIVE_DECISION_SCHEMA_REJECTED"}]}
+    catalog.validate(AnalysisReport.model_validate(r))
+
+
+def test_no_incident_does_not_force_an_invented_finding():
+    catalog = EvidenceCatalog(snapshot())
+    r = report(catalog)
+    r.update(findings=[], deferred_items=[])
+    catalog.validate(AnalysisReport.model_validate(r))
+
+
+def test_retained_draft_is_readable_but_cannot_be_cited_as_owner_truth():
+    from types import SimpleNamespace
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    catalog = EvidenceCatalog(snapshot())
+    tools = AnalysisTools(catalog, {})
+    r = report(catalog)
+    r["deferred_items"][0]["finding_ids"] = ["invalid"]
+    request = SimpleNamespace(delivery_id=uuid4(), proposal=SimpleNamespace(
+        tool_identity="analysis.submit", arguments={"report": r}))
+    receipt = asyncio.run(tools.execute(request))
+    eid = receipt.output["draft_id"]
+    draft = catalog.read(eid)
+    assert draft["trust"] == "MODEL_PROPOSAL_NOT_OWNER_EVIDENCE"
+    assert "invalid" in draft["content"]
+    r = json.loads(json.dumps(report(catalog)))
+    r["current_state"]["citations"] = [{"evidence_id": eid, "quote": "Work is completed"}]
+    with pytest.raises(ValueError, match="MODEL_PROPOSAL_NOT_OWNER_EVIDENCE"):
+        catalog.validate(AnalysisReport.model_validate(r))

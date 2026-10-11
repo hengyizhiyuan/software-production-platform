@@ -44,6 +44,7 @@ class EvidenceCatalog:
         self.snapshot = snapshot
         self.digest = canonical_digest(snapshot)
         self.records: dict[str, dict] = {}
+        self.values: dict[str, object] = {}
         self.observed: set[str] = set()
         self.observed_excerpts: dict[str, list[str]] = {}
         self.add("capture", "/capture", snapshot.get("capture", {}))
@@ -71,7 +72,7 @@ class EvidenceCatalog:
 
     def add(self, group: str, pointer: str, value, *, repository=False):
         evidence_id = str(uuid5(NAMESPACE_URL, f"watt-trace:{self.digest}:{pointer}"))
-        body = text(value)
+        body = value if isinstance(value, str) else text(value)
         if repository and isinstance(value, dict):
             field = next((key for key in ("content", "matches", "patch") if key in value), None)
             if field:
@@ -83,6 +84,7 @@ class EvidenceCatalog:
             "repository": repository, "body": body,
             "condition": value.get("condition") if isinstance(value, dict) else None,
         }
+        self.values[evidence_id] = value
         return evidence_id
 
     def index(self, group=None, query=None, offset=0, limit=30):
@@ -107,7 +109,7 @@ class EvidenceCatalog:
             "content": body[offset:offset + limit], "offset": offset,
             "total_characters": len(body), "next_offset":
             offset + limit if offset + limit < len(body) else None,
-            "trust": "UNTRUSTED_EVIDENCE_ONLY",
+            "trust": "MODEL_PROPOSAL_NOT_OWNER_EVIDENCE" if row["group"] == "analysis_draft" else "UNTRUSTED_EVIDENCE_ONLY",
         }
 
     def seed(self):
@@ -141,11 +143,31 @@ class EvidenceCatalog:
     def validate(self, report: AnalysisReport):
         if str(report.work_id) != str(self.snapshot["work_id"]):
             raise ValueError("REPORT_WORK_ID_MISMATCH")
+        errors = []
+        def strings(value):
+            if isinstance(value, str):
+                yield value
+            elif isinstance(value, dict):
+                for child in value.values():
+                    yield from strings(child)
+            elif isinstance(value, list):
+                for child in value:
+                    yield from strings(child)
         def citation(c, location, *, repository=False):
             row = self.records.get(str(c.evidence_id))
             if not row or str(c.evidence_id) not in self.observed:
                 raise CitationRejected("CITATION_NOT_OBSERVED", location, c.evidence_id)
-            if not any(c.quote in excerpt for excerpt in self.observed_excerpts.get(str(c.evidence_id), [])):
+            if row["group"] == "analysis_draft":
+                raise CitationRejected("MODEL_PROPOSAL_NOT_OWNER_EVIDENCE", location, c.evidence_id)
+            excerpts = self.observed_excerpts.get(str(c.evidence_id), [])
+            literal = any(c.quote in excerpt for excerpt in excerpts)
+            # Exact decoded JSON string quotes are legitimate only when their
+            # exact encoded substring was returned. No fuzzy normalization and
+            # no access to an unread tail of the original record are permitted.
+            encoded = json.dumps(c.quote, ensure_ascii=False)[1:-1]
+            decoded = (any(c.quote in value for value in strings(self.values[str(c.evidence_id)]))
+                       and any(encoded in excerpt for excerpt in excerpts))
+            if not literal and not decoded:
                 raise CitationRejected("CITATION_QUOTE_MISMATCH", location, c.evidence_id)
             if repository and not row["repository"]:
                 raise CitationRejected("REPOSITORY_CITATION_REQUIRED", location, c.evidence_id)
@@ -156,10 +178,28 @@ class EvidenceCatalog:
         for name, fact in facts:
             prefix = list(name) if isinstance(name, tuple) else [name]
             for i, c in enumerate(fact.citations):
-                citation(c, prefix + ["citations", i])
+                try:
+                    citation(c, prefix + ["citations", i])
+                except CitationRejected as error:
+                    errors.append(error)
         for index, finding in enumerate(report.findings):
             for i, c in enumerate(finding.repository_citations):
-                citation(c, ["findings", index, "repository_citations", i], repository=True)
+                try:
+                    citation(c, ["findings", index, "repository_citations", i], repository=True)
+                except CitationRejected as error:
+                    errors.append(error)
+        if errors:
+            error = errors[0]
+            error.issues = [{"type": "CitationRejected", "reason": str(item),
+                             "location": item.location, "evidence_id": item.evidence_id}
+                            for item in errors[:12]]
+            raise error
+        failure_ids = {eid for eid, row in self.records.items()
+                       if (row["group"] in {"execution_steps", "effect_receipts"}
+                           and row["condition"] == "FAILED") or row["group"] == "self_refine_events"}
+        cited = {str(c.evidence_id) for finding in report.findings for c in finding.fact.citations}
+        if failure_ids and not (failure_ids & cited):
+            raise ValueError("OBSERVED_INCIDENT_REQUIRES_FINDING_WITH_ORIGINAL_OWNER_CITATION")
         # This is citation/structure verification. It cannot prove that prose
         # follows logically from the quotes or promote hypotheses to findings.
 
@@ -380,7 +420,8 @@ class AnalysisTools:
                     raise ValueError("REPORT_DRAFT_NOT_OBJECT")
                 if len(text(candidate).encode()) > 128000:
                     raise ValueError("REPORT_DRAFT_CAPACITY_EXCEEDED")
-                draft_id = str(uuid5(NAMESPACE_URL, f"analysis-draft:{self.catalog.digest}:{canonical_digest(candidate)}"))
+                draft_id = self.catalog.add("analysis_draft", f"analysis-drafts/{canonical_digest(candidate)}",
+                                            public_report_candidate(candidate))
                 self.drafts[draft_id] = deepcopy(candidate)
                 report = AnalysisReport.model_validate(candidate)
                 self.catalog.validate(report)
@@ -403,11 +444,13 @@ class AnalysisTools:
             else:
                 issues = [{"type": type(error).__name__, "reason": Redactor(text_limit=300).clean(str(error))}]
                 if isinstance(error, CitationRejected):
-                    issues[0].update(location=error.location, evidence_id=error.evidence_id)
+                    issues = getattr(error, "issues", [{"type": "CitationRejected", "reason": str(error),
+                             "location": error.location, "evidence_id": error.evidence_id}])
             output = {"verification": "FAIL", "issues": issues,
                       "effect_observed": False, "repair": "Same contract only; preserve UNKNOWN and permissions."}
             if draft_id:
                 output["draft_id"] = draft_id
+                output["draft_read_tool"] = "evidence.read"
                 # Give exact same-candidate lineage feedback without inventing,
                 # normalizing, or automatically repairing finding identifiers.
                 findings = candidate.get("findings")
