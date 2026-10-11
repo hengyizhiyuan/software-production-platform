@@ -100,6 +100,8 @@ def test_rejected_review_optional_defaults_preserve_wire_identity_and_bounded_re
     assert all(b.state != 'UNRESOLVED' for b in result)
     assert len(calls) == 4
     rows = provider._fulfillment_receipts
+    a.validate_fulfillment_projection(result, rev, ir,
+        source_revision=inv['source_revision'], exact_target_paths=inv['exact_target_paths'])
     a._validate_wire_feedback_lineage(rows, rev, ir, inv, a.fulfillment_capability_contracts())
     observed = next(r for r in rows if r['stage'] == 'SEMANTIC_REVIEW_OBSERVED')
     raw = observed['review_output']

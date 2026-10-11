@@ -1530,7 +1530,7 @@ def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=N
                 if (sha256(raw_review.encode()).hexdigest() != observed.get("review_output_sha256")
                         or len(raw_review.encode()) != observed.get("review_output_bytes") or observed.get("review_retained") is not True):
                     raise ValueError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
-                observed_review = json.loads(raw_review)
+                observed_review = FulfillmentSemanticReviewCandidate.model_validate_json(raw_review).model_dump(mode="json")
             else:
                 observed_review = observed.get("semantic_review")
             if observed_review != receipt.get("semantic_review"):
