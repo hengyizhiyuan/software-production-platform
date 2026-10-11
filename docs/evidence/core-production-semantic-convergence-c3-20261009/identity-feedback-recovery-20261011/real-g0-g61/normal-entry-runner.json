@@ -1,0 +1,12 @@
+{
+  "schema": "c3-real-g0-once-execution-v1",
+  "started_at_utc": "2026-10-11T08:27:20.880447+00:00",
+  "source": "ca891e0c85371ccce6b6164c735a65b2a97b4ac2",
+  "image": "sha256:c9bae501ed17987f4513b09237a801c0115e2f231270536d564badabb2d30afb",
+  "maximum_new_work": 1,
+  "authorization": "Human 2026-10-11: Deterministic Identity Binding and Feedback Recovery task; execute one real G0 on final exact source/image; preserve production/history; no Human Integration/Acceptance/Delivery authority",
+  "driver_sha256": "00ab0d7cd6682c02c2386803ab77ccde60ae7240961e665da814547048d392e5",
+  "ended_at_utc": "2026-10-11T08:28:05.106006+00:00",
+  "exit_code": 2,
+  "qualification_claim": "OBSERVATION_ONLY_NOT_WORK_PASS"
+}

@@ -1,0 +1,12 @@
+{
+  "captured_at_utc": "2026-10-11T08:53:31.481771+00:00",
+  "production_checkout_head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+  "production_main_ref": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+  "historical_g60_canonical_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation60-qualification-20261010/private/owner-export-20261011T070307-af4b75f2ad7542ca96dbd5fd1f8d3da0/20261011T070316693397Z-9f18d4892f6043f482405d1809db432e-canonical-work.json",
+  "historical_g60_canonical_sha256": "0f6a456f7925a7f1027ff2e722cda2e6b404a762477f7aee0d9810a4cc60d44a",
+  "boundary_scope": "Read-only final Git ref and historical canonical export checks; not complete external-effect or credential audit.",
+  "new_qualification_work_count": 1,
+  "holdout_unsealed_by_executor": false,
+  "human_authorizations_written_by_executor": false,
+  "production_deployments_by_executor": 0
+}

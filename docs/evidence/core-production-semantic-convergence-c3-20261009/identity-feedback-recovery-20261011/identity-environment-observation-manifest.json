@@ -1,0 +1,11 @@
+{
+  "files": [
+    {
+      "file": "real-g0-g61/actual-production-environment-image.json",
+      "sha256": "353b1675a7e4b74240d831281245ea65d54e9aace549fd0b8bd1ae0e3b6bfb4f",
+      "bytes": 1511,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/evidence/actual-production-environment-image.json"
+    }
+  ],
+  "private_artifacts_included": false
+}

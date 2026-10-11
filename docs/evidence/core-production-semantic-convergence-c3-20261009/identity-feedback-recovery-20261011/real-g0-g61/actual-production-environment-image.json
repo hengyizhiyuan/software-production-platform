@@ -1,0 +1,28 @@
+{
+  "captured_at_utc": "2026-10-11T08:57:15.210895+00:00",
+  "work_id": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "pwu_id": "48781eed-8ead-4fee-9d21-973055ef6653",
+  "attempt_id": "de98f392-b8d1-40ac-a442-a283fa938060",
+  "environment_id": "ee43c497-cfe4-4319-a732-9e53dd9d704f",
+  "workspace_id": "bc52a73a-b69c-47c8-86d0-42be30f4fe45",
+  "owner_binding_sha256": "f38d38c051d31aa1af7c22948669f4641995933d1936b3ec85aeb9b2688c41e3",
+  "owner_record_path": "native-execution-bindings/de98f392-b8d1-40ac-a442-a283fa938060.json",
+  "persisted_owner_observation": {
+    "provider_identity": "container-v1",
+    "environment_id": "ee43c497-cfe4-4319-a732-9e53dd9d704f",
+    "container_identity": "b0d8adf332e81b8482d4bb54bd4f9370b5f9c1b392a2ba813b186a8e89c089ce",
+    "actual_image_id": "sha256:c9bae501ed17987f4513b09237a801c0115e2f231270536d564badabb2d30afb",
+    "requested_image_reference": "sha256:c9bae501ed17987f4513b09237a801c0115e2f231270536d564badabb2d30afb",
+    "observation_source": "DOCKER_INSPECT",
+    "observed_at": "2026-10-11T08:37:51.228037Z",
+    "running": true
+  },
+  "current_docker_observation": {
+    "container_identity": "b0d8adf332e81b8482d4bb54bd4f9370b5f9c1b392a2ba813b186a8e89c089ce",
+    "actual_image_id": "sha256:c9bae501ed17987f4513b09237a801c0115e2f231270536d564badabb2d30afb",
+    "running": true
+  },
+  "observation_scope": "actual Docker fixed fields plus existing persisted Provider handle; no new environment or commands executed",
+  "model_calls": 0,
+  "work_mutations": 0
+}

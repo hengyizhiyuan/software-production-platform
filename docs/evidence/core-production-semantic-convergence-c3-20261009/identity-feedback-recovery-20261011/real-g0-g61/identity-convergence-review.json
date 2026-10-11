@@ -1,0 +1,105 @@
+{
+  "captured_at_utc": "2026-10-11T08:41:36.689993+00:00",
+  "basis_snapshot_sha256": "6932e0cbdba61f51e04c633ef93caa7848ae502d96506ce9e4f80210396b942e",
+  "snapshot_time_boundary": "formation_snapshot_before_latest_production_observation",
+  "work_id": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "inventory_fingerprint": "57b6dd706dfc1f56c7066660add814c7728d17e9096e2347ff1bd4db3989d604",
+  "independent_reviews": [
+    {
+      "attempt": 1,
+      "pending_receipt_id": "0bf51eb5-3373-43be-b259-e119a29a4bd5",
+      "observed_receipt_id": "ab766f2c-bdc4-4a72-a65a-ee0ce7699dfb",
+      "validated_receipt_id": "078b7b7e-e087-4f4e-a19b-76ee71b7ab61",
+      "raw_output_sha256": "d94e74d52d396b7d5fcb8e03d5d5ac2585dbc9b0d09b3d9b759b5e1ed97cf610",
+      "raw_output_bytes": 23816,
+      "raw_null_headers": 3,
+      "raw_null_sources": 18,
+      "raw_null_component_ids": 32,
+      "raw_null_capabilities": 32,
+      "slot_source_count": 18,
+      "slot_component_count": 32,
+      "binding_present": true,
+      "binding_model_request_matches": true,
+      "slot_fingerprint_matches": true,
+      "raw_digest_matches": true,
+      "canonical_component_identities_match": true,
+      "validation_passed": false,
+      "failed_predicate": "OBLIGATION_SOURCE_CONSUMPTION_ABSENCE_CONTRADICTED",
+      "rejected_source_count": 6,
+      "rejected_component_count": 10,
+      "usage": {
+        "cached_tokens": 0,
+        "input_tokens": 79044,
+        "output_tokens": 6204,
+        "reasoning_tokens": 0,
+        "total_tokens": 85248,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 21.468346801004373,
+        "first_response_event_seconds": 1.1165318589191884,
+        "first_token_seconds": 2.3947625069413334,
+        "request_sent_seconds": 0.007164043956436217
+      }
+    },
+    {
+      "attempt": 2,
+      "pending_receipt_id": "977d167b-7774-4441-981f-47972d8191cc",
+      "observed_receipt_id": "e161cc93-a8d9-44bf-88fe-b00c303d846c",
+      "validated_receipt_id": "1bb09466-83d9-4694-a631-f91d335e0ec8",
+      "raw_output_sha256": "63a3a996761ee816e15b3235a789f80634fbce7370d18b2b94e1d49a7d01c9d9",
+      "raw_output_bytes": 27339,
+      "raw_null_headers": 3,
+      "raw_null_sources": 18,
+      "raw_null_component_ids": 28,
+      "raw_null_capabilities": 28,
+      "slot_source_count": 18,
+      "slot_component_count": 28,
+      "binding_present": true,
+      "binding_model_request_matches": true,
+      "slot_fingerprint_matches": true,
+      "raw_digest_matches": true,
+      "canonical_component_identities_match": true,
+      "validation_passed": true,
+      "failed_predicate": null,
+      "rejected_source_count": 0,
+      "rejected_component_count": 0,
+      "usage": {
+        "cached_tokens": 2304,
+        "input_tokens": 76829,
+        "output_tokens": 7175,
+        "reasoning_tokens": 0,
+        "total_tokens": 84004,
+        "unknown": false
+      },
+      "timing": {
+        "completed_seconds": 24.10389260703232,
+        "first_response_event_seconds": 1.3137997470330447,
+        "first_token_seconds": 2.3630518830614164,
+        "request_sent_seconds": 0.08726805506739765
+      }
+    }
+  ],
+  "feedback": {
+    "receipt_id": "a5c5292e-773c-4db5-bc19-06c0b0c04539",
+    "primary_error": "OBLIGATION_SOURCE_CONSUMPTION_ABSENCE_CONTRADICTED",
+    "violation_codes": [
+      "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+      "OBLIGATION_SEMANTIC_REVIEW_CONSUMPTION_INVALID",
+      "OBLIGATION_SEMANTIC_SOURCE_MISMATCH",
+      "OBLIGATION_SOURCE_CONSUMPTION_ABSENCE_CONTRADICTED"
+    ],
+    "feedback_sha256": "bb0668a4dab43131c8cda5722c26d8eb129c9f5a2b8e9a9b7de8a947ce1ca40c",
+    "bound_to_original_wire": true
+  },
+  "formation_calls": 2,
+  "review_calls": 2,
+  "logical_calls": 4,
+  "actual_model_token_subtotal": 269365,
+  "actual_provider_seconds_subtotal": 76.56091493100394,
+  "transport_retry_subtotal": 0,
+  "other_work_model_usage": "UNKNOWN",
+  "new_model_calls_by_diagnostic": 0,
+  "historical_records_modified": false,
+  "raw_private_content_published": false
+}

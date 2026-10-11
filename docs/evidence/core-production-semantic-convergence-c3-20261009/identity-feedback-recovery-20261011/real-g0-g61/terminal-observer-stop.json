@@ -1,0 +1,15 @@
+{
+  "recorded_at_utc": "2026-10-11T08:53:01.911357+00:00",
+  "observer_container_id": "85ab351aefd044969ba5ae117178d480a568de7cb3640d91247f7879ae6a598d",
+  "observer_name": "watt-c3-bindingg0g61-normal-entry-resume1-20261010",
+  "observer_was_running": true,
+  "observer_now_running": false,
+  "observer_exit_code": 137,
+  "work_id": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "work_is_not_terminal": true,
+  "reason": "Exact Native context capacity non-retryable wait confirmed; stop passive GET-only observation after one authorized G0. No Work stop/cancel/retry/resume was sent.",
+  "production_containers_stopped": 0,
+  "historical_records_modified": false,
+  "work_pass_claimed": false,
+  "controller_only_correction": "Earlier observer stop guard expected COMPLETED instead of actual driver operation CONFIRMED; failed assertion preceded stop and made no Work/API changes."
+}

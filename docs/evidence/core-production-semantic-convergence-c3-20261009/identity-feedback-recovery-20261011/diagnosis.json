@@ -1,0 +1,41 @@
+{
+  "baseline_evidence": "8310319ac79e7ecd99846f885fba7bba454f9a53",
+  "baseline_source": "9f9c94d8ebba6138d8e818ea5d368c4a376ad788",
+  "historical_work": "d75b35a4-0862-5df7-abdf-0441c63d29d1",
+  "findings": [
+    {
+      "class": "A",
+      "fact": "Reviewer changed one hex character in an existing component identity; Formation identity was correct.",
+      "authority": "Rejected original Review, not an accepted semantic judgment."
+    },
+    {
+      "class": "B",
+      "fact": "Route-scoped Review already fixes each positional result but requires model generation of exact hashes and IDs. Identity echo is unnecessarily delegated to probabilistic output.",
+      "source": "src/spg/providers/fulfillment_candidate.py::_review_output_schema / ModelFulfillmentCandidateProvider.review",
+      "correction_boundary": "Request-local null identity reuse from pre-model persisted ordered slots, strict original wire/request/inventory/candidate binding; unchanged canonical review and independent verdicts."
+    },
+    {
+      "class": "A/C",
+      "fact": "Two proposals add a different effect prohibition to separate accepted ProductionIntent.exclusions entries. Their primary meanings are not replaced by supporting citations.",
+      "correction": "Keep source-correspondence rejection; no selected semantic answer, keyword branch or operation alias introduced."
+    }
+  ],
+  "feedback_chronology": {
+    "first_candidate": "Conflicting disposition and UNRESOLVED; no Review yet.",
+    "one_feedback": "Bound to exact first original Wire, inventory, Attempt and receipts; delivered to second Formation.",
+    "second_candidate": "Passed deterministic prerequisites and reached Review.",
+    "later_review_errors": "Identity typo and two cross-source proposals appeared only after the single feedback slot was consumed. No evidence that this feedback contained or ignored those later errors."
+  },
+  "unknown": [
+    "Model internal reason for cross-source choices.",
+    "Historical raw HTTP input serialization cause.",
+    "Historical unrecorded details; new success must not rewrite old verdicts."
+  ],
+  "preserved_boundaries": [
+    "two Formation / one feedback / at most one Review per candidate / existing cumulative budget",
+    "no new Formation wire schema version or index space",
+    "no fuzzy identity repair / no explicit ID substitution",
+    "no Holdout / no production mutation / no historical Work edits"
+  ],
+  "guardian_dependency": "Its existing evidence path independently parses the original Review. A narrow compatible null identity expansion must validate real persisted slots and raw request binding; Watt PASS is not accepted as proof."
+}

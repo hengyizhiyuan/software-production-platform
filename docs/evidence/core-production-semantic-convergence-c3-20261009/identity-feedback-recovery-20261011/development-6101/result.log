@@ -1,0 +1,110 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 103 items
+
+tests/test_c3_review_identity_binding.py FFFFFFFF........FFFF            [ 19%]
+tests/test_c3_reviewer_contract_feedback.py ..................           [ 36%]
+tests/test_c3_formation_repair_consumption.py ........                   [ 44%]
+tests/test_c3_fulfillment_wire_feedback.py ............................. [ 72%]
+.............                                                            [ 85%]
+tests/test_c3_exclusion_content_correspondence.py ..............F        [100%]
+
+=================================== FAILURES ===================================
+_ test_bound_slots_preserve_negative_verdict_feedback_and_replay_without_new_call _
+tests/test_c3_review_identity_binding.py:45: in test_bound_slots_preserve_negative_verdict_feedback_and_replay_without_new_call
+    with pytest.raises(Checkpoint): execute()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE Checkpoint
+___________ test_invalid_identity_basis_is_never_repaired[inventory] ___________
+tests/test_c3_review_identity_binding.py:75: in test_invalid_identity_basis_is_never_repaired
+    p.FulfillmentSemanticReviewCandidate.model_validate(p._resolve_review_identities(output, inv, plan, binding, 'controlled-request'))
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/fulfillment_candidate.py:1356: in _resolve_review_identities
+    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT")
+E   spg.providers.fulfillment_candidate._FulfillmentWireReceiptIdentityError: OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT
+___________ test_invalid_identity_basis_is_never_repaired[candidate] ___________
+tests/test_c3_review_identity_binding.py:75: in test_invalid_identity_basis_is_never_repaired
+    p.FulfillmentSemanticReviewCandidate.model_validate(p._resolve_review_identities(output, inv, plan, binding, 'controlled-request'))
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/fulfillment_candidate.py:1356: in _resolve_review_identities
+    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT")
+E   spg.providers.fulfillment_candidate._FulfillmentWireReceiptIdentityError: OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT
+__________ test_invalid_identity_basis_is_never_repaired[components] ___________
+tests/test_c3_review_identity_binding.py:75: in test_invalid_identity_basis_is_never_repaired
+    p.FulfillmentSemanticReviewCandidate.model_validate(p._resolve_review_identities(output, inv, plan, binding, 'controlled-request'))
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/fulfillment_candidate.py:1356: in _resolve_review_identities
+    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT")
+E   spg.providers.fulfillment_candidate._FulfillmentWireReceiptIdentityError: OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT
+_____________ test_invalid_identity_basis_is_never_repaired[slots] _____________
+tests/test_c3_review_identity_binding.py:75: in test_invalid_identity_basis_is_never_repaired
+    p.FulfillmentSemanticReviewCandidate.model_validate(p._resolve_review_identities(output, inv, plan, binding, 'controlled-request'))
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/fulfillment_candidate.py:1356: in _resolve_review_identities
+    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT")
+E   spg.providers.fulfillment_candidate._FulfillmentWireReceiptIdentityError: OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT
+____________ test_invalid_identity_basis_is_never_repaired[request] ____________
+tests/test_c3_review_identity_binding.py:75: in test_invalid_identity_basis_is_never_repaired
+    p.FulfillmentSemanticReviewCandidate.model_validate(p._resolve_review_identities(output, inv, plan, binding, 'controlled-request'))
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/fulfillment_candidate.py:1356: in _resolve_review_identities
+    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT")
+E   spg.providers.fulfillment_candidate._FulfillmentWireReceiptIdentityError: OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT
+____________ test_invalid_identity_basis_is_never_repaired[digest] _____________
+tests/test_c3_review_identity_binding.py:75: in test_invalid_identity_basis_is_never_repaired
+    p.FulfillmentSemanticReviewCandidate.model_validate(p._resolve_review_identities(output, inv, plan, binding, 'controlled-request'))
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/fulfillment_candidate.py:1356: in _resolve_review_identities
+    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT")
+E   spg.providers.fulfillment_candidate._FulfillmentWireReceiptIdentityError: OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT
+____________ test_invalid_identity_basis_is_never_repaired[length] _____________
+tests/test_c3_review_identity_binding.py:75: in test_invalid_identity_basis_is_never_repaired
+    p.FulfillmentSemanticReviewCandidate.model_validate(p._resolve_review_identities(output, inv, plan, binding, 'controlled-request'))
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/fulfillment_candidate.py:1356: in _resolve_review_identities
+    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT")
+E   spg.providers.fulfillment_candidate._FulfillmentWireReceiptIdentityError: OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT
+____ test_durable_binding_corruption_stops_replay_without_dispatch[digest] _____
+tests/test_c3_review_identity_binding.py:94: in test_durable_binding_corruption_stops_replay_without_dispatch
+    with pytest.raises(Checkpoint): execute()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE Checkpoint
+____ test_durable_binding_corruption_stops_replay_without_dispatch[request] ____
+tests/test_c3_review_identity_binding.py:94: in test_durable_binding_corruption_stops_replay_without_dispatch
+    with pytest.raises(Checkpoint): execute()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE Checkpoint
+_____ test_durable_binding_corruption_stops_replay_without_dispatch[slots] _____
+tests/test_c3_review_identity_binding.py:94: in test_durable_binding_corruption_stops_replay_without_dispatch
+    with pytest.raises(Checkpoint): execute()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE Checkpoint
+_ test_durable_binding_corruption_stops_replay_without_dispatch[missing-binding] _
+tests/test_c3_review_identity_binding.py:94: in test_durable_binding_corruption_stops_replay_without_dispatch
+    with pytest.raises(Checkpoint): execute()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE Checkpoint
+_ test_current_exclusion_contract_is_negotiated_after_actual_adapter_contract[True] _
+tests/test_c3_exclusion_content_correspondence.py:112: in test_current_exclusion_contract_is_negotiated_after_actual_adapter_contract
+    assert all(b.state != 'UNRESOLVED' for b in result)
+E   assert False
+E    +  where False = all(<generator object test_current_exclusion_contract_is_negotiated_after_actual_adapter_contract.<locals>.<genexpr> at 0x7f7151a81a40>)
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_review_identity_binding.py::test_bound_slots_preserve_negative_verdict_feedback_and_replay_without_new_call
+FAILED tests/test_c3_review_identity_binding.py::test_invalid_identity_basis_is_never_repaired[inventory]
+FAILED tests/test_c3_review_identity_binding.py::test_invalid_identity_basis_is_never_repaired[candidate]
+FAILED tests/test_c3_review_identity_binding.py::test_invalid_identity_basis_is_never_repaired[components]
+FAILED tests/test_c3_review_identity_binding.py::test_invalid_identity_basis_is_never_repaired[slots]
+FAILED tests/test_c3_review_identity_binding.py::test_invalid_identity_basis_is_never_repaired[request]
+FAILED tests/test_c3_review_identity_binding.py::test_invalid_identity_basis_is_never_repaired[digest]
+FAILED tests/test_c3_review_identity_binding.py::test_invalid_identity_basis_is_never_repaired[length]
+FAILED tests/test_c3_review_identity_binding.py::test_durable_binding_corruption_stops_replay_without_dispatch[digest]
+FAILED tests/test_c3_review_identity_binding.py::test_durable_binding_corruption_stops_replay_without_dispatch[request]
+FAILED tests/test_c3_review_identity_binding.py::test_durable_binding_corruption_stops_replay_without_dispatch[slots]
+FAILED tests/test_c3_review_identity_binding.py::test_durable_binding_corruption_stops_replay_without_dispatch[missing-binding]
+FAILED tests/test_c3_exclusion_content_correspondence.py::test_current_exclusion_contract_is_negotiated_after_actual_adapter_contract[True]
+================== 13 failed, 90 passed in 203.93s (0:03:23) ===================

@@ -1,0 +1,14 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 93.50674788397737,
+  "image_id": "sha256:5b396a0edbdf230cbe1a9b0099fa2b13b8dee2cae504b96f53af1c55e6f5d7f9",
+  "container_id": "9e52516bf350b02b22e56bce1d37d57865be476667bbc4c132b7579c2cfe1c3a",
+  "source_overlay": true,
+  "snapshot_sha256": "89e2f71db10d248e1738f36b193e07b370d3c37330035450b13db3c662f88e36",
+  "nodes": [
+    "tests/test_c3_review_identity_binding.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}
