@@ -91,8 +91,9 @@ Use OWNER_RECORD for composite summaries/timeline entries combining several
 surfaces; specialized single-family facts require all citations from that family.
 All missing_evidence entries are structured gaps backed by evidence.check receipts.
 Call evidence.check(family='OWNER_RECORD', group=..., field='/...') for specific
-fields relative to each individual row, without a group-array /0 prefix; '*'
-enumerates nested lists. PRESENT cannot be called missing; a bounded or
+fields relative to each individual row, without a group-array /0 prefix; '/*'
+enumerates record fields, '/field/*' nested lists; bare '*' is invalid.
+PRESENT cannot be called missing; a bounded or
 redacted export permits INCOMPLETE_CAPTURE, never platform-wide absence. Not
 reading available records is a review limitation, not missing evidence. Keep
 runtime comparison provenance and other investigation limitations in uncertainty.

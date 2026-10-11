@@ -157,7 +157,7 @@ class EvidenceCatalog:
         """
         family = EvidenceFamily(family).value
         if field is not None and (len(field) > 200 or not field.startswith("/")):
-            raise ValueError("CHECK_FIELD_REQUIRES_JSON_POINTER; use * to enumerate")
+            raise ValueError("CHECK_FIELD_REQUIRES_JSON_POINTER; use /* to enumerate record fields or /field/* for nested children; bare * is invalid")
         if family in {"PREVIEW_HTTP", "DELIVERY_TRANSFER"} and (group or field):
             raise ValueError("CHECK_SOURCE_SURFACE_FIXED_BY_FAMILY")
         if family == "OWNER_RECORD" and (not group or field is None):
@@ -481,10 +481,10 @@ class AnalysisTools:
             ("evidence.read", "Read an evidence UUID, retaining exact source and digest; page long content.",
              {"evidence_id": {"type": "string"}, "offset": {"type": "integer"},
               "limit": {"type": "integer"}}, ["evidence_id"]),
-            ("evidence.check", "Check original snapshot evidence before absence claims. PREVIEW_HTTP and DELIVERY_TRANSFER fix their producer scope; EXECUTION_RELATIONSHIP enumerates actual identifier links. OWNER_RECORD requires a captured group and JSON Pointer field (* enumerates). No-match never proves global/historical absence.",
+            ("evidence.check", "Check original snapshot evidence before absence claims. PREVIEW_HTTP and DELIVERY_TRANSFER fix their producer scope; EXECUTION_RELATIONSHIP enumerates actual identifier links. OWNER_RECORD requires a captured group and JSON Pointer field (/* enumerates record fields). No-match never proves global/historical absence.",
              {"family": {"enum": [f.value for f in EvidenceFamily]}, "group": {"type": "string"},
               "field": {"type": "string", "maxLength": 200,
-                        "description": "JSON Pointer relative to EACH RECORD, e.g. /pwu_id or /result_payload/raw_response. Do not prefix /0 for the group array. * enumerates nested children. PRESENT container existence does not prove that all children contain usable observations."}}, ["family"]),
+                        "description": "JSON Pointer relative to EACH RECORD, e.g. /pwu_id or /result_payload/raw_response. Do not prefix /0 for the group array. Use /* for record fields or /field/* for nested children, never bare *. PRESENT container existence does not prove that all children contain usable observations."}}, ["family"]),
             ("repository.read", "Read exact committed source lines; repository key and scope are fixed by the service.",
              {"repository": {"type": "string"}, "path": {"type": "string"},
               "start_line": {"type": "integer"}, "lines": {"type": "integer"}}, ["repository", "path"]),

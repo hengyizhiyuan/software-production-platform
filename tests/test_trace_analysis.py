@@ -541,6 +541,9 @@ def test_report_requires_full_family_reconciliation_and_checked_gaps():
 
 def test_wrong_selector_root_is_not_false_negative_evidence():
     catalog = EvidenceCatalog(evidence_snapshot())
+    with pytest.raises(ValueError, match=r"use /\* to enumerate"):
+        catalog.check("OWNER_RECORD", group="execution_sessions", field="*")
+    assert catalog.check("OWNER_RECORD", group="execution_sessions", field="/*")["availability"] == "PRESENT"
     with pytest.raises(ValueError, match="CHECK_SELECTOR_ROOT_NOT_IN_RECORD_SCHEMA"):
         catalog.check("EXECUTION_RELATIONSHIP", group="execution_sessions", field="/0/pwu_id")
     with pytest.raises(ValueError, match="CHECK_SELECTOR_ROOT_NOT_IN_RECORD_SCHEMA"):
