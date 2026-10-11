@@ -1031,7 +1031,7 @@ def test_context_compaction_preserves_exact_invariants_and_evidence_identity() -
         content_digest="a" * 64, consistency_class="APPLICATION_CONSISTENT",
         created_at=NOW, committed_at=NOW,
     )
-    output = {"stdout": "x" * 20000}
+    output = {"stdout": "x" * 20000, "owner_evidence": "y" * 20000}
     previous = ToolExecutionResult(
         delivery_id=uuid4(), tool_identity="test.run",
         condition=EffectCondition.SETTLED, output=output,
@@ -2593,3 +2593,22 @@ def test_worker_parks_quota_failure_with_checkpoint_residual_work() -> None:
     assert runtime.result.residual_obligations == (
         "run only the stale verification",
     )
+
+
+def test_duplicate_checkpoint_compaction_keeps_readable_receipt_frontier():
+    binding,contract=_binding()
+    output={"inspection_id":str(uuid4()),"semantic_input":{"argv":["arbitrary-reader","--list"],"cwd":"."}}
+    previous=ToolExecutionResult(delivery_id=uuid4(),tool_identity="evidence.inspect",condition=EffectCondition.SETTLED,
+        output=output,output_digest=canonical_digest(output))
+    checkpoint=CheckpointBundleRecord(id=uuid4(),session_id=binding.session_id,attempt_id=binding.attempt_id,
+        step_sequence=3,worker_epoch=1,condition=CheckpointCondition.COMMITTED,
+        source_vector_digest=binding.source_vector.digest or "",repository_manifest={},execution_manifest={},
+        semantic_manifest={"working_plan":_plan(3).model_dump(mode="json"),"duplicated_history":"h"*20000},
+        content_digest="a"*64,consistency_class="APPLICATION_CONSISTENT",created_at=NOW,committed_at=NOW)
+    assembler=NativeContextAssembler(max_request_bytes=6000)
+    request=assembler.assemble(binding=binding,contract=contract,working_plan=_plan(3),step_sequence=4,
+        available_tools=(),previous_results=(previous,),checkpoint=checkpoint)
+    assert len(request.model_dump_json().encode())<=6000
+    assert request.previous_results[0]["output"]==output
+    assert request.previous_results[0]["output_digest"]==previous.output_digest
+    assert next(f for f in request.context_facts if f["fact_type"]=="PWU_CONTRACT")["payload"]==contract.contract_payload

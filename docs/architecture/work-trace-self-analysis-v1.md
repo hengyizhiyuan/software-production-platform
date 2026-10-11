@@ -215,6 +215,17 @@ reserve the existing envelope for report verification and revision; these are
 current investigation observations, not historical Work usage or a replacement
 resource ledger.
 
+### Read delivery through the existing Native context assembler
+
+Whole nested field values in lookup examples are bounded; PRESENT fields above
+the limit retain digest/size/read-required metadata and must be read through the
+original evidence tool. Per-string redaction alone did not bound nested contracts.
+The existing Native context assembler now first removes duplicate checkpoint
+history and rechecks the unchanged readable receipt frontier inside the existing
+byte limit. It only uses its older lossy receipt compaction if still necessary.
+This preserves inspection identities and original values when the existing budget
+can hold them, without changing contracts, grants, schedules or capacity limits.
+
 ## Admin and storage
 
 - POST `/api/admin/works/{id}/analyses`: explicit Human request UUID and rationale.

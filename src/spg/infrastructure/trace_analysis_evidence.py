@@ -434,6 +434,17 @@ class EvidenceCatalog:
                   "field_states": field_states,
                   "examples": matches[:12], "examples_truncated": len(matches) > 12,
                   "limitation": "No match is limited to this export and selector. Unread or uncaptured evidence cannot prove historical/system absence. HTTP preview, download transfer and browser/client observations are distinct."}
+        # Limit the entire field value, not each nested string separately.
+        # A request/contract contains many individually small strings; applying
+        # only Redactor.text_limit can still return hundreds of KiB in a lookup.
+        for example in result["examples"]:
+            value = example["value"]
+            size = len(text(value).encode("utf-8"))
+            if size > 1500:
+                example["value"] = {"visibility": "NOT_RETURNED_CAPACITY", "serialized_bytes": size,
+                    "value_digest": canonical_digest({"value": value}),
+                    "read_required": {"tool": "evidence.read", "evidence_id": example["evidence_id"]},
+                    "boundary": "Field is PRESENT; lookup metadata is not an original field read or absence."}
         # Return only bounded examples, even if a field references a large body.
         result = Redactor(text_limit=1500).clean(result)
         result["bounded_conclusion"] = (
@@ -865,6 +876,10 @@ class AnalysisTools:
             if identity == "evidence.read":
                 props["offset"]["minimum"] = 0
                 props["limit"].update(minimum=1, maximum=24000)
+            if identity.startswith("repository.") and self.repositories:
+                props["repository"]["enum"] = sorted(self.repositories)
+                if identity == "repository.diff":
+                    props["baseline_repository"]["enum"] = sorted(self.repositories)
             if identity == "repository.read":
                 props["start_line"]["minimum"] = 1
                 props["lines"].update(minimum=1, maximum=200)

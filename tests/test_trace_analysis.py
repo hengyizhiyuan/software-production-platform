@@ -992,3 +992,14 @@ def test_native_audit_counts_are_current_investigation_planning_only(tmp_path):
     for target in seed["incident_targets"]:
         assert c.records[target["evidence_id"]]["group"]==target["group"]
         assert target["group"] in {"self_refine_events","execution_steps","effect_receipts"}
+
+
+def test_field_lookup_bounds_whole_nested_values_without_denoting_absence():
+    snap=snapshot();payload={"items":[{"description":"x"*1000,"index":i} for i in range(200)]}
+    snap["lifecycle"]["advanced"]["owners"]["execution_steps"][0]["request_payload"]=payload
+    c=EvidenceCatalog(snap);result=c.check("OWNER_RECORD",group="execution_steps",field="/request_payload")
+    assert result["availability"]=="PRESENT" and result["field_states"]["AVAILABLE"]==1
+    value=result["examples"][0]["value"]
+    assert value["visibility"]=="NOT_RETURNED_CAPACITY" and value["serialized_bytes"]>1500
+    assert len(json.dumps(result).encode())<10000
+    assert value["read_required"]["evidence_id"] not in c.observed

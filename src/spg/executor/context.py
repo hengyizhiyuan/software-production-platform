@@ -167,6 +167,13 @@ class NativeContextAssembler:
                     },
                 }
             )
+        # A checkpoint may repeat the settled receipt frontier. Remove that
+        # duplicate capsule first, then re-check the original selected results.
+        # Losing every readable output/inspection identity here makes a
+        # stateless reasoning step re-fetch evidence it can never receive.
+        without_duplicate_history = request.model_copy(update={"context_facts": tuple(compact_facts)})
+        if self._size(without_duplicate_history) <= self.max_request_bytes:
+            return without_duplicate_history
         compact_results = []
         for item in previous_results:
             payload = item.model_dump(mode="json")
