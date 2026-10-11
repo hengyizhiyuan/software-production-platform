@@ -285,6 +285,51 @@ def test_exact_repository_read_ignores_dirty_worktree_and_denies_secrets(tmp_pat
             repo.read(path)
 
 
+def test_repository_multiline_excerpt_is_exact_and_excludes_unread_source(tmp_path):
+    import subprocess
+    def git(*args):
+        return subprocess.check_output(["git", "-C", str(tmp_path), *args], text=True).strip()
+    git("init")
+    (tmp_path / "src").mkdir()
+    source = "header\nif diagnostic_list:\n    record_diagnosis()\nunread_tail()\n"
+    (tmp_path / "src/runtime.py").write_text(source)
+    git("add", ".")
+    git("-c", "user.name=fixture", "-c", "user.email=fixture@example.test", "commit", "-m", "fixture")
+    repo = RepositorySnapshot(key="runtime", path=tmp_path, revision=git("rev-parse", "HEAD"), roots=("src",))
+    value = repo.read("src/runtime.py", start_line=2, lines=2)
+    assert value["content"] == "if diagnostic_list:\n    record_diagnosis()\n"
+    assert (value["start_line"], value["end_line"], value["next_line"]) == (2, 3, 4)
+    catalog = EvidenceCatalog(snapshot())
+    eid = catalog.add("repository_read", "/fixture/source", value, repository=True)
+    catalog.read(eid)
+    r = report(catalog)
+    r["findings"][0]["repository_citations"] = [{"evidence_id": eid, "quote": value["content"]}]
+    catalog.validate(AnalysisReport.model_validate(r))
+    r["findings"][0]["repository_citations"][0]["quote"] += "unread_tail()"
+    with pytest.raises(ValueError, match="CITATION_QUOTE_MISMATCH"):
+        catalog.validate(AnalysisReport.model_validate(r))
+
+
+@pytest.mark.parametrize("field", ["created_at", "started_at"])
+def test_failed_step_outcome_cannot_be_dated_at_start(field):
+    c = EvidenceCatalog(snapshot())
+    r = report(c)
+    value = {"id": str(uuid4()), "condition": "FAILED", "created_at": "2026-10-05T10:00:00+00:00",
+        "started_at": "2026-10-05T10:00:00+00:00", "finished_at": "2026-10-05T10:01:00+00:00"}
+    eid = c.add("execution_steps", "/fixture/failed-step", value)
+    c.read(eid)
+    inspection = c.inspect(eid)
+    r["findings"][0].update(subject_evidence_id=eid, inspection_id=inspection["inspection_id"],
+        uncertainty=inspection["bounded_conclusion"], fact={"statement": "Recorded failed step outcome",
+        "citations": [{"evidence_id": eid, "quote": "FAILED"}]})
+    r["timeline"] = [{"stage": "FAILURE", "statement": "Recorded failed step outcome", "citations": [{"evidence_id": eid, "quote": "FAILED"}],
+        "timestamp": value[field], "timestamp_evidence_id": eid, "timestamp_field": field, "time_interpretation": "ORIGINAL_OWNER_TIME_BOUNDARY"}]
+    with pytest.raises(ValueError, match="TIMELINE_START_CANNOT_TIMESTAMP_FAILED_OUTCOME"):
+        c.validate(AnalysisReport.model_validate(r))
+    r["timeline"][0].update(timestamp=value["finished_at"], timestamp_field="finished_at")
+    c.validate(AnalysisReport.model_validate(r))
+
+
 def test_snapshot_capacity_and_unknown_are_visible():
     snap = snapshot()
     snap["lifecycle"]["capture_truncation"] = {"execution_steps": {"observed_count": 100, "exported_count": 30}}

@@ -625,6 +625,9 @@ class EvidenceCatalog:
                         (state in item.statement or any(state in c.quote for c in item.citations))
                         for state in later_state)):
                     errors.append(CitationRejected("TIMELINE_CREATION_CANNOT_TIMESTAMP_RECOVERY_STATE", prefix + ["timestamp_field"], subject_id))
+            if (row["group"] == "execution_steps" and value.get("condition") == "FAILED"
+                    and item.stage == "FAILURE" and item.timestamp_field in {"created_at", "started_at"}):
+                errors.append(CitationRejected("TIMELINE_START_CANNOT_TIMESTAMP_FAILED_OUTCOME; use observed finished_at or an undated summary", prefix + ["timestamp_field"], subject_id))
             try:
                 actual = datetime.fromisoformat(item.timestamp.replace("Z", "+00:00"))
                 expected = datetime.fromisoformat(recorded.replace("Z", "+00:00"))
@@ -828,11 +831,14 @@ class RepositorySnapshot:
         if size > 1_000_000:
             raise ValueError("REPOSITORY_BLOB_CAPACITY_EXCEEDED")
         data, blob = GitExactReality().read_blob(self.path, self.revision, path)
-        rows = data.decode("utf-8").splitlines()
-        excerpt = "\n".join(f"{i + 1}: {line}" for i, line in
-                            enumerate(rows) if start_line - 1 <= i < start_line - 1 + lines)
+        rows = data.decode("utf-8").splitlines(keepends=True)
+        # Keep source bytes (after declared redaction) directly quotable. Line
+        # numbers are metadata; inserting them into every line changes multiline
+        # excerpts and causes exact quotations of genuinely read code to fail.
+        excerpt = "".join(rows[start_line - 1:start_line - 1 + lines])
         return {"repository": self.key, "revision": self.revision, "tree": self.tree,
                 "path": path, "blob": blob, "start_line": start_line,
+                "end_line": min(len(rows), start_line - 1 + lines),
                 "total_lines": len(rows), "next_line": start_line + lines
                 if start_line + lines <= len(rows) else None,
                 "content": Redactor(text_limit=24000).clean(excerpt)}

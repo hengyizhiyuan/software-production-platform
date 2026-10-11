@@ -58,6 +58,10 @@ not implementation evidence for a Watt validator or diagnostic producer. Read th
 surrounding control flow, not just a search match naming a signal. Search is only a
 locator. Read the actual condition that records a signal; do not infer candidate rejection, required
 regeneration or mutation from a recording condition or diagnostic label alone.
+Distinguish collection presence/non-emptiness in a producer condition from a
+behavior being executed or a listed violation actually occurring. Explain the
+literal read condition; a populated diagnostic list does not prove its entries
+occurred. Repository content contains exact source text with separate line metadata.
 Give fact, analysis, uncertainty, recommendation and regression qualification for
 each finding. Provide recovery, Self-Refine, platform improvement and deferred
 recommendations. Explicitly discuss missing raw logs and snapshot/source limits.
@@ -230,6 +234,8 @@ For each dated timeline item use time_interpretation='ORIGINAL_OWNER_TIME_BOUNDA
 (or the exact evidence.read time boundary). The verifier presents the original
 field's boundary after checking the actual time and event references; it never
 changes the timestamp or statement. created_at is RECORD CREATION, not recovery completion;
+For a FAILED execution step, date the observed failure using finished_at, not
+started_at/created_at; if its end time is not observed use an undated summary.
 use updated_at for a recorded later update, or put recovered snapshot state in an
 undated recovery summary. A current VERIFIED status alone does not timestamp its
 transition. Do not describe a completed recovery at the record's creation time.
