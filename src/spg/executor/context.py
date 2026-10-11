@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 
+from spg.executor.context_evidence import NativeContractExecutionView
+
 from spg.domain.native_execution import (
     CheckpointBundleRecord,
     ExecutionBindingV2,
@@ -41,12 +43,7 @@ class NativeContextAssembler:
         repair_history: tuple[dict[str, object], ...] = (),
     ) -> InferenceRequest:
         facts: list[dict[str, object]] = [
-            {
-                "fact_type": "PWU_CONTRACT",
-                "contract_version_id": str(contract.id),
-                "contract_digest": contract.contract_digest,
-                "payload": contract.contract_payload,
-            },
+            NativeContractExecutionView(binding, contract).contract_fact(),
             {
                 "fact_type": "SOURCE_VECTOR",
                 "digest": binding.source_vector.digest or "",

@@ -17,6 +17,7 @@ from fastapi.responses import Response, FileResponse, JSONResponse, RedirectResp
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import SQLAlchemyError
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+from spg.executor.context_evidence import NativeContractExecutionView, NativeContextEvidenceError
 
 from spg.api.dto import (
     AttentionResolveRequest,
@@ -2166,6 +2167,23 @@ def create_http_application(
             "checkpoint": checkpoint.model_dump(mode="json") if checkpoint else None,
             "timing": timing,
         }
+
+    @api.get("/api/works/{work_id}/native-context/{attempt_id}/evidence/{content_digest}")
+    def native_context_evidence(work_id: UUID, attempt_id: UUID, content_digest: str):
+        with selected_database.unit_of_work() as uow:
+            store = NativeExecutionStore(uow.session)
+            binding = store.attempt_binding(attempt_id).binding
+            if binding.work_id != work_id:
+                raise ProductHttpError(409, "NATIVE_CONTEXT_EVIDENCE_SCOPE_MISMATCH",
+                                       "Attempt does not belong to this Work")
+            contract = store.contract(binding.pwu_contract_version_id)
+        try:
+            view = NativeContractExecutionView(binding, contract)
+            reference = f"native-contract:{contract.id}:evidence:{content_digest}"
+            return {"reference": reference, "contract_digest": contract.contract_digest,
+                    "content_digest": content_digest, "record": view.resolve(reference)}
+        except NativeContextEvidenceError as error:
+            raise ProductHttpError(409, str(error), "Evidence binding cannot be verified") from error
 
     @api.post("/api/native-execution/attempts/{attempt_id}/control")
     def native_execution_control(attempt_id: UUID, request: NativeExecutionControlRequest):

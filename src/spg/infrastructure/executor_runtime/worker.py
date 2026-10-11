@@ -20,6 +20,7 @@ from spg.domain.native_execution import (
 )
 from spg.executor.kernel import NativeExecutorKernel
 from spg.executor.context import NativeContextCapacityError
+from spg.executor.context_evidence import NativeContextEvidenceError
 from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
 from spg.infrastructure.executor_runtime.local_storage import ContentAddressedStorage
 from spg.infrastructure.executor_runtime.production_evidence import (
@@ -248,6 +249,20 @@ class NativeExecutionWorker:
                     residual_obligations=residual,
                     resource_retryable=error.retryable,
                     failure_family="PROVIDER_TRANSPORT",
+                )
+            except NativeContextEvidenceError as error:
+                latest = await asyncio.to_thread(
+                    self._latest_checkpoint, grant.allocation.attempt_id
+                )
+                result = KernelRunResult(
+                    runtime_mode=ExecutionMode.FINISHED,
+                    terminal_outcome=AttemptTerminalOutcome.UNABLE_TO_COMPLETE,
+                    final_checkpoint_id=latest.id if latest else None,
+                    step_count=latest.step_sequence if latest else 0,
+                    inference_submissions=0, tool_effects=0,
+                    summary=str(error),
+                    residual_obligations=tuple(binding_record.binding.obligation_references),
+                    failure_family="CONTEXT_EVIDENCE_INVALID",
                 )
             except NativeContextCapacityError as error:
                 latest = await asyncio.to_thread(

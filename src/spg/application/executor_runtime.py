@@ -1946,6 +1946,7 @@ class NativeExecutorRuntimeService:
                     queue.id,
                     expected_version=queue.version,
                     condition=QueueCondition.RETURNED_TO_QUEUE,
+                    available_at=now,
                 )
             elif queue is not None and not worker_owned and command.action is ControlAction.PAUSE:
                 store.set_queue_condition(

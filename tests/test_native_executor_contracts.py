@@ -1243,6 +1243,8 @@ def test_context_fit_failure_fails_closed_without_dropping_contract() -> None:
             "contract_payload": {"objective": "x" * 10000},
         }
     )
+    oversized = oversized.model_copy(update={"contract_digest": canonical_digest(oversized.contract_payload)})
+    binding = binding.model_copy(update={"pwu_contract_digest": oversized.contract_digest})
     with pytest.raises(NativeContextCapacityError, match="cannot fit|cannot|fit|byte|context"):
         NativeContextAssembler(max_request_bytes=1024).assemble(
             binding=binding, contract=oversized, working_plan=_plan(),

@@ -3094,6 +3094,105 @@ def test_running_pause_is_requested_before_it_is_safely_applied(
         assert state.grant_state is AttemptGrantState.GRANTED
 
 
+def test_capacity_wait_can_resume_same_attempt_without_budget_or_receipt_reset(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    service = NativeExecutorRuntimeService(postgres_database)
+    admission = _admission(postgres_database, git_repository)
+    queue = service.admit(admission)
+    grant = service.allocate(_offer())
+    assert grant is not None
+    service.activate_allocation(grant)
+    service.finish_allocation(grant, KernelRunResult(
+        runtime_mode=ExecutionMode.WAITING_RESOURCE,
+        final_checkpoint_id=None, step_count=0, inference_submissions=0,
+        tool_effects=0, summary="exact contract exceeds context capacity",
+        resource_retryable=False, failure_family="CONTEXT_CAPACITY",
+    ))
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        before_binding = store.attempt_binding(admission.binding.attempt_id)
+        before_contract = store.contract(admission.contract.id)
+        before_usage = list(uow.session.execute(select(execution_resource_usage)).mappings())
+        assert store.queue_for_attempt(admission.binding.attempt_id).available_at.year > 2100
+    handle = ExecutionHandle(backend_identity="watt-native", dispatch_id=queue.id,
+        attempt_id=admission.binding.attempt_id, generation=admission.binding.generation,
+        opaque_reference=f"queue:{queue.id}")
+    for version, action in enumerate((ControlAction.PAUSE, ControlAction.RESUME)):
+        receipt = service.control(BackendControlCommand(
+            command_id=uuid4(), handle=handle, action=action,
+            expected_control_version=version, actor_identity="human:qualification",
+            reason="qualified context representation is now available; preserve Attempt",
+        ))
+        assert receipt.accepted and receipt.condition.value == "APPLIED"
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        assert store.attempt_binding(admission.binding.attempt_id) == before_binding
+        assert store.contract(admission.contract.id) == before_contract
+        assert list(uow.session.execute(select(execution_resource_usage)).mappings()) == before_usage
+        assert store.effects_for_attempt(admission.binding.attempt_id) == ()
+        assert store.queue_for_attempt(admission.binding.attempt_id).available_at <= datetime.now(timezone.utc)
+    successor = service.allocate(_offer())
+    assert successor is not None
+    assert successor.allocation.attempt_id == admission.binding.attempt_id
+    assert successor.allocation.lease_epoch > grant.allocation.lease_epoch
+
+
+def test_native_context_evidence_reads_exact_persisted_contract_and_rejects_foreign_work(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    work_id = uuid4()
+    history = {"schema": "formation-owner-v1", "receipt_id": str(uuid4()),
+        "owner": "fulfillment-formation", "stage": "CANDIDATE",
+        "work_id": str(work_id), "inventory_fingerprint": "a" * 64,
+        "candidate_is_authority": False, "candidate_output": {"historic": "private proof"}}
+    payload = {"objective": "change one bounded file", "completion_contract": {
+        "production_plan": {"fulfillment_formation_receipts": [history]}}}
+    admission = _admission(postgres_database, git_repository,
+                           work_id=work_id, contract_payload=payload)
+    NativeExecutorRuntimeService(postgres_database).admit(admission)
+    app = create_http_application(
+        application=object(), database=postgres_database,
+        work_service=SimpleNamespace(database=postgres_database),
+        orchestrator=SimpleNamespace(shutdown=lambda: None),
+        steering_driver=SimpleNamespace(shutdown=lambda: None),
+        runtime_activation=SimpleNamespace(project=lambda: None),
+    )
+    client = TestClient(app)
+    path = f"/api/works/{work_id}/native-context/{admission.binding.attempt_id}/evidence/"
+    response = client.get(path + canonical_digest(history))
+    assert response.status_code == 200
+    assert response.json()["record"] == history
+    assert response.json()["contract_digest"] == admission.contract.contract_digest
+    assert client.get(path + "0" * 64).status_code == 409
+    assert client.get(path.replace(str(work_id), str(uuid4())) + canonical_digest(history)).status_code == 409
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        assert store.contract(admission.contract.id) == admission.contract
+        assert store.steps_for_attempt(admission.binding.attempt_id) == ()
+        assert store.effects_for_attempt(admission.binding.attempt_id) == ()
+
+
+def test_context_evidence_failure_stops_worker_before_model_or_tool_call(
+    postgres_database: Database, git_repository: Path,
+) -> None:
+    from spg.executor.context_evidence import NativeContextEvidenceError
+    service = NativeExecutorRuntimeService(postgres_database)
+    admission = _admission(postgres_database, git_repository)
+    service.admit(admission)
+    class InvalidContextKernel:
+        async def run(self, **_kwargs):
+            raise NativeContextEvidenceError("NATIVE_CONTEXT_CONTRACT_BINDING_INVALID")
+    worker = NativeExecutionWorker(service, lambda _grant: InvalidContextKernel())
+    assert asyncio.run(worker.run_once(_offer()))
+    with postgres_database.unit_of_work() as uow:
+        store = NativeExecutionStore(uow.session)
+        state = store.attempt_state(admission.binding.attempt_id)
+        assert state.terminal_outcome is AttemptTerminalOutcome.UNABLE_TO_COMPLETE
+        assert store.steps_for_attempt(admission.binding.attempt_id) == ()
+        assert store.effects_for_attempt(admission.binding.attempt_id) == ()
+
+
 def test_session_fork_binds_exact_checkpoint_and_close_does_not_complete_pwu(
     postgres_database: Database, git_repository: Path, tmp_path: Path
 ) -> None:
