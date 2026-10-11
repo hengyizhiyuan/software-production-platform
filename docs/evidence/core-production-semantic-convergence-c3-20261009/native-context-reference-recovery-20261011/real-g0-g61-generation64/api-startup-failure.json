@@ -1,0 +1,14 @@
+{
+  "failure_code": "CURRENT_VERIFICATION_HISTORY_POSITIONAL_ZIP_MISMATCH",
+  "source": "330a171e9dcfd48992da46f0c56dd0a29348870a",
+  "image_id": "sha256:2fe07c269c6dc7b79e385cd0016bce04f297766cfa2317e6a4c3ec50a722dad9",
+  "container_id": "affc2eb47c216221c9a0a76b46db92382f69bfe380630e0d6b2ed5b3f0765efb",
+  "container_exit_code": 3,
+  "work_id": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "failure_path": "API lifespan -> resume_safely_eligible_works -> PlanFrameAssembler.assemble",
+  "exception": "ValueError: zip() argument 2 is shorter than argument 1",
+  "logs_sha256": "2ff08d8d9c456d2a15c739bd3f512c050241e9647497afa8c9a7d9c9cc87fbcd",
+  "fix_boundary": "Bind current result values to exact current Verification Owner IDs; retain all historical references",
+  "historical_failure_modified": false,
+  "original_contract_modified": false
+}

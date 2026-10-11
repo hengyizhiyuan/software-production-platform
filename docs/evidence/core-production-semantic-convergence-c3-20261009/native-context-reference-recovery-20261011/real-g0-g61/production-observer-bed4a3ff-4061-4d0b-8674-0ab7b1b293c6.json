@@ -1,0 +1,57 @@
+{
+  "observations": 11,
+  "latest": {
+    "captured_at_utc": "2026-10-11T10:08:35.969660+00:00",
+    "http": {
+      "work": {
+        "status": 200,
+        "sha256": "cd62f17bba9dfd05ea648bf5ad2f093edb4fc300d4de0555f85d5431b281333c",
+        "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation62/private/production-observer-bed4a3ff-4061-4d0b-8674-0ab7b1b293c6/10-work.json",
+        "bytes": 7317
+      },
+      "/steering": {
+        "status": 200,
+        "sha256": "d23348921df074258300cb1b1fa121ecb80d806bb8907ce37a3b25ee8f70bccb",
+        "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation62/private/production-observer-bed4a3ff-4061-4d0b-8674-0ab7b1b293c6/10-steering.json",
+        "bytes": 3745
+      },
+      "/operations": {
+        "status": 200,
+        "sha256": "f2fdf721dc22dfaba731492c8f1acb19f79662def4742715bc258cab728a70b2",
+        "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation62/private/production-observer-bed4a3ff-4061-4d0b-8674-0ab7b1b293c6/10-operations.json",
+        "bytes": 2589
+      },
+      "/guardian-assurance": {
+        "status": 200,
+        "sha256": "d2ab9273e572a45a905cc5111f632905b53675dbb6efcc6314a8940b383ca35e",
+        "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation62/private/production-observer-bed4a3ff-4061-4d0b-8674-0ab7b1b293c6/10-guardian-assurance.json",
+        "bytes": 71
+      },
+      "/delivery": {
+        "status": 200,
+        "sha256": "0d7bdc24f3594a066222e0dd3c7de7036c65fa6ebd8a75d4ea7fea6fd3ebe36e",
+        "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation62/private/production-observer-bed4a3ff-4061-4d0b-8674-0ab7b1b293c6/10-delivery.json",
+        "bytes": 146
+      }
+    },
+    "model_calls_by_controller": 0,
+    "work_created": 0,
+    "work": {
+      "status": "NEEDS_ATTENTION",
+      "work_complete": false,
+      "human_attention_required": true,
+      "automatic_progression_state": "STOPPED",
+      "current_production_run_id": "94e42d44-5291-49a0-a172-29ffd70940c0",
+      "current_work_reality_revision_id": "dc748198-84bc-5cd5-a74b-ea0bb2ab57b3"
+    },
+    "steering": {
+      "status": null,
+      "condition": null,
+      "production_admission_state": null
+    }
+  },
+  "private_folder": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation62/private/production-observer-bed4a3ff-4061-4d0b-8674-0ab7b1b293c6",
+  "mutation_scope": "Normal Work GET projection and its existing autonomous production lifecycle; no new Work, Human Decision or explicit Artifact writes",
+  "provider_calls_by_controller": 0,
+  "controller_sha256": "776af0fb48ed2ec1a7269172cc58b923558cec00d0f64974ceb2b51837e10623"
+}

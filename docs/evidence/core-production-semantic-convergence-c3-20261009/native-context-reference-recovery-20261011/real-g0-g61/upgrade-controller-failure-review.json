@@ -1,0 +1,13 @@
+{
+  "source": "c125ec674a7537e8cafe7da17fd20be1800fabb5",
+  "image_id": "sha256:a0f7d82e3655b9cd4dbce21c2f5ef114296385e399b7dea5aea3610bb3f03592",
+  "finding_code": "SOURCE_ENV_IDENTITY_MISMATCH",
+  "owner": "watt",
+  "cause": "Controller copied the prior image C3_WATT_TREE into Tool Host; actual installed image is correct, identity attester correctly rejected stale tree metadata",
+  "model_calls": 0,
+  "work_resumed": false,
+  "production_modified": false,
+  "application_repair": false,
+  "image_rebuilt": false,
+  "failed_container_retained": true
+}

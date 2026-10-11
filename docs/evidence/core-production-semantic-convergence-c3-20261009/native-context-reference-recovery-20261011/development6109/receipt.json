@@ -1,0 +1,15 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 80.69756643404253,
+  "image_id": "sha256:c9bae501ed17987f4513b09237a801c0115e2f231270536d564badabb2d30afb",
+  "container_id": "5b8c30e6051507db87abc634e16914fe45d9aecfb5a4ec61c6c1cff4206334ce",
+  "source_overlay": true,
+  "snapshot_sha256": "93d15136b2b3a9e3925dfff17db38999bc7c62ea880f78e171c431d85b9c2fdb",
+  "nodes": [
+    "tests/test_c3_current_verification_projection.py",
+    "tests/test_mvp_plan_steering_decision_contracts.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

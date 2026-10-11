@@ -1,0 +1,15 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 87.16210613795556,
+  "image_id": "sha256:c9bae501ed17987f4513b09237a801c0115e2f231270536d564badabb2d30afb",
+  "container_id": "42a9956aa6c8808344dcfd2ba075accc47898d092b873294d23246eaac9a59d7",
+  "source_overlay": true,
+  "snapshot_sha256": "ec9f016518d13a44407e49cdf132818717e2003c7bcd466e30af632e299546b5",
+  "nodes": [
+    "tests/test_native_context_evidence.py",
+    "tests/test_native_executor_contracts.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

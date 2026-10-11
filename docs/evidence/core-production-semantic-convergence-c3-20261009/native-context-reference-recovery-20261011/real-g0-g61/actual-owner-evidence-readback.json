@@ -1,0 +1,92 @@
+{
+  "captured_at_utc": "2026-10-11T10:04:42.596807+00:00",
+  "reads": [
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:184b4579dbbca84dacd1f0e2188477aff44a8da9a279f6aa02a2b6bde0b917d2",
+      "content_digest": "184b4579dbbca84dacd1f0e2188477aff44a8da9a279f6aa02a2b6bde0b917d2",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "http_status": 200,
+      "record_digest_verified": true
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:b1d573153d525a86a99d2cf3878617b8e764c7d69ec52b62c0d42ec7a432d19b",
+      "content_digest": "b1d573153d525a86a99d2cf3878617b8e764c7d69ec52b62c0d42ec7a432d19b",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "http_status": 200,
+      "record_digest_verified": true
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:9b88935b1bd1ecdffe496583fcc2bbb282482dc378999118a86f79374600f537",
+      "content_digest": "9b88935b1bd1ecdffe496583fcc2bbb282482dc378999118a86f79374600f537",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "http_status": 200,
+      "record_digest_verified": true
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:6327c9a938785b1a70abfa78a50bb825648269c71724a4cb80593bada2d91ae7",
+      "content_digest": "6327c9a938785b1a70abfa78a50bb825648269c71724a4cb80593bada2d91ae7",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "http_status": 200,
+      "record_digest_verified": true
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:129fcde96edba48208bc89ad1fa964027f40d162c20040c7e93afa3627df85a8",
+      "content_digest": "129fcde96edba48208bc89ad1fa964027f40d162c20040c7e93afa3627df85a8",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "http_status": 200,
+      "record_digest_verified": true
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:6300dea56b21f68427a39bb8609eb7bc3bcb9cb4043b25974d177a78976b7a32",
+      "content_digest": "6300dea56b21f68427a39bb8609eb7bc3bcb9cb4043b25974d177a78976b7a32",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "http_status": 200,
+      "record_digest_verified": true
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:c14955cb3a6352dfe4c81ccb746b6d51f8eab23059152626793f6c2c951c2482",
+      "content_digest": "c14955cb3a6352dfe4c81ccb746b6d51f8eab23059152626793f6c2c951c2482",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "http_status": 200,
+      "record_digest_verified": true
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:2105d9249901dce660364077358dd7d8981fe9d94bc640ac5734c20ebab1185e",
+      "content_digest": "2105d9249901dce660364077358dd7d8981fe9d94bc640ac5734c20ebab1185e",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "http_status": 200,
+      "record_digest_verified": true
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:3512585da967d6d548ae5f743010e50547dba95f2f1beabad00102bdd22c9f95",
+      "content_digest": "3512585da967d6d548ae5f743010e50547dba95f2f1beabad00102bdd22c9f95",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "http_status": 200,
+      "record_digest_verified": true
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:94987581171ca80420726560b341653de3fa7ce4a489090763f4f4c6721fdc88",
+      "content_digest": "94987581171ca80420726560b341653de3fa7ce4a489090763f4f4c6721fdc88",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "http_status": 200,
+      "record_digest_verified": true
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:4ef1e4fb8f104b43954132d291ed3ce6fde0f230ed09fc83ead98dd202e49a98",
+      "content_digest": "4ef1e4fb8f104b43954132d291ed3ce6fde0f230ed09fc83ead98dd202e49a98",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "http_status": 200,
+      "record_digest_verified": true
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:d4e24b44ea0ae169e0312d4a73bad5eb7a78b9a8b81455a192d21f06b5bf12c6",
+      "content_digest": "d4e24b44ea0ae169e0312d4a73bad5eb7a78b9a8b81455a192d21f06b5bf12c6",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "http_status": 200,
+      "record_digest_verified": true
+    }
+  ],
+  "model_calls": 0,
+  "tool_effects": 0,
+  "work_created": 0
+}

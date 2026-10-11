@@ -1,0 +1,19 @@
+{
+  "schema": "c3-isolated-pg-test-session-diagnostic-v1",
+  "captured_at_utc": "2026-10-11T12:02:14.954882+00:00",
+  "actual_image_id": "sha256:2fe07c269c6dc7b79e385cd0016bce04f297766cfa2317e6a4c3ec50a722dad9",
+  "test_container_id": "2ff62503e398446903d13515d7c7467a4830db713165d3d6b8fffdf8b34d18c2",
+  "database": "c1_contract_continuity",
+  "production": false,
+  "observed_waits": [
+    "101|active|Lock|relation|639|TRUNCATE|{104}",
+    "104|idle in transaction|Client|ClientRead|640|SELECT|{}"
+  ],
+  "cause": "Regression reuses a RuntimeStore attached to a closed previous UOW Session. SQLAlchemy reopens that Session, leaving an unmanaged read transaction that blocks the next fixture TRUNCATE.",
+  "classification": "TEST_CONTROLLER_RESOURCE_LIFETIME_ERROR_NOT_RUNTIME_FAILURE",
+  "test_body_completed": 1,
+  "qualification_pass_claimed": false,
+  "live_models": 0,
+  "real_work_affected": false,
+  "targeted_fixture_container_stop": "watt-c3-g0-binding-generation64-owner-tests-final-20261010"
+}

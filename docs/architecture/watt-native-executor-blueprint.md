@@ -291,6 +291,29 @@ Separate governed external context from versioned `WorkingState` (plan, observat
 
 The prompt/request projection includes the full current authority/obligation capsule and selected working context. Persist selected source identities and resulting normalized request, not a dependency on private chain-of-thought. Store concise conclusions and rationale. Provider hidden reasoning/opaque compaction may be auxiliary only. An adapter that requires private state without a portable reconstruction path is not eligible for native continuity qualification.
 
+### K.1 Execution context and retained Owner history
+
+The current execution view keeps original requirements, values, ordering, Scope,
+qualifiers, Source Binding, admitted fulfillment bindings, grants and gates inline.
+Historical candidate proposals, validation feedback and model receipts remain
+immutable Owner evidence; they need not be repeated in every inference request.
+Represent those audit records with contract-scoped content digests, receipt IDs,
+Owner identities and original locations. Resolve them through the authenticated
+Work/Attempt Owner read boundary when needed. A reference provides traceability,
+not evidence of fulfillment or permission.
+
+`NativeContractExecutionView` currently factors only the existing typed Formation
+audit histories. The persisted full PWU contract and its original digest remain
+the authority consumed by Verification, Guardian and governance. The execution
+view has its own digest and must reconstruct the exact original contract from
+retained records. Contract drift, contradictory receipt identities or an invalid
+reference fail closed; current requirements that exceed the unchanged request
+limit still stop. This does not implement the general model-assisted compaction
+protocol below or give a Worker a new evidence-fetch tool or effect capability.
+
+Qualification and remaining C3 boundaries are recorded in the
+[Native Context recovery evidence](../evidence/core-production-semantic-convergence-c3-20261009/native-context-reference-recovery-20261011/).
+
 `CompactionOperation` freezes `(Session sequence, context revision, contract version, source/output frontier, control_version)`. At a safe boundary: persist input → reserve budget → build candidate projection → validate all mandatory exact references and unresolved effects/receipts → store projection/source blobs → CAS the current projection and append completion event in PostgreSQL. Only after commit may memory swap to the new projection. A concurrent correction makes CAS fail; retain candidate as unused and reassemble from the new basis. Previous projection remains retrievable; a crash after commit loads the new pointer, a crash before commit keeps the old one.
 
 Default trigger: estimated request plus reserved output exceeds 80% of negotiated context capacity; adapter/token estimator uncertainty adds a 10% margin. At most two compaction submissions per unchanged input frontier and at most 10% of the admitted inference-request allowance, rounded up. If input still fits without compaction, continue with a recorded fallback. If exact required capsule alone cannot fit, park as CONTEXT_BLOCKED; do not summarize away authority. Cross-model compaction uses a successor Attempt/profile under D4, not hidden fallback. Provider-specific compaction is disabled initially and may later optimize a portable projection.

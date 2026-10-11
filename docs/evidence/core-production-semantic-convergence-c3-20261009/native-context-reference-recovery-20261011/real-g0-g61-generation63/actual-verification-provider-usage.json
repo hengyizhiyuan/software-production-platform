@@ -1,0 +1,50 @@
+{
+  "schema": "c3-actual-verification-provider-usage-v1",
+  "source_revision": "ce62ce24cb12913447d0671f54502cfaeaf2d9e5",
+  "verification_record_id": "9393c7c4-a032-5ef2-aae4-469e82ca9edc",
+  "logical_calls": 3,
+  "requests": [
+    {
+      "request_id": "c6f298a1-7056-4153-88ff-9e8400234c1e",
+      "usage": {
+        "unknown": false,
+        "input_tokens": 7244,
+        "total_tokens": 7915,
+        "cached_tokens": 768,
+        "output_tokens": 671,
+        "reasoning_tokens": 0
+      },
+      "effective_model": "deepseek-flash",
+      "provider": "deepseek"
+    },
+    {
+      "request_id": "50ff322e-36b0-4790-95b2-6117384c240a",
+      "usage": {
+        "unknown": false,
+        "input_tokens": 350554,
+        "total_tokens": 351249,
+        "cached_tokens": 0,
+        "output_tokens": 695,
+        "reasoning_tokens": 0
+      },
+      "effective_model": "deepseek-flash",
+      "provider": "deepseek"
+    },
+    {
+      "request_id": "69ad9b67-ce24-4863-8a59-439bf3379f29",
+      "usage": {
+        "unknown": false,
+        "input_tokens": 6285,
+        "total_tokens": 7001,
+        "cached_tokens": 768,
+        "output_tokens": 716,
+        "reasoning_tokens": 0
+      },
+      "effective_model": "deepseek-flash",
+      "provider": "deepseek"
+    }
+  ],
+  "deduplication": "Actual Provider request_id; reasoning tokens included in output, not added twice",
+  "wall_seconds": 83.140593,
+  "monetary_cost": "UNKNOWN"
+}

@@ -1,0 +1,13 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 94 items
+
+tests/test_native_context_evidence.py ...............                    [ 15%]
+tests/test_native_executor_contracts.py ................................ [ 50%]
+...............................................                          [100%]
+
+--------------------- generated xml file: /out/result.xml ----------------------
+============================= 94 passed in 43.22s ==============================

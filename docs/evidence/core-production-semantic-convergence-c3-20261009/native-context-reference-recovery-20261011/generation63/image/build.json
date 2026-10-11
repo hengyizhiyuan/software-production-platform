@@ -1,0 +1,57 @@
+{
+  "schema": "c3-exact-image-build-v1",
+  "started_at_utc": "2026-10-11T10:27:47.815475+00:00",
+  "ended_at_utc": "2026-10-11T10:40:22.164884+00:00",
+  "wall_seconds": 754.3714130480075,
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "ce62ce24cb12913447d0671f54502cfaeaf2d9e5",
+      "tree": "81a20d03696ca2044375e8dd8d7c6716eb858132"
+    },
+    "guardian": {
+      "revision": "5c88ffb9318e68d11b0cfb2af38048e6452bf881",
+      "tree": "df757ab48aac8928896e3f17619e64a7642a6ea3"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "command": [
+    "docker",
+    "build",
+    "--network=none",
+    "--build-arg",
+    "BASE_IMAGE=watt-c3-continuation-dependency-base:6c1f48e-20261009",
+    "--build-arg",
+    "WATT_REVISION=ce62ce24cb12913447d0671f54502cfaeaf2d9e5",
+    "--build-arg",
+    "WATT_TREE=81a20d03696ca2044375e8dd8d7c6716eb858132",
+    "--build-arg",
+    "GUARDIAN_REVISION=5c88ffb9318e68d11b0cfb2af38048e6452bf881",
+    "--build-arg",
+    "GUARDIAN_TREE=df757ab48aac8928896e3f17619e64a7642a6ea3",
+    "--build-arg",
+    "ECF_REVISION=5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "--build-arg",
+    "ECF_TREE=878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "-f",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation63-qualified-20261010/final-image/context/watt/docs/evidence/core-production-semantic-convergence-c3-20261009/Dockerfile.c3",
+    "-t",
+    "watt-c3-source-owner:ce62ce2",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation63-qualified-20261010/final-image/context"
+  ],
+  "source_overlay": false,
+  "real_model_calls": 0,
+  "scope": "C3 Native immutable contract execution-view factoring, scoped historical Owner evidence reads and same-Attempt recovery; unchanged facts, budgets, effect grants and independent Guardian; deterministic qualification only",
+  "image": {
+    "Id": "sha256:a2e1339527deee9e89d73a41d9521fc8a40687d1ebad7fd0b8c2fedae56029c7",
+    "RepoDigests": [],
+    "Created": "2026-10-11T18:36:54.801578812+08:00"
+  }
+}

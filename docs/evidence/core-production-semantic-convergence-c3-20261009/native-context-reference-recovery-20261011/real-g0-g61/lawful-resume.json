@@ -1,0 +1,29 @@
+{
+  "captured_at_utc": "2026-10-11T10:04:48.714326+00:00",
+  "work_id": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "attempt_id": "de98f392-b8d1-40ac-a442-a283fa938060",
+  "image_id": "sha256:a0f7d82e3655b9cd4dbce21c2f5ef114296385e399b7dea5aea3610bb3f03592",
+  "source": "c125ec674a7537e8cafe7da17fd20be1800fabb5",
+  "control_receipts": [
+    {
+      "command_id": "3290a843-9a48-5e44-9c7c-a90724dd51bc",
+      "accepted": true,
+      "condition": "APPLIED",
+      "message": "PAUSE request recorded",
+      "recorded_at": "2026-10-11T10:04:44.916390Z"
+    },
+    {
+      "command_id": "c26c91c0-dc06-5b30-af7c-a0b441845054",
+      "accepted": true,
+      "condition": "APPLIED",
+      "message": "RESUME request recorded",
+      "recorded_at": "2026-10-11T10:04:46.513647Z"
+    }
+  ],
+  "new_work": 0,
+  "original_contract_modified": false,
+  "budget_increased": false,
+  "permission_increased": false,
+  "prior_effects": 0,
+  "controller_sha256": "92b1bd2978b6848dd7818d30216eb50bbb1df79db81bdebe6f977dd26cd3cf76"
+}

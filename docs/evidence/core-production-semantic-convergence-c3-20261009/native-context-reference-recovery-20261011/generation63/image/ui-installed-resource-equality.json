@@ -1,0 +1,11 @@
+{
+  "actual_image_id": "sha256:a2e1339527deee9e89d73a41d9521fc8a40687d1ebad7fd0b8c2fedae56029c7",
+  "resource_sha256": {
+    "advanced.html": "4ac48a0f4462f4b972cbd3a2bc725d23f940e1107694b50c481a1954f1b3ba3b",
+    "app.js": "859467885fd05e9f874ffff33464df6dd953b8fddb6c4a407460ad87393c1e25",
+    "experience.js": "94a30da3842bf6fd8427d55e99b5fd0c9bb63ae78f00ca94b2113012a997eeb9"
+  },
+  "exact_equality": true,
+  "model_calls": 0,
+  "source_import_overlay": false
+}

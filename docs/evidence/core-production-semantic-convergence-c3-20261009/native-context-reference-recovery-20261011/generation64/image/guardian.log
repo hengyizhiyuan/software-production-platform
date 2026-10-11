@@ -1,0 +1,12 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /guardian-qualification
+plugins: anyio-4.14.2
+collected 46 items
+
+tests/test_c3_review_identity_binding.py ...........                     [ 23%]
+tests/test_c3_component_calibration.py ................................. [ 95%]
+..                                                                       [100%]
+
+---------------- generated xml file: /c3-evidence/guardian.xml -----------------
+============================= 46 passed in 15.13s ==============================

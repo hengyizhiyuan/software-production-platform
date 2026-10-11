@@ -1,0 +1,55 @@
+{
+  "schema": "c3-semantic-owner-pg-regression-v1",
+  "started_at_utc": "2026-10-11T10:42:14.815573+00:00",
+  "ended_at_utc": "2026-10-11T11:06:06.766776+00:00",
+  "wall_seconds": 1431.9512162359897,
+  "counts": {
+    "tests": 24,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 24
+  },
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "ce62ce24cb12913447d0671f54502cfaeaf2d9e5",
+      "tree": "81a20d03696ca2044375e8dd8d7c6716eb858132"
+    },
+    "guardian": {
+      "revision": "5c88ffb9318e68d11b0cfb2af38048e6452bf881",
+      "tree": "df757ab48aac8928896e3f17619e64a7642a6ea3"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:a2e1339527deee9e89d73a41d9521fc8a40687d1ebad7fd0b8c2fedae56029c7",
+  "actual_container_id": "050e6620b9e58ae0011695a47c6929486c97edd272618b94d28887e5896d08ac",
+  "actual_postgres_image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+  "actual_postgres_container_id": "4514e14f81ba421add50bf9feeb27458c6a2b3b6c16c5859b6ffbc04c39d4728",
+  "database_name": "c1_contract_continuity",
+  "migration_head": "20261007_72",
+  "network_internal": true,
+  "nodes": [
+    "tests/integration/test_s3b_verification_satisfaction.py::test_corrected_verifier_version_appends_proof_without_rewriting_failed_subject",
+    "tests/integration/test_s3b_verification_satisfaction.py::test_s3b_12_old_snapshot_pass_cannot_satisfy_new_snapshot",
+    "tests/integration/test_c1_contract_continuity.py::test_actual_repository_verification_rejects_source_identity_drift",
+    "tests/integration/test_c1_contract_continuity.py::test_guardian_rejects_missing_independent_owner_records",
+    "tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian"
+  ],
+  "source_or_test_overlay": false,
+  "credentials_independently_generated": true,
+  "live_model_calls": 0,
+  "actual_ai_work_created": 0,
+  "fixture_only": true,
+  "original_database_access": false,
+  "existing_services_started": false,
+  "controller_sha256": "bbb62245b2dd645e48f0d7996b8f5db71d19eda2ce8ea69195c8e295dc84d3fd",
+  "claim": "ISOLATED_PG_OWNER_PERSISTENCE_AND_STATE_REGRESSION_NOT_REAL_G0"
+}

@@ -1,0 +1,206 @@
+{
+  "work_id": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "attempt_id": "de98f392-b8d1-40ac-a442-a283fa938060",
+  "contract_version_id": "21df8cf4-5fbc-5316-b5ca-c47e42a085c9",
+  "contract_digest": "bfca72d790e278192dd1238b34d04ae2493ec832013ae7c7ba7437db2f144100",
+  "original_payload_bytes": 1054482,
+  "execution_view_bytes": 118960,
+  "actual_request_bytes": 142090,
+  "max_request_bytes": 524288,
+  "reference_count": 12,
+  "total_reference_locations": 24,
+  "exact_roundtrip": true,
+  "references": [
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:184b4579dbbca84dacd1f0e2188477aff44a8da9a279f6aa02a2b6bde0b917d2",
+      "content_digest": "184b4579dbbca84dacd1f0e2188477aff44a8da9a279f6aa02a2b6bde0b917d2",
+      "receipt_reference": "work-plan-receipt:82bcca13-60f0-445f-a1ef-d8831e84425c",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "stage": "MODEL_REQUEST_PENDING",
+      "inventory_fingerprint": "57b6dd706dfc1f56c7066660add814c7728d17e9096e2347ff1bd4db3989d604",
+      "work_reality_revision_id": "dc748198-84bc-5cd5-a74b-ea0bb2ab57b3",
+      "source_revision": "084c6f17e2f2625952e4cf6fc3825999410eebc7",
+      "original_locations": [
+        "/completion_contract/production_plan/fulfillment_formation_receipts/0",
+        "/completion_contract/fulfillment_bindings/0/formation_receipt/candidate_attempts/0"
+      ]
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:b1d573153d525a86a99d2cf3878617b8e764c7d69ec52b62c0d42ec7a432d19b",
+      "content_digest": "b1d573153d525a86a99d2cf3878617b8e764c7d69ec52b62c0d42ec7a432d19b",
+      "receipt_reference": "work-plan-receipt:34a9f8d4-8392-4758-b947-2de98af9f597",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "inventory_fingerprint": "57b6dd706dfc1f56c7066660add814c7728d17e9096e2347ff1bd4db3989d604",
+      "work_reality_revision_id": "dc748198-84bc-5cd5-a74b-ea0bb2ab57b3",
+      "source_revision": "084c6f17e2f2625952e4cf6fc3825999410eebc7",
+      "original_locations": [
+        "/completion_contract/production_plan/fulfillment_formation_receipts/1",
+        "/completion_contract/fulfillment_bindings/0/formation_receipt/candidate_attempts/1"
+      ]
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:9b88935b1bd1ecdffe496583fcc2bbb282482dc378999118a86f79374600f537",
+      "content_digest": "9b88935b1bd1ecdffe496583fcc2bbb282482dc378999118a86f79374600f537",
+      "receipt_reference": "work-plan-receipt:0bf51eb5-3373-43be-b259-e119a29a4bd5",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "stage": "SEMANTIC_REVIEW_PENDING",
+      "inventory_fingerprint": "57b6dd706dfc1f56c7066660add814c7728d17e9096e2347ff1bd4db3989d604",
+      "work_reality_revision_id": "dc748198-84bc-5cd5-a74b-ea0bb2ab57b3",
+      "source_revision": "084c6f17e2f2625952e4cf6fc3825999410eebc7",
+      "original_locations": [
+        "/completion_contract/production_plan/fulfillment_formation_receipts/2",
+        "/completion_contract/fulfillment_bindings/0/formation_receipt/candidate_attempts/2"
+      ]
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:6327c9a938785b1a70abfa78a50bb825648269c71724a4cb80593bada2d91ae7",
+      "content_digest": "6327c9a938785b1a70abfa78a50bb825648269c71724a4cb80593bada2d91ae7",
+      "receipt_reference": "work-plan-receipt:ab766f2c-bdc4-4a72-a65a-ee0ce7699dfb",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "stage": "SEMANTIC_REVIEW_OBSERVED",
+      "inventory_fingerprint": "57b6dd706dfc1f56c7066660add814c7728d17e9096e2347ff1bd4db3989d604",
+      "work_reality_revision_id": "dc748198-84bc-5cd5-a74b-ea0bb2ab57b3",
+      "source_revision": "084c6f17e2f2625952e4cf6fc3825999410eebc7",
+      "original_locations": [
+        "/completion_contract/production_plan/fulfillment_formation_receipts/3",
+        "/completion_contract/fulfillment_bindings/0/formation_receipt/candidate_attempts/3"
+      ]
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:129fcde96edba48208bc89ad1fa964027f40d162c20040c7e93afa3627df85a8",
+      "content_digest": "129fcde96edba48208bc89ad1fa964027f40d162c20040c7e93afa3627df85a8",
+      "receipt_reference": "work-plan-receipt:078b7b7e-e087-4f4e-a19b-76ee71b7ab61",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "stage": "SEMANTIC_REVIEW_VALIDATED",
+      "inventory_fingerprint": "57b6dd706dfc1f56c7066660add814c7728d17e9096e2347ff1bd4db3989d604",
+      "work_reality_revision_id": "dc748198-84bc-5cd5-a74b-ea0bb2ab57b3",
+      "source_revision": "084c6f17e2f2625952e4cf6fc3825999410eebc7",
+      "original_locations": [
+        "/completion_contract/production_plan/fulfillment_formation_receipts/4",
+        "/completion_contract/fulfillment_bindings/0/formation_receipt/candidate_attempts/4"
+      ]
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:6300dea56b21f68427a39bb8609eb7bc3bcb9cb4043b25974d177a78976b7a32",
+      "content_digest": "6300dea56b21f68427a39bb8609eb7bc3bcb9cb4043b25974d177a78976b7a32",
+      "receipt_reference": "work-plan-receipt:a5c5292e-773c-4db5-bc19-06c0b0c04539",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "stage": "CANDIDATE_VALIDATED",
+      "inventory_fingerprint": "57b6dd706dfc1f56c7066660add814c7728d17e9096e2347ff1bd4db3989d604",
+      "work_reality_revision_id": "dc748198-84bc-5cd5-a74b-ea0bb2ab57b3",
+      "source_revision": "084c6f17e2f2625952e4cf6fc3825999410eebc7",
+      "original_locations": [
+        "/completion_contract/production_plan/fulfillment_formation_receipts/5",
+        "/completion_contract/fulfillment_bindings/0/formation_receipt/candidate_attempts/5"
+      ]
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:c14955cb3a6352dfe4c81ccb746b6d51f8eab23059152626793f6c2c951c2482",
+      "content_digest": "c14955cb3a6352dfe4c81ccb746b6d51f8eab23059152626793f6c2c951c2482",
+      "receipt_reference": "work-plan-receipt:ef66e4c6-a693-49f6-a27c-266bee3f85f0",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "stage": "MODEL_REQUEST_PENDING",
+      "inventory_fingerprint": "57b6dd706dfc1f56c7066660add814c7728d17e9096e2347ff1bd4db3989d604",
+      "work_reality_revision_id": "dc748198-84bc-5cd5-a74b-ea0bb2ab57b3",
+      "source_revision": "084c6f17e2f2625952e4cf6fc3825999410eebc7",
+      "original_locations": [
+        "/completion_contract/production_plan/fulfillment_formation_receipts/6",
+        "/completion_contract/fulfillment_bindings/0/formation_receipt/candidate_attempts/6"
+      ]
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:2105d9249901dce660364077358dd7d8981fe9d94bc640ac5734c20ebab1185e",
+      "content_digest": "2105d9249901dce660364077358dd7d8981fe9d94bc640ac5734c20ebab1185e",
+      "receipt_reference": "work-plan-receipt:71c4fb60-bb62-46ba-96e7-a7d8de8a5d2b",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "inventory_fingerprint": "57b6dd706dfc1f56c7066660add814c7728d17e9096e2347ff1bd4db3989d604",
+      "work_reality_revision_id": "dc748198-84bc-5cd5-a74b-ea0bb2ab57b3",
+      "source_revision": "084c6f17e2f2625952e4cf6fc3825999410eebc7",
+      "original_locations": [
+        "/completion_contract/production_plan/fulfillment_formation_receipts/7",
+        "/completion_contract/fulfillment_bindings/0/formation_receipt/candidate_attempts/7"
+      ]
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:3512585da967d6d548ae5f743010e50547dba95f2f1beabad00102bdd22c9f95",
+      "content_digest": "3512585da967d6d548ae5f743010e50547dba95f2f1beabad00102bdd22c9f95",
+      "receipt_reference": "work-plan-receipt:977d167b-7774-4441-981f-47972d8191cc",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "stage": "SEMANTIC_REVIEW_PENDING",
+      "inventory_fingerprint": "57b6dd706dfc1f56c7066660add814c7728d17e9096e2347ff1bd4db3989d604",
+      "work_reality_revision_id": "dc748198-84bc-5cd5-a74b-ea0bb2ab57b3",
+      "source_revision": "084c6f17e2f2625952e4cf6fc3825999410eebc7",
+      "original_locations": [
+        "/completion_contract/production_plan/fulfillment_formation_receipts/8",
+        "/completion_contract/fulfillment_bindings/0/formation_receipt/candidate_attempts/8"
+      ]
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:94987581171ca80420726560b341653de3fa7ce4a489090763f4f4c6721fdc88",
+      "content_digest": "94987581171ca80420726560b341653de3fa7ce4a489090763f4f4c6721fdc88",
+      "receipt_reference": "work-plan-receipt:e161cc93-a8d9-44bf-88fe-b00c303d846c",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "stage": "SEMANTIC_REVIEW_OBSERVED",
+      "inventory_fingerprint": "57b6dd706dfc1f56c7066660add814c7728d17e9096e2347ff1bd4db3989d604",
+      "work_reality_revision_id": "dc748198-84bc-5cd5-a74b-ea0bb2ab57b3",
+      "source_revision": "084c6f17e2f2625952e4cf6fc3825999410eebc7",
+      "original_locations": [
+        "/completion_contract/production_plan/fulfillment_formation_receipts/9",
+        "/completion_contract/fulfillment_bindings/0/formation_receipt/candidate_attempts/9"
+      ]
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:4ef1e4fb8f104b43954132d291ed3ce6fde0f230ed09fc83ead98dd202e49a98",
+      "content_digest": "4ef1e4fb8f104b43954132d291ed3ce6fde0f230ed09fc83ead98dd202e49a98",
+      "receipt_reference": "work-plan-receipt:1bb09466-83d9-4694-a631-f91d335e0ec8",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "stage": "SEMANTIC_REVIEW_VALIDATED",
+      "inventory_fingerprint": "57b6dd706dfc1f56c7066660add814c7728d17e9096e2347ff1bd4db3989d604",
+      "work_reality_revision_id": "dc748198-84bc-5cd5-a74b-ea0bb2ab57b3",
+      "source_revision": "084c6f17e2f2625952e4cf6fc3825999410eebc7",
+      "original_locations": [
+        "/completion_contract/production_plan/fulfillment_formation_receipts/10",
+        "/completion_contract/fulfillment_bindings/0/formation_receipt/candidate_attempts/10"
+      ]
+    },
+    {
+      "reference": "native-contract:21df8cf4-5fbc-5316-b5ca-c47e42a085c9:evidence:d4e24b44ea0ae169e0312d4a73bad5eb7a78b9a8b81455a192d21f06b5bf12c6",
+      "content_digest": "d4e24b44ea0ae169e0312d4a73bad5eb7a78b9a8b81455a192d21f06b5bf12c6",
+      "receipt_reference": "work-plan-receipt:0dbf7c9f-a35d-44c2-a45a-02f4f9103896",
+      "owner": "WORK_FULFILLMENT_PROJECTION",
+      "stage": "CANDIDATE_VALIDATED",
+      "inventory_fingerprint": "57b6dd706dfc1f56c7066660add814c7728d17e9096e2347ff1bd4db3989d604",
+      "work_reality_revision_id": "dc748198-84bc-5cd5-a74b-ea0bb2ab57b3",
+      "source_revision": "084c6f17e2f2625952e4cf6fc3825999410eebc7",
+      "original_locations": [
+        "/completion_contract/production_plan/fulfillment_formation_receipts/11",
+        "/completion_contract/fulfillment_bindings/0/formation_receipt/candidate_attempts/11"
+      ]
+    }
+  ],
+  "source_vector_digest": "23f1bc07b55f471c3734996418fa0361710d1c8ff0e6669c2a120513dc56f278",
+  "original_resource_envelope": {
+    "schema_version": 1,
+    "envelope_id": "48e3bf96-ad5a-58ea-a8d7-1338ece8b667",
+    "policy_version": "watt-native-mvp-v1",
+    "max_inference_submissions": 120,
+    "max_tool_effects": 400,
+    "max_active_seconds": 7200,
+    "max_log_bytes": 65536,
+    "max_artifact_bytes": 67108864,
+    "max_workspace_bytes": 536870912,
+    "max_successor_recoveries": 3,
+    "max_parallel_workers": 1,
+    "max_cost_units": null,
+    "provider_profile": "deepseek-responses:deepseek-flash:high",
+    "permitted_provider_profiles": [
+      "deepseek-responses:deepseek-flash:high"
+    ]
+  },
+  "grants_digest": "ec22757acd690a4dc58717413768a83f4e352a6e3d5a8f89ae1065b732a708b4",
+  "model_calls": 0,
+  "tool_effects": 0,
+  "application_revision": "c125ec674a7537e8cafe7da17fd20be1800fabb5"
+}

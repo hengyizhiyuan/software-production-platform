@@ -1,0 +1,36 @@
+{
+  "schema": "c3-content-lifecycle-consumer-plan-root-cause-v1",
+  "work_id": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "source_revision": "ce62ce24cb12913447d0671f54502cfaeaf2d9e5",
+  "verification_record_id": "9393c7c4-a032-5ef2-aae4-469e82ca9edc",
+  "snapshot_id": "5e7cd6d9-6899-5921-9e77-c8f030f319d6",
+  "result": "FAIL",
+  "classification": "B_SYSTEM_CAPABILITY_DEFECT",
+  "passed_fact_checks": 18,
+  "all_fact_checks_passed": true,
+  "failed_source_ref": "ir-clause:e41e711a-1571-5f6b-a524-14e0087b8dd1:pi-n1-index-page:c6",
+  "failure_disposition": "UNVERIFIABLE",
+  "consumer_only_received_current_content_binding": true,
+  "persisted_same_source_current_and_candidate_seal_bindings": true,
+  "same_exact_source_span": [
+    0,
+    72
+  ],
+  "cause": "Current-only consumer input omits the independently admitted same-source Candidate Owner gate; current content and future lifecycle responsibility cannot be distinguished from that input. No source-text proof can seal Candidate.",
+  "fix_boundary": "Supply the related original responsibility bindings to existing independent content verifier while selecting only current content checks. Subsequent existing Owner gates still require their own real evidence.",
+  "budget_changed": false,
+  "historical_records_rewritten": false,
+  "native_effects_replayed": false,
+  "private_evidence_sha256": "eda76a02aebcbc5f9ef152cf047c4be309205f914c055ba0d6b21ac65ed0c073",
+  "receipt_refs": [
+    "native-evidence:1b3f72d5-91ad-489e-aca0-929795c01133",
+    "native-evidence:f7e8256c-fc9c-4b77-9b54-08ef0c655503",
+    "native-evidence:6f7fc093-8d2a-4394-9448-33fb66c1e539",
+    "native-evidence:c87f171e-a18b-4014-9fb0-e155506a68a8",
+    "native-evidence:e0222304-ef62-4093-98a7-9e58ac1b8a10",
+    "native-evidence:160adba8-6bcf-4cac-8b69-20e19b395dff",
+    "native-evidence:edd7c679-440b-4a90-9e53-5fcc351d391f",
+    "native-evidence:3f716699-2c07-47b4-8103-df0042c03a14",
+    "native-evidence:a38781d2-1e31-4560-af38-667ae6c7a70c"
+  ]
+}

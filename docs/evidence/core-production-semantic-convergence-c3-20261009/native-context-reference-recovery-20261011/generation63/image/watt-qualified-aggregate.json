@@ -1,0 +1,66 @@
+{
+  "schema": "c3-continuation-exact-image-regression-v1",
+  "started_at_utc": "2026-10-11T10:41:14.433451+00:00",
+  "ended_at_utc": "2026-10-11T10:44:44.567020+00:00",
+  "wall_seconds": 210.13906575390138,
+  "sources": {
+    "watt": {
+      "revision": "ce62ce24cb12913447d0671f54502cfaeaf2d9e5",
+      "tree": "81a20d03696ca2044375e8dd8d7c6716eb858132"
+    },
+    "guardian": {
+      "revision": "5c88ffb9318e68d11b0cfb2af38048e6452bf881",
+      "tree": "df757ab48aac8928896e3f17619e64a7642a6ea3"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "image_id": "sha256:a2e1339527deee9e89d73a41d9521fc8a40687d1ebad7fd0b8c2fedae56029c7",
+  "actual_container_id": "f00f45f48aab85f14af509183c14b8a183c5c1a30716a5d9a1af76f097cc2e6b",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "junit_family=legacy",
+    "tests/test_native_context_evidence.py",
+    "tests/test_native_executor_contracts.py",
+    "tests/test_c3_reviewed_fact_method_applicability.py",
+    "tests/test_c3_semantic_contract_calibration.py",
+    "tests/test_n1_static_html_semantics.py",
+    "tests/test_c3_static_scope_binding.py",
+    "tests/test_static_protected_context_verifier.py",
+    "-m",
+    "not real_container",
+    "--tb=short",
+    "--junitxml=/c3-evidence/watt-continuation.xml"
+  ],
+  "counts": {
+    "tests": 274,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 274
+  },
+  "exit_code": 0,
+  "source_overlay": false,
+  "live_model_calls": 0,
+  "real_ai_work_created": 0,
+  "business_database_access": false,
+  "proof_boundary": "Deterministic isolated regressions only; not real G0, Provider recovery, Guardian live Assurance, Holdout or Human Acceptance",
+  "qualification": "273 original installed passes plus one targeted fixture-path recovery",
+  "basis_receipts": [
+    "watt-continuation-receipt.json",
+    "ui-recovery-receipt.json",
+    "ui-installed-resource-equality.json"
+  ],
+  "original_initial_failure_retained": true
+}

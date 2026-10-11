@@ -1,0 +1,342 @@
+{
+  "recorded_at_utc": "2026-10-11T10:29:07.064083+00:00",
+  "work_id": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "actual_app_source": "c125ec674a7537e8cafe7da17fd20be1800fabb5",
+  "steps": [
+    {
+      "step_id": "523d4e70-ca6b-4c26-a849-6ab62fc4e1a8",
+      "sequence": 1,
+      "condition": "COMPLETED",
+      "started_at_utc": "2026-10-11T10:04:50.795833+00:00",
+      "finished_at_utc": "2026-10-11T10:04:55.462197+00:00",
+      "provider": {
+        "effective_model": "deepseek-flash",
+        "provider_identity": "deepseek",
+        "provider_request_id": "3aab3af8-a205-47dc-8423-fda2a3005a76",
+        "requested_model": "deepseek-flash",
+        "response_status": "completed",
+        "transport": {
+          "elapsed_ms": 4271,
+          "failure_code": null,
+          "first_byte_elapsed_ms": 1169,
+          "headers_elapsed_ms": 1169,
+          "mode": "stream",
+          "received_bytes": 164961,
+          "received_events": 562,
+          "response_headers_received": true,
+          "response_status_code": 200,
+          "syntactically_complete": true,
+          "terminal_received": true
+        },
+        "usage": {
+          "cached_input_tokens": 2688,
+          "input_tokens": 59014,
+          "output_tokens": 597,
+          "reasoning_tokens": 509,
+          "total_tokens": 59611
+        }
+      }
+    },
+    {
+      "step_id": "9d4f1009-01d7-47ba-ac04-2fcc4f8c4836",
+      "sequence": 2,
+      "condition": "COMPLETED",
+      "started_at_utc": "2026-10-11T10:05:07.480361+00:00",
+      "finished_at_utc": "2026-10-11T10:05:12.712677+00:00",
+      "provider": {
+        "effective_model": "deepseek-flash",
+        "provider_identity": "deepseek",
+        "provider_request_id": "f939a3e8-1f47-4680-9ee7-f3ef20d9b0f7",
+        "requested_model": "deepseek-flash",
+        "response_status": "completed",
+        "transport": {
+          "elapsed_ms": 4879,
+          "failure_code": null,
+          "first_byte_elapsed_ms": 986,
+          "headers_elapsed_ms": 986,
+          "mode": "stream",
+          "received_bytes": 170988,
+          "received_events": 587,
+          "response_headers_received": true,
+          "response_status_code": 200,
+          "syntactically_complete": true,
+          "terminal_received": true
+        },
+        "usage": {
+          "cached_input_tokens": 2688,
+          "input_tokens": 62077,
+          "output_tokens": 622,
+          "reasoning_tokens": 535,
+          "total_tokens": 62699
+        }
+      }
+    },
+    {
+      "step_id": "46529874-8d2f-42c5-ac74-0ed73830c247",
+      "sequence": 3,
+      "condition": "COMPLETED",
+      "started_at_utc": "2026-10-11T10:05:22.550365+00:00",
+      "finished_at_utc": "2026-10-11T10:05:25.306322+00:00",
+      "provider": {
+        "effective_model": "deepseek-flash",
+        "provider_identity": "deepseek",
+        "provider_request_id": "3af1c80a-923e-497e-8c2d-69882a36964d",
+        "requested_model": "deepseek-flash",
+        "response_status": "completed",
+        "transport": {
+          "elapsed_ms": 2703,
+          "failure_code": null,
+          "first_byte_elapsed_ms": 1065,
+          "headers_elapsed_ms": 1065,
+          "mode": "stream",
+          "received_bytes": 74354,
+          "received_events": 159,
+          "response_headers_received": true,
+          "response_status_code": 200,
+          "syntactically_complete": true,
+          "terminal_received": true
+        },
+        "usage": {
+          "cached_input_tokens": 2688,
+          "input_tokens": 62932,
+          "output_tokens": 182,
+          "reasoning_tokens": 56,
+          "total_tokens": 63114
+        }
+      }
+    },
+    {
+      "step_id": "930ff9f0-1c45-4cf5-bb9d-86d1145f99ce",
+      "sequence": 4,
+      "condition": "COMPLETED",
+      "started_at_utc": "2026-10-11T10:05:33.100779+00:00",
+      "finished_at_utc": "2026-10-11T10:05:38.970932+00:00",
+      "provider": {
+        "effective_model": "deepseek-flash",
+        "provider_identity": "deepseek",
+        "provider_request_id": "22060c5b-a7d8-4a34-949c-677c28c7a9e7",
+        "requested_model": "deepseek-flash",
+        "response_status": "completed",
+        "transport": {
+          "elapsed_ms": 5228,
+          "failure_code": null,
+          "first_byte_elapsed_ms": 706,
+          "headers_elapsed_ms": 699,
+          "mode": "stream",
+          "received_bytes": 207598,
+          "received_events": 754,
+          "response_headers_received": true,
+          "response_status_code": 200,
+          "syntactically_complete": true,
+          "terminal_received": true
+        },
+        "usage": {
+          "cached_input_tokens": 2688,
+          "input_tokens": 63276,
+          "output_tokens": 795,
+          "reasoning_tokens": 720,
+          "total_tokens": 64071
+        }
+      }
+    },
+    {
+      "step_id": "ce3a93cd-ef51-4046-b152-d8aee6c0a124",
+      "sequence": 5,
+      "condition": "COMPLETED",
+      "started_at_utc": "2026-10-11T10:05:48.675342+00:00",
+      "finished_at_utc": "2026-10-11T10:05:53.811082+00:00",
+      "provider": {
+        "effective_model": "deepseek-flash",
+        "provider_identity": "deepseek",
+        "provider_request_id": "c1104f2e-685f-425e-9d0f-6f6302036a26",
+        "requested_model": "deepseek-flash",
+        "response_status": "completed",
+        "transport": {
+          "elapsed_ms": 4772,
+          "failure_code": null,
+          "first_byte_elapsed_ms": 1023,
+          "headers_elapsed_ms": 1023,
+          "mode": "stream",
+          "received_bytes": 200502,
+          "received_events": 722,
+          "response_headers_received": true,
+          "response_status_code": 200,
+          "syntactically_complete": true,
+          "terminal_received": true
+        },
+        "usage": {
+          "cached_input_tokens": 2688,
+          "input_tokens": 64199,
+          "output_tokens": 737,
+          "reasoning_tokens": 680,
+          "total_tokens": 64936
+        }
+      }
+    },
+    {
+      "step_id": "c8e2aba6-142c-4072-abc3-3c5c50093bfd",
+      "sequence": 6,
+      "condition": "COMPLETED",
+      "started_at_utc": "2026-10-11T10:05:58.620813+00:00",
+      "finished_at_utc": "2026-10-11T10:06:04.292835+00:00",
+      "provider": {
+        "effective_model": "deepseek-flash",
+        "provider_identity": "deepseek",
+        "provider_request_id": "2e0e6cfa-9b63-4293-8051-e731c4de74ae",
+        "requested_model": "deepseek-flash",
+        "response_status": "completed",
+        "transport": {
+          "elapsed_ms": 5451,
+          "failure_code": null,
+          "first_byte_elapsed_ms": 989,
+          "headers_elapsed_ms": 989,
+          "mode": "stream",
+          "received_bytes": 209177,
+          "received_events": 752,
+          "response_headers_received": true,
+          "response_status_code": 200,
+          "syntactically_complete": true,
+          "terminal_received": true
+        },
+        "usage": {
+          "cached_input_tokens": 2688,
+          "input_tokens": 64709,
+          "output_tokens": 768,
+          "reasoning_tokens": 700,
+          "total_tokens": 65477
+        }
+      }
+    },
+    {
+      "step_id": "646c7948-f780-4c33-8dcb-817542b96ca1",
+      "sequence": 7,
+      "condition": "COMPLETED",
+      "started_at_utc": "2026-10-11T10:06:10.937318+00:00",
+      "finished_at_utc": "2026-10-11T10:06:18.350659+00:00",
+      "provider": {
+        "effective_model": "deepseek-flash",
+        "provider_identity": "deepseek",
+        "provider_request_id": "b0cc4754-8bfc-4a2f-8c9f-e9673e5013e0",
+        "requested_model": "deepseek-flash",
+        "response_status": "completed",
+        "transport": {
+          "elapsed_ms": 6879,
+          "failure_code": null,
+          "first_byte_elapsed_ms": 790,
+          "headers_elapsed_ms": 790,
+          "mode": "stream",
+          "received_bytes": 305381,
+          "received_events": 1179,
+          "response_headers_received": true,
+          "response_status_code": 200,
+          "syntactically_complete": true,
+          "terminal_received": true
+        },
+        "usage": {
+          "cached_input_tokens": 2688,
+          "input_tokens": 65151,
+          "output_tokens": 1167,
+          "reasoning_tokens": 838,
+          "total_tokens": 66318
+        }
+      }
+    }
+  ],
+  "effects": [
+    {
+      "id": "d1d1161b-d9a6-4282-ba2a-3eded40e0f92",
+      "tool_identity": "git.status",
+      "tool_version": "1",
+      "condition": "SETTLED",
+      "classification": "READ",
+      "step_id": "523d4e70-ca6b-4c26-a849-6ab62fc4e1a8"
+    },
+    {
+      "id": "a812f793-01ba-4eea-b579-8401f054e9d5",
+      "tool_identity": "file.read",
+      "tool_version": "1",
+      "condition": "SETTLED",
+      "classification": "READ",
+      "step_id": "523d4e70-ca6b-4c26-a849-6ab62fc4e1a8"
+    },
+    {
+      "id": "c16b3dc5-971d-418a-a8e3-06a118bef84e",
+      "tool_identity": "file.read",
+      "tool_version": "1",
+      "condition": "SETTLED",
+      "classification": "READ",
+      "step_id": "9d4f1009-01d7-47ba-ac04-2fcc4f8c4836"
+    },
+    {
+      "id": "66b51c25-a33f-4029-8a8d-9b8c693688de",
+      "tool_identity": "git.status",
+      "tool_version": "1",
+      "condition": "SETTLED",
+      "classification": "READ",
+      "step_id": "9d4f1009-01d7-47ba-ac04-2fcc4f8c4836"
+    },
+    {
+      "id": "f2a5286f-958d-4121-86f2-e9f02afcb3ae",
+      "tool_identity": "file.write",
+      "tool_version": "1",
+      "condition": "SETTLED",
+      "classification": "LOCAL_MUTATION",
+      "step_id": "46529874-8d2f-42c5-ac74-0ed73830c247"
+    },
+    {
+      "id": "7e45f8f9-7639-4cca-b1ea-cb8d8a692d80",
+      "tool_identity": "file.read",
+      "tool_version": "1",
+      "condition": "SETTLED",
+      "classification": "READ",
+      "step_id": "930ff9f0-1c45-4cf5-bb9d-86d1145f99ce"
+    },
+    {
+      "id": "1c8b406e-99b7-4857-b734-510aeb357cea",
+      "tool_identity": "git.diff",
+      "tool_version": "1",
+      "condition": "SETTLED",
+      "classification": "READ",
+      "step_id": "930ff9f0-1c45-4cf5-bb9d-86d1145f99ce"
+    },
+    {
+      "id": "1530ef5d-5aa7-4759-9b54-027b24344395",
+      "tool_identity": "git.status",
+      "tool_version": "1",
+      "condition": "SETTLED",
+      "classification": "READ",
+      "step_id": "ce3a93cd-ef51-4046-b152-d8aee6c0a124"
+    },
+    {
+      "id": "8bd53455-834b-4486-942e-bc81726b3fbe",
+      "tool_identity": "preview.inspect",
+      "tool_version": "1",
+      "condition": "SETTLED",
+      "classification": "READ",
+      "step_id": "c8e2aba6-142c-4072-abc3-3c5c50093bfd"
+    }
+  ],
+  "effect_receipt_ids": [
+    "1d3e2eac-407a-4f51-9d2c-51270141da5e",
+    "0262b3db-e896-433a-8f8c-c64ca829a111",
+    "8c6fe5a3-50a5-4933-969d-369137af78ea",
+    "87238fbe-953f-49fa-9f50-86e4a5f77276",
+    "1afe355b-ca2f-49aa-8b90-95619d56a51d",
+    "263a65ad-a456-4cc0-a54c-ef289291b326",
+    "d79ae46c-1e48-4ca4-a6b0-7ccaa4015b41",
+    "37b67db2-c8b4-4ead-b671-269c123b9940",
+    "7ec51691-ab55-4476-8652-c6f745428a39"
+  ],
+  "native_model_usage": {
+    "input_tokens": 441358,
+    "output_tokens": 4868,
+    "reasoning_tokens": 4038,
+    "cached_input_tokens": 18816,
+    "total_tokens": 446226
+  },
+  "verification_stage": "FAILED_CURRENT_CONTENT_CONSUMER_SELECTION",
+  "software_candidate": "NOT_CREATED",
+  "human_decision": "NOT_AUTHORIZED",
+  "new_work_count": 0,
+  "evidence_boundary": "Scoped Native settled ledger and explicit permit restrictions; not a claim of universal external audit completeness."
+}

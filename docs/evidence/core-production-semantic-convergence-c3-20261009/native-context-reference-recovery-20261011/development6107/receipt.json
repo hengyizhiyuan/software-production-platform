@@ -1,0 +1,18 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 199.81026053905953,
+  "image_id": "sha256:c9bae501ed17987f4513b09237a801c0115e2f231270536d564badabb2d30afb",
+  "container_id": "bc585fb699789f485c7ab6f7de6e93aaa422d9091bf26af25c401f24483c9099",
+  "source_overlay": true,
+  "snapshot_sha256": "1c3560b203e99134044a85cca691e674027e19c846031c3a97754895ca5f2e36",
+  "nodes": [
+    "tests/test_c3_reviewed_fact_method_applicability.py",
+    "tests/test_c3_semantic_contract_calibration.py",
+    "tests/test_n1_static_html_semantics.py",
+    "tests/test_c3_static_scope_binding.py",
+    "tests/test_static_protected_context_verifier.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

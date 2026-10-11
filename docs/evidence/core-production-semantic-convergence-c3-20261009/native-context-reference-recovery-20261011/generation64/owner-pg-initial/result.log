@@ -1,0 +1,8 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /qualification
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 5 items
+
+tests/integration/test_s3b_verification_satisfaction.py .

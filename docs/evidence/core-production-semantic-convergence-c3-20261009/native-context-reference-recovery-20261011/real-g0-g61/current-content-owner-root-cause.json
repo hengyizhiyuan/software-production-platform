@@ -1,0 +1,87 @@
+{
+  "recorded_at_utc": "2026-10-11T10:26:17.436997+00:00",
+  "schema": "c3-current-content-owner-mismatch-review-v1",
+  "work_id": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "source_revision": "c125ec674a7537e8cafe7da17fd20be1800fabb5",
+  "private_snapshot_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation62/private/owner-export-20261011T100856-43fdc811cc66403d86c36b36f09ff56e/20261011T100907145992Z-fe7f79a564a74ddb8cd4842115b76da3-canonical-work.json",
+  "private_snapshot_sha256": "361c5aa5d3f9191612a316ce413765f35a1775f458f4124a6e2ccad63dfd630d",
+  "facts": [
+    {
+      "fact_id": "08888141-d71d-53e7-ba71-c10bbd029f8d",
+      "relation": "EQUALITY",
+      "scope": "n1_g0_qualification",
+      "qualifiers": {
+        "mutable": "true"
+      },
+      "value_sha256": "3a86fe4bf5023ef10a5b20238946c4a045e9edf600be47b97a0ea8ca5e563708",
+      "current_bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "target_paths": [
+            "index.html"
+          ],
+          "component_quote_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9"
+        },
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "target_paths": [
+            "index.html"
+          ],
+          "component_quote_sha256": "a47cd835924ba5082397fd8d1e3fb0ab2805f6336f365f9af6db27272e4cced9"
+        }
+      ],
+      "prior_consumer_selection": "STATIC_HTML_PLAN_BECAUSE_NEITHER_SCOPE_NOR_FUTURE_SEAL",
+      "confirmed_class": "B_CONSUMER_SELECTION_DEFECT"
+    },
+    {
+      "fact_id": "a1c01a7b-0665-5bc1-bebe-3b66f1f45481",
+      "relation": "EQUALITY",
+      "scope": "n1_g0_qualification",
+      "qualifiers": {
+        "count": "1"
+      },
+      "value_sha256": "d52f537c2068cd6c92e2da4c5d6855a9c58bef9763010829b2bc82ef92867799",
+      "current_bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "target_paths": [
+            "index.html"
+          ],
+          "component_quote_sha256": "a24b1d48dd8fae804d8b7bf4e25740bf79c8716ebefc7201050f42b27e1296db"
+        }
+      ],
+      "prior_consumer_selection": "STATIC_HTML_PLAN_BECAUSE_NEITHER_SCOPE_NOR_FUTURE_SEAL",
+      "confirmed_class": "B_CONSUMER_SELECTION_DEFECT"
+    },
+    {
+      "fact_id": "e3e641fc-f909-5ce1-86ce-90ac047e3bb0",
+      "relation": "EQUALITY",
+      "scope": "n1_g0_qualification",
+      "qualifiers": {
+        "count": "1"
+      },
+      "value_sha256": "617f8812f9fb0eff85d2101ae6c55cb4c939e99cd4fa6596a8c2ec84da7b9e33",
+      "current_bindings": [
+        {
+          "owner": "VERIFICATION",
+          "phase": "CURRENT_VERIFICATION",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "target_paths": [
+            "index.html"
+          ],
+          "component_quote_sha256": "5be6714bf14eea3261e40966c1d1a4039f752f3f376e0320166e32266011c8c4"
+        }
+      ],
+      "prior_consumer_selection": "STATIC_HTML_PLAN_BECAUSE_NEITHER_SCOPE_NOR_FUTURE_SEAL",
+      "confirmed_class": "B_CONSUMER_SELECTION_DEFECT"
+    }
+  ],
+  "resolution": "Consume the already admitted exact current bindings through existing Verification content Owner; retain executable deterministic checks as conjunctive evidence. No Fact mutation, new retry budget or effect replay.",
+  "new_model_requests": 0
+}

@@ -1,0 +1,194 @@
+{
+  "schema": "c3-corrected-owner-verification-continuation-v1",
+  "started_at_utc": "2026-10-11T11:20:18.291857+00:00",
+  "ended_at_utc": "2026-10-11T11:21:41.432450+00:00",
+  "source_revision": "ce62ce24cb12913447d0671f54502cfaeaf2d9e5",
+  "tree": "81a20d03696ca2044375e8dd8d7c6716eb858132",
+  "actual_api_image": "sha256:a2e1339527deee9e89d73a41d9521fc8a40687d1ebad7fd0b8c2fedae56029c7",
+  "work_id": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "attempt_id": "de98f392-b8d1-40ac-a442-a283fa938060",
+  "snapshot_id": "5e7cd6d9-6899-5921-9e77-c8f030f319d6",
+  "provider_binding": {
+    "provider_identity": "provider:contract-driven-repository",
+    "provider_version": "v3-reviewed-current-content"
+  },
+  "verification_record_id": "9393c7c4-a032-5ef2-aae4-469e82ca9edc",
+  "verification_result": "FAIL",
+  "candidate_revision": "43fa0621e0d0e06fd1b84c9b76e06b831a578d97",
+  "candidate_tree": "c9942900fd4ad60eff68f4133bbf57181390da1a",
+  "admissibility_id": null,
+  "admissibility_outcome": null,
+  "private_raw_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation63/private/corrected-verification-private-c0f51ddbf12243ffa9a9c7f736e1c792.json",
+  "private_raw_sha256": "eda76a02aebcbc5f9ef152cf047c4be309205f914c055ba0d6b21ac65ed0c073",
+  "prior_verification_ids": [
+    "166cff32-0fd8-5055-94c5-e51aca7f9201",
+    "51315334-6019-5e27-b016-47bd60d57fa8"
+  ],
+  "original_contract_digest": "bfca72d790e278192dd1238b34d04ae2493ec832013ae7c7ba7437db2f144100",
+  "execution_steps_unchanged": true,
+  "settled_effects_unchanged": true,
+  "historical_verification_unchanged": true,
+  "current_runtime_summary": {
+    "attempt_id": "de98f392-b8d1-40ac-a442-a283fa938060",
+    "dispatch_id": "09edd121-e3a1-482f-b252-5fd21bbf1331",
+    "provider_outcome": "SUCCESS",
+    "observation_id": "18cf93c5-c50b-4540-bad7-8bf6bfb9c420",
+    "completion_id": "680d74f1-ebee-5781-adda-f94d559a651e",
+    "completion_outcome": "PRODUCED",
+    "proposed_snapshot_id": "5e7cd6d9-6899-5921-9e77-c8f030f319d6",
+    "verification_obligations": [
+      "PATH_SCOPE",
+      "GIT_DIFF_CHECK",
+      "PATH_SCOPE"
+    ],
+    "verification_results": [
+      "FAIL",
+      "PASS",
+      "FAIL"
+    ],
+    "admissibility_id": "e2c53e4c-c8b4-5a82-8698-7c17d00d8d07",
+    "admissibility_outcome": "NOT_ADMISSIBLE",
+    "candidate_id": null,
+    "candidate_fingerprint": null,
+    "authorization_id": null,
+    "integration_effect_id": null,
+    "integration_state": null,
+    "runtime_commit_id": null,
+    "artifact_paths": [
+      "index.html"
+    ],
+    "completion_requires_production_result": true,
+    "latest_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+    "extra": {
+      "proposed_commit_identity": "43fa0621e0d0e06fd1b84c9b76e06b831a578d97",
+      "task_contract_mode": "GENERAL",
+      "artifact_contract_path": null
+    }
+  },
+  "formation_replayed": false,
+  "native_execution_replayed": false,
+  "work_created": 0,
+  "human_authorization_created": false,
+  "failure_code": null,
+  "semantic_checks": [
+    {
+      "fact_id": "08888141-d71d-53e7-ba71-c10bbd029f8d",
+      "passed": true,
+      "reason": "EXACT_TYPED_FULFILLMENT_EVIDENCE",
+      "disposition": "VERIFIED_CURRENT"
+    },
+    {
+      "fact_id": "a1c01a7b-0665-5bc1-bebe-3b66f1f45481",
+      "passed": true,
+      "reason": "EXACT_TYPED_FULFILLMENT_EVIDENCE",
+      "disposition": "VERIFIED_CURRENT"
+    },
+    {
+      "fact_id": "e3e641fc-f909-5ce1-86ce-90ac047e3bb0",
+      "passed": true,
+      "reason": "EXACT_TYPED_FULFILLMENT_EVIDENCE",
+      "disposition": "VERIFIED_CURRENT"
+    },
+    {
+      "fact_id": "9f0b4f54-82d6-5a37-ae59-27838cf11cd2",
+      "passed": true,
+      "reason": "EXACT_TYPED_FULFILLMENT_EVIDENCE",
+      "disposition": "VERIFIED_CURRENT"
+    },
+    {
+      "fact_id": null,
+      "passed": true,
+      "reason": "EXACT_OWNER_EVIDENCE",
+      "disposition": "VERIFIED_CURRENT"
+    },
+    {
+      "fact_id": null,
+      "passed": true,
+      "reason": "EXACT_OWNER_EVIDENCE",
+      "disposition": "VERIFIED_CURRENT"
+    },
+    {
+      "fact_id": null,
+      "passed": true,
+      "reason": "EXACT_OWNER_EVIDENCE",
+      "disposition": "VERIFIED_CURRENT"
+    },
+    {
+      "fact_id": null,
+      "passed": true,
+      "reason": "EXACT_OWNER_EVIDENCE",
+      "disposition": "GATED_CONTINUOUS"
+    },
+    {
+      "fact_id": null,
+      "passed": true,
+      "reason": "EXACT_OWNER_EVIDENCE",
+      "disposition": "GATED_CONTINUOUS"
+    },
+    {
+      "fact_id": null,
+      "passed": true,
+      "reason": "EXACT_OWNER_EVIDENCE",
+      "disposition": "VERIFIED_CURRENT"
+    },
+    {
+      "fact_id": null,
+      "passed": true,
+      "reason": "EXACT_OWNER_EVIDENCE",
+      "disposition": "GATED_CONTINUOUS"
+    },
+    {
+      "fact_id": null,
+      "passed": true,
+      "reason": "EXACT_OWNER_EVIDENCE",
+      "disposition": "GATED_CONTINUOUS"
+    },
+    {
+      "fact_id": null,
+      "passed": true,
+      "reason": "EXACT_OWNER_EVIDENCE",
+      "disposition": "VERIFIED_CURRENT"
+    },
+    {
+      "fact_id": null,
+      "passed": true,
+      "reason": "EXACT_OWNER_EVIDENCE",
+      "disposition": "GATED_CONTINUOUS"
+    },
+    {
+      "fact_id": null,
+      "passed": true,
+      "reason": "EXACT_OWNER_EVIDENCE",
+      "disposition": "GATED_CONTINUOUS"
+    },
+    {
+      "fact_id": null,
+      "passed": true,
+      "reason": "EXACT_OWNER_EVIDENCE",
+      "disposition": "VERIFIED_CURRENT"
+    },
+    {
+      "fact_id": null,
+      "passed": true,
+      "reason": "EXACT_OWNER_EVIDENCE",
+      "disposition": "VERIFIED_CURRENT"
+    },
+    {
+      "fact_id": null,
+      "passed": true,
+      "reason": "EXACT_OWNER_EVIDENCE",
+      "disposition": "VERIFIED_CURRENT"
+    }
+  ],
+  "receipt_refs": [
+    "native-evidence:1b3f72d5-91ad-489e-aca0-929795c01133",
+    "native-evidence:f7e8256c-fc9c-4b77-9b54-08ef0c655503",
+    "native-evidence:6f7fc093-8d2a-4394-9448-33fb66c1e539",
+    "native-evidence:c87f171e-a18b-4014-9fb0-e155506a68a8",
+    "native-evidence:e0222304-ef62-4093-98a7-9e58ac1b8a10",
+    "native-evidence:160adba8-6bcf-4cac-8b69-20e19b395dff",
+    "native-evidence:edd7c679-440b-4a90-9e53-5fcc351d391f",
+    "native-evidence:3f716699-2c07-47b4-8103-df0042c03a14",
+    "native-evidence:a38781d2-1e31-4560-af38-667ae6c7a70c"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "schema": "c3-continuation-exact-image-regression-v1",
+  "started_at_utc": "2026-10-11T11:48:43.420628+00:00",
+  "ended_at_utc": "2026-10-11T11:51:02.061054+00:00",
+  "wall_seconds": 138.64043291308917,
+  "sources": {
+    "watt": {
+      "revision": "330a171e9dcfd48992da46f0c56dd0a29348870a",
+      "tree": "54f3ee5e73fc82931670f3c96e76011572db68a3"
+    },
+    "guardian": {
+      "revision": "5c88ffb9318e68d11b0cfb2af38048e6452bf881",
+      "tree": "df757ab48aac8928896e3f17619e64a7642a6ea3"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "image_id": "sha256:2fe07c269c6dc7b79e385cd0016bce04f297766cfa2317e6a4c3ec50a722dad9",
+  "actual_container_id": "66de0a72f6e9686e7b11e3397a7470305e0c709f02564d0faac653737b7601d2",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "junit_family=legacy",
+    "tests/test_native_context_evidence.py",
+    "tests/test_c3_reviewed_fact_method_applicability.py",
+    "tests/test_static_protected_context_verifier.py",
+    "-m",
+    "not real_container",
+    "--tb=short",
+    "--junitxml=/c3-evidence/watt-continuation.xml"
+  ],
+  "counts": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 78
+  },
+  "exit_code": 0,
+  "source_overlay": false,
+  "live_model_calls": 0,
+  "real_ai_work_created": 0,
+  "business_database_access": false,
+  "proof_boundary": "Deterministic isolated regressions only; not real G0, Provider recovery, Guardian live Assurance, Holdout or Human Acceptance"
+}

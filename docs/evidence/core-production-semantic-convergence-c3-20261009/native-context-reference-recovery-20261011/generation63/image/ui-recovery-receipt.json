@@ -1,0 +1,19 @@
+{
+  "exit_code": 0,
+  "counts": {
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 1
+  },
+  "wall_seconds": 65.57445411407389,
+  "actual_container_id": "b9699cb2d74d404f100d000dcc03164fc86c6e9320eca22d665c6fbcb059f31b",
+  "actual_image_id": "sha256:a2e1339527deee9e89d73a41d9521fc8a40687d1ebad7fd0b8c2fedae56029c7",
+  "model_calls": 0,
+  "static_resource_fixture": true,
+  "source_or_runtime_import_overlay": false,
+  "original_failure_retained": true,
+  "cause": "UI test reads repository-relative resource paths absent from installed qualification layout; fixture bytes independently verified identical to actual installed package",
+  "image_rebuilt": false
+}

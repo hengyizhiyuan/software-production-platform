@@ -1,0 +1,12 @@
+{
+  "corrected_verification_count": 0,
+  "new_verification_requests": 0,
+  "schema": "c3-reverification-control-pre-request-failure-v1",
+  "failure_code": "CONTROLLER_OWNER_RECORD_FIELD_MISMATCH",
+  "field": "Runtime model provider vs database provider_binding",
+  "new_model_requests": 0,
+  "application_image_rebuilt": false,
+  "source_changed": false,
+  "original_failure_retained": true,
+  "private_failure_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation63/private/corrected-verification-private-613a8b3087f541ada0b1733aeb08fbe3.json"
+}

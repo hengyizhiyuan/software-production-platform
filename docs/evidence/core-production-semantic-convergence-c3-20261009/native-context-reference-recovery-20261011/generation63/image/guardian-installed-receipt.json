@@ -1,0 +1,37 @@
+{
+  "exit_code": 0,
+  "counts": {
+    "tests": 46,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 46
+  },
+  "wall_seconds": 60.00028549996205,
+  "actual_image_id": "sha256:a2e1339527deee9e89d73a41d9521fc8a40687d1ebad7fd0b8c2fedae56029c7",
+  "actual_container_id": "406f536b0405da69a82e85d6daae7b44f506399859a00f7c5cbc5def6e804778",
+  "sources": {
+    "watt": {
+      "revision": "ce62ce24cb12913447d0671f54502cfaeaf2d9e5",
+      "tree": "81a20d03696ca2044375e8dd8d7c6716eb858132"
+    },
+    "guardian": {
+      "revision": "5c88ffb9318e68d11b0cfb2af38048e6452bf881",
+      "tree": "df757ab48aac8928896e3f17619e64a7642a6ea3"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "source_overlay": false,
+  "tests_from_verified_frozen_archive": true,
+  "fixture_only": true,
+  "live_model_calls": 0,
+  "original_database_access": false,
+  "proof_boundary": "Independent Guardian frozen installed contract regression; no Watt PASS substitution or runtime overlay"
+}
