@@ -975,3 +975,20 @@ def test_unknown_gap_markers_keep_the_exact_performed_field_scope():
     r["evidence_assessments"][0]["statement"]="This proves all historical responses are available"
     with pytest.raises(ValueError,match="EVIDENCE_ASSESSMENT_MUST_MATCH_SEEDED_FAMILY_LOOKUP"):
         c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+def test_native_audit_counts_are_current_investigation_planning_only(tmp_path):
+    from spg.application.trace_analysis import AnalysisJournal
+    from spg.infrastructure.executor_runtime.local_storage import ContentAddressedStorage
+    journal=AnalysisJournal(ContentAddressedStorage(tmp_path),"test-investigation",None)
+    journal.append("INFERENCE_STARTED",{})
+    journal.append("TOOL_STARTED",{})
+    journal.append("TOOL_FINISHED",{})
+    assert journal.event_counts=={"INFERENCE_STARTED":1,"TOOL_STARTED":1,"TOOL_FINISHED":1}
+    snap=evidence_snapshot()
+    snap["lifecycle"]["advanced"]["owners"]["execution_steps"][0]["condition"]="FAILED"
+    c=EvidenceCatalog(snap);seed=c.seed()
+    assert seed["incident_targets"]
+    for target in seed["incident_targets"]:
+        assert c.records[target["evidence_id"]]["group"]==target["group"]
+        assert target["group"] in {"self_refine_events","execution_steps","effect_receipts"}

@@ -470,6 +470,9 @@ class EvidenceCatalog:
                 "initial_inspections": [self.inspect(work_id)],
                 "evidence_reality": self.reality(),
                 "initial_evidence": initial,
+                "incident_targets": [{"evidence_id": eid, "group": row["group"], "pointer": row["pointer"]}
+                    for eid, row in self.records.items() if row["group"] == "self_refine_events"
+                    or row["group"] in {"execution_steps", "effect_receipts"} and row["condition"] == "FAILED"][:12],
                 "selection_policy": "Identity/limits plus bounded failure, refinement and final-owner excerpts. Omitted records remain pageable; excerpts are not a completeness claim.",
                 "rule": "Use evidence.index/read to investigate owners, failed steps, receipts, contracts, context and recovery. Counts are projections, not deduplicated execution totals."}
         counts = {}
@@ -819,6 +822,7 @@ class AnalysisTools:
         self.accepted_digest = None
         self.verification_receipts = []
         self.drafts = {}
+        self.audit_budget = None
 
     def registry(self):
         definitions = (
@@ -978,6 +982,8 @@ class AnalysisTools:
             condition = EffectCondition.FAILED
             if identity.startswith("analysis."):
                 self.verification_receipts.append(output)
+        if self.audit_budget is not None:
+            output = dict(output, audit_budget=self.audit_budget())
         return ToolExecutionResult(delivery_id=request.delivery_id, tool_identity=identity,
                                    condition=condition, output=output,
                                    output_digest=canonical_digest(output))

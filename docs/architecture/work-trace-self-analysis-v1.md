@@ -209,7 +209,11 @@ The output presents canonical text from the performed checks, reducing repeated
 machine-text copying without admitting arbitrary absence claims. PRESENT still
 cannot become missing; unread critical fields still require UNKNOWN. Classifier
 labels/proposal references in a refinement diagnosis alone cannot establish a
-system capability defect or reproducibility. Budgets and permissions are unchanged.
+system capability defect or reproducibility. Budgets and permissions are unchanged. Original incident references seed the
+investigation plan. Native audit counts in tool outputs remind the model to
+reserve the existing envelope for report verification and revision; these are
+current investigation observations, not historical Work usage or a replacement
+resource ledger.
 
 ## Admin and storage
 

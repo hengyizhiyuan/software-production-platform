@@ -68,6 +68,15 @@ UNABLE_TO_COMPLETE with observed limitations. Do not fabricate ECF READY, Guardi
 approval, production context, missing failure text or historical code identity.
 Keep the report concise: normally eight to twelve timeline entries and at most six findings.
 Use short exact quotations and short paragraphs; a report is not a transcript.
+Plan inside the existing Native envelope. Submit a substantive first report by
+32 tool effects or eight inference submissions; reserve remaining budget for
+verification/revision and RESULT_READY. Tool outputs include current investigation
+audit_budget. When next_action says SUBMIT_OR_REVISE, stop optional exploration,
+use already-read original fields and code, retain UNKNOWN for unresolved details,
+and submit/revise. Do not exhaust the envelope reading every available projection.
+Inspect the intended finding subjects before this limit; omit unrelated topics
+rather than inventing unread evidence. Prefer incident_targets over rediscovering
+the same incidents through timeline/recovery/Owner projections.
 Prioritize the observed production incidents and the evidence needed for their
 causes. Do not turn unrelated redacted billing/token/metadata fields into causal
 findings. Keep such inspection limits in checked uncertainty; investigate further
@@ -219,6 +228,7 @@ class AnalysisJournal:
         self.events = []
         self.repairs = []
         self.on_progress = on_progress
+        self.event_counts = {}
 
     def append(self, kind, payload):
         # Existing redaction handles source/provider/tool secrets. Analysis prose
@@ -232,6 +242,7 @@ class AnalysisJournal:
             "kind": kind, "at": datetime.now(UTC).isoformat(), "payload": cleaned,
         })
         self.events.append(digest)
+        self.event_counts[kind] = self.event_counts.get(kind, 0) + 1
         if self.on_progress:
             self.on_progress(self.events)
         return digest
@@ -527,6 +538,17 @@ class TraceAnalysisService:
                 record["event_digests"] = list(events)
                 self._save(record)
             journal = AnalysisJournal(self.storage, ns, binding, on_progress=save_progress)
+            def audit_budget():
+                used_tools = journal.event_counts.get("TOOL_STARTED", 0)
+                used_inferences = journal.event_counts.get("INFERENCE_STARTED", 0)
+                return {"scope": "CURRENT_INVESTIGATION_AUDIT_ONLY",
+                    "observed_tool_starts": used_tools, "observed_inference_starts": used_inferences,
+                    "maximum_tool_effects": binding.resource_envelope.max_tool_effects,
+                    "maximum_inferences": binding.resource_envelope.max_inference_submissions,
+                    "next_action": "SUBMIT_OR_REVISE" if used_tools >= min(32, max(1, binding.resource_envelope.max_tool_effects - 8))
+                        or used_inferences >= min(8, max(1, binding.resource_envelope.max_inference_submissions - 4)) else "INVESTIGATE_SELECTED_SUBJECTS",
+                    "boundary": "Audit observations for planning only; Native resource ledger remains authoritative. Not historical Work usage."}
+            tools.audit_budget = audit_budget
             journal.append("INVESTIGATION_BASIS", {"binding": binding.model_dump(mode="json"),
                            "contract": contract.model_dump(mode="json")})
             if self.inference_factory:
