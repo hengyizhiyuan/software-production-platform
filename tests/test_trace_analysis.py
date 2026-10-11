@@ -440,6 +440,22 @@ def test_preview_and_transfer_are_distinct_producer_scopes():
         catalog.check("PREVIEW_HTTP", group="served_delivery")
 
 
+@pytest.mark.parametrize("actions", [[], [{"id": "arbitrary-action", "condition": "FAILED"}]])
+def test_transfer_rule_is_not_a_completion_observation(actions):
+    snap = evidence_snapshot()
+    snap["lifecycle"]["served_delivery"].update(actions=actions,
+        completion_basis="ASGI_SEND_COMPLETED proves server send only")
+    catalog = EvidenceCatalog(snap)
+    check = catalog.check("DELIVERY_TRANSFER")
+    assert check["availability"] == "PRESENT"
+    value = check["examples"][0]["value"]
+    assert value["action_count"] == len(actions) and value["actions"] == actions
+    assert value["completion_rule_description"] == "ASGI_SEND_COMPLETED proves server send only"
+    assert "completion_basis" not in value and "not a completed transfer" in value["interpretation"]
+    eid = check["examples"][0]["evidence_id"]
+    assert "not an observed event" in catalog.read(eid)["semantics"]["boundary"]
+
+
 @pytest.mark.parametrize("family,group,quote", [
     ("PREVIEW_HTTP", "served_delivery", "UNAVAILABLE"),
     ("DELIVERY_TRANSFER", "guardian", "200"),

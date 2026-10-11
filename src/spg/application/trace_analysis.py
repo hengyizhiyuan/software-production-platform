@@ -82,6 +82,10 @@ HTTP preview, download/server-transfer audits, browser rendering/client receipt,
 and recorded execution identifier links are distinct. Do not use negative evidence
 from one surface to deny positive evidence from another. Inspect relevant original
 examples and potentially contradicting records before recommending missing logs.
+Policy/contract/verification-rule descriptions explain what an event would prove;
+they are not observations that the event occurred. In a transfer audit,
+completion_basis is such a rule. Empty actions cannot prove server send completion;
+PRESENT for the audit object does not mean a download happened or succeeded.
 Declare the matching evidence_family on facts about HTTP/transfer/identity links.
 Use OWNER_RECORD for composite summaries/timeline entries combining several
 surfaces; specialized single-family facts require all citations from that family.

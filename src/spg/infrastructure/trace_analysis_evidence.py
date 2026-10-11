@@ -51,7 +51,7 @@ def source_semantics(group, value, repository):
                 "families": [], "boundary": "Not an original Owner fact; never cite as historical proof."}
     if group == "served_delivery":
         return {"surface": "DELIVERY_TRANSFER_AUDIT", "families": families + ["DELIVERY_TRANSFER"],
-                "boundary": "Download/server-transfer audit. Does not prove or disprove preview GET status, browser rendering or client persistence."}
+                "boundary": "Download/server-transfer audit. completion_basis is a rule description, not an observed event. An audit object with empty actions does not prove any send completed. Does not prove or disprove preview GET status, browser rendering or client persistence."}
     if group == "guardian":
         if isinstance(value, dict) and any(isinstance(item, dict) and isinstance(item.get("status_code"), int)
                                           for item in (value.get("evidence") or [])):
@@ -217,7 +217,11 @@ class EvidenceCatalog:
                     "pointer": row["pointer"] + pointer, "record_id": value.get("id") if isinstance(value, dict) else None,
                     "identity_kind": RELATION_FIELDS.get(pointer.lstrip("/")),
                     "value": child if family != "DELIVERY_TRANSFER" else {
-                        key: value.get(key) for key in ("actions", "client_received", "client_saved", "completion_basis")}})
+                        "actions": value.get("actions"),
+                        "action_count": len(value["actions"]) if isinstance(value.get("actions"), list) else None,
+                        "client_received": value.get("client_received"), "client_saved": value.get("client_saved"),
+                        "completion_rule_description": value.get("completion_basis"),
+                        "interpretation": "PRESENT means an audit object exists, not a completed transfer. Inspect individual actions and their observed states; a rule description alone proves no event."}})
         lifecycle = self.snapshot["lifecycle"]
         partial = bool(lifecycle.get("capture_truncation") or self.snapshot.get("capture_warnings")
                        or lifecycle.get("advanced", {}).get("excluded_due_to_capacity") or redacted)
