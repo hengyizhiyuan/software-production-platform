@@ -46,17 +46,36 @@ RELATION_FIELDS = {"pwu_id": "PWU", "work_unit_id": "PWU", "session_id": "SESSIO
 # Only producer-declared references establish incident association. A shared
 # attempt/Work, error text or timestamp cannot distinguish incidents in that scope.
 RECORD_NAMESPACES = {"effect_receipts": "native-receipt", "execution_steps": "native-inference-step",
-                     "tool_effects": "native-effect", "execution_sessions": "native-session",
+                     "execution_effects": "native-effect", "tool_effects": "native-effect", "execution_sessions": "native-session",
                      "execution_attempts": "native-attempt"}
 DIRECT_REFERENCE_FIELDS = {"receipt_ref": "native-receipt", "receipt_id": "native-receipt",
                           "inference_step_ref": "native-inference-step", "inference_step_id": "native-inference-step",
                           "effect_ref": "native-effect", "effect_id": "native-effect"}
 
 
+def time_boundary(field):
+    meaning = {"created_at": "记录创建", "updated_at": "记录最后更新",
+               "started_at": "记录的开始", "finished_at": "记录的结束",
+               "sealed_at": "候选封存", "assessed_at": "保证评估", "timestamp": "Owner 记录的事件"}[field]
+    return f"此时间仅表示{meaning}时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。"
+
+
+# Absence claims belong to typed, performed lookups, not arbitrary prose. This
+# guard complements original-field/association inspection; it is not entailment
+# evaluation and is deliberately independent of any Work, command or error code.
+ABSENCE_PROSE = re.compile(
+    r"未(?:被)?(?:保留|保存|采集|提供|导出)|不存在|(?:缺少|缺失).{0,16}(?:证据|日志|记录|响应|参数)|"
+    r"(?:没有|从未).{0,24}(?:记录|保存|采集|保留)|"
+    r"\b(?:not|never)\s+(?:retained|stored|saved|captured|provided)|"
+    r"\b(?:missing|absent)\s+(?:evidence|logs?|records?|responses?|arguments?)|"
+    r"\bno\s+(?:raw\s+)?(?:evidence|logs?|records?|responses?|arguments?)", re.I)
+
+
 def source_semantics(group, value, repository):
     families = ["OWNER_RECORD"]
-    if group in {"evidence_check", "analysis_draft"}:
-        return {"surface": "DERIVED_SCOPE_LOOKUP" if group == "evidence_check" else "MODEL_PROPOSAL",
+    if group in {"evidence_check", "evidence_inspection", "analysis_draft"}:
+        return {"surface": "DERIVED_SCOPE_LOOKUP" if group == "evidence_check" else
+                "DERIVED_OWNER_INSPECTION" if group == "evidence_inspection" else "MODEL_PROPOSAL",
                 "families": [], "boundary": "Not an original Owner fact; never cite as historical proof."}
     if group == "served_delivery":
         return {"surface": "DELIVERY_TRANSFER_AUDIT", "families": families + ["DELIVERY_TRANSFER"],
@@ -96,6 +115,7 @@ class EvidenceCatalog:
         self.observed: set[str] = set()
         self.observed_excerpts: dict[str, list[str]] = {}
         self.checks: dict[str, dict] = {}
+        self.inspections: dict[str, dict] = {}
         self.add("capture", "/capture", snapshot.get("capture", {}))
         self.add("work", "/lifecycle/work", snapshot["lifecycle"].get("work", {}))
         self.add("intent", "/lifecycle/first_human_input",
@@ -167,8 +187,11 @@ class EvidenceCatalog:
             "total_characters": len(body), "next_offset":
             offset + limit if offset + limit < len(body) else None,
             "trust": "MODEL_PROPOSAL_NOT_OWNER_EVIDENCE" if row["group"] == "analysis_draft" else
-                     "DERIVED_SCOPE_LOOKUP_NOT_OWNER_FACT" if row["group"] == "evidence_check" else "UNTRUSTED_EVIDENCE_ONLY",
+                     "DERIVED_SCOPE_LOOKUP_NOT_OWNER_FACT" if row["group"] in {"evidence_check", "evidence_inspection"} else "UNTRUSTED_EVIDENCE_ONLY",
             "related_records": self.related(evidence_id),
+            "time_boundaries": {k: time_boundary(k) for k in
+                ("created_at", "updated_at", "started_at", "finished_at", "sealed_at", "assessed_at", "timestamp")
+                if isinstance(self.values[evidence_id], dict) and isinstance(self.values[evidence_id].get(k), str)},
         }
 
     def _references(self, evidence_id):
@@ -192,13 +215,16 @@ class EvidenceCatalog:
     def association(self, subject_evidence_id, evidence_id):
         subject_evidence_id, evidence_id = str(subject_evidence_id), str(evidence_id)
         subject, other = self.records.get(subject_evidence_id), self.records.get(evidence_id)
-        excluded = {"repository", "analysis_draft", "evidence_check"}
+        excluded = {"repository", "analysis_draft", "evidence_check", "evidence_inspection"}
         if not subject or not other or subject["group"] in excluded or other["group"] in excluded:
             return {"status": "NOT_ESTABLISHED", "basis": "ORIGINAL_OWNER_RECORDS_REQUIRED"}
         if subject_evidence_id == evidence_id:
             return {"status": "RELATED", "basis": "SAME_ORIGINAL_RECORD"}
         a, b = self.values[subject_evidence_id], self.values[evidence_id]
-        if subject["group"] == other["group"] and isinstance(a, dict) and isinstance(b, dict) and a.get("id") and a.get("id") == b.get("id"):
+        same_owner = (subject["group"] == other["group"] or
+                      RECORD_NAMESPACES.get(subject["group"]) is not None and
+                      RECORD_NAMESPACES.get(subject["group"]) == RECORD_NAMESPACES.get(other["group"]))
+        if same_owner and isinstance(a, dict) and isinstance(b, dict) and a.get("id") and a.get("id") == b.get("id"):
             return {"status": "RELATED", "basis": "SAME_OWNER_IDENTITY_PROJECTION"}
         if {subject["group"], other["group"]} <= {"capture", "limits"}:
             return {"status": "RELATED", "basis": "SAME_CAPTURE_METADATA"}
@@ -218,13 +244,96 @@ class EvidenceCatalog:
 
     def related(self, evidence_id):
         # This lookup is metadata, never an observation of an unread record body.
-        if self.records[evidence_id]["group"] not in {"self_refine_events", "effect_receipts", "execution_steps"}:
+        if self.records[evidence_id]["group"] not in {"self_refine_events", *RECORD_NAMESPACES}:
             return {"items": [], "truncated": False}
         items = [{"evidence_id": eid, "group": row["group"], "association": relation}
                  for eid, row in self.records.items() if eid != evidence_id
                  and (relation := self.association(evidence_id, eid))["status"] == "RELATED"]
         return {"items": items[:8], "truncated": len(items) > 8,
                 "rule": "Read original linked records before quoting. These are recorded links, not causal proof."}
+
+    def inspect(self, subject_evidence_id):
+        """Read bounded original fields along explicit incident references.
+
+        Two-hop traversal is retrieval coverage, not transitive fact association.
+        Every fact citation still needs its own direct Owner relation. No shared
+        Work/attempt match, database lookup, historical absence or authority grant.
+        """
+        subject_evidence_id = str(subject_evidence_id)
+        subject = self.records[subject_evidence_id]
+        excluded = {"repository", "analysis_draft", "evidence_check", "evidence_inspection", "timeline", "units"}
+        if subject["group"] in excluded:
+            raise ValueError("INSPECTION_REQUIRES_ORIGINAL_OWNER")
+        selected, frontier, edges = [subject_evidence_id], [subject_evidence_id], []
+        omitted = set()
+        for _depth in range(2):
+            following = []
+            for source_id in frontier:
+                for eid, row in list(self.records.items()):
+                    if eid in selected or row["group"] in excluded:
+                        continue
+                    relation = self.association(source_id, eid)
+                    if relation["status"] != "RELATED":
+                        continue
+                    if len(selected) >= 12:
+                        omitted.add(eid)
+                        continue
+                    selected.append(eid)
+                    following.append(eid)
+                    edges.append({"from": source_id, "to": eid, "association": relation})
+            frontier = following
+        rows, remaining = [], 18000
+        # Use exact fragments of the original serialized body. Field metadata
+        # never marks a body or a tail as read; returned fragments alone do.
+        for eid in selected:
+            row, value = self.records[eid], self.values[eid]
+            fields = []
+            body = row["body"]
+            starts = list(re.finditer(r'^  "(?:[^"\\]|\\.)*": ', body, re.M)) if isinstance(value, dict) else []
+            for i, start in enumerate(starts):
+                key = json.loads(start.group(0)[2:-2])
+                end = starts[i + 1].start() if i + 1 < len(starts) else len(body)
+                fragment = body[start.start():end]
+                child = value[key]
+                state = ("REDACTED" if isinstance(child, str) and child.startswith("[REDACTED") else
+                         "EMPTY" if child is None or child == "" or child == [] or child == {} else "PRESENT")
+                already_read = any(fragment in excerpt for excerpt in self.observed_excerpts.get(eid, []))
+                if (len(fragment) > 3000 or len(fragment) > remaining) and not already_read:
+                    fields.append({"field": "/" + key.replace("~", "~0").replace("/", "~1"),
+                                   "availability": state, "read_status": "NOT_READ_CAPACITY", "characters": len(fragment)})
+                    continue
+                if already_read and (len(fragment) > 3000 or len(fragment) > remaining):
+                    fields.append({"field": "/" + key.replace("~", "~0").replace("/", "~1"),
+                                   "availability": state, "read_status": "READ", "previous_original_read": True})
+                    continue
+                remaining -= len(fragment)
+                self.observed.add(eid)
+                self.observed_excerpts.setdefault(eid, []).append(fragment)
+                fields.append({"field": "/" + key.replace("~", "~0").replace("/", "~1"),
+                               "availability": state, "read_status": "READ", "original_excerpt": fragment})
+            if not isinstance(value, dict):
+                part = body[:min(3000, remaining)]
+                remaining -= len(part)
+                self.observed.add(eid)
+                self.observed_excerpts.setdefault(eid, []).append(part)
+                fields.append({"field": "", "read_status": "READ" if part == body else "PARTIAL_READ", "original_excerpt": part})
+            rows.append({"evidence_id": eid, "group": row["group"], "pointer": row["pointer"],
+                         "fields": fields, "semantics": row["semantics"]})
+        result = {"subject_evidence_id": subject_evidence_id, "records": rows, "edges": edges,
+                  "omitted_records": sorted(omitted), "scope": "EXPLICIT_EXPORTED_OWNER_REFERENCES_UP_TO_TWO_HOPS",
+                  "boundary": "Retrieval links are not causal proof or transitive incident identity; absence in one record does not establish absence in another."}
+        unread = [(r["evidence_id"], f["field"]) for r in rows for f in r["fields"] if f["read_status"] != "READ"]
+        result["bounded_conclusion"] = (
+            f"本次关联读取仅限冻结导出 {self.digest} 中主体 {subject_evidence_id} 的显式 Owner 引用（最多两跳）。"
+            f"返回 {len(rows)} 条记录，容量未读字段 {len(unread)} 项，省略关联记录 {len(omitted)} 条。"
+            "PRESENT 表示该字段已导出；READ 才表示原始片段已返回。REDACTED 表示值被脱敏，EMPTY 表示已导出的空值；二者均不表示历史未保存。"
+            "字段未导出、未读取或关联范围外的信息保持 UNKNOWN；单一记录不能证明其他 Owner 或平台历史不存在。"
+            "仓库比较不自动证明历史 Worker 版本；创建时间不自动证明后来的恢复状态。")
+        iid = self.add("evidence_inspection", "inspections/" + canonical_digest(result), result)
+        result["inspection_id"] = iid
+        self.inspections[iid] = result
+        self.observed.add(iid)
+        return result
 
     def check(self, family, group=None, field=None):
         """Bounded original-snapshot search, before any assertion of absence.
@@ -239,7 +348,7 @@ class EvidenceCatalog:
             raise ValueError("CHECK_SOURCE_SURFACE_FIXED_BY_FAMILY")
         if family == "OWNER_RECORD" and (not group or field is None):
             raise ValueError("OWNER_CHECK_REQUIRES_GROUP_AND_FIELD")
-        original = [r for r in self.records.values() if r["group"] not in {"repository", "analysis_draft", "evidence_check"}]
+        original = [r for r in self.records.values() if r["group"] not in {"repository", "analysis_draft", "evidence_check", "evidence_inspection"}]
         if group and group not in {r["group"] for r in original}:
             # An unexported group is not proof that its Owner has no records.
             raise ValueError("CHECK_GROUP_NOT_CAPTURED")
@@ -270,10 +379,12 @@ class EvidenceCatalog:
             elif isinstance(value, list) and key.isdigit() and int(key) < len(value):
                 yield from walk(value[int(key)], rest, pointer + "/" + key)
         matches, redacted = [], False
+        field_states = {"AVAILABLE": 0, "REDACTED": 0, "EMPTY": 0, "NOT_EXPORTED": 0}
         for row in selected:
             value = self.values[row["evidence_id"]]
             if isinstance(value, str) and value.startswith("[REDACTED"):
                 redacted = True
+                field_states["REDACTED"] += 1
                 continue
             if family == "PREVIEW_HTTP":
                 entries = [(f"/evidence/{i}", child) for i, child in enumerate((value.get("evidence") or []) if isinstance(value, dict) else [])
@@ -282,14 +393,19 @@ class EvidenceCatalog:
                 entries = [("", value)]
             elif field:
                 entries = list(walk(value, [part.replace("~1", "/").replace("~0", "~") for part in field[1:].split("/")]))
+                if not entries:
+                    field_states["NOT_EXPORTED"] += 1
             else:
                 entries = [("/" + key, child) for key, child in value.items() if key in RELATION_FIELDS]
             for pointer, child in entries:
                 if isinstance(child, str) and child.startswith("[REDACTED"):
                     redacted = True
+                    field_states["REDACTED"] += 1
                     continue
                 if child is None or child == "" or child == [] or child == {}:
+                    field_states["EMPTY"] += 1
                     continue
+                field_states["AVAILABLE"] += 1
                 matches.append({"evidence_id": row["evidence_id"], "group": row["group"],
                     "pointer": row["pointer"] + pointer, "record_id": value.get("id") if isinstance(value, dict) else None,
                     "identity_kind": RELATION_FIELDS.get(pointer.lstrip("/")),
@@ -306,6 +422,7 @@ class EvidenceCatalog:
                   "availability": "PRESENT" if matches else "INCOMPLETE_CAPTURE" if partial or not selected else "NOT_OBSERVED_IN_CAPTURE",
                   "scope": "FROZEN_EXPORTED_OWNER_RECORDS_ONLY", "scope_complete": not partial,
                   "searched_records": len(selected), "total_matches": len(matches),
+                  "field_states": field_states,
                   "examples": matches[:12], "examples_truncated": len(matches) > 12,
                   "limitation": "No match is limited to this export and selector. Unread or uncaptured evidence cannot prove historical/system absence. HTTP preview, download transfer and browser/client observations are distinct."}
         # Return only bounded examples, even if a field references a large body.
@@ -314,6 +431,8 @@ class EvidenceCatalog:
             f"仅在冻结导出 {self.digest} 中检查 family={family}, group={group or '(producer scope)'}, "
             f"field={field or '(family observations)'}：availability={result['availability']}，"
             f"匹配 {result['total_matches']} 项，扫描 {result['searched_records']} 条记录。"
+            f"字段状态：可用 {field_states['AVAILABLE']}，脱敏 {field_states['REDACTED']}，空值 {field_states['EMPTY']}，未导出 {field_states['NOT_EXPORTED']}。"
+            "脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。"
             "这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。")
         eid = self.add("evidence_check", f"checks/{canonical_digest(result)}", result)
         result = dict(result, check_id=eid)
@@ -350,7 +469,9 @@ class EvidenceCatalog:
                          self.read(row["evidence_id"], offset=len(row["body"]) - 2000, limit=2000)]
             initial.extend(parts)
             used += len(text(parts))
+        work_id = next(eid for eid, row in self.records.items() if row["group"] == "work")
         return {"snapshot_digest": self.digest, "groups": groups,
+                "initial_inspections": [self.inspect(work_id)],
                 "evidence_reality": self.reality(),
                 "initial_evidence": initial,
                 "selection_policy": "Identity/limits plus bounded failure, refinement and final-owner excerpts. Omitted records remain pageable; excerpts are not a completeness claim.",
@@ -373,7 +494,7 @@ class EvidenceCatalog:
             row = self.records.get(str(c.evidence_id))
             if not row or str(c.evidence_id) not in self.observed:
                 raise CitationRejected("CITATION_NOT_OBSERVED", location, c.evidence_id)
-            if row["group"] in {"analysis_draft", "evidence_check"}:
+            if row["group"] in {"analysis_draft", "evidence_check", "evidence_inspection"}:
                 raise CitationRejected("MODEL_PROPOSAL_NOT_OWNER_EVIDENCE", location, c.evidence_id)
             excerpts = self.observed_excerpts.get(str(c.evidence_id), [])
             literal = any(c.quote in excerpt for excerpt in excerpts)
@@ -411,11 +532,19 @@ class EvidenceCatalog:
             value = self.values.get(subject_id)
             prefix = ["timeline", index]
             if (subject_id not in self.observed or not row or row["repository"]
-                    or row["group"] in {"analysis_draft", "evidence_check"}
+                    or row["group"] in {"analysis_draft", "evidence_check", "evidence_inspection"}
                     or not isinstance(value, dict)):
                 errors.append(CitationRejected("TIMELINE_TIME_REQUIRES_ORIGINAL_OWNER", prefix + ["timestamp_evidence_id"], subject_id))
                 continue
             recorded = value.get(item.timestamp_field)
+            if item.time_interpretation != time_boundary(item.timestamp_field):
+                errors.append(CitationRejected("TIMELINE_REQUIRES_EXACT_TIME_BOUNDARY", prefix + ["time_interpretation"], subject_id))
+            if item.timestamp_field == "created_at" and row["group"] == "self_refine_events":
+                later_state = [value.get(k) for k in ("status", "final_result", "work_resume_result")]
+                if (item.stage == "RECOVERY_REFINEMENT" or any(isinstance(state, str) and state and
+                        (state in item.statement or any(state in c.quote for c in item.citations))
+                        for state in later_state)):
+                    errors.append(CitationRejected("TIMELINE_CREATION_CANNOT_TIMESTAMP_RECOVERY_STATE", prefix + ["timestamp_field"], subject_id))
             try:
                 actual = datetime.fromisoformat(item.timestamp.replace("Z", "+00:00"))
                 expected = datetime.fromisoformat(recorded.replace("Z", "+00:00"))
@@ -438,6 +567,25 @@ class EvidenceCatalog:
             previous_time = actual
         for index, finding in enumerate(report.findings):
             subject_id = str(finding.subject_evidence_id)
+            inspection = self.inspections.get(str(finding.inspection_id))
+            if not inspection or inspection["subject_evidence_id"] != subject_id:
+                errors.append(CitationRejected("FINDING_REQUIRES_SUBJECT_OWNER_INSPECTION; call evidence.inspect", ["findings", index, "inspection_id"], subject_id))
+            else:
+                checks = [self.checks.get(str(cid)) for cid in finding.uncertainty_check_ids]
+                expected = "\n".join([inspection["bounded_conclusion"]] + [c["bounded_conclusion"] for c in checks if c])
+                if any(c is None for c in checks) or finding.uncertainty != expected:
+                    errors.append(CitationRejected("UNCERTAINTY_MUST_COPY_INSPECTION_AND_CHECK_BOUNDARIES", ["findings", index, "uncertainty"], subject_id))
+                critical = {"/semantic_input", "/output", "/result_payload", "/diagnostic_evidence"}
+                unread = [f for r in inspection["records"] for f in r["fields"]
+                          if f["field"] in critical and f["read_status"] != "READ"]
+                if (unread or inspection["omitted_records"]) and finding.epistemic_status != "UNKNOWN":
+                    errors.append(CitationRejected("UNREAD_LINKED_OWNER_FIELDS_REQUIRE_UNKNOWN_OR_ORIGINAL_READ", ["findings", index, "epistemic_status"], subject_id))
+                inspected_groups = {r["group"] for r in inspection["records"]}
+                for field in ("scope_check_ids", "uncertainty_check_ids"):
+                    for cid in getattr(finding, field):
+                        check = self.checks.get(str(cid))
+                        if check and check["group"] and check["group"] not in inspected_groups:
+                            errors.append(CitationRejected("CHECK_OWNER_SCOPE_NOT_ASSOCIATED_WITH_FINDING; split unrelated Owner gaps", ["findings", index, field], subject_id))
             if subject_id not in self.observed:
                 errors.append(CitationRejected("FINDING_SUBJECT_NOT_OBSERVED", ["findings", index, "subject_evidence_id"], subject_id))
             if subject_id not in {str(c.evidence_id) for c in finding.fact.citations}:
@@ -455,6 +603,21 @@ class EvidenceCatalog:
                     citation(c, ["findings", index, "repository_citations", i], repository=True)
                 except CitationRejected as error:
                     errors.append(error)
+        # Keep observational absence in canonical checked fields everywhere,
+        # including hypotheses/recommendations, rather than only the gap footer.
+        prose = [((list(name) if isinstance(name, tuple) else [name]) + ["statement"], fact.statement)
+                 for name, fact in facts if name not in {"original_objective", "expected_outcome"}]
+        for i, finding in enumerate(report.findings):
+            for field in ("analysis", "recommendation", "regression_scenario"):
+                if field == "analysis" and finding.scope_check_ids:
+                    continue  # Already required to be the exact check receipt.
+                prose.append((["findings", i, field], getattr(finding, field)))
+        for section in ("immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"):
+            prose.extend(([section, i, "statement"], item.statement)
+                         for i, item in enumerate(getattr(report, section)))
+        for location, statement in prose:
+            if ABSENCE_PROSE.search(statement):
+                errors.append(CitationRejected("EVIDENCE_ABSENCE_BELONGS_IN_CHECKED_UNCERTAINTY; no free-form historical absence", location, report.work_id))
         if errors:
             error = errors[0]
             error.issues = [{"type": "CitationRejected", "reason": str(item),
@@ -616,6 +779,8 @@ class AnalysisTools:
             ("evidence.read", "Read an evidence UUID, retaining exact source and digest; page long content.",
              {"evidence_id": {"type": "string"}, "offset": {"type": "integer"},
               "limit": {"type": "integer"}}, ["evidence_id"]),
+            ("evidence.inspect", "Read original linked Owner fields along explicit references (up to two hops). Returns inspection_id and canonical bounded_conclusion for finding uncertainty. READ, PRESENT, REDACTED, EMPTY and NOT_READ_CAPACITY are distinct. It does not infer historical absence or transitive fact association. Page unread originals with evidence.read, then inspect again; keep UNKNOWN if required fields cannot be read.",
+             {"subject_evidence_id": {"type": "string"}}, ["subject_evidence_id"]),
             ("evidence.check", "Check original snapshot evidence before absence claims. PREVIEW_HTTP and DELIVERY_TRANSFER fix their producer scope; EXECUTION_RELATIONSHIP enumerates actual identifier links. OWNER_RECORD requires a captured group and JSON Pointer field (/* enumerates record fields). No-match never proves global/historical absence.",
              {"family": {"enum": [f.value for f in EvidenceFamily]}, "group": {"type": "string"},
               "field": {"type": "string", "maxLength": 200,
@@ -674,6 +839,8 @@ class AnalysisTools:
                 output = self.catalog.read(**args)
             elif identity == "evidence.check":
                 output = self.catalog.check(**args)
+            elif identity == "evidence.inspect":
+                output = self.catalog.inspect(**args)
             elif identity.startswith("repository."):
                 args = dict(args)
                 repo = self.repositories[args.pop("repository")]

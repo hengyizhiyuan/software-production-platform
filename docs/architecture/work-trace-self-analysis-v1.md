@@ -156,6 +156,33 @@ Recommendations must preserve governed recovery/termination, source uncertainty,
 and the separate meanings of transfer audit, preview evidence and Human acceptance.
 These checks do not prove semantic entailment for arbitrary recommendation prose.
 
+### Original linked fields and bounded uncertainty (report v4)
+
+The Native registry's read-only `evidence.inspect` follows explicit Owner
+references up to two hops and returns original field fragments. The actual
+`execution_effects` producer is mapped to `native-effect` alongside the legacy
+alias; a receipt's `effect_id` now resolves its original semantic input. Shared
+Work/attempt/error text still does not establish incident identity. Traversal is
+retrieval coverage, not transitive fact association.
+
+Every finding requires a subject-specific inspection receipt. PRESENT, READ,
+REDACTED, EMPTY, NOT_EXPORTED and capacity-unread observations are distinguished;
+only actually returned fragments acquire citation authority. Unread critical
+linked fields or omitted associated records require further original reading or
+UNKNOWN. Large fields remain pageable through the existing `evidence.read`.
+
+Uncertainty is the exact inspection boundary plus performed field-check boundaries,
+not arbitrary generated absence prose. Check groups must belong to the finding's
+inspected Owner scope. Unrelated gaps require separate subjects. A general prose
+guard also rejects common absence assertions outside those checked fields; it
+complements typed lookup/reading and does not claim complete linguistic entailment.
+The gate is independent of any Work identity, command name or scenario wording.
+
+Dated entries copy the exact producer-time boundary into `time_interpretation`,
+also shown in Admin. Refinement creation time cannot timestamp later VERIFIED or
+recovered state; use its original update record or an undated snapshot summary.
+Existing saved v1/v2/v3 reports remain readable without migration or rewriting.
+
 ## Admin and storage
 
 - POST `/api/admin/works/{id}/analyses`: explicit Human request UUID and rationale.

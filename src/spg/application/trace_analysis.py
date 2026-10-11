@@ -150,6 +150,30 @@ regression_scenario, immediate_recovery and deferred_items, not only findings:
 - Inspect existing tool descriptions, rejection feedback and capabilities before
   suggesting they are missing. Proposed improvements are unverified proposals,
   not proven system defects or executable instructions.
+Report v4 requires evidence.inspect for EVERY finding's exact subject; a read or
+index snippet alone is insufficient. Inspection reads linked ORIGINAL Owner fields
+along explicit references, including receipt->effect semantic_input and parameters.
+Use returned field excerpts as observations. Read NOT_READ_CAPACITY fields through
+evidence.read and inspect again before a hypothesis, or retain UNKNOWN. Do not
+equate the absence of parameters in a receipt with their absence in linked effects.
+Copy inspection_id. uncertainty must be exactly inspection.bounded_conclusion
+followed by each uncertainty_check_ids check.bounded_conclusion joined by newline.
+Keep missing/unexported/redacted/empty/unread claims ONLY in these canonical checked
+boundaries and missing_evidence. Do not repeat such absence assertions in fact,
+analysis, scenario, recommendation or deferred prose. Describe the positive recorded
+signal and a conditional mechanism instead; refer to the uncertainty checks.
+Every scope_check_ids / uncertainty_check_ids group must occur in that subject's
+explicit Owner inspection. Split unrelated Owner gaps into separate findings;
+do not combine a Guardian redaction and an unrelated inference field under one
+subject. Use UNKNOWN scope findings where required, without changing incident causes.
+For each dated timeline item, copy evidence.read time_boundaries[timestamp_field]
+into time_interpretation. created_at is RECORD CREATION, not recovery completion;
+use updated_at for a recorded later update, or put recovered snapshot state in an
+undated recovery summary. A current VERIFIED status alone does not timestamp its
+transition. Do not describe a completed recovery at the record's creation time.
+Concise recommendations must address their cited findings' actual subjects, not
+another logging surface. Review all sections against original linked observations
+before submission; structural verification is not a substitute for this review.
 """
 
 

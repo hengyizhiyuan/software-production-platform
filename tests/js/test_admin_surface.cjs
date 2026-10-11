@@ -143,3 +143,15 @@ test('Analysis v3 shows subject and governed regression scenario with escaping',
  assert.match(h,/主体证据 &lt;subject&gt;/);assert.match(h,/回归场景：&lt;script&gt;/);
  assert.doesNotMatch(h,/<script>bad/);
 });
+
+test('Analysis v4 displays the event-time boundary and escapes historical values',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-v4';
+ const fact={statement:'Recorded snapshot',citations:[]};
+ const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
+  timeline:[{...fact,stage:'FAILURE',timestamp:'2026-10-05T10:00:00Z',time_interpretation:'记录创建时间；<unsafe>不证明恢复完成'}],
+  findings:[],immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],deferred_items:[],missing_evidence:[]};
+ const s=surface('/admin',true,null,null,{[path]:{status:'COMPLETED',report}});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v4',analysisTarget:'ordinary-work'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;
+ assert.match(h,/记录创建时间；&lt;unsafe&gt;不证明恢复完成/);assert.doesNotMatch(h,/<unsafe>/);
+});

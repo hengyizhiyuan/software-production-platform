@@ -64,6 +64,7 @@ class TimelineItem(ObservedFact):
     timestamp: str | None = Field(default=None, description="Original event time only. Composite stage summaries have no single timestamp. Dated entries must be ordered chronologically, regardless of stage.")
     timestamp_evidence_id: UUID | None = Field(default=None, description="Observed original Owner record whose time is used; must be cited. Other citations of a dated event must be explicitly associated with this record.")
     timestamp_field: Literal["created_at", "updated_at", "started_at", "finished_at", "sealed_at", "assessed_at", "timestamp"] | None = Field(default=None, description="Exact top-level original Owner timestamp field, not an invented stage-wide time.")
+    time_interpretation: str | None = Field(default=None, description="For dated entries copy the exact evidence.read time_boundaries[timestamp_field]. Creation time cannot establish later snapshot state or recovery completion. Undated entries use null.")
 
     @model_validator(mode="after")
     def recorded_time_requires_source(self):
@@ -78,6 +79,9 @@ class TimelineItem(ObservedFact):
 class Finding(AnalysisRecord):
     finding_id: str = Field(min_length=1, max_length=80)
     subject_evidence_id: UUID = Field(description="Original Owner record this finding is about. Fact citations must be this record or explicitly linked records; shared Work/attempt, similar errors or timestamps do not establish the same incident.")
+    inspection_id: UUID = Field(description="Call evidence.inspect(subject_evidence_id) to read the original linked Owner fields, not merely relationship hints. Copy its inspection_id. An index snippet is insufficient.")
+    uncertainty_check_ids: tuple[UUID, ...] = Field(default=(), max_length=4,
+        description="Performed field checks relevant to this finding's uncertainty. Do not infer whole-response or historical absence from them.")
     scope_check_ids: tuple[UUID, ...] = Field(default=(), max_length=4,
         description="For findings about unavailable fields, cite performed checks. Such findings are UNKNOWN and analysis must copy their bounded_conclusion values joined by a newline. Do not use them to infer global/history absence.")
     classification: IssueClass
@@ -86,7 +90,8 @@ class Finding(AnalysisRecord):
     analysis: str = Field(min_length=1, max_length=4000,
         description="ROOT_CAUSE_HYPOTHESIS must start with '假设：' and use conditional causal language. Owner diagnosis/expected/rejected-behavior lists are not proof of executed effects or an unavailable candidate's contents.")
     repository_citations: tuple[Citation, ...] = Field(default=(), max_length=8)
-    uncertainty: str = Field(min_length=1, max_length=2000)
+    uncertainty: str = Field(min_length=1, max_length=12000,
+        description="Copy inspection.bounded_conclusion, followed by each uncertainty_check_ids evidence.check bounded_conclusion, joined by newline. No free-form absence claims. Unread, redacted, empty and unexported are distinct.")
     recommendation: str = Field(min_length=1, max_length=3000)
     handling: Literal["SELF_REFINE_RETRY_REGENERATE", "EVOLUTION_WORK_PROPOSAL",
                       "BLOCK_AND_ESCALATE", "INVESTIGATE"] = Field(description=
@@ -125,7 +130,7 @@ class Recommendation(AnalysisRecord):
 
 
 class AnalysisReport(AnalysisRecord):
-    schema_version: Literal["watt-trace-analysis-report-v3"] = "watt-trace-analysis-report-v3"
+    schema_version: Literal["watt-trace-analysis-report-v4"] = "watt-trace-analysis-report-v4"
     work_id: UUID
     original_objective: ObservedFact
     expected_outcome: ObservedFact

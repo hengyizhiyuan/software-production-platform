@@ -11,7 +11,7 @@ from spg.config import Settings
 from spg.domain.native_execution import InferenceAction, InferenceResponse, ToolCallProposal, canonical_digest
 from spg.domain.trace_analysis import AnalysisReport, AnalysisTrigger, REGRESSION_CRITERIA, IssueClass
 from spg.evaluation.contracts import QualityError
-from spg.infrastructure.trace_analysis_evidence import EvidenceCatalog, RepositorySnapshot
+from spg.infrastructure.trace_analysis_evidence import EvidenceCatalog, RepositorySnapshot, time_boundary
 
 
 def snapshot(work_id=None):
@@ -28,6 +28,7 @@ def snapshot(work_id=None):
 def report(catalog):
     row = next(r for r in catalog.records.values() if r["group"] == "work")
     catalog.read(row["evidence_id"])
+    inspection = catalog.inspect(row["evidence_id"])
     fact = {"statement": "Work is completed", "citations": [
         {"evidence_id": row["evidence_id"], "quote": "COMPLETED"}]}
     return {"work_id": catalog.snapshot["work_id"], "original_objective": fact,
@@ -35,8 +36,9 @@ def report(catalog):
             "timeline": [dict(fact, stage="FINAL_STATE", timestamp=None)],
             "findings": [{"finding_id": "missing-raw", "classification": "UNKNOWN",
                 "subject_evidence_id": row["evidence_id"],
+                "inspection_id": inspection["inspection_id"],
                 "epistemic_status": "UNKNOWN", "fact": fact, "analysis": "Exact invalid text unavailable",
-                "repository_citations": [], "uncertainty": "No raw provider output",
+                "repository_citations": [], "uncertainty": inspection["bounded_conclusion"],
                 "recommendation": "Inspect existing owner evidence", "handling": "INVESTIGATE",
                 "regression_qualification": REGRESSION_CRITERIA[IssueClass.UNKNOWN]}],
             "deferred_items": [{"statement": "Raw log investigation", "finding_ids": ["missing-raw"]}],
@@ -129,6 +131,8 @@ def timed_report():
         "citations": [{"evidence_id": eid, "quote": "FAILED"}],
         "timestamp": catalog.values[eid]["created_at"],
         "timestamp_evidence_id": eid, "timestamp_field": "created_at"} for eid in event_ids]
+    for item in candidate["timeline"]:
+        item["time_interpretation"] = time_boundary("created_at")
     return catalog, candidate, event_ids
 
 
@@ -428,6 +432,8 @@ def test_original_incident_cannot_be_omitted_with_empty_findings():
     r["findings"][0]["fact"] = {"statement": "Failed schema decision; raw invalid text unknown",
         "citations": [{"evidence_id": eid, "quote": "NATIVE_DECISION_SCHEMA_REJECTED"}]}
     r["findings"][0]["subject_evidence_id"] = eid
+    inspection = catalog.inspect(eid)
+    r["findings"][0].update(inspection_id=inspection["inspection_id"], uncertainty=inspection["bounded_conclusion"])
     catalog.validate(AnalysisReport.model_validate(r))
 
 
@@ -571,6 +577,10 @@ def test_absence_is_snapshot_scoped_and_redaction_preserves_unknown():
     r["evidence_assessments"].append({"statement": check["bounded_conclusion"], "family": "OWNER_RECORD",
         "check_id": check["check_id"], "availability": check["availability"]})
     r["findings"][0].update(scope_check_ids=[check["check_id"]], analysis=check["bounded_conclusion"])
+    eid = next(eid for eid, row in catalog.records.items() if row["group"] == "execution_steps")
+    inspection = catalog.inspect(eid)
+    r["findings"][0].update(subject_evidence_id=eid, inspection_id=inspection["inspection_id"], uncertainty=inspection["bounded_conclusion"],
+        fact={"statement": "Recorded inference rejection", "citations": [{"evidence_id": eid, "quote": "NATIVE_DECISION_SCHEMA_REJECTED"}]})
     catalog.validate(AnalysisReport.model_validate(r))
     snap = evidence_snapshot()
     snap["lifecycle"]["advanced"]["owners"]["execution_steps"][0]["result_payload"]["raw_response"] = "[REDACTED_FIELD]"
@@ -631,6 +641,8 @@ def test_same_attempt_same_error_cannot_join_distinct_incidents():
         catalog.read(eid)
     f = r["findings"][0]
     f["subject_evidence_id"] = events[0]
+    inspection = catalog.inspect(events[0])
+    f.update(inspection_id=inspection["inspection_id"], uncertainty=inspection["bounded_conclusion"])
     f["fact"] = {"statement": "Recorded failure", "citations": [
         {"evidence_id": events[0], "quote": "SAME_FAILURE"},
         {"evidence_id": receipts[0], "quote": "same failure"}]}
@@ -656,7 +668,9 @@ def test_related_record_metadata_does_not_observe_unread_body():
     f["subject_evidence_id"] = events[0]
     f["fact"]["citations"] = [{"evidence_id": events[0], "quote": "SAME_FAILURE"},
                               {"evidence_id": receipts[0], "quote": "same failure"}]
-    with pytest.raises(ValueError, match="CITATION_NOT_OBSERVED"):
+    # A plain read exposes only relationship hints; the mandatory inspect is
+    # deliberately omitted here. It must not be bypassed by a snippet citation.
+    with pytest.raises(ValueError, match="CITATION_NOT_OBSERVED|FINDING_REQUIRES_SUBJECT_OWNER_INSPECTION"):
         catalog.validate(AnalysisReport.model_validate(r))
 
 
@@ -665,6 +679,10 @@ def test_checked_field_cannot_be_promoted_to_missing_whole_response_or_history()
     check = catalog.check("OWNER_RECORD", group="execution_steps", field="/result_payload/raw_response")
     r = json.loads(json.dumps(report(catalog)))
     f = r["findings"][0]
+    eid = next(eid for eid, row in catalog.records.items() if row["group"] == "execution_steps")
+    inspection = catalog.inspect(eid)
+    f.update(subject_evidence_id=eid, inspection_id=inspection["inspection_id"], uncertainty=inspection["bounded_conclusion"],
+             fact={"statement": "Recorded inference rejection", "citations": [{"evidence_id": eid, "quote": "NATIVE_DECISION_SCHEMA_REJECTED"}]})
     f.update(scope_check_ids=[check["check_id"]], analysis=check["bounded_conclusion"])
     r["missing_evidence"] = [{"statement": check["bounded_conclusion"], "family": "OWNER_RECORD",
         "check_id": check["check_id"], "availability": check["availability"]}]
@@ -704,3 +722,115 @@ def test_diagnostic_expected_behavior_does_not_become_execution_receipt():
         AnalysisReport.model_validate(r)
     f["analysis"] = "假设：可能与候选理解偏差相关；没有原始执行证据时保留 UNKNOWN。"
     AnalysisReport.model_validate(r)
+
+
+@pytest.mark.parametrize("command", ["arbitrary-executable", "unlisted-reader", "自定义命令"])
+def test_real_owner_effect_namespace_resolves_parameters_without_work_rules(command):
+    snap = snapshot()
+    effect, receipt, recovery, other_effect, other_receipt = [str(uuid4()) for _ in range(5)]
+    owners = snap["lifecycle"]["advanced"]["owners"]
+    owners["execution_effects"] = [
+        {"id": effect, "semantic_input": {"argv": [command, "--generic-option"], "cwd": "."}},
+        {"id": other_effect, "semantic_input": {"argv": ["unrelated-command"]}}]
+    owners["effect_receipts"] = [
+        {"id": receipt, "effect_id": effect, "condition": "FAILED", "output": {"error_type": "ValueError"}},
+        {"id": other_receipt, "effect_id": other_effect, "condition": "FAILED", "output": {"error_type": "ValueError"}}]
+    owners["self_refine_events"] = [{"id": recovery, "diagnostic_evidence": {"receipt_ref": "native-receipt:" + receipt}}]
+    c = EvidenceCatalog(snap)
+    rid = next(eid for eid, value in c.values.items() if isinstance(value, dict) and value.get("id") == receipt)
+    effect_id = next(eid for eid, value in c.values.items() if isinstance(value, dict) and value.get("id") == effect)
+    unrelated = next(eid for eid, value in c.values.items() if isinstance(value, dict) and value.get("id") == other_effect)
+    assert c.association(rid, effect_id)["basis"] == "EXPLICIT_OWNER_REFERENCE"
+    assert effect_id not in c.observed
+    bundle = c.inspect(rid)
+    assert effect_id in c.observed and unrelated not in c.observed
+    row = next(r for r in bundle["records"] if r["evidence_id"] == effect_id)
+    argv = next(f for f in row["fields"] if f["field"] == "/semantic_input")
+    assert argv["read_status"] == "READ" and command in argv["original_excerpt"]
+    assert c.association(rid, unrelated)["status"] == "NOT_ESTABLISHED"
+
+
+def test_inspection_capacity_never_marks_unreturned_input_as_read():
+    c = EvidenceCatalog(snapshot())
+    effect = str(uuid4())
+    eid = c.add("execution_effects", "/fixture/effect", {"id": effect, "semantic_input": {"argv": ["x" * 5000]}})
+    rid = c.add("effect_receipts", "/fixture/receipt", {"id": str(uuid4()), "effect_id": effect, "output": {"error_type": "ValueError"}})
+    first = c.inspect(rid)
+    data = next(f for r in first["records"] if r["evidence_id"] == eid for f in r["fields"] if f["field"] == "/semantic_input")
+    assert data["availability"] == "PRESENT" and data["read_status"] == "NOT_READ_CAPACITY"
+    assert not any('x' * 5000 in s for s in c.observed_excerpts[eid])
+    c.read(eid)
+    second = c.inspect(rid)
+    assert next(f for r in second["records"] if r["evidence_id"] == eid for f in r["fields"] if f["field"] == "/semantic_input")["read_status"] == "READ"
+
+
+def test_redacted_empty_and_unexported_fields_remain_distinct():
+    snap = snapshot()
+    snap["lifecycle"]["advanced"]["owners"]["execution_steps"] = [
+        {"id": str(uuid4()), "result_payload": {"raw_response": "[REDACTED_FIELD]"}},
+        {"id": str(uuid4()), "result_payload": {"raw_response": ""}},
+        {"id": str(uuid4()), "result_payload": {"reason_code": "INVALID"}}]
+    c = EvidenceCatalog(snap)
+    check = c.check("OWNER_RECORD", group="execution_steps", field="/result_payload/raw_response")
+    assert check["field_states"] == {"AVAILABLE": 0, "REDACTED": 1, "EMPTY": 1, "NOT_EXPORTED": 1}
+    assert check["availability"] == "INCOMPLETE_CAPTURE"
+
+
+@pytest.mark.parametrize("field", ["analysis", "recommendation", "regression_scenario"])
+def test_absence_cannot_escape_checked_boundaries_into_other_prose(field):
+    c = EvidenceCatalog(snapshot())
+    r = report(c)
+    r["findings"][0][field] = "完整响应未保留，平台从未保存原始参数。"
+    with pytest.raises(ValueError, match="EVIDENCE_ABSENCE_BELONGS_IN_CHECKED_UNCERTAINTY"):
+        c.validate(AnalysisReport.model_validate(r))
+
+
+def test_findings_cannot_claim_unbounded_uncertainty_or_borrow_inspection():
+    c = EvidenceCatalog(snapshot())
+    r = report(c)
+    r["findings"][0]["uncertainty"] = "No raw response was ever retained"
+    with pytest.raises(ValueError, match="UNCERTAINTY_MUST_COPY_INSPECTION"):
+        c.validate(AnalysisReport.model_validate(r))
+    r = report(c)
+    r["findings"][0]["inspection_id"] = str(uuid4())
+    with pytest.raises(ValueError, match="FINDING_REQUIRES_SUBJECT_OWNER_INSPECTION"):
+        c.validate(AnalysisReport.model_validate(r))
+
+
+def test_creation_time_requires_snapshot_state_boundary():
+    c, r, _ = timed_report()
+    r["timeline"][0]["time_interpretation"] = "Recovery definitely finished at creation time"
+    with pytest.raises(ValueError, match="TIMELINE_REQUIRES_EXACT_TIME_BOUNDARY"):
+        c.validate(AnalysisReport.model_validate(r))
+
+
+def test_refinement_created_at_does_not_timestamp_later_recovered_status():
+    c = EvidenceCatalog(snapshot())
+    r = report(c)
+    eid = c.add("self_refine_events", "/fixture/recovery", {"id": str(uuid4()),
+        "created_at": "2026-10-05T10:00:00+00:00", "updated_at": "2026-10-05T10:01:00+00:00",
+        "status": "VERIFIED", "final_result": "LOCAL_OBLIGATION_RECOVERED"})
+    c.read(eid)
+    r["timeline"] = [{"stage": "RECOVERY_REFINEMENT", "statement": "Recorded LOCAL_OBLIGATION_RECOVERED",
+        "citations": [{"evidence_id": eid, "quote": "LOCAL_OBLIGATION_RECOVERED"}],
+        "timestamp": c.values[eid]["created_at"], "timestamp_evidence_id": eid,
+        "timestamp_field": "created_at", "time_interpretation": time_boundary("created_at")}]
+    with pytest.raises(ValueError, match="TIMELINE_CREATION_CANNOT_TIMESTAMP_RECOVERY_STATE"):
+        c.validate(AnalysisReport.model_validate(r))
+    r["timeline"][0].update(timestamp=c.values[eid]["updated_at"], timestamp_field="updated_at",
+                            time_interpretation=time_boundary("updated_at"))
+    inspection = c.inspect(eid)
+    r["findings"][0].update(subject_evidence_id=eid, inspection_id=inspection["inspection_id"],
+        uncertainty=inspection["bounded_conclusion"], fact={"statement": "Recorded recovery",
+        "citations": [{"evidence_id": eid, "quote": "VERIFIED"}]})
+    c.validate(AnalysisReport.model_validate(r))
+
+
+def test_unrelated_owner_gap_cannot_be_attached_to_another_subject():
+    c = EvidenceCatalog(evidence_snapshot())
+    r = report(c)
+    check = c.check("OWNER_RECORD", group="execution_steps", field="/result_payload/raw_response")
+    f = r["findings"][0]
+    f.update(scope_check_ids=[check["check_id"]], analysis=check["bounded_conclusion"])
+    with pytest.raises(ValueError, match="CHECK_OWNER_SCOPE_NOT_ASSOCIATED_WITH_FINDING"):
+        c.validate(AnalysisReport.model_validate(r))
