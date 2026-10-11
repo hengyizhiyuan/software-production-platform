@@ -74,3 +74,24 @@ test('Failed owner execution is visible even when the transport queue completed 
  const t=traceFixture();t.candidate=[];t.timeline=[{owner:'EXECUTION',title:'执行失败',state:'FAIL',source_ref:'execution_events:failure',timestamp:'2026-10-07T01:00:00Z',detail:{event_type:'ExecutionFailed'}},{owner:'EXECUTION',title:'执行器报告生产结果',state:'FAIL',source_ref:'provider_execution_reports:report',detail:{outcome:'FAILURE'}}];
  const s=surface('/admin/trace',true,null,t);await s.ready();await s.listeners.click({target:{closest:()=>({dataset:{traceTab:'execution'}})}});const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/执行失败/);assert.match(h,/执行器报告生产结果/);assert.match(h,/data-kind="bad">失败/);
 });
+
+
+test('Trace analysis is Human-triggered and history reads never create a Work',async()=>{
+ const data={total:1,next_offset:null,items:[{work_id:'ordinary-work',title:'分析目标',state:'COMPLETED',state_label:'已完成',raw_user_requirement:'需求'}],note:'owner'};
+ const path='/api/admin/works/ordinary-work/analyses';
+ const s=surface('/admin/works',true,null,null,{'/api/admin/works?filter=ALL&limit=50&offset=0':data,[path]:{items:[]}});await s.ready();
+ assert.match(s.nodes['#admin-content'].innerHTML,/用 Watt 分析 Trace/);
+ assert.ok(!s.calls.some(([,o])=>o.method==='POST'));
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisWork:'ordinary-work'}})}});
+ assert.equal(s.calls.at(-1)[0],path);assert.match(s.nodes['#admin-content'].innerHTML,/开始 Watt 分析/);
+ assert.ok(!s.calls.some(([,o])=>o.method==='POST'));
+});
+
+test('Analysis report escapes model text and preserves failed analysis evidence',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-one';
+ const a={work_id:'ordinary-work',request_id:'request-one',status:'FAILED',failure:{error_type:'ProviderError',note:'<script>bad()</script>'},report:null};
+ const s=surface('/admin',true,null,null,{[path]:a});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/未形成合格报告/);assert.match(h,/下载报告与执行证据/);
+ assert.match(h,/&lt;script&gt;/);assert.doesNotMatch(h,/<script>bad/);
+});

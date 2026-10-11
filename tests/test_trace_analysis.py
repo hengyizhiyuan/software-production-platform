@@ -1,0 +1,281 @@
+"""Native investigation gates, evidence fidelity, replay and failure receipts."""
+import asyncio
+import json
+from pathlib import Path
+from uuid import uuid4
+
+import pytest
+
+from spg.application.trace_analysis import TraceAnalysisService
+from spg.config import Settings
+from spg.domain.native_execution import InferenceAction, InferenceResponse, ToolCallProposal, canonical_digest
+from spg.domain.trace_analysis import AnalysisReport, AnalysisTrigger
+from spg.evaluation.contracts import QualityError
+from spg.infrastructure.trace_analysis_evidence import EvidenceCatalog, RepositorySnapshot
+
+
+def snapshot(work_id=None):
+    wid = work_id or uuid4()
+    return {"work_id": str(wid), "capture": {"consistency": "NON_ATOMIC_ACROSS_OWNERS"},
+            "capture_warnings": ["raw failed response missing"],
+            "lifecycle": {"work": {"work_id": str(wid), "state": "COMPLETED",
+                "raw_user_requirement": "Create a static page", "desired_outcome": "static page"},
+                "first_human_input": "Create a static page",
+                "advanced": {"owners": {"execution_steps": [{"id": "failed-step",
+                    "result_payload": {"reason_code": "NATIVE_DECISION_SCHEMA_REJECTED"}}]}}}}
+
+
+def report(catalog):
+    row = next(r for r in catalog.records.values() if r["group"] == "work")
+    catalog.read(row["evidence_id"])
+    fact = {"statement": "Work is completed", "citations": [
+        {"evidence_id": row["evidence_id"], "quote": "COMPLETED"}]}
+    return {"work_id": catalog.snapshot["work_id"], "original_objective": fact,
+            "expected_outcome": fact, "actual_execution_path": fact, "current_state": fact,
+            "timeline": [dict(fact, stage="FINAL_STATE", timestamp=None)],
+            "findings": [{"finding_id": "missing-raw", "classification": "UNKNOWN",
+                "epistemic_status": "UNKNOWN", "fact": fact, "analysis": "Exact invalid text unavailable",
+                "repository_citations": [], "uncertainty": "No raw provider output",
+                "recommendation": "Inspect existing owner evidence", "handling": "INVESTIGATE",
+                "regression_qualification": "Preserve UNKNOWN when raw evidence is absent"}],
+            "deferred_items": [{"statement": "Raw log investigation", "finding_ids": ["missing-raw"]}],
+            "missing_evidence": ["raw invalid response"]}
+
+
+class Registry:
+    def __init__(self, snapshot):
+        self.snapshot, self.calls = snapshot, []
+        self.state = "COMPLETED"
+
+    def get(self, owner, wid):
+        self.calls.append((owner, wid))
+        if owner != "human:owner" or str(wid) != self.snapshot["work_id"]:
+            raise QualityError("TRACE_SOURCE_NOT_FOUND")
+        return {"work_id": str(wid), "product_id": str(uuid4()), "state": self.state}
+
+
+class Exporter:
+    def __init__(self, snapshot):
+        self.snapshot, self.calls = snapshot, 0
+
+    def capture(self, *args, **kwargs):
+        self.calls += 1
+        return {"trace.json": json.dumps(self.snapshot).encode()}
+
+
+class NativeModel:
+    """Scripted test model; never represented as live-model qualification."""
+    def __init__(self, snap, *, reject_first=False, bad_terminal=False):
+        self.catalog = EvidenceCatalog(snap)
+        self.reject_first, self.bad_terminal = reject_first, bad_terminal
+        self.requests = []
+
+    async def infer(self, req):
+        self.requests.append(req)
+        candidate = report(self.catalog)
+        if len(self.requests) == 1 and self.reject_first:
+            candidate["current_state"]["citations"][0]["quote"] = "unobserved fabricated quote"
+        if not req.previous_results or req.previous_results[-1]["condition"] == "FAILED":
+            return InferenceResponse(action=InferenceAction.CONTINUE, summary="Verify report",
+                working_plan=req.working_plan, tool_calls=(ToolCallProposal(proposal_index=0,
+                    tool_identity="analysis.submit", arguments={"report": candidate}),))
+        return InferenceResponse(action=InferenceAction.RESULT_READY, summary="Advisory report submitted",
+            working_plan=req.working_plan, result_claim={"evidence_ids": [], "output_vector": {
+                "report_digest": "wrong" if self.bad_terminal else canonical_digest(AnalysisReport.model_validate(candidate).model_dump(mode="json"))}})
+
+
+def service(tmp_path, *, reject_first=False, bad_terminal=False):
+    snap = snapshot()
+    registry, exporter = Registry(snap), Exporter(snap)
+    model = NativeModel(snap, reject_first=reject_first, bad_terminal=bad_terminal)
+    s = TraceAnalysisService(None, Settings(native_executor_storage_root=tmp_path,
+        native_executor_inference_model="scripted-test-only"), exporter=exporter, registry=registry,
+        inference_factory=lambda: model, repository_factory=lambda *_: ({}, ["historical source unavailable"]))
+    return s, snap, model
+
+
+def test_native_kernel_report_and_durable_history_without_new_work(tmp_path):
+    s, snap, model = service(tmp_path)
+    trigger = AnalysisTrigger(request_id=uuid4(), rationale="Investigate")
+    r = asyncio.run(s.analyze("human:owner", uuid4_from(snap), trigger))
+    assert r["status"] == "COMPLETED" and r["verification"] == "CITATIONS_AND_STRUCTURE_PASS"
+    assert r["semantic_qualification"] == "HUMAN_REVIEW_REQUIRED"
+    assert r["production_work_created"] is False and r["authority"] == "ADVISORY_ONLY"
+    detail = s.read("human:owner", uuid4_from(snap), trigger.request_id, detail=True)
+    kinds = {event["kind"] for event in detail["execution_history"]}
+    assert {"INVESTIGATION_BASIS", "INFERENCE_STARTED", "INFERENCE_FINISHED", "TOOL_FINISHED", "CHECKPOINT"} <= kinds
+    assert "report_schema" in model.requests[0].context_facts[0]["payload"]
+    assert s.list("human:owner", uuid4_from(snap))["items"][0]["request_id"] == str(trigger.request_id)
+
+
+def uuid4_from(snap):
+    from uuid import UUID
+    return UUID(snap["work_id"])
+
+
+def test_report_rejection_enters_existing_native_bounded_refinement(tmp_path):
+    s, snap, model = service(tmp_path, reject_first=True)
+    r = asyncio.run(s.analyze("human:owner", uuid4_from(snap), AnalysisTrigger(request_id=uuid4(), rationale="Investigate")))
+    assert r["status"] == "COMPLETED"
+    assert [v["verification"] for v in r["verification_receipts"]] == ["FAIL", "CITATIONS_AND_STRUCTURE_PASS"]
+    assert r["refinement_feedback"][0]["status"] == "VERIFIED"
+    assert any(f["fact_type"] == "RECENT_SELF_REFINE" for f in model.requests[1].context_facts)
+    assert len(model.requests) == 3
+
+
+def test_terminal_model_claim_cannot_replace_verified_submission(tmp_path):
+    s, snap, _ = service(tmp_path, bad_terminal=True)
+    r = asyncio.run(s.analyze("human:owner", uuid4_from(snap), AnalysisTrigger(request_id=uuid4(), rationale="Investigate")))
+    assert r["status"] == "FAILED" and r["report"] is None
+
+
+def test_idempotent_request_never_reissues_model_or_recaptures(tmp_path):
+    s, snap, model = service(tmp_path)
+    trigger = AnalysisTrigger(request_id=uuid4(), rationale="Investigate")
+    first = asyncio.run(s.analyze("human:owner", uuid4_from(snap), trigger))
+    second = asyncio.run(s.analyze("human:owner", uuid4_from(snap), trigger))
+    assert first == second and len(model.requests) == 2 and s.exporter.calls == 1
+    with pytest.raises(QualityError, match="ANALYSIS_REQUEST_ID_CONFLICT"):
+        asyncio.run(s.analyze("human:owner", uuid4_from(snap), trigger.model_copy(update={"rationale": "changed"})))
+
+
+def test_wrong_owner_and_active_work_rejected_before_capture_or_model(tmp_path):
+    s, snap, model = service(tmp_path)
+    trigger = AnalysisTrigger(request_id=uuid4(), rationale="Investigate")
+    with pytest.raises(QualityError, match="TRACE_SOURCE_NOT_FOUND"):
+        asyncio.run(s.analyze("human:foreign", uuid4_from(snap), trigger))
+    s.registry.state = "RUNNING"
+    with pytest.raises(QualityError, match="ANALYSIS_WORK_NOT_TERMINAL_OR_BLOCKED"):
+        asyncio.run(s.analyze("human:owner", uuid4_from(snap), trigger))
+    assert s.exporter.calls == 0 and not model.requests
+
+
+def test_read_history_requires_current_owner(tmp_path):
+    s, snap, _ = service(tmp_path)
+    trigger = AnalysisTrigger(request_id=uuid4(), rationale="Investigate")
+    asyncio.run(s.analyze("human:owner", uuid4_from(snap), trigger))
+    with pytest.raises(QualityError, match="TRACE_SOURCE_NOT_FOUND"):
+        s.read("human:foreign", uuid4_from(snap), trigger.request_id, detail=True)
+
+
+def test_provider_failure_preserves_evidence_and_does_not_leak_exception_secrets(tmp_path):
+    s, snap, _ = service(tmp_path)
+    class Failed:
+        async def infer(self, _):
+            raise RuntimeError("api_key=must-never-be-persisted")
+    s.inference_factory = Failed
+    trigger = AnalysisTrigger(request_id=uuid4(), rationale="Investigate")
+    r = asyncio.run(s.analyze("human:owner", uuid4_from(snap), trigger))
+    assert r["status"] == "FAILED" and r["failure"]["error_type"] == "RuntimeError"
+    assert "must-never" not in json.dumps(s.read("human:owner", uuid4_from(snap), trigger.request_id, detail=True))
+    assert not (s.root / ".active-investigation").exists()
+
+
+def test_crash_capacity_lock_is_not_silently_stolen(tmp_path):
+    s, snap, model = service(tmp_path)
+    (s.root / ".active-investigation").touch()
+    with pytest.raises(QualityError, match="ANALYSIS_CAPACITY_BUSY"):
+        asyncio.run(s.analyze("human:owner", uuid4_from(snap), AnalysisTrigger(request_id=uuid4(), rationale="Investigate")))
+    assert not model.requests
+
+
+@pytest.mark.parametrize("mutation, reason", [
+    (lambda r: r.update(work_id=str(uuid4())), "REPORT_WORK_ID_MISMATCH"),
+    (lambda r: r["current_state"]["citations"][0].update(evidence_id=str(uuid4())), "CITATION_NOT_OBSERVED"),
+    (lambda r: r["current_state"]["citations"][0].update(quote="fake"), "CITATION_QUOTE_MISMATCH"),
+])
+def test_report_citations_are_exact_and_work_bound(mutation, reason):
+    catalog = EvidenceCatalog(snapshot())
+    r = report(catalog)
+    mutation(r)
+    with pytest.raises(ValueError, match=reason):
+        catalog.validate(AnalysisReport.model_validate(r))
+
+
+def test_root_cause_and_governance_classification_are_not_promoted_without_evidence():
+    r = report(EvidenceCatalog(snapshot()))
+    r["findings"][0]["epistemic_status"] = "ROOT_CAUSE_HYPOTHESIS"
+    with pytest.raises(ValueError, match="repository evidence"):
+        AnalysisReport.model_validate(r)
+    r["findings"][0].update(epistemic_status="UNKNOWN", classification="GOVERNANCE_ISSUE")
+    with pytest.raises(ValueError, match="classification boundary"):
+        AnalysisReport.model_validate(r)
+
+
+def test_exact_repository_read_ignores_dirty_worktree_and_denies_secrets(tmp_path):
+    import subprocess
+    def git(*args):
+        return subprocess.check_output(["git", "-C", str(tmp_path), *args], text=True).strip()
+    git("init")
+    (tmp_path / "src").mkdir()
+    p = tmp_path / "src/runtime.py"
+    p.write_text("original implementation\n")
+    git("add", "src/runtime.py")
+    git("-c", "user.name=fixture", "-c", "user.email=fixture@example.test", "commit", "-m", "fixture")
+    revision = git("rev-parse", "HEAD")
+    repo = RepositorySnapshot(key="runtime", path=tmp_path, revision=revision, roots=("src",))
+    p.write_text("C3 temporary patch must not enter snapshot\n")
+    assert "original implementation" in repo.read("src/runtime.py")["content"]
+    assert "temporary patch" not in repo.read("src/runtime.py")["content"]
+    assert "original implementation" in repo.search("original", "src")["matches"]
+    for path in ("../private", "/etc/passwd", "src/.env", "src/holdout.json", "tests/outside.py"):
+        with pytest.raises(ValueError, match="PATH_NOT_ADMITTED"):
+            repo.read(path)
+
+
+def test_snapshot_capacity_and_unknown_are_visible():
+    snap = snapshot()
+    snap["lifecycle"]["capture_truncation"] = {"execution_steps": {"observed_count": 100, "exported_count": 30}}
+    catalog = EvidenceCatalog(snap)
+    seed = catalog.seed()
+    assert "100" in json.dumps(seed) and "raw failed response missing" in json.dumps(seed)
+    assert catalog.index(group="execution_steps")["total"] == 1
+    with pytest.raises(ValueError):
+        catalog.index(limit=999)
+
+
+def test_unread_fragment_cannot_be_used_as_a_valid_citation():
+    catalog = EvidenceCatalog(snapshot())
+    eid = catalog.add("fixture", "/fixture", "visible-head " + "x" * 100 + "unseen-tail")
+    catalog.read(eid, limit=20)
+    r = report(catalog)
+    r["current_state"]["citations"] = [{"evidence_id": eid, "quote": "unseen-tail"}]
+    with pytest.raises(ValueError, match="CITATION_QUOTE_MISMATCH"):
+        catalog.validate(AnalysisReport.model_validate(r))
+
+
+def test_cancelled_analysis_keeps_durable_partial_history(tmp_path):
+    s, snap, _ = service(tmp_path)
+    class Cancelled:
+        async def infer(self, _):
+            raise asyncio.CancelledError()
+    s.inference_factory = Cancelled
+    trigger = AnalysisTrigger(request_id=uuid4(), rationale="Investigate")
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(s.analyze("human:owner", uuid4_from(snap), trigger))
+    r = s.read("human:owner", uuid4_from(snap), trigger.request_id, detail=True)
+    assert r["status"] == "INTERRUPTED" and r["execution_history"]
+    assert not (s.root / ".active-investigation").exists()
+
+
+def test_investigation_tools_still_require_exact_grants(tmp_path):
+    from spg.domain.native_execution import (
+        NativeExecutionConflict, SourceVector, ToolExecutionRequest, WorkspaceManifest, WorkspaceMount,
+    )
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    tools = AnalysisTools(EvidenceCatalog(snapshot()), {}).registry()
+    attempt, pwu, wid = uuid4(), uuid4(), uuid4()
+    workspace = WorkspaceManifest(workspace_id=uuid4(), work_id=wid, pwu_id=pwu,
+        attempt_id=attempt, source_vector_digest=SourceVector().digest,
+        host_storage_id="fixture", environment_profile_digest="a" * 64,
+        mounts=(WorkspaceMount(mount_id="artifacts", host_path=str(tmp_path),
+                container_path="/artifacts", writable=True),), evidence_namespace="fixture", retention_policy="fixture")
+    req = ToolExecutionRequest(delivery_id=uuid4(), attempt_id=attempt, worker_epoch=1,
+        step_id=uuid4(), capability_grants=(), workspace=workspace,
+        proposal=ToolCallProposal(proposal_index=0, tool_identity="evidence.index", arguments={}))
+    with pytest.raises(NativeExecutionConflict, match="not granted"):
+        asyncio.run(tools.execute(req))
+    req = req.model_copy(update={"proposal": ToolCallProposal(proposal_index=0,
+        tool_identity="file.write", arguments={"path": "src/x.py", "content": "bad"})})
+    with pytest.raises(NativeExecutionConflict, match="not registered"):
+        asyncio.run(tools.execute(req))

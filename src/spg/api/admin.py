@@ -15,6 +15,8 @@ from spg.evaluation.operations import OperationsService
 from spg.evaluation.production_trace import ProductionTraceService
 from spg.evaluation.work_diagnostic_export import WorkDiagnosticExportService
 from spg.evaluation.admin_projection import cockpit_projection, outcome_projection
+from spg.application.trace_analysis import TraceAnalysisService
+from spg.domain.trace_analysis import AnalysisTrigger
 
 
 def install_admin(api, database, settings, runtime=None):
@@ -22,6 +24,8 @@ def install_admin(api, database, settings, runtime=None):
     operations = OperationsService(database, settings, runtime)
     traces = ProductionTraceService(database, settings, quality)
     diagnostic_exports = WorkDiagnosticExportService(database, settings, quality)
+    trace_analysis = TraceAnalysisService(database, settings, exporter=diagnostic_exports)
+    api.state.trace_analysis = trace_analysis
     api.state.quality_owner = quality
     api.state.operations_observer = operations
     router = APIRouter(prefix="/api/admin")
@@ -114,6 +118,21 @@ def install_admin(api, database, settings, runtime=None):
             headers={'Content-Disposition':f'attachment; filename="{name}"',
                 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff',
                 'X-Evidence-SHA256':sha256(content).hexdigest()})
+
+    @router.post('/works/{work_id}/analyses')
+    async def analyze_work_trace(work_id: UUID, request: AnalysisTrigger, http_request: Request):
+        owner = getattr(http_request.state, 'actor_id', ACTOR_ID)
+        return await api.state.trace_analysis.analyze(owner, work_id, request)
+
+    @router.get('/works/{work_id}/analyses')
+    def work_trace_analyses(work_id: UUID, http_request: Request):
+        return api.state.trace_analysis.list(getattr(http_request.state, 'actor_id', ACTOR_ID), work_id)
+
+    @router.get('/works/{work_id}/analyses/{request_id}')
+    def work_trace_analysis(work_id: UUID, request_id: UUID, http_request: Request,
+                            detail: bool = False):
+        return api.state.trace_analysis.read(getattr(http_request.state, 'actor_id', ACTOR_ID),
+                                             work_id, request_id, detail=detail)
 
     @router.get('/case-runs/{case_run_id}/trace')
     def case_trace(case_run_id: UUID, view: str = "full"):

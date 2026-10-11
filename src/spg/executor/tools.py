@@ -204,6 +204,7 @@ class NativeToolRegistry:
             raise NativeExecutionConflict(
                 f"tool is not registered: {request.proposal.tool_identity}"
             )
+        connector = None
         if definition.identity in {
             str(contract["identity"]) for contract in PUBLIC_NATIVE_TOOL_CONTRACTS
         }:
@@ -245,7 +246,7 @@ class NativeToolRegistry:
         grant = self._grant_for(definition.identity, request.capability_grants)
         if definition.identity in {"git.operation", "filesystem.operation"} and connector.capability_id not in grant.scope.get("capabilities", ()):
             raise NativeExecutionConflict("Operation is not admitted by the Task Contract")
-        if connector.side_effect_level is SideEffectLevel.DESTRUCTIVE and any(
+        if connector is not None and connector.side_effect_level is SideEffectLevel.DESTRUCTIVE and any(
             permission not in grant.scope.get("permissions", ())
             for permission in connector.permissions_required
         ):
