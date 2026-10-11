@@ -139,6 +139,23 @@ failures. These gates do not prove arbitrary free-form semantic entailment.
 Saved v1/v2 reports remain readable. See the [association repair qualification](work-trace-self-analysis-association-repair-20261011.md)
 for original Owner reconciliation, live historical analysis and remaining limits.
 
+### Timeline and recommendation qualification
+
+Dated timeline entries also require `timestamp_evidence_id` and `timestamp_field`.
+The cited, read original Owner must contain the same timezone-aware instant.
+Events are ordered by observed time; an unrelated incident cannot share a dated
+entry merely because it belongs to the same Work. Undated composite summaries
+remain possible, without invented timestamp anchors. Creation time does not
+automatically establish recovery completion time; prose still needs Human review.
+
+Producer field descriptions distinguish refinement budgets and synthetic counters
+from observed regeneration. Exact repository source is comparison evidence until
+historical Worker identity is established. A final diff describes net changes;
+it cannot independently establish intermediate behavior or rollback safety.
+Recommendations must preserve governed recovery/termination, source uncertainty,
+and the separate meanings of transfer audit, preview evidence and Human acceptance.
+These checks do not prove semantic entailment for arbitrary recommendation prose.
+
 ## Admin and storage
 
 - POST `/api/admin/works/{id}/analyses`: explicit Human request UUID and rationale.
