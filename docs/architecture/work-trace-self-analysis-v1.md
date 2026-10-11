@@ -68,7 +68,8 @@ alone is insufficient.
 
 `analysis.submit` checks report schema, Work identity, unique findings, recommendation
 lineage, class/handling consistency, observed evidence UUIDs, exact quotes in
-actually returned excerpts and repository provenance for root cause hypotheses.
+actually returned excerpts (including bounded index snippets, never unread body)
+and repository provenance for root cause hypotheses.
 Rejected report drafts are retained by digest and can be read through
 `evidence.read(draft_id)`. They are labelled MODEL_PROPOSAL_NOT_OWNER_EVIDENCE and
 cannot be cited as historical observations. Bounded explicit remove/replace edits

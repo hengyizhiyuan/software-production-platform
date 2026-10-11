@@ -93,10 +93,17 @@ class EvidenceCatalog:
         rows = [row for row in self.records.values()
                 if (not group or group == row["group"])
                 and (not query or query.lower() in row["body"].lower())]
+        selected = rows[offset:offset + limit]
+        # Index snippets are also evidence actually returned to the model.
+        # Only that bounded snippet becomes observed, never the unread body.
+        for row in selected:
+            eid = row["evidence_id"]
+            self.observed.add(eid)
+            self.observed_excerpts.setdefault(eid, []).append(row["body"][:300])
         return {"total": len(rows), "offset": offset, "next_offset":
                 offset + limit if offset + limit < len(rows) else None,
                 "items": [{k: v for k, v in row.items() if k != "body"}
-                          | {"excerpt": row["body"][:300]} for row in rows[offset:offset + limit]]}
+                          | {"excerpt": row["body"][:300]} for row in selected]}
 
     def read(self, evidence_id: str, offset=0, limit=16000):
         if offset < 0 or limit < 1 or limit > 24000:

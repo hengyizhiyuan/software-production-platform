@@ -43,7 +43,10 @@ class Finding(AnalysisRecord):
     uncertainty: str = Field(min_length=1, max_length=2000)
     recommendation: str = Field(min_length=1, max_length=3000)
     handling: Literal["SELF_REFINE_RETRY_REGENERATE", "EVOLUTION_WORK_PROPOSAL",
-                      "BLOCK_AND_ESCALATE", "INVESTIGATE"]
+                      "BLOCK_AND_ESCALATE", "INVESTIGATE"] = Field(description=
+        "Required mapping: RUNTIME_MODEL_VARIANCE -> SELF_REFINE_RETRY_REGENERATE; "
+        "SYSTEM_CAPABILITY_DEFECT -> EVOLUTION_WORK_PROPOSAL; "
+        "GOVERNANCE_ISSUE -> BLOCK_AND_ESCALATE; UNKNOWN -> INVESTIGATE.")
     regression_qualification: str = Field(min_length=1, max_length=3000)
 
     @model_validator(mode="after")

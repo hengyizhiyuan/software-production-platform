@@ -398,3 +398,15 @@ def test_retained_draft_is_readable_but_cannot_be_cited_as_owner_truth():
     r["current_state"]["citations"] = [{"evidence_id": eid, "quote": "Work is completed"}]
     with pytest.raises(ValueError, match="MODEL_PROPOSAL_NOT_OWNER_EVIDENCE"):
         catalog.validate(AnalysisReport.model_validate(r))
+
+
+def test_index_snippet_can_be_cited_but_unread_body_cannot():
+    catalog = EvidenceCatalog(snapshot())
+    eid = catalog.add("fixture", "/index-snippet", "returned-snippet " + "x" * 400 + "unread-tail")
+    catalog.index(group="fixture")
+    r = json.loads(json.dumps(report(catalog)))
+    r["current_state"]["citations"] = [{"evidence_id": eid, "quote": "returned-snippet"}]
+    catalog.validate(AnalysisReport.model_validate(r))
+    r["current_state"]["citations"][0]["quote"] = "unread-tail"
+    with pytest.raises(ValueError, match="CITATION_QUOTE_MISMATCH"):
+        catalog.validate(AnalysisReport.model_validate(r))
