@@ -171,6 +171,14 @@ class EvidenceCatalog:
                          or family == "PREVIEW_HTTP" and r["group"] == "guardian")]
         if family == "EXECUTION_RELATIONSHIP":
             selected.sort(key=lambda r: (r["group"] not in {"execution_sessions", "execution_attempts"}, r["group"], r["pointer"]))
+        if field and selected:
+            root_field = field[1:].split("/", 1)[0].replace("~1", "/").replace("~0", "~")
+            roots = sorted({key for row in selected for key in
+                            (self.values[row["evidence_id"]].keys()
+                             if isinstance(self.values[row["evidence_id"]], dict) else ())})
+            if roots and root_field not in roots and root_field != "*":
+                raise ValueError("CHECK_SELECTOR_ROOT_NOT_IN_RECORD_SCHEMA; field is relative to each record, "
+                                 "not the group array. Available root fields: " + ", ".join(roots[:60]))
         def walk(value, parts, pointer=""):
             if not parts:
                 yield pointer, value
@@ -187,6 +195,9 @@ class EvidenceCatalog:
         matches, redacted = [], False
         for row in selected:
             value = self.values[row["evidence_id"]]
+            if isinstance(value, str) and value.startswith("[REDACTED"):
+                redacted = True
+                continue
             if family == "PREVIEW_HTTP":
                 entries = [(f"/evidence/{i}", child) for i, child in enumerate((value.get("evidence") or []) if isinstance(value, dict) else [])
                            if isinstance(child, dict) and isinstance(child.get("status_code"), int)]
@@ -321,12 +332,13 @@ class EvidenceCatalog:
         for assessment in report.evidence_assessments:
             check = self.checks.get(str(assessment.check_id))
             if (not check or check["family"] != assessment.family.value
-                    or check["availability"] != assessment.availability or check["group"] or check["field"]):
+                    or check["availability"] != assessment.availability
+                    or (assessment.family.value != "OWNER_RECORD" and (check["group"] or check["field"]))):
                 raise ValueError("EVIDENCE_ASSESSMENT_MUST_MATCH_SEEDED_FAMILY_LOOKUP")
             if assessment.family.value in reviewed:
                 raise ValueError("DUPLICATE_EVIDENCE_ASSESSMENT")
             reviewed.add(assessment.family.value)
-        if reviewed != {"PREVIEW_HTTP", "DELIVERY_TRANSFER", "EXECUTION_RELATIONSHIP"}:
+        if not {"PREVIEW_HTTP", "DELIVERY_TRANSFER", "EXECUTION_RELATIONSHIP"}.issubset(reviewed):
             raise ValueError("EVIDENCE_FAMILY_RECONCILIATION_REQUIRED")
         for gap in report.missing_evidence:
             check = self.checks.get(str(gap.check_id))
@@ -467,7 +479,8 @@ class AnalysisTools:
               "limit": {"type": "integer"}}, ["evidence_id"]),
             ("evidence.check", "Check original snapshot evidence before absence claims. PREVIEW_HTTP and DELIVERY_TRANSFER fix their producer scope; EXECUTION_RELATIONSHIP enumerates actual identifier links. OWNER_RECORD requires a captured group and JSON Pointer field (* enumerates). No-match never proves global/historical absence.",
              {"family": {"enum": [f.value for f in EvidenceFamily]}, "group": {"type": "string"},
-              "field": {"type": "string", "maxLength": 200}}, ["family"]),
+              "field": {"type": "string", "maxLength": 200,
+                        "description": "JSON Pointer relative to EACH RECORD, e.g. /pwu_id or /result_payload/raw_response. Do not prefix /0 for the group array. * enumerates nested children. PRESENT container existence does not prove that all children contain usable observations."}}, ["family"]),
             ("repository.read", "Read exact committed source lines; repository key and scope are fixed by the service.",
              {"repository": {"type": "string"}, "path": {"type": "string"},
               "start_line": {"type": "integer"}, "lines": {"type": "integer"}}, ["repository", "path"]),

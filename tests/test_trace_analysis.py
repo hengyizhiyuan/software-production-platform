@@ -496,6 +496,8 @@ def test_absence_is_snapshot_scoped_and_redaction_preserves_unknown():
     r = report(catalog)
     r["missing_evidence"] = [{"statement": "Raw response not observed in this captured group",
         "family": "OWNER_RECORD", "check_id": check["check_id"], "availability": check["availability"]}]
+    r["evidence_assessments"].append({"statement": "Additional field reviewed", "family": "OWNER_RECORD",
+        "check_id": check["check_id"], "availability": check["availability"]})
     catalog.validate(AnalysisReport.model_validate(r))
     snap = evidence_snapshot()
     snap["lifecycle"]["advanced"]["owners"]["execution_steps"][0]["result_payload"]["raw_response"] = "[REDACTED_FIELD]"
@@ -519,3 +521,12 @@ def test_report_requires_full_family_reconciliation_and_checked_gaps():
     r["missing_evidence"] = ["Unread records are absent"]
     with pytest.raises(ValueError):
         AnalysisReport.model_validate(r)
+
+
+def test_wrong_selector_root_is_not_false_negative_evidence():
+    catalog = EvidenceCatalog(evidence_snapshot())
+    with pytest.raises(ValueError, match="CHECK_SELECTOR_ROOT_NOT_IN_RECORD_SCHEMA"):
+        catalog.check("EXECUTION_RELATIONSHIP", group="execution_sessions", field="/0/pwu_id")
+    with pytest.raises(ValueError, match="CHECK_SELECTOR_ROOT_NOT_IN_RECORD_SCHEMA"):
+        catalog.check("OWNER_RECORD", group="execution_sessions", field="/misspelled_pwu_id")
+    assert catalog.check("EXECUTION_RELATIONSHIP", group="execution_sessions", field="/pwu_id")["availability"] == "PRESENT"
