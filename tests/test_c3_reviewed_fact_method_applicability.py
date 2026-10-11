@@ -134,8 +134,9 @@ def test_existing_model_boundary_negotiates_persists_and_replays_same_contract_w
         assert left == right
 
 
-@pytest.mark.parametrize('content', ('correct', 'wrong', 'missing-consumer'))
-def test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal(tmp_path, content):
+@pytest.mark.parametrize('seal', (True, False))
+@pytest.mark.parametrize('content', ('correct', 'wrong', 'missing-consumer', 'missing-source'))
+def test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal(tmp_path, content, seal):
     import subprocess
     from types import SimpleNamespace
     from uuid import uuid4
@@ -144,6 +145,8 @@ def test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_futur
     from spg.providers.protected_context_verifier import StaticProtectedContextVerifier
     from spg.infrastructure.model_runtime import StructuredModelResult, ModelProvider, ModelUsage, ModelTiming
     rev, ir, inv, plan = case(mixed=True)
+    if not seal:
+        plan = plan.model_copy(update={'routes': tuple(r for r in plan.routes if r.capability != 'CANDIDATE_SEAL')})
     def git(*args):
         return subprocess.check_output(['git', '-C', str(tmp_path), *args], text=True).strip()
     git('init', '-q')
@@ -186,16 +189,26 @@ def test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_futur
                 usage=ModelUsage(unknown=True),timing=ModelTiming())
         return SimpleNamespace(generate=generate, registry=SimpleNamespace(close=lambda:None))
     before=deepcopy(rev.engineering_semantic_facts)
+    if content == 'missing-source':
+        request.semantic_fact_obligations = ()
+        with pytest.raises(ValueError, match='OBLIGATION_DERIVED_FACT_SOURCE_MISSING'):
+            verify_fulfillment_fact_routes(repository=tmp_path, request=request, contract=contract,
+                references=(ref,), admitted_facts={str(ref.fact_id):rev.engineering_semantic_facts[0]},
+                revision=rev, ir=ir, baseline=SimpleNamespace(repository_revision=baseline_revision),
+                bindings=bindings, plan_repair=None, static_verifier=StaticProtectedContextVerifier(runtime_factory), task=task)
+        assert verification_calls == []
+        return
     result=verify_fulfillment_fact_routes(repository=tmp_path, request=request, contract=contract,
         references=(ref,), admitted_facts={str(ref.fact_id):rev.engineering_semantic_facts[0]},
         revision=rev, ir=ir, baseline=SimpleNamespace(repository_revision=baseline_revision),
         bindings=bindings, plan_repair=None,
         static_verifier=None if content == 'missing-consumer' else StaticProtectedContextVerifier(runtime_factory), task=task)
     assert result[0]['passed'] is (content == 'correct')
-    assert result[0]['future_evidence_status'] == 'PENDING_FUTURE_OWNER_GATE'
+    assert result[0]['future_evidence_status'] == ('PENDING_FUTURE_OWNER_GATE' if seal else None)
     assert rev.engineering_semantic_facts == before and len(formation_calls)==2
     if content != 'missing-consumer':
         assert len(verification_calls)==1
+        assert verification_calls[0]['immutable_fact_references'] == [ref.model_dump(mode='json')]
         assert len(result[0]['current_component_evidence'])==1
         assert result[0]['current_component_evidence'][0]['candidate_revision']==candidate
         assert all(b['phase']=='CURRENT_VERIFICATION' for b in verification_calls[0]['assigned_fulfillment_bindings'])

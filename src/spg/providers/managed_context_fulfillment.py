@@ -464,7 +464,8 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
         if str(binding.fact_id) == str(reference.fact_id)) for reference in references}
     dependencies = linked_component_dependencies(references, bindings)
     linked_components = set(dependencies)
-    # A reviewed mixed Fact has a current content contribution and a separate
+    # A reviewed open content SCOPE, or a mixed Fact, has a current
+    # content contribution. A mixed Fact also has a separate
     # pending Candidate gate. Consume its exact current component through the
     # existing content Owner, never ask a static checker to prove future Seal.
     from spg.application.governed_obligations import (
@@ -475,7 +476,8 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
         for row in receipt.get("candidate_attempts", ()) if row.get("stage") == "MODEL_REQUEST_PENDING")
     component_facts = {identity for identity, routes in routes_by_fact.items()
         if negotiated and identity not in linked_components
-        and any(b.phase.value == "CANDIDATE_SEAL" for b in routes)
+        and (any(b.phase.value == "CANDIDATE_SEAL" for b in routes)
+            or next(ref for ref in references if str(ref.fact_id) == identity).relation.value == "SCOPE")
         and any(b.phase.value == "CURRENT_VERIFICATION" and b.evidence_method == "EXACT_CANDIDATE_CONTENT"
             and b.component_basis is not None for b in routes)}
     component_checks = ()

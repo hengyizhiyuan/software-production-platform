@@ -186,12 +186,18 @@ class StaticProtectedContextVerifier:
         if any(getattr(binding, "component_basis", None) is not None for binding in fulfillment_bindings) and any(
                 not contributions[(item.context_class, item.semantic_key)] for item in selected):
             raise ValueError("OBLIGATION_CURRENT_COMPONENT_NOT_ASSIGNED")
+        fact_ids = {str(binding.fact_id) for binding in derived_bindings if binding.source_kind.value == "FACT"}
+        original_facts = [ref.model_dump(mode="json") for ref in getattr(request, "semantic_fact_obligations", ())
+            if str(ref.fact_id) in fact_ids]
+        if {str(ref["fact_id"]) for ref in original_facts} != fact_ids or len(original_facts) != len(fact_ids):
+            raise ValueError("OBLIGATION_DERIVED_FACT_SOURCE_MISSING")
         payload = {"task": {"id": str(task.task_contract_id), "objective": task.objective,
                    "scope": task.scope, "constraints": task.constraints, "out_of_scope": task.out_of_scope},
             "exact_candidate_revision": revision, "exact_candidate_tree": request.tree_identity,
             "baseline_revision": baseline, "changed_paths": changed,
             "protected_obligations": [item.model_dump(mode="json") for item in selected],
             "candidate_sources": materials,
+            "immutable_fact_references": original_facts,
             "assigned_fulfillment_bindings": [binding.model_dump(mode="json") for binding in fulfillment_bindings],
             "current_component_contributions": [{"context_class": key[0], "semantic_key": key[1],
                 "contributions": value} for key, value in contributions.items()],
@@ -202,6 +208,8 @@ class StaticProtectedContextVerifier:
             "When current_component_contributions are supplied, verify exactly those original source contributions; "
             "the full original protected source remains immutable identity and context. Component quotes are "
             "derived scope for this content check, never a rewrite of original Fact values or constraints. "
+            "For derived Fact checks, immutable_fact_references supply the exact original relation, value, "
+            "Scope, qualifiers, provenance and authority; preserve every applicable current restriction. "
             "Other phase/Owner components remain separate pending gates; never prove Human decisions, permits "
             "or Candidate sealing by source text. A pending component does not excuse wrong current content. "
             "Return one check per exact context_class/semantic_key. Judge whether this bounded PWU "
