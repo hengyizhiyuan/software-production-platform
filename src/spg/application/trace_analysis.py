@@ -119,7 +119,7 @@ Owner refinement diagnoses are not execution receipts. In particular, required,
 rejected or expected behaviors name a diagnostic/governance boundary, not proof
 that files were changed or that an unavailable rejected candidate contained each
 listed behavior. State the recorded signal in fact; start causal analysis with
-'假设：', use conditional language, and leave candidate contents UNKNOWN without
+'假设：若', state a conditional mechanism, and leave candidate contents UNKNOWN without
 the corresponding exact source/diff or executed-effect observations. Keep semantic
 proposal/contract stages distinct from production code execution.
 Build a chronological timeline, not a fixed stage-order list. For each dated item,
@@ -150,7 +150,7 @@ regression_scenario, immediate_recovery and deferred_items, not only findings:
 - Inspect existing tool descriptions, rejection feedback and capabilities before
   suggesting they are missing. Proposed improvements are unverified proposals,
   not proven system defects or executable instructions.
-Report v4 requires evidence.inspect for EVERY finding's exact subject; a read or
+Report v5 requires evidence.inspect for EVERY finding's exact subject; a read or
 index snippet alone is insufficient. Inspection reads linked ORIGINAL Owner fields
 along explicit references, including receipt->effect semantic_input and parameters.
 Use returned field excerpts as observations. Read NOT_READ_CAPACITY fields through
@@ -171,6 +171,20 @@ into time_interpretation. created_at is RECORD CREATION, not recovery completion
 use updated_at for a recorded later update, or put recovered snapshot state in an
 undated recovery summary. A current VERIFIED status alone does not timestamp its
 transition. Do not describe a completed recovery at the record's creation time.
+Every recommendation declares evidence_family; each referenced finding SUBJECT
+must belong to that surface. Use DELIVERY_TRANSFER for download/client-transfer
+recommendations, PREVIEW_HTTP for preview recommendations, EXECUTION_RELATIONSHIP
+for identity mapping, OWNER_RECORD only for general Owner/source/lifecycle topics.
+Do not label a specific download/preview/lineage topic OWNER_RECORD to evade its
+surface boundary. Split different topics and give each an inspected original
+subject-specific finding. An uninvestigated topic cannot borrow another finding;
+omit it until its own evidence investigation is performed.
+For ROOT_CAUSE_HYPOTHESIS begin analysis with '假设：若' and explain a conditional
+mechanism. A VERIFIED recovery outcome or repair_hypothesis does not prove the
+actual replacement recipe/tool/command that ran. Only report a performed repair
+recipe as fact when original execution receipts establish it; otherwise keep that
+recipe UNKNOWN and describe it as a conditional proposal. Do not write a subsequent
+repair plan as an observed historical action in analysis or recommendations.
 Concise recommendations must address their cited findings' actual subjects, not
 another logging surface. Review all sections against original linked observations
 before submission; structural verification is not a substitute for this review.

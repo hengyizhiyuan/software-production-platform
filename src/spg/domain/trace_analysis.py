@@ -88,7 +88,7 @@ class Finding(AnalysisRecord):
     epistemic_status: Literal["ROOT_CAUSE_HYPOTHESIS", "UNKNOWN"]
     fact: ObservedFact
     analysis: str = Field(min_length=1, max_length=4000,
-        description="ROOT_CAUSE_HYPOTHESIS must start with '假设：' and use conditional causal language. Owner diagnosis/expected/rejected-behavior lists are not proof of executed effects or an unavailable candidate's contents.")
+        description="ROOT_CAUSE_HYPOTHESIS must start with '假设：若' and use conditional causal language. Owner diagnosis/expected/rejected-behavior lists are not proof of executed effects or an unavailable candidate's contents.")
     repository_citations: tuple[Citation, ...] = Field(default=(), max_length=8)
     uncertainty: str = Field(min_length=1, max_length=12000,
         description="Copy inspection.bounded_conclusion, followed by each uncertainty_check_ids evidence.check bounded_conclusion, joined by newline. No free-form absence claims. Unread, redacted, empty and unexported are distinct.")
@@ -115,8 +115,8 @@ class Finding(AnalysisRecord):
             raise ValueError("handling must preserve the issue classification boundary")
         if not self.repository_citations and self.epistemic_status != "UNKNOWN":
             raise ValueError("a root cause hypothesis requires repository evidence")
-        if self.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and not self.analysis.startswith("假设："):
-            raise ValueError("CAUSAL_HYPOTHESIS_MUST_BE_EXPLICIT; begin analysis with 假设： and do not promote diagnoses to executed facts")
+        if self.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and not self.analysis.startswith("假设：若"):
+            raise ValueError("CAUSAL_HYPOTHESIS_MUST_BE_EXPLICIT; begin analysis with 假设：若, state a conditional mechanism, and do not promote diagnoses or repair plans to performed actions")
         if self.regression_qualification != REGRESSION_CRITERIA[self.classification]:
             raise ValueError("REGRESSION_CRITERION_MUST_MATCH_GOVERNED_OUTCOME: " + REGRESSION_CRITERIA[self.classification])
         if self.scope_check_ids and (self.classification != IssueClass.UNKNOWN or self.epistemic_status != "UNKNOWN"):
@@ -126,11 +126,12 @@ class Finding(AnalysisRecord):
 
 class Recommendation(AnalysisRecord):
     statement: str = Field(min_length=1, max_length=3000)
+    evidence_family: EvidenceFamily = Field(description="Declare the recommendation topic surface. Each cited finding subject must belong to this family. Download/client-transfer suggestions use DELIVERY_TRANSFER; preview suggestions use PREVIEW_HTTP; general Owner/source suggestions use OWNER_RECORD. Do not borrow an unrelated finding.")
     finding_ids: tuple[str, ...] = Field(min_length=1, max_length=20)
 
 
 class AnalysisReport(AnalysisRecord):
-    schema_version: Literal["watt-trace-analysis-report-v4"] = "watt-trace-analysis-report-v4"
+    schema_version: Literal["watt-trace-analysis-report-v5"] = "watt-trace-analysis-report-v5"
     work_id: UUID
     original_objective: ObservedFact
     expected_outcome: ObservedFact

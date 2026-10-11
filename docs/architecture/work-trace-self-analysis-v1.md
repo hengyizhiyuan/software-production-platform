@@ -181,7 +181,21 @@ The gate is independent of any Work identity, command name or scenario wording.
 Dated entries copy the exact producer-time boundary into `time_interpretation`,
 also shown in Admin. Refinement creation time cannot timestamp later VERIFIED or
 recovered state; use its original update record or an undated snapshot summary.
-Existing saved v1/v2/v3 reports remain readable without migration or rewriting.
+Existing saved v1/v2/v3/v4 reports remain readable without migration or rewriting.
+
+### Recommendation subjects and conditional mechanisms (report v5)
+
+Recommendations now declare their evidence family; every referenced finding's
+original subject must belong to that producer surface. A download recommendation
+cannot borrow a Guardian authorization finding. General Owner proposals remain
+separate from specific transfer, preview and identity topics. Free prose still
+requires semantic review; this gate does not claim complete linguistic entailment.
+Causal hypotheses must begin with a conditional mechanism (`假设：若`). A recovery
+outcome or proposed repair does not establish which replacement command ran;
+that requires original execution observations. Both `recovery` and
+`self_refine_events` are verified projections of the same producer rows and use
+the same identity, diagnosis and timestamp boundaries. Initial context selection
+reserves space within the existing ECF budget; omitted excerpts are not marked read.
 
 ## Admin and storage
 

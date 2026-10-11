@@ -41,7 +41,7 @@ def report(catalog):
                 "repository_citations": [], "uncertainty": inspection["bounded_conclusion"],
                 "recommendation": "Inspect existing owner evidence", "handling": "INVESTIGATE",
                 "regression_qualification": REGRESSION_CRITERIA[IssueClass.UNKNOWN]}],
-            "deferred_items": [{"statement": "Raw log investigation", "finding_ids": ["missing-raw"]}],
+            "deferred_items": [{"statement": "Raw log investigation", "evidence_family": "OWNER_RECORD", "finding_ids": ["missing-raw"]}],
             "evidence_assessments": [{"family": c["family"], "check_id": c["check_id"],
                 "availability": c["availability"], "statement": "Snapshot scope reviewed"}
                 for c in catalog.reality()["families"]], "missing_evidence": []}
@@ -720,7 +720,7 @@ def test_diagnostic_expected_behavior_does_not_become_execution_receipt():
         "evidence_id": str(uuid4()), "quote": "comparison"}], analysis="A proposed constraint definitely executed")
     with pytest.raises(ValueError, match="CAUSAL_HYPOTHESIS_MUST_BE_EXPLICIT"):
         AnalysisReport.model_validate(r)
-    f["analysis"] = "假设：可能与候选理解偏差相关；没有原始执行证据时保留 UNKNOWN。"
+    f["analysis"] = "假设：若候选理解存在偏差，则可能解释该诊断；实际候选内容保持 UNKNOWN。"
     AnalysisReport.model_validate(r)
 
 
@@ -866,3 +866,42 @@ def test_recovery_projection_preserves_owner_identity_and_semantics():
     assert c.association(original, unrelated)["status"] == "NOT_ESTABLISHED"
     assert c.records[original]["semantics"] == c.records[projected]["semantics"]
     assert projected in {r["evidence_id"] for r in c.inspect(original)["records"]}
+
+
+@pytest.mark.parametrize("family", ["DELIVERY_TRANSFER", "PREVIEW_HTTP", "EXECUTION_RELATIONSHIP"])
+def test_recommendation_surface_cannot_borrow_unrelated_finding(family):
+    c = EvidenceCatalog(snapshot())
+    r = report(c)
+    eid = c.add("guardian", "/fixture/guardian", {"id": str(uuid4()), "gate": "PASS"})
+    inspection = c.inspect(eid)
+    r["findings"][0].update(subject_evidence_id=eid, inspection_id=inspection["inspection_id"],
+        uncertainty=inspection["bounded_conclusion"], fact={"statement":"Guardian gate",
+            "citations":[{"evidence_id":eid, "quote":"PASS"}]})
+    r["deferred_items"][0]["evidence_family"] = family
+    with pytest.raises(ValueError, match="RECOMMENDATION_FAMILY_REQUIRES_FINDING_SUBJECT_SURFACE"):
+        c.validate(AnalysisReport.model_validate(r))
+
+
+def test_recommendation_requires_explicit_surface_and_hypothesis_requires_condition():
+    r = report(EvidenceCatalog(snapshot()))
+    del r["deferred_items"][0]["evidence_family"]
+    with pytest.raises(ValueError):
+        AnalysisReport.model_validate(r)
+    r = report(EvidenceCatalog(snapshot()))
+    r["findings"][0].update(epistemic_status="ROOT_CAUSE_HYPOTHESIS",
+        repository_citations=[{"evidence_id":str(uuid4()), "quote":"comparison"}],
+        analysis="假设：模型随后执行了某个替代配方。")
+    with pytest.raises(ValueError, match="CAUSAL_HYPOTHESIS_MUST_BE_EXPLICIT"):
+        AnalysisReport.model_validate(r)
+
+
+def test_transfer_recommendation_accepts_its_own_audit_subject():
+    c = EvidenceCatalog(snapshot())
+    r = report(c)
+    eid = c.add("served_delivery", "/fixture/transfer", {"actions":[], "client_saved":"UNAVAILABLE"})
+    inspection = c.inspect(eid)
+    r["findings"][0].update(subject_evidence_id=eid, inspection_id=inspection["inspection_id"],
+        uncertainty=inspection["bounded_conclusion"], fact={"statement":"Audit client state",
+            "citations":[{"evidence_id":eid, "quote":"UNAVAILABLE"}]})
+    r["deferred_items"][0].update(evidence_family="DELIVERY_TRANSFER", statement="Evaluate client receipt observations")
+    c.validate(AnalysisReport.model_validate(r))

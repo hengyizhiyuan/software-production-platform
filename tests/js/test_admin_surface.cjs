@@ -155,3 +155,19 @@ test('Analysis v4 displays the event-time boundary and escapes historical values
  const h=s.nodes['#admin-content'].innerHTML;
  assert.match(h,/记录创建时间；&lt;unsafe&gt;不证明恢复完成/);assert.doesNotMatch(h,/<unsafe>/);
 });
+
+
+test('Analysis v5 shows recommendation surfaces and preserves legacy rendering',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-v5';
+ const fact={statement:'Recorded snapshot',citations:[]};
+ const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
+  timeline:[],findings:[],immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],
+  deferred_items:[{statement:'Inspect transfer',evidence_family:'<DELIVERY_TRANSFER>',finding_ids:['audit']}],missing_evidence:[]};
+ const s=surface('/admin',true,null,null,{[path]:{status:'COMPLETED',report}});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v5',analysisTarget:'ordinary-work'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;
+ assert.match(h,/证据表面 &lt;DELIVERY_TRANSFER&gt;/);assert.doesNotMatch(h,/<DELIVERY_TRANSFER>/);
+ delete report.deferred_items[0].evidence_family;
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v5',analysisTarget:'ordinary-work'}})}});
+ assert.match(s.nodes['#admin-content'].innerHTML,/Inspect transfer · 依据 audit/);
+});

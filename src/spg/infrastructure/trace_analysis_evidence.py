@@ -614,6 +614,13 @@ class EvidenceCatalog:
                     citation(c, ["findings", index, "repository_citations", i], repository=True)
                 except CitationRejected as error:
                     errors.append(error)
+        findings = {f.finding_id: f for f in report.findings}
+        for section in ("immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"):
+            for index, item in enumerate(getattr(report, section)):
+                for fid in item.finding_ids:
+                    subject = self.records.get(str(findings[fid].subject_evidence_id))
+                    if not subject or item.evidence_family.value not in subject["semantics"]["families"]:
+                        errors.append(CitationRejected("RECOMMENDATION_FAMILY_REQUIRES_FINDING_SUBJECT_SURFACE; split unrelated topics", [section, index, "finding_ids"], findings[fid].subject_evidence_id))
         # Keep observational absence in canonical checked fields everywhere,
         # including hypotheses/recommendations, rather than only the gap footer.
         prose = [((list(name) if isinstance(name, tuple) else [name]) + ["statement"], fact.statement)
