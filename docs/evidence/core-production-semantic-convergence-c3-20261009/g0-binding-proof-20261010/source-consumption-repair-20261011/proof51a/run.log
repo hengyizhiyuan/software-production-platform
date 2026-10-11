@@ -1,0 +1,61 @@
+............................F.............FFFFFFF....................... [ 56%]
+........................................................                 [100%]
+=================================== FAILURES ===================================
+_ test_negative_scope_values_never_become_positive_allowlist_and_actual_diff_stays_exact _
+tests/test_c3_source_consumption_proof.py:300: in test_negative_scope_values_never_become_positive_allowlist_and_actual_diff_stays_exact
+    assert all(b.state != "UNRESOLVED" for b in bindings) and len(calls) == 2
+E   assert (False)
+E    +  where False = all(<generator object test_negative_scope_values_never_become_positive_allowlist_and_actual_diff_stays_exact.<locals>.<genexpr> at 0x7f25d2a84110>)
+_ test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget[None] _
+tests/test_c3_generation_binding_prerequisites.py:118: in test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget
+    assert all(b.state != "UNRESOLVED" for b in run()) and len(calls)==2
+E   assert (False)
+E    +  where False = all(<generator object test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget.<locals>.<genexpr> at 0x7f25d2a841e0>)
+_ test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget[generation_prerequisite_contract] _
+tests/test_c3_generation_binding_prerequisites.py:118: in test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget
+    assert all(b.state != "UNRESOLVED" for b in run()) and len(calls)==2
+E   assert (False)
+E    +  where False = all(<generator object test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget.<locals>.<genexpr> at 0x7f25d2f8bb90>)
+_ test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget[semantic_selection_input_contract] _
+tests/test_c3_generation_binding_prerequisites.py:118: in test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget
+    assert all(b.state != "UNRESOLVED" for b in run()) and len(calls)==2
+E   assert (False)
+E    +  where False = all(<generator object test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget.<locals>.<genexpr> at 0x7f25d2cf68e0>)
+_ test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget[typed_prerequisite_contract] _
+tests/test_c3_generation_binding_prerequisites.py:118: in test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget
+    assert all(b.state != "UNRESOLVED" for b in run()) and len(calls)==2
+E   assert (False)
+E    +  where False = all(<generator object test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget.<locals>.<genexpr> at 0x7f25d2c98ad0>)
+_ test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget[source_context_contract] _
+tests/test_c3_generation_binding_prerequisites.py:118: in test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget
+    assert all(b.state != "UNRESOLVED" for b in run()) and len(calls)==2
+E   assert (False)
+E    +  where False = all(<generator object test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget.<locals>.<genexpr> at 0x7f25d2a08380>)
+_ test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget[wire_presentation_contract] _
+tests/test_c3_generation_binding_prerequisites.py:118: in test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget
+    assert all(b.state != "UNRESOLVED" for b in run()) and len(calls)==2
+E   assert (False)
+E    +  where False = all(<generator object test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget.<locals>.<genexpr> at 0x7f25d2c99f20>)
+_ test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget[review_source_consumption_contract] _
+tests/test_c3_generation_binding_prerequisites.py:118: in test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget
+    assert all(b.state != "UNRESOLVED" for b in run()) and len(calls)==2
+E   assert (False)
+E    +  where False = all(<generator object test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget.<locals>.<genexpr> at 0x7f25d2ce4790>)
+=============================== warnings summary ===============================
+tests/test_c3_route_scoped_review.py::test_independent_comparison_preserves_all_meaning_but_proposer_claims_cannot_change_request[small]
+tests/test_c3_route_scoped_review.py::test_independent_comparison_preserves_all_meaning_but_proposer_claims_cannot_change_request[medium]
+tests/test_c3_route_scoped_review.py::test_independent_comparison_preserves_all_meaning_but_proposer_claims_cannot_change_request[complex]
+  tests/test_c3_route_scoped_review.py:96: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    @pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_c3_source_consumption_proof.py::test_negative_scope_values_never_become_positive_allowlist_and_actual_diff_stays_exact
+FAILED tests/test_c3_generation_binding_prerequisites.py::test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget[None]
+FAILED tests/test_c3_generation_binding_prerequisites.py::test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget[generation_prerequisite_contract]
+FAILED tests/test_c3_generation_binding_prerequisites.py::test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget[semantic_selection_input_contract]
+FAILED tests/test_c3_generation_binding_prerequisites.py::test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget[typed_prerequisite_contract]
+FAILED tests/test_c3_generation_binding_prerequisites.py::test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget[source_context_contract]
+FAILED tests/test_c3_generation_binding_prerequisites.py::test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget[wire_presentation_contract]
+FAILED tests/test_c3_generation_binding_prerequisites.py::test_new_marker_replay_cannot_change_original_request_identity_or_reopen_budget[review_source_consumption_contract]
+8 failed, 120 passed, 3 warnings in 87.89s (0:01:27)

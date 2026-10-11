@@ -1,0 +1,66 @@
+{
+  "schema": "c3-actual-review-consumption-owner-observations-v1",
+  "candidate_fingerprint": "af319906542f62517d28c4c7983dfe19a296d3f559c55461b299d51753e5b50d",
+  "inventory_fingerprint": "1155ee88bc3e3e7a8d72dd85556fb1e2d863d1f78e0db3450b5639f3e017a4f2",
+  "review_sha256": "ce4dbb4b0c157639ca6a606cd8b52ebbf1e9a55148e736d23bdd6f51631a146f",
+  "source_boolean_rejection_count": 7,
+  "positive_source_owner_witness_failures": [
+    {
+      "source": 4,
+      "code": "OBLIGATION_SOURCE_CONSUMPTION_CONSUMER_MISMATCH",
+      "source_ref": "ir-clause:13408e62-98eb-58dc-b53a-7f18d14b9fdd:pi-1:cl-1",
+      "check": 0,
+      "route": 5
+    },
+    {
+      "source": 4,
+      "code": "OBLIGATION_SOURCE_CONSUMPTION_COMPONENT_COVERAGE_LOST",
+      "source_ref": "ir-clause:13408e62-98eb-58dc-b53a-7f18d14b9fdd:pi-1:cl-1",
+      "check": 0
+    },
+    {
+      "source": 6,
+      "code": "OBLIGATION_SOURCE_CONSUMPTION_CONSUMER_MISMATCH",
+      "source_ref": "ir-clause:13408e62-98eb-58dc-b53a-7f18d14b9fdd:pi-1:cl-3",
+      "check": 0,
+      "route": 7
+    },
+    {
+      "source": 6,
+      "code": "OBLIGATION_SOURCE_CONSUMPTION_COMPONENT_COVERAGE_LOST",
+      "source_ref": "ir-clause:13408e62-98eb-58dc-b53a-7f18d14b9fdd:pi-1:cl-3",
+      "check": 0
+    },
+    {
+      "source": 16,
+      "code": "OBLIGATION_SOURCE_CONSUMPTION_CONSUMER_MISMATCH",
+      "source_ref": "work-constraint:2512755e-fc60-540d-b35b-40c257b5b2c7:5",
+      "check": 0,
+      "route": 21
+    },
+    {
+      "source": 16,
+      "code": "OBLIGATION_SOURCE_CONSUMPTION_COMPONENT_COVERAGE_LOST",
+      "source_ref": "work-constraint:2512755e-fc60-540d-b35b-40c257b5b2c7:5",
+      "check": 0
+    },
+    {
+      "source": 17,
+      "code": "OBLIGATION_SOURCE_CONSUMPTION_CONSUMER_MISMATCH",
+      "source_ref": "work-constraint:2512755e-fc60-540d-b35b-40c257b5b2c7:6",
+      "check": 0,
+      "route": 22
+    },
+    {
+      "source": 17,
+      "code": "OBLIGATION_SOURCE_CONSUMPTION_COMPONENT_COVERAGE_LOST",
+      "source_ref": "work-constraint:2512755e-fc60-540d-b35b-40c257b5b2c7:6",
+      "check": 0
+    }
+  ],
+  "full_review_valid": false,
+  "actual_model_calls_added": 0,
+  "history_modified": false,
+  "boolean_or_witness_modified": false,
+  "admitted": false
+}

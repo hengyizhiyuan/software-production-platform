@@ -1,0 +1,22 @@
+{
+  "source": "9c8463c10c7c04b9f429663ad4b5ad368d69722d",
+  "tree": "00f84c8691c69439cb463aba56bb7c88af9aa09f",
+  "image": "sha256:04316cb489231f0d470c570d2dc912806f1423fab386019e108ee513ab047f9b",
+  "guardian": "76c1e87a1b29d151f4ed949748e3298f2169c5b1",
+  "ecf": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "parent_execution_ready": true,
+  "conditional_authorization": "ROOT_MATCHING_INSTALLED_835_PG_43_REQUIRED",
+  "created_at_utc": "2026-10-11T00:52:45.916665+00:00",
+  "installed": {
+    "junit_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation50-qualified-20261010/final-image/evidence/watt-continuation.xml",
+    "sha256": "412b74d9a1409084dd23219b72b188f97d0a85c7c9d83862fb67844624f08440",
+    "actual_pass_count": 835,
+    "receipt_sha256": "6df9523af50a5da577884778f9dfaf3a79cfe0986fc908f5f1fb2deb44befbdc"
+  },
+  "postgresql": {
+    "junit_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation50-qualified-20261010/owner-pg-generation50/evidence/result.xml",
+    "sha256": "e484b7da445cd889e688a7293abd081196a2de6aad675be048fd763ca3a4af1c",
+    "actual_pass_count": 43,
+    "receipt_sha256": "1bdd1dada7e19060b988dec7128b8face8823283545374bffb0a033f67cb162c"
+  }
+}

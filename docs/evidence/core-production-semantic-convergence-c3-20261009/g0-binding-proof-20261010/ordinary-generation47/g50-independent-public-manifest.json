@@ -1,0 +1,41 @@
+{
+  "schema": "c3-independent-audit-public-file-manifest-v1",
+  "created_at_utc": "2026-10-11T01:05:52.337524+00:00",
+  "credential_pattern_scan": "PASS",
+  "raw_human_and_provider_field_scan": "PASS",
+  "scan_scope": "SIX_NEW_PUBLIC_REVIEW_FILES_ONLY",
+  "files": [
+    {
+      "path": "g50-negative-review-live-result.json",
+      "sha256": "2c8c28f9d663dccc1016e6c868bbdd80214b52264cd248d7a36d1f3c8e5d486d",
+      "bytes": 43688
+    },
+    {
+      "path": "g50-negative-review-live-container.json",
+      "sha256": "0c72880205ad798735c18e5d7d3533f33d58eb8e9a62c7392b9b98d92b5e8099",
+      "bytes": 353
+    },
+    {
+      "path": "g50-source-witness-audit.json",
+      "sha256": "7cbe470646917e38cb7c7d336ef0efdb9e1cfc21f203e9fba1679b8283109803",
+      "bytes": 17364
+    },
+    {
+      "path": "g50-positive-witness-owner-check.json",
+      "sha256": "d880bf7a46552b4a7cef64ec63350ef1c2fdd64d4754df674229219977e44fb0",
+      "bytes": 2233
+    },
+    {
+      "path": "g50-independent-final-assessment.json",
+      "sha256": "19509a107d4caacd389299ddb0d41db18876c490453f2addf117f5839f18e203",
+      "bytes": 20370
+    },
+    {
+      "path": "g50-negative-review-independent-audit.md",
+      "sha256": "08b868bc931ef8d49fbda113b2acdec815e2ca0b5a934ca0908b0f283e27c524",
+      "bytes": 9004
+    }
+  ],
+  "private_data_not_copied": true,
+  "extra_model_calls": 0
+}

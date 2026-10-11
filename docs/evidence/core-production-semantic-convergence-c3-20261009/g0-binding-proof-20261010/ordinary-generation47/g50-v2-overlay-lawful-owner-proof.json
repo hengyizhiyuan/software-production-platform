@@ -1,0 +1,74 @@
+{
+  "schema": "c3-unadmitted-ordinary47-v2-owner-boundary-proof-v1",
+  "actual_installed_base_image": "sha256:04316cb489231f0d470c570d2dc912806f1423fab386019e108ee513ab047f9b",
+  "source_overlay": true,
+  "overlay_module": "spg.application.governed_obligations",
+  "overlay_module_sha256": "a44ac5b9417115483285b03c972eb8124eef376e2ddb64e8611ba2667da970e9",
+  "immutable_basis_sha256": "363db92ebe6c8530436a33d90044ff34af44d156ce3c74a89825ad608e465217",
+  "original_inventory_fingerprint": "1155ee88bc3e3e7a8d72dd85556fb1e2d863d1f78e0db3450b5639f3e017a4f2",
+  "original_candidate_fingerprint": "af319906542f62517d28c4c7983dfe19a296d3f559c55461b299d51753e5b50d",
+  "counterfactual_candidate_fingerprint": "d95e9e60fbcbe65fd5b327fc4864ba9c8e41d8700e3ce7f9f54c83546b221f98",
+  "counterfactual_route_count": 28,
+  "review_source_consumption_contract": "existing-source-consumption-proof-v2",
+  "results": [
+    {
+      "source": 3,
+      "source_ref": "semantic-fact:dce2d768-250d-548b-9427-d2078bfbf63c",
+      "capability": "GIT_DIFF_SCOPE",
+      "support_refs": [
+        "ir-constraint:c-4:cl-7"
+      ],
+      "linked_fact_refs": [],
+      "target_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+      "original_component_quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "predicate": "PASS_NECESSARY_OWNER_BINDING_ONLY",
+      "owner": "VERIFICATION",
+      "method": "EXACT_GIT_DIFF_SCOPE",
+      "phase": "CURRENT_VERIFICATION"
+    },
+    {
+      "source": 9,
+      "source_ref": "ir-constraint:c-3:cl-6",
+      "capability": "ARTIFACT_CONTENT",
+      "support_refs": [
+        "ir-constraint:c-3:cl-6"
+      ],
+      "linked_fact_refs": [
+        "semantic-fact:493b7684-7510-5948-b80c-ee96f551962e",
+        "semantic-fact:0148028d-8d24-5c92-9506-19c56976bf5a"
+      ],
+      "target_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+      "original_component_quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "predicate": "PASS_NECESSARY_OWNER_BINDING_ONLY",
+      "owner": "VERIFICATION",
+      "method": "EXACT_CANDIDATE_CONTENT",
+      "phase": "CURRENT_VERIFICATION"
+    },
+    {
+      "source": 13,
+      "source_ref": "work-constraint:2512755e-fc60-540d-b35b-40c257b5b2c7:2",
+      "capability": "ARTIFACT_CONTENT",
+      "support_refs": [
+        "ir-constraint:c-3:cl-6"
+      ],
+      "linked_fact_refs": [
+        "semantic-fact:493b7684-7510-5948-b80c-ee96f551962e",
+        "semantic-fact:0148028d-8d24-5c92-9506-19c56976bf5a"
+      ],
+      "target_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+      "original_component_quote_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "predicate": "PASS_NECESSARY_OWNER_BINDING_ONLY",
+      "owner": "VERIFICATION",
+      "method": "EXACT_CANDIDATE_CONTENT",
+      "phase": "CURRENT_VERIFICATION"
+    }
+  ],
+  "full_plan_predicate": "PASS_NECESSARY_OWNER_ONLY_REVIEW_AND_EVIDENCE_PENDING",
+  "not_semantic_qualification": true,
+  "additional_page_behavior_not_proved": true,
+  "review_or_runtime_evidence_created": false,
+  "historical_candidate_modified": false,
+  "model_calls": 0,
+  "http_requests": 0,
+  "admitted": false
+}

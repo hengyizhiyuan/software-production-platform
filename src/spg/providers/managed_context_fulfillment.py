@@ -673,7 +673,7 @@ def _exact_fact_git_scope(reference, binding, targets, changed, *, revision=None
     paths = exact_file_scope_paths(reference, qualified=binding.component_basis is not None)
     calibrated = any((b.formation_receipt or {}).get("source_role_contract") == "v3" for b in bindings)
     source_consumption = any((row.get("owner_source_preconditions") or {}).get(
-        "review_source_consumption_contract") == "existing-source-consumption-proof-v1"
+        "review_source_consumption_contract") in {"existing-source-consumption-proof-v1", "existing-source-consumption-proof-v2"}
         for row in ((bindings[0].formation_receipt or {}) if bindings else {}).get("candidate_attempts", ())
         if row.get("stage") == "MODEL_REQUEST_PENDING")
     if source_consumption:

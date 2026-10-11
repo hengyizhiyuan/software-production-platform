@@ -1,0 +1,530 @@
+{
+  "schema": "c3-source-union-negative-private-semantic-audit-safe-v2",
+  "review_wire_sha256": "d2f474dbc56e1a215732ae6cbf1bb127f4ea003727379911cb1107e24ab04857",
+  "inventory_fingerprint": "1155ee88bc3e3e7a8d72dd85556fb1e2d863d1f78e0db3450b5639f3e017a4f2",
+  "candidate_fingerprint": "af319906542f62517d28c4c7983dfe19a296d3f559c55461b299d51753e5b50d",
+  "source_count": 20,
+  "route_count": 25,
+  "analysis_only": true,
+  "model_calls_added": 0,
+  "history_modified": false,
+  "observations": [
+    {
+      "source": 3,
+      "source_ref": "semantic-fact:dce2d768-250d-548b-9427-d2078bfbf63c",
+      "source_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "source_verdict": false,
+      "own_routes": [
+        3,
+        4
+      ],
+      "declared_fact_refs": [],
+      "reason_sha256": "c9f9f2362b5a872897e414a4bcca1bb853355ec28e22aa3edbc5a467b618fec4",
+      "reason_observation": {
+        "mentions_scope": true,
+        "mentions_path": false,
+        "mentions_page": true,
+        "mentions_readme": true,
+        "mentions_current_content": false,
+        "mentions_support_provenance": true,
+        "other_source_ordinals_mentioned": []
+      },
+      "checks": [
+        {
+          "check": 0,
+          "span": [
+            0,
+            11
+          ],
+          "quote_valid": false,
+          "capability": "DENY_DEPLOY",
+          "method": "EXACT_PERMISSION_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "target_paths_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "declared_route_indices": [
+            3
+          ],
+          "mechanically_matching_own_routes": [],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": false
+        },
+        {
+          "check": 1,
+          "span": [
+            13,
+            20
+          ],
+          "quote_valid": false,
+          "capability": "DENY_PUBLISH",
+          "method": "EXACT_PERMISSION_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "target_paths_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "declared_route_indices": [
+            4
+          ],
+          "mechanically_matching_own_routes": [],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": false
+        },
+        {
+          "check": 2,
+          "span": [
+            22,
+            32
+          ],
+          "quote_valid": false,
+          "capability": "GIT_DIFF_SCOPE",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "phase": "CURRENT_VERIFICATION",
+          "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+          "declared_route_indices": [],
+          "mechanically_matching_own_routes": [],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": false
+        },
+        {
+          "check": 3,
+          "span": [
+            37,
+            55
+          ],
+          "quote_valid": false,
+          "capability": "GIT_DIFF_SCOPE",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "phase": "CURRENT_VERIFICATION",
+          "target_paths_sha256": "be3ae3b6479236a18da3e876a0de9dfe9ae2428896d83c3e804db008861b12d0",
+          "declared_route_indices": [],
+          "mechanically_matching_own_routes": [],
+          "extra_target_outside_task": true,
+          "matching_span_covers_claim": false
+        }
+      ]
+    },
+    {
+      "source": 4,
+      "source_ref": "ir-clause:13408e62-98eb-58dc-b53a-7f18d14b9fdd:pi-1:cl-1",
+      "source_sha256": "c01616d2fa1687d3f2dbde62f78b2d07c72c8f63034431eb8b263f2cd82e53b1",
+      "source_verdict": true,
+      "own_routes": [
+        5
+      ],
+      "declared_fact_refs": [],
+      "reason_sha256": "56c988717049fcf79da6c28ff92679c3afebabfaf8d02e728f07b3981ca92f98",
+      "reason_observation": {
+        "mentions_scope": false,
+        "mentions_path": false,
+        "mentions_page": false,
+        "mentions_readme": false,
+        "mentions_current_content": false,
+        "mentions_support_provenance": false,
+        "other_source_ordinals_mentioned": []
+      },
+      "checks": [
+        {
+          "check": 0,
+          "span": [
+            0,
+            49
+          ],
+          "quote_valid": true,
+          "capability": "RETAIN_CONTEXT",
+          "method": "RETAIN_AUTHORITATIVE_CONTEXT",
+          "phase": "CONTEXT_RETENTION",
+          "target_paths_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "declared_route_indices": [
+            5
+          ],
+          "mechanically_matching_own_routes": [],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": false
+        }
+      ]
+    },
+    {
+      "source": 9,
+      "source_ref": "ir-constraint:c-3:cl-6",
+      "source_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "source_verdict": false,
+      "own_routes": [
+        10
+      ],
+      "declared_fact_refs": [],
+      "reason_sha256": "381bc4bdab11e4c03e0d3616f92232ce77a9a6e0f7723e207b6f0d7250d13dda",
+      "reason_observation": {
+        "mentions_scope": false,
+        "mentions_path": false,
+        "mentions_page": false,
+        "mentions_readme": false,
+        "mentions_current_content": true,
+        "mentions_support_provenance": false,
+        "other_source_ordinals_mentioned": []
+      },
+      "checks": [
+        {
+          "check": 0,
+          "span": [
+            0,
+            37
+          ],
+          "quote_valid": false,
+          "capability": "ARTIFACT_CONTENT",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "phase": "CURRENT_VERIFICATION",
+          "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+          "declared_route_indices": [],
+          "mechanically_matching_own_routes": [],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": false
+        },
+        {
+          "check": 1,
+          "span": [
+            38,
+            72
+          ],
+          "quote_valid": false,
+          "capability": "CANDIDATE_SEAL",
+          "method": "EXACT_SEALED_CANDIDATE",
+          "phase": "CANDIDATE_SEAL",
+          "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+          "declared_route_indices": [
+            10
+          ],
+          "mechanically_matching_own_routes": [
+            10
+          ],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": true
+        }
+      ]
+    },
+    {
+      "source": 10,
+      "source_ref": "ir-constraint:c-4:cl-7",
+      "source_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "source_verdict": false,
+      "own_routes": [
+        11,
+        12,
+        13
+      ],
+      "declared_fact_refs": [],
+      "reason_sha256": "cede0e62b2fb3d39c8b7fae7749fdd4460abdd634fd62670a223a2af491ddd45",
+      "reason_observation": {
+        "mentions_scope": true,
+        "mentions_path": false,
+        "mentions_page": true,
+        "mentions_readme": true,
+        "mentions_current_content": false,
+        "mentions_support_provenance": false,
+        "other_source_ordinals_mentioned": []
+      },
+      "checks": [
+        {
+          "check": 0,
+          "span": [
+            0,
+            11
+          ],
+          "quote_valid": false,
+          "capability": "DENY_DEPLOY",
+          "method": "EXACT_PERMISSION_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "target_paths_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "declared_route_indices": [
+            11
+          ],
+          "mechanically_matching_own_routes": [],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": false
+        },
+        {
+          "check": 1,
+          "span": [
+            13,
+            20
+          ],
+          "quote_valid": false,
+          "capability": "DENY_PUBLISH",
+          "method": "EXACT_PERMISSION_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "target_paths_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "declared_route_indices": [
+            12
+          ],
+          "mechanically_matching_own_routes": [],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": false
+        },
+        {
+          "check": 2,
+          "span": [
+            22,
+            32
+          ],
+          "quote_valid": false,
+          "capability": "GIT_DIFF_SCOPE",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "phase": "CURRENT_VERIFICATION",
+          "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+          "declared_route_indices": [],
+          "mechanically_matching_own_routes": [
+            13
+          ],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": true
+        },
+        {
+          "check": 3,
+          "span": [
+            37,
+            55
+          ],
+          "quote_valid": false,
+          "capability": "GIT_DIFF_SCOPE",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "phase": "CURRENT_VERIFICATION",
+          "target_paths_sha256": "be3ae3b6479236a18da3e876a0de9dfe9ae2428896d83c3e804db008861b12d0",
+          "declared_route_indices": [],
+          "mechanically_matching_own_routes": [],
+          "extra_target_outside_task": true,
+          "matching_span_covers_claim": false
+        }
+      ]
+    },
+    {
+      "source": 13,
+      "source_ref": "work-constraint:2512755e-fc60-540d-b35b-40c257b5b2c7:2",
+      "source_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "source_verdict": false,
+      "own_routes": [
+        16
+      ],
+      "declared_fact_refs": [],
+      "reason_sha256": "75773ece96194b10d1bda664204155eabf3335ce1eca6ef4bc7eb2dc2d157a9a",
+      "reason_observation": {
+        "mentions_scope": false,
+        "mentions_path": false,
+        "mentions_page": false,
+        "mentions_readme": false,
+        "mentions_current_content": true,
+        "mentions_support_provenance": false,
+        "other_source_ordinals_mentioned": []
+      },
+      "checks": [
+        {
+          "check": 0,
+          "span": [
+            0,
+            37
+          ],
+          "quote_valid": false,
+          "capability": "ARTIFACT_CONTENT",
+          "method": "EXACT_CANDIDATE_CONTENT",
+          "phase": "CURRENT_VERIFICATION",
+          "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+          "declared_route_indices": [],
+          "mechanically_matching_own_routes": [],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": false
+        },
+        {
+          "check": 1,
+          "span": [
+            38,
+            72
+          ],
+          "quote_valid": false,
+          "capability": "CANDIDATE_SEAL",
+          "method": "EXACT_SEALED_CANDIDATE",
+          "phase": "CANDIDATE_SEAL",
+          "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+          "declared_route_indices": [
+            16
+          ],
+          "mechanically_matching_own_routes": [
+            16
+          ],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": true
+        }
+      ]
+    },
+    {
+      "source": 14,
+      "source_ref": "work-constraint:2512755e-fc60-540d-b35b-40c257b5b2c7:3",
+      "source_sha256": "8db6e27d3255b89aad8c129a15b493caf8312970a79b8ce0353f995cdfba4646",
+      "source_verdict": false,
+      "own_routes": [
+        17,
+        18,
+        19
+      ],
+      "declared_fact_refs": [],
+      "reason_sha256": "a896594a1a654aeeefc0b8aa624aa58150cadb037f048bb71ea77f5ca7307310",
+      "reason_observation": {
+        "mentions_scope": true,
+        "mentions_path": false,
+        "mentions_page": true,
+        "mentions_readme": true,
+        "mentions_current_content": false,
+        "mentions_support_provenance": false,
+        "other_source_ordinals_mentioned": []
+      },
+      "checks": [
+        {
+          "check": 0,
+          "span": [
+            0,
+            13
+          ],
+          "quote_valid": true,
+          "capability": "DENY_DEPLOY",
+          "method": "EXACT_PERMISSION_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "target_paths_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "declared_route_indices": [
+            17
+          ],
+          "mechanically_matching_own_routes": [],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": false
+        },
+        {
+          "check": 1,
+          "span": [
+            15,
+            29
+          ],
+          "quote_valid": true,
+          "capability": "DENY_PUBLISH",
+          "method": "EXACT_PERMISSION_GATE",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "target_paths_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "declared_route_indices": [
+            18
+          ],
+          "mechanically_matching_own_routes": [],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": false
+        },
+        {
+          "check": 2,
+          "span": [
+            31,
+            49
+          ],
+          "quote_valid": false,
+          "capability": "GIT_DIFF_SCOPE",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "phase": "CURRENT_VERIFICATION",
+          "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+          "declared_route_indices": [],
+          "mechanically_matching_own_routes": [
+            19
+          ],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": true
+        },
+        {
+          "check": 3,
+          "span": [
+            54,
+            75
+          ],
+          "quote_valid": false,
+          "capability": "GIT_DIFF_SCOPE",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "phase": "CURRENT_VERIFICATION",
+          "target_paths_sha256": "be3ae3b6479236a18da3e876a0de9dfe9ae2428896d83c3e804db008861b12d0",
+          "declared_route_indices": [],
+          "mechanically_matching_own_routes": [],
+          "extra_target_outside_task": true,
+          "matching_span_covers_claim": false
+        }
+      ]
+    },
+    {
+      "source": 18,
+      "source_ref": "work-constraint:2512755e-fc60-540d-b35b-40c257b5b2c7:7",
+      "source_sha256": "07e3b3c0e75b6d7005cbce24d0132991c692cefb989fdc443a62f094344b7bcd",
+      "source_verdict": false,
+      "own_routes": [
+        23
+      ],
+      "declared_fact_refs": [],
+      "reason_sha256": "f1dd8fefcd528790b5347959767095092590feb019e218c414a818464130c373",
+      "reason_observation": {
+        "mentions_scope": true,
+        "mentions_path": true,
+        "mentions_page": true,
+        "mentions_readme": false,
+        "mentions_current_content": false,
+        "mentions_support_provenance": false,
+        "other_source_ordinals_mentioned": []
+      },
+      "checks": [
+        {
+          "check": 0,
+          "span": [
+            0,
+            41
+          ],
+          "quote_valid": true,
+          "capability": "GIT_DIFF_SCOPE",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "phase": "CURRENT_VERIFICATION",
+          "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+          "declared_route_indices": [],
+          "mechanically_matching_own_routes": [
+            23
+          ],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": true
+        }
+      ]
+    },
+    {
+      "source": 19,
+      "source_ref": "work-constraint:2512755e-fc60-540d-b35b-40c257b5b2c7:8",
+      "source_sha256": "fbbb725a71eec770c41c2f148df66c4786cf619a02bff6d1fe74d4ac3cd4814d",
+      "source_verdict": false,
+      "own_routes": [
+        24
+      ],
+      "declared_fact_refs": [],
+      "reason_sha256": "47924cfc940ce5069ecbca05f0ffdc18098f1cffeef6527483ec84d36e406eac",
+      "reason_observation": {
+        "mentions_scope": true,
+        "mentions_path": false,
+        "mentions_page": false,
+        "mentions_readme": true,
+        "mentions_current_content": false,
+        "mentions_support_provenance": false,
+        "other_source_ordinals_mentioned": []
+      },
+      "checks": [
+        {
+          "check": 0,
+          "span": [
+            0,
+            48
+          ],
+          "quote_valid": true,
+          "capability": "GIT_DIFF_SCOPE",
+          "method": "EXACT_GIT_DIFF_SCOPE",
+          "phase": "CURRENT_VERIFICATION",
+          "target_paths_sha256": "9fcd730ec63f67db6f3280344d1a2035343d932c5427a4780beae13b9c268904",
+          "declared_route_indices": [],
+          "mechanically_matching_own_routes": [
+            24
+          ],
+          "extra_target_outside_task": false,
+          "matching_span_covers_claim": true
+        }
+      ]
+    }
+  ],
+  "prior_controller_issue": "AUDIT_V1_USED_SHARED_CONTRACT_REF_AS_DIRECT_METHOD; NO_RUNTIME_OR_CANDIDATE_CHANGE",
+  "prior_audit_sha256": "1bfedf572e294411bc2c43f87e0b58af86eb228486ff353dbe6b60f07c67335f"
+}

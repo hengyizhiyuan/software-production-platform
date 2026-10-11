@@ -215,7 +215,7 @@ def controlled_model_provider(inventory, plan, *, equivalent=True, review_change
                 review["component_results"] = [row.model_copy(update={"complete_and_equivalent": equivalent}).model_dump(mode="json")
                     for row in components]
             if (payload.get("existing_owner_source_preconditions") or {}).get(
-                    "review_source_consumption_contract") == "existing-source-consumption-proof-v1":
+                    "review_source_consumption_contract") in {"existing-source-consumption-proof-v1", "existing-source-consumption-proof-v2"}:
                 from tests.test_c3_source_consumption_proof import fixture_consumption_checks
                 for row in review["source_results"]:
                     row["consumption_checks"] = fixture_consumption_checks(inventory, restored, row["source_ref"])

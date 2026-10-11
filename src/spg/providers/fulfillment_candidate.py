@@ -1146,11 +1146,11 @@ def _review_input_view(inventory, candidate, capabilities, owner_context):
                 "candidate_fingerprint", "components_fingerprint")}
             payload["exact_response_header"]["inventory_fingerprint"] = inventory["inventory_fingerprint"]
     if owner_context.get("existing_owner_source_preconditions", {}).get(
-            "review_source_consumption_contract") == "existing-source-consumption-proof-v1":
+            "review_source_consumption_contract") in {"existing-source-consumption-proof-v1", "existing-source-consumption-proof-v2"}:
         comparisons = []
         for source in inventory["sources"]:
             own = [row for row in rows if row["source_ref"] == source["source_ref"]]
-            comparisons.append({"source_ref": source["source_ref"],
+            comparison = {"source_ref": source["source_ref"],
                 "original_semantic_source_ref": source["source_ref"],
                 "original_semantic_text": fulfillment_source_semantic_text(source),
                 "original_semantic_text_character_count": len(fulfillment_source_semantic_text(source)),
@@ -1158,7 +1158,25 @@ def _review_input_view(inventory, candidate, capabilities, owner_context):
                                                 if row["source_ref"] == source["source_ref"]],
                 "declared_fact_proof_refs": sorted({ref for row in own for ref in row["linked_fact_refs"]}),
                 "provenance_is_a_consumption_proof": False,
-                "future_gate_precondition_is_a_current_proof": False})
+                "future_gate_precondition_is_a_current_proof": False}
+            if owner_context.get("existing_owner_source_preconditions", {}).get(
+                    "review_source_consumption_contract") == "existing-source-consumption-proof-v2":
+                declared = set(comparison["declared_fact_proof_refs"])
+                comparison["actual_consumer_operands"] = [{
+                    "route_index": i, "source_ref": row["source_ref"],
+                    "capability": row["capability"],
+                    "evidence_method": contracts[row["capability"]]["evidence_method"],
+                    "phase": contracts[row["capability"]]["phase"],
+                    "target_paths": row["target_paths"], "source_span": row["source_span"],
+                    "dependency_kind": "OWN_ROUTE" if row["source_ref"] == source["source_ref"] else "DECLARED_FACT"}
+                    for i, row in enumerate(rows)
+                    if row["source_ref"] == source["source_ref"] or row["source_ref"] in declared]
+                comparison["target_operand_contract"] = {
+                    "target_paths": "EXACT_SUBMITTED_CONSUMER_OPERANDS; NOT_THE_PROHIBITED_PATH_LIST",
+                    "git_scope": "COMPLETE_CHANGED_PATH_SET_SUBSET_OF_AUTHORIZED_TARGETS; ORIGINAL_EXCLUSIONS_REMAIN_AUTHORITY",
+                    "retention": "COPY_SUBMITTED_OPERANDS_WHEN_REFERENCING_A_RETAIN_ROUTE; PATHS_DO_NOT_DISCHARGE_CONTENT",
+                    "structural_match_is_semantic_equivalence": False}
+            comparisons.append(comparison)
         payload = {"source_consumer_comparison_table": comparisons, **payload}
     return payload
 
@@ -1257,7 +1275,8 @@ def _review_schema_failure_observation(output, inventory, candidate):
         "repair_boundary": "INVALID_CRITIC_RESPONSE_IS_NOT_A_REJECTED_SEMANTIC_MAPPING; NO_VERDICT_BACKFILL"}
 
 
-def _review_output_schema(inventory, candidate, *, route_scoped=False, source_consumption=False):
+def _review_output_schema(inventory, candidate, *, route_scoped=False, source_consumption=False,
+                          consumer_operand_checks=False):
     """Request only existing review identities; no semantic answer is supplied.
 
     The canonical review and historical receipt shapes stay unchanged. The
@@ -1288,6 +1307,25 @@ def _review_output_schema(inventory, candidate, *, route_scoped=False, source_co
         check["properties"]["source_component_quote"]["description"] = (
             "Optional exact original [start,end) slice; null reuses that slice losslessly from the bound inventory. "
             "Unicode character offsets, exclusive end; never expand or repair a span.")
+        if consumer_operand_checks:
+            # Task identity operands are authoritative. Off-scope requirements
+            # remain in original quotes and false/UNRESOLVED judgements; a
+            # critic cannot invent an executable target. Null quote reuses the
+            # exact bound slice and does not repair the proposed offsets.
+            if inventory["exact_target_paths"]:
+                check["properties"]["target_paths"]["items"]["enum"] = list(inventory["exact_target_paths"])
+            else:
+                check["properties"]["target_paths"]["maxItems"] = 0
+            check["properties"]["source_component_quote"]["enum"] = [None]
+            check["properties"]["target_paths"]["description"] = (
+                "Exact actual consumer operands, not a list of paths forbidden by the source. "
+                "Git Diff compares all changed files with this authorized target allowlist and original "
+                "exclusions. Retention checks referencing an actual route copy that route's exact operands. "
+                "A matching operand is not semantic approval.")
+            check["properties"]["route_indices"]["description"] = (
+                "Reference actual eligible consumers matching the proposed capability, method, phase, "
+                "target operands and source span even for a false semantic verdict. Empty means no "
+                "matching submitted consumer exists, not that an existing method is semantically insufficient.")
     # The response is a judgement of the fixed submitted plan, not a repaired
     # plan described by the critic. Put a concise source/consumer comparison
     # before the verdict in this request only. Historical serialization and
@@ -2160,12 +2198,32 @@ class ModelFulfillmentCandidateProvider:
                        "only own routes and explicitly submitted f Fact dependencies are eligible. Do not infer "
                        "unsubmitted global dependencies or claim future proof is already performed. These checks "
                        "are critic proposals, not evidence of execution or authority."
+                       if (owner_preconditions or {}).get("review_source_consumption_contract") in {
+                           "existing-source-consumption-proof-v1", "existing-source-consumption-proof-v2"} else "")
+                    + (" Consumer operand consistency: use null source_component_quote to reuse the exact "
+                       "original [start,end) slice; original text is never rewritten or spans extended. "
+                       "target_paths denotes exact submitted consumer operands within admitted Task scope, "
+                       "not paths forbidden by the original source. Git Diff uses the authorized target "
+                       "allowlist; original exclusions are checked against all actual changed files. An "
+                       "unchanged prohibited file is within that method, but behavior inside an allowed file "
+                       "requires an applicable content/behavior consumer. Source Task scope is authoritative "
+                       "consumer configuration, not borrowed content evidence. Copy the exact target operands "
+                       "also for RETAIN_CONTEXT references; that copies identity, not semantic approval. "
+                       "Inspect actual_consumer_operands before claiming a consumer absent. If an exact "
+                       "matching route exists, cite it even when the source verdict is false because its "
+                       "method cannot prove the original meaning; explain that semantic insufficiency. "
+                       "Empty route_indices means an actually absent match only. Do not expand a required "
+                       "method merely because another source with related provenance was rejected. "
+                       "Neither a matching route nor a future gate supplies completed execution evidence."
                        if (owner_preconditions or {}).get("review_source_consumption_contract") ==
-                           "existing-source-consumption-proof-v1" else "")),
+                           "existing-source-consumption-proof-v2" else "")),
                 input_text=json.dumps(review_input, ensure_ascii=False),
                 output_schema=_review_output_schema(inventory, candidate,
                     route_scoped=(owner_preconditions or {}).get("review_input_contract") in _ROUTE_SCOPED_REVIEW_INPUTS,
-                    source_consumption=(owner_preconditions or {}).get("review_source_consumption_contract") == "existing-source-consumption-proof-v1"))
+                    source_consumption=(owner_preconditions or {}).get("review_source_consumption_contract") in {
+                        "existing-source-consumption-proof-v1", "existing-source-consumption-proof-v2"},
+                    consumer_operand_checks=(owner_preconditions or {}).get("review_source_consumption_contract") ==
+                        "existing-source-consumption-proof-v2"))
             self.last_observation = {"request_id": result.request_id, "provider": result.provider.value,
                 "requested_model": result.requested_model, "effective_model": result.effective_model,
                 "usage": asdict(result.usage), "timing": asdict(result.timing),

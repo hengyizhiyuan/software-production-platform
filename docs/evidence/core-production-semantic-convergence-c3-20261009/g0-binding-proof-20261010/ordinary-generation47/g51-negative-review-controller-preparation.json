@@ -1,0 +1,40 @@
+{
+  "schema": "c3-ordinary47-source-union-review-next-preparation-v1",
+  "generation": 51,
+  "status": "PREPARED_ONLY_EXACT_FREEZE_AND_QUALIFICATION_PENDING",
+  "frozen": false,
+  "source": null,
+  "tree": null,
+  "image": null,
+  "review_source_consumption_contract": "existing-source-consumption-proof-v2",
+  "basis_sha256": "363db92ebe6c8530436a33d90044ff34af44d156ce3c74a89825ad608e465217",
+  "inventory_fingerprint": "1155ee88bc3e3e7a8d72dd85556fb1e2d863d1f78e0db3450b5639f3e017a4f2",
+  "candidate_fingerprint": "af319906542f62517d28c4c7983dfe19a296d3f559c55461b299d51753e5b50d",
+  "source_count": 20,
+  "route_count": 25,
+  "model": "deepseek-flash",
+  "reasoning_effort": "none",
+  "max_output_tokens": 16384,
+  "timeout_seconds": 120,
+  "maximum_logical_calls": 1,
+  "formation_calls": 0,
+  "expected_required_rejections": [
+    3,
+    9,
+    13
+  ],
+  "source4_must_remain_nonexecuting_context": true,
+  "extra_rejections_not_automatically_accepted_as_correct": true,
+  "no_model_calls_during_preparation": true,
+  "holdout_accessed": false,
+  "original_history_unchanged": true,
+  "new_controller_sha256": "14edc2b95e437b3d2055d34c2d6ef843ad3cb7243c4a77666588f037ad5ea74a",
+  "launcher_sha256": "8c24d1169c1492cc491e9739a6f56ba398a11c4b15fc10818cb99cfb217df279",
+  "execute_preconditions": [
+    "EXACT_SOURCE_TREE_IMAGE_OWNER_MATCH",
+    "FULL_INSTALLED_AND_AFFECTED_PG_PASS_WITHOUT_OVERLAY",
+    "NETWORK_NONE_PREFLIGHT_AND_SCHEMA_MARKER_CHECK",
+    "CURRENT_ROOT_READINESS_AUTHORIZATION",
+    "UNIQUE_LIVE_STARTED_LOCK"
+  ]
+}

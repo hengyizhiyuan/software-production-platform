@@ -869,7 +869,7 @@ def _projection_binding(revision, ir, inventory, route, *, reviewed_background_r
             if original_paths is None and not negative_scope:
                 raise ValueError("OBLIGATION_FACT_SCOPE_VALUE_UNSUPPORTED")
             negative_consumption = (source_contract == "v3"
-                and source_consumption_contract == _SOURCE_CONSUMPTION_CONTRACT and negative_scope)
+                and source_consumption_contract in _SOURCE_CONSUMPTION_CONTRACTS and negative_scope)
             if original_paths is not None and not negative_consumption and set(route.target_paths) != set(original_paths):
                 raise ValueError("OBLIGATION_FACT_SCOPE_VALUE_MISMATCH")
             if negative_scope:
@@ -1059,10 +1059,13 @@ def locate_projection_components(candidate, inventory):
     return candidate.model_copy(update={"routes": tuple(routes)}), tuple(adjustments)
 
 
-_SOURCE_CONSUMPTION_CONTRACT = "existing-source-consumption-proof-v1"
+_SOURCE_CONSUMPTION_CONTRACT = "existing-source-consumption-proof-v2"
+_SOURCE_CONSUMPTION_CONTRACTS = frozenset({
+    "existing-source-consumption-proof-v1", _SOURCE_CONSUMPTION_CONTRACT})
 
 
-def _review_consumption_failures(candidate, inventory, review, *, required=False):
+def _review_consumption_failures(candidate, inventory, review, *, required=False,
+                                validate_negative_claims=False):
     """Validate critic claims against submitted consumers, never infer intent.
 
     Semantic subdivision and required methods remain untrusted critic proposals.
@@ -1072,16 +1075,18 @@ def _review_consumption_failures(candidate, inventory, review, *, required=False
     contracts = {c["capability"]: c for c in fulfillment_capability_contracts()}
     failures = []
     for row in review.source_results:
-        if not row.complete_and_equivalent:
+        if not row.complete_and_equivalent and not validate_negative_claims:
             continue
         checks = row.consumption_checks
         if checks is None and not required:
             continue  # Historical Review representation remains immutable.
         def add(code, index=None, **values):
             failures.append({"code": code, "source_ref": row.source_ref,
+                **({"failed_owner": "INDEPENDENT_SEMANTIC_REVIEW_OUTPUT"} if validate_negative_claims else {}),
                 **({"check": index} if index is not None else {}), **values})
         if not checks:
-            add("OBLIGATION_SOURCE_CONSUMPTION_PROOF_REQUIRED")
+            if row.complete_and_equivalent:
+                add("OBLIGATION_SOURCE_CONSUMPTION_PROOF_REQUIRED")
             continue
         text = fulfillment_source_semantic_text(sources[row.source_ref])
         own = [r for r in candidate.routes if r.source_ref == row.source_ref]
@@ -1103,7 +1108,41 @@ def _review_consumption_failures(candidate, inventory, review, *, required=False
                     or contract["phase"] != check.required_phase.value):
                 add("OBLIGATION_SOURCE_CONSUMPTION_METHOD_PHASE_DRIFT", index)
                 continue
-            if not check.route_indices or len(set(check.route_indices)) != len(check.route_indices):
+            if validate_negative_claims and set(check.target_paths) - set(inventory["exact_target_paths"]):
+                add("OBLIGATION_SOURCE_CONSUMPTION_TARGET_AUTHORITY_DRIFT", index)
+                continue
+            if not check.route_indices:
+                if row.complete_and_equivalent:
+                    add("OBLIGATION_SOURCE_CONSUMPTION_ROUTE_REQUIRED", index)
+                elif validate_negative_claims:
+                    # The critic still decides whether a method is semantically
+                    # sufficient. It cannot claim an exactly matching submitted
+                    # consumer is absent. Detect contradiction; never backfill
+                    # its witness, change the verdict or admit the Candidate.
+                    matching, matched_coverage = [], set()
+                    for ordinal, route in enumerate(candidate.routes):
+                        anchors = ([route] if route.source_ref == row.source_ref else
+                            [anchor for anchor in own if anchor.component_basis is not None
+                             and route.source_ref in anchor.component_basis.linked_fact_refs])
+                        if (route.capability == check.required_capability
+                                and tuple(route.target_paths) == tuple(check.target_paths)
+                                and any(anchor.component_basis is not None
+                                    and anchor.component_basis.source_span_start < check.source_span_end
+                                    and anchor.component_basis.source_span_end > check.source_span_start
+                                    for anchor in anchors)):
+                            matching.append(ordinal)
+                            for anchor in anchors:
+                                if anchor.component_basis is not None:
+                                    matched_coverage.update(range(
+                                        max(check.source_span_start, anchor.component_basis.source_span_start),
+                                        min(check.source_span_end, anchor.component_basis.source_span_end)))
+                    if matching and all(text[i].isspace() or i in matched_coverage
+                            for i in range(check.source_span_start, check.source_span_end)):
+                        add("OBLIGATION_SOURCE_CONSUMPTION_ABSENCE_CONTRADICTED", index,
+                            matching_actual_routes=matching,
+                            failed_owner="INDEPENDENT_SEMANTIC_REVIEW_OUTPUT")
+                continue
+            if len(set(check.route_indices)) != len(check.route_indices):
                 add("OBLIGATION_SOURCE_CONSUMPTION_ROUTE_REQUIRED", index)
                 continue
             actual_coverage = set()
@@ -1129,7 +1168,7 @@ def _review_consumption_failures(candidate, inventory, review, *, required=False
             if any(not text[i].isspace() and i not in actual_coverage
                    for i in range(check.source_span_start, check.source_span_end)):
                 add("OBLIGATION_SOURCE_CONSUMPTION_COMPONENT_COVERAGE_LOST", index)
-        if any(not char.isspace() and i not in covered for i, char in enumerate(text)):
+        if row.complete_and_equivalent and any(not char.isspace() and i not in covered for i, char in enumerate(text)):
             add("OBLIGATION_SOURCE_CONSUMPTION_COVERAGE_LOST")
     return failures
 
@@ -1167,12 +1206,16 @@ def validate_projection_components(candidate, inventory, *, semantic_review=None
             or result.components_fingerprint != fulfillment_components_fingerprint(candidate)
             or len(refs) != len(set(refs)) or set(refs) != {s["source_ref"] for s in inventory["sources"]}):
         raise ValueError("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_DRIFT")
-    if not all(row.complete_and_equivalent for row in result.source_results):
+    if (review_source_consumption_contract != _SOURCE_CONSUMPTION_CONTRACT
+            and not all(row.complete_and_equivalent for row in result.source_results)):
         raise ValueError("OBLIGATION_SEMANTIC_COMPONENT_MISMATCH")
     consumption = _review_consumption_failures(candidate, inventory, result,
-        required=review_source_consumption_contract == _SOURCE_CONSUMPTION_CONTRACT)
+        required=review_source_consumption_contract in _SOURCE_CONSUMPTION_CONTRACTS,
+        validate_negative_claims=review_source_consumption_contract == _SOURCE_CONSUMPTION_CONTRACT)
     if consumption:
         raise ValueError(consumption[0]["code"])
+    if not all(row.complete_and_equivalent for row in result.source_results):
+        raise ValueError("OBLIGATION_SEMANTIC_COMPONENT_MISMATCH")
     if result.component_results is not None:
         from spg.domain.governed_obligation import fulfillment_component_id
         expected = {(fulfillment_component_id(route, inventory["inventory_fingerprint"]), route.capability)
@@ -1620,14 +1663,22 @@ def projection_validation_feedback(candidate, revision, ir, inventory, primary_e
         if not identity_valid:
             add("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_DRIFT")
         else:
+            consumption_failures = _review_consumption_failures(candidate, inventory, review,
+                required=(owner_preconditions or {}).get("review_source_consumption_contract") in _SOURCE_CONSUMPTION_CONTRACTS,
+                validate_negative_claims=(owner_preconditions or {}).get("review_source_consumption_contract") == _SOURCE_CONSUMPTION_CONTRACT)
+            invalid_witness_sources = {failure["source_ref"] for failure in consumption_failures
+                if failure.get("failed_owner") == "INDEPENDENT_SEMANTIC_REVIEW_OUTPUT"}
             for row in review.source_results:
-                if not row.complete_and_equivalent:
+                if not row.complete_and_equivalent and row.source_ref not in invalid_witness_sources:
                     add("OBLIGATION_SEMANTIC_SOURCE_MISMATCH", source=refs[row.source_ref])
                     failures[-1]["review_reason"] = row.reason
-            for failure in _review_consumption_failures(candidate, inventory, review,
-                    required=(owner_preconditions or {}).get("review_source_consumption_contract") == _SOURCE_CONSUMPTION_CONTRACT):
+            for failure in consumption_failures:
                 row = {"code": failure["code"], "source": refs[failure["source_ref"]],
                     "source_consumption_comparison": failure}
+                if failure["source_ref"] in invalid_witness_sources:
+                    row.update(failed_owner="INDEPENDENT_SEMANTIC_REVIEW_OUTPUT",
+                        semantic_judgement_status="NOT_EVALUABLE_INVALID_CONSUMPTION_WITNESS",
+                        repair_boundary="REVIEW_OPERAND_CONTRACT; NO_INFERRED_FORMATION_REQUIREMENT")
                 if row not in failures:
                     failures.append(row)
             for row in review.component_results:
@@ -1636,6 +1687,12 @@ def projection_validation_feedback(candidate, revision, ir, inventory, primary_e
                 if row.context_only != (row.capability == "RETAIN_CONTEXT"):
                     predicates.append("context_only")
                 if predicates:
+                    index = expected_components[(row.component_id, row.capability)]
+                    if candidate.routes[index].source_ref in invalid_witness_sources:
+                        add("OBLIGATION_SEMANTIC_REVIEW_CONSUMPTION_INVALID", index)
+                        failures[-1].update(failed_owner="INDEPENDENT_SEMANTIC_REVIEW_OUTPUT",
+                            semantic_judgement_status="NOT_EVALUABLE_INVALID_CONSUMPTION_WITNESS")
+                        continue
                     add("OBLIGATION_SEMANTIC_COMPONENT_MISMATCH", expected_components[(row.component_id, row.capability)])
                     failures[-1].update(capability=row.capability, failed_review_predicates=predicates, review_reason=row.reason)
                     if (owner_preconditions or {}).get("review_input_contract") in {"existing-route-scoped-review-input-v2", "existing-independent-comparison-input-v3", "existing-source-typed-comparison-input-v4", "existing-admission-source-comparison-input-v5"}:
@@ -2044,7 +2101,7 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     if wire_presentation_contract not in (None, "existing-lossless-json-frame-v1"):
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
-    if (review_source_consumption_contract not in (None, _SOURCE_CONSUMPTION_CONTRACT)
+    if (review_source_consumption_contract not in (None, *_SOURCE_CONSUMPTION_CONTRACTS)
             or review_source_consumption_contract is not None and review_input_contract != "existing-admission-source-comparison-input-v5"):
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     if generation_view_contract not in (None, "existing-lossless-source-consumer-input-v1", "existing-lossless-source-consumer-input-v2", "existing-lossless-source-consumer-input-v3"):

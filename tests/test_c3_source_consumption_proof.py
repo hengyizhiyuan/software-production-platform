@@ -8,7 +8,7 @@ from spg.domain.governed_obligation import (
 from tests.test_c3_fulfillment_capacity_representation import controlled_capacity_case
 from tests.test_c3_semantic_contract_calibration import review
 
-CONTRACT = "existing-source-consumption-proof-v1"
+CONTRACT = "existing-source-consumption-proof-v2"
 
 
 def fixture_consumption_checks(inventory, plan, source_ref):
@@ -25,7 +25,8 @@ def fixture_consumption_checks(inventory, plan, source_ref):
 
 def fixture_review_proof(inventory, plan, verdict, payload):
     """Bind explicit controlled oracle consumers to the actual request marker."""
-    if (payload.get("existing_owner_source_preconditions") or {}).get("review_source_consumption_contract") != CONTRACT:
+    if (payload.get("existing_owner_source_preconditions") or {}).get("review_source_consumption_contract") not in {
+            "existing-source-consumption-proof-v1", CONTRACT}:
         return verdict
     raw = verdict.model_dump(mode="json")
     for row in raw["source_results"]:
@@ -62,7 +63,7 @@ def test_legitimate_source_union_and_original_identity_remain_exact(scale):
     ("no-route", "ROUTE_REQUIRED"), ("other-source", "UNDECLARED_DEPENDENCY"),
     ("bad-route", "ROUTE_IDENTITY_DRIFT"), ("future-instead-content", "CONSUMER_MISMATCH"),
     ("wrong-method", "METHOD_PHASE_DRIFT"), ("wrong-phase", "METHOD_PHASE_DRIFT"),
-    ("wrong-path", "CONSUMER_MISMATCH"), ("wrong-quote", "QUOTE_DRIFT"),
+    ("wrong-path", "TARGET_AUTHORITY_DRIFT"), ("wrong-quote", "QUOTE_DRIFT"),
     ("truncated", "COVERAGE_LOST"), ("duplicate", "DUPLICATE"),
 ])
 def test_positive_review_cannot_backfill_absent_or_wrong_proof(change, code):
@@ -113,6 +114,103 @@ def test_negative_semantic_verdict_remains_failure_without_fabricated_checks():
     _, _, inv, plan, raw = case()
     raw["source_results"][0].update(complete_and_equivalent=False, consumption_checks=[])
     with pytest.raises(ValueError, match="SEMANTIC_COMPONENT_MISMATCH"): validate(plan, inv, raw)
+
+
+def test_false_absence_claim_is_reviewer_contract_failure_not_candidate_repair_or_pass():
+    _, _, inv, plan, raw = case()
+    row = raw["source_results"][0]
+    row["complete_and_equivalent"] = False
+    row["consumption_checks"][0]["route_indices"] = []
+    original = deepcopy(raw)
+    with pytest.raises(ValueError, match="SOURCE_CONSUMPTION_ABSENCE_CONTRADICTED"):
+        validate(plan, inv, raw)
+    assert raw == original
+    failures = a._review_consumption_failures(plan, inv,
+        FulfillmentSemanticReviewCandidate.model_validate(raw), required=True, validate_negative_claims=True)
+    assert failures[0]["matching_actual_routes"] == [0]
+    assert failures[0]["failed_owner"] == "INDEPENDENT_SEMANTIC_REVIEW_OUTPUT"
+    # Historical contract must not acquire a new rejection or feedback.
+    assert a._review_consumption_failures(plan, inv,
+        FulfillmentSemanticReviewCandidate.model_validate(raw), required=True) == []
+    with pytest.raises(ValueError, match="SEMANTIC_COMPONENT_MISMATCH"):
+        a.validate_projection_components(plan, inv, semantic_review=raw,
+            review_source_consumption_contract="existing-source-consumption-proof-v1")
+
+
+def test_matching_consumer_does_not_override_independent_false_semantic_judgement():
+    _, _, inv, plan, raw = case()
+    raw["source_results"][0]["complete_and_equivalent"] = False
+    with pytest.raises(ValueError, match="SEMANTIC_COMPONENT_MISMATCH"):
+        validate(plan, inv, raw)
+
+
+def test_actually_missing_consumer_can_have_false_verdict_and_empty_indices():
+    _, _, inv, plan, raw = case()
+    row = raw["source_results"][0]
+    seal = next(c for c in a.fulfillment_capability_contracts() if c["capability"] == "CANDIDATE_SEAL")
+    row["complete_and_equivalent"] = False
+    row["consumption_checks"][0].update(required_capability=seal["capability"],
+        required_evidence_method=seal["evidence_method"], required_phase=seal["phase"], route_indices=[])
+    with pytest.raises(ValueError, match="SEMANTIC_COMPONENT_MISMATCH"):
+        validate(plan, inv, raw)
+
+
+@pytest.mark.parametrize("change,code", [("path", "TARGET_AUTHORITY_DRIFT"), ("quote", "QUOTE_DRIFT")])
+def test_negative_review_cannot_hide_false_operands_or_fabricated_quotes(change, code):
+    _, _, inv, plan, raw = case()
+    row = raw["source_results"][0]
+    row["complete_and_equivalent"] = False
+    check = row["consumption_checks"][0]
+    if change == "path": check["target_paths"] = ["prohibited-file.md"]
+    else: check["source_component_quote"] = "invented evidence"
+    with pytest.raises(ValueError, match="SOURCE_CONSUMPTION_" + code):
+        validate(plan, inv, raw)
+
+
+def test_source_operand_view_is_exact_identity_without_semantic_verdict():
+    rev, ir, inv, plan, _ = case()
+    owner = a._owner_source_preconditions(rev, ir, inv, a.fulfillment_capability_contracts(),
+        review_input_contract=p._REVIEW_INPUT_CONTRACT, review_source_consumption_contract=CONTRACT)
+    payload = p._review_input_view(inv, plan, a.fulfillment_capability_contracts(),
+        {"existing_owner_source_preconditions": owner})
+    for source, comparison in zip(inv["sources"], payload["source_consumer_comparison_table"]):
+        for entry in comparison["actual_consumer_operands"]:
+            route = plan.routes[entry["route_index"]]
+            assert entry["capability"] == route.capability
+            assert entry["target_paths"] == list(route.target_paths)
+            assert entry["source_span"] == [route.component_basis.source_span_start, route.component_basis.source_span_end]
+            assert "complete_and_equivalent" not in entry
+        assert comparison["target_operand_contract"]["structural_match_is_semantic_equivalence"] is False
+    schema = p._review_output_schema(inv, plan, route_scoped=True, source_consumption=True,
+        consumer_operand_checks=True)
+    assert "not a list of paths forbidden" in schema["$defs"]["FulfillmentSourceConsumptionCheck"]["properties"]["target_paths"]["description"]
+    from spg.infrastructure.model_runtime import ResponsesModelAdapter
+    compact = ResponsesModelAdapter._compact_schema(schema)
+    props = compact["$defs"]["FulfillmentSourceConsumptionCheck"]["properties"]
+    assert props["target_paths"]["items"]["enum"] == list(inv["exact_target_paths"])
+    assert props["source_component_quote"]["enum"] == [None]
+    # Generation constraints never replace Owner validation of actual output.
+    _, _, inv, plan, raw = case()
+    raw["source_results"][0]["consumption_checks"][0]["source_component_quote"] = "forged"
+    with pytest.raises(ValueError, match="QUOTE_DRIFT"): validate(plan, inv, raw)
+
+
+def test_invalid_critic_operands_do_not_become_authoritative_formation_repair_requirements():
+    rev, ir, inv, plan, raw = case()
+    row = raw["source_results"][0]
+    row["complete_and_equivalent"] = False
+    row["reason"] = "Controlled false absence claim, not a required repair."
+    row["consumption_checks"][0]["route_indices"] = []
+    import json
+    feedback = json.loads(a.projection_validation_feedback(plan, rev, ir, inv,
+        "OBLIGATION_SOURCE_CONSUMPTION_ABSENCE_CONTRADICTED",
+        semantic_observation={"review": raw},
+        owner_preconditions={"review_source_consumption_contract": CONTRACT}))
+    assert not any(v["code"] == "OBLIGATION_SEMANTIC_SOURCE_MISMATCH" and v.get("source") == 0
+        for v in feedback["violations"])
+    failure = next(v for v in feedback["violations"] if v["code"].endswith("ABSENCE_CONTRADICTED"))
+    assert failure["semantic_judgement_status"] == "NOT_EVALUABLE_INVALID_CONSUMPTION_WITNESS"
+    assert failure["failed_owner"] == "INDEPENDENT_SEMANTIC_REVIEW_OUTPUT"
 
 
 def test_legacy_receipt_and_schema_are_unchanged_new_schema_is_source_first():

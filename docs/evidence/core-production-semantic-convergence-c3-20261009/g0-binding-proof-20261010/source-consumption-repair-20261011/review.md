@@ -50,3 +50,22 @@ Watt source `9c8463c10c7c04b9f429663ad4b5ad368d69722d`, tree `00f84c8691c69439cb
 The exact generation50 image `sha256:04316cb489231f0d470c570d2dc912806f1423fab386019e108ee513ab047f9b` completed **835/835 PASS**, zero failures/errors/skips, no source/test overlays. Build wall105.131s; regression wall365.522s. JUnit SHA256 `412b74d9a1409084dd23219b72b188f97d0a85c7c9d83862fb67844624f08440`. Actual installed Watt/Guardian/ECF imports match the frozen source identities. History41/42/46/47 zero-call replay passed with original terminal reasons and receipts unchanged, and retrospective marker upgrades rejected. Full sanitized artifacts and hashes are in `../owner-generation-calibration/generation50/manifest.json`.
 
 Fresh PostgreSQL, actual negative Review, real G0 and sealed Holdout remain pending here. This checkpoint qualifies controlled engineering boundaries only and does not close C3.
+
+
+## Generation50 exact qualification and actual Review boundary
+
+Exact source `9c8463c10c7c04b9f429663ad4b5ad368d69722d`, tree `00f84c8691c69439cb463aba56bb7c88af9aa09f`, image `sha256:04316cb489231f0d470c570d2dc912806f1423fab386019e108ee513ab047f9b`: installed regressions 835/835 PASS; fresh PostgreSQL 43/43 PASS, no overlay, no skipped test, migration `20261007_72`. Owners remain Guardian `76c1e87a1b29d151f4ed949748e3298f2169c5b1` and ECF `5aa4f8833c359c15bd059eda5972aa3915bcc18c`.
+
+One independent ordinary47 negative Review rejected Source3/9/13 and preserved the background meaning of Source4. It is not fully qualified: Source19 claims a Git consumer absent while its own route24 matches every requested operand and original span. Source10/14 mix forbidden paths with authorized Git target operands; positive Source4/6/16/17 checks omit actual target operands. Git path scope alone does not prove absence of page behavior inside an authorized file. Semantic method sufficiency remains for independent Review, not a deterministic assumption.
+
+Actual use: one logical Review, one HTTP 200, no retry; 69,463 input + 7,928 output = 77,391 total tokens, reasoning 0; 26.8105 seconds. No Formation, Work, admission, Assurance or Holdout. Raw Candidate, source and Review are private persistent evidence, not altered.
+
+## Current narrow repair
+
+Fresh requests opt into `existing-source-consumption-proof-v2` within the existing v5 Review input and unchanged Formation Wire. Historical v1 request/validation/feedback retain exact behavior. v2 validates mechanical witness claims for negative as well as positive judgments, reports false absence when actual eligible routes cover the claimed span with matching method/phase/targets, rejects off-Task target operands and invented quotes, and never changes a semantic false verdict to PASS.
+
+The independent model still selects the required method and semantic subdivision. Read-only actual consumer operands are supplied beside each original source, without a verdict. Request schema restricts target identity to existing Task scope; null quote reuses only the original specified slice. Bounds cannot be expanded or repaired. Incorrect Review witnesses are explicitly NOT_EVALUABLE and cannot become authoritative Formation repair requirements. No Subject alias, permission, Owner, retry, Formation stage, budget or Wire schema is added.
+
+Development `proof51a`: 120/128 PASS, eight failures from a controlled capacity adapter recognizing v1 only. The fixture now consumes the actual v1/v2 request marker. `proof51b`: 128/128 PASS after that correction. Both are overlay development, not exact-image qualification. Final directed run includes explicit invalid-critic feedback classification; receipt pending. Historical failures are retained. This is an active engineering checkpoint, not C3 CLOSED.
+
+Final directed development: `proof51c`, 129/129 PASS, 95.128485 seconds; original failure and both positive receipts retained. Exact installed image and fresh PostgreSQL qualification follow; no new model call or G0 at this checkpoint.
