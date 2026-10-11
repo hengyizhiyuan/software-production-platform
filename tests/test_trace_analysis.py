@@ -1064,8 +1064,31 @@ def test_root_cause_requires_implementation_excerpt_not_only_final_net_changes(o
     value=base|({"path":"src/example.py","blob":"b"*40,"content":"10: record_signal(condition)"} if operation=="read" else {"matches":"a:src/example.py:10: record_signal(condition)"} if operation=="search" else {"changed_paths":["src/example.py"],"patch":"+record_signal(condition)"})
     eid=c.add("repository","/fixture/source",value,repository=True);c.read(eid)
     r["findings"][0].update(epistemic_status="ROOT_CAUSE_HYPOTHESIS",analysis="假设：若该条件成立，则该实现可能产生诊断；历史实现身份保持 UNKNOWN。",repository_citations=[{"evidence_id":eid,"quote":"record_signal(condition)"}])
-    if operation=="diff":
+    if operation!="read":
         with pytest.raises(ValueError,match="ROOT_CAUSE_REQUIRES_IMPLEMENTATION_EXCERPT"):
             c.materialize_boundaries(AnalysisReport.model_validate(r))
     else:
         c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+def test_removing_a_citation_cannot_keep_an_uncited_original_owner_claim():
+    c=EvidenceCatalog(snapshot());r=report(c);other_id=str(uuid4());eid=c.add("execution_evidence","/fixture/other",{"id":other_id,"evidence_type":"arbitrary-evidence"})
+    c.read(eid);r["findings"][0]["fact"]["statement"]="Other original Owner "+other_id+" proves an unrelated result"
+    with pytest.raises(ValueError,match="FACT_NAMES_UNCITED_OWNER_RECORD"):
+        c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+def test_positive_execution_receipts_require_an_execution_timeline_entry():
+    c=EvidenceCatalog(snapshot());r=report(c);eid=c.add("effect_receipts","/fixture/settled",{"id":str(uuid4()),"condition":"SETTLED","output":{"path":"arbitrary.txt"}})
+    assert eid in c.seed()["execution_stage_targets"]
+    with pytest.raises(ValueError,match="OBSERVED_EXECUTION_STAGE_MUST_BE_RECONSTRUCTED"):
+        c.materialize_boundaries(AnalysisReport.model_validate(r))
+    c.read(eid);r["timeline"].insert(0,{"stage":"EXECUTION","statement":"Recorded settled effect", "citations":[{"evidence_id":eid,"quote":"SETTLED"}]})
+    c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+@pytest.mark.parametrize("phrase",["触发候选重做","随后重新生成候选","then retry the decision","execute a replacement recipe"])
+def test_causal_mechanism_cannot_silently_promote_recovery_actions(phrase):
+    c=EvidenceCatalog(snapshot());r=report(c);r["findings"][0].update(epistemic_status="ROOT_CAUSE_HYPOTHESIS",analysis="假设：若条件成立，则"+phrase,repository_citations=[{"evidence_id":str(uuid4()),"quote":"implementation"}])
+    with pytest.raises(ValueError,match="CAUSE_MECHANISM_CANNOT_ASSERT_RECOVERY_ACTION"):
+        AnalysisReport.model_validate(r)

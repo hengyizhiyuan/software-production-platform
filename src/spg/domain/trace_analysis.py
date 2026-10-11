@@ -1,5 +1,6 @@
 """Advisory investigation contracts. They confer no production authority."""
 from enum import StrEnum
+import re
 from typing import Literal
 from uuid import UUID
 
@@ -90,7 +91,7 @@ class Finding(AnalysisRecord):
     analysis: str = Field(min_length=1, max_length=4000,
         description="ROOT_CAUSE_HYPOTHESIS must start with '假设：若' and use conditional causal language. Owner diagnosis/expected/rejected-behavior lists are not proof of executed effects or an unavailable candidate's contents.")
     repository_citations: tuple[Citation, ...] = Field(default=(), max_length=8,
-        description="Root cause hypotheses require an observed EXACT_SOURCE_EXCERPT from repository.read/search of the relevant implementation. A final diff proves net changes only and cannot alone ground a validation/recording mechanism. Keep the cause UNKNOWN without implementation evidence.")
+        description="Root cause hypotheses require EXACT_IMPLEMENTATION_READ from repository.read of the relevant implementation and its surrounding control flow. Search locates code; a single matching line and a final diff cannot alone ground a validation/recording mechanism. Keep the cause UNKNOWN without implementation evidence.")
     uncertainty: str = Field(min_length=1, max_length=12000,
         description="Use INSPECTED_OWNER_BOUNDARY. The verifier derives presentation text only from the registered subject inspection and uncertainty_check_ids. Exact canonical boundary text is also accepted. No free-form absence claims.")
     recommendation: str = Field(min_length=1, max_length=3000)
@@ -118,6 +119,8 @@ class Finding(AnalysisRecord):
             raise ValueError("a root cause hypothesis requires repository evidence")
         if self.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and not self.analysis.startswith("假设：若"):
             raise ValueError("CAUSAL_HYPOTHESIS_MUST_BE_EXPLICIT; begin analysis with 假设：若, state a conditional mechanism, and do not promote diagnoses or repair plans to performed actions")
+        if self.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and re.search(r"重做|重新生成|重新推理|替代配方|\b(?:regenerat\w*|retr(?:y|ied|ies)|replacement\s+recipe)\b", self.analysis, re.I):
+            raise ValueError("CAUSE_MECHANISM_CANNOT_ASSERT_RECOVERY_ACTION; describe only the failure/recording condition here. Proposed recovery belongs in recommendations; performed recovery needs its own original fact receipts.")
         if self.regression_qualification != REGRESSION_CRITERIA[self.classification]:
             raise ValueError("REGRESSION_CRITERION_MUST_MATCH_GOVERNED_OUTCOME: " + REGRESSION_CRITERIA[self.classification])
         if self.scope_check_ids and (self.classification != IssueClass.UNKNOWN or self.epistemic_status != "UNKNOWN"):

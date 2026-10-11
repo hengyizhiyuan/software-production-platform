@@ -103,9 +103,10 @@ def source_semantics(group, value, repository):
                                 "platform_improvement_candidate_ref": "PROPOSAL_REFERENCE_NOT_VERIFIED_DEFECT"},
                 "boundary": "Signals and recovery are recorded Owner diagnoses. Required/rejected/expected behavior lists do not establish executed file changes or the contents of an unavailable rejected candidate. Budget attempt_count and convergence fields do not independently prove model call counts or successful regeneration; inspect original steps/calls and producer source. Execution receipts and exact candidate source/diff are separate observations; causal interpretation remains hypothetical. Known-match/recurring labels and proposal references alone do not establish repeated executions, a reproducible failure or an implementation defect."}
     if repository:
-        source_kind = ("EXACT_SOURCE_EXCERPT" if isinstance(value, dict) and
-            (all(k in value for k in ("repository", "revision", "path", "blob", "content")) or
-             all(k in value for k in ("repository", "revision", "matches"))) else
+        source_kind = ("EXACT_IMPLEMENTATION_READ" if isinstance(value, dict) and
+            all(k in value for k in ("repository", "revision", "path", "blob", "content")) else
+            "SOURCE_SEARCH_LOCATOR" if isinstance(value, dict) and
+            all(k in value for k in ("repository", "revision", "matches")) else
             "FINAL_NET_DIFF" if isinstance(value, dict) and "changed_paths" in value else
             "UNCLASSIFIED_COMPARISON")
         return {"surface": "COMMITTED_REPOSITORY", "families": families,
@@ -507,6 +508,9 @@ class EvidenceCatalog:
                    for row in self.records.values()
                    if row["group"] in {"capture", "intent", "limits"}]
         seed = {"snapshot_digest": self.digest, "groups": groups,
+                "execution_stage_targets": [eid for eid, row in self.records.items()
+                    if row["group"] in {"execution_effects", "effect_receipts", "execution_steps"}
+                    and isinstance(self.values[eid], dict) and self.values[eid].get("condition") in {"SETTLED", "COMPLETED"}][:3],
                 "initial_inspections": [self.inspect(work_id)],
                 "evidence_reality": self.reality(),
                 "initial_evidence": initial,
@@ -569,8 +573,18 @@ class EvidenceCatalog:
             "original_objective", "expected_outcome", "actual_execution_path", "current_state")]
         facts += [(("timeline", i), fact) for i, fact in enumerate(report.timeline)]
         facts += [(("findings", i, "fact"), finding.fact) for i, finding in enumerate(report.findings)]
+        known_owner_ids = {str(value["id"]) for eid, value in self.values.items()
+            if isinstance(value, dict) and value.get("id") and not self.records[eid]["repository"]
+            and self.records[eid]["group"] not in {"analysis_draft", "evidence_check", "evidence_inspection"}}
+        uuid_pattern = re.compile(r"\b[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\b")
         for name, fact in facts:
             prefix = list(name) if isinstance(name, tuple) else [name]
+            supported_ids = {str(report.work_id)}
+            for c in fact.citations:
+                for value in strings(self.values.get(str(c.evidence_id), {})):
+                    supported_ids.update(uuid_pattern.findall(value))
+            for owner_id in set(uuid_pattern.findall(fact.statement)) & known_owner_ids - supported_ids:
+                errors.append(CitationRejected("FACT_NAMES_UNCITED_OWNER_RECORD; removing a citation also requires correcting claims about that record", prefix + ["statement"], report.work_id))
             for i, c in enumerate(fact.citations):
                 try:
                     citation(c, prefix + ["citations", i])
@@ -580,6 +594,10 @@ class EvidenceCatalog:
                                                prefix + ["citations", i], c.evidence_id)
                 except CitationRejected as error:
                     errors.append(error)
+        if (any(row["group"] in {"execution_effects", "effect_receipts", "execution_steps"}
+                and isinstance(self.values[eid], dict) and self.values[eid].get("condition") in {"SETTLED", "COMPLETED"}
+                for eid, row in self.records.items()) and not any(t.stage == "EXECUTION" for t in report.timeline)):
+            errors.append(CitationRejected("OBSERVED_EXECUTION_STAGE_MUST_BE_RECONSTRUCTED; inspect settled/completed original records", ["timeline"], report.work_id))
         previous_time = None
         for index, item in enumerate(report.timeline):
             if item.timestamp is None:
@@ -667,7 +685,7 @@ class EvidenceCatalog:
                     errors.append(error)
             if (finding.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and
                     not any(self.records.get(str(c.evidence_id), {}).get("semantics", {}).get("source_kind") ==
-                            "EXACT_SOURCE_EXCERPT" for c in finding.repository_citations)):
+                            "EXACT_IMPLEMENTATION_READ" for c in finding.repository_citations)):
                 errors.append(CitationRejected("ROOT_CAUSE_REQUIRES_IMPLEMENTATION_EXCERPT; read/search the relevant producer implementation or retain UNKNOWN; a final diff alone cannot establish its mechanism", ["findings", index, "repository_citations"], subject_id))
         findings = {f.finding_id: f for f in report.findings}
         for section in ("immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"):

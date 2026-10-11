@@ -53,9 +53,10 @@ Classify model variance, capability defect, governance issue or UNKNOWN. Valid
 citations are observed evidence UUIDs with verbatim short quotes. Root causes are
 hypotheses requiring repository citations; absent code/evidence means UNKNOWN.
 For each causal mechanism, read/search its relevant producer implementation and
-cite an EXACT_SOURCE_EXCERPT. A final Work diff is supplemental net-change evidence,
+cite an EXACT_IMPLEMENTATION_READ from repository.read. A final Work diff is supplemental net-change evidence,
 not implementation evidence for a Watt validator or diagnostic producer. Read the
-actual condition that records a signal; do not infer candidate rejection, required
+surrounding control flow, not just a search match naming a signal. Search is only a
+locator. Read the actual condition that records a signal; do not infer candidate rejection, required
 regeneration or mutation from a recording condition or diagnostic label alone.
 Give fact, analysis, uncertainty, recommendation and regression qualification for
 each finding. Provide recovery, Self-Refine, platform improvement and deferred
@@ -120,6 +121,16 @@ PRESENT cannot be called missing; a bounded or
 redacted export permits INCOMPLETE_CAPTURE, never platform-wide absence. Not
 reading available records is a review limitation, not missing evidence. Keep
 runtime comparison provenance and other investigation limitations in uncertainty.
+A fact may only describe its cited original records or the identifier links those
+records explicitly carry. If a citation is rejected, correct or remove the related
+claim as well; do not retain an uncited third Owner record in factual prose.
+Every recommendation must reference each finding it discusses; do not describe an
+additional incident using only references to other findings in the same family.
+For regression scenarios, keep each input condition and reason code tied to the
+actual read implementation branch. Empty/missing input, invalid syntax and invalid
+fields can have distinct codes; do not apply one observed code to all branches.
+When execution_stage_targets are present, inspect a relevant original settled
+effect/completed step and include an EXECUTION entry describing what actually ran.
 Each finding must declare subject_evidence_id and cite that exact original record.
 Additional fact citations must be the same Owner identity/projection or an explicit
 Owner reference to/from that subject. Shared Work, attempt, component, failure code
