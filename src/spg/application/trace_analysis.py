@@ -75,6 +75,20 @@ or refinement records exist, findings must cite those original Owner records.
 Drafts can be read through evidence.read(draft_id) for explicit correction, but
 are model proposals and cannot be cited as historical facts. Verification returns
 multiple citation errors together: correct all reported locations in one revise.
+Use evidence_reality as the required initial cross-owner review. Reconcile each
+family in evidence_assessments with the seeded check_id and exact availability.
+Producer semantics in every evidence record define what its surface can prove:
+HTTP preview, download/server-transfer audits, browser rendering/client receipt,
+and recorded execution identifier links are distinct. Do not use negative evidence
+from one surface to deny positive evidence from another. Inspect relevant original
+examples and potentially contradicting records before recommending missing logs.
+Declare the matching evidence_family on facts about HTTP/transfer/identity links.
+All missing_evidence entries are structured gaps backed by evidence.check receipts.
+Call evidence.check(family='OWNER_RECORD', group=..., field='/...') for specific
+fields; '*' enumerates lists. PRESENT cannot be called missing; a bounded or
+redacted export permits INCOMPLETE_CAPTURE, never platform-wide absence. Not
+reading available records is a review limitation, not missing evidence. Keep
+runtime comparison provenance and other investigation limitations in uncertainty.
 """
 
 
@@ -446,7 +460,7 @@ class TraceAnalysisService:
             if catalog:
                 digest, _ = self.storage.put_json(ns + "/catalog", {
                     "snapshot_digest": catalog.digest, "records": catalog.records,
-                    "observed_ids": sorted(catalog.observed)})
+                    "observed_ids": sorted(catalog.observed), "scope_checks": catalog.checks})
                 record["catalog_digest"] = digest
             record["draft_digests"] = {}
             if tools:

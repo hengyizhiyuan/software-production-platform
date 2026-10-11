@@ -110,3 +110,20 @@ test('Analysis submission generates a UUID on the existing HTTP origin and reuse
  await s.listeners.submit({target:f,preventDefault(){}});
  assert.equal(JSON.parse(s.calls.at(-1)[1].body).request_id,request.request_id);
 });
+
+test('Analysis v2 renders scoped gaps safely and still reads legacy reports',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-one';
+ const fact={statement:'Observed',citations:[]};
+ const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
+  timeline:[],findings:[],immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],deferred_items:[],
+  evidence_assessments:[{family:'PREVIEW_HTTP',availability:'PRESENT',statement:'HTTP receipt exists',check_id:'preview-check'}],
+  missing_evidence:[{statement:'<script>bad()</script>',availability:'INCOMPLETE_CAPTURE',check_id:'scope-check'}]};
+ const a={work_id:'ordinary-work',request_id:'request-one',status:'COMPLETED',report};
+ const s=surface('/admin',true,null,null,{[path]:a});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;
+ assert.match(h,/PREVIEW_HTTP.*PRESENT/);assert.match(h,/scope-check/);assert.match(h,/&lt;script&gt;/);assert.doesNotMatch(h,/<script>bad/);
+ report.missing_evidence=['legacy limitation'];delete report.evidence_assessments;
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
+ assert.match(s.nodes['#admin-content'].innerHTML,/legacy limitation/);
+});

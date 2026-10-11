@@ -39,7 +39,9 @@ def report(catalog):
                 "recommendation": "Inspect existing owner evidence", "handling": "INVESTIGATE",
                 "regression_qualification": "Preserve UNKNOWN when raw evidence is absent"}],
             "deferred_items": [{"statement": "Raw log investigation", "finding_ids": ["missing-raw"]}],
-            "missing_evidence": ["raw invalid response"]}
+            "evidence_assessments": [{"family": c["family"], "check_id": c["check_id"],
+                "availability": c["availability"], "statement": "Snapshot scope reviewed"}
+                for c in catalog.reality()["families"]], "missing_evidence": []}
 
 
 class Registry:
@@ -410,3 +412,110 @@ def test_index_snippet_can_be_cited_but_unread_body_cannot():
     r["current_state"]["citations"][0]["quote"] = "unread-tail"
     with pytest.raises(ValueError, match="CITATION_QUOTE_MISMATCH"):
         catalog.validate(AnalysisReport.model_validate(r))
+
+
+def evidence_snapshot():
+    snap = snapshot()
+    pwu, session, attempt = (str(uuid4()) for _ in range(3))
+    snap["capture_warnings"] = []
+    snap["lifecycle"].update(guardian=[{"result_id": str(uuid4()), "gate": "PASS", "evidence": [
+        {"status_code": 200, "response_sha256": "d" * 64, "runtime_ref": "candidate-preview:fixture",
+         "obligation_ref": "an-arbitrary-route"}]}],
+        served_delivery={"actions": [], "client_received": "UNAVAILABLE", "client_saved": "UNAVAILABLE",
+                         "completion_basis": "server transfer only"})
+    snap["lifecycle"]["advanced"]["owners"].update(execution_sessions=[{"id": session, "pwu_id": pwu}],
+        execution_attempts=[{"id": attempt, "work_unit_id": pwu}])
+    return snap
+
+
+def test_preview_and_transfer_are_distinct_producer_scopes():
+    catalog = EvidenceCatalog(evidence_snapshot())
+    preview = catalog.check("PREVIEW_HTTP")
+    transfer = catalog.check("DELIVERY_TRANSFER")
+    assert preview["total_matches"] == 1 and preview["availability"] == "PRESENT"
+    assert preview["examples"][0]["value"]["status_code"] == 200
+    assert preview["examples"][0]["group"] == "guardian"
+    assert transfer["examples"][0]["value"]["client_received"] == "UNAVAILABLE"
+    with pytest.raises(ValueError, match="FIXED_BY_FAMILY"):
+        catalog.check("PREVIEW_HTTP", group="served_delivery")
+
+
+@pytest.mark.parametrize("family,group,quote", [
+    ("PREVIEW_HTTP", "served_delivery", "UNAVAILABLE"),
+    ("DELIVERY_TRANSFER", "guardian", "200"),
+])
+def test_fact_cannot_cross_producer_surface(family, group, quote):
+    catalog = EvidenceCatalog(evidence_snapshot())
+    r = json.loads(json.dumps(report(catalog)))
+    eid = next(eid for eid, row in catalog.records.items() if row["group"] == group)
+    catalog.read(eid)
+    r["current_state"].update(evidence_family=family, citations=[{"evidence_id": eid, "quote": quote}])
+    with pytest.raises(ValueError, match="SOURCE_SURFACE_MISMATCH"):
+        catalog.validate(AnalysisReport.model_validate(r))
+
+
+def test_assurance_pass_without_http_receipt_is_not_http_observation():
+    snap = evidence_snapshot()
+    snap["lifecycle"]["guardian"][0].pop("evidence")
+    catalog = EvidenceCatalog(snap)
+    assert catalog.check("PREVIEW_HTTP")["availability"] == "NOT_OBSERVED_IN_CAPTURE"
+    eid = next(eid for eid, row in catalog.records.items() if row["group"] == "guardian")
+    assert "PREVIEW_HTTP" not in catalog.records[eid]["semantics"]["families"]
+
+
+def test_lineage_exposes_owner_aliases_without_reading_every_row():
+    catalog = EvidenceCatalog(evidence_snapshot())
+    links = catalog.check("EXECUTION_RELATIONSHIP")
+    pwu = catalog.snapshot["lifecycle"]["advanced"]["owners"]["execution_sessions"][0]["pwu_id"]
+    same = [link for link in links["examples"] if link["value"] == pwu]
+    assert {link["group"] for link in same} == {"execution_sessions", "execution_attempts"}
+    assert all(link["identity_kind"] == "PWU" for link in same)
+    specific = catalog.check("EXECUTION_RELATIONSHIP", group="execution_sessions", field="/pwu_id")
+    assert specific["availability"] == "PRESENT"
+
+
+@pytest.mark.parametrize("family,group,field", [
+    ("PREVIEW_HTTP", None, None),
+    ("EXECUTION_RELATIONSHIP", "execution_sessions", "/pwu_id"),
+])
+def test_available_evidence_cannot_be_claimed_missing(family, group, field):
+    catalog = EvidenceCatalog(evidence_snapshot())
+    r = report(catalog)
+    receipt = catalog.check(family, group=group, field=field)
+    r["missing_evidence"] = [{"statement": "Absent", "family": family,
+        "check_id": receipt["check_id"], "availability": "NOT_OBSERVED_IN_CAPTURE"}]
+    with pytest.raises(ValueError, match="MISSING_EVIDENCE_CONTRADICTS"):
+        catalog.validate(AnalysisReport.model_validate(r))
+
+
+def test_absence_is_snapshot_scoped_and_redaction_preserves_unknown():
+    catalog = EvidenceCatalog(evidence_snapshot())
+    check = catalog.check("OWNER_RECORD", group="execution_steps", field="/result_payload/raw_response")
+    assert check["availability"] == "NOT_OBSERVED_IN_CAPTURE"
+    assert check["scope"] == "FROZEN_EXPORTED_OWNER_RECORDS_ONLY"
+    r = report(catalog)
+    r["missing_evidence"] = [{"statement": "Raw response not observed in this captured group",
+        "family": "OWNER_RECORD", "check_id": check["check_id"], "availability": check["availability"]}]
+    catalog.validate(AnalysisReport.model_validate(r))
+    snap = evidence_snapshot()
+    snap["lifecycle"]["advanced"]["owners"]["execution_steps"][0]["result_payload"]["raw_response"] = "[REDACTED_FIELD]"
+    assert EvidenceCatalog(snap).check("OWNER_RECORD", group="execution_steps",
+        field="/result_payload/raw_response")["availability"] == "INCOMPLETE_CAPTURE"
+    with pytest.raises(ValueError, match="GROUP_NOT_CAPTURED"):
+        catalog.check("OWNER_RECORD", group="not-exported", field="/id")
+
+
+def test_report_requires_full_family_reconciliation_and_checked_gaps():
+    catalog = EvidenceCatalog(evidence_snapshot())
+    r = report(catalog)
+    r["evidence_assessments"] = []
+    with pytest.raises(ValueError, match="RECONCILIATION_REQUIRED"):
+        catalog.validate(AnalysisReport.model_validate(r))
+    r = report(catalog)
+    r["evidence_assessments"][0]["availability"] = "NOT_OBSERVED_IN_CAPTURE"
+    with pytest.raises(ValueError, match="ASSESSMENT_MUST_MATCH"):
+        catalog.validate(AnalysisReport.model_validate(r))
+    r = report(catalog)
+    r["missing_evidence"] = ["Unread records are absent"]
+    with pytest.raises(ValueError):
+        AnalysisReport.model_validate(r)

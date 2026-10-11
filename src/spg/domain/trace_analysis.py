@@ -22,9 +22,32 @@ class Citation(AnalysisRecord):
     quote: str = Field(min_length=1, max_length=1200)
 
 
+class EvidenceFamily(StrEnum):
+    OWNER_RECORD = "OWNER_RECORD"
+    PREVIEW_HTTP = "PREVIEW_HTTP"
+    DELIVERY_TRANSFER = "DELIVERY_TRANSFER"
+    EXECUTION_RELATIONSHIP = "EXECUTION_RELATIONSHIP"
+
+
+class EvidenceAssessment(AnalysisRecord):
+    family: EvidenceFamily
+    check_id: UUID
+    availability: Literal["PRESENT", "NOT_OBSERVED_IN_CAPTURE", "INCOMPLETE_CAPTURE"]
+    statement: str = Field(min_length=1, max_length=2000)
+
+
+class EvidenceGap(AnalysisRecord):
+    statement: str = Field(min_length=1, max_length=2000)
+    family: EvidenceFamily
+    check_id: UUID
+    availability: Literal["NOT_OBSERVED_IN_CAPTURE", "INCOMPLETE_CAPTURE"]
+
+
 class ObservedFact(AnalysisRecord):
     statement: str = Field(min_length=1, max_length=2000)
     citations: tuple[Citation, ...] = Field(min_length=1, max_length=8)
+    evidence_family: EvidenceFamily = Field(default=EvidenceFamily.OWNER_RECORD,
+        description="Declare PREVIEW_HTTP for preview GET/status/digest claims, DELIVERY_TRANSFER for download audits, EXECUTION_RELATIONSHIP for identity linkage. Citation text from another surface cannot prove this fact.")
 
 
 class TimelineItem(ObservedFact):
@@ -70,7 +93,7 @@ class Recommendation(AnalysisRecord):
 
 
 class AnalysisReport(AnalysisRecord):
-    schema_version: Literal["watt-trace-analysis-report-v1"] = "watt-trace-analysis-report-v1"
+    schema_version: Literal["watt-trace-analysis-report-v2"] = "watt-trace-analysis-report-v2"
     work_id: UUID
     original_objective: ObservedFact
     expected_outcome: ObservedFact
@@ -82,7 +105,10 @@ class AnalysisReport(AnalysisRecord):
     self_refine_opportunities: tuple[Recommendation, ...] = Field(default=(), max_length=20)
     platform_improvements: tuple[Recommendation, ...] = Field(default=(), max_length=20)
     deferred_items: tuple[Recommendation, ...] = Field(default=(), max_length=20)
-    missing_evidence: tuple[str, ...] = Field(default=(), max_length=60)
+    evidence_assessments: tuple[EvidenceAssessment, ...] = Field(max_length=8,
+        description="Reconcile every family in the seeded evidence_reality summary with its exact check_id and availability. These are snapshot observations, not completeness or causal truth.")
+    missing_evidence: tuple[EvidenceGap, ...] = Field(default=(), max_length=60,
+        description="Every absence/incompleteness claim needs a prior evidence.check receipt for the same family. PRESENT evidence cannot be called missing; NOT_OBSERVED is limited to the checked snapshot scope. Put source/comparison limitations in uncertainty, not invented absence claims.")
 
     @model_validator(mode="after")
     def recommendation_lineage(self):

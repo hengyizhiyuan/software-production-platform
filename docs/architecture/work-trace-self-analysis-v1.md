@@ -89,6 +89,37 @@ summaries of cited observations; causal analyses remain ROOT_CAUSE_HYPOTHESIS or
 UNKNOWN. Human review remains required even when the investigation completes.
 No new Guardian PASS or original Work PASS is inferred from a valid report.
 
+### General evidence scope repair (report v2)
+
+Every catalog record now carries producer-derived source semantics. Guardian HTTP
+observations, delivery download/server-transfer audits and Native identifier links
+are different evidence families. These labels come from existing producer
+contracts, never keywords or model text. A Guardian PASS without an actual HTTP
+receipt cannot support a PREVIEW_HTTP fact. Typed facts cannot cite a different
+producer surface. This is an evidence rule, not a Work/domain-specific rule.
+
+The initial context contains deterministic `evidence_reality` checks across these
+families, including exact original evidence IDs/pointers and bounded examples.
+Session `pwu_id` and attempt `work_unit_id` are the existing PWU identifier aliases;
+other actual execution reference fields are exposed without inferring lifecycle
+completion. Missing an initial example is not interpreted as absent: the model can
+read originals or perform a scoped `evidence.check` against a captured group and
+JSON Pointer (`*` enumerates). The query scans all selected exported rows; returned
+examples are capped and labelled. No database/query/write capability is added.
+
+Report v2 requires exact reconciliation of the seeded family checks. Every
+`missing_evidence` entry is now a structured gap with a check ID, family and
+availability. PRESENT evidence cannot be labelled missing. No-match is at most
+NOT_OBSERVED_IN_CAPTURE; redaction, truncation or an uncaptured producer preserves
+INCOMPLETE_CAPTURE. It never proves global or historical absence. Unknown groups
+are rejected instead of silently treated as zero records. Derived checks can
+substantiate lookup scope, but cannot replace original Owner fact citations.
+
+All checks are saved in the immutable investigation catalog for independent review.
+This still cannot validate arbitrary free-form prose or causal entailment; Human
+review is required. Existing saved v1 reports remain readable, including legacy
+string gaps; no original report or Owner record is migrated or rewritten.
+
 ## Admin and storage
 
 - POST `/api/admin/works/{id}/analyses`: explicit Human request UUID and rationale.

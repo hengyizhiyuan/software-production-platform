@@ -48,7 +48,8 @@
       `<section class="admin-panel"><h2>生产时间线</h2>${r.timeline.map(t=>`<h3>${esc(t.stage)} · ${esc(date(t.timestamp))}</h3>${fact(t)}`).join('')}</section>`+
       r.findings.map(f=>`<section class="admin-panel"><h2>${esc(f.finding_id)} · ${esc(f.classification)}</h2><p>${esc(f.epistemic_status)}</p><h3>事实</h3>${fact(f.fact)}<h3>分析</h3><p>${esc(f.analysis)}</p><h3>源码依据</h3>${f.repository_citations.map(c=>`<blockquote>${esc(c.quote)}<small>证据 ${esc(c.evidence_id)}</small></blockquote>`).join('') || '<p>UNKNOWN</p>'}<h3>不确定性</h3><p>${esc(f.uncertainty)}</p><h3>建议</h3><p>${esc(f.recommendation)}</p><h3>回归资格</h3><p>${esc(f.regression_qualification)}</p></section>`).join('')+
       [['立即恢复建议',r.immediate_recovery],['Self-Refine 机会',r.self_refine_opportunities],['平台改进机会',r.platform_improvements],['延期项',r.deferred_items]].map(([title,items])=>`<section class="admin-panel"><h2>${title}</h2>${items.map(i=>`<p>${esc(i.statement)} · 依据 ${esc(i.finding_ids.join('、'))}</p>`).join('') || '<p>无建议</p>'}</section>`).join('')+
-      `<section class="admin-panel"><h2>缺失证据</h2>${r.missing_evidence.map(x=>`<p>${esc(x)}</p>`).join('') || '<p>模型未列出；不构成完整性保证</p>'}</section>`:
+      `<section class="admin-panel"><h2>证据范围核查</h2>${(r.evidence_assessments||[]).map(x=>`<p>${esc(x.family)} · ${esc(x.availability)}：${esc(x.statement)} · 核查 ${esc(x.check_id)}</p>`).join('') || '<p>历史报告未记录结构化范围核查</p>'}</section>`+
+      `<section class="admin-panel"><h2>缺失证据</h2>${r.missing_evidence.map(x=>`<p>${esc(typeof x==='string'?x:x.statement)}${typeof x==='string'?'':` · ${esc(x.availability)} · 核查 ${esc(x.check_id)}`}</p>`).join('') || '<p>模型未列出；不构成完整性保证</p>'}</section>`:
       `<section class="admin-panel"><h2>未形成合格报告</h2><p>调查状态和已保存的模型、工具及校验记录可下载审查。</p></section>`)+evidence(a);
   }
   function navigate(section) {history.pushState({}, '', section === 'overview' ? '/admin' : `/admin/${section}`);currentRun = null;render();}
