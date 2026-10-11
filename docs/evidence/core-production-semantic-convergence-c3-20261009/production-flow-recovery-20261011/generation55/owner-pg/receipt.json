@@ -1,0 +1,57 @@
+{
+  "schema": "c3-semantic-owner-pg-regression-v1",
+  "started_at_utc": "2026-10-11T04:23:52.753975+00:00",
+  "ended_at_utc": "2026-10-11T04:37:25.816369+00:00",
+  "wall_seconds": 813.0624126419425,
+  "counts": {
+    "tests": 41,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 41
+  },
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "ae965a34af0b3103a6547b049d23ffedb961c095",
+      "tree": "db00ef2defaa6bd1877e042e72d1195e61861609"
+    },
+    "guardian": {
+      "revision": "a4a6802cba64bd069864467e4e9b8ee585c972d7",
+      "tree": "7bbc8841b0e7c4d82e81b1982cd529dd5a239635"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:8ce58441a3ee154d2cb400d424374aac1ee2876cbea229a849a717ffdd1ac659",
+  "actual_container_id": "a69c87f3c2ff6f0412eb8a94b54eb803ab31184e50374e6fd4b20f618082fd7c",
+  "actual_postgres_image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+  "actual_postgres_container_id": "a4869c21ac3f60a22e793bb0ad509962b988f0fa3598a72685021a79cd010eeb",
+  "database_name": "c1_contract_continuity",
+  "migration_head": "20261007_72",
+  "network_internal": true,
+  "nodes": [
+    "tests/integration/test_c3_fulfillment_receipts.py::test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls",
+    "tests/integration/test_c3_fulfillment_receipts.py::test_reviewed_open_current_scope_reaches_exact_candidate_and_independent_guardian",
+    "tests/integration/test_c3_fulfillment_receipts.py::test_rejected_independent_review_feedback_persists_and_replays_in_postgresql",
+    "tests/integration/test_c3_fulfillment_receipts.py::test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift",
+    "tests/integration/test_c3_fulfillment_receipts.py::test_wire_feedback_capacity_stop_is_bounded_durable_and_never_reopens",
+    "tests/integration/test_c3_fulfillment_receipts.py::test_count_plan_review_role_is_durable_in_existing_native_receipts",
+    "tests/integration/test_c1_contract_continuity.py::test_both_actual_admission_paths_reach_independent_guardian"
+  ],
+  "source_or_test_overlay": false,
+  "credentials_independently_generated": true,
+  "live_model_calls": 0,
+  "actual_ai_work_created": 0,
+  "fixture_only": true,
+  "original_database_access": false,
+  "existing_services_started": false,
+  "controller_sha256": "88cbc90f331f4576a223cf0472c5b1f727ee6e2ad230fa1ca24a7322c76c39a0",
+  "claim": "ISOLATED_PG_OWNER_PERSISTENCE_AND_STATE_REGRESSION_NOT_REAL_G0"
+}

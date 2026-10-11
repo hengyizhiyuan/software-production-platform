@@ -1,0 +1,13 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 34 items
+
+tests/test_c3_reviewed_fact_method_applicability.py .................... [ 58%]
+.                                                                        [ 61%]
+tests/test_static_protected_context_verifier.py .............            [100%]
+
+--------------------- generated xml file: /out/result.xml ----------------------
+============================= 34 passed in 44.65s ==============================

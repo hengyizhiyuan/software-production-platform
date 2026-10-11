@@ -1,0 +1,14 @@
+{
+  "exit_code": 1,
+  "wall_seconds": 39.771783743985,
+  "image_id": "sha256:c87016e8fb5f73599b633ca6bf25e4ae77fa22901d202d45684cb71e7cc02446",
+  "container_id": "d59c075557638f869d4a880cd8cca62f5e9a9301247c7d2dd8566c0a758de74c",
+  "source_overlay": true,
+  "snapshot_sha256": "14cdd2153c485e455b3eeeaaa0ed8819b4fd590feb83dd0e0921fa6bdf54b106",
+  "nodes": [
+    "tests/test_c3_reviewed_fact_method_applicability.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

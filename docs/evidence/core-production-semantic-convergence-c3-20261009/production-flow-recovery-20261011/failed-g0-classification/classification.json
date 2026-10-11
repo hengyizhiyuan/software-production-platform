@@ -1,0 +1,124 @@
+{
+  "application_source": "ae965a34af0b3103a6547b049d23ffedb961c095",
+  "image": "sha256:8ce58441a3ee154d2cb400d424374aac1ee2876cbea229a849a717ffdd1ac659",
+  "work_id": "e9846f78-be51-5909-8cb8-832429569fde",
+  "reality_id": "baf913a1-9e27-57c1-a895-c474c7112d78",
+  "inventory_fingerprint": "cfa83cddffafddc73f2cb466c22f11b598ff81085e630c8f317f2b0de1da9f6f",
+  "source_count": 27,
+  "source_snapshot_sha256": "00aa33ee38cee142946993aea691860c0d638b626052f1dbb30541b84b0b15f0",
+  "attempts": [
+    {
+      "attempt": 1,
+      "candidate_fingerprint": "d7798a122b0c32ec7704d0fb7f70272fdbaca6fa397abdd79a7bc44e8d23fb94",
+      "routes": 46,
+      "wire_output_sha256": "22f88e7ef326f8e6162a59caefbe9bd2949b8cdc499e94f1d4a48d0e3470db91",
+      "request_receipt_id": "05e5ea1f-0613-4846-a163-533c8a7ef98e",
+      "response_receipt_id": "407a996a-7ef3-4f24-9e11-029af9287881",
+      "feedback_received": false,
+      "feedback_bound": false,
+      "problems": [
+        {
+          "route": 6,
+          "source": 5,
+          "source_ref": "semantic-fact:8dfb02c7-715b-5cee-aaaf-15bb477ceb94",
+          "source_kind": "FACT",
+          "proposed_capability": "GIT_DIFF_SCOPE",
+          "code": "OBLIGATION_FACT_SCOPE_VALUE_MISMATCH",
+          "fact_relation": "SCOPE",
+          "fact_subject": "work.change_scope",
+          "fact_value_sha256": "2266667d76bff42b1a80aee6b2e7511aaca3a8655999b37e5c4ddd9bd130ccd2",
+          "fact_qualifier_keys": [],
+          "fact_qualifiers": {},
+          "route_targets": [
+            "index.html"
+          ],
+          "exact_inventory_targets": [
+            "index.html"
+          ],
+          "literal_fact_paths": [
+            "index.html only"
+          ],
+          "already_rejected_in_generation_prerequisites": {
+            "capability": 1,
+            "codes": [
+              "OBLIGATION_FACT_SCOPE_VALUE_MISMATCH"
+            ]
+          },
+          "structurally_expressible_alternatives": [
+            "ARTIFACT_CONTENT",
+            "UNRESOLVED"
+          ],
+          "alternative_semantic_equivalence": "NOT_JUDGED",
+          "not_actual_evidence": true
+        }
+      ],
+      "usage": {
+        "cached_tokens": 2176,
+        "input_tokens": 48162,
+        "output_tokens": 4263,
+        "reasoning_tokens": 0,
+        "total_tokens": 52425,
+        "unknown": false
+      }
+    },
+    {
+      "attempt": 2,
+      "candidate_fingerprint": "5f4d80e8dccfc829783edcbc153a760ee7a7a1e14dc705dc65b469f299d708b1",
+      "routes": 43,
+      "wire_output_sha256": "a573814f03f9ba46b5e77e06eb529a1ca206a9cdde33906880c033ee1fdea4ff",
+      "request_receipt_id": "ba33f34e-43d5-4499-9e17-1932cd2172a1",
+      "response_receipt_id": "85eab9d0-02ce-41cf-837c-8ad8d4f1fd93",
+      "feedback_received": true,
+      "feedback_bound": true,
+      "problems": [
+        {
+          "route": 5,
+          "source": 5,
+          "source_ref": "semantic-fact:8dfb02c7-715b-5cee-aaaf-15bb477ceb94",
+          "source_kind": "FACT",
+          "proposed_capability": "GIT_DIFF_SCOPE",
+          "code": "OBLIGATION_FACT_SCOPE_VALUE_MISMATCH",
+          "fact_relation": "SCOPE",
+          "fact_subject": "work.change_scope",
+          "fact_value_sha256": "2266667d76bff42b1a80aee6b2e7511aaca3a8655999b37e5c4ddd9bd130ccd2",
+          "fact_qualifier_keys": [],
+          "fact_qualifiers": {},
+          "route_targets": [
+            "index.html"
+          ],
+          "exact_inventory_targets": [
+            "index.html"
+          ],
+          "literal_fact_paths": [
+            "index.html only"
+          ],
+          "already_rejected_in_generation_prerequisites": {
+            "capability": 1,
+            "codes": [
+              "OBLIGATION_FACT_SCOPE_VALUE_MISMATCH"
+            ]
+          },
+          "structurally_expressible_alternatives": [
+            "ARTIFACT_CONTENT",
+            "UNRESOLVED"
+          ],
+          "alternative_semantic_equivalence": "NOT_JUDGED",
+          "not_actual_evidence": true
+        }
+      ],
+      "usage": {
+        "cached_tokens": 2560,
+        "input_tokens": 66568,
+        "output_tokens": 3924,
+        "reasoning_tokens": 0,
+        "total_tokens": 70492,
+        "unknown": false
+      }
+    }
+  ],
+  "new_model_calls": 0,
+  "historical_mutations": 0,
+  "independent_review_calls": 0,
+  "read_only_owner_proof": true,
+  "candidate_admission": false
+}

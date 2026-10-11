@@ -1,0 +1,9 @@
+{
+  "recorded_at_utc": "2026-10-11T04:37:52.891837+00:00",
+  "original_log_sha256": "74de5924622e679770a3980438c1bfe6e02c18ca072867962a5e34d62401e8e7",
+  "failure": "NEW_GITEA_NOT_READY",
+  "failure_time": "UNKNOWN",
+  "historical_root_cause": "UNKNOWN",
+  "original_stop_preserved": true,
+  "no_work_created": true
+}

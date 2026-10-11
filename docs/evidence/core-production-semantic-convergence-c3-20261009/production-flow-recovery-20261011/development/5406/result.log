@@ -1,0 +1,55 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 16 items
+
+tests/test_c3_reviewed_fact_method_applicability.py .............FF.     [100%]
+
+=================================== FAILURES ===================================
+_ test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[correct] _
+tests/test_c3_reviewed_fact_method_applicability.py:189: in test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal
+    result=verify_fulfillment_fact_routes(repository=tmp_path, request=request, contract=contract,
+src/spg/providers/managed_context_fulfillment.py:489: in verify_fulfillment_fact_routes
+    component_checks = static_verifier.verify_fulfillment_bindings(request, task, contract, repository,
+src/spg/providers/protected_context_verifier.py:116: in verify_fulfillment_bindings
+    return self.verify(request, task, contract, repository, baseline, obligations=selected,
+src/spg/providers/protected_context_verifier.py:183: in verify
+    changed = git(repository, "diff", "--name-status", baseline, revision, "--").decode()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/protected_context_verifier.py:82: in git
+    return subprocess.run(["git", "-C", str(repository), *args], check=True,
+/usr/local/lib/python3.13/subprocess.py:555: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.13/subprocess.py:1040: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+/usr/local/lib/python3.13/subprocess.py:1922: in _execute_child
+    self.pid = _fork_exec(
+E   TypeError: expected str, bytes or os.PathLike object, not SimpleNamespace
+_ test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[wrong] _
+tests/test_c3_reviewed_fact_method_applicability.py:189: in test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal
+    result=verify_fulfillment_fact_routes(repository=tmp_path, request=request, contract=contract,
+src/spg/providers/managed_context_fulfillment.py:489: in verify_fulfillment_fact_routes
+    component_checks = static_verifier.verify_fulfillment_bindings(request, task, contract, repository,
+src/spg/providers/protected_context_verifier.py:116: in verify_fulfillment_bindings
+    return self.verify(request, task, contract, repository, baseline, obligations=selected,
+src/spg/providers/protected_context_verifier.py:183: in verify
+    changed = git(repository, "diff", "--name-status", baseline, revision, "--").decode()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/protected_context_verifier.py:82: in git
+    return subprocess.run(["git", "-C", str(repository), *args], check=True,
+/usr/local/lib/python3.13/subprocess.py:555: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.13/subprocess.py:1040: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+/usr/local/lib/python3.13/subprocess.py:1922: in _execute_child
+    self.pid = _fork_exec(
+E   TypeError: expected str, bytes or os.PathLike object, not SimpleNamespace
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_reviewed_fact_method_applicability.py::test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[correct]
+FAILED tests/test_c3_reviewed_fact_method_applicability.py::test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[wrong]
+======================== 2 failed, 14 passed in 23.59s =========================

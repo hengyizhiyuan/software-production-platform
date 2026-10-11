@@ -1,0 +1,8 @@
+{
+  "controller_inputs": {
+    "c3_normal_entry.py": "fc574d8e8f335701755b4a6a8858377838eb368922141afa63e222b6964c2967",
+    "c3_export_work_snapshot.py": "e49cae9a19d01c247c77e8d159bc7094e43d09d8310e26576c5b44629a931885"
+  },
+  "change": "exact isolated service/database guards only; input and model contracts unchanged",
+  "historical_controls_preserved": true
+}

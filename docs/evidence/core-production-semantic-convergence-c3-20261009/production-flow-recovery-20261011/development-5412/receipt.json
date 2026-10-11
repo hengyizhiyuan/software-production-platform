@@ -1,0 +1,15 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 221.9272190289339,
+  "image_id": "sha256:c87016e8fb5f73599b633ca6bf25e4ae77fa22901d202d45684cb71e7cc02446",
+  "container_id": "b5317a9f8f7330d649bbcc761dcafd4be0db13b7dc8e7a31a6a35dc7faa04bfc",
+  "source_overlay": true,
+  "snapshot_sha256": "ff60bff45141a46a2959e762b1c826393bc5bd228fefc484e06a827b5fe41e22",
+  "nodes": [
+    "tests/test_c3_reviewed_fact_method_applicability.py",
+    "tests/integration/test_c3_fulfillment_receipts.py::test_reviewed_open_current_scope_reaches_exact_candidate_and_independent_guardian"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

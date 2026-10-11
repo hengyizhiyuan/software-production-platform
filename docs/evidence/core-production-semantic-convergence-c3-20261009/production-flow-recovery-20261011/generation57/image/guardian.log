@@ -1,0 +1,16 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /guardian-tests
+plugins: anyio-4.14.2
+collected 178 items
+
+tests/test_c3_reviewed_fact_method_applicability.py ...........          [  6%]
+tests/test_c3_component_calibration.py ................................. [ 24%]
+..                                                                       [ 25%]
+tests/test_c3_phase_evidence.py ........................................ [ 48%]
+...........................                                              [ 63%]
+tests/test_c1_governed_evidence_continuity.py .......................... [ 78%]
+.......................................                                  [100%]
+
+-------------------- generated xml file: /out/guardian.xml ---------------------
+======================== 178 passed in 96.69s (0:01:36) ========================

@@ -1,0 +1,12 @@
+{
+  "files": [
+    {
+      "file": "real-g0-g57/final-boundary-observation.json",
+      "sha256": "07b4172fb3d77bd18b5ea49aa125a670afbd11c21942ef535f143b62206f0705",
+      "bytes": 1790,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/final-boundary-observation.json"
+    }
+  ],
+  "archive_sha256": "f0b5f3e34e155f5a571fe71ec42229036676589143e6da2a717e5a16ce8ee389",
+  "private_artifacts_included": false
+}

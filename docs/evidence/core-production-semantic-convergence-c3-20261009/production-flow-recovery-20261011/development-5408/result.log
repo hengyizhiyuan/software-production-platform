@@ -1,0 +1,26 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 6 items
+
+tests/test_c3_reviewed_fact_method_applicability.py .F.F..               [100%]
+
+=================================== FAILURES ===================================
+_ test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[correct-False] _
+tests/test_c3_reviewed_fact_method_applicability.py:197: in test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal
+    assert result[0]['passed'] is (content == 'correct')
+E   AssertionError: assert False is ('correct' == 'correct'
+E     
+E       correct)
+_ test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[wrong-False] _
+tests/test_c3_reviewed_fact_method_applicability.py:201: in test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal
+    assert len(verification_calls)==1
+E   assert 0 == 1
+E    +  where 0 = len([])
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_reviewed_fact_method_applicability.py::test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[correct-False]
+FAILED tests/test_c3_reviewed_fact_method_applicability.py::test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[wrong-False]
+========================= 2 failed, 4 passed in 31.14s =========================

@@ -1,0 +1,12 @@
+{
+  "schema": "c3-real-g0-once-execution-v1",
+  "started_at_utc": "2026-10-11T05:14:38.008519+00:00",
+  "source": "51e41c113076711bcdc7a3ca6dd071c3cbb2eff8",
+  "image": "sha256:19b086d553e631e0c019efddbe58465cf8221d81d64c23e7dfa3c5fbcb373c4d",
+  "maximum_new_work": 1,
+  "authorization": "Human 2026-10-11: production-flow recovery; execute one real G0 on final exact source/image; preserve production/history; no Human Integration/Acceptance/Delivery authority",
+  "driver_sha256": "a099e620636879320097ee50b1e77ec2fc8dc7124100f17ad6dc23e8ffeb79fe",
+  "ended_at_utc": "2026-10-11T05:30:04.347311+00:00",
+  "exit_code": 137,
+  "qualification_claim": "OBSERVATION_ONLY_NOT_WORK_PASS"
+}

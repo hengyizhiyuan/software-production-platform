@@ -1,0 +1,157 @@
+{
+  "application_source": "881c2c303083be149594f9d79659a037853e302e",
+  "image": "sha256:5b396a0edbdf230cbe1a9b0099fa2b13b8dee2cae504b96f53af1c55e6f5d7f9",
+  "work_id": "c1c0a944-4626-5ebb-9507-9dbd8aab4974",
+  "reality_id": "a2a5f56d-0add-5bd8-aa7b-f0b83d6dd4a2",
+  "inventory_fingerprint": "6908ea702c03019f2a47adb3c90e54b124cb16358d7a609e8b19ed34724fed9b",
+  "source_count": 18,
+  "source_snapshot_sha256": "fa51683da2110c206cca363fd25acc52e956461f2f3bdfb6fd644e80dd71f18f",
+  "attempts": [
+    {
+      "attempt": 2,
+      "candidate_fingerprint": "e2c81b7b7cc3b350274105b3b471b5c4d22c228e0eb65fd73f67523ccdf51ef7",
+      "routes": 22,
+      "wire_output_sha256": "4aeaabad4fb02ff9fc812c9d9dd777898d154b76cddde7cb3d012a324faa2b8a",
+      "request_receipt_id": "4baeb97d-ffc4-46a9-bbf8-38cc30af2fc7",
+      "response_receipt_id": "760f23d1-d1fa-4c27-b040-365554ea6dda",
+      "feedback_received": true,
+      "feedback_bound": true,
+      "problems": [
+        {
+          "route": 15,
+          "source": 11,
+          "source_ref": "work-constraint:a2a5f56d-0add-5bd8-aa7b-f0b83d6dd4a2:3",
+          "source_kind": "WORK_CONSTRAINT",
+          "proposed_capability": "CANDIDATE_SEAL",
+          "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "fact_relation": null,
+          "fact_subject": null,
+          "fact_value_sha256": null,
+          "fact_qualifier_keys": [],
+          "route_targets": [
+            "index.html"
+          ],
+          "exact_inventory_targets": [
+            "index.html"
+          ],
+          "literal_fact_paths": null,
+          "already_rejected_in_generation_prerequisites": null,
+          "structurally_expressible_alternatives": [
+            "UNRESOLVED"
+          ],
+          "alternative_semantic_equivalence": "NOT_JUDGED",
+          "not_actual_evidence": true
+        },
+        {
+          "route": 21,
+          "source": 17,
+          "source_ref": "work-context:a2a5f56d-0add-5bd8-aa7b-f0b83d6dd4a2:0",
+          "source_kind": "WORK_CONTEXT",
+          "proposed_capability": "ARTIFACT_CONTENT",
+          "code": "OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT",
+          "fact_relation": null,
+          "fact_subject": null,
+          "fact_value_sha256": null,
+          "fact_qualifier_keys": [],
+          "route_targets": [
+            "index.html"
+          ],
+          "exact_inventory_targets": [
+            "index.html"
+          ],
+          "literal_fact_paths": null,
+          "already_rejected_in_generation_prerequisites": null,
+          "structurally_expressible_alternatives": [
+            "RETAIN_CONTEXT",
+            "UNRESOLVED"
+          ],
+          "alternative_semantic_equivalence": "NOT_JUDGED",
+          "not_actual_evidence": true
+        }
+      ],
+      "usage": {
+        "cached_tokens": 2432,
+        "input_tokens": 48154,
+        "output_tokens": 2605,
+        "reasoning_tokens": 0,
+        "total_tokens": 50759,
+        "unknown": false
+      }
+    }
+  ],
+  "new_model_calls": 0,
+  "historical_mutations": 0,
+  "independent_review_calls": 0,
+  "read_only_owner_proof": true,
+  "candidate_admission": false,
+  "necessary_binding_proofs": [
+    {
+      "actual_route_ordinal": 15,
+      "source_ordinal": 11,
+      "actual_capability": "CANDIDATE_SEAL",
+      "actual_support_source_ordinals": [],
+      "counterfactual_necessary_binding_only": [
+        {
+          "capability": "CANDIDATE_SEAL",
+          "support_source_ordinals": [
+            0
+          ],
+          "outcome": "NECESSARY_BINDING_ELIGIBLE_NOT_SEMANTICALLY_REVIEWED"
+        },
+        {
+          "capability": "CANDIDATE_SEAL",
+          "support_source_ordinals": [
+            1
+          ],
+          "outcome": "NECESSARY_BINDING_ELIGIBLE_NOT_SEMANTICALLY_REVIEWED"
+        },
+        {
+          "capability": "CANDIDATE_SEAL",
+          "support_source_ordinals": [
+            2
+          ],
+          "outcome": "NECESSARY_BINDING_ELIGIBLE_NOT_SEMANTICALLY_REVIEWED"
+        },
+        {
+          "capability": "CANDIDATE_SEAL",
+          "support_source_ordinals": [
+            3
+          ],
+          "outcome": "NECESSARY_BINDING_ELIGIBLE_NOT_SEMANTICALLY_REVIEWED"
+        },
+        {
+          "capability": "CANDIDATE_SEAL",
+          "support_source_ordinals": [
+            4
+          ],
+          "outcome": "NECESSARY_BINDING_ELIGIBLE_NOT_SEMANTICALLY_REVIEWED"
+        },
+        {
+          "capability": "CANDIDATE_SEAL",
+          "support_source_ordinals": [
+            5
+          ],
+          "outcome": "NECESSARY_BINDING_ELIGIBLE_NOT_SEMANTICALLY_REVIEWED"
+        }
+      ],
+      "actual_route_unchanged": true
+    },
+    {
+      "actual_route_ordinal": 21,
+      "source_ordinal": 17,
+      "actual_capability": "ARTIFACT_CONTENT",
+      "actual_support_source_ordinals": [],
+      "counterfactual_necessary_binding_only": [
+        {
+          "capability": "RETAIN_CONTEXT",
+          "support_source_ordinals": [],
+          "outcome": "NECESSARY_BINDING_ELIGIBLE_NOT_SEMANTICALLY_REVIEWED"
+        }
+      ],
+      "actual_route_unchanged": true
+    }
+  ],
+  "raw_candidate_modified": false,
+  "counterfactual_candidate_admitted": false,
+  "interpretation": "ORIGINAL_CANDIDATE_REMAINS_FAIL; EXISTING_CONTRACT_EXPRESSIBILITY_ONLY; NO_SEMANTIC_PASS"
+}

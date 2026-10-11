@@ -1,0 +1,30 @@
+{
+  "schema": "c3-final-g0-readonly-export-v1",
+  "recorded_at_utc": "2026-10-11T05:19:16.759211+00:00",
+  "work_id": "9339266e-8a99-58e6-9cda-fcf2a81594d0",
+  "product_id": "6088cd87-3dad-47d8-b255-2f45a6a9f801",
+  "runtime_identity": {
+    "api_base_url": "http://watt-c3-bindingg0g55-api-20261010:8000",
+    "api_service": "watt-c3-bindingg0g55-api-20261010",
+    "captured_at_utc": "2026-10-11T05:10:27.966781+00:00",
+    "database_name": "spg_c3_bindingg0g55_qualification_20261010",
+    "image_id": "sha256:19b086d553e631e0c019efddbe58465cf8221d81d64c23e7dfa3c5fbcb373c4d",
+    "isolated": true,
+    "model_credential_scope": "HUMAN_AUTHORIZED_SHARED_TEST",
+    "provider_ready": true,
+    "qualification": "C3",
+    "qualification_run": "final-g0",
+    "source_revision": "51e41c113076711bcdc7a3ca6dd071c3cbb2eff8"
+  },
+  "collector_exit_code": 0,
+  "private_directory": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation55-qualification-20261010/private/owner-export-20261011T051854-8d1b317367884b1c8aec6375958fe567",
+  "raw_private_file": "20261011T051901952753Z-7e4a3bc3efb34b54928b953fbed1966f-canonical-work.json",
+  "raw_private_sha256": "c02850bc25e17fe8c2395cd26fba2de57a5c9df5822fc6a1d2abe01228f08fe6",
+  "state_sha256": "1dc4f29010bceabc1e87077424831c94baf10e82460c8c98547b13c474eca765",
+  "collector_sha256": "3cb7277d7ef254e08afac2660e0a5c42710f960d1617bcea7ff8e8d7675940a4",
+  "actual_api_container_id": "aad8108af453717ece0e647d1bac780570ef32ca940f8f561ef463b5fb21d13f",
+  "actual_api_image": "sha256:19b086d553e631e0c019efddbe58465cf8221d81d64c23e7dfa3c5fbcb373c4d",
+  "model_requests": 0,
+  "work_mutations": 0,
+  "historical_owner_mutations": 0
+}

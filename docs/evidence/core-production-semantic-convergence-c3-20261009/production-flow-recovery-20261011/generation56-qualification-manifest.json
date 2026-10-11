@@ -1,0 +1,102 @@
+{
+  "files": [
+    {
+      "file": "generation56/image/actual-imports.json",
+      "sha256": "b8c9305dc16dc5c913159f48ce6179523d1acee13792d795cb63bde976186ab1",
+      "bytes": 488759,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/final-image/evidence/actual-imports.json"
+    },
+    {
+      "file": "generation56/image/actual-imports.log",
+      "sha256": "bac94ed20752a8ca7ac699454b9fb9942439c9132fea5f7a89739f13608a7a34",
+      "bytes": 215,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/final-image/evidence/actual-imports.log"
+    },
+    {
+      "file": "generation56/image/build-input-identity.json",
+      "sha256": "a3d604e91e4d5adf7b31bc5fb4c92c3100a1089d3a6a9f7a5133fce677ce88c8",
+      "bytes": 148721,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/final-image/evidence/build-input-identity.json"
+    },
+    {
+      "file": "generation56/image/build.json",
+      "sha256": "922ecf0d1ea08362211794a080df2ad3f66ed39cd69dc2c0d118fcd53cd15a02",
+      "bytes": 2364,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/final-image/evidence/build.json"
+    },
+    {
+      "file": "generation56/image/build.log",
+      "sha256": "36676ffd6848a8f7adaef579709e46193984d92b49b2741901c263b55cd08ab0",
+      "bytes": 576178,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/final-image/evidence/build.log"
+    },
+    {
+      "file": "generation56/image/frozen-inputs.json",
+      "sha256": "da58db6032bc731b5297e0c6ab2dc7fb4714c258cfe5637e880fde58d1351b49",
+      "bytes": 77438,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/final-image/evidence/frozen-inputs.json"
+    },
+    {
+      "file": "generation56/image/guardian-receipt.json",
+      "sha256": "d922418b1fd5a1eb7c214ccec159d6c00893dcdc210c99ac4eea2e0ee75e6953",
+      "bytes": 1444,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/final-image/evidence/guardian-receipt.json"
+    },
+    {
+      "file": "generation56/image/guardian.log",
+      "sha256": "28e42b5bd9e911994325583062d234bb0093adb5765c849d916172471057029d",
+      "bytes": 853,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/final-image/evidence/guardian.log"
+    },
+    {
+      "file": "generation56/image/guardian.xml",
+      "sha256": "dcb9030f73ae7ad536dc00261ef6bfaaec206e4ed92444330dfd6a0b16fe0f10",
+      "bytes": 28911,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/final-image/evidence/guardian.xml"
+    },
+    {
+      "file": "generation56/image/watt-continuation-receipt.json",
+      "sha256": "568a2d236fea6eeb08f801483a75d58edbb6b594efea497e364c9aaef062d079",
+      "bytes": 3244,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/final-image/evidence/watt-continuation-receipt.json"
+    },
+    {
+      "file": "generation56/image/watt-continuation.log",
+      "sha256": "23f5105195c287d5d98d25be35283a72b281c399c195d2720e60894d291d2d01",
+      "bytes": 3879,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/final-image/evidence/watt-continuation.log"
+    },
+    {
+      "file": "generation56/image/watt-continuation.xml",
+      "sha256": "70ef605597fb66d074d8b1954f0e7c0eae40f422a5decf456f6cf9f965e42c6e",
+      "bytes": 213423,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/final-image/evidence/watt-continuation.xml"
+    },
+    {
+      "file": "generation56/owner-pg/receipt.json",
+      "sha256": "116340685935922135ee4759be92e0993e3d18cfd50ddf3a02bbf33679027e62",
+      "bytes": 2119,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/owner-pg-generation56/evidence/receipt.json"
+    },
+    {
+      "file": "generation56/owner-pg/result.log",
+      "sha256": "a6e50b8e82a8e52367d21813ee24226115625a6655b5982ac1f183532f5f6ff9",
+      "bytes": 477,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/owner-pg-generation56/evidence/result.log"
+    },
+    {
+      "file": "generation56/owner-pg/result.xml",
+      "sha256": "d9e3ee0a1e542ca0f859c417cd9bef6fcec2788808df1c3f63f7a16e413e99b5",
+      "bytes": 1797,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/owner-pg-generation56/evidence/result.xml"
+    },
+    {
+      "file": "generation56/historical54/replay.json",
+      "sha256": "7c459825805030c82ca16b3f39305b8d755a0ddd99d7a354368e1d891a43bb24",
+      "bytes": 590,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation56-qualified-20261010/historical54-replay/evidence/replay.json"
+    }
+  ],
+  "archive_sha256": "5468e36598e41282375666b0d214f45ff90872951c6696f05fb8d029221300cf",
+  "private_artifacts_included": false
+}

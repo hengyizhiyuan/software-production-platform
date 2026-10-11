@@ -1,0 +1,11 @@
+{
+  "qualification": "EXACT_INSTALLED_IMAGE_ZERO_MODEL_HISTORICAL_TERMINAL_REPLAY",
+  "work_id": "f94d5d8b-0f9d-5046-85b5-bf206cbc2899",
+  "inventory_fingerprint": "dddddf753d0e752c80eddd6b993374dba178ddd04cd005f50cec5576335023a5",
+  "historical_terminal_reason": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+  "historical_receipts_unchanged": true,
+  "historical_marker_upgrade_rejected": true,
+  "model_calls": 0,
+  "work_mutations": 0,
+  "independent_semantic_review": false
+}

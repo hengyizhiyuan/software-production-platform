@@ -1,0 +1,53 @@
+{
+  "schema": "c3-semantic-owner-pg-regression-v1",
+  "started_at_utc": "2026-10-11T05:59:32.828197+00:00",
+  "ended_at_utc": "2026-10-11T06:02:53.675954+00:00",
+  "wall_seconds": 200.82418329501525,
+  "counts": {
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 3
+  },
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "881c2c303083be149594f9d79659a037853e302e",
+      "tree": "d5ad35dc881717d3dab99cfeefc857d0bc78d704"
+    },
+    "guardian": {
+      "revision": "88f5ac35a6d48fb1aace24f94a2100708864e0be",
+      "tree": "e9e1d88889dff69979a79e4c2638d036a1dfcc6b"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:5b396a0edbdf230cbe1a9b0099fa2b13b8dee2cae504b96f53af1c55e6f5d7f9",
+  "actual_container_id": "42c4fe6daac4023a176d7e9a916575c36357a691db16aa6c872a0df4405bf306",
+  "actual_postgres_image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+  "actual_postgres_container_id": "c2876c05875a894a7cbcb1ba88133bf45afde51fbe03ad39a664b8b162371ff6",
+  "database_name": "c1_contract_continuity",
+  "migration_head": "20261007_72",
+  "network_internal": true,
+  "nodes": [
+    "tests/integration/test_c3_fulfillment_receipts.py::test_rejected_independent_review_feedback_persists_and_replays_in_postgresql[semantic-optional-defaults]",
+    "tests/integration/test_c3_fulfillment_receipts.py::test_rejected_independent_review_feedback_persists_and_replays_in_postgresql[semantic-jsonb-order]",
+    "tests/integration/test_c3_fulfillment_receipts.py::test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls[semantic-scope-wire-defaults-work]"
+  ],
+  "source_or_test_overlay": false,
+  "credentials_independently_generated": true,
+  "live_model_calls": 0,
+  "actual_ai_work_created": 0,
+  "fixture_only": true,
+  "original_database_access": false,
+  "existing_services_started": false,
+  "controller_sha256": "ad9e95295d81c2d4408fb638f8b890e60cf8955361d2738bd866a83268bcd9fd",
+  "claim": "ISOLATED_PG_OWNER_PERSISTENCE_AND_STATE_REGRESSION_NOT_REAL_G0"
+}

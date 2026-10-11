@@ -1,0 +1,12 @@
+{
+  "first_controller_exit": 125,
+  "first_failure": "UNIQUE_CONTAINER_NAME_CONFLICT_BEFORE_PROCESS_START",
+  "original_failure_log_sha256": "0e782e679cf62efdeeed7beb09457d92a29c6f6548f7ff05ce7a0dae17dd857e",
+  "original_controller_sha256": "32e3e79cbaabcd77274c5559c47b6483324404adfaee6495dd0816e1f58b52fb",
+  "executed_program_sha256": "a8e1edff40a3fa4d82747e0bbe3bad6c8c0ef8e5ff46cb3ed63f5324f40a17ab",
+  "new_container_name": "watt-c3-g59-historical55-replay",
+  "actual_image": "sha256:5b396a0edbdf230cbe1a9b0099fa2b13b8dee2cae504b96f53af1c55e6f5d7f9",
+  "recovery_exit": 0,
+  "models": 0,
+  "old_container_modified": false
+}

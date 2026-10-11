@@ -1,0 +1,28 @@
+{
+  "recorded_at_utc": "2026-10-11T04:26:41.751037+00:00",
+  "resources": [
+    {
+      "name": "watt-c3-bindingg0g54-postgres-20261010",
+      "id": "ff5d7e591e35fdd6dda38267171c919c02a39022f765c1b31d1cf17c36cb7df8",
+      "image": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+      "running": true,
+      "started_at": "2026-10-11T03:48:09.291344641Z",
+      "production": "false"
+    },
+    {
+      "name": "watt-c3-bindingg0g54-gitea-20261010",
+      "id": "50ccb1da5f0b803ae8baef5164660f9f338a010d14e84d4e85ddf5f21bf8e203",
+      "image": "sha256:071efa747340e5e211213fc79a0b928003bedf9b6b48f61cb32b3c52bfd1e09e",
+      "running": true,
+      "started_at": "2026-10-11T03:48:30.610491045Z",
+      "production": "false"
+    }
+  ],
+  "current_gitea_health": "pass",
+  "administrator_absent": true,
+  "public_tables": 0,
+  "model_calls": 0,
+  "works_created": 0,
+  "production_modified": false,
+  "historical_gitea_delay_reason": "UNKNOWN"
+}

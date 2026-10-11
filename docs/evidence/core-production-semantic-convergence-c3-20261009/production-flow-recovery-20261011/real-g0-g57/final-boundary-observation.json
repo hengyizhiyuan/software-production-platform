@@ -1,0 +1,51 @@
+{
+  "recorded_at_utc": "2026-10-11T06:20:13.591767+00:00",
+  "production_checkout_head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+  "canonical_main_ref": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+  "qualification_roles": [
+    {
+      "role": "api",
+      "id": "a0fca9dbdcd812d1f38e3df3c7e9762e3798c8c47054939b9fa87cb0fbd5ecd6",
+      "image": "sha256:5b396a0edbdf230cbe1a9b0099fa2b13b8dee2cae504b96f53af1c55e6f5d7f9",
+      "running": true
+    },
+    {
+      "role": "coordinator",
+      "id": "b6d3facb38531dd8d087233c35397b0a5ff7c2d309891bb9456d4010eea794ac",
+      "image": "sha256:5b396a0edbdf230cbe1a9b0099fa2b13b8dee2cae504b96f53af1c55e6f5d7f9",
+      "running": true
+    },
+    {
+      "role": "worker",
+      "id": "7a405ccc41a4b4cacabc8efadaccb4e1effd985b21f9f6a5554b629bdaf108c6",
+      "image": "sha256:5b396a0edbdf230cbe1a9b0099fa2b13b8dee2cae504b96f53af1c55e6f5d7f9",
+      "running": true
+    },
+    {
+      "role": "tool-host",
+      "id": "fbada38577225e0ab8b1aa8dfab81ea1c8b728a5c6d7ee67a0ab5b18f3259a68",
+      "image": "sha256:5b396a0edbdf230cbe1a9b0099fa2b13b8dee2cae504b96f53af1c55e6f5d7f9",
+      "running": true
+    }
+  ],
+  "retained_snapshots": [
+    {
+      "generation": 54,
+      "raw_snapshot_sha256": "970cf7c2aaf47b7875addee8eaa2629f1ea7a274348e860bff36ed35600ff29d",
+      "original_retained": true
+    },
+    {
+      "generation": 55,
+      "raw_snapshot_sha256": "c02850bc25e17fe8c2395cd26fba2de57a5c9df5822fc6a1d2abe01228f08fe6",
+      "original_retained": true
+    },
+    {
+      "generation": 57,
+      "raw_snapshot_sha256": "fa51683da2110c206cca363fd25acc52e956461f2f3bdfb6fd644e80dd71f18f",
+      "original_retained": true
+    }
+  ],
+  "observer_only_stop": true,
+  "models_called_by_observer": 0,
+  "business_owner_mutations_by_observer": 0
+}

@@ -1,0 +1,13 @@
+{
+  "qualification": "EXACT_INSTALLED_IMAGE_ZERO_MODEL_HISTORICAL_TERMINAL_REPLAY",
+  "work_id": "109d783b-4632-5251-9470-276bdfa45e99",
+  "snapshot_sha256": "21fd84bd3e2995466bbc6a0a46f45900dc640b1ea960147cd437942d19ee9ee7",
+  "inventory_fingerprint": "852b025ed68014f6a7d4603d032c4526dda626b458b644a21a6be6aaca00a8fa",
+  "historical_terminal_reason": "OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED",
+  "historical_receipts_unchanged": true,
+  "historical_marker_upgrade_rejected": true,
+  "model_calls": 0,
+  "work_mutations": 0,
+  "source_overlay": false,
+  "independent_semantic_review": false
+}

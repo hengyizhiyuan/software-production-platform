@@ -1,0 +1,179 @@
+{
+  "qualification": "ZERO_MODEL_HISTORICAL_IDENTITY_AND_EXISTING_SOURCE_PROOF_ONLY",
+  "historical_wire_lineage_verified": true,
+  "historical_receipts_unchanged": true,
+  "real_model_calls": 0,
+  "work_created": false,
+  "original_work_modified": false,
+  "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+  "existing_owner_domains_identical": true,
+  "exact_derivations": [
+    {
+      "source": 13,
+      "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:0",
+      "origins": [
+        {
+          "semantic_ir_id": "c64cbc0f-1a1a-5f51-a15c-863861eda4f4",
+          "item_id": "c-only-index",
+          "field": "statement",
+          "original_value_fingerprint": "ed051fecdcdebcd911e9fa682dc2f654372e4f1f1a08b702bd167ba476d8583e",
+          "existing_admission_derivation": "CONSTRAINT_STATEMENT"
+        }
+      ],
+      "unknown": null
+    },
+    {
+      "source": 14,
+      "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:1",
+      "origins": [
+        {
+          "semantic_ir_id": "c64cbc0f-1a1a-5f51-a15c-863861eda4f4",
+          "item_id": "c-no-deploy",
+          "field": "statement",
+          "original_value_fingerprint": "04771bb5719d6f0a74d44ed5392ed4ca0910a116cd38fac8523568edd513aa63",
+          "existing_admission_derivation": "CONSTRAINT_STATEMENT"
+        }
+      ],
+      "unknown": null
+    },
+    {
+      "source": 15,
+      "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:2",
+      "origins": [
+        {
+          "semantic_ir_id": "c64cbc0f-1a1a-5f51-a15c-863861eda4f4",
+          "item_id": "pi-n1-static-page",
+          "field": "production.scope",
+          "index": 0,
+          "existing_type_contract_ref": "scope",
+          "original_value_fingerprint": "853952bc2436b6c4073b17bb974665b1044ac1b9e65df1de8e6e9bf0605e16be",
+          "existing_admission_derivation": "CURRENT_PRODUCTION_SCOPE"
+        }
+      ],
+      "unknown": null
+    },
+    {
+      "source": 16,
+      "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:3",
+      "origins": [
+        {
+          "semantic_ir_id": "c64cbc0f-1a1a-5f51-a15c-863861eda4f4",
+          "item_id": "pi-n1-static-page",
+          "field": "production.scope",
+          "index": 1,
+          "existing_type_contract_ref": "scope",
+          "original_value_fingerprint": "f7a1ba0756f9c9e3b3e322491103373da4f40694e7883beb56cf3638d1a3274f",
+          "existing_admission_derivation": "CURRENT_PRODUCTION_SCOPE"
+        }
+      ],
+      "unknown": null
+    },
+    {
+      "source": 17,
+      "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:4",
+      "origins": [
+        {
+          "semantic_ir_id": "c64cbc0f-1a1a-5f51-a15c-863861eda4f4",
+          "item_id": "pi-n1-static-page",
+          "field": "production.scope",
+          "index": 2,
+          "existing_type_contract_ref": "scope",
+          "original_value_fingerprint": "ea2baffe7f6a9da24944d4a858b7660be528ab705a5b145519cfa0f86f8fc2d0",
+          "existing_admission_derivation": "CURRENT_PRODUCTION_SCOPE"
+        }
+      ],
+      "unknown": null
+    },
+    {
+      "source": 18,
+      "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:5",
+      "origins": [
+        {
+          "semantic_ir_id": "c64cbc0f-1a1a-5f51-a15c-863861eda4f4",
+          "item_id": "pi-n1-static-page",
+          "field": "production.exclusions",
+          "index": 0,
+          "existing_type_contract_ref": "exclusions",
+          "original_value_fingerprint": "363c3e308441d6b9706d61011c239d03697b504b36ebb31edddbf96abb3f3f11",
+          "existing_admission_derivation": "EXCLUSION_WORK_CONSTRAINT_WRAPPER",
+          "derived_value_fingerprint": "0e56c5a448015596f40952dd1b90e187a4f7bda0c792076ad1c2ce64d0a21e8c"
+        }
+      ],
+      "unknown": null
+    },
+    {
+      "source": 19,
+      "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:6",
+      "origins": [
+        {
+          "semantic_ir_id": "c64cbc0f-1a1a-5f51-a15c-863861eda4f4",
+          "item_id": "pi-n1-static-page",
+          "field": "production.exclusions",
+          "index": 1,
+          "existing_type_contract_ref": "exclusions",
+          "original_value_fingerprint": "fb33338b620fa03f7e4dbd4bd22fa5181fa0d18b0e1cd28f1fbd04fa32bc3665",
+          "existing_admission_derivation": "EXCLUSION_WORK_CONSTRAINT_WRAPPER",
+          "derived_value_fingerprint": "adb999efa1155267664a80832252f8e7021455de99a0aaa9ddf68eceacc57470"
+        }
+      ],
+      "unknown": null
+    },
+    {
+      "source": 20,
+      "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:7",
+      "origins": [
+        {
+          "semantic_ir_id": "c64cbc0f-1a1a-5f51-a15c-863861eda4f4",
+          "item_id": "pi-n1-static-page",
+          "field": "production.exclusions",
+          "index": 2,
+          "existing_type_contract_ref": "exclusions",
+          "original_value_fingerprint": "3e520eecb22acfac0b7f1c0a6005b2cbe4f9b32f0fb500fe212702080d1e52d5",
+          "existing_admission_derivation": "EXCLUSION_WORK_CONSTRAINT_WRAPPER",
+          "derived_value_fingerprint": "e2ecb830eac4cc0e32cc0dbbc6a4e43dbe1d8140098d97497a89cbf734ed9f07"
+        }
+      ],
+      "unknown": null
+    },
+    {
+      "source": 21,
+      "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:8",
+      "origins": [
+        {
+          "semantic_ir_id": "c64cbc0f-1a1a-5f51-a15c-863861eda4f4",
+          "item_id": "pi-n1-static-page",
+          "field": "production.exclusions",
+          "index": 3,
+          "existing_type_contract_ref": "exclusions",
+          "original_value_fingerprint": "06828d300d921e797c1441073abe1be0bc667d46706438509464841fc1bc5fb2",
+          "existing_admission_derivation": "EXCLUSION_WORK_CONSTRAINT_WRAPPER",
+          "derived_value_fingerprint": "3bb31c2be436f9f85ae7d44e94cdb2102175c474e3253072af7ac53bf2bb9c64"
+        }
+      ],
+      "unknown": null
+    },
+    {
+      "source": 22,
+      "source_ref": "work-constraint:8eb93963-649f-5795-9cac-21f21da5a266:9",
+      "origins": [
+        {
+          "semantic_ir_id": "c64cbc0f-1a1a-5f51-a15c-863861eda4f4",
+          "item_id": "pi-n1-static-page",
+          "field": "production.exclusions",
+          "index": 4,
+          "existing_type_contract_ref": "exclusions",
+          "original_value_fingerprint": "4a2ee0036755b6cf9e8c642914feaafc958028b1b0e93fa8d91f1350976d69b4",
+          "existing_admission_derivation": "EXCLUSION_WORK_CONSTRAINT_WRAPPER",
+          "derived_value_fingerprint": "911041a3c458796d583b0e37531ea7f21fbfd415b6864a80b5e1f55ce74e9ec7"
+        }
+      ],
+      "unknown": null
+    }
+  ],
+  "prefix_observation": "COUNTERFACTUAL_ONLY_NOT_ADMITTED_OR_MODEL_SUCCESS",
+  "counterfactual_context_fingerprints": {
+    "existing-owner-preconditions-v1": "6d423ea0989d83ca3ad6c9b9e9b6b01f84c9af15214b6485c9987ca97cc29ff0",
+    "existing-owner-preconditions-v2": "7ed61ac39b433e35f3d385ec4d1613fd84f21083822e10bd250523fe2bf5a6d6"
+  },
+  "historical_contract_upgrade_rejected": "OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT"
+}

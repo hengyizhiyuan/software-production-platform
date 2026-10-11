@@ -1,0 +1,61 @@
+{
+  "role": "tool-host",
+  "name": "watt-c3-bindingg0g55-tool-host-20261010",
+  "container_id": "6b2102dc5b359615c7fcb0c82cb5aa49eec1847481eadf6dbb88b52d7a0876f8",
+  "image_id": "sha256:19b086d553e631e0c019efddbe58465cf8221d81d64c23e7dfa3c5fbcb373c4d",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation55-qualification-20261010/app",
+      "Destination": "/var/lib/spg",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "volume",
+      "Name": "watt-c3-bindingg0g55-workspaces-20261010",
+      "Source": "/data/docker/volumes/watt-c3-bindingg0g55-workspaces-20261010/_data",
+      "Destination": "/var/lib/spg/native-workspaces",
+      "Driver": "local",
+      "Mode": "z",
+      "RW": true,
+      "Propagation": ""
+    },
+    {
+      "Type": "bind",
+      "Source": "/var/run/docker.sock",
+      "Destination": "/var/run/docker.sock",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation55-qualification-20261010/receipts",
+      "Destination": "/var/lib/spg/native-tool-receipts",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "labels": {
+    "org.opencontainers.image.revision": "51e41c113076711bcdc7a3ca6dd071c3cbb2eff8",
+    "watt.c3.base-image-id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+    "watt.c3.ecf-revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "watt.c3.ecf-tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "watt.c3.ecf-unsupported-revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+    "watt.c3.guardian-revision": "b9b6c32edd9b46ac6e24035e45429134ef60c2df",
+    "watt.c3.guardian-tree": "a529a52c4b21668554653eb87e4074927fb460af",
+    "watt.c3.source-tree": "008bb88e63a909dd2ecca5cba54f9c631de0054b",
+    "watt.production": "false",
+    "watt.qualification": "C3-binding-g0"
+  },
+  "user": "10001:10001",
+  "networks": [
+    "watt-c3-bindingg0g55-control-20261010",
+    "watt-c3-bindingg0g55-executor-20261010"
+  ],
+  "ports": {},
+  "read_only_root": true
+}

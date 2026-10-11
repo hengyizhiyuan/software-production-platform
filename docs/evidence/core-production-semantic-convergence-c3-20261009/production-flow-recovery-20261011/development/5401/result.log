@@ -1,0 +1,29 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 116 items
+
+tests/test_c3_reviewed_fact_method_applicability.py ............F        [ 11%]
+tests/test_c3_generation_binding_prerequisites.py ...................... [ 30%]
+.....                                                                    [ 34%]
+tests/test_c3_source_consumption_proof.py .............................. [ 60%]
+.....                                                                    [ 64%]
+tests/test_c3_exclusion_content_correspondence.py ...............        [ 77%]
+tests/test_c3_fulfillment_components.py ..............                   [ 89%]
+tests/test_c3_static_scope_binding.py ............                       [100%]
+
+=================================== FAILURES ===================================
+_ test_existing_model_boundary_negotiates_persists_and_replays_same_contract_without_new_calls _
+tests/test_c3_reviewed_fact_method_applicability.py:126: in test_existing_model_boundary_negotiates_persists_and_replays_same_contract_without_new_calls
+    assert again == result and provider._fulfillment_receipts == frozen and len(calls) == 2
+E   AssertionError: assert ((FulfillmentB...IDENCE'), ...) == (FulfillmentB...IDENCE'), ...)
+E     
+E     At index 0 diff: FulfillmentBinding(fact_id=UUID('662070eb-2c45-454f-aceb-c3e4be5fd66f'), source_kind=<FulfillmentSourceKind.FACT: 'FACT'>, semantic_ir_id=None, constraint_item_id=None, constraint_clause_id=None, constraint_fingerprint=None, work_reality_revision_id=UUID('1ac2d51d-d606-4524-badf-dd98e0f8f2c0'), fact_fingerprint='43e63ca89aa6501825b8bdc44e28df35bb7f6e66ae42a4b5a487d68aab9a007d', provenance_fingerprint='a49bae466f75c26af7122553b8593ee267d45e79912cf003ae802166e0572573', source_record_ids=(UUID('03abe324-9f75-49fb-ae79-6d78e663581b'),), component='artifact-...
+E     
+E     ...Full output truncated (2 lines hidden), use '-vv' to show)
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_reviewed_fact_method_applicability.py::test_existing_model_boundary_negotiates_persists_and_replays_same_contract_without_new_calls
+======================== 1 failed, 115 passed in 48.45s ========================

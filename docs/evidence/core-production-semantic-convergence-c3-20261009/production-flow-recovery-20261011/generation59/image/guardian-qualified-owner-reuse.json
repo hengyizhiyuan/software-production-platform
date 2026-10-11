@@ -1,0 +1,28 @@
+{
+  "qualification": "REUSE_EXACT_UNCHANGED_INDEPENDENT_GUARDIAN_OWNER",
+  "exit_code": 0,
+  "counts": {
+    "tests": 178,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 178
+  },
+  "guardian_source": {
+    "revision": "88f5ac35a6d48fb1aace24f94a2100708864e0be",
+    "tree": "e9e1d88889dff69979a79e4c2638d036a1dfcc6b"
+  },
+  "guardian_archive_sha256": "3dd72553fe494eb821be91e3ee94b61ed1c4681d0da9ed14097734be6c2c79fa",
+  "qualification_receipt_path": "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation57-qualified-20261010/final-image/evidence/guardian-receipt.json",
+  "qualification_receipt_sha256": "9752694df048d0e817bc28ec9788a00c73e66886f9932665278bd8048e4b8ed0",
+  "qualified_owner_image": "sha256:e02fc0766a4ac28e758ef72d93c95bd4fbd4665e1a6c03019b23cb1882b0d9c3",
+  "target_image": "sha256:5b396a0edbdf230cbe1a9b0099fa2b13b8dee2cae504b96f53af1c55e6f5d7f9",
+  "target_watt_source": {
+    "revision": "881c2c303083be149594f9d79659a037853e302e",
+    "tree": "d5ad35dc881717d3dab99cfeefc857d0bc78d704"
+  },
+  "new_watt_full_regression_claim": false,
+  "new_image_178_test_execution_claim": false,
+  "current_joint_qualification_required": "owner-pg-generation59",
+  "model_calls": 0
+}

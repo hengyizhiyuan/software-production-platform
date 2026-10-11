@@ -1,0 +1,28 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 3 items
+
+tests/test_c3_reviewed_fact_method_applicability.py FFF                  [100%]
+
+=================================== FAILURES ===================================
+_ test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[correct] _
+tests/test_c3_reviewed_fact_method_applicability.py:189: in test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal
+    result=verify_fulfillment_fact_routes(repository=tmp_path, request=request, contract=contract,
+E   TypeError: verify_fulfillment_fact_routes() got an unexpected keyword argument 'static_verifier'
+_ test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[wrong] _
+tests/test_c3_reviewed_fact_method_applicability.py:189: in test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal
+    result=verify_fulfillment_fact_routes(repository=tmp_path, request=request, contract=contract,
+E   TypeError: verify_fulfillment_fact_routes() got an unexpected keyword argument 'static_verifier'
+_ test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[missing-consumer] _
+tests/test_c3_reviewed_fact_method_applicability.py:189: in test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal
+    result=verify_fulfillment_fact_routes(repository=tmp_path, request=request, contract=contract,
+E   TypeError: verify_fulfillment_fact_routes() got an unexpected keyword argument 'static_verifier'
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_reviewed_fact_method_applicability.py::test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[correct]
+FAILED tests/test_c3_reviewed_fact_method_applicability.py::test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[wrong]
+FAILED tests/test_c3_reviewed_fact_method_applicability.py::test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[missing-consumer]
+============================== 3 failed in 22.41s ==============================

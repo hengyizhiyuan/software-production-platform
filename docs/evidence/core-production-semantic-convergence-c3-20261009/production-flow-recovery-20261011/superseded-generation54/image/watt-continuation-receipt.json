@@ -1,0 +1,85 @@
+{
+  "schema": "c3-continuation-exact-image-regression-v1",
+  "started_at_utc": "2026-10-11T03:46:58.099411+00:00",
+  "ended_at_utc": "2026-10-11T03:55:00.987047+00:00",
+  "wall_seconds": 482.8876809490612,
+  "sources": {
+    "watt": {
+      "revision": "ec4fc607503f3a4c45fc1b8824ee51dce28b0434",
+      "tree": "5ce8282e5359c52784e00c3f8c1a6af6e9163cc8"
+    },
+    "guardian": {
+      "revision": "1542645d97c8a58bba48da47c99d598daf6bcd2f",
+      "tree": "6cb0e47df188ad3d9742c2384f13142f4d36a7dd"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "image_id": "sha256:64f0f93bef4ee9a644c69894b18a5723f671a07fbd3ff768da51ba3b78d94f18",
+  "actual_container_id": "a3600a5af4f51a262f6516596c3df7a293b1ec44a7a1fc8f6e359143525bbbf1",
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "junit_family=legacy",
+    "tests/test_c3_admitted_source_facets.py",
+    "tests/test_c3_evidence_projection.py",
+    "tests/test_c3_fulfillment_admission_stop.py",
+    "tests/test_c3_fulfillment_capacity_representation.py",
+    "tests/test_c3_fulfillment_components.py",
+    "tests/test_c3_fulfillment_provider_failures.py",
+    "tests/test_c3_fulfillment_repair_context.py",
+    "tests/test_c3_fulfillment_stop_projection.py",
+    "tests/test_c3_fulfillment_wire_feedback.py",
+    "tests/test_c3_greenfield_target_proof.py",
+    "tests/test_c3_owner_repair_preconditions.py",
+    "tests/test_c3_provider_http_metadata.py",
+    "tests/test_c3_semantic_contract_calibration.py",
+    "tests/test_c3_semantic_failure_continuity.py",
+    "tests/test_c3_source_role_contract.py",
+    "tests/test_c3_verification_receipts.py",
+    "tests/test_fulfillment_projection.py",
+    "tests/test_governed_obligation_fulfillment.py",
+    "tests/test_c3_generation_owner_domains.py",
+    "tests/test_c3_source_consumer_input.py",
+    "tests/test_c3_feedback_observation_capacity.py",
+    "tests/test_c3_generation_projection_economy.py",
+    "tests/test_n1_static_html_semantics.py",
+    "tests/test_c3_route_scoped_review.py",
+    "tests/test_c3_static_scope_binding.py",
+    "tests/test_c3_generation_binding_prerequisites.py",
+    "tests/test_c3_reviewer_contract_feedback.py",
+    "tests/test_c3_exclusion_content_correspondence.py",
+    "tests/test_c3_primary_context_contract.py",
+    "tests/test_c3_wire_presentation.py",
+    "tests/test_model_runtime.py",
+    "tests/test_c3_source_consumption_proof.py",
+    "tests/test_c3_reviewed_fact_method_applicability.py",
+    "-m",
+    "not real_container",
+    "--tb=short",
+    "--junitxml=/c3-evidence/watt-continuation.xml"
+  ],
+  "counts": {
+    "tests": 888,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 888
+  },
+  "exit_code": 0,
+  "source_overlay": false,
+  "live_model_calls": 0,
+  "real_ai_work_created": 0,
+  "business_database_access": false,
+  "proof_boundary": "Deterministic isolated regressions only; not real G0, Provider recovery, Guardian live Assurance, Holdout or Human Acceptance"
+}

@@ -1,0 +1,16 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 171 items
+
+tests/test_c3_reviewed_fact_method_applicability.py ...........          [  6%]
+tests/test_c3_component_calibration.py ............................      [ 22%]
+tests/test_c3_phase_evidence.py ........................................ [ 46%]
+...........................                                              [ 61%]
+tests/test_c1_governed_evidence_continuity.py .......................... [ 77%]
+.......................................                                  [100%]
+
+-------------------- generated xml file: /out/guardian.xml ---------------------
+============================= 171 passed in 53.47s =============================

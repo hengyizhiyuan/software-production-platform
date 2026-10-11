@@ -1,0 +1,43 @@
+{
+  "exit_code": 0,
+  "counts": {
+    "tests": 178,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 178
+  },
+  "started_at_utc": "2026-10-11T05:40:54.234428+00:00",
+  "ended_at_utc": "2026-10-11T05:43:02.405922+00:00",
+  "wall_seconds": 128.17544079595245,
+  "source": {
+    "watt": {
+      "revision": "f07eef6339018ea13552df958945fa756ee4bf77",
+      "tree": "6afd9bb9b99241a1336984c010d4dba20e4ecd52"
+    },
+    "guardian": {
+      "revision": "88f5ac35a6d48fb1aace24f94a2100708864e0be",
+      "tree": "e9e1d88889dff69979a79e4c2638d036a1dfcc6b"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:e02fc0766a4ac28e758ef72d93c95bd4fbd4665e1a6c03019b23cb1882b0d9c3",
+  "actual_container_id": "5d026b174e4e648b944cd03e0b9caab6f7fa331dec31e13a3d00ab73498d66af",
+  "application_source_overlay": false,
+  "test_inputs": "Exact Guardian git archive in frozen build inputs, read-only",
+  "model_calls": 0,
+  "original_db_access": false,
+  "nodes": [
+    "tests/test_c3_reviewed_fact_method_applicability.py",
+    "tests/test_c3_component_calibration.py",
+    "tests/test_c3_phase_evidence.py",
+    "tests/test_c1_governed_evidence_continuity.py"
+  ]
+}

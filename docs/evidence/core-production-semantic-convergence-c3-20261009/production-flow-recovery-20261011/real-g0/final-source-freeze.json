@@ -1,0 +1,26 @@
+{
+  "recorded_at_utc": "2026-10-11T04:37:59.803540+00:00",
+  "sources": {
+    "watt": {
+      "revision": "ae965a34af0b3103a6547b049d23ffedb961c095",
+      "tree": "db00ef2defaa6bd1877e042e72d1195e61861609"
+    },
+    "guardian": {
+      "revision": "a4a6802cba64bd069864467e4e9b8ee585c972d7",
+      "tree": "7bbc8841b0e7c4d82e81b1982cd529dd5a239635"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "image": "sha256:071efa747340e5e211213fc79a0b928003bedf9b6b48f61cb32b3c52bfd1e09e",
+  "original_resource_preparation_unchanged": true,
+  "runtime_roles_previously_absent": true,
+  "work_previously_absent": true,
+  "source_overlay": false
+}

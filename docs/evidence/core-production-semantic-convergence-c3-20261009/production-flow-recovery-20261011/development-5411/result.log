@@ -1,0 +1,39 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 4 items
+
+tests/integration/test_c3_fulfillment_receipts.py ..FF                   [100%]
+
+=================================== FAILURES ===================================
+_ test_reviewed_open_current_scope_reaches_exact_candidate_and_independent_guardian[work] _
+tests/integration/test_c3_fulfillment_receipts.py:808: in test_reviewed_open_current_scope_reaches_exact_candidate_and_independent_guardian
+    chain=c1._produce_chain(postgres_database,tmp_path,admitted);projection=c1._assess(chain)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:536: in _produce_chain
+    assert all(item.result is VerificationResultValue.PASS for item in records), [
+E   AssertionError: [{'kind': 'PATH_SCOPE', 'mode': 'contract-driven-code-verification', 'target': None, 'changed_paths': ['index.html'], ...}, {'kind': 'GIT_DIFF_CHECK', 'mode': 'contract-driven-code-verification', 'target': None, 'exit_code': 0, ...}]
+E   assert False
+E    +  where False = all(<generator object _produce_chain.<locals>.<genexpr> at 0x7f640f7cb5e0>)
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+_ test_reviewed_open_current_scope_reaches_exact_candidate_and_independent_guardian[steering] _
+tests/integration/test_c3_fulfillment_receipts.py:808: in test_reviewed_open_current_scope_reaches_exact_candidate_and_independent_guardian
+    chain=c1._produce_chain(postgres_database,tmp_path,admitted);projection=c1._assess(chain)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:536: in _produce_chain
+    assert all(item.result is VerificationResultValue.PASS for item in records), [
+E   AssertionError: [{'kind': 'PATH_SCOPE', 'mode': 'contract-driven-code-verification', 'target': None, 'changed_paths': ['index.html'], ...}, {'kind': 'GIT_DIFF_CHECK', 'mode': 'contract-driven-code-verification', 'target': None, 'exit_code': 0, ...}]
+E   assert False
+E    +  where False = all(<generator object _produce_chain.<locals>.<genexpr> at 0x7f640f7c9700>)
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/integration/test_c3_fulfillment_receipts.py::test_reviewed_open_current_scope_reaches_exact_candidate_and_independent_guardian[work]
+FAILED tests/integration/test_c3_fulfillment_receipts.py::test_reviewed_open_current_scope_reaches_exact_candidate_and_independent_guardian[steering]
+=================== 2 failed, 2 passed in 192.97s (0:03:12) ====================

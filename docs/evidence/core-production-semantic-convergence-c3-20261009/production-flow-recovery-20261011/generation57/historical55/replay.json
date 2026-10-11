@@ -1,0 +1,14 @@
+{
+  "qualification": "EXACT_INSTALLED_IMAGE_ZERO_MODEL_HISTORICAL_TERMINAL_REPLAY",
+  "work_id": "9339266e-8a99-58e6-9cda-fcf2a81594d0",
+  "snapshot_sha256": "c02850bc25e17fe8c2395cd26fba2de57a5c9df5822fc6a1d2abe01228f08fe6",
+  "inventory_fingerprint": "aaee66b12f8784559c376283de3d020f30b4602c466a746e1127f7e1ba7faf7f",
+  "historical_terminal_reason": "OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT",
+  "historical_receipts_unchanged": true,
+  "historical_terminal_preserved": true,
+  "rejected_review_reconstruction_verified": true,
+  "model_calls": 0,
+  "work_mutations": 0,
+  "source_overlay": false,
+  "independent_semantic_review": false
+}

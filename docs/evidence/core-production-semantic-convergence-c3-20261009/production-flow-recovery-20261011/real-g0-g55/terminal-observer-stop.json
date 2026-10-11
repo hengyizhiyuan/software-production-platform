@@ -1,0 +1,14 @@
+{
+  "recorded_at_utc": "2026-10-11T05:30:04.348043+00:00",
+  "work_id": "9339266e-8a99-58e6-9cda-fcf2a81594d0",
+  "automatic_stop_observed": true,
+  "terminal_receipt_id": "2f76867e-4a72-48f4-a56f-333c33ebfd34",
+  "owner_snapshot_sha256": "c02850bc25e17fe8c2395cd26fba2de57a5c9df5822fc6a1d2abe01228f08fe6",
+  "observer_container_id": "e79199ac23b8ce4d5ab6723a8aee8ac066c6f07c34fe62ea4641452a366e2798",
+  "observer_previously_running": true,
+  "action": "stop only completed trial GET observer",
+  "work_cancelled": false,
+  "api_worker_coordinator_unchanged": true,
+  "provider_interruption_claim": false,
+  "qualification_claim": "FAILED_FORMATION_NOT_WORK_PASS"
+}

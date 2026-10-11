@@ -1,0 +1,60 @@
+{
+  "role": "api",
+  "name": "watt-c3-bindingg0g57-api-20261010",
+  "container_id": "a0fca9dbdcd812d1f38e3df3c7e9762e3798c8c47054939b9fa87cb0fbd5ecd6",
+  "image_id": "sha256:5b396a0edbdf230cbe1a9b0099fa2b13b8dee2cae504b96f53af1c55e6f5d7f9",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/app",
+      "Destination": "/var/lib/spg",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "volume",
+      "Name": "watt-c3-bindingg0g57-workspaces-20261010",
+      "Source": "/data/docker/volumes/watt-c3-bindingg0g57-workspaces-20261010/_data",
+      "Destination": "/var/lib/spg/native-workspaces",
+      "Driver": "local",
+      "Mode": "z",
+      "RW": true,
+      "Propagation": ""
+    },
+    {
+      "Type": "bind",
+      "Source": "/var/run/docker.sock",
+      "Destination": "/var/run/docker.sock",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "labels": {
+    "org.opencontainers.image.revision": "881c2c303083be149594f9d79659a037853e302e",
+    "watt.c3.base-image-id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+    "watt.c3.ecf-revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "watt.c3.ecf-tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "watt.c3.ecf-unsupported-revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+    "watt.c3.guardian-revision": "88f5ac35a6d48fb1aace24f94a2100708864e0be",
+    "watt.c3.guardian-tree": "e9e1d88889dff69979a79e4c2638d036a1dfcc6b",
+    "watt.c3.source-tree": "d5ad35dc881717d3dab99cfeefc857d0bc78d704",
+    "watt.production": "false",
+    "watt.qualification": "C3-binding-g0"
+  },
+  "user": "10001:10001",
+  "networks": [
+    "watt-c3-bindingg0g57-control-20261010",
+    "watt-c3-bindingg0g57-executor-20261010"
+  ],
+  "ports": {
+    "8000/tcp": [
+      {
+        "HostIp": "127.0.0.1",
+        "HostPort": "18325"
+      }
+    ]
+  },
+  "read_only_root": true
+}

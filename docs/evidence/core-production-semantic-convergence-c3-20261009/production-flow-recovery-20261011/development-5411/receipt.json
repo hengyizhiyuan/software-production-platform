@@ -1,0 +1,15 @@
+{
+  "exit_code": 1,
+  "wall_seconds": 232.60665231698658,
+  "image_id": "sha256:c87016e8fb5f73599b633ca6bf25e4ae77fa22901d202d45684cb71e7cc02446",
+  "container_id": "8e2c4cc9e6858b7d5596271aa3942dad108357418d627ce95f16dc73edfe1904",
+  "source_overlay": true,
+  "snapshot_sha256": "4f2942ece813405b21e3d468019895a2363d493805cbd3a532d8f057265b0679",
+  "nodes": [
+    "tests/integration/test_c3_fulfillment_receipts.py::test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls",
+    "tests/integration/test_c3_fulfillment_receipts.py::test_reviewed_open_current_scope_reaches_exact_candidate_and_independent_guardian"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

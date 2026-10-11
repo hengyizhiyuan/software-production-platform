@@ -1,0 +1,144 @@
+{
+  "files": [
+    {
+      "file": "real-g0-g57/api-actual-runtime.json",
+      "sha256": "aab57e41a44b3ba2c1a6acdea2dd093351da3a268d8a6ce8dcb42db72a3d181b",
+      "bytes": 2031,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/api-actual-runtime.json"
+    },
+    {
+      "file": "real-g0-g57/api-import-attestation.json",
+      "sha256": "94a515afd3afa9f2da46d377194c1cfa08f1fda64690845d4cb7448c83c506b0",
+      "bytes": 488768,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/api-import-attestation.json"
+    },
+    {
+      "file": "real-g0-g57/bounded-recovery-observation.json",
+      "sha256": "cef1ee54a0c94b2234958b628f9f5dde7c092a97f4e8515b1217f1b0cdb6d375",
+      "bytes": 5390,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/bounded-recovery-observation.json"
+    },
+    {
+      "file": "real-g0-g57/build-reference.json",
+      "sha256": "754ed4f35a9004c561bdf949ad381861951c189d9b76ce1e08ee4baaa041bb95",
+      "bytes": 2364,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/build-reference.json"
+    },
+    {
+      "file": "real-g0-g57/coordinator-actual-runtime.json",
+      "sha256": "8cde7766d12ab8400d468a5205f4781c8335af8c40663fa4c3a74e02578ddd6e",
+      "bytes": 1757,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/coordinator-actual-runtime.json"
+    },
+    {
+      "file": "real-g0-g57/coordinator-import-attestation.json",
+      "sha256": "5fff4487657cc8de128a16b0dca18f0068c44af38ca0ed7f5671649d5c05b4a2",
+      "bytes": 488759,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/coordinator-import-attestation.json"
+    },
+    {
+      "file": "real-g0-g57/driver-runtime-identity.json",
+      "sha256": "6e1d5948e98fdfa276c3948c0a64456a3c2002568ffadd749503a2f7269e25f5",
+      "bytes": 634,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/driver-runtime-identity.json"
+    },
+    {
+      "file": "real-g0-g57/migration.json",
+      "sha256": "4d7878cc000dc5f83844ff9dc146c565b4f5ddae4310c51b41866ef750c995ad",
+      "bytes": 254,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/migration.json"
+    },
+    {
+      "file": "real-g0-g57/normal-entry-runner.json",
+      "sha256": "c40084d094795d33d86ee18c75be1787f8e2107fc8dc19248df2845683602f19",
+      "bytes": 684,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/normal-entry-runner.json"
+    },
+    {
+      "file": "real-g0-g57/owner-export-20261011T061311-331eb4a3db8f4f639328efc3152e80b3.json",
+      "sha256": "330b269f61108516e70222a5957b8c50879cd41d96d636097c923e90e0e7c27c",
+      "bytes": 1686,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/owner-export-20261011T061311-331eb4a3db8f4f639328efc3152e80b3.json"
+    },
+    {
+      "file": "real-g0-g57/preparation-gitea-stop.json",
+      "sha256": "cf3f98b1e907e3816ebe2b944caf2b1231eef8a546b648ef9dc717e125d98639",
+      "bytes": 752,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/preparation-gitea-stop.json"
+    },
+    {
+      "file": "real-g0-g57/preparation-preflight.json",
+      "sha256": "7ac1df98c91d4f8c3f25cc238ebdc521b1dc0caae73aacda423d83605f33baf8",
+      "bytes": 6758,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/preparation-preflight.json"
+    },
+    {
+      "file": "real-g0-g57/provider-config-readiness.json",
+      "sha256": "49ba3131731c633ad56ecd540464fa0a0e4d592fe2b6895d3e8232c68d545825",
+      "bytes": 318,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/provider-config-readiness.json"
+    },
+    {
+      "file": "real-g0-g57/runtime-role-preparation.json",
+      "sha256": "4ed23772cc41561b0b8013430f4cf9f8261e09e598091e6a37664e9701e73853",
+      "bytes": 9313,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/runtime-role-preparation.json"
+    },
+    {
+      "file": "real-g0-g57/safe-g0-observation-owner-export-20261011T061311-331eb4a3db8f4f639328efc3152e80b3.json",
+      "sha256": "3d3e6ab4cdc5f364cfb0ea42fee1ce0f16fac38f668abc26b4201ef6cadfc4e1",
+      "bytes": 27044,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/safe-g0-observation-owner-export-20261011T061311-331eb4a3db8f4f639328efc3152e80b3.json"
+    },
+    {
+      "file": "real-g0-g57/terminal-observer-stop.json",
+      "sha256": "fd27982ba01e1f8002d4228e7bb1c63f39951dd1c658270364cdda13cbfe4b64",
+      "bytes": 742,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/terminal-observer-stop.json"
+    },
+    {
+      "file": "real-g0-g57/tool-host-actual-runtime.json",
+      "sha256": "ab909d6b1864abd762f882e8d1c3a0ba9156f94a114e286eea25c42c049ae28f",
+      "bytes": 2222,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/tool-host-actual-runtime.json"
+    },
+    {
+      "file": "real-g0-g57/tool-host-import-attestation.json",
+      "sha256": "b58a314cae6c80aea6f1bb7c7a30a60e6c87a41fa1ae0c16320180dcb5f6ced1",
+      "bytes": 488768,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/tool-host-import-attestation.json"
+    },
+    {
+      "file": "real-g0-g57/verified-preparation-resume.json",
+      "sha256": "b25599022c0cfd0c8c05522b6e783324b49b9df4ba8f30354ba1093da6fcad74",
+      "bytes": 1439,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/verified-preparation-resume.json"
+    },
+    {
+      "file": "real-g0-g57/worker-actual-runtime.json",
+      "sha256": "872e3c7c776ba772d069abebdcbd57f84e24decfa1a7bb70c4f6c17194d5dcd1",
+      "bytes": 1747,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/worker-actual-runtime.json"
+    },
+    {
+      "file": "real-g0-g57/worker-import-attestation.json",
+      "sha256": "49c1206a772ada8803e44a8286af45b5e7eb8ea76b43094eab8b71067c89277d",
+      "bytes": 488759,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/worker-import-attestation.json"
+    },
+    {
+      "file": "real-g0-g57/worker-root-preflight.json",
+      "sha256": "f5c434459571d7f7ad742dba4f87c1aa97d0c702603fc46958f0209818458bcf",
+      "bytes": 912,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/evidence/worker-root-preflight.json"
+    },
+    {
+      "file": "real-g0-g57-classification/classification.json",
+      "sha256": "dec4f6838a4afb9e10f06f1f3aa27e843a4223d97ea7f66817a45c6216190579",
+      "bytes": 5289,
+      "persistent_source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation57-qualification-20261010/source-consumer-classification3/evidence/classification.json"
+    }
+  ],
+  "archive_sha256": "e42aa111aae8a04b3a375db0e022ae4883e5c436c3e23f5f543fb923a16b5aa5",
+  "private_artifacts_included": false
+}

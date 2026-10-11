@@ -1,0 +1,57 @@
+{
+  "schema": "c3-exact-image-build-v1",
+  "started_at_utc": "2026-10-11T03:44:15.592097+00:00",
+  "ended_at_utc": "2026-10-11T03:46:43.122863+00:00",
+  "wall_seconds": 147.53086857695598,
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "ec4fc607503f3a4c45fc1b8824ee51dce28b0434",
+      "tree": "5ce8282e5359c52784e00c3f8c1a6af6e9163cc8"
+    },
+    "guardian": {
+      "revision": "1542645d97c8a58bba48da47c99d598daf6bcd2f",
+      "tree": "6cb0e47df188ad3d9742c2384f13142f4d36a7dd"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "command": [
+    "docker",
+    "build",
+    "--network=none",
+    "--build-arg",
+    "BASE_IMAGE=watt-c3-continuation-dependency-base:6c1f48e-20261009",
+    "--build-arg",
+    "WATT_REVISION=ec4fc607503f3a4c45fc1b8824ee51dce28b0434",
+    "--build-arg",
+    "WATT_TREE=5ce8282e5359c52784e00c3f8c1a6af6e9163cc8",
+    "--build-arg",
+    "GUARDIAN_REVISION=1542645d97c8a58bba48da47c99d598daf6bcd2f",
+    "--build-arg",
+    "GUARDIAN_TREE=6cb0e47df188ad3d9742c2384f13142f4d36a7dd",
+    "--build-arg",
+    "ECF_REVISION=5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "--build-arg",
+    "ECF_TREE=878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "-f",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation54-qualified-20261010/final-image/context/watt/docs/evidence/core-production-semantic-convergence-c3-20261009/Dockerfile.c3",
+    "-t",
+    "watt-c3-source-owner:ec4fc60",
+    "/data/watt/c3-semantic-convergence-20261009/semantic-contract-implementation-20261010/g0-binding-generation54-qualified-20261010/final-image/context"
+  ],
+  "source_overlay": false,
+  "real_model_calls": 0,
+  "scope": "C3 reviewed original Fact method eligibility, current content and future Candidate Gate consumption; matched independent Guardian; unchanged historical requests, Wire schema, Authority and budget; deterministic qualification only",
+  "image": {
+    "Id": "sha256:64f0f93bef4ee9a644c69894b18a5723f671a07fbd3ff768da51ba3b78d94f18",
+    "RepoDigests": [],
+    "Created": "2026-10-11T11:46:10.283111517+08:00"
+  }
+}

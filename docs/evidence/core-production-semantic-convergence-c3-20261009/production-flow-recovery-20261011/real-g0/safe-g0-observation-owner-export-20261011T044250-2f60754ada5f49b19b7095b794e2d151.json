@@ -1,0 +1,797 @@
+{
+  "snapshot_export_error_type": null,
+  "work_id": "e9846f78-be51-5909-8cb8-832429569fde",
+  "snapshot_sha256": "00aa33ee38cee142946993aea691860c0d638b626052f1dbb30541b84b0b15f0",
+  "snapshot_private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation54-qualification-20261010/private/owner-export-20261011T044250-2f60754ada5f49b19b7095b794e2d151/20261011T044259096136Z-55262313e2d049fbbea7147cca34786d-canonical-work.json",
+  "captured_at": "2026-10-11T04:43:14.052895Z",
+  "driver_observation": {
+    "automatic_progression_state": "ACTIVE",
+    "current_production_run_id": null,
+    "current_work_reality_revision_id": "baf913a1-9e27-57c1-a895-c474c7112d78",
+    "human_attention_required": false,
+    "interaction_id": "41e10375-af9a-4788-acab-db22b1326f7c",
+    "status": "COMPLETED",
+    "turn_id": "71bc547a-b745-4316-8271-2bcbed570f82",
+    "work_complete": false,
+    "work_id": "e9846f78-be51-5909-8cb8-832429569fde",
+    "work_status": "READY"
+  },
+  "datasets": {
+    "attempt_preparations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "baseline_candidates": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "checkpoint_bundles": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "completion_evaluations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "context_packages": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "effect_receipts": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "engineering_resource_bindings": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "condition": "ACTIVE",
+          "created_at": "2026-10-11T04:41:41.969683+00:00",
+          "engineering_scope_id": "126bb6e8-9b8f-513f-b923-dd3ac54bca2c",
+          "id": "662fae35-c1ef-5f38-b337-f8bdd0494fb9",
+          "resource_id": "ea2dd2e5-e7b4-4595-bd72-f8d3f979c8ae"
+        }
+      ]
+    },
+    "engineering_resources": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:41:50.883684+00:00",
+          "id": "ea2dd2e5-e7b4-4595-bd72-f8d3f979c8ae",
+          "kind": "REPOSITORY",
+          "updated_at": "2026-10-11T04:41:50.883684+00:00"
+        }
+      ]
+    },
+    "engineering_scopes": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "condition": "ADMITTED",
+          "created_at": "2026-10-11T04:41:41.969683+00:00",
+          "id": "126bb6e8-9b8f-513f-b923-dd3ac54bca2c",
+          "updated_at": "2026-10-11T04:41:41.969683+00:00",
+          "work_id": "e9846f78-be51-5909-8cb8-832429569fde"
+        }
+      ]
+    },
+    "event_outbox": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_allocations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_attempts": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_control_requests": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_dispatches": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_effects": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_events": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_evidence": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_recovery_cases": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_resource_envelopes": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_resource_usage": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_sessions": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_source_members": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_source_vectors": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_steps": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "execution_workspaces": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "executor_leases": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "executor_queue": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "executor_worker_events": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "executor_worker_registrations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "governance_records": {
+      "query_status": "QUERIED",
+      "count": 7,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:41:41.969683+00:00",
+          "id": "4b8641e1-dc7f-5d7c-85b6-823b2c74a3b6"
+        },
+        {
+          "created_at": "2026-10-11T04:42:30.819186+00:00",
+          "id": "2ca6459c-ef40-43b9-a507-a97e4bb9b415"
+        },
+        {
+          "created_at": "2026-10-11T04:42:47.03109+00:00",
+          "id": "28909f95-4fb9-44a3-b179-5b578852fca3"
+        },
+        {
+          "created_at": "2026-10-11T04:42:48.302249+00:00",
+          "id": "f2f5d6bf-170c-4013-8455-de85e30bd317"
+        },
+        {
+          "created_at": "2026-10-11T04:42:50.66609+00:00",
+          "id": "0f79fadc-34d6-4a4a-b23c-e10c7149a676"
+        },
+        {
+          "created_at": "2026-10-11T04:43:04.141123+00:00",
+          "id": "df52294a-cabb-4e49-9491-81b75a9377dc"
+        },
+        {
+          "created_at": "2026-10-11T04:43:08.243155+00:00",
+          "id": "96439b09-845a-490e-a035-e0d977bccb49"
+        }
+      ]
+    },
+    "human_authorizations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "interaction_assessments": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:41:40.937555+00:00",
+          "id": "80562aaa-436f-492b-a6d7-9c4098b8ad08",
+          "interaction_id": "41e10375-af9a-4788-acab-db22b1326f7c"
+        }
+      ]
+    },
+    "interaction_records": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:41:19.668546+00:00",
+          "id": "888d6828-18bc-4ae2-9ca5-aa0dbeda96bb",
+          "interaction_id": "41e10375-af9a-4788-acab-db22b1326f7c"
+        }
+      ]
+    },
+    "interaction_turn_obligations": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "id": "7400c357-8172-53c2-a0ab-4abb189fc1e6",
+          "state": "SATISFIED",
+          "turn_id": "71bc547a-b745-4316-8271-2bcbed570f82"
+        }
+      ]
+    },
+    "interaction_turn_realization_refinements": {
+      "query_status": "QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "interaction_turn_realizations": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "assessment_id": "80562aaa-436f-492b-a6d7-9c4098b8ad08",
+          "semantic_ir_id": "8c6de788-2377-5059-8fe8-f0307c651800",
+          "turn_id": "71bc547a-b745-4316-8271-2bcbed570f82"
+        }
+      ]
+    },
+    "interaction_turn_semantic_envelopes": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "semantic_ir_id": "8c6de788-2377-5059-8fe8-f0307c651800",
+          "source_record_id": "888d6828-18bc-4ae2-9ca5-aa0dbeda96bb",
+          "state": "GOVERNED",
+          "turn_id": "71bc547a-b745-4316-8271-2bcbed570f82"
+        }
+      ]
+    },
+    "interaction_turns": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "assessment_id": "80562aaa-436f-492b-a6d7-9c4098b8ad08",
+          "completed_at": "2026-10-11T04:42:12.898467+00:00",
+          "created_at": "2026-10-11T04:41:19.668546+00:00",
+          "failure_code": null,
+          "id": "71bc547a-b745-4316-8271-2bcbed570f82",
+          "interaction_id": "41e10375-af9a-4788-acab-db22b1326f7c",
+          "request_record_id": "888d6828-18bc-4ae2-9ca5-aa0dbeda96bb",
+          "started_at": "2026-10-11T04:41:20.14418+00:00",
+          "status": "COMPLETED",
+          "updated_at": "2026-10-11T04:42:12.898467+00:00"
+        }
+      ]
+    },
+    "native_attempt_bindings": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "native_attempt_states": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "plan_revisions": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "product_interactions": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "condition": "OPEN",
+          "created_at": "2026-10-11T04:41:19.475676+00:00",
+          "current_work_id": "e9846f78-be51-5909-8cb8-832429569fde",
+          "id": "41e10375-af9a-4788-acab-db22b1326f7c",
+          "updated_at": "2026-10-11T04:41:41.969683+00:00"
+        }
+      ]
+    },
+    "product_managed_sources": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "product_id": "b881f69a-8d34-45a2-9847-6343d797c255",
+          "updated_at": "2026-10-11T04:41:18.74788+00:00"
+        }
+      ]
+    },
+    "product_source_promotion_intents": {
+      "query_status": "QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "product_source_versions": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:41:18.74788+00:00",
+          "id": "ded91f9a-185a-48ae-9e36-a7c583fc34ab",
+          "product_id": "b881f69a-8d34-45a2-9847-6343d797c255"
+        }
+      ]
+    },
+    "product_works": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "condition": "READY",
+          "created_at": "2026-10-11T04:41:41.969683+00:00",
+          "current_engineering_scope_id": "126bb6e8-9b8f-513f-b923-dd3ac54bca2c",
+          "current_work_reality_revision_id": "baf913a1-9e27-57c1-a895-c474c7112d78",
+          "id": "e9846f78-be51-5909-8cb8-832429569fde",
+          "product_id": "b881f69a-8d34-45a2-9847-6343d797c255",
+          "updated_at": "2026-10-11T04:42:19.414442+00:00"
+        }
+      ]
+    },
+    "product_workspace_interactions": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:41:19.493571+00:00",
+          "interaction_id": "41e10375-af9a-4788-acab-db22b1326f7c",
+          "product_id": "b881f69a-8d34-45a2-9847-6343d797c255"
+        }
+      ]
+    },
+    "production_admissibility_records": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "production_runs": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "production_snapshots": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "condition": "TRUSTED",
+          "created_at": "2026-10-11T04:41:51.159528+00:00",
+          "id": "a34adb99-ab46-46b7-be09-e056582ff0f8"
+        }
+      ]
+    },
+    "production_work_units": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "proposed_repository_snapshots": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "provider_execution_reports": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "pwu_contract_versions": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "repository_integration_effects": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "repository_observations": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "result_ready_claims": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "runtime_commits": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "self_refine_actions": {
+      "query_status": "QUERIED",
+      "count": 2,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:42:19.209576+00:00",
+          "event_id": "7c490ec0-a04d-4b33-aee3-e3b21d5856a6",
+          "id": "3a8f1f45-13fe-460a-b272-eb9e75a8d482",
+          "outcome": "RECOVERED"
+        },
+        {
+          "created_at": "2026-10-11T04:43:08.930456+00:00",
+          "event_id": "c722e51f-3050-41c0-a64f-ef1c2c0f73f0",
+          "id": "37a7bd4e-944a-47f8-bdd2-6c71be88baf9",
+          "outcome": "ESCALATED"
+        }
+      ]
+    },
+    "self_refine_events": {
+      "query_status": "QUERIED",
+      "count": 2,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:42:19.209576+00:00",
+          "id": "7c490ec0-a04d-4b33-aee3-e3b21d5856a6",
+          "operation_id": "881b82a5-51f4-4761-8648-74bdb23daacb",
+          "status": "VERIFIED",
+          "updated_at": "2026-10-11T04:42:19.209576+00:00",
+          "work_id": "e9846f78-be51-5909-8cb8-832429569fde"
+        },
+        {
+          "created_at": "2026-10-11T04:43:08.930456+00:00",
+          "id": "c722e51f-3050-41c0-a64f-ef1c2c0f73f0",
+          "operation_id": "ca170237-382c-5b3b-9cdb-b506887c7ddd",
+          "status": "MITIGATED",
+          "updated_at": "2026-10-11T04:43:08.930456+00:00",
+          "work_id": "e9846f78-be51-5909-8cb8-832429569fde"
+        }
+      ]
+    },
+    "semantic_step_results": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:42:19.414442+00:00",
+          "id": "e057f8b9-e0e5-46fd-984d-e125e15dc335",
+          "steering_plan_revision_id": "96a78b7d-8c94-4aee-9a74-89884ae1d4be",
+          "step_id": "881b82a5-51f4-4761-8648-74bdb23daacb",
+          "work_id": "e9846f78-be51-5909-8cb8-832429569fde"
+        }
+      ]
+    },
+    "software_product_assets": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:41:18.74788+00:00",
+          "id": "1b18721e-4a41-4749-b6b4-7fdbe392bcd3",
+          "product_id": "b881f69a-8d34-45a2-9847-6343d797c255",
+          "resource_id": "bc37c831-4731-4c77-aaa1-5b59eac7a4ef"
+        }
+      ]
+    },
+    "software_products": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:41:07.264038+00:00",
+          "id": "b881f69a-8d34-45a2-9847-6343d797c255",
+          "updated_at": "2026-10-11T04:41:07.264038+00:00"
+        }
+      ]
+    },
+    "steering_decisions": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:42:25.765604+00:00",
+          "current_step_id": "881b82a5-51f4-4761-8648-74bdb23daacb",
+          "id": "80c65634-512a-4bce-ab5e-0c0324c17148",
+          "steering_plan_revision_id": "96a78b7d-8c94-4aee-9a74-89884ae1d4be"
+        }
+      ]
+    },
+    "steering_history_events": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:42:25.851091+00:00",
+          "event_type": "STEP_TRANSITION",
+          "from_step_id": "881b82a5-51f4-4761-8648-74bdb23daacb",
+          "id": "5f067ceb-65ea-4eee-bd11-08811e7ffab1",
+          "steering_decision_id": "80c65634-512a-4bce-ab5e-0c0324c17148",
+          "steering_plan_id": "a571a0f4-3820-4381-8602-6c9279b59387",
+          "steering_plan_revision_id": "96a78b7d-8c94-4aee-9a74-89884ae1d4be",
+          "to_step_id": "dfc04042-f13f-42e3-ade8-0a0c26566749"
+        }
+      ]
+    },
+    "steering_plan_revisions": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "condition": "ACTIVE",
+          "created_at": "2026-10-11T04:41:53.79404+00:00",
+          "id": "96a78b7d-8c94-4aee-9a74-89884ae1d4be",
+          "steering_plan_id": "a571a0f4-3820-4381-8602-6c9279b59387",
+          "work_id": "e9846f78-be51-5909-8cb8-832429569fde"
+        }
+      ]
+    },
+    "steering_plans": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:41:53.79404+00:00",
+          "id": "a571a0f4-3820-4381-8602-6c9279b59387",
+          "work_id": "e9846f78-be51-5909-8cb8-832429569fde"
+        }
+      ]
+    },
+    "steering_steps": {
+      "query_status": "QUERIED",
+      "count": 4,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:41:53.79404+00:00",
+          "id": "5430c420-38b2-4120-9cf7-8daee2e40d00",
+          "state": "KNOWN",
+          "steering_plan_revision_id": "96a78b7d-8c94-4aee-9a74-89884ae1d4be"
+        },
+        {
+          "created_at": "2026-10-11T04:41:53.79404+00:00",
+          "id": "e0979499-7efe-4b49-ba55-fde2600644b2",
+          "state": "KNOWN",
+          "steering_plan_revision_id": "96a78b7d-8c94-4aee-9a74-89884ae1d4be"
+        },
+        {
+          "created_at": "2026-10-11T04:41:53.79404+00:00",
+          "id": "881b82a5-51f4-4761-8648-74bdb23daacb",
+          "state": "CLOSED",
+          "steering_plan_revision_id": "96a78b7d-8c94-4aee-9a74-89884ae1d4be"
+        },
+        {
+          "created_at": "2026-10-11T04:41:53.79404+00:00",
+          "id": "dfc04042-f13f-42e3-ade8-0a0c26566749",
+          "state": "CURRENT",
+          "steering_plan_revision_id": "96a78b7d-8c94-4aee-9a74-89884ae1d4be"
+        }
+      ]
+    },
+    "transition_history": {
+      "query_status": "QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "verification_records": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "work_convergence_observations": {
+      "query_status": "QUERIED",
+      "count": 2,
+      "rows": [
+        {
+          "condition": "NOT_YET_CONVERGED",
+          "created_at": "2026-10-11T04:42:20.007505+00:00",
+          "id": "80279697-de35-4966-acc6-0a5aa13fb5c3",
+          "work_id": "e9846f78-be51-5909-8cb8-832429569fde"
+        },
+        {
+          "condition": "NOT_YET_CONVERGED",
+          "created_at": "2026-10-11T04:42:27.118805+00:00",
+          "id": "b1960afa-3cdd-4f32-908a-bdd329dbff4f",
+          "predecessor_id": "80279697-de35-4966-acc6-0a5aa13fb5c3",
+          "work_id": "e9846f78-be51-5909-8cb8-832429569fde"
+        }
+      ]
+    },
+    "work_delivery_acceptances": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "work_delivery_manifests": {
+      "query_status": "QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "work_delivery_runtimes": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "work_delivery_targets": {
+      "query_status": "QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "work_product_references": {
+      "query_status": "NO_SCOPED_IDENTITIES_NOT_QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "work_reality_revisions": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:41:41.969683+00:00",
+          "engineering_resource_id": "ea2dd2e5-e7b4-4595-bd72-f8d3f979c8ae",
+          "engineering_scope_id": "126bb6e8-9b8f-513f-b923-dd3ac54bca2c",
+          "governance_record_id": "4b8641e1-dc7f-5d7c-85b6-823b2c74a3b6",
+          "id": "baf913a1-9e27-57c1-a895-c474c7112d78",
+          "source_assessment_id": "80562aaa-436f-492b-a6d7-9c4098b8ad08",
+          "source_baseline_id": "a34adb99-ab46-46b7-be09-e056582ff0f8",
+          "source_interaction_id": "41e10375-af9a-4788-acab-db22b1326f7c",
+          "work_id": "e9846f78-be51-5909-8cb8-832429569fde"
+        }
+      ]
+    },
+    "work_runtime_bindings": {
+      "query_status": "QUERIED",
+      "count": 0,
+      "rows": []
+    },
+    "work_source_bases": {
+      "query_status": "QUERIED",
+      "count": 1,
+      "rows": [
+        {
+          "created_at": "2026-10-11T04:41:51.393808+00:00",
+          "product_id": "b881f69a-8d34-45a2-9847-6343d797c255",
+          "resource_id": "ea2dd2e5-e7b4-4595-bd72-f8d3f979c8ae",
+          "work_id": "e9846f78-be51-5909-8cb8-832429569fde"
+        }
+      ]
+    }
+  },
+  "formation_events": [
+    {
+      "owner_record_id": "2ca6459c-ef40-43b9-a507-a97e4bb9b415",
+      "stage": "MODEL_REQUEST_PENDING",
+      "attempt": 1,
+      "receipt_id": "05e5ea1f-0613-4846-a163-533c8a7ef98e",
+      "inventory_fingerprint": "cfa83cddffafddc73f2cb466c22f11b598ff81085e630c8f317f2b0de1da9f6f",
+      "source_revision": "74085aa5c2ad36a34a4f98c51aa8598432db3b53"
+    },
+    {
+      "owner_record_id": "28909f95-4fb9-44a3-b179-5b578852fca3",
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "attempt": 1,
+      "receipt_id": "407a996a-7ef3-4f24-9e11-029af9287881",
+      "inventory_fingerprint": "cfa83cddffafddc73f2cb466c22f11b598ff81085e630c8f317f2b0de1da9f6f",
+      "source_revision": "74085aa5c2ad36a34a4f98c51aa8598432db3b53",
+      "model": {
+        "provider": "deepseek",
+        "request_id": "641d03b5-1270-4fb7-8e76-2ce3db066812",
+        "usage": {
+          "cached_tokens": 2176,
+          "input_tokens": 48162,
+          "output_tokens": 4263,
+          "reasoning_tokens": 0,
+          "total_tokens": 52425,
+          "unknown": false
+        },
+        "timing": {
+          "completed_seconds": 15.4118155320175,
+          "first_response_event_seconds": 1.4902699730591848,
+          "first_token_seconds": 1.7105063661001623,
+          "request_sent_seconds": 0.002700207056477666
+        },
+        "transport_retry_count": 0
+      },
+      "wire_output_fingerprint": "22f88e7ef326f8e6162a59caefbe9bd2949b8cdc499e94f1d4a48d0e3470db91",
+      "wire_output_bytes": 15243
+    },
+    {
+      "owner_record_id": "f2f5d6bf-170c-4013-8455-de85e30bd317",
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 1,
+      "receipt_id": "65f9ae1d-cf46-4bc3-8dc0-e476077bf226",
+      "inventory_fingerprint": "cfa83cddffafddc73f2cb466c22f11b598ff81085e630c8f317f2b0de1da9f6f",
+      "source_revision": "74085aa5c2ad36a34a4f98c51aa8598432db3b53",
+      "validation_passed": false,
+      "terminal": false,
+      "terminal_reason": null
+    },
+    {
+      "owner_record_id": "0f79fadc-34d6-4a4a-b23c-e10c7149a676",
+      "stage": "MODEL_REQUEST_PENDING",
+      "attempt": 2,
+      "receipt_id": "ba33f34e-43d5-4499-9e17-1932cd2172a1",
+      "inventory_fingerprint": "cfa83cddffafddc73f2cb466c22f11b598ff81085e630c8f317f2b0de1da9f6f",
+      "source_revision": "74085aa5c2ad36a34a4f98c51aa8598432db3b53"
+    },
+    {
+      "owner_record_id": "df52294a-cabb-4e49-9491-81b75a9377dc",
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "attempt": 2,
+      "receipt_id": "85eab9d0-02ce-41cf-837c-8ad8d4f1fd93",
+      "inventory_fingerprint": "cfa83cddffafddc73f2cb466c22f11b598ff81085e630c8f317f2b0de1da9f6f",
+      "source_revision": "74085aa5c2ad36a34a4f98c51aa8598432db3b53",
+      "model": {
+        "provider": "deepseek",
+        "request_id": "21cd0ac4-acb5-47d6-96e6-a3e9eefe441a",
+        "usage": {
+          "cached_tokens": 2560,
+          "input_tokens": 66568,
+          "output_tokens": 3924,
+          "reasoning_tokens": 0,
+          "total_tokens": 70492,
+          "unknown": false
+        },
+        "timing": {
+          "completed_seconds": 12.537777638994157,
+          "first_response_event_seconds": 0.8836401479784399,
+          "first_token_seconds": 1.7906634899554774,
+          "request_sent_seconds": 0.002993701957166195
+        },
+        "transport_retry_count": 0
+      },
+      "wire_output_fingerprint": "a573814f03f9ba46b5e77e06eb529a1ca206a9cdde33906880c033ee1fdea4ff",
+      "wire_output_bytes": 13984
+    },
+    {
+      "owner_record_id": "96439b09-845a-490e-a035-e0d977bccb49",
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 2,
+      "receipt_id": "ce1426d9-50cc-4ada-9a88-a85ac6ac169e",
+      "inventory_fingerprint": "cfa83cddffafddc73f2cb466c22f11b598ff81085e630c8f317f2b0de1da9f6f",
+      "source_revision": "74085aa5c2ad36a34a4f98c51aa8598432db3b53",
+      "validation_passed": false,
+      "terminal": true,
+      "terminal_reason": "OBLIGATION_FACT_SCOPE_VALUE_MISMATCH"
+    }
+  ],
+  "filesystem_owner_records": [],
+  "guardian_owner_records": [],
+  "models_called_by_observer": 0,
+  "work_mutations_by_observer": 0,
+  "qualification_claim": "OWNER_OBSERVATION_REQUIRES_ROOT_QUALIFICATION_REVIEW"
+}

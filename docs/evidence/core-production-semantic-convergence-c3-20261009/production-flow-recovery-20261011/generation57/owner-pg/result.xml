@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="3" time="116.151" timestamp="2026-10-11T05:42:15.581992+00:00" hostname="c572d09d3619"><testcase classname="tests.integration.test_c3_fulfillment_receipts" name="test_rejected_independent_review_feedback_persists_and_replays_in_postgresql[semantic-optional-defaults]" file="tests/integration/test_c3_fulfillment_receipts.py" line="169" time="46.497"><failure message="ValueError: OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT">tests/integration/test_c3_fulfillment_receipts.py:235: in test_rejected_independent_review_feedback_persists_and_replays_in_postgresql
+    _, work_id, revision, ir, _, baseline, pwu = c1._admit_c1(postgres_database, tmp_path, 'work')
+                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:478: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py:150: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py:1537: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+E   ValueError: OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT</failure></testcase><testcase classname="tests.integration.test_c3_fulfillment_receipts" name="test_rejected_independent_review_feedback_persists_and_replays_in_postgresql[semantic-jsonb-order]" file="tests/integration/test_c3_fulfillment_receipts.py" line="169" time="20.458" /><testcase classname="tests.integration.test_c3_fulfillment_receipts" name="test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls[semantic-scope-wire-defaults-work]" file="tests/integration/test_c3_fulfillment_receipts.py" line="85" time="13.232"><failure message="ValueError: OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT">tests/integration/test_c3_fulfillment_receipts.py:143: in test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls
+    admitted = c1._admit_c1(postgres_database, tmp_path, admission)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_c1_contract_continuity.py:478: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py:150: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py:1537: in validate_fulfillment_projection
+    raise ValueError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+E   ValueError: OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT</failure></testcase></testsuite></testsuites>

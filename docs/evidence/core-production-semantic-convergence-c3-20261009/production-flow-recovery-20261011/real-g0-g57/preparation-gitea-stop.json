@@ -1,0 +1,18 @@
+{
+  "recorded_at_utc": "2026-10-11T05:46:35.636401+00:00",
+  "original_stop": "NEW_GITEA_NOT_READY",
+  "original_controller_sha256": "c9d60e586cfda1801fd83f1947785c058d13f9e0b94daf39947641aeae03731a",
+  "actual_container_id": "4e0145916d71a7ea2406ec1ddb50e91d354ac93b7e9543b29476ccce67594032",
+  "actual_image_id": "sha256:071efa747340e5e211213fc79a0b928003bedf9b6b48f61cb32b3c52bfd1e09e",
+  "started_at": "2026-10-11T05:42:25.244034635Z",
+  "restarts": 0,
+  "oom_killed": false,
+  "current_readonly_health_exit_code": 0,
+  "current_health_status": "pass",
+  "work_created": false,
+  "model_requests": 0,
+  "migration_started": false,
+  "original_startup_cause": "UNKNOWN",
+  "wait_budget_modified": false,
+  "resources_restarted_or_recreated": false
+}

@@ -1,0 +1,58 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 91 items
+
+tests/test_c3_reviewed_fact_method_applicability.py .............FF.     [ 17%]
+tests/test_c3_semantic_contract_calibration.py ......................... [ 45%]
+...............                                                          [ 61%]
+tests/test_c3_source_consumption_proof.py .............................. [ 94%]
+.....                                                                    [100%]
+
+=================================== FAILURES ===================================
+_ test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[correct] _
+tests/test_c3_reviewed_fact_method_applicability.py:189: in test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal
+    result=verify_fulfillment_fact_routes(repository=tmp_path, request=request, contract=contract,
+src/spg/providers/managed_context_fulfillment.py:489: in verify_fulfillment_fact_routes
+    component_checks = static_verifier.verify_fulfillment_bindings(request, task, contract, repository,
+src/spg/providers/protected_context_verifier.py:115: in verify_fulfillment_bindings
+    selected = self._derived_obligations(bindings, request.decision_context_fingerprint)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/protected_context_verifier.py:133: in _derived_obligations
+    selected.append(ProtectedContextObligation(context_class="DERIVED_VERIFICATION_OBLIGATION",
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for ProtectedContextObligation
+E   package_fingerprint
+E     String should match pattern '^[0-9a-f]{64}$' [type=string_pattern_mismatch, input_value='controlled-component', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.13/v/string_pattern_mismatch
+_ test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[wrong] _
+tests/test_c3_reviewed_fact_method_applicability.py:189: in test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal
+    result=verify_fulfillment_fact_routes(repository=tmp_path, request=request, contract=contract,
+src/spg/providers/managed_context_fulfillment.py:489: in verify_fulfillment_fact_routes
+    component_checks = static_verifier.verify_fulfillment_bindings(request, task, contract, repository,
+src/spg/providers/protected_context_verifier.py:115: in verify_fulfillment_bindings
+    selected = self._derived_obligations(bindings, request.decision_context_fingerprint)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/providers/protected_context_verifier.py:133: in _derived_obligations
+    selected.append(ProtectedContextObligation(context_class="DERIVED_VERIFICATION_OBLIGATION",
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for ProtectedContextObligation
+E   package_fingerprint
+E     String should match pattern '^[0-9a-f]{64}$' [type=string_pattern_mismatch, input_value='controlled-component', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.13/v/string_pattern_mismatch
+=============================== warnings summary ===============================
+tests/test_c3_semantic_contract_calibration.py::test_negative_file_component_preserves_original_exclusion_and_requires_real_diff
+  /opt/spg-venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_c3_reviewed_fact_method_applicability.py::test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[correct]
+FAILED tests/test_c3_reviewed_fact_method_applicability.py::test_reviewed_mixed_fact_uses_exact_current_component_without_claiming_future_seal[wrong]
+=================== 2 failed, 89 passed, 1 warning in 30.47s ===================
