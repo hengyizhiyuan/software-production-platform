@@ -175,13 +175,14 @@ class EvidenceCatalog:
                 "items": [{k: v for k, v in row.items() if k != "body"}
                           | {"excerpt": row["body"][:300]} for row in selected]}
 
-    def read(self, evidence_id: str, offset=0, limit=16000):
+    def read(self, evidence_id: str, offset=0, limit=16000, *, _observe=True):
         if offset < 0 or limit < 1 or limit > 24000:
             raise ValueError("read requires offset >= 0 and 1 <= limit <= 24000")
         row = self.records[evidence_id]
-        self.observed.add(evidence_id)
         body = row["body"]
-        self.observed_excerpts.setdefault(evidence_id, []).append(body[offset:offset + limit])
+        if _observe:
+            self.observed.add(evidence_id)
+            self.observed_excerpts.setdefault(evidence_id, []).append(body[offset:offset + limit])
         return {k: v for k, v in row.items() if k != "body"} | {
             "content": body[offset:offset + limit], "offset": offset,
             "total_characters": len(body), "next_offset":
@@ -450,32 +451,37 @@ class EvidenceCatalog:
         groups = {}
         for row in self.records.values():
             groups[row["group"]] = groups.get(row["group"], 0) + 1
-        initial = [self.read(row["evidence_id"], limit=6000)
-                   for row in self.records.values()
-                   if row["group"] in {"capture", "work", "intent", "limits"}]
-        used = len(text(initial))
-        counts = {}
-        for row in self.records.values():
-            group = row["group"]
-            important = (group in {"self_refine_events", "baseline_candidates", "work_delivery_acceptances", "runtime_commits"}
-                         or (group in {"execution_steps", "effect_receipts"} and row["condition"] == "FAILED"))
-            if not important or counts.get(group, 0) >= 3 or used > 28000:
-                continue
-            counts[group] = counts.get(group, 0) + 1
-            if len(row["body"]) <= 4000:
-                parts = [self.read(row["evidence_id"], limit=4000)]
-            else:
-                parts = [self.read(row["evidence_id"], limit=2000),
-                         self.read(row["evidence_id"], offset=len(row["body"]) - 2000, limit=2000)]
-            initial.extend(parts)
-            used += len(text(parts))
         work_id = next(eid for eid, row in self.records.items() if row["group"] == "work")
-        return {"snapshot_digest": self.digest, "groups": groups,
+        # The Work inspection already returns its original fields. Avoid copying
+        # the same body twice, and reserve room inside the existing ECF budget
+        # for repository provenance and Human focus. Omitted evidence is pageable.
+        initial = [self.read(row["evidence_id"], limit=2000)
+                   for row in self.records.values()
+                   if row["group"] in {"capture", "intent", "limits"}]
+        seed = {"snapshot_digest": self.digest, "groups": groups,
                 "initial_inspections": [self.inspect(work_id)],
                 "evidence_reality": self.reality(),
                 "initial_evidence": initial,
                 "selection_policy": "Identity/limits plus bounded failure, refinement and final-owner excerpts. Omitted records remain pageable; excerpts are not a completeness claim.",
                 "rule": "Use evidence.index/read to investigate owners, failed steps, receipts, contracts, context and recovery. Counts are projections, not deduplicated execution totals."}
+        counts = {}
+        for row in list(self.records.values()):
+            group = row["group"]
+            important = (group in {"self_refine_events", "baseline_candidates", "work_delivery_acceptances", "runtime_commits"}
+                         or (group in {"execution_steps", "effect_receipts"} and row["condition"] == "FAILED"))
+            if not important or counts.get(group, 0) >= 3:
+                continue
+            reads = [(0, 4000)] if len(row["body"]) <= 4000 else [(0, 2000), (len(row["body"]) - 2000, 2000)]
+            # A prospective excerpt must not count as read if it cannot be
+            # included in the context actually returned to the model.
+            parts = [self.read(row["evidence_id"], offset=offset, limit=limit, _observe=False)
+                     for offset, limit in reads]
+            if len(text(dict(seed, initial_evidence=initial + parts))) > 44000:
+                continue
+            counts[group] = counts.get(group, 0) + 1
+            initial.extend(self.read(row["evidence_id"], offset=offset, limit=limit)
+                           for offset, limit in reads)
+        return seed
 
     def validate(self, report: AnalysisReport):
         if str(report.work_id) != str(self.snapshot["work_id"]):

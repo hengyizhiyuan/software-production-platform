@@ -834,3 +834,22 @@ def test_unrelated_owner_gap_cannot_be_attached_to_another_subject():
     f.update(scope_check_ids=[check["check_id"]], analysis=check["bounded_conclusion"])
     with pytest.raises(ValueError, match="CHECK_OWNER_SCOPE_NOT_ASSOCIATED_WITH_FINDING"):
         c.validate(AnalysisReport.model_validate(r))
+
+
+def test_seed_stays_in_context_budget_and_does_not_observe_omitted_bodies():
+    from spg.infrastructure.trace_analysis_evidence import text
+    snap = snapshot()
+    owners = snap["lifecycle"]["advanced"]["owners"]
+    owners["self_refine_events"] = [
+        {"id": str(uuid4()), "diagnostic_evidence": {"payload": "x" * 12000},
+         "condition": "FAILED", "marker": "only-original-" + str(uuid4())}
+        for _ in range(20)]
+    catalog = EvidenceCatalog(snap)
+    seed = catalog.seed()
+    assert len(text(seed)) <= 44000
+    returned = {part["evidence_id"] for part in seed["initial_evidence"]}
+    omitted = [eid for eid, row in catalog.records.items()
+               if row["group"] == "self_refine_events" and eid not in returned]
+    assert omitted
+    assert not any(eid in catalog.observed for eid in omitted)
+    assert catalog.index(group="self_refine_events")["total"] == 20
