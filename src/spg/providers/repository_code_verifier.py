@@ -223,7 +223,8 @@ class RepositoryCodeVerifier:
                     repository=dispatch.workspace.repository_path, request=request, contract=contract,
                     references=work_unit.completion_contract.semantic_fact_obligations,
                     admitted_facts=admitted_facts, revision=admitted_revision, ir=admitted_ir,
-                    baseline=source, bindings=gate_bindings, plan_repair=plan_repair)
+                    baseline=source, bindings=gate_bindings, plan_repair=plan_repair,
+                    static_verifier=self.context_verifier, task=work_unit.completion_contract.task_contract, receipt_recorder=receipt_recorder)
                 if gate_bindings:
                     from spg.application.governed_obligations import evaluate_continuous_gates
                     semantic_checks = evaluate_continuous_gates(

@@ -732,9 +732,20 @@ def _capability_tuple(name):
     return route
 
 
+_FACT_METHOD_APPLICABILITY = "existing-reviewed-fact-method-applicability-v1"
+
+
+def _fact_method_arguments(preconditions, candidate=None):
+    return dict(fact_method_applicability_contract=(preconditions or {}).get("fact_method_applicability_contract"),
+        current_content_fact_refs=tuple(r.source_ref for r in candidate.routes
+            if r.capability == "ARTIFACT_CONTENT" and r.component_basis is not None)
+            if candidate is not None else ())
+
+
 def _projection_binding(revision, ir, inventory, route, *, reviewed_background_refs=(),
                         allow_calibrated=False, background_components=(), source_contract="v2",
-                        source_consumption_contract=None, exclusion_content_contract=None):
+                        source_consumption_contract=None, exclusion_content_contract=None,
+                        fact_method_applicability_contract=None, current_content_fact_refs=()):
     source = next((item for item in inventory["sources"] if item["source_ref"] == route.source_ref), None)
     if source is None:
         raise ValueError("OBLIGATION_SOURCE_REFERENCE_SUBSTITUTED")
@@ -817,6 +828,9 @@ def _projection_binding(revision, ir, inventory, route, *, reviewed_background_r
             source_record_ids=records, source_quote=quote, **common)
     if source["kind"] == "FACT":
         fact = next(fact for fact in revision.engineering_semantic_facts if str(fact.id) == source["fact_id"])
+        reviewed_method = (fact_method_applicability_contract == _FACT_METHOD_APPLICABILITY
+            and source_contract == "v3" and source_consumption_contract == _SOURCE_CONSUMPTION_CONTRACT
+            and allow_calibrated and route.component_basis is not None)
         if phase is FulfillmentPhase.CONTINUOUS_FROM_ADMISSION:
             # A Boolean Fact alone cannot invent the effect's semantic identity.
             # Bind new continuous routes to the admitted typed clause instead.
@@ -826,7 +840,11 @@ def _projection_binding(revision, ir, inventory, route, *, reviewed_background_r
         from spg.domain.engineering_semantics import SemanticRelation, SemanticReferenceRole
         if state == "RETAINED_CONTEXT" and not _fact_context_retention_eligible(fact):
             raise ValueError("OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY")
-        if phase in {FulfillmentPhase.CANDIDATE_SEAL, FulfillmentPhase.HUMAN_INTEGRATION, FulfillmentPhase.DELIVERY} and fact.relation is not SemanticRelation.ACCEPTANCE_ASSERTION:
+        additional_seal = (reviewed_method and phase is FulfillmentPhase.CANDIDATE_SEAL
+            and bool(ir.current_production) and fact.qualifiers.get("negated") is not True)
+        if additional_seal and route.source_ref not in current_content_fact_refs:
+            raise ValueError("OBLIGATION_SEAL_CURRENT_CONTRIBUTION_MISSING")
+        if phase in {FulfillmentPhase.CANDIDATE_SEAL, FulfillmentPhase.HUMAN_INTEGRATION, FulfillmentPhase.DELIVERY} and fact.relation is not SemanticRelation.ACCEPTANCE_ASSERTION and not additional_seal:
             raise ValueError("OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED")
         if state != "UNRESOLVED":
             if (fact.relation is SemanticRelation.SCOPE and fact.qualifiers.get("negated") is True
@@ -853,14 +871,14 @@ def _projection_binding(revision, ir, inventory, route, *, reviewed_background_r
         # v3 keeps arbitrary admitted qualifiers unchanged for independent
         # component Review; v1/v2 retain their exact historical restrictions.
         if (source_contract == "v3" and allow_calibrated and route.component_basis is not None
-                and fact.relation is SemanticRelation.SCOPE and method == "EXACT_GIT_DIFF_SCOPE"
+                and (fact.relation is SemanticRelation.SCOPE or reviewed_method) and method == "EXACT_GIT_DIFF_SCOPE"
                 and original_scope_paths is None and not _fact_prohibition_sources(
                     revision, ir, inventory, fact, route, source_contract=source_contract)):
             from spg.domain.governed_obligation import literal_file_scope_value_paths
-            original_scope_paths = literal_file_scope_value_paths(fact)
+            original_scope_paths = literal_file_scope_value_paths(fact, proposed_method=reviewed_method)
             if original_scope_paths is not None and tuple(route.target_paths) != tuple(original_scope_paths):
                 raise ValueError("OBLIGATION_FACT_SCOPE_VALUE_MISMATCH")
-        method_failure = _fact_evidence_method_failure(fact, method)
+        method_failure = _fact_evidence_method_failure(fact, method, reviewed_method=reviewed_method)
         if method_failure:
             raise ValueError(method_failure)
         if method == "EXACT_GIT_DIFF_SCOPE":
@@ -929,11 +947,13 @@ def _fact_context_retention_eligible(fact):
         and fact.reference_role is SemanticReferenceRole.EXTERNAL_REFERENCE)
 
 
-def _fact_evidence_method_failure(fact, method):
+def _fact_evidence_method_failure(fact, method, *, reviewed_method=False):
     """Typed Owner prerequisites shared by admission and repair observations."""
     from spg.domain.engineering_semantics import SemanticRelation, SemanticReferenceRole
     if method == "EXACT_GIT_DIFF_SCOPE" and fact.relation is not SemanticRelation.SCOPE:
-        return "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH"
+        from spg.domain.governed_obligation import literal_file_scope_value_paths
+        if not reviewed_method or literal_file_scope_value_paths(fact, proposed_method=True) is None:
+            return "OBLIGATION_FACT_EVIDENCE_METHOD_MISMATCH"
     if method == "EXACT_PRODUCT_SOURCE_IDENTITY" and (
             fact.relation is not SemanticRelation.REFERENCE
             or fact.reference_role is not SemanticReferenceRole.PROJECT_REPOSITORY):
@@ -1305,7 +1325,8 @@ def _projection_dependency_observations(candidate, revision, ir, inventory, *, s
             reviewed_background_refs=background, allow_calibrated=route.component_basis is not None,
             background_components=partial, source_contract=source_contract,
             source_consumption_contract=(owner_preconditions or {}).get("review_source_consumption_contract"),
-            exclusion_content_contract=(owner_preconditions or {}).get("exclusion_content_contract")) for route in candidate.routes)
+            exclusion_content_contract=(owner_preconditions or {}).get("exclusion_content_contract"),
+            **_fact_method_arguments(owner_preconditions, candidate)) for route in candidate.routes)
     except ValueError:
         return None
     return linked_component_dependency_failures(revision.engineering_semantic_facts, bindings)
@@ -1395,7 +1416,8 @@ def validate_projection_candidate(candidate, revision, ir, inventory, *, semanti
         reviewed_background_refs=reviewed_background_refs, allow_calibrated=route.component_basis is not None,
         background_components=partial_background, source_contract=source_contract,
         source_consumption_contract=(owner_preconditions or {}).get("review_source_consumption_contract"),
-                    exclusion_content_contract=(owner_preconditions or {}).get("exclusion_content_contract")) for route in candidate.routes)
+                    exclusion_content_contract=(owner_preconditions or {}).get("exclusion_content_contract"),
+            **_fact_method_arguments(owner_preconditions, candidate)) for route in candidate.routes)
     if (owner_preconditions or {}).get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v11":
         from spg.providers.managed_context_fulfillment import linked_component_dependency_failures
         dependency_failures = linked_component_dependency_failures(revision.engineering_semantic_facts, bindings)
@@ -1590,7 +1612,8 @@ def projection_validation_feedback(candidate, revision, ir, inventory, primary_e
                 _projection_binding(revision, ir, inventory, route, reviewed_background_refs=background,
                     allow_calibrated=route.component_basis is not None, background_components=partial, source_contract=source_contract,
                     source_consumption_contract=(owner_preconditions or {}).get("review_source_consumption_contract"),
-            exclusion_content_contract=(owner_preconditions or {}).get("exclusion_content_contract"))
+            exclusion_content_contract=(owner_preconditions or {}).get("exclusion_content_contract"),
+                    **_fact_method_arguments(owner_preconditions, candidate))
             except ValueError as error:
                 add(stable(error), index)
             basis = route.component_basis
@@ -2100,13 +2123,20 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                                 review_input_contract=None, semantic_selection_input_contract=None,
                                 generation_prerequisite_contract=None, source_context_contract=None,
                                 wire_presentation_contract=None, review_source_consumption_contract=None,
-                                exclusion_content_contract=None):
+                                exclusion_content_contract=None, fact_method_applicability_contract=None):
     """Necessary proof sets from existing Owner predicates, never route proposals.
 
     The semantic boundary still chooses components and which eligible origin
     actually proves their meaning. Structural eligibility is not equivalence,
     evidence satisfaction, independent review or authority.
     """
+    if fact_method_applicability_contract not in (None, _FACT_METHOD_APPLICABILITY):
+        raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
+    if fact_method_applicability_contract is not None and (
+            typed_prerequisite_contract != "existing-owner-typed-prerequisites-v11"
+            or review_input_contract != "existing-admission-source-comparison-input-v5"
+            or review_source_consumption_contract != _SOURCE_CONSUMPTION_CONTRACT):
+        raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     if source_context_contract not in (None, _PRIMARY_CONTEXT_CONTRACT):
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     if exclusion_content_contract not in (None, "existing-current-exclusion-content-correspondence-v1"):
@@ -2254,14 +2284,16 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                 if source["kind"] == "FACT":
                     row["original_fact_type"] = {"relation": fact.relation.value,
                         "reference_role": fact.reference_role.value if fact.reference_role else None}
-                    failure = _fact_evidence_method_failure(fact, method)
+                    failure = _fact_evidence_method_failure(fact, method, reviewed_method=fact_method_applicability_contract == _FACT_METHOD_APPLICABILITY)
                     if failure:
                         codes.append(failure)
                     if (typed_prerequisite_contract in {"existing-owner-typed-prerequisites-v2", "existing-owner-typed-prerequisites-v3", "existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"}
                             and method == "RETAIN_AUTHORITATIVE_CONTEXT" and not _fact_context_retention_eligible(fact)):
                         codes.append("OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY")
                     if (phase in {FulfillmentPhase.CANDIDATE_SEAL, FulfillmentPhase.HUMAN_INTEGRATION,
-                                  FulfillmentPhase.DELIVERY} and fact.relation.value != "ACCEPTANCE_ASSERTION"):
+                                  FulfillmentPhase.DELIVERY} and fact.relation.value != "ACCEPTANCE_ASSERTION"
+                            and not (fact_method_applicability_contract == _FACT_METHOD_APPLICABILITY
+                                and phase is FulfillmentPhase.CANDIDATE_SEAL)):
                         codes.append("OBLIGATION_CURRENT_FACT_CANNOT_BE_DEFERRED")
                 if (source["kind"] == "WORK_CONSTRAINT"
                         and not any(p["capability"] == cap_index for p in proofs)
@@ -2300,7 +2332,9 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                         try:
                             _projection_binding(revision, ir, inventory, probe,
                                 allow_calibrated=True, source_contract=source_contract,
-                                source_consumption_contract=review_source_consumption_contract)
+                                source_consumption_contract=review_source_consumption_contract,
+                                fact_method_applicability_contract=fact_method_applicability_contract,
+                                current_content_fact_refs=(source["source_ref"],))
                             break
                         except ValueError as error:
                             code = re.search(r"\bOBLIGATION_[A-Z0-9_]+\b", str(error))
@@ -2312,6 +2346,13 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
     return {"contract": "existing-owner-source-prerequisites-v1", "inventory_fingerprint": inventory["inventory_fingerprint"],
         **({"source_context_contract": source_context_contract} if source_context_contract is not None else {}),
         **({"exclusion_content_contract": exclusion_content_contract} if exclusion_content_contract is not None else {}),
+        **({"fact_method_applicability_contract": fact_method_applicability_contract,
+            "fact_method_applicability_rule": "These are candidate method prerequisites, not evidence or semantic approval. "
+                "A non-SCOPE Fact with literal safe path values may propose exact Git Diff on the unchanged Fact; "
+                "independent source/component consumption Review must prove meaning. A Seal component requires "
+                "the SAME Fact's current content consumer and actual Candidate Owner gate. This cannot defer "
+                "current content, authorize Human actions, reinterpret relations or replace current prohibitions."}
+           if fact_method_applicability_contract is not None else {}),
         **({"wire_presentation_contract": wire_presentation_contract} if wire_presentation_contract is not None else {}),
         **({"review_source_consumption_contract": review_source_consumption_contract}
            if review_source_consumption_contract is not None else {}),
@@ -2581,7 +2622,8 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
                 exact_fact_bindings.append(_projection_binding(revision, ir, inventory, route,
                     allow_calibrated=True, source_contract=source_contract,
                     source_consumption_contract=(owner_preconditions or {}).get("review_source_consumption_contract"),
-            exclusion_content_contract=(owner_preconditions or {}).get("exclusion_content_contract")))
+            exclusion_content_contract=(owner_preconditions or {}).get("exclusion_content_contract"),
+                    **_fact_method_arguments(owner_preconditions, diagnostic_view)))
             except ValueError:
                 continue
         dependencies = linked_component_dependencies(revision.engineering_semantic_facts, exact_fact_bindings)
@@ -2845,7 +2887,8 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     source_context_contract=preconditions.get("source_context_contract"),
                     wire_presentation_contract=preconditions.get("wire_presentation_contract"),
                     review_source_consumption_contract=preconditions.get("review_source_consumption_contract"),
-                    exclusion_content_contract=preconditions.get("exclusion_content_contract"))
+                    exclusion_content_contract=preconditions.get("exclusion_content_contract"),
+                    fact_method_applicability_contract=preconditions.get("fact_method_applicability_contract"))
             except ValueError as error:
                 # An individually known marker can still form an invalid
                 # restored contract combination. Preserve the existing
@@ -3381,7 +3424,8 @@ def _unresolved_bindings_have_owner_methods(candidate, revision, ir, inventory, 
                     _projection_binding(revision, ir, inventory, probe,
                         allow_calibrated=probe.component_basis is not None, source_contract=source_contract,
                         source_consumption_contract=preconditions.get("review_source_consumption_contract"),
-                        exclusion_content_contract=preconditions.get("exclusion_content_contract"))
+                        exclusion_content_contract=preconditions.get("exclusion_content_contract"),
+                    fact_method_applicability_contract=preconditions.get("fact_method_applicability_contract"))
                 except ValueError:
                     continue
                 found = True
@@ -3524,6 +3568,8 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                         if initial_request is not None else _SOURCE_CONSUMPTION_CONTRACT
                         if getattr(provider, "supports_source_consumption_proof", False) else None),
                     exclusion_content_contract=((initial_request.get("owner_source_preconditions") or {}).get("exclusion_content_contract")
+                        if initial_request is not None else None),
+                    fact_method_applicability_contract=((initial_request.get("owner_source_preconditions") or {}).get("fact_method_applicability_contract")
                         if initial_request is not None else None))}
                     if supports_preconditions and callable(metadata_builder)
                     and "owner_preconditions" in inspect.signature(metadata_builder).parameters else {})
@@ -3556,7 +3602,8 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                                 "semantic_selection_input_contract", "generation_prerequisite_contract",
                                 "source_context_contract", "wire_presentation_contract",
                                 "review_source_consumption_contract")},
-                            exclusion_content_contract="existing-current-exclusion-content-correspondence-v1")
+                            exclusion_content_contract="existing-current-exclusion-content-correspondence-v1",
+                            fact_method_applicability_contract=_FACT_METHOD_APPLICABILITY)
                         precondition_arguments["owner_preconditions"] = actual_preconditions
                     source_contract = ("v3" if precondition_arguments["owner_preconditions"].get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v2" if precondition_arguments["owner_preconditions"].get(
                         "typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v1")

@@ -448,7 +448,8 @@ def linked_component_dependency_failures(facts, bindings):
 
 
 def verify_fulfillment_fact_routes(*, repository, request, contract, references,
-        admitted_facts, revision, ir, baseline, bindings, plan_repair):
+        admitted_facts, revision, ir, baseline, bindings, plan_repair,
+        static_verifier=None, task=None, receipt_recorder=None):
     """Consume typed projected Fact roles while preserving all current checks.
 
     Legacy requests retain their existing checker. A disposition is not evidence
@@ -463,7 +464,31 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
         if str(binding.fact_id) == str(reference.fact_id)) for reference in references}
     dependencies = linked_component_dependencies(references, bindings)
     linked_components = set(dependencies)
-    content = tuple(reference for reference in references if str(reference.fact_id) not in linked_components and any(
+    # A reviewed mixed Fact has a current content contribution and a separate
+    # pending Candidate gate. Consume its exact current component through the
+    # existing content Owner, never ask a static checker to prove future Seal.
+    from spg.application.governed_obligations import (
+        _FACT_METHOD_APPLICABILITY, validate_fulfillment_projection)
+    receipt = (bindings[0].formation_receipt or {}) if bindings else {}
+    negotiated = any((row.get("owner_source_preconditions") or {}).get(
+        "fact_method_applicability_contract") == _FACT_METHOD_APPLICABILITY
+        for row in receipt.get("candidate_attempts", ()) if row.get("stage") == "MODEL_REQUEST_PENDING")
+    component_facts = {identity for identity, routes in routes_by_fact.items()
+        if negotiated and identity not in linked_components
+        and any(b.phase.value == "CANDIDATE_SEAL" for b in routes)
+        and any(b.phase.value == "CURRENT_VERIFICATION" and b.evidence_method == "EXACT_CANDIDATE_CONTENT"
+            and b.component_basis is not None for b in routes)}
+    component_checks = ()
+    if component_facts:
+        validate_fulfillment_projection(bindings, revision, ir,
+            source_revision=contract.source_revision,
+            exact_target_paths=tuple(t.path for t in contract.exact_targets))
+        current_components = tuple(b for b in bindings if str(b.fact_id) in component_facts
+            and b.phase.value == "CURRENT_VERIFICATION" and b.evidence_method == "EXACT_CANDIDATE_CONTENT")
+        if static_verifier is not None and task is not None and static_verifier.supports(contract):
+            component_checks = static_verifier.verify_fulfillment_bindings(request, task, contract, repository,
+                contract.source_revision, bindings=current_components, receipt_recorder=receipt_recorder)
+    content = tuple(reference for reference in references if str(reference.fact_id) not in linked_components | component_facts and any(
         binding.evidence_method == "EXACT_CANDIDATE_CONTENT" and binding.phase.value == "CURRENT_VERIFICATION"
         for binding in routes_by_fact[str(reference.fact_id)]))
     checked = verify_static_html_semantic_facts(repository, request.proposed_commit_identity,
@@ -514,6 +539,14 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
                     and revision.source_revision == baseline.repository_revision
                     and revision.repository_identity == baseline.repository_identity
                     and revision.repository_ref == baseline.repository_ref)
+            elif binding.evidence_method == "EXACT_CANDIDATE_CONTENT" and identity in component_facts:
+                observed = [row for row in component_checks if row.get("binding") == binding.model_dump(mode="json")]
+                satisfied = len(observed) == 1 and observed[0].get("coverage") == "COVERED"
+                evaluations.append(satisfied)
+                if len(observed) == 1:
+                    component_evidence.append({**observed[0], "passed": satisfied,
+                        "evidence_method": "EXACT_CANDIDATE_SOURCE_WITNESS",
+                        "source_revision": contract.source_revision})
             elif binding.evidence_method == "EXACT_CANDIDATE_CONTENT" and identity in linked_components:
                 proof = _linked_fact_current_evidence(binding, result)
                 evaluations.append(proof is not None and proof["passed"])

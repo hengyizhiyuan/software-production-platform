@@ -341,14 +341,17 @@ def exact_file_scope_paths(fact_or_reference, *, qualified=False) -> tuple[str, 
     return paths
 
 
-def literal_file_scope_value_paths(fact_or_reference) -> tuple[str, ...] | None:
+def literal_file_scope_value_paths(fact_or_reference, *, proposed_method=False) -> tuple[str, ...] | None:
     """Observe literal Scope values, without judging any qualifier semantics.
 
     This is not exclusive-scope evidence or authority. A calibrated consumer
     must independently review the unchanged qualifiers before admitting its
     proposed exclusive-diff meaning.
     """
-    if getattr(fact_or_reference.relation, "value", fact_or_reference.relation) != "SCOPE":
+    # A reviewed method proposal may observe original literal operands without
+    # changing the admitted relation. This is not a semantic file-scope grant.
+    # Unmarked historical callers retain the original typed SCOPE contract.
+    if not proposed_method and getattr(fact_or_reference.relation, "value", fact_or_reference.relation) != "SCOPE":
         return None
     value = fact_or_reference.value
     values = (value,) if isinstance(value, str) else tuple(value) if isinstance(value, (tuple, list)) else None

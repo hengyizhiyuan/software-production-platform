@@ -83,6 +83,78 @@ class NeverCallAgain:
         raise AssertionError("A sealed same-basis receipt must be replayed without another model call")
 
 
+@pytest.mark.parametrize('admission', ('work', 'steering'))
+def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls(postgres_database, tmp_path, monkeypatch, admission):
+    import json
+    from copy import deepcopy
+    from types import SimpleNamespace
+    from spg.domain.engineering_semantics import SemanticRelation
+    from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+    from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+    from tests.integration import test_c1_contract_continuity as c1
+    from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+    from tests.test_c3_semantic_contract_calibration import review
+    meaning = c1.DeclaredC1Meaning
+    declared = c1.DeclaredC1Fulfillment()
+    class OriginalBoundMeaning(meaning):
+        def interpret(self, basis):
+            candidate = super().interpret(basis)
+            original = candidate.semantic_fact_candidates[0]
+            bound = original.model_copy(update={'candidate_id': 'controlled-file-bound',
+                'subject': 'controlled.repository.bound', 'relation': SemanticRelation.BOUND,
+                'value': 'index.html', 'scope': None, 'qualifiers': {}, 'source_text': c1.CONSTRAINTS[0]})
+            return candidate.model_copy(update={'semantic_fact_candidates': (*candidate.semantic_fact_candidates, bound)})
+    monkeypatch.setattr(c1, 'DeclaredC1Meaning', OriginalBoundMeaning)
+    calls = []
+    def generate(**request):
+        payload = json.loads(request['input_text']); calls.append(payload)
+        inv = _restore_formation_inventory_view(payload['immutable_inventory'], payload.get('existing_ir_item_table', {}))
+        if 'untrusted_fulfillment_candidate' in payload:
+            plan = decode_review_input(payload)
+            output = fixture_review_proof(inv, plan, review(inv, plan), payload).model_dump_json()
+        else:
+            plan = declared.form(inv, payload['existing_capability_contracts'])
+            bounded = {s['source_ref'] for s in inv['sources'] if s['kind'] == 'FACT' and s['payload']['relation'] == 'BOUND'}
+            routes = tuple(r.model_copy(update={'capability': 'GIT_DIFF_SCOPE', 'component_basis':
+                r.component_basis.model_copy(update={'linked_fact_refs': ()})}) if r.source_ref in bounded
+                else r.model_copy(update={'component_basis': r.component_basis.model_copy(update={
+                    'linked_fact_refs': tuple(ref for ref in r.component_basis.linked_fact_refs if ref not in bounded)})})
+                for r in plan.routes)
+            plan = plan.model_copy(update={'routes': routes})
+            wire, _ = controlled_wire(inv, plan, owner_preconditions=payload.get('owner_source_preconditions'))
+            output = json.dumps(wire)
+        return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
+            requested_model='controlled-original-bound', effective_model='controlled-original-bound',
+            request_id=f'controlled-original-bound-{len(calls)}', usage=ModelUsage(), timing=ModelTiming(), retry_count=0)
+    provider = ModelFulfillmentCandidateProvider(lambda: SimpleNamespace(generate=generate, close=lambda: None))
+    monkeypatch.setattr(c1, 'DeclaredC1Fulfillment', lambda: provider)
+    admitted = c1._admit_c1(postgres_database, tmp_path, admission)
+    _, work_id, revision, ir, _, baseline, pwu = admitted
+    original = next(f for f in revision.engineering_semantic_facts if f.relation is SemanticRelation.BOUND)
+    binding = next(b for b in pwu.completion_contract.fulfillment_bindings if b.fact_id == original.id)
+    assert binding.evidence_method == 'EXACT_GIT_DIFF_SCOPE' and binding.state == 'BOUND_PENDING_EVIDENCE'
+    assert len(calls) == 2
+    inv = binding.projection_inventory_fingerprint
+    with postgres_database.unit_of_work() as uow:
+        before = deepcopy([r.scope for r in RuntimeStore(uow.session).governance_for_subject(inv)])
+        assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
+    replay = form_fulfillment_projection(revision, ir, provider=NeverCallAgain(), database=postgres_database,
+        source_revision=baseline.repository_revision, exact_target_paths=('index.html',))
+    assert all(b.state != 'UNRESOLVED' for b in replay)
+    with postgres_database.unit_of_work() as uow:
+        after = [r.scope for r in RuntimeStore(uow.session).governance_for_subject(inv)]
+        assert after == before
+        assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
+
+
+    chain = c1._produce_chain(postgres_database, tmp_path, admitted)
+    projection = c1._assess(chain)
+    assert projection['gate'] == 'PASS', projection
+    assert chain.candidate.proposed_commit_identity != baseline.repository_revision
+    with postgres_database.unit_of_work() as uow:
+        assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
+
+
 @pytest.mark.parametrize('first_failure', ('semantic', 'semantic-jsonb-order', 'semantic-framed', 'incomplete', 'critic-schema', 'critic-json', 'consumption-proof', 'critic-duplicate'))
 def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql(postgres_database, tmp_path, monkeypatch, first_failure):
     import json
