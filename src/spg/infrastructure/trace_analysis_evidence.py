@@ -696,12 +696,30 @@ class EvidenceCatalog:
                             "EXACT_IMPLEMENTATION_READ" for c in finding.repository_citations)):
                 errors.append(CitationRejected("ROOT_CAUSE_REQUIRES_IMPLEMENTATION_EXCERPT; use repository.read for surrounding producer control flow or retain UNKNOWN; search only locates code and a final diff cannot establish its mechanism", ["findings", index, "repository_citations"], subject_id))
         findings = {f.finding_id: f for f in report.findings}
+        def diagnostic_without_failure_observation(finding):
+            subject = self.records.get(str(finding.subject_evidence_id), {})
+            if subject.get("semantics", {}).get("surface") != "OWNER_REFINEMENT_DIAGNOSIS":
+                return False
+            return not any(str(c.evidence_id) in self.observed
+                and self.records.get(str(c.evidence_id), {}).get("group") in
+                    {"execution_steps", "execution_effects", "effect_receipts"}
+                and isinstance(self.values.get(str(c.evidence_id)), dict)
+                and self.values[str(c.evidence_id)].get("condition") == "FAILED"
+                for c in finding.fact.citations)
+        historical_interruption = re.compile(
+            r"(?:观察到|本次|此次|已发生|发生了).{0,100}(?:中断|执行失败|执行被拒|生产失败)|"
+            r"\b(?:observed|occurred|this\s+(?:work|run)).{0,100}\b(?:interrupt\w*|execution\s+failures?)\b", re.I)
+        for index, finding in enumerate(report.findings):
+            if diagnostic_without_failure_observation(finding) and historical_interruption.search(finding.fact.statement):
+                errors.append(CitationRejected("REFINEMENT_DIAGNOSIS_CANNOT_ESTABLISH_EXECUTION_INTERRUPTION; cite its own associated failed execution observation or describe the recorded diagnosis only", ["findings", index, "fact", "statement"], finding.subject_evidence_id))
         for section in ("immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"):
             for index, item in enumerate(getattr(report, section)):
                 for fid in item.finding_ids:
                     subject = self.records.get(str(findings[fid].subject_evidence_id))
                     if not subject or item.evidence_family.value not in subject["semantics"]["families"]:
                         errors.append(CitationRejected("RECOMMENDATION_FAMILY_REQUIRES_FINDING_SUBJECT_SURFACE; split unrelated topics", [section, index, "finding_ids"], findings[fid].subject_evidence_id))
+                    if diagnostic_without_failure_observation(findings[fid]) and historical_interruption.search(item.statement):
+                        errors.append(CitationRejected("REFINEMENT_DIAGNOSIS_CANNOT_ESTABLISH_EXECUTION_INTERRUPTION; split observed execution failures from metadata-only diagnoses", [section, index, "statement"], findings[fid].subject_evidence_id))
         # Keep observational absence in canonical checked fields everywhere,
         # including hypotheses/recommendations, rather than only the gap footer.
         prose = [((list(name) if isinstance(name, tuple) else [name]) + ["statement"], fact.statement)
@@ -1071,6 +1089,16 @@ class AnalysisTools:
                     if len(encoded) <= 2000 and feedback_bytes + len(encoded) <= 8000:
                         issue["rejected_value"] = public_report_candidate(value)
                         feedback_bytes += len(encoded)
+                    location = issue.get("location", [])
+                    if len(location) >= 3 and location[0] == "timeline" and isinstance(location[1], int):
+                        # Return the exact retained entry so a model can replace
+                        # coupled time fields together, without another full-draft
+                        # read. This is proposal context, never an Owner fact or edit.
+                        context = public_report_candidate(candidate["timeline"][location[1]])
+                        encoded = text(context).encode()
+                        if len(encoded) <= 2000 and feedback_bytes + len(encoded) <= 8000:
+                            issue["rejected_context"] = {"path": "/timeline/" + str(location[1]), "value": context}
+                            feedback_bytes += len(encoded)
             condition = EffectCondition.FAILED
             if identity.startswith("analysis."):
                 self.verification_receipts.append(output)

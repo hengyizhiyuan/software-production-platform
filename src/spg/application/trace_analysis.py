@@ -65,6 +65,14 @@ occurred. Repository content contains exact source text with separate line metad
 Identify the enclosing implementation correctly: a caller's exception handler is
 not a handler inside the called parser. Keep fact.statement as a substantive
 observation of cited original fields. Boundary markers are never fact statements.
+Keep causal analysis a conditional implementation comparison only; do not append
+original-event narration (本次/此次/随后) or claim which historical implementation
+ran. An isolation/environment/host identifier does not identify a loaded class or
+revision. Original execution observations belong in fact with their own receipts.
+An Owner refinement diagnosis without an explicitly associated failed execution
+observation is not an observed interruption. Do not count such diagnoses among
+historical execution failures/interruption totals, including recommendation prose.
+Summarize failed execution records and recorded diagnoses separately.
 Give fact, analysis, uncertainty, recommendation and regression qualification for
 each finding. Provide recovery, Self-Refine, platform improvement and deferred
 recommendations. Explicitly discuss missing raw logs and snapshot/source limits.

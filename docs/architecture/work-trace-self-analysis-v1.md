@@ -286,3 +286,14 @@ Root cause hypotheses require an observed exact implementation excerpt from repo
 Causal mechanisms now require surrounding implementation text from repository.read; search is a locator, and neither a lone signal-name match nor a net diff qualifies. Causal prose describes failure/recording conditions only; recovery actions belong to proposals or separately evidenced facts. Facts cannot retain named uncited original Owner records after rejected citations are removed. Positive settled/completed execution records require an EXECUTION timeline entry. Regression proposals must preserve distinct implementation branches and their reason codes; natural-language relevance still needs independent review.
 
 Original plan-history/PWU records require a PLANNING timeline entry; their target IDs are exposed in initial context. This distinguishes recorded planning from actual settled execution and prevents silent loss of an observed stage. Implementation feedback directs repository.read of surrounding control flow; search alone remains a locator.
+
+Causal hypotheses remain conditional implementation comparisons. They cannot append
+historical execution narration or infer a loaded implementation from an isolation,
+environment or host label; original-event observations belong in cited facts.
+A refinement diagnosis cannot be counted as an observed execution interruption in
+facts or recommendations without its own cited, explicitly associated failed
+execution observation. Other findings' receipts cannot supply that authority.
+These conservative prose checks complement independent semantic review; they do
+not establish full linguistic entailment. Timeline rejection feedback can include
+the bounded exact retained draft entry so the model can explicitly revise coupled
+time fields together. The verifier does not alter the draft or invent Owner facts.

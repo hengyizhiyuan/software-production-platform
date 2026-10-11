@@ -127,6 +127,11 @@ class Finding(AnalysisRecord):
             raise ValueError("CAUSAL_HYPOTHESIS_MUST_BE_EXPLICIT; begin analysis with 假设：若, state a conditional mechanism, and do not promote diagnoses or repair plans to performed actions")
         if self.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and re.search(r"重做|重新生成|重新推理|替代配方|\b(?:regenerat\w*|retr(?:y|ied|ies)|replacement\s+recipe)\b", self.analysis, re.I):
             raise ValueError("CAUSE_MECHANISM_CANNOT_ASSERT_RECOVERY_ACTION; describe only the failure/recording condition here. Proposed recovery belongs in recommendations; performed recovery needs its own original fact receipts.")
+        if self.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and re.search(
+                r"本次|此次|随后|实际(?:执行|运行|加载|使用)|历史(?:执行|运行|加载|使用)|"
+                r"\bthis\s+(?:work|run|incident)\b|\b(?:then|actually)\s+(?:executed|loaded|used)\b",
+                self.analysis, re.I):
+            raise ValueError("CAUSE_MECHANISM_CANNOT_NARRATE_HISTORICAL_EXECUTION; keep analysis a conditional implementation comparison. Put original-event observations in cited facts; an isolation/host label does not identify historical loaded code.")
         if self.regression_qualification != REGRESSION_CRITERIA[self.classification]:
             raise ValueError("REGRESSION_CRITERION_MUST_MATCH_GOVERNED_OUTCOME: " + REGRESSION_CRITERIA[self.classification])
         if self.scope_check_ids and (self.classification != IssueClass.UNKNOWN or self.epistemic_status != "UNKNOWN"):

@@ -1158,3 +1158,57 @@ def test_original_planning_records_cannot_be_omitted_from_timeline(group):
         c.materialize_boundaries(AnalysisReport.model_validate(r))
     c.read(eid);r["timeline"].insert(0,{"stage":"PLANNING","statement":"Recorded planning objective", "citations":[{"evidence_id":eid,"quote":"arbitrary objective"}]})
     c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+@pytest.mark.parametrize("phrase", ["本次隔离标识与该实现一致", "执行器随后使用该分类", "this incident used that implementation"])
+def test_conditional_mechanism_cannot_append_historical_implementation_narration(phrase):
+    c=EvidenceCatalog(snapshot());r=report(c)
+    r["findings"][0].update(epistemic_status="ROOT_CAUSE_HYPOTHESIS",
+        analysis="假设：若输入命中该条件，则实现会拒绝该请求。"+phrase,
+        repository_citations=[{"evidence_id":str(uuid4()),"quote":"implementation"}])
+    with pytest.raises(ValueError,match="CAUSE_MECHANISM_CANNOT_NARRATE_HISTORICAL_EXECUTION"):
+        AnalysisReport.model_validate(r)
+
+
+@pytest.mark.parametrize("section", ["immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"])
+def test_metadata_only_diagnosis_cannot_borrow_other_findings_interruption(section):
+    c=EvidenceCatalog(snapshot());r=report(c)
+    eid=c.add("self_refine_events","/fixture/diagnosis",{"id":str(uuid4()),"signal":"ARBITRARY_DIAGNOSIS","status":"VERIFIED"})
+    inspected=c.inspect(eid)
+    r["findings"][0].update(subject_evidence_id=eid,inspection_id=inspected["inspection_id"],
+        uncertainty="INSPECTED_OWNER_BOUNDARY",fact={"statement":"Recorded diagnostic label", "citations":[{"evidence_id":eid,"quote":"ARBITRARY_DIAGNOSIS"}]})
+    r[section]=[{"statement":"本次观察到的中断已恢复", "evidence_family":"OWNER_RECORD", "finding_ids":["missing-raw"]}]
+    with pytest.raises(ValueError,match="REFINEMENT_DIAGNOSIS_CANNOT_ESTABLISH_EXECUTION_INTERRUPTION"):
+        c.materialize_boundaries(AnalysisReport.model_validate(r))
+    r[section][0]["statement"]="Owner 诊断记录为 VERIFIED；后续核查真实执行收据。"
+    c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+def test_explicit_failed_receipt_can_support_its_own_diagnosis_interruption():
+    c,events,receipts=associated_incident_catalog();r=report(c);i=c.inspect(events[0]);f=r["findings"][0]
+    f.update(subject_evidence_id=events[0],inspection_id=i["inspection_id"],uncertainty="INSPECTED_OWNER_BOUNDARY",
+        fact={"statement":"Recorded diagnostic and explicitly associated failed receipt", "citations":[
+            {"evidence_id":events[0],"quote":"SAME_FAILURE"},{"evidence_id":receipts[0],"quote":"FAILED"}]})
+    r["immediate_recovery"]=[{"statement":"本次观察到的执行失败有其自身收据", "evidence_family":"OWNER_RECORD", "finding_ids":["missing-raw"]}]
+    c.materialize_boundaries(AnalysisReport.model_validate(r))
+    f["fact"]["citations"].pop()
+    with pytest.raises(ValueError,match="REFINEMENT_DIAGNOSIS_CANNOT_ESTABLISH_EXECUTION_INTERRUPTION"):
+        c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+def test_time_rejection_returns_bounded_exact_draft_entry_without_changing_it():
+    from types import SimpleNamespace
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());r=report(c)
+    eid=c.add("self_refine_events","/fixture/diagnosis",{"id":str(uuid4()),"created_at":"2026-10-05T12:00:00+00:00","status":"VERIFIED"});c.read(eid)
+    entry={"stage":"RECOVERY_REFINEMENT","statement":"Owner recorded VERIFIED", "citations":[{"evidence_id":eid,"quote":"VERIFIED"}],
+        "timestamp":"2026-10-05T12:00:00+00:00","timestamp_evidence_id":eid,"timestamp_field":"created_at","time_interpretation":"ORIGINAL_OWNER_TIME_BOUNDARY"}
+    r["timeline"]=[entry]
+    tools=AnalysisTools(c,{})
+    req=SimpleNamespace(delivery_id=uuid4(),proposal=SimpleNamespace(tool_identity="analysis.submit",arguments={"report":r}))
+    result=asyncio.run(tools.execute(req))
+    issue=next(i for i in result.output["issues"] if i.get("reason","").startswith("TIMELINE_CREATION"))
+    assert issue["rejected_context"]=={"path":"/timeline/0","value":entry}
+    assert tools.drafts[result.output["draft_id"]]["timeline"][0]==entry
+    assert tools.accepted_report is None
+    assert sum(len(json.dumps(i.get(k),ensure_ascii=False).encode()) for i in result.output["issues"] for k in ["rejected_value","rejected_context"] if k in i)<8500
