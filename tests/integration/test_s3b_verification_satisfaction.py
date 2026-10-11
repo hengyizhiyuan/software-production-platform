@@ -465,7 +465,7 @@ def test_corrected_verifier_version_appends_proof_without_rewriting_failed_subje
         broken = projection.runtime_summary(SimpleNamespace(
             work_unit_id=facts.spine.work_unit.id, production_run_id=facts.spine.run.id))
         assert broken.verification_results[0] == "UNKNOWN"
-        assert store.verification_record(failed.id) == failed
+        assert RuntimeStore(uow.session).verification_record(failed.id) == failed
 
 
 def test_s3b_10_missing_verification_blocks_satisfaction(
