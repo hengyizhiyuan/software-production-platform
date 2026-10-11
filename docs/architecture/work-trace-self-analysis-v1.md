@@ -120,6 +120,25 @@ This still cannot validate arbitrary free-form prose or causal entailment; Human
 review is required. Existing saved v1 reports remain readable, including legacy
 string gaps; no original report or Owner record is migrated or rewritten.
 
+### Owner association and conclusion boundaries (report v3)
+
+New reports bind every finding to an observed original `subject_evidence_id`.
+The fact must cite that subject; additional fact citations require an explicit
+Owner reference, the same Owner identity, or the same capture metadata. Shared
+Work, attempt, component, error text or timestamp alone does not establish a link.
+Related-record hints do not mark their bodies read or establish causality.
+
+Captured-field gaps must copy the exact bounded check conclusion and link to an
+UNKNOWN finding with the same scope. Owner refinement diagnoses and expected or
+rejected behaviors are distinguished from execution receipts. Causal hypotheses
+must be explicitly labelled and conditional; missing rejected candidate contents
+remain UNKNOWN. Regression criteria require governed recovery or termination;
+specific scenarios are recorded separately, without requiring zero future model
+failures. These gates do not prove arbitrary free-form semantic entailment.
+
+Saved v1/v2 reports remain readable. See the [association repair qualification](work-trace-self-analysis-association-repair-20261011.md)
+for original Owner reconciliation, live historical analysis and remaining limits.
+
 ## Admin and storage
 
 - POST `/api/admin/works/{id}/analyses`: explicit Human request UUID and rationale.
