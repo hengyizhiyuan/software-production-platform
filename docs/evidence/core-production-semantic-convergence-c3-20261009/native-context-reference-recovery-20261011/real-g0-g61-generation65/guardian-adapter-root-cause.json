@@ -1,0 +1,26 @@
+{
+  "schema": "c3-guardian-adapter-qualified-proof-diagnosis-v1",
+  "captured_at_utc": "2026-10-11T13:19:59.167215+00:00",
+  "source_revision": "518fcf9f07c7ddfc9672dde431419af0412d58ed",
+  "actual_image_id": "sha256:b0b7899e2c66a2135b90d0a7b9c8419e3fa937d587d23061f0d20a4e6ab7cbe4",
+  "work_id": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "candidate_id": "4a4096c3-2846-5678-ab8c-37aed60a0c9c",
+  "observed_guardian_projection": {
+    "status": "BLOCKED",
+    "gate": "BLOCKED",
+    "candidate_id": "4a4096c3-2846-5678-ab8c-37aed60a0c9c",
+    "finding_count": 0,
+    "summary": "Guardian assurance unavailable: ProductInvariantViolation: Guardian requires exact qualified PWU Verification",
+    "failure_attribution": "GUARDIAN_PLATFORM_DEFECT",
+    "result_ref": null,
+    "evidence_ref": null,
+    "required": true
+  },
+  "projection_sha256": "09d06af4007a3fcfb4b8247e702399e697c392d745051cc9cc876910d122b242",
+  "failure_boundary": "Watt adapter before independent Guardian request construction",
+  "root_cause": "All matching historical PWU verification records are required PASS instead of consuming the sealed Candidate exact admitted proof IDs",
+  "classification": "B_SYSTEM_CONSUMER_DEFECT",
+  "original_failed_verdicts_retained": true,
+  "guardian_independent_gate_relaxed": false,
+  "recovery": "Exact Candidate proof validation; preserve original blocked Preview projection; create successor Preview through existing stop/request lifecycle only after final source qualification"
+}

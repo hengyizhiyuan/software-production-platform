@@ -1,0 +1,123 @@
+{
+  "schema": "c3-actual-verification-provider-usage-v1",
+  "source_revision": "518fcf9f07c7ddfc9672dde431419af0412d58ed",
+  "verification_record_id": "5d603bcf-4245-5c64-8333-179d1fc797d6",
+  "logical_calls": 4,
+  "requests": [
+    {
+      "request_id": "8afe45c1-d8c2-4048-a6ec-a0ab22203998",
+      "usage": {
+        "unknown": false,
+        "input_tokens": 351270,
+        "total_tokens": 352002,
+        "cached_tokens": 0,
+        "output_tokens": 732,
+        "reasoning_tokens": 0
+      },
+      "timing": {
+        "completed_seconds": 10.81704981403891,
+        "first_token_seconds": 7.651668446953408,
+        "request_sent_seconds": 0.00020071305334568024,
+        "first_response_event_seconds": 3.1233819460030645
+      },
+      "effective_model": "deepseek-flash",
+      "requested_model": "deepseek-flash",
+      "provider": "deepseek",
+      "attempt": 1,
+      "component": "fulfillment-content:331cf3f2c0e6c579a2eaa8bf9569f761fa0a899496ee045059af5f66babbcb90",
+      "receipt_ref": "native-evidence:5ca50037-e31e-48df-a3ef-4c6fc5a604b9",
+      "candidate_output_sha256": "b023494f3b2c9d0fc4e16f67067caaec138ee432b30bfdbdd7fd11c5f594eeab",
+      "candidate_bytes": 2966,
+      "transport_retry_count": 0
+    },
+    {
+      "request_id": "cb82ec85-f783-4b27-859d-2b80abfdf8a7",
+      "usage": {
+        "unknown": false,
+        "input_tokens": 7315,
+        "total_tokens": 7661,
+        "cached_tokens": 768,
+        "output_tokens": 346,
+        "reasoning_tokens": 0
+      },
+      "timing": {
+        "completed_seconds": 3.0500857330625877,
+        "first_token_seconds": 1.5043738790554926,
+        "request_sent_seconds": 0.0001838130410760641,
+        "first_response_event_seconds": 1.0099890650017187
+      },
+      "effective_model": "deepseek-flash",
+      "requested_model": "deepseek-flash",
+      "provider": "deepseek",
+      "attempt": 1,
+      "component": "protected-context",
+      "receipt_ref": "native-evidence:eff3396a-0839-47de-a465-e39526f7a69b",
+      "candidate_output_sha256": "fae5c9fbfa1fc0f49bca01a8c841f68b52556e5f960c1d0a7ef2870f71e84741",
+      "candidate_bytes": 1507,
+      "transport_retry_count": 0
+    },
+    {
+      "request_id": "547d5cb3-7b7c-47f2-9ef7-759030e79817",
+      "usage": {
+        "unknown": false,
+        "input_tokens": 7342,
+        "total_tokens": 8308,
+        "cached_tokens": 896,
+        "output_tokens": 966,
+        "reasoning_tokens": 0
+      },
+      "timing": {
+        "completed_seconds": 5.201238239067607,
+        "first_token_seconds": 1.7098177940351889,
+        "request_sent_seconds": 0.00013890804257243872,
+        "first_response_event_seconds": 1.488653787993826
+      },
+      "effective_model": "deepseek-flash",
+      "requested_model": "deepseek-flash",
+      "provider": "deepseek",
+      "attempt": 1,
+      "component": "fulfillment-content:0e11d6a0007b96f785d619248c2c46423ebd42074d4a06df03fe09cad5f96c23",
+      "receipt_ref": "native-evidence:df9b6915-d14e-4611-a1ca-6e86c810d835",
+      "candidate_output_sha256": "f9dfff8e2fe14f75d822a61427eb7832d759d17fe9853692a61727e920abace1",
+      "candidate_bytes": 3673,
+      "transport_retry_count": 0
+    },
+    {
+      "request_id": "23da73c2-626e-4df3-be94-c05d3bbf180c",
+      "usage": {
+        "unknown": false,
+        "input_tokens": 8526,
+        "total_tokens": 9388,
+        "cached_tokens": 7296,
+        "output_tokens": 862,
+        "reasoning_tokens": 0
+      },
+      "timing": {
+        "completed_seconds": 4.491408250061795,
+        "first_token_seconds": 1.8491353670833632,
+        "request_sent_seconds": 0.00014261598698794842,
+        "first_response_event_seconds": 1.407418766990304
+      },
+      "effective_model": "deepseek-flash",
+      "requested_model": "deepseek-flash",
+      "provider": "deepseek",
+      "attempt": 2,
+      "component": "fulfillment-content:0e11d6a0007b96f785d619248c2c46423ebd42074d4a06df03fe09cad5f96c23",
+      "receipt_ref": "native-evidence:6799486b-8d20-4d11-b691-9877097d3637",
+      "candidate_output_sha256": "9ca82d75392aec3a8f18777c30c6254b208c1ed04d87e1d510f14f2d3eb049f9",
+      "candidate_bytes": 3256,
+      "transport_retry_count": 0
+    }
+  ],
+  "deduplicated_actual_usage": {
+    "input_tokens": 374453,
+    "output_tokens": 2906,
+    "total_tokens": 377359,
+    "cached_tokens": 8960,
+    "reasoning_tokens": 0
+  },
+  "wall_seconds": 114.00816522608511,
+  "monetary_cost": "UNKNOWN",
+  "provider_http_status": "UNKNOWN_NOT_RECORDED",
+  "private_raw_sha256": "2bc220757386289c12761b630cb2513129969a6621c533fb636e14da554c8b48"
+}

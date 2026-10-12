@@ -1,0 +1,17 @@
+{
+  "frame_assembled": true,
+  "all_historical_verification_retained": true,
+  "verification_count": 3,
+  "selected_current_ids": [
+    "166cff32-0fd8-5055-94c5-e51aca7f9201",
+    "51315334-6019-5e27-b016-47bd60d57fa8"
+  ],
+  "current_results": [
+    "FAIL",
+    "PASS"
+  ],
+  "blocker_kinds": [
+    "VERIFICATION_NOT_PASSING"
+  ],
+  "model_calls": 0
+}

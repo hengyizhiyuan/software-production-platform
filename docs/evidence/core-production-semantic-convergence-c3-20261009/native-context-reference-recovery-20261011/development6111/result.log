@@ -1,0 +1,23 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 35 items
+
+tests/test_c3_candidate_verification_history.py ............             [ 34%]
+tests/test_guardian_assurance_adapter.py ................                [ 80%]
+tests/test_static_candidate_assurance.py .....F.                         [100%]
+
+=================================== FAILURES ===================================
+_____ test_real_guardian_covers_each_required_pwu_not_root_context[False] ______
+tests/test_static_candidate_assurance.py:147: in test_real_guardian_covers_each_required_pwu_not_root_context
+    assert result["gate"] == ("BLOCKED" if missing_second_coverage else "PASS")
+E   AssertionError: assert 'BLOCKED' == 'PASS'
+E     
+E     - PASS
+E     + BLOCKED
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_static_candidate_assurance.py::test_real_guardian_covers_each_required_pwu_not_root_context[False]
+======================== 1 failed, 34 passed in 42.00s =========================

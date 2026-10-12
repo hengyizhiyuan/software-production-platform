@@ -1,0 +1,65 @@
+{
+  "schema": "c3-handoff-runtime-inventory-v1",
+  "captured_at_utc": "2026-10-12T02:02:47.016289+00:00",
+  "client_handoff_date": "2026-10-12",
+  "roles": [
+    {
+      "role": "api",
+      "name": "watt-c3-bindingg0g61-api-20261010",
+      "container_id": "586daf484eeb65eacabe7308a155e7b4c92a946d3057fc0360d3679b561977f7",
+      "actual_image_id": "sha256:8c3eda5e197c7778b2deb9e126ccdbeb0b2e716d1112f0dbe0f5a8804a2f7d3a",
+      "running": true,
+      "user": "10001:10001",
+      "qualification_label": "C3-binding-g0-context-recovery",
+      "production_label": "false"
+    },
+    {
+      "role": "coordinator",
+      "name": "watt-c3-bindingg0g61-coordinator-20261010",
+      "container_id": "eca1f3d642afdbfe998717857e8f48eef75aa7e1e15ae649df42936d47d2d6f9",
+      "actual_image_id": "sha256:8c3eda5e197c7778b2deb9e126ccdbeb0b2e716d1112f0dbe0f5a8804a2f7d3a",
+      "running": true,
+      "user": "10001:10001",
+      "qualification_label": "C3-binding-g0-context-recovery",
+      "production_label": "false"
+    },
+    {
+      "role": "worker",
+      "name": "watt-c3-bindingg0g61-worker-20261010",
+      "container_id": "7819d6cb9607b3d928f6563e7175ee73e728ddbd131590b564e491e3ac971bae",
+      "actual_image_id": "sha256:8c3eda5e197c7778b2deb9e126ccdbeb0b2e716d1112f0dbe0f5a8804a2f7d3a",
+      "running": true,
+      "user": "10001:10001",
+      "qualification_label": "C3-binding-g0-context-recovery",
+      "production_label": "false"
+    },
+    {
+      "role": "tool-host",
+      "name": "watt-c3-bindingg0g61-tool-host-20261010",
+      "container_id": "e2056e0caede1edcf7f7035908e5716ae0027da10044fc313d61950c30620dba",
+      "actual_image_id": "sha256:8c3eda5e197c7778b2deb9e126ccdbeb0b2e716d1112f0dbe0f5a8804a2f7d3a",
+      "running": true,
+      "user": "10001:10001",
+      "qualification_label": "C3-binding-g0-context-recovery",
+      "production_label": "false"
+    }
+  ],
+  "evidence": {
+    "isolated-role-upgrade.json": {
+      "sha256": "4256c37a4283ac4903ff801ff577a0b9c9c5e976a2aa4149401bf5059318e480",
+      "ecs_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation66/evidence/isolated-role-upgrade.json"
+    },
+    "preview-owner-recovery.json": {
+      "sha256": "c9765db72ba21d68fe307019c0463ce38b2d2cab2a20f4b27ad69356ce7b03d0",
+      "ecs_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation66/evidence/preview-owner-recovery.json"
+    },
+    "guardian-lineage-diagnostic.json": {
+      "sha256": "645eaea59393dd45d25e21da1b099c42917bd92960d39809daaf46ee2de095bb",
+      "ecs_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation66/evidence/guardian-lineage-diagnostic.json"
+    }
+  },
+  "production_source_head": "5de657f3cb65780adf50f6557b54171a6c3cfae5",
+  "production_main_ref": "ee5bd86a53891f9391785c91d0ccef81ad2d56c3",
+  "runtime_mutations": 0,
+  "provider_requests": 0
+}

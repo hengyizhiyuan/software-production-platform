@@ -1,0 +1,53 @@
+{
+  "runtime_source": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+  "database_name": "spg_c3_bindingg0g61_qualification_20261010",
+  "candidate_id": "4a4096c3-2846-5678-ab8c-37aed60a0c9c",
+  "candidate_fingerprint": "9446c018fcafc8512a56c00d46861feac90c440014e6dc72af373249825af823",
+  "candidate_condition": "SEALED",
+  "verification_record_ids": [
+    "5d603bcf-4245-5c64-8333-179d1fc797d6",
+    "a0c9307e-f5fe-516a-95e8-fe17b27e985b"
+  ],
+  "admissibility_id": "6b3129be-1310-56ac-ba17-cdcbfc4b2bbe",
+  "pwu_condition": "SATISFIED",
+  "native_step_count": 7,
+  "native_effect_conditions": {
+    "SETTLED": 9
+  },
+  "integration_authorization_id": null,
+  "runtime_commit_id": null,
+  "integration_effect_id": null,
+  "preview_id": "7216b9a4-15b4-4279-9a4a-6cdd941bdaf8",
+  "preview_status": "READY",
+  "guardian_projection": {
+    "status": "BLOCKED",
+    "gate": "BLOCKED",
+    "candidate_id": "4a4096c3-2846-5678-ab8c-37aed60a0c9c",
+    "request_id": "b705e6f6-d358-5ea0-9a7b-2b337c5b49fa",
+    "result_ref": "guardian:assurance-result:b705e6f6-d358-5ea0-9a7b-2b337c5b49fa",
+    "result_refs": [
+      "guardian:assurance-result:b705e6f6-d358-5ea0-9a7b-2b337c5b49fa"
+    ],
+    "required_pwu_ids": [
+      "48781eed-8ead-4fee-9d21-973055ef6653"
+    ],
+    "finding_count": 8,
+    "finding_ids": [
+      "344bdc40-fade-4077-a0cd-de1891cb8692",
+      "7150d00b-6024-4996-bf28-be14357f2b19",
+      "9c442cf7-785a-4dd3-82c6-c539b6830cf1",
+      "792f8e35-97bb-4f3e-9ed7-d7f19d9d361e",
+      "4761bf3c-aa15-4550-9c98-759e7cc515c8",
+      "4567505c-627e-47e2-be2f-c074af32bdb3",
+      "40c57258-b94a-4d21-b201-7305a3d4e671",
+      "a67aa02d-49c1-40fb-b8c0-1c0162107a07"
+    ],
+    "summary": "No exact verification or Guardian effect covers work-reality:6ba2cffa-0bf3-565a-81e0-7f3c6696f21e:greenfield-constraint:0@cb02b8dbc40400ef3af9d69cd947861e378537f2c5c531991a97b946dcc08b71; No exact verification or Guardian effect covers work-reality:6ba2cffa-0bf3-565a-81e0-7f3c6696f21e:greenfield-constraint:1@cb02b8dbc40400ef3af9d69cd947861e378537f2c5c531991a97b946dcc08b71; No exact verification or Guardian effect covers work-reality:6ba2cffa-0bf3-565a-81e0-7f3c6696f21e:greenfield-constraint:2@cb02b8dbc40400ef3af9d69cd947861e378537f2c5c531991a97b946dcc08b71",
+    "evidence_ref": "guardian:evidence:df590367-e35a-4e6b-b8d4-e8d6a4f6701e"
+  },
+  "guardian_store_container_path": "/var/lib/spg/owner-runtime/guardian",
+  "schema": "c3-handoff-current-owner-state-v1",
+  "captured_at_utc": "2026-10-12T02:05:29.745965+00:00",
+  "owner_mutations": 0,
+  "provider_requests": 0
+}

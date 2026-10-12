@@ -1,0 +1,65 @@
+{
+  "schema": "c3-actual-installed-stage-continuity-v1",
+  "status": "PASS",
+  "stages": {
+    "native": {
+      "prior_source": "c125ec674a7537e8cafe7da17fd20be1800fabb5",
+      "prior_observed_image": "sha256:a0f7d82e3655b9cd4dbce21c2f5ef114296385e399b7dea5aea3610bb3f03592",
+      "current_source": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+      "current_observed_image": "sha256:8c3eda5e197c7778b2deb9e126ccdbeb0b2e716d1112f0dbe0f5a8804a2f7d3a",
+      "byte_identical_installed_file_sha256": {
+        "application/governed_obligations.py": "1a5749bc8e1fd2f037a806222822410a3b113c5a1fc8ad08da381b815db67805",
+        "executor/__init__.py": "6e6cc01ebfcc04a9c6d6476e2ae3d770ebf0486e4e125d73a0acda7ade7fe566",
+        "executor/context.py": "a59d8d1396052c97ba96e8ed96ecdf992281044b93e6244ae8ba3900d74b5f67",
+        "executor/context_evidence.py": "8ffa17e55cbea0b83f972db82295b4dd184a6e40188e1f5db013a6dac6b12262",
+        "executor/git_operations.py": "09d5222296bc9d0e20da241feee269d3e12fde076a4efd1e5b24558add0a7600",
+        "executor/kernel.py": "291318bbf8ac3da4e217eda1f67b080b8ce48d3cd0e5cfbd3b6039094525aff4",
+        "executor/recovery.py": "8efdd155adc3cd0eca789ce7137f04e0900bb8046f3a29157d0fa6dd469af2f7",
+        "executor/tools.py": "4db56250253d46d0f6bc8592c52ac44be2568125f9f35632ed1265cc057cf1f8",
+        "infrastructure/executor_runtime/__init__.py": "7fd0ad3f3a5817f27d55deeccb0af1bf404c51780677375f055f196f318c0663",
+        "infrastructure/executor_runtime/backends.py": "2d5c8abc387e2d207591824fdd834877224183805d9b52b798eb1d71e719776e",
+        "infrastructure/executor_runtime/git_inference.py": "ed2ead366abb803e001f51e55a14d4a3425d3ecd927158f8cc41bdec78c34ed8",
+        "infrastructure/executor_runtime/inference.py": "a6fff2741d92e051afa6c8b71cefe7aed0be910c689a712d1f135e3f96b2f5ec",
+        "infrastructure/executor_runtime/landlock_sandbox.py": "de9a02c14de8804263a235e86e8a1a293f740f13f9f54e8c306ec1d0b72b4625",
+        "infrastructure/executor_runtime/local_storage.py": "65a85e929f30f64d4f0df00a334691985edb946dbeb0ca145ba58e158dd782e9",
+        "infrastructure/executor_runtime/native_compatibility_executor.py": "49975fa8df948295811481ecb94abc8339e86c692563ab258451f2ef66d3838c",
+        "infrastructure/executor_runtime/postgres_store.py": "13a3c91c9ddd0a8bb642a15fa0a77b4ee86b142b7bc615126f992c26bef181ce",
+        "infrastructure/executor_runtime/production_environment_tool_host.py": "2556db3d9816ca8fc75126cf8c7d21eb68554c775416eb4d5f3c4d6d19bd9bdf",
+        "infrastructure/executor_runtime/production_evidence.py": "48c3d62c0b21ad3f3db8f2db6f233c94fff68e5c323cd6955c47dae49e0ec549",
+        "infrastructure/executor_runtime/remote_tool_host.py": "8900eb22f455f2610e186576d044d5ede4cc3ddc3f16c5edd05bdcf2390144d7",
+        "infrastructure/executor_runtime/runtime_ports.py": "8d259a7df517b6df73e6e84c6a9d2c90059d20e0644b768177c74770c755cbf1",
+        "infrastructure/executor_runtime/tool_host.py": "5025815e5c1176c90c86d6aec85275c452776b88749dc8f21d57861346517540",
+        "infrastructure/executor_runtime/worker.py": "98cbeccb2dcbeb3ce1b4ce591627b8bffc4306afa9fad294a6ea3705c3e35376",
+        "infrastructure/executor_runtime/workspace_host.py": "421fde2801c337e52ff5072610248046bd7a434127c7afa1771fd45ec07e380b",
+        "providers/fulfillment_candidate.py": "44e5a6a013147803c72366f34b43f1a5785ba83a9f46fae1fd2a890e089ccc00"
+      },
+      "prior_manifest_sha256": "82d8ee9662c0f68d54881e1f21cba204e0724976711e91931e617a3ffeac2985"
+    },
+    "verification": {
+      "prior_source": "518fcf9f07c7ddfc9672dde431419af0412d58ed",
+      "prior_observed_image": "sha256:b0b7899e2c66a2135b90d0a7b9c8419e3fa937d587d23061f0d20a4e6ab7cbe4",
+      "current_source": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+      "current_observed_image": "sha256:8c3eda5e197c7778b2deb9e126ccdbeb0b2e716d1112f0dbe0f5a8804a2f7d3a",
+      "byte_identical_installed_file_sha256": {
+        "application/verification.py": "20a267dd04857174f4e9e9f93f123a41a3207ffe9e8d8cfd198145a301f51e64",
+        "providers/contract_verifier.py": "bc5dede85b26f207419b24163224ddfe2a4e690f5a88dc9b6a7f69ad8c4ebed2",
+        "providers/managed_context_fulfillment.py": "34aaeb256e8f7b6ae9d11ddb91a3f9771c2619f27fffc8cff3a77a5d9f6ac4d6",
+        "providers/protected_context_verifier.py": "d8f7916a1b20dd8d11e523ed558aa2c698bc8ef4f6f04454ca55684d137e6b2b",
+        "providers/repository_code_verifier.py": "dd13406a7afb62b2fa0524b26f348b8252f37ee905f57797342ad9fb2cb27327"
+      },
+      "prior_manifest_sha256": "8cc527894a9acb1ae9709312d1bcb95b965c1e3cdd9c4b7b9e6e29223b99d2a3"
+    },
+    "sealing": {
+      "prior_source": "518fcf9f07c7ddfc9672dde431419af0412d58ed",
+      "prior_observed_image": "sha256:b0b7899e2c66a2135b90d0a7b9c8419e3fa937d587d23061f0d20a4e6ab7cbe4",
+      "current_source": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+      "current_observed_image": "sha256:8c3eda5e197c7778b2deb9e126ccdbeb0b2e716d1112f0dbe0f5a8804a2f7d3a",
+      "byte_identical_installed_file_sha256": {
+        "application/governance.py": "f6303a6ac9c463b7d490d5530998cbeddb5b41ad266d5c78e5f695c36d90548c"
+      },
+      "prior_manifest_sha256": "8cc527894a9acb1ae9709312d1bcb95b965c1e3cdd9c4b7b9e6e29223b99d2a3"
+    }
+  },
+  "prior_runtime_events_relabelled": false,
+  "new_stage_to_qualify": "Guardian independent assessment"
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "c3-stage-source-continuity-v1",
+  "native_source": "c125ec674a7537e8cafe7da17fd20be1800fabb5",
+  "current_application_source": "518fcf9f07c7ddfc9672dde431419af0412d58ed",
+  "unchanged_stage_paths": [
+    "src/spg/executor",
+    "src/spg/infrastructure/executor_runtime",
+    "src/spg/application/governed_obligations.py",
+    "src/spg/providers/fulfillment_candidate.py",
+    "src/spg/application/governance.py",
+    "src/spg/application/guardian_assurance.py"
+  ],
+  "native_reexecution_required_by_code_delta": false,
+  "historical_runtime_identity_relabelled": false,
+  "changed_paths": [
+    "src/spg/application/steering_decision.py",
+    "src/spg/infrastructure/persistence/product_store.py",
+    "src/spg/providers/contract_verifier.py",
+    "src/spg/providers/managed_context_fulfillment.py",
+    "src/spg/providers/protected_context_verifier.py",
+    "src/spg/providers/repository_code_verifier.py"
+  ]
+}

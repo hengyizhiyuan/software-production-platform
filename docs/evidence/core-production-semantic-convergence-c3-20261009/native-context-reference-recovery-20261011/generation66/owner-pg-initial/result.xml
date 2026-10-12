@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="16" time="1232.747" timestamp="2026-10-11T13:50:53.887667+00:00" hostname="3686e2e6b9a7"><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_uses_sealed_proof_without_rejecting_historical_failure[work]" file="tests/integration/test_c1_contract_continuity.py" line="596" time="49.949"><failure message="sqlalchemy.exc.CompileError: Unconsumed column names: provider">tests/integration/test_c1_contract_continuity.py:610: in test_guardian_uses_sealed_proof_without_rejecting_historical_failure
+    RuntimeStore(uow.session).insert_verification_record(values)
+/opt/spg-venv/lib/python3.13/site-packages/spg/infrastructure/persistence/runtime_store.py:190: in insert_verification_record
+    self.session.execute(insert(verification_records).values(**values))
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2373: in execute
+    return self._execute_internal(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2280: in _execute_internal
+    result = conn.execute(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1421: in execute
+    return meth(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1635: in _execute_clauseelement
+    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:715: in _compile_w_cache
+    compiled_sql = self._compiler(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:323: in _compiler
+    return dialect.statement_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/compiler.py:1462: in __init__
+    Compiled.__init__(self, dialect, statement, **kwargs)
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/compiler.py:902: in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/compiler.py:948: in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/visitors.py:138: in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/compiler.py:5955: in visit_insert
+    crud_params_struct = crud._get_crud_params(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/crud.py:382: in _get_crud_params
+    raise exc.CompileError(
+E   sqlalchemy.exc.CompileError: Unconsumed column names: provider</failure></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_uses_sealed_proof_without_rejecting_historical_failure[steering]" file="tests/integration/test_c1_contract_continuity.py" line="596" time="28.989"><failure message="sqlalchemy.exc.CompileError: Unconsumed column names: provider">tests/integration/test_c1_contract_continuity.py:610: in test_guardian_uses_sealed_proof_without_rejecting_historical_failure
+    RuntimeStore(uow.session).insert_verification_record(values)
+/opt/spg-venv/lib/python3.13/site-packages/spg/infrastructure/persistence/runtime_store.py:190: in insert_verification_record
+    self.session.execute(insert(verification_records).values(**values))
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2373: in execute
+    return self._execute_internal(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2280: in _execute_internal
+    result = conn.execute(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1421: in execute
+    return meth(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1635: in _execute_clauseelement
+    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:715: in _compile_w_cache
+    compiled_sql = self._compiler(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:323: in _compiler
+    return dialect.statement_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/compiler.py:1462: in __init__
+    Compiled.__init__(self, dialect, statement, **kwargs)
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/compiler.py:902: in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/compiler.py:948: in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/visitors.py:138: in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/compiler.py:5955: in visit_insert
+    crud_params_struct = crud._get_crud_params(
+/opt/spg-venv/lib/python3.13/site-packages/sqlalchemy/sql/crud.py:382: in _get_crud_params
+    raise exc.CompileError(
+E   sqlalchemy.exc.CompileError: Unconsumed column names: provider</failure></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_both_actual_admission_paths_reach_independent_guardian[work]" file="tests/integration/test_c1_contract_continuity.py" line="572" time="73.813"><properties><property name="work" value="8b4b57de-dad7-4b11-a3e3-a74d5dde26f0" /><property name="work_revision" value="6ff0ddc2-98d5-40dc-9e51-9c06f7296658" /><property name="pwu" value="57cf816c-47bf-4040-88ed-bea13d677292" /><property name="attempt" value="27487be1-e2e9-4079-a90e-100287cd82af" /><property name="candidate" value="7a9097d5-5042-5f30-9eca-285445b4096b" /><property name="candidate_fingerprint" value="1da1b24df0176772bc6be739e0e0a8aa9318b330a739f1d3338aa2a10ea97146" /><property name="source_baseline" value="1167a5fa067ce9d2718eb2119324a420d1e00289" /><property name="candidate_output" value="78046cce8d374a82139d04e16bea693f184c11c6" /><property name="verification_ids" value="cd5c791a-730b-5e90-8873-0db3982fe00e,d93098bc-13bb-54b9-8c41-aa69b906b313" /></properties></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_both_actual_admission_paths_reach_independent_guardian[steering]" file="tests/integration/test_c1_contract_continuity.py" line="572" time="74.394"><properties><property name="work" value="c4680174-fb6a-5ee9-8ade-e3d5810035d9" /><property name="work_revision" value="2f0e48aa-c389-5b7d-a3cb-095261979707" /><property name="pwu" value="26108418-082c-4c54-a655-74216dc2f39a" /><property name="attempt" value="e278419e-33f9-44db-bb40-6f70cafd81af" /><property name="candidate" value="bea965b3-cf72-5efc-902d-8d16e3696f38" /><property name="candidate_fingerprint" value="b817eafd22c4d60d8abb1307e8e55e76d73d6d1e09f8005acdd2072eeb5b0639" /><property name="source_baseline" value="bcd036672aa14a6e4cad2f4b3e916fb4134abdfa" /><property name="candidate_output" value="1ed61e82573315a98d0389cad1f4787bdb24cfb0" /><property name="verification_ids" value="8662e311-b653-5fc9-8339-88aad8042d82,7bf0e4f9-2762-547f-9f64-fa32da386d33" /></properties></testcase><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[work-verification]" file="tests/integration/test_c1_contract_continuity.py" line="729" time="73.536" /><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[work-candidate]" file="tests/integration/test_c1_contract_continuity.py" line="729" time="83.162" /><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[work-native-attempt]" file="tests/integration/test_c1_contract_continuity.py" line="729" time="79.983" /><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[work-source-baseline]" file="tests/integration/test_c1_contract_continuity.py" line="729" time="82.045" /><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[work-proposed-snapshot]" file="tests/integration/test_c1_contract_continuity.py" line="729" time="84.695" /><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[work-pwu]" file="tests/integration/test_c1_contract_continuity.py" line="729" time="78.558" /><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[steering-verification]" file="tests/integration/test_c1_contract_continuity.py" line="729" time="82.859" /><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[steering-candidate]" file="tests/integration/test_c1_contract_continuity.py" line="729" time="86.432" /><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[steering-native-attempt]" file="tests/integration/test_c1_contract_continuity.py" line="729" time="80.560" /><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[steering-source-baseline]" file="tests/integration/test_c1_contract_continuity.py" line="729" time="77.485" /><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[steering-proposed-snapshot]" file="tests/integration/test_c1_contract_continuity.py" line="729" time="85.265" /><testcase classname="tests.integration.test_c1_contract_continuity" name="test_guardian_rejects_missing_independent_owner_records[steering-pwu]" file="tests/integration/test_c1_contract_continuity.py" line="729" time="78.597" /></testsuite></testsuites>

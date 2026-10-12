@@ -1,0 +1,71 @@
+{
+  "schema": "c3-stage-source-continuity-v2",
+  "stages": {
+    "native": {
+      "qualified_source": "c125ec674a7537e8cafe7da17fd20be1800fabb5",
+      "final_source": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+      "git_object_continuity": {
+        "src/spg/executor": {
+          "qualified_object": "dd4d89cbc9e28fb7dd7085a07060cdccf9bc445a",
+          "final_object": "dd4d89cbc9e28fb7dd7085a07060cdccf9bc445a"
+        },
+        "src/spg/infrastructure/executor_runtime": {
+          "qualified_object": "264655ade8741d885041b37aec3f83d626023392",
+          "final_object": "264655ade8741d885041b37aec3f83d626023392"
+        },
+        "src/spg/providers/fulfillment_candidate.py": {
+          "qualified_object": "fa753d780b7a62e1ee2c04f945ad883b05f2510d",
+          "final_object": "fa753d780b7a62e1ee2c04f945ad883b05f2510d"
+        },
+        "src/spg/application/governed_obligations.py": {
+          "qualified_object": "a05a44859f6844732853826076f21b384879a8eb",
+          "final_object": "a05a44859f6844732853826076f21b384879a8eb"
+        }
+      },
+      "rerun_due_to_code_change_required": false
+    },
+    "verification": {
+      "qualified_source": "518fcf9f07c7ddfc9672dde431419af0412d58ed",
+      "final_source": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+      "git_object_continuity": {
+        "src/spg/providers/contract_verifier.py": {
+          "qualified_object": "a126c3edbcbf54c1f2a8c59ee504f21d17dd518d",
+          "final_object": "a126c3edbcbf54c1f2a8c59ee504f21d17dd518d"
+        },
+        "src/spg/providers/managed_context_fulfillment.py": {
+          "qualified_object": "8045c98b1662066a22faeb93439b330f33681547",
+          "final_object": "8045c98b1662066a22faeb93439b330f33681547"
+        },
+        "src/spg/providers/protected_context_verifier.py": {
+          "qualified_object": "09e5b21b9c0710f7465b783f6e6cd1f431de4922",
+          "final_object": "09e5b21b9c0710f7465b783f6e6cd1f431de4922"
+        },
+        "src/spg/providers/repository_code_verifier.py": {
+          "qualified_object": "c6ac77d5b2d9962e0104c3ecbcfcefe807272002",
+          "final_object": "c6ac77d5b2d9962e0104c3ecbcfcefe807272002"
+        },
+        "src/spg/application/verification.py": {
+          "qualified_object": "a9c037798f55d15ef75607a3950cbbd481e67b4c",
+          "final_object": "a9c037798f55d15ef75607a3950cbbd481e67b4c"
+        }
+      },
+      "rerun_due_to_code_change_required": false
+    },
+    "sealing": {
+      "qualified_source": "518fcf9f07c7ddfc9672dde431419af0412d58ed",
+      "final_source": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+      "git_object_continuity": {
+        "src/spg/application/governance.py": {
+          "qualified_object": "2fa44aa35376a220ecc4182bb62427e09edbd682",
+          "final_object": "2fa44aa35376a220ecc4182bb62427e09edbd682"
+        }
+      },
+      "rerun_due_to_code_change_required": false
+    }
+  },
+  "newly_qualified_stage": "Guardian adapter / independent Owner readbacks / served preview",
+  "unchanged_history_relabelled": false,
+  "changed_runtime_files_since_verification": [
+    "src/spg/application/guardian_assurance.py"
+  ]
+}

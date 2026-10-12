@@ -1,0 +1,16 @@
+{
+  "exit_code": 1,
+  "wall_seconds": 95.79474015394226,
+  "image_id": "sha256:c9bae501ed17987f4513b09237a801c0115e2f231270536d564badabb2d30afb",
+  "container_id": "4e3fd7d2d6cdd6c8b3329b994bd4a351a17781450f3d961bde1bd216158fe5d8",
+  "source_overlay": true,
+  "snapshot_sha256": "34426a5a823bcdb799a392bb053c6bdf345247b2dbeb64429ca34999f069ad05",
+  "nodes": [
+    "tests/test_c3_candidate_verification_history.py",
+    "tests/test_guardian_assurance_adapter.py",
+    "tests/test_static_candidate_assurance.py"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

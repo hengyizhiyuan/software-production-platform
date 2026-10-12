@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="32.070" timestamp="2026-10-11T13:21:30.757750+00:00" hostname="097d959f4d48"><testcase classname="tests.test_static_candidate_assurance" name="test_real_guardian_covers_each_required_pwu_not_root_context[False]" time="1.853"><failure message="AssertionError: {'status': 'BLOCKED', 'gate': 'BLOCKED', 'candidate_id': '97aadb6f-d48c-4ed0-8cdb-155488d94be2', 'request_id': 'ac5f0fc8-651a-5856-aa10-bf2429baa224', ...}&#10;assert 'BLOCKED' == 'PASS'&#10;  &#10;  - PASS&#10;  + BLOCKED">tests/test_static_candidate_assurance.py:147: in test_real_guardian_covers_each_required_pwu_not_root_context
+    assert result["gate"] == ("BLOCKED" if missing_second_coverage else "PASS"), result
+E   AssertionError: {'status': 'BLOCKED', 'gate': 'BLOCKED', 'candidate_id': '97aadb6f-d48c-4ed0-8cdb-155488d94be2', 'request_id': 'ac5f0fc8-651a-5856-aa10-bf2429baa224', ...}
+E   assert 'BLOCKED' == 'PASS'
+E     
+E     - PASS
+E     + BLOCKED</failure></testcase></testsuite></testsuites>

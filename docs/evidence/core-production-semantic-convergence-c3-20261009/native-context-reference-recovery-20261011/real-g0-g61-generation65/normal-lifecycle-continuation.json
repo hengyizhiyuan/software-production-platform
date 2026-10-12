@@ -1,0 +1,194 @@
+{
+  "schema": "c3-existing-g0-normal-lifecycle-continuation-v1",
+  "captured_at_utc": "2026-10-11T13:05:47.877326+00:00",
+  "source_revision": "518fcf9f07c7ddfc9672dde431419af0412d58ed",
+  "actual_api_image": "sha256:b0b7899e2c66a2135b90d0a7b9c8419e3fa937d587d23061f0d20a4e6ab7cbe4",
+  "work_id": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "attempt_id": "de98f392-b8d1-40ac-a442-a283fa938060",
+  "initial": {
+    "summary": {
+      "attempt_id": "de98f392-b8d1-40ac-a442-a283fa938060",
+      "dispatch_id": "09edd121-e3a1-482f-b252-5fd21bbf1331",
+      "provider_outcome": "SUCCESS",
+      "observation_id": "18cf93c5-c50b-4540-bad7-8bf6bfb9c420",
+      "completion_id": "680d74f1-ebee-5781-adda-f94d559a651e",
+      "completion_outcome": "PRODUCED",
+      "proposed_snapshot_id": "5e7cd6d9-6899-5921-9e77-c8f030f319d6",
+      "verification_obligations": [
+        "PATH_SCOPE",
+        "GIT_DIFF_CHECK"
+      ],
+      "verification_results": [
+        "PASS",
+        "PASS"
+      ],
+      "admissibility_id": "6b3129be-1310-56ac-ba17-cdcbfc4b2bbe",
+      "admissibility_outcome": "ADMISSIBLE",
+      "candidate_id": null,
+      "candidate_fingerprint": null,
+      "authorization_id": null,
+      "integration_effect_id": null,
+      "integration_state": null,
+      "runtime_commit_id": null,
+      "artifact_paths": [
+        "index.html"
+      ],
+      "completion_requires_production_result": true,
+      "latest_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+      "extra": {
+        "verification_record_ids": [
+          "5d603bcf-4245-5c64-8333-179d1fc797d6",
+          "a0c9307e-f5fe-516a-95e8-fe17b27e985b"
+        ],
+        "proposed_commit_identity": "43fa0621e0d0e06fd1b84c9b76e06b831a578d97",
+        "task_contract_mode": "GENERAL",
+        "artifact_contract_path": null
+      }
+    },
+    "work_unit_condition": "SATISFIED",
+    "verified_output_baseline_id": null
+  },
+  "transitions": [
+    {
+      "step": 0,
+      "http_status": 200,
+      "before": {
+        "summary": {
+          "attempt_id": "de98f392-b8d1-40ac-a442-a283fa938060",
+          "dispatch_id": "09edd121-e3a1-482f-b252-5fd21bbf1331",
+          "provider_outcome": "SUCCESS",
+          "observation_id": "18cf93c5-c50b-4540-bad7-8bf6bfb9c420",
+          "completion_id": "680d74f1-ebee-5781-adda-f94d559a651e",
+          "completion_outcome": "PRODUCED",
+          "proposed_snapshot_id": "5e7cd6d9-6899-5921-9e77-c8f030f319d6",
+          "verification_obligations": [
+            "PATH_SCOPE",
+            "GIT_DIFF_CHECK"
+          ],
+          "verification_results": [
+            "PASS",
+            "PASS"
+          ],
+          "admissibility_id": "6b3129be-1310-56ac-ba17-cdcbfc4b2bbe",
+          "admissibility_outcome": "ADMISSIBLE",
+          "candidate_id": null,
+          "candidate_fingerprint": null,
+          "authorization_id": null,
+          "integration_effect_id": null,
+          "integration_state": null,
+          "runtime_commit_id": null,
+          "artifact_paths": [
+            "index.html"
+          ],
+          "completion_requires_production_result": true,
+          "latest_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+          "extra": {
+            "verification_record_ids": [
+              "5d603bcf-4245-5c64-8333-179d1fc797d6",
+              "a0c9307e-f5fe-516a-95e8-fe17b27e985b"
+            ],
+            "proposed_commit_identity": "43fa0621e0d0e06fd1b84c9b76e06b831a578d97",
+            "task_contract_mode": "GENERAL",
+            "artifact_contract_path": null
+          }
+        },
+        "work_unit_condition": "SATISFIED",
+        "verified_output_baseline_id": null
+      },
+      "after": {
+        "summary": {
+          "attempt_id": "de98f392-b8d1-40ac-a442-a283fa938060",
+          "dispatch_id": "09edd121-e3a1-482f-b252-5fd21bbf1331",
+          "provider_outcome": "SUCCESS",
+          "observation_id": "18cf93c5-c50b-4540-bad7-8bf6bfb9c420",
+          "completion_id": "680d74f1-ebee-5781-adda-f94d559a651e",
+          "completion_outcome": "PRODUCED",
+          "proposed_snapshot_id": "5e7cd6d9-6899-5921-9e77-c8f030f319d6",
+          "verification_obligations": [
+            "PATH_SCOPE",
+            "GIT_DIFF_CHECK"
+          ],
+          "verification_results": [
+            "PASS",
+            "PASS"
+          ],
+          "admissibility_id": "6b3129be-1310-56ac-ba17-cdcbfc4b2bbe",
+          "admissibility_outcome": "ADMISSIBLE",
+          "candidate_id": "4a4096c3-2846-5678-ab8c-37aed60a0c9c",
+          "candidate_fingerprint": "9446c018fcafc8512a56c00d46861feac90c440014e6dc72af373249825af823",
+          "authorization_id": null,
+          "integration_effect_id": null,
+          "integration_state": null,
+          "runtime_commit_id": null,
+          "artifact_paths": [
+            "index.html"
+          ],
+          "completion_requires_production_result": true,
+          "latest_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+          "extra": {
+            "verification_record_ids": [
+              "5d603bcf-4245-5c64-8333-179d1fc797d6",
+              "a0c9307e-f5fe-516a-95e8-fe17b27e985b"
+            ],
+            "proposed_commit_identity": "43fa0621e0d0e06fd1b84c9b76e06b831a578d97",
+            "task_contract_mode": "GENERAL",
+            "artifact_contract_path": null
+          }
+        },
+        "work_unit_condition": "SATISFIED",
+        "verified_output_baseline_id": null
+      },
+      "response_sha256": "55bad2f7cc5df03ee55d08fc4813deeef447ef3342180e9de0e824895ab4f0e8",
+      "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation65/private/lifecycle-response-510318944e1249e08155f7c5748da120.json"
+    }
+  ],
+  "latest": {
+    "summary": {
+      "attempt_id": "de98f392-b8d1-40ac-a442-a283fa938060",
+      "dispatch_id": "09edd121-e3a1-482f-b252-5fd21bbf1331",
+      "provider_outcome": "SUCCESS",
+      "observation_id": "18cf93c5-c50b-4540-bad7-8bf6bfb9c420",
+      "completion_id": "680d74f1-ebee-5781-adda-f94d559a651e",
+      "completion_outcome": "PRODUCED",
+      "proposed_snapshot_id": "5e7cd6d9-6899-5921-9e77-c8f030f319d6",
+      "verification_obligations": [
+        "PATH_SCOPE",
+        "GIT_DIFF_CHECK"
+      ],
+      "verification_results": [
+        "PASS",
+        "PASS"
+      ],
+      "admissibility_id": "6b3129be-1310-56ac-ba17-cdcbfc4b2bbe",
+      "admissibility_outcome": "ADMISSIBLE",
+      "candidate_id": "4a4096c3-2846-5678-ab8c-37aed60a0c9c",
+      "candidate_fingerprint": "9446c018fcafc8512a56c00d46861feac90c440014e6dc72af373249825af823",
+      "authorization_id": null,
+      "integration_effect_id": null,
+      "integration_state": null,
+      "runtime_commit_id": null,
+      "artifact_paths": [
+        "index.html"
+      ],
+      "completion_requires_production_result": true,
+      "latest_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+      "extra": {
+        "verification_record_ids": [
+          "5d603bcf-4245-5c64-8333-179d1fc797d6",
+          "a0c9307e-f5fe-516a-95e8-fe17b27e985b"
+        ],
+        "proposed_commit_identity": "43fa0621e0d0e06fd1b84c9b76e06b831a578d97",
+        "task_contract_mode": "GENERAL",
+        "artifact_contract_path": null
+      }
+    },
+    "work_unit_condition": "SATISFIED",
+    "verified_output_baseline_id": null
+  },
+  "new_work": 0,
+  "formation_replayed": false,
+  "native_execution_replayed": false,
+  "human_authorization_created": false,
+  "effects_and_steps_unchanged": true,
+  "controller_sha256": "fcd037273f8dd3f95254404545ce85462da7cd103bd1f6b5e666741f535683d6"
+}

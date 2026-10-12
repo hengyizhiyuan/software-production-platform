@@ -1,0 +1,50 @@
+{
+  "captured_at_utc": "2026-10-11T13:07:38.948794+00:00",
+  "http": {
+    "work": {
+      "status": 200,
+      "sha256": "55bad2f7cc5df03ee55d08fc4813deeef447ef3342180e9de0e824895ab4f0e8",
+      "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation65/private/production-observer-60b24b00-f910-4caa-a860-d368f501e765/0-work.json",
+      "bytes": 6929
+    },
+    "/steering": {
+      "status": 200,
+      "sha256": "f8d44787621306d50c9dae4a87201ebd9e4bd3e22b2baa32cfed6a495f131a5d",
+      "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation65/private/production-observer-60b24b00-f910-4caa-a860-d368f501e765/0-steering.json",
+      "bytes": 3970
+    },
+    "/operations": {
+      "status": 200,
+      "sha256": "dbdcc195105e3c6ccc3a9f19e2461e44c87e2356ae7760dc13dafe557984eaf6",
+      "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation65/private/production-observer-60b24b00-f910-4caa-a860-d368f501e765/0-operations.json",
+      "bytes": 2699
+    },
+    "/guardian-assurance": {
+      "status": 200,
+      "sha256": "09d06af4007a3fcfb4b8247e702399e697c392d745051cc9cc876910d122b242",
+      "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation65/private/production-observer-60b24b00-f910-4caa-a860-d368f501e765/0-guardian-assurance.json",
+      "bytes": 334
+    },
+    "/delivery": {
+      "status": 200,
+      "sha256": "0d7bdc24f3594a066222e0dd3c7de7036c65fa6ebd8a75d4ea7fea6fd3ebe36e",
+      "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/native-context-recovery-generation65/private/production-observer-60b24b00-f910-4caa-a860-d368f501e765/0-delivery.json",
+      "bytes": 146
+    }
+  },
+  "model_calls_by_controller": 0,
+  "work_created": 0,
+  "work": {
+    "status": "NEEDS_ATTENTION",
+    "work_complete": false,
+    "human_attention_required": true,
+    "automatic_progression_state": "STOPPED",
+    "current_production_run_id": "94e42d44-5291-49a0-a172-29ffd70940c0",
+    "current_work_reality_revision_id": "dc748198-84bc-5cd5-a74b-ea0bb2ab57b3"
+  },
+  "steering": {
+    "status": null,
+    "condition": null,
+    "production_admission_state": null
+  }
+}

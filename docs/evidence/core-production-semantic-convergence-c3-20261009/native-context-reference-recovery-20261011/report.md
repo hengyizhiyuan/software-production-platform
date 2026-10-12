@@ -2,7 +2,7 @@
 
 ## Checkpoint status
 
-C3 qualification is IN PROGRESS. No C3 Closure, Human Integration, Acceptance or Delivery is claimed. Historical failures remain failures. This report will record the observed continuation, including any further blocker.
+**C3 PARTIAL — Independent Guardian lineage/coverage blocker.** Latest recovery state and remaining actions are in [handoff-20261012.md](handoff-20261012.md). No C3 Closure, Human Integration, Acceptance or Delivery is claimed. Historical failures remain failures.
 
 ## Confirmed capacity cause and correction
 
@@ -64,3 +64,17 @@ Public evidence manifests verify every downloaded file hash. Private complete Ow
 Recover from another computer by checking out the remote C3 branch and using authorized SSH to these persistent ECS paths. Local untracked files are not the only recovery source. No off-site backup or restore drill is claimed.
 
 Production checkout/main, original incident Works, historical Candidates, Human Decisions and Quality Ledger were not modified. No Holdout was read or used to tune this implementation; it remains gated on ordinary G0 qualification.
+
+## Current proof recovery (2026-10-11 continuation)
+
+Source `518fcf9f07c7ddfc9672dde431419af0412d58ed` and image `sha256:b0b7899e2c66a2135b90d0a7b9c8419e3fa937d587d23061f0d20a4e6ab7cbe4` passed installed 32 application / 46 Guardian / 5 PostgreSQL checks. Its same-Work append-only [actual Verification](real-g0-g61-generation65/corrected-verification.json) passed PATH_SCOPE `5d603bcf-4245-5c64-8333-179d1fc797d6` and GIT_DIFF_CHECK `a0c9307e-f5fe-516a-95e8-fe17b27e985b`; admissibility `6b3129be-1310-56ac-ba17-cdcbfc4b2bbe` is ADMISSIBLE. All original historical judgments and the seven Native steps/nine settled effects remained unchanged.
+
+The [normal lifecycle continuation](real-g0-g61-generation65/normal-lifecycle-continuation.json) sealed Candidate `4a4096c3-2846-5678-ab8c-37aed60a0c9c`, fingerprint `9446c018fcafc8512a56c00d46861feac90c440014e6dc72af373249825af823`, on the actual Git revision/tree recorded above. No integration authorization, runtime commit, integration effect or Human Acceptance was created.
+
+The actual Guardian boundary exposed the same current-proof/history consumer defect in a separate adapter. [Diagnosis](real-g0-g61-generation65/guardian-adapter-root-cause.json): Watt required all matching historical PWU records to be PASS before constructing an independent Guardian request. The sealed Candidate already references its precise qualified Owner records. This old BLOCKED projection has no independent Guardian result; it must not be described as Guardian FAIL or PASS.
+
+Source `01446afc7cccb03f99e8e6febbe4cfe9ed8388e4` selects and validates the sealed Candidate's exact admissibility/Verification proof, including proposal, PWU, plan, input, completion, source, tree and obligations. Missing/contradictory proofs still block. Guardian remains the independent Assurance Owner. The final source has only this adapter implementation delta from actual content Verification; Native, Verification and sealing are byte-identical in installed imports. The original BLOCKED Preview projection will remain retained. Recovery uses the existing Preview stop/request lifecycle for the same sealed Candidate, without repeating Formation, Native effects or successful model Verification.
+
+Initial development runs 6110/6111/6112 failed because old controlled fixtures omitted the formal sealed proof and actual Owner evidence readbacks; receipts remain retained. The corrected fixture supplies those real contract-shaped readbacks, with no Guardian rule reduction. [Development 6113](development6113/receipt.json) passed 35 checks. Final image `sha256:8c3eda5e197c7778b2deb9e126ccdbeb0b2e716d1112f0dbe0f5a8804a2f7d3a` passed 35 installed application and 46 Guardian checks; Initial PostgreSQL qualification passed 14 and failed 2 fixture nodes (`provider` instead of `provider_binding`). The same image with a test-only correction passed those 2 nodes separately; original failures remain. Real successor Preview is READY, but independent Guardian request b705e6f6-d358-5ea0-9a7b-2b337c5b49fa returned BLOCKED / 8 coverage Findings. The installed read-only trace identifies `_continuous_binding_permitted:1126 -> FALSE`, then `_production_lineage_records:474 -> NONE`; the exact triggering Fact/field remains to be established. See the [handoff](handoff-20261012.md) and [actual result](real-g0-g61-generation66/preview-owner-recovery.json).
+
+Current Verification used four actual requests, input 374,453 / output 2,906 / total 377,359 / reasoning 0, observed wall time 114.008 seconds. One component failed first-pass witness validation and converged on its existing second candidate using feedback; the other checks passed without additional attempts. No original requirement or budget was changed. These are per-stage observed costs, not a complete program bill.

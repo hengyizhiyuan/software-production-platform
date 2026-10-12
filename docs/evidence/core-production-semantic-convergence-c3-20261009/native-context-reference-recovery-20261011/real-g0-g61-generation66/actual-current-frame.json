@@ -1,0 +1,15 @@
+{
+  "frame_assembled": true,
+  "all_historical_verification_retained": true,
+  "verification_count": 5,
+  "selected_current_ids": [
+    "5d603bcf-4245-5c64-8333-179d1fc797d6",
+    "a0c9307e-f5fe-516a-95e8-fe17b27e985b"
+  ],
+  "current_results": [
+    "PASS",
+    "PASS"
+  ],
+  "blocker_kinds": [],
+  "model_calls": 0
+}

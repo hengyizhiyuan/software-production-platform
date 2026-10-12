@@ -1,0 +1,37 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /dev-input
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 35 items
+
+tests/test_c3_candidate_verification_history.py ............             [ 34%]
+tests/test_guardian_assurance_adapter.py ................                [ 80%]
+tests/test_static_candidate_assurance.py .....FF                         [100%]
+
+=================================== FAILURES ===================================
+_____ test_real_guardian_covers_each_required_pwu_not_root_context[False] ______
+tests/test_static_candidate_assurance.py:127: in test_real_guardian_covers_each_required_pwu_not_root_context
+    result = client.assess_ready_preview(preview)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/guardian_assurance.py:323: in assess_ready_preview
+    records = _candidate_pwu_verifications(
+src/spg/application/guardian_assurance.py:78: in _candidate_pwu_verifications
+    proposed = runtime.proposed_snapshot(candidate.proposed_snapshot_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'proposed_snapshot'
+______ test_real_guardian_covers_each_required_pwu_not_root_context[True] ______
+tests/test_static_candidate_assurance.py:127: in test_real_guardian_covers_each_required_pwu_not_root_context
+    result = client.assess_ready_preview(preview)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/guardian_assurance.py:323: in assess_ready_preview
+    records = _candidate_pwu_verifications(
+src/spg/application/guardian_assurance.py:78: in _candidate_pwu_verifications
+    proposed = runtime.proposed_snapshot(candidate.proposed_snapshot_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'proposed_snapshot'
+--------------------- generated xml file: /out/result.xml ----------------------
+=========================== short test summary info ============================
+FAILED tests/test_static_candidate_assurance.py::test_real_guardian_covers_each_required_pwu_not_root_context[False]
+FAILED tests/test_static_candidate_assurance.py::test_real_guardian_covers_each_required_pwu_not_root_context[True]
+======================== 2 failed, 33 passed in 41.75s =========================

@@ -1,0 +1,14 @@
+{
+  "exit_code": 1,
+  "wall_seconds": 82.03564351599198,
+  "image_id": "sha256:c9bae501ed17987f4513b09237a801c0115e2f231270536d564badabb2d30afb",
+  "container_id": "097d959f4d48d7f6a21b4f37e2217db62a3426f41c14733714c3842bfd1fba08",
+  "source_overlay": true,
+  "snapshot_sha256": "e82771b5d2fcc354b2a6565e486e287970f9a794f621ea301a92a2bedf236c3f",
+  "nodes": [
+    "tests/test_static_candidate_assurance.py::test_real_guardian_covers_each_required_pwu_not_root_context[False]"
+  ],
+  "model_calls": 0,
+  "business_work_created": 0,
+  "original_db_access": false
+}

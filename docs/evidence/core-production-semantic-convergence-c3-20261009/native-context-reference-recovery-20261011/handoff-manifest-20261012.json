@@ -1,0 +1,43 @@
+{
+  "schema": "c3-handoff-manifest-v1",
+  "client_date": "2026-10-12",
+  "application_revision": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+  "pre_handoff_branch_head": "5e686c4cf665c0267761105ad92d30b18e7f1c90",
+  "status": "C3_PARTIAL_INDEPENDENT_GUARDIAN_BLOCKED",
+  "files": {
+    "handoff-20261012.md": {
+      "sha256": "f14cd2f337e9ea4bae2f59057c3125bf9b5702448f4242fb1c7162098e81f853",
+      "bytes": 15199
+    },
+    "closure-delta.md": {
+      "sha256": "5b76bb59a800d75b0b1ca50975199dd9e5cd7d02441656f313c7043b2e729df2",
+      "bytes": 2411
+    },
+    "report.md": {
+      "sha256": "9f35380da9c03318f0dc14b777981cfc821244cc39a891d8860e5a9c0438c1d9",
+      "bytes": 14314
+    },
+    "real-g0-g61-generation66/handoff-runtime-inventory-20261012.json": {
+      "sha256": "2a03b47dfb7b07b2c7146568c73c2441acf825a8d51fecded460d3fe23ec9116",
+      "bytes": 3052
+    },
+    "real-g0-g61-generation66/handoff-current-owner-state-20261012.json": {
+      "sha256": "64a8545e2e852f545ccf5519030a567bdfad5567c9517c1a626f665c08a36a69",
+      "bytes": 2569
+    }
+  },
+  "published_prior_manifests": [
+    {
+      "file": "publication-generation65-checkpoint-manifest.json",
+      "sha256": "bcd9892309afbec35d83872522f7a1b3139c79c7453c85bdc4a358c3b608ab15"
+    },
+    {
+      "file": "publication-generation66-checkpoint-manifest.json",
+      "sha256": "d24716ea4a94a61e2146bc7a8cac3936c3bfec3e05d58336707e00c4aea7acd1"
+    }
+  ],
+  "runtime_code_changed_by_handoff": false,
+  "live_model_calls_by_handoff": 0,
+  "holdout_unsealed": false,
+  "private_owner_model_content_published": false
+}
