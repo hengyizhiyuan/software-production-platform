@@ -1290,3 +1290,20 @@ def test_unknown_cannot_hide_unsupported_conditional_producer_mechanism():
     r["findings"][0]["analysis"]="假设：若未读取的实现求差，则产生这个信号。"
     with pytest.raises(ValueError,match="UNKNOWN_CANNOT_BYPASS_CAUSAL_SOURCE_REQUIREMENT"):
         AnalysisReport.model_validate(r)
+
+
+@pytest.mark.parametrize("phrase", ["不得回填历史丢弃的响应", "不依赖已丢弃响应的重建", "原始记录已删除", "historical discarded responses cannot be reconstructed", "raw evidence was lost"])
+@pytest.mark.parametrize("section", ["finding", "platform_improvements"])
+def test_capture_gaps_cannot_presuppose_historical_loss_in_recommendations(phrase, section):
+    c=EvidenceCatalog(snapshot());r=report(c)
+    if section=="finding":r["findings"][0]["recommendation"]=phrase
+    else:r[section]=[{"statement":phrase,"evidence_family":"OWNER_RECORD","finding_ids":["missing-raw"]}]
+    with pytest.raises(ValueError,match="CAPTURE_GAP_CANNOT_ESTABLISH_HISTORICAL_DATA_LOSS"):
+        c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+def test_explicit_original_disposal_observation_is_distinct_from_capture_gap():
+    c=EvidenceCatalog(snapshot());r=report(c)
+    eid=c.add("retention_receipts","/fixture/disposal",{"id":str(uuid4()),"observation":"原始记录已删除"})
+    f=r["findings"][0];f.update(subject_evidence_id=eid,inspection_id=c.inspect(eid)["inspection_id"],uncertainty="INSPECTED_OWNER_BOUNDARY",fact={"statement":"Owner observation: 原始记录已删除","citations":[{"evidence_id":eid,"quote":"原始记录已删除"}]},recommendation="核对原始记录已删除的处置收据")
+    c.materialize_boundaries(AnalysisReport.model_validate(r))

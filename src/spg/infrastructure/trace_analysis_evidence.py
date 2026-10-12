@@ -40,6 +40,13 @@ class CitationRejected(ValueError):
 # Producer contracts, not inferred from words in an untrusted log. The transfer
 # surface is DeliveryObservationService's download audit; Guardian owns its HTTP
 # preview observations. Identity aliases follow existing Native Owner fields.
+
+HISTORICAL_DATA_LOSS = re.compile(
+    r"(?:已|历史|被|遭|永久|彻底).{0,12}(?:丢弃|丢失|删除|销毁).{0,12}(?:响应|日志|记录|证据|字节|数据)|"
+    r"(?:响应|日志|记录|证据|字节|数据).{0,12}(?:已|历史|被|遭|永久|彻底).{0,12}(?:丢弃|丢失|删除|销毁)|"
+    r"\b(?:discarded|deleted|lost|destroyed)\s+(?:historical\s+|raw\s+)?(?:responses?|records?|logs?|bytes?|evidence|data)\b|"
+    r"\b(?:responses?|records?|logs?|bytes?|evidence|data)\s+(?:were?\s+|was\s+|have\s+been\s+|has\s+been\s+)?(?:discarded|deleted|lost|destroyed)\b", re.I)
+
 RELATION_FIELDS = {"pwu_id": "PWU", "work_unit_id": "PWU", "session_id": "SESSION",
                    "attempt_id": "ATTEMPT", "work_id": "WORK", "candidate_id": "CANDIDATE"}
 
@@ -834,6 +841,22 @@ class EvidenceCatalog:
             prose.extend(([section, i, "statement"], item.statement)
                          for i, item in enumerate(getattr(report, section)))
         for location, statement in prose:
+            if HISTORICAL_DATA_LOSS.search(statement):
+                if location[0] == "findings":
+                    loss_citations = report.findings[location[1]].fact.citations
+                elif location[0] in {"immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"}:
+                    item = getattr(report, location[0])[location[1]]
+                    loss_citations = [c for fid in item.finding_ids for c in findings[fid].fact.citations]
+                elif location[0] == "timeline":
+                    loss_citations = report.timeline[location[1]].citations
+                else:
+                    loss_citations = getattr(report, location[0]).citations
+                if not any(HISTORICAL_DATA_LOSS.search(c.quote) and
+                        not self.records.get(str(c.evidence_id), {}).get("repository", True) and
+                        self.records.get(str(c.evidence_id), {}).get("group") not in
+                            {"analysis_draft", "evidence_check", "evidence_inspection"}
+                        for c in loss_citations):
+                    errors.append(CitationRejected("CAPTURE_GAP_CANNOT_ESTABLISH_HISTORICAL_DATA_LOSS; absent/unexported/unread fields do not prove discarded, deleted or lost originals. Keep retention state UNKNOWN; future capture cannot fill historical UNKNOWN", location, report.work_id))
             if ABSENCE_PROSE.search(statement):
                 errors.append(CitationRejected("EVIDENCE_ABSENCE_BELONGS_IN_CHECKED_UNCERTAINTY; no free-form historical absence", location, report.work_id))
         if errors:

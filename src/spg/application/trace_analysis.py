@@ -206,8 +206,10 @@ regression_scenario, immediate_recovery and deferred_items, not only findings:
   substitute for an acceptance decision, nor does a redacted Guardian field deny
   a readable acceptance elsewhere.
 - Recover historical response details only IF existing retained bytes can be found.
-  Future logging cannot reconstruct discarded historical responses. If unavailable,
-  keep the historical cause UNKNOWN; controlled future capture is a proposal only.
+  Unexported, unobserved or unread fields do not prove deletion, discard or loss.
+  Retention state is UNKNOWN without original retention/disposal observations. Do not
+  presuppose loss in recommendations, e.g. historical discarded response. Future
+  capture cannot fill historical UNKNOWN; controlled future capture is a proposal only.
 - Inspect existing tool descriptions, rejection feedback and capabilities before
   suggesting they are missing. Proposed improvements are unverified proposals,
   not proven system defects or executable instructions.
