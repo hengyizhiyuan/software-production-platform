@@ -32,9 +32,10 @@ def public_report_candidate(value):
 
 
 class CitationRejected(ValueError):
-    def __init__(self, reason, location, evidence_id):
+    def __init__(self, reason, location, evidence_id, *, navigation=None):
         super().__init__(reason)
         self.location, self.evidence_id = location, str(evidence_id)
+        self.navigation = navigation
 
 
 # Producer contracts, not inferred from words in an untrusted log. The transfer
@@ -597,15 +598,43 @@ class EvidenceCatalog:
         row = self.records.get(eid)
         if not row or eid not in self.observed:
             raise CitationRejected("CITATION_NOT_OBSERVED", ["field"], eid)
-        if row["repository"] or row["group"] in {"analysis_draft", "evidence_check", "evidence_inspection"}:
-            raise CitationRejected("FIELD_REFERENCE_REQUIRES_ORIGINAL_JSON_OWNER", ["field"], eid)
+        if row["group"] in {"analysis_draft", "evidence_check", "evidence_inspection"}:
+            raise CitationRejected("FIELD_REFERENCE_REQUIRES_ORIGINAL_JSON_EVIDENCE", ["field"], eid)
         try:
             left, right = json_field_range(row["body"], field)
         except ValueError as error:
-            raise CitationRejected("ORIGINAL_FIELD_REFERENCE_NOT_CAPTURED: " + str(error), ["field"], eid) from None
+            raise CitationRejected("ORIGINAL_FIELD_REFERENCE_NOT_CAPTURED: " + str(error), ["field"], eid,
+                                   navigation=self.field_navigation(eid, field)) from None
         if not self._range_read(eid, left, right):
             raise CitationRejected("ORIGINAL_FIELD_REFERENCE_NOT_FULLY_READ; use evidence.read with this field first", ["field"], eid)
         return row["body"][left:right]
+
+    def field_navigation(self, evidence_id, pointer):
+        """Navigate captured structure only; never expose or observe its values."""
+        value = json.loads(self.records[str(evidence_id)]["body"])
+        parent, found = "", True
+        if not isinstance(pointer, str) or len(pointer) > 500 or (pointer and not pointer.startswith("/")):
+            return {"requested_pointer_valid": False, "navigation_only": True}
+        for token in pointer[1:].split("/") if pointer else ():
+            if re.search(r"~(?![01])", token):
+                return {"requested_pointer_valid": False, "navigation_only": True}
+            key = token.replace("~1", "/").replace("~0", "~")
+            if isinstance(value, dict) and key in value:
+                value = value[key]
+            elif isinstance(value, list) and key.isdecimal() and str(int(key)) == key and int(key) < len(value):
+                value = value[int(key)]
+            else:
+                found = False
+                break
+            parent += "/" + token
+        tokens = sorted(value) if isinstance(value, dict) else [str(i) for i in range(min(len(value), 20))] if isinstance(value, list) else []
+        selected = [key for key in tokens if len(key) <= 200][:20]
+        count = len(value) if isinstance(value, (dict, list)) else 0
+        return {"requested_pointer_valid": True, "requested_pointer_exists": found,
+                "nearest_captured_parent": parent, "parent_type": type(value).__name__,
+                "available_child_tokens": selected, "omitted_child_tokens": count - len(selected),
+                "navigation_only": True,
+                "boundary": "Captured key/index names only. No field value was read; this lookup cannot prove a claim or historical absence."}
 
     def validate(self, report: AnalysisReport):
         if str(report.work_id) != str(self.snapshot["work_id"]):
@@ -631,7 +660,7 @@ class EvidenceCatalog:
             except CitationRejected as error:
                 # Preserve the candidate location through the original-field
                 # port so same-draft repair can address the actual citation.
-                raise CitationRejected(str(error), location + ["field"], c.evidence_id) from None
+                raise CitationRejected(str(error), location + ["field"], c.evidence_id, navigation=error.navigation) from None
             if c.quote is not None:
                 literal = any(c.quote in excerpt for excerpt in excerpts)
                 encoded = json.dumps(c.quote, ensure_ascii=False)[1:-1]
@@ -754,7 +783,8 @@ class EvidenceCatalog:
         if errors:
             error = errors[0]
             error.issues = [{"type": "CitationRejected", "reason": str(item),
-                             "location": item.location, "evidence_id": item.evidence_id}
+                             "location": item.location, "evidence_id": item.evidence_id,
+                             **({"field_navigation": item.navigation} if item.navigation is not None else {})}
                             for item in errors[:12]]
             raise error
         reviewed, reviewed_checks = set(), set()
@@ -1186,6 +1216,7 @@ class AnalysisTools:
                 value = self.catalog.values.get(eid)
                 issues[0].update(evidence_id=eid, requested_field=args.get("field"),
                     captured_root_fields=sorted(value)[:50] if isinstance(value, dict) else [],
+                    field_navigation=self.catalog.field_navigation(eid, args.get("field")),
                     boundary="Requested pointer not found in this captured record. Field names are navigation metadata, not observed values or evidence of historical absence.",
                     repair="Inspect this record's original fields, then read the exact admitted JSON Pointer; preserve UNKNOWN where its value is unavailable.")
             if identity == "analysis.revise" and draft_id is None and args.get("draft_id") in self.drafts:

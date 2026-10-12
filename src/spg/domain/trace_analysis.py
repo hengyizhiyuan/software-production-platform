@@ -29,7 +29,7 @@ class Citation(AnalysisRecord):
     evidence_id: UUID
     quote: str | None = Field(default=None, min_length=1, max_length=1200)
     field: str | None = Field(default=None, max_length=500,
-        description="Alternative to copying a quote: JSON Pointer to an original Owner value already fully read. The service derives observed_value; this does not establish the prose conclusion.")
+        description="Alternative to copying a quote: JSON Pointer to an original Owner or admitted exact-repository tool value already fully read. Derived lookups and model drafts are not original evidence. The service derives observed_value; this does not establish the prose conclusion or historical loaded source.")
     observed_value: str | None = Field(default=None, description="Service-derived original serialized value excerpt; not a model-created quotation.")
     observed_value_truncated: bool = Field(default=False)
 

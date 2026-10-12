@@ -1360,3 +1360,67 @@ def test_missing_report_field_retains_exact_candidate_location_for_bounded_edit(
     fixed=invoke_analysis(tools,'analysis.revise',{'draft_id':failed.output['draft_id'],'edits':[{'op':'replace','path':'/current_state/citations/0/field','value':'/state'}]})
     assert fixed.condition.value=='SETTLED' and tools.accepted_report is None
     assert tools.drafts[failed.output['draft_id']]['current_state']['citations'][0]['field']=='/not_captured'
+
+
+def test_exact_git_tool_fields_use_fully_read_references_without_quoting_or_promoting_diff_to_cause():
+    c=EvidenceCatalog(snapshot());r=report(c)
+    eid=c.add('repository','/fixture/git-diff',{'repository':'source','revision':'a'*40,'baseline':'b'*40,'tree':'c'*40,'changed_paths':['one.txt','two.txt'],'excluded_paths':0,'patch':'bounded net change'},repository=True)
+    c.read(eid,field='/changed_paths')
+    r['actual_execution_path']={'statement':'These are the admitted final net paths only; intermediate effects are unknown.','citations':[{'evidence_id':eid,'field':'/changed_paths'}]}
+    out=c.materialize_boundaries(AnalysisReport.model_validate(r))
+    assert json.loads(out.actual_execution_path.citations[0].observed_value)==['one.txt','two.txt']
+    r['findings'][0].update(epistemic_status='ROOT_CAUSE_HYPOTHESIS',repository_citations=[{'evidence_id':eid,'field':'/changed_paths'}])
+    with pytest.raises(ValueError,match='ROOT_CAUSE_REQUIRES_IMPLEMENTATION_EXCERPT'):c.validate(AnalysisReport.model_validate(r))
+
+
+def test_git_field_reference_rejects_unread_value_and_wrong_explicit_quote():
+    c=EvidenceCatalog(snapshot());r=report(c)
+    eid=c.add('repository','/fixture/git-value',{'repository':'source','revision':'a'*40,'changed_paths':['actual.txt'],'patch':'actual net change'},repository=True)
+    c.read(eid,field='/revision')
+    r['actual_execution_path']={'statement':'Proposed paths','citations':[{'evidence_id':eid,'field':'/changed_paths'}]}
+    with pytest.raises(ValueError,match='ORIGINAL_FIELD_REFERENCE_NOT_FULLY_READ'):c.validate(AnalysisReport.model_validate(r))
+    c.read(eid,field='/changed_paths');r['actual_execution_path']['citations'][0]['quote']='imagined.txt'
+    with pytest.raises(ValueError,match='CITATION_QUOTE_MISMATCH'):c.validate(AnalysisReport.model_validate(r))
+
+
+@pytest.mark.parametrize('group',['analysis_draft','evidence_check','evidence_inspection'])
+def test_derived_field_remains_inadmissible_even_if_marked_as_repository(group):
+    c=EvidenceCatalog(snapshot());eid=c.add(group,'/fixture/derived-value',{'statement':'not original evidence'},repository=True);c.read(eid)
+    with pytest.raises(ValueError,match='FIELD_REFERENCE_REQUIRES_ORIGINAL_JSON_EVIDENCE'):c.original_field_excerpt(eid,'/statement')
+
+
+def test_missing_nested_pointer_returns_actual_parent_tokens_without_reading_values():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());eid=c.add('verification','/fixture/dynamic-fields',{'metadata':{'rows':[{'actual/status':'private-fixture-value','kind':'fixture'}]}})
+    tools=AnalysisTools(c,{})
+    fail=invoke_analysis(tools,'evidence.read',{'evidence_id':eid,'field':'/metadata/rows/0/imagined'})
+    nav=fail.output['issues'][0]['field_navigation']
+    assert nav['nearest_captured_parent']=='/metadata/rows/0' and nav['available_child_tokens']==['actual/status','kind']
+    assert nav['requested_pointer_exists'] is False and nav['navigation_only'] is True
+    assert eid not in c.observed_ranges and 'private-fixture-value' not in json.dumps(fail.output)
+    read=invoke_analysis(tools,'evidence.read',{'evidence_id':eid,'field':'/metadata/rows/0/actual~1status'})
+    assert read.condition.value=='SETTLED' and c.original_field_excerpt(eid,'/metadata/rows/0/actual~1status')=='"private-fixture-value"'
+
+
+def test_report_field_feedback_keeps_nested_navigation_and_original_draft_identity():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());r=json.loads(json.dumps(report(c)))
+    eid=c.add('verification','/fixture/nested-citation',{'evidence':{'original_keys':{'status':'PASS'}}});c.read(eid)
+    r['actual_execution_path']={'statement':'Proposed observation','citations':[{'evidence_id':eid,'field':'/evidence/original_keys/imagined'}]}
+    tools=AnalysisTools(c,{});fail=invoke_analysis(tools,'analysis.submit',{'report':r})
+    issue=next(i for i in fail.output['issues'] if i['evidence_id']==eid)
+    assert issue['location']==['actual_execution_path','citations',0,'field']
+    assert issue['field_navigation']['nearest_captured_parent']=='/evidence/original_keys'
+    assert issue['field_navigation']['available_child_tokens']==['status']
+    assert fail.output['repair_candidate']==r and tools.drafts[fail.output['draft_id']]==r
+
+
+def test_navigation_is_bounded_and_invalid_or_noncanonical_array_selectors_are_not_rewritten():
+    c=EvidenceCatalog(snapshot());eid=c.add('verification','/fixture/bounded-navigation',{'rows':[{'x':1}],'many':{str(i):i for i in range(80)}})
+    nav=c.field_navigation(eid,'/many/missing')
+    assert len(nav['available_child_tokens'])==20 and nav['omitted_child_tokens']==60
+    for field in ['/rows/01','/rows/-1','/rows/9']:
+        assert c.field_navigation(eid,field)['requested_pointer_exists'] is False
+    for field in ['/bad~2escape','/'+('1'*501)]:
+        assert c.field_navigation(eid,field)['requested_pointer_valid'] is False
+    assert eid not in c.observed_ranges

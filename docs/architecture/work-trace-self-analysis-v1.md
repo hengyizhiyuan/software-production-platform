@@ -364,3 +364,16 @@ untrusted model data, allowing a stateless refinement step to reconsider the
 assertion together with its rejected reference. Failed partial edits return the
 unchanged source draft. Current repair-history snapshots are copied so subsequent
 closure cannot retroactively change what an earlier inference observed.
+
+Fully read original values from the admitted exact Git repository ports support
+the same JSON Pointer citations (including structured diff fields). Their original
+source identities and scopes remain mandatory. Derived lookup/model records remain
+inadmissible. A diff field cannot satisfy the existing implementation-read gate for
+a causal hypothesis, and current source still cannot establish historical Worker
+identity. This fixes a refusal of lawful source references without accepting unread,
+misquoted, or incorrectly associated evidence.
+Missing nested fields return the nearest captured parent and bounded actual child
+key/index tokens in navigation metadata. This reads no values, supplies no aliases
+or automatic pointer rewrites, and cannot qualify absence or a factual citation.
+Both evidence-read and report-reference failures preserve this metadata so the
+existing Owner can choose an exact read, revise the assertion, or terminate.

@@ -67,6 +67,9 @@ Existing PWU/session/attempt mappings and command parameters must be inspected;
 an absent field in a receipt does not mean absence in its explicitly linked effect.
 Prefer {evidence_id, field=JSON_POINTER} citations for fully read original Owner
 values; the service derives observed_value without asking you to retype data.
+Exact repository tool fields may use the same fully-read references. Their Git
+identity and read scope remain fixed; a diff field does not prove an implementation
+mechanism, and current source never establishes historical loaded Worker source.
 Alternatively give an exact quotation. Incorrect explicit quotations are rejected.
 Every quotation must be from returned original bytes/decoded strings, with its
 correct evidence identity. Removing a citation requires reconsidering its claims.
