@@ -517,7 +517,7 @@ def test_actual_compact_observation_replays_from_postgresql_without_repeating_fo
     record_property("receipt_ids", json.dumps([row.scope["receipt_id"] for row in rows]))
 
 
-@pytest.mark.parametrize('tamper', (None, 'feedback', 'response-receipt', 'scope-inventory', 'owner-precondition', 'initial-prerequisite', 'raw-owner-observation', 'selection-input-contract'))
+@pytest.mark.parametrize('tamper', (None, 'feedback', 'response-receipt', 'scope-inventory', 'owner-precondition', 'initial-prerequisite', 'raw-owner-observation', 'selection-input-contract', 'joint-observation'))
 @pytest.mark.parametrize('failure_kind', ('predecode', 'canonical', 'complete-prefix'))
 def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
     postgres_database, tmp_path, monkeypatch, record_property, tamper, failure_kind,
@@ -602,6 +602,10 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
         assert feedback['owner_repair_context']['inventory_fingerprint'] == fingerprint
         assert binding['response_receipt_id'] == records[1].scope['receipt_id']
         assert binding['request_receipt_id'] == records[0].scope['receipt_id']
+        joint = feedback['owner_repair_context']['source_component_observations']
+        assert joint['inventory_fingerprint'] == fingerprint
+        assert all(row['semantic_fulfillment'] == 'UNKNOWN' and row['actual_evidence'] == 'NEED_EVIDENCE'
+                   for row in joint['sources'])
         raw_operands = feedback['owner_repair_context']['original_wire_owner_operands']
         if failure_kind == 'predecode':
             assert any('OBLIGATION_CONTENT_TARGET_UNRESOLVED' in f['failed_predicates']
@@ -621,6 +625,10 @@ def test_predecode_feedback_recovers_from_postgresql_and_rejects_identity_drift(
             elif tamper == 'owner-precondition':
                 changed = json.loads(scope['validation_feedback'])
                 changed['owner_repair_context']['source_preconditions'][0]['primary_component_required'] = False
+                scope['validation_feedback'] = json.dumps(changed)
+            elif tamper == 'joint-observation':
+                changed = json.loads(scope['validation_feedback'])
+                changed['owner_repair_context']['source_component_observations']['sources'][0]['original_text_sha256'] = '0'*64
                 scope['validation_feedback'] = json.dumps(changed)
             elif tamper == 'raw-owner-observation':
                 changed = json.loads(scope['validation_feedback'])

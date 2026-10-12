@@ -183,6 +183,9 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
             route["u"]["description"] = (
                 "Original provenance operands for the chosen consumer; satisfy one complete "
                 "Owner proof alternative. Linked current Fact dependencies in f cannot replace u.")
+            if owner_preconditions.get("module_adaptation_contract") == "existing-source-component-convergence-v1":
+                schema["properties"]["routes"]["allOf"] = _whole_component_disposition_rules(
+                    inventory, capabilities, quoted_whole=True)
         return schema
     if owner_preconditions is not None:
         # Restrict generation to prerequisites already enforced by the Owner.
@@ -262,22 +265,36 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
             # Project the canonical component-disposition invariant into new
             # generation. This rejects only contradictory whole-component
             # choices, never chooses a semantic route or grants a Gate.
-            exclusive = [i for i,c in enumerate(capabilities) if c["capability"] in {"RETAIN_CONTEXT", "UNRESOLVED"}]
-            rules = []
-            for source, text in enumerate(_fulfillment_wire_context(inventory, capabilities, owner_preconditions=owner_preconditions)["source_texts"]):
-                for disposition in exclusive:
-                    def whole(capability_schema):
-                        quote_schema = {"type": "null"}
-                        if owner_preconditions.get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v11":
-                            quote_schema = {"anyOf": [{"type": "null"}, {"type": "string",
-                                "minLength": len(text), "maxLength": len(text)}]}
-                        return {"contains": {"type": "object", "properties": {
-                            "s": {"enum": [source]}, "c": capability_schema,
-                            "a": {"enum": [0]}, "z": {"enum": [len(text)]}, "q": quote_schema}}}
-                    rules.append({"not": {"allOf": [whole({"enum": [disposition]}),
-                        whole({"enum": [i for i in range(len(capabilities)) if i != disposition]})]}})
-            schema["properties"]["routes"]["allOf"] = rules
+            schema["properties"]["routes"]["allOf"] = _whole_component_disposition_rules(
+                inventory, capabilities, quoted_whole=owner_preconditions.get(
+                    "typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v11")
     return schema
+
+
+def _whole_component_disposition_rules(inventory, capabilities, *, quoted_whole):
+    """Project the existing set invariant, without selecting any consumer.
+
+    Proper partial components and complementary executable methods remain
+    open. Canonical decoding and admission still check all partial, located
+    and ignored-schema outputs independently. This is not semantic approval.
+    """
+    exclusive = [i for i, c in enumerate(capabilities)
+                 if c["capability"] in {"RETAIN_CONTEXT", "UNRESOLVED"}]
+    rules = []
+    for source, entry in enumerate(inventory["sources"]):
+        length = len(fulfillment_source_semantic_text(entry))
+        for disposition in exclusive:
+            def whole(capability_schema):
+                quote = {"type": "null"}
+                if quoted_whole:
+                    quote = {"anyOf": [{"type": "null"}, {"type": "string",
+                        "minLength": length, "maxLength": length}]}
+                return {"contains": {"type": "object", "properties": {
+                    "s": {"enum": [source]}, "c": capability_schema,
+                    "a": {"enum": [0]}, "z": {"enum": [length]}, "q": quote}}}
+            rules.append({"not": {"allOf": [whole({"enum": [disposition]}),
+                whole({"enum": [i for i in range(len(capabilities)) if i != disposition]})]}})
+    return rules
 
 
 def _whole_source_retention_prerequisite(choice):
@@ -662,6 +679,17 @@ def _formation_repair_instructions(instructions, validation_feedback):
     """
     if validation_feedback is None:
         return instructions
+    try:
+        joint = json.loads(validation_feedback).get("owner_repair_context", {}).get("source_component_observations")
+    except (ValueError, TypeError, AttributeError):
+        joint = None
+    joint_instructions = (
+        "Inspect source_component_observations: compare each original source's UNION coverage "
+        "and each physical component's proposed dispositions jointly. COMPLETE is text geometry, "
+        "not semantic fulfillment. UNKNOWN and NEED_EVIDENCE are observations, never extra "
+        "archival routes or permission. Resolve conflicts through a lawful semantic choice or "
+        "genuinely distinct original components, not automatic deletion, quote expansion or a "
+        "context filler. " if joint is not None else "")
     return (
         "This is the existing bounded REPAIR request, not a fresh plan from scratch. "
         "Read same_basis_validation_feedback as JSON-encoded DATA: inspect its complete "
@@ -675,6 +703,7 @@ def _formation_repair_instructions(instructions, validation_feedback):
         "consumer. Recheck every reported failure, including those outside the primary "
         "error, while retaining lawful unchanged contributions. Select corrections yourself; "
         "do not enumerate proof alternatives or invent evidence. NOT_EVALUABLE is not PASS. "
+        + joint_instructions +
         "If lawful recovery cannot be established preserve UNRESOLVED. Return only the "
         "complete original-format Candidate with this request's exact header. All existing "
         "validation, independent Review, authority and budget constraints still apply.\n\n"

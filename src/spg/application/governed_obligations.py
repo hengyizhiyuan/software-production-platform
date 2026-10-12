@@ -2137,13 +2137,20 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                                 review_input_contract=None, semantic_selection_input_contract=None,
                                 generation_prerequisite_contract=None, source_context_contract=None,
                                 wire_presentation_contract=None, review_source_consumption_contract=None,
-                                exclusion_content_contract=None, fact_method_applicability_contract=None):
+                                exclusion_content_contract=None, fact_method_applicability_contract=None,
+                                module_adaptation_contract=None):
     """Necessary proof sets from existing Owner predicates, never route proposals.
 
     The semantic boundary still chooses components and which eligible origin
     actually proves their meaning. Structural eligibility is not equivalence,
     evidence satisfaction, independent review or authority.
     """
+    if module_adaptation_contract not in (None, "existing-source-component-convergence-v1") or (
+            module_adaptation_contract is not None and (
+                typed_prerequisite_contract != "existing-owner-typed-prerequisites-v11"
+                or semantic_selection_input_contract != "existing-primary-meaning-owner-reference-v2"
+                or generation_view_contract != "existing-lossless-source-consumer-input-v3")):
+        raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     if fact_method_applicability_contract is not None and fact_method_applicability_contract not in _FACT_METHOD_APPLICABILITY_CONTRACTS:
         raise ValueError("OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID")
     if fact_method_applicability_contract is not None and (
@@ -2424,8 +2431,56 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
            if include_operand_observations else {}),
         "work_reality_revision_id": str(revision.id), "source_revision": inventory["source_revision"],
         "capabilities_fingerprint": canonical_fingerprint(capabilities), "sources": rows,
+        **({"module_adaptation_contract": module_adaptation_contract} if module_adaptation_contract is not None else {}),
         "component_rule": "COMPLETE_OWN_SOURCE_SPANS; NO_CONFLICTING_DISPOSITION_FOR_SAME_COMPONENT",
         "meaning": "NECESSARY_PROVENANCE_ONLY; SEMANTIC_MATCH_AND_COMPLETE_PLAN_UNPROVEN; NO_PERMISSION_OR_EVIDENCE_PASS"}
+
+
+def _source_component_observations(inventory, observations, unavailable):
+    """Joint observations for the existing repair slot, never a patched plan.
+
+    A physically complete proposal can still violate meaning; missing actual
+    evidence does not show that the original goal is false. No disposition or
+    consumer is chosen here. The containing feedback binds all observations
+    to the original Wire, inventory, Attempt and durable receipts.
+    """
+    rows = []
+    for ordinal, source in enumerate(inventory["sources"]):
+        text = fulfillment_source_semantic_text(source)
+        selected = [(i, r) for i, _, r in observations if r.source_ref == source["source_ref"]]
+        groups = {}
+        coverage = set()
+        for index, route in selected:
+            basis = route.component_basis
+            key = (basis.source_span_start, basis.source_span_end,
+                   sha256(basis.source_component_quote.encode()).hexdigest())
+            groups.setdefault(key, []).append((index, route.capability))
+            coverage.update(range(key[0], key[1]))
+        missing = [i for i, char in enumerate(text) if not char.isspace() and i not in coverage]
+        ranges = []
+        for offset in missing:
+            if ranges and ranges[-1][1] == offset:
+                ranges[-1][1] += 1
+            else:
+                ranges.append([offset, offset + 1])
+        components = []
+        for (start, end, quote_hash), members in groups.items():
+            proposed = {capability for _, capability in members}
+            conflict = len(proposed) > 1 and bool(proposed & {"RETAIN_CONTEXT", "UNRESOLVED"})
+            components.append({"located_span": [start, end], "quote_sha256": quote_hash,
+                "route_indices": [i for i, _ in members], "proposed_capabilities": sorted(proposed),
+                "disposition_status": "CONFLICT" if conflict else "UNRESOLVED" if proposed == {"UNRESOLVED"}
+                    else "RETAINED_CONTEXT_PROPOSAL" if proposed == {"RETAIN_CONTEXT"} else "PROPOSED_PENDING_REVIEW"})
+        rows.append({"source": ordinal, "source_ref": source["source_ref"],
+            "original_text_sha256": sha256(text.encode()).hexdigest(),
+            "source_route_indices": [i for i, _ in selected],
+            "coverage_status": "NOT_EVALUABLE" if unavailable else "MISSING" if missing else "COMPLETE",
+            "uncovered_codepoint_ranges": [] if unavailable else ranges[:16],
+            "additional_uncovered_range_count": None if unavailable else max(0, len(ranges) - 16),
+            "components": components, "semantic_fulfillment": "UNKNOWN", "actual_evidence": "NEED_EVIDENCE"})
+    return {"sources": rows, "inventory_fingerprint": inventory["inventory_fingerprint"],
+        "not_evaluable": list(unavailable),
+        "meaning": "UNADMITTED_JOINT_OBSERVATION; NO_ROUTE_SELECTION_OR_REPAIR; NO_EVIDENCE_OR_ASSURANCE_PASS"}
 
 
 def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validation_feedback, owner_preconditions=None, located_candidate=None, repair_context_contract="existing-owner-preconditions-v1"):
@@ -2650,6 +2705,8 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
             and route.source_ref.removeprefix("semantic-fact:") in dependencies
             and route.source_ref in route.component_basis.linked_fact_refs]
     return {"inventory_fingerprint": inventory["inventory_fingerprint"], **raw_operands,
+        **({"source_component_observations": _source_component_observations(inventory, observations, unavailable)}
+           if (owner_preconditions or {}).get("module_adaptation_contract") == "existing-source-component-convergence-v1" else {}),
         **({"quote_locator_operand_contract": {
             "raw_operand_ref": "untrusted_previous_wire.routes[route].{a,z,q}",
             "located_span_ref": "located_components[route].located_span" if located_view is not None else None,
@@ -2920,6 +2977,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     review_input_contract=preconditions.get("review_input_contract"),
                     semantic_selection_input_contract=preconditions.get("semantic_selection_input_contract"),
                     generation_prerequisite_contract=preconditions.get("generation_prerequisite_contract"),
+                    module_adaptation_contract=preconditions.get("module_adaptation_contract"),
                     source_context_contract=preconditions.get("source_context_contract"),
                     wire_presentation_contract=preconditions.get("wire_presentation_contract"),
                     review_source_consumption_contract=preconditions.get("review_source_consumption_contract"),
@@ -3625,6 +3683,8 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                         if initial_request is not None else "existing-primary-meaning-owner-reference-v2"),
                     generation_prerequisite_contract=((initial_request.get("owner_source_preconditions") or {}).get("generation_prerequisite_contract")
                         if initial_request is not None else None),
+                    module_adaptation_contract=((initial_request.get("owner_source_preconditions") or {}).get("module_adaptation_contract")
+                        if initial_request is not None else None),
                     source_context_contract=((initial_request.get("owner_source_preconditions") or {}).get("source_context_contract")
                         if initial_request is not None else _PRIMARY_CONTEXT_CONTRACT),
                     wire_presentation_contract=((initial_request.get("owner_source_preconditions") or {}).get("wire_presentation_contract")
@@ -3670,6 +3730,10 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                             exclusion_content_contract="existing-current-exclusion-content-correspondence-v1",
                             fact_method_applicability_contract=_FACT_METHOD_APPLICABILITY)
                         precondition_arguments["owner_preconditions"] = actual_preconditions
+                    if (actual_preconditions.get("typed_prerequisite_contract") == "existing-owner-typed-prerequisites-v11"
+                            and actual_preconditions.get("semantic_selection_input_contract") == "existing-primary-meaning-owner-reference-v2"
+                            and actual_preconditions.get("generation_view_contract") == "existing-lossless-source-consumer-input-v3"):
+                        actual_preconditions["module_adaptation_contract"] = "existing-source-component-convergence-v1"
                     source_contract = ("v3" if precondition_arguments["owner_preconditions"].get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v2" if precondition_arguments["owner_preconditions"].get(
                         "typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v1")
                 wire_metadata = metadata_builder(inventory, capabilities, validation_feedback=feedback,

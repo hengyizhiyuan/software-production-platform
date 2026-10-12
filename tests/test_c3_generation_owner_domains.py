@@ -916,7 +916,9 @@ def test_v3_final_consumer_revalidates_actual_formation_and_review_lineage(tampe
         stage = {"review-pending-capabilities": "SEMANTIC_REVIEW_PENDING", "review-observed-capabilities": "SEMANTIC_REVIEW_OBSERVED", "review-validated-capabilities": "SEMANTIC_REVIEW_VALIDATED"}[tamper]
         next(r for r in rows if r["stage"] == stage)["capabilities_fingerprint"] = "0" * 64
     altered = (bindings[0].model_copy(update={"formation_receipt": receipt}), *bindings[1:])
-    with pytest.raises(ValueError, match="IDENTITY_DRIFT|SEMANTIC_COMPONENT_MISMATCH"):
+    expected = ("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT" if tamper == "review-output"
+                else "IDENTITY_DRIFT|SEMANTIC_COMPONENT_MISMATCH")
+    with pytest.raises(ValueError, match=expected):
         validate_fulfillment_projection(altered, revision, ir, exact_target_paths=inv["exact_target_paths"])
 
 
