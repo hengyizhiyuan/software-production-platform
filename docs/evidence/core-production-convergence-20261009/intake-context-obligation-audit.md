@@ -1,0 +1,167 @@
+# Phase B support — Intake, Context and Obligation handoff reality
+
+Audit date: 2026-10-09 (Asia/Shanghai). New read-only audit note; no code, runtime, tests, historical script, database mutation, new Work or production change was performed. One specifically requested historical ECF commit was fetched; no checkout changed. Only this new document was created. This is not a Runtime qualification or replacement historical report.
+
+## Exact source and evidence rules
+
+| Source | Exact identity |
+| --- | --- |
+| Watt main (M) | `3c367be19d7663b5b9764347b45e6ae355c28e7d`, `D:\hy\core-production-audit\watt` |
+| N1 branch HEAD (N) | `5fd2579f8ab67db12f6ea122048613184276175f`, `C:\Users\yuchunbo\.codex\worktrees\governed-context-convergence\software-production-platform` |
+| N1 latest recovery code | `9b3ca2f0b3e298a64ba345229c5856e22be931e5`, branch-only; no new qualified image in its receipt |
+| ECF current main (ECF-M) | `c6b568d006022e39b95daebedfecfb55e562ebe5`, tree `f102fa082bbd0a1abd827e77d6aa1340db8b83c5` |
+| N1 historical ECF (ECF-H) | `5aa4f8833c359c15bd059eda5972aa3915bcc18c`, tree `878d39d9c259272bb05f2e02bdf9d60c22fad460` |
+| Program criterion | Accepted ADR-0002 `1e2c1fdf37d9252c0a9bd480fc2ff15c88d0fee1` |
+
+ECF reads used `git show` in `D:\hy\engineering-context-fabric`; its local checkout is older `e2202f3211843d3f6a6e16b3cdfa5226f21ee908` and was not treated as current main. `git fetch origin 5aa4f8833c359c15bd059eda5972aa3915bcc18c` succeeded, and `cat-file -t` confirmed the object is a commit. Thus the historical source is available, rather than inferred from `rev-parse` echo alone. Parent additionally reports a fresh read-only ECS Python-source aggregate for `/data/watt/owners/ecf`: `3f3fea2ec06e45917bb6f219f5f172ff0256f893817cdf75ba1f56f2051d6767`, matching ECF-H and differing from ECF-M. Exact capture details belong to the parent attestation. Parent resolved the earlier aggregate discrepancy with per-file checks: all 256 N1 Watt Python files match 84d16b1 and all five Guardian overlay Python files match 7cdd58540b59767d9a68a5d16038c06f89059a5d; the initial difference was platform-path sorting. See [source register](source-register.md) for exact current identity and capture details. This establishes inspected source identity, not new qualification.
+
+Paths below are repository relative at the named revision. **E1** means historical persistent Owner/runtime snapshots or an explicitly identified fresh read-only observation; **E2** historical exact-source fixture/test/replay results (not live model unless stated); **E3** exact-source code path; **E4** architecture or narrative without independent corroboration. A test file read now is E3; only its historical execution receipt establishes E2. This sub-audit does not requery ECS. Report-only narratives remain E4 unless underlying archived Owner data is also identified. Causal labels **PROVEN / CONFIRMED_EDGE / HYPOTHESIS / UNKNOWN** are separate from qualification classes **PROVEN_SCOPED / IMPLEMENTED_UNQUALIFIED / DEFECT_CONFIRMED / CAPABILITY_GAP / UNKNOWN / DEFERRED**.
+
+## 1. Boundary ledger — eight required questions at each handoff
+
+### Human Interaction → WIC / IRK
+
+1. **Upstream authority:** persisted Human `InteractionRecord` IDs/content/actor and immutable interpretation basis; Owner observations are separate authority. Model output starts as a Candidate (N `src/spg/application/interaction.py:2927-2944`; `providers/deepseek_interaction.py:274-322`).
+2. **Actual projection:** WIC returns Semantic Items/Clauses, Production Intent, questions, Human decisions and Fact candidates. IRK admits a governed Semantic IR; `current_production` is computed from typed items, not a required top-level JSON field (M `domain/intent_realization.py:218`; N `application/intent_realization.py:695`).
+3. **Consistency:** IRK checks source spans, item/clause links, authority, source evidence and literal target paths. Syntactic coverage explicitly does not prove complete meaning preservation (N `intent_realization.py:179`, `223-261`, `269`, `491-535`). Model proposals cannot create delivery authorization.
+4. **Protection:** current/future/negated clauses and unresolved reserved Human choices remain typed. Latest actual Human decisions require source grounding/options (N `intent_realization.py:162-176`). Provider sanitation drops unsupported supersession claims before admission (`deepseek_interaction.py:57-92`), not already admitted Facts; total semantic retention after sanitation remains unqualified.
+5. **Validation/convergence Owner:** WIC performs three bounded repair attempts with original instruction+feedback and calls IRK validation plus Fact binding inside that boundary; exhaustion raises `StructuredResponseSchemaViolation` (N `deepseek_interaction.py:282-314`, `325-333`). No new Refine coordinator is used.
+6. **Evidence/promotion Owner:** WIC supplies candidate/model identity; Interaction/IRK governs admission against authoritative basis. Downstream Verification/Guardian/Human Owners retain their evidence and promotion responsibilities; candidate prose is not approval.
+7. **Generality:** actual model-based semantic repair exists, but no broad live end-to-end proof here. Narrow extra G4/source-role helpers do not establish unlisted Human-expression coverage, nor prove every other expression fails.
+8. **Evidence:** E3 cited path; M fixture source `tests/test_deepseek_wic_provider.py:223`, `342`, `694`, `711`, `724` for same-basis repair, exhaustion, cross-reference validity, literal protection and reserved choices. None executed now. Historical downstream N1 failures are not evidence that WIC lacks all repair.
+
+**Assessment:** identity/authority checks **PROVEN_SCOPED**; broad production generality **IMPLEMENTED_UNQUALIFIED / UNKNOWN**; E3 **CONFIRMED_EDGE**.
+
+### IRK / Engineering Semantic Truth → Work Reality
+
+1. **Upstream authority:** governed IR plus lawful source-grounded Fact candidates. An authoritative IR `CONSTRAINT` need not also be a distinct Engineering Semantic Fact; the latest GOF addendum corrects the prior Fact-only diagnosis.
+2. **Actual projection:** `project_interaction_candidate` projects typed constraints and scope/exclusions into Work constraints; Fact binder retains lineage and admission sets Work Reality identity (N `application/intent_realization.py:1068`, `1087-1092`; `application/engineering_semantics.py:27`, `237`). Object counts alone do not prove semantic loss.
+3. **Consistency:** inferred facts cannot supersede HumanExplicit authority. Canonical provenance resolves actual source records (`engineering_semantics.py:126-137`, `182-233`); replacing an excerpt with the cited full Human record proves citation integrity, not independently that every candidate Value is semantically equivalent.
+4. **Protection:** immutable Work basis/revision/Fact lineages and nonproduction side-question guards preserve accepted reality (N `application/interaction.py:2995-3012`). G4 content order and governance facts require separate traces; fourteen correct strings alone do not prove all protected obligations.
+5. **Validation/convergence Owner:** WIC/IRK validates before admission, Work lifecycle Owner admits revisions. Consumers may repair derived plans but not accepted Fact authority. The G4 helper acts before admission, not as post-admission fact rewrite.
+6. **Evidence/promotion Owner:** assessment, Semantic IR, Work revision and admission governance are separate persisted records; Work/Fact Owners admit and preserve them. Satisfaction requires actual downstream Verification/Guardian/Human evidence.
+7. **Generality:** domain-neutral relations are not a business-field ontology. Literal helper/source-role seams have scoped coverage; retained constraints do not by themselves establish lawful fulfillment/gates.
+8. **Evidence:** archived E1 `docs/evidence/governed-obligation-fulfillment-20261009/blocker-forensics-snapshot.json` and `original-scenarios-read-only.jsonl`; report addendum `qualification-report.md:12-30` says latest real G0 IR item `si-3` / Clause `c7` retain HumanExplicit prohibitions while old persisted Completion Contract has zero fulfillment bindings. Missing separate prohibition Fact is not missing authority.
+
+**Assessment:** admitted provenance **PROVEN_SCOPED**; new IR-Constraint route **IMPLEMENTED_UNQUALIFIED**; complete consumption **CAPABILITY_GAP / UNKNOWN**. The old pre-Fact-admission diagnosis is explicitly withdrawn, not current truth.
+
+### Work Reality / Product Source → ECF / Context Assembly
+
+1. **Upstream authority:** exact admitted Work revision/governance and Product managed source identity/version/revision/tree; accepted successor requires real acceptance lineage. Ordinary users need not supply internal revision IDs.
+2. **Actual projection:** Watt ManagedGreenfieldContext carries admitted Product Intent and Work constraints. Invariant/Decision is applicable only when actual declarations or reserved unresolved choice require it; no fictitious policy facts (M `application/managed_greenfield_context.py:37-79`; N `:40`, `68`, `74-119`, `122-159`, `160-228`).
+3. **Consistency:** Product repository and Work branch identities differ lawfully; exact current resource/source proof is checked. ECF checks authoritative class Owner, source/version, exact scope, supersession, conflicts and temporal freshness (ECF-M `src/ecf/decision_context.py:132`, `192`, `421-433`, `435-534`). READY is context readiness, not Work/Delivery PASS. ECF's pure kernel consumes Owner snapshots; it does not authenticate external domain truth by itself.
+4. **Protection:** Work restrictions remain constraints; unresolved required Human choice clears apparent decisions and blocks readiness. Policy roles still rely on exact IR subjects plus kind/provenance/affirmative-current checks (N `managed_greenfield_context.py:93-110`). This is a generality seam, not evidence that every alternative policy expression is silently lost.
+5. **Validation/convergence Owner:** Watt validates projection; ECF validates structural context contract. Upstream WIC owns model candidate repair. ECF does not re-interpret Human language or fabricate missing approval.
+6. **Evidence/promotion Owner:** Product Source/Work admission supply authoritative records; ECF emits fingerprinted covered identities. Task checks freshness. ECF READY cannot seal Candidate, grant Guardian PASS or approve Human integration.
+7. **Generality:** unique accepted-source binding checks real Owner facts and fails ambiguous/no matches unresolved (N `application/intent_realization.py:85-149`). Natural-role recognition is English fullmatch; other generic/external strings return unchanged to normal validation. This helper does not prove all unlisted source expressions converge.
+8. **Evidence:** exact code and archived G0/G3 root-cause replays (section 3). N fixture sources `tests/test_managed_greenfield_context.py:139`, `149`, `163`, `237`; integration `test_managed_greenfield_context.py:39`, `test_product_managed_source_gitea.py:322`. ECF-H managed test has applicability cases absent ECF-M. F1 proves a conditional current-main compatibility defect; old N1 used ECF-H, where API exists.
+
+**Assessment:** routing corrections **PROVEN_SCOPED** by code/replays; successor/general references **IMPLEMENTED_UNQUALIFIED**; M/N + ECF-M managed pairing **DEFECT_CONFIRMED** E3. Deployed owner combination is separate current attestation, not historical inference.
+### ECF / Context → Steering / Planning / Task Contract / PWU
+
+1. **Upstream authority:** Work/IR/Facts, exact source baseline/tree, ECF protected identities/fingerprint. Model design/production proposals remain Candidates.
+2. **Actual projection:** SemanticStepInput carries immutable basis; Task Contract carries Fact obligations, ECF required sources and lossless Protected Context envelope (N `application/semantic_steps.py:132`, `248`; M/N `application/production_intelligence.py:278-370`). ContextOrchestrator rejects required-source overflow rather than dropping required facts (`:159-226`, especially `197-202`).
+3. **Consistency:** Task validation requires context fingerprint, lineage and protected-source coverage (M/N `domain/production_intelligence.py:397-418`). Steering admission checks current basis/step/source/tree, evidence authority and unresolved Human decisions (M `semantic_steps.py:432-469`; N `452` onward). These are valid deterministic governance.
+4. **Protection:** one required Protected Context envelope avoids source-count trimming; every character still counts. Model results cannot expand Work authority/constraints/scope; reserved Human choice stops current action. Inclusion proves transport integrity, not satisfaction at the right lifecycle phase.
+5. **Validation/convergence Owner:** semantic Provider refines once against immutable basis; existing SemanticStepApplicationService routine records two total candidate attempts (M `semantic_steps.py:281`, `397`; N `301`, `417`; M/N `providers/deepseek_semantic.py:105`, `181-206`, `310`). Actual default ProductionPlanningService uses RuleBased planner and deterministic candidate regeneration (M `semantic_steps.py:104`; N `124`; M/N `steering_production.py:78`, `planning.py:22-53`). That is not model-based planning convergence.
+6. **Evidence/promotion Owner:** Steering admits semantic step; Planning validates graph; Work/PWU creates units. None grants Assurance or Human authority. Native/Verification must actually consume bindings; N's Steering entry has the conditional omission F2.
+7. **Generality:** hard identity/path/graph checks are reusable. Default planner's target grouping and fixed-keyword dependency/parallel decision has limited open-semantic capability (M/N `providers/rule_based_planner.py:165-224`). Deterministic decomposition over exact contracts is not inherently forbidden; keyword coupling is not evidence for novel dependency meaning.
+8. **Evidence:** M fixture sources `tests/integration/test_mvp_semantic_step_execution.py:672`, `735`, `771`, `798`, `828` for same-basis repair, path correction, authority rejection and exhaustion; M/N `test_multi_pwu_planning.py:43`, `51`, `58`, `66`, `111`, `133` for fixed graph cases. Read only now. Old N1 Worker progress does not qualify this new branch's whole production path.
+
+**Assessment:** protected transport/budget/authority **PROVEN_SCOPED**; broad model production **IMPLEMENTED_UNQUALIFIED**; open planning generality **IMPLEMENTED_UNQUALIFIED** and missing semantic-dependency candidate/refinement responsibility **CAPABILITY_GAP**; F2 conditional **DEFECT_CONFIRMED**, fails closed.
+
+### Task / PWU → GOF evidence consumer (limited downstream seam)
+
+1. **Upstream authority:** admitted Fact or IR Constraint, exact Work revision/provenance/source, actual Native record, exact Candidate/Git evidence. These authority sources are not interchangeable.
+2. **Actual projection:** N FulfillmentBinding supports FACT or IR_CONSTRAINT and remains derived pending evidence, not new Fact/approval/state machine (N `domain/governed_obligation.py:34-83`, `122-161`). Typed current effects route to existing permissions/diff/Delivery Owners (`application/governed_obligations.py:65-105`).
+3. **Consistency:** exact Clause/Work/source/Native reference, capability grants, write scope and Git Diff are checked; drift fails (`governed_obligations.py:108-114`, `169-219`). Evidence is explicitly current attempt and scoped Verification only, not a complete lifetime audit.
+4. **Protection:** unknown typed PROHIBIT_/RESTRICT_ routes fail unresolved (`:85-89`). Other unknown effect strings receive no result in this materializer; their outcome must be established elsewhere. IR requested_effects is a free string tuple, not the route table's seven-entry closed protocol. Protected Context remains independent but cannot alone prove every effect was routed.
+5. **Validation/convergence Owner:** no model-assisted fulfillment candidate mapping/refinement occurs within typed route construction. The table names real Owner capabilities and is not intrinsically an alias violation. Managed Context uses English effect/candidate/change expressions to choose evidence classes (`providers/managed_context_fulfillment.py:91-151`); exact checking after routing is valid, broader semantic-to-Owner generality remains unqualified.
+6. **Evidence/promotion Owner:** Verification owns content/diff, Native current permissions, Product accepted source, Candidate seal, Human decision and Guardian assurance retain independent owners. Future Candidate handoff may be pending at its real gate, never implied already sealed/approved.
+7. **Generality:** branch code supports tested typed routes/literals; it does not prove arbitrary lawful obligations receive a legal consumer or pending gate. Upstream WIC repair must not be reported as a missing model-based obligation-mapping implementation. No global semantic ontology or new Refine coordinator found in this module; potential lifecycle consolidation is an audit input, not implementation authorization.
+8. **Evidence:** historical recovery receipt records seven directed fixtures and actual persisted-IR replay over old-image source overlay, explicitly no new image/Work/PASS. Test shape does not cover real Constraint rows entering the Fact-only Managed Context consumer (F3). That defect is separate from old Workspace failure.
+
+**Assessment:** exact derived identity/current negatives **PROVEN_SCOPED** in E3/historical E2; overall new branch **IMPLEMENTED_UNQUALIFIED**; F3 **DEFECT_CONFIRMED** conditionally; generic mapping **CAPABILITY_GAP / UNKNOWN**; real new-image qualification **IMPLEMENTED_UNQUALIFIED**, not executed under this read-only mission.
+
+## 2. Exact findings and limitations
+
+### F1 — Current Watt / current ECF managed API is incompatible despite version 0.1
+
+**DEFECT_CONFIRMED; E3; CONFIRMED_EDGE** for this version combination, not historical live causation.
+
+M `src/spg/application/decision_context.py:_ecf` 422-429 and N 434-441 import `ecf.decision_context`, checking only `VERSION == "0.1"`. Both ECF-M and ECF-H declare 0.1 at `src/ecf/decision_context.py:14`. M managed call accesses enum at 471 and keyword at 492; N at 483 / 504. ECF-H has `MANAGED_GREENFIELD_PRODUCTION` enum at 26, `required_context_classes` field at 173 and dynamic contract at 336-363. ECF-M has neither enum nor keyword; Request begins 163, contract_for 322. Managed call can fail by missing enum/keyword while nominal version check accepts it.
+
+Cross-revision src/tests diff touches only `src/ecf/decision_context.py` (29 lines) and absent 49-line `tests/test_managed_greenfield_context.py`; runtime/production_environment/contracts comparison is otherwise unchanged. This does not assert c6 itself deleted a previously merged contract, or that doc adoption caused the drift. The historical fetched ECF-H object/tree is now real; parent current ECS source attestation also matches ECF-H. Thus current-main incompatibility is an available-version contract risk, not the cause of old N1 failures against historical API that existed. Exact runtime import identity belongs to parent's E1 observation.
+
+### F2 — Steering Completion Contract omits bindings required by Native validation
+
+**DEFECT_CONFIRMED; E3; CONFIRMED_EDGE; conditional fail-closed blocker.**
+
+N WorkApplicationService.approve_work materializes bindings (`src/spg/application/work.py:1790-1794`) and adds them to Completion Contracts at 1989 / 2031. N SteeringProductionAdmissionService._production_contract (`steering_production.py:468`) creates both Documentation and Code Completion Contracts (517-530, 540-548) without fulfillment_bindings. Domain default is empty (`domain/runtime.py:92`).
+
+N Native compatibility validates whenever Work revision exists (`infrastructure/executor_runtime/native_compatibility_executor.py:224-228`). `validate_continuous_gates` recomputes admitted typed routes and rejects unequal IR_CONSTRAINT bindings (`application/governed_obligations.py:108-114`). If Steering's unit has typed effects requiring a nonempty expected route, its empty bindings produce `OBLIGATION_GATE_BINDING_DRIFT` before legitimate execution. No-binding-needed unit is unaffected. This is a lawful path blocked, not an unauthorized bypass. No new runtime executed; old images precede latest route support, so old Workspace failure cannot be assigned to this defect.
+
+### F3 — IR Constraint verification rows reach a Fact-only managed consumer
+
+**DEFECT_CONFIRMED; E3; CONFIRMED_EDGE; fail-safe UNKNOWN, not PASS.**
+
+N evaluate_constraint_routes (`application/governed_obligations.py:169-219`) emits constraint_item_id / constraint_clause_id (203-204), no fact_id; successful continuous result is GATED_CONTINUOUS (206-208). RepositoryCodeVerifier appends these rows to semantic_checks (`providers/repository_code_verifier.py:214-221`) and passes whole collection to managed consumer at 241-247 when managed surface + PATH_SCOPE PASS + protected obligations apply.
+
+Managed consumer `providers/managed_context_fulfillment.py:79-85` accesses check["fact_id"] for every GATED_CONTINUOUS binding. Evidence comprehensions at 150 / 165 also assume Fact rows. A successful IR_CONSTRAINT continuous row therefore raises KeyError. Repository verifier catches all exceptions at 257-263 and returns UNKNOWN with exception type, preventing false PASS; preceding detailed check metadata is lost in that result.
+
+Seven-test recovery receipt does not exclude this seam. `tests/test_governed_obligation_fulfillment.py:253` constructs managed fixture; both manual semantic_checks rows at 289-295 contain fact_id. Actual persisted-IR probe proves route building and negative gates, not full mixed-row Repository → managed ECF chain. No latest recovery image or real Work ran. A lawful evidence shape must reference an IR Constraint without inventing a Fact ID; this audit does not implement that repair.
+
+### F4 — G4 literal helper is scoped pre-admission protection, not proven global failure
+
+**IMPLEMENTED_UNQUALIFIED; E3; CONFIRMED_EDGE specialization; broader consequences UNKNOWN.**
+
+N WorkInteractionService.admit_candidate invokes `_preserve_explicit_ordered_page_items` at `application/interaction.py:2942`, before IRK.govern 2944. Helper at 4273 intentionally has narrow grammar: index.html, ordered list, exact English sentence, semicolon-separated F01..Fn. Nonmatching input returns original Candidate at 4284-4290, then ordinary IRK path. It is not the only Greenfield entry; no evidence establishes every alternative expression fails.
+
+For a matching Human-required literal list, exact value/occurrence/order checks are lawful deterministic protection. Helper verifies or appends a Human-sourced Candidate Fact; canonicalization 4319-4326 is before immutable admission, not a rewrite of Engineering Truth. Fixed subject/scope/count and replacing qualifiers deserves retention qualification, but no actual additional-qualifier loss demonstrated. `tests/test_n1_static_html_semantics.py:450-521` covers multiple model Candidate Subject/Scope/label variants against one prelisted Human grammar, plus malformed label; not unlisted Human expression/whole Work qualification. F IDs alone are not an ADR violation. The unqualified risk is claiming helper success proves generic consumer convergence; historical G4 downstream scope failure is separate.
+
+### F5 — Source-role / obligation-routing semantic coverage remains narrow
+
+**CAPABILITY_GAP; E3; CONFIRMED_EDGE scoped implementation; broad failure UNKNOWN.**
+
+N accepted Product binder `application/intent_realization.py:85-149` resolves an already compiler-typed role against unique exact Owner sources; identity governance is valid. Natural fullmatch 92-96 / 115-118 recognizes English accepted product source/repository/codebase; unsupported strings return unchanged 121-123. Exact Owner-observed source is supported; ambiguity remains unresolved rather than guessed. This helper alone is not broad natural-language role generality.
+
+Typed effect routes `governed_obligations.py:35-57` identify actual capabilities, so enum presence is not inherently wrongdoing. Unknown prohibitions/restrictions fail unresolved 85-89, but arbitrary other effects have no result there. Protected-context raw lexical classification `managed_context_fulfillment.py:91-151` is not a general lawful Owner/phase mapping. No model or local Self-Refine inside route builder. Existing bounded WIC/content repair must not be presented as a new generic fulfillment plan repair path.
+
+### F6 — Default planning regenerates deterministically and uses keyword coupling
+
+**IMPLEMENTED_UNQUALIFIED** for open planning generality; **CAPABILITY_GAP** only for the missing semantic-dependency candidate/refinement responsibility at the observed default path; E3; **CONFIRMED_EDGE** behavior, not a proven failed Work.
+
+M/N planning.py22-53 regenerates invalid candidate with RuleBased planner and records bounded existing routine. Authority checks 84-151 preserve original source/scope/constraint/Verification, which should remain. RuleBased planner165-224 groups targets and uses fixed words such as shared/schema/interface/depends-on and Chinese equivalents to decide coupling/parallelism. This does not prove novel semantic dependency understanding. Deterministic grouping over exact lawful contracts is not intrinsically forbidden; presenting keyword coupling as sufficient open requirement planning is the unqualified boundary. No implementation/new system authorized here.
+## 3. Historical runtime and fixture scope
+
+These remain historical failures/results; none reclassified or modified. `G0/G3/G4` references below live under N `docs/evidence/governed-production-context-convergence-v1/`; GOF references under N `docs/evidence/governed-obligation-fulfillment-20261009/`.
+
+| Case / receipt | Exact identity and observed boundary | Evidence scope |
+| --- | --- | --- |
+| G0 `g0-root-cause-review-20261008.md`, capture 2026-10-08 06:18 UTC | Work `eaae7b07-38ed-50f4-8322-167da879596d`; Product repository / Work branch are distinct identities. Incorrect adapter comparison fell back to all-three-class UI contract. | Archived Owner/context replay supports route correction without invented Invariant/Decision; not full live Work PASS. |
+| G3 `g3-existing-product-v0-review-20261008.md` | Product `6fa33e3c-bbf6-4d2a-b6e7-5488b74cbe81`; Work `c3905967-6c21-551e-ba1a-3d44b692513b`; revision `a747e65e-4d89-555f-88b2-96a0481ba98d`. Real observed managed V0 existed; old adapter assumed no repository. | Scoped replay READY; not real accepted V1, successor or new-image full Work. |
+| G0 `qualification-report-0d48353-20261008.md` | Watt `0d4835353dbdb38abd6abfc19127b84eb5544475`; image `sha256:64289d0a086ecf03efb2dae24ab036bd83906905e00fd71fa30fc51feb160709`; Work `6899ad34-73f1-5180-8323-f1559dd9cc8f`; revision `056a1c94-9762-584c-b48e-a60e829a9a06`; PATH_SCOPE `ca50583d-a863-5fee-94cf-f03467d5e921` fails at `page.index_file`. | Real old-image expression/consumer failure, no sealed Candidate. Not 5fd behavior. |
+| G3 same 0d report | Work `e50a9566-155c-5843-93fd-9b7ec800df7d`; revision `54b21d5d-3e03-54bf-8b1c-c46b987b3abb`; Product source `c37c2e366650935dde62ef48a6b54a621337a27c`; Candidate `3d612a3e-bac9-54c9-8a3f-078a981c3362`. | Scoped source/HTML/path/diff positive; Human authorization absent. No full Work, accepted V1 or G2. |
+| G4 same 0d report / `self-refine-boundary-review-20261008.md` | Work `c616ab6b-d985-5b35-a2c4-47d9b79ad4e7`; revision `071c9671-c68c-5a66-926e-d334e2aa3e8a`; exact ordered Fact `7b610ed7-bb57-54fb-88cc-4a4b10bdc6cb`; assertion `84f6bfcd-184c-55ad-ada1-8bea7ac9f784`; PATH_SCOPE `2c650693-cbe6-50b4-a0a5-ab6019a57eff`. | Exact F01–F14 values retained and checked; separate scope `index.html ordered list` failed old static consumer. No sealed Candidate; content alone does not prove governance. |
+| Original G4 `g1-g3-g4-root-cause-trace-20261008.md` | Work `4a9f9064-d307-5261-a1c5-e734a52db4bf`; Human `367c2a56-0c4d-413b-b69f-63706e11eb1d`; ordered Fact `45452139-afde-555f-a409-794f0e69b610`. | One ordered Fact can contain fourteen values while Work summaries have nine rows. Count difference alone is not omission; each semantics and downstream Gate still needs trace. |
+| Latest real GOF `qualification-report.md`, `live-outcomes-read-only.jsonl`, `blocker-forensics-snapshot.json` | Work `84d7f3a9-b90c-5341-a007-2661fc6399b3`; revision `c8372b46-7701-5d8c-bed9-c2a07084f66d`; IR `82132598-0186-58a7-b35d-cf70c02ccda3`; Human `5b2577cb-c83b-4cf6-aa8e-a580335c71f0`; baseline `0bdd028418e0e7efea7675cfbbd6b6a3a008ceeb`; Attempt `e3addc05-7ee4-49f4-9043-c69b6466bcf8`; event `879cdfb4-77e6-4837-a8af-875563dbb59b`. | Exact old code `84d16b1f98ee124a4a7fb11761c821e25223ad24`, image `sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14` stops at workspace before first step; Candidate/Verification zero. Current visibility cannot reconstruct failing predicate/errno, UNKNOWN. |
+| Branch-only `blocker-b-regression-receipt.json` | Code `9b3ca2f0b3e298a64ba345229c5856e22be931e5`; old84d source overlay; five bindings from real persisted IR; seven directed fixture tests; missing ref, forbidden grant, wrong revision, failed diff scope, wrong exact target rejected. | E2 fixture + persisted IR replay, not new image/live Work. Receipt explicitly new_image_built=false, new_work_created=false, live_work_pass=false. Does not cover F3 mixed-row consumer. |
+
+Archived `original-scenarios-read-only.jsonl` records G0 facts6/protected8/Work constraints7; G3 facts5/protected8/constraints7; G4 facts4/protected9/constraints8; each has zero historic GOF bindings because it predates GOF. They were not retroactively amended.
+
+Historical ECF export `/data/watt/owners/ecf` exact revision/tree is in `guardian-governance-evidence-contract-finding-20261008.md:9`. The 0d receipt records mounted ECF hash-manifest `48b10918282db55267b86fceb355c5d87c8bb29b5761bf38dbca10d2a53df7d5`. That old hash-manifest scheme is different from the parent's fresh sorted-relative-POSIX Python-source aggregate; they must not be directly compared as the same algorithm.
+
+### Parent read-only source attestation clarification
+
+After the earlier aggregate discrepancy noted in this document's source introduction, parent performed per-file Git-archive versus container Python comparison and resolved a platform-path sort difference: **all 256 Watt .py paths and SHA values match 84d16b1; all five Guardian overlay .py files match 7cdd58540b59767d9a68a5d16038c06f89059a5d**. Consistent sorted-relative-POSIX aggregate: Watt `dae29a4b4bfeba283f00256609e22777600348286de6ba17223a44f718442b08`; Guardian `c03659155b14e39fd4a26cc7ade394b5136723d918681a87cfc8d9f4ea021fcf`. This establishes current inspected file identity, not new qualification, image rebuild, full archive coverage or historical effect audit. Latest9b remains unbuilt/unqualified. Parent reports production Python source matching its canonical/main code; exact full production identity/time is recorded separately in the parent attestation.
+
+## 4. Whole-system disposition
+
+- **Preserve actual scoped capability:** same-basis bounded WIC/Steering candidate repair; immutable admitted authority; exact source/revision/scope checks; required Context budget stop; exact ordered value/diff checks; Fact or IR Constraint derived identity; actual current grant and missing-evidence rejection. These are determinism governing stochastic candidates, not automatically forbidden enum use.
+- **Do not claim generality from scoped fixes:** narrow literal helper, English accepted-source fullmatch, exact policy subjects, keyword-based planner and lexical GOF evidence routing need unlisted-expression/real Work evidence. No repeated new Subject aliases should be inferred as the remedy.
+- **Confirmed seams:** F1 current-version API pairing; F2 Steering binding omission; F3 mixed Fact/Constraint result shape. Exact conditional E3 defects, not proven historical live causes. F2/F3 fail closed.
+- **GOF disposition:** derived FulfillmentBinding is not a new Fact or second Coordinator; it reuses Native, Verification, Candidate, Human and Delivery Owners. Correct responsibility/entry wiring and general mapping remain incomplete. Potential consolidation into existing lifecycle admission is an architecture audit input; no blanket preserve/delete decision or implementation performed.
+- **UNKNOWN:** old preflight predicate/errno; broad live unlisted-expression convergence; every obligation's lawful consumer/gate; complete continuous prohibition audit. No illegal log is not proof of no illegal effect. Current exact file attestation does not prove old runtime events or full Work PASS.
+- **Audit scope / qualification not completed:** fixes, new Work, tests, broad Guardian inspection and N1 23 Closure Conditions are not executed by this supporting slice. Missing new-image qualification remains **IMPLEMENTED_UNQUALIFIED**, not DEFERRED merely because this mission is read only. **DEFERRED** is reserved for an explicit architectural postponement; none is newly declared here. Parent's whole-system report owns final categorization and future action scope.
+
+This document grants no Runtime conformance, N1 Closure, integration, delivery acceptance or production permission. Existing historical evidence and results remain unchanged.
