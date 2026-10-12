@@ -1424,3 +1424,26 @@ def test_navigation_is_bounded_and_invalid_or_noncanonical_array_selectors_are_n
     for field in ['/bad~2escape','/'+('1'*501)]:
         assert c.field_navigation(eid,field)['requested_pointer_valid'] is False
     assert eid not in c.observed_ranges
+
+
+@pytest.mark.parametrize('citation',[{'field':'/revision'},{'quote':'a'*40}])
+def test_repository_metadata_cannot_satisfy_the_causal_implementation_reference_gate(citation):
+    c=EvidenceCatalog(snapshot());r=report(c)
+    eid=c.add('repository','/fixture/implementation',{'repository':'source','revision':'a'*40,'path':'src/port.py','blob':'b'*40,'content':'if invalid: reject_without_effect()'},repository=True);c.read(eid)
+    r['findings'][0].update(epistemic_status='ROOT_CAUSE_HYPOTHESIS',repository_citations=[dict(citation,evidence_id=eid)])
+    with pytest.raises(ValueError,match='ROOT_CAUSE_REQUIRES_IMPLEMENTATION_EXCERPT'):c.validate(AnalysisReport.model_validate(r))
+    r['findings'][0]['repository_citations']=[{'evidence_id':eid,'field':'/content'}]
+    c.validate(AnalysisReport.model_validate(r))
+
+
+def test_repository_record_preserves_uniform_original_json_and_existing_decoded_code_quotes():
+    c=EvidenceCatalog(snapshot());r=report(c)
+    value={'repository':'source','revision':'a'*40,'path':'src/control.py','blob':'b'*40,'content':'if rejected:\n    return "拒绝"\n'}
+    eid=c.add('repository','/fixture/serialized-source',value,repository=True)
+    assert json.loads(c.records[eid]['body'])==value
+    c.read(eid,field='/content')
+    r['findings'][0].update(epistemic_status='ROOT_CAUSE_HYPOTHESIS',repository_citations=[{'evidence_id':eid,'quote':'if rejected:\n    return "拒绝"'}])
+    c.validate(AnalysisReport.model_validate(r))
+    r['findings'][0]['repository_citations']=[{'evidence_id':eid,'field':'/content'}]
+    out=c.materialize_boundaries(AnalysisReport.model_validate(r))
+    assert json.loads(out.findings[0].repository_citations[0].observed_value)==value['content']

@@ -193,10 +193,6 @@ class EvidenceCatalog:
     def add(self, group: str, pointer: str, value, *, repository=False):
         evidence_id = str(uuid5(NAMESPACE_URL, f"watt-trace:{self.digest}:{pointer}"))
         body = value if isinstance(value, str) else text(value)
-        if repository and isinstance(value, dict):
-            field = next((key for key in ("content", "matches", "patch") if key in value), None)
-            if field:
-                body = text({key: child for key, child in value.items() if key != field}) + "\nSOURCE_EXCERPT\n" + value[field]
         self.records[evidence_id] = {
             "evidence_id": evidence_id, "group": group, "pointer": pointer,
             "source_ref": value.get("source_ref") if isinstance(value, dict) else None,
@@ -674,6 +670,16 @@ class EvidenceCatalog:
             "original_objective", "expected_outcome", "actual_execution_path", "current_state")]
         facts += [(("timeline", i), fact) for i, fact in enumerate(report.timeline)]
         facts += [(("findings", i, "fact"), finding.fact) for i, finding in enumerate(report.findings)]
+        def implementation_reference(c):
+            row = self.records.get(str(c.evidence_id), {})
+            if row.get("semantics", {}).get("source_kind") != "EXACT_IMPLEMENTATION_READ":
+                return False
+            content = self.values.get(str(c.evidence_id), {}).get("content")
+            if not isinstance(content, str) or not content:
+                return False
+            if c.field is not None:
+                return c.field in {"", "/content"}
+            return c.quote is not None and (c.quote in content or c.quote in json.dumps(content, ensure_ascii=False)[1:-1])
         known_owner_ids = {str(value["id"]) for eid, value in self.values.items()
             if isinstance(value, dict) and value.get("id") and not self.records[eid]["repository"]
             and self.records[eid]["group"] not in {"analysis_draft", "evidence_check", "evidence_inspection"}}
@@ -770,8 +776,7 @@ class EvidenceCatalog:
                 except CitationRejected as error:
                     errors.append(error)
             if (finding.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and
-                    not any(self.records.get(str(c.evidence_id), {}).get("semantics", {}).get("source_kind") ==
-                            "EXACT_IMPLEMENTATION_READ" for c in finding.repository_citations)):
+                    not any(implementation_reference(c) for c in finding.repository_citations)):
                 errors.append(CitationRejected("ROOT_CAUSE_REQUIRES_IMPLEMENTATION_EXCERPT; use repository.read for surrounding producer control flow or retain UNKNOWN; search only locates code and a final diff cannot establish its mechanism", ["findings", index, "repository_citations"], subject_id))
         findings = {f.finding_id: f for f in report.findings}
         for section in ("immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"):

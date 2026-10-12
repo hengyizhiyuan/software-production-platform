@@ -377,3 +377,13 @@ key/index tokens in navigation metadata. This reads no values, supplies no alias
 or automatic pointer rewrites, and cannot qualify absence or a factual citation.
 Both evidence-read and report-reference failures preserve this metadata so the
 existing Owner can choose an exact read, revise the assertion, or terminate.
+The causal implementation gate also requires the cited implementation content
+(a fully read content/root field or an exact content quotation). Repository identity
+metadata alone cannot satisfy it, even when its record also contains implementation.
+This is source-selection verification; entailment remains semantic review.
+New repository records use the same single JSON serialization as their emitted
+structured value. The former JSON-header plus plaintext excerpt representation
+omitted content/matches/patch from JSON Pointer access and broke nested navigation.
+Exact decoded code quotations remain supported; immutable historical records are
+not migrated. Git identities, read scope, read coverage and source-content gates
+are preserved.
