@@ -87,7 +87,7 @@ class Finding(AnalysisRecord):
     uncertainty_check_ids: tuple[UUID, ...] = Field(default=(), max_length=4,
         description="Performed field checks relevant to this finding's uncertainty. Do not infer whole-response or historical absence from them.")
     scope_check_ids: tuple[UUID, ...] = Field(default=(), max_length=4,
-        description="For findings about unavailable fields, cite performed checks. Such findings are UNKNOWN; explain the checked scope in your own words. PRESENT checks cannot establish a missing field. Do not use them to infer global/history absence.")
+        description="Performed gap checks relevant to this finding. Their retrieval limits do not establish a cause or defect; independent positive facts/source may support other parts of the finding. PRESENT checks cannot establish a missing field. Explain uncertainty without broadening the checked scope.")
     classification: IssueClass
     epistemic_status: Literal["ROOT_CAUSE_HYPOTHESIS", "UNKNOWN"]
     fact: ObservedFact
@@ -121,8 +121,6 @@ class Finding(AnalysisRecord):
             raise ValueError("handling must preserve the issue classification boundary")
         if not self.repository_citations and self.epistemic_status != "UNKNOWN":
             raise ValueError("a root cause hypothesis requires repository evidence")
-        if self.scope_check_ids and (self.classification != IssueClass.UNKNOWN or self.epistemic_status != "UNKNOWN"):
-            raise ValueError("checked capture limitations cannot establish a platform defect or root cause")
         return self
 
 

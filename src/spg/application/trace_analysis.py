@@ -100,7 +100,10 @@ mutations or that rollback is unnecessary.
 Recommendations must address their cited subjects and preserve permissions, facts,
 verification and bounded recovery OR governed termination. No automatic Work creation,
 code modification, deployment or self-upgrade. A/B/C/UNKNOWN handling uses the existing
-classification boundaries; a diagnosis label alone is not a verified system defect.
+classification boundaries. A diagnosis label or a forbidden-behavior list alone does
+not establish that an actual generation deviated, a recovery action executed, or a
+system defect occurred. A gap annotation can coexist with separately supported
+positive observations and conditional source comparisons; it does not supply their proof.
 
 BOUNDED REPORT SELF-REVIEW AND REFINEMENT
 Submit early (by about inference 5 / tool 20) to retain budget for review and repair.
@@ -442,13 +445,29 @@ class TraceAnalysisService:
             def audit_budget():
                 used_tools = journal.event_counts.get("TOOL_STARTED", 0)
                 used_inferences = journal.event_counts.get("INFERENCE_STARTED", 0)
+                remaining = max(0, binding.resource_envelope.max_inference_submissions - used_inferences)
+                last = tools.verification_receipts[-1] if tools.verification_receipts else {}
+                if tools.accepted_report:
+                    phase, next_action, route = "REVIEWED_ADVISORY", "RETURN_RESULT_READY", ["terminal"]
+                elif last.get("verification") == "NATIVE_SELF_REVIEW_REQUIRES_REVISION":
+                    phase, next_action, route = "SEMANTIC_FEEDBACK", "REVISE_REVIEW_OR_TERMINATE", ["revise", "self-review", "terminal"]
+                elif last.get("next_action") == "analysis.review":
+                    phase, next_action, route = "STRUCTURAL_CANDIDATE", "SELF_REVIEW_PENDING_REPORT", ["self-review", "terminal"]
+                elif last.get("draft_id"):
+                    phase, next_action, route = "SOURCE_FEEDBACK", "REVISE_REVIEW_OR_TERMINATE", ["revise", "self-review", "terminal"]
+                else:
+                    phase, next_action, route = "RETRIEVAL", "DRAFT_THEN_SELF_REVIEW" if used_inferences >= binding.resource_envelope.max_inference_submissions // 2 else "INVESTIGATE_SELECTED_SUBJECTS", ["submit", "self-review", "terminal"]
                 return {"scope": "CURRENT_INVESTIGATION_AUDIT_ONLY",
                     "observed_tool_starts": used_tools, "observed_inference_starts": used_inferences,
+                    "remaining_inference_starts": remaining,
+                    "remaining_tool_starts": max(0, binding.resource_envelope.max_tool_effects - used_tools),
                     "maximum_tool_effects": binding.resource_envelope.max_tool_effects,
                     "maximum_inferences": binding.resource_envelope.max_inference_submissions,
-                    "next_action": "SUBMIT_OR_REVISE" if used_tools >= min(24, max(1, binding.resource_envelope.max_tool_effects - 8))
-                        or used_inferences >= min(6, max(1, binding.resource_envelope.max_inference_submissions - 4)) else "INVESTIGATE_SELECTED_SUBJECTS",
-                    "boundary": "Audit observations for planning only; Native resource ledger remains authoritative. Not historical Work usage."}
+                    "report_phase": phase, "next_action": next_action,
+                    "remaining_report_route": route,
+                    "planning": "Reserve room for this route and any recoverable feedback. A supported partial report with scoped UNKNOWN is preferable to exhaustive retrieval without review. If the route cannot fit, terminate honestly.",
+                    "boundary": "Audit observations for planning only; Native resource ledger remains authoritative. Not historical Work usage. No budget reset or fixed retry count."}
+
             tools.audit_budget = audit_budget
             journal.append("INVESTIGATION_BASIS", {"binding": binding.model_dump(mode="json"),
                            "contract": contract.model_dump(mode="json")})

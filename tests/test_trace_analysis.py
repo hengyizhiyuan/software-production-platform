@@ -1223,3 +1223,18 @@ def test_unreviewed_structurally_valid_report_cannot_finish_as_completed(tmp_pat
     model=SkipReview(snap);s.inference_factory=lambda:model
     result=asyncio.run(s.analyze("human:owner",uuid4_from(snap),AnalysisTrigger(request_id=uuid4(),rationale="Require self-review")))
     assert result["status"]=="FAILED" and result["report"] is None
+
+
+@pytest.mark.parametrize("classification,handling",[("RUNTIME_MODEL_VARIANCE","SELF_REFINE_RETRY_REGENERATE"),("SYSTEM_CAPABILITY_DEFECT","EVOLUTION_WORK_PROPOSAL"),("UNKNOWN","INVESTIGATE")])
+def test_gap_annotation_does_not_erase_separately_supported_conditional_source_comparison(classification, handling):
+    c=EvidenceCatalog(evidence_snapshot());r=report(c);eid=next(eid for eid,row in c.records.items() if row["group"]=="execution_steps")
+    inspection=c.inspect(eid);check=c.check("OWNER_RECORD",group="execution_steps",field="/result_payload/raw_response")
+    source=c.add("repository","/fixture/source",{"repository":"source","revision":"a"*40,"path":"src/adapter.py","blob":"b"*40,"content":"if invalid_decision: reject_candidate()"},repository=True);c.read(source)
+    f=r["findings"][0];f.update(subject_evidence_id=eid,inspection_id=inspection["inspection_id"],scope_check_ids=[check["check_id"]],
+        classification=classification,handling=handling,epistemic_status="ROOT_CAUSE_HYPOTHESIS",uncertainty="该字段检查限于导出范围，原始响应内容与历史实现尚未证实。",
+        fact={"statement":"Original rejected decision","citations":[{"evidence_id":eid,"quote":"NATIVE_DECISION_SCHEMA_REJECTED"}]},
+        analysis="所读实现的拒绝分支可解释该条件下的结果；缺口检查不证明因果或历史丢失。",repository_citations=[{"evidence_id":source,"quote":"if invalid_decision: reject_candidate()"}])
+    result=c.materialize_boundaries(AnalysisReport.model_validate(r))
+    assert result.findings[0].epistemic_status=="ROOT_CAUSE_HYPOTHESIS" and check["bounded_conclusion"] in result.findings[0].checked_boundaries
+    f["repository_citations"][0]["evidence_id"]=str(uuid4())
+    with pytest.raises(ValueError):c.materialize_boundaries(AnalysisReport.model_validate(r))
