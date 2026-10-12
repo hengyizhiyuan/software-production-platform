@@ -41,12 +41,6 @@ class CitationRejected(ValueError):
 # surface is DeliveryObservationService's download audit; Guardian owns its HTTP
 # preview observations. Identity aliases follow existing Native Owner fields.
 
-HISTORICAL_DATA_LOSS = re.compile(
-    r"(?:已|历史|被|遭|永久|彻底).{0,12}(?:丢弃|丢失|删除|销毁).{0,12}(?:响应|日志|记录|证据|字节|数据)|"
-    r"(?:响应|日志|记录|证据|字节|数据).{0,12}(?:已|历史|被|遭|永久|彻底).{0,12}(?:丢弃|丢失|删除|销毁)|"
-    r"\b(?:discarded|deleted|lost|destroyed)\s+(?:historical\s+|raw\s+)?(?:responses?|records?|logs?|bytes?|evidence|data)\b|"
-    r"\b(?:responses?|records?|logs?|bytes?|evidence|data)\s+(?:were?\s+|was\s+|have\s+been\s+|has\s+been\s+)?(?:discarded|deleted|lost|destroyed)\b", re.I)
-
 RELATION_FIELDS = {"pwu_id": "PWU", "work_unit_id": "PWU", "session_id": "SESSION",
                    "attempt_id": "ATTEMPT", "work_id": "WORK", "candidate_id": "CANDIDATE"}
 
@@ -68,17 +62,6 @@ def time_boundary(field):
                "started_at": "记录的开始", "finished_at": "记录的结束",
                "sealed_at": "候选封存", "assessed_at": "保证评估", "committed_at": "运行时提交", "timestamp": "Owner 记录的事件"}[field]
     return f"此时间仅表示{meaning}时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。"
-
-
-# Absence claims belong to typed, performed lookups, not arbitrary prose. This
-# guard complements original-field/association inspection; it is not entailment
-# evaluation and is deliberately independent of any Work, command or error code.
-ABSENCE_PROSE = re.compile(
-    r"未(?:被)?(?:保留|保存|采集|提供|导出)|不存在|(?:缺少|缺失).{0,16}(?:证据|日志|记录|响应|参数)|"
-    r"(?:没有|从未).{0,24}(?:记录|保存|采集|保留)|"
-    r"\b(?:not|never)\s+(?:retained|stored|saved|captured|provided)|"
-    r"\b(?:missing|absent)\s+(?:evidence|logs?|records?|responses?|arguments?)|"
-    r"\bno\s+(?:raw\s+)?(?:evidence|logs?|records?|responses?|arguments?)", re.I)
 
 
 def source_semantics(group, value, repository):
@@ -181,7 +164,6 @@ class EvidenceCatalog:
         self.observed_ranges: dict[str, list[tuple[int, int]]] = {}
         self.checks: dict[str, dict] = {}
         self.inspections: dict[str, dict] = {}
-        self.investigation_tool_identities: set[str] = set()
         self.add("capture", "/capture", snapshot.get("capture", {}))
         self.add("work", "/lifecycle/work", snapshot["lifecycle"].get("work", {}))
         self.add("intent", "/lifecycle/first_human_input",
@@ -685,17 +667,6 @@ class EvidenceCatalog:
                 errors.append(CitationRejected("TIMELINE_TIME_REQUIRES_ORIGINAL_OWNER", prefix + ["timestamp_evidence_id"], subject_id))
                 continue
             recorded = value.get(item.timestamp_field)
-            if item.time_interpretation not in {time_boundary(item.timestamp_field), "ORIGINAL_OWNER_TIME_BOUNDARY"}:
-                errors.append(CitationRejected("TIMELINE_REQUIRES_EXACT_TIME_BOUNDARY", prefix + ["time_interpretation"], subject_id))
-            if item.timestamp_field == "created_at" and OWNER_GROUP_PROJECTIONS.get(row["group"], row["group"]) == "self_refine_events":
-                later_state = [value.get(k) for k in ("status", "final_result", "work_resume_result")]
-                if (item.stage == "RECOVERY_REFINEMENT" or any(isinstance(state, str) and state and
-                        (state in item.statement or any(state in c.quote for c in item.citations))
-                        for state in later_state)):
-                    errors.append(CitationRejected("TIMELINE_CREATION_CANNOT_TIMESTAMP_RECOVERY_STATE", prefix + ["timestamp_field"], subject_id))
-            if (row["group"] == "execution_steps" and value.get("condition") == "FAILED"
-                    and item.stage == "FAILURE" and item.timestamp_field in {"created_at", "started_at"}):
-                errors.append(CitationRejected("TIMELINE_START_CANNOT_TIMESTAMP_FAILED_OUTCOME; use observed finished_at or an undated summary", prefix + ["timestamp_field"], subject_id))
             try:
                 actual = datetime.fromisoformat(item.timestamp.replace("Z", "+00:00"))
                 expected = datetime.fromisoformat(recorded.replace("Z", "+00:00"))
@@ -723,14 +694,8 @@ class EvidenceCatalog:
                 errors.append(CitationRejected("FINDING_REQUIRES_SUBJECT_OWNER_INSPECTION; call evidence.inspect", ["findings", index, "inspection_id"], subject_id))
             else:
                 checks = [self.checks.get(str(cid)) for cid in finding.uncertainty_check_ids]
-                expected = "\n".join([inspection["bounded_conclusion"]] + [c["bounded_conclusion"] for c in checks if c])
-                if any(c is None for c in checks) or finding.uncertainty not in {expected, "INSPECTED_OWNER_BOUNDARY"}:
-                    errors.append(CitationRejected("UNCERTAINTY_MUST_COPY_INSPECTION_AND_CHECK_BOUNDARIES", ["findings", index, "uncertainty"], subject_id))
-                critical = {"/semantic_input", "/output", "/result_payload", "/diagnostic_evidence"}
-                unread = [f for r in inspection["records"] for f in r["fields"]
-                          if f["field"] in critical and f["read_status"] != "READ"]
-                if (unread or inspection["omitted_records"]) and finding.epistemic_status != "UNKNOWN":
-                    errors.append(CitationRejected("UNREAD_LINKED_OWNER_FIELDS_REQUIRE_UNKNOWN_OR_ORIGINAL_READ", ["findings", index, "epistemic_status"], subject_id))
+                if any(c is None for c in checks):
+                    errors.append(CitationRejected("UNCERTAINTY_CHECK_NOT_PERFORMED", ["findings", index, "uncertainty_check_ids"], subject_id))
                 inspected_groups = {OWNER_GROUP_PROJECTIONS.get(r["group"], r["group"]) for r in inspection["records"]}
                 for field in ("scope_check_ids", "uncertainty_check_ids"):
                     for cid in getattr(finding, field):
@@ -744,16 +709,10 @@ class EvidenceCatalog:
             for i, c in enumerate(finding.fact.citations):
                 if self.association(subject_id, c.evidence_id)["status"] != "RELATED":
                     errors.append(CitationRejected("CITATION_OWNER_ASSOCIATION_NOT_ESTABLISHED: choose same subject or explicit Owner reference", ["findings", index, "fact", "citations", i], c.evidence_id))
-            if (finding.classification.value == "SYSTEM_CAPABILITY_DEFECT" and
-                    all(self.records.get(str(c.evidence_id), {}).get("semantics", {}).get("surface") ==
-                        "OWNER_REFINEMENT_DIAGNOSIS" for c in finding.fact.citations)):
-                errors.append(CitationRejected("DIAGNOSIS_METADATA_ALONE_CANNOT_ESTABLISH_CAPABILITY_DEFECT; read original contract/failure observations or keep UNKNOWN", ["findings", index, "classification"], subject_id))
             if finding.scope_check_ids:
                 checks = [self.checks.get(str(cid)) for cid in finding.scope_check_ids]
                 if any(not c or c["availability"] == "PRESENT" for c in checks):
                     errors.append(CitationRejected("PRESENT_CHECK_CANNOT_SUPPORT_MISSING_FIELD_FINDING; use uncertainty_check_ids for present evidence, or check its precise unavailable field with OWNER_RECORD", ["findings", index, "scope_check_ids"], subject_id))
-                if finding.analysis not in {"CHECKED_FIELD_SCOPE", "\n".join(c["bounded_conclusion"] for c in checks if c)}:
-                    errors.append(CitationRejected("CAPTURE_CONCLUSION_MUST_COPY_CHECKED_BOUNDARY", ["findings", index, "analysis"], subject_id))
             for i, c in enumerate(finding.repository_citations):
                 try:
                     citation(c, ["findings", index, "repository_citations", i], repository=True)
@@ -763,102 +722,13 @@ class EvidenceCatalog:
                     not any(self.records.get(str(c.evidence_id), {}).get("semantics", {}).get("source_kind") ==
                             "EXACT_IMPLEMENTATION_READ" for c in finding.repository_citations)):
                 errors.append(CitationRejected("ROOT_CAUSE_REQUIRES_IMPLEMENTATION_EXCERPT; use repository.read for surrounding producer control flow or retain UNKNOWN; search only locates code and a final diff cannot establish its mechanism", ["findings", index, "repository_citations"], subject_id))
-            if finding.epistemic_status == "ROOT_CAUSE_HYPOTHESIS":
-                for c in finding.fact.citations:
-                    value = self.values.get(str(c.evidence_id), {})
-                    if not isinstance(value, dict):
-                        continue
-                    payloads = [value.get(name) for name in ("result_payload", "output", "diagnostic_evidence")]
-                    for payload in payloads:
-                        if not isinstance(payload, dict):
-                            continue
-                        issues = payload.get("validation_issues", [])
-                        for issue in issues if isinstance(issues, list) else []:
-                            subtype = issue.get("type") if isinstance(issue, dict) else None
-                            if isinstance(subtype, str) and subtype and subtype in finding.analysis:
-                                errors.append(CitationRejected("CAPTURED_DIAGNOSTIC_LITERAL_IS_NOT_A_GENERAL_MECHANISM_OUTPUT; keep observed issue subtype/location in fact and explain the variable exception-to-issues mapping from source", ["findings", index, "analysis"], c.evidence_id))
         findings = {f.finding_id: f for f in report.findings}
-        def recovery_tools_supported(finding, prose, location):
-            for tool in self.investigation_tool_identities:
-                if not re.search(r"(?<![\w.])" + re.escape(tool) + r"(?![\w.])", prose):
-                    continue
-                inspection = self.inspections.get(str(finding.inspection_id), {})
-                inspected = {r["evidence_id"] for r in inspection.get("records", [])}
-                supported = False
-                for c in finding.fact.citations:
-                    eid = str(c.evidence_id)
-                    value = self.values.get(eid, {})
-                    payload = value.get("request_payload", {}) if isinstance(value, dict) else {}
-                    definitions = payload.get("available_tools", []) if isinstance(payload, dict) else []
-                    if eid not in inspected or not isinstance(definitions, list):
-                        continue
-                    for i, definition in enumerate(definitions):
-                        if isinstance(definition, dict) and definition.get("identity") == tool:
-                            left, right = json_field_range(self.records[eid]["body"], f"/request_payload/available_tools/{i}/identity")
-                            supported |= self._range_read(eid, left, right)
-                if not supported:
-                    errors.append(CitationRejected("INVESTIGATION_TOOLS_CANNOT_SUPPLY_HISTORICAL_RECOVERY_AUTHORITY; cite and inspect the associated original offered tools, or propose a contract-admitted recovery without naming current investigation tools", location, finding.subject_evidence_id))
-        for index, finding in enumerate(report.findings):
-            recovery_tools_supported(finding, finding.recommendation, ["findings", index, "recommendation"])
-        for section in ("immediate_recovery", "self_refine_opportunities"):
-            for index, item in enumerate(getattr(report, section)):
-                for fid in item.finding_ids:
-                    recovery_tools_supported(findings[fid], item.statement, [section, index, "statement"])
-        def diagnostic_without_failure_observation(finding):
-            subject = self.records.get(str(finding.subject_evidence_id), {})
-            if subject.get("semantics", {}).get("surface") != "OWNER_REFINEMENT_DIAGNOSIS":
-                return False
-            return not any(str(c.evidence_id) in self.observed
-                and self.records.get(str(c.evidence_id), {}).get("group") in
-                    {"execution_steps", "execution_effects", "effect_receipts"}
-                and isinstance(self.values.get(str(c.evidence_id)), dict)
-                and self.values[str(c.evidence_id)].get("condition") == "FAILED"
-                for c in finding.fact.citations)
-        historical_interruption = re.compile(
-            r"(?:观察到|本次|此次|已发生|发生了).{0,100}(?:中断|执行失败|执行被拒|生产失败)|"
-            r"\b(?:observed|occurred|this\s+(?:work|run)).{0,100}\b(?:interrupt\w*|execution\s+failures?)\b", re.I)
-        for index, finding in enumerate(report.findings):
-            if diagnostic_without_failure_observation(finding) and historical_interruption.search(finding.fact.statement):
-                errors.append(CitationRejected("REFINEMENT_DIAGNOSIS_CANNOT_ESTABLISH_EXECUTION_INTERRUPTION; cite its own associated failed execution observation or describe the recorded diagnosis only", ["findings", index, "fact", "statement"], finding.subject_evidence_id))
         for section in ("immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"):
             for index, item in enumerate(getattr(report, section)):
                 for fid in item.finding_ids:
                     subject = self.records.get(str(findings[fid].subject_evidence_id))
                     if not subject or item.evidence_family.value not in subject["semantics"]["families"]:
                         errors.append(CitationRejected("RECOMMENDATION_FAMILY_REQUIRES_FINDING_SUBJECT_SURFACE; split unrelated topics", [section, index, "finding_ids"], findings[fid].subject_evidence_id))
-                    if diagnostic_without_failure_observation(findings[fid]) and historical_interruption.search(item.statement):
-                        errors.append(CitationRejected("REFINEMENT_DIAGNOSIS_CANNOT_ESTABLISH_EXECUTION_INTERRUPTION; split observed execution failures from metadata-only diagnoses", [section, index, "statement"], findings[fid].subject_evidence_id))
-        # Keep observational absence in canonical checked fields everywhere,
-        # including hypotheses/recommendations, rather than only the gap footer.
-        prose = [((list(name) if isinstance(name, tuple) else [name]) + ["statement"], fact.statement)
-                 for name, fact in facts if name not in {"original_objective", "expected_outcome"}]
-        for i, finding in enumerate(report.findings):
-            for field in ("analysis", "recommendation", "regression_scenario"):
-                if field == "analysis" and finding.scope_check_ids:
-                    continue  # Already required to be the exact check receipt.
-                prose.append((["findings", i, field], getattr(finding, field)))
-        for section in ("immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"):
-            prose.extend(([section, i, "statement"], item.statement)
-                         for i, item in enumerate(getattr(report, section)))
-        for location, statement in prose:
-            if HISTORICAL_DATA_LOSS.search(statement):
-                if location[0] == "findings":
-                    loss_citations = report.findings[location[1]].fact.citations
-                elif location[0] in {"immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"}:
-                    item = getattr(report, location[0])[location[1]]
-                    loss_citations = [c for fid in item.finding_ids for c in findings[fid].fact.citations]
-                elif location[0] == "timeline":
-                    loss_citations = report.timeline[location[1]].citations
-                else:
-                    loss_citations = getattr(report, location[0]).citations
-                if not any(HISTORICAL_DATA_LOSS.search(c.quote) and
-                        not self.records.get(str(c.evidence_id), {}).get("repository", True) and
-                        self.records.get(str(c.evidence_id), {}).get("group") not in
-                            {"analysis_draft", "evidence_check", "evidence_inspection"}
-                        for c in loss_citations):
-                    errors.append(CitationRejected("CAPTURE_GAP_CANNOT_ESTABLISH_HISTORICAL_DATA_LOSS; absent/unexported/unread fields do not prove discarded, deleted or lost originals. Keep retention state UNKNOWN; future capture cannot fill historical UNKNOWN", location, report.work_id))
-            if ABSENCE_PROSE.search(statement):
-                errors.append(CitationRejected("EVIDENCE_ABSENCE_BELONGS_IN_CHECKED_UNCERTAINTY; no free-form historical absence", location, report.work_id))
         if errors:
             error = errors[0]
             error.issues = [{"type": "CitationRejected", "reason": str(item),
@@ -870,7 +740,6 @@ class EvidenceCatalog:
             check = self.checks.get(str(assessment.check_id))
             if (not check or check["family"] != assessment.family.value
                     or check["availability"] != assessment.availability
-                    or assessment.statement not in {"CHECKED_FIELD_SCOPE", check["bounded_conclusion"]}
                     or (assessment.family.value != "OWNER_RECORD" and (check["group"] or check["field"]))):
                 raise ValueError("EVIDENCE_ASSESSMENT_MUST_MATCH_SEEDED_FAMILY_LOOKUP")
             if str(assessment.check_id) in reviewed_checks or (assessment.family.value != "OWNER_RECORD" and assessment.family.value in reviewed):
@@ -883,8 +752,6 @@ class EvidenceCatalog:
             check = self.checks.get(str(gap.check_id))
             if (not check or check["family"] != gap.family.value or check["availability"] != gap.availability):
                 raise ValueError("MISSING_EVIDENCE_CONTRADICTS_LOOKUP_OR_UNCHECKED; PRESENT cannot be missing")
-            if gap.statement not in {"CHECKED_FIELD_SCOPE", check["bounded_conclusion"]}:
-                raise ValueError("MISSING_EVIDENCE_MUST_COPY_BOUNDED_CONCLUSION; copy evidence.check bounded_conclusion exactly")
             if str(gap.check_id) not in {str(cid) for finding in report.findings for cid in finding.scope_check_ids}:
                 raise ValueError("MISSING_EVIDENCE_REQUIRES_SCOPED_FINDING")
         failure_ids = {eid for eid, row in self.records.items()
@@ -907,15 +774,13 @@ class EvidenceCatalog:
         findings = []
         for f in report.findings:
             inspection = self.inspections[str(f.inspection_id)]
-            updates = {"uncertainty": "\n".join([inspection["bounded_conclusion"]] +
-                [self.checks[str(cid)]["bounded_conclusion"] for cid in f.uncertainty_check_ids])}
-            if f.scope_check_ids:
-                updates["analysis"] = "\n".join(self.checks[str(cid)]["bounded_conclusion"] for cid in f.scope_check_ids)
-            findings.append(f.model_copy(update=updates))
+            boundaries = [inspection["bounded_conclusion"]] + [self.checks[str(cid)]["bounded_conclusion"]
+                for cid in (*f.uncertainty_check_ids, *f.scope_check_ids)]
+            findings.append(f.model_copy(update={"checked_boundaries": tuple(boundaries)}))
         result = report.model_copy(update={"findings": tuple(findings),
-            "timeline": tuple(t.model_copy(update={"time_interpretation": time_boundary(t.timestamp_field)}) if t.timestamp is not None else t for t in report.timeline),
-            "evidence_assessments": tuple(a.model_copy(update={"statement": self.checks[str(a.check_id)]["bounded_conclusion"]}) for a in report.evidence_assessments),
-            "missing_evidence": tuple(g.model_copy(update={"statement": self.checks[str(g.check_id)]["bounded_conclusion"]}) for g in report.missing_evidence)})
+            "timeline": tuple(t.model_copy(update={"owner_time_boundary": time_boundary(t.timestamp_field)}) if t.timestamp is not None else t for t in report.timeline),
+            "evidence_assessments": tuple(a.model_copy(update={"checked_boundary": self.checks[str(a.check_id)]["bounded_conclusion"]}) for a in report.evidence_assessments),
+            "missing_evidence": tuple(g.model_copy(update={"checked_boundary": self.checks[str(g.check_id)]["bounded_conclusion"]}) for g in report.missing_evidence)})
         self.validate(result)
         return result
 
@@ -1035,6 +900,8 @@ class AnalysisTools:
         self.catalog, self.repositories = catalog, repositories
         self.accepted_report = None
         self.accepted_digest = None
+        self.pending_reports = {}
+        self.accepted_review = None
         self.verification_receipts = []
         self.drafts = {}
         self.audit_budget = None
@@ -1047,7 +914,7 @@ class AnalysisTools:
             ("evidence.read", "Read an evidence UUID, retaining exact source and digest; page long content.",
              {"evidence_id": {"type": "string"}, "offset": {"type": "integer"},
               "limit": {"type": "integer"}, "field": {"type": "string", "description": "Optional JSON Pointer relative to this original record; page its exact value without reading an unrelated large parent"}}, ["evidence_id"]),
-            ("evidence.inspect", "Read original linked Owner fields along explicit references (up to two hops). Returns inspection_id and canonical bounded_conclusion for finding uncertainty. READ, PRESENT, REDACTED, EMPTY and NOT_READ_CAPACITY are distinct. It does not infer historical absence or transitive fact association. Page unread originals with evidence.read, then inspect again; keep UNKNOWN if required fields cannot be read.",
+            ("evidence.inspect", "Read original linked Owner fields along explicit references (up to two hops). Returns inspection_id and checked scope metadata for finding uncertainty. READ, PRESENT, REDACTED, EMPTY and NOT_READ_CAPACITY are distinct. It does not infer historical absence or transitive fact association. Page unread originals with evidence.read, then inspect again; keep UNKNOWN if required fields cannot be read.",
              {"subject_evidence_id": {"type": "string"}}, ["subject_evidence_id"]),
             ("evidence.check", "Check original snapshot evidence before absence claims. PREVIEW_HTTP and DELIVERY_TRANSFER fix their producer scope; EXECUTION_RELATIONSHIP enumerates actual identifier links. OWNER_RECORD requires a captured group and JSON Pointer field (/* enumerates record fields). No-match never proves global/historical absence.",
              {"family": {"enum": [f.value for f in EvidenceFamily]}, "group": {"type": "string"},
@@ -1064,6 +931,13 @@ class AnalysisTools:
              ["repository", "baseline_repository"]),
             ("analysis.submit", "Verify a structured advisory report. Failures return bounded feedback for same-contract Self-Refine. Use the supplied JSON schema.",
              {"report": {"type": "object"}}, ["report"]),
+            ("analysis.review", "Review the entire pending report against observed sources within this same Native investigation. Return evidence-based judgments in any wording. REVISE yields feedback for existing analysis.revise; a recorded self-review is not independent assurance. No permissions or execution effects are granted.",
+             {"draft_id": {"type": "string"}, "items": {"type": "array", "minItems": 1, "maxItems": 50,
+              "items": {"type": "object", "properties": {
+                  "target_path": {"type": "string"}, "judgment": {"enum": ["SUPPORTED", "QUALIFIED", "UNKNOWN", "REVISE"]},
+                  "evidence_ids": {"type": "array", "items": {"type": "string"}, "maxItems": 100},
+                  "rationale": {"type": "string", "minLength": 1, "maxLength": 1600}},
+                  "required": ["target_path", "judgment", "evidence_ids", "rationale"], "additionalProperties": False}}}, ["draft_id", "items"]),
             ("analysis.revise", "Explicitly correct a retained rejected report using bounded remove/replace JSON Pointer edits. Revalidate the entire report without regenerating it. This changes advisory artifacts only.",
              {"draft_id": {"type": "string"}, "edits": {"type": "array", "minItems": 1, "maxItems": 24,
               "items": {"type": "object", "properties": {"op": {"enum": ["remove", "replace"]},
@@ -1094,13 +968,32 @@ class AnalysisTools:
                 result["$defs"] = report_schema.pop("$defs")
                 props["report"] = report_schema
             return result
-        self.catalog.investigation_tool_identities = {row[0] for row in definitions}
         return NativeToolRegistry(tuple(ToolDefinition(
             identity=identity, version="1", description=description,
             input_schema=schema(identity, props, required),
             effect_classification="LOCAL_EVIDENCE" if identity.startswith("analysis.") else "READ",
             handler=self.execute,
         ) for identity, description, props, required in definitions))
+
+    def review_targets(self, report):
+        targets = []
+        def add(path, references):
+            targets.append({"target_path": path, "evidence_ids": sorted({str(eid) for eid in references})})
+        for name in ("original_objective", "expected_outcome", "actual_execution_path", "current_state"):
+            add("/" + name, (c["evidence_id"] for c in report[name]["citations"]))
+        add("/timeline", (c["evidence_id"] for t in report["timeline"] for c in t["citations"]))
+        by_id = {f["finding_id"]: f for f in report["findings"]}
+        for i, f in enumerate(report["findings"]):
+            add(f"/findings/{i}", [c["evidence_id"] for c in f["fact"]["citations"] + f["repository_citations"]]
+                + f["scope_check_ids"] + f["uncertainty_check_ids"] + [f["inspection_id"]])
+        for section in ("immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"):
+            if report[section]:
+                add("/" + section, [c["evidence_id"] for item in report[section] for fid in item["finding_ids"]
+                    for c in by_id[fid]["fact"]["citations"] + by_id[fid]["repository_citations"]])
+        for section in ("evidence_assessments", "missing_evidence"):
+            if report[section]:
+                add("/" + section, (item["check_id"] for item in report[section]))
+        return targets
 
     async def execute(self, request):
         identity, args = request.proposal.tool_identity, request.proposal.arguments
@@ -1125,6 +1018,30 @@ class AnalysisTools:
                 eid = self.catalog.add("repository", f"repository/{repo.key}/{canonical_digest(value)}",
                                        value, repository=True)
                 output = self.catalog.read(eid, limit=24000)
+            elif identity == "analysis.review":
+                report = self.pending_reports[args["draft_id"]]
+                targets = {t["target_path"]: set(t["evidence_ids"]) for t in self.review_targets(report)}
+                items = args["items"]
+                if len(items) != len(targets) or {i["target_path"] for i in items} != set(targets):
+                    raise ValueError("SELF_REVIEW_REQUIRES_COMPLETE_REPORT_COVERAGE")
+                for item in items:
+                    refs = set(item["evidence_ids"])
+                    if refs != targets[item["target_path"]] or not refs.issubset(self.catalog.observed):
+                        raise ValueError("SELF_REVIEW_SOURCE_SCOPE_MISMATCH")
+                    if item["judgment"] not in {"SUPPORTED", "QUALIFIED", "UNKNOWN", "REVISE"} or not item["rationale"].strip():
+                        raise ValueError("SELF_REVIEW_JUDGMENT_REQUIRED")
+                needs_revision = [i for i in items if i["judgment"] == "REVISE"]
+                review = {"draft_id": args["draft_id"], "report_digest": canonical_digest(report),
+                    "items": public_report_candidate(items), "authority": "MODEL_SELF_REVIEW_PROPOSAL_NOT_INDEPENDENT_ASSURANCE"}
+                if needs_revision:
+                    self.accepted_report, self.accepted_digest, self.accepted_review = None, None, None
+                    output = {"verification": "NATIVE_SELF_REVIEW_REQUIRES_REVISION", "draft_id": args["draft_id"],
+                        "feedback": needs_revision, "effect_observed": False, "failure_class": "RUNTIME_MODEL_VARIANCE", "issues": [{"type": "NATIVE_SELF_REVIEW_FEEDBACK", "location": i["target_path"], "reason": i["rationale"]} for i in needs_revision], "repair": "Use existing analysis.revise under the same contract and budget; review the changed report again."}
+                else:
+                    self.accepted_report, self.accepted_digest, self.accepted_review = report, canonical_digest(report), review
+                    output = {"verification": "CITATIONS_AND_STRUCTURE_PASS", "native_self_review": "RECORDED_NOT_INDEPENDENT_ASSURANCE",
+                        "report_digest": self.accepted_digest, "semantic_correctness": "HUMAN_REVIEW_REQUIRED", "production_authority": "NONE"}
+                self.verification_receipts.append(output | {"review": review})
             elif identity in {"analysis.submit", "analysis.revise"}:
                 if identity == "analysis.submit":
                     candidate = args["report"]
@@ -1160,19 +1077,20 @@ class AnalysisTools:
                 self.drafts[draft_id] = deepcopy(candidate)
                 report = AnalysisReport.model_validate(candidate)
                 report = self.catalog.materialize_boundaries(report)
-                self.accepted_report = report.model_dump(mode="json")
-                self.accepted_digest = canonical_digest(self.accepted_report)
+                self.pending_reports[draft_id] = report.model_dump(mode="json")
+                self.accepted_report, self.accepted_digest, self.accepted_review = None, None, None
                 output = {"verification": "CITATIONS_AND_STRUCTURE_PASS",
-                          "evidence_scope_checks": "PASS; NOT_SEMANTIC_ENTAILMENT",
-                          "report_digest": self.accepted_digest,
-                          "semantic_correctness": "HUMAN_REVIEW_REQUIRED",
+                          "draft_id": draft_id, "candidate_digest": canonical_digest(self.pending_reports[draft_id]),
+                          "review_targets": self.review_targets(self.pending_reports[draft_id]),
+                          "next_action": "analysis.review", "semantic_correctness": "NATIVE_SELF_REVIEW_REQUIRED_THEN_HUMAN_REVIEW",
                           "production_authority": "NONE"}
                 self.verification_receipts.append(output)
             else:
                 raise ValueError("TOOL_NOT_ADMITTED")
-            condition = EffectCondition.SETTLED
+            condition = EffectCondition.FAILED if identity == "analysis.review" and needs_revision else EffectCondition.SETTLED
         except (ValueError, KeyError, TypeError, UnicodeError, IndexError) as error:
-            self.accepted_report = None if identity.startswith("analysis.") else self.accepted_report
+            if identity.startswith("analysis."):
+                self.accepted_report, self.accepted_digest, self.accepted_review = None, None, None
             if hasattr(error, "errors"):
                 issues = [{"location": list(item["loc"]), "type": item["type"],
                            "reason": Redactor(text_limit=300).clean(item["msg"])}

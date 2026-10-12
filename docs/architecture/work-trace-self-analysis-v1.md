@@ -277,23 +277,41 @@ an offline historical capability check; it is distinct from deployed ECS UI/runt
 qualification. Production deployment requires separate authorization and exact
 source/storage/configuration checks. C3 closure is neither changed nor qualified.
 
-The timeline also admits the existing runtime-commit Owner `committed_at` field, with the same observed-byte, identity, chronology and timestamp equality gates. Rejection feedback includes bounded original rejected values at reported locations; it never supplies automatic edits or invents quotations, and preserves the retained immutable draft.
+## Native self-review and legal semantic variation (report v7)
 
-Original inspections reuse exact previously returned field ranges and deduplicate only byte-identical projections of the same producer Owner identity. Projection metadata grants no citation authority to unread aliases; conflicting bytes remain separately inspectable. Planning feedback now reserves half the existing Native tool/inference envelope for report submission, revision and terminal result. The 12/48/600 resource envelope is unchanged.
+Trace Analysis owns its own probabilistic consumption boundary. Deterministic
+verification checks observed quotation bytes, source identity, explicit Owner links,
+check scopes, report references, timestamps and existing permissions. It does not
+classify free prose by keyword, required sentence prefix or copied paragraph.
 
-Root cause hypotheses require an observed exact implementation excerpt from repository read/search. Repository adapter provenance distinguishes source excerpts, final net diffs and unclassified comparison artifacts. A final Work diff alone cannot ground a Watt validation or diagnostic-recording mechanism. Exact quotation and source type gates still do not replace independent semantic review of whether the cited implementation supports the proposed mechanism.
+The producer may use semantically equivalent Chinese/English explanations. Original
+model prose remains unchanged; performed retrieval/time boundaries are added in
+separate derived fields. Snapshot absence, unread/redacted fields and historical
+retention state are distinct; none may be silently promoted to a historical loss
+or executed event. This meaning is examined by the existing Native investigation
+and independent Human review, not a blacklist pretending to prove entailment.
 
-Causal mechanisms now require surrounding implementation text from repository.read; search is a locator, and neither a lone signal-name match nor a net diff qualifies. Causal prose describes failure/recording conditions only; recovery actions belong to proposals or separately evidenced facts. Facts cannot retain named uncited original Owner records after rejected citations are removed. Positive settled/completed execution records require an EXECUTION timeline entry. Regression proposals must preserve distinct implementation branches and their reason codes; natural-language relevance still needs independent review.
+Within the same Native invocation, analysis.submit/revise checks a pending report
+and returns immutable draft identity plus source-linked review targets. The existing
+Owner calls analysis.review to critique all targets against the observed evidence.
+A REVISE judgment yields same-contract feedback through the existing bounded Native
+refinement path; analysis.revise retains the rejected artifact and produces another
+candidate, which is reviewed again. No outside LLM pipeline, governance Owner,
+global coordinator, new Work or production mutation is introduced. Native resource
+limits remain 12 inferences / 48 tools / 600 seconds; exhaustion terminates honestly.
 
-Original plan-history/PWU records require a PLANNING timeline entry; their target IDs are exposed in initial context. This distinguishes recorded planning from actual settled execution and prevents silent loss of an observed stage. Implementation feedback directs repository.read of surrounding control flow; search alone remains a locator.
+Only a structurally qualified candidate with a recorded Native self-review may be
+returned as an advisory completed report. Self-review is a MODEL PROPOSAL, not
+independent assurance or historical Owner evidence. semantic_qualification remains
+HUMAN_REVIEW_REQUIRED, and production_authority remains NONE. Deployment qualification
+requires a separate independent review of a real historical report. A normal model
+candidate deviation is not automatically a capability defect; erroneous acceptance
+or rejection needs concrete evidence and a repair of the common cause.
 
-Causal hypotheses remain conditional implementation comparisons. They cannot append
-historical execution narration or infer a loaded implementation from an isolation,
-environment or host label; original-event observations belong in cited facts.
-A refinement diagnosis cannot be counted as an observed execution interruption in
-facts or recommendations without its own cited, explicitly associated failed
-execution observation. Other findings' receipts cannot supply that authority.
-These conservative prose checks complement independent semantic review; they do
-not establish full linguistic entailment. Timeline rejection feedback can include
-the bounded exact retained draft entry so the model can explicitly revise coupled
-time fields together. The verifier does not alter the draft or invent Owner facts.
+Report v1–v6 history remains readable without migration. v7 renders original prose,
+neutral derived inspection/check/time scope, and the recorded Native self-review
+separately and escapes all model/evidence content. Relevant regression covers legal
+wording variants, source/association violations, semantic feedback and recovery,
+resource exhaustion, premature terminal claims, auth/Origin, original database
+immutability and idempotent history reads. Scripted model tests qualify controls;
+they do not substitute for real-model semantic qualification.

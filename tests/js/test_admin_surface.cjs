@@ -171,3 +171,15 @@ test('Analysis v5 shows recommendation surfaces and preserves legacy rendering',
  await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v5',analysisTarget:'ordinary-work'}})}});
  assert.match(s.nodes['#admin-content'].innerHTML,/Inspect transfer · 依据 audit/);
 });
+
+
+test('Analysis v7 preserves model wording and escapes separate checked boundaries and self-review',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-v7';const fact={statement:'Recorded snapshot',citations:[]};
+ const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
+  timeline:[{...fact,stage:'EXECUTION',time_interpretation:'自由解释',owner_time_boundary:'<owner-boundary>'}],
+  findings:[{finding_id:'f',classification:'UNKNOWN',epistemic_status:'UNKNOWN',fact,analysis:'保留模型原文',repository_citations:[],uncertainty:'自由限定',checked_boundaries:['<checked>'],recommendation:'继续取证',regression_qualification:'预算内恢复或停止'}],
+  immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],deferred_items:[],missing_evidence:[],evidence_assessments:[]};
+ const s=surface('/admin',true,null,null,{[path]:{status:'COMPLETED',report,native_self_review:{items:[{target_path:'/findings/0',judgment:'QUALIFIED',rationale:'<unsafe-review>'}]}}});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v7',analysisTarget:'ordinary-work'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/保留模型原文/);assert.match(h,/自由限定/);assert.match(h,/&lt;checked&gt;/);assert.match(h,/&lt;owner-boundary&gt;/);assert.match(h,/&lt;unsafe-review&gt;/);assert.match(h,/不能代替独立人工审查/);assert.doesNotMatch(h,/<unsafe-review>|<checked>|<owner-boundary>/);
+});

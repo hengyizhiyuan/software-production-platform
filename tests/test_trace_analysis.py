@@ -85,9 +85,17 @@ class NativeModel:
             return InferenceResponse(action=InferenceAction.CONTINUE, summary="Verify report",
                 working_plan=req.working_plan, tool_calls=(ToolCallProposal(proposal_index=0,
                     tool_identity="analysis.submit", arguments={"report": candidate}),))
-        return InferenceResponse(action=InferenceAction.RESULT_READY, summary="Advisory report submitted",
+        output = req.previous_results[-1]["output"]
+        if output.get("next_action") == "analysis.review":
+            return InferenceResponse(action=InferenceAction.CONTINUE, summary="Review original evidence and conclusion boundaries",
+                working_plan=req.working_plan, tool_calls=(ToolCallProposal(proposal_index=0,
+                    tool_identity="analysis.review", arguments={"draft_id":output["draft_id"], "items":[
+                        dict(target, judgment="QUALIFIED", rationale="Scoped fixture observation; no independent semantic assurance is claimed")
+                        for target in output["review_targets"]]}),))
+        return InferenceResponse(action=InferenceAction.RESULT_READY, summary="Advisory report and self-review recorded",
             working_plan=req.working_plan, result_claim={"evidence_ids": [], "output_vector": {
-                "report_digest": "wrong" if self.bad_terminal else canonical_digest(AnalysisReport.model_validate(candidate).model_dump(mode="json"))}})
+                "report_digest": "wrong" if self.bad_terminal else output["report_digest"]}})
+
 
 
 def service(tmp_path, *, reject_first=False, bad_terminal=False):
@@ -179,10 +187,10 @@ def test_report_rejection_enters_existing_native_bounded_refinement(tmp_path):
     s, snap, model = service(tmp_path, reject_first=True)
     r = asyncio.run(s.analyze("human:owner", uuid4_from(snap), AnalysisTrigger(request_id=uuid4(), rationale="Investigate")))
     assert r["status"] == "COMPLETED"
-    assert [v["verification"] for v in r["verification_receipts"]] == ["FAIL", "CITATIONS_AND_STRUCTURE_PASS"]
+    assert [v["verification"] for v in r["verification_receipts"]] == ["FAIL", "CITATIONS_AND_STRUCTURE_PASS", "CITATIONS_AND_STRUCTURE_PASS"]
     assert r["refinement_feedback"][0]["status"] == "VERIFIED"
     assert any(f["fact_type"] == "RECENT_SELF_REFINE" for f in model.requests[1].context_facts)
-    assert len(model.requests) == 3
+    assert len(model.requests) == 4
 
 
 def test_terminal_model_claim_cannot_replace_verified_submission(tmp_path):
@@ -196,7 +204,7 @@ def test_idempotent_request_never_reissues_model_or_recaptures(tmp_path):
     trigger = AnalysisTrigger(request_id=uuid4(), rationale="Investigate")
     first = asyncio.run(s.analyze("human:owner", uuid4_from(snap), trigger))
     second = asyncio.run(s.analyze("human:owner", uuid4_from(snap), trigger))
-    assert first == second and len(model.requests) == 2 and s.exporter.calls == 1
+    assert first == second and len(model.requests) == 3 and s.exporter.calls == 1
     with pytest.raises(QualityError, match="ANALYSIS_REQUEST_ID_CONFLICT"):
         asyncio.run(s.analyze("human:owner", uuid4_from(snap), trigger.model_copy(update={"rationale": "changed"})))
 
@@ -264,15 +272,6 @@ def test_root_cause_and_governance_classification_are_not_promoted_without_evide
         AnalysisReport.model_validate(r)
 
 
-@pytest.mark.parametrize("marker", ["CHECKED_FIELD_SCOPE", "INSPECTED_OWNER_BOUNDARY", "ORIGINAL_OWNER_TIME_BOUNDARY"])
-def test_scope_presentation_marker_cannot_replace_original_fact(marker):
-    c = EvidenceCatalog(snapshot())
-    r = report(c)
-    r["findings"][0]["fact"]["statement"] = marker
-    with pytest.raises(ValueError, match="FACT_REQUIRES_ORIGINAL_OBSERVATION"):
-        AnalysisReport.model_validate(r)
-    r["findings"][0]["fact"]["statement"] = "Original Work state is COMPLETED"
-    c.validate(AnalysisReport.model_validate(r))
 
 
 def test_exact_repository_read_ignores_dirty_worktree_and_denies_secrets(tmp_path):
@@ -321,24 +320,6 @@ def test_repository_multiline_excerpt_is_exact_and_excludes_unread_source(tmp_pa
         catalog.validate(AnalysisReport.model_validate(r))
 
 
-@pytest.mark.parametrize("field", ["created_at", "started_at"])
-def test_failed_step_outcome_cannot_be_dated_at_start(field):
-    c = EvidenceCatalog(snapshot())
-    r = report(c)
-    value = {"id": str(uuid4()), "condition": "FAILED", "created_at": "2026-10-05T10:00:00+00:00",
-        "started_at": "2026-10-05T10:00:00+00:00", "finished_at": "2026-10-05T10:01:00+00:00"}
-    eid = c.add("execution_steps", "/fixture/failed-step", value)
-    c.read(eid)
-    inspection = c.inspect(eid)
-    r["findings"][0].update(subject_evidence_id=eid, inspection_id=inspection["inspection_id"],
-        uncertainty=inspection["bounded_conclusion"], fact={"statement": "Recorded failed step outcome",
-        "citations": [{"evidence_id": eid, "quote": "FAILED"}]})
-    r["timeline"] = [{"stage": "FAILURE", "statement": "Recorded failed step outcome", "citations": [{"evidence_id": eid, "quote": "FAILED"}],
-        "timestamp": value[field], "timestamp_evidence_id": eid, "timestamp_field": field, "time_interpretation": "ORIGINAL_OWNER_TIME_BOUNDARY"}]
-    with pytest.raises(ValueError, match="TIMELINE_START_CANNOT_TIMESTAMP_FAILED_OUTCOME"):
-        c.validate(AnalysisReport.model_validate(r))
-    r["timeline"][0].update(timestamp=value["finished_at"], timestamp_field="finished_at")
-    c.validate(AnalysisReport.model_validate(r))
 
 
 def test_snapshot_capacity_and_unknown_are_visible():
@@ -415,6 +396,10 @@ def test_native_refinement_patches_retained_report_and_rechecks_all_gates(tmp_pa
                 assert any(issue.get("location") == ["deferred_items", 0, "finding_ids"] for issue in failure["issues"])
                 proposal = ToolCallProposal(proposal_index=0, tool_identity="analysis.revise", arguments={
                     "draft_id": failure["draft_id"], "edits": [{"op": "replace", "path": "/deferred_items/0/finding_ids", "value": ["missing-raw"]}]})
+            elif req.previous_results[-1]["output"].get("next_action") == "analysis.review":
+                pending = req.previous_results[-1]["output"]
+                proposal = ToolCallProposal(proposal_index=0, tool_identity="analysis.review", arguments={
+                    "draft_id": pending["draft_id"], "items": [dict(t,judgment="QUALIFIED",rationale="Scoped fixture sources and qualified interpretation") for t in pending["review_targets"]]})
             else:
                 return InferenceResponse(action=InferenceAction.RESULT_READY, summary="Verified retained report",
                     working_plan=req.working_plan, result_claim={"output_vector": {
@@ -425,7 +410,7 @@ def test_native_refinement_patches_retained_report_and_rechecks_all_gates(tmp_pa
     s.inference_factory = lambda: model
     trigger = AnalysisTrigger(request_id=uuid4(), rationale="Investigate")
     r = asyncio.run(s.analyze("human:owner", uuid4_from(snap), trigger))
-    assert r["status"] == "COMPLETED" and len(model.requests) == 3
+    assert r["status"] == "COMPLETED" and len(model.requests) == 4
     assert len(r["draft_digests"]) == 2
     detail = s.read("human:owner", uuid4_from(snap), trigger.request_id, detail=True)
     assert any(d["deferred_items"][0]["finding_ids"] == ["abbreviated-invalid-id"] for d in detail["report_drafts"].values())
@@ -732,54 +717,10 @@ def test_related_record_metadata_does_not_observe_unread_body():
         catalog.validate(AnalysisReport.model_validate(r))
 
 
-def test_checked_field_cannot_be_promoted_to_missing_whole_response_or_history():
-    catalog = EvidenceCatalog(evidence_snapshot())
-    check = catalog.check("OWNER_RECORD", group="execution_steps", field="/result_payload/raw_response")
-    r = json.loads(json.dumps(report(catalog)))
-    f = r["findings"][0]
-    eid = next(eid for eid, row in catalog.records.items() if row["group"] == "execution_steps")
-    inspection = catalog.inspect(eid)
-    f.update(subject_evidence_id=eid, inspection_id=inspection["inspection_id"], uncertainty=inspection["bounded_conclusion"],
-             fact={"statement": "Recorded inference rejection", "citations": [{"evidence_id": eid, "quote": "NATIVE_DECISION_SCHEMA_REJECTED"}]})
-    f.update(scope_check_ids=[check["check_id"]], analysis=check["bounded_conclusion"])
-    r["missing_evidence"] = [{"statement": check["bounded_conclusion"], "family": "OWNER_RECORD",
-        "check_id": check["check_id"], "availability": check["availability"]}]
-    catalog.validate(AnalysisReport.model_validate(r))
-    f["analysis"] = "Watt never stores raw responses anywhere"
-    with pytest.raises(ValueError, match="CAPTURE_CONCLUSION_MUST_COPY_CHECKED_BOUNDARY"):
-        catalog.validate(AnalysisReport.model_validate(r))
-    f["analysis"] = check["bounded_conclusion"]
-    r["missing_evidence"][0]["statement"] = "All historical provider response bodies are missing"
-    with pytest.raises(ValueError, match="MISSING_EVIDENCE_MUST_COPY_BOUNDED_CONCLUSION"):
-        catalog.validate(AnalysisReport.model_validate(r))
 
 
-def test_random_failure_regression_qualifies_handling_not_zero_future_errors():
-    r = report(EvidenceCatalog(snapshot()))
-    f = r["findings"][0]
-    f.update(classification="RUNTIME_MODEL_VARIANCE", handling="SELF_REFINE_RETRY_REGENERATE",
-             regression_qualification="No model failure may ever recur")
-    with pytest.raises(ValueError, match="REGRESSION_CRITERION_MUST_MATCH_GOVERNED_OUTCOME"):
-        AnalysisReport.model_validate(r)
-    f["regression_qualification"] = REGRESSION_CRITERIA[IssueClass.RUNTIME_MODEL_VARIANCE]
-    AnalysisReport.model_validate(r)
 
 
-def test_diagnostic_expected_behavior_does_not_become_execution_receipt():
-    catalog, events, _ = associated_incident_catalog()
-    semantics = catalog.read(events[0])["semantics"]
-    assert semantics["surface"] == "OWNER_REFINEMENT_DIAGNOSIS"
-    assert semantics["field_roles"]["diagnostic_evidence"] == "DIAGNOSIS_NOT_EXECUTION_RECEIPT"
-    assert semantics["field_roles"]["expected_reality"] == "EXPECTED_NOT_OBSERVED"
-    assert "do not establish executed file changes" in semantics["boundary"]
-    r = report(catalog)
-    f = r["findings"][0]
-    f.update(epistemic_status="ROOT_CAUSE_HYPOTHESIS", repository_citations=[{
-        "evidence_id": str(uuid4()), "quote": "comparison"}], analysis="A proposed constraint definitely executed")
-    with pytest.raises(ValueError, match="CAUSAL_HYPOTHESIS_MUST_BE_EXPLICIT"):
-        AnalysisReport.model_validate(r)
-    f["analysis"] = "假设：若候选理解存在偏差，则可能解释该诊断；实际候选内容保持 UNKNOWN。"
-    AnalysisReport.model_validate(r)
 
 
 @pytest.mark.parametrize("command", ["arbitrary-executable", "unlisted-reader", "自定义命令"])
@@ -834,55 +775,12 @@ def test_redacted_empty_and_unexported_fields_remain_distinct():
     assert check["availability"] == "INCOMPLETE_CAPTURE"
 
 
-@pytest.mark.parametrize("field", ["analysis", "recommendation", "regression_scenario"])
-def test_absence_cannot_escape_checked_boundaries_into_other_prose(field):
-    c = EvidenceCatalog(snapshot())
-    r = report(c)
-    r["findings"][0][field] = "完整响应未保留，平台从未保存原始参数。"
-    with pytest.raises(ValueError, match="EVIDENCE_ABSENCE_BELONGS_IN_CHECKED_UNCERTAINTY"):
-        c.validate(AnalysisReport.model_validate(r))
 
 
-def test_findings_cannot_claim_unbounded_uncertainty_or_borrow_inspection():
-    c = EvidenceCatalog(snapshot())
-    r = report(c)
-    r["findings"][0]["uncertainty"] = "No raw response was ever retained"
-    with pytest.raises(ValueError, match="UNCERTAINTY_MUST_COPY_INSPECTION"):
-        c.validate(AnalysisReport.model_validate(r))
-    r = report(c)
-    r["findings"][0]["inspection_id"] = str(uuid4())
-    with pytest.raises(ValueError, match="FINDING_REQUIRES_SUBJECT_OWNER_INSPECTION"):
-        c.validate(AnalysisReport.model_validate(r))
 
 
-def test_creation_time_requires_snapshot_state_boundary():
-    c, r, _ = timed_report()
-    r["timeline"][0]["time_interpretation"] = "Recovery definitely finished at creation time"
-    with pytest.raises(ValueError, match="TIMELINE_REQUIRES_EXACT_TIME_BOUNDARY"):
-        c.validate(AnalysisReport.model_validate(r))
 
 
-@pytest.mark.parametrize("group", ["self_refine_events", "recovery"])
-def test_refinement_created_at_does_not_timestamp_later_recovered_status(group):
-    c = EvidenceCatalog(snapshot())
-    r = report(c)
-    eid = c.add(group, "/fixture/recovery", {"id": str(uuid4()),
-        "created_at": "2026-10-05T10:00:00+00:00", "updated_at": "2026-10-05T10:01:00+00:00",
-        "status": "VERIFIED", "final_result": "LOCAL_OBLIGATION_RECOVERED"})
-    c.read(eid)
-    r["timeline"] = [{"stage": "RECOVERY_REFINEMENT", "statement": "Recorded LOCAL_OBLIGATION_RECOVERED",
-        "citations": [{"evidence_id": eid, "quote": "LOCAL_OBLIGATION_RECOVERED"}],
-        "timestamp": c.values[eid]["created_at"], "timestamp_evidence_id": eid,
-        "timestamp_field": "created_at", "time_interpretation": time_boundary("created_at")}]
-    with pytest.raises(ValueError, match="TIMELINE_CREATION_CANNOT_TIMESTAMP_RECOVERY_STATE"):
-        c.validate(AnalysisReport.model_validate(r))
-    r["timeline"][0].update(timestamp=c.values[eid]["updated_at"], timestamp_field="updated_at",
-                            time_interpretation=time_boundary("updated_at"))
-    inspection = c.inspect(eid)
-    r["findings"][0].update(subject_evidence_id=eid, inspection_id=inspection["inspection_id"],
-        uncertainty=inspection["bounded_conclusion"], fact={"statement": "Recorded recovery",
-        "citations": [{"evidence_id": eid, "quote": "VERIFIED"}]})
-    c.validate(AnalysisReport.model_validate(r))
 
 
 def test_unrelated_owner_gap_cannot_be_attached_to_another_subject():
@@ -940,17 +838,6 @@ def test_recommendation_surface_cannot_borrow_unrelated_finding(family):
         c.validate(AnalysisReport.model_validate(r))
 
 
-def test_recommendation_requires_explicit_surface_and_hypothesis_requires_condition():
-    r = report(EvidenceCatalog(snapshot()))
-    del r["deferred_items"][0]["evidence_family"]
-    with pytest.raises(ValueError):
-        AnalysisReport.model_validate(r)
-    r = report(EvidenceCatalog(snapshot()))
-    r["findings"][0].update(epistemic_status="ROOT_CAUSE_HYPOTHESIS",
-        repository_citations=[{"evidence_id":str(uuid4()), "quote":"comparison"}],
-        analysis="假设：模型随后执行了某个替代配方。")
-    with pytest.raises(ValueError, match="CAUSAL_HYPOTHESIS_MUST_BE_EXPLICIT"):
-        AnalysisReport.model_validate(r)
 
 
 def test_transfer_recommendation_accepts_its_own_audit_subject():
@@ -976,8 +863,10 @@ def test_checked_boundary_markers_materialize_only_verified_receipts():
     assert materialized["findings"][0]["fact"] == original["findings"][0]["fact"] | {"evidence_family":"OWNER_RECORD"}
     assert materialized["findings"][0]["analysis"] == original["findings"][0]["analysis"]
     assert materialized["deferred_items"] == original["deferred_items"]
-    assert "本次关联读取仅限冻结导出" in materialized["findings"][0]["uncertainty"]
-    for a in materialized["evidence_assessments"]:assert a["statement"] == c.checks[a["check_id"]]["bounded_conclusion"]
+    assert "本次关联读取仅限冻结导出" in materialized["findings"][0]["checked_boundaries"][0]
+    for a in materialized["evidence_assessments"]:
+        assert a["checked_boundary"] == c.checks[a["check_id"]]["bounded_conclusion"]
+        assert a["statement"] == "CHECKED_FIELD_SCOPE"
     r["findings"][0]["inspection_id"] = str(uuid4())
     with pytest.raises(ValueError, match="FINDING_REQUIRES_SUBJECT_OWNER_INSPECTION"):
         c.materialize_boundaries(AnalysisReport.model_validate(r))
@@ -995,18 +884,6 @@ def test_checked_markers_do_not_allow_present_evidence_to_be_called_missing():
         c.materialize_boundaries(AnalysisReport.model_validate(r))
 
 
-@pytest.mark.parametrize("group", ["self_refine_events", "recovery"])
-def test_classifier_metadata_alone_cannot_promote_a_system_defect(group):
-    c = EvidenceCatalog(snapshot());r = report(c)
-    eid = c.add(group, "/fixture/diagnosis", {"id":str(uuid4()),"known_failure_match":True,
-        "refinement_class":"DEGRADING_OR_RECURRING_REFINEMENT", "platform_improvement_candidate_ref":"proposal:example"})
-    inspection=c.inspect(eid)
-    r["findings"][0].update(subject_evidence_id=eid,inspection_id=inspection["inspection_id"],
-        uncertainty="INSPECTED_OWNER_BOUNDARY",classification="SYSTEM_CAPABILITY_DEFECT",
-        handling="EVOLUTION_WORK_PROPOSAL",regression_qualification=REGRESSION_CRITERIA[IssueClass.SYSTEM_CAPABILITY_DEFECT],
-        fact={"statement":"Recorded classifier metadata", "citations":[{"evidence_id":eid,"quote":"DEGRADING_OR_RECURRING_REFINEMENT"}]})
-    with pytest.raises(ValueError, match="DIAGNOSIS_METADATA_ALONE_CANNOT_ESTABLISH_CAPABILITY_DEFECT"):
-        c.materialize_boundaries(AnalysisReport.model_validate(r))
 
 
 def test_time_marker_does_not_change_an_event_or_hide_recovery_creation_error():
@@ -1015,7 +892,8 @@ def test_time_marker_does_not_change_an_event_or_hide_recovery_creation_error():
     output=c.materialize_boundaries(AnalysisReport.model_validate(r)).model_dump(mode="json")
     for old,new in zip(r["timeline"],output["timeline"]):
         assert old["timestamp"]==new["timestamp"] and old["statement"]==new["statement"]
-        assert new["time_interpretation"]==time_boundary(old["timestamp_field"])
+        assert new["time_interpretation"]==old["time_interpretation"]
+        assert new["owner_time_boundary"]==time_boundary(old["timestamp_field"])
 
 
 def test_unknown_gap_markers_keep_the_exact_performed_field_scope():
@@ -1028,9 +906,11 @@ def test_unknown_gap_markers_keep_the_exact_performed_field_scope():
     r["missing_evidence"]=[{"statement":"CHECKED_FIELD_SCOPE","family":"OWNER_RECORD", "check_id":check["check_id"],"availability":check["availability"]}]
     r["evidence_assessments"].append({"statement":"CHECKED_FIELD_SCOPE","family":"OWNER_RECORD","check_id":check["check_id"],"availability":check["availability"]})
     output=c.materialize_boundaries(AnalysisReport.model_validate(r)).model_dump(mode="json")
-    assert output["findings"][0]["analysis"]==check["bounded_conclusion"]
-    assert output["missing_evidence"][0]["statement"]==check["bounded_conclusion"]
-    r["evidence_assessments"][0]["statement"]="This proves all historical responses are available"
+    assert output["findings"][0]["analysis"]==r["findings"][0]["analysis"]
+    assert output["findings"][0]["checked_boundaries"][-1]==check["bounded_conclusion"]
+    assert output["missing_evidence"][0]["statement"]==r["missing_evidence"][0]["statement"]
+    assert output["missing_evidence"][0]["checked_boundary"]==check["bounded_conclusion"]
+    r["evidence_assessments"][0]["availability"]="INCOMPLETE_CAPTURE"
     with pytest.raises(ValueError,match="EVIDENCE_ASSESSMENT_MUST_MATCH_SEEDED_FAMILY_LOOKUP"):
         c.materialize_boundaries(AnalysisReport.model_validate(r))
 
@@ -1084,7 +964,7 @@ def test_runtime_commit_time_uses_only_observed_original_owner_field():
     c.read(eid)
     r["timeline"]=[{"stage":"FINAL_STATE","statement":"Recorded runtime commit", "citations":[{"evidence_id":eid,"quote":"committed_at"}],"timestamp":c.values[eid]["committed_at"],"timestamp_evidence_id":eid,"timestamp_field":"committed_at","time_interpretation":"ORIGINAL_OWNER_TIME_BOUNDARY"}]
     output=c.materialize_boundaries(AnalysisReport.model_validate(r))
-    assert "运行时提交" in output.timeline[0].time_interpretation
+    assert "运行时提交" in output.timeline[0].owner_time_boundary
     r["timeline"][0]["timestamp"]="2026-10-05T13:00:00+00:00"
     with pytest.raises(ValueError,match="TIMELINE_TIME_DOES_NOT_MATCH_OWNER_FIELD"):
         c.materialize_boundaries(AnalysisReport.model_validate(r))
@@ -1143,11 +1023,6 @@ def test_positive_execution_receipts_require_an_execution_timeline_entry():
     c.materialize_boundaries(AnalysisReport.model_validate(r))
 
 
-@pytest.mark.parametrize("phrase",["触发候选重做","随后重新生成候选","then retry the decision","execute a replacement recipe"])
-def test_causal_mechanism_cannot_silently_promote_recovery_actions(phrase):
-    c=EvidenceCatalog(snapshot());r=report(c);r["findings"][0].update(epistemic_status="ROOT_CAUSE_HYPOTHESIS",analysis="假设：若条件成立，则"+phrase,repository_citations=[{"evidence_id":str(uuid4()),"quote":"implementation"}])
-    with pytest.raises(ValueError,match="CAUSE_MECHANISM_CANNOT_ASSERT_RECOVERY_ACTION"):
-        AnalysisReport.model_validate(r)
 
 
 @pytest.mark.parametrize("group",["plan_history","production_work_units"])
@@ -1160,40 +1035,10 @@ def test_original_planning_records_cannot_be_omitted_from_timeline(group):
     c.materialize_boundaries(AnalysisReport.model_validate(r))
 
 
-@pytest.mark.parametrize("phrase", ["本次隔离标识与该实现一致", "执行器随后使用该分类", "this incident used that implementation"])
-def test_conditional_mechanism_cannot_append_historical_implementation_narration(phrase):
-    c=EvidenceCatalog(snapshot());r=report(c)
-    r["findings"][0].update(epistemic_status="ROOT_CAUSE_HYPOTHESIS",
-        analysis="假设：若输入命中该条件，则实现会拒绝该请求。"+phrase,
-        repository_citations=[{"evidence_id":str(uuid4()),"quote":"implementation"}])
-    with pytest.raises(ValueError,match="CAUSE_MECHANISM_CANNOT_NARRATE_HISTORICAL_EXECUTION"):
-        AnalysisReport.model_validate(r)
 
 
-@pytest.mark.parametrize("section", ["immediate_recovery", "self_refine_opportunities", "platform_improvements", "deferred_items"])
-def test_metadata_only_diagnosis_cannot_borrow_other_findings_interruption(section):
-    c=EvidenceCatalog(snapshot());r=report(c)
-    eid=c.add("self_refine_events","/fixture/diagnosis",{"id":str(uuid4()),"signal":"ARBITRARY_DIAGNOSIS","status":"VERIFIED"})
-    inspected=c.inspect(eid)
-    r["findings"][0].update(subject_evidence_id=eid,inspection_id=inspected["inspection_id"],
-        uncertainty="INSPECTED_OWNER_BOUNDARY",fact={"statement":"Recorded diagnostic label", "citations":[{"evidence_id":eid,"quote":"ARBITRARY_DIAGNOSIS"}]})
-    r[section]=[{"statement":"本次观察到的中断已恢复", "evidence_family":"OWNER_RECORD", "finding_ids":["missing-raw"]}]
-    with pytest.raises(ValueError,match="REFINEMENT_DIAGNOSIS_CANNOT_ESTABLISH_EXECUTION_INTERRUPTION"):
-        c.materialize_boundaries(AnalysisReport.model_validate(r))
-    r[section][0]["statement"]="Owner 诊断记录为 VERIFIED；后续核查真实执行收据。"
-    c.materialize_boundaries(AnalysisReport.model_validate(r))
 
 
-def test_explicit_failed_receipt_can_support_its_own_diagnosis_interruption():
-    c,events,receipts=associated_incident_catalog();r=report(c);i=c.inspect(events[0]);f=r["findings"][0]
-    f.update(subject_evidence_id=events[0],inspection_id=i["inspection_id"],uncertainty="INSPECTED_OWNER_BOUNDARY",
-        fact={"statement":"Recorded diagnostic and explicitly associated failed receipt", "citations":[
-            {"evidence_id":events[0],"quote":"SAME_FAILURE"},{"evidence_id":receipts[0],"quote":"FAILED"}]})
-    r["immediate_recovery"]=[{"statement":"本次观察到的执行失败有其自身收据", "evidence_family":"OWNER_RECORD", "finding_ids":["missing-raw"]}]
-    c.materialize_boundaries(AnalysisReport.model_validate(r))
-    f["fact"]["citations"].pop()
-    with pytest.raises(ValueError,match="REFINEMENT_DIAGNOSIS_CANNOT_ESTABLISH_EXECUTION_INTERRUPTION"):
-        c.materialize_boundaries(AnalysisReport.model_validate(r))
 
 
 def test_time_rejection_returns_bounded_exact_draft_entry_without_changing_it():
@@ -1202,12 +1047,12 @@ def test_time_rejection_returns_bounded_exact_draft_entry_without_changing_it():
     c=EvidenceCatalog(snapshot());r=report(c)
     eid=c.add("self_refine_events","/fixture/diagnosis",{"id":str(uuid4()),"created_at":"2026-10-05T12:00:00+00:00","status":"VERIFIED"});c.read(eid)
     entry={"stage":"RECOVERY_REFINEMENT","statement":"Owner recorded VERIFIED", "citations":[{"evidence_id":eid,"quote":"VERIFIED"}],
-        "timestamp":"2026-10-05T12:00:00+00:00","timestamp_evidence_id":eid,"timestamp_field":"created_at","time_interpretation":"ORIGINAL_OWNER_TIME_BOUNDARY"}
+        "timestamp":"2026-10-05T13:00:00+00:00","timestamp_evidence_id":eid,"timestamp_field":"created_at","time_interpretation":"ORIGINAL_OWNER_TIME_BOUNDARY"}
     r["timeline"]=[entry]
     tools=AnalysisTools(c,{})
     req=SimpleNamespace(delivery_id=uuid4(),proposal=SimpleNamespace(tool_identity="analysis.submit",arguments={"report":r}))
     result=asyncio.run(tools.execute(req))
-    issue=next(i for i in result.output["issues"] if i.get("reason","").startswith("TIMELINE_CREATION"))
+    issue=next(i for i in result.output["issues"] if i.get("reason","").startswith("TIMELINE_TIME_DOES_NOT_MATCH_OWNER_FIELD"))
     assert issue["rejected_context"]=={"path":"/timeline/0","value":entry}
     assert tools.drafts[result.output["draft_id"]]["timeline"][0]==entry
     assert tools.accepted_report is None
@@ -1253,53 +1098,14 @@ def test_original_tool_identities_read_within_large_request_without_marking_it_r
     assert not c._range_read(eid,0,len(c.records[eid]["body"]))
 
 
-@pytest.mark.parametrize("tool", ["analyst.inspect", "evidence.read", "repository.read"])
-def test_analyst_tools_do_not_become_historical_recovery_authority(tool):
-    c=EvidenceCatalog(snapshot());r=report(c);c.investigation_tool_identities={tool}
-    r["findings"][0]["recommendation"]="Use "+tool+" as an admitted recovery capability"
-    with pytest.raises(ValueError,match="INVESTIGATION_TOOLS_CANNOT_SUPPLY_HISTORICAL_RECOVERY_AUTHORITY"):
-        c.materialize_boundaries(AnalysisReport.model_validate(r))
-    r["findings"][0]["recommendation"]="Use only capabilities admitted by the original task contract; inspect unknown grants first"
-    c.materialize_boundaries(AnalysisReport.model_validate(r))
 
 
-def test_analyst_tool_reference_needs_cited_inspected_original_definition():
-    c=EvidenceCatalog(snapshot());r=report(c);tool="arbitrary.inspect";c.investigation_tool_identities={tool}
-    eid=c.add("execution_steps","/fixture/request",{"id":str(uuid4()),"request_payload":{"available_tools":[{"identity":tool}],"large":"x"*40000}})
-    f=r["findings"][0];f.update(subject_evidence_id=eid,inspection_id=c.inspect(eid)["inspection_id"],uncertainty="INSPECTED_OWNER_BOUNDARY",fact={"statement":"Original offered tool definition, permissions still require contract check","citations":[{"evidence_id":eid,"quote":tool}]},recommendation="If original contract grants allow, use "+tool)
-    c.materialize_boundaries(AnalysisReport.model_validate(r))
-    c.observed_ranges[eid]=[]
-    with pytest.raises(ValueError,match="INVESTIGATION_TOOLS_CANNOT_SUPPLY_HISTORICAL_RECOVERY_AUTHORITY"):
-        c.materialize_boundaries(AnalysisReport.model_validate(r))
 
 
-@pytest.mark.parametrize("subtype", ["arbitrary_failure_alpha", "arbitrary_failure_beta"])
-def test_captured_issue_subtype_cannot_become_output_of_all_exception_branches(subtype):
-    c=EvidenceCatalog(snapshot());r=report(c)
-    eid=c.add("execution_steps","/fixture/diagnostics",{"id":str(uuid4()),"result_payload":{"validation_issues":[{"type":subtype,"location":[]}]}})
-    code=c.add("repository","/fixture/source",{"repository":"source","revision":"a"*40,"path":"src/adapter.py","blob":"b"*40,"content":"issues = diagnostic_from(error)"},repository=True);c.read(code)
-    f=r["findings"][0];f.update(subject_evidence_id=eid,inspection_id=c.inspect(eid)["inspection_id"],uncertainty="INSPECTED_OWNER_BOUNDARY",fact={"statement":"Observed subtype "+subtype,"citations":[{"evidence_id":eid,"quote":subtype}]},epistemic_status="ROOT_CAUSE_HYPOTHESIS",analysis="假设：若不同异常进入该分支，则输出 "+subtype,repository_citations=[{"evidence_id":code,"quote":"diagnostic_from(error)"}])
-    with pytest.raises(ValueError,match="CAPTURED_DIAGNOSTIC_LITERAL_IS_NOT_A_GENERAL_MECHANISM_OUTPUT"):
-        c.materialize_boundaries(AnalysisReport.model_validate(r))
-    f["analysis"]="假设：若异常进入该分支，则诊断助手按实际异常生成类型和位置。"
-    c.materialize_boundaries(AnalysisReport.model_validate(r))
 
 
-def test_unknown_cannot_hide_unsupported_conditional_producer_mechanism():
-    c=EvidenceCatalog(snapshot());r=report(c)
-    r["findings"][0]["analysis"]="假设：若未读取的实现求差，则产生这个信号。"
-    with pytest.raises(ValueError,match="UNKNOWN_CANNOT_BYPASS_CAUSAL_SOURCE_REQUIREMENT"):
-        AnalysisReport.model_validate(r)
 
 
-@pytest.mark.parametrize("phrase", ["不得回填历史丢弃的响应", "不依赖已丢弃响应的重建", "原始记录已删除", "historical discarded responses cannot be reconstructed", "raw evidence was lost"])
-@pytest.mark.parametrize("section", ["finding", "platform_improvements"])
-def test_capture_gaps_cannot_presuppose_historical_loss_in_recommendations(phrase, section):
-    c=EvidenceCatalog(snapshot());r=report(c)
-    if section=="finding":r["findings"][0]["recommendation"]=phrase
-    else:r[section]=[{"statement":phrase,"evidence_family":"OWNER_RECORD","finding_ids":["missing-raw"]}]
-    with pytest.raises(ValueError,match="CAPTURE_GAP_CANNOT_ESTABLISH_HISTORICAL_DATA_LOSS"):
-        c.materialize_boundaries(AnalysisReport.model_validate(r))
 
 
 def test_explicit_original_disposal_observation_is_distinct_from_capture_gap():
@@ -1307,3 +1113,113 @@ def test_explicit_original_disposal_observation_is_distinct_from_capture_gap():
     eid=c.add("retention_receipts","/fixture/disposal",{"id":str(uuid4()),"observation":"原始记录已删除"})
     f=r["findings"][0];f.update(subject_evidence_id=eid,inspection_id=c.inspect(eid)["inspection_id"],uncertainty="INSPECTED_OWNER_BOUNDARY",fact={"statement":"Owner observation: 原始记录已删除","citations":[{"evidence_id":eid,"quote":"原始记录已删除"}]},recommendation="核对原始记录已删除的处置收据")
     c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+@pytest.mark.parametrize("analysis", [
+    "如果接纳记录满足该条件，代码会写入完成状态；历史加载版本仍待查。",
+    "A possible explanation is this accepted-input branch; the historical implementation remains unknown.",
+    "这是一项源码比较假设：满足条件时返回完成状态，尚不能认定历史调用过该实现。",
+    "若预算内的重新推理采用该已读实现，接纳输入会进入完成分支；此处不声称实际重试过。"])
+def test_semantically_qualified_source_comparisons_do_not_require_a_sentence_template(analysis):
+    c=EvidenceCatalog(snapshot());r=report(c)
+    code=c.add("repository","/fixture/actual-source",{"repository":"source","revision":"a"*40,"path":"src/state.py","blob":"b"*40,"content":"if acceptance == 'ACCEPT': work.state = 'COMPLETED'"},repository=True);c.read(code)
+    f=r["findings"][0];f.update(epistemic_status="ROOT_CAUSE_HYPOTHESIS",analysis=analysis,
+        repository_citations=[{"evidence_id":code,"quote":"if acceptance == 'ACCEPT': work.state = 'COMPLETED'"}],
+        regression_qualification="在原权限和预算里核验可恢复结果；否则如实停止。")
+    result=c.materialize_boundaries(AnalysisReport.model_validate(r))
+    assert result.findings[0].analysis==analysis and result.findings[0].regression_qualification==f["regression_qualification"]
+    f["repository_citations"][0]["evidence_id"]=str(uuid4())
+    with pytest.raises(ValueError):c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+def invoke_analysis(tools, identity, args):
+    from types import SimpleNamespace
+    return asyncio.run(tools.execute(SimpleNamespace(delivery_id=uuid4(),proposal=SimpleNamespace(tool_identity=identity,arguments=args))))
+
+
+def review_items(pending, *, revise=False):
+    return [dict(t,judgment="REVISE" if revise and t["target_path"]=="/findings/0" else "QUALIFIED",
+        rationale="原始快照没有提供处置事件；应限于实际可读字段，不能将取证范围扩为历史丢失。" if revise and t["target_path"]=="/findings/0" else "按原始字段和已检查范围限定解释；仍需独立审查。") for t in pending["review_targets"]]
+
+
+def test_structural_pass_is_pending_until_native_self_review_and_changed_report_is_reviewed_again():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());tools=AnalysisTools(c,{});r=report(c)
+    submitted=invoke_analysis(tools,"analysis.submit",{"report":r})
+    assert submitted.condition.value=="SETTLED" and tools.accepted_report is None
+    assert "report_digest" not in submitted.output and submitted.output["next_action"]=="analysis.review"
+    pending=submitted.output
+    feedback=invoke_analysis(tools,"analysis.review",{"draft_id":pending["draft_id"],"items":review_items(pending,revise=True)})
+    assert feedback.condition.value=="FAILED" and tools.accepted_report is None
+    assert feedback.output["failure_class"]=="RUNTIME_MODEL_VARIANCE"
+    revised=invoke_analysis(tools,"analysis.revise",{"draft_id":pending["draft_id"],"edits":[{"op":"replace","path":"/findings/0/recommendation","value":"仅核对已导出的原始信息，处置状态保持 UNKNOWN。"}]})
+    assert tools.accepted_report is None and revised.output["draft_id"]!=pending["draft_id"]
+    reviewed=invoke_analysis(tools,"analysis.review",{"draft_id":revised.output["draft_id"],"items":review_items(revised.output)})
+    assert reviewed.condition.value=="SETTLED" and tools.accepted_digest==reviewed.output["report_digest"]
+    assert tools.accepted_report["findings"][0]["recommendation"]=="仅核对已导出的原始信息，处置状态保持 UNKNOWN。"
+    assert tools.accepted_review["authority"]=="MODEL_SELF_REVIEW_PROPOSAL_NOT_INDEPENDENT_ASSURANCE"
+    assert tools.drafts[pending["draft_id"]]==r
+
+
+@pytest.mark.parametrize("invalid",["coverage","source","empty_rationale"])
+def test_native_self_review_cannot_forge_coverage_or_source_identity(invalid):
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());tools=AnalysisTools(c,{});pending=invoke_analysis(tools,"analysis.submit",{"report":report(c)}).output
+    items=review_items(pending)
+    if invalid=="coverage":items.pop()
+    if invalid=="source":items[0]["evidence_ids"]=[str(uuid4())]
+    if invalid=="empty_rationale":items[0]["rationale"]=""
+    result=invoke_analysis(tools,"analysis.review",{"draft_id":pending["draft_id"],"items":items})
+    assert result.condition.value=="FAILED" and tools.accepted_report is None
+
+
+class SemanticRefinementModel(NativeModel):
+    """Scripted semantic feedback for recovery control qualification, not live-model evidence."""
+    async def infer(self, req):
+        self.requests.append(req);n=len(self.requests)
+        if n==1:
+            candidate=report(self.catalog);candidate["findings"][0]["recommendation"]="历史响应已丢弃，请重建原始字节。"
+            identity,args="analysis.submit",{"report":candidate}
+        elif n==2:
+            pending=req.previous_results[-1]["output"]
+            identity,args="analysis.review",{"draft_id":pending["draft_id"],"items":review_items(pending,revise=True)}
+        elif n==3:
+            feedback=req.previous_results[-1]["output"]
+            identity,args="analysis.revise",{"draft_id":feedback["draft_id"],"edits":[{"op":"replace","path":"/findings/0/recommendation","value":"先检查已有原始记录；未查明保留状态时保持 UNKNOWN。"}]}
+        elif n==4:
+            pending=req.previous_results[-1]["output"]
+            identity,args="analysis.review",{"draft_id":pending["draft_id"],"items":review_items(pending)}
+        else:
+            return InferenceResponse(action=InferenceAction.RESULT_READY,summary="Scoped report reviewed",working_plan=req.working_plan,
+                result_claim={"output_vector":{"report_digest":req.previous_results[-1]["output"]["report_digest"]}})
+        return InferenceResponse(action=InferenceAction.CONTINUE,summary="Same-owner bounded candidate feedback and repair",working_plan=req.working_plan,
+            tool_calls=(ToolCallProposal(proposal_index=0,tool_identity=identity,arguments=args),))
+
+
+@pytest.mark.parametrize("limit,expected",[(12,"COMPLETED"),(3,"FAILED")])
+def test_native_semantic_feedback_uses_existing_bounded_refinement_and_exhausts_honestly(tmp_path, limit, expected):
+    s,snap,_=service(tmp_path);original=json.loads(json.dumps(snap));model=SemanticRefinementModel(snap)
+    s.inference_factory=lambda:model;s.settings=s.settings.model_copy(update={"trace_analysis_max_inferences":limit})
+    trigger=AnalysisTrigger(request_id=uuid4(),rationale="Recover a candidate's unsupported presupposition")
+    result=asyncio.run(s.analyze("human:owner",uuid4_from(snap),trigger))
+    assert result["status"]==expected and len(model.requests)<=limit and snap==original
+    assert any(v["verification"]=="NATIVE_SELF_REVIEW_REQUIRES_REVISION" for v in result["verification_receipts"])
+    assert result["refinement_feedback"]
+    if expected=="COMPLETED":
+        assert result["report"]["findings"][0]["recommendation"]=="先检查已有原始记录；未查明保留状态时保持 UNKNOWN。"
+        assert result["native_self_review"]["report_digest"]==result["kernel_result"]["result_claim"]["output_vector"]["report_digest"]
+    else:assert result["report"] is None
+
+
+def test_unreviewed_structurally_valid_report_cannot_finish_as_completed(tmp_path):
+    s,snap,_=service(tmp_path)
+    class SkipReview(NativeModel):
+        async def infer(self, req):
+            if req.previous_results:
+                self.requests.append(req)
+                return InferenceResponse(action=InferenceAction.RESULT_READY,summary="Premature terminal",working_plan=req.working_plan,
+                    result_claim={"output_vector":{"report_digest":req.previous_results[-1]["output"]["candidate_digest"]}})
+            return await super().infer(req)
+    model=SkipReview(snap);s.inference_factory=lambda:model
+    result=asyncio.run(s.analyze("human:owner",uuid4_from(snap),AnalysisTrigger(request_id=uuid4(),rationale="Require self-review")))
+    assert result["status"]=="FAILED" and result["report"] is None

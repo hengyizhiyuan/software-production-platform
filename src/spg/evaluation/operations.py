@@ -159,16 +159,19 @@ class OperationsService:
         value = command(["du", "-sk", "--one-file-system", str(self.settings.native_executor_workspace_root)])
         out["workspaces"] = {"bytes": int(value.split()[0]) * 1024 if value else None,
             "method": "du current native workspace volume", "state": "OBSERVED" if value else "UNAVAILABLE"}
-        output = command(["docker", "system", "df", "--format", "{{json .}}"])
-        out["docker"] = {"categories": [json.loads(x) for x in output.splitlines()] if output else [],
-            "state": "OBSERVED" if output else "UNAVAILABLE", "scope": "daemon, shared layers; do not sum with /data"}
+        # Docker's system/df walks overlay2 layers and may continue consuming CPU
+        # after the client times out. Never run it from the periodic Admin sampler.
+        out["docker"] = {"categories": [], "state": "NOT_SAMPLED",
+            "scope": "daemon, shared layers; do not sum with /data",
+            "reason": "EXPENSIVE_DOCKER_DISK_SCAN_DISABLED"}
         # Gitea volume footprint can be measured through a fixed read-only command.
         services = self.services()["services"]
         gitea = next((x for x in services if x["service"] == "gitea" and x["state"] == "running"), None)
         value = command(["docker", "exec", gitea["container_id"], "du", "-sk", "/var/lib/gitea"]) if gitea else None
         out["gitea"] = {"bytes": int(value.split()[0]) * 1024 if value else None,
             "method": "fixed read-only Gitea du", "state": "OBSERVED" if value else "UNAVAILABLE"}
-        out["note"] = "Measurements have different scopes and may overlap; they are not a sum of total disk usage."
+        out["note"] = ("Measurements have different scopes and may overlap; they are not a sum of total disk usage. "
+            "Docker layer usage is not sampled automatically.")
         return out
 
     def assurance(self):

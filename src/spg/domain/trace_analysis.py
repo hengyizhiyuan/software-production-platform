@@ -1,6 +1,5 @@
 """Advisory investigation contracts. They confer no production authority."""
 from enum import StrEnum
-import re
 from typing import Literal
 from uuid import UUID
 
@@ -43,6 +42,7 @@ class EvidenceAssessment(AnalysisRecord):
     check_id: UUID
     availability: Literal["PRESENT", "NOT_OBSERVED_IN_CAPTURE", "INCOMPLETE_CAPTURE"]
     statement: str = Field(min_length=1, max_length=2000)
+    checked_boundary: str = Field(default="", description="Service-derived scope receipt; not a historical event or model assertion.")
 
 
 class EvidenceGap(AnalysisRecord):
@@ -50,6 +50,7 @@ class EvidenceGap(AnalysisRecord):
     family: EvidenceFamily
     check_id: UUID
     availability: Literal["NOT_OBSERVED_IN_CAPTURE", "INCOMPLETE_CAPTURE"]
+    checked_boundary: str = Field(default="", description="Service-derived scope receipt; unexported does not establish historical loss.")
 
 
 class ObservedFact(AnalysisRecord):
@@ -58,11 +59,6 @@ class ObservedFact(AnalysisRecord):
     evidence_family: EvidenceFamily = Field(default=EvidenceFamily.OWNER_RECORD,
         description="Declare PREVIEW_HTTP for preview GET/status/digest claims, DELIVERY_TRANSFER for download audits, EXECUTION_RELATIONSHIP for identity linkage. Citation text from another surface cannot prove this fact.")
 
-    @model_validator(mode="after")
-    def fact_requires_original_observation(self):
-        if self.statement.strip() in {"CHECKED_FIELD_SCOPE", "INSPECTED_OWNER_BOUNDARY", "ORIGINAL_OWNER_TIME_BOUNDARY"}:
-            raise ValueError("FACT_REQUIRES_ORIGINAL_OBSERVATION; boundary markers belong only to checked analysis/uncertainty/assessment fields. Describe the cited original positive fields, not a placeholder; factual prose is never automatically repaired.")
-        return self
 
 
 class TimelineItem(ObservedFact):
@@ -71,7 +67,8 @@ class TimelineItem(ObservedFact):
     timestamp: str | None = Field(default=None, description="Original event time only. Composite stage summaries have no single timestamp. Dated entries must be ordered chronologically, regardless of stage.")
     timestamp_evidence_id: UUID | None = Field(default=None, description="Observed original Owner record whose time is used; must be cited. Other citations of a dated event must be explicitly associated with this record.")
     timestamp_field: Literal["created_at", "updated_at", "started_at", "finished_at", "sealed_at", "assessed_at", "committed_at", "timestamp"] | None = Field(default=None, description="Exact top-level original Owner timestamp field, not an invented stage-wide time.")
-    time_interpretation: str | None = Field(default=None, description="For dated entries use ORIGINAL_OWNER_TIME_BOUNDARY or the exact evidence.read time_boundaries[timestamp_field]; presentation derives from the validated original field. Creation time cannot establish later snapshot state or recovery completion. Undated entries use null.")
+    time_interpretation: str | None = Field(default=None, description="Explain the meaning of this observed Owner time in your own words; do not infer a later transition from row creation.")
+    owner_time_boundary: str | None = Field(default=None, description="Service-derived neutral meaning of the validated original timestamp field.")
 
     @model_validator(mode="after")
     def recorded_time_requires_source(self):
@@ -90,16 +87,17 @@ class Finding(AnalysisRecord):
     uncertainty_check_ids: tuple[UUID, ...] = Field(default=(), max_length=4,
         description="Performed field checks relevant to this finding's uncertainty. Do not infer whole-response or historical absence from them.")
     scope_check_ids: tuple[UUID, ...] = Field(default=(), max_length=4,
-        description="For findings about unavailable fields, cite performed checks. Such findings are UNKNOWN and analysis must be CHECKED_FIELD_SCOPE or the exact checked bounded_conclusion. PRESENT checks cannot establish a missing field. Do not use them to infer global/history absence.")
+        description="For findings about unavailable fields, cite performed checks. Such findings are UNKNOWN; explain the checked scope in your own words. PRESENT checks cannot establish a missing field. Do not use them to infer global/history absence.")
     classification: IssueClass
     epistemic_status: Literal["ROOT_CAUSE_HYPOTHESIS", "UNKNOWN"]
     fact: ObservedFact
     analysis: str = Field(min_length=1, max_length=4000,
-        description="ROOT_CAUSE_HYPOTHESIS must start with '假设：若' and use conditional causal language. Owner diagnosis/expected/rejected-behavior lists are not proof of executed effects or an unavailable candidate's contents.")
+        description="Explain a conditional cause comparison in any semantically equivalent wording; epistemic_status carries the hypothesis boundary. Owner diagnosis/expected/rejected-behavior lists are not proof of executed effects or an unavailable candidate's contents.")
     repository_citations: tuple[Citation, ...] = Field(default=(), max_length=8,
         description="Root cause hypotheses require EXACT_IMPLEMENTATION_READ from repository.read of the relevant implementation and its surrounding control flow. Search locates code; a single matching line and a final diff cannot alone ground a validation/recording mechanism. Keep the cause UNKNOWN without implementation evidence.")
     uncertainty: str = Field(min_length=1, max_length=12000,
-        description="Use INSPECTED_OWNER_BOUNDARY. The verifier derives presentation text only from the registered subject inspection and uncertainty_check_ids. Exact canonical boundary text is also accepted. No free-form absence claims.")
+        description="Explain uncertainty in your own words. Service-derived checked_boundaries preserve exact retrieval scope separately; do not broaden that scope into historical absence.")
+    checked_boundaries: tuple[str, ...] = Field(default=(), description="Service-derived inspection/check receipts; never an independent historical fact.")
     recommendation: str = Field(min_length=1, max_length=3000)
     handling: Literal["SELF_REFINE_RETRY_REGENERATE", "EVOLUTION_WORK_PROPOSAL",
                       "BLOCK_AND_ESCALATE", "INVESTIGATE"] = Field(description=
@@ -109,7 +107,7 @@ class Finding(AnalysisRecord):
     regression_scenario: str = Field(default="", max_length=2000,
         description="Describe an adversarial/recovery scenario, not a promise of zero future failures.")
     regression_qualification: str = Field(min_length=1, max_length=3000,
-        description="Copy the criterion for classification exactly: " + str({k.value: v for k, v in REGRESSION_CRITERIA.items()}))
+        description="Describe permission/budget-bounded recovery or governed termination in your own words; model variance does not require zero future errors. Guidance: " + str({k.value: v for k, v in REGRESSION_CRITERIA.items()}))
 
     @model_validator(mode="after")
     def preserve_governance_boundary(self):
@@ -123,19 +121,6 @@ class Finding(AnalysisRecord):
             raise ValueError("handling must preserve the issue classification boundary")
         if not self.repository_citations and self.epistemic_status != "UNKNOWN":
             raise ValueError("a root cause hypothesis requires repository evidence")
-        if self.epistemic_status == "UNKNOWN" and self.analysis.startswith("假设：若"):
-            raise ValueError("UNKNOWN_CANNOT_BYPASS_CAUSAL_SOURCE_REQUIREMENT; describe recorded metadata and limits only, or use ROOT_CAUSE_HYPOTHESIS with exact implementation evidence")
-        if self.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and not self.analysis.startswith("假设：若"):
-            raise ValueError("CAUSAL_HYPOTHESIS_MUST_BE_EXPLICIT; begin analysis with 假设：若, state a conditional mechanism, and do not promote diagnoses or repair plans to performed actions")
-        if self.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and re.search(r"重做|重新生成|重新推理|替代配方|\b(?:regenerat\w*|retr(?:y|ied|ies)|replacement\s+recipe)\b", self.analysis, re.I):
-            raise ValueError("CAUSE_MECHANISM_CANNOT_ASSERT_RECOVERY_ACTION; describe only the failure/recording condition here. Proposed recovery belongs in recommendations; performed recovery needs its own original fact receipts.")
-        if self.epistemic_status == "ROOT_CAUSE_HYPOTHESIS" and re.search(
-                r"本次|此次|随后|实际(?:执行|运行|加载|使用)|历史(?:执行|运行|加载|使用)|"
-                r"\bthis\s+(?:work|run|incident)\b|\b(?:then|actually)\s+(?:executed|loaded|used)\b",
-                self.analysis, re.I):
-            raise ValueError("CAUSE_MECHANISM_CANNOT_NARRATE_HISTORICAL_EXECUTION; keep analysis a conditional implementation comparison. Put original-event observations in cited facts; an isolation/host label does not identify historical loaded code.")
-        if self.regression_qualification != REGRESSION_CRITERIA[self.classification]:
-            raise ValueError("REGRESSION_CRITERION_MUST_MATCH_GOVERNED_OUTCOME: " + REGRESSION_CRITERIA[self.classification])
         if self.scope_check_ids and (self.classification != IssueClass.UNKNOWN or self.epistemic_status != "UNKNOWN"):
             raise ValueError("checked capture limitations cannot establish a platform defect or root cause")
         return self
@@ -148,7 +133,7 @@ class Recommendation(AnalysisRecord):
 
 
 class AnalysisReport(AnalysisRecord):
-    schema_version: Literal["watt-trace-analysis-report-v6"] = "watt-trace-analysis-report-v6"
+    schema_version: Literal["watt-trace-analysis-report-v7"] = "watt-trace-analysis-report-v7"
     work_id: UUID
     original_objective: ObservedFact
     expected_outcome: ObservedFact
@@ -161,9 +146,9 @@ class AnalysisReport(AnalysisRecord):
     platform_improvements: tuple[Recommendation, ...] = Field(default=(), max_length=20)
     deferred_items: tuple[Recommendation, ...] = Field(default=(), max_length=20)
     evidence_assessments: tuple[EvidenceAssessment, ...] = Field(max_length=8,
-        description="Reconcile every family with its exact check_id and availability. Use CHECKED_FIELD_SCOPE as statement; presentation derives from that performed check. These are snapshot observations, not completeness or causal truth.")
+        description="Reconcile every family with its exact check_id and availability. Describe the performed check in any equivalent wording; checked_boundary is derived separately. These are snapshot observations, not completeness or causal truth.")
     missing_evidence: tuple[EvidenceGap, ...] = Field(default=(), max_length=60,
-        description="Use CHECKED_FIELD_SCOPE; the verifier materializes its performed check boundary. Every absence/incompleteness claim needs a prior evidence.check receipt for the same family. PRESENT evidence cannot be called missing; NOT_OBSERVED is limited to the checked snapshot scope. Put source/comparison limitations in uncertainty, not invented absence claims.")
+        description="Describe the gap in your own words; checked_boundary preserves the performed lookup scope separately. Every absence/incompleteness claim needs a prior evidence.check receipt for the same family. PRESENT evidence cannot be called missing; NOT_OBSERVED is limited to the checked snapshot scope. Put source/comparison limitations in uncertainty, not invented absence claims.")
 
     @model_validator(mode="after")
     def recommendation_lineage(self):
