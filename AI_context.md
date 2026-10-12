@@ -1,6 +1,14 @@
 # AI-Native Software Production Platform
 
-> Current development entry (2026-10-11): Human Governor and the AI collaborator
+> Development entry (Human-approved, 2026-10-12): substantial tasks involving
+> probabilistic intelligent products apply the sole Watt
+> [§14 module adaptation and review norm](docs/architecture/ai-native-development-execution-principles.md#14-ai-native-module-adaptation-and-development-review)
+> and preserved [§13 execution discipline](docs/architecture/ai-native-development-execution-principles.md#13-ai-non-determinism-principle-and-execution-discipline),
+> including deterministic consumers without LLM calls. Existing Mission/Owner
+> governance applies; the Human Governor and AI collaborator conduct development.
+> Documentation adoption does not qualify current Runtime behavior.
+
+> Retained C3 development checkpoint (2026-10-11): Human Governor and the AI collaborator
 > jointly conduct Watt development; no separate Architecture Lead approval gate
 > is required. Apply the canonical
 > [AI Non-Determinism Principle and Execution Discipline](docs/architecture/ai-native-development-execution-principles.md#13-ai-non-determinism-principle-and-execution-discipline):
@@ -9,6 +17,9 @@
 > is recorded in its
 > [current execution-recalibration evidence](docs/evidence/core-production-semantic-convergence-c3-20261009/execution-recalibration-20261011/assessment-and-execution-plan.md), independently of
 > historical closure entries below.
+
+> Latest retained C3 handoff (2026-10-12): [current progress and remaining obligations](docs/evidence/core-production-semantic-convergence-c3-20261009/native-context-reference-recovery-20261011/handoff-20261012.md).
+> This documentation sync does not resume qualification or change that evidence.
 
 > Runtime transition note (2026-09-24): the active source and deployment
 > profiles use the Watt Native Executor with API-key model providers. Historical
@@ -35,6 +46,17 @@ historical TNGA references remain truthful and are not rewritten opportunistical
 This repository is the Source of Truth for the AI-Native Software Production Platform: a platform for the full lifecycle of AI-native software production.
 
 The platform is an AI-native Software Production System, not an AI Coding tool, ChatGPT replacement, or Coding Agent integration platform. Its objective is to build an AI-native Software Production Loop in which AI can use goals, engineering context, and governance constraints to drive planning, execution coordination, verification, feedback analysis, iteration adjustment, and baseline evolution.
+
+## Program Architecture Invariant
+
+The Human Governor Accepted
+[Program ADR-0002 — Stochastic-native Engineering](https://github.com/hengyizhiyuan/software-production-system/blob/1e2c1fdf37d9252c0a9bd480fc2ff15c88d0fee1/docs/04-decisions/ADR-0002-STOCHASTIC-NATIVE-ENGINEERING.md)
+owns the highest Program invariant: **Reuse Determinism, Harness Stochasticity**.
+Watt's [applicability and publication reference](docs/architecture/program-architecture-decisions.md#stochastic-native-engineering--program-adr-0002)
+preserves stochastic candidates, bounded convergence, existing Owner boundaries,
+effect authority and real Work qualification. Model-capability changes use the
+[Mission Contract review](docs/architecture/ai-native-development-execution-principles.md#stochastic-native-capability-review).
+This documentation adoption does not establish Runtime conformance or N1 Closure.
 
 ## Current Stage
 

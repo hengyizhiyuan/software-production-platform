@@ -13,6 +13,22 @@ scheduler progression, Provider and Executor recovery, and UI consistency. The
 system must absorb those failures without adopting a policy of one permanent
 browser journey for every bug.
 
+## Stochastic-native capability qualification
+
+Under [Program ADR-0002](program-architecture-decisions.md#stochastic-native-engineering--program-adr-0002),
+qualification of an applicable new or materially changed capability producing
+or consuming probabilistic intelligence follows [Development Principles §14.5](ai-native-development-execution-principles.md#145-default-development-and-maintenance-process),
+including consumers without direct LLM calls. It must appropriately include
+non-prelisted expressions, semantic-equivalence variants, a real end-to-end Work
+and applicable negative evidence. Validate intent, constraints, effects, evidence
+and authority equivalence rather than identical reasoning, steps or code.
+
+Deterministic fixtures and focused regression checks remain useful at their
+existing layers. A single Case PASS does not establish generality. Bind real
+qualification to exact source/runtime identity and preserve independent Guardian
+evidence and Human authority. This design requirement adds no test framework
+and does not rewrite prior Golden results or prove existing code compliant.
+
 ## Governing principle
 
 > A historical bug should normally be converted into a durable system invariant,
@@ -40,6 +56,13 @@ A historical incident does not automatically justify a new Golden Journey.
 The default engineering rule is:
 
 > No regression protection, no bug closure.
+
+First apply the canonical [A/B/C classification](ai-native-development-execution-principles.md#132-runtime-recovery-versus-system-evolution)
+and [module maintenance review](ai-native-development-execution-principles.md#145-default-development-and-maintenance-process)
+to actual Trace, Owner, source/version and failed predicates. A normal candidate
+deviation or correct governance refusal is not automatically a platform defect.
+For a proven engineering defect, use common-root repair and proportionate
+regression within the existing mission.
 
 Every meaningful production or Human Dogfood defect must identify:
 

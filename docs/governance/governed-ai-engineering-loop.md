@@ -52,22 +52,23 @@ As the platform matures, lower-value manual checks may be assisted or replaced b
 
 The governed loop uses Controlled Autonomy. AI coordinates understanding, planning, decomposition, execution, feedback analysis, and adjustment. The Human Governor retains Goal Authority, Strategic Direction, Major Trade-off, Risk Acceptance, and Final Governance.
 
-## Model uncertainty and mission execution review
+## Program invariant and model capability review
 
-Use the canonical
-[AI Non-Determinism Principle](../architecture/ai-native-development-execution-principles.md#13-ai-non-determinism-principle-and-execution-discipline)
-when adding or materially changing a model-mediated capability. A Mission
-Contract must identify allowed variance, immutable facts and authority, the
-existing validation/recovery Owner and budget, termination rules, static
-special-case risk, and representative real/negative evidence.
+The fixed [Program ADR-0002](../architecture/program-architecture-decisions.md#stochastic-native-engineering--program-adr-0002)
+is the authoritative stochastic-native engineering constraint. Substantial tasks
+producing, consuming, validating or relaying probabilistic intelligent products
+use the existing
+[Mission Contract review](../architecture/ai-native-development-execution-principles.md#stochastic-native-capability-review).
+Role ownership, independent Assurance and Acceptance Authority remain unchanged.
+Documentation adoption is separate from Runtime conformance qualification.
 
-Classify a current failure as runtime variance, proven system capability defect
-or governance blocker before choosing recovery or engineering evolution.
-Prioritize the blocked production journey (P0) and necessary common capability
-gaps (P1); defer optional quality/cosmetic work (P2/P3). Use local validation
-for local edits, focused regression for grouped changes and broader regression
-for architecture changes or required final qualification. The Human Governor
-and AI collaborator perform this review within the existing mission; it adds
-no separate approval actor or runtime compliance engine.
+## Module adaptation in development and maintenance
 
-
+The sole Watt normative body is [Development Principles §§13–14](../architecture/ai-native-development-execution-principles.md#14-ai-native-module-adaptation-and-development-review).
+Task admission, architecture/implementation review, maintenance diagnosis and
+qualification/closure use its [existing-process checks](../architecture/ai-native-development-execution-principles.md#145-default-development-and-maintenance-process),
+including deterministic consumers without LLM calls. Record applicable answers
+in the existing Mission Contract/review; ordinary deterministic tasks need no
+full checklist. The Human Governor and AI collaborator retain existing authority
+boundaries. No new approval workflow, governance Owner or compliance engine is
+created, and existing modules receive no conformance PASS from this adoption.
