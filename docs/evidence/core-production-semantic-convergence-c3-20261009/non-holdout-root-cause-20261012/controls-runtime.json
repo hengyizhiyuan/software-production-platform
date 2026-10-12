@@ -1,0 +1,9 @@
+{
+  "actual_image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "container": "0f3f71e8e1929f631ee5f7fb6d250c94d17db36ca527fe6dc0db95361d1e2002",
+  "network": "none",
+  "runtime_source_overlay": false,
+  "frozen_test_revision": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+  "frozen_tests_archive_sha256": "665cc29b8ec3eb0e5d952d4e49628f4e7e38884b3a4e26072eff685234a55984",
+  "no_credentials_or_business_database_supplied": true
+}

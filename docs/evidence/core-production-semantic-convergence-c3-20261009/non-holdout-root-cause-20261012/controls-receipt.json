@@ -1,0 +1,36 @@
+{
+  "schema": "c3-nonholdout-owner-control-run-v1",
+  "started_at_utc": "2026-10-12T11:19:24.652625+00:00",
+  "wall_seconds": 11.112024290021509,
+  "exit_code": 0,
+  "counts": {
+    "tests": 24,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 24
+  },
+  "nodes": [
+    "tests/test_c3_semantic_contract_calibration.py::test_same_source_same_capability_distinct_components_and_historical_review_shape",
+    "tests/test_c3_semantic_contract_calibration.py::test_component_identity_conflict_and_complete_half_open_coverage",
+    "tests/test_c3_semantic_contract_calibration.py::test_distinct_background_and_candidate_components_have_separate_dispositions",
+    "tests/test_c3_semantic_contract_calibration.py::test_distinct_unresolved_component_is_preserved_and_runtime_admission_stops",
+    "tests/test_c3_source_role_contract.py::test_shared_production_and_negative_clause_identity_has_a_legal_full_binding",
+    "tests/test_c3_source_role_contract.py::test_located_coverage_feedback_reports_exact_gap_without_repairing_candidate",
+    "tests/test_c3_fulfillment_repair_context.py::test_incomplete_legal_candidate_can_use_one_existing_feedback_and_replay_never_reexecutes",
+    "tests/test_c3_fulfillment_repair_context.py::test_second_incomplete_candidate_stops_without_budget_reset",
+    "tests/test_c3_fulfillment_repair_context.py::test_predecode_coverage_feedback_observes_full_wire_without_admitting_candidate",
+    "tests/test_c3_fulfillment_repair_context.py::test_located_gap_checkpoint_resumes_only_remaining_calls_and_preserves_original_receipts",
+    "tests/test_c3_fulfillment_repair_context.py::test_bound_original_proposal_is_available_to_one_repair_and_independent_review",
+    "tests/test_c3_generation_owner_domains.py::test_v10_generation_excludes_only_contradictory_whole_component_dispositions",
+    "tests/test_c3_generation_owner_domains.py::test_v10_feedback_identifies_both_original_conflicting_routes_without_selecting_a_repair",
+    "tests/test_c3_generation_owner_domains.py::test_v10_and_historical_v9_conflict_stop_replay_preserves_budget_receipts_and_peer_identity"
+  ],
+  "actual_image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "live_model_calls": 0,
+  "controlled_provider_results_only": true,
+  "application_or_test_source_changed": false,
+  "holdout_inputs_used": false,
+  "business_database_access": false,
+  "quality_boundary": "OWNER_EXPRESSIBILITY_AND_FEEDBACK_CONTROL_NOT_REAL_MODEL_QUALIFICATION"
+}

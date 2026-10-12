@@ -1,0 +1,8 @@
+{
+  "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "container": "2769ca26f6f584d19351f6dcc94bcff17ea263e4efc5b32089add0074d777dca",
+  "network": "none",
+  "runtime_source_overlay": false,
+  "input_mounts_readonly": true,
+  "model_calls": 0
+}

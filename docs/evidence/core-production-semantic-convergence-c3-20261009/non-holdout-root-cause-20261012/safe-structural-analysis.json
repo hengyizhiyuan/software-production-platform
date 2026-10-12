@@ -1,0 +1,884 @@
+{
+  "schema": "c3-holdout-readonly-structural-analysis-v1",
+  "scope": "READ_ONLY_FINISHED_HOLDOUT_EVIDENCE",
+  "model_calls_added": 0,
+  "owner_calls_added": 0,
+  "candidate_or_oracle_changes": 0,
+  "counterfactual_candidates_constructed": 0,
+  "input_snapshots_equal": true,
+  "input_file_count": 91,
+  "input_snapshot_sha256": "6ca1ccbafb5fc4163ea3aeabc26b49fa3f37f65ae37ea648ed8a80da7e11d134",
+  "original_qualification_root": "/data/watt/c3-semantic-convergence-20261009/independent-holdout-preflight-20261012-092000Z",
+  "cases": [
+    {
+      "opaque_ordinal": 0,
+      "inventory_sha256": "6debefb7920ac39a0ba682715a1d24b4363de9812424bca148b0ef4c45b00c52",
+      "inventory_fingerprint": "45d7ea207cd18361faf972b6b21fe65607251c11f86eb312318b7cd38062cf91",
+      "sources": {
+        "total": 18,
+        "kinds": {
+          "FACT": 5,
+          "IR_CLAUSE": 2,
+          "IR_CONSTRAINT": 3,
+          "WORK_CONSTRAINT": 7,
+          "WORK_CONTEXT": 1
+        },
+        "original_text_codepoint_length_intervals_by_kind": {
+          "FACT": {
+            "1-64": 5
+          },
+          "IR_CLAUSE": {
+            "1-64": 2
+          },
+          "IR_CONSTRAINT": {
+            "1-64": 3
+          },
+          "WORK_CONSTRAINT": {
+            "129-256": 1,
+            "65-128": 3,
+            "1-64": 3
+          },
+          "WORK_CONTEXT": {
+            "129-256": 1
+          }
+        }
+      },
+      "review_call_count": 0,
+      "attempts": [
+        {
+          "attempt": 1,
+          "candidate_wire_sha256": "9fd66ecfb175bba730cf2ffd43482cbe8e5e6585c3a51498313f8044fa04daa9",
+          "wire_bytes": 8870,
+          "request_receipt_id_hash": "42188c452d2b0a2446badb018a4d4ad8a6d8b582700acc1baf46bc9a75720878",
+          "response_receipt_id_hash": "0c7a2eb4ca7432808a310229d0d359ceabde55da482778d8ad6da94a50b7403b",
+          "validation_receipt_id_hash": "a75ebef5ea99e26ad05a14b28c0ad80a1b1addf80d10ae6d87a9660bf3d827e7",
+          "failed_predicate": "OBLIGATION_FORMATION_WIRE_JSON_INVALID",
+          "validation_passed": false,
+          "provider": {
+            "status": "completed",
+            "terminal_matches_delta": true,
+            "terminal_text_observed": true,
+            "selection": "TERMINAL_MATCHED_DELTA",
+            "output_tokens": 2488,
+            "output_cap": 16384,
+            "cap_reached": false,
+            "explicit_finish_reason": "NOT_CAPTURED",
+            "transport_retries": 0,
+            "generation_input_sha256": "ba9d573d8ff0b2c9db47fd996678d816895ec5ef6aac01ae47b5bd1c4945adaf"
+          },
+          "actual_model_call_pending_input_hash_match_count": 1,
+          "syntax": {
+            "strict_json_valid": false,
+            "error_type": "EXTRA_DATA",
+            "error_at_eof": false
+          },
+          "feedback": {
+            "sha256": "1e313d348547ff5d5788be8d37f5de53ddc4e6854ae789fc4f621469d3db23f0",
+            "code_counts": {
+              "OBLIGATION_FORMATION_WIRE_JSON_INVALID": 1
+            },
+            "additional_violation_count": 0,
+            "exact_binding_checks": {
+              "work_id": true,
+              "work_reality_revision_id": true,
+              "inventory_fingerprint": true,
+              "source_revision": true,
+              "attempt": true,
+              "wire_output_fingerprint": true,
+              "request_receipt_id": true,
+              "response_receipt_id": true,
+              "exact_target_paths": true,
+              "owner_source_preconditions_fingerprint": true
+            },
+            "binding_all_pass": true,
+            "repair_feedback_bound_observed": true,
+            "owner_repair_context_bound_observed": true,
+            "conflict_observation_count": 0,
+            "conflict_all_exact_same_source_span_quote": null,
+            "conflict_with_executable_count": 0,
+            "raw_character_coverage_observation_count": 0,
+            "raw_character_coverage_observations_exact": null,
+            "syntax_observation": {
+              "reason": "EXTRA_DATA",
+              "trailing_bytes": 1,
+              "complete_value_sha256": "5d35e53d0928df2ae9b0e7efd0848e4cb4008971d95b788ea5259c5f93387f39",
+              "complete_value_recorded": true
+            },
+            "next_attempt_consumption": {
+              "feedback_receipt_matches": true,
+              "request_feedback_exact_text_match": true,
+              "provider_validation_feedback_sha256_matches": true,
+              "provider_generation_input_has_actual_pending_record": true,
+              "transmission_scope": "PROVIDER_INVOCATION_METADATA_AND_ACTUAL_CALL_PENDING; HTTP_BODY_NOT_INDEPENDENTLY_CAPTURED"
+            }
+          }
+        },
+        {
+          "attempt": 2,
+          "candidate_wire_sha256": "dffc967c675fea6ec01bf2ce5d7771bf2ec210959c1b34b493a5cc50223603e5",
+          "wire_bytes": 7973,
+          "request_receipt_id_hash": "d3c9db2f6767121791b748fb80ea49ebec47f80d2411e2fa2e5ba790e0f74ffa",
+          "response_receipt_id_hash": "a17ead1ef3a8b621b4c4c8aa444d320909419e3600cf32664bde5be0468e685e",
+          "validation_receipt_id_hash": "4f9478447433d75355de2b868ed9b202b0275f5d5bc42af3defd708b22e05ad3",
+          "failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "validation_passed": false,
+          "provider": {
+            "status": "completed",
+            "terminal_matches_delta": true,
+            "terminal_text_observed": true,
+            "selection": "TERMINAL_MATCHED_DELTA",
+            "output_tokens": 2293,
+            "output_cap": 16384,
+            "cap_reached": false,
+            "explicit_finish_reason": "NOT_CAPTURED",
+            "transport_retries": 0,
+            "generation_input_sha256": "53d7259005b890cd275820b50d02faab0fe9720dc1c6cb66e346fb206d308a76"
+          },
+          "actual_model_call_pending_input_hash_match_count": 1,
+          "route_structure": {
+            "count": 22,
+            "capability_counts": {
+              "ARTIFACT_CONTENT": 8,
+              "GIT_DIFF_SCOPE": 4,
+              "DENY_PREVIEW": 1,
+              "DENY_PUBLISH": 3,
+              "DENY_DEPLOY": 3,
+              "HUMAN_INTEGRATION": 2,
+              "CANDIDATE_SEAL": 1
+            },
+            "source_kind_counts": {
+              "FACT": 5,
+              "IR_CLAUSE": 3,
+              "IR_CONSTRAINT": 5,
+              "WORK_CONSTRAINT": 8,
+              "WORK_CONTEXT": 1
+            },
+            "unique_exact_quote_offset_adjustment_count": 2,
+            "locatable_span_count": 22
+          },
+          "physical_conflicts": {
+            "same_source_same_span_quote_pair_count": 0,
+            "capability_pair_counts": {},
+            "source_kind_pair_counts": {},
+            "distinct_span_mixed_disposition_pair_count": 0,
+            "distinct_span_pairs_are_not_declared_semantically_lawful": "SEMANTIC_REVIEW_REQUIRED"
+          },
+          "character_coverage": {
+            "scope": "ORIGINAL_NONWHITESPACE_CODEPOINTS; NOT_SEMANTIC_COMPONENT_EQUIVALENCE",
+            "gap_source_count": 1,
+            "gaps": [
+              {
+                "source_kind": "IR_CONSTRAINT",
+                "missing_nonwhitespace_codepoints": 1,
+                "range_count": 1,
+                "range_location_types": {
+                  "INTERIOR": 1
+                },
+                "character_categories": {
+                  "P": 1
+                }
+              }
+            ]
+          },
+          "feedback": {
+            "sha256": "5299fea578e8ad69bd5ee604dd26876447ea37c03d3953f19768f4e330f91c8f",
+            "code_counts": {
+              "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST": 1
+            },
+            "additional_violation_count": 0,
+            "exact_binding_checks": {
+              "work_id": true,
+              "work_reality_revision_id": true,
+              "inventory_fingerprint": true,
+              "source_revision": true,
+              "attempt": true,
+              "wire_output_fingerprint": true,
+              "request_receipt_id": true,
+              "response_receipt_id": true,
+              "exact_target_paths": true,
+              "owner_source_preconditions_fingerprint": true
+            },
+            "binding_all_pass": true,
+            "repair_feedback_bound_observed": true,
+            "owner_repair_context_bound_observed": true,
+            "conflict_observation_count": 0,
+            "conflict_all_exact_same_source_span_quote": null,
+            "conflict_with_executable_count": 0,
+            "raw_character_coverage_observation_count": 1,
+            "raw_character_coverage_observations_exact": true
+          }
+        }
+      ],
+      "lawful_multicomponent_misrejection_evidence": "NONE_IN_RECORDED_PHYSICAL_CONFLICT_OBSERVATIONS; FULL_SEMANTIC_FEASIBILITY_UNKNOWN"
+    },
+    {
+      "opaque_ordinal": 1,
+      "inventory_sha256": "0db3173e69f3d6b2a9997fcb0c6a0e6e7b7705ac7746c8af1709cc4470b75b21",
+      "inventory_fingerprint": "803334b925fc2f2d003f2805bb701cbfe884a9160f74dadb23cb622e6816bb99",
+      "sources": {
+        "total": 19,
+        "kinds": {
+          "FACT": 3,
+          "IR_CLAUSE": 3,
+          "IR_CONSTRAINT": 4,
+          "WORK_CONSTRAINT": 8,
+          "WORK_CONTEXT": 1
+        },
+        "original_text_codepoint_length_intervals_by_kind": {
+          "FACT": {
+            "65-128": 2,
+            "1-64": 1
+          },
+          "IR_CLAUSE": {
+            "65-128": 2,
+            "1-64": 1
+          },
+          "IR_CONSTRAINT": {
+            "129-256": 2,
+            "65-128": 1,
+            "1-64": 1
+          },
+          "WORK_CONSTRAINT": {
+            "129-256": 2,
+            "257-512": 1,
+            "1-64": 3,
+            "65-128": 2
+          },
+          "WORK_CONTEXT": {
+            "65-128": 1
+          }
+        }
+      },
+      "review_call_count": 0,
+      "attempts": [
+        {
+          "attempt": 1,
+          "candidate_wire_sha256": "8f2dadce7040fa793c542e7d72a1bfdc4010e2cbf3a2c82f72a330cab118dedc",
+          "wire_bytes": 17660,
+          "request_receipt_id_hash": "eb5ae3f9de19b6c341804304b1941b533d136a24baabc7db6dbd245bee9d9ad6",
+          "response_receipt_id_hash": "5912eb362dd02540ff7bebdf0a95999af1289f702f62b0fc1ac1355767fbfab2",
+          "validation_receipt_id_hash": "96eea2189577243be8aeb8447095331678276273688a0e25d60e4e5ea0a8b648",
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "validation_passed": false,
+          "provider": {
+            "status": "completed",
+            "terminal_matches_delta": true,
+            "terminal_text_observed": true,
+            "selection": "TERMINAL_MATCHED_DELTA",
+            "output_tokens": 4409,
+            "output_cap": 16384,
+            "cap_reached": false,
+            "explicit_finish_reason": "NOT_CAPTURED",
+            "transport_retries": 0,
+            "generation_input_sha256": "29630787d2c8326917a00dbc7851083040c7228319bd90f11f2e2b06d67b20b5"
+          },
+          "actual_model_call_pending_input_hash_match_count": 1,
+          "route_structure": {
+            "count": 39,
+            "capability_counts": {
+              "ARTIFACT_CONTENT": 7,
+              "RETAIN_CONTEXT": 6,
+              "GIT_DIFF_SCOPE": 5,
+              "CANDIDATE_SEAL": 4,
+              "DENY_PREVIEW": 5,
+              "DENY_DEPLOY": 5,
+              "DENY_PUBLISH": 5,
+              "HUMAN_INTEGRATION": 2
+            },
+            "source_kind_counts": {
+              "FACT": 5,
+              "IR_CLAUSE": 7,
+              "IR_CONSTRAINT": 6,
+              "WORK_CONSTRAINT": 20,
+              "WORK_CONTEXT": 1
+            },
+            "unique_exact_quote_offset_adjustment_count": 0,
+            "locatable_span_count": 39
+          },
+          "physical_conflicts": {
+            "same_source_same_span_quote_pair_count": 6,
+            "capability_pair_counts": {
+              "ARTIFACT_CONTENT+RETAIN_CONTEXT": 3,
+              "CANDIDATE_SEAL+RETAIN_CONTEXT": 2,
+              "HUMAN_INTEGRATION+RETAIN_CONTEXT": 1
+            },
+            "source_kind_pair_counts": {
+              "FACT": 2,
+              "IR_CLAUSE": 4
+            },
+            "distinct_span_mixed_disposition_pair_count": 0,
+            "distinct_span_pairs_are_not_declared_semantically_lawful": "SEMANTIC_REVIEW_REQUIRED"
+          },
+          "character_coverage": {
+            "scope": "ORIGINAL_NONWHITESPACE_CODEPOINTS; NOT_SEMANTIC_COMPONENT_EQUIVALENCE",
+            "gap_source_count": 0,
+            "gaps": []
+          },
+          "feedback": {
+            "sha256": "a067a8b441dfc4e13e7eac4cea20c98593186e108f791114e43ec8333f5bf02a",
+            "code_counts": {
+              "OBLIGATION_CURRENT_FACT_CANNOT_BE_CONTEXT_ONLY": 2,
+              "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION": 4,
+              "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY": 1,
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN": 3
+            },
+            "additional_violation_count": 0,
+            "exact_binding_checks": {
+              "work_id": true,
+              "work_reality_revision_id": true,
+              "inventory_fingerprint": true,
+              "source_revision": true,
+              "attempt": true,
+              "wire_output_fingerprint": true,
+              "request_receipt_id": true,
+              "response_receipt_id": true,
+              "exact_target_paths": true,
+              "owner_source_preconditions_fingerprint": true
+            },
+            "binding_all_pass": true,
+            "repair_feedback_bound_observed": true,
+            "owner_repair_context_bound_observed": true,
+            "conflict_observation_count": 4,
+            "conflict_all_exact_same_source_span_quote": true,
+            "conflict_with_executable_count": 4,
+            "raw_character_coverage_observation_count": 0,
+            "raw_character_coverage_observations_exact": null,
+            "next_attempt_consumption": {
+              "feedback_receipt_matches": true,
+              "request_feedback_exact_text_match": true,
+              "provider_validation_feedback_sha256_matches": true,
+              "provider_generation_input_has_actual_pending_record": true,
+              "transmission_scope": "PROVIDER_INVOCATION_METADATA_AND_ACTUAL_CALL_PENDING; HTTP_BODY_NOT_INDEPENDENTLY_CAPTURED"
+            }
+          }
+        },
+        {
+          "attempt": 2,
+          "candidate_wire_sha256": "f752cd12a6f983ac812258bda6b77ff56ecb60ef62659b903519821e50267e65",
+          "wire_bytes": 15741,
+          "request_receipt_id_hash": "a42cb5f386a107108464fbc0e67ce5ac68d81443d2ffa0800bbff281331da629",
+          "response_receipt_id_hash": "ce31afc71b5948ea71e9197e66b19fb247cf3315de149f6c4a6f614b069a3c11",
+          "validation_receipt_id_hash": "5517a730d59b173fcaa3984cba2b195e40c6dc64b0602b86ac9303c587cd8a9b",
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "validation_passed": false,
+          "provider": {
+            "status": "completed",
+            "terminal_matches_delta": true,
+            "terminal_text_observed": true,
+            "selection": "TERMINAL_MATCHED_DELTA",
+            "output_tokens": 4053,
+            "output_cap": 16384,
+            "cap_reached": false,
+            "explicit_finish_reason": "NOT_CAPTURED",
+            "transport_retries": 0,
+            "generation_input_sha256": "8e963fcc9d988cf1608933ac3a3773dabc1aa9810b2a95f6c47a4e84316a4d59"
+          },
+          "actual_model_call_pending_input_hash_match_count": 1,
+          "route_structure": {
+            "count": 37,
+            "capability_counts": {
+              "ARTIFACT_CONTENT": 7,
+              "GIT_DIFF_SCOPE": 5,
+              "CANDIDATE_SEAL": 4,
+              "RETAIN_CONTEXT": 4,
+              "DENY_PREVIEW": 5,
+              "DENY_DEPLOY": 5,
+              "DENY_PUBLISH": 5,
+              "HUMAN_INTEGRATION": 2
+            },
+            "source_kind_counts": {
+              "FACT": 3,
+              "IR_CLAUSE": 7,
+              "IR_CONSTRAINT": 6,
+              "WORK_CONSTRAINT": 20,
+              "WORK_CONTEXT": 1
+            },
+            "unique_exact_quote_offset_adjustment_count": 0,
+            "locatable_span_count": 37
+          },
+          "physical_conflicts": {
+            "same_source_same_span_quote_pair_count": 4,
+            "capability_pair_counts": {
+              "ARTIFACT_CONTENT+RETAIN_CONTEXT": 1,
+              "CANDIDATE_SEAL+RETAIN_CONTEXT": 2,
+              "HUMAN_INTEGRATION+RETAIN_CONTEXT": 1
+            },
+            "source_kind_pair_counts": {
+              "IR_CLAUSE": 4
+            },
+            "distinct_span_mixed_disposition_pair_count": 0,
+            "distinct_span_pairs_are_not_declared_semantically_lawful": "SEMANTIC_REVIEW_REQUIRED"
+          },
+          "character_coverage": {
+            "scope": "ORIGINAL_NONWHITESPACE_CODEPOINTS; NOT_SEMANTIC_COMPONENT_EQUIVALENCE",
+            "gap_source_count": 0,
+            "gaps": []
+          },
+          "feedback": {
+            "sha256": "b7237390a2acf9723189eac58dc8341ebcfaf521cc7e50ff8cd656daa4a47365",
+            "code_counts": {
+              "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY": 1,
+              "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION": 2,
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN": 2
+            },
+            "additional_violation_count": 0,
+            "exact_binding_checks": {
+              "work_id": true,
+              "work_reality_revision_id": true,
+              "inventory_fingerprint": true,
+              "source_revision": true,
+              "attempt": true,
+              "wire_output_fingerprint": true,
+              "request_receipt_id": true,
+              "response_receipt_id": true,
+              "exact_target_paths": true,
+              "owner_source_preconditions_fingerprint": true
+            },
+            "binding_all_pass": true,
+            "repair_feedback_bound_observed": true,
+            "owner_repair_context_bound_observed": true,
+            "conflict_observation_count": 2,
+            "conflict_all_exact_same_source_span_quote": true,
+            "conflict_with_executable_count": 2,
+            "raw_character_coverage_observation_count": 0,
+            "raw_character_coverage_observations_exact": null
+          }
+        }
+      ],
+      "lawful_multicomponent_misrejection_evidence": "NONE_IN_RECORDED_PHYSICAL_CONFLICT_OBSERVATIONS; FULL_SEMANTIC_FEASIBILITY_UNKNOWN"
+    },
+    {
+      "opaque_ordinal": 2,
+      "inventory_sha256": "10f63daca87e0929204810b1b895fabc8c35cc6892595c174832eab635ca5f0b",
+      "inventory_fingerprint": "26215e80da7b7a69f71d21d84df10daa1c33772efb8884088bb92e4094fe2fae",
+      "sources": {
+        "total": 25,
+        "kinds": {
+          "FACT": 6,
+          "IR_CLAUSE": 3,
+          "IR_CONSTRAINT": 4,
+          "WORK_CONSTRAINT": 10,
+          "WORK_CONTEXT": 2
+        },
+        "original_text_codepoint_length_intervals_by_kind": {
+          "FACT": {
+            "1-64": 6
+          },
+          "IR_CLAUSE": {
+            "1-64": 3
+          },
+          "IR_CONSTRAINT": {
+            "1-64": 4
+          },
+          "WORK_CONSTRAINT": {
+            "1-64": 10
+          },
+          "WORK_CONTEXT": {
+            "1-64": 2
+          }
+        }
+      },
+      "review_call_count": 0,
+      "attempts": [
+        {
+          "attempt": 1,
+          "candidate_wire_sha256": "c14dee4dbe3531edbf027f8ad379884cd85f7b96f12da6cfc5bf91010ceed116",
+          "wire_bytes": 18171,
+          "request_receipt_id_hash": "ce44461af3d255fd9efcc4fb2239fac539f40bfa992c01876b528c0c64001ec8",
+          "response_receipt_id_hash": "9d591a4afa998a53a0fc96654a98881c2d6d1c086ecd6a5abf5b7de027039939",
+          "validation_receipt_id_hash": "162337803e5243be988178d4701107d910ada01c87f88daf70fd08ed8f1b015e",
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "validation_passed": false,
+          "provider": {
+            "status": "completed",
+            "terminal_matches_delta": true,
+            "terminal_text_observed": true,
+            "selection": "TERMINAL_MATCHED_DELTA",
+            "output_tokens": 5208,
+            "output_cap": 16384,
+            "cap_reached": false,
+            "explicit_finish_reason": "NOT_CAPTURED",
+            "transport_retries": 0,
+            "generation_input_sha256": "60b2444ea6060a3cede1c622d043dcc842204b597dcee63d90ffebb250b0e163"
+          },
+          "actual_model_call_pending_input_hash_match_count": 1,
+          "route_structure": {
+            "count": 47,
+            "capability_counts": {
+              "ARTIFACT_CONTENT": 16,
+              "GIT_DIFF_SCOPE": 6,
+              "DENY_DEPLOY": 5,
+              "DENY_PUBLISH": 5,
+              "CANDIDATE_SEAL": 6,
+              "HUMAN_INTEGRATION": 2,
+              "HUMAN_DELIVERY_PUBLISH": 2,
+              "RETAIN_CONTEXT": 4,
+              "DENY_PREVIEW": 1
+            },
+            "source_kind_counts": {
+              "FACT": 8,
+              "IR_CLAUSE": 6,
+              "IR_CONSTRAINT": 8,
+              "WORK_CONSTRAINT": 20,
+              "WORK_CONTEXT": 5
+            },
+            "unique_exact_quote_offset_adjustment_count": 0,
+            "locatable_span_count": 47
+          },
+          "physical_conflicts": {
+            "same_source_same_span_quote_pair_count": 5,
+            "capability_pair_counts": {
+              "ARTIFACT_CONTENT+RETAIN_CONTEXT": 2,
+              "DENY_PREVIEW+RETAIN_CONTEXT": 1,
+              "DENY_DEPLOY+RETAIN_CONTEXT": 1,
+              "DENY_PUBLISH+RETAIN_CONTEXT": 1
+            },
+            "source_kind_pair_counts": {
+              "IR_CLAUSE": 1,
+              "WORK_CONSTRAINT": 1,
+              "WORK_CONTEXT": 3
+            },
+            "distinct_span_mixed_disposition_pair_count": 0,
+            "distinct_span_pairs_are_not_declared_semantically_lawful": "SEMANTIC_REVIEW_REQUIRED"
+          },
+          "character_coverage": {
+            "scope": "ORIGINAL_NONWHITESPACE_CODEPOINTS; NOT_SEMANTIC_COMPONENT_EQUIVALENCE",
+            "gap_source_count": 0,
+            "gaps": []
+          },
+          "feedback": {
+            "sha256": "b751087a1983af17666ea44a6919cc5680c5963b4f32ddd1981c4ece904716b5",
+            "code_counts": {
+              "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION": 5,
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN": 1,
+              "OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT": 3
+            },
+            "additional_violation_count": 0,
+            "exact_binding_checks": {
+              "work_id": true,
+              "work_reality_revision_id": true,
+              "inventory_fingerprint": true,
+              "source_revision": true,
+              "attempt": true,
+              "wire_output_fingerprint": true,
+              "request_receipt_id": true,
+              "response_receipt_id": true,
+              "exact_target_paths": true,
+              "owner_source_preconditions_fingerprint": true
+            },
+            "binding_all_pass": true,
+            "repair_feedback_bound_observed": true,
+            "owner_repair_context_bound_observed": true,
+            "conflict_observation_count": 5,
+            "conflict_all_exact_same_source_span_quote": true,
+            "conflict_with_executable_count": 5,
+            "raw_character_coverage_observation_count": 0,
+            "raw_character_coverage_observations_exact": null,
+            "next_attempt_consumption": {
+              "feedback_receipt_matches": true,
+              "request_feedback_exact_text_match": true,
+              "provider_validation_feedback_sha256_matches": true,
+              "provider_generation_input_has_actual_pending_record": true,
+              "transmission_scope": "PROVIDER_INVOCATION_METADATA_AND_ACTUAL_CALL_PENDING; HTTP_BODY_NOT_INDEPENDENTLY_CAPTURED"
+            }
+          }
+        },
+        {
+          "attempt": 2,
+          "candidate_wire_sha256": "4556055c8a6e8fb035f216a61b9e9851cd989d1cdc132a232c9046a6a2d2325e",
+          "wire_bytes": 14640,
+          "request_receipt_id_hash": "447800bceb316fe40c8890e26eeba153af2cd0ce538b91b8a9d90f17b3f5df9e",
+          "response_receipt_id_hash": "6d872cc6b11945539f20a863d238366e526760d84e37183a6ba4b1d3ca699965",
+          "validation_receipt_id_hash": "9d1874994901d7290b2ec54acf565cc52f943bc7fec8ff8b7316cf1e4a15655a",
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "validation_passed": false,
+          "provider": {
+            "status": "completed",
+            "terminal_matches_delta": true,
+            "terminal_text_observed": true,
+            "selection": "TERMINAL_MATCHED_DELTA",
+            "output_tokens": 3938,
+            "output_cap": 16384,
+            "cap_reached": false,
+            "explicit_finish_reason": "NOT_CAPTURED",
+            "transport_retries": 0,
+            "generation_input_sha256": "be70cbe9146bb4b13985c7691bd030b2307e3f3f1f1860333864167caa14aeb7"
+          },
+          "actual_model_call_pending_input_hash_match_count": 1,
+          "route_structure": {
+            "count": 41,
+            "capability_counts": {
+              "ARTIFACT_CONTENT": 14,
+              "GIT_DIFF_SCOPE": 6,
+              "DENY_DEPLOY": 4,
+              "DENY_PUBLISH": 4,
+              "CANDIDATE_SEAL": 6,
+              "HUMAN_INTEGRATION": 2,
+              "HUMAN_DELIVERY_PUBLISH": 2,
+              "RETAIN_CONTEXT": 3
+            },
+            "source_kind_counts": {
+              "FACT": 8,
+              "IR_CLAUSE": 6,
+              "IR_CONSTRAINT": 8,
+              "WORK_CONSTRAINT": 17,
+              "WORK_CONTEXT": 2
+            },
+            "unique_exact_quote_offset_adjustment_count": 0,
+            "locatable_span_count": 41
+          },
+          "physical_conflicts": {
+            "same_source_same_span_quote_pair_count": 1,
+            "capability_pair_counts": {
+              "ARTIFACT_CONTENT+RETAIN_CONTEXT": 1
+            },
+            "source_kind_pair_counts": {
+              "IR_CLAUSE": 1
+            },
+            "distinct_span_mixed_disposition_pair_count": 0,
+            "distinct_span_pairs_are_not_declared_semantically_lawful": "SEMANTIC_REVIEW_REQUIRED"
+          },
+          "character_coverage": {
+            "scope": "ORIGINAL_NONWHITESPACE_CODEPOINTS; NOT_SEMANTIC_COMPONENT_EQUIVALENCE",
+            "gap_source_count": 0,
+            "gaps": []
+          },
+          "feedback": {
+            "sha256": "92955190b5eedcea788edcb6bbdc6994bd8829f58e669cedd996375523a70aee",
+            "code_counts": {
+              "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION": 1
+            },
+            "additional_violation_count": 0,
+            "exact_binding_checks": {
+              "work_id": true,
+              "work_reality_revision_id": true,
+              "inventory_fingerprint": true,
+              "source_revision": true,
+              "attempt": true,
+              "wire_output_fingerprint": true,
+              "request_receipt_id": true,
+              "response_receipt_id": true,
+              "exact_target_paths": true,
+              "owner_source_preconditions_fingerprint": true
+            },
+            "binding_all_pass": true,
+            "repair_feedback_bound_observed": true,
+            "owner_repair_context_bound_observed": true,
+            "conflict_observation_count": 1,
+            "conflict_all_exact_same_source_span_quote": true,
+            "conflict_with_executable_count": 1,
+            "raw_character_coverage_observation_count": 0,
+            "raw_character_coverage_observations_exact": null
+          }
+        }
+      ],
+      "lawful_multicomponent_misrejection_evidence": "NONE_IN_RECORDED_PHYSICAL_CONFLICT_OBSERVATIONS; FULL_SEMANTIC_FEASIBILITY_UNKNOWN"
+    },
+    {
+      "opaque_ordinal": 3,
+      "inventory_sha256": "be8abac458a786f0e2f4d69d552a14aecca13709cb027b5e7cf1346a9e1d5950",
+      "inventory_fingerprint": "a13d2950db5303346a015e2f3a4d10ce49325f02ec2f9a2a23e15737db6154a6",
+      "sources": {
+        "total": 16,
+        "kinds": {
+          "FACT": 3,
+          "IR_CLAUSE": 1,
+          "IR_CONSTRAINT": 4,
+          "WORK_CONSTRAINT": 8
+        },
+        "original_text_codepoint_length_intervals_by_kind": {
+          "FACT": {
+            "1-64": 3
+          },
+          "IR_CLAUSE": {
+            "129-256": 1
+          },
+          "IR_CONSTRAINT": {
+            "1-64": 1,
+            "65-128": 3
+          },
+          "WORK_CONSTRAINT": {
+            "1-64": 4,
+            "65-128": 3,
+            "129-256": 1
+          }
+        }
+      },
+      "review_call_count": 1,
+      "attempts": [
+        {
+          "attempt": 1,
+          "candidate_wire_sha256": "43835811791c6c75f034ce9c5d6eff4b49bb057d6b5df0858feffcc96bc6d8e6",
+          "wire_bytes": 15804,
+          "request_receipt_id_hash": "205249e0b28930d7dd8269219ed47cd25bb9a83cefe2aeac93bb376ebed313bc",
+          "response_receipt_id_hash": "38c2b111647a19a017b8caced8a7f7f9c57e1019587f00292a54618ebd087789",
+          "validation_receipt_id_hash": "a43d439466363a63973e7edf0748fc3e57ace975c38a7857699673b45f2b3478",
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "validation_passed": false,
+          "provider": {
+            "status": "completed",
+            "terminal_matches_delta": true,
+            "terminal_text_observed": true,
+            "selection": "TERMINAL_MATCHED_DELTA",
+            "output_tokens": 4231,
+            "output_cap": 16384,
+            "cap_reached": false,
+            "explicit_finish_reason": "NOT_CAPTURED",
+            "transport_retries": 0,
+            "generation_input_sha256": "d58fe1eb6c986e59862e25a3a7bc190eb9dc01305d6c4e204116c0bcaefb388f"
+          },
+          "actual_model_call_pending_input_hash_match_count": 1,
+          "route_structure": {
+            "count": 43,
+            "capability_counts": {
+              "ARTIFACT_CONTENT": 5,
+              "CANDIDATE_SEAL": 7,
+              "GIT_DIFF_SCOPE": 2,
+              "RETAIN_CONTEXT": 10,
+              "DENY_PREVIEW": 5,
+              "DENY_DEPLOY": 5,
+              "DENY_PUBLISH": 5,
+              "HUMAN_INTEGRATION": 4
+            },
+            "source_kind_counts": {
+              "FACT": 6,
+              "IR_CLAUSE": 2,
+              "IR_CONSTRAINT": 13,
+              "WORK_CONSTRAINT": 22
+            },
+            "unique_exact_quote_offset_adjustment_count": 0,
+            "locatable_span_count": 43
+          },
+          "physical_conflicts": {
+            "same_source_same_span_quote_pair_count": 17,
+            "capability_pair_counts": {
+              "GIT_DIFF_SCOPE+RETAIN_CONTEXT": 2,
+              "DENY_PREVIEW+RETAIN_CONTEXT": 3,
+              "DENY_DEPLOY+RETAIN_CONTEXT": 3,
+              "DENY_PUBLISH+RETAIN_CONTEXT": 3,
+              "CANDIDATE_SEAL+RETAIN_CONTEXT": 3,
+              "HUMAN_INTEGRATION+RETAIN_CONTEXT": 2,
+              "ARTIFACT_CONTENT+RETAIN_CONTEXT": 1
+            },
+            "source_kind_pair_counts": {
+              "IR_CONSTRAINT": 6,
+              "WORK_CONSTRAINT": 11
+            },
+            "distinct_span_mixed_disposition_pair_count": 0,
+            "distinct_span_pairs_are_not_declared_semantically_lawful": "SEMANTIC_REVIEW_REQUIRED"
+          },
+          "character_coverage": {
+            "scope": "ORIGINAL_NONWHITESPACE_CODEPOINTS; NOT_SEMANTIC_COMPONENT_EQUIVALENCE",
+            "gap_source_count": 0,
+            "gaps": []
+          },
+          "feedback": {
+            "sha256": "5c42b2139b379f490a2a1337ee72e814ed09f9b2316735836d726f792672f0b2",
+            "code_counts": {
+              "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY": 3,
+              "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION": 10,
+              "OBLIGATION_PERMISSION_POLARITY_CONFLICT": 3,
+              "OBLIGATION_REQUIRED_CONSTRAINT_CANNOT_BE_CONTEXT_ONLY": 4,
+              "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE": 3,
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN": 3
+            },
+            "additional_violation_count": 0,
+            "exact_binding_checks": {
+              "work_id": true,
+              "work_reality_revision_id": true,
+              "inventory_fingerprint": true,
+              "source_revision": true,
+              "attempt": true,
+              "wire_output_fingerprint": true,
+              "request_receipt_id": true,
+              "response_receipt_id": true,
+              "exact_target_paths": true,
+              "owner_source_preconditions_fingerprint": true
+            },
+            "binding_all_pass": true,
+            "repair_feedback_bound_observed": true,
+            "owner_repair_context_bound_observed": true,
+            "conflict_observation_count": 10,
+            "conflict_all_exact_same_source_span_quote": true,
+            "conflict_with_executable_count": 10,
+            "raw_character_coverage_observation_count": 0,
+            "raw_character_coverage_observations_exact": null,
+            "next_attempt_consumption": {
+              "feedback_receipt_matches": true,
+              "request_feedback_exact_text_match": true,
+              "provider_validation_feedback_sha256_matches": true,
+              "provider_generation_input_has_actual_pending_record": true,
+              "transmission_scope": "PROVIDER_INVOCATION_METADATA_AND_ACTUAL_CALL_PENDING; HTTP_BODY_NOT_INDEPENDENTLY_CAPTURED"
+            }
+          }
+        },
+        {
+          "attempt": 2,
+          "candidate_wire_sha256": "5d455d03acbe0aeeb5dc2d518257fa6729c3ac492226027f418be17450da0cc1",
+          "wire_bytes": 11022,
+          "request_receipt_id_hash": "8e7d7d9e8b571b91946defb288c43a3c23d6a4954f9d9b286b970754b25910ed",
+          "response_receipt_id_hash": "394efd563768eeb65c9b70ae1543701c2aa77c4ae4620b22c147aa16cdbeec1f",
+          "validation_receipt_id_hash": "75e0e2a962bdca6154011bbf7d744db888290d10dc1e9a9aa379fbe5e68c7178",
+          "failed_predicate": null,
+          "validation_passed": true,
+          "provider": {
+            "status": "completed",
+            "terminal_matches_delta": true,
+            "terminal_text_observed": true,
+            "selection": "TERMINAL_MATCHED_DELTA",
+            "output_tokens": 2933,
+            "output_cap": 16384,
+            "cap_reached": false,
+            "explicit_finish_reason": "NOT_CAPTURED",
+            "transport_retries": 0,
+            "generation_input_sha256": "aefb514edd2ef4d537dd4ec5bf4cd03b1143e77c409131d0b039a81538ac477b"
+          },
+          "actual_model_call_pending_input_hash_match_count": 1,
+          "route_structure": {
+            "count": 27,
+            "capability_counts": {
+              "ARTIFACT_CONTENT": 5,
+              "CANDIDATE_SEAL": 7,
+              "GIT_DIFF_SCOPE": 2,
+              "DENY_PREVIEW": 3,
+              "DENY_DEPLOY": 3,
+              "DENY_PUBLISH": 3,
+              "HUMAN_INTEGRATION": 4
+            },
+            "source_kind_counts": {
+              "FACT": 6,
+              "IR_CLAUSE": 2,
+              "IR_CONSTRAINT": 7,
+              "WORK_CONSTRAINT": 12
+            },
+            "unique_exact_quote_offset_adjustment_count": 0,
+            "locatable_span_count": 27
+          },
+          "physical_conflicts": {
+            "same_source_same_span_quote_pair_count": 0,
+            "capability_pair_counts": {},
+            "source_kind_pair_counts": {},
+            "distinct_span_mixed_disposition_pair_count": 0,
+            "distinct_span_pairs_are_not_declared_semantically_lawful": "SEMANTIC_REVIEW_REQUIRED"
+          },
+          "character_coverage": {
+            "scope": "ORIGINAL_NONWHITESPACE_CODEPOINTS; NOT_SEMANTIC_COMPONENT_EQUIVALENCE",
+            "gap_source_count": 0,
+            "gaps": []
+          }
+        }
+      ],
+      "lawful_multicomponent_misrejection_evidence": "NONE_IN_RECORDED_PHYSICAL_CONFLICT_OBSERVATIONS; FULL_SEMANTIC_FEASIBILITY_UNKNOWN"
+    }
+  ],
+  "interpretation": {
+    "current_qualification": "NOT_QUALIFIED",
+    "final_failed_cases": 3,
+    "review_reached_failed_cases": 0,
+    "observed_layer": "UNADMITTED_MODEL_WIRE_AND_DETERMINISTIC_VALIDATION; NOT_INDEPENDENT_REVIEW_ERROR",
+    "exact_failed_basis_A_or_B": "UNKNOWN",
+    "new_architecture_or_authority_gap": "NOT_ESTABLISHED",
+    "legal_multiple_component_false_positive": "NOT_OBSERVED_IN_RECORDED_CONFLICT_PEERS; EXACT_SUCCESS_FEASIBILITY_UNKNOWN",
+    "next_step": "COMPARE_NON_HOLDOUT_DEVELOPMENT_STRUCTURES_WITH_THESE_COUNTS_AND_PREDICATES; NO_HOLDOUT_REPLAY_OR_TUNING"
+  }
+}

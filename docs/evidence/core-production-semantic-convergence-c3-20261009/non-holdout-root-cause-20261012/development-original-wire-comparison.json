@@ -1,0 +1,360 @@
+{
+  "schema": "c3-nonholdout-original-wire-owner-comparison-v1",
+  "actual_runtime_module": "/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py",
+  "actual_runtime_module_sha256": "1a5749bc8e1fd2f037a806222822410a3b113c5a1fc8ad08da381b815db67805",
+  "live_model_calls": 0,
+  "independent_review_calls": 0,
+  "business_database_access": false,
+  "historical_records_modified": false,
+  "holdout_inputs_used": false,
+  "raw_wires_or_candidates_repaired": false,
+  "cases": [
+    {
+      "development_case": "ordinary34",
+      "basis_sha256": "aad0fa15b3b24c12aa5b4b1099f8fe7ef0d6f7044bbc79ba8650a68ad4c81998",
+      "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+      "source_count": 19,
+      "source_kinds": {
+        "FACT": 5,
+        "IR_CLAUSE": 7,
+        "WORK_CONSTRAINT": 7
+      },
+      "source_codepoint_lengths": [
+        48,
+        55,
+        27,
+        72,
+        55,
+        49,
+        91,
+        48,
+        132,
+        27,
+        72,
+        55,
+        59,
+        62,
+        45,
+        36,
+        37,
+        38,
+        44
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "raw_wire_sha256": "0af1c36bcab5b3d065dab20a2d044e700cf64795f2f0f499aaf3fff3ca10853b",
+          "historical_failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "historical_contract": "v3",
+          "historical_typed_prerequisites": "existing-owner-typed-prerequisites-v11",
+          "current_decode_and_validation": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "raw_owner_observation_unavailable": [],
+          "observed_route_count": 25,
+          "character_coverage_gaps": [
+            {
+              "source_ordinal": 6,
+              "source_kind": "IR_CLAUSE",
+              "uncovered_nonwhitespace_count": 1,
+              "unicode_categories": {
+                "Po": 1
+              },
+              "source_text_sha256": "9268cc964f6cb6011eb23204032873bdfbfff04e950cfda4f190d57a1cae73aa"
+            },
+            {
+              "source_ordinal": 11,
+              "source_kind": "IR_CLAUSE",
+              "uncovered_nonwhitespace_count": 8,
+              "unicode_categories": {
+                "Lu": 1,
+                "Ll": 4,
+                "Po": 3
+              },
+              "source_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6"
+            },
+            {
+              "source_ordinal": 15,
+              "source_kind": "WORK_CONSTRAINT",
+              "uncovered_nonwhitespace_count": 22,
+              "unicode_categories": {
+                "Lu": 2,
+                "Ll": 18,
+                "Po": 2
+              },
+              "source_text_sha256": "8f73931419beb5ccb80dbdd5aa3aa609513cff870ae39d6181a04d0b4fb9b1bd"
+            },
+            {
+              "source_ordinal": 16,
+              "source_kind": "WORK_CONSTRAINT",
+              "uncovered_nonwhitespace_count": 22,
+              "unicode_categories": {
+                "Lu": 2,
+                "Ll": 18,
+                "Po": 2
+              },
+              "source_text_sha256": "5b7cd03090c3931b77a8929c4e8aab12368a7f8fcb5d941b155013aac44be6fd"
+            },
+            {
+              "source_ordinal": 17,
+              "source_kind": "WORK_CONSTRAINT",
+              "uncovered_nonwhitespace_count": 22,
+              "unicode_categories": {
+                "Lu": 2,
+                "Ll": 18,
+                "Po": 2
+              },
+              "source_text_sha256": "8314fcbae674bc2d2d5f514db6776b0ba01afb427ff4a931c0be2907609cf114"
+            },
+            {
+              "source_ordinal": 18,
+              "source_kind": "WORK_CONSTRAINT",
+              "uncovered_nonwhitespace_count": 22,
+              "unicode_categories": {
+                "Lu": 2,
+                "Ll": 18,
+                "Po": 2
+              },
+              "source_text_sha256": "43c16d3a65f35160438c5b7952e55d3da51f243d4e0ba2a150578155c39b3786"
+            }
+          ],
+          "physical_conflict_pairs": [],
+          "new_source_current_metadata_substitution": false
+        },
+        {
+          "attempt": 2,
+          "raw_wire_sha256": "1ce8e1ba826b604bbd930453b36b4d6a004c51b3da7f9f9591eb2565cb8f33b8",
+          "historical_failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "historical_contract": "v3",
+          "historical_typed_prerequisites": "existing-owner-typed-prerequisites-v11",
+          "current_decode_and_validation": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "decoder_codes": [
+            "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST"
+          ],
+          "raw_owner_observation_unavailable": [],
+          "observed_route_count": 25,
+          "character_coverage_gaps": [
+            {
+              "source_ordinal": 4,
+              "source_kind": "FACT",
+              "uncovered_nonwhitespace_count": 8,
+              "unicode_categories": {
+                "Lu": 1,
+                "Ll": 4,
+                "Po": 3
+              },
+              "source_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6"
+            },
+            {
+              "source_ordinal": 6,
+              "source_kind": "IR_CLAUSE",
+              "uncovered_nonwhitespace_count": 1,
+              "unicode_categories": {
+                "Po": 1
+              },
+              "source_text_sha256": "9268cc964f6cb6011eb23204032873bdfbfff04e950cfda4f190d57a1cae73aa"
+            },
+            {
+              "source_ordinal": 11,
+              "source_kind": "IR_CLAUSE",
+              "uncovered_nonwhitespace_count": 8,
+              "unicode_categories": {
+                "Lu": 1,
+                "Ll": 4,
+                "Po": 3
+              },
+              "source_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6"
+            },
+            {
+              "source_ordinal": 15,
+              "source_kind": "WORK_CONSTRAINT",
+              "uncovered_nonwhitespace_count": 22,
+              "unicode_categories": {
+                "Lu": 2,
+                "Ll": 18,
+                "Po": 2
+              },
+              "source_text_sha256": "8f73931419beb5ccb80dbdd5aa3aa609513cff870ae39d6181a04d0b4fb9b1bd"
+            },
+            {
+              "source_ordinal": 16,
+              "source_kind": "WORK_CONSTRAINT",
+              "uncovered_nonwhitespace_count": 22,
+              "unicode_categories": {
+                "Lu": 2,
+                "Ll": 18,
+                "Po": 2
+              },
+              "source_text_sha256": "5b7cd03090c3931b77a8929c4e8aab12368a7f8fcb5d941b155013aac44be6fd"
+            },
+            {
+              "source_ordinal": 17,
+              "source_kind": "WORK_CONSTRAINT",
+              "uncovered_nonwhitespace_count": 22,
+              "unicode_categories": {
+                "Lu": 2,
+                "Ll": 18,
+                "Po": 2
+              },
+              "source_text_sha256": "8314fcbae674bc2d2d5f514db6776b0ba01afb427ff4a931c0be2907609cf114"
+            },
+            {
+              "source_ordinal": 18,
+              "source_kind": "WORK_CONSTRAINT",
+              "uncovered_nonwhitespace_count": 22,
+              "unicode_categories": {
+                "Lu": 2,
+                "Ll": 18,
+                "Po": 2
+              },
+              "source_text_sha256": "43c16d3a65f35160438c5b7952e55d3da51f243d4e0ba2a150578155c39b3786"
+            }
+          ],
+          "physical_conflict_pairs": [],
+          "feedback_receipt_matches": true,
+          "feedback_text_matches": true,
+          "new_source_current_metadata_substitution": false
+        }
+      ],
+      "historical_receipts_unchanged": true
+    },
+    {
+      "development_case": "ordinary41",
+      "basis_sha256": "8139c4b98c98069cd5b02ad2c9b731497253a851d1994fdbaa4a2704f0cc03e7",
+      "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+      "source_count": 23,
+      "source_kinds": {
+        "FACT": 5,
+        "IR_CLAUSE": 6,
+        "IR_CONSTRAINT": 2,
+        "WORK_CONSTRAINT": 10
+      },
+      "source_codepoint_lengths": [
+        48,
+        55,
+        48,
+        55,
+        27,
+        49,
+        91,
+        48,
+        132,
+        27,
+        72,
+        72,
+        55,
+        40,
+        55,
+        83,
+        87,
+        77,
+        39,
+        40,
+        42,
+        49,
+        66
+      ],
+      "attempts": [
+        {
+          "attempt": 1,
+          "raw_wire_sha256": "c8da38c6d2f25d358f81ff7e3d31e5c07c2123952fc2a0a886241d175fe04a1d",
+          "historical_failed_predicate": "OBLIGATION_FORMATION_WIRE_JSON_INVALID",
+          "historical_contract": "v3",
+          "historical_typed_prerequisites": "existing-owner-typed-prerequisites-v11",
+          "current_decode_and_validation": "OBLIGATION_FORMATION_WIRE_JSON_INVALID",
+          "decoder_codes": [
+            "OBLIGATION_FORMATION_WIRE_JSON_INVALID"
+          ],
+          "raw_owner_observation_unavailable": [
+            "COMPLETE_WIRE_SYNTAX"
+          ],
+          "observed_route_count": 27,
+          "character_coverage_gaps": [],
+          "physical_conflict_pairs": [
+            {
+              "source_ordinal": 12,
+              "source_kind": "IR_CONSTRAINT",
+              "route_indices": [
+                12,
+                13
+              ],
+              "capabilities": [
+                "UNRESOLVED",
+                "GIT_DIFF_SCOPE"
+              ],
+              "same_span_and_quote": true
+            },
+            {
+              "source_ordinal": 14,
+              "source_kind": "WORK_CONSTRAINT",
+              "route_indices": [
+                15,
+                16
+              ],
+              "capabilities": [
+                "UNRESOLVED",
+                "DENY_DEPLOY"
+              ],
+              "same_span_and_quote": true
+            },
+            {
+              "source_ordinal": 14,
+              "source_kind": "WORK_CONSTRAINT",
+              "route_indices": [
+                15,
+                17
+              ],
+              "capabilities": [
+                "UNRESOLVED",
+                "DENY_PUBLISH"
+              ],
+              "same_span_and_quote": true
+            },
+            {
+              "source_ordinal": 14,
+              "source_kind": "WORK_CONSTRAINT",
+              "route_indices": [
+                15,
+                18
+              ],
+              "capabilities": [
+                "UNRESOLVED",
+                "GIT_DIFF_SCOPE"
+              ],
+              "same_span_and_quote": true
+            }
+          ],
+          "new_source_current_metadata_substitution": false
+        },
+        {
+          "attempt": 2,
+          "raw_wire_sha256": "2c660532270a8a1967c7245e3326266890f1f240e7f5f15b176d6b5ab8f58c9c",
+          "historical_failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "historical_contract": "v3",
+          "historical_typed_prerequisites": "existing-owner-typed-prerequisites-v11",
+          "current_decode_and_validation": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "raw_owner_observation_unavailable": [],
+          "observed_route_count": 24,
+          "character_coverage_gaps": [],
+          "physical_conflict_pairs": [
+            {
+              "source_ordinal": 12,
+              "source_kind": "IR_CONSTRAINT",
+              "route_indices": [
+                12,
+                13
+              ],
+              "capabilities": [
+                "UNRESOLVED",
+                "GIT_DIFF_SCOPE"
+              ],
+              "same_span_and_quote": true
+            }
+          ],
+          "feedback_receipt_matches": true,
+          "feedback_text_matches": true,
+          "new_source_current_metadata_substitution": false
+        }
+      ],
+      "historical_receipts_unchanged": true
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "schema": "c3-nonholdout-root-cause-public-manifest-v1",
+  "created_at_utc": "2026-10-12T11:39:38.411850+00:00",
+  "scope": "ATTRIBUTION_ONLY_NO_IMPLEMENTATION_OR_LIVE_MODEL_CALL",
+  "watt_source": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+  "guardian": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+  "ecf": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+  "actual_image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "files": [
+    {
+      "file": "controls-receipt.json",
+      "bytes": 2494,
+      "sha256": "3febb165724d6c76397f47bbeaaf656b4e8a9879886028ee71f1b6f87d920399"
+    },
+    {
+      "file": "controls-runtime.json",
+      "bytes": 462,
+      "sha256": "b99db0c176e5b5cbdd78d31afa54aa06e3427b2fbe353004f9a6702a717a7c47"
+    },
+    {
+      "file": "controls.xml",
+      "bytes": 4401,
+      "sha256": "d75a540861dae31615cd1612cb58ff3b3a6b8037425a5343362e70a24a527d4f"
+    },
+    {
+      "file": "development-original-wire-comparison.json",
+      "bytes": 11966,
+      "sha256": "9c012d4e368aefc0627413d0a0bf0203abcb780117bb3c463bb44e26cf9c5b13"
+    },
+    {
+      "file": "development-wire-runtime.json",
+      "bytes": 281,
+      "sha256": "599d8664eba1e900b7db86d4f8273bf855d42632f0e2de8c4b1453d0a3756817"
+    },
+    {
+      "file": "preservation.json",
+      "bytes": 3323,
+      "sha256": "b430c3e10ed24f36d38de3f1753ebb1db7c8bd050e9bd20843d03e253d0ff531"
+    },
+    {
+      "file": "readonly-receipt.json",
+      "bytes": 784,
+      "sha256": "330fa99987ff254de395e0a6aa1eb8af5245407230db2c1b3e94b341dcf0a7ec"
+    },
+    {
+      "file": "readonly-upstream-receipt.json",
+      "bytes": 641,
+      "sha256": "2965dbe5892972e8bdf7196113093c4a6ef564669d752ce0bd10483c04fc7a84"
+    },
+    {
+      "file": "report.md",
+      "bytes": 9406,
+      "sha256": "246ae583eccf37029944bc866186c6f3aeb99b8388ee350254df4232a281275c"
+    },
+    {
+      "file": "safe-structural-analysis.json",
+      "bytes": 36571,
+      "sha256": "df4771641790f6181df828d1b095cf97ab0e811aa5c9ad24ecafae0f467223b5"
+    },
+    {
+      "file": "safe-upstream-responsibility.json",
+      "bytes": 15195,
+      "sha256": "4244513ab49301571a4ead0dc25d7b9394965054a752514376fc00bfb185f88c"
+    }
+  ],
+  "publication_allowlist": true,
+  "raw_inputs_candidates_oracle_prompts_excluded": true,
+  "json_sensitive_content_keys_and_private_key_patterns_not_found": true,
+  "restricted_ecs_recovery_root": "/data/watt/c3-semantic-convergence-20261009/non-holdout-cause-control-20261012",
+  "privacy_check_limit": "Allowlisted structured diagnostics; pattern scan is additional protection, not proof of arbitrary data confidentiality."
+}

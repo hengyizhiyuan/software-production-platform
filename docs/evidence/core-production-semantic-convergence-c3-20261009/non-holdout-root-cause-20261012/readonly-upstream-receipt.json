@@ -1,0 +1,15 @@
+{
+  "schema": "c3-readonly-upstream-receipt-v1",
+  "allowlist": [
+    "safe-upstream-responsibility.json",
+    "readonly-upstream-receipt.json"
+  ],
+  "file_sha256": "4244513ab49301571a4ead0dc25d7b9394965054a752514376fc00bfb185f88c",
+  "file_bytes": 15195,
+  "input_files": 92,
+  "private_input_snapshot_sha256": "1489fac8ce9a569a7d74ece15e5e7fdeefd2e0eaed0633b9e51d80777741c9a4",
+  "script_sha256": "f955b73a22367e46726e02254ce6670aaf0fa82682c874cb5e010532af3edc61",
+  "new_evidence_root": "/data/watt/c3-semantic-convergence-20261009/readonly-holdout-upstream-responsibility-20261012",
+  "model_calls_added": 0,
+  "owner_calls_added": 0
+}

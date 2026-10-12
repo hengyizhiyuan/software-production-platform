@@ -1,0 +1,85 @@
+{
+  "schema": "c3-nonholdout-preservation-v1",
+  "checked_at_utc": "2026-10-12T11:38:59.193306+00:00",
+  "original_input_copies": [
+    {
+      "case": "ordinary34",
+      "file": "basis.json",
+      "original_sha256": "aad0fa15b3b24c12aa5b4b1099f8fe7ef0d6f7044bbc79ba8650a68ad4c81998",
+      "diagnostic_copy_sha256": "aad0fa15b3b24c12aa5b4b1099f8fe7ef0d6f7044bbc79ba8650a68ad4c81998",
+      "equal": true
+    },
+    {
+      "case": "ordinary34",
+      "file": "immutable-inventory.json",
+      "original_sha256": "f890af6ea4a85e481b03ea0e638651a61c9513042ad88761f6049f41ea895e85",
+      "diagnostic_copy_sha256": "f890af6ea4a85e481b03ea0e638651a61c9513042ad88761f6049f41ea895e85",
+      "equal": true
+    },
+    {
+      "case": "ordinary34",
+      "file": "capability-contracts.json",
+      "original_sha256": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+      "diagnostic_copy_sha256": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+      "equal": true
+    },
+    {
+      "case": "ordinary34",
+      "file": "formation-owner-observations.json",
+      "original_sha256": "733d8fe3e0c452081d93638f64eeea6e90e6ae2f60dca8f39801adb61b8fe202",
+      "diagnostic_copy_sha256": "733d8fe3e0c452081d93638f64eeea6e90e6ae2f60dca8f39801adb61b8fe202",
+      "equal": true
+    },
+    {
+      "case": "ordinary41",
+      "file": "basis.json",
+      "original_sha256": "8139c4b98c98069cd5b02ad2c9b731497253a851d1994fdbaa4a2704f0cc03e7",
+      "diagnostic_copy_sha256": "8139c4b98c98069cd5b02ad2c9b731497253a851d1994fdbaa4a2704f0cc03e7",
+      "equal": true
+    }
+  ],
+  "containers": [
+    {
+      "name": "watt-c3-nonholdout-owner-controls-20261012",
+      "id": "0f3f71e8e1929f631ee5f7fb6d250c94d17db36ca527fe6dc0db95361d1e2002",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "status": "exited",
+      "exit_code": 0,
+      "network": "none",
+      "started_at": "2026-10-12T11:19:24.893870651Z",
+      "finished_at": "2026-10-12T11:19:35.658532997Z"
+    },
+    {
+      "name": "watt-c3-nonholdout-wire-analysis-20261012",
+      "id": "2769ca26f6f584d19351f6dcc94bcff17ea263e4efc5b32089add0074d777dca",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "status": "exited",
+      "exit_code": 0,
+      "network": "none",
+      "started_at": "2026-10-12T11:26:39.926291556Z",
+      "finished_at": "2026-10-12T11:26:43.749029159Z"
+    }
+  ],
+  "scripts": [
+    {
+      "file": "analyze_development.py",
+      "sha256": "e5e2fa53b6a4c539762e947c2b6755cd17c22f9283a5607742b55e2d7e216903"
+    },
+    {
+      "file": "run_controls.py",
+      "sha256": "2a92f836987e65d4f9b788bf033b778f24c59457867bcf955a83d31253d2fc6f"
+    },
+    {
+      "file": "run_controls_v2.py",
+      "sha256": "1579432d3c70a3dc324944a8101c632a736a6995088064b47d14ae02cf303d37"
+    },
+    {
+      "file": "verify_preservation.py",
+      "sha256": "a2514cfc54202a3dc9c371674a29366d8d1f35a495e4e0a3f61bc1866d9168f4"
+    }
+  ],
+  "business_database_access": false,
+  "new_live_model_calls": 0,
+  "holdout_originals_accessed_by_root": false,
+  "preparation_failure_retained": "run_controls.py HOST_PYTHON36_TEXT_ARGUMENT_UNSUPPORTED_BEFORE_CONTAINER_CREATE; execution copy run_controls_v2.py universal_newlines compatibility only"
+}

@@ -1,0 +1,401 @@
+{
+  "schema": "c3-readonly-upstream-responsibility-v1",
+  "model_calls_added": 0,
+  "owner_calls_added": 0,
+  "counterfactual_candidates_created": 0,
+  "input_files_preserved": true,
+  "private_input_snapshot_sha256": "1489fac8ce9a569a7d74ece15e5e7fdeefd2e0eaed0633b9e51d80777741c9a4",
+  "cases": [
+    {
+      "opaque_ordinal": 0,
+      "original_input_sha256": "890dc95cb0b55c5585a60c534baddcef7261e3f8f61a5d013ce705ff4a867dbc",
+      "saved_input_sha256_matches_sealed": true,
+      "wic_assessment_sha256": "396f0ad8db87c40c457951675d534bd64f524f0cc81b53374bb0b2326118d26d",
+      "immutable_inventory_sha256": "6debefb7920ac39a0ba682715a1d24b4363de9812424bca148b0ef4c45b00c52",
+      "source_record_binding": {
+        "all_clause_source_record_id_match_input": true,
+        "all_fact_source_record_ids_include_input": true
+      },
+      "literal_provenance": {
+        "comparison_scope": "LEXICAL_PROVENANCE_ONLY; NOT_SEMANTIC_EQUIVALENCE_OR_COMPLETENESS",
+        "counts": {
+          "clauses_exact_substring": 5,
+          "fact_primary_exact_substring": 5,
+          "fact_governed_exact_substring": 25
+        },
+        "original_nonwhitespace_covered_by_exact_provenance_substrings": 191,
+        "original_nonwhitespace_not_covered_by_exact_provenance_substrings": 0,
+        "quote_text_is_not_in_this_public_receipt": true
+      },
+      "upstream_typed_fields": {
+        "clauses": 5,
+        "polarity": {
+          "AFFIRMATIVE": 4,
+          "NEGATED": 1
+        },
+        "temporal_scope": {
+          "CURRENT": 5
+        },
+        "modality": {
+          "REQUEST": 5
+        },
+        "speech_act": {
+          "EXPLICIT_REQUEST": 5
+        },
+        "item_kind": {
+          "PRODUCTION_INTENT": 1,
+          "CONSTRAINT": 3,
+          "FACT": 1
+        },
+        "requires_human": {
+          "False": 5
+        },
+        "production_current": {
+          "True": 1
+        },
+        "production_delivery_authorized": {
+          "False": 1
+        },
+        "fact_authority": {
+          "HUMAN_EXPLICIT": 5
+        },
+        "fact_epistemic_status": {
+          "CONFIRMED": 5
+        },
+        "fact_reference_role": {
+          "None": 5
+        },
+        "requested_effect_type_counts": {
+          "CREATE_FILE": 1
+        }
+      },
+      "wic_to_inventory_lineage": {
+        "clause_objects_compared": 5,
+        "clause_objects_unchanged": 5,
+        "item_objects_compared": 5,
+        "item_objects_unchanged": 5,
+        "fact_semantic_and_provenance_objects_compared": 5,
+        "fact_semantic_and_provenance_objects_unchanged": 5,
+        "production_intents_exact": true,
+        "candidate_constraints_content_exact": true,
+        "candidate_context_exact": true,
+        "original_semantic_ir_unchanged_observed": true,
+        "original_semantic_facts_unchanged_observed": true
+      },
+      "target_range": {
+        "exact_target_path_count": 1,
+        "target_path_set_sha256": "009e2debb16f30a581bfe2ed61e9dfc347f6708550c81c4b00b54ec603e644ea",
+        "production_target_path_count": 1,
+        "all_production_target_values_in_inventory": true,
+        "original_input_target_semantic_alignment": "UNKNOWN; NO_INDEPENDENT_INPUT_TO_TARGET_SEMANTIC_JUDGEMENT_RECEIPT"
+      },
+      "input_to_typed_semantic_fidelity": {
+        "current_future": "UNKNOWN",
+        "negated_affirmative": "UNKNOWN",
+        "background_required": "UNKNOWN",
+        "source_target_scope": "UNKNOWN",
+        "reason": "RAW_NATURAL_LANGUAGE_INPUT_IS_NOT_A_TYPED_COMPARISON_ORACLE; NO_INDEPENDENT_UPSTREAM_EQUIVALENCE_RECEIPT_RETAINED"
+      },
+      "owner_method_absence_proved": false,
+      "owner_method_absence_conclusion": "NOT_ESTABLISHED; LEGAL_EXACT_BASIS_ROUTE_FEASIBILITY_UNKNOWN"
+    },
+    {
+      "opaque_ordinal": 1,
+      "original_input_sha256": "d2e4abb2c5fb4023d18f44be40467041a89bf619fc3076646fd6d89acc255e94",
+      "saved_input_sha256_matches_sealed": true,
+      "wic_assessment_sha256": "3e61273836e0ad1315aa923d7d8df4ec36674f8375cf70cd0ce892607fe50d0c",
+      "immutable_inventory_sha256": "0db3173e69f3d6b2a9997fcb0c6a0e6e7b7705ac7746c8af1709cc4470b75b21",
+      "source_record_binding": {
+        "all_clause_source_record_id_match_input": true,
+        "all_fact_source_record_ids_include_input": true
+      },
+      "literal_provenance": {
+        "comparison_scope": "LEXICAL_PROVENANCE_ONLY; NOT_SEMANTIC_EQUIVALENCE_OR_COMPLETENESS",
+        "counts": {
+          "clauses_exact_substring": 7,
+          "fact_primary_exact_substring": 3,
+          "fact_governed_exact_substring": 15
+        },
+        "original_nonwhitespace_covered_by_exact_provenance_substrings": 525,
+        "original_nonwhitespace_not_covered_by_exact_provenance_substrings": 0,
+        "quote_text_is_not_in_this_public_receipt": true
+      },
+      "upstream_typed_fields": {
+        "clauses": 7,
+        "polarity": {
+          "AFFIRMATIVE": 6,
+          "NEGATED": 1
+        },
+        "temporal_scope": {
+          "CURRENT": 7
+        },
+        "modality": {
+          "REQUEST": 6,
+          "ASSERTION": 1
+        },
+        "speech_act": {
+          "EXPLICIT_REQUEST": 6,
+          "DISCUSSION": 1
+        },
+        "item_kind": {
+          "PRODUCTION_INTENT": 1,
+          "CONSTRAINT": 3,
+          "FACT": 1
+        },
+        "requires_human": {
+          "False": 5
+        },
+        "production_current": {
+          "True": 1
+        },
+        "production_delivery_authorized": {
+          "False": 1
+        },
+        "fact_authority": {
+          "HUMAN_EXPLICIT": 3
+        },
+        "fact_epistemic_status": {
+          "CONFIRMED": 3
+        },
+        "fact_reference_role": {
+          "None": 3
+        },
+        "requested_effect_type_counts": {}
+      },
+      "wic_to_inventory_lineage": {
+        "clause_objects_compared": 7,
+        "clause_objects_unchanged": 7,
+        "item_objects_compared": 7,
+        "item_objects_unchanged": 7,
+        "fact_semantic_and_provenance_objects_compared": 3,
+        "fact_semantic_and_provenance_objects_unchanged": 3,
+        "production_intents_exact": true,
+        "candidate_constraints_content_exact": true,
+        "candidate_context_exact": true,
+        "original_semantic_ir_unchanged_observed": true,
+        "original_semantic_facts_unchanged_observed": true
+      },
+      "target_range": {
+        "exact_target_path_count": 2,
+        "target_path_set_sha256": "857ffa7d8b629f95058d3d11c12a9ed448fb16e468fc47b9f52354464e65ab60",
+        "production_target_path_count": 2,
+        "all_production_target_values_in_inventory": true,
+        "original_input_target_semantic_alignment": "UNKNOWN; NO_INDEPENDENT_INPUT_TO_TARGET_SEMANTIC_JUDGEMENT_RECEIPT"
+      },
+      "input_to_typed_semantic_fidelity": {
+        "current_future": "UNKNOWN",
+        "negated_affirmative": "UNKNOWN",
+        "background_required": "UNKNOWN",
+        "source_target_scope": "UNKNOWN",
+        "reason": "RAW_NATURAL_LANGUAGE_INPUT_IS_NOT_A_TYPED_COMPARISON_ORACLE; NO_INDEPENDENT_UPSTREAM_EQUIVALENCE_RECEIPT_RETAINED"
+      },
+      "owner_method_absence_proved": false,
+      "owner_method_absence_conclusion": "NOT_ESTABLISHED; LEGAL_EXACT_BASIS_ROUTE_FEASIBILITY_UNKNOWN"
+    },
+    {
+      "opaque_ordinal": 2,
+      "original_input_sha256": "ba285326f9d60afc502630a5236da24c89f4ce6d3cb41dd24fced58f9e108d77",
+      "saved_input_sha256_matches_sealed": true,
+      "wic_assessment_sha256": "121cd711b698fc1f71e50e4c7cbc53facba2140b003ff84eec0d192ca5fa5329",
+      "immutable_inventory_sha256": "10f63daca87e0929204810b1b895fabc8c35cc6892595c174832eab635ca5f0b",
+      "source_record_binding": {
+        "all_clause_source_record_id_match_input": true,
+        "all_fact_source_record_ids_include_input": true
+      },
+      "literal_provenance": {
+        "comparison_scope": "LEXICAL_PROVENANCE_ONLY; NOT_SEMANTIC_EQUIVALENCE_OR_COMPLETENESS",
+        "counts": {
+          "clauses_exact_substring": 7,
+          "fact_primary_exact_substring": 6,
+          "fact_governed_exact_substring": 42
+        },
+        "original_nonwhitespace_covered_by_exact_provenance_substrings": 229,
+        "original_nonwhitespace_not_covered_by_exact_provenance_substrings": 0,
+        "quote_text_is_not_in_this_public_receipt": true
+      },
+      "upstream_typed_fields": {
+        "clauses": 7,
+        "polarity": {
+          "AFFIRMATIVE": 6,
+          "NEGATED": 1
+        },
+        "temporal_scope": {
+          "CURRENT": 6,
+          "FUTURE": 1
+        },
+        "modality": {
+          "REQUEST": 3,
+          "ASSERTION": 3,
+          "CONDITIONAL": 1
+        },
+        "speech_act": {
+          "EXPLICIT_REQUEST": 3,
+          "DISCUSSION": 4
+        },
+        "item_kind": {
+          "PRODUCTION_INTENT": 1,
+          "CONSTRAINT": 4,
+          "FACT": 2
+        },
+        "requires_human": {
+          "False": 7
+        },
+        "production_current": {
+          "True": 1
+        },
+        "production_delivery_authorized": {
+          "False": 1
+        },
+        "fact_authority": {
+          "HUMAN_EXPLICIT": 6
+        },
+        "fact_epistemic_status": {
+          "CONFIRMED": 6
+        },
+        "fact_reference_role": {
+          "None": 6
+        },
+        "requested_effect_type_counts": {}
+      },
+      "wic_to_inventory_lineage": {
+        "clause_objects_compared": 7,
+        "clause_objects_unchanged": 7,
+        "item_objects_compared": 7,
+        "item_objects_unchanged": 7,
+        "fact_semantic_and_provenance_objects_compared": 6,
+        "fact_semantic_and_provenance_objects_unchanged": 6,
+        "production_intents_exact": true,
+        "candidate_constraints_content_exact": true,
+        "candidate_context_exact": true,
+        "original_semantic_ir_unchanged_observed": true,
+        "original_semantic_facts_unchanged_observed": true
+      },
+      "target_range": {
+        "exact_target_path_count": 1,
+        "target_path_set_sha256": "194efb43fecc8d3c330676d21271f3e875e639bd8e5799a267add73c72311b18",
+        "production_target_path_count": 1,
+        "all_production_target_values_in_inventory": true,
+        "original_input_target_semantic_alignment": "UNKNOWN; NO_INDEPENDENT_INPUT_TO_TARGET_SEMANTIC_JUDGEMENT_RECEIPT"
+      },
+      "input_to_typed_semantic_fidelity": {
+        "current_future": "UNKNOWN",
+        "negated_affirmative": "UNKNOWN",
+        "background_required": "UNKNOWN",
+        "source_target_scope": "UNKNOWN",
+        "reason": "RAW_NATURAL_LANGUAGE_INPUT_IS_NOT_A_TYPED_COMPARISON_ORACLE; NO_INDEPENDENT_UPSTREAM_EQUIVALENCE_RECEIPT_RETAINED"
+      },
+      "owner_method_absence_proved": false,
+      "owner_method_absence_conclusion": "NOT_ESTABLISHED; LEGAL_EXACT_BASIS_ROUTE_FEASIBILITY_UNKNOWN"
+    },
+    {
+      "opaque_ordinal": 3,
+      "original_input_sha256": "fd1862aafa383d22c5a2d3d1cfbdb359171170b3847cfb20ed1f0a6b8d809b12",
+      "saved_input_sha256_matches_sealed": true,
+      "wic_assessment_sha256": "f09097bdc4422bcfa9c219cd00b9416aefb32dedbc59f233fd281198b998b21b",
+      "immutable_inventory_sha256": "be8abac458a786f0e2f4d69d552a14aecca13709cb027b5e7cf1346a9e1d5950",
+      "source_record_binding": {
+        "all_clause_source_record_id_match_input": true,
+        "all_fact_source_record_ids_include_input": true
+      },
+      "literal_provenance": {
+        "comparison_scope": "LEXICAL_PROVENANCE_ONLY; NOT_SEMANTIC_EQUIVALENCE_OR_COMPLETENESS",
+        "counts": {
+          "clauses_exact_substring": 5,
+          "fact_primary_exact_substring": 3,
+          "fact_governed_exact_substring": 15
+        },
+        "original_nonwhitespace_covered_by_exact_provenance_substrings": 457,
+        "original_nonwhitespace_not_covered_by_exact_provenance_substrings": 0,
+        "quote_text_is_not_in_this_public_receipt": true
+      },
+      "upstream_typed_fields": {
+        "clauses": 5,
+        "polarity": {
+          "AFFIRMATIVE": 4,
+          "NEGATED": 1
+        },
+        "temporal_scope": {
+          "CURRENT": 5
+        },
+        "modality": {
+          "REQUEST": 4,
+          "ASSERTION": 1
+        },
+        "speech_act": {
+          "EXPLICIT_REQUEST": 4,
+          "DISCUSSION": 1
+        },
+        "item_kind": {
+          "PRODUCTION_INTENT": 1,
+          "CONSTRAINT": 4
+        },
+        "requires_human": {
+          "False": 5
+        },
+        "production_current": {
+          "True": 1
+        },
+        "production_delivery_authorized": {
+          "False": 1
+        },
+        "fact_authority": {
+          "HUMAN_EXPLICIT": 3
+        },
+        "fact_epistemic_status": {
+          "CONFIRMED": 3
+        },
+        "fact_reference_role": {
+          "None": 3
+        },
+        "requested_effect_type_counts": {}
+      },
+      "wic_to_inventory_lineage": {
+        "clause_objects_compared": 5,
+        "clause_objects_unchanged": 5,
+        "item_objects_compared": 5,
+        "item_objects_unchanged": 5,
+        "fact_semantic_and_provenance_objects_compared": 3,
+        "fact_semantic_and_provenance_objects_unchanged": 3,
+        "production_intents_exact": true,
+        "candidate_constraints_content_exact": true,
+        "candidate_context_exact": true,
+        "original_semantic_ir_unchanged_observed": true,
+        "original_semantic_facts_unchanged_observed": true
+      },
+      "target_range": {
+        "exact_target_path_count": 1,
+        "target_path_set_sha256": "674ca74f8f5a0fc6883cccaba14db3aa00ee00cb6a06510fc6544d2ec1c975c1",
+        "production_target_path_count": 1,
+        "all_production_target_values_in_inventory": true,
+        "original_input_target_semantic_alignment": "UNKNOWN; NO_INDEPENDENT_INPUT_TO_TARGET_SEMANTIC_JUDGEMENT_RECEIPT"
+      },
+      "input_to_typed_semantic_fidelity": {
+        "current_future": "UNKNOWN",
+        "negated_affirmative": "UNKNOWN",
+        "background_required": "UNKNOWN",
+        "source_target_scope": "UNKNOWN",
+        "reason": "RAW_NATURAL_LANGUAGE_INPUT_IS_NOT_A_TYPED_COMPARISON_ORACLE; NO_INDEPENDENT_UPSTREAM_EQUIVALENCE_RECEIPT_RETAINED"
+      },
+      "owner_method_absence_proved": false,
+      "owner_method_absence_conclusion": "NOT_ESTABLISHED; LEGAL_EXACT_BASIS_ROUTE_FEASIBILITY_UNKNOWN"
+    }
+  ],
+  "development_comparison": {
+    "evidence_source": "PARENT_REPORTED_FROZEN_IMAGE_DEVELOPMENT_CONTROL_RESULT; NOT_INDEPENDENTLY_RERUN",
+    "image_id": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+    "controlled_samples": 24,
+    "passed": 24,
+    "real_provider_calls": 0,
+    "difference_supported": "DEVELOPMENT_CONTROLS_SHOW_REPRESENTABLE_POSITIVE_AND_NEGATIVE_STRUCTURES; FAILED_HOLDOUT_OBSERVED_CANDIDATES_HAVE_CHARACTER_GAP_OR_SAME_PHYSICAL_SPAN_DISPOSITION_CONFLICT",
+    "not_proved": "DEVELOPMENT_PASS_DOES_NOT_PROVE_SEMANTIC_FIDELITY_OR_LEGAL_RECOVERY_FOR_THE_THREE_EXACT_FAILED_HOLDOUT_BASES"
+  },
+  "conclusion": {
+    "qualification": "NOT_QUALIFIED",
+    "observed_candidate_failures_proved": true,
+    "upstream_semantic_corruption_proved": false,
+    "upstream_semantic_fidelity": "UNKNOWN",
+    "missing_owner_or_authority_proved": false,
+    "exact_failed_basis_A_B": "UNKNOWN",
+    "new_experiments_or_tuning_authorized_by_this_analysis": false
+  }
+}
