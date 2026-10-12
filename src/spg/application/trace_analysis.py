@@ -63,6 +63,9 @@ Read large nested fields with evidence.read(field=JSON_POINTER, offset, limit).
 A nested read does not make an unrelated tail or its whole parent observed.
 Existing PWU/session/attempt mappings and command parameters must be inspected;
 an absent field in a receipt does not mean absence in its explicitly linked effect.
+Prefer {evidence_id, field=JSON_POINTER} citations for fully read original Owner
+values; the service derives observed_value without asking you to retype data.
+Alternatively give an exact quotation. Incorrect explicit quotations are rejected.
 Every quotation must be from returned original bytes/decoded strings, with its
 correct evidence identity. Removing a citation requires reconsidering its claims.
 A projection is not a second event. Diagnoses, intended/rejected behavior lists,
@@ -92,7 +95,9 @@ an event. A redacted authorization reference does not deny a readable acceptance
 Original available_tools describes historical offered tools, not actual execution
 or automatic current permission. Current investigation tools cannot supply historical
 recovery authority; read the original contract/grants or qualify the proposal.
-A dated timeline cites an observed exact Owner timestamp. Creation/start/update/end
+For dated timelines prefer paired timestamp_evidence_id/timestamp_field with
+timestamp omitted; the service derives the fully read original value. Explicit
+wrong values are rejected rather than repaired. A dated timeline cites an observed exact Owner timestamp. Creation/start/update/end
 have different meanings; snapshot state does not establish its transition time.
 Include actual planning/execution when their original records are present. Composite
 summaries may be undated. Final diffs do not prove absence of intermediate/external
@@ -114,7 +119,9 @@ its returned evidence_ids, a judgment and an evidence-based public rationale.
 Review whether each assertion follows from its actual records/source, whether quoted
 parameters and actor permissions match, whether a diagnostic/lookup was promoted into
 an executed event or historical absence, and whether recommendations presuppose facts.
-Use REVISE for unsupported conclusions; read more evidence where useful or use existing
+analysis.revise supports explicit add for omitted optional properties; replace
+requires an existing path. Failed edits preserve the source draft and return field
+presence feedback. Use REVISE for unsupported conclusions; read more evidence where useful or use existing
 analysis.revise to qualify/remove the claim. Review the changed report again. Model
 self-review remains a proposal, never independent assurance or historical evidence.
 Only after analysis.review returns report_digest may you finish RESULT_READY with that

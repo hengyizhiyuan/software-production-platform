@@ -27,7 +27,17 @@ REGRESSION_CRITERIA = {
 
 class Citation(AnalysisRecord):
     evidence_id: UUID
-    quote: str = Field(min_length=1, max_length=1200)
+    quote: str | None = Field(default=None, min_length=1, max_length=1200)
+    field: str | None = Field(default=None, max_length=500,
+        description="Alternative to copying a quote: JSON Pointer to an original Owner value already fully read. The service derives observed_value; this does not establish the prose conclusion.")
+    observed_value: str | None = Field(default=None, description="Service-derived original serialized value excerpt; not a model-created quotation.")
+    observed_value_truncated: bool = Field(default=False)
+
+    @model_validator(mode="after")
+    def reference_requires_quote_or_field(self):
+        if self.quote is None and self.field is None:
+            raise ValueError("CITATION_REQUIRES_QUOTE_OR_ORIGINAL_FIELD_REFERENCE")
+        return self
 
 
 class EvidenceFamily(StrEnum):
@@ -64,7 +74,7 @@ class ObservedFact(AnalysisRecord):
 class TimelineItem(ObservedFact):
     stage: Literal["INTENT", "CONTEXT", "PLANNING", "EXECUTION", "VERIFICATION",
                    "FAILURE", "RECOVERY_REFINEMENT", "FINAL_STATE"]
-    timestamp: str | None = Field(default=None, description="Original event time only. Composite stage summaries have no single timestamp. Dated entries must be ordered chronologically, regardless of stage.")
+    timestamp: str | None = Field(default=None, description="Original event time only. Provide an exact value OR omit it with paired timestamp_evidence_id/timestamp_field to derive the observed original value. Wrong explicit values are rejected. Composite summaries omit all time references.")
     timestamp_evidence_id: UUID | None = Field(default=None, description="Observed original Owner record whose time is used; must be cited. Other citations of a dated event must be explicitly associated with this record.")
     timestamp_field: Literal["created_at", "updated_at", "started_at", "finished_at", "sealed_at", "assessed_at", "committed_at", "timestamp"] | None = Field(default=None, description="Exact top-level original Owner timestamp field, not an invented stage-wide time.")
     time_interpretation: str | None = Field(default=None, description="Explain the meaning of this observed Owner time in your own words; do not infer a later transition from row creation.")
@@ -73,7 +83,7 @@ class TimelineItem(ObservedFact):
     @model_validator(mode="after")
     def recorded_time_requires_source(self):
         if self.timestamp is None:
-            if self.timestamp_evidence_id is not None or self.timestamp_field is not None:
+            if (self.timestamp_evidence_id is None) != (self.timestamp_field is None):
                 raise ValueError("TIMELINE_SUMMARY_HAS_NO_SINGLE_EVENT_TIME")
         elif self.timestamp_evidence_id is None or self.timestamp_field is None:
             raise ValueError("TIMELINE_TIME_REQUIRES_ORIGINAL_OWNER_FIELD")
@@ -131,7 +141,7 @@ class Recommendation(AnalysisRecord):
 
 
 class AnalysisReport(AnalysisRecord):
-    schema_version: Literal["watt-trace-analysis-report-v7"] = "watt-trace-analysis-report-v7"
+    schema_version: Literal["watt-trace-analysis-report-v8"] = "watt-trace-analysis-report-v8"
     work_id: UUID
     original_objective: ObservedFact
     expected_outcome: ObservedFact

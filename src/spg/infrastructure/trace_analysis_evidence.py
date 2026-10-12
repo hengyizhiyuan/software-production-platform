@@ -110,6 +110,8 @@ def source_semantics(group, value, repository):
 
 def json_field_range(body, pointer):
     """Locate a JSON Pointer in original serialization without recomposing it."""
+    if pointer == "":
+        return 0, len(body)
     if not isinstance(pointer, str) or not pointer.startswith("/") or len(pointer) > 500:
         raise ValueError("READ_FIELD_REQUIRES_JSON_POINTER")
     decoder = json.JSONDecoder()
@@ -590,6 +592,21 @@ class EvidenceCatalog:
                            for offset, limit in reads)
         return seed
 
+    def original_field_excerpt(self, evidence_id, field):
+        eid = str(evidence_id)
+        row = self.records.get(eid)
+        if not row or eid not in self.observed:
+            raise CitationRejected("CITATION_NOT_OBSERVED", ["field"], eid)
+        if row["repository"] or row["group"] in {"analysis_draft", "evidence_check", "evidence_inspection"}:
+            raise CitationRejected("FIELD_REFERENCE_REQUIRES_ORIGINAL_JSON_OWNER", ["field"], eid)
+        try:
+            left, right = json_field_range(row["body"], field)
+        except ValueError as error:
+            raise CitationRejected("ORIGINAL_FIELD_REFERENCE_NOT_CAPTURED: " + str(error), ["field"], eid) from None
+        if not self._range_read(eid, left, right):
+            raise CitationRejected("ORIGINAL_FIELD_REFERENCE_NOT_FULLY_READ; use evidence.read with this field first", ["field"], eid)
+        return row["body"][left:right]
+
     def validate(self, report: AnalysisReport):
         if str(report.work_id) != str(self.snapshot["work_id"]):
             raise ValueError("REPORT_WORK_ID_MISMATCH")
@@ -609,16 +626,14 @@ class EvidenceCatalog:
                 raise CitationRejected("CITATION_NOT_OBSERVED", location, c.evidence_id)
             if row["group"] in {"analysis_draft", "evidence_check", "evidence_inspection"}:
                 raise CitationRejected("MODEL_PROPOSAL_NOT_OWNER_EVIDENCE", location, c.evidence_id)
-            excerpts = self.observed_excerpts.get(str(c.evidence_id), [])
-            literal = any(c.quote in excerpt for excerpt in excerpts)
-            # Exact decoded JSON string quotes are legitimate only when their
-            # exact encoded substring was returned. No fuzzy normalization and
-            # no access to an unread tail of the original record are permitted.
-            encoded = json.dumps(c.quote, ensure_ascii=False)[1:-1]
-            decoded = (any(c.quote in value for value in strings(self.values[str(c.evidence_id)]))
-                       and any(encoded in excerpt for excerpt in excerpts))
-            if not literal and not decoded:
-                raise CitationRejected("CITATION_QUOTE_MISMATCH", location, c.evidence_id)
+            excerpts = [self.original_field_excerpt(c.evidence_id, c.field)] if c.field is not None else self.observed_excerpts.get(str(c.evidence_id), [])
+            if c.quote is not None:
+                literal = any(c.quote in excerpt for excerpt in excerpts)
+                encoded = json.dumps(c.quote, ensure_ascii=False)[1:-1]
+                decoded = (any(c.quote in value for value in strings(self.values[str(c.evidence_id)]))
+                           and any(encoded in excerpt for excerpt in excerpts))
+                if not literal and not decoded:
+                    raise CitationRejected("CITATION_QUOTE_MISMATCH", location, c.evidence_id)
             if repository and not row["repository"]:
                 raise CitationRejected("REPOSITORY_CITATION_REQUIRED", location, c.evidence_id)
         facts = [(name, getattr(report, name)) for name in (
@@ -655,7 +670,7 @@ class EvidenceCatalog:
             errors.append(CitationRejected("OBSERVED_PLANNING_STAGE_MUST_BE_RECONSTRUCTED; inspect original plan/PWU records", ["timeline"], report.work_id))
         previous_time = None
         for index, item in enumerate(report.timeline):
-            if item.timestamp is None:
+            if item.timestamp is None and item.timestamp_evidence_id is None:
                 continue
             subject_id = str(item.timestamp_evidence_id)
             row = self.records.get(subject_id)
@@ -668,7 +683,9 @@ class EvidenceCatalog:
                 continue
             recorded = value.get(item.timestamp_field)
             try:
-                actual = datetime.fromisoformat(item.timestamp.replace("Z", "+00:00"))
+                if item.timestamp is None:
+                    self.original_field_excerpt(subject_id, "/" + item.timestamp_field)
+                actual = datetime.fromisoformat((item.timestamp if item.timestamp is not None else recorded).replace("Z", "+00:00"))
                 expected = datetime.fromisoformat(recorded.replace("Z", "+00:00"))
                 if actual.utcoffset() is None or expected.utcoffset() is None or actual != expected:
                     raise ValueError("timestamp mismatch")
@@ -771,14 +788,30 @@ class EvidenceCatalog:
         references, recommendations and causal hypotheses are never rewritten.
         """
         self.validate(report)
+        def cite(c):
+            raw = self.original_field_excerpt(c.evidence_id, c.field) if c.field is not None else None
+            return c.model_copy(update={"observed_value": raw[:1200] if raw is not None else None,
+                "observed_value_truncated": raw is not None and len(raw) > 1200})
+        def fact(f):
+            return f.model_copy(update={"citations": tuple(cite(c) for c in f.citations)})
+        times = []
+        for t in report.timeline:
+            t = fact(t)
+            if t.timestamp_evidence_id is not None:
+                observed = self.values[str(t.timestamp_evidence_id)][t.timestamp_field]
+                t = t.model_copy(update={"timestamp": t.timestamp if t.timestamp is not None else observed,
+                    "owner_time_boundary": time_boundary(t.timestamp_field)})
+            times.append(t)
         findings = []
         for f in report.findings:
             inspection = self.inspections[str(f.inspection_id)]
             boundaries = [inspection["bounded_conclusion"]] + [self.checks[str(cid)]["bounded_conclusion"]
                 for cid in (*f.uncertainty_check_ids, *f.scope_check_ids)]
-            findings.append(f.model_copy(update={"checked_boundaries": tuple(boundaries)}))
+            findings.append(f.model_copy(update={"checked_boundaries": tuple(boundaries), "fact": fact(f.fact),
+                "repository_citations": tuple(cite(c) for c in f.repository_citations)}))
         result = report.model_copy(update={"findings": tuple(findings),
-            "timeline": tuple(t.model_copy(update={"owner_time_boundary": time_boundary(t.timestamp_field)}) if t.timestamp is not None else t for t in report.timeline),
+            **{name: fact(getattr(report, name)) for name in ("original_objective", "expected_outcome", "actual_execution_path", "current_state")},
+            "timeline": tuple(times),
             "evidence_assessments": tuple(a.model_copy(update={"checked_boundary": self.checks[str(a.check_id)]["bounded_conclusion"]}) for a in report.evidence_assessments),
             "missing_evidence": tuple(g.model_copy(update={"checked_boundary": self.checks[str(g.check_id)]["bounded_conclusion"]}) for g in report.missing_evidence)})
         self.validate(result)
@@ -938,9 +971,9 @@ class AnalysisTools:
                   "evidence_ids": {"type": "array", "items": {"type": "string"}, "maxItems": 100},
                   "rationale": {"type": "string", "minLength": 1, "maxLength": 1600}},
                   "required": ["target_path", "judgment", "evidence_ids", "rationale"], "additionalProperties": False}}}, ["draft_id", "items"]),
-            ("analysis.revise", "Explicitly correct a retained rejected report using bounded remove/replace JSON Pointer edits. Revalidate the entire report without regenerating it. This changes advisory artifacts only.",
+            ("analysis.revise", "Explicitly correct a retained rejected report using bounded add/remove/replace JSON Pointer edits. Revalidate the entire report without regenerating it. This changes advisory artifacts only.",
              {"draft_id": {"type": "string"}, "edits": {"type": "array", "minItems": 1, "maxItems": 24,
-              "items": {"type": "object", "properties": {"op": {"enum": ["remove", "replace"]},
+              "items": {"type": "object", "properties": {"op": {"enum": ["add", "remove", "replace"]},
                         "path": {"type": "string"}, "value": {}},
                         "required": ["op", "path"], "additionalProperties": False}}}, ["draft_id", "edits"]),
         )
@@ -995,9 +1028,37 @@ class AnalysisTools:
                 add("/" + section, (item["check_id"] for item in report[section]))
         return targets
 
+    def resolved_observations(self, report):
+        """Return bounded deterministic values for this report's explicit references."""
+        values, used, omitted = [], 0, 0
+        def add(entry):
+            nonlocal used, omitted
+            size = len(text(entry))
+            if used + size > 24000:
+                omitted += 1
+            else:
+                values.append(entry)
+                used += size
+        def fact(path, value):
+            for i, c in enumerate(value["citations"]):
+                if c.get("field") is not None:
+                    add({"report_path": path + f"/citations/{i}", "evidence_id": c["evidence_id"],
+                        "field": c["field"], "observed_value": c["observed_value"], "truncated": c["observed_value_truncated"]})
+        for name in ("original_objective", "expected_outcome", "actual_execution_path", "current_state"):
+            fact("/" + name, report[name])
+        for i, item in enumerate(report["timeline"]):
+            fact(f"/timeline/{i}", item)
+            if item["timestamp_evidence_id"] is not None:
+                add({"report_path": f"/timeline/{i}/timestamp", "evidence_id": item["timestamp_evidence_id"],
+                    "field": "/" + item["timestamp_field"], "observed_value": item["timestamp"], "boundary": item["owner_time_boundary"]})
+        for i, f in enumerate(report["findings"]):
+            fact(f"/findings/{i}/fact", f["fact"])
+        return {"values": values, "omitted_values": omitted,
+            "scope": "FULLY_READ_ORIGINAL_REFERENCES; VALUES_ARE_NOT_SEMANTIC_ENTAILMENT; OMITTED_VALUES_REMAIN_RETRIEVABLE"}
+
     async def execute(self, request):
         identity, args = request.proposal.tool_identity, request.proposal.arguments
-        draft_id, candidate = None, None
+        draft_id, candidate, edit_context = None, None, None
         try:
             if identity == "evidence.index":
                 output = self.catalog.index(**args)
@@ -1051,7 +1112,7 @@ class AnalysisTools:
                     if not 1 <= len(edits) <= 24:
                         raise ValueError("REPORT_EDIT_CAPACITY_EXCEEDED")
                     for edit in edits:
-                        if set(edit) - {"op", "path", "value"} or edit["op"] not in {"remove", "replace"}:
+                        if set(edit) - {"op", "path", "value"} or edit["op"] not in {"add", "remove", "replace"}:
                             raise ValueError("REPORT_EDIT_NOT_ADMITTED")
                         path = edit["path"]
                         if not isinstance(path, str) or not path.startswith("/") or len(path) > 300:
@@ -1061,7 +1122,18 @@ class AnalysisTools:
                         for part in parts[:-1]:
                             parent = parent[int(part)] if isinstance(parent, list) and part.isdigit() else parent[part]
                         last = int(parts[-1]) if isinstance(parent, list) and parts[-1].isdigit() else parts[-1]
-                        if edit["op"] == "remove":
+                        edit_context = {"path": path, "operation": edit["op"],
+                            "available_parent_fields": list(parent)[:60] if isinstance(parent, dict) else [],
+                            "target_present": last in parent if isinstance(parent, dict) else isinstance(last, int) and 0 <= last < len(parent)}
+                        if edit["op"] == "add":
+                            if isinstance(parent, list):
+                                index = len(parent) if last == "-" else last
+                                if not isinstance(index, int) or not 0 <= index <= len(parent):
+                                    raise ValueError("REPORT_ADD_ARRAY_INDEX_INVALID")
+                                parent.insert(index, edit["value"])
+                            else:
+                                parent[last] = edit["value"]
+                        elif edit["op"] == "remove":
                             del parent[last]
                         else:
                             # Replace must reference an existing field; it never
@@ -1075,6 +1147,7 @@ class AnalysisTools:
                 draft_id = self.catalog.add("analysis_draft", f"analysis-drafts/{canonical_digest(candidate)}",
                                             public_report_candidate(candidate))
                 self.drafts[draft_id] = deepcopy(candidate)
+                edit_context = None
                 report = AnalysisReport.model_validate(candidate)
                 report = self.catalog.materialize_boundaries(report)
                 self.pending_reports[draft_id] = report.model_dump(mode="json")
@@ -1082,6 +1155,7 @@ class AnalysisTools:
                 output = {"verification": "CITATIONS_AND_STRUCTURE_PASS",
                           "draft_id": draft_id, "candidate_digest": canonical_digest(self.pending_reports[draft_id]),
                           "review_targets": self.review_targets(self.pending_reports[draft_id]),
+                          "resolved_observations": self.resolved_observations(self.pending_reports[draft_id]),
                           "next_action": "analysis.review", "semantic_correctness": "NATIVE_SELF_REVIEW_REQUIRED_THEN_HUMAN_REVIEW",
                           "production_authority": "NONE"}
                 self.verification_receipts.append(output)
@@ -1100,6 +1174,13 @@ class AnalysisTools:
                 if isinstance(error, CitationRejected):
                     issues = getattr(error, "issues", [{"type": "CitationRejected", "reason": str(error),
                              "location": error.location, "evidence_id": error.evidence_id}])
+            if identity == "analysis.revise" and draft_id is None and args.get("draft_id") in self.drafts:
+                draft_id = args["draft_id"]
+                candidate = deepcopy(self.drafts[draft_id])
+                if edit_context is not None:
+                    issues.append({"type": "REPORT_EDIT_INPUT_FEEDBACK", "location": edit_context["path"],
+                        **edit_context, "admitted_operations": ["add", "remove", "replace"],
+                        "repair": "For an omitted property, explicitly add the proposed value or replace its existing parent. The original draft is unchanged; all evidence and schema gates are rechecked."})
             output = {"verification": "FAIL", "issues": issues,
                       "effect_observed": False, "repair": "Same contract only; preserve UNKNOWN and permissions."}
             if draft_id:

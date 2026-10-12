@@ -860,7 +860,8 @@ def test_checked_boundary_markers_materialize_only_verified_receipts():
     original = json.loads(json.dumps(r))
     materialized = c.materialize_boundaries(AnalysisReport.model_validate(r)).model_dump(mode="json")
     assert r == original
-    assert materialized["findings"][0]["fact"] == original["findings"][0]["fact"] | {"evidence_family":"OWNER_RECORD"}
+    assert materialized["findings"][0]["fact"]["statement"] == original["findings"][0]["fact"]["statement"]
+    assert [{"evidence_id": c["evidence_id"], "quote": c["quote"]} for c in materialized["findings"][0]["fact"]["citations"]] == original["findings"][0]["fact"]["citations"]
     assert materialized["findings"][0]["analysis"] == original["findings"][0]["analysis"]
     assert materialized["deferred_items"] == original["deferred_items"]
     assert "本次关联读取仅限冻结导出" in materialized["findings"][0]["checked_boundaries"][0]
@@ -1238,3 +1239,74 @@ def test_gap_annotation_does_not_erase_separately_supported_conditional_source_c
     assert result.findings[0].epistemic_status=="ROOT_CAUSE_HYPOTHESIS" and check["bounded_conclusion"] in result.findings[0].checked_boundaries
     f["repository_citations"][0]["evidence_id"]=str(uuid4())
     with pytest.raises(ValueError):c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+@pytest.mark.parametrize("pointer",["/state","/raw_user_requirement",""])
+def test_original_field_reference_derives_only_observed_value_without_rewriting_prose(pointer):
+    c=EvidenceCatalog(snapshot());r=report(c);eid=r["current_state"]["citations"][0]["evidence_id"]
+    c.read(eid);r["current_state"]={"statement":"原始字段可核查；结论仍需语义自审。","citations":[{"evidence_id":eid,"field":pointer,"observed_value":"forged supplied value"}]}
+    output=c.materialize_boundaries(AnalysisReport.model_validate(r));citation=output.current_state.citations[0]
+    assert citation.quote is None and citation.observed_value==c.original_field_excerpt(eid,pointer)[:1200]
+    assert output.current_state.statement==r["current_state"]["statement"]
+    assert citation.observed_value!='forged supplied value'
+
+
+def test_field_reference_cannot_read_a_tail_or_repair_a_wrong_explicit_quote():
+    c=EvidenceCatalog(snapshot());r=report(c);eid=c.add("execution_steps","/fixture/large",{"large":"x"*40000,"nested":{"marker":"original-value"}});c.index(group="execution_steps")
+    r["current_state"]={"statement":"Explicit original field reference","citations":[{"evidence_id":eid,"field":"/nested/marker"}]}
+    with pytest.raises(ValueError,match="ORIGINAL_FIELD_REFERENCE_NOT_FULLY_READ"):c.materialize_boundaries(AnalysisReport.model_validate(r))
+    c.read(eid,field="/nested/marker");output=c.materialize_boundaries(AnalysisReport.model_validate(r))
+    assert json.loads(output.current_state.citations[0].observed_value)=="original-value"
+    r["current_state"]["citations"][0]["quote"]="different-value"
+    with pytest.raises(ValueError,match="CITATION_QUOTE_MISMATCH"):c.materialize_boundaries(AnalysisReport.model_validate(r))
+    r["current_state"]["citations"][0].update(quote=None,field="/not_exported")
+    with pytest.raises(ValueError,match="ORIGINAL_FIELD_REFERENCE_NOT_CAPTURED"):c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+def test_reference_time_is_original_and_wrong_explicit_time_still_fails():
+    c,r,ids=timed_report();r["timeline"][0].pop("timestamp")
+    out=c.materialize_boundaries(AnalysisReport.model_validate(r))
+    assert out.timeline[0].timestamp==c.values[ids[0]]["created_at"] and "timestamp" not in r["timeline"][0]
+    r["timeline"][0]["timestamp"]="2026-10-05T16:58:13+00:00"
+    with pytest.raises(ValueError,match="TIMELINE_TIME_DOES_NOT_MATCH_OWNER_FIELD"):c.materialize_boundaries(AnalysisReport.model_validate(r))
+
+
+def test_report_editor_can_add_omitted_optional_source_field_and_retains_original_draft():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());r=report(c);f=r["findings"][0];f.pop("repository_citations");f['epistemic_status']='ROOT_CAUSE_HYPOTHESIS'
+    code=c.add("repository","/fixture/code",{"repository":"source","revision":"a"*40,"path":"src/state.py","blob":"b"*40,"content":"if accepted: complete()"},repository=True);c.read(code)
+    tools=AnalysisTools(c,{});failed=invoke_analysis(tools,"analysis.submit",{"report":r});original=json.loads(json.dumps(tools.drafts[failed.output['draft_id']]))
+    fixed=invoke_analysis(tools,"analysis.revise",{"draft_id":failed.output['draft_id'],"edits":[{"op":"add","path":"/findings/0/repository_citations","value":[{"evidence_id":code,"quote":"if accepted: complete()"}]}]})
+    assert fixed.condition.value=='SETTLED' and tools.accepted_report is None
+    assert tools.drafts[failed.output['draft_id']]==original and 'repository_citations' not in original['findings'][0]
+    assert invoke_analysis(tools,"analysis.review",{"draft_id":fixed.output['draft_id'],"items":review_items(fixed.output)}).condition.value=='SETTLED'
+
+
+def test_failed_report_edit_returns_source_identity_and_field_presence_without_partial_changes():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());r=report(c);r['findings'][0].pop('repository_citations');tools=AnalysisTools(c,{});pending=invoke_analysis(tools,'analysis.submit',{'report':r}).output
+    original=json.loads(json.dumps(tools.drafts[pending['draft_id']]))
+    fail=invoke_analysis(tools,'analysis.revise',{'draft_id':pending['draft_id'],'edits':[{'op':'replace','path':'/findings/0/recommendation','value':'partial edit must not persist'}, {'op':'replace','path':'/findings/0/repository_citations','value':[]}]})
+    assert fail.condition.value=='FAILED' and fail.output['draft_id']==pending['draft_id'] and tools.drafts[pending['draft_id']]==original
+    context=next(i for i in fail.output['issues'] if i['type']=='REPORT_EDIT_INPUT_FEEDBACK')
+    assert context['target_present'] is False and context['operation']=='replace' and 'add' in context['admitted_operations']
+
+
+def test_added_advisory_values_never_bypass_evidence_validation_or_extra_field_schema():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());tools=AnalysisTools(c,{});pending=invoke_analysis(tools,'analysis.submit',{'report':report(c)}).output
+    result=invoke_analysis(tools,'analysis.revise',{'draft_id':pending['draft_id'],'edits':[{'op':'add','path':'/current_state/citations/-','value':{'evidence_id':str(uuid4()),'field':'/state'}}]})
+    assert result.condition.value=='FAILED' and tools.accepted_report is None
+    result=invoke_analysis(tools,'analysis.revise',{'draft_id':pending['draft_id'],'edits':[{'op':'add','path':'/execute_code','value':True}]})
+    assert result.condition.value=='FAILED' and tools.accepted_report is None
+
+
+
+def test_pending_native_review_receives_actual_resolved_field_values_and_reference_time():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c,r,ids=timed_report();r['timeline'][0].pop('timestamp');work=r['current_state']['citations'][0]['evidence_id'];r['current_state']['citations']=[{'evidence_id':work,'field':'/state'}]
+    tools=AnalysisTools(c,{});pending=invoke_analysis(tools,'analysis.submit',{'report':r}).output
+    values=pending['resolved_observations']['values']
+    assert next(v for v in values if v['report_path']=='/current_state/citations/0')['observed_value']=='"COMPLETED"'
+    assert next(v for v in values if v['report_path']=='/timeline/0/timestamp')['observed_value']==c.values[ids[0]]['created_at']
+    assert tools.accepted_report is None and pending['resolved_observations']['omitted_values']==0

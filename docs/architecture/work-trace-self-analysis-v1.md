@@ -277,7 +277,7 @@ an offline historical capability check; it is distinct from deployed ECS UI/runt
 qualification. Production deployment requires separate authorization and exact
 source/storage/configuration checks. C3 closure is neither changed nor qualified.
 
-## Native self-review and legal semantic variation (report v7)
+## Native self-review and legal semantic variation (report v8)
 
 Trace Analysis owns its own probabilistic consumption boundary. Deterministic
 verification checks observed quotation bytes, source identity, explicit Owner links,
@@ -308,10 +308,30 @@ requires a separate independent review of a real historical report. A normal mod
 candidate deviation is not automatically a capability defect; erroneous acceptance
 or rejection needs concrete evidence and a repair of the common cause.
 
-Report v1–v6 history remains readable without migration. v7 renders original prose,
+Report v1–v7 history remains readable without migration. v8 renders original prose,
 neutral derived inspection/check/time scope, and the recorded Native self-review
 separately and escapes all model/evidence content. Relevant regression covers legal
 wording variants, source/association violations, semantic feedback and recovery,
 resource exhaustion, premature terminal claims, auth/Origin, original database
 immutability and idempotent history reads. Scripted model tests qualify controls;
 they do not substitute for real-model semantic qualification.
+
+Original Owner field references are an alternative to retyping exact quotation
+bytes. A citation may specify an evidence ID and JSON Pointer (including the root
+pointer); its entire selected value must have actually been returned. The service
+adds an exact bounded observed_value excerpt and an explicit truncation flag. It
+never changes an incorrect explicit quote or claims that the prose follows from
+that field. Source-code quotations remain exact committed-source reads. Paired
+original timestamp identity/field references can derive a fully read original time;
+wrong explicit times remain rejected. Native review receives bounded resolved
+original values so deterministic facts are reused, not guessed or recopied.
+
+The existing advisory editor supports explicit JSON Pointer add/remove/replace.
+Adding an omitted optional property does not create new evidence or change source
+records: the producer proposes its exact value and the whole candidate is checked
+again. Failed editing attempts retain the source draft identity and return actual
+field-presence feedback; partial edits do not overwrite that immutable draft.
+Scoped gap annotations can accompany separately supported observations/comparisons;
+they cannot themselves establish a cause, a defect or global absence. Existing
+Owner audit feedback reports the remaining submit/revise/review/terminal route and
+budget as planning evidence without imposing a fixed retry count or resetting it.

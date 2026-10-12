@@ -183,3 +183,11 @@ test('Analysis v7 preserves model wording and escapes separate checked boundarie
  await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v7',analysisTarget:'ordinary-work'}})}});
  const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/保留模型原文/);assert.match(h,/自由限定/);assert.match(h,/&lt;checked&gt;/);assert.match(h,/&lt;owner-boundary&gt;/);assert.match(h,/&lt;unsafe-review&gt;/);assert.match(h,/不能代替独立人工审查/);assert.doesNotMatch(h,/<unsafe-review>|<checked>|<owner-boundary>/);
 });
+
+
+test('Analysis field references display escaped observed values with original field identity',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-fields';const fact={statement:'原始字段引用',citations:[{evidence_id:'owner-id',quote:null,field:'/semantic_input/argv',observed_value:'<original-value>'}]};
+ const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,timeline:[],findings:[],immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],deferred_items:[],missing_evidence:[]};
+ const s=surface('/admin',true,null,null,{[path]:{status:'COMPLETED',report}});await s.ready();await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-fields',analysisTarget:'ordinary-work'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/&lt;original-value&gt;/);assert.match(h,/字段 \/semantic_input\/argv/);assert.doesNotMatch(h,/<original-value>/);
+});
