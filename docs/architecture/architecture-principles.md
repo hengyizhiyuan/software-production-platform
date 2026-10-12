@@ -13,6 +13,18 @@ retains existing production, Verification, Guardian and ECF ownership.
 and [qualification governance](watt-regression-protection-and-golden-journey-governance.md#stochastic-native-capability-qualification)
 apply without certifying any existing implementation by this document change.
 
+## AI-native module responsibility
+
+**Human Governor approved, 2026-10-12:** AI-native modules adapt to probabilistic
+intelligent products within their own lawful responsibility; direct LLM use is
+neither sufficient nor required. Existing Owners retain semantic validation,
+bounded recovery and truthful termination; exact engineering/authority gates
+remain strict. Pure hash, transaction and permission components stay deterministic.
+The sole Watt normative definition and review process are
+[Development Principles §14](ai-native-development-execution-principles.md#14-ai-native-module-adaptation-and-development-review),
+under Program ADR-0002 and the preserved [§13 execution discipline](ai-native-development-execution-principles.md#13-ai-non-determinism-principle-and-execution-discipline).
+This principle grants no new Owner, adaptation layer or Runtime qualification.
+
 ## AI-Native Software Production System
 
 The platform is not an AI coding tool. It solves how humans and AI can continuously produce trustworthy software through a governed production loop.
@@ -696,11 +708,9 @@ Executor implementation, Evidence/Reality review, and Human Acceptance.
 Human Governor
     owns Intent, material Authority, risk, and acceptance
 
-Architecture Lead AI
-    preserves the capability boundary and reviews Reality
-
-AI Executor
-    owns HOW inside the admitted development envelope
+AI collaborator
+    preserves the capability boundary, reviews Reality,
+    and owns HOW inside the admitted development envelope
 ```
 
 The system rejects both unrestricted autonomy against a vague goal and Human
@@ -712,3 +722,18 @@ materially changes.
 The complete responsibility model, Mission Contract semantics, PWU continuity
 rationale, lessons learned, and current/future boundary are recorded in
 [AI-native Development Execution Principles](ai-native-development-execution-principles.md).
+
+### Probabilistic Intelligence and Controlled Convergence
+
+Watt assumes probabilistic LLM output, expected bounded candidate failures and
+imperfect first-pass generation. Existing Owners must validate, refine and
+converge on acceptable production results while preserving facts, permissions
+and independent evidence. Runtime model variance uses existing bounded
+recovery; a proven capability defect justifies engineering evolution; missing
+authority or authentic evidence blocks acceptance.
+
+The canonical Watt development rule, P0–P3 prioritization and proportionate
+regression strategy are in
+[AI Non-Determinism Principle](ai-native-development-execution-principles.md#13-ai-non-determinism-principle-and-execution-discipline),
+which references the Program's versioned ADR-0002. This entry does not claim
+current runtime conformance or require a separate Architecture Lead role.

@@ -16,7 +16,9 @@ browser journey for every bug.
 ## Stochastic-native capability qualification
 
 Under [Program ADR-0002](program-architecture-decisions.md#stochastic-native-engineering--program-adr-0002),
-qualification of a new or materially changed generic model capability must include
+qualification of an applicable new or materially changed capability producing
+or consuming probabilistic intelligence follows [Development Principles §14.5](ai-native-development-execution-principles.md#145-default-development-and-maintenance-process),
+including consumers without direct LLM calls. It must appropriately include
 non-prelisted expressions, semantic-equivalence variants, a real end-to-end Work
 and applicable negative evidence. Validate intent, constraints, effects, evidence
 and authority equivalence rather than identical reasoning, steps or code.
@@ -54,6 +56,13 @@ A historical incident does not automatically justify a new Golden Journey.
 The default engineering rule is:
 
 > No regression protection, no bug closure.
+
+First apply the canonical [A/B/C classification](ai-native-development-execution-principles.md#132-runtime-recovery-versus-system-evolution)
+and [module maintenance review](ai-native-development-execution-principles.md#145-default-development-and-maintenance-process)
+to actual Trace, Owner, source/version and failed predicates. A normal candidate
+deviation or correct governance refusal is not automatically a platform defect.
+For a proven engineering defect, use common-root repair and proportionate
+regression within the existing mission.
 
 Every meaningful production or Human Dogfood defect must identify:
 

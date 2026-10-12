@@ -315,3 +315,11 @@ Future implementation follows the
 and existing exact-revision qualification. Existing code, N1/GOF evidence,
 Candidates, Decisions and Quality Ledger remain historical facts; this record
 neither reclassifies their outcomes nor declares conformance.
+
+### Watt module-level refinement — 2026-10-12
+
+The Human Governor approved [Development Principles §14](ai-native-development-execution-principles.md#14-ai-native-module-adaptation-and-development-review)
+as Watt's local module-adaptation and development-review refinement of the same
+fixed Program ADR-0002. The normative body remains in that document, alongside
+C3's preserved §13. This does not amend the Program ADR, reassign Guardian/ECF
+ownership, add an approval actor or certify Runtime conformance.

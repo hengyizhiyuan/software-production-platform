@@ -1,5 +1,13 @@
 # AI-Native Software Production Platform
 
+> Development entry (Human-approved, 2026-10-12): substantial tasks involving
+> probabilistic intelligent products apply the sole Watt
+> [§14 module adaptation and review norm](docs/architecture/ai-native-development-execution-principles.md#14-ai-native-module-adaptation-and-development-review)
+> and preserved [§13 execution discipline](docs/architecture/ai-native-development-execution-principles.md#13-ai-non-determinism-principle-and-execution-discipline),
+> including deterministic consumers without LLM calls. Existing Mission/Owner
+> governance applies; the Human Governor and AI collaborator conduct development.
+> Documentation adoption does not qualify current Runtime behavior.
+
 > Runtime transition note (2026-09-24): the active source and deployment
 > profiles use the Watt Native Executor with API-key model providers. Historical
 > Codex SDK milestones below describe preserved past evidence, not a selectable
