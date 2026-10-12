@@ -303,6 +303,19 @@ class EvidenceCatalog:
                         return {"status": "RELATED", "basis": "EXPLICIT_OWNER_REFERENCE",
                                 "source_evidence_id": source_id, "reference_pointer": pointer,
                                 "target_evidence_id": target_id, "reference": token}
+        # Sibling receipts/evidence may each explicitly name the same unique
+        # captured effect/receipt. Resolve the target, rather than infer identity
+        # from a shared Work, attempt, step, timestamp or error description.
+        shared = set(token for _, token in self._references(subject_evidence_id)) & set(token for _, token in self._references(evidence_id))
+        for token in sorted(shared):
+            if token.split(":", 1)[0] not in {"native-effect", "native-receipt"}:
+                continue
+            for target_id, target in self.records.items():
+                namespace = RECORD_NAMESPACES.get(target["group"])
+                value = self.values[target_id]
+                if namespace and isinstance(value, dict) and value.get("id") and token == namespace + ":" + str(value["id"]):
+                    return {"status": "RELATED", "basis": "SHARED_EXPLICIT_RESOLVED_OWNER_REFERENCE",
+                            "reference": token, "target_evidence_id": target_id}
         return {"status": "NOT_ESTABLISHED", "basis": "NO_EXPLICIT_OWNER_REFERENCE",
                 "limitation": "Shared Work/attempt/component/error/timestamp is not incident identity."}
 
@@ -556,6 +569,13 @@ class EvidenceCatalog:
         initial = [self.read(row["evidence_id"], limit=2000)
                    for row in self.records.values()
                    if row["group"] in {"capture", "intent", "limits"}]
+        reality = deepcopy(self.reality())
+        for family in reality["families"]:
+            family["initial_examples_omitted"] = len(family["examples"]) - min(3, len(family["examples"]))
+            family["examples_truncated"] = family["examples_truncated"] or bool(family["initial_examples_omitted"])
+            family["examples"] = [{key: value for key, value in example.items() if key != "value"}
+                                  for example in family["examples"][:3]]
+            family["example_value_boundary"] = "Initial lookup includes identities/selectors only; read original values through evidence.read. No original value was observed by this lookup."
         seed = {"snapshot_digest": self.digest, "groups": groups,
                 "planning_stage_targets": [eid for eid, row in self.records.items()
                     if row["group"] in {"plan_history", "production_work_units"}][:3],
@@ -563,15 +583,36 @@ class EvidenceCatalog:
                     if row["group"] in {"execution_effects", "effect_receipts", "execution_steps"}
                     and isinstance(self.values[eid], dict) and self.values[eid].get("condition") in {"SETTLED", "COMPLETED"}][:3],
                 "initial_inspections": [self.inspect(work_id)],
-                "evidence_reality": self.reality(),
+                "evidence_reality": reality,
                 "initial_evidence": initial,
                 "incident_targets": [{"evidence_id": eid, "group": row["group"], "pointer": row["pointer"]}
                     for eid, row in self.records.items() if row["group"] == "self_refine_events"
                     or row["group"] in {"execution_steps", "effect_receipts"} and row["condition"] == "FAILED"][:12],
-                "selection_policy": "Identity/limits plus bounded failure, refinement and final-owner excerpts. Omitted records remain pageable; excerpts are not a completeness claim.",
+                "selection_policy": "Identity/limits and bounded original planning/execution, then failure/refinement and final-owner excerpts. Lookup example values are omitted from this initial context. Omitted originals remain pageable and unobserved; excerpts are not a completeness claim.",
                 "rule": "Use evidence.index/read to investigate owners, failed steps, receipts, contracts, context and recovery. Counts are projections, not deduplicated execution totals."}
+        # Reconstruction needs original planning/execution as well as failures.
+        # Supply bounded originals before optional diagnostic excerpts consume
+        # the existing ECF envelope. Targets alone do not provide readable facts.
+        stage_rows = []
+        for families in (("plan_history", "production_work_units"), ("execution_effects", "effect_receipts", "execution_steps")):
+            for group in families:
+                rows = [row for row in self.records.values() if row["group"] == group and
+                        (group in {"plan_history", "production_work_units"} or row["condition"] in {"SETTLED", "COMPLETED"})]
+                if rows:
+                    stage_rows.extend(rows[:1])
+                    break
+        for row in stage_rows:
+            eid = row["evidence_id"]
+            reads = [(0, min(3000, len(row["body"])))]
+            if len(row["body"]) > 3000:
+                reads.append((len(row["body"]) - 1000, 1000))
+            parts = [self.read(eid, offset=offset, limit=limit, _observe=False) for offset, limit in reads]
+            if len(text(dict(seed, initial_evidence=initial + parts))) <= 44000:
+                initial.extend(self.read(eid, offset=offset, limit=limit) for offset, limit in reads)
         counts = {}
-        for row in list(self.records.values()):
+        prioritized = sorted(self.records.values(), key=lambda row: 0 if row["group"] == "self_refine_events" else
+                             1 if row["group"] in {"execution_steps", "effect_receipts"} and row["condition"] == "FAILED" else 2)
+        for row in prioritized:
             group = row["group"]
             important = (group in {"self_refine_events", "baseline_candidates", "work_delivery_acceptances", "runtime_commits"}
                          or (group in {"execution_steps", "effect_receipts"} and row["condition"] == "FAILED"))

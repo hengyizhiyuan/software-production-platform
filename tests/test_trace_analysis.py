@@ -1447,3 +1447,40 @@ def test_repository_record_preserves_uniform_original_json_and_existing_decoded_
     r['findings'][0]['repository_citations']=[{'evidence_id':eid,'field':'/content'}]
     out=c.materialize_boundaries(AnalysisReport.model_validate(r))
     assert json.loads(out.findings[0].repository_citations[0].observed_value)==value['content']
+
+
+def test_sibling_evidence_joins_only_an_explicit_unique_captured_effect():
+    c=EvidenceCatalog(snapshot());effect=str(uuid4());attempt=str(uuid4())
+    target=c.add('execution_effects','/fixture/unique-effect',{'id':effect,'condition':'FAILED'})
+    receipt=c.add('effect_receipts','/fixture/receipt',{'id':str(uuid4()),'effect_id':effect,'attempt_id':attempt})
+    evidence=c.add('execution_evidence','/fixture/evidence',{'id':str(uuid4()),'effect_id':effect,'attempt_id':attempt})
+    relation=c.association(receipt,evidence)
+    assert relation['basis']=='SHARED_EXPLICIT_RESOLVED_OWNER_REFERENCE' and relation['target_evidence_id']==target
+    assert receipt not in c.observed and evidence not in c.observed and target not in c.observed
+    other=c.add('execution_evidence','/fixture/other',{'id':str(uuid4()),'effect_id':str(uuid4()),'attempt_id':attempt})
+    assert c.association(receipt,other)['status']=='NOT_ESTABLISHED'
+    missing=str(uuid4());a=c.add('effect_receipts','/fixture/no-target-a',{'effect_id':missing});b=c.add('execution_evidence','/fixture/no-target-b',{'effect_id':missing})
+    assert c.association(a,b)['status']=='NOT_ESTABLISHED'
+
+
+def test_shared_step_reference_does_not_join_different_tool_incidents():
+    c=EvidenceCatalog(snapshot());step=str(uuid4())
+    c.add('execution_steps','/fixture/multi-tool-step',{'id':step,'step_type':'INFERENCE','condition':'COMPLETED'})
+    a=c.add('execution_evidence','/fixture/step-a',{'inference_step_id':step,'effect_id':str(uuid4())})
+    b=c.add('effect_receipts','/fixture/step-b',{'inference_step_id':step,'effect_id':str(uuid4())})
+    assert c.association(a,b)['status']=='NOT_ESTABLISHED'
+
+
+def test_seed_prioritizes_original_planning_and_settled_execution_within_existing_envelope():
+    from spg.infrastructure.trace_analysis_evidence import text
+    snap=snapshot();owners=snap['lifecycle']['advanced']['owners']
+    owners['plan_history']=[{'id':str(uuid4()),'plan':{'objective':'original plan'},'created_at':'2026-01-01T00:00:00Z'}]
+    owners['execution_effects']=[{'id':str(uuid4()),'condition':'SETTLED','tool_identity':'file.write','semantic_input':{'path':'arbitrary.txt'}}]
+    owners['self_refine_events']=[{'id':str(uuid4()),'diagnostic_evidence':{'large':'x'*12000}} for _ in range(20)]
+    c=EvidenceCatalog(snap);seed=c.seed()
+    assert len(text(seed))<=44000
+    returned={c.records[p['evidence_id']]['group'] for p in seed['initial_evidence']}
+    assert {'plan_history','execution_effects'}.issubset(returned)
+    for group in ['plan_history','execution_effects']:
+        eid=next(eid for eid,row in c.records.items() if row['group']==group)
+        assert c.original_field_excerpt(eid,'')==c.records[eid]['body']

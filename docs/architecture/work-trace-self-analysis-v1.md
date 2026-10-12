@@ -387,3 +387,9 @@ omitted content/matches/patch from JSON Pointer access and broke nested navigati
 Exact decoded code quotations remain supported; immutable historical records are
 not migrated. Git identities, read scope, read coverage and source-content gates
 are preserved.
+The existing ECF seed prioritizes bounded original planning and settled execution
+records before optional failure excerpts, within the same 44,000-character seed
+envelope. Excluded excerpts remain unobserved and pageable. Sibling evidence may
+associate through a shared explicit native effect/receipt reference only when that
+unique original target is captured. This navigation relation is not causal proof;
+shared Work/attempt/step/error/time and unresolved targets remain inadmissible.
