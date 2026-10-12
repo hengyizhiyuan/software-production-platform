@@ -356,3 +356,11 @@ references. This is needed because the next stateless inference does not inherit
 the preceding tool proposal's arguments. That candidate remains a model proposal,
 not Owner evidence. Field-reference rejection preserves its complete location inside
 the proposed report so an explicit bounded edit can address the offending citation.
+Semantic-review feedback remains OPEN after a merely structural revision. Only a
+subsequent successful Native review records its model-review recovery; this still
+does not qualify independent semantic assurance.
+Source-validation failures similarly return the retained repair_candidate as
+untrusted model data, allowing a stateless refinement step to reconsider the
+assertion together with its rejected reference. Failed partial edits return the
+unchanged source draft. Current repair-history snapshots are copied so subsequent
+closure cannot retroactively change what an earlier inference observed.

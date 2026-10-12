@@ -103,7 +103,7 @@ class NativeContextAssembler:
         if repair_history:
             facts.append({
                 "fact_type": "RECENT_SELF_REFINE",
-                "events": list(repair_history[:3]),
+                "events": deepcopy(list(repair_history[:3])),
                 "rule": (
                     "Historical failures are evidence, not permission to change Work intent "
                     "or repeat an uncertain side effect."

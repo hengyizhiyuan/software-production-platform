@@ -127,8 +127,10 @@ an executed event or historical absence, and whether recommendations presuppose 
 analysis.revise supports explicit add for omitted optional properties; replace
 requires an existing path. Failed edits preserve the source draft and return field
 presence feedback. Use REVISE for unsupported conclusions; read more evidence where useful or use existing
-analysis.revise to qualify/remove the claim. Review the changed report again. Model
-self-review remains a proposal, never independent assurance or historical evidence.
+analysis.revise to qualify/remove the claim. When source validation fails,
+repair_candidate preserves the retained public draft for this stateless step;
+reconsider its assertions together with its references. Review the changed report
+again. Model self-review remains a proposal, never independent assurance or historical evidence.
 Only after analysis.review returns report_digest may you finish RESULT_READY with that
 exact digest. Unrecoverable ambiguity, missing authority or budget exhaustion must
 terminate honestly; do not reset budgets or manufacture facts. Independent Human
@@ -191,7 +193,8 @@ class AnalysisJournal:
                     "error_type": type(error).__name__ if error else None})
         if result and result.condition.value == "FAILED":
             event = {"event_id": str(effect_id), "operation_id": str(self.binding.attempt_id),
-                     "failure_family": "ANALYSIS_EVIDENCE_OR_REPORT_REJECTED",
+                     "failure_family": ("ANALYSIS_SEMANTIC_REVIEW_REJECTED" if request.proposal.tool_identity == "analysis.review"
+                                        else "ANALYSIS_EVIDENCE_OR_REPORT_REJECTED"),
                      "tool_identity": request.proposal.tool_identity,
                      "status": "OPEN", "repairability": "AUTONOMOUSLY_REPAIRABLE",
                      "result": "NO_EXTERNAL_EFFECT; SAME_CONTRACT_RETRY_ONLY"}
@@ -201,8 +204,11 @@ class AnalysisJournal:
         if result and request.proposal.tool_identity.startswith("analysis."):
             for event in self.repairs:
                 if str(event.get("tool_identity", "")).startswith("analysis."):
+                    if event["tool_identity"] == "analysis.review" and request.proposal.tool_identity != "analysis.review":
+                        continue
                     event["status"] = "VERIFIED"
-                    event["result"] = "REPORT_CITATIONS_AND_STRUCTURE_RECOVERED"
+                    event["result"] = ("MODEL_SELF_REVIEW_RECOVERED_NOT_INDEPENDENT_ASSURANCE" if event["tool_identity"] == "analysis.review"
+                                       else "REPORT_CITATIONS_AND_STRUCTURE_RECOVERED")
         return None
 
     def recent_repair_reality(self):

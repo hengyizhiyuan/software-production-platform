@@ -1212,6 +1212,10 @@ def test_native_semantic_feedback_uses_existing_bounded_refinement_and_exhausts_
     if expected=="COMPLETED":
         assert result["report"]["findings"][0]["recommendation"]=="先检查已有原始记录；未查明保留状态时保持 UNKNOWN。"
         assert result["native_self_review"]["report_digest"]==result["kernel_result"]["result_claim"]["output_vector"]["report_digest"]
+        before_review=next(f['events'][0] for f in model.requests[3].context_facts if f['fact_type']=='RECENT_SELF_REFINE')
+        assert before_review['tool_identity']=='analysis.review' and before_review['status']=='OPEN'
+        assert result['refinement_feedback'][0]['result']=='MODEL_SELF_REVIEW_RECOVERED_NOT_INDEPENDENT_ASSURANCE'
+        assert result['refinement_feedback'][0]['failure_family']=='ANALYSIS_SEMANTIC_REVIEW_REJECTED'
     else:assert result["report"] is None
 
 
@@ -1291,6 +1295,7 @@ def test_failed_report_edit_returns_source_identity_and_field_presence_without_p
     original=json.loads(json.dumps(tools.drafts[pending['draft_id']]))
     fail=invoke_analysis(tools,'analysis.revise',{'draft_id':pending['draft_id'],'edits':[{'op':'replace','path':'/findings/0/recommendation','value':'partial edit must not persist'}, {'op':'replace','path':'/findings/0/repository_citations','value':[]}]})
     assert fail.condition.value=='FAILED' and fail.output['draft_id']==pending['draft_id'] and tools.drafts[pending['draft_id']]==original
+    assert fail.output['repair_candidate']==original and fail.output['repair_candidate_trust']=='MODEL_PROPOSAL_NOT_OWNER_EVIDENCE'
     context=next(i for i in fail.output['issues'] if i['type']=='REPORT_EDIT_INPUT_FEEDBACK')
     assert context['target_present'] is False and context['operation']=='replace' and 'add' in context['admitted_operations']
 
@@ -1349,6 +1354,7 @@ def test_missing_report_field_retains_exact_candidate_location_for_bounded_edit(
     r['current_state']['citations']=[{'evidence_id':eid,'field':'/not_captured'}]
     tools=AnalysisTools(c,{})
     failed=invoke_analysis(tools,'analysis.submit',{'report':r})
+    assert failed.output['repair_candidate']==r and tools.drafts[failed.output['draft_id']]==r
     issue=next(i for i in failed.output['issues'] if 'ORIGINAL_FIELD_REFERENCE_NOT_CAPTURED' in i['reason'])
     assert issue['location']==['current_state','citations',0,'field'] and issue['rejected_value']=='/not_captured'
     fixed=invoke_analysis(tools,'analysis.revise',{'draft_id':failed.output['draft_id'],'edits':[{'op':'replace','path':'/current_state/citations/0/field','value':'/state'}]})

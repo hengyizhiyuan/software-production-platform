@@ -1200,6 +1200,8 @@ class AnalysisTools:
             if draft_id:
                 output["draft_id"] = draft_id
                 output["draft_read_tool"] = "evidence.read"
+                output["repair_candidate"] = public_report_candidate(candidate)
+                output["repair_candidate_trust"] = "MODEL_PROPOSAL_NOT_OWNER_EVIDENCE"
                 # Give exact same-candidate lineage feedback without inventing,
                 # normalizing, or automatically repairing finding identifiers.
                 findings = candidate.get("findings")
