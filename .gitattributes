@@ -8,3 +8,6 @@ docs/evidence/lifecycle/verification-logs/*.xml -whitespace
 docs/evidence/action-generalization/**/*.log -whitespace
 docs/evidence/action-generalization/**/*.xml -whitespace
 docs/evidence/action-generalization/**/*.sse -whitespace
+# Preserve the exact C3 module-recovery receipts, including failed diagnostics.
+docs/evidence/core-production-semantic-convergence-c3-20261009/formation-module-adaptation-20261012/*.json -text
+docs/evidence/core-production-semantic-convergence-c3-20261009/formation-module-adaptation-20261012/*.xml -text -whitespace

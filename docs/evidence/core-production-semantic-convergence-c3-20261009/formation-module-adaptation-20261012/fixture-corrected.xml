@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="14" time="5.558" timestamp="2026-10-12T12:00:03.050090+00:00" hostname="0a040b8f5419"><testcase classname="tests.test_c3_module_adaptation" name="test_current_generation_projects_existing_whole_component_invariant[UNRESOLVED-None]" time="0.253" /><testcase classname="tests.test_c3_module_adaptation" name="test_current_generation_projects_existing_whole_component_invariant[UNRESOLVED-full]" time="0.239" /><testcase classname="tests.test_c3_module_adaptation" name="test_current_generation_projects_existing_whole_component_invariant[RETAIN_CONTEXT-None]" time="0.226" /><testcase classname="tests.test_c3_module_adaptation" name="test_current_generation_projects_existing_whole_component_invariant[RETAIN_CONTEXT-full]" time="0.229" /><testcase classname="tests.test_c3_module_adaptation" name="test_historical_qualified_generation_is_not_silently_upgraded" time="0.009" /><testcase classname="tests.test_c3_module_adaptation" name="test_same_goal_allows_distinct_legal_component_compositions[split]" time="0.014"><failure message="jsonschema.exceptions.ValidationError: {'s': 0, 'c': 0, 'a': 0, 'z': 32, 'q': None, 'f': [1], 't': [0], 'u': [], 'r': 'Controlled current lifecycle component'} is not valid under any of the given schemas&#10;&#10;Failed validating 'anyOf' in schema['properties']['routes']['items']['allOf'][1]:&#10;    {'anyOf': [{'properties': {'s': {'enum': [0]}},&#10;                'anyOf': [{'properties': {'q': {'type': 'null'},&#10;                                          'a': {'enum': [0]},&#10;                                          'z': {'enum': [67]}}},&#10;                          {'properties': {'q': {'type': 'string',&#10;                                                'minLength': 1}}}]},&#10;               {'properties': {'s': {'enum': [1]}},&#10;                'anyOf': [{'properties': {'q': {'type': 'null'},&#10;                                          'a': {'enum': [0]},&#10;                                          'z': {'enum': [32]}}},&#10;                          {'properties': {'q': {'type': 'string',&#10;                                                'minLength': 1}}}]},&#10;               {'properties': {'s': {'enum': [2]}},&#10;                'anyOf': [{'properties': {'q': {'type': 'null'},&#10;                                          'a': {'enum': [0]},&#10;                                          'z': {'enum': [35]}}},&#10;                          {'properties': {'q': {'type': 'string',&#10;                                                'minLength': 1}}}]},&#10;               {'properties': {'s': {'enum': [3, 4]}},&#10;                'anyOf': [{'properties': {'q': {'type': 'null'},&#10;                                          'a': {'enum': [0]},&#10;                                          'z': {'enum': [50]}}},&#10;                          {'properties': {'q': {'type': 'string',&#10;                                                'minLength': 1}}}]},&#10;               {'properties': {'s': {'enum': [5]}},&#10;                'anyOf': [{'properties': {'q': {'type': 'null'},&#10;                                          'a': {'enum': [0]},&#10;                                          'z': {'enum': [25]}}},&#10;                          {'properties': {'q': {'type': 'string',&#10;                                                'minLength': 1}}}]}]}&#10;&#10;On instance['routes'][0]:&#10;    {'s': 0,&#10;     'c': 0,&#10;     'a': 0,&#10;     'z': 32,&#10;     'q': None,&#10;     'f': [1],&#10;     't': [0],&#10;     'u': [],&#10;     'r': 'Controlled current lifecycle component'}">alternative = 'split'
+
+    @pytest.mark.parametrize("alternative", ["split", "shared-full-basis"])
+    def test_same_goal_allows_distinct_legal_component_compositions(alternative):
+        revision, ir, inventory, plan = split_content()
+        if alternative == "shared-full-basis":
+            first, second = plan.routes[:2]
+            text = fulfillment_source_semantic_text(inventory["sources"][0])
+            whole = first.model_copy(update={"component_basis": first.component_basis.model_copy(update={
+                "source_span_start":0, "source_span_end":len(text), "source_component_quote":text,
+                "linked_fact_refs":(*first.component_basis.linked_fact_refs, *second.component_basis.linked_fact_refs)})})
+            plan = plan.model_copy(update={"routes":(whole, *plan.routes[2:])})
+        original = deepcopy(plan.model_dump(mode="json"))
+        bindings = validate_projection_candidate(plan, revision, ir, inventory, semantic_review=review(inventory, plan),
+            source_contract="v3")
+        assert all(b.state!="UNRESOLVED" for b in bindings)
+        assert any(b.state=="BOUND_PENDING_EVIDENCE" for b in bindings)
+        assert plan.model_dump(mode="json")==original
+        caps=fulfillment_capability_contracts();owner=owner_for(revision,ir,inventory)
+        wire,_=controlled_wire(inventory,plan,owner_preconditions=owner)
+&gt;       Draft202012Validator(_formation_output_schema(inventory,caps,owner_preconditions=owner)).validate(wire)
+
+tests/test_c3_module_adaptation.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Draft202012Validator(schema={'$defs': {'_FulfillmentCompactRoute': {'additionalProperties': False, 'description': 'Eph... 'v': {'const': 1, 'title': 'V', 'type': 'integer'}}, 'required': ['v', 'h', 'd', 'routes'], ...}, format_checker=None)
+args = ({'v': 1, 'h': 'd09a956de8b34b68174a13f4d29844c6dd1465d549716219f8b0831992279856', 'd': '415613d457e54b6a2507ff6a27faa... 'c': 0, 'a': 0, 'z': 35, ...}, {'s': 3, 'c': 6, 'a': 0, 'z': 50, ...}, {'s': 4, 'c': 6, 'a': 0, 'z': 50, ...}, ...]},)
+kwargs = {}
+
+    def validate(self, *args, **kwargs):
+        for error in self.iter_errors(*args, **kwargs):
+&gt;           raise error
+E           jsonschema.exceptions.ValidationError: {'s': 0, 'c': 0, 'a': 0, 'z': 32, 'q': None, 'f': [1], 't': [0], 'u': [], 'r': 'Controlled current lifecycle component'} is not valid under any of the given schemas
+E           
+E           Failed validating 'anyOf' in schema['properties']['routes']['items']['allOf'][1]:
+E               {'anyOf': [{'properties': {'s': {'enum': [0]}},
+E                           'anyOf': [{'properties': {'q': {'type': 'null'},
+E                                                     'a': {'enum': [0]},
+E                                                     'z': {'enum': [67]}}},
+E                                     {'properties': {'q': {'type': 'string',
+E                                                           'minLength': 1}}}]},
+E                          {'properties': {'s': {'enum': [1]}},
+E                           'anyOf': [{'properties': {'q': {'type': 'null'},
+E                                                     'a': {'enum': [0]},
+E                                                     'z': {'enum': [32]}}},
+E                                     {'properties': {'q': {'type': 'string',
+E                                                           'minLength': 1}}}]},
+E                          {'properties': {'s': {'enum': [2]}},
+E                           'anyOf': [{'properties': {'q': {'type': 'null'},
+E                                                     'a': {'enum': [0]},
+E                                                     'z': {'enum': [35]}}},
+E                                     {'properties': {'q': {'type': 'string',
+E                                                           'minLength': 1}}}]},
+E                          {'properties': {'s': {'enum': [3, 4]}},
+E                           'anyOf': [{'properties': {'q': {'type': 'null'},
+E                                                     'a': {'enum': [0]},
+E                                                     'z': {'enum': [50]}}},
+E                                     {'properties': {'q': {'type': 'string',
+E                                                           'minLength': 1}}}]},
+E                          {'properties': {'s': {'enum': [5]}},
+E                           'anyOf': [{'properties': {'q': {'type': 'null'},
+E                                                     'a': {'enum': [0]},
+E                                                     'z': {'enum': [25]}}},
+E                                     {'properties': {'q': {'type': 'string',
+E                                                           'minLength': 1}}}]}]}
+E           
+E           On instance['routes'][0]:
+E               {'s': 0,
+E                'c': 0,
+E                'a': 0,
+E                'z': 32,
+E                'q': None,
+E                'f': [1],
+E                't': [0],
+E                'u': [],
+E                'r': 'Controlled current lifecycle component'}
+
+/opt/c3-test-deps/jsonschema/validators.py:451: ValidationError</failure></testcase><testcase classname="tests.test_c3_module_adaptation" name="test_same_goal_allows_distinct_legal_component_compositions[shared-full-basis]" time="0.018" /><testcase classname="tests.test_c3_module_adaptation" name="test_joint_coverage_is_not_a_semantic_or_evidence_verdict[False]" time="0.004" /><testcase classname="tests.test_c3_module_adaptation" name="test_joint_coverage_is_not_a_semantic_or_evidence_verdict[True]" time="0.004" /><testcase classname="tests.test_c3_module_adaptation" name="test_missing_or_unlocated_wire_does_not_fabricate_absent_obligations" time="0.004" /><testcase classname="tests.test_c3_module_adaptation" name="test_joint_component_conflict_is_observed_without_selecting_a_route_to_delete" time="0.004" /><testcase classname="tests.test_c3_module_adaptation" name="test_true_missing_component_still_fails_and_missing_current_evidence_is_unverifiable" time="0.010" /><testcase classname="tests.test_c3_module_adaptation" name="test_bound_feedback_joint_observation_tamper_stops_before_another_call" time="0.283" /><testcase classname="tests.test_c3_module_adaptation" name="test_existing_feedback_recovers_without_extra_calls_and_replay_preserves_identity" time="0.368" /></testsuite></testsuites>

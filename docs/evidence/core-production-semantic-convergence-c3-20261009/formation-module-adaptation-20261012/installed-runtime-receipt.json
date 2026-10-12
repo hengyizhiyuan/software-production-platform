@@ -1,0 +1,36 @@
+{
+  "schema": "c3-module-adaptation-installed-validation-v1",
+  "operations": [
+    {
+      "operation": "installed-attestation",
+      "started_at_utc": "2026-10-12T12:19:02.703419+00:00",
+      "elapsed_seconds": 2.233002473018132,
+      "exit_code": 0,
+      "container": "14936efa5202351bd55abd9764f10248ef4510a8e2f6071fcada1c0b8b3bfc87",
+      "actual_image": "sha256:24d9f809ad3cd6b98d68948020fccd3997c09ee947f9cb5acd57e48abb44e5b1",
+      "runtime_source_overlay": false,
+      "external_test_overlay": false,
+      "live_model_calls": 0,
+      "production_database_access": false
+    },
+    {
+      "operation": "installed-module",
+      "started_at_utc": "2026-10-12T12:19:05.031808+00:00",
+      "elapsed_seconds": 7.673641394008882,
+      "exit_code": 0,
+      "container": "03713e095ffe915d531a10729797a363fdf6655532497f341e842916ec8ed998",
+      "actual_image": "sha256:24d9f809ad3cd6b98d68948020fccd3997c09ee947f9cb5acd57e48abb44e5b1",
+      "runtime_source_overlay": false,
+      "external_test_overlay": false,
+      "live_model_calls": 0,
+      "production_database_access": false,
+      "counts": {
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 15
+      }
+    }
+  ]
+}

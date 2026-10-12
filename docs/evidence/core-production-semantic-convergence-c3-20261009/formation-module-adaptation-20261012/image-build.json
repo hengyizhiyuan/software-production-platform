@@ -1,0 +1,28 @@
+{
+  "schema": "c3-module-adaptation-image-build-v1",
+  "started_at_utc": "2026-10-12T12:16:45.203921+00:00",
+  "elapsed_seconds": 52.54472278698813,
+  "exit_code": 0,
+  "tag": "watt-c3-module-adaptation:f52d3996-20261012",
+  "revision": "f52d39965826ba2e9ddcdba44c85e79bf5c43fc0",
+  "tree": "c8ad5b06283905e218786ef785e940a82edd1dbf",
+  "dependency_base_id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+  "owner_source_image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "watt_archive_sha256": "346c8eea406b49250fa979650d11409c1691ba034f2cc8b2e4a0567e21030cd8",
+  "build_input_manifest_sha256": "b183b68ca69a2f0797d73b69184463f8a9a45b298266b6de9cb2ef76fcc0b923",
+  "network": "none",
+  "source_reinstalled": true,
+  "production_resources_modified": false,
+  "actual_image_id": "sha256:24d9f809ad3cd6b98d68948020fccd3997c09ee947f9cb5acd57e48abb44e5b1",
+  "repo_digests": [],
+  "labels": {
+    "org.opencontainers.image.revision": "f52d39965826ba2e9ddcdba44c85e79bf5c43fc0",
+    "watt.c3.base-image-id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+    "watt.c3.ecf-revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "watt.c3.ecf-tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "watt.c3.ecf-unsupported-revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+    "watt.c3.guardian-revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+    "watt.c3.guardian-tree": "92ac992c03bd84923a569bbe9f314c0786457040",
+    "watt.c3.source-tree": "c8ad5b06283905e218786ef785e940a82edd1dbf"
+  }
+}

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="14" time="5.375" timestamp="2026-10-12T11:59:13.597960+00:00" hostname="ff4c506e7f68"><testcase classname="tests.test_c3_module_adaptation" name="test_current_generation_projects_existing_whole_component_invariant[UNRESOLVED-None]" time="0.254" /><testcase classname="tests.test_c3_module_adaptation" name="test_current_generation_projects_existing_whole_component_invariant[UNRESOLVED-full]" time="0.250" /><testcase classname="tests.test_c3_module_adaptation" name="test_current_generation_projects_existing_whole_component_invariant[RETAIN_CONTEXT-None]" time="0.233" /><testcase classname="tests.test_c3_module_adaptation" name="test_current_generation_projects_existing_whole_component_invariant[RETAIN_CONTEXT-full]" time="0.244" /><testcase classname="tests.test_c3_module_adaptation" name="test_historical_qualified_generation_is_not_silently_upgraded" time="0.008" /><testcase classname="tests.test_c3_module_adaptation" name="test_same_goal_allows_distinct_legal_component_compositions[split]" time="0.007"><failure message="assert False&#10; +  where False = all(&lt;generator object test_same_goal_allows_distinct_legal_component_compositions.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f3c998c58a0&gt;)">alternative = 'split'
+
+    @pytest.mark.parametrize("alternative", ["split", "shared-full-basis"])
+    def test_same_goal_allows_distinct_legal_component_compositions(alternative):
+        revision, ir, inventory, plan = split_content()
+        if alternative == "shared-full-basis":
+            first, second = plan.routes[:2]
+            text = fulfillment_source_semantic_text(inventory["sources"][0])
+            whole = first.model_copy(update={"component_basis": first.component_basis.model_copy(update={
+                "source_span_start":0, "source_span_end":len(text), "source_component_quote":text,
+                "linked_fact_refs":(*first.component_basis.linked_fact_refs, *second.component_basis.linked_fact_refs)})})
+            plan = plan.model_copy(update={"routes":(whole, *plan.routes[2:])})
+        original = deepcopy(plan.model_dump(mode="json"))
+        bindings = validate_projection_candidate(plan, revision, ir, inventory, semantic_review=review(inventory, plan),
+            source_contract="v3")
+&gt;       assert all(b.state=="BOUND_PENDING_EVIDENCE" for b in bindings)
+E       assert False
+E        +  where False = all(&lt;generator object test_same_goal_allows_distinct_legal_component_compositions.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f3c998c58a0&gt;)
+
+tests/test_c3_module_adaptation.py:77: AssertionError</failure></testcase><testcase classname="tests.test_c3_module_adaptation" name="test_same_goal_allows_distinct_legal_component_compositions[shared-full-basis]" time="0.005"><failure message="assert False&#10; +  where False = all(&lt;generator object test_same_goal_allows_distinct_legal_component_compositions.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f3c9969d970&gt;)">alternative = 'shared-full-basis'
+
+    @pytest.mark.parametrize("alternative", ["split", "shared-full-basis"])
+    def test_same_goal_allows_distinct_legal_component_compositions(alternative):
+        revision, ir, inventory, plan = split_content()
+        if alternative == "shared-full-basis":
+            first, second = plan.routes[:2]
+            text = fulfillment_source_semantic_text(inventory["sources"][0])
+            whole = first.model_copy(update={"component_basis": first.component_basis.model_copy(update={
+                "source_span_start":0, "source_span_end":len(text), "source_component_quote":text,
+                "linked_fact_refs":(*first.component_basis.linked_fact_refs, *second.component_basis.linked_fact_refs)})})
+            plan = plan.model_copy(update={"routes":(whole, *plan.routes[2:])})
+        original = deepcopy(plan.model_dump(mode="json"))
+        bindings = validate_projection_candidate(plan, revision, ir, inventory, semantic_review=review(inventory, plan),
+            source_contract="v3")
+&gt;       assert all(b.state=="BOUND_PENDING_EVIDENCE" for b in bindings)
+E       assert False
+E        +  where False = all(&lt;generator object test_same_goal_allows_distinct_legal_component_compositions.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f3c9969d970&gt;)
+
+tests/test_c3_module_adaptation.py:77: AssertionError</failure></testcase><testcase classname="tests.test_c3_module_adaptation" name="test_joint_coverage_is_not_a_semantic_or_evidence_verdict[False]" time="0.002" /><testcase classname="tests.test_c3_module_adaptation" name="test_joint_coverage_is_not_a_semantic_or_evidence_verdict[True]" time="0.002" /><testcase classname="tests.test_c3_module_adaptation" name="test_missing_or_unlocated_wire_does_not_fabricate_absent_obligations" time="0.002" /><testcase classname="tests.test_c3_module_adaptation" name="test_joint_component_conflict_is_observed_without_selecting_a_route_to_delete" time="0.002" /><testcase classname="tests.test_c3_module_adaptation" name="test_true_missing_component_still_fails_and_missing_current_evidence_is_unverifiable" time="0.008" /><testcase classname="tests.test_c3_module_adaptation" name="test_bound_feedback_joint_observation_tamper_stops_before_another_call" time="0.385"><failure message="AssertionError: assert 'OBLIGATION_F...ssertionError' == 'OBLIGATION_F...DENTITY_DRIFT'&#10;  &#10;  - OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT&#10;  + OBLIGATION_FORMATION_TRANSPORT_AssertionError">def test_bound_feedback_joint_observation_tamper_stops_before_another_call():
+        from tests.test_c3_fulfillment_repair_context import repair_case, Checkpoint
+        provider,calls,wires,run=repair_case(interrupt=True,predecode_coverage_failure=True)
+        with pytest.raises(Checkpoint):run()
+        provider._fulfillment_receipts=list(provider._fulfillment_receipts)
+        row=next(r for r in provider._fulfillment_receipts if r['stage']=='CANDIDATE_VALIDATED')
+        feedback=json.loads(row['validation_feedback'])
+        observations=feedback['owner_repair_context']['source_component_observations']
+        assert observations['inventory_fingerprint']==feedback['inventory_fingerprint']
+        from hashlib import sha256
+        assert feedback['repair_feedback_binding']['wire_output_fingerprint']==sha256(wires[0].encode()).hexdigest()
+        observations['sources'][0]['coverage_status']='COMPLETE'
+        row['validation_feedback']=json.dumps(feedback,separators=(',',':'))
+        result=run()
+&gt;       assert result[0].formation_receipt['terminal_reason']=='OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
+E       AssertionError: assert 'OBLIGATION_F...ssertionError' == 'OBLIGATION_F...DENTITY_DRIFT'
+E         
+E         - OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT
+E         + OBLIGATION_FORMATION_TRANSPORT_AssertionError
+
+tests/test_c3_module_adaptation.py:145: AssertionError</failure></testcase><testcase classname="tests.test_c3_module_adaptation" name="test_existing_feedback_recovers_without_extra_calls_and_replay_preserves_identity" time="0.188"><failure message="assert False&#10; +  where False = all(&lt;generator object test_existing_feedback_recovers_without_extra_calls_and_replay_preserves_identity.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f3c998c76b0&gt;)">def test_existing_feedback_recovers_without_extra_calls_and_replay_preserves_identity():
+        from tests.test_c3_fulfillment_repair_context import repair_case
+        provider,calls,wires,run=repair_case(predecode_coverage_failure=True)
+        result=run()
+&gt;       assert all(b.state!='UNRESOLVED' for b in result)
+E       assert False
+E        +  where False = all(&lt;generator object test_existing_feedback_recovers_without_extra_calls_and_replay_preserves_identity.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f3c998c76b0&gt;)
+
+tests/test_c3_module_adaptation.py:153: AssertionError</failure></testcase></testsuite></testsuites>

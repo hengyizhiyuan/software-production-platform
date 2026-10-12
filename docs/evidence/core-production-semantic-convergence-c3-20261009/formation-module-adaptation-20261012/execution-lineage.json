@@ -1,0 +1,56 @@
+{
+  "schema": "c3-module-adaptation-effective-inputs-v1",
+  "development_files": [
+    {
+      "file": "src/spg/application/governed_obligations.py",
+      "development_raw_sha256": "eac452fbd575d7fcf18b2c91a28a341f45093a67d59781759c3286e7dfc10626",
+      "development_lf_sha256": "8aa8ce53c7fcdf4695a14e9ea3323cf11c6036ebc582b2837b6d2c4996001232",
+      "git_blob_sha256": "8aa8ce53c7fcdf4695a14e9ea3323cf11c6036ebc582b2837b6d2c4996001232",
+      "matches_git_after_lf_normalization": true
+    },
+    {
+      "file": "src/spg/providers/fulfillment_candidate.py",
+      "development_raw_sha256": "1e57bc6544308ee2c61d1710b4f7a7e140f609919c601498fa7eaab854fe1ff1",
+      "development_lf_sha256": "36122875f1b2bcda1406d2b016f742fca85c785fb0e7510b507b41bb99bef5c2",
+      "git_blob_sha256": "36122875f1b2bcda1406d2b016f742fca85c785fb0e7510b507b41bb99bef5c2",
+      "matches_git_after_lf_normalization": true
+    },
+    {
+      "file": "tests/test_c3_module_adaptation.py",
+      "development_raw_sha256": "634b12bcae47c9036bf7c0c666703fc196090eba304ee038f79e998dc6e050f1",
+      "development_lf_sha256": "634b12bcae47c9036bf7c0c666703fc196090eba304ee038f79e998dc6e050f1",
+      "git_blob_sha256": "634b12bcae47c9036bf7c0c666703fc196090eba304ee038f79e998dc6e050f1",
+      "matches_git_after_lf_normalization": true
+    },
+    {
+      "file": "tests/test_c3_generation_owner_domains.py",
+      "development_raw_sha256": "b095d2642baccc33c0b20d79c7e4e8f51cc812cecf4a50990d13938f5b1067f1",
+      "development_lf_sha256": "20e2bd988ea80ff5739556a95e91cbf3720decee359e8a212cb332652111e88a",
+      "git_blob_sha256": "20e2bd988ea80ff5739556a95e91cbf3720decee359e8a212cb332652111e88a",
+      "matches_git_after_lf_normalization": true
+    },
+    {
+      "file": "tests/integration/test_c3_fulfillment_receipts.py",
+      "development_raw_sha256": "45087b73a2dc9cb1934f42a1ee35005b1f431775fdb26c854b084455eb4a2d32",
+      "development_lf_sha256": "1580a041734aae73563f40722ec566e26111d480a73bef1ba53c817e4e0cc03d",
+      "git_blob_sha256": "1580a041734aae73563f40722ec566e26111d480a73bef1ba53c817e4e0cc03d",
+      "matches_git_after_lf_normalization": true
+    }
+  ],
+  "initial_archive_sha256": "fadc423b36c0264f50ee3401eff726b798a93fe1ad7da21d986d27b7edcc1dce",
+  "final_git_archive_sha256": "346c8eea406b49250fa979650d11409c1691ba034f2cc8b2e4a0567e21030cd8",
+  "immutable_failed_receipts_retained": true,
+  "test_only_corrections_after_initial_archive": [
+    "tests/test_c3_module_adaptation.py",
+    "tests/test_c3_generation_owner_domains.py",
+    "tests/integration/test_c3_fulfillment_receipts.py"
+  ],
+  "application_files_unchanged_between_development_runs": true,
+  "source_commit": "f52d39965826ba2e9ddcdba44c85e79bf5c43fc0",
+  "installed_attestation_status": "PASS",
+  "installed_watt_identity": {
+    "revision": "f52d39965826ba2e9ddcdba44c85e79bf5c43fc0",
+    "tree": "c8ad5b06283905e218786ef785e940a82edd1dbf"
+  },
+  "immutable_receipt_explanation": "Initial, fixture-corrected, focused and baseline failures retained. Early archive identifies preparation input; three explicit test-only updates identify effective executed tests. Final baked archive is exact Git source; no runtime overlay."
+}

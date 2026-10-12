@@ -1,0 +1,142 @@
+{
+  "schema": "c3-module-adaptation-retention-v1",
+  "observed_at_utc": "2026-10-12T12:27:53.867467+00:00",
+  "containers": [
+    {
+      "name": "watt-c3-module-adaptation-installed-module-20261012",
+      "container": "03713e095ffe915d531a10729797a363fdf6655532497f341e842916ec8ed998",
+      "image": "sha256:24d9f809ad3cd6b98d68948020fccd3997c09ee947f9cb5acd57e48abb44e5b1",
+      "status": "exited",
+      "network": "none",
+      "external_port_bindings": false
+    },
+    {
+      "name": "watt-c3-module-adaptation-installed-attestation-20261012",
+      "container": "14936efa5202351bd55abd9764f10248ef4510a8e2f6071fcada1c0b8b3bfc87",
+      "image": "sha256:24d9f809ad3cd6b98d68948020fccd3997c09ee947f9cb5acd57e48abb44e5b1",
+      "status": "exited",
+      "network": "none",
+      "external_port_bindings": false
+    },
+    {
+      "name": "watt-c3-module-adaptation-owner-inputs-20261012",
+      "container": "6a853277cadbe17e6150cf8760262c2b4fa3417191f0dd659de8a7446a6b8b7c",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "status": "created",
+      "network": "none",
+      "external_port_bindings": false
+    },
+    {
+      "name": "watt-c3-module-adaptation-capacity-and-partial-20261012",
+      "container": "95d38f335a2785c3170cc4dbd90823ad4f0265f1c9429e99722ee54db148be4a",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "status": "exited",
+      "network": "none",
+      "external_port_bindings": false
+    },
+    {
+      "name": "watt-c3-module-adaptation-comparison-20261012",
+      "container": "95743d41f2761e9db0a6fb4b33c8b742e815a3e4537da7282f6c46b3720bb537",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "status": "exited",
+      "network": "none",
+      "external_port_bindings": false
+    },
+    {
+      "name": "watt-c3-module-adaptation-pg-tests-20261012",
+      "container": "305bd20830608c29021913794c9c27118caa4a310a6ed42cb9f8983b77f8d71a",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "status": "exited",
+      "network": "container:d58527a7c335f983e2d3821ddfd86e74bfe3eb76e794ed3419baea5ec42c1f85",
+      "external_port_bindings": false
+    },
+    {
+      "name": "watt-c3-module-adaptation-pg-20261012",
+      "container": "d58527a7c335f983e2d3821ddfd86e74bfe3eb76e794ed3419baea5ec42c1f85",
+      "image": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+      "status": "exited",
+      "network": "none",
+      "external_port_bindings": false
+    },
+    {
+      "name": "watt-c3-module-adaptation-regression-assertion-20261012",
+      "container": "622178f389d729c1e2d74977c6bf2d5b2dc586c94f7b03fd8da069c1ff70ff9c",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "status": "exited",
+      "network": "none",
+      "external_port_bindings": false
+    },
+    {
+      "name": "watt-c3-module-adaptation-baseline-20261012",
+      "container": "e18993e14103e6cdd1381ae2048368b8a7e574cb0773674439195f5394ecf974",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "status": "exited",
+      "network": "none",
+      "external_port_bindings": false
+    },
+    {
+      "name": "watt-c3-module-adaptation-focused-20261012",
+      "container": "86fb3852072ad3be369bf3f069c5ea98469b63671ac53a50a8f22e6206a46174",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "status": "exited",
+      "network": "none",
+      "external_port_bindings": false
+    },
+    {
+      "name": "watt-c3-module-adaptation-fixture-corrected-20261012",
+      "container": "0a040b8f5419475192e6a769f3978f9206df271053b2808d526a1ad8856b9709",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "status": "exited",
+      "network": "none",
+      "external_port_bindings": false
+    },
+    {
+      "name": "watt-c3-module-adaptation-initial-20261012",
+      "container": "ff4c506e7f681b76f2ff94c91ed7fa45b0233453e9f9c67bc0cdf97d4a46ca33",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "status": "exited",
+      "network": "none",
+      "external_port_bindings": false
+    }
+  ],
+  "postgres_volume_retained": "watt-c3-module-adaptation-pg-20261012-data",
+  "qualification_image": "sha256:24d9f809ad3cd6b98d68948020fccd3997c09ee947f9cb5acd57e48abb44e5b1",
+  "full_recovery_root": "/data/watt/c3-semantic-convergence-20261009/formation-module-adaptation-20261012",
+  "private_credentials_files_mode_0600": true,
+  "restore_drill_performed": false,
+  "historical_holdout_or_production_resources_changed": false,
+  "scripts": [
+    {
+      "file": "build_image.py",
+      "sha256": "eee8281602d37eda5a7d057de926cb98ace78d8fc18165986a63a2b51db7882b"
+    },
+    {
+      "file": "check_effective_inputs.py",
+      "sha256": "274b61c5143af0df42303f88dc70379806cd87578b04169ce04bf6813a7e49c4"
+    },
+    {
+      "file": "compare_development.py",
+      "sha256": "3ec2d2052001c2e7463ad495e5520ba4bc501ea2c68c6dde990bb79b4d353815"
+    },
+    {
+      "file": "retain_resources.py",
+      "sha256": "5f67d02db6041f1aabac72481c9ae5c00b22bdd4dc2dc77fb93a3768b888f495"
+    },
+    {
+      "file": "run_development.py",
+      "sha256": "03c75a87c81d3f33d966c5fbc823768fe5526bf174887bedf6dbb854966f9e43"
+    },
+    {
+      "file": "run_development_v2.py",
+      "sha256": "02c1121b3d502ad54f19c277285ae54e06c39c279e04d8c1897485fe3e07e52f"
+    },
+    {
+      "file": "run_postgresql.py",
+      "sha256": "a9afd56ad4b0d70dab5d9e71e94eb63d952c731fbc634bb472665c44e78f2aa8"
+    },
+    {
+      "file": "verify_installed.py",
+      "sha256": "d56c9c31f9f17b1b138900153620d2d1a47fe26a41444effb2e6cb6ab0eb5e38"
+    }
+  ]
+}

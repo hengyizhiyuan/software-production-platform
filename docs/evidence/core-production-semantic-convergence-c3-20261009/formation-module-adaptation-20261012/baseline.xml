@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="3.151" timestamp="2026-10-12T12:02:58.103506+00:00" hostname="e18993e14103"><testcase classname="tests.test_c3_generation_owner_domains" name="test_v3_final_consumer_revalidates_actual_formation_and_review_lineage[review-output]" time="0.201"><failure message="AssertionError: Regex pattern did not match.&#10;  Expected regex: 'IDENTITY_DRIFT|SEMANTIC_COMPONENT_MISMATCH'&#10;  Actual message: 'OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT'">tamper = 'review-output'
+
+    @pytest.mark.parametrize("tamper", ["wire", "inventory", "attempt", "review-output", "review-row", "receipt-removal", "owner-policy", "review-pending-capabilities", "review-observed-capabilities", "review-validated-capabilities"])
+    def test_v3_final_consumer_revalidates_actual_formation_and_review_lineage(tamper):
+        from tests.test_c3_fulfillment_components import current_lifecycle_candidate
+        from spg.application.governed_obligations import fulfillment_inventory, validate_fulfillment_projection
+        revision, ir, _, plan = current_lifecycle_candidate()
+        ir.current_production = tuple(g.model_copy(update={"acceptance_required": False}) for g in ir.current_production)
+        inv = fulfillment_inventory(revision, ir)
+        plan = plan.model_copy(update={"inventory_fingerprint": inv["inventory_fingerprint"]})
+        bindings = _controlled_v3_binding_receipt(revision, ir, inv, plan)
+        validate_fulfillment_projection(bindings, revision, ir, exact_target_paths=inv["exact_target_paths"])
+        receipt = deepcopy(bindings[0].formation_receipt)
+        rows = receipt["candidate_attempts"]
+        if tamper == "wire": next(r for r in rows if r["stage"] == "MODEL_RESPONSE_OBSERVED")["candidate_output"] += " "
+        if tamper == "inventory": rows[0]["inventory_fingerprint"] = "0" * 64
+        if tamper == "attempt": next(r for r in rows if r["stage"] == "SEMANTIC_REVIEW_PENDING")["attempt"] = 2
+        if tamper == "review-output": next(r for r in rows if r["stage"] == "SEMANTIC_REVIEW_OBSERVED")["review_output"] += " "
+        if tamper == "review-row": next(r for r in rows if r["stage"] == "SEMANTIC_REVIEW_VALIDATED")["semantic_review"]["component_results"][0]["nonredundant"] = False
+        if tamper == "receipt-removal": receipt["candidate_attempts"] = []
+        if tamper == "owner-policy": next(r for r in rows if r["stage"] == "MODEL_REQUEST_PENDING")["owner_source_preconditions"]["typed_prerequisite_contract"] = "existing-owner-typed-prerequisites-v8"
+        if tamper.startswith("review-") and tamper.endswith("-capabilities"):
+            stage = {"review-pending-capabilities": "SEMANTIC_REVIEW_PENDING", "review-observed-capabilities": "SEMANTIC_REVIEW_OBSERVED", "review-validated-capabilities": "SEMANTIC_REVIEW_VALIDATED"}[tamper]
+            next(r for r in rows if r["stage"] == stage)["capabilities_fingerprint"] = "0" * 64
+        altered = (bindings[0].model_copy(update={"formation_receipt": receipt}), *bindings[1:])
+&gt;       with pytest.raises(ValueError, match="IDENTITY_DRIFT|SEMANTIC_COMPONENT_MISMATCH"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'IDENTITY_DRIFT|SEMANTIC_COMPONENT_MISMATCH'
+E         Actual message: 'OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT'
+
+tests/test_c3_generation_owner_domains.py:919: AssertionError</failure></testcase></testsuite></testsuites>

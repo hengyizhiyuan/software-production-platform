@@ -1,0 +1,24 @@
+{
+  "schema": "c3-module-adaptation-development-run-v1",
+  "started_at_utc": "2026-10-12T12:00:00.981480+00:00",
+  "elapsed_seconds": 8.572477307054214,
+  "nodes": [
+    "tests/test_c3_module_adaptation.py"
+  ],
+  "counts": {
+    "tests": 14,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 13
+  },
+  "exit_code": 1,
+  "actual_base_image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "container": "0a040b8f5419475192e6a769f3978f9206df271053b2808d526a1ad8856b9709",
+  "development_source_overlay": true,
+  "source_snapshot_sha256": "fadc423b36c0264f50ee3401eff726b798a93fe1ad7da21d986d27b7edcc1dce",
+  "new_application_image_qualification": false,
+  "holdout_inputs_used": false,
+  "live_model_calls": 0,
+  "business_database_access": false
+}

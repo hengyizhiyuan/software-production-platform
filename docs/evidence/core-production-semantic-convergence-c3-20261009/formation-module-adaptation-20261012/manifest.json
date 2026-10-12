@@ -1,0 +1,133 @@
+{
+  "schema": "c3-module-adaptation-public-evidence-manifest-v1",
+  "created_at_utc": "2026-10-12T12:29:45.915637+00:00",
+  "source_commit": "f52d39965826ba2e9ddcdba44c85e79bf5c43fc0",
+  "image": "sha256:24d9f809ad3cd6b98d68948020fccd3997c09ee947f9cb5acd57e48abb44e5b1",
+  "files": [
+    {
+      "file": "analysis-and-design.md",
+      "bytes": 5880,
+      "sha256": "5ecbc63419f977f4c6ab59029f759ea27bd9972d9d4d697d5261f1b961f37c08"
+    },
+    {
+      "file": "baseline-receipt.json",
+      "bytes": 888,
+      "sha256": "d0abf92720111e41114ebd399c2e823362238171657b000bfbbb83979b4f7c9c"
+    },
+    {
+      "file": "baseline.xml",
+      "bytes": 3620,
+      "sha256": "2c776a4943aa1d66b5e5a17d9eaa8b41b1b29b37d3111b3d34239f7abcd5f957"
+    },
+    {
+      "file": "capacity-and-partial-receipt.json",
+      "bytes": 1298,
+      "sha256": "57cd59f9e9894ecb5722cb9627d27ba992f93467f7624322e3b3c76be12c80f5"
+    },
+    {
+      "file": "capacity-and-partial.xml",
+      "bytes": 1126,
+      "sha256": "27481417551d41ae466cdbffcb0491ff2bc20628d7b29367dbf1cfa98646f8df"
+    },
+    {
+      "file": "execution-lineage.json",
+      "bytes": 3255,
+      "sha256": "6217969fbf6dbd69081bb89e9bf46066c4d23a6363234f1c9a3ae1ca9cd311ba"
+    },
+    {
+      "file": "fixture-corrected-receipt.json",
+      "bytes": 795,
+      "sha256": "d51fd0fc629739abc976bbdf583c8aea4b4ee9b98d1abef02f4ffe8ba0717c47"
+    },
+    {
+      "file": "fixture-corrected.xml",
+      "bytes": 10184,
+      "sha256": "786ff3f9479546a6e61f8912ed1ed5737335524c7d70aa3691a36779e27783b1"
+    },
+    {
+      "file": "focused-receipt.json",
+      "bytes": 1052,
+      "sha256": "16f5d9037c589ed95d11d47692ae896bbeede7ba747ad340ce1b21f0526cb8dd"
+    },
+    {
+      "file": "focused.xml",
+      "bytes": 41778,
+      "sha256": "02344027ac75f796066013561217e2c77d3facee72a2518237091660cce5beaa"
+    },
+    {
+      "file": "holdout-requalification-decision-package.md",
+      "bytes": 2662,
+      "sha256": "10a1410449faa42e32e3558ee1ec982e819f3a257caa617d1f0818e427ddce46"
+    },
+    {
+      "file": "image-build.json",
+      "bytes": 1591,
+      "sha256": "13b23125de08a99849f3b4759566bc45dcfbe0f89b96a9ba76d8bc52f9cea9b8"
+    },
+    {
+      "file": "initial-receipt.json",
+      "bytes": 795,
+      "sha256": "4deaf605e27c699f98421881a470918ba01e0e451cab214e90c05d282845f4f7"
+    },
+    {
+      "file": "initial.xml",
+      "bytes": 7985,
+      "sha256": "ba186f381f33105cac064009e559b70b804261d5e298c65858af950a64f11350"
+    },
+    {
+      "file": "installed-attestation.json",
+      "bytes": 490957,
+      "sha256": "68f8ae097092089f38e2523d174330df19cf5f7812f82e92e1c0dd728d7dcbb7"
+    },
+    {
+      "file": "installed-module.xml",
+      "bytes": 2535,
+      "sha256": "cd0982dcb8fd5e8f5b8aebb9bc272e006d4f0a10c31dc4e1d843a7e044655bab"
+    },
+    {
+      "file": "installed-runtime-receipt.json",
+      "bytes": 1245,
+      "sha256": "f878fcecbb17c47a41441bfe33d355439116454921fb1481a0b828c5e6b71c83"
+    },
+    {
+      "file": "non-holdout-development-comparison.json",
+      "bytes": 3958,
+      "sha256": "5c2a4a1ccb9566fa29ea2e23152902f5cad91a3ae556c8cf9f256d475ad15d13"
+    },
+    {
+      "file": "postgresql-receipt.json",
+      "bytes": 1189,
+      "sha256": "413cfdc6e55aa4fb4e9ec7594dea2ab3ef3fbddc23e5b4a55210ce10dc6a632e"
+    },
+    {
+      "file": "postgresql.xml",
+      "bytes": 19414,
+      "sha256": "0177400eab4e1879ce62a4ce809804e6be95d6ed916ccbbef074f2830b9ee89b"
+    },
+    {
+      "file": "regression-assertion-receipt.json",
+      "bytes": 887,
+      "sha256": "27eecf132092b0a0e037c5cffc9216e260c7c51af9ecdb213f1b5f3059326c03"
+    },
+    {
+      "file": "regression-assertion.xml",
+      "bytes": 417,
+      "sha256": "3caa739e8c1830da76932a8d2c227bdfad38278096d341ef05d52f1c9df74f3e"
+    },
+    {
+      "file": "report.md",
+      "bytes": 8280,
+      "sha256": "b9a2eff1308f1f3a85c8a1824fce79fc48715fb0962e045573120180c05e2e65"
+    },
+    {
+      "file": "resource-retention.json",
+      "bytes": 5850,
+      "sha256": "f414000301461fd2d90280d63673a99fb043827b09e0989c00abe772751f3c11"
+    }
+  ],
+  "allowlisted_public_files_only": true,
+  "raw_development_inputs_model_wires_holdout_oracle_and_credentials_excluded": true,
+  "new_live_model_calls": 0,
+  "holdout_requalification_run": false,
+  "privacy_check_limit": "Allowlisted structured receipts and controlled test failures. Key/pattern checks supplement review; not proof of arbitrary confidentiality."
+}
