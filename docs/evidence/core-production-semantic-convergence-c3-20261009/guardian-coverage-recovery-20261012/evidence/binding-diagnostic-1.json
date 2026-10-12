@@ -1,0 +1,505 @@
+{
+  "runtime_revision": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+  "request_id": "b705e6f6-d358-5ea0-9a7b-2b337c5b49fa",
+  "request_sha256": "78126bf0245ef6f390da6d2db04432612c5d43ba6bd2f8c734965e5ba360e78a",
+  "guardian_runtime_sha256": "8d24de8f891577340e2c35023f94df95176607fdca252eecaab944ff04172381",
+  "candidate_id": "4a4096c3-2846-5678-ab8c-37aed60a0c9c",
+  "candidate_fingerprint": "9446c018fcafc8512a56c00d46861feac90c440014e6dc72af373249825af823",
+  "candidate_verification_ids": [
+    "5d603bcf-4245-5c64-8333-179d1fc797d6",
+    "a0c9307e-f5fe-516a-95e8-fe17b27e985b"
+  ],
+  "request_verification_refs": [
+    "verification:5d603bcf-4245-5c64-8333-179d1fc797d6",
+    "verification:a0c9307e-f5fe-516a-95e8-fe17b27e985b"
+  ],
+  "resolved_verifications": [
+    {
+      "id": "5d603bcf-4245-5c64-8333-179d1fc797d6",
+      "result": "PASS",
+      "obligation": "PATH_SCOPE",
+      "revision": "43fa0621e0d0e06fd1b84c9b76e06b831a578d97",
+      "tree": "c9942900fd4ad60eff68f4133bbf57181390da1a"
+    },
+    {
+      "id": "a0c9307e-f5fe-516a-95e8-fe17b27e985b",
+      "result": "PASS",
+      "obligation": "GIT_DIFF_CHECK",
+      "revision": "43fa0621e0d0e06fd1b84c9b76e06b831a578d97",
+      "tree": "c9942900fd4ad60eff68f4133bbf57181390da1a"
+    }
+  ],
+  "native_capabilities": [
+    "file.read",
+    "file.write",
+    "process.run",
+    "git.status",
+    "git.diff",
+    "test.run",
+    "build.run",
+    "dependency.sync",
+    "preview.inspect"
+  ],
+  "continuous_bindings": [
+    {
+      "source_ref": "semantic-fact:9f0b4f54-82d6-5a37-ae59-27838cf11cd2",
+      "source_kind": "FACT",
+      "fact_id": "9f0b4f54-82d6-5a37-ae59-27838cf11cd2",
+      "component": "deploy",
+      "component_basis_sha256": "9cbbf7fb5b3b10d58b90d8c2d1ae9f523394b0b5a7697f5158441fe47dfbc02f",
+      "original_source_resolved": true,
+      "source_relation": "SCOPE",
+      "source_authority": "HUMAN_EXPLICIT",
+      "source_epistemic_status": "CONFIRMED",
+      "qualifier_keys": [],
+      "negated_value": null,
+      "negated_type": "NoneType",
+      "calibrated_component_verdict": true,
+      "owner": "DELIVERY_GATE",
+      "evidence_method": "EXACT_PERMISSION_GATE",
+      "gate_ref": "cloud-delivery:human-authorization-required",
+      "source_records": [
+        "9087613a-b597-4f13-9b22-017044f53b87"
+      ],
+      "source_quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "binding_sha256": "3a40ec2d500912827c948057935a9041b98d1470746ec67dd8f6991e78fd15ac",
+      "continuous_binding_valid": false,
+      "failed_paths": [
+        {
+          "function": "_continuous_binding_permitted",
+          "line": 1126,
+          "result": "FALSE"
+        }
+      ],
+      "supporting_bindings": [
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "git-diff-scope",
+          "phase": "CURRENT_VERIFICATION",
+          "gate_ref": "code-verification:path-scope",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": null
+        },
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "deploy",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "gate_ref": "cloud-delivery:human-authorization-required",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": true
+        },
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "publish",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "gate_ref": "remote-delivery:human-authorization-required",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": true
+        }
+      ]
+    },
+    {
+      "source_ref": "semantic-fact:9f0b4f54-82d6-5a37-ae59-27838cf11cd2",
+      "source_kind": "FACT",
+      "fact_id": "9f0b4f54-82d6-5a37-ae59-27838cf11cd2",
+      "component": "publish",
+      "component_basis_sha256": "9cbbf7fb5b3b10d58b90d8c2d1ae9f523394b0b5a7697f5158441fe47dfbc02f",
+      "original_source_resolved": true,
+      "source_relation": "SCOPE",
+      "source_authority": "HUMAN_EXPLICIT",
+      "source_epistemic_status": "CONFIRMED",
+      "qualifier_keys": [],
+      "negated_value": null,
+      "negated_type": "NoneType",
+      "calibrated_component_verdict": true,
+      "owner": "DELIVERY_GATE",
+      "evidence_method": "EXACT_PERMISSION_GATE",
+      "gate_ref": "remote-delivery:human-authorization-required",
+      "source_records": [
+        "9087613a-b597-4f13-9b22-017044f53b87"
+      ],
+      "source_quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "binding_sha256": "f92ba3688a3be3b4922e9b24f62741f554b343c0130c96c5d6167304e112028b",
+      "continuous_binding_valid": false,
+      "failed_paths": [
+        {
+          "function": "_continuous_binding_permitted",
+          "line": 1126,
+          "result": "FALSE"
+        }
+      ],
+      "supporting_bindings": [
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "git-diff-scope",
+          "phase": "CURRENT_VERIFICATION",
+          "gate_ref": "code-verification:path-scope",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": null
+        },
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "deploy",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "gate_ref": "cloud-delivery:human-authorization-required",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": true
+        },
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "publish",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "gate_ref": "remote-delivery:human-authorization-required",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": true
+        }
+      ]
+    },
+    {
+      "source_ref": "ir-constraint:ct-only-index:c7",
+      "source_kind": "IR_CONSTRAINT",
+      "fact_id": null,
+      "component": "deploy",
+      "component_basis_sha256": "9cbbf7fb5b3b10d58b90d8c2d1ae9f523394b0b5a7697f5158441fe47dfbc02f",
+      "original_source_resolved": true,
+      "source_relation": null,
+      "source_authority": null,
+      "source_epistemic_status": null,
+      "qualifier_keys": [],
+      "negated_value": null,
+      "negated_type": "NoneType",
+      "calibrated_component_verdict": true,
+      "owner": "DELIVERY_GATE",
+      "evidence_method": "EXACT_PERMISSION_GATE",
+      "gate_ref": "cloud-delivery:human-authorization-required",
+      "source_records": [
+        "9087613a-b597-4f13-9b22-017044f53b87"
+      ],
+      "source_quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "binding_sha256": "c27ae14b302f92b10fd1054e7e9ddefbad60a6a0c693d73fed65f57e85372aaf",
+      "continuous_binding_valid": true,
+      "failed_paths": [],
+      "supporting_bindings": []
+    },
+    {
+      "source_ref": "ir-constraint:ct-only-index:c7",
+      "source_kind": "IR_CONSTRAINT",
+      "fact_id": null,
+      "component": "publish",
+      "component_basis_sha256": "9cbbf7fb5b3b10d58b90d8c2d1ae9f523394b0b5a7697f5158441fe47dfbc02f",
+      "original_source_resolved": true,
+      "source_relation": null,
+      "source_authority": null,
+      "source_epistemic_status": null,
+      "qualifier_keys": [],
+      "negated_value": null,
+      "negated_type": "NoneType",
+      "calibrated_component_verdict": true,
+      "owner": "DELIVERY_GATE",
+      "evidence_method": "EXACT_PERMISSION_GATE",
+      "gate_ref": "remote-delivery:human-authorization-required",
+      "source_records": [
+        "9087613a-b597-4f13-9b22-017044f53b87"
+      ],
+      "source_quote_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "binding_sha256": "0aba737e24b03a9d89fdc9779056ca5cfc7d85dd36064c53e3539e0c873f3cae",
+      "continuous_binding_valid": true,
+      "failed_paths": [],
+      "supporting_bindings": []
+    },
+    {
+      "source_ref": "work-constraint:dc748198-84bc-5cd5-a74b-ea0bb2ab57b3:0",
+      "source_kind": "WORK_CONSTRAINT",
+      "fact_id": null,
+      "component": "deploy",
+      "component_basis_sha256": "a4e97a7d1e31d11013f10c050db6fe67115276ba0e1cb8192c6814aee59419ed",
+      "original_source_resolved": true,
+      "source_relation": null,
+      "source_authority": null,
+      "source_epistemic_status": null,
+      "qualifier_keys": [],
+      "negated_value": null,
+      "negated_type": "NoneType",
+      "calibrated_component_verdict": true,
+      "owner": "DELIVERY_GATE",
+      "evidence_method": "EXACT_PERMISSION_GATE",
+      "gate_ref": "cloud-delivery:human-authorization-required",
+      "source_records": [
+        "9087613a-b597-4f13-9b22-017044f53b87"
+      ],
+      "source_quote_sha256": "a846b7057c122b5fe416eb7e00e48176a93fe586be210cd82a063d97236f9922",
+      "binding_sha256": "902195fa595ad8bef788525f555b865fe89ad793549fefb1ed44ee25e0e818f2",
+      "continuous_binding_valid": true,
+      "failed_paths": [],
+      "supporting_bindings": [
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "git-diff-scope",
+          "phase": "CURRENT_VERIFICATION",
+          "gate_ref": "code-verification:path-scope",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": null
+        },
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "deploy",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "gate_ref": "cloud-delivery:human-authorization-required",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": true
+        },
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "publish",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "gate_ref": "remote-delivery:human-authorization-required",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": true
+        }
+      ]
+    },
+    {
+      "source_ref": "work-constraint:dc748198-84bc-5cd5-a74b-ea0bb2ab57b3:0",
+      "source_kind": "WORK_CONSTRAINT",
+      "fact_id": null,
+      "component": "publish",
+      "component_basis_sha256": "a4e97a7d1e31d11013f10c050db6fe67115276ba0e1cb8192c6814aee59419ed",
+      "original_source_resolved": true,
+      "source_relation": null,
+      "source_authority": null,
+      "source_epistemic_status": null,
+      "qualifier_keys": [],
+      "negated_value": null,
+      "negated_type": "NoneType",
+      "calibrated_component_verdict": true,
+      "owner": "DELIVERY_GATE",
+      "evidence_method": "EXACT_PERMISSION_GATE",
+      "gate_ref": "remote-delivery:human-authorization-required",
+      "source_records": [
+        "9087613a-b597-4f13-9b22-017044f53b87"
+      ],
+      "source_quote_sha256": "a846b7057c122b5fe416eb7e00e48176a93fe586be210cd82a063d97236f9922",
+      "binding_sha256": "675b85ce585e7e892444a14fe993ec1c7a81f1be354ee023ba3b5c0b499a04af",
+      "continuous_binding_valid": true,
+      "failed_paths": [],
+      "supporting_bindings": [
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "git-diff-scope",
+          "phase": "CURRENT_VERIFICATION",
+          "gate_ref": "code-verification:path-scope",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": null
+        },
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "deploy",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "gate_ref": "cloud-delivery:human-authorization-required",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": true
+        },
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "publish",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "gate_ref": "remote-delivery:human-authorization-required",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": true
+        }
+      ]
+    },
+    {
+      "source_ref": "work-constraint:dc748198-84bc-5cd5-a74b-ea0bb2ab57b3:2",
+      "source_kind": "WORK_CONSTRAINT",
+      "fact_id": null,
+      "component": "deploy",
+      "component_basis_sha256": "5c751321ca2cb61ac822d8016c9f79c86c61a53c74d55468637bca6b0109c1dc",
+      "original_source_resolved": true,
+      "source_relation": null,
+      "source_authority": null,
+      "source_epistemic_status": null,
+      "qualifier_keys": [],
+      "negated_value": null,
+      "negated_type": "NoneType",
+      "calibrated_component_verdict": true,
+      "owner": "DELIVERY_GATE",
+      "evidence_method": "EXACT_PERMISSION_GATE",
+      "gate_ref": "cloud-delivery:human-authorization-required",
+      "source_records": [
+        "9087613a-b597-4f13-9b22-017044f53b87"
+      ],
+      "source_quote_sha256": "780ad6675d1cee0d2d3f86e5335b6a05adc9dd3f0538348935250a8d6302950e",
+      "binding_sha256": "40f688415476133e729e61a18da83827161b763d831f1567ca2d3a160dbbca93",
+      "continuous_binding_valid": true,
+      "failed_paths": [],
+      "supporting_bindings": [
+        {
+          "source_ref": "ir-clause:e41e711a-1571-5f6b-a524-14e0087b8dd1:pi-n1-index-page:c1",
+          "component": "retained-context",
+          "phase": "CONTEXT_RETENTION",
+          "gate_ref": "work-reality:retained",
+          "original_source_resolved": true,
+          "clause_polarity": "AFFIRMATIVE",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": null
+        },
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "git-diff-scope",
+          "phase": "CURRENT_VERIFICATION",
+          "gate_ref": "code-verification:path-scope",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": null
+        },
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "deploy",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "gate_ref": "cloud-delivery:human-authorization-required",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": true
+        },
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "publish",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "gate_ref": "remote-delivery:human-authorization-required",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": true
+        }
+      ]
+    },
+    {
+      "source_ref": "work-constraint:dc748198-84bc-5cd5-a74b-ea0bb2ab57b3:3",
+      "source_kind": "WORK_CONSTRAINT",
+      "fact_id": null,
+      "component": "publish",
+      "component_basis_sha256": "20225938d50f3d9bde7b255b254a39b2729fd279a73983436b608be6e4f0b927",
+      "original_source_resolved": true,
+      "source_relation": null,
+      "source_authority": null,
+      "source_epistemic_status": null,
+      "qualifier_keys": [],
+      "negated_value": null,
+      "negated_type": "NoneType",
+      "calibrated_component_verdict": true,
+      "owner": "DELIVERY_GATE",
+      "evidence_method": "EXACT_PERMISSION_GATE",
+      "gate_ref": "remote-delivery:human-authorization-required",
+      "source_records": [
+        "9087613a-b597-4f13-9b22-017044f53b87"
+      ],
+      "source_quote_sha256": "75decd71cd127e9006eafc189dfbc102c1fbfa19fbd5c6c7fd34d2c3c246f5d7",
+      "binding_sha256": "5e07e77eec0c01c04e6f8e8f83f4d57b22a28bb5cb73493500677e7c3a9ac240",
+      "continuous_binding_valid": true,
+      "failed_paths": [],
+      "supporting_bindings": [
+        {
+          "source_ref": "ir-clause:e41e711a-1571-5f6b-a524-14e0087b8dd1:pi-n1-index-page:c1",
+          "component": "retained-context",
+          "phase": "CONTEXT_RETENTION",
+          "gate_ref": "work-reality:retained",
+          "original_source_resolved": true,
+          "clause_polarity": "AFFIRMATIVE",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": null
+        },
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "git-diff-scope",
+          "phase": "CURRENT_VERIFICATION",
+          "gate_ref": "code-verification:path-scope",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": null
+        },
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "deploy",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "gate_ref": "cloud-delivery:human-authorization-required",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": true
+        },
+        {
+          "source_ref": "ir-constraint:ct-only-index:c7",
+          "component": "publish",
+          "phase": "CONTINUOUS_FROM_ADMISSION",
+          "gate_ref": "remote-delivery:human-authorization-required",
+          "original_source_resolved": true,
+          "clause_polarity": "NEGATED",
+          "clause_temporal_scope": "CURRENT",
+          "source_record_matches": true,
+          "actual_gate_proof": true
+        }
+      ]
+    }
+  ],
+  "production_lineage_by_verification": [
+    {
+      "id": "5d603bcf-4245-5c64-8333-179d1fc797d6",
+      "valid": false
+    },
+    {
+      "id": "a0c9307e-f5fe-516a-95e8-fe17b27e985b",
+      "valid": false
+    }
+  ],
+  "model_calls": 0,
+  "owner_mutations": 0,
+  "captured_at_utc": "2026-10-12T07:33:53.604922+00:00",
+  "schema": "c3-guardian-continuous-binding-root-cause-v1"
+}

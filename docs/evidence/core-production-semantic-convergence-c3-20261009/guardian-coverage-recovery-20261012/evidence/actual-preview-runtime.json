@@ -1,0 +1,18 @@
+{
+  "preview_id": "f61f401e-8541-45d2-b85f-5b9ae4e1d84b",
+  "environment_id": "6f7fb873-a921-46f3-86df-eefd78ed8b58",
+  "workspace_id": "81fb13a1-5836-4e8b-b5bc-363f159c8f83",
+  "candidate_revision": "43fa0621e0d0e06fd1b84c9b76e06b831a578d97",
+  "candidate_tree": "c9942900fd4ad60eff68f4133bbf57181390da1a",
+  "candidate_fingerprint": "9446c018fcafc8512a56c00d46861feac90c440014e6dc72af373249825af823",
+  "status": "READY",
+  "declared_image_reference": "git-tree:c9942900fd4ad60eff68f4133bbf57181390da1a",
+  "actual_services": [
+    {
+      "service_identity": "static-git:f61f401e-8541-45d2-b85f-5b9ae4e1d84b",
+      "actual_image": "UNKNOWN",
+      "reason": "DOCKER_IDENTITY_NOT_RESOLVED"
+    }
+  ],
+  "captured_at_utc": "2026-10-12T08:11:07.705202+00:00"
+}

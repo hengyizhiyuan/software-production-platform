@@ -1,0 +1,243 @@
+{
+  "schema": "c3-guardian-coverage-safe-evidence-publication-v1",
+  "captured_at_utc": "2026-10-12T08:17:51.739267+00:00",
+  "persistent_root": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012",
+  "private_directory": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/private",
+  "private_files_excluded": true,
+  "records": [
+    {
+      "archive_path": "evidence/actual-independent-guardian-owner.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/actual-independent-guardian-owner.json",
+      "sha256": "5dc915bc5c5de2981bd6b86f2c0995a05c416c1baef48744b2d3578e6d7261fa",
+      "bytes": 7666
+    },
+    {
+      "archive_path": "evidence/actual-preview-runtime.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/actual-preview-runtime.json",
+      "sha256": "adeb53a045bb173df296e58ae49aa2d15c2472db0036a8dee6eec509afb7cc3c",
+      "bytes": 761
+    },
+    {
+      "archive_path": "evidence/binding-diagnostic-1.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/binding-diagnostic-1.json",
+      "sha256": "b88184e657b7a1b213d02647f149819315c030476421fda0e950e91939f5f8ba",
+      "bytes": 19521
+    },
+    {
+      "archive_path": "evidence/binding-diagnostic-2.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/binding-diagnostic-2.json",
+      "sha256": "d2760e1eeef254a7aec1d00ce458b37c4b1e06ef58e910e7bcd28b1d67616d26",
+      "bytes": 20662
+    },
+    {
+      "archive_path": "evidence/build.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/build.json",
+      "sha256": "e4d659378aa4b72a1d11e5bc70ee7887c6be1e4231a0f735cf9a6f6d6a70c505",
+      "bytes": 1782
+    },
+    {
+      "archive_path": "evidence/counterfactual-source-consumer-1.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/counterfactual-source-consumer-1.json",
+      "sha256": "22d3d041ab4ab7d74bfa6d8cafdd31b5f1a8a958969e71c0d0ffcc5e07cd0acb",
+      "bytes": 21696
+    },
+    {
+      "archive_path": "evidence/counterfactual-source-consumer-2.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/counterfactual-source-consumer-2.json",
+      "sha256": "4047cc3ae107089e7290099086296bf18877b5a82ceab1fef22b03a38c407660",
+      "bytes": 23849
+    },
+    {
+      "archive_path": "evidence/counterfactual-source-consumer-3.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/counterfactual-source-consumer-3.json",
+      "sha256": "438913360eb39e3a41c7f4c18dda1662ca09b140037d47e94280a74cef44c5f4",
+      "bytes": 23608
+    },
+    {
+      "archive_path": "evidence/development-test-1.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/development-test-1.json",
+      "sha256": "6340fc2cd365a31fb4b86365a82a955c3ebe27d8bd9a136056a666240c34b0bc",
+      "bytes": 506
+    },
+    {
+      "archive_path": "evidence/development-test-1.log",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/development-test-1.log",
+      "sha256": "83b8058813c3c25577f9cd391c5490aee45db7c8003204ea9b60bb45f3112b83",
+      "bytes": 49
+    },
+    {
+      "archive_path": "evidence/development-test-2.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/development-test-2.json",
+      "sha256": "147caeec725c4a2c8a067e5b648c132024567b5dd08ca90b83ee8757f63fd886",
+      "bytes": 506
+    },
+    {
+      "archive_path": "evidence/development-test-2.log",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/development-test-2.log",
+      "sha256": "2ccdb735c4037919937294d2f8237c22d6b1cc696cdbb72bf3efd623074bac21",
+      "bytes": 3199
+    },
+    {
+      "archive_path": "evidence/development-test-3.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/development-test-3.json",
+      "sha256": "b86d0a9902f1c316069b9024cc9a39c27379a91f52ba988697f1bd566978fc9f",
+      "bytes": 505
+    },
+    {
+      "archive_path": "evidence/development-test-3.log",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/development-test-3.log",
+      "sha256": "0860aa696823117a9e1eea6fbe9c18a32cd798589dca38f7e5855c5116dce316",
+      "bytes": 160
+    },
+    {
+      "archive_path": "evidence/development-test-4.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/development-test-4.json",
+      "sha256": "5510f302789c8611e239d33d2514d88197ef5dd4429de6b2d8b62eecf8ea3787",
+      "bytes": 504
+    },
+    {
+      "archive_path": "evidence/development-test-4.log",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/development-test-4.log",
+      "sha256": "91dcb8076ccd39d3b7c026c953d5a5e2a9df3a2cebbe5c2c4aab69bb5eb45838",
+      "bytes": 160
+    },
+    {
+      "archive_path": "evidence/development-test-5.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/development-test-5.json",
+      "sha256": "3154cd4e1685998344f6cc439d7ef3524f9e04a1c8f92001afc2b84f13a3093f",
+      "bytes": 505
+    },
+    {
+      "archive_path": "evidence/development-test-5.log",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/development-test-5.log",
+      "sha256": "45e00f2cc162072e381af0198bc09a54daa73544fa9cd47b4ed25760a061c4aa",
+      "bytes": 80
+    },
+    {
+      "archive_path": "evidence/diagnostic-provenance.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/diagnostic-provenance.json",
+      "sha256": "6fb4bd24141fa7b203e24f2abed472975fccf9de695a64a14d8f1286a4f49e15",
+      "bytes": 2163
+    },
+    {
+      "archive_path": "evidence/final-runtime-inventory.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/final-runtime-inventory.json",
+      "sha256": "2ab2dbe205fcdc3ec82f9dc645ef443e37bd138d1535a1418acaac000f95ba73",
+      "bytes": 7146
+    },
+    {
+      "archive_path": "evidence/image-build.log",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/image-build.log",
+      "sha256": "4e81d34cb2d8b57ee541727b648ea909c56b7ecb26a64339af0045eb7dda6dbd",
+      "bytes": 911
+    },
+    {
+      "archive_path": "evidence/image2/actual-imports.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/image2/actual-imports.json",
+      "sha256": "e81301c801f16ea34cb813ba2feaff9bff266b58dd8ea4103f9014c0d30bb3d7",
+      "bytes": 491049
+    },
+    {
+      "archive_path": "evidence/image2/build.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/image2/build.json",
+      "sha256": "476e800c41ea2ddb9ea7bd4a6289b25a77837f8802ed9d6d687bb88dedf6a920",
+      "bytes": 1788
+    },
+    {
+      "archive_path": "evidence/image2/guardian.xml",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/image2/guardian.xml",
+      "sha256": "e1b884d5067cb783da5b473238d3a9240783863b2bf36ea9b4e790b51e17bdf5",
+      "bytes": 25782
+    },
+    {
+      "archive_path": "evidence/image2/image-build.log",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/image2/image-build.log",
+      "sha256": "0082d07ae88c7ae559ccc82f0914646ae042d51cc9b98df1bdc2170034ae2d16",
+      "bytes": 881
+    },
+    {
+      "archive_path": "evidence/image2/import-attestation.log",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/image2/import-attestation.log",
+      "sha256": "8bf3eda74f1fb6ad20ea18a14f029ab81a0f63c19b3f6e13176f80fe6e5564c8",
+      "bytes": 215
+    },
+    {
+      "archive_path": "evidence/image2/installed-guardian-regression.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/image2/installed-guardian-regression.json",
+      "sha256": "59e354a777a5ecefdd16a180e6dbcc892fe30a33997d68ed0a3ed7dbdbab3b05",
+      "bytes": 1023
+    },
+    {
+      "archive_path": "evidence/image2/installed-guardian.log",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/image2/installed-guardian.log",
+      "sha256": "0541518d5f11b26ef563b29bde9f7b737aea9eb8cff10a9a744256f8465e6f68",
+      "bytes": 968
+    },
+    {
+      "archive_path": "evidence/immutable-before.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/immutable-before.json",
+      "sha256": "73d6d32d86f474e636e1ac75cb278123ab7d944f166f0a7153429cc78faada5d",
+      "bytes": 3080
+    },
+    {
+      "archive_path": "evidence/import-attestation.log",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/import-attestation.log",
+      "sha256": "b4647448011f56a29ec6fc9ed798f6c066d6d01af3f4c59c2832e24c61b1d356",
+      "bytes": 96
+    },
+    {
+      "archive_path": "evidence/preview-before.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/preview-before.json",
+      "sha256": "4363dce678587ef650a45e6388dc74aa1c3b179e296c987e126715731b9ba87b",
+      "bytes": 851
+    },
+    {
+      "archive_path": "evidence/real-guardian-continuation.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/real-guardian-continuation.json",
+      "sha256": "20c5c7d59750cd8322eb2d402fd58a29135d6cf408482db91782179c9035ae3e",
+      "bytes": 18221
+    },
+    {
+      "archive_path": "evidence/retention-source-diagnostic-1.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/retention-source-diagnostic-1.json",
+      "sha256": "1fe07ae5e004d6c961639afd489b8232f84735b96088dfcddd149b7de667677b",
+      "bytes": 23849
+    },
+    {
+      "archive_path": "evidence/role-upgrade.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/role-upgrade.json",
+      "sha256": "aed43881e80b112d08ec10b045b0deb6868edb9c8f355bbe25b1a19bc1047a79",
+      "bytes": 1129682
+    },
+    {
+      "archive_path": "evidence/static-preview-actual-observation.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/static-preview-actual-observation.json",
+      "sha256": "49e5b0cf471f90e4444a1f1a8810cae39c5b866be39265fd998c389740e942d2",
+      "bytes": 1024
+    },
+    {
+      "archive_path": "evidence/successor-preview-requested.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/successor-preview-requested.json",
+      "sha256": "c9f683f8bd2249815a83470e1c0505560cf5889742cbac8682855f1760742409",
+      "bytes": 978
+    },
+    {
+      "archive_path": "owner-pg/receipt.json",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/owner-pg/evidence/receipt.json",
+      "sha256": "27bde3ea171c574f8313c456599ac51daa66074c67d33cad92dd2d6c0b11441a",
+      "bytes": 2192
+    },
+    {
+      "archive_path": "owner-pg/result.log",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/owner-pg/evidence/result.log",
+      "sha256": "eec90857381046edbc87165e6f8718e24839c00449e435ba3b1d07cf74b2539c",
+      "bytes": 477
+    },
+    {
+      "archive_path": "owner-pg/result.xml",
+      "remote_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/owner-pg/evidence/result.xml",
+      "sha256": "8d14e8395957921f7b4f23bf45c8fb9f409922d98bd9cf0ac8d4e58799b44ab3",
+      "bytes": 717
+    }
+  ]
+}

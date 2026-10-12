@@ -1,0 +1,18 @@
+{
+  "old_preview_id": "7216b9a4-15b4-4279-9a4a-6cdd941bdaf8",
+  "successor_preview_id": "f61f401e-8541-45d2-b85f-5b9ae4e1d84b",
+  "candidate_id": "4a4096c3-2846-5678-ab8c-37aed60a0c9c",
+  "candidate_fingerprint": "9446c018fcafc8512a56c00d46861feac90c440014e6dc72af373249825af823",
+  "stop_http": {
+    "http_status": 200,
+    "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/private/http-a839b752139f409a878a0f5e31faf338.json",
+    "sha256": "356af3b06b27da223ebf56d519d80bf5f94923b67e53abcd4744b0ac8add7f62",
+    "bytes": 2867
+  },
+  "request_http": {
+    "http_status": 200,
+    "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/private/http-f9b80df9476b4f44af8f07a1a9a87d14.json",
+    "sha256": "c51ad08df1e96dc5157b5fa35e37aeb6a45c31119c9e6026d19ea91b33dbb0e5",
+    "bytes": 1020
+  }
+}

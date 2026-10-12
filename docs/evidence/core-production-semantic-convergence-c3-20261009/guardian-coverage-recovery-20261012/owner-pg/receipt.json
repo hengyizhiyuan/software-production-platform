@@ -1,0 +1,55 @@
+{
+  "schema": "c3-semantic-owner-pg-regression-v1",
+  "started_at_utc": "2026-10-12T08:00:24.400401+00:00",
+  "ended_at_utc": "2026-10-12T08:00:48.298599+00:00",
+  "wall_seconds": 23.89821533591021,
+  "counts": {
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 2
+  },
+  "exit_code": 0,
+  "sources": {
+    "watt": {
+      "revision": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+      "tree": "daa0a41b756755c7f88f347ee18c68ecd99273b0"
+    },
+    "guardian": {
+      "revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+      "tree": "92ac992c03bd84923a569bbe9f314c0786457040"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "actual_container_id": "80f0159e212fe7b1911646ecdbb613473e1fbd329ed62862bfc1298780345fcf",
+  "actual_postgres_image_id": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+  "actual_postgres_container_id": "93fc82611064fcaaf581bba19422e240fa1dcf7ddf2fb4f14e90f14b97f7e590",
+  "database_name": "c1_contract_continuity",
+  "migration_head": "20261007_72",
+  "network_internal": true,
+  "nodes": [
+    "tests/integration/test_c1_contract_continuity.py::test_guardian_uses_sealed_proof_without_rejecting_historical_failure"
+  ],
+  "source_or_test_overlay": true,
+  "runtime_source_overlay": false,
+  "test_only_overlay": true,
+  "test_source_revision": "5e686c4cf665c0267761105ad92d30b18e7f1c90",
+  "test_input_sha256": "a547c7a78df608d77b517a6c1e2e3c959a87862e4fcf3c4357524e5a569d0fe8",
+  "credentials_independently_generated": true,
+  "live_model_calls": 0,
+  "actual_ai_work_created": 0,
+  "fixture_only": true,
+  "original_database_access": false,
+  "existing_services_started": false,
+  "controller_sha256": "3841155651bc8b87cbdae7f068d389e975e475e44b411f2fafd9282ea9ebfe84",
+  "claim": "ISOLATED_PG_OWNER_PERSISTENCE_AND_STATE_REGRESSION_NOT_REAL_G0"
+}

@@ -1,0 +1,16 @@
+{
+  "old_preview_id": "7216b9a4-15b4-4279-9a4a-6cdd941bdaf8",
+  "http": {
+    "http_status": 200,
+    "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/private/http-c5190c2fbd8f4b4f98ff2168e4cdd679.json",
+    "sha256": "12f4be857b2f08f534e727a6e4f4c7d49d41f8d50092c42a38ecddc1fd5022e8",
+    "bytes": 3011
+  },
+  "guardian_http": {
+    "http_status": 200,
+    "private_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/private/http-27871570eb384be4af2ac178785222a4.json",
+    "sha256": "01e0282cb8cbc7fd9a041bac465558f90479c023769724478abc006ee4d743ce",
+    "bytes": 1371
+  },
+  "old_guardian_request_ref": "guardian:assurance-result:b705e6f6-d358-5ea0-9a7b-2b337c5b49fa"
+}

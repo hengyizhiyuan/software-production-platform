@@ -1,0 +1,10 @@
+{
+  "captured_at_utc": "2026-10-12T07:42:34.098405+00:00",
+  "exit_code": 0,
+  "duration_seconds": 8.327498697093688,
+  "test_log_sha256": "0860aa696823117a9e1eea6fbe9c18a32cd798589dca38f7e5855c5116dce316",
+  "guardian_runtime_sha256": "e233932ca7fed13fae7dec450cd74dbf353351aad51b9273e7e0e52dd1d07bac",
+  "image_base": "sha256:8c3eda5e197c7778b2deb9e126ccdbeb0b2e716d1112f0dbe0f5a8804a2f7d3a",
+  "qualification_scope": "isolated development mount; not installed-image qualification",
+  "model_calls": 0
+}

@@ -1,0 +1,34 @@
+{
+  "sources": {
+    "watt": {
+      "revision": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+      "tree": "daa0a41b756755c7f88f347ee18c68ecd99273b0"
+    },
+    "guardian": {
+      "revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+      "tree": "92ac992c03bd84923a569bbe9f314c0786457040"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "actual_container_id": "388b45d31350c8fecd2bfc03200ac1508a0a1d6b94a44ecd6c24d5b38ff2f46c",
+  "exit_code": 0,
+  "counts": {
+    "tests": 155,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 155
+  },
+  "wall_seconds": 9.31098775495775,
+  "source_overlay": false,
+  "live_model_calls": 0,
+  "fixture_only": true
+}

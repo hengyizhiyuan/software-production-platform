@@ -1,0 +1,37 @@
+{
+  "schema": "c3-counterfactual-diagnostic-identity-clarification-v1",
+  "probes": [
+    {
+      "receipt": "counterfactual-source-consumer-1.json",
+      "controller_sha256": "73aaed781be0fd0c16b81ed09ac0bf287aeae102aef4f4c10d222eeac1a03e46",
+      "counterfactual_consumer_source_sha256": "e233932ca7fed13fae7dec450cd74dbf353351aad51b9273e7e0e52dd1d07bac",
+      "qualification_scope": "READONLY_COUNTERFACTUAL_CONSUMER_DIAGNOSIS_NOT_LIVE_ASSURANCE",
+      "guardian_runtime_sha256_field_describes": "ORIGINAL_INSTALLED_GUARDIAN_BASELINE_NOT_COUNTERFACTUAL_CONSUMER",
+      "owner_mutations": 0
+    },
+    {
+      "receipt": "retention-source-diagnostic-1.json",
+      "controller_sha256": "603253a4bbdfb79d152504f8dfcf7d6abb37e703f31d5adc0448f6b2c0f5545b",
+      "counterfactual_consumer_source_sha256": "e233932ca7fed13fae7dec450cd74dbf353351aad51b9273e7e0e52dd1d07bac",
+      "qualification_scope": "READONLY_COUNTERFACTUAL_CONSUMER_DIAGNOSIS_NOT_LIVE_ASSURANCE",
+      "guardian_runtime_sha256_field_describes": "ORIGINAL_INSTALLED_GUARDIAN_BASELINE_NOT_COUNTERFACTUAL_CONSUMER",
+      "owner_mutations": 0
+    },
+    {
+      "receipt": "counterfactual-source-consumer-2.json",
+      "controller_sha256": "50de081bf8e2bea6d021f525e2f83ea5816a7e31e57adb85bd921d3055994574",
+      "counterfactual_consumer_source_sha256": "ec761b33d3ef9b54e73e460723f05de72314f3693322e5c9d172afe3de22d8ce",
+      "qualification_scope": "READONLY_COUNTERFACTUAL_CONSUMER_DIAGNOSIS_NOT_LIVE_ASSURANCE",
+      "guardian_runtime_sha256_field_describes": "ORIGINAL_INSTALLED_GUARDIAN_BASELINE_NOT_COUNTERFACTUAL_CONSUMER",
+      "owner_mutations": 0
+    },
+    {
+      "receipt": "counterfactual-source-consumer-3.json",
+      "controller_sha256": "107b9bc84608fa756770387f103b2bd75222bdceba483e9fea6f7d3ced75046d",
+      "counterfactual_consumer_source_sha256": "1e30c1f5b4b585fb97c1bcff82c05c61f504ed4d01047d8e1c0bb188542be09f",
+      "qualification_scope": "READONLY_COUNTERFACTUAL_CONSUMER_DIAGNOSIS_NOT_LIVE_ASSURANCE",
+      "guardian_runtime_sha256_field_describes": "ORIGINAL_INSTALLED_GUARDIAN_BASELINE_NOT_COUNTERFACTUAL_CONSUMER",
+      "owner_mutations": 0
+    }
+  ]
+}

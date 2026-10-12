@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
+rootdir: /qualification
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 2 items
+
+tests/integration/test_c1_contract_continuity.py ..                      [100%]
+
+----------------- generated xml file: /c3-evidence/result.xml ------------------
+============================== 2 passed in 18.65s ==============================

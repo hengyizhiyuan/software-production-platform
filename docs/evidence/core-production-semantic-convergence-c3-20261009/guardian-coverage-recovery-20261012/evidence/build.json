@@ -1,0 +1,47 @@
+{
+  "schema": "c3-exact-owner-layer-build-v1",
+  "exit_code": 0,
+  "wall_seconds": 2.074932934017852,
+  "sources": {
+    "watt": {
+      "revision": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+      "tree": "daa0a41b756755c7f88f347ee18c68ecd99273b0"
+    },
+    "guardian": {
+      "revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+      "tree": "92ac992c03bd84923a569bbe9f314c0786457040"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_base_image": "sha256:8c3eda5e197c7778b2deb9e126ccdbeb0b2e716d1112f0dbe0f5a8804a2f7d3a",
+  "base_reference": "watt-c3-source-owner:01446af",
+  "frozen_guardian_archive_sha256": "f2c60d2da34b70c0013abab7728ab8ca3c8b95394db25b97f2b1b6a194e1b60a",
+  "dockerfile_sha256": "f72b8da115a98164966c8f209f4b89b4c5586ebb014866e6fb3ca11021cb8800",
+  "build_manifest_sha256": "da63d1c722db00bf5674a113c15493a029f2bce36a412ba7bf59f1d1cdde2951",
+  "build_command": [
+    "docker",
+    "build",
+    "--network",
+    "none",
+    "-t",
+    "watt-c3-owner-source:guardian-0d7aca9",
+    "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/image/context"
+  ],
+  "source_overlay": false,
+  "live_model_calls": 0,
+  "watt_runtime_changed": false,
+  "canonical_production_modified": false,
+  "captured_at_utc": "2026-10-12T07:57:38.711147+00:00",
+  "image": {
+    "Id": "sha256:a60bc2d755401b4f1323b44001c232ddc5683bd1aea82a5953f383051357bfb7",
+    "RepoDigests": [],
+    "Created": "2026-10-12T15:57:37.057889111+08:00"
+  }
+}
