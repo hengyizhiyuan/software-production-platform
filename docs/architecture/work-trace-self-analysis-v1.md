@@ -335,3 +335,13 @@ Scoped gap annotations can accompany separately supported observations/compariso
 they cannot themselves establish a cause, a defect or global absence. Existing
 Owner audit feedback reports the remaining submit/revise/review/terminal route and
 budget as planning evidence without imposing a fixed retry count or resetting it.
+
+The same audit feedback includes elapsed and remaining active seconds from a
+monotonic clock. It does not reset the admitted envelope. The Native inference
+port preserves safe structural feedback for rejected tool arguments: admitted
+tool identity, response location, JSON parse position or decoded value type.
+Raw malformed argument text is not exported, accepted, or heuristically repaired.
+An invalid evidence pointer returns captured root field names for navigation only;
+this does not observe their values or establish historical absence. These receipts
+support the existing Owner's bounded repair or truthful termination, not a second
+analysis pipeline or a guarantee that every candidate can be recovered.

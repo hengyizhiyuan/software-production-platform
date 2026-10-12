@@ -1310,3 +1310,27 @@ def test_pending_native_review_receives_actual_resolved_field_values_and_referen
     assert next(v for v in values if v['report_path']=='/current_state/citations/0')['observed_value']=='"COMPLETED"'
     assert next(v for v in values if v['report_path']=='/timeline/0/timestamp')['observed_value']==c.values[ids[0]]['created_at']
     assert tools.accepted_report is None and pending['resolved_observations']['omitted_values']==0
+
+
+def test_failed_field_read_supplies_navigation_without_observing_any_value():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());eid=c.add('execution_steps','/fixture/navigation',{'id':'fixture','result_payload':{'state':'observed-only-after-read'}})
+    tools=AnalysisTools(c,{})
+    failed=invoke_analysis(tools,'evidence.read',{'evidence_id':eid,'field':'/lifecycle/guardian/0'})
+    assert failed.condition.value=='FAILED' and eid not in c.observed_ranges
+    issue=failed.output['issues'][0]
+    assert issue['captured_root_fields']==['id','result_payload'] and issue['requested_field']=='/lifecycle/guardian/0'
+    assert 'observed-only-after-read' not in json.dumps(failed.output)
+    read=invoke_analysis(tools,'evidence.read',{'evidence_id':eid,'field':'/result_payload/state'})
+    assert read.condition.value=='SETTLED' and c.original_field_excerpt(eid,'/result_payload/state')=='"observed-only-after-read"'
+
+
+def test_native_budget_feedback_includes_elapsed_time_without_resetting_envelope(tmp_path, monkeypatch):
+    ticks=iter([100.0,111.25,125.0,137.0])
+    monkeypatch.setattr('spg.application.trace_analysis.monotonic',lambda:next(ticks))
+    s,snap,model=service(tmp_path)
+    result=asyncio.run(s.analyze('human:owner',uuid4_from(snap),AnalysisTrigger(request_id=uuid4(),rationale='Read finite owner time')))
+    assert result['status']=='COMPLETED'
+    budget=model.requests[1].previous_results[-1]['output']['audit_budget']
+    assert budget['observed_active_seconds']==11.25 and budget['remaining_active_seconds']==588.75
+    assert budget['maximum_inferences']==12 and budget['maximum_tool_effects']==48 and budget['maximum_active_seconds']==600

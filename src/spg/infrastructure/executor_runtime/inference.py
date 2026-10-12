@@ -722,7 +722,7 @@ class ResponsesInferenceAdapter:
         if not isinstance(output, list):
             return ()
         proposals: list[ToolCallProposal] = []
-        for item in output:
+        for output_index, item in enumerate(output):
             if not isinstance(item, dict) or item.get("type") != "function_call":
                 continue
             provider_name = item.get("name")
@@ -743,18 +743,29 @@ class ResponsesInferenceAdapter:
                     "TOOL_CALL_ID_MISSING",
                     f"{self.provider_identity} tool proposal had no call identity"
                 )
+            argument_issue = {
+                "location": ["output", output_index, "arguments"],
+                "tool_identity": tool_identity,
+                "type": "object_type",
+                "expected": "JSON-encoded object matching the admitted tool input_schema",
+            }
             try:
                 arguments = (
                     json.loads(arguments_text)
                     if isinstance(arguments_text, str)
                     else None
                 )
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as error:
                 arguments = None
+                argument_issue.update(type="json_invalid", character=error.pos,
+                                      line=error.lineno, column=error.colno)
             if not isinstance(arguments, dict):
+                if argument_issue["type"] != "json_invalid":
+                    argument_issue["observed_type"] = type(arguments).__name__
                 raise InferenceAdapterDecisionRejected(
                     "TOOL_ARGUMENTS_NOT_OBJECT",
-                    f"{self.provider_identity} tool proposal arguments were not a JSON object"
+                    f"{self.provider_identity} tool proposal arguments were not a JSON object",
+                    validation_issues=(argument_issue,),
                 )
             proposals.append(
                 ToolCallProposal(

@@ -316,6 +316,29 @@ def test_deepseek_function_call_is_normalized_without_executing_it(
     assert result.tool_calls[0].provider_call_id == "deepseek-call-1"
 
 
+@pytest.mark.parametrize("arguments,issue_type,observed_type", [
+    ('{"path":"private-provider-content",}', "json_invalid", None),
+    ('["private-provider-content"]', "object_type", "list"),
+    ('null', "object_type", "NoneType"),
+])
+def test_invalid_tool_arguments_return_safe_actionable_same_contract_feedback(arguments, issue_type, observed_type):
+    adapter = DeepSeekResponsesInferenceAdapter(model="deepseek-flash", api_key=lambda: "not-a-real-key")
+    payload = _completed_payload([{"type": "function_call", "call_id": "fixture-call",
+                                  "name": "watt_tool_0", "arguments": arguments}])
+    with pytest.raises(InferenceAdapterDecisionRejected) as caught:
+        adapter._provider_tool_calls(payload, {"watt_tool_0": "file.read"})
+    error = caught.value
+    assert error.reason_code == "TOOL_ARGUMENTS_NOT_OBJECT"
+    issue, = error.validation_issues
+    assert issue["location"] == ["output", 0, "arguments"] and issue["tool_identity"] == "file.read"
+    assert issue["type"] == issue_type
+    if observed_type is None:
+        assert issue["character"] > 0 and issue["line"] == 1 and issue["column"] > 1
+    else:
+        assert issue["observed_type"] == observed_type
+    assert "private-provider-content" not in json.dumps(issue) and "private-provider-content" not in str(error)
+
+
 def test_deepseek_stream_preserves_multiple_semantic_tool_proposals(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

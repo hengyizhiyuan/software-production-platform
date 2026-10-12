@@ -1174,6 +1174,13 @@ class AnalysisTools:
                 if isinstance(error, CitationRejected):
                     issues = getattr(error, "issues", [{"type": "CitationRejected", "reason": str(error),
                              "location": error.location, "evidence_id": error.evidence_id}])
+            if identity == "evidence.read" and str(error) == "READ_FIELD_NOT_FOUND":
+                eid = str(args.get("evidence_id"))
+                value = self.catalog.values.get(eid)
+                issues[0].update(evidence_id=eid, requested_field=args.get("field"),
+                    captured_root_fields=sorted(value)[:50] if isinstance(value, dict) else [],
+                    boundary="Requested pointer not found in this captured record. Field names are navigation metadata, not observed values or evidence of historical absence.",
+                    repair="Inspect this record's original fields, then read the exact admitted JSON Pointer; preserve UNKNOWN where its value is unavailable.")
             if identity == "analysis.revise" and draft_id is None and args.get("draft_id") in self.drafts:
                 draft_id = args["draft_id"]
                 candidate = deepcopy(self.drafts[draft_id])

@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+from time import monotonic
 from hashlib import sha256
 from uuid import UUID, uuid4
 
@@ -111,7 +112,9 @@ system defect occurred. A gap annotation can coexist with separately supported
 positive observations and conditional source comparisons; it does not supply their proof.
 
 BOUNDED REPORT SELF-REVIEW AND REFINEMENT
-Submit early (by about inference 5 / tool 20) to retain budget for review and repair.
+Plan retrieval, drafting, review and repair together using the observed remaining
+time and Native envelope. A scoped report can keep unsupported causes UNKNOWN;
+exhaustive retrieval must not consume the route needed to review the deliverable.
 analysis.submit/revise validates source references and returns draft_id/review_targets;
 this structural success is not the final deliverable. In the same Native loop, inspect
 all report targets against their evidence and call analysis.review with every target,
@@ -449,10 +452,12 @@ class TraceAnalysisService:
                 record["event_digests"] = list(events)
                 self._save(record)
             journal = AnalysisJournal(self.storage, ns, binding, on_progress=save_progress)
+            investigation_clock_start = monotonic()
             def audit_budget():
                 used_tools = journal.event_counts.get("TOOL_STARTED", 0)
                 used_inferences = journal.event_counts.get("INFERENCE_STARTED", 0)
                 remaining = max(0, binding.resource_envelope.max_inference_submissions - used_inferences)
+                elapsed = max(0.0, monotonic() - investigation_clock_start)
                 last = tools.verification_receipts[-1] if tools.verification_receipts else {}
                 if tools.accepted_report:
                     phase, next_action, route = "REVIEWED_ADVISORY", "RETURN_RESULT_READY", ["terminal"]
@@ -470,6 +475,9 @@ class TraceAnalysisService:
                     "remaining_tool_starts": max(0, binding.resource_envelope.max_tool_effects - used_tools),
                     "maximum_tool_effects": binding.resource_envelope.max_tool_effects,
                     "maximum_inferences": binding.resource_envelope.max_inference_submissions,
+                    "observed_active_seconds": round(elapsed, 3),
+                    "remaining_active_seconds": round(max(0.0, binding.resource_envelope.max_active_seconds - elapsed), 3),
+                    "maximum_active_seconds": binding.resource_envelope.max_active_seconds,
                     "report_phase": phase, "next_action": next_action,
                     "remaining_report_route": route,
                     "planning": "Reserve room for this route and any recoverable feedback. A supported partial report with scoped UNKNOWN is preferable to exhaustive retrieval without review. If the route cannot fit, terminate honestly.",
