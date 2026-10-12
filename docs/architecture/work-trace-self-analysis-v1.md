@@ -402,3 +402,11 @@ assertions, in freely chosen wording. The review must check historical-vs-curren
 authority, causal alternatives, and policy/diagnosis-vs-observation boundaries.
 Declared unsupported assertions require revision even if the item says SUPPORTED.
 These remain model judgments and require independent real-report qualification.
+Before a first report, the existing Owner conserves the submit/review/terminal
+route plus one revise/review feedback cycle from its original inference envelope.
+At that capacity boundary only the already granted submission port is projected;
+the producer may submit a scoped candidate from observed originals or terminate.
+After review, the projection closes for the terminal decision. Context selection
+can only reduce the admitted projection, never introduce or alter a tool/grant.
+This controls finite execution capacity; it does not rewrite semantic conclusions,
+increase budgets, or make an unverified candidate acceptable.

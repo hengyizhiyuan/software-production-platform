@@ -137,6 +137,10 @@ BOUNDED REPORT SELF-REVIEW AND REFINEMENT
 Plan retrieval, drafting, review and repair together using the observed remaining
 time and Native envelope. A scoped report can keep unsupported causes UNKNOWN;
 exhaustive retrieval must not consume the route needed to review the deliverable.
+The Owner reserves the initial submit/review/terminal route plus one existing
+revise/review feedback cycle. If only analysis.submit is projected, use already
+read evidence for a scoped candidate or terminate honestly; omitted tools are not
+new permissions. Once reviewed, the tool projection closes for the terminal decision.
 analysis.submit/revise validates source references and returns draft_id/review_targets;
 this structural success is not the final deliverable. In the same Native loop, inspect
 the returned review_candidate (the actual proposed assertions, not evidence) and
@@ -521,6 +525,19 @@ class TraceAnalysisService:
                     "boundary": "Audit observations for planning only; Native resource ledger remains authoritative. Not historical Work usage. No budget reset or fixed retry count."}
 
             tools.audit_budget = audit_budget
+            def select_tools(available):
+                remaining = binding.resource_envelope.max_inference_submissions - journal.event_counts.get("INFERENCE_STARTED", 0)
+                last = tools.verification_receipts[-1] if tools.verification_receipts else {}
+                if tools.accepted_report:
+                    return ()
+                # Before an initial report, reserve its submission, review and
+                # terminal route plus one revise/review feedback cycle. This is
+                # the existing finite contract, not a new retry budget.
+                initial_route = ("submit", "self-review", "terminal")
+                feedback_cycle = ("revise", "self-review")
+                if not last and remaining <= len(initial_route) + len(feedback_cycle):
+                    return tuple(item for item in available if item["identity"] == "analysis.submit")
+                return available
             journal.append("INVESTIGATION_BASIS", {"binding": binding.model_dump(mode="json"),
                            "contract": contract.model_dump(mode="json")})
             if self.inference_factory:
@@ -531,7 +548,7 @@ class TraceAnalysisService:
                 inference = configured_inference_adapter(self.settings)
             record["phase"] = "NATIVE_KERNEL_INVESTIGATION"
             kernel = NativeExecutorKernel(inference=inference, tools=registry, checkpoints=journal, audit=journal,
-                context=NativeContextAssembler(observation_provider=audit_budget))
+                context=NativeContextAssembler(observation_provider=audit_budget, tool_selection_provider=select_tools))
             result = await asyncio.wait_for(kernel.run(binding=binding, contract=contract, worker_epoch=1,
                 working_plan=WorkingPlan(version=1, objective_reference=f"work:{work_id}",
                     chosen_approach="Reconstruct, inspect exact source, classify and verify advisory report",

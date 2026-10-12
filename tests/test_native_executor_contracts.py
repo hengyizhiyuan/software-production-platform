@@ -2640,3 +2640,13 @@ def test_capacity_compaction_retains_latest_candidate_and_feedback_before_old_re
     assert req.previous_results[0]['output_digest']==results[0].output_digest
     assert req.previous_results[1]['output']==outputs[1] and req.previous_results[1]['output_digest']==results[1].output_digest
     assert len(req.model_dump_json().encode())<=6000
+
+
+def test_owner_tool_selection_can_only_reduce_the_existing_admitted_projection():
+    binding,contract=_binding()
+    original={'identity':'file.read','version':'1','input_schema':{'type':'object'}}
+    assembler=NativeContextAssembler(tool_selection_provider=lambda _:({'identity':'file.read','version':'forged'}, {'identity':'ungranted.tool'}))
+    req=assembler.assemble(binding=binding,contract=contract,working_plan=_plan(),step_sequence=1,available_tools=(original,))
+    assert req.available_tools==(original,)
+    empty=assembler.assemble(binding=binding,contract=contract,working_plan=_plan(),step_sequence=1,available_tools=())
+    assert empty.available_tools==()

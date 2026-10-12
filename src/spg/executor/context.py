@@ -25,11 +25,13 @@ class NativeContextAssembler:
     """Build inference context only from admitted contracts and durable Reality."""
 
     def __init__(self, *, max_request_bytes: int = 512 * 1024,
-                 observation_provider: Callable[[], dict[str, object]] | None = None) -> None:
+                 observation_provider: Callable[[], dict[str, object]] | None = None,
+                 tool_selection_provider: Callable[[tuple[dict[str, object], ...]], tuple[dict[str, object], ...]] | None = None) -> None:
         if max_request_bytes < 1024:
             raise ValueError("native context byte limit is too small")
         self.max_request_bytes = max_request_bytes
         self.observation_provider = observation_provider
+        self.tool_selection_provider = tool_selection_provider
 
     def assemble(
         self,
@@ -118,6 +120,12 @@ class NativeContextAssembler:
                     "semantic_manifest": checkpoint.semantic_manifest,
                 }
             )
+        if self.tool_selection_provider is not None:
+            selected = self.tool_selection_provider(available_tools)
+            # The Owner may conserve its remaining resource capacity, never add
+            # an absent tool or change a granted tool contract through selection.
+            identities = {item["identity"] for item in selected}
+            available_tools = tuple(item for item in available_tools if item["identity"] in identities)
         request = InferenceRequest(
             attempt_id=binding.attempt_id,
             session_id=binding.session_id,

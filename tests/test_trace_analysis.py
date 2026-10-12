@@ -1510,3 +1510,24 @@ def test_native_countercheck_cannot_accept_its_own_declared_unsupported_assertio
     assert result.output['verification']=='NATIVE_SELF_REVIEW_REQUIRES_REVISION'
     items=review_items(pending);items[0].pop('countercheck')
     assert invoke_analysis(tools,'analysis.review',{'draft_id':pending['draft_id'],'items':items}).condition.value=='FAILED'
+
+
+def test_native_owner_reserves_initial_report_route_and_one_existing_feedback_cycle(tmp_path):
+    s,snap,_=service(tmp_path)
+    class DeliberatingModel(NativeModel):
+        async def infer(self,req):
+            if len(self.requests)<7:
+                self.requests.append(req)
+                return InferenceResponse(action=InferenceAction.CONTINUE,summary='Read admitted scope before closure',working_plan=req.working_plan,
+                    tool_calls=(ToolCallProposal(proposal_index=0,tool_identity='evidence.check',arguments={'family':'OWNER_RECORD','group':'work','field':'/*'}),))
+            if len(self.requests)==7:
+                self.requests.append(req)
+                return InferenceResponse(action=InferenceAction.CONTINUE,summary='Submit supported advisory within the reserved route',working_plan=req.working_plan,
+                    tool_calls=(ToolCallProposal(proposal_index=0,tool_identity='analysis.submit',arguments={'report':report(self.catalog)}),))
+            return await super().infer(req)
+    model=DeliberatingModel(snap);s.inference_factory=lambda:model
+    r=asyncio.run(s.analyze('human:owner',uuid4_from(snap),AnalysisTrigger(request_id=uuid4(),rationale='Conserve bounded delivery capacity')))
+    assert r['status']=='COMPLETED' and len(model.requests)==10
+    assert {t['identity'] for t in model.requests[7].available_tools}=={'analysis.submit'}
+    assert model.requests[-1].available_tools==()
+    assert r['kernel_result']['inference_submissions']==10 and s.settings.trace_analysis_max_inferences==12
