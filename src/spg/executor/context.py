@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
+from copy import deepcopy
 
 from spg.domain.native_execution import (
     CheckpointBundleRecord,
@@ -22,10 +24,12 @@ class NativeContextCapacityError(RuntimeError):
 class NativeContextAssembler:
     """Build inference context only from admitted contracts and durable Reality."""
 
-    def __init__(self, *, max_request_bytes: int = 512 * 1024) -> None:
+    def __init__(self, *, max_request_bytes: int = 512 * 1024,
+                 observation_provider: Callable[[], dict[str, object]] | None = None) -> None:
         if max_request_bytes < 1024:
             raise ValueError("native context byte limit is too small")
         self.max_request_bytes = max_request_bytes
+        self.observation_provider = observation_provider
 
     def assemble(
         self,
@@ -70,6 +74,7 @@ class NativeContextAssembler:
                 "capability_grants": [grant.model_dump(mode="json") for grant in binding.capability_grants],
                 "stop_conditions": list(binding.stop_conditions),
                 "obligation_references": list(binding.obligation_references),
+                "resource_envelope": binding.resource_envelope.model_dump(mode="json"),
             },
             {
                 "fact_type": "TOOL_PATH_CONVENTION",
@@ -91,6 +96,10 @@ class NativeContextAssembler:
                 ),
             },
         ]
+        if self.observation_provider is not None:
+            facts.append({"fact_type": "CURRENT_ATTEMPT_OBSERVATION",
+                "payload": deepcopy(self.observation_provider()),
+                "boundary": "Current Owner audit observations for planning; not historical Work evidence, a new grant, or a reset of EXECUTION_ENVELOPE."})
         if repair_history:
             facts.append({
                 "fact_type": "RECENT_SELF_REFINE",
@@ -174,8 +183,11 @@ class NativeContextAssembler:
         without_duplicate_history = request.model_copy(update={"context_facts": tuple(compact_facts)})
         if self._size(without_duplicate_history) <= self.max_request_bytes:
             return without_duplicate_history
-        compact_results = []
-        for item in previous_results:
+        compact_results = list(without_duplicate_history.previous_results)
+        # Compact the oldest receipts first. Preserve the latest actionable
+        # feedback/candidate whenever it fits; a stateless next inference cannot
+        # repair an output whose only readable copy was discarded here.
+        for index, item in enumerate(previous_results):
             payload = item.model_dump(mode="json")
             encoded_output = json.dumps(
                 payload["output"], ensure_ascii=False, sort_keys=True
@@ -186,7 +198,10 @@ class NativeContextAssembler:
                 "output_digest": item.output_digest,
                 "output_keys": sorted(item.output),
             }
-            compact_results.append(payload)
+            compact_results[index] = payload
+            selected = without_duplicate_history.model_copy(update={"previous_results": tuple(compact_results)})
+            if self._size(selected) <= self.max_request_bytes:
+                return selected
         compacted = request.model_copy(
             update={
                 "context_facts": tuple(compact_facts),

@@ -626,7 +626,12 @@ class EvidenceCatalog:
                 raise CitationRejected("CITATION_NOT_OBSERVED", location, c.evidence_id)
             if row["group"] in {"analysis_draft", "evidence_check", "evidence_inspection"}:
                 raise CitationRejected("MODEL_PROPOSAL_NOT_OWNER_EVIDENCE", location, c.evidence_id)
-            excerpts = [self.original_field_excerpt(c.evidence_id, c.field)] if c.field is not None else self.observed_excerpts.get(str(c.evidence_id), [])
+            try:
+                excerpts = [self.original_field_excerpt(c.evidence_id, c.field)] if c.field is not None else self.observed_excerpts.get(str(c.evidence_id), [])
+            except CitationRejected as error:
+                # Preserve the candidate location through the original-field
+                # port so same-draft repair can address the actual citation.
+                raise CitationRejected(str(error), location + ["field"], c.evidence_id) from None
             if c.quote is not None:
                 literal = any(c.quote in excerpt for excerpt in excerpts)
                 encoded = json.dumps(c.quote, ensure_ascii=False)[1:-1]
@@ -1155,6 +1160,8 @@ class AnalysisTools:
                 output = {"verification": "CITATIONS_AND_STRUCTURE_PASS",
                           "draft_id": draft_id, "candidate_digest": canonical_digest(self.pending_reports[draft_id]),
                           "review_targets": self.review_targets(self.pending_reports[draft_id]),
+                          "review_candidate": public_report_candidate(candidate),
+                          "review_candidate_trust": "MODEL_PROPOSAL_NOT_OWNER_EVIDENCE",
                           "resolved_observations": self.resolved_observations(self.pending_reports[draft_id]),
                           "next_action": "analysis.review", "semantic_correctness": "NATIVE_SELF_REVIEW_REQUIRED_THEN_HUMAN_REVIEW",
                           "production_authority": "NONE"}

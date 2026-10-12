@@ -33,6 +33,7 @@ from spg.evaluation.contracts import QualityError
 from spg.evaluation.work_diagnostic_export import WorkDiagnosticExportService, Redactor
 from spg.evaluation.work_registry import WorkRegistryService
 from spg.executor.kernel import NativeExecutorKernel
+from spg.executor.context import NativeContextAssembler
 from spg.infrastructure.executor_runtime.local_storage import ContentAddressedStorage
 from spg.infrastructure.trace_analysis_evidence import (
     AnalysisTools, EvidenceCatalog, RepositorySnapshot, text, public_report_candidate,
@@ -117,6 +118,7 @@ time and Native envelope. A scoped report can keep unsupported causes UNKNOWN;
 exhaustive retrieval must not consume the route needed to review the deliverable.
 analysis.submit/revise validates source references and returns draft_id/review_targets;
 this structural success is not the final deliverable. In the same Native loop, inspect
+the returned review_candidate (the actual proposed assertions, not evidence) and
 all report targets against their evidence and call analysis.review with every target,
 its returned evidence_ids, a judgment and an evidence-based public rationale.
 Review whether each assertion follows from its actual records/source, whether quoted
@@ -493,7 +495,8 @@ class TraceAnalysisService:
                 record["phase"] = "INFERENCE_CONFIGURATION"
                 inference = configured_inference_adapter(self.settings)
             record["phase"] = "NATIVE_KERNEL_INVESTIGATION"
-            kernel = NativeExecutorKernel(inference=inference, tools=registry, checkpoints=journal, audit=journal)
+            kernel = NativeExecutorKernel(inference=inference, tools=registry, checkpoints=journal, audit=journal,
+                context=NativeContextAssembler(observation_provider=audit_budget))
             result = await asyncio.wait_for(kernel.run(binding=binding, contract=contract, worker_epoch=1,
                 working_plan=WorkingPlan(version=1, objective_reference=f"work:{work_id}",
                     chosen_approach="Reconstruct, inspect exact source, classify and verify advisory report",

@@ -2612,3 +2612,31 @@ def test_duplicate_checkpoint_compaction_keeps_readable_receipt_frontier():
     assert request.previous_results[0]["output"]==output
     assert request.previous_results[0]["output_digest"]==previous.output_digest
     assert next(f for f in request.context_facts if f["fact_type"]=="PWU_CONTRACT")["payload"]==contract.contract_payload
+
+
+def test_live_context_observation_is_separate_from_exact_authority_and_frozen_per_request():
+    binding,contract=_binding();live={'remaining_active_seconds':42,'observed_tool_starts':3}
+    assembler=NativeContextAssembler(observation_provider=lambda:live)
+    req=assembler.assemble(binding=binding,contract=contract,working_plan=_plan(),step_sequence=4,available_tools=())
+    fact=next(f for f in req.context_facts if f['fact_type']=='CURRENT_ATTEMPT_OBSERVATION')
+    envelope=next(f for f in req.context_facts if f['fact_type']=='EXECUTION_ENVELOPE')
+    assert envelope['resource_envelope']==binding.resource_envelope.model_dump(mode='json')
+    assert envelope['capability_grants']==[g.model_dump(mode='json') for g in binding.capability_grants]
+    live['remaining_active_seconds']=0;live['observed_tool_starts']=4
+    second=assembler.assemble(binding=binding,contract=contract,working_plan=_plan(),step_sequence=5,available_tools=())
+    assert fact['payload']['remaining_active_seconds']==42
+    assert next(f for f in second.context_facts if f['fact_type']=='CURRENT_ATTEMPT_OBSERVATION')['payload']==live
+    assert next(f for f in second.context_facts if f['fact_type']=='EXECUTION_ENVELOPE')==envelope
+    assert next(f for f in second.context_facts if f['fact_type']=='PWU_CONTRACT')['payload']==contract.contract_payload
+
+
+def test_capacity_compaction_retains_latest_candidate_and_feedback_before_old_receipt_body():
+    binding,contract=_binding()
+    outputs=[{'content':'old-original-evidence-'*3000}, {'review_candidate':{'fact':'a proposed bounded assertion'},'issues':[{'location':['current_state','citations',0,'field'],'reason':'field unavailable'}]}]
+    results=tuple(ToolExecutionResult(delivery_id=uuid4(),tool_identity='evidence.read' if i==0 else 'analysis.submit',condition=EffectCondition.SETTLED,
+        output=o,output_digest=canonical_digest(o)) for i,o in enumerate(outputs))
+    req=NativeContextAssembler(max_request_bytes=6000).assemble(binding=binding,contract=contract,working_plan=_plan(),step_sequence=4,available_tools=(),previous_results=results)
+    assert req.previous_results[0]['output']['compacted'] is True
+    assert req.previous_results[0]['output_digest']==results[0].output_digest
+    assert req.previous_results[1]['output']==outputs[1] and req.previous_results[1]['output_digest']==results[1].output_digest
+    assert len(req.model_dump_json().encode())<=6000

@@ -345,3 +345,14 @@ An invalid evidence pointer returns captured root field names for navigation onl
 this does not observe their values or establish historical absence. These receipts
 support the existing Owner's bounded repair or truthful termination, not a second
 analysis pipeline or a guarantee that every candidate can be recovered.
+
+The existing Native Context Assembler carries the exact admitted resource envelope
+and an optional current Owner audit observation, refreshed each inference. Observed
+usage is a separate fact and cannot change grants or limits. When capacity is tight,
+older receipt bodies are compacted before the latest actionable candidate/feedback;
+their immutable digests and durable receipts remain intact. The report port returns
+the actual retained public review_candidate together with targets and resolved
+references. This is needed because the next stateless inference does not inherit
+the preceding tool proposal's arguments. That candidate remains a model proposal,
+not Owner evidence. Field-reference rejection preserves its complete location inside
+the proposed report so an explicit bounded edit can address the offending citation.

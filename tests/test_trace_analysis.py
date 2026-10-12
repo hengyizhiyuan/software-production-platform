@@ -1150,10 +1150,13 @@ def test_structural_pass_is_pending_until_native_self_review_and_changed_report_
     assert submitted.condition.value=="SETTLED" and tools.accepted_report is None
     assert "report_digest" not in submitted.output and submitted.output["next_action"]=="analysis.review"
     pending=submitted.output
+    assert pending['review_candidate']==r and pending['review_candidate_trust']=='MODEL_PROPOSAL_NOT_OWNER_EVIDENCE'
     feedback=invoke_analysis(tools,"analysis.review",{"draft_id":pending["draft_id"],"items":review_items(pending,revise=True)})
     assert feedback.condition.value=="FAILED" and tools.accepted_report is None
     assert feedback.output["failure_class"]=="RUNTIME_MODEL_VARIANCE"
     revised=invoke_analysis(tools,"analysis.revise",{"draft_id":pending["draft_id"],"edits":[{"op":"replace","path":"/findings/0/recommendation","value":"仅核对已导出的原始信息，处置状态保持 UNKNOWN。"}]})
+    assert revised.output['review_candidate']['findings'][0]['recommendation']=='仅核对已导出的原始信息，处置状态保持 UNKNOWN。'
+    assert revised.output['review_candidate']['findings'][0]['recommendation']!=pending['review_candidate']['findings'][0]['recommendation']
     assert tools.accepted_report is None and revised.output["draft_id"]!=pending["draft_id"]
     reviewed=invoke_analysis(tools,"analysis.review",{"draft_id":revised.output["draft_id"],"items":review_items(revised.output)})
     assert reviewed.condition.value=="SETTLED" and tools.accepted_digest==reviewed.output["report_digest"]
@@ -1326,11 +1329,28 @@ def test_failed_field_read_supplies_navigation_without_observing_any_value():
 
 
 def test_native_budget_feedback_includes_elapsed_time_without_resetting_envelope(tmp_path, monkeypatch):
-    ticks=iter([100.0,111.25,125.0,137.0])
+    ticks=iter([100.0,110.0,120.0,130.0,140.0,150.0])
     monkeypatch.setattr('spg.application.trace_analysis.monotonic',lambda:next(ticks))
     s,snap,model=service(tmp_path)
     result=asyncio.run(s.analyze('human:owner',uuid4_from(snap),AnalysisTrigger(request_id=uuid4(),rationale='Read finite owner time')))
     assert result['status']=='COMPLETED'
     budget=model.requests[1].previous_results[-1]['output']['audit_budget']
-    assert budget['observed_active_seconds']==11.25 and budget['remaining_active_seconds']==588.75
+    assert budget['observed_active_seconds']==20.0 and budget['remaining_active_seconds']==580.0
     assert budget['maximum_inferences']==12 and budget['maximum_tool_effects']==48 and budget['maximum_active_seconds']==600
+    observations=[next(f['payload'] for f in req.context_facts if f['fact_type']=='CURRENT_ATTEMPT_OBSERVATION') for req in model.requests]
+    assert [v['remaining_active_seconds'] for v in observations]==[590.0,570.0,550.0]
+    assert [v['observed_inference_starts'] for v in observations]==[0,1,2]
+    assert next(f for f in model.requests[0].context_facts if f['fact_type']=='EXECUTION_ENVELOPE')['resource_envelope']['max_inference_submissions']==12
+
+
+def test_missing_report_field_retains_exact_candidate_location_for_bounded_edit():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());r=json.loads(json.dumps(report(c)));eid=r['current_state']['citations'][0]['evidence_id']
+    r['current_state']['citations']=[{'evidence_id':eid,'field':'/not_captured'}]
+    tools=AnalysisTools(c,{})
+    failed=invoke_analysis(tools,'analysis.submit',{'report':r})
+    issue=next(i for i in failed.output['issues'] if 'ORIGINAL_FIELD_REFERENCE_NOT_CAPTURED' in i['reason'])
+    assert issue['location']==['current_state','citations',0,'field'] and issue['rejected_value']=='/not_captured'
+    fixed=invoke_analysis(tools,'analysis.revise',{'draft_id':failed.output['draft_id'],'edits':[{'op':'replace','path':'/current_state/citations/0/field','value':'/state'}]})
+    assert fixed.condition.value=='SETTLED' and tools.accepted_report is None
+    assert tools.drafts[failed.output['draft_id']]['current_state']['citations'][0]['field']=='/not_captured'
