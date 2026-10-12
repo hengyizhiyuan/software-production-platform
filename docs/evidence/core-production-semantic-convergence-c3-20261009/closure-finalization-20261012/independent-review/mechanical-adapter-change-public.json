@@ -1,0 +1,12 @@
+{
+  "schema": "c3-holdout-mechanical-adapter-change-v1",
+  "original_adapter_sha256": "0c0318ecb0a86aaf3145760e3174b61db26462d4dd18a1b8934e65e359bf1818",
+  "adapter_sha256": "ce755cc9fbd4ac16adfebaca6e286899805a32708fe1b5210ec65f2a87e564e4",
+  "change": "One read_settings database-name comparison aligned with unchanged runner.check_freeze dedicated database identity. No other bytes changed.",
+  "basis": "harness-interface.adapter_rules: Adapt mechanical invocation and schema names only, recording adapter digest/change reason; parent explicit mechanical conflict correction authorization 2026-10-12",
+  "oracle_input_semantic_check_budget_changes": false,
+  "full_mechanical_diff_private_receipt_sha256": "9fa021c40144895d7183640f7ab1a99bbb25403e3697051aff76e5cf7a667669",
+  "full_diff_sha256": "56f7e7fda027dce4619ddb59f75d72e8ba34b02da57fdd8b0eaa7cf3a4c5e4c2",
+  "public_source_excerpt_removed": true,
+  "original_full_receipt_preserved_private": true
+}

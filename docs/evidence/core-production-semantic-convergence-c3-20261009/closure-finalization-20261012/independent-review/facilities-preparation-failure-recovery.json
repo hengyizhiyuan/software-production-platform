@@ -1,0 +1,12 @@
+{
+  "schema": "c3-independent-facilities-preparation-failure-recovery-v1",
+  "first_failure": "Docker default IPv4 address pool exhausted before network/container/DB creation",
+  "private_configuration_retained": true,
+  "no_secret_or_budget_reset": true,
+  "model_calls": 0,
+  "existing_networks_modified": false,
+  "failed_named_network_absent": true,
+  "new_explicit_subnet": "172.23.1.240/28",
+  "existing_network_and_route_overlap": false,
+  "docker_network_count": 143
+}

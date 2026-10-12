@@ -1,0 +1,32 @@
+{
+  "new_holdout_created": false,
+  "original_terminal_24_not_replayed": true,
+  "schema": "c3-independent-original-seals-preservation-v1",
+  "seals": [
+    {
+      "identity": "original24",
+      "sha256": "770828adeabec942548218c17bc6e9dbb9222ce19df19bc89c260f28ed8f4cf0",
+      "unchanged": true
+    },
+    {
+      "identity": "unused20",
+      "sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0",
+      "unchanged": true
+    },
+    {
+      "identity": "unused25",
+      "sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0",
+      "unchanged": true
+    },
+    {
+      "identity": "unused28",
+      "sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0",
+      "unchanged": true
+    },
+    {
+      "identity": "current_opaque_copy",
+      "sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0",
+      "unchanged": true
+    }
+  ]
+}

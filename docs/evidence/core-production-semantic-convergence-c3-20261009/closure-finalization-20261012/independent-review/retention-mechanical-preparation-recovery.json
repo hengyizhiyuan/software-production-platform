@@ -1,0 +1,9 @@
+{
+  "schema": "c3-retention-uninvoked-preparation-recovery-v1",
+  "first_supplement": "ModuleNotFoundError tests, before fixture construction or retention Owner call; incomplete Python mechanical fixture import path",
+  "old_controller_sha256": "5c34af49a0ef856912a883442d0dfd65e208dadf2b629f243fe61685a1a04454",
+  "new_controller_sha256": "e4484045e61dbb70e86ae60f05f0b054dca8f8f115f9c634862d6164ee2583f5",
+  "change": "Append existing baked /qualification fixture path and append recovery stage into existing journal; no case or budget reset",
+  "owner_subcomparisons_replayed": false,
+  "model_calls": 0
+}

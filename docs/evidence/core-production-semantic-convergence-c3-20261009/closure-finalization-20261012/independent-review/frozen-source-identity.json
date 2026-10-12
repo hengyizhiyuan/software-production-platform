@@ -1,0 +1,109 @@
+{
+  "schema": "c3-holdout-independent-frozen-source-identity-v1",
+  "status": "PASS_WITH_RECORDED_LEGACY_LABEL_RESIDUE_AND_EOL_TRANSFORM",
+  "image_id": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "image_created": "2026-10-12T15:57:37.057889111+08:00",
+  "existing_attestation_path": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/guardian-coverage-recovery-20261012/evidence/image2/actual-imports.json",
+  "existing_attestation_sha256": "e81301c801f16ea34cb813ba2feaff9bff266b58dd8ea4103f9014c0d30bb3d7",
+  "actual_import_container": "watt-c3-guardian-source-imports2-20261012",
+  "actual_container_image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "manifest_path": "/opt/c3-build/c3-source-identity.json",
+  "manifest_sha256": "da63d1c722db00bf5674a113c15493a029f2bce36a412ba7bf59f1d1cdde2951",
+  "manifest_matches_existing_attestation": true,
+  "manifest_sources": {
+    "watt": {
+      "revision": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+      "tree": "daa0a41b756755c7f88f347ee18c68ecd99273b0"
+    },
+    "guardian": {
+      "revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+      "tree": "92ac992c03bd84923a569bbe9f314c0786457040"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "canonical_environment": {
+    "SPG_RUNTIME_REVISION": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+    "C3_WATT_TREE": "daa0a41b756755c7f88f347ee18c68ecd99273b0",
+    "C3_GUARDIAN_REVISION": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+    "C3_GUARDIAN_TREE": "92ac992c03bd84923a569bbe9f314c0786457040",
+    "C3_ECF_REVISION": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "PYTHONPATH": "/opt/c3-owners/guardian/src:/opt/c3-owners/ecf/src:/opt/c3-test-deps"
+  },
+  "legacy_guardian_labels": {
+    "watt.c3.guardian-revision": "5c88ffb9318e68d11b0cfb2af38048e6452bf881",
+    "watt.c3.guardian-tree": "df757ab48aac8928896e3f17619e64a7642a6ea3"
+  },
+  "qualified_guardian_label": {
+    "guardian.source_revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867"
+  },
+  "guardian_file_correspondence": [
+    {
+      "module": "__init__.py",
+      "installed_raw_sha256": "3601c601f8de84808b16cf32b2e662c1b4dc6bbcee1fb1ee14876380bf83db26",
+      "attested_build_input_sha256": "3601c601f8de84808b16cf32b2e662c1b4dc6bbcee1fb1ee14876380bf83db26",
+      "raw_attestation_matches": true,
+      "installed_raw_bytes": 234,
+      "lf_normalized_sha256": "2bd3d51229e67e67bbd606f240b7906c2c0df834b31f1f5c6b11744e978afa27",
+      "git_0d7aca_blob_sha256": "2bd3d51229e67e67bbd606f240b7906c2c0df834b31f1f5c6b11744e978afa27",
+      "normalization_matches_git_blob": true,
+      "crlf_count": 6
+    },
+    {
+      "module": "contracts/__init__.py",
+      "installed_raw_sha256": "b05ea8ea82f57fd87f6745ac8ea82e73867a4e0706f9414c563530e1eaddebc9",
+      "attested_build_input_sha256": "b05ea8ea82f57fd87f6745ac8ea82e73867a4e0706f9414c563530e1eaddebc9",
+      "raw_attestation_matches": true,
+      "installed_raw_bytes": 231,
+      "lf_normalized_sha256": "e411b6c0ce9607c11294ea0d69655693999c94b8f86fcee7cdadfc9b9779ae82",
+      "git_0d7aca_blob_sha256": "e411b6c0ce9607c11294ea0d69655693999c94b8f86fcee7cdadfc9b9779ae82",
+      "normalization_matches_git_blob": true,
+      "crlf_count": 8
+    },
+    {
+      "module": "contracts/production_environment.py",
+      "installed_raw_sha256": "67451eeed4be11dbf9e8086c7a0c0b1616fe8dbf97eab1850a9a84e9af96a76e",
+      "attested_build_input_sha256": "67451eeed4be11dbf9e8086c7a0c0b1616fe8dbf97eab1850a9a84e9af96a76e",
+      "raw_attestation_matches": true,
+      "installed_raw_bytes": 3351,
+      "lf_normalized_sha256": "8498da7f8077294ec558d23251e93136bdddb34334b96d3a3810a6cd572e07fc",
+      "git_0d7aca_blob_sha256": "8498da7f8077294ec558d23251e93136bdddb34334b96d3a3810a6cd572e07fc",
+      "normalization_matches_git_blob": true,
+      "crlf_count": 78
+    },
+    {
+      "module": "contracts/software_assurance.py",
+      "installed_raw_sha256": "2469000fa220f3bd3f0fdf2a89515ba565c76ff34ed47e59d9436978a49756d3",
+      "attested_build_input_sha256": "2469000fa220f3bd3f0fdf2a89515ba565c76ff34ed47e59d9436978a49756d3",
+      "raw_attestation_matches": true,
+      "installed_raw_bytes": 8986,
+      "lf_normalized_sha256": "fa74e94abed0cc12267364bcc9dcd4430b545f494d6919d300473d92c63c639e",
+      "git_0d7aca_blob_sha256": "fa74e94abed0cc12267364bcc9dcd4430b545f494d6919d300473d92c63c639e",
+      "normalization_matches_git_blob": true,
+      "crlf_count": 208
+    },
+    {
+      "module": "runtime.py",
+      "installed_raw_sha256": "1e30c1f5b4b585fb97c1bcff82c05c61f504ed4d01047d8e1c0bb188542be09f",
+      "attested_build_input_sha256": "1e30c1f5b4b585fb97c1bcff82c05c61f504ed4d01047d8e1c0bb188542be09f",
+      "raw_attestation_matches": true,
+      "installed_raw_bytes": 136954,
+      "lf_normalized_sha256": "97378dd825c10da9db969edd659ad9b83662144401daffa60ab21ba34c4675d4",
+      "git_0d7aca_blob_sha256": "97378dd825c10da9db969edd659ad9b83662144401daffa60ab21ba34c4675d4",
+      "normalization_matches_git_blob": true,
+      "crlf_count": 2020
+    }
+  ],
+  "exactness_statement": "Installed raw bytes are the attested CRLF build inputs; they are not byte-equal to LF Git blobs. Independently copied installed bytes normalized only from CRLF to LF match all five exact 0d7aca Git blobs. No code difference is claimed or hidden.",
+  "contract_judgment": "Unchanged runner.check_freeze requires actual image ID, PASS actual-installed-imports and canonical source revision/tree correspondence; it does not require all arbitrary inherited Docker labels to agree. Pure extracted check_freeze passed current external identity and existing attestation. Existing import source roots and no runtime source overlay are retained. Legacy conflicting labels remain evidence, not substituted source identity.",
+  "new_model_calls": 0,
+  "new_application_tests": 0,
+  "new_containers_started": 0,
+  "old_evidence_mutations": 0
+}

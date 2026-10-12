@@ -1,0 +1,47 @@
+{
+  "full_work_pass_claimed": false,
+  "identity": {
+    "adapter_sha256": "6dff6f919bf514c3d2eb938406f0987482f1746c6cc306d7e96f4d178d0fd9f0",
+    "freeze_sha256": "434db8ae5134b4776f1916e6eb38a3230665f9125b053227b0776e443374bf00",
+    "imports_sha256": "e81301c801f16ea34cb813ba2feaff9bff266b58dd8ea4103f9014c0d30bb3d7",
+    "mechanical_plan_sha256": "48d6eddb2152007df81b6c873cc74231fd0f3cc3bcc7e68306d6e5dbfae20ff7",
+    "runner_sha256": "ef8fe306e1bd0b568bc1e3ebb9a418c23d872ec4321f82b89aa852e91d7366f3",
+    "sealed_specification_sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0"
+  },
+  "model_calls": 0,
+  "results": [
+    {
+      "model_calls": 0,
+      "observation_sha256": "dbb81af20121f3bc8a6dc7a076bc45b29392ae08e857d604af5ca67840f733b3",
+      "ordinal": 4,
+      "reason": "CONTROLLED_OWNER_FIXTURE",
+      "result": "OBSERVED_PENDING_INDEPENDENT_REVIEW",
+      "table": "CONTROLLED_OWNER_NEGATIVE"
+    },
+    {
+      "model_calls": 0,
+      "observation_sha256": "e887d798a32a28229a9aecc2064f6ba96ddf9987e12aa949a5aeeb0afc1512f4",
+      "ordinal": 5,
+      "reason": "CONTROLLED_OWNER_FIXTURE",
+      "result": "OBSERVED_PENDING_INDEPENDENT_REVIEW",
+      "table": "CONTROLLED_OWNER_NEGATIVE"
+    },
+    {
+      "model_calls": 0,
+      "observation_sha256": "4ce7df67ea77c79a90e8fae027b1a04a86c5f1922f970c52cf9024f0b4e2cc35",
+      "ordinal": 6,
+      "reason": "CONTROLLED_OWNER_FIXTURE",
+      "result": "OBSERVED_PENDING_INDEPENDENT_REVIEW",
+      "table": "CONTROLLED_OWNER_NEGATIVE"
+    },
+    {
+      "model_calls": 0,
+      "observation_sha256": "33c774a264b97e19ea7be27572c1610d9c71ba4055592a92ea5cd3bfa20bd849",
+      "ordinal": 7,
+      "reason": "CONTROLLED_OWNER_FIXTURE",
+      "result": "OBSERVED_PENDING_INDEPENDENT_REVIEW",
+      "table": "CONTROLLED_OWNER_NEGATIVE"
+    }
+  ],
+  "schema": "c3-independent-controlled-owner-observations-v1"
+}

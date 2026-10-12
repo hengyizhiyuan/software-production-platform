@@ -1,0 +1,43 @@
+{
+  "schema": "c3-non-holdout-readonly-contract-triage-v1",
+  "source_revision": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+  "evidence_level": "CODE_INSPECTION_AND_EXISTING_DEVELOPMENT_TEST_DEFINITIONS; NOT_A_NEW_TEST_OR_MODEL_QUALIFICATION",
+  "sealed_inputs_or_oracles_read_by_implementer": false,
+  "new_model_calls": 0,
+  "new_tests": 0,
+  "runtime_or_test_code_changed": false,
+  "observations": [
+    {
+      "source": "src/spg/application/governed_obligations.py:1215",
+      "owner_method": "validate_projection_components",
+      "stable_error": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "observed_rule": "Each original source's semantic text requires complete non-whitespace character coverage by exact half-open source component spans. Quotes, fact references and review fingerprints are independently checked."
+    },
+    {
+      "source": "src/spg/application/governed_obligations.py:1350",
+      "owner_method": "validate_projection_candidate",
+      "stable_error": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "observed_rule": "Conflict concerns the same physical span and quote with incompatible RETAIN_CONTEXT/UNRESOLVED and another disposition; it is not a blanket prohibition of distinct components or current/future executable contributions in one source."
+    },
+    {
+      "source": "tests/test_c3_semantic_contract_calibration.py",
+      "existing_development_contracts": [
+        "test_same_source_same_capability_distinct_components_and_historical_review_shape",
+        "test_distinct_background_and_candidate_components_have_separate_dispositions",
+        "test_distinct_unresolved_component_is_preserved_and_runtime_admission_stops"
+      ],
+      "limitation": "Definitions express the intended legal alternatives; this inspection neither reruns nor upgrades their historical test receipts."
+    },
+    {
+      "source": "tests/test_c3_generation_owner_domains.py",
+      "existing_development_contracts": [
+        "test_v10_generation_excludes_only_contradictory_whole_component_dispositions",
+        "test_v10_feedback_identifies_both_original_conflicting_routes_without_selecting_a_repair",
+        "test_v10_and_historical_v9_conflict_stop_replay_preserves_budget_receipts_and_peer_identity"
+      ],
+      "limitation": "Existing feedback and immutable replay boundaries remain present; no new exact-basis legal binding or model convergence is demonstrated by reading these definitions."
+    }
+  ],
+  "conclusion": "No new B-class defect is established by this common-rule inspection. The three exact failed Holdout bases remain A/B UNKNOWN. Neither code inspection, a different development fixture nor the real-G0 success can replace their failed qualification.",
+  "next_boundary": "Further causal proof must use authorized non-Holdout development evidence while preserving implementer blindness and the terminal independent suite. No new models, budget reset, source patch or qualification-set creation follows from this receipt."
+}

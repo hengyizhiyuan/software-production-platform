@@ -1,0 +1,67 @@
+{
+  "containers": [
+    {
+      "exit_code": 0,
+      "host_ports_published": false,
+      "id": "df6cf5bc7820c518ae451a3894867a1cc104fd888482255fa0d46d288ea85b73",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "name": "watt-c3-independent-holdout-20261012-092000z-migration",
+      "runtime_source_overlay": false,
+      "status": "exited"
+    },
+    {
+      "exit_code": 0,
+      "host_ports_published": false,
+      "id": "4ad93849d793ac83c84c12ec3cfe46b7a34b85748c4842c1af6263aefa3f3d86",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "name": "watt-c3-independent-holdout-20261012-092000z-controls",
+      "runtime_source_overlay": false,
+      "status": "exited"
+    },
+    {
+      "exit_code": 1,
+      "host_ports_published": false,
+      "id": "71fc1f359b78fb21a85cf3a86821f165d04e8d400ab1db26e537a07f2d2af1ea",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "name": "watt-c3-independent-holdout-20261012-092000z-retention-completion",
+      "runtime_source_overlay": false,
+      "status": "exited"
+    },
+    {
+      "exit_code": 0,
+      "host_ports_published": false,
+      "id": "36a235c78fbae6d2920cda009702d34d601b12509b6f07b29132e5aa6e128629",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "name": "watt-c3-independent-holdout-20261012-092000z-retention-completion-v2",
+      "runtime_source_overlay": false,
+      "status": "exited"
+    },
+    {
+      "exit_code": 0,
+      "host_ports_published": false,
+      "id": "2a411af0a17ecf2093826a7716b26568514a198ab990f7f1cb7b9607c4a4fe37",
+      "image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+      "name": "watt-c3-independent-holdout-20261012-092000z-live",
+      "runtime_source_overlay": false,
+      "status": "exited"
+    },
+    {
+      "exit_code": 0,
+      "host_ports_published": false,
+      "id": "bd1e4705ca340b20d6d9461bbb70e56e7240135d74b9f95663f2a9f8b632b71c",
+      "image": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+      "name": "watt-c3-independent-holdout-20261012-092000z-pg",
+      "runtime_source_overlay": false,
+      "status": "exited"
+    }
+  ],
+  "database_volume_retained": "watt-c3-independent-holdout-20261012-092000z-pg",
+  "dedicated_network_retained": "watt-c3-independent-holdout-20261012-092000z-net",
+  "new_dedicated_postgres_stopped_after_all_known_outcomes": true,
+  "new_writable_scope": "Only new evidence root and dedicated isolated PostgreSQL volume; frozen image read-only; qualification control/spec mounts read-only",
+  "old_resources_modified": false,
+  "private_credentials_retained_mode": "0600",
+  "private_root": "/data/watt/c3-semantic-convergence-20261009/independent-holdout-preflight-20261012-092000Z",
+  "resource_monetary_cpu_peak_memory_cost": "UNKNOWN",
+  "schema": "c3-independent-qualification-resource-retention-v1"
+}

@@ -1,0 +1,9 @@
+{
+  "schema": "c3-independent-live-runtime-observation-v1",
+  "actual_container_id": "2a411af0a17ecf2093826a7716b26568514a198ab990f7f1cb7b9607c4a4fe37",
+  "actual_image_id": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "exit_code": 0,
+  "wall_seconds": 315.7392384199193,
+  "source_overlay": false,
+  "existing_owner_or_database_mutations": false
+}

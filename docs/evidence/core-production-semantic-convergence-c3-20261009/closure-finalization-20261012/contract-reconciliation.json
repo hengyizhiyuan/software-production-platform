@@ -1,0 +1,15 @@
+{
+  "schema": "c3-closure-contract-reconciliation-v1",
+  "evidence_base": "0acb09e721ea99236a434add51b95a77ae055757",
+  "application_source": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+  "runtime_src_difference_paths": [],
+  "original_mission_sha256": "4207e4cb4d01acc09ddcdbd9df63730e92ea0b23d3c602024747e0d1c5ae3e67",
+  "human_gates_required_to_execute_for_c3": false,
+  "independent_final_freeze_qualification": "NOT_YET_ESTABLISHED",
+  "initial_audit_sha256": "ffc0bfe78c6c25b91510881e562521178e3c0a4510951b65d38de07b93cdea4b",
+  "initial_audit_followup": "Independent private coverage and actual-source identity reconciliation authorized under existing Human independent-qualification task; no model call until scope and budgets proved. Initial authorization interpretation is a reviewer opinion, not a new Human rule.",
+  "source_changes": false,
+  "old_evidence_changed": false,
+  "implementer_read_holdout_inputs": false,
+  "qualification_authority": "original Mission and current Human instruction; no change to sealed expectations, budgets or old terminal results"
+}

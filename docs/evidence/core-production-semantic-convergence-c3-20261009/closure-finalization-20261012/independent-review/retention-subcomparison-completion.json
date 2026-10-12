@@ -1,0 +1,15 @@
+{
+  "completed_comparisons_replayed": false,
+  "current_required_components": 1,
+  "external_effect_attempted": false,
+  "human_authority_created": false,
+  "model_calls": 0,
+  "predicates_passed": true,
+  "previous_empty_selector_observation_preserved": true,
+  "previous_observation_sha256": "33c774a264b97e19ea7be27572c1610d9c71ba4055592a92ea5cd3bfa20bd849",
+  "private_observation_sha256": "7190ec11b8826de05083b03055ff35c9c2e5714f8701d1883c927d15d9d8494f",
+  "retention_components": 2,
+  "schema": "c3-uninvoked-retention-subcomparison-completion-v1",
+  "stable_evidence_method": "RETAIN_AUTHORITATIVE_CONTEXT",
+  "truth_boundary": "CONTROLLED_OWNER_FIXTURE"
+}

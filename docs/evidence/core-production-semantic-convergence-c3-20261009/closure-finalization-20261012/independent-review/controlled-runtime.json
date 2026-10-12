@@ -1,0 +1,10 @@
+{
+  "schema": "c3-independent-controlled-runtime-observation-v1",
+  "actual_container_id": "4ad93849d793ac83c84c12ec3cfe46b7a34b85748c4842c1af6263aefa3f3d86",
+  "actual_image_id": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "exit_code": 0,
+  "wall_seconds": 8.927439894992858,
+  "model_calls": 0,
+  "source_overlay": false,
+  "existing_owner_records_or_database_modified": false
+}

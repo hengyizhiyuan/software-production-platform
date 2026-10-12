@@ -1,0 +1,94 @@
+{
+  "actual_model_observed_count": 14,
+  "actual_model_pending_count": 14,
+  "attempt_wire_feedback_links": "Verified same inventory/Wire table across model attempts; second request links to first actual validation receipt. Final assessment contains opaque hashes only.",
+  "case_inventory_complete": true,
+  "cases": [
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 18,
+      "journal_sha256": "a601842fac799b398ba87851f72c69c83f374e1a6f033d7485b74d09dd0652f7",
+      "observed": 3,
+      "opaque_ordinal": 0,
+      "pending": 3,
+      "uninvoked_retention_completed": false,
+      "unknown": 0
+    },
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 18,
+      "journal_sha256": "d6e78b0c39d7e384d4f0e0955a86d6b27978aa909e158ad7ea9ae46acf4cd639",
+      "observed": 3,
+      "opaque_ordinal": 1,
+      "pending": 3,
+      "uninvoked_retention_completed": false,
+      "unknown": 0
+    },
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 18,
+      "journal_sha256": "e750a346f6c4f19a7c0d2aa1b5b5d65c7cc599502a4f6f63f1a21f85fedef7e2",
+      "observed": 3,
+      "opaque_ordinal": 2,
+      "pending": 3,
+      "uninvoked_retention_completed": false,
+      "unknown": 0
+    },
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 25,
+      "journal_sha256": "1bf0d93df8fbdba2fa5c33dee7db7cd8c41d2100571ee18ea2e50df05338b751",
+      "observed": 5,
+      "opaque_ordinal": 3,
+      "pending": 5,
+      "uninvoked_retention_completed": false,
+      "unknown": 0
+    },
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 4,
+      "journal_sha256": "9090fc99f44d76bb149300932495ad366d8ec5e4a04204d8cd526a60287ebf7e",
+      "observed": 0,
+      "opaque_ordinal": 4,
+      "pending": 0,
+      "uninvoked_retention_completed": false,
+      "unknown": 0
+    },
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 4,
+      "journal_sha256": "cf0224efd5b76deabbbc3600e8d1a9f154b45043ae25dbcb47b72bc1855cdf77",
+      "observed": 0,
+      "opaque_ordinal": 5,
+      "pending": 0,
+      "uninvoked_retention_completed": false,
+      "unknown": 0
+    },
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 4,
+      "journal_sha256": "154848acbd303771cc1571ca0c3d12dfb58848b281e9c3f6542aa0cc8a58e133",
+      "observed": 0,
+      "opaque_ordinal": 6,
+      "pending": 0,
+      "uninvoked_retention_completed": false,
+      "unknown": 0
+    },
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 7,
+      "journal_sha256": "b1f66ea5baa77a541f9b3b5e39f1fa0f241836c51a155d01c750ec8a687e43c3",
+      "observed": 0,
+      "opaque_ordinal": 7,
+      "pending": 0,
+      "uninvoked_retention_completed": true,
+      "unknown": 0
+    }
+  ],
+  "duplicate_case_terminal_count": 0,
+  "first_retention_mechanical_false_and_import_failure_preserved": true,
+  "only_uninvoked_retention_comparison_completed": true,
+  "private_receipt_file_count": 217,
+  "schema": "c3-independent-qualification-receipt-continuity-v1",
+  "unresolved_outcomes": 0
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "c3-independent-public-delivery-privacy-v2",
+  "allowlist": [
+    "qualification-review-final.json",
+    "model-usage-final.json",
+    "receipt-continuity-final.json",
+    "minimum-next-action.json",
+    "seal-preservation-final.json",
+    "resource-retention-final.json",
+    "frozen-source-identity.json",
+    "safe-crosswalk.json",
+    "mechanical-adapter-change-public.json",
+    "pure-config-check.json",
+    "facilities-preparation-failure-recovery.json",
+    "facilities-preparation.json",
+    "controlled-runtime.json",
+    "controlled-observations.json",
+    "retention-mechanical-preparation-recovery.json",
+    "retention-subcomparison-completion.json",
+    "live-execution-readiness.json",
+    "live-runtime.json"
+  ],
+  "private_input_or_oracle_or_literal_or_credential_matches": 0,
+  "full_input_or_oracle_or_raw_wire_included": false,
+  "qualification_tool_source_included": false,
+  "source_code_excerpt_included": false,
+  "private_directories_excluded": true,
+  "original_privacy_receipt_preserved": true,
+  "mechanical_diff_published_as_hash_and_description_only": true
+}

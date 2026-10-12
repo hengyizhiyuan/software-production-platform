@@ -1,0 +1,15 @@
+{
+  "schema": "c3-independent-isolated-facilities-preparation-v1",
+  "migration_exit_code": 0,
+  "actual_image_id": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "migration_container_id": "df6cf5bc7820c518ae451a3894867a1cc104fd888482255fa0d46d288ea85b73",
+  "database_name": "c3_independent_final_generation20_20261010",
+  "dedicated_postgres_container": "watt-c3-independent-holdout-20261012-092000z-pg",
+  "dedicated_network": "watt-c3-independent-holdout-20261012-092000z-net",
+  "host_ports_published": false,
+  "production": false,
+  "existing_db_or_work_mutations": false,
+  "model_calls": 0,
+  "private_sealed_specification_sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0",
+  "configuration_values_or_credentials_disclosed": false
+}

@@ -1,0 +1,55 @@
+{
+  "schema": "c3-independent-live-execution-readiness-v1",
+  "status": "READY_EXISTING_AUTHORIZED_UNUSED_SEALED_SUITE",
+  "controlled_owner_results": [
+    {
+      "ordinal": 4,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER",
+      "initial_observation_sha256": "dbb81af20121f3bc8a6dc7a076bc45b29392ae08e857d604af5ca67840f733b3",
+      "first_mechanical_omission_preserved": false,
+      "model_calls": 0
+    },
+    {
+      "ordinal": 5,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER",
+      "initial_observation_sha256": "e887d798a32a28229a9aecc2064f6ba96ddf9987e12aa949a5aeeb0afc1512f4",
+      "first_mechanical_omission_preserved": false,
+      "model_calls": 0
+    },
+    {
+      "ordinal": 6,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER",
+      "initial_observation_sha256": "4ce7df67ea77c79a90e8fae027b1a04a86c5f1922f970c52cf9024f0b4e2cc35",
+      "first_mechanical_omission_preserved": false,
+      "model_calls": 0
+    },
+    {
+      "ordinal": 7,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER",
+      "initial_observation_sha256": "33c774a264b97e19ea7be27572c1610d9c71ba4055592a92ea5cd3bfa20bd849",
+      "first_mechanical_omission_preserved": true,
+      "model_calls": 0
+    }
+  ],
+  "sealed_specification_sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0",
+  "private_mechanical_plan_sha256": "ce61a782340a7a7db1a9774d672369f5c1e06af17e8ea447230494cda2a3d6f8",
+  "recipe_adapter_sha256": "6dff6f919bf514c3d2eb938406f0987482f1746c6cc306d7e96f4d178d0fd9f0",
+  "execution_freeze_sha256": "88cb25e0cb0170675cc341c8dc380b6d8aa6f6396bcd256aed03db40f71d1dd1",
+  "actual_image_id": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "empty_actual_model_pending_counters_verified": true,
+  "formation_review_logical_total_upper_bound": 16,
+  "formation_review_per_case_upper_bound": 4,
+  "live_cases": 4,
+  "wic_budget": "Unchanged existing Owner separate ledger; no additional retry",
+  "model": "deepseek-flash",
+  "formation_review_reasoning": "none",
+  "max_output_tokens": 16384,
+  "timeout_seconds": 120,
+  "unknown_result_stops_new_call": true,
+  "actual_http_transmissions": "UNKNOWN unless independently observed; Provider retries recorded separately",
+  "historical_original_suite_33_calls_retained_not_replayed": true,
+  "future_human_authority": "PENDING",
+  "external_effects": false,
+  "full_work_pass_claimed": false,
+  "public_content_or_oracle_disclosure": false
+}

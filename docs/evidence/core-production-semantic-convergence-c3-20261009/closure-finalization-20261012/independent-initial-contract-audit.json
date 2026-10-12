@@ -1,0 +1,73 @@
+{
+  "schema": "c3-independent-holdout-closure-contract-audit-v1",
+  "observed_at_utc": "2026-10-12T08:53:08Z",
+  "reviewer_authority": "Independent qualification engineering reviewer; not Human Acceptance",
+  "status": "EXECUTION_BOUNDARY_REQUIRES_DECISION",
+  "classification": "Qualification identity, prior consumption and authorization boundary; not a newly observed model variance or engineering defect",
+  "current_execution": {
+    "model_calls": 0,
+    "tokens": 0,
+    "transport_attempts": 0,
+    "business_works_created": 0,
+    "owner_or_database_mutations": 0,
+    "code_changes": 0,
+    "new_holdout_created": false,
+    "human_acceptance": false,
+    "c3_closure_supported": false,
+    "sealed_inputs_or_oracles_disclosed_to_implementation": false
+  },
+  "original_contract": {
+    "mission_sha256_verified": "4207e4cb4d01acc09ddcdbd9df63730e92ea0b23d3c602024747e0d1c5ae3e67",
+    "mission_binding": "The unchanged Mission requires independent engineering qualification across prescribed semantic and governance categories. Its text does not permanently bind Closure to 24 items or one specification hash.",
+    "specific_execution_binding": "The original 24-case runner, sealed inventory and completed qualification do bind exact SHA256, all ordinals and frozen identities. They cannot be silently rebound, omitted, relabelled unseen or replayed by resetting journals.",
+    "original_sha256_verified_local_and_ecs": "770828adeabec942548218c17bc6e9dbb9222ce19df19bc89c260f28ed8f4cf0",
+    "case_count": 24,
+    "category_count": 8,
+    "seal_preserved": true,
+    "ecs_sealed_file_mode": "0600",
+    "ecs_private_evidence_directory_mode": "0700",
+    "original_runner_sha256": "718d6f73c5b8143f8f362f31857d1cfb305792da25cb6eb28c1295541b7577eb",
+    "original_adapter_sha256": "251a4df3f6a53e908ef3a2c8eb54c1afe0c832ba3309605501123cf6f7e7cb3a",
+    "allowed_boundary": "Live WIC/IRK and Formation in explicitly unadmitted qualification basis; actual deterministic Owner probes using declared isolated fixtures. This does not establish full normal Work qualification.",
+    "private_recovery_root": "/data/watt/c3-semantic-convergence-20261009/holdout-final-qualification-20261010",
+    "historical_public_receipts_root": "/data/watt/c3-semantic-convergence-20261009/holdout-final-qualification-20261010/evidence",
+    "historical_result": "NOT_QUALIFIED",
+    "historical_aggregate_counts": {"FAIL": 8, "PARTIAL_NOT_AT_REQUIRED_GATE": 1, "PASS_SCOPED_CONTROLLED_OWNER": 14, "NOT_REACHED": 1},
+    "prior_consumption": {"pending": 33, "observed": 33, "failed": 0, "unresolved_model_outcomes": 0, "formation_calls": 19, "wic_calls": 14, "input_tokens": 629553, "output_tokens": 159718, "cached_tokens": 167680, "reasoning_tokens": 61467, "total_tokens": 789271, "transport_retry_count": 0, "model_call_wall_seconds_sum": 561.6341480253614, "case_wall_seconds_sum": 573.951633270015, "independent_http_transmissions": "UNKNOWN", "monetary_cpu_peak_memory_cost": "UNKNOWN"},
+    "budget_interpretation": "Nine live cases have terminal journals. Their Formation maximum is 36 logical calls and recorded use is 19; the arithmetic headroom of 17 is not permission to reopen terminal cases or create new case journals. WIC has its unchanged separate Owner budget. Original receipts are not erased or reset.",
+    "future_reuse_boundary": "These cases cannot again be claimed unseen independent Holdout. Future qualification requires an independently sealed set or explicitly disclosed regression classification; implementation inputs/oracles remained private."
+  },
+  "existing_other_seals": {
+    "consumed_fresh_20261010": {"sha256": "662a22145c91d7bb1f284b0ba5feff08a8d4d8e0746704abaf9c08248838f82c", "case_count": 8, "qualification": "NOT_QUALIFIED", "unseen_eligibility": false},
+    "unused_initial_seal": {"sha256": "a7ed5542f76e26de78db4ad5c11ebf0249bb3214e7c70a4a7a6055b556887092", "sealed_at_utc": "2026-10-10T14:35:00.508639+00:00", "case_count": 8, "model_journal_files": 0, "private_root": "/data/watt/c3-semantic-convergence-20261009/final-independent-holdout-generation19-20261010"},
+    "unused_rebound_seal": {"sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0", "sealed_at_utc": "2026-10-10T14:43:37.680076+00:00", "case_count": 8, "live_case_count": 4, "controlled_case_count": 4, "formation_maximum_logical_calls": 16, "model_journal_files": 0, "same_case_inventory_sha256": "ea3a73609afc6283aa6aaf3d6cf443108bdb8ee3e4497d304e2beeb246693ab3", "opaque_copy_roots": ["/data/watt/c3-semantic-convergence-20261009/final-independent-holdout-generation20-20261010", "/data/watt/c3-semantic-convergence-20261009/final-independent-holdout-generation25-20261011", "/data/watt/c3-semantic-convergence-20261009/final-independent-holdout-generation28-20261011"], "metadata_independence": "Implementer access is false; exposed old sets reused is false; no execution journals or qualification results were found in these packages. Metadata was inspected without displaying case inputs/oracles.", "scope_preservation_rule": "All original categories and necessary negative gates remain obligations; this 8-case package does not certify 24 prior scenarios. Independent post-G0 unseal must establish coverage crosswalk; any uncovered necessary item remains NOT_QUALIFIED.", "crosswalk": "NOT_EVALUATED_METADATA_HAS_NO_PER_SCENARIO_MAPPING", "embedded_legacy_freeze": "Preserved unchanged and differs from current freeze", "current_transfer_authorization": "Not established under the current explicit instruction to preserve original Holdout and not substitute a suite"},
+    "coverage_conclusion": "Metadata declares broad original-category coverage for the unused suite, but does not prove a complete original-obligation crosswalk. Neither missing coverage nor complete coverage is established. This reviewer did not replace the original suite or open case inputs/oracles to manufacture a crosswalk."
+  },
+  "current_frozen_identity": {
+    "evidence_head": "0acb09e721ea99236a434add51b95a77ae055757",
+    "branch": "codex/c3-open-semantic-obligation-convergence",
+    "requested_watt_revision": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+    "requested_watt_tree": "daa0a41b756755c7f88f347ee18c68ecd99273b0",
+    "requested_guardian_revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+    "requested_guardian_tree": "92ac992c03bd84923a569bbe9f314c0786457040",
+    "requested_ecf_revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "actual_docker_image_id": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+    "image_created": "2026-10-12T15:57:37.057889111+08:00",
+    "docker_watt_labels_match": true,
+    "docker_ecf_label_matches": true,
+    "docker_guardian_revision_label": "5c88ffb9318e68d11b0cfb2af38048e6452bf881",
+    "docker_guardian_tree_label": "df757ab48aac8928896e3f17619e64a7642a6ea3",
+    "guardian_label_binding": "MISMATCH_REQUIRES_AUTHORITATIVE_IMPORT_ATTESTATION_OR_SAFE_IDENTITY_RECONCILIATION; no capability defect inferred",
+    "current_installed_imports": "NOT_RETESTED; parent existing attestation may resolve metadata correspondence"
+  },
+  "precise_remaining_gates": [
+    "Decide whether qualification may use the already independently sealed, unexecuted 8-case inventory with all original category and negative-gate obligations retained; no new Holdout, no oracle change, no implicit substitution.",
+    "If authorized, independent private coverage crosswalk and unchanged-harness/current-freeze binding must be established before model calls. Uncovered requirements remain NOT_QUALIFIED.",
+    "Resolve requested Guardian identity against image labels through existing authoritative actual-import evidence.",
+    "Supply only safe parent final normal-G0 and PG-gate result metadata required by the existing unused seal; no G0 inputs, Candidate content or repair context.",
+    "Preserve applicable model, timeout, tokens, per-case recovery and cumulative budget; no repeated terminal case or automatic retry."
+  ],
+  "minimum_human_decision_question": "是否允许独立 Reviewer 使用既有、未执行的8项封存包（3f093e…），先私下核对原全部类别与必要 Gate 覆盖，再在当前冻结身份上按原预算执行；原24项失败和全部义务保留，未覆盖项仍为 NOT_QUALIFIED？",
+  "no_mutation_attestation": "Old seals, historical receipts, code, image, existing Work/Candidate/DB and production were not modified. Only a new independent review receipt directory is created.",
+  "forbidden_context": "Original G0 input, successful Candidate contents, human repair context and guardian-coverage-recovery-20261012/report.md were not read."
+}

@@ -1,0 +1,12 @@
+{
+  "schema": "c3-holdout-pure-configuration-check-v1",
+  "status": "PASS",
+  "unchanged_runner_check_freeze": "PASS_WITH_CURRENT_EXTERNAL_FREEZE_AND_EXISTING_ACTUAL_IMPORTS",
+  "adapter_database_name_aligned": "c3_independent_final_generation20_20261010",
+  "application_imports_or_owner_methods_called": false,
+  "model_calls": 0,
+  "execution_enabled": false,
+  "sealed_specification_sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0",
+  "runner_sha256": "ef8fe306e1bd0b568bc1e3ebb9a418c23d872ec4321f82b89aa852e91d7366f3",
+  "adapter_sha256": "ce755cc9fbd4ac16adfebaca6e286899805a32708fe1b5210ec65f2a87e564e4"
+}

@@ -1,0 +1,168 @@
+{
+  "schema": "c3-closure-finalization-publication-v1",
+  "captured_at_utc": "2026-10-12T10:15:54.541158+00:00",
+  "branch": "codex/c3-open-semantic-obligation-convergence",
+  "runtime_revision": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+  "status": "C3_PARTIAL_INDEPENDENT_HOLDOUT_NOT_QUALIFIED",
+  "files": [
+    {
+      "file": "closure-contract-matrix.md",
+      "bytes": 4615,
+      "sha256": "6e54841f8513d4a552918a1641400cdeba8f6780688b2c23560e7efecf807c34"
+    },
+    {
+      "file": "contract-reconciliation.json",
+      "bytes": 1093,
+      "sha256": "c93e55b41e84eb44755bfa4eb7f0ff7e8ca0eb0d848735d222f6794f74c7aab1"
+    },
+    {
+      "file": "independent-frozen-source-identity.json",
+      "bytes": 6214,
+      "sha256": "a8729d29cca19ba7c0c67eda3e1edede5cd6854cc5158349bb92cf9cc41e4eec"
+    },
+    {
+      "file": "independent-initial-contract-audit.json",
+      "bytes": 8683,
+      "sha256": "ffc0bfe78c6c25b91510881e562521178e3c0a4510951b65d38de07b93cdea4b"
+    },
+    {
+      "file": "independent-live-execution-readiness.json",
+      "bytes": 2438,
+      "sha256": "8c02603c19503427f593f3d5123065b805ad3f5c6398c6566b3cb5601c90f28e"
+    },
+    {
+      "file": "independent-pure-config-check.json",
+      "bytes": 639,
+      "sha256": "31f97582b47e3a3699286296d4b2ce57cd667e9a9a68a22710d5b3e34fa49555"
+    },
+    {
+      "file": "independent-review/controlled-observations.json",
+      "bytes": 1899,
+      "sha256": "ea347c9151bd2276c667e6830edf8c4df44bb2762268b75288b21f84c2f79e4e"
+    },
+    {
+      "file": "independent-review/controlled-runtime.json",
+      "bytes": 413,
+      "sha256": "188887a113d57645b6dfa3134ca941f1a52b7cd008405d390a62644bfd7173ea"
+    },
+    {
+      "file": "independent-review/facilities-preparation-failure-recovery.json",
+      "bytes": 476,
+      "sha256": "22b1be80db0a1fac020f59ddeafd6e7eeb2360e7292fe7bb44e9684d4d1e5d37"
+    },
+    {
+      "file": "independent-review/facilities-preparation.json",
+      "bytes": 797,
+      "sha256": "00c88efef6dfbb575fa4241de62a1187d6cdfe277d6c66b84b1cb7989a664e74"
+    },
+    {
+      "file": "independent-review/frozen-source-identity.json",
+      "bytes": 6214,
+      "sha256": "a8729d29cca19ba7c0c67eda3e1edede5cd6854cc5158349bb92cf9cc41e4eec"
+    },
+    {
+      "file": "independent-review/live-execution-readiness.json",
+      "bytes": 2438,
+      "sha256": "8c02603c19503427f593f3d5123065b805ad3f5c6398c6566b3cb5601c90f28e"
+    },
+    {
+      "file": "independent-review/live-runtime.json",
+      "bytes": 380,
+      "sha256": "cdd744836a788ad752258dd747ff164695b8e57d12cf7c25ceb53c3e1c077b82"
+    },
+    {
+      "file": "independent-review/mechanical-adapter-change-public.json",
+      "bytes": 960,
+      "sha256": "299b0e42b2ef0389658b23b1268cfa76893bbb92107abacae810083bd9621f0f"
+    },
+    {
+      "file": "independent-review/minimum-next-action.json",
+      "bytes": 1598,
+      "sha256": "a80c76d96b500ebd699aa821ac1a6e15a74c56dc61105d083639ffa58ff67a9a"
+    },
+    {
+      "file": "independent-review/model-usage-final.json",
+      "bytes": 15091,
+      "sha256": "b62f89176b5d1d131923b44b9bba4f9a187cf790177b6845fe5443796756487c"
+    },
+    {
+      "file": "independent-review/privacy-scan-final-v2.json",
+      "bytes": 1104,
+      "sha256": "f7160bbbe0f06b67855d07a9968b363ad394e4d4023d6cd154abd44fe8cebff0"
+    },
+    {
+      "file": "independent-review/public-delivery-receipt-final-v2.json",
+      "bytes": 1766,
+      "sha256": "a916e039436a12b83c39c6efe96eebab4434c2e30cd156f560abd2809e6b7cea"
+    },
+    {
+      "file": "independent-review/public-manifest-final-v2.json",
+      "bytes": 3405,
+      "sha256": "8383441830afb482dd8d602fcd069e24ce771edfa721322d9bf3931e858ee760"
+    },
+    {
+      "file": "independent-review/pure-config-check.json",
+      "bytes": 639,
+      "sha256": "31f97582b47e3a3699286296d4b2ce57cd667e9a9a68a22710d5b3e34fa49555"
+    },
+    {
+      "file": "independent-review/qualification-review-final.json",
+      "bytes": 25845,
+      "sha256": "9775ab3523c9cab6bdc80aacdd00a7ae71dcf83db0bc284affda05eef9a9ed42"
+    },
+    {
+      "file": "independent-review/receipt-continuity-final.json",
+      "bytes": 2987,
+      "sha256": "a429337f722fb69bfe96ef67b46df4b8a18f658f0184b40902fde60f07319ed7"
+    },
+    {
+      "file": "independent-review/resource-retention-final.json",
+      "bytes": 3012,
+      "sha256": "4aa25324f788c83fca0ac81bda3917d542fbc2f47e9f09ccdfbb4e9a132aa720"
+    },
+    {
+      "file": "independent-review/retention-mechanical-preparation-recovery.json",
+      "bytes": 608,
+      "sha256": "93fab9c9867e0f047a92fa6de3ec180d3c16957f52bfc9f268c566cc8f3f6b14"
+    },
+    {
+      "file": "independent-review/retention-subcomparison-completion.json",
+      "bytes": 666,
+      "sha256": "a354766310dcce9a4862b8e554dfdb1968b7d46f7dddadcbb46e24450e8a667f"
+    },
+    {
+      "file": "independent-review/safe-crosswalk.json",
+      "bytes": 10897,
+      "sha256": "5c693f4ca8485a812bf759f360ded5d6b40b270a345ba79c5928251a451aa62a"
+    },
+    {
+      "file": "independent-review/seal-preservation-final.json",
+      "bytes": 926,
+      "sha256": "72849fe1cb00dbd1b71e0719bd9785fd6e99c59c0a1cdd167d6399b6244db7cb"
+    },
+    {
+      "file": "independent-scope-preflight.json",
+      "bytes": 10897,
+      "sha256": "5c693f4ca8485a812bf759f360ded5d6b40b270a345ba79c5928251a451aa62a"
+    },
+    {
+      "file": "non-holdout-readonly-triage.json",
+      "bytes": 3001,
+      "sha256": "45a91e505d757036c008e87ffc5c77b586a2b8ab1b07e2112334b264eb8c0986"
+    },
+    {
+      "file": "report.md",
+      "bytes": 7580,
+      "sha256": "504f287de86b6914fc41dbb24db3679926cb335e7b94fc85e1b63ce5c6b55f36"
+    }
+  ],
+  "private_holdout_contents_included": false,
+  "source_code_changes": false,
+  "public_evidence_recovery_root": "/data/watt/c3-semantic-convergence-20261009/closure-finalization-20261012",
+  "independent_private_recovery_root": "/data/watt/c3-semantic-convergence-20261009/independent-holdout-preflight-20261012-092000Z",
+  "source_delivery_archive_sha256": "ca841c2a78f659ad8ce363116f1c55fbff239fcabf547ee0f854c47e3974b879",
+  "external_preflight_origin": {
+    "root": "/data/watt/c3-semantic-convergence-20261009/independent-holdout-preflight-20261012-092000Z/evidence",
+    "imported_prefixed_files_are_exact_source_copies": true
+  }
+}
