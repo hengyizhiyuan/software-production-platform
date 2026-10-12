@@ -1,0 +1,34 @@
+{
+  "event": "FINISHED",
+  "status": "COMPLETED",
+  "request_id": "0bf80dc8-f233-4013-a847-c6986de29963",
+  "verification": "CITATIONS_AND_STRUCTURE_PASS",
+  "failure": null,
+  "kernel_result": {
+    "runtime_mode": "FINISHED",
+    "terminal_outcome": "RESULT_READY",
+    "final_checkpoint_id": "123fdd49-48dd-410b-90bf-f0e0f74050b3",
+    "step_count": 10,
+    "inference_submissions": 10,
+    "tool_effects": 28,
+    "summary": "历史 Work 3ee622b5-b816-5679-afdc-e5de51cd2702 的调查报告已完成并通过校验。报告的第一次提交与分析修订曾被拒（分别是 regression_qualification 与契约准则不一致、以及自由文本式的历史缺失断言），随后在同契约内用有界编辑修正，最终 analysis.revise 返回 CITATIONS_AND_STRUCTURE_PASS，report_digest=5b28a8237e7b2b0120cdf063f5ecc4991a9ac3faf6f60a7e9319c36676723fe6。",
+    "result_claim": {
+      "output_vector": {
+        "report_digest": "5b28a8237e7b2b0120cdf063f5ecc4991a9ac3faf6f60a7e9319c36676723fe6",
+        "verification": "CITATIONS_AND_STRUCTURE_PASS",
+        "semantic_correctness": "HUMAN_REVIEW_REQUIRED",
+        "production_authority": "NONE",
+        "advisory_only": true
+      },
+      "evidence_ids": [],
+      "summary": "覆盖 Intent→Context→Planning→Execution→Verification→Failure→Recovery→Final State 的顾问式报告，包含 5 项 finding（F1 process.run 可执行项未入允许清单、F2 推理决策结构化校验被拒、F3 semantic/scope 范围诊断、F4 被拒推理原始响应采集缺口、F5 交付审计客户端状态），并分别给出恢复、Self-Refine、平台改进与延期建议；未被支撑的历史成因保持 UNKNOWN。"
+    },
+    "residual_obligations": [],
+    "resource_retryable": true,
+    "failure_family": null,
+    "observation_evidence": {}
+  },
+  "original_owner_records": "UNCHANGED",
+  "original_owner_digest": "2e3b1d60025c720a12c4e24ccac3bb30fc27f0b5020328ee1cba04efed3ae9ca",
+  "storage_root": "/var/lib/spg/native-executor/trace-analysis"
+}

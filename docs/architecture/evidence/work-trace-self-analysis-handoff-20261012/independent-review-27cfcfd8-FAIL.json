@@ -1,0 +1,19 @@
+{
+  "source_commit": "27cfcfd871f6a96fe21d2cc9ff0add8e96ae8b8d",
+  "request_id": "0bf80dc8-f233-4013-a847-c6986de29963",
+  "report_digest": "5b28a8237e7b2b0120cdf063f5ecc4991a9ac3faf6f60a7e9319c36676723fe6",
+  "native_status": "COMPLETED",
+  "independent_semantic_review": "FAIL",
+  "original_owner_records": "UNCHANGED",
+  "deployment_gate": "REJECTED_KEEP_ROLLBACK",
+  "errors": [
+    {
+      "locations": [
+        "findings/3/recommendation",
+        "platform_improvements/0/statement"
+      ],
+      "reason": "Unexported raw_response is broadened to historically discarded response; export alone cannot establish discard/loss"
+    }
+  ],
+  "correction_to_prior_reviewer_notes": "Frozen receipt effect_id 0faefc4c-21ab-4111-8157-0d448e7fe740 resolves to file.read, not preview.inspect; newest report correctly cites original effect. Prior summary note was incorrect."
+}

@@ -1,0 +1,22 @@
+{
+  "source_commit": "ecc5c747d3cefa57207d0fa31a64b29614ec9457",
+  "request_id": "2d67ac2c-c9e3-4d2f-b6a9-986e6ac96327",
+  "schema_verification": "PASS",
+  "independent_semantic_review": "FAIL",
+  "deployment_gate": "REJECTED_KEEP_ROLLBACK",
+  "original_owner_records": "UNCHANGED",
+  "errors": [
+    {
+      "location": "findings/0/recommendation + immediate_recovery",
+      "reason": "Current investigation repository.read/search incorrectly treated as admitted historical execution capabilities"
+    },
+    {
+      "location": "findings/1/analysis",
+      "reason": "Captured validation issue subtype/location generalized to different exception branches"
+    },
+    {
+      "location": "findings/2/analysis",
+      "reason": "Conditional producer mechanism under UNKNOWN without repository citation"
+    }
+  ]
+}

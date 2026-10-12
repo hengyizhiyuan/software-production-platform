@@ -1,0 +1,10 @@
+{
+  "source_commit": "27cfcfd871f6a96fe21d2cc9ff0add8e96ae8b8d",
+  "regression_tests": 210,
+  "errors": 0,
+  "failures": 0,
+  "skipped": 0,
+  "admin_js_pass": 33,
+  "build_admission": "PASS",
+  "real_work_qualification": "PENDING; NO API ACTIVATION AUTHORITY"
+}

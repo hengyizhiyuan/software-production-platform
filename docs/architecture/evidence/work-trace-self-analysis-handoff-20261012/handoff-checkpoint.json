@@ -1,0 +1,55 @@
+{
+  "handoff_date_asia_shanghai": "2026-10-12",
+  "branch": "codex/watt-trace-self-analysis",
+  "code_wip_commit": "ac3c8083a08ab91189fd48f9aa3ba7b218b6711f",
+  "last_regression_source": "27cfcfd871f6a96fe21d2cc9ff0add8e96ae8b8d",
+  "last_regression": {
+    "python_postgresql": 210,
+    "admin_js": 33,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "wip_regression": "NOT_EXECUTED_DOCKER_UNAVAILABLE",
+  "wip_added_test_cases_expected": 11,
+  "wip_full_regression_expected_not_observed": 221,
+  "latest_real_work": {
+    "work_id": "3ee622b5-b816-5679-afdc-e5de51cd2702",
+    "request_id": "0bf80dc8-f233-4013-a847-c6986de29963",
+    "native_status": "COMPLETED",
+    "terminal_outcome": "RESULT_READY",
+    "report_digest": "5b28a8237e7b2b0120cdf063f5ecc4991a9ac3faf6f60a7e9319c36676723fe6",
+    "snapshot_digest": "3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d",
+    "export_trace_sha256": "6db92ee91fd648ba138e3a6b40a46d2f09c20e078325d7b73f82896d9355e9e7",
+    "model_inferences": 10,
+    "tool_effects": 28,
+    "independent_semantic_review": "FAIL",
+    "original_owner_records": "UNCHANGED",
+    "original_owner_digest": "2e3b1d60025c720a12c4e24ccac3bb30fc27f0b5020328ee1cba04efed3ae9ca"
+  },
+  "deployment_gate": "CLOSED; NO_NEW_DEPLOYMENT",
+  "production_current": {
+    "source_commit": "8505c7bd75ca0e53be4cfd189b34eac653f8764d",
+    "api_container": "watt-cloud-worker-api-1",
+    "image": "sha256:75980116516128bffc00d322b7c6721aa6bfd1a9cae86a47d5044450ca69cf2f",
+    "status": "running",
+    "started_at": "2026-10-11T13:02:27.834026702Z",
+    "observation": "docker inspect on 2026-10-12; current application health not requalified during handoff"
+  },
+  "qualification_containers": {
+    "watt-trace-owner-qual-ecc5c747": "exited 0",
+    "watt-trace-owner-qual-27cfcfd8": "exited 0"
+  },
+  "external_local_artifact_root": "D:\\hy\\watt-trace-owner-repair-artifacts-20261011",
+  "external_server_artifact_root": "/data/watt/trace-analysis-releases",
+  "embedded_artifacts_sha256": {
+    "image-build-27cfcfd8.json": "68aab8b11e9cce2e0c91cb18ffce28f68149d889342aeba32406c05e14580829",
+    "image-preflight-27cfcfd8.json": "de6693ff2deb1ee0c6b4c855f793fbe7be46f727c806abf4cc3ce867cb97b8e9",
+    "image-source-manifest-27cfcfd8.json": "17dc77c71669901130b962821c3d38e36b7593c126187f519925cfc5260d72d3",
+    "independent-review-27cfcfd8-FAIL.json": "fc961f897d29fe9c214854700726567ed8151a71283e5fc1cb844f2b2e02fc0c",
+    "independent-review-ecc5c747-FAIL.json": "7c9fc98707adbeff495c3fa54a4e554688f717e7e97403ee3356b1ba1e7744b3",
+    "latest-model-report-NOT-QUALIFIED.json": "f04a45259b726a8e97c20e1a9ba2d0992a666b473155a7aee339965adf461ef3",
+    "latest-model-summary.json": "f3ced5f945abb5258fbbfda722ee3545b9fa63825608e65bede65048147cbd77",
+    "regression-27cfcfd8-PASS.json": "628b6baeaa49fbe3800f1e8bacd50c74d5f6de6e6d4f06f67377b148889e80fb"
+  }
+}

@@ -1,0 +1,588 @@
+{
+  "actual_execution_path": {
+    "citations": [
+      {
+        "evidence_id": "db45c5e5-4924-5d49-983f-aa1a8ba9e0e0",
+        "quote": "\"returncode\": 0,"
+      },
+      {
+        "evidence_id": "195d8b22-25fb-52b8-bbda-89251e814c3e",
+        "quote": "\"exists\": false,"
+      },
+      {
+        "evidence_id": "e1c377d4-8ec9-5956-bc72-e33054816337",
+        "quote": "\"bytes\": 926,"
+      },
+      {
+        "evidence_id": "37bfd161-c568-5789-9892-456257677951",
+        "quote": "\"message\": \"process executable is not allowlisted: ls\""
+      },
+      {
+        "evidence_id": "58a62fa5-3c9c-5f8c-8898-80e1cf40ac8c",
+        "quote": "\"reason_code\": \"NATIVE_DECISION_SCHEMA_REJECTED\","
+      },
+      {
+        "evidence_id": "58e60297-8321-535a-933d-a8ad3feb815e",
+        "quote": "\"gate\": \"PASS\","
+      },
+      {
+        "evidence_id": "f6ae6568-9478-53d5-8a1b-624e488de74d",
+        "quote": "\"repository_revision\": \"b4280990d55ac9da36eaa0dd9644006df7e8762e\","
+      },
+      {
+        "evidence_id": "966bfe82-bd73-523f-ba55-cee34f9e574e",
+        "quote": "\"state\": \"COMPLETED\","
+      }
+    ],
+    "evidence_family": "OWNER_RECORD",
+    "statement": "实际执行路径：先以 git.status 与 file.read services.html 确认工作区与目标文件状态（效果回执 0、1 均 SETTLED，其中 file.read 返回 exists=false），随后 file.write services.html 写入 926 字节并取得 SETTLED 回执（回执 2）；其后一条 process.run 效果以 FAILED 回执结束，一次 INFERENCE 步骤以 FAILED 结束（reason_code=NATIVE_DECISION_SCHEMA_REJECTED）；Guardian 记录 gate=PASS 并对 /news.html 与 /services.html 各记录一次 HTTP 200；运行时提交记录 repository_revision=b4280990d55ac9da36eaa0dd9644006df7e8762e；最终 Work 记录 state=COMPLETED、acceptance_decision=ACCEPT。"
+  },
+  "current_state": {
+    "citations": [
+      {
+        "evidence_id": "966bfe82-bd73-523f-ba55-cee34f9e574e",
+        "quote": "\"acceptance_decision\": \"ACCEPT\","
+      },
+      {
+        "evidence_id": "ef942e45-d293-5968-948f-4a02d4a35865",
+        "quote": "\"condition\": \"SEALED\","
+      },
+      {
+        "evidence_id": "58e60297-8321-535a-933d-a8ad3feb815e",
+        "quote": "\"gate\": \"PASS\","
+      }
+    ],
+    "evidence_family": "OWNER_RECORD",
+    "statement": "当前状态：Work state=COMPLETED、acceptance_decision=ACCEPT、latest_event=「Human 交付验收」、repair_status=VERIFIED、repair_result=LOCAL_OBLIGATION_RECOVERED、self_refine_count=3、pwu_count=3；候选成果 13c231ba-bc32-5f91-b391-aeeb930c91c4 处于 SEALED 且已由运行时提交承载；Guardian 记录 gate=PASS。"
+  },
+  "deferred_items": [
+    {
+      "evidence_family": "DELIVERY_TRANSFER",
+      "finding_ids": [
+        "F5-delivery-audit-client-state"
+      ],
+      "statement": "交付审计对象目前只承载完成规则说明与客户端状态取值；若未来需要客户端侧收据，应在既有权限内对相应表面做独立检查，在获得该类证据前保持 UNKNOWN。"
+    },
+    {
+      "evidence_family": "OWNER_RECORD",
+      "finding_ids": [
+        "F1-tool-executable-allowlist-rejection",
+        "F2-inference-decision-schema-rejected",
+        "F3-scope-inflation-diagnostic"
+      ],
+      "statement": "该 Work 的闭环证据由不同 Owner 表面分别记录（执行效果回执、推理步骤、Guardian 观测、运行时提交、Human 验收）；后续复核应区分执行观测与 Owner 诊断，不把诊断标签计入执行失败计数，也不以单一表面否定另一表面的正向证据。"
+    }
+  ],
+  "evidence_assessments": [
+    {
+      "availability": "PRESENT",
+      "check_id": "4df1f1f3-9def-5e22-bf97-96c46e7df8ae",
+      "family": "PREVIEW_HTTP",
+      "statement": "仅在冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中检查 family=PREVIEW_HTTP, group=(producer scope), field=(family observations)：availability=PRESENT，匹配 6 项，扫描 4 条记录。字段状态：可用 6，脱敏 0，空值 0，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。"
+    },
+    {
+      "availability": "PRESENT",
+      "check_id": "a324e6d1-530c-5b08-ab43-e594dd9c1671",
+      "family": "DELIVERY_TRANSFER",
+      "statement": "仅在冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中检查 family=DELIVERY_TRANSFER, group=(producer scope), field=(family observations)：availability=PRESENT，匹配 1 项，扫描 1 条记录。字段状态：可用 1，脱敏 0，空值 0，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。"
+    },
+    {
+      "availability": "PRESENT",
+      "check_id": "ecd3c4a1-4235-5d58-83a7-3267ec0ba44e",
+      "family": "EXECUTION_RELATIONSHIP",
+      "statement": "仅在冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中检查 family=EXECUTION_RELATIONSHIP, group=(producer scope), field=(family observations)：availability=PRESENT，匹配 356 项，扫描 469 条记录。字段状态：可用 356，脱敏 0，空值 218，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。"
+    },
+    {
+      "availability": "PRESENT",
+      "check_id": "802ed3ea-4d8b-5568-a86c-2dd193f95387",
+      "family": "OWNER_RECORD",
+      "statement": "仅在冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中检查 family=OWNER_RECORD, group=effect_receipts, field=/condition：availability=PRESENT，匹配 24 项，扫描 24 条记录。字段状态：可用 24，脱敏 0，空值 0，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。"
+    }
+  ],
+  "expected_outcome": {
+    "citations": [
+      {
+        "evidence_id": "966bfe82-bd73-523f-ba55-cee34f9e574e",
+        "quote": "\"desired_outcome\": \"独立新增 services.html 与 news.html 两个静态页面; Provide an independently verified Preview of the exact produced Candidate for Human review.\","
+      },
+      {
+        "evidence_id": "58e60297-8321-535a-933d-a8ad3feb815e",
+        "quote": "\"work-route:news.html\","
+      }
+    ],
+    "evidence_family": "OWNER_RECORD",
+    "statement": "期望成果为独立新增 services.html 与 news.html 两个静态页面，并提供对确切候选成果的独立验证预览（desired_outcome）；Guardian 覆盖义务引用 work-route:news.html 与 work-route:services.html，即以真实 HTTP 预览这两个路由作为验收前提的一部分。"
+  },
+  "findings": [
+    {
+      "analysis": "假设：若 工具宿主以本轮仓库比较基线的实现执行 process.run，则 `_run_argv` 会取 argv[0] 的文件名并检查其是否属于 `self.process_allowlist`，当 'ls' 不在允许清单内时抛出 ValueError('process executable is not allowlisted: ls')，宿主据此记录 FAILED 效果回执而不启动该进程。该机制对应的是可执行项准入判断分支，而不是进程启动后返回非零退出码的分支。因果解释仅限该条件分支；被拒绝决策的其余内容与历史 Worker 的具体实现版本保持 UNKNOWN。",
+      "classification": "RUNTIME_MODEL_VARIANCE",
+      "epistemic_status": "ROOT_CAUSE_HYPOTHESIS",
+      "fact": {
+        "citations": [
+          {
+            "evidence_id": "37bfd161-c568-5789-9892-456257677951",
+            "quote": "\"message\": \"process executable is not allowlisted: ls\""
+          },
+          {
+            "evidence_id": "592f7aa9-7f78-5913-9882-623610c817f7",
+            "quote": "\"tool_identity\": \"process.run\","
+          },
+          {
+            "evidence_id": "7837e29d-ef11-5e81-a71b-8b029afd16e3",
+            "quote": "\"signal_kind\": \"CAPABILITY_MISMATCH\","
+          }
+        ],
+        "evidence_family": "OWNER_RECORD",
+        "statement": "执行效果回执 effect_receipts/9 记录 condition=FAILED、output.effect_observed=false、error_type=ValueError、message=「process executable is not allowlisted: ls」，host_identity=native-tool-host；其自身显式引用的 execution_effects/9 记录 tool_identity=process.run、semantic_input.argv=['ls','-la']、cwd='.'；显式引用该回执的自我修复记录 self_refine_events/1 记录 signal_kind=CAPABILITY_MISMATCH、root_cause_classification=RUNTIME_PROCESS_FAILURE、refinement_class=ROUTINE_STOCHASTIC_REFINEMENT、observation_confidence=CONFIRMED_FAILURE、status=VERIFIED、final_result=LOCAL_OBLIGATION_RECOVERED。"
+      },
+      "finding_id": "F1-tool-executable-allowlist-rejection",
+      "handling": "SELF_REFINE_RETRY_REGENERATE",
+      "inspection_id": "dc9aafd5-2627-58ee-81e0-e58abffe3e89",
+      "recommendation": "恢复应在同一 Task Contract 内进行：重新提出被允许清单内的可执行项，或在不放宽准入的前提下受治理终止；不得重放已失败的效果。由于未读取该 PWU 契约的准入清单，具体替代命令与允许清单内容保持 UNKNOWN。",
+      "regression_qualification": "在既有权限和预算内恢复，或受治理地终止；不要求未来随机失败次数为零。",
+      "regression_scenario": "对抗场景：模型再次提出不在允许清单内的可执行项（例如 'ls -la'）。按读取到的实现分支，条件 `executable not in allowlist` 为真即抛 ValueError 并留下 FAILED 效果回执；恢复路径是在同一 Task Contract 内改提被准入可执行项，或在权限与预算边界内受治理终止。若可执行项在清单内，该分支不触发，结果改由后续参数与工作区校验分支决定，两者结果不可混用同一原因码。",
+      "repository_citations": [
+        {
+          "evidence_id": "4410ca9d-a418-5fd3-b2ca-d25158befa26",
+          "quote": "        if executable not in {item.lower() for item in self.process_allowlist}:\n            raise ValueError(f\"process executable is not allowlisted: {executable}\")"
+        }
+      ],
+      "scope_check_ids": [],
+      "subject_evidence_id": "37bfd161-c568-5789-9892-456257677951",
+      "uncertainty": "本次关联读取仅限冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中主体 37bfd161-c568-5789-9892-456257677951 的显式 Owner 引用（最多两跳）。返回 4 条记录，容量未读字段 0 项，省略关联记录 0 条。PRESENT 表示该字段已导出；READ 才表示原始片段已返回。REDACTED 表示值被脱敏，EMPTY 表示已导出的空值；二者均不表示历史未保存。字段未导出、未读取或关联范围外的信息保持 UNKNOWN；单一记录不能证明其他 Owner 或平台历史不存在。仓库比较不自动证明历史 Worker 版本；创建时间不自动证明后来的恢复状态。\n仅在冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中检查 family=OWNER_RECORD, group=effect_receipts, field=/condition：availability=PRESENT，匹配 24 项，扫描 24 条记录。字段状态：可用 24，脱敏 0，空值 0，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。",
+      "uncertainty_check_ids": [
+        "802ed3ea-4d8b-5568-a86c-2dd193f95387"
+      ]
+    },
+    {
+      "analysis": "假设：若推理适配器按本轮仓库比较基线的实现处理该响应，则先计算 `provider_calls`；当该值为假值时进入 else 分支，读取结构化文本并调用 `_parse_text_decision`，当该解析抛出 ValidationError 或 json.JSONDecodeError 时，包装为 InferenceAdapterDecisionRejected('NATIVE_DECISION_SCHEMA_REJECTED', ...) 并附上校验问题摘要。该机制描述的是本地结构化校验边界，而不是工具效果执行分支。",
+      "classification": "RUNTIME_MODEL_VARIANCE",
+      "epistemic_status": "ROOT_CAUSE_HYPOTHESIS",
+      "fact": {
+        "citations": [
+          {
+            "evidence_id": "58a62fa5-3c9c-5f8c-8898-80e1cf40ac8c",
+            "quote": "\"validation_issues\": [\n      {\n        \"location\": [],\n        \"type\": \"json_invalid\"\n      }\n    ]"
+          },
+          {
+            "evidence_id": "2430db80-7e77-549f-a993-9fc447d051e8",
+            "quote": "\"maximum_same_decision_retries\": 1,"
+          }
+        ],
+        "evidence_family": "OWNER_RECORD",
+        "statement": "执行步骤 execution_steps/8 记录 kind=INFERENCE、condition=FAILED、finished_at=2026-10-05T17:01:33.482220+00:00；result_payload 记录 error_type=InferenceAdapterDecisionRejected、failure_code=INVALID_MODEL_RESPONSE、reason_code=NATIVE_DECISION_SCHEMA_REJECTED、validation_issues=[{location: [], type: 'json_invalid'}]；request_payload.available_tools 列出 file.read、file.write、process.run、git.status、git.diff、test.run、build.run、dependency.sync、preview.inspect；显式引用该步骤的 self_refine_events/2 记录 reason_code=NATIVE_DECISION_SCHEMA_REJECTED、validation_issue_count=1、budget_decision.maximum_same_decision_retries=1、status=VERIFIED、final_result=LOCAL_OBLIGATION_RECOVERED。"
+      },
+      "finding_id": "F2-inference-decision-schema-rejected",
+      "handling": "SELF_REFINE_RETRY_REGENERATE",
+      "inspection_id": "d484711d-6c24-5e7a-9af0-8286643be696",
+      "recommendation": "在同一 Task Contract 内做一次受约束的推理修复：保持权限与来源门禁不变、不重放已执行工具效果；被拒绝候选的原始文本内容与详细成因保持 UNKNOWN。",
+      "regression_qualification": "在既有权限和预算内恢复，或受治理地终止；不要求未来随机失败次数为零。",
+      "regression_scenario": "对抗场景：若回包含结构化 tool calls，实现走 CONTINUE 分支；若无 tool calls 且结构化文本缺失，走 STRUCTURED_TEXT_MISSING；若文本存在但不符合推理契约，走 ValidationError/json.JSONDecodeError 分支并产生 NATIVE_DECISION_SCHEMA_REJECTED。不同输入条件对应不同原因码，不能以一个原因码概括全部失败分支。",
+      "repository_citations": [
+        {
+          "evidence_id": "c6702935-51b2-5afa-8cdd-451d85139997",
+          "quote": "            except (ValidationError, json.JSONDecodeError) as error:\n                raise InferenceAdapterDecisionRejected(\n                    \"NATIVE_DECISION_SCHEMA_REJECTED\","
+        }
+      ],
+      "scope_check_ids": [],
+      "subject_evidence_id": "58a62fa5-3c9c-5f8c-8898-80e1cf40ac8c",
+      "uncertainty": "本次关联读取仅限冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中主体 58a62fa5-3c9c-5f8c-8898-80e1cf40ac8c 的显式 Owner 引用（最多两跳）。返回 2 条记录，容量未读字段 1 项，省略关联记录 0 条。PRESENT 表示该字段已导出；READ 才表示原始片段已返回。REDACTED 表示值被脱敏，EMPTY 表示已导出的空值；二者均不表示历史未保存。字段未导出、未读取或关联范围外的信息保持 UNKNOWN；单一记录不能证明其他 Owner 或平台历史不存在。仓库比较不自动证明历史 Worker 版本；创建时间不自动证明后来的恢复状态。",
+      "uncertainty_check_ids": []
+    },
+    {
+      "analysis": "仅在冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中检查 family=OWNER_RECORD, group=self_refine_events, field=/diagnostic_evidence/rejected_candidate_content：availability=INCOMPLETE_CAPTURE，匹配 0 项，扫描 3 条记录。字段状态：可用 0，脱敏 0，空值 0，未导出 3。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。",
+      "classification": "UNKNOWN",
+      "epistemic_status": "UNKNOWN",
+      "fact": {
+        "citations": [
+          {
+            "evidence_id": "6ef44093-5f05-5df1-94ee-7d2da0ef4edc",
+            "quote": "\"signal\": \"SCOPE_INFLATION\""
+          },
+          {
+            "evidence_id": "6ef44093-5f05-5df1-94ee-7d2da0ef4edc",
+            "quote": "\"在 index.html 中添加指向新页面的导航链接（Human 仅要求新页返回 index.html）\","
+          }
+        ],
+        "evidence_family": "OWNER_RECORD",
+        "statement": "self_refine_events/0 记录 affected_component=semantic/scope、failure_family=CANDIDATE_INCONSISTENT、diagnostic_evidence.signal=SCOPE_INFLATION、required_paths=['services.html','news.html']，rejected_behaviors 含「在 index.html 中添加指向新页面的导航链接（Human 仅要求新页返回 index.html）」与「新增 services.html/news.html 之外的页面或资源」；该记录 expected_reality 与 observed_reality 的导出值为空对象，observation_confidence=OBSERVED_SUCCESS、refinement_class=DEGRADING_OR_RECURRING_REFINEMENT、status=VERIFIED、final_result=LOCAL_OBLIGATION_RECOVERED。"
+      },
+      "finding_id": "F3-scope-inflation-diagnostic",
+      "handling": "INVESTIGATE",
+      "inspection_id": "1be664fe-a55d-555f-8ac8-71f51276ea40",
+      "recommendation": "把 semantic/scope 的范围诊断当作咨询信号：先核对原始记录与已检查范围，再判断范围是否扩张；不据此推断已执行的文件改动，也不以 refinement_class 标签推断能力缺陷或重复失败。",
+      "regression_qualification": "核对原始记录、关联与已检查范围；证据不足时保留 UNKNOWN，不扩大结论。",
+      "regression_scenario": "对抗场景：当语义范围诊断再次记录 SCOPE_INFLATION 时，逐条核对候选路径与人类边界（仅新增两页、保留返回 index.html 链接），并在同一 Task Contract 内复核；若诊断记录同时缺少被拒候选内容，该项保持 UNKNOWN，由已执行的检查范围决定结论。",
+      "repository_citations": [],
+      "scope_check_ids": [
+        "705f9c63-d605-5d19-89bb-2435c3d9712e"
+      ],
+      "subject_evidence_id": "6ef44093-5f05-5df1-94ee-7d2da0ef4edc",
+      "uncertainty": "本次关联读取仅限冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中主体 6ef44093-5f05-5df1-94ee-7d2da0ef4edc 的显式 Owner 引用（最多两跳）。返回 1 条记录，容量未读字段 0 项，省略关联记录 0 条。PRESENT 表示该字段已导出；READ 才表示原始片段已返回。REDACTED 表示值被脱敏，EMPTY 表示已导出的空值；二者均不表示历史未保存。字段未导出、未读取或关联范围外的信息保持 UNKNOWN；单一记录不能证明其他 Owner 或平台历史不存在。仓库比较不自动证明历史 Worker 版本；创建时间不自动证明后来的恢复状态。",
+      "uncertainty_check_ids": []
+    },
+    {
+      "analysis": "仅在冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中检查 family=OWNER_RECORD, group=execution_steps, field=/result_payload/raw_response：availability=INCOMPLETE_CAPTURE，匹配 0 项，扫描 13 条记录。字段状态：可用 0，脱敏 0，空值 0，未导出 13。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。",
+      "classification": "UNKNOWN",
+      "epistemic_status": "UNKNOWN",
+      "fact": {
+        "citations": [
+          {
+            "evidence_id": "58a62fa5-3c9c-5f8c-8898-80e1cf40ac8c",
+            "quote": "\"result_digest\": \"5b61636a568d63e98ba0ac404e6cc27a8139adc861ba6c4a456e84b0e9505f55\","
+          },
+          {
+            "evidence_id": "2430db80-7e77-549f-a993-9fc447d051e8",
+            "quote": "\"validation_issue_count\": 1"
+          }
+        ],
+        "evidence_family": "OWNER_RECORD",
+        "statement": "同一步骤 execution_steps/8 的 result_payload 被导出为结构化摘要：error_type、failure_code、reason_code 为标量，validation_issues 长度为 1，其唯一元素 location 为空数组、type 为 'json_invalid'，result_digest 已记录；self_refine_events/2 的 diagnostic_evidence 同步记录 reason_code 与 validation_issue_count=1。"
+      },
+      "finding_id": "F4-raw-response-capture-gap",
+      "handling": "INVESTIGATE",
+      "inspection_id": "d484711d-6c24-5e7a-9af0-8286643be696",
+      "recommendation": "在既有契约与权限内，把被拒推理决策的原始响应字节作为受控采集项纳入未来执行（未验证提议）；不得用未来日志回填历史丢弃的响应，历史成因保持 UNKNOWN。",
+      "regression_qualification": "核对原始记录、关联与已检查范围；证据不足时保留 UNKNOWN，不扩大结论。",
+      "regression_scenario": "对抗场景：当诊断所依据的原始响应内容以结构化 reason_code 与 validation_issues 摘要呈现时，报告按已执行的字段检查保留 UNKNOWN，并在既有权限与预算内启用受控采集，或在该边界内受治理终止。",
+      "repository_citations": [],
+      "scope_check_ids": [
+        "eaea1a10-4293-5217-bf79-127518c13c05"
+      ],
+      "subject_evidence_id": "58a62fa5-3c9c-5f8c-8898-80e1cf40ac8c",
+      "uncertainty": "本次关联读取仅限冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中主体 58a62fa5-3c9c-5f8c-8898-80e1cf40ac8c 的显式 Owner 引用（最多两跳）。返回 2 条记录，容量未读字段 1 项，省略关联记录 0 条。PRESENT 表示该字段已导出；READ 才表示原始片段已返回。REDACTED 表示值被脱敏，EMPTY 表示已导出的空值；二者均不表示历史未保存。字段未导出、未读取或关联范围外的信息保持 UNKNOWN；单一记录不能证明其他 Owner 或平台历史不存在。仓库比较不自动证明历史 Worker 版本；创建时间不自动证明后来的恢复状态。",
+      "uncertainty_check_ids": []
+    },
+    {
+      "analysis": "该交付审计对象自身声明其可证明范围：completion_basis 只是完成规则描述，其存在不证明任何事件发生；客户端状态字段与审计启用前的动作身份属于不同的观测表面。HTTP 预览、下载传输与客户端保存是彼此独立的证据表面，本报告不以其状态字段推断渲染或保存结果。",
+      "classification": "UNKNOWN",
+      "epistemic_status": "UNKNOWN",
+      "fact": {
+        "citations": [
+          {
+            "evidence_id": "74c45260-289f-5b45-ac1e-f0bed5a129aa",
+            "quote": "\"client_received\": \"UNAVAILABLE\","
+          },
+          {
+            "evidence_id": "74c45260-289f-5b45-ac1e-f0bed5a129aa",
+            "quote": "\"completion_basis\": \"ASGI_SEND_COMPLETED proves server send only\","
+          },
+          {
+            "evidence_id": "74c45260-289f-5b45-ac1e-f0bed5a129aa",
+            "quote": "\"historical_action_identity\": \"NOT_RECORDED\","
+          }
+        ],
+        "evidence_family": "DELIVERY_TRANSFER",
+        "statement": "交付审计对象记录 client_received 与 client_saved 取值均为 'UNAVAILABLE'，actions 字段的导出值为空列表且 action_count=0，completion_basis 为 'ASGI_SEND_COMPLETED proves server send only'，historical_action_identity 为 'NOT_RECORDED' 并附 historical_note「审计启用前的原始点击未记录；当前动作不能补作历史点击。」。"
+      },
+      "finding_id": "F5-delivery-audit-client-state",
+      "handling": "INVESTIGATE",
+      "inspection_id": "277780be-f882-515b-8945-48993f895609",
+      "recommendation": "对交付审计对象保持其声明语义：completion_basis 是完成规则描述，client_received/client_saved 的取值不用于推断浏览器渲染或客户端保存；客户端侧证据需在既有权限内对相应表面另行检查。",
+      "regression_qualification": "核对原始记录、关联与已检查范围；证据不足时保留 UNKNOWN，不扩大结论。",
+      "regression_scenario": "对抗场景：当审计对象只携带完成规则说明与客户端状态取值时，不将其解释为传输成功或失败；结论由对应表面的独立检查决定，无法获得该类证据时保留 UNKNOWN，并在既有权限内受治理终止取证尝试。",
+      "repository_citations": [],
+      "scope_check_ids": [],
+      "subject_evidence_id": "74c45260-289f-5b45-ac1e-f0bed5a129aa",
+      "uncertainty": "本次关联读取仅限冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中主体 74c45260-289f-5b45-ac1e-f0bed5a129aa 的显式 Owner 引用（最多两跳）。返回 1 条记录，容量未读字段 0 项，省略关联记录 0 条。PRESENT 表示该字段已导出；READ 才表示原始片段已返回。REDACTED 表示值被脱敏，EMPTY 表示已导出的空值；二者均不表示历史未保存。字段未导出、未读取或关联范围外的信息保持 UNKNOWN；单一记录不能证明其他 Owner 或平台历史不存在。仓库比较不自动证明历史 Worker 版本；创建时间不自动证明后来的恢复状态。\n仅在冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中检查 family=OWNER_RECORD, group=served_delivery, field=/client_received：availability=PRESENT，匹配 1 项，扫描 1 条记录。字段状态：可用 1，脱敏 0，空值 0，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。",
+      "uncertainty_check_ids": [
+        "c11ba447-7566-5479-915d-58fadc25d579"
+      ]
+    }
+  ],
+  "immediate_recovery": [
+    {
+      "evidence_family": "OWNER_RECORD",
+      "finding_ids": [
+        "F1-tool-executable-allowlist-rejection"
+      ],
+      "statement": "针对被允许清单拒绝的 process.run 事件：保留现有准入门禁、不重放已失败效果；恢复限定在同一 Task Contract 内已准入的能力，具体替代可执行项在该 PWU 契约未读取时保持 UNKNOWN。"
+    },
+    {
+      "evidence_family": "OWNER_RECORD",
+      "finding_ids": [
+        "F2-inference-decision-schema-rejected"
+      ],
+      "statement": "针对被本地结构化校验拒绝的推理决策：在原 Task Contract 内进行一次受约束修复，不改动权限、不重放工具效果；被拒候选的原始内容保持 UNKNOWN。"
+    }
+  ],
+  "missing_evidence": [
+    {
+      "availability": "INCOMPLETE_CAPTURE",
+      "check_id": "eaea1a10-4293-5217-bf79-127518c13c05",
+      "family": "OWNER_RECORD",
+      "statement": "仅在冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中检查 family=OWNER_RECORD, group=execution_steps, field=/result_payload/raw_response：availability=INCOMPLETE_CAPTURE，匹配 0 项，扫描 13 条记录。字段状态：可用 0，脱敏 0，空值 0，未导出 13。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。"
+    },
+    {
+      "availability": "INCOMPLETE_CAPTURE",
+      "check_id": "705f9c63-d605-5d19-89bb-2435c3d9712e",
+      "family": "OWNER_RECORD",
+      "statement": "仅在冻结导出 3f3b536e79d874a7905e4719bef7ff9eab985866e566715128eb1645bf07b72d 中检查 family=OWNER_RECORD, group=self_refine_events, field=/diagnostic_evidence/rejected_candidate_content：availability=INCOMPLETE_CAPTURE，匹配 0 项，扫描 3 条记录。字段状态：可用 0，脱敏 0，空值 0，未导出 3。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。"
+    }
+  ],
+  "original_objective": {
+    "citations": [
+      {
+        "evidence_id": "59ee7310-262a-571f-ab61-d8ca76858f7d",
+        "quote": "新开一个独立的有界 Work：独立新增 services.html 服务介绍页和 news.html 公司新闻页"
+      },
+      {
+        "evidence_id": "966bfe82-bd73-523f-ba55-cee34f9e574e",
+        "quote": "\"raw_user_requirement\": \"在既有演示官网上新增服务介绍页与公司新闻页\","
+      }
+    ],
+    "evidence_family": "OWNER_RECORD",
+    "statement": "人类原始要求：新开一个独立的有界 Work，独立新增 services.html 服务介绍页与 news.html 公司新闻页，每页包含中文标题、简短说明和返回 index.html 的链接；两份成果各自验证后整合并再次验证为同一事项的最终成果；只新增这两个文件、不修改其他文件、不用后端与外部资源；完成后形成候选成果，经真实 HTTP 预览与独立质量检查，等待 Human 明确验收且不自动接受。Work 记录将其概括为「在既有演示官网上新增服务介绍页与公司新闻页」。"
+  },
+  "platform_improvements": [
+    {
+      "evidence_family": "OWNER_RECORD",
+      "finding_ids": [
+        "F2-inference-decision-schema-rejected",
+        "F4-raw-response-capture-gap"
+      ],
+      "statement": "未验证提议：在既有契约内为被拒推理决策增加原始响应字节的受控采集与校验问题保留，使未来诊断不依赖对已丢弃响应的重建；该提议不改变权限与来源门禁，也不证明当前实现存在缺陷。"
+    },
+    {
+      "evidence_family": "OWNER_RECORD",
+      "finding_ids": [
+        "F3-scope-inflation-diagnostic"
+      ],
+      "statement": "未验证提议：对被拒候选的诊断记录，在既有边界内保留可核证的最小摘要（如被拒路径与校验问题位置），以便区分诊断标签与实际执行行为。"
+    }
+  ],
+  "schema_version": "watt-trace-analysis-report-v6",
+  "self_refine_opportunities": [
+    {
+      "evidence_family": "OWNER_RECORD",
+      "finding_ids": [
+        "F1-tool-executable-allowlist-rejection",
+        "F2-inference-decision-schema-rejected"
+      ],
+      "statement": "自我修复时应把「推理决策被拒」与「工具效果被拒」视为不同分支与不同原因码，并只修复被拒绝的那一层，避免把标签当作执行事实。"
+    },
+    {
+      "evidence_family": "OWNER_RECORD",
+      "finding_ids": [
+        "F3-scope-inflation-diagnostic"
+      ],
+      "statement": "把 semantic/scope 的范围诊断用于复核候选与人类边界的对应（仅新增两页并保留返回 index.html 的链接），不把它当作已执行改动或能力缺陷的证据。"
+    }
+  ],
+  "timeline": [
+    {
+      "citations": [
+        {
+          "evidence_id": "966bfe82-bd73-523f-ba55-cee34f9e574e",
+          "quote": "\"created_at\": \"2026-10-05T16:57:33.127532+00:00\","
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "INTENT",
+      "statement": "Work 记录创建，记载原始人类要求「在既有演示官网上新增服务介绍页与公司新闻页」，工作模式为 LONG_LIVED_STEERING。",
+      "time_interpretation": "此时间仅表示记录创建时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。",
+      "timestamp": "2026-10-05T16:57:33.127532+00:00",
+      "timestamp_evidence_id": "966bfe82-bd73-523f-ba55-cee34f9e574e",
+      "timestamp_field": "created_at"
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "ef942e45-d293-5968-948f-4a02d4a35865",
+          "quote": "\"source_baseline_id\": \"6417cfb5-69dc-4c6e-a9fd-be91253e967c\","
+        },
+        {
+          "evidence_id": "f6ae6568-9478-53d5-8a1b-624e488de74d",
+          "quote": "\"expected_source_repository_revision\": \"d4ad65db95fa1bb3ad7ec951ea844fd4939c2a3d\","
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "CONTEXT",
+      "statement": "上下文由受信基线与源仓库修订界定：封存的基线候选记录 source_baseline_id=6417cfb5-69dc-4c6e-a9fd-be91253e967c、expected_source_repository_revision=d4ad65db95fa1bb3ad7ec951ea844fd4939c2a3d，并绑定仓库身份 watt://work-branches/3ee622b5-b816-5679-afdc-e5de51cd2702。",
+      "time_interpretation": null,
+      "timestamp": null,
+      "timestamp_evidence_id": null,
+      "timestamp_field": null
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "d3c0be8d-45c7-5368-ae05-51990aa35438",
+          "quote": "\"rationale\": \"The current governed Step is ready to yield to the next admitted ordered Step\","
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "PLANNING",
+      "statement": "治理计划历史记录一次 STEP_TRANSITION，理由为「The current governed Step is ready to yield to the next admitted ordered Step」，由步骤 9baf162c-d4aa-4558-9d03-7ccf5882590d 迁移到 4ff328d7-609e-421c-bb3c-55f58c5847e1，现实引用包含 TRUSTED_BASELINE、WORK 与 WORK_REALITY_REVISION。",
+      "time_interpretation": "此时间仅表示记录创建时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。",
+      "timestamp": "2026-10-05T16:58:13.408052+00:00",
+      "timestamp_evidence_id": "d3c0be8d-45c7-5368-ae05-51990aa35438",
+      "timestamp_field": "created_at"
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "db45c5e5-4924-5d49-983f-aa1a8ba9e0e0",
+          "quote": "\"argv\": [\n      \"git\",\n      \"status\",\n      \"--short\",\n      \"--untracked-files=all\"\n    ],"
+        },
+        {
+          "evidence_id": "117f055b-caa9-5209-bd4e-ec7f428dfb13",
+          "quote": "\"tool_identity\": \"git.status\","
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "EXECUTION",
+      "statement": "执行效果回执 0 记录 condition=SETTLED，对应 git.status，参数为 git status --short --untracked-files=all（cwd='.'），returncode=0，且记录生产环境与工作区引用。",
+      "time_interpretation": "此时间仅表示记录创建时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。",
+      "timestamp": "2026-10-05T16:58:21.750188+00:00",
+      "timestamp_evidence_id": "db45c5e5-4924-5d49-983f-aa1a8ba9e0e0",
+      "timestamp_field": "created_at"
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "195d8b22-25fb-52b8-bbda-89251e814c3e",
+          "quote": "\"path\": \"services.html\","
+        },
+        {
+          "evidence_id": "fa141e30-ad6f-5117-98d7-ffaeba7fe01a",
+          "quote": "\"tool_identity\": \"file.read\","
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "EXECUTION",
+      "statement": "执行效果回执 1 记录一次 file.read 的 SETTLED 回执，其 output 字段为 path=services.html、exists=false、content=null、bytes=0；该回执显式引用的执行效果记录 tool_identity=file.read、semantic_input.path=services.html。",
+      "time_interpretation": "此时间仅表示记录创建时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。",
+      "timestamp": "2026-10-05T16:58:22.043640+00:00",
+      "timestamp_evidence_id": "195d8b22-25fb-52b8-bbda-89251e814c3e",
+      "timestamp_field": "created_at"
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "e1c377d4-8ec9-5956-bc72-e33054816337",
+          "quote": "\"bytes\": 926,"
+        },
+        {
+          "evidence_id": "ff7120ea-454c-552b-9f42-fa7034f11fa0",
+          "quote": "本演示官网提供企业信息展示与页面导航示例，不声明公司的真实业务范围。"
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "EXECUTION",
+      "statement": "执行效果回执 2 记录 file.write 写入 services.html 成功：output.bytes=926、mode=FULL；其显式引用的效果记录 semantic_input.content 含要求文案「本演示官网提供企业信息展示与页面导航示例，不声明公司的真实业务范围。」与返回首页链接。",
+      "time_interpretation": "此时间仅表示记录创建时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。",
+      "timestamp": "2026-10-05T16:58:28.854149+00:00",
+      "timestamp_evidence_id": "e1c377d4-8ec9-5956-bc72-e33054816337",
+      "timestamp_field": "created_at"
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "37bfd161-c568-5789-9892-456257677951",
+          "quote": "\"message\": \"process executable is not allowlisted: ls\""
+        },
+        {
+          "evidence_id": "592f7aa9-7f78-5913-9882-623610c817f7",
+          "quote": "\"argv\": [\n      \"ls\",\n      \"-la\"\n    ],"
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "FAILURE",
+      "statement": "执行效果回执 9 记录条件 FAILED：output.effect_observed=false、error_type=ValueError、message=「process executable is not allowlisted: ls」；其显式引用的 execution_effects/9 记录 tool_identity=process.run、semantic_input.argv=['ls','-la']、cwd='.'。",
+      "time_interpretation": "此时间仅表示记录创建时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。",
+      "timestamp": "2026-10-05T16:59:24.631047+00:00",
+      "timestamp_evidence_id": "37bfd161-c568-5789-9892-456257677951",
+      "timestamp_field": "created_at"
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "58a62fa5-3c9c-5f8c-8898-80e1cf40ac8c",
+          "quote": "\"result_payload\": {\n    \"error_type\": \"InferenceAdapterDecisionRejected\",\n    \"failure_code\": \"INVALID_MODEL_RESPONSE\",\n    \"reason_code\": \"NATIVE_DECISION_SCHEMA_REJECTED\","
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "FAILURE",
+      "statement": "推理步骤 execution_steps/8 记录 kind=INFERENCE、condition=FAILED，result_payload 记录 error_type=InferenceAdapterDecisionRejected、failure_code=INVALID_MODEL_RESPONSE、reason_code=NATIVE_DECISION_SCHEMA_REJECTED，validation_issues 为 [{location: [], type: 'json_invalid'}]。",
+      "time_interpretation": "此时间仅表示记录的结束时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。",
+      "timestamp": "2026-10-05T17:01:33.482220+00:00",
+      "timestamp_evidence_id": "58a62fa5-3c9c-5f8c-8898-80e1cf40ac8c",
+      "timestamp_field": "finished_at"
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "6ef44093-5f05-5df1-94ee-7d2da0ef4edc",
+          "quote": "\"signal\": \"SCOPE_INFLATION\""
+        },
+        {
+          "evidence_id": "7837e29d-ef11-5e81-a71b-8b029afd16e3",
+          "quote": "\"affected_component\": \"native-tool-host/process.run\","
+        },
+        {
+          "evidence_id": "2430db80-7e77-549f-a993-9fc447d051e8",
+          "quote": "\"diagnosis_summary\": \"Provider decision failed canonical local validation.\","
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "RECOVERY_REFINEMENT",
+      "statement": "三条自我修复记录：self_refine_events/0（affected_component=semantic/scope、signal=SCOPE_INFLATION）、self_refine_events/1（affected_component=native-tool-host/process.run、signal_kind=CAPABILITY_MISMATCH）、self_refine_events/2（affected_component=native-executor/inference-decision、reason_code=NATIVE_DECISION_SCHEMA_REJECTED），三者 status 均为 VERIFIED 且 final_result=LOCAL_OBLIGATION_RECOVERED；这些是 Owner 诊断记录，本身不是执行回执。",
+      "time_interpretation": null,
+      "timestamp": null,
+      "timestamp_evidence_id": null,
+      "timestamp_field": null
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "58e60297-8321-535a-933d-a8ad3feb815e",
+          "quote": "\"observation\": \"GET /news.html returned HTTP 200 with exact Candidate identity\","
+        }
+      ],
+      "evidence_family": "PREVIEW_HTTP",
+      "stage": "VERIFICATION",
+      "statement": "Guardian 保障记录 gate=PASS、acceptance_state=PENDING，并对 work-route:news.html 与 work-route:services.html 各记录一次 HTTP 观测：「GET /news.html returned HTTP 200 with exact Candidate identity」，候选指纹 9208e9b2222f695c95e616a97f220a6cac00ec65718e9da7275f8a1ac21a7b00 与 source_revision b4280990d55ac9da36eaa0dd9644006df7e8762e 绑定。",
+      "time_interpretation": "此时间仅表示保证评估时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。",
+      "timestamp": "2026-10-05T17:02:37.116042Z",
+      "timestamp_evidence_id": "58e60297-8321-535a-933d-a8ad3feb815e",
+      "timestamp_field": "assessed_at"
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "f6ae6568-9478-53d5-8a1b-624e488de74d",
+          "quote": "\"committed_at\": \"2026-10-05T17:27:54.587812+00:00\","
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "FINAL_STATE",
+      "statement": "运行时提交记录候选成果被提交：candidate_fingerprint=9208e9b2222f695c95e616a97f220a6cac00ec65718e9da7275f8a1ac21a7b00、repository_revision=b4280990d55ac9da36eaa0dd9644006df7e8762e、repository_tree_identity=330eb480e850ba9e0a57506db084d9a94ac59562，satisfied_work_unit_ids 含 b394e64d、9e15e2eb、55782a07。",
+      "time_interpretation": "此时间仅表示运行时提交时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。",
+      "timestamp": "2026-10-05T17:27:54.587812+00:00",
+      "timestamp_evidence_id": "f6ae6568-9478-53d5-8a1b-624e488de74d",
+      "timestamp_field": "committed_at"
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "b1428125-f535-579c-bb64-bcb18db6e723",
+          "quote": "\"kind\": \"CANDIDATE\""
+        },
+        {
+          "evidence_id": "966bfe82-bd73-523f-ba55-cee34f9e574e",
+          "quote": "\"latest_event\": \"Human 交付验收\","
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "FINAL_STATE",
+      "statement": "提交后的治理步骤迁移：plan_history/1 由 4ff328d7-609e-421c-bb3c-55f58c5847e1 迁移到 fc6a035c-6bda-4eab-9e9e-3652ac50d7f5，现实引用含 CANDIDATE、VERIFICATION、INTEGRATION_EFFECT 与两个 TRUSTED_BASELINE；最终 Work 记录 state=COMPLETED、acceptance_decision=ACCEPT、latest_event=「Human 交付验收」。",
+      "time_interpretation": null,
+      "timestamp": null,
+      "timestamp_evidence_id": null,
+      "timestamp_field": null
+    }
+  ],
+  "work_id": "3ee622b5-b816-5679-afdc-e5de51cd2702"
+}
