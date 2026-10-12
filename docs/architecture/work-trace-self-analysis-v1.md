@@ -393,3 +393,12 @@ envelope. Excluded excerpts remain unobserved and pageable. Sibling evidence may
 associate through a shared explicit native effect/receipt reference only when that
 unique original target is captured. This navigation relation is not causal proof;
 shared Work/attempt/step/error/time and unresolved targets remain inadmissible.
+The current advisory terminal identity contract declares result_claim.report_digest
+and the compatible output_vector.report_digest location. At least one must contain
+the exact Native-reviewed digest; all present locations must agree. No prose or other
+field can supply identity. Historical failed records are not rewritten.
+Each Native review item includes a public countercheck and explicit unsupported
+assertions, in freely chosen wording. The review must check historical-vs-current
+authority, causal alternatives, and policy/diagnosis-vs-observation boundaries.
+Declared unsupported assertions require revision even if the item says SUPPORTED.
+These remain model judgments and require independent real-report qualification.

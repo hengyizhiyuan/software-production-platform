@@ -1050,8 +1050,11 @@ class AnalysisTools:
               "items": {"type": "object", "properties": {
                   "target_path": {"type": "string"}, "judgment": {"enum": ["SUPPORTED", "QUALIFIED", "UNKNOWN", "REVISE"]},
                   "evidence_ids": {"type": "array", "items": {"type": "string"}, "maxItems": 100},
-                  "rationale": {"type": "string", "minLength": 1, "maxLength": 1600}},
-                  "required": ["target_path", "judgment", "evidence_ids", "rationale"], "additionalProperties": False}}}, ["draft_id", "items"]),
+                  "rationale": {"type": "string", "minLength": 1, "maxLength": 1600},
+                  "countercheck": {"type": "string", "minLength": 1, "maxLength": 1600,
+                    "description": "Public source/alternative audit in your own words: distinguish historical Work requirements from this investigation's contract; actual effects from labels/policy; test whether observations distinguish the proposed cause from other explanations. Later success alone does not establish an earlier failure cause. State unsupported assumptions."},
+                  "unsupported_assertions": {"type": "array", "maxItems": 20, "items": {"type": "string", "minLength": 1,"maxLength": 1000}}},
+                  "required": ["target_path", "judgment", "evidence_ids", "rationale", "countercheck", "unsupported_assertions"], "additionalProperties": False}}}, ["draft_id", "items"]),
             ("analysis.revise", "Explicitly correct a retained rejected report using bounded add/remove/replace JSON Pointer edits. Revalidate the entire report without regenerating it. This changes advisory artifacts only.",
              {"draft_id": {"type": "string"}, "edits": {"type": "array", "minItems": 1, "maxItems": 24,
               "items": {"type": "object", "properties": {"op": {"enum": ["add", "remove", "replace"]},
@@ -1172,7 +1175,9 @@ class AnalysisTools:
                         raise ValueError("SELF_REVIEW_SOURCE_SCOPE_MISMATCH")
                     if item["judgment"] not in {"SUPPORTED", "QUALIFIED", "UNKNOWN", "REVISE"} or not item["rationale"].strip():
                         raise ValueError("SELF_REVIEW_JUDGMENT_REQUIRED")
-                needs_revision = [i for i in items if i["judgment"] == "REVISE"]
+                    if not isinstance(item.get("countercheck"), str) or not item["countercheck"].strip() or not isinstance(item.get("unsupported_assertions"), list):
+                        raise ValueError("SELF_REVIEW_COUNTERCHECK_REQUIRED")
+                needs_revision = [i for i in items if i["judgment"] == "REVISE" or i["unsupported_assertions"]]
                 review = {"draft_id": args["draft_id"], "report_digest": canonical_digest(report),
                     "items": public_report_candidate(items), "authority": "MODEL_SELF_REVIEW_PROPOSAL_NOT_INDEPENDENT_ASSURANCE"}
                 if needs_revision:

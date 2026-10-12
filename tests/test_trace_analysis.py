@@ -90,7 +90,7 @@ class NativeModel:
             return InferenceResponse(action=InferenceAction.CONTINUE, summary="Review original evidence and conclusion boundaries",
                 working_plan=req.working_plan, tool_calls=(ToolCallProposal(proposal_index=0,
                     tool_identity="analysis.review", arguments={"draft_id":output["draft_id"], "items":[
-                        dict(target, judgment="QUALIFIED", rationale="Scoped fixture observation; no independent semantic assurance is claimed")
+                        dict(target, countercheck="Only the scoped historical fixture is used, not current investigation authority.", unsupported_assertions=[], judgment="QUALIFIED", rationale="Scoped fixture observation; no independent semantic assurance is claimed")
                         for target in output["review_targets"]]}),))
         return InferenceResponse(action=InferenceAction.RESULT_READY, summary="Advisory report and self-review recorded",
             working_plan=req.working_plan, result_claim={"evidence_ids": [], "output_vector": {
@@ -399,7 +399,7 @@ def test_native_refinement_patches_retained_report_and_rechecks_all_gates(tmp_pa
             elif req.previous_results[-1]["output"].get("next_action") == "analysis.review":
                 pending = req.previous_results[-1]["output"]
                 proposal = ToolCallProposal(proposal_index=0, tool_identity="analysis.review", arguments={
-                    "draft_id": pending["draft_id"], "items": [dict(t,judgment="QUALIFIED",rationale="Scoped fixture sources and qualified interpretation") for t in pending["review_targets"]]})
+                    "draft_id": pending["draft_id"], "items": [dict(t,countercheck="Scoped originals support the fixture; unobserved causes remain unknown.",unsupported_assertions=[],judgment="QUALIFIED",rationale="Scoped fixture sources and qualified interpretation") for t in pending["review_targets"]]})
             else:
                 return InferenceResponse(action=InferenceAction.RESULT_READY, summary="Verified retained report",
                     working_plan=req.working_plan, result_claim={"output_vector": {
@@ -1139,7 +1139,7 @@ def invoke_analysis(tools, identity, args):
 
 
 def review_items(pending, *, revise=False):
-    return [dict(t,judgment="REVISE" if revise and t["target_path"]=="/findings/0" else "QUALIFIED",
+    return [dict(t,countercheck="Historical fields do not establish retention, actual retry counts or an unavailable candidate cause.",unsupported_assertions=[],judgment="REVISE" if revise and t["target_path"]=="/findings/0" else "QUALIFIED",
         rationale="原始快照没有提供处置事件；应限于实际可读字段，不能将取证范围扩为历史丢失。" if revise and t["target_path"]=="/findings/0" else "按原始字段和已检查范围限定解释；仍需独立审查。") for t in pending["review_targets"]]
 
 
@@ -1484,3 +1484,29 @@ def test_seed_prioritizes_original_planning_and_settled_execution_within_existin
     for group in ['plan_history','execution_effects']:
         eid=next(eid for eid,row in c.records.items() if row['group']==group)
         assert c.original_field_excerpt(eid,'')==c.records[eid]['body']
+
+
+@pytest.mark.parametrize('shape,expected',[('root','COMPLETED'),('nested','COMPLETED'),('both','COMPLETED'),('conflict','FAILED'),('undeclared','FAILED')])
+def test_reviewed_terminal_identity_has_declared_machine_locations_and_rejects_conflicts(tmp_path,shape,expected):
+    s,snap,_=service(tmp_path)
+    class ClaimModel(NativeModel):
+        async def infer(self,req):
+            decision=await super().infer(req)
+            if decision.action is not InferenceAction.RESULT_READY:return decision
+            digest=decision.result_claim['output_vector']['report_digest'];claims={'root':{'report_digest':digest},'nested':{'output_vector':{'report_digest':digest}},'both':{'report_digest':digest,'output_vector':{'report_digest':digest}},'conflict':{'report_digest':digest,'output_vector':{'report_digest':'wrong'}},'undeclared':{'summary':digest}}
+            return decision.model_copy(update={'result_claim':claims[shape]})
+    model=ClaimModel(snap);s.inference_factory=lambda:model
+    r=asyncio.run(s.analyze('human:owner',uuid4_from(snap),AnalysisTrigger(request_id=uuid4(),rationale='Check module terminal identity')))
+    assert r['status']==expected
+    assert 'report_claim_contract' in model.requests[0].context_facts[0]['payload']
+
+
+def test_native_countercheck_cannot_accept_its_own_declared_unsupported_assertion():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());tools=AnalysisTools(c,{});pending=invoke_analysis(tools,'analysis.submit',{'report':report(c)}).output
+    items=review_items(pending);items[0]['unsupported_assertions']=['Current investigation acceptance is not historical Work acceptance.'];items[0]['judgment']='SUPPORTED'
+    result=invoke_analysis(tools,'analysis.review',{'draft_id':pending['draft_id'],'items':items})
+    assert result.condition.value=='FAILED' and tools.accepted_report is None
+    assert result.output['verification']=='NATIVE_SELF_REVIEW_REQUIRES_REVISION'
+    items=review_items(pending);items[0].pop('countercheck')
+    assert invoke_analysis(tools,'analysis.review',{'draft_id':pending['draft_id'],'items':items}).condition.value=='FAILED'
