@@ -1,0 +1,33 @@
+{
+  "schema": "ai-native-evolution-image-build-v1",
+  "started_at_utc": "2026-10-13T07:09:20.360518+00:00",
+  "elapsed_seconds": 29.639851865940727,
+  "exit_code": 1,
+  "revision": "f52ea2cd784abf9cae5d1e9a60b6353177d8ff48",
+  "tree": "f74e125f9c6a35de789a32bdeac5b82f44b1d88e",
+  "tag": "watt-ai-native-evolution:f52ea2cd-20261013",
+  "archive_sha256": "d427b3f8754f84810f1f8eedc4b2533cda2144e4495b2f4b78763c9c04aaf507",
+  "raw_git_blob_export": true,
+  "network": "none",
+  "source_reinstalled": false,
+  "owner_revisions": {
+    "watt": {
+      "revision": "f52ea2cd784abf9cae5d1e9a60b6353177d8ff48",
+      "tree": "f74e125f9c6a35de789a32bdeac5b82f44b1d88e"
+    },
+    "guardian": {
+      "revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+      "tree": "92ac992c03bd84923a569bbe9f314c0786457040"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "runtime_source_overlay": false,
+  "production_resources_modified": false
+}

@@ -24,7 +24,7 @@ RUN test "$BASE_IMAGE_ID" = "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d
 
 # COPY merges directories. Clear only these image-local source trees first so
 # files deleted in the new exact revision cannot survive from the old image.
-RUN rm -rf /app/src /app/migrations /app/docker /qualification \
+RUN rm -rf /app/src /app/build /app/dist /app/migrations /app/docker /qualification \
     /opt/c2-owners /opt/c2-test-deps /opt/c2-build /opt/c3-owners /opt/c3-test-deps /opt/c3-build
 
 COPY watt/pyproject.toml watt/uv.lock watt/alembic.ini watt/README.md /app/

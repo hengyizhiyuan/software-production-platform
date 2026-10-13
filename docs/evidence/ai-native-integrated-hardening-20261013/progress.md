@@ -75,3 +75,5 @@ Source/格式/组件冲突均可在原一次反馈内局部修复；真正遗漏
 这是模块内 Candidate Generation → Semantic Interpretation/quote location → 原 Source/Evidence 角色与约束校验 → 完整 Projection → 独立 Review 的接线，不新增模型阶段或请求。临时表示不是 Fact，不修改正式 Binding/Guardian/Wire v1 的接纳职责。
 
 最终聚焦组合 `receipts/semantic-grouped-final.xml` **129/129 PASS**；第一提案控制 `semantic-construction-1.xml` **20/20 PASS**；`postgresql-semantic-proposal-1.xml` **1/1 PASS**：已观测第二编辑后只恢复剩余 Review，不重新 Formation。均无真实模型，不替代后续实际资格。
+
+第二构建源码 `f52ea2cd784abf9cae5d1e9a60b6353177d8ff48`，Tree `f74e125f9c6a35de789a32bdeac5b82f44b1d88e`；输入校验 PASS、包构建完成，安装态校验 FAIL / `IMPORTED_PACKAGE_CONTENT_MISMATCH`。新 Provider 文件安装 SHA 与 Git 原始输入一致；未变更的 `spg/__init__.py` 安装字节仍为 CRLF，等于继承的 `/app/build/lib/spg/__init__.py`。这是 image-local 增量 build 输出保留导致的字节漂移，不改源码内容，也不以换行归一化豁免安装态校验。Dockerfile 仅补清空新镜像阶段的 `/app/build`、`/app/dist`，保持锁、Owner、离线构建与全部字节核验。两次原始构建 FAIL 收据分别保留，不作 PASS。
