@@ -122,6 +122,43 @@ class _FulfillmentCompactCandidate(BaseModel):
 _CANDIDATE_CONSTRUCTION_CONTRACT = "owner-local-wire-candidate-edits-v1"
 
 
+class _FulfillmentSemanticRoute(BaseModel):
+    """Semantic choices only; source identity and quote geometry belong to Owner."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    s: StrictInt = Field(ge=0)
+    c: StrictInt = Field(ge=0)
+    q: str | None = Field(min_length=1, max_length=65536)
+    f: tuple[StrictInt, ...]
+    t: tuple[StrictInt, ...]
+    u: tuple[StrictInt, ...]
+    r: str = Field(min_length=1, max_length=1000)
+
+
+class _FulfillmentSemanticProposal(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    routes: tuple[_FulfillmentSemanticRoute, ...] = Field(min_length=1, max_length=1024)
+
+
+def _construct_semantic_proposal(value, inventory, wire_identity):
+    proposal = _FulfillmentSemanticProposal.model_validate(value)
+    routes = []
+    for item in proposal.routes:
+        if item.s >= len(inventory["sources"]):
+            raise ValueError("OBLIGATION_FORMATION_WIRE_SOURCE_UNKNOWN")
+        text = fulfillment_source_semantic_text(inventory["sources"][item.s])
+        start = 0 if item.q is None else text.find(item.q)
+        end = len(text) if item.q is None else start + len(item.q)
+        if start < 0 or end <= start:
+            raise ValueError("OBLIGATION_COMPONENT_QUOTE_NOT_OBSERVED")
+        if item.q is not None and text.find(item.q, start + 1) >= 0:
+            raise ValueError("OBLIGATION_COMPONENT_LOCATOR_AMBIGUOUS")
+        routes.append({**item.model_dump(mode="json"), "a": start, "z": end})
+    wire = {"v": 1, "h": wire_identity["wire_request_fingerprint"],
+        "d": wire_identity["wire_table_fingerprint"], "routes": routes}
+    body = json.dumps(wire, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return wire, body
+
+
 class _FulfillmentRouteReplacement(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     index: StrictInt = Field(ge=0)
@@ -181,6 +218,8 @@ def candidate_construction_preconditions(preconditions, inventory, feedback):
             try:
                 text, _ = _fulfillment_wire_value(raw, preconditions)
                 original = json.loads(text, object_pairs_hook=_wire_json_object)
+                if set(original) == {"routes"}:
+                    original, _ = _construct_semantic_proposal(original, inventory, binding)
                 if (set(original) == {"v", "h", "d", "routes"} and type(original["v"]) is int
                         and original["v"] == 1
                         and original["h"] == binding.get("wire_request_fingerprint")
@@ -298,6 +337,9 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
             schema["properties"][field]["enum"] = [wire_metadata[key]]
         schema["properties"]["basis"]["enum"] = [owner_preconditions["candidate_construction_state"]["repair_basis"]["raw_sha256"]]
         return schema
+    if (owner_preconditions or {}).get("candidate_construction_contract") == _CANDIDATE_CONSTRUCTION_CONTRACT:
+        from spg.providers.semantic_wire import _provider_strict_output_schema
+        return _provider_strict_output_schema(_FulfillmentSemanticProposal.model_json_schema())
     schema = _fulfillment_wire_schema()
     if wire_metadata is not None:
         # Identity copying is not semantic reasoning. Keep the existing Wire
@@ -1779,7 +1821,7 @@ def _fulfillment_wire_route_observations(output, inventory, capabilities, *, val
     cannot provide proof for another route. Full-plan validation is unchanged.
     """
     context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
-    output, _ = _fulfillment_wire_value(output, owner_preconditions)
+    output, _ = _fulfillment_wire_value(output, owner_preconditions, inventory=inventory, wire_identity=context)
     syntax_unavailable = []
     try:
         wire = _FulfillmentCompactCandidate.model_validate(json.loads(output, object_pairs_hook=_wire_json_object))
@@ -1841,7 +1883,7 @@ def _raw_fulfillment_owner_operands(output, inventory, capabilities, *, validati
     context = _fulfillment_wire_context(inventory, capabilities,
         validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
     choices = _formation_binding_choices(inventory, capabilities, owner_preconditions)
-    output, _ = _fulfillment_wire_value(output, owner_preconditions)
+    output, _ = _fulfillment_wire_value(output, owner_preconditions, inventory=inventory, wire_identity=context)
     syntax_observation = None
     try:
         wire = _FulfillmentCompactCandidate.model_validate(json.loads(output, object_pairs_hook=_wire_json_object))
@@ -1907,7 +1949,7 @@ def _raw_fulfillment_owner_operands(output, inventory, capabilities, *, validati
 _WIRE_PRESENTATION_CONTRACT = "existing-lossless-json-frame-v1"
 
 
-def _fulfillment_wire_value(output, owner_preconditions=None, *, construct=True):
+def _fulfillment_wire_value(output, owner_preconditions=None, *, construct=True, inventory=None, wire_identity=None):
     """Select only a request-bound, complete outer representation, never repair.
 
     The original Wire remains the Provider observation. Character and UTF-8
@@ -1945,6 +1987,22 @@ def _fulfillment_wire_value(output, owner_preconditions=None, *, construct=True)
                 "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID"}
         if construction is not None:
             presentation["candidate_construction"] = construction
+        elif inventory is not None and wire_identity is not None:
+            try:
+                proposal = json.loads(body, object_pairs_hook=_wire_json_object)
+                if isinstance(proposal, dict) and set(proposal) == {"routes"}:
+                    original_body = body
+                    _wire, body = _construct_semantic_proposal(proposal, inventory, wire_identity)
+                    presentation["candidate_construction"] = {
+                        "contract": _CANDIDATE_CONSTRUCTION_CONTRACT, "representation": "SEMANTIC_QUOTE_PROPOSAL",
+                        "proposal_sha256": sha256(original_body.encode()).hexdigest(),
+                        "constructed_wire_sha256": sha256(body.encode()).hexdigest(),
+                        "inventory_fingerprint": inventory["inventory_fingerprint"],
+                        "disposition": "OWNER_METADATA_ONLY; ALL_VALIDATION_AND_REVIEW_REQUIRED"}
+            except ValueError as error:
+                code = re.search(r"OBLIGATION_[A-Z0-9_]+", str(error))
+                presentation["candidate_construction"] = {"rejected": True,
+                    "code": code.group() if code else "OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID"}
     return body, presentation
 
 
@@ -1968,7 +2026,7 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
         "inventory_fingerprint": inventory["inventory_fingerprint"],
         **{key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS}}
     detailed = (owner_preconditions or {}).get("syntax_observation_contract") == "complete-value-owner-observations-v2"
-    output, presentation = _fulfillment_wire_value(output, owner_preconditions)
+    output, presentation = _fulfillment_wire_value(output, owner_preconditions, inventory=inventory, wire_identity=context)
     if presentation and presentation.get("candidate_construction", {}).get("rejected"):
         code = presentation["candidate_construction"]["code"]
         if code.endswith("BASIS_DRIFT"):
@@ -2375,6 +2433,21 @@ class ModelFulfillmentCandidateProvider:
                     "Choose all meanings, consumers and proof operands yourself. No automatic evidence or "
                     "permission is granted. The complete constructed candidate is revalidated and independently "
                     "reviewed. Keep the current h/d and exact parent basis. Do not output a new complete plan.")
+            elif (owner_preconditions or {}).get("candidate_construction_contract") == _CANDIDATE_CONSTRUCTION_CONTRACT:
+                formation_instructions = (
+                    "Propose semantic contribution routes for the immutable source table. Select s/c/f/t/u "
+                    "from its exact existing index domains; capability/Owner prerequisites are necessary "
+                    "conditions, not semantic approval. q=null proposes the complete original source basis; "
+                    "otherwise select an exact contiguous original quote preserving its governing qualifiers. "
+                    "The Owner supplies version, identity and unique quote geometry, never meaning or evidence. "
+                    "r is an inspectable source-to-consumer method justification, not proof of execution. "
+                    "Preserve each original contribution; complementary consumers and legitimate components "
+                    "may share original context. Separate current outcomes, continuous prohibitions, later "
+                    "Human/Candidate gates and genuine background according to their original semantics. "
+                    "Actual future evidence not yet existing does not make a lawful candidate plan unresolved. "
+                    "Use UNRESOLVED for meaning/method/source correspondence that cannot be legally established. "
+                    "The complete plan must pass exact validation and independent semantic review. No new "
+                    "Fact, performed witness, effect permit or Human authorization is created here.")
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
                 instructions=formation_instructions, input_text=formation_input, output_schema=output_schema)
             self.last_observation = {"generation_schema_fingerprint": canonical_fingerprint(output_schema),

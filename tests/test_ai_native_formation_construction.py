@@ -48,7 +48,7 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof"):
                 future = next(i for i,s in enumerate(inventory["sources"])
                     if s["kind"] == "WORK_CONSTRAINT" and s["index"] == 1)
                 touched = next(i for i,r in enumerate(wire["routes"]) if r["s"] == future)
-                if first == "source-proof":
+                if first in {"source-proof", "semantic-source-proof"}:
                     wire["routes"][touched]["u"] = []
                 elif first == "format":
                     wire["routes"][touched]["c"] = "not-an-ordinal"
@@ -60,7 +60,9 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof"):
                         if c["capability"] == "UNRESOLVED"), f=[], u=[], t=[])
                     wire["routes"].append(duplicate)
                 old_wire = deepcopy(wire)
-                output = json.dumps(wire, ensure_ascii=False)
+                proposal = ({"routes":[{k:v for k,v in row.items() if k not in {"a","z"}}
+                    for row in wire["routes"]]} if first.startswith("semantic-") else wire)
+                output = json.dumps(proposal, ensure_ascii=False)
             else:
                 assert state["convergence"]["action"] == "REPAIR"
                 basis = state["repair_basis"]
@@ -197,3 +199,33 @@ def test_record_existence_does_not_promote_an_unconfirmed_fact_or_supply_evidenc
     assert source["source_ref"] not in state["evidence"]["fact_refs"]
     assert source["source_ref"] in state["evidence"]["observation_refs"]
     assert state["evidence"]["evidence_refs"] == []
+
+
+def test_semantic_proposal_uses_owner_identity_and_geometry_then_local_source_repair():
+    bindings,provider,calls,args,_touched,_original = local_edit_case(first="semantic-source-proof")
+    assert all(b.state != "UNRESOLVED" for b in bindings) and len(calls) == 3
+    first = next(r for r in provider._fulfillment_receipts
+        if r["stage"] == "MODEL_RESPONSE_OBSERVED" and r["attempt"] == 1)
+    raw = json.loads(first["candidate_output"])
+    assert set(raw) == {"routes"}
+    assert all("a" not in r and "z" not in r for r in raw["routes"])
+    assert first["wire_presentation"]["candidate_construction"]["representation"] == "SEMANTIC_QUOTE_PROPOSAL"
+    assert first["candidate_output_sha256"] == sha256(first["candidate_output"].encode()).hexdigest()
+    rev,ir,kwargs = args
+    replay = app.form_fulfillment_projection(rev,ir,**kwargs)
+    assert all(b.state != "UNRESOLVED" for b in replay) and len(calls) == 3
+
+
+def test_semantic_quote_compiler_refuses_ambiguous_or_invented_text():
+    from spg.providers.fulfillment_candidate import _construct_semantic_proposal
+    _rev,_ir,inventory,_plan = controlled_capacity_case()
+    source = next(i for i,s in enumerate(inventory["sources"]) if s["kind"] == "FACT")
+    sketch = {"routes":[{"s":source,"c":0,"q":"this text was never observed", "f":[],"t":[],"u":[],"r":"proposal only"}]}
+    with pytest.raises(ValueError,match="QUOTE_NOT_OBSERVED"):
+        _construct_semantic_proposal(sketch,inventory,{"wire_request_fingerprint":"0"*64,"wire_table_fingerprint":"1"*64})
+    from collections import Counter
+    from spg.domain.governed_obligation import fulfillment_source_semantic_text
+    text = fulfillment_source_semantic_text(inventory["sources"][source])
+    sketch["routes"][0]["q"] = next(ch for ch,n in Counter(text).items() if n > 1 and not ch.isspace())
+    with pytest.raises(ValueError,match="LOCATOR_AMBIGUOUS"):
+        _construct_semantic_proposal(sketch,inventory,{"wire_request_fingerprint":"0"*64,"wire_table_fingerprint":"1"*64})

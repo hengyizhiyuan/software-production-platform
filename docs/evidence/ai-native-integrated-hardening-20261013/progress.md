@@ -67,3 +67,11 @@ Source/格式/组件冲突均可在原一次反馈内局部修复；真正遗漏
 第一构建 FAIL / `DEPENDENCY_LOCK_MISMATCH`，未重装源码成功，未取得镜像资格或模型调用。核对确认：原 attestor 的 lock 常量是旧 CRLF 捕获值 `ee2c5e...`；真实 Git blob 为 LF，SHA256 `ac853305...`。原 `f52d3996` 与新 `ddd517c0` 的 uv.lock Git blob 均为 `071627a271c51880c67cc58bc0a5c913c842c7ac`；旧镜像 lock 将 CRLF 转 LF 后与 Git blob 字节完全相同，TOML 包、版本、依赖及顶层元数据完全一致。
 
 因此仅更正 attestor 对真实 Git lock 字节的绑定，不改变依赖、不转码导出内容、不降低源/镜像校验。旧 attestation/失败与旧镜像保持不变。重新冻结这一构建检查修正后再构建；不得把旧镜像覆盖文件算作新资格。
+
+## 第一候选的语义提案接入
+
+不把改善第二次修复误称为消除了第一次精确编码负担。已在同一新协商构造契约中增加第一候选 `{routes:[s,c,q,f,t,u,r]}` 语义提案：模型选择贡献原文/消费者/支撑/目标，Owner 从实际请求身份及唯一原文位置构造完整 Wire v1。不能自动选择消费者、补原文或扩跨度；重复引文或不存在的引文拒绝。合法旧完整 Wire 仍按原身份与全部谓词检查，历史请求不升级。
+
+这是模块内 Candidate Generation → Semantic Interpretation/quote location → 原 Source/Evidence 角色与约束校验 → 完整 Projection → 独立 Review 的接线，不新增模型阶段或请求。临时表示不是 Fact，不修改正式 Binding/Guardian/Wire v1 的接纳职责。
+
+最终聚焦组合 `receipts/semantic-grouped-final.xml` **129/129 PASS**；第一提案控制 `semantic-construction-1.xml` **20/20 PASS**；`postgresql-semantic-proposal-1.xml` **1/1 PASS**：已观测第二编辑后只恢复剩余 Review，不重新 Formation。均无真实模型，不替代后续实际资格。

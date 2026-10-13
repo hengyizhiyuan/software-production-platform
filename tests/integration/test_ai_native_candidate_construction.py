@@ -43,7 +43,8 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
             if payload["same_basis_validation_feedback"] is None:
                 assert inventory["sources"][wire["routes"][0]["s"]]["kind"] == "FACT"
                 wire["routes"][0]["f"] = [len(inventory["sources"])]
-                output = json.dumps(wire)
+                output = json.dumps({"routes":[{k:v for k,v in row.items() if k not in {"a","z"}}
+                    for row in wire["routes"]]})
             else:
                 basis = payload["owner_source_preconditions"]["candidate_construction_state"]["repair_basis"]
                 output = json.dumps({"v":1,"h":wire["h"],"d":wire["d"],"basis":basis["raw_sha256"],

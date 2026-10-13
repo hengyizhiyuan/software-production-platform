@@ -1911,8 +1911,12 @@ class FulfillmentFormationReceipts:
             "recorded_at_utc": datetime.now(UTC).isoformat(), "budget_limit": 2,
             "candidate_is_authority": False, **_safe_value(values)}
         if stage == "MODEL_RESPONSE_OBSERVED" and isinstance(row.get("candidate_output"), str):
-            from spg.providers.fulfillment_candidate import _fulfillment_wire_value
-            _, presentation = _fulfillment_wire_value(row["candidate_output"], row.get("owner_source_preconditions"))
+            from spg.providers.fulfillment_candidate import _fulfillment_wire_value, _fulfillment_wire_context
+            source_request = next(r for r in self.records() if r["stage"] == "MODEL_REQUEST_PENDING" and r["attempt"] == attempt)
+            context = _fulfillment_wire_context(self.inventory, fulfillment_capability_contracts(),
+                validation_feedback=source_request.get("feedback"), owner_preconditions=row.get("owner_source_preconditions"))
+            _, presentation = _fulfillment_wire_value(row["candidate_output"], row.get("owner_source_preconditions"),
+                inventory=self.inventory, wire_identity=context)
             if presentation is not None:
                 row["wire_presentation"] = presentation
         if isinstance(row.get("validation_feedback"), str):
@@ -2036,7 +2040,7 @@ def _wire_response_basis(rows, attempt, revision, inventory, capabilities):
     if response.get("candidate_output_sha256") != output_fingerprint or response.get("candidate_output_bytes") != len(raw_bytes):
         drift()
     from spg.providers.fulfillment_candidate import _fulfillment_wire_value
-    _, presentation = _fulfillment_wire_value(raw, preconditions)
+    _, presentation = _fulfillment_wire_value(raw, preconditions, inventory=inventory, wire_identity=context)
     if response.get("wire_presentation") != presentation:
         drift()
     model = response.get("model")
@@ -2507,8 +2511,10 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
                 != fulfillment_candidate_fingerprint(located_candidate)):
             from spg.providers.fulfillment_candidate import _FulfillmentWireReceiptIdentityError
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
-        from spg.providers.fulfillment_candidate import _fulfillment_wire_value
-        wire_rows = json.loads(_fulfillment_wire_value(raw, owner_preconditions)[0])["routes"]
+        from spg.providers.fulfillment_candidate import _fulfillment_wire_value, _fulfillment_wire_context
+        context = _fulfillment_wire_context(inventory, capabilities,
+            validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
+        wire_rows = json.loads(_fulfillment_wire_value(raw, owner_preconditions, inventory=inventory, wire_identity=context)[0])["routes"]
     if (located_candidate is not None and (owner_preconditions or {}).get("typed_prerequisite_contract")
             == "existing-owner-typed-prerequisites-v7"):
         # Use the same complete Wire decode and locator as admission. Never
@@ -2519,8 +2525,10 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
         restored, _ = locate_projection_components(restored, inventory)
         if fulfillment_candidate_fingerprint(restored) != fulfillment_candidate_fingerprint(located_candidate):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
-        from spg.providers.fulfillment_candidate import _fulfillment_wire_value
-        wire_rows = json.loads(_fulfillment_wire_value(raw, owner_preconditions)[0])["routes"]
+        from spg.providers.fulfillment_candidate import _fulfillment_wire_value, _fulfillment_wire_context
+        context = _fulfillment_wire_context(inventory, capabilities,
+            validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
+        wire_rows = json.loads(_fulfillment_wire_value(raw, owner_preconditions, inventory=inventory, wire_identity=context)[0])["routes"]
         observations = tuple((i, wire_rows[i], route) for i, route in enumerate(restored.routes))
         unavailable = []
         located_view = restored
