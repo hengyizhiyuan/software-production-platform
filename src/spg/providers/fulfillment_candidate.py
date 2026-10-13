@@ -246,7 +246,8 @@ def candidate_construction_preconditions(preconditions, inventory, feedback):
         elif error in {"OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION", "OBLIGATION_COMPONENT_DISPOSITION_CONFLICT",
                 "OBLIGATION_PROJECTION_DUPLICATE_ROUTE"}:
             families.add("SEMANTIC_CONFLICT")
-        elif error.startswith("OBLIGATION_SUPPORTING_SOURCE_") or error.startswith("OBLIGATION_SOURCE_"):
+        elif (error.startswith("OBLIGATION_SUPPORTING_SOURCE_") or error.startswith("OBLIGATION_SOURCE_")
+                or error == "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST"):
             families.add("SOURCE_CORRESPONDENCE")
         elif error.startswith("OBLIGATION_SEMANTIC_REVIEW_"):
             families.add("SEMANTIC_REVIEW")
@@ -322,6 +323,42 @@ def _fulfillment_wire_schema():
     return _provider_strict_output_schema(_FulfillmentCompactCandidate.model_json_schema())
 
 
+def _project_route_identity_domains(route, inventory, capabilities):
+    """Reuse Wire v1 operand domains in every temporary representation.
+
+    These are necessary identity/type conditions, never semantic choices or
+    evidence. A Provider that ignores them still faces the original decoder.
+    """
+    sources = list(range(len(inventory["sources"])))
+    route["s"]["enum"] = sources
+    route["c"]["enum"] = list(range(len(capabilities)))
+    for name, domain in (("f", [i for i,s in enumerate(inventory["sources"]) if s["kind"] == "FACT"]),
+                         ("u", sources), ("t", list(range(len(inventory["exact_target_paths"]))))):
+        if domain:
+            route[name]["items"]["enum"] = domain
+        else:
+            route[name]["maxItems"] = 0
+
+
+def _project_construction_route_contract(schema, definition, inventory, capabilities):
+    route = schema["$defs"][definition]["properties"]
+    _project_route_identity_domains(route, inventory, capabilities)
+    # Declare the existing operands, rather than assuming abbreviated letters
+    # alone carry their roles. Do not import the old case-oriented instruction
+    # list or generate a recommended consumer for any source.
+    descriptions = {
+        "s": "Primary source ordinal. Each immutable source requires its own complete component contribution; a supporting reference in u does not cover it.",
+        "c": "Proposed existing capability ordinal. Structural eligibility is not semantic approval or authority.",
+        "q": "Null selects the complete original source basis. A string selects an exact unique contiguous component quote with its governing context, never invented or expanded text.",
+        "f": "Linked current FACT dependencies only, in the SAME original source ordinal space. Clause, constraint and provenance references belong in u, never f. An empty list is allowed; do not copy s by default.",
+        "t": "Exact admitted target-path ordinals for this proposed consumer; not excluded paths or new paths.",
+        "u": "Original provenance support ordinals. These do not discharge the referenced source's own contribution or provide performed evidence. Choose one justified complete Owner proof alternative when required.",
+        "r": "Inspectable original-source-to-consumer method justification, not hidden reasoning, performed evidence or an Assurance decision.",
+    }
+    for field, description in descriptions.items():
+        route[field]["description"] = description
+
+
 def _formation_output_schema(inventory, capabilities, *, owner_preconditions=None, wire_metadata=None):
     """A strict subset of existing wire v1 over this request's known identities.
 
@@ -336,10 +373,17 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
         for field, key in (("h", "wire_request_fingerprint"), ("d", "wire_table_fingerprint")):
             schema["properties"][field]["enum"] = [wire_metadata[key]]
         schema["properties"]["basis"]["enum"] = [owner_preconditions["candidate_construction_state"]["repair_basis"]["raw_sha256"]]
+        _project_construction_route_contract(schema, "_FulfillmentCompactRoute", inventory, capabilities)
+        schema["properties"]["remove"]["description"] = (
+            "Explicit original-route removals only. Removal is not a coverage repair: the complete derived candidate must retain every original contribution and pass unchanged validation.")
         return schema
     if (owner_preconditions or {}).get("candidate_construction_contract") == _CANDIDATE_CONSTRUCTION_CONTRACT:
         from spg.providers.semantic_wire import _provider_strict_output_schema
-        return _provider_strict_output_schema(_FulfillmentSemanticProposal.model_json_schema())
+        schema = _provider_strict_output_schema(_FulfillmentSemanticProposal.model_json_schema())
+        _project_construction_route_contract(schema, "_FulfillmentSemanticRoute", inventory, capabilities)
+        schema["properties"]["routes"]["description"] = (
+            "Complete proposed component coverage for EVERY immutable source identity, including equal-text sources. Multiple legal components/consumers are allowed. Coverage is necessary geometry, not proof of semantic fulfillment.")
+        return schema
     schema = _fulfillment_wire_schema()
     if wire_metadata is not None:
         # Identity copying is not semantic reasoning. Keep the existing Wire
@@ -364,15 +408,7 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
             "evidence or private reasoning is requested.")
         schema["$defs"]["_FulfillmentCompactRoute"]["properties"] = route = {
             name: route[name] for name in ("s", "a", "z", "q", "r", "c", "f", "t", "u")}
-    sources = list(range(len(inventory["sources"])))
-    route["s"]["enum"] = sources
-    route["c"]["enum"] = list(range(len(capabilities)))
-    for name, domain in (("f", [i for i,s in enumerate(inventory["sources"]) if s["kind"] == "FACT"]),
-                         ("u", sources), ("t", list(range(len(inventory["exact_target_paths"]))))):
-        if domain:
-            route[name]["items"]["enum"] = domain
-        else:
-            route[name]["maxItems"] = 0
+    _project_route_identity_domains(route, inventory, capabilities)
     if (owner_preconditions or {}).get("generation_view_contract") == "existing-lossless-source-consumer-input-v3":
         # The canonical format/identity domains stay strict. Semantic and
         # source-specific necessities remain in the complete Owner input and

@@ -77,3 +77,17 @@ Source/格式/组件冲突均可在原一次反馈内局部修复；真正遗漏
 最终聚焦组合 `receipts/semantic-grouped-final.xml` **129/129 PASS**；第一提案控制 `semantic-construction-1.xml` **20/20 PASS**；`postgresql-semantic-proposal-1.xml` **1/1 PASS**：已观测第二编辑后只恢复剩余 Review，不重新 Formation。均无真实模型，不替代后续实际资格。
 
 第二构建源码 `f52ea2cd784abf9cae5d1e9a60b6353177d8ff48`，Tree `f74e125f9c6a35de789a32bdeac5b82f44b1d88e`；输入校验 PASS、包构建完成，安装态校验 FAIL / `IMPORTED_PACKAGE_CONTENT_MISMATCH`。新 Provider 文件安装 SHA 与 Git 原始输入一致；未变更的 `spg/__init__.py` 安装字节仍为 CRLF，等于继承的 `/app/build/lib/spg/__init__.py`。这是 image-local 增量 build 输出保留导致的字节漂移，不改源码内容，也不以换行归一化豁免安装态校验。Dockerfile 仅补清空新镜像阶段的 `/app/build`、`/app/dist`，保持锁、Owner、离线构建与全部字节核验。两次原始构建 FAIL 收据分别保留，不作 PASS。
+
+## 新镜像与非 Holdout 实际模型结果
+
+源码 `3c490a4f4da6f3635a69e7bc9f5b23488404e1cd` / Tree `6bdbda17d352022eaebd404381c806fcc431aaea`，新镜像 `sha256:9471199480bcbfd3fe9ebcd79863698cc0f5923398259f97d56dca89c6847b91`。安装态 attestation PASS；镜像内 baked tests 129/129 PASS，无源码 overlay。
+
+两个既有非 Holdout 开发库存 readonly 模型资格：ordinary34/ordinary41 均 2 Formation / 0 Review / FAIL；没有创建 Work、数据库写入或 Guardian 调用。实际 Provider 正常，reasoning=none、16384、120s 不变。累计 Input 192589 / Output 6208 / Total 198797 / Reasoning 0 / Cached 512 tokens；货币费用 UNKNOWN。
+
+ordinary34 第一次漏来源 7，第二次局部编辑删掉更多必要贡献，覆盖门正确拒绝。反馈已含逐来源覆盖和缺口，不能将其说成 Validator 错拒。ordinary41 多条 f 指向 IR_CLAUSE/IR_CONSTRAINT，类型门正确拒绝。两者都是未接纳提案，没有实际履约资格。
+
+核对发现新候选 Schema 两个早退分支漏接了原 Wire 的 s/c/f/t/u 身份取值域和字段角色，属于本次表示接线缺口；已抽出同一个原身份域投影供旧 Wire、初提案及局部编辑复用。f 仍仅 FACT，u 仍为原来源空间；不新增索引、不自动选来源/能力/效果。覆盖错误纳入 SOURCE_CORRESPONDENCE，补缺仍必须模型明确 append，不能把 u 支撑当引用来源本身的履约。
+
+`construction-domain-2.xml` 133/133 PASS（受控），`postgresql-domain-1.xml` 1/1 PASS（中断后剩余 Review 恢复，无候选重发）。首次修改有括号语法错误，collection FAIL 原收据 `construction-domain-1.xml` 保留，随后修正；不记作运行 PASS。下一实际资格须重新冻结并构建新镜像，原失败与库存不改。
+
+跨电脑恢复：完整私有 Owner 收据、运行身份及构建事实在 ECS `/data/watt/ai-native-evolution-20261013`；公开脱敏收据在本分支 `receipts/`。没有 Holdout 内容用于实现；Program/C3 仍未完成。

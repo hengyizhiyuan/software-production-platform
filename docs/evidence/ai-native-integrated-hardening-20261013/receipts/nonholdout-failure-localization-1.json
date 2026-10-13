@@ -1,0 +1,1575 @@
+{
+  "schema": "ai-native-nonholdout-safe-failure-localization-v1",
+  "holdout_used": false,
+  "cases": [
+    {
+      "case": "ordinary34",
+      "attempts": [
+        {
+          "attempt": 1,
+          "wire_sha256": "b8ad9683cbf865667f26126eedcb51a9a6f10a0744bb1e1eb6c9289df66d4e08",
+          "failure_ref": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "repair_family": null,
+          "violations": [
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 7,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  4
+                ],
+                [
+                  5,
+                  7
+                ],
+                [
+                  8,
+                  17
+                ],
+                [
+                  18,
+                  27
+                ],
+                [
+                  28,
+                  29
+                ],
+                [
+                  30,
+                  38
+                ],
+                [
+                  39,
+                  48
+                ]
+              ],
+              "original_text_sha256": "763311981a479580e9d52e736ecffbec46cfc41a94a3564badab89c5fa354e60",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            }
+          ],
+          "not_evaluable": [
+            "CANONICAL_COMPONENT_VALIDATION",
+            "OWNER_PHASE_EVIDENCE",
+            "INDEPENDENT_SEMANTIC_REVIEW",
+            "ACTUAL_OWNER_EVIDENCE",
+            "ASSURANCE"
+          ],
+          "source_coverage": [
+            {
+              "source": 0,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 1,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 2,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 3,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 4,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 5,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 6,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 7,
+              "kind": null,
+              "coverage_status": "MISSING",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 8,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 9,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 10,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 11,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 12,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 13,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 14,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 15,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 16,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 17,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 18,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            }
+          ],
+          "raw_shape_fields": [
+            "routes"
+          ]
+        },
+        {
+          "attempt": 2,
+          "wire_sha256": "a8a5c12def4e29ec61e689a6b6371d51b1042d1001cca20ec3778dd2159d1ebb",
+          "failure_ref": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "repair_family": "UNKNOWN",
+          "violations": [
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 4,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  2
+                ],
+                [
+                  3,
+                  6
+                ],
+                [
+                  7,
+                  14
+                ],
+                [
+                  15,
+                  23
+                ],
+                [
+                  24,
+                  27
+                ],
+                [
+                  28,
+                  34
+                ],
+                [
+                  35,
+                  37
+                ],
+                [
+                  38,
+                  44
+                ],
+                [
+                  45,
+                  55
+                ]
+              ],
+              "original_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 7,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  4
+                ],
+                [
+                  5,
+                  7
+                ],
+                [
+                  8,
+                  17
+                ],
+                [
+                  18,
+                  27
+                ],
+                [
+                  28,
+                  29
+                ],
+                [
+                  30,
+                  38
+                ],
+                [
+                  39,
+                  48
+                ]
+              ],
+              "original_text_sha256": "763311981a479580e9d52e736ecffbec46cfc41a94a3564badab89c5fa354e60",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 12,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  3
+                ],
+                [
+                  4,
+                  10
+                ],
+                [
+                  11,
+                  14
+                ],
+                [
+                  15,
+                  19
+                ],
+                [
+                  20,
+                  22
+                ],
+                [
+                  23,
+                  42
+                ],
+                [
+                  43,
+                  47
+                ],
+                [
+                  48,
+                  59
+                ]
+              ],
+              "original_text_sha256": "57cb451611ece48c519970730d053123646136b1b1f355133abc42fe7384638f",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 13,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  12
+                ],
+                [
+                  13,
+                  15
+                ],
+                [
+                  16,
+                  19
+                ],
+                [
+                  20,
+                  25
+                ],
+                [
+                  26,
+                  34
+                ],
+                [
+                  35,
+                  42
+                ],
+                [
+                  43,
+                  46
+                ],
+                [
+                  47,
+                  56
+                ],
+                [
+                  57,
+                  62
+                ]
+              ],
+              "original_text_sha256": "739b15bc79375f46eff063aa8ddbff21cbeac67890f413337406f4719dc627f8",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 15,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ],
+                [
+                  25,
+                  36
+                ]
+              ],
+              "original_text_sha256": "8f73931419beb5ccb80dbdd5aa3aa609513cff870ae39d6181a04d0b4fb9b1bd",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 16,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ],
+                [
+                  25,
+                  37
+                ]
+              ],
+              "original_text_sha256": "5b7cd03090c3931b77a8929c4e8aab12368a7f8fcb5d941b155013aac44be6fd",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 17,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ],
+                [
+                  25,
+                  31
+                ],
+                [
+                  32,
+                  38
+                ]
+              ],
+              "original_text_sha256": "8314fcbae674bc2d2d5f514db6776b0ba01afb427ff4a931c0be2907609cf114",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 18,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ],
+                [
+                  25,
+                  33
+                ],
+                [
+                  34,
+                  44
+                ]
+              ],
+              "original_text_sha256": "43c16d3a65f35160438c5b7952e55d3da51f243d4e0ba2a150578155c39b3786",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            }
+          ],
+          "not_evaluable": [
+            "CANONICAL_COMPONENT_VALIDATION",
+            "OWNER_PHASE_EVIDENCE",
+            "INDEPENDENT_SEMANTIC_REVIEW",
+            "ACTUAL_OWNER_EVIDENCE",
+            "ASSURANCE"
+          ],
+          "source_coverage": [
+            {
+              "source": 0,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 1,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 2,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 3,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 4,
+              "kind": null,
+              "coverage_status": "MISSING",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 5,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 6,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 7,
+              "kind": null,
+              "coverage_status": "MISSING",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 8,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 9,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 10,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 11,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 12,
+              "kind": null,
+              "coverage_status": "MISSING",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 13,
+              "kind": null,
+              "coverage_status": "MISSING",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 14,
+              "kind": null,
+              "coverage_status": "COMPLETE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 15,
+              "kind": null,
+              "coverage_status": "MISSING",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 16,
+              "kind": null,
+              "coverage_status": "MISSING",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 17,
+              "kind": null,
+              "coverage_status": "MISSING",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 18,
+              "kind": null,
+              "coverage_status": "MISSING",
+              "uncovered_ranges": null,
+              "component_count": 0
+            }
+          ],
+          "raw_shape_fields": [
+            "append",
+            "basis",
+            "d",
+            "h",
+            "remove",
+            "replace",
+            "v"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "ordinary41",
+      "attempts": [
+        {
+          "attempt": 1,
+          "wire_sha256": "bfd47aa2c3374bdabef763d1d6da307217ffe36b60db5e983f6ac75449f85f6f",
+          "failure_ref": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+          "repair_family": null,
+          "violations": [
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 5,
+              "source": 12,
+              "capability": 3,
+              "raw_route_fingerprint": "5d01ad3b04323910dfcbb05e23280161df9cd77b3bef5ce1a19cb60626ed40fe"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 6,
+              "source": 12,
+              "capability": 4,
+              "raw_route_fingerprint": "9cd61d48251a142d4e470f528d08bc2f1ab37adf7d7fe0c98d276f28186191ac"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 7,
+              "source": 12,
+              "capability": 5,
+              "raw_route_fingerprint": "94b9985eb8cd5a8a6a1b488c9524a29f621781644381e9844c8fdc6db0db1402"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 6,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 8,
+              "source": 6,
+              "capability": 6,
+              "raw_route_fingerprint": "58ef74fc69f9e11b75fdd10328691789d3b6378d61c3d70475a348ab71091c19"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 8,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 9,
+              "source": 8,
+              "capability": 0,
+              "raw_route_fingerprint": "9fd0881c6296edd71c26f966c0dff6c574b288281fc7829a503bb01b9e4db81a"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 5,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 10,
+              "source": 5,
+              "capability": 0,
+              "raw_route_fingerprint": "b768c269f6cd549118ea8fba3f872d2eed20367f8920fa823f352334b723378e"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 7,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 11,
+              "source": 7,
+              "capability": 0,
+              "raw_route_fingerprint": "6978a8461aca38e991e8f16749b422993ade64bc15f86e4365ee1b3caa863349"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 9,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 12,
+              "source": 9,
+              "capability": 1,
+              "raw_route_fingerprint": "2768b88609d2c6a2b81ec71f194654aa1127d267f657bde96e1a203d07f56818"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 10,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 13,
+              "source": 10,
+              "capability": 6,
+              "raw_route_fingerprint": "72528518e542149e2af8a16e97a80e83d83076e464fd315d85fac952079960c3"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 11,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 14,
+              "source": 11,
+              "capability": 6,
+              "raw_route_fingerprint": "ab877f0543057b9ebca7c080726920c5698e6fa1c478b796eb52c331a23ed00f"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 5,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 15,
+              "source": 13,
+              "capability": 6,
+              "raw_route_fingerprint": "ffbe34cfa5638065d9e776925ed843682321d7a98412b8b0a87741dfa4eb4f3e"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 6,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 15,
+              "source": 13,
+              "capability": 6,
+              "raw_route_fingerprint": "ffbe34cfa5638065d9e776925ed843682321d7a98412b8b0a87741dfa4eb4f3e"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 7,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 15,
+              "source": 13,
+              "capability": 6,
+              "raw_route_fingerprint": "ffbe34cfa5638065d9e776925ed843682321d7a98412b8b0a87741dfa4eb4f3e"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 8,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 15,
+              "source": 13,
+              "capability": 6,
+              "raw_route_fingerprint": "ffbe34cfa5638065d9e776925ed843682321d7a98412b8b0a87741dfa4eb4f3e"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 11,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 15,
+              "source": 13,
+              "capability": 6,
+              "raw_route_fingerprint": "ffbe34cfa5638065d9e776925ed843682321d7a98412b8b0a87741dfa4eb4f3e"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 16,
+              "source": 14,
+              "capability": 4,
+              "raw_route_fingerprint": "9cdd5e15e15d496b2c56a3e378fc6d2a3e465281040888f548f0a2d3fc6adfc8"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 17,
+              "source": 14,
+              "capability": 5,
+              "raw_route_fingerprint": "f8918ca18fbd876342656c13b5b22ce39ece616403bbb9480fa1cf9e580a4308"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 18,
+              "source": 18,
+              "capability": 3,
+              "raw_route_fingerprint": "8d885953ee688400f01e5a57c73bbed63e34f72c814919d0fc449d41d34d22c4"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 19,
+              "source": 19,
+              "capability": 5,
+              "raw_route_fingerprint": "efc29f9df076e76884a5fd02b44740d0c20ee95a51787ff5a1d3de90bfb3a0da"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 20,
+              "source": 20,
+              "capability": 0,
+              "raw_route_fingerprint": "675228bfd7ce6a28258ae077080e586a9e7a04583d4122941c00b9da23eb93e7"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 21,
+              "source": 21,
+              "capability": 0,
+              "raw_route_fingerprint": "dd91edd98ed027b3cb3f11ee6b8e6e49a3219b3e25292a23959862ee988a8010"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 22,
+              "source": 22,
+              "capability": 1,
+              "raw_route_fingerprint": "6221e15c6f3a521fb3ebc8866608a103e9d5ab1d11247c96ad5dd231873e259e"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 9,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 22,
+              "source": 22,
+              "capability": 1,
+              "raw_route_fingerprint": "6221e15c6f3a521fb3ebc8866608a103e9d5ab1d11247c96ad5dd231873e259e"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 5,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 23,
+              "source": 15,
+              "capability": 0,
+              "raw_route_fingerprint": "7a6dc7bdad9e56208ddee22fe89d43db41b121e585ff2f19815614ca8082573a"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 6,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 23,
+              "source": 15,
+              "capability": 0,
+              "raw_route_fingerprint": "7a6dc7bdad9e56208ddee22fe89d43db41b121e585ff2f19815614ca8082573a"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 7,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 23,
+              "source": 15,
+              "capability": 0,
+              "raw_route_fingerprint": "7a6dc7bdad9e56208ddee22fe89d43db41b121e585ff2f19815614ca8082573a"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 8,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 23,
+              "source": 15,
+              "capability": 0,
+              "raw_route_fingerprint": "7a6dc7bdad9e56208ddee22fe89d43db41b121e585ff2f19815614ca8082573a"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 11,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 23,
+              "source": 15,
+              "capability": 0,
+              "raw_route_fingerprint": "7a6dc7bdad9e56208ddee22fe89d43db41b121e585ff2f19815614ca8082573a"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 5,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 24,
+              "source": 16,
+              "capability": 0,
+              "raw_route_fingerprint": "8039e4870bdbb01f4c1c0cec9aa5e8c0e12c039a47539687734693052fd43c9d"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 6,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 24,
+              "source": 16,
+              "capability": 0,
+              "raw_route_fingerprint": "8039e4870bdbb01f4c1c0cec9aa5e8c0e12c039a47539687734693052fd43c9d"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 7,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 24,
+              "source": 16,
+              "capability": 0,
+              "raw_route_fingerprint": "8039e4870bdbb01f4c1c0cec9aa5e8c0e12c039a47539687734693052fd43c9d"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 8,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 24,
+              "source": 16,
+              "capability": 0,
+              "raw_route_fingerprint": "8039e4870bdbb01f4c1c0cec9aa5e8c0e12c039a47539687734693052fd43c9d"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 11,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 24,
+              "source": 16,
+              "capability": 0,
+              "raw_route_fingerprint": "8039e4870bdbb01f4c1c0cec9aa5e8c0e12c039a47539687734693052fd43c9d"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 5,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 25,
+              "source": 17,
+              "capability": 6,
+              "raw_route_fingerprint": "806d19095471c22ec962d574f6172d5b8ad27fdd4f7839cc05546a73830bb90b"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 6,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 25,
+              "source": 17,
+              "capability": 6,
+              "raw_route_fingerprint": "806d19095471c22ec962d574f6172d5b8ad27fdd4f7839cc05546a73830bb90b"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 7,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 25,
+              "source": 17,
+              "capability": 6,
+              "raw_route_fingerprint": "806d19095471c22ec962d574f6172d5b8ad27fdd4f7839cc05546a73830bb90b"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 8,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 25,
+              "source": 17,
+              "capability": 6,
+              "raw_route_fingerprint": "806d19095471c22ec962d574f6172d5b8ad27fdd4f7839cc05546a73830bb90b"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 11,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 25,
+              "source": 17,
+              "capability": 6,
+              "raw_route_fingerprint": "806d19095471c22ec962d574f6172d5b8ad27fdd4f7839cc05546a73830bb90b"
+            }
+          ],
+          "not_evaluable": [
+            "CANONICAL_COMPONENT_VALIDATION",
+            "OWNER_PHASE_EVIDENCE",
+            "INDEPENDENT_SEMANTIC_REVIEW",
+            "ACTUAL_OWNER_EVIDENCE",
+            "ASSURANCE"
+          ],
+          "source_coverage": [
+            {
+              "source": 0,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 1,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 2,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 3,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 4,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 5,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 6,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 7,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 8,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 9,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 10,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 11,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 12,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 13,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 14,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 15,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 16,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 17,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 18,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 19,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 20,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 21,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 22,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            }
+          ],
+          "raw_shape_fields": [
+            "routes"
+          ]
+        },
+        {
+          "attempt": 2,
+          "wire_sha256": "ed75e3cb14bd2f12e28c90ac842ca01711914164e8d75b6a2445f03aaed94b8e",
+          "failure_ref": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+          "repair_family": "FORMAT",
+          "violations": [
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 9,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 15,
+              "source": 13,
+              "capability": 6,
+              "raw_route_fingerprint": "b0420c72eb3328f4907c4b7978b45f0ef7e78406487412af6217e224f01251c3"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 16,
+              "source": 14,
+              "capability": 4,
+              "raw_route_fingerprint": "c008ebee653720c3d0fe937ac57857d07fe820f687963b1ab9a6f4fb72a3de0d"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 17,
+              "source": 14,
+              "capability": 5,
+              "raw_route_fingerprint": "70ec88fa6e7930aa6bb6f2fde9afc0f376dcd838e5babd3de87ea5e3ba63b6b0"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 18,
+              "source": 18,
+              "capability": 3,
+              "raw_route_fingerprint": "081fc0697603407fd121a5d44f16b69fd694f69bb50b458999be9e8653335d5c"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 19,
+              "source": 19,
+              "capability": 5,
+              "raw_route_fingerprint": "c34574a7924ad7500f5a486a7ee6479e043017368d1af4163ddb2440ac5ffd26"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 20,
+              "source": 20,
+              "capability": 0,
+              "raw_route_fingerprint": "619fb49c2b36bf0970e45897be058229f9fd9b7bfee7e88427be66ff886b6a2c"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 21,
+              "source": 21,
+              "capability": 0,
+              "raw_route_fingerprint": "21ddf6050da45684520569d462c6846de06b26b8c6c2c228ccc14789257a061f"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 9,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 22,
+              "source": 22,
+              "capability": 1,
+              "raw_route_fingerprint": "116121a16053a1a01583c90eb1853fe25a7505151fce4e9ae042f2dc1767c2a0"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 12,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CONSTRAINT",
+              "route": 22,
+              "source": 22,
+              "capability": 1,
+              "raw_route_fingerprint": "116121a16053a1a01583c90eb1853fe25a7505151fce4e9ae042f2dc1767c2a0"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 6,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 23,
+              "source": 15,
+              "capability": 0,
+              "raw_route_fingerprint": "1f3ce1c69f0bb67c4335bf432dc00307fc570accfd68f3e98309678a446630a7"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 8,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 24,
+              "source": 16,
+              "capability": 0,
+              "raw_route_fingerprint": "ee6686e40bb95d13ed2f2f0e25aa0e519f84a17788a019dd894ef1057f3d9314"
+            },
+            {
+              "code": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+              "field": "f",
+              "referenced_source": 11,
+              "expected_kind": "FACT",
+              "actual_kind": "IR_CLAUSE",
+              "route": 25,
+              "source": 17,
+              "capability": 6,
+              "raw_route_fingerprint": "308a898acc7d0a740068fbc3f0a62507da532647dde03e4c4dc8fd02a3a1a1d4"
+            }
+          ],
+          "not_evaluable": [
+            "CANONICAL_COMPONENT_VALIDATION",
+            "OWNER_PHASE_EVIDENCE",
+            "INDEPENDENT_SEMANTIC_REVIEW",
+            "ACTUAL_OWNER_EVIDENCE",
+            "ASSURANCE"
+          ],
+          "source_coverage": [
+            {
+              "source": 0,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 1,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 2,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 3,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 4,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 5,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 6,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 7,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 8,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 9,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 10,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 11,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 12,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 1
+            },
+            {
+              "source": 13,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 14,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 15,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 16,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 17,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 18,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 19,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 20,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 21,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            },
+            {
+              "source": 22,
+              "kind": null,
+              "coverage_status": "NOT_EVALUABLE",
+              "uncovered_ranges": null,
+              "component_count": 0
+            }
+          ],
+          "raw_shape_fields": [
+            "append",
+            "basis",
+            "d",
+            "h",
+            "remove",
+            "replace",
+            "v"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -59,6 +59,8 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof"):
                     duplicate.update(c=next(i for i,c in enumerate(payload["existing_capability_contracts"])
                         if c["capability"] == "UNRESOLVED"), f=[], u=[], t=[])
                     wire["routes"].append(duplicate)
+                elif first == "semantic-coverage":
+                    wire["routes"].pop(touched)
                 old_wire = deepcopy(wire)
                 proposal = ({"routes":[{k:v for k,v in row.items() if k not in {"a","z"}}
                     for row in wire["routes"]]} if first.startswith("semantic-") else wire)
@@ -87,6 +89,15 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof"):
                 if first == "critic-format":
                     assert state["convergence"]["repair_strategy"] == "RETAIN_VALID_CANDIDATE_REPAIR_REVIEW_OUTPUT"
                     edit["replace"] = []
+                    output = json.dumps(edit)
+                elif first == "semantic-coverage":
+                    assert state["convergence"]["repair_family"] == "SOURCE_CORRESPONDENCE"
+                    feedback = json.loads(payload["same_basis_validation_feedback"])
+                    missing = [s for s in feedback["owner_repair_context"]["source_component_observations"]["sources"]
+                        if s["coverage_status"] == "MISSING"]
+                    assert missing and missing[0]["uncovered_codepoint_ranges"]
+                    edit["replace"] = []
+                    edit["append"] = [replacement]
                     output = json.dumps(edit)
                 elif first == "conflict":
                     edit["replace"] = []
@@ -229,3 +240,49 @@ def test_semantic_quote_compiler_refuses_ambiguous_or_invented_text():
     sketch["routes"][0]["q"] = next(ch for ch,n in Counter(text).items() if n > 1 and not ch.isspace())
     with pytest.raises(ValueError,match="LOCATOR_AMBIGUOUS"):
         _construct_semantic_proposal(sketch,inventory,{"wire_request_fingerprint":"0"*64,"wire_table_fingerprint":"1"*64})
+
+
+@pytest.mark.parametrize("scale", ("small", "medium", "complex"))
+def test_temporary_schemas_reuse_exact_original_operand_domains(scale):
+    from spg.providers.fulfillment_candidate import _formation_output_schema
+    _bindings,_provider,calls,_args,_touched,_original = local_edit_case(scale, first="semantic-source-proof")
+    first = json.loads(calls[0][0]["input_text"])
+    _rev,_ir,inventory,_plan = controlled_capacity_case(scale)
+    capabilities = first["existing_capability_contracts"]
+    expected = {
+        "s": list(range(len(inventory["sources"]))),
+        "c": list(range(len(capabilities))),
+        "f": [i for i,s in enumerate(inventory["sources"]) if s["kind"] == "FACT"],
+        "u": list(range(len(inventory["sources"]))),
+        "t": list(range(len(inventory["exact_target_paths"]))),
+    }
+    legacy = _formation_output_schema(inventory, capabilities)
+    for request,_input in calls[:2]:
+        schema = request["output_schema"]
+        name = "_FulfillmentSemanticRoute" if request is calls[0][0] else "_FulfillmentCompactRoute"
+        properties = schema["$defs"][name]["properties"]
+        for field,domain in expected.items():
+            part = properties[field] if field in {"s","c"} else properties[field]["items"]
+            assert part["enum"] == domain
+            original = legacy["$defs"]["_FulfillmentCompactRoute"]["properties"][field]
+            assert part["enum"] == (original if field in {"s","c"} else original["items"])["enum"]
+        assert "do not discharge" in properties["u"]["description"]
+        assert "FACT" in properties["f"]["description"]
+    empty = deepcopy(inventory)
+    empty["sources"] = [s for s in empty["sources"] if s["kind"] != "FACT"]
+    empty["exact_target_paths"] = []
+    schema = _formation_output_schema(empty, capabilities,
+        owner_preconditions={"candidate_construction_contract":"owner-local-wire-candidate-edits-v1"})
+    properties = schema["$defs"]["_FulfillmentSemanticRoute"]["properties"]
+    assert properties["f"]["maxItems"] == properties["t"]["maxItems"] == 0
+
+
+def test_missing_primary_source_is_locally_added_not_silently_covered_by_support():
+    bindings,provider,calls,_args,_touched,original = local_edit_case(first="semantic-coverage")
+    assert all(b.state != "UNRESOLVED" for b in bindings) and len(calls) == 3
+    observed = next(r for r in provider._fulfillment_receipts
+        if r["stage"] == "MODEL_RESPONSE_OBSERVED" and r["attempt"] == 2)
+    construction = observed["wire_presentation"]["candidate_construction"]
+    assert construction["appended_count"] == 1
+    assert construction["replaced_original_ordinals"] == construction["removed_original_ordinals"] == []
+    assert construction["retained_original_ordinals"] == list(range(len(original["routes"])))

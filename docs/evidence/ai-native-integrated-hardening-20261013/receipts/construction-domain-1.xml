@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="6.696" timestamp="2026-10-13T07:36:28.791532+00:00" hostname="da10fc763596"><testcase classname="" name="tests.test_ai_native_formation_construction" time="0.000"><error message="collection failure">/opt/spg-venv/lib/python3.13/site-packages/_pytest/python.py:508: in importtestmodule
+    mod = import_path(
+/opt/spg-venv/lib/python3.13/site-packages/_pytest/pathlib.py:596: in import_path
+    importlib.import_module(module_name)
+/usr/local/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1395: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+/opt/spg-venv/lib/python3.13/site-packages/_pytest/assertion/rewrite.py:188: in exec_module
+    exec(co, module.__dict__)
+tests/test_ai_native_formation_construction.py:11: in &lt;module&gt;
+    from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+E     File "/work/src/spg/providers/fulfillment_candidate.py", line 335
+E       for name, domain in (("f", [i for i,s in enumerate(inventory["sources"]) if s["kind"] == "FACT"]),
+E                           ^
+E   SyntaxError: '(' was never closed</error></testcase></testsuite></testsuites>
