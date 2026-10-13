@@ -186,6 +186,14 @@ Trace 真实结果的 Admin 展示校验补充 `actual-trace-admin-presentation-
 
 在同一个 FulfillmentFormationReceipts Owner 内修复重复载荷：新 v4 的第二请求通过原 CANDIDATE_VALIDATED 收据 ID 和完整字符串 fingerprint 引用反馈；响应通过同一 Attempt 的 MODEL_REQUEST_PENDING 收据引用完整 Owner 上下文。原父收据保留全部数据，实际 Provider 输入不改；读取对同 Work/Revision/Inventory/Source/路径、角色、Attempt、字段与 hash 校验后物化。缺父收据、改 hash、错用途、跨 Work、改父载荷或循环均由既有身份停止拒绝。旧无引用收据的格式与事实不改。
 
-容量停止不物化被裁减载荷、不复活终态；finish 只读取实际保留的理解状态，缺最新状态不会抛 KeyError 或伪造 PASS。原 131072-byte 界限和模型额度不增加。`owner-reference-capacity-1.xml` 的 1 FAIL 揭示原容量停止校验假定反馈必须被裁减；现精确校验保留的反馈引用，`owner-reference-capacity-2.xml` 78 PASS；`postgresql-owner-reference-1.xml` 6 PASS。原 FAIL 收据保留，不追认。
+容量停止不物化被裁减载荷、不复活终态；finish 只读取实际保留的理解状态，缺最新状态不会抛 KeyError 或伪造 PASS。原 131072-byte 界限和模型额度不增加。`owner-reference-capacity-1.xml` 的 1 FAIL 揭示原容量停止校验假定反馈必须被裁减；现精确校验保留的反馈引用，`owner-reference-capacity-2.xml` 80 PASS；`postgresql-owner-reference-1.xml` 6 PASS。原 FAIL 收据保留，不追认。
 
 下一验证仅重验该可证实的普通41记录阻断。对普通34正确的模型/治理拒绝不继续相同条件下盲目调用；尚未产生新的 Work、Artifact、Verification 或 Guardian 成果。C3 仍 PARTIAL，历史生产/Holdout 保持不变。
+
+## 失败反馈自身引用原始 Wire（只读重建，不增加模型尝试）
+
+普通41第九次 Source `1f74d76e` / image `a2d727a2...`：请求/响应引用修复已让第二请求实际完成，模型两次 completed，无传输重发，实际总 Token 139323（Input124191/Output15132/Reasoning0/Cached40576）。仍未接纳，0 Review；第二候选存在重复 Route。CANDIDATE_VALIDATED 的完整反馈包含 115394 bytes 的 validation_feedback，整收据 133150 bytes，原 131072 限制正确停止。原始第二响应及实际阶段收据已由私有 harness 每次 append 后原子落盘，因此此次可以依据真正保留的事实只读重建错误，不通过新模型请求碰运气。
+
+同 Owner 的 v4 失败反馈现在引用对应同 Attempt MODEL_RESPONSE_OBSERVED 的原 Wire 字符串：保存原字符串 SHA、JSON frame 的精确 prefix/suffix；只对唯一且与真实父响应完全相同的字段建立引用。读取恢复完全相同反馈字节，并核对完整反馈 SHA/bytes。没有重新编码其他字段、删除失败、缩减约束或生成不存在的证据。父/用途/Work/version/hash、prefix/suffix 漂移继续停止；历史被裁减的终态不复活。
+
+`feedback-wire-reference-2.xml` 定向正负与原容量回归通过；`postgresql-feedback-wire-reference-1.xml` 6 条持久恢复通过。这只是记录能力资格，不能让原非法 Candidate 合格，不宣称过去运行取得 PASS。后续实际模型资格仍需真正的合法方法计划和独立 Review。

@@ -1,0 +1,13 @@
+{
+  "schema": "unified-trace-final-image-compatibility-v1",
+  "result": "PASS",
+  "original_request_id": "3ad5e57d-a815-4432-8bc3-256e80ec9a93",
+  "original_work_id": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "original_status": "COMPLETED",
+  "new_model_calls": 0,
+  "new_production_work": false,
+  "original_cas_readonly": true,
+  "api_and_download_identical": true,
+  "history_events_unchanged": true,
+  "installed_admin_js_sha256": "588003235ba39875dcebeea18370e2574f6de7fe319e7a732f9b39d0df4fc15b"
+}

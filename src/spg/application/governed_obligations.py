@@ -1913,6 +1913,25 @@ class FulfillmentFormationReceipts:
                 # Retained reference identities do not resurrect its payload.
                 resolved[rid]=row
                 return row
+            feedback_frame=row.get('feedback_wire_reference')
+            if feedback_frame is not None:
+                if (row.get('stage')!='CANDIDATE_VALIDATED' or row.get('validation_passed') is not False
+                        or 'validation_feedback' in row or not isinstance(feedback_frame,dict)
+                        or set(feedback_frame)!={'receipt_id','sha256','prefix','suffix'}):
+                    raise ValueError('RECEIPT_REFERENCE_INVALID')
+                parent=index.get(feedback_frame['receipt_id'])
+                if (parent is None or parent.get('stage')!='MODEL_RESPONSE_OBSERVED' or parent['attempt']!=row['attempt']
+                        or any(parent.get(k)!=row.get(k) for k in ('owner','work_id','work_reality_revision_id',
+                            'inventory_fingerprint','source_revision','exact_target_paths'))):
+                    raise ValueError('RECEIPT_REFERENCE_IDENTITY_DRIFT')
+                parent=materialize(parent,(*active,rid))
+                wire=parent.get('candidate_output')
+                if not isinstance(wire,str) or sha256(wire.encode()).hexdigest()!=feedback_frame['sha256']:
+                    raise ValueError('RECEIPT_REFERENCE_HASH_DRIFT')
+                feedback=feedback_frame['prefix']+json.dumps(wire,ensure_ascii=False)+feedback_frame['suffix']
+                if sha256(feedback.encode()).hexdigest()!=row.get('validation_feedback_sha256') or len(feedback.encode())!=row.get('validation_feedback_bytes'):
+                    raise ValueError('RECEIPT_REFERENCE_HASH_DRIFT')
+                result={**row,'validation_feedback':feedback}
             if refs is not None:
                 if not isinstance(refs,dict) or not refs or not set(refs)<={'feedback','owner_source_preconditions'}:
                     raise ValueError('RECEIPT_REFERENCE_INVALID')
@@ -1972,6 +1991,25 @@ class FulfillmentFormationReceipts:
         if row.get("terminal") and not row.get("validation_passed"):
             row["unresolved_source_refs"] = [source["source_ref"] for source in self.inventory["sources"]]
         protocol=(row.get('owner_source_preconditions') or {}).get('candidate_construction_contract')
+        if stage=='CANDIDATE_VALIDATED' and row.get('validation_passed') is False and isinstance(row.get('validation_feedback'),str):
+            prior=self.records()
+            parent=next((r for r in prior if r['stage']=='MODEL_RESPONSE_OBSERVED' and r['attempt']==attempt),None)
+            request=next((r for r in prior if r['stage']=='MODEL_REQUEST_PENDING' and r['attempt']==attempt),None)
+            if ((request or {}).get('owner_source_preconditions') or {}).get('candidate_construction_contract')=='owner-local-interpretation-role-construction-v4':
+                feedback=row['validation_feedback'];wire=(parent or {}).get('candidate_output')
+                try:
+                    data=json.loads(feedback)
+                    matches=list(re.finditer(r'"untrusted_previous_wire"\s*:\s*',feedback))
+                    if isinstance(wire,str) and data.get('untrusted_previous_wire')==wire and len(matches)==1:
+                        start=matches[0].end()
+                        value,end=json.JSONDecoder().raw_decode(feedback,start)
+                        encoded=json.dumps(wire,ensure_ascii=False)
+                        if value==wire and feedback[start:end]==encoded:
+                            row['feedback_wire_reference']={'receipt_id':parent['receipt_id'],
+                                'sha256':sha256(wire.encode()).hexdigest(),'prefix':feedback[:start],'suffix':feedback[end:]}
+                            del row['validation_feedback']
+                except (ValueError,TypeError,AttributeError):
+                    pass # No safe exact frame: retain the original, or truthfully stop at the unchanged limit.
         if protocol=='owner-local-interpretation-role-construction-v4':
             prior=self.records();refs={}
             if stage=='MODEL_REQUEST_PENDING' and attempt>1 and isinstance(row.get('feedback'),str):
@@ -2977,6 +3015,19 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
     for row in rows:
         if row.get('receipt_reference_validation')=='INVALID':
             raise _FulfillmentWireReceiptIdentityError('OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT')
+        frame=row.get('feedback_wire_reference')
+        if frame is not None and row.get('capacity_observation') is None:
+            parent=next((r for r in rows if isinstance(frame,dict) and r['receipt_id']==frame.get('receipt_id')),None)
+            if (not isinstance(frame,dict) or set(frame)!={'receipt_id','sha256','prefix','suffix'}
+                    or row['stage']!='CANDIDATE_VALIDATED' or row.get('validation_passed') is not False
+                    or parent is None or parent['stage']!='MODEL_RESPONSE_OBSERVED' or parent['attempt']!=row['attempt']
+                    or any(parent.get(k)!=row.get(k) for k in ('owner','work_id','work_reality_revision_id',
+                        'inventory_fingerprint','source_revision','exact_target_paths'))
+                    or not isinstance(parent.get('candidate_output'),str)
+                    or not isinstance(frame['prefix'],str) or not isinstance(frame['suffix'],str)
+                    or sha256(parent['candidate_output'].encode()).hexdigest()!=frame['sha256']
+                    or row.get('validation_feedback')!=frame['prefix']+json.dumps(parent['candidate_output'],ensure_ascii=False)+frame['suffix']):
+                raise _FulfillmentWireReceiptIdentityError('OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT')
         references=row.get('owner_payload_references')
         if references is not None and row.get('capacity_observation') is None:
             if not isinstance(references,dict) or not references or not set(references)<={'feedback','owner_source_preconditions'}:

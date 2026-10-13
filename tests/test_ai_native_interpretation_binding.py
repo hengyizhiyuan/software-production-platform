@@ -123,6 +123,22 @@ def test_owner_payload_references_preserve_full_data_and_reduce_stored_duplicati
     assert len(calls)==3
 
 
+@pytest.mark.parametrize('tamper',('prefix','wire-hash','parent'))
+def test_feedback_wire_frame_is_exact_and_cannot_drift(tamper):
+    _bindings,provider,calls,args=interpretation_case()
+    row=next(r for r in provider._fulfillment_receipts if r['stage']=='CANDIDATE_VALIDATED' and r['attempt']==1)
+    assert 'validation_feedback' not in row
+    frame=row['feedback_wire_reference']
+    if tamper=='prefix':frame['prefix']='modified'+frame['prefix']
+    elif tamper=='wire-hash':frame['sha256']='0'*64
+    else:frame['receipt_id']='foreign-response'
+    rev,ir,kwargs=args
+    result=app.form_fulfillment_projection(rev,ir,**kwargs)
+    assert all(b.state=='UNRESOLVED' for b in result)
+    assert result[0].formation_receipt['terminal_reason']=='OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT'
+    assert len(calls)==3
+
+
 @pytest.mark.parametrize('tamper',('hash','missing','field','work','parent-payload'))
 def test_reference_corruption_truthfully_stops_without_another_provider_call(tamper):
     _bindings,provider,calls,args=interpretation_case()
