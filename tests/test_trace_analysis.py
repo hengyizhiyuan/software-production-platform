@@ -1674,7 +1674,8 @@ def test_summary_and_short_download_keep_unknown_and_exclude_large_unverified_dr
     assert len(json.dumps(summary))<5000
     assert 'repair_candidate' not in json.dumps(summary) and 'private-log' not in json.dumps(summary)
     html=concise_analysis_html(r).decode()
-    assert 'UNKNOWN' in html and 'original field missing' in html and '&lt;script&gt;' in html
+    assert 'UNKNOWN' in html and 'original field missing' in html and '<script>' not in html
+    assert summary['kernel_result']['summary']=='<script>unsafe()</script>'
     assert '<script>' not in html and len(html.encode())<10000
     s,snap,model=service(tmp_path);trigger=AnalysisTrigger(request_id=uuid4(),rationale='Investigate')
     done=asyncio.run(s.analyze('human:owner',uuid4_from(snap),trigger))

@@ -93,7 +93,7 @@ test('Analysis report escapes model text and preserves failed analysis evidence'
  const s=surface('/admin',true,null,null,{[path]:a});await s.ready();
  await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
  const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/未形成合格报告/);assert.match(h,/下载简明报告/);assert.doesNotMatch(h,/执行证据 JSON/);assert.equal((h.match(/role="tab"/g)||[]).length,4);
- assert.match(h,/&lt;script&gt;/);assert.doesNotMatch(h,/<script>bad/);
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'evidence'}})}});const detail=s.nodes['#admin-content'].innerHTML;assert.match(detail,/&lt;script&gt;/);assert.doesNotMatch(detail,/<script>bad/);
 });
 
 test('Analysis entry follows backend admission and explains active Work',async()=>{
@@ -223,9 +223,9 @@ test('Analysis tabs switch locally and concise HTML download never requests evid
  const a={work_id:'ordinary-work',request_id:'request-one',status:'FAILED',report:null,kernel_result:{summary:'工具不可用，修订未完成',inference_submissions:9,tool_effects:23},verification_receipts:[{verification:'FAIL',issues:[{location:['findings',0,'scope_check_ids'],reason:'PRESENT check cannot support absence'}]}]};
  const s=surface('/admin',true,null,null,{[path]:a});await s.ready();
  await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
- const h=s.nodes['#admin-content'].innerHTML;for(const label of ['失败现象','原因总结','改进方案','UNKNOWN','PRESENT check'])assert.ok(h.includes(label));
+ const h=s.nodes['#admin-content'].innerHTML;for(const label of ['失败现象','原因总结','改进方案','UNKNOWN'])assert.ok(h.includes(label));
  const n=s.calls.length;await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'evidence'}})}});assert.equal(s.calls.length,n);
- assert.match(s.nodes['#admin-content'].innerHTML,/推理 9 次/);
+ assert.match(s.nodes['#admin-content'].innerHTML,/推理 9 次/);assert.match(s.nodes['#admin-content'].innerHTML,/PRESENT check/);
  await s.listeners.keydown({key:'Home',preventDefault(){},target:{closest:q=>q==='[data-analysis-tab]'?{dataset:{analysisTab:'evidence'}}:null}});
  assert.match(s.nodes['#admin-content'].innerHTML,/id="analysis-tab-overview"[^>]*aria-selected="true"/);
  await s.listeners.click({target:{closest:()=>({dataset:{analysisDownload:'request-one',analysisTarget:'ordinary-work'}})}});

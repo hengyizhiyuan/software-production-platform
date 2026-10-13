@@ -23,6 +23,20 @@ def analysis_summary(record):
             "type", "reason", "location", "evidence_id", "check_observation") if key in issue}
             for issue in item.get("issues", [])[:12]],
     } for item in receipts[-6:]]
+    # Translate protocol rejection codes for display only. No model prose is
+    # classified, repaired, or promoted by this projection.
+    issues = [issue for item in result["verification_receipts"] for issue in item["issues"]]
+    reason = str(issues[-1].get("reason", "")) if issues else ""
+    code = reason.split(";", 1)[0].split(":", 1)[0]
+    labels = {
+        "PRESENT_CHECK_CANNOT_SUPPORT_MISSING_FIELD_FINDING": "草稿曾把已存在的证据用作缺失证据，被校验拒绝。",
+        "MISSING_EVIDENCE_CONTRADICTS_LOOKUP_OR_UNCHECKED": "草稿的证据缺口与实际核查结果不一致，被校验拒绝。",
+        "MISSING_EVIDENCE_REQUIRES_SCOPED_FINDING": "草稿的证据缺口没有关联到对应的分析事件，被校验拒绝。",
+        "ORIGINAL_FIELD_REFERENCE_NOT_CAPTURED": "草稿引用了未捕获的原始字段，被校验拒绝。",
+        "ORIGINAL_FIELD_REFERENCE_NOT_FULLY_READ": "草稿引用了尚未完整读取的原始字段，被校验拒绝。",
+    }
+    result["failure_summary"] = (labels.get(code, "本次分析未形成通过最终校验的报告，具体未确认原因保持 UNKNOWN。")
+        + ("最终仍未形成合格报告；详细终止说明与拒绝项见证据与校验。" if code in labels else "")) if not result["report"] else None
     result["omitted_verification_receipts"] = max(0, len(receipts) - 6)
     result["boundary"] = "保存记录的展示摘要；失败草稿未作为生产诊断结论，UNKNOWN 不代表没有问题。"
     return result
@@ -76,7 +90,7 @@ def concise_analysis_html(record):
     else:
         kernel = value["kernel_result"]
         sections += ["<h2>失败现象</h2>", paragraph("本次分析未形成合格报告；原 Work 的根因保持 UNKNOWN。"),
-            "<h2>原因总结（分析流程自身）</h2>", paragraph(kernel.get("summary"), 3000),
+            "<h2>原因总结（分析流程自身）</h2>", paragraph(value["failure_summary"], 500),
             paragraph("终态：" + str(kernel.get("terminal_outcome") or "UNKNOWN"), 200),
             paragraph("错误类型：" + str(value["failure"].get("error_type") or "未记录额外异常"), 200),
             "<h3>保存的校验反馈</h3>"]
