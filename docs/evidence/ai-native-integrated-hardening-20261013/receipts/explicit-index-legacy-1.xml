@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="5.516" timestamp="2026-10-13T14:01:20.161147+00:00" hostname="f647895c1d08"><testcase classname="tests.test_ai_native_role_convergence" name="test_v1_negotiation_is_not_upgraded_to_v2_on_resume" time="0.514" /></testsuite></testsuites>

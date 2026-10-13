@@ -73,9 +73,10 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
                         'alternatives':[]} for s in inventory['sources']]})
                     if unparsed_claim:output=output[:-1]
                     if role_convergence:
-                        from spg.domain.governed_obligation import fulfillment_source_semantic_text
                         wire['routes'][0]['f']=original_dependencies
-                        wire['routes'][0]['q']=fulfillment_source_semantic_text(inventory['sources'][wire['routes'][0]['s']])[:-1]
+                        duplicate=deepcopy(wire['routes'][0])
+                        duplicate.update(c=next(i for i,c in enumerate(payload['existing_capability_contracts']) if c['capability']=='UNRESOLVED'),f=[],t=[],u=[])
+                        wire['routes'].append(duplicate)
                         output=json.dumps({'routes':[role(r) for r in wire['routes']]})
             else:
                 basis = payload["owner_source_preconditions"]["candidate_construction_state"]["repair_basis"]
@@ -88,8 +89,8 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
                     output=json.dumps({'basis':basis['raw_sha256'],'replace':[{'index':0,'route':role(wire['routes'][0])}],
                         'remove':[],'append':[]})
                 if construction_contract=='owner-local-interpretation-role-construction-v4':
-                    output=(json.dumps({'basis':basis['raw_sha256'],'replace':[{'index':0,'route':role(wire['routes'][0])}],
-                        'remove':[],'append':[]}) if role_convergence else json.dumps({'routes':[role(r) for r in wire['routes']]}))
+                    output=(json.dumps({'basis':basis['raw_sha256'],'replace':[],
+                        'remove':[{'index':len(basis['original_wire']['routes'])-1}],'append':[]}) if role_convergence else json.dumps({'routes':[role(r) for r in wire['routes']]}))
         return StructuredModelResult(output_text=output,provider=ModelProvider.DEEPSEEK,
             requested_model="controlled-pg-edit",effective_model="controlled-pg-edit",
             request_id=f"pg-edit-{len(calls)}",usage=ModelUsage(unknown=True),timing=ModelTiming(),retry_count=0)

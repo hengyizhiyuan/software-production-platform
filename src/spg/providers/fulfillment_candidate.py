@@ -126,7 +126,9 @@ _RAW_ROLE_REPAIR_CONTRACT = "existing-bound-unadmitted-role-repair-v1"
 _INTERPRETATION_ROLE_CONTRACT = "owner-local-interpretation-role-construction-v4"
 _CONSTRUCTION_CONSUMER_INSTRUCTION_CONTRACT = "existing-consumer-semantics-in-construction-v1"
 _UNPARSED_CLAIM_REPAIR_CONTRACT = "existing-bound-unparsed-claim-repair-v1"
-_ROLE_CONVERGENCE_CONTRACT = "existing-complete-role-candidate-and-bound-repair-targets-v1"
+_ROLE_CONVERGENCE_LEGACY_CONTRACT = "existing-complete-role-candidate-and-bound-repair-targets-v1"
+_ROLE_CONVERGENCE_CONTRACT = "existing-complete-role-candidate-and-bound-repair-targets-v2"
+_ROLE_CONVERGENCE_CONTRACTS = {_ROLE_CONVERGENCE_LEGACY_CONTRACT, _ROLE_CONVERGENCE_CONTRACT}
 _CANDIDATE_CONSTRUCTION_CONTRACTS = {_CANDIDATE_CONSTRUCTION_CONTRACT, _SEMANTIC_EDIT_CONTRACT, _ROLE_REFERENCE_CONTRACT,
     _INTERPRETATION_ROLE_CONTRACT}
 
@@ -228,6 +230,16 @@ class _FulfillmentRoleEdits(BaseModel):
     replace: tuple[_FulfillmentRoleReplacement, ...] = Field(max_length=64)
     remove: tuple[StrictInt, ...] = Field(max_length=64)
     append: tuple[_FulfillmentRoleRoute, ...] = Field(max_length=64)
+
+
+class _FulfillmentRoleRemoval(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    index: StrictInt = Field(ge=0)
+
+
+class _FulfillmentRoleTargetEdits(_FulfillmentRoleEdits):
+    # Same ORIGINAL target domain and operation; no string/boolean coercion.
+    remove: tuple[StrictInt | _FulfillmentRoleRemoval, ...] = Field(max_length=64)
 
 
 def _role_proposal_semantic_value(value,inventory,capabilities):
@@ -528,7 +540,7 @@ def candidate_construction_preconditions(preconditions, inventory, feedback, *,
     state = {"understanding": understanding.model_dump(mode="json"),
         "evidence": evidence.model_dump(mode="json"), "convergence": decision.model_dump(mode="json"),
         "repair_basis": basis}
-    if preconditions.get('role_convergence_contract') == _ROLE_CONVERGENCE_CONTRACT:
+    if preconditions.get('role_convergence_contract') in _ROLE_CONVERGENCE_CONTRACTS:
         state['repair_targets'] = _coverage_repair_targets(payload, basis, inventory)
     if _safe_value(state) != state:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
@@ -570,7 +582,8 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
     if role_basis and preconditions.get("candidate_construction_contract") not in {_ROLE_REFERENCE_CONTRACT,_INTERPRETATION_ROLE_CONTRACT}:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
     try:
-        model = _FulfillmentRoleEdits if role_basis else _FulfillmentSemanticEdits if semantic_basis else _FulfillmentCandidateEdits
+        model = (_FulfillmentRoleTargetEdits if preconditions.get('role_convergence_contract') == _ROLE_CONVERGENCE_CONTRACT
+            else _FulfillmentRoleEdits) if role_basis else _FulfillmentSemanticEdits if semantic_basis else _FulfillmentCandidateEdits
         proposal = model.model_validate(json.loads(body, object_pairs_hook=_wire_json_object))
     except ValueError as error:
         raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID") from error
@@ -580,13 +593,14 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
     if canonical_fingerprint(original) != basis["original_wire_fingerprint"]:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
     count = len(original["routes"])
-    indices = [r.index for r in proposal.replace] + list(proposal.remove)
+    removed_indices = [r.index if isinstance(r, _FulfillmentRoleRemoval) else r for r in proposal.remove]
+    indices = [r.index for r in proposal.replace] + removed_indices
     review_only = state.get("convergence", {}).get("repair_strategy") == "RETAIN_VALID_CANDIDATE_REPAIR_REVIEW_OUTPUT"
     if (not indices and not proposal.append and not review_only) or len(set(indices)) != len(indices) or any(
             type(i) is not int or not 0 <= i < count for i in indices):
         raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID")
     replacements = {r.index: r.route.model_dump(mode="json") for r in proposal.replace}
-    removed = set(proposal.remove)
+    removed = set(removed_indices)
     routes = [deepcopy(replacements.get(i, r)) for i, r in enumerate(original["routes"]) if i not in removed]
     routes.extend(r.model_dump(mode="json") for r in proposal.append)
     if not routes or len(routes) > 1024:
@@ -613,7 +627,7 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
         "edit_response_sha256": sha256(body.encode()).hexdigest(),
         "constructed_wire_sha256": sha256(constructed.encode()).hexdigest(),
         "replaced_original_ordinals": [r.index for r in proposal.replace],
-        "removed_original_ordinals": list(proposal.remove), "appended_count": len(proposal.append),
+        "removed_original_ordinals": removed_indices, "appended_count": len(proposal.append),
         "retained_original_ordinals": [i for i in range(count) if i not in set(indices)],
         "disposition": "DERIVED_CANDIDATE; NO_SEMANTIC_OR_EVIDENCE_ADMISSION"}
 
@@ -700,7 +714,9 @@ def _role_generation_schema(inventory,capabilities,owner_preconditions):
     from spg.providers.semantic_wire import _provider_strict_output_schema
     basis=(owner_preconditions.get('candidate_construction_state') or {}).get('repair_basis')
     edits = basis and basis.get('representation') not in {'UNREVIEWED_INTERPRETATION_CLAIMS','UNPARSED_PRIVACY_SAFE_PROPOSAL'}
-    schema=_provider_strict_output_schema((_FulfillmentRoleEdits if edits else _FulfillmentRoleProposal).model_json_schema())
+    edit_model = (_FulfillmentRoleTargetEdits if owner_preconditions.get('role_convergence_contract') == _ROLE_CONVERGENCE_CONTRACT
+        else _FulfillmentRoleEdits)
+    schema=_provider_strict_output_schema((edit_model if edits else _FulfillmentRoleProposal).model_json_schema())
     props=schema['$defs']['_FulfillmentRoleRoute']['properties']
     refs=[s['source_ref'] for s in inventory['sources']]
     props['source_ref']['enum']=refs
@@ -719,6 +735,10 @@ def _role_generation_schema(inventory,capabilities,owner_preconditions):
         operand=_role_operand_schema(_qualified_operand_generation_schema(inventory,capabilities,choices,
             enforce_owner_prerequisites=True,route_definition='_FulfillmentSemanticRoute'),inventory,capabilities)
     if edits:
+        if edit_model is _FulfillmentRoleTargetEdits:
+            # Prefer the same explicit target object used by replace. Existing
+            # exact integer commands remain consumable at this local boundary.
+            schema['properties']['remove']['items']={'$ref':'#/$defs/_FulfillmentRoleRemoval'}
         schema['properties']['basis']['enum']=[basis['raw_sha256']]
         schema['$defs']['_FulfillmentRoleReplacement']['properties']['route']=deepcopy(operand)
         schema['properties']['append']['items']=deepcopy(operand)
@@ -740,7 +760,7 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
     basis=((owner_preconditions or {}).get('candidate_construction_state') or {}).get('repair_basis')
     if (owner_preconditions or {}).get('candidate_construction_contract') == _INTERPRETATION_ROLE_CONTRACT:
         if not basis:
-            if owner_preconditions.get('role_convergence_contract') == _ROLE_CONVERGENCE_CONTRACT:
+            if owner_preconditions.get('role_convergence_contract') in _ROLE_CONVERGENCE_CONTRACTS:
                 return _role_generation_schema(inventory,capabilities,owner_preconditions)
             from spg.providers.semantic_wire import _provider_strict_output_schema
             schema = _provider_strict_output_schema(_FulfillmentInterpretationProposal.model_json_schema())
@@ -2663,7 +2683,7 @@ class ModelFulfillmentCandidateProvider:
     def __init__(self, runtime_factory, *, candidate_construction=False,
                  candidate_construction_contract=_CANDIDATE_CONSTRUCTION_CONTRACT,
                  raw_role_repair=False, construction_consumer_instructions=False, unparsed_claim_repair=False,
-                 role_convergence=False):
+                 role_convergence=False, role_convergence_contract=_ROLE_CONVERGENCE_CONTRACT):
         self.runtime_factory = runtime_factory
         self.last_observation = None
         self.supports_candidate_construction = candidate_construction
@@ -2674,6 +2694,9 @@ class ModelFulfillmentCandidateProvider:
         self.supports_construction_consumer_instructions = construction_consumer_instructions
         self.supports_unparsed_claim_repair = unparsed_claim_repair
         self.supports_role_convergence = role_convergence
+        if role_convergence_contract not in _ROLE_CONVERGENCE_CONTRACTS:
+            raise ValueError('OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID')
+        self.role_convergence_contract = role_convergence_contract
 
     @classmethod
     def from_settings(cls, settings):
@@ -2975,7 +2998,7 @@ class ModelFulfillmentCandidateProvider:
                     "with this request's exact header.","with the exact parent basis; current request identity is supplied by the Owner.").replace(
                     'from its exact existing index domains','from the exact original source references, capability names and governed paths')
             if (owner_preconditions or {}).get('candidate_construction_contract') == _INTERPRETATION_ROLE_CONTRACT:
-                if not basis and owner_preconditions.get('role_convergence_contract') != _ROLE_CONVERGENCE_CONTRACT:
+                if not basis and owner_preconditions.get('role_convergence_contract') not in _ROLE_CONVERGENCE_CONTRACTS:
                     formation_instructions = (
                         'Propose source-referenced semantic interpretation claims for the COMPLETE immutable inventory. '
                         'Identify complementary components, the intent and constraints they express, reasonable alternatives '
@@ -3010,7 +3033,7 @@ class ModelFulfillmentCandidateProvider:
             if (owner_preconditions or {}).get("candidate_construction_contract") in {
                     _ROLE_REFERENCE_CONTRACT, _INTERPRETATION_ROLE_CONTRACT} and not (
                     owner_preconditions.get("candidate_construction_contract") == _INTERPRETATION_ROLE_CONTRACT
-                    and not basis and owner_preconditions.get('role_convergence_contract') != _ROLE_CONVERGENCE_CONTRACT):
+                    and not basis and owner_preconditions.get('role_convergence_contract') not in _ROLE_CONVERGENCE_CONTRACTS):
                 semantics = _construction_consumer_instructions(
                     owner_preconditions.get("construction_consumer_instruction_contract"))
                 if semantics:

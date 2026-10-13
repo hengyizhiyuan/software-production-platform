@@ -1,0 +1,159 @@
+{
+  "schema": "ai-native-nonholdout-formation-v1",
+  "source_revision": "3d5656ac4ff9665c9939a3d316b624fd86d777f5",
+  "actual_runtime_module": "/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py",
+  "actual_runtime_sha256": "21a8e1cda747a9d59a27930e5247a7ef912fa71fb6e407458f2b5974506aaf25",
+  "holdout_used": false,
+  "new_work_created": false,
+  "database_access": false,
+  "historical_records_modified": false,
+  "model_profile": {
+    "provider": "DEEPSEEK",
+    "model": "deepseek-flash",
+    "reasoning_effort": "none",
+    "max_output_tokens": 16384,
+    "timeout_seconds": 120
+  },
+  "cases": [
+    {
+      "case": "ordinary41",
+      "started_at_utc": "2026-10-13T13:39:19.707412+00:00",
+      "elapsed_seconds": 23.759014527895488,
+      "input_basis_sha256": "8139c4b98c98069cd5b02ad2c9b731497253a851d1994fdbaa4a2704f0cc03e7",
+      "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+      "source_count": 23,
+      "formation_calls": 2,
+      "review_calls": 0,
+      "legal_projection_admitted": false,
+      "terminal_reason": "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID",
+      "observations": [
+        {
+          "stage": "MODEL_RESPONSE_OBSERVED",
+          "attempt": 1,
+          "receipt_id": "ab0f1b18-8ce8-44a5-ab40-689e8cfe23c8",
+          "failed_predicate": null,
+          "validation_passed": null,
+          "terminal_reason": null,
+          "provider_observation": {
+            "request_id": "2fd08b94-5c8d-4cfc-b65e-d151c79c9c09",
+            "provider": "deepseek",
+            "requested_model": "deepseek-flash",
+            "effective_model": "deepseek-flash",
+            "usage": {
+              "input_tokens": 49716,
+              "output_tokens": 4862,
+              "cached_tokens": 42496,
+              "reasoning_tokens": 0,
+              "total_tokens": 54578,
+              "unknown": false
+            },
+            "timing": {
+              "request_sent_seconds": 0.0015414719237014651,
+              "first_response_event_seconds": 0.44925516401417553,
+              "first_token_seconds": 0.7163910520030186,
+              "completed_seconds": 20.003484974964522
+            },
+            "transport_retry_count": 0,
+            "output_sha256": "9eed616e6f0b490d7dede0c7739f3dd798445edba7402fde42b3f0e80cff7b51",
+            "output_bytes": 16248,
+            "output_evidence": {
+              "provider_status": "completed",
+              "delta_sha256": "9eed616e6f0b490d7dede0c7739f3dd798445edba7402fde42b3f0e80cff7b51",
+              "delta_bytes": 16248,
+              "terminal_text_observed": true,
+              "terminal_sha256": "9eed616e6f0b490d7dede0c7739f3dd798445edba7402fde42b3f0e80cff7b51",
+              "terminal_bytes": 16248,
+              "selection": "TERMINAL_MATCHED_DELTA"
+            }
+          },
+          "construction": {
+            "rejected": true,
+            "code": "OBLIGATION_FORMATION_ROLE_REFERENCE_UNKNOWN",
+            "diagnostics": {
+              "violations": [
+                {
+                  "code": "OBLIGATION_FORMATION_ROLE_REFERENCE_UNKNOWN",
+                  "route": 28,
+                  "field": "provenance_support_refs",
+                  "reference_sha256": "c166a76a84c2da09369fe4c2ee07d248c89c986e7f86d09914642b8f6a59b399"
+                }
+              ],
+              "additional_violation_count": 0
+            }
+          }
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "receipt_id": "f0a1c7ec-0114-4cf1-b832-200b965a4d03",
+          "failed_predicate": "OBLIGATION_FORMATION_ROLE_REFERENCE_UNKNOWN",
+          "validation_passed": false,
+          "terminal_reason": null,
+          "error_codes": [
+            "OBLIGATION_FORMATION_ROLE_REFERENCE_UNKNOWN"
+          ],
+          "feedback_sha256": "1be16cca592b01a4e3ab27d7d364df65a2ad7fc20ad73084889f1ef2d0f9c854"
+        },
+        {
+          "stage": "MODEL_RESPONSE_OBSERVED",
+          "attempt": 2,
+          "receipt_id": "2c180fd3-2a4e-4a65-83c7-d86c3fa2758c",
+          "failed_predicate": null,
+          "validation_passed": null,
+          "terminal_reason": null,
+          "provider_observation": {
+            "request_id": "e839751e-35e5-4569-8643-9916b55b5e03",
+            "provider": "deepseek",
+            "requested_model": "deepseek-flash",
+            "effective_model": "deepseek-flash",
+            "usage": {
+              "input_tokens": 77304,
+              "output_tokens": 307,
+              "cached_tokens": 10112,
+              "reasoning_tokens": 0,
+              "total_tokens": 77611,
+              "unknown": false
+            },
+            "timing": {
+              "request_sent_seconds": 0.002525484887883067,
+              "first_response_event_seconds": 0.5325447659706697,
+              "first_token_seconds": 1.600044643972069,
+              "completed_seconds": 2.7656010579084978
+            },
+            "transport_retry_count": 0,
+            "output_sha256": "b8719bdf02ba4498066693b0dddd87f41b390afda6fb84401e9aac85e26e7d3e",
+            "output_bytes": 889,
+            "output_evidence": {
+              "provider_status": "completed",
+              "delta_sha256": "b8719bdf02ba4498066693b0dddd87f41b390afda6fb84401e9aac85e26e7d3e",
+              "delta_bytes": 889,
+              "terminal_text_observed": true,
+              "terminal_sha256": "b8719bdf02ba4498066693b0dddd87f41b390afda6fb84401e9aac85e26e7d3e",
+              "terminal_bytes": 889,
+              "selection": "TERMINAL_MATCHED_DELTA"
+            }
+          },
+          "construction": {
+            "rejected": true,
+            "code": "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID"
+          }
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 2,
+          "receipt_id": "899e5da8-8aec-4de8-a89f-7eb9aae3ab32",
+          "failed_predicate": "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID",
+          "validation_passed": false,
+          "terminal_reason": "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID",
+          "error_codes": [
+            "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID"
+          ],
+          "feedback_sha256": "c29a95e98e94aff630056da19b2b85edc505c1b24aed87385b6988d1ffba8eb3"
+        }
+      ],
+      "actual_artifact_verification": "NOT_EXECUTED",
+      "guardian": "NOT_CALLED_DIAGNOSTIC_SCOPE",
+      "raw_receipt_sha256": "6e5259ab3d968aa485d6aed2c9dc202fda72c8a0ef887cb4f08c5b6f24744513"
+    }
+  ]
+}

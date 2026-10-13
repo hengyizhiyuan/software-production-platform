@@ -229,3 +229,11 @@ Source `67b9f4922a71f59891ea201dd94135caf9259789` / Tree `9bde194ec5a0721cace61d
 同 Owner 将来源覆盖失败的原 Source ordinal 规范化为原 Source ref 与相关 ORIGINAL Route indices/fingerprints，并引用完整原始 basis 与实际缺口。它不自动选消费者、权限、证明、路径或新 quote，不暗中扩大跨度。错误定位不能评估时保留 NOT_EVALUABLE；显式模型编辑后仍由全部原门禁判断。未证明这个引用接线问题单独导致上述剩余两项；其真实收益仍需最终镜像验证。
 
 首轮新增验证 7 FAIL/2 PASS 因新路径初始化读取 None basis（无 Provider 请求），已修正条件，原失败收据保留。`role-convergence-2.xml` 10 PASS；新的 PostgreSQL 中断恢复单项 PASS，仅剩余 Review 被调用，原模式按其既有身份恢复。新协商目标、原输出、父反馈和旧默认漂移均不能产生新模型调用或成功。稳定修订继续真实资格；C3 仍 PARTIAL。
+
+## 局部编辑统一目标结构
+
+`3d5656ac4ff9665c9939a3d316b624fd86d777f5` / Tree `8a6362f9e12d456425e112bb20b7b706b3248694` / image `sha256:798187b017d70e3571a8e33683b5a620593de2d343bf9966daa5c4f553445c27` 安装及聚焦镜像验证通过。普通41第十三次：初次32个 Role 提案中存在未知原来源 ref，正确拒绝。第二次实际编辑为完整的唯一 JSON fence，包装 Owner 已正确解包；不是不完整 JSON 或缺失 replacement 字段。其 replace 提案为完整字段，remove 却使用 `[{"index":27}]`，而旧消费契约只接受 `[27]`，因此停在 LOCAL_EDIT_SCHEMA_INVALID，0 Review。实际 Input127020 / Output5169 / Total132189 / Reasoning0 / Cached52608，无传输重发，不计为成功。
+
+已撤回“可能需要支持部分字段 patch”的未证实假设，不实施该变更。真正最小缺口是编辑命令同一原始索引的结构不一致：replace 用 index target object、remove 强制裸整数。在原局部编辑 Owner 内，新临时 v2 协商统一生成显式 index target；解码仍可消费同域的准确整数。没有字符串/布尔转整数、未知字段或越界接纳，duplicate/replace-remove 重叠仍拒绝。模型明确指定的原 Route 才可移除；最终完整来源、scope、权限、证明和独立 Review 门禁保持不变。没有 Scope/Subject Alias、语义猜测或新 Gate。
+
+原 v1 协商保留，包括原 object removal 的历史拒绝；恢复不升级默认、不复活终态，也不更改 Model 原始输出、反馈、父 basis 或预算。`explicit-index-targets-1.xml` 15 PASS；精确旧协商选择补充 `explicit-index-legacy-1.xml` 单项 PASS；PostgreSQL 新 object target 的第二响应中断恢复单项 PASS，仅执行剩余 Review。下一确切修订仍需实际 Provider 资格；受控解码 PASS 不等于真实语义或 C3 Closure。

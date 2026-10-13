@@ -69,3 +69,41 @@ def test_preferred_complete_proposal_still_consumes_legal_interpretation_varianc
     assert 'routes' in calls[0][0]['output_schema']['properties']
     assert all(b.state!='UNRESOLVED' for b in bindings)
     assert len(calls)==3  # Claim fallback remains bounded, not a new stage.
+
+
+@pytest.mark.parametrize('encoding,passed', (('object',True),('string',False),('extra',False),('range',False)))
+def test_explicit_remove_targets_have_same_identity_and_no_coercion(encoding,passed):
+    bindings,provider,calls,_args,_touched,original=local_edit_case(first='conflict',role_refs=True,
+        role_convergence=True,removal_encoding=encoding)
+    assert all(b.state!='UNRESOLVED' for b in bindings)==passed
+    assert len(calls)==(3 if passed else 2)
+    if passed:
+        request=calls[1][0]
+        assert request['output_schema']['properties']['remove']['items']['$ref'].endswith('/_FulfillmentRoleRemoval')
+        observed=next(r for r in provider._fulfillment_receipts if r['stage']=='MODEL_RESPONSE_OBSERVED' and r['attempt']==2)
+        assert json.loads(observed['candidate_output'])['remove']==[{'index':len(original['routes'])-1}]
+        assert observed['wire_presentation']['candidate_construction']['removed_original_ordinals']==[len(original['routes'])-1]
+
+
+def test_v1_negotiation_is_not_upgraded_to_v2_on_resume():
+    from spg.providers import fulfillment_candidate as provider_module
+    _bindings,provider,calls,args,_touched,_original=local_edit_case(first='conflict',role_refs=True,role_convergence=True,
+        role_contract=provider_module._ROLE_CONVERGENCE_LEGACY_CONTRACT)
+    before=len(calls)
+    rev,ir,kwargs=args
+    provider.role_convergence_contract=provider_module._ROLE_CONVERGENCE_CONTRACT
+    bindings=app.form_fulfillment_projection(rev,ir,**kwargs)
+    assert all(b.state!='UNRESOLVED' for b in bindings)
+    assert len(calls)==before
+    assert all(r.get('owner_source_preconditions',{}).get('role_convergence_contract') in {None,provider_module._ROLE_CONVERGENCE_LEGACY_CONTRACT}
+        for r in provider._fulfillment_receipts)
+
+
+def test_v1_object_removal_stays_rejected_after_new_provider_default():
+    from spg.providers.fulfillment_candidate import _ROLE_CONVERGENCE_LEGACY_CONTRACT
+    bindings,provider,calls,args,_touched,_original=local_edit_case(first='conflict',role_refs=True,role_convergence=True,
+        role_contract=_ROLE_CONVERGENCE_LEGACY_CONTRACT,removal_encoding='object')
+    assert all(b.state=='UNRESOLVED' for b in bindings) and len(calls)==2
+    rev,ir,kwargs=args
+    app.form_fulfillment_projection(rev,ir,**kwargs)
+    assert len(calls)==2

@@ -16,7 +16,7 @@ from tests.test_c3_semantic_contract_calibration import review
 from tests.test_c3_source_consumption_proof import fixture_review_proof
 
 
-def local_edit_case(scale="small", outcome="repair", first="source-proof", *, semantic_edits=False,role_refs=False,raw_role_repair=False,role_convergence=False):
+def local_edit_case(scale="small", outcome="repair", first="source-proof", *, semantic_edits=False,role_refs=False,raw_role_repair=False,role_convergence=False,removal_encoding=None,role_contract=None):
     rev, ir, inventory, plan = controlled_capacity_case(scale)
     snapshots = deepcopy((rev, ir, inventory, plan))
     calls = []
@@ -134,6 +134,12 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof", *, se
                     output = json.dumps(edit)
                 if outcome == "duplicate-key":
                     output = '{"basis":"' + "0" * 64 + '",' + output[1:]
+                if removal_encoding:
+                    edit['remove'] = [{'index':index} for index in edit['remove']]
+                    if removal_encoding == 'string':edit['remove'][0]['index']=str(edit['remove'][0]['index'])
+                    elif removal_encoding == 'extra':edit['remove'][0]['authority']='unsupported'
+                    elif removal_encoding == 'range':edit['remove'][0]['index']=len(old_wire['routes'])
+                    output=json.dumps(edit)
         return result(output)
 
     def result(output):
@@ -150,6 +156,7 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof", *, se
             "owner-local-wire-candidate-edits-v1",raw_role_repair=raw_role_repair,
         role_convergence=role_convergence,construction_consumer_instructions=role_convergence,
         unparsed_claim_repair=role_convergence)
+    if role_contract:provider.role_convergence_contract=role_contract
     kwargs = dict(provider=provider, exact_target_paths=inventory["exact_target_paths"])
     bindings = app.form_fulfillment_projection(rev, ir, **kwargs)
     assert (rev, ir, inventory, plan) == snapshots
