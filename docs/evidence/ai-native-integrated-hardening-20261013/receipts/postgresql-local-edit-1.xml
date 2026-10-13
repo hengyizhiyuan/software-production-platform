@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="6.442" timestamp="2026-10-13T05:43:33.323224+00:00" hostname="e328b48bdaff"><testcase classname="tests.integration.test_ai_native_candidate_construction" name="test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration" time="0.209"><error message="failed on setup with &quot;AssertionError: assert 'evolution' == 'c1_contract_continuity'&#10;  &#10;  - c1_contract_continuity&#10;  + evolution&quot;">tests/integration/test_c1_contract_continuity.py:108: in c1_schema
+    assert url.database == "c1_contract_continuity"
+E   AssertionError: assert 'evolution' == 'c1_contract_continuity'
+E     
+E     - c1_contract_continuity
+E     + evolution</error></testcase></testsuite></testsuites>

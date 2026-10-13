@@ -1,0 +1,84 @@
+"""Durable local candidate edits, resumed through the existing Work Owner."""
+from copy import deepcopy
+import json
+from types import SimpleNamespace
+from uuid import UUID
+
+import pytest
+
+from spg.application import governed_obligations as app
+from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+from spg.infrastructure.persistence.interaction_store import InteractionStore
+from spg.infrastructure.persistence.product_store import ProductStore
+from spg.providers.fulfillment_candidate import (
+    ModelFulfillmentCandidateProvider, _restore_formation_inventory_view,
+)
+from tests.integration import test_c1_contract_continuity as c1
+from tests.integration.test_c1_contract_continuity import c1_schema
+from tests.test_c3_fulfillment_capacity_representation import controlled_wire, decode_review_input
+from tests.test_c3_semantic_contract_calibration import review
+from tests.test_c3_source_consumption_proof import fixture_review_proof
+
+pytestmark = pytest.mark.postgresql
+
+
+def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(postgres_database, tmp_path, monkeypatch):
+    declared = c1.DeclaredC1Fulfillment()
+    calls = []
+    inventories = []
+
+    def generate(**request):
+        payload = json.loads(request["input_text"])
+        calls.append(payload)
+        if "untrusted_fulfillment_candidate" in payload:
+            candidate = decode_review_input(payload)
+            inventory = inventories[-1]
+            output = fixture_review_proof(inventory, candidate, review(inventory,candidate), payload).model_dump_json()
+        else:
+            inventory = _restore_formation_inventory_view(payload["immutable_inventory"],payload.get("existing_ir_item_table",{}))
+            inventories.append(inventory)
+            plan = declared.form(inventory,payload["existing_capability_contracts"])
+            wire,_ = controlled_wire(inventory,plan,feedback=payload["same_basis_validation_feedback"],
+                owner_preconditions=payload["owner_source_preconditions"])
+            if payload["same_basis_validation_feedback"] is None:
+                assert inventory["sources"][wire["routes"][0]["s"]]["kind"] == "FACT"
+                wire["routes"][0]["f"] = [len(inventory["sources"])]
+                output = json.dumps(wire)
+            else:
+                basis = payload["owner_source_preconditions"]["candidate_construction_state"]["repair_basis"]
+                output = json.dumps({"v":1,"h":wire["h"],"d":wire["d"],"basis":basis["raw_sha256"],
+                    "replace":[{"index":0,"route":wire["routes"][0]}],"remove":[],"append":[]})
+        return StructuredModelResult(output_text=output,provider=ModelProvider.DEEPSEEK,
+            requested_model="controlled-pg-edit",effective_model="controlled-pg-edit",
+            request_id=f"pg-edit-{len(calls)}",usage=ModelUsage(unknown=True),timing=ModelTiming(),retry_count=0)
+
+    provider = ModelFulfillmentCandidateProvider(lambda:SimpleNamespace(generate=generate,close=lambda:None),
+        candidate_construction=True)
+    monkeypatch.setattr(c1,"DeclaredC1Fulfillment",lambda:provider)
+    class DurableEditObserved(BaseException):
+        pass
+    original_append = app.FulfillmentFormationReceipts.append
+    def checkpoint(self, stage, attempt, **values):
+        row = original_append(self,stage,attempt,**values)
+        if stage == "MODEL_RESPONSE_OBSERVED" and attempt == 2:
+            raise DurableEditObserved()
+        return row
+    monkeypatch.setattr(app.FulfillmentFormationReceipts,"append",checkpoint)
+    with pytest.raises(DurableEditObserved):
+        c1._admit_c1(postgres_database,tmp_path,"work")
+    assert len(calls) == 2
+    monkeypatch.setattr(app.FulfillmentFormationReceipts,"append",original_append)
+    inventory = inventories[-1]
+    with postgres_database.unit_of_work() as uow:
+        revision = ProductStore(uow.session).current_work_reality_revision(UUID(inventory["work_id"]))
+        ir = InteractionStore(uow.session).assessment(revision.source_assessment_id).semantic_ir
+    resumed = app.form_fulfillment_projection(revision,ir,provider=provider,database=postgres_database,
+        source_revision=inventory["source_revision"],exact_target_paths=inventory["exact_target_paths"])
+    assert all(b.state != "UNRESOLVED" for b in resumed), resumed[0].formation_receipt["terminal_reason"]
+    assert len(calls) == 3  # only the remaining independent Review
+    original = deepcopy(resumed[0].formation_receipt["candidate_attempts"])
+    replayed = app.form_fulfillment_projection(revision,ir,provider=provider,database=postgres_database,
+        source_revision=inventory["source_revision"],exact_target_paths=inventory["exact_target_paths"])
+    assert all(b.state != "UNRESOLVED" for b in replayed)
+    assert replayed[0].formation_receipt["candidate_attempts"] == original
+    assert len(calls) == 3

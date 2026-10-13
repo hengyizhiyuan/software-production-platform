@@ -5,8 +5,48 @@ import re
 from pathlib import PurePosixPath
 from datetime import datetime
 from uuid import UUID
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+
+class OwnerUnderstandingState(BaseModel):
+    """Derived understanding of exact sources, never admitted engineering truth."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    authority: Literal["DERIVED_CANDIDATE_ONLY"] = "DERIVED_CANDIDATE_ONLY"
+    intent_refs: tuple[str, ...]
+    constraint_refs: tuple[str, ...]
+    confidence: float | None = Field(default=None, ge=0, le=1)
+    unknowns: tuple[str, ...] = ()
+    alternatives: tuple[str, ...] = ()
+    risks: tuple[str, ...] = ()
+
+
+class OwnerEvidenceState(BaseModel):
+    """Role references are not proof that any lifecycle requirement is fulfilled."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    fact_refs: tuple[str, ...] = ()
+    observation_refs: tuple[str, ...] = ()
+    inference_refs: tuple[str, ...] = ()
+    claim_refs: tuple[str, ...] = ()
+    evidence_refs: tuple[str, ...] = ()
+    missing_evidence: tuple[str, ...] = ()
+
+
+class OwnerConvergenceDecision(BaseModel):
+    """An Owner-local route, not permission to execute or accept a Product."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    action: Literal["CONTINUE", "REPAIR", "ASK", "COMMIT", "STOP"]
+    goal_ref: str
+    failure_class: Literal["CANDIDATE_DEVIATION", "GOVERNANCE_BLOCKER", "UNKNOWN"] | None = None
+    failure_ref: str | None = None
+    repair_family: Literal["FORMAT", "SEMANTIC_CONFLICT", "SOURCE_CORRESPONDENCE",
+        "SEMANTIC_REVIEW", "MIXED", "UNKNOWN"] | None = None
+    repair_strategy: str | None = None
+    information_sufficient_for: Literal["CANDIDATE_GENERATION", "LOCAL_CANDIDATE_EDIT", "LOCAL_PLAN_ADMISSION", "UNKNOWN"]
+    progress_signal: str
+    stop_condition: str
+    budget_scope: str
 
 
 class RefinementClass(StrEnum):

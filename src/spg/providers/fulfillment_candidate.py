@@ -119,6 +119,165 @@ class _FulfillmentCompactCandidate(BaseModel):
         return value
 
 
+_CANDIDATE_CONSTRUCTION_CONTRACT = "owner-local-wire-candidate-edits-v1"
+
+
+class _FulfillmentRouteReplacement(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    index: StrictInt = Field(ge=0)
+    route: _FulfillmentCompactRoute
+
+
+class _FulfillmentCandidateEdits(BaseModel):
+    """Temporary edits to an unadmitted proposal; final Wire remains v1."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    v: Literal[1]
+    h: str = Field(pattern=r"^[0-9a-f]{64}$")
+    d: str = Field(pattern=r"^[0-9a-f]{64}$")
+    basis: str = Field(pattern=r"^[0-9a-f]{64}$")
+    replace: tuple[_FulfillmentRouteReplacement, ...] = Field(max_length=64)
+    remove: tuple[StrictInt, ...] = Field(max_length=64)
+    append: tuple[_FulfillmentCompactRoute, ...] = Field(max_length=64)
+
+    @field_validator("v", mode="before")
+    @classmethod
+    def exact_version(cls, value):
+        if type(value) is not int or value != 1:
+            raise ValueError("OBLIGATION_FORMATION_WIRE_VERSION_INVALID")
+        return value
+
+
+def candidate_construction_preconditions(preconditions, inventory, feedback):
+    """Reconstruct Owner-local state from exact records, without semantic repair."""
+    from spg.domain.refinement_contract import (
+        OwnerUnderstandingState, OwnerEvidenceState, OwnerConvergenceDecision)
+    from spg.providers.verification_receipts import _safe_value
+    payload = json.loads(feedback) if isinstance(feedback, str) else {}
+    facts = tuple(s["source_ref"] for s in inventory["sources"] if s["kind"] == "FACT"
+        and s["payload"].get("epistemic_status") == "CONFIRMED")
+    unresolved_records = tuple(s["source_ref"] for s in inventory["sources"] if s["kind"] == "FACT"
+        and s["payload"].get("epistemic_status") != "CONFIRMED")
+    constraints = tuple(s["source_ref"] for s in inventory["sources"] if s["kind"] in {
+        "IR_CONSTRAINT", "WORK_CONSTRAINT"})
+    understanding = OwnerUnderstandingState(intent_refs=(f"inventory:{inventory['inventory_fingerprint']}",), constraint_refs=constraints,
+        unknowns=("SEMANTIC_EQUIVALENCE", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"),
+        alternatives=(() if not payload else ("PRIOR_UNADMITTED_PROPOSAL",)),
+        risks=tuple(sorted({v.get("code", payload.get("primary_error", "UNKNOWN"))
+            for v in payload.get("violations", ()) if isinstance(v, dict)})))
+    binding = payload.get("repair_feedback_binding") or {}
+    evidence = OwnerEvidenceState(fact_refs=facts,
+        observation_refs=unresolved_records + tuple(binding[key] for key in ("request_receipt_id", "response_receipt_id")
+            if isinstance(binding.get(key), str)),
+        inference_refs=tuple([binding["candidate_fingerprint"]] if binding.get("candidate_fingerprint") else []),
+        claim_refs=tuple([binding["wire_output_fingerprint"]] if binding.get("wire_output_fingerprint") else []),
+        missing_evidence=("INDEPENDENT_SEMANTIC_REVIEW", "APPLICABLE_FULFILLMENT_EVIDENCE"))
+    basis = None
+    if payload:
+        raw = payload.get("untrusted_previous_wire")
+        if (isinstance(raw, str) and binding.get("attempt") == 1
+                and binding.get("inventory_fingerprint") == inventory["inventory_fingerprint"]
+                and sha256(raw.encode()).hexdigest() == binding.get("wire_output_fingerprint")
+                and all(isinstance(binding.get(key), str) for key in ("request_receipt_id", "response_receipt_id"))):
+            try:
+                text, _ = _fulfillment_wire_value(raw, preconditions)
+                original = json.loads(text, object_pairs_hook=_wire_json_object)
+                if (set(original) == {"v", "h", "d", "routes"} and type(original["v"]) is int
+                        and original["v"] == 1
+                        and original["h"] == binding.get("wire_request_fingerprint")
+                        and original["d"] == binding.get("wire_table_fingerprint")
+                        and isinstance(original["routes"], list) and 0 < len(original["routes"]) <= 1024
+                        and all(isinstance(r, dict) for r in original["routes"])
+                        and _safe_value(original) == original):
+                    basis = {"raw_sha256": binding["wire_output_fingerprint"],
+                        "original_wire": original, "original_wire_fingerprint": canonical_fingerprint(original),
+                        "inventory_fingerprint": inventory["inventory_fingerprint"],
+                        "parent_binding": binding}
+            except (ValueError, TypeError, RecursionError):
+                pass
+    action = "CONTINUE" if not payload else "REPAIR" if basis is not None else "STOP"
+    review_only = (basis is not None and binding.get("candidate_fingerprint") is not None
+        and payload.get("primary_error") == "OBLIGATION_SEMANTIC_REVIEW_SCHEMA_INVALID"
+        and bool((payload.get("semantic_review_feedback_binding") or {}).get("review_contract_failure")))
+    # Stable contract predicates describe repair families, not business keywords
+    # or a diagnosis that Watt's accepted product goal is defective.
+    families = set()
+    for error in understanding.risks:
+        if error.startswith("OBLIGATION_FORMATION_WIRE_") or error.endswith("SCHEMA_INVALID"):
+            families.add("FORMAT")
+        elif error in {"OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION", "OBLIGATION_COMPONENT_DISPOSITION_CONFLICT",
+                "OBLIGATION_PROJECTION_DUPLICATE_ROUTE"}:
+            families.add("SEMANTIC_CONFLICT")
+        elif error.startswith("OBLIGATION_SUPPORTING_SOURCE_") or error.startswith("OBLIGATION_SOURCE_"):
+            families.add("SOURCE_CORRESPONDENCE")
+        elif error.startswith("OBLIGATION_SEMANTIC_REVIEW_"):
+            families.add("SEMANTIC_REVIEW")
+        else:
+            families.add("UNKNOWN")
+    family = next(iter(families)) if len(families) == 1 else "MIXED" if families else "UNKNOWN"
+    decision = OwnerConvergenceDecision(action=action,
+        goal_ref=f"inventory:{inventory['inventory_fingerprint']}",
+        failure_class=None if not payload else "CANDIDATE_DEVIATION" if basis else "UNKNOWN",
+        failure_ref=None if not payload else payload.get("primary_error", "UNKNOWN"),
+        repair_family=family if payload else None,
+        repair_strategy=("RETAIN_VALID_CANDIDATE_REPAIR_REVIEW_OUTPUT" if review_only else
+            "EXPLICIT_LOCAL_ROUTE_EDITS" if basis else None),
+        information_sufficient_for=("CANDIDATE_GENERATION" if not payload else
+            "LOCAL_CANDIDATE_EDIT" if basis else "UNKNOWN"),
+        progress_signal="COMPLETE_PROPOSAL_MUST_PASS_UNCHANGED_VALIDATOR_AND_INDEPENDENT_REVIEW",
+        stop_condition="NO_SAFE_BOUND_BASIS_OR_OWNER_BUDGET_EXHAUSTED",
+        budget_scope="EXISTING_TWO_CANDIDATES_ONE_FEEDBACK_FOUR_LOGICAL_CALLS")
+    state = {"understanding": understanding.model_dump(mode="json"),
+        "evidence": evidence.model_dump(mode="json"), "convergence": decision.model_dump(mode="json"),
+        "repair_basis": basis}
+    if _safe_value(state) != state:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    return {**preconditions, "candidate_construction_contract": _CANDIDATE_CONSTRUCTION_CONTRACT,
+        "candidate_construction_state": state}
+
+
+def _construct_local_candidate(body, preconditions):
+    """Apply only explicit model edits to the bound old proposal, never admit."""
+    state = preconditions.get("candidate_construction_state") or {}
+    basis = state.get("repair_basis")
+    if basis is None:
+        return body, None
+    try:
+        proposal = _FulfillmentCandidateEdits.model_validate(json.loads(body, object_pairs_hook=_wire_json_object))
+    except ValueError as error:
+        raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID") from error
+    if proposal.basis != basis["raw_sha256"]:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
+    original = basis["original_wire"]
+    if canonical_fingerprint(original) != basis["original_wire_fingerprint"]:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
+    count = len(original["routes"])
+    indices = [r.index for r in proposal.replace] + list(proposal.remove)
+    review_only = state.get("convergence", {}).get("repair_strategy") == "RETAIN_VALID_CANDIDATE_REPAIR_REVIEW_OUTPUT"
+    if (not indices and not proposal.append and not review_only) or len(set(indices)) != len(indices) or any(
+            type(i) is not int or not 0 <= i < count for i in indices):
+        raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID")
+    replacements = {r.index: r.route.model_dump(mode="json") for r in proposal.replace}
+    removed = set(proposal.remove)
+    routes = [deepcopy(replacements.get(i, r)) for i, r in enumerate(original["routes"]) if i not in removed]
+    routes.extend(r.model_dump(mode="json") for r in proposal.append)
+    if not routes or len(routes) > 1024:
+        raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID")
+    if canonical_fingerprint(routes) == canonical_fingerprint(original["routes"]) and not review_only:
+        raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_NO_PROGRESS")
+    wire = {"v": 1, "h": proposal.h, "d": proposal.d, "routes": routes}
+    # JSONB may reorder object keys on restart. Derived bytes must be stable;
+    # original Provider bytes remain unchanged in their separate receipt.
+    constructed = json.dumps(wire, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return constructed, {"contract": _CANDIDATE_CONSTRUCTION_CONTRACT,
+        "parent_wire_sha256": basis["raw_sha256"], "parent_binding": basis["parent_binding"],
+        "edit_response_sha256": sha256(body.encode()).hexdigest(),
+        "constructed_wire_sha256": sha256(constructed.encode()).hexdigest(),
+        "replaced_original_ordinals": [r.index for r in proposal.replace],
+        "removed_original_ordinals": list(proposal.remove), "appended_count": len(proposal.append),
+        "retained_original_ordinals": [i for i in range(count) if i not in set(indices)],
+        "disposition": "DERIVED_CANDIDATE; NO_SEMANTIC_OR_EVIDENCE_ADMISSION"}
+
+
 def _fulfillment_wire_schema():
     from spg.providers.semantic_wire import _provider_strict_output_schema
     return _provider_strict_output_schema(_FulfillmentCompactCandidate.model_json_schema())
@@ -132,6 +291,13 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
     observed. The existing decoder remains authoritative if a Provider ignores
     these generation constraints.
     """
+    if (owner_preconditions or {}).get("candidate_construction_state", {}).get("repair_basis"):
+        from spg.providers.semantic_wire import _provider_strict_output_schema
+        schema = _provider_strict_output_schema(_FulfillmentCandidateEdits.model_json_schema())
+        for field, key in (("h", "wire_request_fingerprint"), ("d", "wire_table_fingerprint")):
+            schema["properties"][field]["enum"] = [wire_metadata[key]]
+        schema["properties"]["basis"]["enum"] = [owner_preconditions["candidate_construction_state"]["repair_basis"]["raw_sha256"]]
+        return schema
     schema = _fulfillment_wire_schema()
     if wire_metadata is not None:
         # Identity copying is not semantic reasoning. Keep the existing Wire
@@ -1741,7 +1907,7 @@ def _raw_fulfillment_owner_operands(output, inventory, capabilities, *, validati
 _WIRE_PRESENTATION_CONTRACT = "existing-lossless-json-frame-v1"
 
 
-def _fulfillment_wire_value(output, owner_preconditions=None):
+def _fulfillment_wire_value(output, owner_preconditions=None, *, construct=True):
     """Select only a request-bound, complete outer representation, never repair.
 
     The original Wire remains the Provider observation. Character and UTF-8
@@ -1763,13 +1929,23 @@ def _fulfillment_wire_value(output, owner_preconditions=None):
                 frame = None
     start, end = frame.span("body") if frame is not None else (0, len(output))
     body = output[start:end]
-    return body, {"contract": _WIRE_PRESENTATION_CONTRACT,
+    presentation = {"contract": _WIRE_PRESENTATION_CONTRACT,
         "representation": "UNIQUE_COMPLETE_JSON_FRAME" if frame is not None else "ORIGINAL_JSON_VALUE",
         "original_wire_sha256": sha256(output.encode()).hexdigest(),
         "original_wire_bytes": len(output.encode()), "inner_character_range": [start, end],
         "inner_utf8_byte_range": [len(output[:start].encode()), len(output[:end].encode())],
         "inner_sha256": sha256(body.encode()).hexdigest(), "inner_bytes": len(body.encode()),
         "disposition": "DERIVED_REPRESENTATION_ONLY; ALL_VALIDATION_AND_AUTHORITY_GATES_REQUIRED"}
+    if construct and (owner_preconditions or {}).get("candidate_construction_contract") == _CANDIDATE_CONSTRUCTION_CONTRACT:
+        try:
+            body, construction = _construct_local_candidate(body, owner_preconditions)
+        except ValueError as error:
+            code = re.search(r"OBLIGATION_[A-Z0-9_]+", str(error))
+            construction = {"rejected": True, "code": code.group() if code else
+                "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID"}
+        if construction is not None:
+            presentation["candidate_construction"] = construction
+    return body, presentation
 
 
 def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
@@ -1777,6 +1953,11 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
     """Expand only metadata; all semantic route choices remain model candidates."""
     from spg.providers.verification_receipts import _safe_output, _safe_value
     context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
+    if (owner_preconditions or {}).get("candidate_construction_contract") == _CANDIDATE_CONSTRUCTION_CONTRACT:
+        base = {k: v for k, v in owner_preconditions.items() if k not in {
+            "candidate_construction_contract", "candidate_construction_state"}}
+        if candidate_construction_preconditions(base, inventory, validation_feedback) != owner_preconditions:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
     if wire_metadata is not None and any(wire_metadata.get(key) != context[key]
             for key in _FULFILLMENT_WIRE_METADATA_KEYS):
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_RECEIPT_IDENTITY_DRIFT")
@@ -1788,6 +1969,14 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
         **{key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS}}
     detailed = (owner_preconditions or {}).get("syntax_observation_contract") == "complete-value-owner-observations-v2"
     output, presentation = _fulfillment_wire_value(output, owner_preconditions)
+    if presentation and presentation.get("candidate_construction", {}).get("rejected"):
+        code = presentation["candidate_construction"]["code"]
+        if code.endswith("BASIS_DRIFT"):
+            raise _FulfillmentWireReceiptIdentityError(code)
+        raise _FulfillmentWireValidationError(code, {**diagnostic_basis,
+            "violations": [{"code": code}], "additional_violation_count": 0,
+            "not_evaluable": ["CANONICAL_COMPONENT_VALIDATION", "INDEPENDENT_SEMANTIC_REVIEW",
+                "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"]})
     if presentation is not None:
         diagnostic_basis["wire_presentation"] = presentation
     try:
@@ -1894,7 +2083,7 @@ def _safe_fulfillment_response_output(text, *, owner_preconditions=None):
     if output != text:
         return None, digest, count, "SECRET_BACKFILL"
     try:
-        value, _ = _fulfillment_wire_value(text, owner_preconditions)
+        value, _ = _fulfillment_wire_value(text, owner_preconditions, construct=False)
         decoded = json.loads(value, object_pairs_hook=lambda pairs: [
             [key, value] for key, value in pairs])
     except (json.JSONDecodeError, ValueError, RecursionError):
@@ -1910,9 +2099,10 @@ def _safe_fulfillment_response_output(text, *, owner_preconditions=None):
 
 class ModelFulfillmentCandidateProvider:
     supports_source_consumption_proof = True
-    def __init__(self, runtime_factory):
+    def __init__(self, runtime_factory, *, candidate_construction=False):
         self.runtime_factory = runtime_factory
         self.last_observation = None
+        self.supports_candidate_construction = candidate_construction
 
     @classmethod
     def from_settings(cls, settings):
@@ -1932,7 +2122,7 @@ class ModelFulfillmentCandidateProvider:
                 timeout_seconds=settings.collaboration_provider_timeout_seconds,
                 max_output_tokens=settings.collaboration_provider_max_output_tokens)
             return WattModelRuntime(registry, PurposeProfileRouter({ModelPurpose.STEERING_SEMANTIC: profile}))
-        return cls(runtime_factory)
+        return cls(runtime_factory, candidate_construction=True)
 
     def form_wire_metadata(self, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
         context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
@@ -2175,6 +2365,16 @@ class ModelFulfillmentCandidateProvider:
                             for index, entry in enumerate(context["tables"]["capabilities"])],
                         "target_index_table": [{"index": index, "path": path}
                             for index, path in enumerate(context["tables"]["target_paths"])]}}, ensure_ascii=False)
+            if (owner_preconditions or {}).get("candidate_construction_state", {}).get("repair_basis"):
+                # The existing second proposal edits exact old route ordinals;
+                # the Owner constructs the full candidate and runs every gate.
+                formation_instructions = (
+                    "Propose explicit local edits to the unadmitted original Wire in "
+                    "candidate_construction_state.repair_basis. replace/remove refer only to ORIGINAL "
+                    "route ordinals; append adds new proposed routes. Preserve unrelated lawful contributions. "
+                    "Choose all meanings, consumers and proof operands yourself. No automatic evidence or "
+                    "permission is granted. The complete constructed candidate is revalidated and independently "
+                    "reviewed. Keep the current h/d and exact parent basis. Do not output a new complete plan.")
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
                 instructions=formation_instructions, input_text=formation_input, output_schema=output_schema)
             self.last_observation = {"generation_schema_fingerprint": canonical_fingerprint(output_schema),

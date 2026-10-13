@@ -2991,6 +2991,17 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     raise
                 raise _FulfillmentWireReceiptIdentityError(
                     "OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT") from error
+            if preconditions.get("candidate_construction_contract") is not None:
+                from spg.providers.fulfillment_candidate import (
+                    _CANDIDATE_CONSTRUCTION_CONTRACT, candidate_construction_preconditions)
+                if preconditions["candidate_construction_contract"] != _CANDIDATE_CONSTRUCTION_CONTRACT:
+                    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                source_request = next((r for r in rows if r.get("stage") == "MODEL_REQUEST_PENDING"
+                    and r.get("attempt") == row.get("attempt")), None)
+                if source_request is None:
+                    raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                restored_preconditions = candidate_construction_preconditions(
+                    restored_preconditions, inventory, source_request.get("feedback"))
             if preconditions != restored_preconditions:
                 raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if (row.get("stage") == "MODEL_RESPONSE_OBSERVED" and row.get("candidate_retained") is True
@@ -3600,6 +3611,25 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
             "unresolved_source_refs": [] if passed else [source["source_ref"] for source in inventory["sources"]],
             "elapsed_seconds": monotonic() - started,
             "meaning": "derived binding only; no evidence PASS, authority or effect"}
+        first_request = next((r for r in rows if r["stage"] == "MODEL_REQUEST_PENDING"), None)
+        if ((first_request or {}).get("owner_source_preconditions") or {}).get(
+                "candidate_construction_contract") == "owner-local-wire-candidate-edits-v1":
+            from spg.domain.refinement_contract import OwnerConvergenceDecision
+            state = first_request["owner_source_preconditions"]["candidate_construction_state"]
+            receipt["understanding_state"] = {**state["understanding"],
+                "unknowns": ["ACTUAL_OWNER_EVIDENCE", "ASSURANCE"] if passed else state["understanding"]["unknowns"]}
+            receipt["candidate_space"] = [{"response_receipt_id": r["receipt_id"],
+                "wire_output_fingerprint": r.get("candidate_output_sha256"),
+                "attempt": r["attempt"], "authority": "CANDIDATE_OBSERVATION_ONLY"}
+                for r in rows if r["stage"] == "MODEL_RESPONSE_OBSERVED"]
+            receipt["convergence_decision"] = OwnerConvergenceDecision(
+                action="COMMIT" if passed else "STOP", goal_ref=f"inventory:{inventory['inventory_fingerprint']}",
+                failure_class=None if passed else "UNKNOWN", failure_ref=None if passed else reason,
+                information_sufficient_for="LOCAL_PLAN_ADMISSION" if passed else "UNKNOWN",
+                progress_signal="LOCAL_PLAN_VALIDATED_WITH_INDEPENDENT_REVIEW" if passed else "NO_LEGAL_PROJECTION_ADMITTED",
+                stop_condition="LOCAL_PLAN_ADMISSION_OR_OWNER_BUDGET_OR_UNSAFE_BASIS",
+                budget_scope="EXISTING_TWO_CANDIDATES_ONE_FEEDBACK_FOUR_LOGICAL_CALLS").model_dump(mode="json")
+            receipt["commit_scope"] = "DERIVED_PLAN_ONLY; NOT_RUNTIME_COMMIT_OR_HUMAN_AUTHORIZATION"
         if not passed or candidate is None:
             return unresolved_projection(revision, ir, inventory, reason=reason, receipt=receipt)
         bindings = validate_projection_candidate(candidate, revision, ir, inventory, semantic_review=semantic_review, source_contract=source_contract,
@@ -3736,6 +3766,22 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                         actual_preconditions["module_adaptation_contract"] = "existing-source-component-convergence-v1"
                     source_contract = ("v3" if precondition_arguments["owner_preconditions"].get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v2" if precondition_arguments["owner_preconditions"].get(
                         "typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v1")
+                construction_enabled = (getattr(provider, "supports_candidate_construction", False)
+                    if initial_request is None else (initial_request.get("owner_source_preconditions") or {}).get(
+                        "candidate_construction_contract") == "owner-local-wire-candidate-edits-v1")
+                if construction_enabled and precondition_arguments:
+                    from spg.providers.fulfillment_candidate import candidate_construction_preconditions
+                    original_preconditions = {key: value for key, value in
+                        precondition_arguments["owner_preconditions"].items() if key not in {
+                            "candidate_construction_contract", "candidate_construction_state"}}
+                    precondition_arguments["owner_preconditions"] = candidate_construction_preconditions(
+                        original_preconditions, inventory, feedback)
+                    decision = precondition_arguments["owner_preconditions"]["candidate_construction_state"]["convergence"]
+                    if decision["action"] == "STOP":
+                        recorder.append("FORMATION_STOPPED", attempt, terminal=True, validation_passed=False,
+                            terminal_reason="OBLIGATION_FORMATION_LOCAL_REPAIR_BASIS_UNAVAILABLE",
+                            convergence_decision=decision)
+                        return finish(None, "OBLIGATION_FORMATION_LOCAL_REPAIR_BASIS_UNAVAILABLE", False)
                 wire_metadata = metadata_builder(inventory, capabilities, validation_feedback=feedback,
                     **precondition_arguments) if callable(metadata_builder) else {}
                 owner_contract = {"owner_repair_context_contract": (
