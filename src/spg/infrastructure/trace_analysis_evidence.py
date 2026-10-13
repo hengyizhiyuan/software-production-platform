@@ -648,7 +648,11 @@ class EvidenceCatalog:
 
     def field_navigation(self, evidence_id, pointer):
         """Navigate captured structure only; never expose or observe its values."""
-        value = json.loads(self.records[str(evidence_id)]["body"])
+        # Owner records may be plain text (for example original Human intent).
+        # Their serialized body is not necessarily JSON. Navigate the captured
+        # value without reparsing it; an invalid field must retain its citation
+        # location and remain repairable, not mask rejection with JSONDecodeError.
+        value = self.values[str(evidence_id)]
         parent, found = "", True
         if not isinstance(pointer, str) or len(pointer) > 500 or (pointer and not pointer.startswith("/")):
             return {"requested_pointer_valid": False, "navigation_only": True}

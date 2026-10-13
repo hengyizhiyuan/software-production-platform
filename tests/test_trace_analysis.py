@@ -1362,6 +1362,41 @@ def test_missing_report_field_retains_exact_candidate_location_for_bounded_edit(
     assert tools.drafts[failed.output['draft_id']]['current_state']['citations'][0]['field']=='/not_captured'
 
 
+def test_plain_text_owner_field_rejection_preserves_location_and_same_draft_repair():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());r=report(c)
+    eid=c.add('intent','/fixture/original-input','Original plain text objective, not JSON.')
+    c.read(eid);r['original_objective']={'statement':'Original plain text objective.',
+        'citations':[{'evidence_id':eid,'field':'/lifecycle/first_human_input'}]}
+    tools=AnalysisTools(c,{})
+    failed=invoke_analysis(tools,'analysis.submit',{'report':r})
+    assert failed.condition.value=='FAILED' and tools.accepted_report is None
+    issue=failed.output['issues'][0]
+    assert issue['type']=='CitationRejected'
+    assert issue['location']==['original_objective','citations',0,'field']
+    assert issue['field_navigation']['parent_type']=='str'
+    assert issue['field_navigation']['available_child_tokens']==[]
+    fixed=invoke_analysis(tools,'analysis.revise',{'draft_id':failed.output['draft_id'],
+        'edits':[{'op':'replace','path':'/original_objective/citations/0',
+            'value':{'evidence_id':eid,'quote':'Original plain text objective, not JSON.'}}]})
+    assert fixed.condition.value=='SETTLED' and fixed.output['next_action']=='analysis.review'
+    assert tools.accepted_report is None
+    assert tools.drafts[failed.output['draft_id']]==r
+
+
+def test_plain_text_missing_field_read_is_bounded_navigation_without_values():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());eid=c.add('intent','/fixture/plain-input','Unobserved original text.')
+    tools=AnalysisTools(c,{})
+    failed=invoke_analysis(tools,'evidence.read',{'evidence_id':eid,'field':'/invented/child'})
+    assert failed.condition.value=='FAILED' and eid not in c.observed_ranges
+    issue=failed.output['issues'][0]
+    assert issue['reason']=='READ_FIELD_NOT_FOUND'
+    assert issue['field_navigation']['requested_pointer_exists'] is False
+    assert 'Unobserved original text.' not in json.dumps(failed.output)
+    assert invoke_analysis(tools,'evidence.read',{'evidence_id':eid,'field':''}).condition.value=='SETTLED'
+
+
 def test_exact_git_tool_fields_use_fully_read_references_without_quoting_or_promoting_diff_to_cause():
     c=EvidenceCatalog(snapshot());r=report(c)
     eid=c.add('repository','/fixture/git-diff',{'repository':'source','revision':'a'*40,'baseline':'b'*40,'tree':'c'*40,'changed_paths':['one.txt','two.txt'],'excluded_paths':0,'patch':'bounded net change'},repository=True)

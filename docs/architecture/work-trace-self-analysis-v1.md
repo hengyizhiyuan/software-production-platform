@@ -410,3 +410,22 @@ After review, the projection closes for the terminal decision. Context selection
 can only reduce the admitted projection, never introduce or alter a tool/grant.
 This controls finite execution capacity; it does not rewrite semantic conclusions,
 increase budgets, or make an unverified candidate acceptable.
+
+### Current phase: minimum sufficient real report (2026-10-13)
+
+Human narrowed this stage to key Owner/Evidence consumption, a structured report,
+fact-consistent references, UNKNOWN for unsupported conclusions, and a commit.
+Exhaustive investigation and a complete automatic improvement loop are deferred.
+The existing Owner should stop retrieval once a scoped report is supported, keeping
+its original finite capacity for submission, correction and self-review. Unread
+incidents must be disclosed rather than treated as covered or used to justify
+unbounded exploration. All existing source, association and authority gates remain.
+
+The eb6d3941 real execution did not qualify: a candidate cited a catalog locator
+as a nested field of plain-text Human intent. Its expected citation rejection was
+masked by JSONDecodeError in field-navigation feedback, including later revisions.
+Navigation now uses the captured typed value, so plain text produces bounded
+no-child navigation and preserves the rejected report location. Original bytes,
+read coverage and source identity remain unchanged; no field aliases or automatic
+citation repair are introduced. Real-report semantic qualification is separate
+from these regression controls and must not be inferred from their success.
