@@ -14,7 +14,7 @@ from tests.test_c3_semantic_contract_calibration import review
 from tests.test_c3_source_consumption_proof import fixture_review_proof
 
 
-def interpretation_case(scale='small', failure=None, *, consumer_instructions=False, first_format=None, unparsed_claim_repair=False):
+def interpretation_case(scale='small', failure=None, *, consumer_instructions=False, first_format=None, unparsed_claim_repair=False, role_convergence=False):
     rev,ir,inventory,plan=controlled_capacity_case(scale)
     snapshot=deepcopy((rev,ir,inventory,plan))
     calls=[]
@@ -70,7 +70,8 @@ def interpretation_case(scale='small', failure=None, *, consumer_instructions=Fa
             request_id=f'understanding-{len(calls)}',usage=ModelUsage(unknown=True),timing=ModelTiming(),retry_count=0)
     provider=ModelFulfillmentCandidateProvider(lambda:SimpleNamespace(generate=generate,close=lambda:None),
         candidate_construction=True,candidate_construction_contract='owner-local-interpretation-role-construction-v4',
-        construction_consumer_instructions=consumer_instructions, unparsed_claim_repair=unparsed_claim_repair)
+        construction_consumer_instructions=consumer_instructions, unparsed_claim_repair=unparsed_claim_repair,
+        role_convergence=role_convergence)
     kwargs={'provider':provider,'exact_target_paths':inventory['exact_target_paths']}
     result=app.form_fulfillment_projection(rev,ir,**kwargs)
     assert (rev,ir,inventory,plan)==snapshot

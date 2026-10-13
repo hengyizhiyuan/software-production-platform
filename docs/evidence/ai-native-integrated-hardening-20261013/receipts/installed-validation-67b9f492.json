@@ -1,0 +1,28 @@
+{
+  "operations": [
+    {
+      "operation": "attestation",
+      "started_at_utc": "2026-10-13T12:57:34.182806+00:00",
+      "elapsed_seconds": 2.231774199055508,
+      "exit_code": 0,
+      "container": "5c5906584410b2d0e1471c82c3a91d8f596214599f20e1b9e44cda2a7e7fb5e8",
+      "actual_image": "sha256:357422a19a09ea27ee494a65b62bc1547256f1500776194299b0993e4d6aaa1d",
+      "runtime_source_overlay": false,
+      "external_test_overlay": false,
+      "live_model_calls": 0,
+      "production_database_access": false
+    },
+    {
+      "operation": "focused",
+      "started_at_utc": "2026-10-13T12:57:36.516826+00:00",
+      "elapsed_seconds": 61.149422722053714,
+      "exit_code": 0,
+      "container": "8e27c6719986c7b0f1e23be3631709216fc0b8a9e0d184df3e4495624d87f736",
+      "actual_image": "sha256:357422a19a09ea27ee494a65b62bc1547256f1500776194299b0993e4d6aaa1d",
+      "runtime_source_overlay": false,
+      "external_test_overlay": false,
+      "live_model_calls": 0,
+      "production_database_access": false
+    }
+  ]
+}

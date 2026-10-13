@@ -1,0 +1,234 @@
+{
+  "schema": "ai-native-nonholdout-formation-v1",
+  "source_revision": "67b9f4922a71f59891ea201dd94135caf9259789",
+  "actual_runtime_module": "/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py",
+  "actual_runtime_sha256": "b521c6e6568e23689ae38102010923af266b15d4e3b6b089cccee7cc8c1e11fe",
+  "holdout_used": false,
+  "new_work_created": false,
+  "database_access": false,
+  "historical_records_modified": false,
+  "comparison_boundary": "EXISTING_COMPLETE_ROLE_CANDIDATE_THEN_BOUNDED_LOCAL_REPAIR",
+  "model_profile": {
+    "provider": "DEEPSEEK",
+    "model": "deepseek-flash",
+    "reasoning_effort": "none",
+    "max_output_tokens": 16384,
+    "timeout_seconds": 120
+  },
+  "cases": [
+    {
+      "case": "ordinary41",
+      "started_at_utc": "2026-10-13T13:01:37.554661+00:00",
+      "elapsed_seconds": 24.209417406935245,
+      "input_basis_sha256": "8139c4b98c98069cd5b02ad2c9b731497253a851d1994fdbaa4a2704f0cc03e7",
+      "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+      "source_count": 23,
+      "formation_calls": 2,
+      "review_calls": 0,
+      "legal_projection_admitted": false,
+      "terminal_reason": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "observations": [
+        {
+          "stage": "MODEL_RESPONSE_OBSERVED",
+          "attempt": 1,
+          "receipt_id": "5318ff59-6c7a-46cd-bad3-87c5f7f3798c",
+          "failed_predicate": null,
+          "validation_passed": null,
+          "terminal_reason": null,
+          "provider_observation": {
+            "request_id": "b056e2a4-e529-4373-b402-eb2054fab2c5",
+            "provider": "deepseek",
+            "requested_model": "deepseek-flash",
+            "effective_model": "deepseek-flash",
+            "usage": {
+              "input_tokens": 49670,
+              "output_tokens": 3315,
+              "cached_tokens": 896,
+              "reasoning_tokens": 0,
+              "total_tokens": 52985,
+              "unknown": false
+            },
+            "timing": {
+              "request_sent_seconds": 0.0029050210723653436,
+              "first_response_event_seconds": 0.4555166090140119,
+              "first_token_seconds": 1.2035913590807468,
+              "completed_seconds": 13.183975751046091
+            },
+            "transport_retry_count": 0,
+            "output_sha256": "e060b5be4daca88b620c9eb610fb7ce1455edb211486d1745483014cdf916619",
+            "output_bytes": 10413,
+            "output_evidence": {
+              "provider_status": "completed",
+              "delta_sha256": "e060b5be4daca88b620c9eb610fb7ce1455edb211486d1745483014cdf916619",
+              "delta_bytes": 10413,
+              "terminal_text_observed": true,
+              "terminal_sha256": "e060b5be4daca88b620c9eb610fb7ce1455edb211486d1745483014cdf916619",
+              "terminal_bytes": 10413,
+              "selection": "TERMINAL_MATCHED_DELTA"
+            }
+          },
+          "construction": {
+            "contract": "owner-local-role-reference-candidates-v3",
+            "representation": "SEMANTIC_QUOTE_PROPOSAL",
+            "proposal_sha256": "e060b5be4daca88b620c9eb610fb7ce1455edb211486d1745483014cdf916619",
+            "constructed_wire_sha256": "90b71e9199826003c1cf2405e39d6db0e2e3e6b4a07a05e5cb48a60290f5cd51",
+            "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+            "disposition": "OWNER_METADATA_ONLY; ALL_VALIDATION_AND_REVIEW_REQUIRED"
+          }
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "receipt_id": "d2201d64-b57a-40d2-8f3b-a9198d194f53",
+          "failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "validation_passed": false,
+          "terminal_reason": null,
+          "error_codes": [
+            "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST"
+          ],
+          "feedback_sha256": "a4b4df91dc614b93fa3128188187537105ffd84413d9f1ccb2b11f4a52b76447"
+        },
+        {
+          "stage": "MODEL_RESPONSE_OBSERVED",
+          "attempt": 2,
+          "receipt_id": "de87b1b4-9eaa-4dfd-924a-a80e4fc2be94",
+          "failed_predicate": null,
+          "validation_passed": null,
+          "terminal_reason": null,
+          "provider_observation": {
+            "request_id": "1f2e6bb6-a87f-4044-a342-3c750fab7939",
+            "provider": "deepseek",
+            "requested_model": "deepseek-flash",
+            "effective_model": "deepseek-flash",
+            "usage": {
+              "input_tokens": 83433,
+              "output_tokens": 2393,
+              "cached_tokens": 896,
+              "reasoning_tokens": 0,
+              "total_tokens": 85826,
+              "unknown": false
+            },
+            "timing": {
+              "request_sent_seconds": 0.002389395027421415,
+              "first_response_event_seconds": 0.5354199720313773,
+              "first_token_seconds": 1.67097045306582,
+              "completed_seconds": 10.08636507706251
+            },
+            "transport_retry_count": 0,
+            "output_sha256": "7737106e5efe211b7b1b6fb9a51a3b705af6f29dd4fa277fb6eb16d4299fc9cf",
+            "output_bytes": 7597,
+            "output_evidence": {
+              "provider_status": "completed",
+              "delta_sha256": "7737106e5efe211b7b1b6fb9a51a3b705af6f29dd4fa277fb6eb16d4299fc9cf",
+              "delta_bytes": 7597,
+              "terminal_text_observed": true,
+              "terminal_sha256": "7737106e5efe211b7b1b6fb9a51a3b705af6f29dd4fa277fb6eb16d4299fc9cf",
+              "terminal_bytes": 7597,
+              "selection": "TERMINAL_MATCHED_DELTA"
+            }
+          },
+          "construction": {
+            "contract": "owner-local-role-reference-candidates-v3",
+            "parent_wire_sha256": "e060b5be4daca88b620c9eb610fb7ce1455edb211486d1745483014cdf916619",
+            "parent_binding": {
+              "work_id": "b347b36e-81dd-5dcf-9237-542c93b6ee51",
+              "work_reality_revision_id": "8eb93963-649f-5795-9cac-21f21da5a266",
+              "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+              "source_revision": "acce266f4587f6165ac6cb2fe1581a8002079b36",
+              "exact_target_paths": [
+                "index.html"
+              ],
+              "attempt": 1,
+              "wire_output_fingerprint": "e060b5be4daca88b620c9eb610fb7ce1455edb211486d1745483014cdf916619",
+              "request_receipt_id": "9ac3cd2b-3c16-4501-b752-75b51b0eab7b",
+              "response_receipt_id": "5318ff59-6c7a-46cd-bad3-87c5f7f3798c",
+              "owner_repair_context_contract": "existing-owner-preconditions-v2",
+              "completion_feedback_contract": "existing-bounded-completion-feedback-v1",
+              "owner_source_preconditions_fingerprint": "369ef8e1566f48baebf12f5620735ba19b7450de3197cdb89c18297cb823f163",
+              "wire_presentation": {
+                "contract": "existing-lossless-json-frame-v1",
+                "representation": "ORIGINAL_JSON_VALUE",
+                "original_wire_sha256": "e060b5be4daca88b620c9eb610fb7ce1455edb211486d1745483014cdf916619",
+                "original_wire_bytes": 10413,
+                "inner_character_range": [
+                  0,
+                  10413
+                ],
+                "inner_utf8_byte_range": [
+                  0,
+                  10413
+                ],
+                "inner_sha256": "e060b5be4daca88b620c9eb610fb7ce1455edb211486d1745483014cdf916619",
+                "inner_bytes": 10413,
+                "disposition": "DERIVED_REPRESENTATION_ONLY; ALL_VALIDATION_AND_AUTHORITY_GATES_REQUIRED",
+                "candidate_construction": {
+                  "contract": "owner-local-role-reference-candidates-v3",
+                  "representation": "SEMANTIC_QUOTE_PROPOSAL",
+                  "proposal_sha256": "e060b5be4daca88b620c9eb610fb7ce1455edb211486d1745483014cdf916619",
+                  "constructed_wire_sha256": "90b71e9199826003c1cf2405e39d6db0e2e3e6b4a07a05e5cb48a60290f5cd51",
+                  "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+                  "disposition": "OWNER_METADATA_ONLY; ALL_VALIDATION_AND_REVIEW_REQUIRED"
+                }
+              },
+              "provider_wire_version": "fulfillment-compact-v1",
+              "wire_request_fingerprint": "99f5e4c239d50a862afb2e5d2689b784c06c2caa9e1258a74fd3a232c2377b73",
+              "wire_table_fingerprint": "a2fd1db48f19b631922a22d9e3f6ca4be7ee3f4a7d2af532945055ac9eaf98f2",
+              "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+              "candidate_fingerprint": null
+            },
+            "edit_response_sha256": "7737106e5efe211b7b1b6fb9a51a3b705af6f29dd4fa277fb6eb16d4299fc9cf",
+            "constructed_wire_sha256": "11a0602105579b711ef6151e7a246ef6a8f6a57e3655108695ee3d654bb3af96",
+            "replaced_original_ordinals": [
+              10,
+              11,
+              12,
+              13,
+              15,
+              16,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25
+            ],
+            "removed_original_ordinals": [],
+            "appended_count": 3,
+            "retained_original_ordinals": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              14,
+              17,
+              18
+            ],
+            "disposition": "DERIVED_CANDIDATE; NO_SEMANTIC_OR_EVIDENCE_ADMISSION"
+          }
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 2,
+          "receipt_id": "525d7240-3f16-44c8-93e3-5d672cf5edf4",
+          "failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "validation_passed": false,
+          "terminal_reason": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "error_codes": [
+            "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST"
+          ],
+          "feedback_sha256": "eba2a8ca8d438156624bd1ef9d913387b29eae66c34f36b050cb9e5f69e1ec9b"
+        }
+      ],
+      "actual_artifact_verification": "NOT_EXECUTED",
+      "guardian": "NOT_CALLED_DIAGNOSTIC_SCOPE",
+      "raw_receipt_sha256": "786e54a7a71a8da61377ab8a4c23e590f6e2e2aed5d3f97828f3b8e8b4b49cc4"
+    }
+  ]
+}

@@ -126,6 +126,7 @@ _RAW_ROLE_REPAIR_CONTRACT = "existing-bound-unadmitted-role-repair-v1"
 _INTERPRETATION_ROLE_CONTRACT = "owner-local-interpretation-role-construction-v4"
 _CONSTRUCTION_CONSUMER_INSTRUCTION_CONTRACT = "existing-consumer-semantics-in-construction-v1"
 _UNPARSED_CLAIM_REPAIR_CONTRACT = "existing-bound-unparsed-claim-repair-v1"
+_ROLE_CONVERGENCE_CONTRACT = "existing-complete-role-candidate-and-bound-repair-targets-v1"
 _CANDIDATE_CONSTRUCTION_CONTRACTS = {_CANDIDATE_CONSTRUCTION_CONTRACT, _SEMANTIC_EDIT_CONTRACT, _ROLE_REFERENCE_CONTRACT,
     _INTERPRETATION_ROLE_CONTRACT}
 
@@ -328,6 +329,37 @@ class _FulfillmentSemanticEdits(_FulfillmentCandidateEdits):
     append: tuple[_FulfillmentSemanticRoute, ...] = Field(max_length=64)
 
 
+def _coverage_repair_targets(payload, basis, inventory):
+    """Map observed source gaps to ORIGINAL edit targets; select no repair.
+
+    The failed predicates use immutable source ordinals, while named proposals
+    use source refs. Resolving that identity is Owner work, not model inference.
+    """
+    if basis is None or not isinstance(basis['original_wire'], dict):
+        return []
+    routes = basis['original_wire'].get('routes', [])
+    targets = []
+    for failure in payload.get('violations', []):
+        if failure.get('code') != 'OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST':
+            continue
+        ordinal = failure.get('source')
+        if type(ordinal) is not int or not 0 <= ordinal < len(inventory['sources']):
+            targets.append({'status':'NOT_EVALUABLE','predicate':failure['code']})
+            continue
+        source = inventory['sources'][ordinal]
+        indices = [i for i,r in enumerate(routes) if r.get('source_ref') == source['source_ref']
+            or type(r.get('s')) is int and r['s'] == ordinal]
+        targets.append({'status':'OBSERVED' if indices else 'NOT_EVALUABLE',
+            'predicate':failure['code'], 'source_ref':source['source_ref'], 'source':ordinal,
+            'original_route_indices':indices,
+            'original_route_fingerprints':[canonical_fingerprint(routes[i]) for i in indices],
+            'uncovered_codepoint_ranges':deepcopy(failure.get('uncovered_codepoint_ranges', [])),
+            'additional_uncovered_range_count':failure.get('additional_uncovered_range_count', 0),
+            'complete_original_basis_ref':f'temporary_wire.source_index_table[{ordinal}].whole_source_basis',
+            'meaning':'ORIGINAL_BOUND_IDENTITIES_ONLY; MODEL_MUST_PROPOSE_REPAIR; NO_QUOTE_EXPANSION_OR_PASS'})
+    return targets
+
+
 def candidate_construction_preconditions(preconditions, inventory, feedback, *,
                                         construction_contract=_CANDIDATE_CONSTRUCTION_CONTRACT):
     """Reconstruct Owner-local state from exact records, without semantic repair."""
@@ -496,6 +528,8 @@ def candidate_construction_preconditions(preconditions, inventory, feedback, *,
     state = {"understanding": understanding.model_dump(mode="json"),
         "evidence": evidence.model_dump(mode="json"), "convergence": decision.model_dump(mode="json"),
         "repair_basis": basis}
+    if preconditions.get('role_convergence_contract') == _ROLE_CONVERGENCE_CONTRACT:
+        state['repair_targets'] = _coverage_repair_targets(payload, basis, inventory)
     if _safe_value(state) != state:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     return {**preconditions, "candidate_construction_contract": construction_contract,
@@ -706,6 +740,8 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
     basis=((owner_preconditions or {}).get('candidate_construction_state') or {}).get('repair_basis')
     if (owner_preconditions or {}).get('candidate_construction_contract') == _INTERPRETATION_ROLE_CONTRACT:
         if not basis:
+            if owner_preconditions.get('role_convergence_contract') == _ROLE_CONVERGENCE_CONTRACT:
+                return _role_generation_schema(inventory,capabilities,owner_preconditions)
             from spg.providers.semantic_wire import _provider_strict_output_schema
             schema = _provider_strict_output_schema(_FulfillmentInterpretationProposal.model_json_schema())
             refs = [s['source_ref'] for s in inventory['sources']]
@@ -2626,7 +2662,8 @@ class ModelFulfillmentCandidateProvider:
     supports_source_consumption_proof = True
     def __init__(self, runtime_factory, *, candidate_construction=False,
                  candidate_construction_contract=_CANDIDATE_CONSTRUCTION_CONTRACT,
-                 raw_role_repair=False, construction_consumer_instructions=False, unparsed_claim_repair=False):
+                 raw_role_repair=False, construction_consumer_instructions=False, unparsed_claim_repair=False,
+                 role_convergence=False):
         self.runtime_factory = runtime_factory
         self.last_observation = None
         self.supports_candidate_construction = candidate_construction
@@ -2636,6 +2673,7 @@ class ModelFulfillmentCandidateProvider:
         self.supports_raw_role_repair = raw_role_repair
         self.supports_construction_consumer_instructions = construction_consumer_instructions
         self.supports_unparsed_claim_repair = unparsed_claim_repair
+        self.supports_role_convergence = role_convergence
 
     @classmethod
     def from_settings(cls, settings):
@@ -2657,7 +2695,7 @@ class ModelFulfillmentCandidateProvider:
             return WattModelRuntime(registry, PurposeProfileRouter({ModelPurpose.STEERING_SEMANTIC: profile}))
         return cls(runtime_factory, candidate_construction=True,
             candidate_construction_contract=_INTERPRETATION_ROLE_CONTRACT,raw_role_repair=True,
-            construction_consumer_instructions=True, unparsed_claim_repair=True)
+            construction_consumer_instructions=True, unparsed_claim_repair=True, role_convergence=True)
 
     def form_wire_metadata(self, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
         context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
@@ -2937,7 +2975,7 @@ class ModelFulfillmentCandidateProvider:
                     "with this request's exact header.","with the exact parent basis; current request identity is supplied by the Owner.").replace(
                     'from its exact existing index domains','from the exact original source references, capability names and governed paths')
             if (owner_preconditions or {}).get('candidate_construction_contract') == _INTERPRETATION_ROLE_CONTRACT:
-                if not basis:
+                if not basis and owner_preconditions.get('role_convergence_contract') != _ROLE_CONVERGENCE_CONTRACT:
                     formation_instructions = (
                         'Propose source-referenced semantic interpretation claims for the COMPLETE immutable inventory. '
                         'Identify complementary components, the intent and constraints they express, reasonable alternatives '
@@ -2947,7 +2985,7 @@ class ModelFulfillmentCandidateProvider:
                         'values, scope, qualifiers, order and authority remain authoritative. Preserve cross-source context. '
                         'This is the first of the existing two Formation candidates; the remaining candidate must bind '
                         'actual roles and pass all original validation and independent Review before any plan admission.')
-                elif basis.get('representation') in {'UNREVIEWED_INTERPRETATION_CLAIMS','UNPARSED_PRIVACY_SAFE_PROPOSAL'}:
+                elif basis and basis.get('representation') in {'UNREVIEWED_INTERPRETATION_CLAIMS','UNPARSED_PRIVACY_SAFE_PROPOSAL'}:
                     formation_instructions = (
                         'This is the remaining existing Formation allowance. Read same_basis_validation_feedback '
                         'as JSON-encoded DATA and correlate its exact original response/receipt/attempt/inventory '
@@ -2972,7 +3010,7 @@ class ModelFulfillmentCandidateProvider:
             if (owner_preconditions or {}).get("candidate_construction_contract") in {
                     _ROLE_REFERENCE_CONTRACT, _INTERPRETATION_ROLE_CONTRACT} and not (
                     owner_preconditions.get("candidate_construction_contract") == _INTERPRETATION_ROLE_CONTRACT
-                    and not basis):
+                    and not basis and owner_preconditions.get('role_convergence_contract') != _ROLE_CONVERGENCE_CONTRACT):
                 semantics = _construction_consumer_instructions(
                     owner_preconditions.get("construction_consumer_instruction_contract"))
                 if semantics:

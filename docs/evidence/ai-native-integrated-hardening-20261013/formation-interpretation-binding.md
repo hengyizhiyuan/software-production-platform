@@ -71,3 +71,37 @@ The module has not proved reliable production convergence under the fixed Provid
 profile. Actual semantic construction and Review, then normal user G0 and independent
 qualification, are still required. Trace product convergence is separately real
 qualified; it cannot substitute for this P0 boundary or C3 Closure.
+
+## Bounded convergence correction after actual development observations
+
+Actual v4 observation 11 completed all 23 understanding claims, then its only
+complete role plan failed original source coverage. A separate existing v3
+complete-plan/one-edit path on the SAME frozen image and inventory reduced ten
+coverage gaps to two. Neither run reached Review. Owner predicate audit found
+remaining required letters as well as punctuation; this is not evidence that
+Validator should ignore the gaps. The interpretation-first path had already
+spent both Formation slots before a complete plan could receive repair.
+
+New requests negotiate `existing-complete-role-candidate-and-bound-repair-targets-v1`
+inside the SAME v4 Owner. Prefer a complete initial semantic role candidate,
+then retain the original one feedback opportunity for actual repair or failed
+independent Review. Existing interpretation claims, compact semantic proposals
+and complete Wire remain consumable; receiving an interpretation-only proposal
+still uses the remaining slot to construct roles, never adds a call. Public
+method justifications remain unreviewed claims until original independent gates.
+
+The Owner maps coverage-feedback source ordinals to their exact original source
+refs and ORIGINAL route edit indices/fingerprints. It references the original
+complete basis and observed uncovered ranges, selecting NO operation, proof,
+path or replacement quote. This corrects a representation seam: named-role
+proposals should not require the model to reconstruct identity links across
+representations in the same original source space. It does not prove that this
+seam alone caused the two remaining errors.
+Only an explicit model edit can change a quote; full final validation and
+independent Review remain necessary. Unknown target mapping stays NOT_EVALUABLE.
+
+Older request/default identities and terminal records are retained. No extra
+candidate, review, budget, authority, Owner or formal Wire version is introduced.
+Controlled positive, wrong/missing source, unchanged quote, deletion, parent and
+target identity tests precede exact-image real qualification. Until that actual
+qualification succeeds, this is implementation, not C3 Closure.

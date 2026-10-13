@@ -1,0 +1,759 @@
+{
+  "scope": "READONLY_NONHOLDOUT_OWNER_PREDICATE_AUDIT",
+  "model_calls": 0,
+  "cases": [
+    {
+      "trial": 11,
+      "attempts": [
+        {
+          "attempt": 1,
+          "predicate": "OBLIGATION_FORMATION_ROLE_MAPPING_REQUIRED",
+          "coverage_failures": [],
+          "feedback_sha256": "1242248ffd3d9d7e5e317783423ba0ea3e62da28d8ad942376f493d2195f887e"
+        },
+        {
+          "attempt": 2,
+          "predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "coverage_failures": [
+            {
+              "source": 5,
+              "kind": "IR_CLAUSE",
+              "text_sha256": "c01616d2fa1687d3f2dbde62f78b2d07c72c8f63034431eb8b263f2cd82e53b1",
+              "uncovered_ranges": [
+                [
+                  0,
+                  2
+                ],
+                [
+                  3,
+                  11
+                ],
+                [
+                  12,
+                  14
+                ],
+                [
+                  15,
+                  23
+                ],
+                [
+                  24,
+                  34
+                ],
+                [
+                  35,
+                  49
+                ]
+              ],
+              "uncovered_count": 44,
+              "uncovered_punctuation": 1,
+              "uncovered_letters": 41
+            },
+            {
+              "source": 7,
+              "kind": "IR_CLAUSE",
+              "text_sha256": "763311981a479580e9d52e736ecffbec46cfc41a94a3564badab89c5fa354e60",
+              "uncovered_ranges": [
+                [
+                  0,
+                  4
+                ],
+                [
+                  5,
+                  7
+                ],
+                [
+                  8,
+                  17
+                ],
+                [
+                  18,
+                  27
+                ],
+                [
+                  28,
+                  29
+                ],
+                [
+                  30,
+                  38
+                ],
+                [
+                  39,
+                  48
+                ]
+              ],
+              "uncovered_count": 42,
+              "uncovered_punctuation": 2,
+              "uncovered_letters": 40
+            },
+            {
+              "source": 9,
+              "kind": "IR_CONSTRAINT",
+              "text_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+              "uncovered_ranges": [
+                [
+                  0,
+                  4
+                ],
+                [
+                  5,
+                  15
+                ],
+                [
+                  16,
+                  19
+                ],
+                [
+                  20,
+                  27
+                ]
+              ],
+              "uncovered_count": 24,
+              "uncovered_punctuation": 2,
+              "uncovered_letters": 22
+            },
+            {
+              "source": 12,
+              "kind": "IR_CONSTRAINT",
+              "text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+              "uncovered_ranges": [
+                [
+                  13,
+                  14
+                ],
+                [
+                  22,
+                  23
+                ],
+                [
+                  24,
+                  27
+                ],
+                [
+                  28,
+                  34
+                ],
+                [
+                  35,
+                  37
+                ],
+                [
+                  38,
+                  44
+                ],
+                [
+                  45,
+                  55
+                ]
+              ],
+              "uncovered_count": 29,
+              "uncovered_punctuation": 5,
+              "uncovered_letters": 24
+            },
+            {
+              "source": 14,
+              "kind": "WORK_CONSTRAINT",
+              "text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+              "uncovered_ranges": [
+                [
+                  13,
+                  14
+                ],
+                [
+                  22,
+                  23
+                ],
+                [
+                  24,
+                  27
+                ],
+                [
+                  28,
+                  34
+                ],
+                [
+                  35,
+                  37
+                ],
+                [
+                  38,
+                  44
+                ],
+                [
+                  45,
+                  55
+                ]
+              ],
+              "uncovered_count": 29,
+              "uncovered_punctuation": 5,
+              "uncovered_letters": 24
+            },
+            {
+              "source": 18,
+              "kind": "WORK_CONSTRAINT",
+              "text_sha256": "507aaa42ced1bdcf5e1e0a05994505f857eff2bf398eb867310852abe4bf9dad",
+              "uncovered_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ],
+                [
+                  38,
+                  39
+                ]
+              ],
+              "uncovered_count": 22,
+              "uncovered_punctuation": 2,
+              "uncovered_letters": 20
+            },
+            {
+              "source": 19,
+              "kind": "WORK_CONSTRAINT",
+              "text_sha256": "f1dfea41bf13f350665a03240b08f6491c80243927f1a59c7fdb645902357f0b",
+              "uncovered_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ],
+                [
+                  25,
+                  27
+                ],
+                [
+                  28,
+                  31
+                ],
+                [
+                  39,
+                  40
+                ]
+              ],
+              "uncovered_count": 27,
+              "uncovered_punctuation": 2,
+              "uncovered_letters": 25
+            },
+            {
+              "source": 20,
+              "kind": "WORK_CONSTRAINT",
+              "text_sha256": "3510723f91812ab387575ceb090ab3c5cc024019eb97a99fdef6b41f7c5da26f",
+              "uncovered_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ],
+                [
+                  25,
+                  27
+                ],
+                [
+                  28,
+                  31
+                ],
+                [
+                  32,
+                  35
+                ],
+                [
+                  36,
+                  42
+                ]
+              ],
+              "uncovered_count": 35,
+              "uncovered_punctuation": 2,
+              "uncovered_letters": 33
+            },
+            {
+              "source": 21,
+              "kind": "WORK_CONSTRAINT",
+              "text_sha256": "0cbbfe1c1da1d5d28b969fae787f2e3f1e45158c5314b0ef98ec213a62b81ae4",
+              "uncovered_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ],
+                [
+                  25,
+                  27
+                ],
+                [
+                  28,
+                  31
+                ],
+                [
+                  32,
+                  38
+                ],
+                [
+                  39,
+                  49
+                ]
+              ],
+              "uncovered_count": 42,
+              "uncovered_punctuation": 3,
+              "uncovered_letters": 39
+            },
+            {
+              "source": 22,
+              "kind": "WORK_CONSTRAINT",
+              "text_sha256": "94810ee600952fea2c7e0bb65483740c01c5926f3cec9992933edb5417b533e5",
+              "uncovered_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ],
+                [
+                  25,
+                  27
+                ],
+                [
+                  28,
+                  32
+                ],
+                [
+                  33,
+                  38
+                ],
+                [
+                  39,
+                  43
+                ],
+                [
+                  44,
+                  54
+                ],
+                [
+                  55,
+                  58
+                ],
+                [
+                  59,
+                  66
+                ]
+              ],
+              "uncovered_count": 56,
+              "uncovered_punctuation": 3,
+              "uncovered_letters": 53
+            }
+          ],
+          "feedback_sha256": "d104e2bcfbfdb84fb4940ebe82382a6f8e7ead462b84d3796f25d08a58a1efd4"
+        }
+      ]
+    },
+    {
+      "trial": 12,
+      "attempts": [
+        {
+          "attempt": 1,
+          "predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "coverage_failures": [
+            {
+              "source": 10,
+              "kind": "IR_CLAUSE",
+              "text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+              "uncovered_ranges": [
+                [
+                  39,
+                  42
+                ],
+                [
+                  71,
+                  72
+                ]
+              ],
+              "uncovered_count": 4,
+              "uncovered_punctuation": 1,
+              "uncovered_letters": 3
+            },
+            {
+              "source": 11,
+              "kind": "IR_CLAUSE",
+              "text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+              "uncovered_ranges": [
+                [
+                  0,
+                  6
+                ],
+                [
+                  7,
+                  10
+                ],
+                [
+                  11,
+                  16
+                ],
+                [
+                  17,
+                  24
+                ],
+                [
+                  25,
+                  28
+                ],
+                [
+                  29,
+                  38
+                ],
+                [
+                  39,
+                  42
+                ],
+                [
+                  43,
+                  48
+                ],
+                [
+                  49,
+                  50
+                ],
+                [
+                  51,
+                  61
+                ],
+                [
+                  62,
+                  72
+                ]
+              ],
+              "uncovered_count": 62,
+              "uncovered_punctuation": 1,
+              "uncovered_letters": 61
+            },
+            {
+              "source": 12,
+              "kind": "IR_CONSTRAINT",
+              "text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+              "uncovered_ranges": [
+                [
+                  13,
+                  14
+                ],
+                [
+                  22,
+                  23
+                ],
+                [
+                  24,
+                  27
+                ],
+                [
+                  28,
+                  34
+                ],
+                [
+                  35,
+                  37
+                ],
+                [
+                  38,
+                  44
+                ],
+                [
+                  45,
+                  55
+                ]
+              ],
+              "uncovered_count": 29,
+              "uncovered_punctuation": 5,
+              "uncovered_letters": 24
+            },
+            {
+              "source": 14,
+              "kind": "WORK_CONSTRAINT",
+              "text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+              "uncovered_ranges": [
+                [
+                  24,
+                  27
+                ],
+                [
+                  28,
+                  34
+                ],
+                [
+                  35,
+                  37
+                ],
+                [
+                  38,
+                  44
+                ],
+                [
+                  45,
+                  55
+                ]
+              ],
+              "uncovered_count": 27,
+              "uncovered_punctuation": 3,
+              "uncovered_letters": 24
+            },
+            {
+              "source": 17,
+              "kind": "WORK_CONSTRAINT",
+              "text_sha256": "11bc51eeda5175d8c3ec5718770bf997b5862a18f2e6b5c63fea2c859872e3f8",
+              "uncovered_ranges": [
+                [
+                  44,
+                  47
+                ],
+                [
+                  76,
+                  77
+                ]
+              ],
+              "uncovered_count": 4,
+              "uncovered_punctuation": 1,
+              "uncovered_letters": 3
+            },
+            {
+              "source": 18,
+              "kind": "WORK_CONSTRAINT",
+              "text_sha256": "507aaa42ced1bdcf5e1e0a05994505f857eff2bf398eb867310852abe4bf9dad",
+              "uncovered_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ]
+              ],
+              "uncovered_count": 21,
+              "uncovered_punctuation": 1,
+              "uncovered_letters": 20
+            },
+            {
+              "source": 19,
+              "kind": "WORK_CONSTRAINT",
+              "text_sha256": "f1dfea41bf13f350665a03240b08f6491c80243927f1a59c7fdb645902357f0b",
+              "uncovered_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ]
+              ],
+              "uncovered_count": 21,
+              "uncovered_punctuation": 1,
+              "uncovered_letters": 20
+            },
+            {
+              "source": 20,
+              "kind": "WORK_CONSTRAINT",
+              "text_sha256": "3510723f91812ab387575ceb090ab3c5cc024019eb97a99fdef6b41f7c5da26f",
+              "uncovered_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ]
+              ],
+              "uncovered_count": 21,
+              "uncovered_punctuation": 1,
+              "uncovered_letters": 20
+            },
+            {
+              "source": 21,
+              "kind": "WORK_CONSTRAINT",
+              "text_sha256": "0cbbfe1c1da1d5d28b969fae787f2e3f1e45158c5314b0ef98ec213a62b81ae4",
+              "uncovered_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ]
+              ],
+              "uncovered_count": 21,
+              "uncovered_punctuation": 1,
+              "uncovered_letters": 20
+            },
+            {
+              "source": 22,
+              "kind": "WORK_CONSTRAINT",
+              "text_sha256": "94810ee600952fea2c7e0bb65483740c01c5926f3cec9992933edb5417b533e5",
+              "uncovered_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ]
+              ],
+              "uncovered_count": 21,
+              "uncovered_punctuation": 1,
+              "uncovered_letters": 20
+            }
+          ],
+          "feedback_sha256": "a4b4df91dc614b93fa3128188187537105ffd84413d9f1ccb2b11f4a52b76447"
+        },
+        {
+          "attempt": 2,
+          "predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "coverage_failures": [
+            {
+              "source": 12,
+              "kind": "IR_CONSTRAINT",
+              "text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+              "uncovered_ranges": [
+                [
+                  13,
+                  14
+                ],
+                [
+                  22,
+                  23
+                ]
+              ],
+              "uncovered_count": 2,
+              "uncovered_punctuation": 2,
+              "uncovered_letters": 0
+            },
+            {
+              "source": 14,
+              "kind": "WORK_CONSTRAINT",
+              "text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+              "uncovered_ranges": [
+                [
+                  24,
+                  27
+                ],
+                [
+                  28,
+                  34
+                ],
+                [
+                  35,
+                  37
+                ],
+                [
+                  38,
+                  44
+                ],
+                [
+                  45,
+                  55
+                ]
+              ],
+              "uncovered_count": 27,
+              "uncovered_punctuation": 3,
+              "uncovered_letters": 24
+            }
+          ],
+          "feedback_sha256": "eba2a8ca8d438156624bd1ef9d913387b29eae66c34f36b050cb9e5f69e1ec9b"
+        }
+      ]
+    }
+  ]
+}

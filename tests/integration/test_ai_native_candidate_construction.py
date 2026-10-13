@@ -22,13 +22,13 @@ from tests.test_c3_source_consumption_proof import fixture_review_proof
 pytestmark = pytest.mark.postgresql
 
 
-@pytest.mark.parametrize('construction_contract,raw_role_repair,consumer_instructions,unparsed_claim',(
-    ('owner-local-wire-candidate-edits-v1',False,False,False),('owner-local-semantic-candidate-edits-v2',False,False,False),
-    ('owner-local-role-reference-candidates-v3',False,False,False),('owner-local-role-reference-candidates-v3',True,False,False),
-    ('owner-local-interpretation-role-construction-v4',False,False,False),('owner-local-interpretation-role-construction-v4',True,False,False),
-    ('owner-local-role-reference-candidates-v3',True,True,False),('owner-local-interpretation-role-construction-v4',True,True,False),
-    ('owner-local-interpretation-role-construction-v4',True,True,True)))
-def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(postgres_database, tmp_path, monkeypatch,construction_contract,raw_role_repair,consumer_instructions,unparsed_claim):
+@pytest.mark.parametrize('construction_contract,raw_role_repair,consumer_instructions,unparsed_claim,role_convergence',(
+    ('owner-local-wire-candidate-edits-v1',False,False,False,False),('owner-local-semantic-candidate-edits-v2',False,False,False,False),
+    ('owner-local-role-reference-candidates-v3',False,False,False,False),('owner-local-role-reference-candidates-v3',True,False,False,False),
+    ('owner-local-interpretation-role-construction-v4',False,False,False,False),('owner-local-interpretation-role-construction-v4',True,False,False,False),
+    ('owner-local-role-reference-candidates-v3',True,True,False,False),('owner-local-interpretation-role-construction-v4',True,True,False,False),
+    ('owner-local-interpretation-role-construction-v4',True,True,True,False),('owner-local-interpretation-role-construction-v4',True,True,False,True)))
+def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(postgres_database, tmp_path, monkeypatch,construction_contract,raw_role_repair,consumer_instructions,unparsed_claim,role_convergence):
     declared = c1.DeclaredC1Fulfillment()
     calls = []
     inventories = []
@@ -56,6 +56,7 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
                     'rationale':r['r']}
             if payload["same_basis_validation_feedback"] is None:
                 assert inventory["sources"][wire["routes"][0]["s"]]["kind"] == "FACT"
+                original_dependencies=wire['routes'][0]['f']
                 wire["routes"][0]["f"] = [len(inventory["sources"])]
                 output = json.dumps({"routes":[{k:v for k,v in row.items() if k not in {"a","z"}}
                     for row in wire["routes"]]})
@@ -71,6 +72,11 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
                         'interpretation':'Unreviewed complete contribution','unknowns':['Need role binding'],
                         'alternatives':[]} for s in inventory['sources']]})
                     if unparsed_claim:output=output[:-1]
+                    if role_convergence:
+                        from spg.domain.governed_obligation import fulfillment_source_semantic_text
+                        wire['routes'][0]['f']=original_dependencies
+                        wire['routes'][0]['q']=fulfillment_source_semantic_text(inventory['sources'][wire['routes'][0]['s']])[:-1]
+                        output=json.dumps({'routes':[role(r) for r in wire['routes']]})
             else:
                 basis = payload["owner_source_preconditions"]["candidate_construction_state"]["repair_basis"]
                 replacement=wire['routes'][0]
@@ -82,14 +88,15 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
                     output=json.dumps({'basis':basis['raw_sha256'],'replace':[{'index':0,'route':role(wire['routes'][0])}],
                         'remove':[],'append':[]})
                 if construction_contract=='owner-local-interpretation-role-construction-v4':
-                    output=json.dumps({'routes':[role(r) for r in wire['routes']]})
+                    output=(json.dumps({'basis':basis['raw_sha256'],'replace':[{'index':0,'route':role(wire['routes'][0])}],
+                        'remove':[],'append':[]}) if role_convergence else json.dumps({'routes':[role(r) for r in wire['routes']]}))
         return StructuredModelResult(output_text=output,provider=ModelProvider.DEEPSEEK,
             requested_model="controlled-pg-edit",effective_model="controlled-pg-edit",
             request_id=f"pg-edit-{len(calls)}",usage=ModelUsage(unknown=True),timing=ModelTiming(),retry_count=0)
 
     provider = ModelFulfillmentCandidateProvider(lambda:SimpleNamespace(generate=generate,close=lambda:None),
         candidate_construction=True,candidate_construction_contract=construction_contract,raw_role_repair=raw_role_repair,
-        construction_consumer_instructions=consumer_instructions,unparsed_claim_repair=unparsed_claim)
+        construction_consumer_instructions=consumer_instructions,unparsed_claim_repair=unparsed_claim,role_convergence=role_convergence)
     monkeypatch.setattr(c1,"DeclaredC1Fulfillment",lambda:provider)
     class DurableEditObserved(BaseException):
         pass
@@ -108,6 +115,7 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
     provider.supports_raw_role_repair=False
     provider.supports_construction_consumer_instructions=False
     provider.supports_unparsed_claim_repair=False
+    provider.supports_role_convergence=False
     with postgres_database.unit_of_work() as uow:
         revision = ProductStore(uow.session).current_work_reality_revision(UUID(inventory["work_id"]))
         ir = InteractionStore(uow.session).assessment(revision.source_assessment_id).semantic_ir

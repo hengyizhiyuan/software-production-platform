@@ -16,7 +16,7 @@ from tests.test_c3_semantic_contract_calibration import review
 from tests.test_c3_source_consumption_proof import fixture_review_proof
 
 
-def local_edit_case(scale="small", outcome="repair", first="source-proof", *, semantic_edits=False,role_refs=False,raw_role_repair=False):
+def local_edit_case(scale="small", outcome="repair", first="source-proof", *, semantic_edits=False,role_refs=False,raw_role_repair=False,role_convergence=False):
     rev, ir, inventory, plan = controlled_capacity_case(scale)
     snapshots = deepcopy((rev, ir, inventory, plan))
     calls = []
@@ -71,6 +71,10 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof", *, se
                     wire["routes"].pop(touched)
                 elif first == "semantic-quote":
                     wire["routes"][touched]["q"] = "a quote that was never in the immutable source"
+                elif first == "semantic-span":
+                    from spg.domain.governed_obligation import fulfillment_source_semantic_text
+                    text=fulfillment_source_semantic_text(inventory['sources'][future])
+                    wire['routes'][touched]['q']=text[:-1]
                 old_wire = deepcopy(wire)
                 proposal = ({"routes":[{k:v for k,v in row.items() if k not in {"a","z"}}
                     for row in wire["routes"]]} if first.startswith("semantic-") else wire)
@@ -140,9 +144,12 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof", *, se
 
     provider = ModelFulfillmentCandidateProvider(
         lambda: SimpleNamespace(generate=generate, close=lambda: None), candidate_construction=True,
-        candidate_construction_contract='owner-local-role-reference-candidates-v3' if role_refs else
+        candidate_construction_contract='owner-local-interpretation-role-construction-v4' if role_convergence else
+            'owner-local-role-reference-candidates-v3' if role_refs else
             "owner-local-semantic-candidate-edits-v2" if semantic_edits else
-            "owner-local-wire-candidate-edits-v1",raw_role_repair=raw_role_repair)
+            "owner-local-wire-candidate-edits-v1",raw_role_repair=raw_role_repair,
+        role_convergence=role_convergence,construction_consumer_instructions=role_convergence,
+        unparsed_claim_repair=role_convergence)
     kwargs = dict(provider=provider, exact_target_paths=inventory["exact_target_paths"])
     bindings = app.form_fulfillment_projection(rev, ir, **kwargs)
     assert (rev, ir, inventory, plan) == snapshots

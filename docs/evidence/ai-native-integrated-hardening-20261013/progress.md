@@ -217,3 +217,15 @@ Source `148a25cece061d56365d9ba60e3dccfc39015274` / Tree `c0c8f614e68e5597efb2be
 这是 A 类格式波动伴随 B 类恢复前提缺口。仅在原 v4 Owner 内，增加持久协商的 `existing-bound-unparsed-claim-repair-v1`：原已观测、安全、精确绑定且可归因 JSON 格式失败的输出可以保留为 UNPARSED_PRIVACY_SAFE_PROPOSAL。它没有组件解析、来源几何、语义批准或证据；不补逗号/括号、不默默修 JSON、不改原始输出。剩余原候选额度从不可变完整库存构造方法计划，保留原 Raw SHA、父收据、Attempt、库存与反馈绑定，然后照常执行全部确定性和独立 Review 门禁。
 
 无法证明隐私安全的 escape 输出、重复 JSON keys、身份/预算不明仍停止。旧请求不获得新协商能力，原 terminal 不复活；没有新增候选、Review、Token、权限、Owner 或正式 Schema。`unparsed-claim-repair-1.xml` 40 PASS，身份扩充后 `unparsed-claim-repair-2.xml` 11 PASS；PostgreSQL 新路径单项中断恢复 PASS，原8种协议仍使用上一已通过回归。再次格式失败必须在第二候选结束，不能追加第三次。控制证明只说明恢复可以合法执行，真实模型收敛尚待新冻结资格。
+
+## 恢复修复机会与原来源角色反馈绑定
+
+Source `67b9f4922a71f59891ea201dd94135caf9259789` / Tree `9bde194ec5a0721cace61d2fb43726197be47b0f` / image `sha256:357422a19a09ea27ee494a65b62bc1547256f1500776194299b0993e4d6aaa1d` 安装与镜像定向回归通过。第十一次普通41：Provider 两次 completed，全部23条理解 Claim 有观察到的原文几何，仍未获语义批准。完整角色计划只报来源覆盖缺失，没有新增权限/支撑/重复错误；0 Review。实际 Input122980 / Output5658 / Total128638 / Reasoning0 / Cached33664，不计为成功。
+
+同源镜像、同一库存，使用既有 v3 完整初候选→一次局部编辑路径做机制对照（第十二次，不建 Work、不写历史 Owner、不用 Holdout）：原一次反馈将覆盖失败从10个来源缩到2个，仍0 Review。实际 Input133103 / Output5708 / Total138811 / Reasoning0 / Cached1792，无传输重发。只读 Owner 谓词核验发现最后两项分别为 IR_CONSTRAINT 2个标点及 WORK_CONSTRAINT 27个字符（含24个字母）未覆盖，不能称作无害显示差异或直接放宽 Validator。
+
+两步强制路径在第一完整计划出现前已耗完原2个 Formation 机会。新协商 `existing-complete-role-candidate-and-bound-repair-targets-v1` 在原 v4 内优先完整初候选，保留原一次反馈用于真正的计划修复；合法的理解 Claim/完整 Wire/语义方案仍可消费，理解-only fallback 不增加调用。复用原有字段、语义契约、完整验证、独立 Review 和额度，不将模型 Claim 变 Fact。
+
+同 Owner 将来源覆盖失败的原 Source ordinal 规范化为原 Source ref 与相关 ORIGINAL Route indices/fingerprints，并引用完整原始 basis 与实际缺口。它不自动选消费者、权限、证明、路径或新 quote，不暗中扩大跨度。错误定位不能评估时保留 NOT_EVALUABLE；显式模型编辑后仍由全部原门禁判断。未证明这个引用接线问题单独导致上述剩余两项；其真实收益仍需最终镜像验证。
+
+首轮新增验证 7 FAIL/2 PASS 因新路径初始化读取 None basis（无 Provider 请求），已修正条件，原失败收据保留。`role-convergence-2.xml` 10 PASS；新的 PostgreSQL 中断恢复单项 PASS，仅剩余 Review 被调用，原模式按其既有身份恢复。新协商目标、原输出、父反馈和旧默认漂移均不能产生新模型调用或成功。稳定修订继续真实资格；C3 仍 PARTIAL。
