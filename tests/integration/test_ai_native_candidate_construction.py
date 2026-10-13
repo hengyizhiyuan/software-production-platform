@@ -22,7 +22,7 @@ from tests.test_c3_source_consumption_proof import fixture_review_proof
 pytestmark = pytest.mark.postgresql
 
 
-@pytest.mark.parametrize('construction_contract',('owner-local-wire-candidate-edits-v1','owner-local-semantic-candidate-edits-v2'))
+@pytest.mark.parametrize('construction_contract',('owner-local-wire-candidate-edits-v1','owner-local-semantic-candidate-edits-v2','owner-local-role-reference-candidates-v3'))
 def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(postgres_database, tmp_path, monkeypatch,construction_contract):
     declared = c1.DeclaredC1Fulfillment()
     calls = []
@@ -41,11 +41,25 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
             plan = declared.form(inventory,payload["existing_capability_contracts"])
             wire,_ = controlled_wire(inventory,plan,feedback=payload["same_basis_validation_feedback"],
                 owner_preconditions=payload["owner_source_preconditions"])
+            def role(r):
+                return {'source_ref':inventory['sources'][r['s']]['source_ref'],
+                    'capability':payload['existing_capability_contracts'][r['c']]['capability'],
+                    'component_quote':r['q'],
+                    'current_fact_dependencies':[inventory['sources'][i]['source_ref'] for i in r['f']],
+                    'target_paths':[inventory['exact_target_paths'][i] for i in r['t']],
+                    'provenance_support_refs':[inventory['sources'][i]['source_ref'] for i in r['u']],
+                    'rationale':r['r']}
             if payload["same_basis_validation_feedback"] is None:
                 assert inventory["sources"][wire["routes"][0]["s"]]["kind"] == "FACT"
                 wire["routes"][0]["f"] = [len(inventory["sources"])]
                 output = json.dumps({"routes":[{k:v for k,v in row.items() if k not in {"a","z"}}
                     for row in wire["routes"]]})
+                if construction_contract=='owner-local-role-reference-candidates-v3':
+                    wire['routes'][0]['f']=[]
+                    proposal={'routes':[role(r) for r in wire['routes']]}
+                    proposal['routes'][0]['current_fact_dependencies']=[next(
+                        s['source_ref'] for s in inventory['sources'] if s['kind']!='FACT')]
+                    output=json.dumps(proposal)
             else:
                 basis = payload["owner_source_preconditions"]["candidate_construction_state"]["repair_basis"]
                 replacement=wire['routes'][0]
@@ -53,6 +67,9 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
                     replacement={k:v for k,v in replacement.items() if k not in {'a','z'}}
                 output = json.dumps({"v":1,"h":wire["h"],"d":wire["d"],"basis":basis["raw_sha256"],
                     "replace":[{"index":0,"route":replacement}],"remove":[],"append":[]})
+                if construction_contract=='owner-local-role-reference-candidates-v3':
+                    output=json.dumps({'basis':basis['raw_sha256'],'replace':[{'index':0,'route':role(wire['routes'][0])}],
+                        'remove':[],'append':[]})
         return StructuredModelResult(output_text=output,provider=ModelProvider.DEEPSEEK,
             requested_model="controlled-pg-edit",effective_model="controlled-pg-edit",
             request_id=f"pg-edit-{len(calls)}",usage=ModelUsage(unknown=True),timing=ModelTiming(),retry_count=0)

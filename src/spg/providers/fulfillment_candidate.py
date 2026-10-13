@@ -121,7 +121,8 @@ class _FulfillmentCompactCandidate(BaseModel):
 
 _CANDIDATE_CONSTRUCTION_CONTRACT = "owner-local-wire-candidate-edits-v1"
 _SEMANTIC_EDIT_CONTRACT = "owner-local-semantic-candidate-edits-v2"
-_CANDIDATE_CONSTRUCTION_CONTRACTS = {_CANDIDATE_CONSTRUCTION_CONTRACT, _SEMANTIC_EDIT_CONTRACT}
+_ROLE_REFERENCE_CONTRACT = "owner-local-role-reference-candidates-v3"
+_CANDIDATE_CONSTRUCTION_CONTRACTS = {_CANDIDATE_CONSTRUCTION_CONTRACT, _SEMANTIC_EDIT_CONTRACT, _ROLE_REFERENCE_CONTRACT}
 
 
 class _FulfillmentSemanticRoute(BaseModel):
@@ -139,6 +140,71 @@ class _FulfillmentSemanticRoute(BaseModel):
 class _FulfillmentSemanticProposal(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     routes: tuple[_FulfillmentSemanticRoute, ...] = Field(min_length=1, max_length=1024)
+
+
+class _FulfillmentRoleRoute(BaseModel):
+    """Semantic role choices using actual Owner references, never new facts."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    source_ref: str = Field(min_length=1)
+    capability: str = Field(min_length=1)
+    component_quote: str | None = Field(min_length=1, max_length=65536)
+    current_fact_dependencies: tuple[str, ...]
+    target_paths: tuple[str, ...]
+    provenance_support_refs: tuple[str, ...]
+    rationale: str = Field(min_length=1,max_length=1000)
+
+
+class _FulfillmentRoleProposal(BaseModel):
+    model_config = ConfigDict(extra="forbid",frozen=True)
+    routes: tuple[_FulfillmentRoleRoute, ...] = Field(min_length=1,max_length=1024)
+
+
+class _FulfillmentRoleReplacement(BaseModel):
+    model_config = ConfigDict(extra="forbid",frozen=True)
+    index: StrictInt = Field(ge=0)
+    route: _FulfillmentRoleRoute
+
+
+class _FulfillmentRoleEdits(BaseModel):
+    model_config = ConfigDict(extra="forbid",frozen=True)
+    basis: str = Field(pattern=r"^[0-9a-f]{64}$")
+    replace: tuple[_FulfillmentRoleReplacement, ...] = Field(max_length=64)
+    remove: tuple[StrictInt, ...] = Field(max_length=64)
+    append: tuple[_FulfillmentRoleRoute, ...] = Field(max_length=64)
+
+
+def _role_proposal_semantic_value(value,inventory,capabilities):
+    """Resolve explicit existing references only; never choose a semantic role."""
+    proposal=_FulfillmentRoleProposal.model_validate(value)
+    sources={s['source_ref']:i for i,s in enumerate(inventory['sources'])}
+    consumers={c['capability']:i for i,c in enumerate(capabilities)}
+    paths={p:i for i,p in enumerate(inventory['exact_target_paths'])}
+    routes=[];failures=[]
+    for index,r in enumerate(proposal.routes):
+        def resolve(field,values,table,*,fact_only=False):
+            result=[]
+            for value in values:
+                if value not in table:
+                    failures.append({'code':'OBLIGATION_FORMATION_ROLE_REFERENCE_UNKNOWN','route':index,
+                        'field':field,'reference_sha256':sha256(value.encode()).hexdigest()})
+                elif fact_only and inventory['sources'][table[value]]['kind']!='FACT':
+                    failures.append({'code':'OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID','route':index,
+                        'field':field,'referenced_source':table[value],
+                        'actual_kind':inventory['sources'][table[value]]['kind'],'expected_kind':'FACT'})
+                else:result.append(table[value])
+            return result
+        primary=resolve('source_ref',[r.source_ref],sources)
+        capability=resolve('capability',[r.capability],consumers)
+        facts=resolve('current_fact_dependencies',r.current_fact_dependencies,sources,fact_only=True)
+        targets=resolve('target_paths',r.target_paths,paths)
+        support=resolve('provenance_support_refs',r.provenance_support_refs,sources)
+        if primary and capability:
+            routes.append({'s':primary[0],'c':capability[0],'q':r.component_quote,
+                'f':facts,'t':targets,'u':support,'r':r.rationale})
+    if failures:
+        raise _FulfillmentWireValidationError(failures[0]['code'],{'violations':failures[:64],
+            'additional_violation_count':max(0,len(failures)-64)})
+    return {'routes':routes}
 
 
 def _construct_semantic_proposal(value, inventory, wire_identity):
@@ -253,6 +319,12 @@ def candidate_construction_preconditions(preconditions, inventory, feedback, *,
                             "d":binding["wire_table_fingerprint"],
                             **_FulfillmentSemanticProposal.model_validate(original).model_dump(mode="json")}
                         semantic_basis = True
+                    elif construction_contract == _ROLE_REFERENCE_CONTRACT:
+                        role_basis = all('source_ref' in r for r in original['routes'])
+                        model = _FulfillmentRoleProposal if role_basis else _FulfillmentSemanticProposal
+                        original = {"v":1,"h":binding["wire_request_fingerprint"],
+                            "d":binding["wire_table_fingerprint"],**model.model_validate(original).model_dump(mode="json")}
+                        semantic_basis = True
                     else:
                         original, _ = _construct_semantic_proposal(original, inventory, binding)
                 if (set(original) == {"v", "h", "d", "routes"} and type(original["v"]) is int
@@ -267,7 +339,8 @@ def candidate_construction_preconditions(preconditions, inventory, feedback, *,
                         "inventory_fingerprint": inventory["inventory_fingerprint"],
                         "parent_binding": binding}
                     if semantic_basis:
-                        basis["representation"] = "UNLOCATED_SEMANTIC_PROPOSAL"
+                        basis["representation"] = ("UNADMITTED_ROLE_REFERENCE_PROPOSAL" if
+                            construction_contract == _ROLE_REFERENCE_CONTRACT and role_basis else "UNLOCATED_SEMANTIC_PROPOSAL")
             except (ValueError, TypeError, RecursionError):
                 pass
     action = "CONTINUE" if not payload else "REPAIR" if basis is not None else "STOP"
@@ -313,17 +386,20 @@ def candidate_construction_preconditions(preconditions, inventory, feedback, *,
         "candidate_construction_state": state}
 
 
-def _construct_local_candidate(body, preconditions, *, inventory=None):
+def _construct_local_candidate(body, preconditions, *, inventory=None, wire_identity=None):
     """Apply only explicit model edits to the bound old proposal, never admit."""
     state = preconditions.get("candidate_construction_state") or {}
     basis = state.get("repair_basis")
     if basis is None:
         return body, None
     semantic_basis = basis.get("representation") == "UNLOCATED_SEMANTIC_PROPOSAL"
-    if semantic_basis and preconditions.get("candidate_construction_contract") != _SEMANTIC_EDIT_CONTRACT:
+    role_basis = basis.get("representation") == "UNADMITTED_ROLE_REFERENCE_PROPOSAL"
+    if semantic_basis and preconditions.get("candidate_construction_contract") not in {_SEMANTIC_EDIT_CONTRACT,_ROLE_REFERENCE_CONTRACT}:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
+    if role_basis and preconditions.get("candidate_construction_contract") != _ROLE_REFERENCE_CONTRACT:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
     try:
-        model = _FulfillmentSemanticEdits if semantic_basis else _FulfillmentCandidateEdits
+        model = _FulfillmentRoleEdits if role_basis else _FulfillmentSemanticEdits if semantic_basis else _FulfillmentCandidateEdits
         proposal = model.model_validate(json.loads(body, object_pairs_hook=_wire_json_object))
     except ValueError as error:
         raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID") from error
@@ -346,7 +422,13 @@ def _construct_local_candidate(body, preconditions, *, inventory=None):
         raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID")
     if canonical_fingerprint(routes) == canonical_fingerprint(original["routes"]) and not review_only:
         raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_NO_PROGRESS")
-    wire = {"v": 1, "h": proposal.h, "d": proposal.d, "routes": routes}
+    if role_basis:
+        if inventory is None or wire_identity is None:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
+        value = _role_proposal_semantic_value({'routes':routes},inventory,wire_identity['tables']['capabilities'])
+        wire, _ = _construct_semantic_proposal(value,inventory,wire_identity)
+    else:
+        wire = {"v": 1, "h": proposal.h, "d": proposal.d, "routes": routes}
     if semantic_basis:
         if inventory is None:
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
@@ -406,6 +488,75 @@ def _project_construction_route_contract(schema, definition, inventory, capabili
         route[field]["description"] = description
 
 
+def _role_operand_schema(value,inventory,capabilities):
+    """Project the SAME existing prerequisites into semantic role field names."""
+    mapping={'s':'source_ref','c':'capability','q':'component_quote','f':'current_fact_dependencies',
+        't':'target_paths','u':'provenance_support_refs','r':'rationale'}
+    domains={'s':[s['source_ref'] for s in inventory['sources']],
+        'c':[c['capability'] for c in capabilities],
+        'f':[s['source_ref'] for s in inventory['sources']],
+        'u':[s['source_ref'] for s in inventory['sources']],
+        't':list(inventory['exact_target_paths'])}
+    def walk(part):
+        if isinstance(part,list):return [walk(p) for p in part]
+        if not isinstance(part,dict):return part
+        result={k:walk(v) for k,v in part.items() if k not in {'properties','required'}}
+        if part.get('$ref')=='#/$defs/_FulfillmentSemanticRoute':
+            result['$ref']='#/$defs/_FulfillmentRoleRoute'
+        if 'properties' in part:
+            props={}
+            for field,rule in part['properties'].items():
+                if field in {'a','z'}:continue
+                converted=walk(rule)
+                def refs(node):
+                    if isinstance(node,list):return [refs(p) for p in node]
+                    if not isinstance(node,dict):return node
+                    new={k:refs(v) for k,v in node.items()}
+                    if 'enum' in node:
+                        new['enum']=[domains[field][i] for i in node['enum']]
+                    if new.get('type')=='integer':new['type']='string'
+                    return new
+                if field in domains:converted=refs(converted)
+                props[mapping.get(field,field)]=converted
+            result['properties']=props
+        if 'required' in part:
+            result['required']=[mapping.get(k,k) for k in part['required'] if k not in {'a','z'}]
+        return result
+    return walk(value)
+
+
+def _role_generation_schema(inventory,capabilities,owner_preconditions):
+    from spg.providers.semantic_wire import _provider_strict_output_schema
+    basis=(owner_preconditions.get('candidate_construction_state') or {}).get('repair_basis')
+    schema=_provider_strict_output_schema((_FulfillmentRoleEdits if basis else _FulfillmentRoleProposal).model_json_schema())
+    props=schema['$defs']['_FulfillmentRoleRoute']['properties']
+    refs=[s['source_ref'] for s in inventory['sources']]
+    props['source_ref']['enum']=refs
+    props['capability']['enum']=[c['capability'] for c in capabilities]
+    for name,domain in (('current_fact_dependencies',[s['source_ref'] for s in inventory['sources'] if s['kind']=='FACT']),
+            ('provenance_support_refs',refs),('target_paths',inventory['exact_target_paths'])):
+        if domain:props[name]['items']['enum']=list(domain)
+        else:props[name]['maxItems']=0
+    props['current_fact_dependencies']['description']='Proposed current Fact proof dependencies, not original provenance or a claim of already completed proof. Only supplied FACT references can be used; their actual fulfillment must later be proved by their existing Owners. Empty when the method has no declared dependency.'
+    props['provenance_support_refs']['description']='Original source correspondence for the chosen method. These refs provide provenance, not completed proofs or the referenced source own contribution.'
+    props['component_quote']['description']='Null selects the entire exact primary source. Otherwise an exact uniquely occurring original contiguous component quote, preserving its qualifiers. Owner derives [start,end); does not invent or expand quotes.'
+    props['rationale']['description']='Source-to-consumer semantic method justification, not performed evidence or private reasoning.'
+    operand={'$ref':'#/$defs/_FulfillmentRoleRoute'}
+    if owner_preconditions.get('semantic_selection_input_contract')==_PRIMARY_MEANING_INPUT_CONTRACT:
+        choices=_formation_binding_choices(inventory,capabilities,owner_preconditions)
+        operand=_role_operand_schema(_qualified_operand_generation_schema(inventory,capabilities,choices,
+            enforce_owner_prerequisites=True,route_definition='_FulfillmentSemanticRoute'),inventory,capabilities)
+    if basis:
+        schema['properties']['basis']['enum']=[basis['raw_sha256']]
+        schema['$defs']['_FulfillmentRoleReplacement']['properties']['route']=deepcopy(operand)
+        schema['properties']['append']['items']=deepcopy(operand)
+    else:
+        schema['properties']['routes']['items']=operand
+        schema['properties']['routes']['allOf']=[{'contains':{'type':'object','properties':{
+            'source_ref':{'enum':[ref]}},'required':['source_ref']}} for ref in refs]
+    return schema
+
+
 def _formation_output_schema(inventory, capabilities, *, owner_preconditions=None, wire_metadata=None):
     """A strict subset of existing wire v1 over this request's known identities.
 
@@ -414,6 +565,10 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
     observed. The existing decoder remains authoritative if a Provider ignores
     these generation constraints.
     """
+    basis=((owner_preconditions or {}).get('candidate_construction_state') or {}).get('repair_basis')
+    if (owner_preconditions or {}).get('candidate_construction_contract')==_ROLE_REFERENCE_CONTRACT and (
+            not basis or basis.get('representation')=='UNADMITTED_ROLE_REFERENCE_PROPOSAL'):
+        return _role_generation_schema(inventory,capabilities,owner_preconditions)
     if (owner_preconditions or {}).get("candidate_construction_state", {}).get("repair_basis"):
         from spg.providers.semantic_wire import _provider_strict_output_schema
         semantic_basis = owner_preconditions["candidate_construction_state"]["repair_basis"].get(
@@ -2088,13 +2243,13 @@ def _fulfillment_wire_value(output, owner_preconditions=None, *, construct=True,
         "disposition": "DERIVED_REPRESENTATION_ONLY; ALL_VALIDATION_AND_AUTHORITY_GATES_REQUIRED"}
     if construct and (owner_preconditions or {}).get("candidate_construction_contract") in _CANDIDATE_CONSTRUCTION_CONTRACTS:
         try:
-            body, construction = _construct_local_candidate(body, owner_preconditions, inventory=inventory)
+            body, construction = _construct_local_candidate(body, owner_preconditions, inventory=inventory,wire_identity=wire_identity)
         except ValueError as error:
             code = re.search(r"OBLIGATION_[A-Z0-9_]+", str(error))
             construction = {"rejected": True, "code": code.group() if code else
                 "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID"}
             if isinstance(error, _FulfillmentWireValidationError) and owner_preconditions.get(
-                    "candidate_construction_contract") == _SEMANTIC_EDIT_CONTRACT:
+                    "candidate_construction_contract") in {_SEMANTIC_EDIT_CONTRACT,_ROLE_REFERENCE_CONTRACT}:
                 construction["diagnostics"] = error.diagnostics
         if construction is not None:
             presentation["candidate_construction"] = construction
@@ -2103,6 +2258,11 @@ def _fulfillment_wire_value(output, owner_preconditions=None, *, construct=True,
                 proposal = json.loads(body, object_pairs_hook=_wire_json_object)
                 if isinstance(proposal, dict) and set(proposal) == {"routes"}:
                     original_body = body
+                    if owner_preconditions.get('candidate_construction_contract')==_ROLE_REFERENCE_CONTRACT:
+                        if all('source_ref' in r for r in proposal['routes']):
+                            proposal=_role_proposal_semantic_value(proposal,inventory,wire_identity['tables']['capabilities'])
+                        else:
+                            proposal=_FulfillmentSemanticProposal.model_validate(proposal).model_dump(mode='json')
                     _wire, body = _construct_semantic_proposal(proposal, inventory, wire_identity)
                     presentation["candidate_construction"] = {
                         "contract": owner_preconditions["candidate_construction_contract"], "representation": "SEMANTIC_QUOTE_PROPOSAL",
@@ -2115,7 +2275,7 @@ def _fulfillment_wire_value(output, owner_preconditions=None, *, construct=True,
                 presentation["candidate_construction"] = {"rejected": True,
                     "code": code.group() if code else "OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID"}
                 if isinstance(error, _FulfillmentWireValidationError) and owner_preconditions.get(
-                        "candidate_construction_contract") == _SEMANTIC_EDIT_CONTRACT:
+                        "candidate_construction_contract") in {_SEMANTIC_EDIT_CONTRACT,_ROLE_REFERENCE_CONTRACT}:
                     presentation["candidate_construction"]["diagnostics"] = error.diagnostics
     return body, presentation
 
@@ -2301,7 +2461,7 @@ class ModelFulfillmentCandidateProvider:
                 max_output_tokens=settings.collaboration_provider_max_output_tokens)
             return WattModelRuntime(registry, PurposeProfileRouter({ModelPurpose.STEERING_SEMANTIC: profile}))
         return cls(runtime_factory, candidate_construction=True,
-            candidate_construction_contract=_SEMANTIC_EDIT_CONTRACT)
+            candidate_construction_contract=_ROLE_REFERENCE_CONTRACT)
 
     def form_wire_metadata(self, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
         context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
@@ -2571,6 +2731,15 @@ class ModelFulfillmentCandidateProvider:
                     "Use UNRESOLVED for meaning/method/source correspondence that cannot be legally established. "
                     "The complete plan must pass exact validation and independent semantic review. No new "
                     "Fact, performed witness, effect permit or Human authorization is created here.")
+            basis=((owner_preconditions or {}).get('candidate_construction_state') or {}).get('repair_basis')
+            if (owner_preconditions or {}).get('candidate_construction_contract')==_ROLE_REFERENCE_CONTRACT and (
+                    not basis or basis.get('representation')=='UNADMITTED_ROLE_REFERENCE_PROPOSAL'):
+                formation_instructions=formation_instructions.replace('s/c/f/t/u',
+                    'source_ref/capability/current_fact_dependencies/target_paths/provenance_support_refs').replace(
+                    'q=null','component_quote=null').replace('Keep the current h/d and exact parent basis.',
+                    'Keep the exact parent basis; version and current request/table identity belong to the Owner.').replace(
+                    "with this request's exact header.","with the exact parent basis; current request identity is supplied by the Owner.").replace(
+                    'from its exact existing index domains','from the exact original source references, capability names and governed paths')
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
                 instructions=formation_instructions, input_text=formation_input, output_schema=output_schema)
             self.last_observation = {"generation_schema_fingerprint": canonical_fingerprint(output_schema),

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="6.436" timestamp="2026-10-13T09:52:04.609388+00:00" hostname="1bfcb2ca2d22"><testcase classname="tests.test_ai_native_formation_construction" name="test_named_protocol_still_consumes_valid_wire_and_compact_semantic_variants" time="0.037"><failure message="spg.providers.fulfillment_candidate._FulfillmentWireValidationError: OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID">src/spg/providers/fulfillment_candidate.py:2319: in _decode_fulfillment_candidate_wire
+    wire = _FulfillmentCompactCandidate.model_validate(output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   pydantic_core._pydantic_core.ValidationError: 26 validation errors for _FulfillmentCompactCandidate
+E   v
+E     Field required [type=missing, input_value={'routes': [{'s': 0, 'c':...mantic qualification'}]}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   h
+E     Field required [type=missing, input_value={'routes': [{'s': 0, 'c':...mantic qualification'}]}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   d
+E     Field required [type=missing, input_value={'routes': [{'s': 0, 'c':...mantic qualification'}]}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.0.a
+E     Field required [type=missing, input_value={'s': 0, 'c': 0, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.0.z
+E     Field required [type=missing, input_value={'s': 0, 'c': 0, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.1.a
+E     Field required [type=missing, input_value={'s': 1, 'c': 1, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.1.z
+E     Field required [type=missing, input_value={'s': 1, 'c': 1, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.2.a
+E     Field required [type=missing, input_value={'s': 2, 'c': 2, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.2.z
+E     Field required [type=missing, input_value={'s': 2, 'c': 2, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.3.a
+E     Field required [type=missing, input_value={'s': 3, 'c': 4, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.3.z
+E     Field required [type=missing, input_value={'s': 3, 'c': 4, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.4.a
+E     Field required [type=missing, input_value={'s': 3, 'c': 5, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.4.z
+E     Field required [type=missing, input_value={'s': 3, 'c': 5, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.5.a
+E     Field required [type=missing, input_value={'s': 4, 'c': 7, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.5.z
+E     Field required [type=missing, input_value={'s': 4, 'c': 7, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.6.a
+E     Field required [type=missing, input_value={'s': 5, 'c': 10, 'q': No...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.6.z
+E     Field required [type=missing, input_value={'s': 5, 'c': 10, 'q': No...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.7.a
+E     Field required [type=missing, input_value={'s': 6, 'c': 4, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.7.z
+E     Field required [type=missing, input_value={'s': 6, 'c': 4, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.8.a
+E     Field required [type=missing, input_value={'s': 6, 'c': 5, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.8.z
+E     Field required [type=missing, input_value={'s': 6, 'c': 5, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.9.a
+E     Field required [type=missing, input_value={'s': 7, 'c': 7, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.9.z
+E     Field required [type=missing, input_value={'s': 7, 'c': 7, 'q': Non...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.10.a
+E     Field required [type=missing, input_value={'s': 8, 'c': 10, 'q': No...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes.10.z
+E     Field required [type=missing, input_value={'s': 8, 'c': 10, 'q': No...semantic qualification'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/missing
+E   routes
+E     Tuple should have at least 1 item after validation, not 0 [type=too_short, input_value=[{'s': 0, 'c': 0, 'q': No...emantic qualification'}], input_type=list]
+E       For further information visit https://errors.pydantic.dev/2.13/v/too_short
+
+The above exception was the direct cause of the following exception:
+tests/test_ai_native_formation_construction.py:425: in test_named_protocol_still_consumes_valid_wire_and_compact_semantic_variants
+    decoded.append(_decode_fulfillment_candidate_wire(json.dumps(value),inventory,caps,
+src/spg/providers/fulfillment_candidate.py:2365: in _decode_fulfillment_candidate_wire
+    raise _FulfillmentWireValidationError(code, {**diagnostic_basis,
+E   spg.providers.fulfillment_candidate._FulfillmentWireValidationError: OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID</failure></testcase><testcase classname="tests.test_ai_native_formation_construction" name="test_role_mapping_does_not_promote_clauses_to_facts_or_create_missing_references" time="0.002" /></testsuite></testsuites>

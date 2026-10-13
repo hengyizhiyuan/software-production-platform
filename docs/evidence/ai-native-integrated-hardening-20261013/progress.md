@@ -141,3 +141,15 @@ v2 是模块内部临时候选与恢复协议，不新增 Engineering Fact/Owner
 第四次真实 Formation：ordinary34/41 均两候选、0 Review，仍 FAIL。可定位缺陷不再使第二候选提前丢失，但当前/未来贡献、来源对应与新引文偏差仍未收敛。准确错误集合见 `nonholdout-model-f423bd6a-4.json`，不根据标签冒称 Validator Bug。
 
 代码审查发现新局部协议覆盖了 `_formation_repair_instructions` 的原反馈读取方向，丢失原“完整拒绝集合与 Owner 观察”消费接线。修复为复用该机制并声明局部编辑输出形态，避免要求模型重生完整计划；没有追加业务词汇禁令、Owner 能力、权限或重试预算。`local-edit-feedback-1.xml` 定向 86/86 PASS。下一镜像只做受影响资格；不能把反馈说明自身视为实际模型收敛成功。
+
+## 语义角色候选表示（模块内部）
+
+第五轮仍未进入 Review。原始方案普通34缺覆盖；普通41两次均把非 Fact 放入 f。已核对第四轮的 mixed acceptance Fact：它同时要求确切标题/段落验证与 reviewable Candidate，仅 CANDIDATE_SEAL 确实漏当前贡献。其他提案把当前义务归背景、使用 DENY_PREVIEW 及错误支撑，拒绝有实际来源依据；未证明 Validator 错拒。
+
+本模块内增加语义角色提案 v3：source_ref、capability、component_quote、current_fact_dependencies、target_paths、provenance_support_refs、rationale。均使用原始 Source refs、现有能力与准予路径；Owner 精确映射到同一个既有 ordinal space 和正式 Wire v1，不另建 FACT 索引或语义 Owner，不选消费者、不改原 Fact/引文/权限/门禁。
+
+Header/版本由实际请求 Owner 提供，模型不能新增声明。局部 edits 严格绑定原始 response SHA 和持久反馈/库存/Attempt，保留未改原提案。合法旧完整 Wire 和紧凑语义表示继续被消费；修复输出按实际 basis 选择原形态，不强制统一外部模型形状。未知引用/混合字段/非 Fact dependency/不存在的引文不变成 Fact、证明或 PASS。
+
+输出字段变长是明确成本，不以缩短 JSON 为目标；减少模型对压缩字母/不同角色/精确编码的同时猜测负担。仍原 2 Formation/1 feedback/每候选最多1独立 Review、最多4逻辑调用；不提高模型预算、不改变 Provider。当前 Source/phase/evidence Validator 与 Guardian 不放宽。
+
+`role-reference-focused-2.xml` 169/169 受控通过；PostgreSQL v1/v2/v3 各自中断与持久恢复 `postgresql-role-reference-1.xml` 3/3，通过后仍需真实模型资格。两项新增测试准备错误（fixture 没 IR_CLAUSE、单独构造缺 presentation negotiation）均保留失败收据，随后修正并局部 2/2。不能将历史模型 Candidate 改写后当作成功。

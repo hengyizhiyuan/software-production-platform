@@ -16,7 +16,7 @@ from tests.test_c3_semantic_contract_calibration import review
 from tests.test_c3_source_consumption_proof import fixture_review_proof
 
 
-def local_edit_case(scale="small", outcome="repair", first="source-proof", *, semantic_edits=False):
+def local_edit_case(scale="small", outcome="repair", first="source-proof", *, semantic_edits=False,role_refs=False):
     rev, ir, inventory, plan = controlled_capacity_case(scale)
     snapshots = deepcopy((rev, ir, inventory, plan))
     calls = []
@@ -43,6 +43,14 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof", *, se
             assert "ACTUAL_OWNER_EVIDENCE" in state["understanding"]["unknowns"]
             wire, _ = controlled_wire(inventory, plan,
                 feedback=payload["same_basis_validation_feedback"], owner_preconditions=owner)
+            def role(row):
+                return {'source_ref':inventory['sources'][row['s']]['source_ref'],
+                    'capability':payload['existing_capability_contracts'][row['c']]['capability'],
+                    'component_quote':row['q'],
+                    'current_fact_dependencies':[inventory['sources'][i]['source_ref'] for i in row['f']],
+                    'target_paths':[inventory['exact_target_paths'][i] for i in row['t']],
+                    'provenance_support_refs':[inventory['sources'][i]['source_ref'] for i in row['u']],
+                    'rationale':row['r']}
             if payload["same_basis_validation_feedback"] is None:
                 assert state["convergence"]["action"] == "CONTINUE"
                 future = next(i for i,s in enumerate(inventory["sources"])
@@ -66,7 +74,10 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof", *, se
                 old_wire = deepcopy(wire)
                 proposal = ({"routes":[{k:v for k,v in row.items() if k not in {"a","z"}}
                     for row in wire["routes"]]} if first.startswith("semantic-") else wire)
-                if semantic_edits and first.startswith("semantic-"):
+                if role_refs:
+                    proposal={'routes':[role(row) for row in wire['routes']]}
+                    old_wire['routes']=deepcopy(proposal['routes'])
+                elif semantic_edits and first.startswith("semantic-"):
                     old_wire["routes"] = deepcopy(proposal["routes"])
                 output = json.dumps(proposal, ensure_ascii=False)
             else:
@@ -79,8 +90,11 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof", *, se
                 replacement = deepcopy(wire["routes"][touched])
                 if basis.get("representation") == "UNLOCATED_SEMANTIC_PROPOSAL":
                     replacement = {k:v for k,v in replacement.items() if k not in {"a","z"}}
+                if role_refs:replacement=role(replacement)
                 edit = {"v":1,"h":wire["h"],"d":wire["d"],"basis":basis["raw_sha256"],
                     "replace":[{"index":touched,"route":replacement}],"remove":[],"append":[]}
+                if role_refs:
+                    edit={k:v for k,v in edit.items() if k not in {'v','h','d'}}
                 if outcome == "repeat":
                     edit["replace"][0]["route"] = deepcopy(old_wire["routes"][touched])
                 elif outcome == "basis":
@@ -124,7 +138,8 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof", *, se
 
     provider = ModelFulfillmentCandidateProvider(
         lambda: SimpleNamespace(generate=generate, close=lambda: None), candidate_construction=True,
-        candidate_construction_contract="owner-local-semantic-candidate-edits-v2" if semantic_edits else
+        candidate_construction_contract='owner-local-role-reference-candidates-v3' if role_refs else
+            "owner-local-semantic-candidate-edits-v2" if semantic_edits else
             "owner-local-wire-candidate-edits-v1")
     kwargs = dict(provider=provider, exact_target_paths=inventory["exact_target_paths"])
     bindings = app.form_fulfillment_projection(rev, ir, **kwargs)
@@ -361,3 +376,56 @@ def test_old_construction_receipt_replays_under_new_provider_without_protocol_up
     replay=app.form_fulfillment_projection(rev,ir,**kwargs)
     assert all(b.state!='UNRESOLVED' for b in replay) and len(calls)==3
     assert replay[0].formation_receipt['candidate_attempts']==bindings[0].formation_receipt['candidate_attempts']
+
+
+@pytest.mark.parametrize('scale',('small','medium','complex'))
+@pytest.mark.parametrize('first',('semantic-source-proof','semantic-quote'))
+def test_role_references_share_original_identity_space_and_local_repair(scale,first):
+    bindings,provider,calls,args,_touched,_original=local_edit_case(scale,first=first,role_refs=True)
+    assert all(b.state!='UNRESOLVED' for b in bindings) and len(calls)==3
+    first_raw=json.loads(next(r for r in provider._fulfillment_receipts
+        if r['stage']=='MODEL_RESPONSE_OBSERVED' and r['attempt']==1)['candidate_output'])
+    assert all(set(r)=={'source_ref','capability','component_quote','current_fact_dependencies',
+        'target_paths','provenance_support_refs','rationale'} for r in first_raw['routes'])
+    second_raw=json.loads(next(r for r in provider._fulfillment_receipts
+        if r['stage']=='MODEL_RESPONSE_OBSERVED' and r['attempt']==2)['candidate_output'])
+    assert set(second_raw)=={'basis','replace','remove','append'}
+    assert bindings[0].formation_receipt['commit_scope'].startswith('DERIVED_PLAN_ONLY')
+    rev,ir,kwargs=args
+    assert all(b.state!='UNRESOLVED' for b in app.form_fulfillment_projection(rev,ir,**kwargs))
+    assert len(calls)==3
+    from jsonschema import Draft202012Validator
+    for request,_input in calls[:2]:Draft202012Validator.check_schema(request['output_schema'])
+
+
+def test_role_mapping_does_not_promote_clauses_to_facts_or_create_missing_references():
+    from spg.providers.fulfillment_candidate import _role_proposal_semantic_value
+    _rev,_ir,inventory,_plan=controlled_capacity_case()
+    caps=app.fulfillment_capability_contracts()
+    clause=next(s['source_ref'] for s in inventory['sources'] if s['kind'] in {'IR_CLAUSE','IR_CONSTRAINT'})
+    proposal={'routes':[{'source_ref':clause,'capability':'ARTIFACT_CONTENT','component_quote':None,
+        'current_fact_dependencies':[clause],'target_paths':[],'provenance_support_refs':[],
+        'rationale':'Unadmitted explicit proposal'}]}
+    with pytest.raises(ValueError,match='FACT_KIND_INVALID'):_role_proposal_semantic_value(proposal,inventory,caps)
+    proposal['routes'][0]['current_fact_dependencies']=[]
+    proposal['routes'][0]['source_ref']='not-an-original-reference'
+    with pytest.raises(ValueError,match='ROLE_REFERENCE_UNKNOWN'):_role_proposal_semantic_value(proposal,inventory,caps)
+
+
+def test_named_protocol_still_consumes_valid_wire_and_compact_semantic_variants():
+    from spg.providers.fulfillment_candidate import candidate_construction_preconditions,_decode_fulfillment_candidate_wire
+    _rev,_ir,inventory,plan=controlled_capacity_case()
+    caps=app.fulfillment_capability_contracts()
+    owner=candidate_construction_preconditions({'wire_presentation_contract':'existing-lossless-json-frame-v1'},inventory,None,
+        construction_contract='owner-local-role-reference-candidates-v3')
+    full,metadata=controlled_wire(inventory,plan,owner_preconditions=owner)
+    compact={'routes':[{k:v for k,v in r.items() if k not in {'a','z'}} for r in full['routes']]}
+    decoded=[]
+    for value in (full,compact):
+        decoded.append(_decode_fulfillment_candidate_wire(json.dumps(value),inventory,caps,
+            owner_preconditions=owner,wire_metadata=metadata))
+    assert decoded[0]==decoded[1]
+    mixed=deepcopy(compact)
+    mixed['routes'][0]['source_ref']=inventory['sources'][0]['source_ref']
+    with pytest.raises(ValueError):
+        _decode_fulfillment_candidate_wire(json.dumps(mixed),inventory,caps,owner_preconditions=owner)

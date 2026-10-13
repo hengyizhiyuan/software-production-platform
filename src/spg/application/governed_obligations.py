@@ -3623,7 +3623,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
         first_request = next((r for r in rows if r["stage"] == "MODEL_REQUEST_PENDING"), None)
         if ((first_request or {}).get("owner_source_preconditions") or {}).get(
                 "candidate_construction_contract") in {
-                    "owner-local-wire-candidate-edits-v1", "owner-local-semantic-candidate-edits-v2"}:
+                    "owner-local-wire-candidate-edits-v1", "owner-local-semantic-candidate-edits-v2", "owner-local-role-reference-candidates-v3"}:
             from spg.domain.refinement_contract import OwnerConvergenceDecision
             state = first_request["owner_source_preconditions"]["candidate_construction_state"]
             receipt["understanding_state"] = {**state["understanding"],
@@ -3781,7 +3781,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                         "candidate_construction_contract"))
                 construction_enabled = (getattr(provider, "supports_candidate_construction", False)
                     if initial_request is None else construction_contract in {
-                        "owner-local-wire-candidate-edits-v1", "owner-local-semantic-candidate-edits-v2"})
+                        "owner-local-wire-candidate-edits-v1", "owner-local-semantic-candidate-edits-v2", "owner-local-role-reference-candidates-v3"})
                 if construction_enabled and precondition_arguments:
                     from spg.providers.fulfillment_candidate import candidate_construction_preconditions
                     original_preconditions = {key: value for key, value in
