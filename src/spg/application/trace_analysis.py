@@ -357,7 +357,8 @@ class TraceAnalysisService:
         work = self.authorize(owner, work_id)
         parent = self._pointer(work_id, uuid4()).parent
         paths = sorted(parent.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
-        return {"items": [self.read(owner, work_id, UUID(path.stem)) for path in paths[:20]],
+        return {"items": [{key: row.get(key) for key in ("request_id", "work_id", "status", "started_at", "verification")}
+                          for path in paths[:20] for row in [self.read(owner, work_id, UUID(path.stem))]],
                 "truncated": len(paths) > 20, "work_state": work.get("state"),
                 "can_analyze": can_analyze_work(work)}
 

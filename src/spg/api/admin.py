@@ -17,6 +17,7 @@ from spg.evaluation.work_diagnostic_export import WorkDiagnosticExportService
 from spg.evaluation.admin_projection import cockpit_projection, outcome_projection
 from spg.application.trace_analysis import TraceAnalysisService
 from spg.domain.trace_analysis import AnalysisTrigger
+from spg.application.trace_analysis_presentation import analysis_summary, concise_analysis_html
 
 
 def install_admin(api, database, settings, runtime=None):
@@ -120,9 +121,12 @@ def install_admin(api, database, settings, runtime=None):
                 'X-Evidence-SHA256':sha256(content).hexdigest()})
 
     @router.post('/works/{work_id}/analyses')
-    async def analyze_work_trace(work_id: UUID, request: AnalysisTrigger, http_request: Request):
+    async def analyze_work_trace(work_id: UUID, request: AnalysisTrigger, http_request: Request, view: str = "full"):
+        if view not in {"full", "summary"}:
+            raise QualityError("TRACE_VIEW_NOT_SUPPORTED")
         owner = getattr(http_request.state, 'actor_id', ACTOR_ID)
-        return await api.state.trace_analysis.analyze(owner, work_id, request)
+        record = await api.state.trace_analysis.analyze(owner, work_id, request)
+        return analysis_summary(record) if view == "summary" else record
 
     @router.get('/works/{work_id}/analyses')
     def work_trace_analyses(work_id: UUID, http_request: Request):
@@ -130,9 +134,23 @@ def install_admin(api, database, settings, runtime=None):
 
     @router.get('/works/{work_id}/analyses/{request_id}')
     def work_trace_analysis(work_id: UUID, request_id: UUID, http_request: Request,
-                            detail: bool = False):
-        return api.state.trace_analysis.read(getattr(http_request.state, 'actor_id', ACTOR_ID),
-                                             work_id, request_id, detail=detail)
+                            detail: bool = False, view: str = "full"):
+        if view not in {"full", "summary"}:
+            raise QualityError("TRACE_VIEW_NOT_SUPPORTED")
+        record = api.state.trace_analysis.read(getattr(http_request.state, 'actor_id', ACTOR_ID),
+                                             work_id, request_id, detail=detail and view == "full")
+        return analysis_summary(record) if view == "summary" else record
+
+    @router.get('/works/{work_id}/analyses/{request_id}/report')
+    def work_trace_analysis_report(work_id: UUID, request_id: UUID, http_request: Request):
+        record = api.state.trace_analysis.read(getattr(http_request.state, 'actor_id', ACTOR_ID),
+                                              work_id, request_id)
+        content = concise_analysis_html(record)
+        return Response(content=content, media_type='text/html; charset=utf-8', headers={
+            'Content-Disposition': f'attachment; filename="watt-work-{work_id}-analysis-{request_id}.html"',
+            'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff',
+            'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'",
+            'X-Evidence-SHA256': sha256(content).hexdigest()})
 
     @router.get('/case-runs/{case_run_id}/trace')
     def case_trace(case_run_id: UUID, view: str = "full"):

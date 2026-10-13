@@ -1639,3 +1639,44 @@ def test_native_scoped_report_can_self_review_without_retranscribing_source_ids(
     assert contract['report_scope']['maximum_detailed_findings']==1
     assert contract['report_schema']['properties']['findings']['maxItems']==1
     assert all(i['evidence_ids'] for i in result['native_self_review']['items'])
+
+
+def test_candidate_feedback_reports_citation_and_missing_scope_defects_together():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());r=report(c)
+    c.seed()
+    gap=c.check('OWNER_RECORD',group='execution_steps',field='/result_payload/raw_response')
+    r['current_state']['citations'][0]['field']='/not_captured'
+    present=c.check('OWNER_RECORD',group='work',field='/state')
+    r['findings'][0]['scope_check_ids']=[present['check_id']]
+    r['missing_evidence']=[dict(statement='Scoped raw field missing',family='OWNER_RECORD',check_id=gap['check_id'],availability=gap['availability'])]
+    tools=AnalysisTools(c,{})
+    failure=invoke_analysis(tools,'analysis.submit',{'report':r})
+    assert failure.condition.value=='FAILED' and tools.accepted_report is None
+    issues=failure.output['issues']
+    assert any('ORIGINAL_FIELD_REFERENCE_NOT_CAPTURED' in i['reason'] for i in issues)
+    gap_issue=next(i for i in issues if 'MISSING_EVIDENCE_REQUIRES_SCOPED_FINDING' in i['reason'])
+    assert gap_issue['location']==['missing_evidence',0,'check_id']
+    assert gap_issue['check_observation']['availability']==gap['availability']
+    present_issue=next(i for i in issues if 'PRESENT_CHECK_CANNOT' in i['reason'])
+    assert present_issue['location']==['findings',0,'scope_check_ids',0]
+    assert present_issue['check_observation']['availability']=='PRESENT'
+    assert tools.drafts[failure.output['draft_id']]==r
+
+
+def test_summary_and_short_download_keep_unknown_and_exclude_large_unverified_draft(tmp_path):
+    from spg.application.trace_analysis_presentation import analysis_summary, concise_analysis_html
+    r={'work_id':str(uuid4()),'request_id':str(uuid4()),'status':'FAILED','report':None,
+       'verification':'REPORT_NOT_VERIFIED','kernel_result':{'summary':'<script>unsafe()</script>','terminal_outcome':'UNABLE_TO_COMPLETE','inference_submissions':9},
+       'verification_receipts':[{'verification':'FAIL','repair_candidate':{'analysis':'x'*11000000},'issues':[{'type':'CitationRejected','reason':'original field missing','location':['findings',0]}]}],
+       'event_digests':['private-digest'],'execution_history':['private-log']}
+    summary=analysis_summary(r)
+    assert len(json.dumps(summary))<5000
+    assert 'repair_candidate' not in json.dumps(summary) and 'private-log' not in json.dumps(summary)
+    html=concise_analysis_html(r).decode()
+    assert 'UNKNOWN' in html and 'original field missing' in html and '&lt;script&gt;' in html
+    assert '<script>' not in html and len(html.encode())<10000
+    s,snap,model=service(tmp_path);trigger=AnalysisTrigger(request_id=uuid4(),rationale='Investigate')
+    done=asyncio.run(s.analyze('human:owner',uuid4_from(snap),trigger))
+    out=concise_analysis_html(done).decode()
+    assert 'Work is completed' in out and '引用：' in out and '根因假设不等于已证实根因' in out

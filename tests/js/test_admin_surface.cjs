@@ -88,11 +88,11 @@ test('Trace analysis is Human-triggered and history reads never create a Work',a
 });
 
 test('Analysis report escapes model text and preserves failed analysis evidence',async()=>{
- const path='/api/admin/works/ordinary-work/analyses/request-one';
- const a={work_id:'ordinary-work',request_id:'request-one',status:'FAILED',failure:{error_type:'ProviderError',note:'<script>bad()</script>'},report:null};
+ const path='/api/admin/works/ordinary-work/analyses/request-one?view=summary';
+ const a={work_id:'ordinary-work',request_id:'request-one',status:'FAILED',failure:{error_type:'ProviderError'},kernel_result:{summary:'<script>bad()</script>'},report:null};
  const s=surface('/admin',true,null,null,{[path]:a});await s.ready();
  await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
- const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/未形成合格报告/);assert.match(h,/下载报告与执行证据/);
+ const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/未形成合格报告/);assert.match(h,/下载简明报告/);assert.doesNotMatch(h,/执行证据 JSON/);assert.equal((h.match(/role="tab"/g)||[]).length,4);
  assert.match(h,/&lt;script&gt;/);assert.doesNotMatch(h,/<script>bad/);
 });
 
@@ -105,7 +105,7 @@ test('Analysis entry follows backend admission and explains active Work',async()
 });
 
 test('Analysis admission rejection is shown in Chinese rather than a raw code',async()=>{
- const path='/api/admin/works/ordinary-work/analyses';
+ const path='/api/admin/works/ordinary-work/analyses?view=summary';
  const s=surface('/admin',true,null,null,{[path]:{_httpStatus:409,code:'ANALYSIS_WORK_NOT_TERMINAL_OR_BLOCKED'}});await s.ready();
  s.context.crypto={getRandomValues(b){b.fill(23);return b;}};s.context.FormData=class {get(){return 'Inspect current snapshot';}};
  const f=new s.context.HTMLFormElement();f.dataset={traceAnalysisForm:'ordinary-work'};f.hasAttribute=n=>n==='data-trace-analysis-form';f.querySelector=()=>({});
@@ -115,7 +115,7 @@ test('Analysis admission rejection is shown in Chinese rather than a raw code',a
 
 
 test('Analysis submission generates a UUID on the existing HTTP origin and reuses it',async()=>{
- const path='/api/admin/works/ordinary-work/analyses';
+ const path='/api/admin/works/ordinary-work/analyses?view=summary';
  const response={work_id:'ordinary-work',request_id:'req',status:'FAILED',report:null};
  const s=surface('/admin',true,null,null,{[path]:response});await s.ready();
  s.context.crypto={getRandomValues(b){b.fill(23);return b;}};
@@ -129,7 +129,7 @@ test('Analysis submission generates a UUID on the existing HTTP origin and reuse
 });
 
 test('Analysis v2 renders scoped gaps safely and still reads legacy reports',async()=>{
- const path='/api/admin/works/ordinary-work/analyses/request-one';
+ const path='/api/admin/works/ordinary-work/analyses/request-one?view=summary';
  const fact={statement:'Observed',citations:[]};
  const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
   timeline:[],findings:[],immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],deferred_items:[],
@@ -138,15 +138,17 @@ test('Analysis v2 renders scoped gaps safely and still reads legacy reports',asy
  const a={work_id:'ordinary-work',request_id:'request-one',status:'COMPLETED',report};
  const s=surface('/admin',true,null,null,{[path]:a});await s.ready();
  await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'evidence'}})}});
  const h=s.nodes['#admin-content'].innerHTML;
  assert.match(h,/PREVIEW_HTTP.*PRESENT/);assert.match(h,/scope-check/);assert.match(h,/&lt;script&gt;/);assert.doesNotMatch(h,/<script>bad/);
  report.missing_evidence=['legacy limitation'];delete report.evidence_assessments;
  await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'evidence'}})}});
  assert.match(s.nodes['#admin-content'].innerHTML,/legacy limitation/);
 });
 
 test('Analysis v3 shows subject and governed regression scenario with escaping',async()=>{
- const path='/api/admin/works/ordinary-work/analyses/request-v3';
+ const path='/api/admin/works/ordinary-work/analyses/request-v3?view=summary';
  const fact={statement:'Observed',citations:[]};
  const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
   timeline:[],findings:[{finding_id:'incident',classification:'UNKNOWN',epistemic_status:'UNKNOWN',fact,
@@ -156,55 +158,77 @@ test('Analysis v3 shows subject and governed regression scenario with escaping',
  const a={work_id:'ordinary-work',request_id:'request-v3',status:'COMPLETED',report};
  const s=surface('/admin',true,null,null,{[path]:a});await s.ready();
  await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v3',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'improvements'}})}});
  const h=s.nodes['#admin-content'].innerHTML;
- assert.match(h,/主体证据 &lt;subject&gt;/);assert.match(h,/回归场景：&lt;script&gt;/);
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'evidence'}})}});assert.match(s.nodes['#admin-content'].innerHTML,/主体证据 &lt;subject&gt;/);assert.match(h,/回归场景：&lt;script&gt;/);
  assert.doesNotMatch(h,/<script>bad/);
 });
 
 test('Analysis v4 displays the event-time boundary and escapes historical values',async()=>{
- const path='/api/admin/works/ordinary-work/analyses/request-v4';
+ const path='/api/admin/works/ordinary-work/analyses/request-v4?view=summary';
  const fact={statement:'Recorded snapshot',citations:[]};
  const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
   timeline:[{...fact,stage:'FAILURE',timestamp:'2026-10-05T10:00:00Z',time_interpretation:'记录创建时间；<unsafe>不证明恢复完成'}],
   findings:[],immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],deferred_items:[],missing_evidence:[]};
  const s=surface('/admin',true,null,null,{[path]:{status:'COMPLETED',report}});await s.ready();
  await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v4',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'process'}})}});
  const h=s.nodes['#admin-content'].innerHTML;
  assert.match(h,/记录创建时间；&lt;unsafe&gt;不证明恢复完成/);assert.doesNotMatch(h,/<unsafe>/);
 });
 
 
 test('Analysis v5 shows recommendation surfaces and preserves legacy rendering',async()=>{
- const path='/api/admin/works/ordinary-work/analyses/request-v5';
+ const path='/api/admin/works/ordinary-work/analyses/request-v5?view=summary';
  const fact={statement:'Recorded snapshot',citations:[]};
  const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
   timeline:[],findings:[],immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],
   deferred_items:[{statement:'Inspect transfer',evidence_family:'<DELIVERY_TRANSFER>',finding_ids:['audit']}],missing_evidence:[]};
  const s=surface('/admin',true,null,null,{[path]:{status:'COMPLETED',report}});await s.ready();
  await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v5',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'improvements'}})}});
  const h=s.nodes['#admin-content'].innerHTML;
  assert.match(h,/证据表面 &lt;DELIVERY_TRANSFER&gt;/);assert.doesNotMatch(h,/<DELIVERY_TRANSFER>/);
  delete report.deferred_items[0].evidence_family;
  await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v5',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'improvements'}})}});
  assert.match(s.nodes['#admin-content'].innerHTML,/Inspect transfer · 依据 audit/);
 });
 
 
 test('Analysis v7 preserves model wording and escapes separate checked boundaries and self-review',async()=>{
- const path='/api/admin/works/ordinary-work/analyses/request-v7';const fact={statement:'Recorded snapshot',citations:[]};
+ const path='/api/admin/works/ordinary-work/analyses/request-v7?view=summary';const fact={statement:'Recorded snapshot',citations:[]};
  const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
   timeline:[{...fact,stage:'EXECUTION',time_interpretation:'自由解释',owner_time_boundary:'<owner-boundary>'}],
   findings:[{finding_id:'f',classification:'UNKNOWN',epistemic_status:'UNKNOWN',fact,analysis:'保留模型原文',repository_citations:[],uncertainty:'自由限定',checked_boundaries:['<checked>'],recommendation:'继续取证',regression_qualification:'预算内恢复或停止'}],
   immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],deferred_items:[],missing_evidence:[],evidence_assessments:[]};
  const s=surface('/admin',true,null,null,{[path]:{status:'COMPLETED',report,native_self_review:{items:[{target_path:'/findings/0',judgment:'QUALIFIED',rationale:'<unsafe-review>'}]}}});await s.ready();
  await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v7',analysisTarget:'ordinary-work'}})}});
- const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/保留模型原文/);assert.match(h,/自由限定/);assert.match(h,/&lt;checked&gt;/);assert.match(h,/&lt;owner-boundary&gt;/);assert.match(h,/&lt;unsafe-review&gt;/);assert.match(h,/不能代替独立人工审查/);assert.doesNotMatch(h,/<unsafe-review>|<checked>|<owner-boundary>/);
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'evidence'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'overview'}})}});assert.match(s.nodes['#admin-content'].innerHTML,/保留模型原文/);assert.match(h,/自由限定/);assert.match(h,/&lt;checked&gt;/);await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'process'}})}});assert.match(s.nodes['#admin-content'].innerHTML,/&lt;owner-boundary&gt;/);assert.match(h,/&lt;unsafe-review&gt;/);assert.match(h,/不能代替独立人工审查/);assert.doesNotMatch(h,/<unsafe-review>|<checked>|<owner-boundary>/);
 });
 
 
 test('Analysis field references display escaped observed values with original field identity',async()=>{
- const path='/api/admin/works/ordinary-work/analyses/request-fields';const fact={statement:'原始字段引用',citations:[{evidence_id:'owner-id',quote:null,field:'/semantic_input/argv',observed_value:'<original-value>'}]};
+ const path='/api/admin/works/ordinary-work/analyses/request-fields?view=summary';const fact={statement:'原始字段引用',citations:[{evidence_id:'owner-id',quote:null,field:'/semantic_input/argv',observed_value:'<original-value>'}]};
  const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,timeline:[],findings:[],immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],deferred_items:[],missing_evidence:[]};
  const s=surface('/admin',true,null,null,{[path]:{status:'COMPLETED',report}});await s.ready();await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-fields',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'process'}})}});
  const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/&lt;original-value&gt;/);assert.match(h,/字段 \/semantic_input\/argv/);assert.doesNotMatch(h,/<original-value>/);
+});
+
+
+test('Analysis tabs switch locally and concise HTML download never requests evidence JSON',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-one?view=summary';
+ const a={work_id:'ordinary-work',request_id:'request-one',status:'FAILED',report:null,kernel_result:{summary:'工具不可用，修订未完成',inference_submissions:9,tool_effects:23},verification_receipts:[{verification:'FAIL',issues:[{location:['findings',0,'scope_check_ids'],reason:'PRESENT check cannot support absence'}]}]};
+ const s=surface('/admin',true,null,null,{[path]:a});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;for(const label of ['失败现象','原因总结','改进方案','UNKNOWN','PRESENT check'])assert.ok(h.includes(label));
+ const n=s.calls.length;await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'evidence'}})}});assert.equal(s.calls.length,n);
+ assert.match(s.nodes['#admin-content'].innerHTML,/推理 9 次/);
+ await s.listeners.keydown({key:'Home',preventDefault(){},target:{closest:q=>q==='[data-analysis-tab]'?{dataset:{analysisTab:'evidence'}}:null}});
+ assert.match(s.nodes['#admin-content'].innerHTML,/id="analysis-tab-overview"[^>]*aria-selected="true"/);
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisDownload:'request-one',analysisTarget:'ordinary-work'}})}});
+ assert.equal(s.calls.at(-1)[0],'/api/admin/works/ordinary-work/analyses/request-one/report');
+ assert.deepEqual(s.downloads,['watt-work-ordinary-work-analysis-request-one.html']);assert.ok(!s.calls.some(([p])=>p.includes('detail=true')));
 });

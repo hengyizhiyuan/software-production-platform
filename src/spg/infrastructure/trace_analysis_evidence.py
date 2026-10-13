@@ -813,8 +813,9 @@ class EvidenceCatalog:
                     errors.append(CitationRejected("CITATION_OWNER_ASSOCIATION_NOT_ESTABLISHED: choose same subject or explicit Owner reference", ["findings", index, "fact", "citations", i], c.evidence_id))
             if finding.scope_check_ids:
                 checks = [self.checks.get(str(cid)) for cid in finding.scope_check_ids]
-                if any(not c or c["availability"] == "PRESENT" for c in checks):
-                    errors.append(CitationRejected("PRESENT_CHECK_CANNOT_SUPPORT_MISSING_FIELD_FINDING; use uncertainty_check_ids for present evidence, or check its precise unavailable field with OWNER_RECORD", ["findings", index, "scope_check_ids"], subject_id))
+                for check_index, check in enumerate(checks):
+                    if not check or check["availability"] == "PRESENT":
+                        errors.append(CitationRejected("PRESENT_CHECK_CANNOT_SUPPORT_MISSING_FIELD_FINDING; use uncertainty_check_ids for present evidence, or check its precise unavailable field with OWNER_RECORD", ["findings", index, "scope_check_ids", check_index], finding.scope_check_ids[check_index]))
             for i, c in enumerate(finding.repository_citations):
                 try:
                     citation(c, ["findings", index, "repository_citations", i], repository=True)
@@ -830,38 +831,51 @@ class EvidenceCatalog:
                     subject = self.records.get(str(findings[fid].subject_evidence_id))
                     if not subject or item.evidence_family.value not in subject["semantics"]["families"]:
                         errors.append(CitationRejected("RECOMMENDATION_FAMILY_REQUIRES_FINDING_SUBJECT_SURFACE; split unrelated topics", [section, index, "finding_ids"], findings[fid].subject_evidence_id))
-        if errors:
-            error = errors[0]
-            error.issues = [{"type": "CitationRejected", "reason": str(item),
-                             "location": item.location, "evidence_id": item.evidence_id,
-                             **({"field_navigation": item.navigation} if item.navigation is not None else {})}
-                            for item in errors[:12]]
-            raise error
+        # Return all independently checkable defects in this candidate together.
+        # A citation failure must not hide a gap/association error until the next
+        # inference; no draft, source value or semantic claim is auto-corrected.
+        def reject(reason, location, evidence_id):
+            errors.append(CitationRejected(reason, location, evidence_id))
         reviewed, reviewed_checks = set(), set()
-        for assessment in report.evidence_assessments:
+        for index, assessment in enumerate(report.evidence_assessments):
             check = self.checks.get(str(assessment.check_id))
             if (not check or check["family"] != assessment.family.value
                     or check["availability"] != assessment.availability
                     or (assessment.family.value != "OWNER_RECORD" and (check["group"] or check["field"]))):
-                raise ValueError("EVIDENCE_ASSESSMENT_MUST_MATCH_SEEDED_FAMILY_LOOKUP")
+                reject("EVIDENCE_ASSESSMENT_MUST_MATCH_SEEDED_FAMILY_LOOKUP",
+                       ["evidence_assessments", index], assessment.check_id)
             if str(assessment.check_id) in reviewed_checks or (assessment.family.value != "OWNER_RECORD" and assessment.family.value in reviewed):
-                raise ValueError("DUPLICATE_EVIDENCE_ASSESSMENT")
+                reject("DUPLICATE_EVIDENCE_ASSESSMENT", ["evidence_assessments", index], assessment.check_id)
             reviewed.add(assessment.family.value)
             reviewed_checks.add(str(assessment.check_id))
         if not {"PREVIEW_HTTP", "DELIVERY_TRANSFER", "EXECUTION_RELATIONSHIP"}.issubset(reviewed):
-            raise ValueError("EVIDENCE_FAMILY_RECONCILIATION_REQUIRED")
-        for gap in report.missing_evidence:
+            reject("EVIDENCE_FAMILY_RECONCILIATION_REQUIRED", ["evidence_assessments"], report.work_id)
+        scoped = {str(cid) for finding in report.findings for cid in finding.scope_check_ids}
+        for index, gap in enumerate(report.missing_evidence):
             check = self.checks.get(str(gap.check_id))
             if (not check or check["family"] != gap.family.value or check["availability"] != gap.availability):
-                raise ValueError("MISSING_EVIDENCE_CONTRADICTS_LOOKUP_OR_UNCHECKED; PRESENT cannot be missing")
-            if str(gap.check_id) not in {str(cid) for finding in report.findings for cid in finding.scope_check_ids}:
-                raise ValueError("MISSING_EVIDENCE_REQUIRES_SCOPED_FINDING")
+                reject("MISSING_EVIDENCE_CONTRADICTS_LOOKUP_OR_UNCHECKED; PRESENT cannot be missing",
+                       ["missing_evidence", index], gap.check_id)
+            if str(gap.check_id) not in scoped:
+                reject("MISSING_EVIDENCE_REQUIRES_SCOPED_FINDING; only associate a performed unavailable-field check with its inspected subject; unrelated gaps belong in deferred scope, source/comparison limitations in uncertainty",
+                       ["missing_evidence", index, "check_id"], gap.check_id)
         failure_ids = {eid for eid, row in self.records.items()
                        if (row["group"] in {"execution_steps", "effect_receipts"}
                            and row["condition"] == "FAILED") or row["group"] == "self_refine_events"}
         cited = {str(c.evidence_id) for finding in report.findings for c in finding.fact.citations}
         if failure_ids and not (failure_ids & cited):
-            raise ValueError("OBSERVED_INCIDENT_REQUIRES_FINDING_WITH_ORIGINAL_OWNER_CITATION")
+            reject("OBSERVED_INCIDENT_REQUIRES_FINDING_WITH_ORIGINAL_OWNER_CITATION", ["findings"], report.work_id)
+        if errors:
+            error = errors[0]
+            error.issues = [{"type": "CitationRejected", "reason": str(item),
+                             "location": item.location, "evidence_id": item.evidence_id,
+                             **({"field_navigation": item.navigation} if item.navigation is not None else {}),
+                             **({"check_observation": {key: self.checks[item.evidence_id][key]
+                                 for key in ("family", "availability", "group", "field")}}
+                                if item.evidence_id in self.checks else {})}
+                            for item in errors[:12]]
+            error.omitted_issues = max(0, len(errors) - 12)
+            raise error
         # This is citation/structure verification. It cannot prove that prose
         # follows logically from the quotes or promote hypotheses to findings.
 
@@ -1294,7 +1308,8 @@ class AnalysisTools:
                         **edit_context, "admitted_operations": ["add", "remove", "replace"],
                         "repair": "For an omitted property, explicitly add the proposed value or replace its existing parent. The original draft is unchanged; all evidence and schema gates are rechecked."})
             output = {"verification": "FAIL", "issues": issues,
-                      "effect_observed": False, "repair": "Same contract only; preserve UNKNOWN and permissions."}
+                      "effect_observed": False, "omitted_issues": getattr(error, "omitted_issues", 0),
+                      "repair": "Same contract only; preserve UNKNOWN and permissions."}
             if draft_id:
                 output["draft_id"] = draft_id
                 output["draft_read_tool"] = "evidence.read"

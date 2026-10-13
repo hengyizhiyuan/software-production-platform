@@ -63,4 +63,13 @@ def test_analysis_api_auth_csrf_scope_and_no_original_owner_mutation(postgres_da
         detail = client.get(path + "/" + body["request_id"] + "?detail=true")
         assert detail.status_code == 200 and detail.json()["execution_history"]
         assert client.get(f"/api/admin/works/{foreign}/analyses/{body['request_id']}?detail=true").status_code == 409
+        summary = client.get(path + "/" + body["request_id"] + "?view=summary").json()
+        assert "execution_history" not in summary and "event_digests" not in summary
+        downloaded = client.get(path + "/" + body["request_id"] + "/report")
+        assert downloaded.status_code == 200 and downloaded.headers["content-type"].startswith("text/html")
+        assert '.html' in downloaded.headers["content-disposition"]
+        assert 'UNKNOWN' in downloaded.text and len(downloaded.content) < 20000
+        assert client.get(f"/api/admin/works/{foreign}/analyses/{body['request_id']}/report").status_code == 409
+        client.cookies.clear()
+        assert client.get(path + "/" + body["request_id"] + "/report").status_code == 401
         assert counts() == before
