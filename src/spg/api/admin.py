@@ -17,7 +17,7 @@ from spg.evaluation.work_diagnostic_export import WorkDiagnosticExportService
 from spg.evaluation.admin_projection import cockpit_projection, outcome_projection
 from spg.application.trace_analysis import TraceAnalysisService
 from spg.domain.trace_analysis import AnalysisTrigger
-from spg.application.trace_analysis_presentation import analysis_summary, concise_analysis_html
+from spg.application.trace_analysis_presentation import analysis_summary, concise_analysis_markdown
 
 
 def install_admin(api, database, settings, runtime=None):
@@ -145,9 +145,9 @@ def install_admin(api, database, settings, runtime=None):
     def work_trace_analysis_report(work_id: UUID, request_id: UUID, http_request: Request):
         record = api.state.trace_analysis.read(getattr(http_request.state, 'actor_id', ACTOR_ID),
                                               work_id, request_id)
-        content = concise_analysis_html(record)
-        return Response(content=content, media_type='text/html; charset=utf-8', headers={
-            'Content-Disposition': f'attachment; filename="watt-work-{work_id}-analysis-{request_id}.html"',
+        content = concise_analysis_markdown(record)
+        return Response(content=content, media_type='text/markdown; charset=utf-8', headers={
+            'Content-Disposition': f'attachment; filename="watt-work-{work_id}-analysis-{request_id}.md"',
             'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff',
             'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'",
             'X-Evidence-SHA256': sha256(content).hexdigest()})

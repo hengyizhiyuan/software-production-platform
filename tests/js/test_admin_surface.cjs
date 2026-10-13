@@ -218,7 +218,7 @@ test('Analysis field references display escaped observed values with original fi
 });
 
 
-test('Analysis tabs switch locally and concise HTML download never requests evidence JSON',async()=>{
+test('Analysis tabs switch locally and concise Markdown download never requests evidence JSON',async()=>{
  const path='/api/admin/works/ordinary-work/analyses/request-one?view=summary';
  const a={work_id:'ordinary-work',request_id:'request-one',status:'FAILED',report:null,kernel_result:{summary:'工具不可用，修订未完成',inference_submissions:9,tool_effects:23},verification_receipts:[{verification:'FAIL',issues:[{location:['findings',0,'scope_check_ids'],reason:'PRESENT check cannot support absence'}]}]};
  const s=surface('/admin',true,null,null,{[path]:a});await s.ready();
@@ -230,5 +230,5 @@ test('Analysis tabs switch locally and concise HTML download never requests evid
  assert.match(s.nodes['#admin-content'].innerHTML,/id="analysis-tab-overview"[^>]*aria-selected="true"/);
  await s.listeners.click({target:{closest:()=>({dataset:{analysisDownload:'request-one',analysisTarget:'ordinary-work'}})}});
  assert.equal(s.calls.at(-1)[0],'/api/admin/works/ordinary-work/analyses/request-one/report');
- assert.deepEqual(s.downloads,['watt-work-ordinary-work-analysis-request-one.html']);assert.ok(!s.calls.some(([p])=>p.includes('detail=true')));
+ assert.deepEqual(s.downloads,['watt-work-ordinary-work-analysis-request-one.md']);assert.ok(!s.calls.some(([p])=>p.includes('detail=true')));
 });

@@ -1665,7 +1665,7 @@ def test_candidate_feedback_reports_citation_and_missing_scope_defects_together(
 
 
 def test_summary_and_short_download_keep_unknown_and_exclude_large_unverified_draft(tmp_path):
-    from spg.application.trace_analysis_presentation import analysis_summary, concise_analysis_html
+    from spg.application.trace_analysis_presentation import analysis_summary, concise_analysis_markdown
     r={'work_id':str(uuid4()),'request_id':str(uuid4()),'status':'FAILED','report':None,
        'verification':'REPORT_NOT_VERIFIED','kernel_result':{'summary':'<script>unsafe()</script>','terminal_outcome':'UNABLE_TO_COMPLETE','inference_submissions':9},
        'verification_receipts':[{'verification':'FAIL','repair_candidate':{'analysis':'x'*11000000},'issues':[{'type':'CitationRejected','reason':'original field missing','location':['findings',0]}]}],
@@ -1673,11 +1673,12 @@ def test_summary_and_short_download_keep_unknown_and_exclude_large_unverified_dr
     summary=analysis_summary(r)
     assert len(json.dumps(summary))<5000
     assert 'repair_candidate' not in json.dumps(summary) and 'private-log' not in json.dumps(summary)
-    html=concise_analysis_html(r).decode()
+    html=concise_analysis_markdown(r).decode()
     assert 'UNKNOWN' in html and 'original field missing' in html and '<script>' not in html
     assert summary['kernel_result']['summary']=='<script>unsafe()</script>'
     assert '<script>' not in html and len(html.encode())<10000
+    assert html.startswith('# Watt Trace 简明分析报告\n') and '<!doctype html>' not in html
     s,snap,model=service(tmp_path);trigger=AnalysisTrigger(request_id=uuid4(),rationale='Investigate')
     done=asyncio.run(s.analyze('human:owner',uuid4_from(snap),trigger))
-    out=concise_analysis_html(done).decode()
+    out=concise_analysis_markdown(done).decode()
     assert 'Work is completed' in out and '引用：' in out and '根因假设不等于已证实根因' in out
