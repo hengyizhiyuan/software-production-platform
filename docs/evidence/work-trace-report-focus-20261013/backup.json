@@ -1,0 +1,20 @@
+{
+  "source_commit": "6c9095214c8724ab32058ffa5f199d4acc161e5b",
+  "old_api_id": "b241a8948bf2684eb1ec0248c025187443fd9a74c2f1100aea7368b2de04f73f",
+  "old_image": "sha256:2968973bd2554b27c8c1d71996cac917e7146df700702a96445ad05729131d9e",
+  "rollback_tag": "watt-cloud-worker:trace-owner-rollback-6c909521",
+  "compose_files": [
+    "/data/watt/runtime/docker-compose.yml",
+    "/data/watt/trace-analysis-releases/0ad7bf83/rollback.override.private.yml",
+    "/data/watt/maintenance/cpu-fix-20261012/compose.admin-storage-no-df.yml",
+    "/data/watt/trace-analysis-releases/e207b92c/deployed-api.override.yml"
+  ],
+  "compose_sha256": {
+    "/data/watt/runtime/docker-compose.yml": "0a5922aeb9d2b1f6fb3c75b55deec7f7b3200633d46b8ecf3025a65c948b1f9b",
+    "/data/watt/trace-analysis-releases/0ad7bf83/rollback.override.private.yml": "104346b83c6537e479916d7533501c81155e34787388e8e9d64da0a04dc471da",
+    "/data/watt/maintenance/cpu-fix-20261012/compose.admin-storage-no-df.yml": "e2812c4b35090b3ba29968ab3315dbe089d76619759763b504f9bbf8afd06e80",
+    "/data/watt/trace-analysis-releases/e207b92c/deployed-api.override.yml": "29c2fe2f88aa329cd796ac363d5256b3b01ca08ab509378773f9a15b295dd240"
+  },
+  "containers": 25,
+  "independent_review": "PASS"
+}

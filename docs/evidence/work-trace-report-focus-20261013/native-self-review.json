@@ -1,0 +1,153 @@
+{
+  "authority": "MODEL_SELF_REVIEW_PROPOSAL_NOT_INDEPENDENT_ASSURANCE",
+  "draft_id": "f6260516-7b8f-5868-b2f1-d547c8e3edbb",
+  "items": [
+    {
+      "countercheck": "本调查契约只要求对一个已捕获事件做有界重建，因此范围声明表达的是本次契约义务，不是改写历史 Work 的要求。替代解释检验：产品名可能不同于用户原话，但记录中两者同值「运营管理后台」，无未解冲突；报告未主张时间线全量覆盖，也未把该声明当作历史 Work 的验收要件。",
+      "evidence_ids": [
+        "0559bfde-6410-56d9-809c-dca9d6eab0b7",
+        "50f76e48-7411-55ca-bcee-65d83c7f25a4"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "范围声明与该 Work 的已读原始字段一致：首条 Human 输入原文由 50f76e48-7411-55ca-bcee-65d83c7f25a4 支撑，产品名与 Work 模式由 Work 投影的 /product_name、/work_mode 支撑（服务已取回观测值「运营管理后台」与「LONG_LIVED_STEERING」）；声明同时限定只分析 self_refine_events 索引 0、其余保持未分析或 UNKNOWN，与当前阶段至多一个详细 finding 的边界相符。",
+      "target_path": "/original_objective",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "区分 Human 权威与平台规范化：desired_outcome 承载于由 human:owner 准入的治理记录，scope 事实带 HUMAN_EXPLICIT 与来源记录 id，不是模型推断；约束文本是平台对 Human 选择的规范化表述，报告未把它说成 Human 逐字原话。替代解释：语义事实也可能由别的输入派生，但其 provenance 指向同一条 Human 消息记录，未见冲突。",
+      "evidence_ids": [
+        "38bf5734-140e-5d83-a2a2-d141f3788a85",
+        "80b3887f-fd35-53d9-9e19-9e8b016b0ab7"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "Human 的选择由 38bf5734-140e-5d83-a2a2-d141f3788a85 原文「还是做成带登录和账号的吧」支撑；期望结果、两条约束与 scope 语义事实（subject=ops_console.first_version.scope、value=带登录和账号、authority=HUMAN_EXPLICIT）均由 Work Reality 第 1 版原始字段支撑，准入者记为 human:owner。",
+      "target_path": "/expected_outcome",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "区分诊断与执行回执：INTENT_COMPLETENESS_MISMATCH 是 owner 的校验判断，不等同被拒候选原文，也不证明当时仓库的真实文件集，报告已作此声明；区分策略计数与实际调用：attempt_count=2 不是模型调用次数。替代解释检验：设计步停滞也可能来自其它未观测原因，报告以条件性比较呈现并未排除，也未把该路径判定为缺陷。",
+      "evidence_ids": [
+        "2624c203-0239-5145-a719-366707031790",
+        "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+        "92db5979-5dfd-5e51-9168-54acf1b8d1c3",
+        "c21722b5-39ed-5872-a483-35ba61ddb1d0"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "主干由已读原始记录支撑：二选一对话、Human 选择、Work Reality 准入、DESIGN 步 bd21eead 的 objective 与 completion_condition、首轮拒绝反馈、budget_decision.attempt_count=2、second_error_type=ValueError、final_result=ESCALATED、pwu_count=0。修订后该目标已把「仓库只有 README.md、没有 Web 服务入口与清单文件」明确归属于 owner 记录的准入反馈诊断，并说明本次仅读取到 README.md、没有可枚举目录或文件清单，去除了独立枚举的含义。",
+      "target_path": "/actual_execution_path",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "区分快照值与迁移时间：updated_at 等于 created_at，不能证明状态何时变化，报告已在时间解释中声明。区分标签与已执行效果：repair_status=MITIGATED、repair_result=ESCALATED 是 Owner 记录，不证明修复动作被执行；「Automatic retries stop」是策略声明，不是实际重试计数。替代解释：pwu_count=0 与 result_label 同源于同一投影，不能互为独立证据。",
+      "evidence_ids": [
+        "0559bfde-6410-56d9-809c-dca9d6eab0b7",
+        "c21722b5-39ed-5872-a483-35ba61ddb1d0"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "全部取值来自 Work 投影的已读根字段（/state、/stage、/pwu_count、/result_label、/steering_outcome、/repair_result、/candidate_id）与 Steering 决定的原文（human_required=true、authority_assessment=WITHIN_AUTHORITY、next_step_type=HUMAN_DECISION、Automatic retries stop）；快照本身声明 NON_ATOMIC_ACROSS_OWNERS，报告未据此推断状态迁移时刻。",
+      "target_path": "/current_state",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "创建/事件时间不自动等于执行或结束时间，报告在每条 time_interpretation 中逐项声明；同一行走的其它字段是冻结快照值。区分生成内容与证据：末项明确把 Watt 回复标为生成内容、仅表示可见交流。替代解释检验：Refinement 事件时间早于 Steering 决定约 0.2 秒，二者仍是两个不同 Owner 记录，报告未据时间邻近建立因果或同一事件身份。",
+      "evidence_ids": [
+        "0559bfde-6410-56d9-809c-dca9d6eab0b7",
+        "38bf5734-140e-5d83-a2a2-d141f3788a85",
+        "4ed12ffb-8b84-5400-b9c2-195ef9cf4202",
+        "50f76e48-7411-55ca-bcee-65d83c7f25a4",
+        "54033605-642f-5716-afa0-82ac8508c348",
+        "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+        "77adbbf8-9327-5f19-a670-a5cda2f7c0fe",
+        "80b3887f-fd35-53d9-9e19-9e8b016b0ab7",
+        "92db5979-5dfd-5e51-9168-54acf1b8d1c3",
+        "c21722b5-39ed-5872-a483-35ba61ddb1d0",
+        "c6a03731-38b9-5e4a-abc2-f4697e828037"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "带时间的条目均以 timestamp_evidence_id/timestamp_field 配对并由服务取回原值（09:13:16.642750、09:14:20.854381、09:14:23.003779、09:15:34.463951、09:15:34.688149），引用分别落在 Human 消息、Work Reality 修订、steering step 与 refinement 事件上；FAILURE 条目写成「被记录的首轮反馈指出」，未把诊断升格为执行观察。",
+      "target_path": "/timeline",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "区分当前实现与当时加载版本：仓库读仅为条件性比较证据，报告已声明不能证明历史 Worker 源码；区分标签与已执行效果：SYSTEMIC_OR_NON_CONVERGING_INCIDENT 是分类标签，不是能力缺陷证明；区分策略预算与真实调用：attempt_count=2 与 REDACTED 的 token 用量不能核对真实次数。替代解释检验：结构性解释（Human 未指定路径、仓库读取范围仅 README.md）与模型波动解释无法用现有记录区分，报告保留 UNKNOWN 且未升级为缺陷提案。",
+      "evidence_ids": [
+        "07500823-33d1-5c82-b4c6-e919bc12ba27",
+        "41ae6600-4b15-5034-ac51-ed4663b99a00",
+        "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+        "9676612c-3f19-579e-8eef-eb047a15f1aa",
+        "a117b2c6-14d9-5af0-946b-94a0af8f678c",
+        "e32f7b5a-41fa-5825-9a7b-995ddd9116df"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "事实字段全部以原始 Owner 指针引用（affected_component、budget_decision、diagnostic_evidence、final_result、refinement_class、work_resume_result）；机制部分引用当前运行库 semantic_steps.py 的精确实现读：_materialize_production_plan 抛 \"INTENT_COMPLETENESS_MISMATCH: \"+缺失验收、admit 把 ValueError 包装为 \"Task Contract candidate failed validation: …\"、仅当命中 REFINABLE_ADMISSION_FEEDBACK 前缀才 refine 一次、第二次失败抛 SemanticStepRefinementExhausted，并附注释说明 provider 选定的 code_targets 不是 Human scope。不确定性第 3 项限定为本次检索范围的观察：事件记录本身不含候选原文与 refine 输入输出，导出分组列举中亦未见 self_refine_actions。",
+      "target_path": "/findings/0",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "区分权限与建议：该建议不授予生产权限，也不主张以重启未变更 Work 冒充修复，报告已显式排除。区分诊断措辞与独立枚举：把「仅含 README.md」当作本次调查的完整目录枚举会超出读取范围，故此处只沿用 owner 记录的措辞与已读范围，不主张全量目录；这与时间线 FAILURE 条目对该表述的归属方式一致。",
+      "evidence_ids": [
+        "07500823-33d1-5c82-b4c6-e919bc12ba27",
+        "41ae6600-4b15-5034-ac51-ed4663b99a00",
+        "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+        "e32f7b5a-41fa-5825-9a7b-995ddd9116df"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "该建议只沿用 Steering 决定已记录的治理姿态（human_required=true、Automatic retries stop、no authority or delivery is granted）及其两个受支持选项，并仅就 Human 侧的澄清事项提出建议；其前提「读取到的修订下仅含 README.md」与「准入反馈要求新行为目标基于实际实现见证」均来自本目标已绑定的 64b79ce0 记录（其中原文写明 the repository contains only README.md 与 owner 必须提出 grounded in actual implementation witnesses 的目标），与该来源的读取范围一致。",
+      "target_path": "/immediate_recovery",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "区分未捕获与不存在/丢弃：未观测不等于被删除或从未产生，报告未作此推断。区分策略预算与真实调用：attempt_count=2 不能核对真实调用次数，报告已声明。替代解释检验：第二次尝试也许确实遵守了首轮反馈，只是证据未采集，报告未断言违规，仅指出无法核对。",
+      "evidence_ids": [
+        "07500823-33d1-5c82-b4c6-e919bc12ba27",
+        "41ae6600-4b15-5034-ac51-ed4663b99a00",
+        "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+        "e32f7b5a-41fa-5825-9a7b-995ddd9116df"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "修订后已把来源缺口表述为本次检索范围内的未观测（该事件记录本身不含候选原文与 refine 输入或输出，检索范围内未观测到 self_refine_actions），据此保留「同 basis 有界纠正后受治理终止」的形态判断，并明确不要求未来随机失败次数为零。",
+      "target_path": "/self_refine_opportunities",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "区分采集/工具缺口与历史行为：建议不主张过去发生过缺陷或错误生成。区分未捕获与不存在：导出中未见 actions 分组不证明平台从未采集。替代解释检验：即便补齐这些来源，也未必改变本事件分类，故建议的价值限于提升可区分度，报告未承诺零失败或自动修复。",
+      "evidence_ids": [
+        "07500823-33d1-5c82-b4c6-e919bc12ba27",
+        "41ae6600-4b15-5034-ac51-ed4663b99a00",
+        "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+        "e32f7b5a-41fa-5825-9a7b-995ddd9116df"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "建议被限定为证据采集层面：保留候选原文、refine 输入输出、actions 与未脱敏计数，以提升「正常模型方差」与「结构性缺口」的可区分度；修订后把「1 条记录、1 个字段脱敏」限定为就本次检索范围而言，并把 actions 表述为未观测；同时明确不构成历史断言，也不构成自动创建 Work、改码或部署的权限。",
+      "target_path": "/platform_improvements",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "区分检索范围与历史缺失：未读取不等于未保存或已丢弃。报告未主张完整覆盖，也未把 limits 中的 PWU、Candidate、Guardian 均为 NOT_OBSERVED_OR_NOT_REACHED 当作历史不存在；这些问题留待后续有界分析，而非本报告的结论。",
+      "evidence_ids": [
+        "07500823-33d1-5c82-b4c6-e919bc12ba27",
+        "41ae6600-4b15-5034-ac51-ed4663b99a00",
+        "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+        "e32f7b5a-41fa-5825-9a7b-995ddd9116df"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "延期项列出本次未逐一分析的内容：未读取的时间线区间（约索引 40–59 段）、除已读条目外的其它 Steering 计划修订与语义评估记录、09:19:22 之后是否被 Human 调整边界的记录，以及其它未导出的 Owner 字段，并声明保持未读/UNKNOWN、不在本报告范围，符合只做一个详细 finding 的阶段边界。",
+      "target_path": "/deferred_items",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "区分生产表面：HTTP 预览、服务端传输审计与客户端持久化互不替代，报告未据其中任一推断渲染或下载完成。区分 PRESENT 容器与子字段：字段计数不证明其余字段存在。替代解释检验：本导出无预览观察可用当时尚无 Candidate（pwu_count=0、candidate_id 为空）解释，但该检查不能证明平台历史或其它 Owner 不存在预览记录，报告如此限定。",
+      "evidence_ids": [
+        "1421001c-13d4-53ed-aa8e-4d6b0d66dc63",
+        "9676612c-3f19-579e-8eef-eb047a15f1aa",
+        "a67bfba2-65c0-5f65-ac5e-5af00feb1c97",
+        "cb2fcb7c-d837-5796-9e4f-bd49aaf42bec"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "四个家族各以精确 check_id 与 availability 对齐：OWNER_RECORD（group=self_refine_events，field=/*）PRESENT，可用 25、脱敏 1、空值 3；EXECUTION_RELATIONSHIP PRESENT，扫描 136、匹配 7、空值 131；DELIVERY_TRANSFER PRESENT，1 项 /lifecycle/served_delivery，读后 actions=[]、client_received/client_saved=UNAVAILABLE、completion_basis 只为服务端发送规则；PREVIEW_HTTP INCOMPLETE_CAPTURE，0 匹配、扫描 0。陈述均限定在该冻结导出与该选择器。",
+      "target_path": "/evidence_assessments",
+      "unsupported_assertions": []
+    }
+  ],
+  "report_digest": "cc2277e94159288a51eb60f0a5dfa4b84257bb2f6d435b89f64d33be00d71b1d"
+}

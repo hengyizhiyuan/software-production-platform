@@ -1,0 +1,26 @@
+{
+  "runtime_mode": "FINISHED",
+  "terminal_outcome": "RESULT_READY",
+  "final_checkpoint_id": "515fb63d-1e1d-4d75-9f72-7f5d4ba99da3",
+  "step_count": 11,
+  "inference_submissions": 11,
+  "tool_effects": 25,
+  "summary": "完成对历史 Work 408e408a-fab8-5a34-b101-b922043cb6fd 的有界调查，并通过 Native 自审（记录为 RECORDED_NOT_INDEPENDENT_ASSURANCE，非独立保证）。报告以冻结快照 ca51c532d9261d6a755cda2d3649593c1a0f961dfcb7bcff559110656c9f7305 的原始 Owner 记录为主证据，仅给出一个详细 finding（self_refine_events 索引 0，id 88b26b47-7310-4460-8cde-72a76338718b），其分类与认知状态均为 UNKNOWN：被拒候选原文、refine 输入输出、self_refine_actions 与当时加载的 Worker 版本均未观测，因此只保留条件性因果比较（当前运行库 src/spg/application/semantic_steps.py 的准入校验与单次有界 refine 分支形态与所记录的 CONTRACT_MISMATCH / attempt_count=2 / second_error_type=ValueError / ESCALATED 相容），不判定为能力缺陷；owner 的 SYSTEMIC_OR_NON_CONVERGING_INCIDENT 标签按分类标签对待。重建路径涵盖 Human 意图、二选一、产品形态选择、Work Reality 准入、DESIGN 步 bd21eead、准入被拒、有界 refinement 与 Steering 的 HUMAN_DECISION 终态（state=WAITING_HUMAN、pwu_count=0、无 Candidate）。报告显式声明范围（单一事件、非完整覆盖），把未读时间线区间、其它 Steering 记录与未导出字段列为 deferred/UNKNOWN，并区分 PRESENT、EMPTY、REDACTED、未观测与未导出检索状态。所有建议均保持既有权限与预算边界：不新增生产权限、不自动创建 Work、不以重启未变更 Work 冒充修复，允许在现有边界内恢复或受治理地终止。human:owner 的独立语义审查仍为必需。",
+  "result_claim": {
+    "report_digest": "cc2277e94159288a51eb60f0a5dfa4b84257bb2f6d435b89f64d33be00d71b1d",
+    "report_scope": "CURRENT_REVIEWED_ADVISORY_ONLY",
+    "phase": "MINIMUM_SUFFICIENT_TRUSTWORTHY_REPORT",
+    "detailed_finding_count": 1,
+    "production_authority": "NONE",
+    "semantic_correctness": "HUMAN_REVIEW_REQUIRED"
+  },
+  "residual_obligations": [
+    "独立 Human 语义审查（本报告仅完成 Native 模型自审，不构成独立保证）",
+    "被拒候选原文、refine 输入输出与 self_refine_actions 未观测，该事件保持 UNKNOWN，待后续有界证据补充后再评估分类",
+    "冻结导出中未读取的时间线区间与其它 Owner 字段留待后续有界分析（deferred，不在本次范围）",
+    "该报告的结论仅为咨询性，不授予任何生产权限"
+  ],
+  "resource_retryable": true,
+  "failure_family": null,
+  "observation_evidence": {}
+}

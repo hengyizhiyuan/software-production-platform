@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "native_source_commit": "3d154a1ea4b8c2c1f1ec695a0528627db268d40a",
+  "deployment_source_commit": "6c9095214c8724ab32058ffa5f199d4acc161e5b",
+  "changed_since_native_run": [
+    "application/trace_analysis_presentation.py",
+    "web/admin.js"
+  ],
+  "all_other_source_files_byte_identical": 275,
+  "boundary": "Native investigation, validation, tools, context, kernel, schemas and authority unchanged; final changes only shorten already-saved failure display. No new inference or budget reset."
+}

@@ -1,0 +1,27 @@
+{
+  "independent_semantic_review": "PASS",
+  "source_commit": "6c9095214c8724ab32058ffa5f199d4acc161e5b",
+  "native_source_commit": "3d154a1ea4b8c2c1f1ec695a0528627db268d40a",
+  "native_status": "COMPLETED",
+  "work_id": "408e408a-fab8-5a34-b101-b922043cb6fd",
+  "request_id": "3ca692e0-10ea-48a0-b23a-6af5d661a0be",
+  "report_digest": "cc2277e94159288a51eb60f0a5dfa4b84257bb2f6d435b89f64d33be00d71b1d",
+  "reviewer": "CODEX source/evidence review; not Human assurance or independent Guardian qualification",
+  "manual_report_edit": false,
+  "checks": [
+    "Facts attributed to original Work/Steering/Self-Refine records; exact original citation validation PASS",
+    "Original Work WAITING_HUMAN; no Candidate or completed production claimed",
+    "Only selected incident reconstructed; report classification and epistemic status UNKNOWN",
+    "Original candidate, second ValueError details, actual model-call count and historical worker source not established",
+    "Runtime source comparison expressly conditional; Owner diagnostic text not repository inventory or executed effect proof",
+    "Two native self-review feedback subjects corrected and re-reviewed without manual rewriting",
+    "Final native result_claim digest equals accepted native self-review digest",
+    "No activity permissions, automatic Work creation or deployment implied by report",
+    "Final UI-only delta leaves 275 other source files byte-identical to real Native qualification"
+  ],
+  "limits": [
+    "Minimum sufficient advisory report; no exhaustive Work root cause certification",
+    "Kernel public narrative retains an earlier draft digest; accepted result_claim and self-review carry matching final digest. Concise successful report uses accepted report, not that narrative.",
+    "Qualification executed on 3d154a1e; deployment 6c909521 changes only presentation and JavaScript"
+  ]
+}

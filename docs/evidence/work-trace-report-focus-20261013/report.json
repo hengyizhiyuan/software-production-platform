@@ -1,0 +1,607 @@
+{
+  "actual_execution_path": {
+    "citations": [
+      {
+        "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+        "field": null,
+        "observed_value": null,
+        "observed_value_truncated": false,
+        "quote": "The owner observed a failure against its bounded acceptance obligation."
+      },
+      {
+        "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+        "field": null,
+        "observed_value": null,
+        "observed_value_truncated": false,
+        "quote": "Task Contract candidate failed validation: INTENT_COMPLETENESS_MISMATCH: Primary implementation is absent: the repository contains only README.md; there is no web server entry point, no package manifest and no browser console surface for a first-version operations admin backend."
+      },
+      {
+        "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+        "field": "/budget_decision",
+        "observed_value": "{\n    \"attempt_count\": 2,\n    \"bounded\": true,\n    \"human_escalated\": false\n  }",
+        "observed_value_truncated": false,
+        "quote": null
+      },
+      {
+        "evidence_id": "92db5979-5dfd-5e51-9168-54acf1b8d1c3",
+        "field": null,
+        "observed_value": null,
+        "observed_value_truncated": false,
+        "quote": "A bounded design direction is supported by current Reality"
+      },
+      {
+        "evidence_id": "2624c203-0239-5145-a719-366707031790",
+        "field": null,
+        "observed_value": null,
+        "observed_value_truncated": false,
+        "quote": "# 运营管理后台"
+      },
+      {
+        "evidence_id": "c21722b5-39ed-5872-a483-35ba61ddb1d0",
+        "field": null,
+        "observed_value": null,
+        "observed_value_truncated": false,
+        "quote": "连续的自动尝试未能推进当前成果。你希望暂停，还是修改这次的目标或边界后继续？"
+      }
+    ],
+    "evidence_family": "OWNER_RECORD",
+    "statement": "实际路径为：Human 描述意图 → Watt 建议第一版先做只读概览看板并给出二选一 → Human 选择带登录与账号权限 → Work 被准入并绑定只读来源基线（本次调查对该来源仓库仅读取到 README.md，且没有可枚举的目录或文件清单；「仓库里只有 README.md、没有 Web 服务入口与清单文件」这一表述出自 owner 记录的准入反馈诊断，而非本调查对仓库的完整枚举）→ Steering 计划生成 4 个步骤，当前步为 DESIGN 类型的 bd21eead（objective=「把第一版做成带登录与账号权限的日常操作台」，completion_condition=「A bounded design direction is supported by current Reality」）→ 该步的语义候选在准入校验中被拒，owner 把首轮拒绝记录为含 INTENT_COMPLETENESS_MISMATCH 的准入反馈，并记录了一次 attempt_count=2 的有界 refinement、第二次错误类型 ValueError → final_result=ESCALATED，转由 Steering 向 Human 请求决定。整个过程没有形成 Candidate（pwu_count=0）。"
+  },
+  "current_state": {
+    "citations": [
+      {
+        "evidence_id": "0559bfde-6410-56d9-809c-dca9d6eab0b7",
+        "field": "/state",
+        "observed_value": "\"WAITING_HUMAN\"",
+        "observed_value_truncated": false,
+        "quote": null
+      },
+      {
+        "evidence_id": "0559bfde-6410-56d9-809c-dca9d6eab0b7",
+        "field": "/stage",
+        "observed_value": "\"DESIGN\"",
+        "observed_value_truncated": false,
+        "quote": null
+      },
+      {
+        "evidence_id": "0559bfde-6410-56d9-809c-dca9d6eab0b7",
+        "field": "/pwu_count",
+        "observed_value": "0",
+        "observed_value_truncated": false,
+        "quote": null
+      },
+      {
+        "evidence_id": "0559bfde-6410-56d9-809c-dca9d6eab0b7",
+        "field": "/result_label",
+        "observed_value": "\"尚未形成 Candidate\"",
+        "observed_value_truncated": false,
+        "quote": null
+      },
+      {
+        "evidence_id": "0559bfde-6410-56d9-809c-dca9d6eab0b7",
+        "field": "/steering_outcome",
+        "observed_value": "\"HUMAN_ATTENTION\"",
+        "observed_value_truncated": false,
+        "quote": null
+      },
+      {
+        "evidence_id": "0559bfde-6410-56d9-809c-dca9d6eab0b7",
+        "field": "/repair_result",
+        "observed_value": "\"ESCALATED\"",
+        "observed_value_truncated": false,
+        "quote": null
+      },
+      {
+        "evidence_id": "0559bfde-6410-56d9-809c-dca9d6eab0b7",
+        "field": "/candidate_id",
+        "observed_value": "null",
+        "observed_value_truncated": false,
+        "quote": null
+      },
+      {
+        "evidence_id": "c21722b5-39ed-5872-a483-35ba61ddb1d0",
+        "field": null,
+        "observed_value": null,
+        "observed_value_truncated": false,
+        "quote": "Automatic retries stop; no authority or delivery is granted."
+      }
+    ],
+    "evidence_family": "OWNER_RECORD",
+    "statement": "冻结快照（mode=full、consistency=NON_ATOMIC_ACROSS_OWNERS）中的 Work 记录为：state=WAITING_HUMAN、state_label=「等待 Human 决定」、stage=DESIGN、condition=READY、bucket=WAITING、complete=false；self_refine_count=1、pwu_count=0、candidate_id 为空、result_label=「尚未形成 Candidate」；steering_outcome=HUMAN_ATTENTION、repair_status=MITIGATED、repair_result=ESCALATED；latest_event=「Human / Watt 交流」。Steering 决定记录 human_required=true、authority_assessment=WITHIN_AUTHORITY、next_step_type=HUMAN_DECISION，并声明 Automatic retries stop。"
+  },
+  "deferred_items": [
+    {
+      "evidence_family": "OWNER_RECORD",
+      "finding_ids": [
+        "self-refine-0-intent-mismatch"
+      ],
+      "statement": "本次未逐一分析的内容包括：该冻结导出中尚未读取的时间线区间（索引分页未覆盖的约 40–59 段）、除已读条目外的其它 Steering 计划修订与语义评估记录、该 Work 在 09:19:22 之后是否被 Human 调整边界的记录，以及其它未导出的 Owner 字段。这些保持未读/UNKNOWN，留待后续有界分析，不在本报告范围。"
+    }
+  ],
+  "evidence_assessments": [
+    {
+      "availability": "PRESENT",
+      "check_id": "9676612c-3f19-579e-8eef-eb047a15f1aa",
+      "checked_boundary": "仅在冻结导出 ca51c532d9261d6a755cda2d3649593c1a0f961dfcb7bcff559110656c9f7305 中检查 family=OWNER_RECORD, group=self_refine_events, field=/*：availability=PRESENT，匹配 25 项，扫描 1 条记录。字段状态：可用 25，脱敏 1，空值 3，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。",
+      "family": "OWNER_RECORD",
+      "statement": "对冻结快照 ca51c532d9261d6a755cda2d3649593c1a0f961dfcb7bcff559110656c9f7305 的 self_refine_events 分组做字段检查：availability=PRESENT，匹配 25 项、扫描 1 条记录，字段状态为可用 25、脱敏 1、空值 3、未导出 0。该检查只覆盖该导出与选择器，不证明其它字段、其它 Owner 或平台历史不存在。"
+    },
+    {
+      "availability": "PRESENT",
+      "check_id": "1421001c-13d4-53ed-aa8e-4d6b0d66dc63",
+      "checked_boundary": "仅在冻结导出 ca51c532d9261d6a755cda2d3649593c1a0f961dfcb7bcff559110656c9f7305 中检查 family=EXECUTION_RELATIONSHIP, group=(producer scope), field=(family observations)：availability=PRESENT，匹配 7 项，扫描 136 条记录。字段状态：可用 7，脱敏 0，空值 131，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。",
+      "family": "EXECUTION_RELATIONSHIP",
+      "statement": "对同一冻结快照做关联家族检查：availability=PRESENT，扫描 136 条记录、匹配 7 项，其中可用 7、空值 131。已读的例子把 recovery/0 与 self_refine_events/0 指向同一 work_id 88b26b47-7310-4460-8cde-72a76338718b，并存在指向 d13c75ca-5a0d-440f-921c-16895abdeb63 的 steering_plan_revisions 关联；这些是记录的链接，不是因果证明。"
+    },
+    {
+      "availability": "PRESENT",
+      "check_id": "a67bfba2-65c0-5f65-ac5e-5af00feb1c97",
+      "checked_boundary": "仅在冻结导出 ca51c532d9261d6a755cda2d3649593c1a0f961dfcb7bcff559110656c9f7305 中检查 family=DELIVERY_TRANSFER, group=(producer scope), field=(family observations)：availability=PRESENT，匹配 1 项，扫描 1 条记录。字段状态：可用 1，脱敏 0，空值 0，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。",
+      "family": "DELIVERY_TRANSFER",
+      "statement": "对同一快照做交付家族检查：availability=PRESENT，匹配 1 项（/lifecycle/served_delivery）。读取该记录后见 actions=[]、client_received=UNAVAILABLE、client_saved=UNAVAILABLE、completion_basis=ASGI_SEND_COMPLETED proves server send only、historical_action_identity=NOT_RECORDED；该审计对象本身不证明发生过任何下载/发送，也不证明或否证预览 GET 状态、浏览器渲染或客户端持久化。"
+    },
+    {
+      "availability": "INCOMPLETE_CAPTURE",
+      "check_id": "cb2fcb7c-d837-5796-9e4f-bd49aaf42bec",
+      "checked_boundary": "仅在冻结导出 ca51c532d9261d6a755cda2d3649593c1a0f961dfcb7bcff559110656c9f7305 中检查 family=PREVIEW_HTTP, group=(producer scope), field=(family observations)：availability=INCOMPLETE_CAPTURE，匹配 0 项，扫描 0 条记录。字段状态：可用 0，脱敏 0，空值 0，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。",
+      "family": "PREVIEW_HTTP",
+      "statement": "对同一快照做预览家族检查：availability=INCOMPLETE_CAPTURE，匹配 0 项、扫描 0 条记录，字段状态全为 0。该结果限于此导出与该选择器，说明本导出内未采到 HTTP 预览观察；结合 Work 快照中 pwu_count=0、candidate_id 为空，可理解为此时没有可预览的 Candidate，但该检查不能证明平台历史或其它 Owner 中不存在预览记录。"
+    }
+  ],
+  "expected_outcome": {
+    "citations": [
+      {
+        "evidence_id": "38bf5734-140e-5d83-a2a2-d141f3788a85",
+        "field": null,
+        "observed_value": null,
+        "observed_value_truncated": false,
+        "quote": "还是做成带登录和账号的吧"
+      },
+      {
+        "evidence_id": "80b3887f-fd35-53d9-9e19-9e8b016b0ab7",
+        "field": null,
+        "observed_value": null,
+        "observed_value_truncated": false,
+        "quote": "把第一版做成带登录与账号权限的日常操作台"
+      },
+      {
+        "evidence_id": "80b3887f-fd35-53d9-9e19-9e8b016b0ab7",
+        "field": null,
+        "observed_value": null,
+        "observed_value_truncated": false,
+        "quote": "运营人员可在其中执行日常业务操作"
+      },
+      {
+        "evidence_id": "80b3887f-fd35-53d9-9e19-9e8b016b0ab7",
+        "field": null,
+        "observed_value": null,
+        "observed_value_truncated": false,
+        "quote": "\"value\": \"带登录和账号\""
+      }
+    ],
+    "evidence_family": "OWNER_RECORD",
+    "statement": "Human 在首轮二选一之后明确选定了「带登录和账号」的产品形态：「还是做成带登录和账号的吧」。随后由 human:owner 准入的 Work Reality 第 1 版记录期望结果为「把第一版做成带登录与账号权限的日常操作台」，约束为「首版交付带登录与账号权限的运营管理后台操作台」与「运营人员可在其中执行日常业务操作」；该版本同时记录 scope 语义事实 subject=ops_console.first_version.scope、value=「带登录和账号」、authority=HUMAN_EXPLICIT。"
+  },
+  "findings": [
+    {
+      "analysis": "条件性因果比较（比较基准是当前运行库源码，不假定为当时加载的 Worker 版本）：事件记录只有诊断字段，没有候选原文。诊断字段的首轮拒绝理由指出候选把 src/server/main.ts 定为唯一 Web 服务入口、package.json 定为清单，而观察到的仓库里没有这些路径，并要求 owner 基于实际实现见证提出新行为目标。运行库源码显示该反馈的可行机制：src/spg/application/semantic_steps.py 中 _materialize_production_plan 先调用 capability.validate_production_scope（仅在 CODE_WORK 或不需要中间产物时），若返回的 missing_acceptance_requirements 非空，就抛出 ValueError(\"INTENT_COMPLETENESS_MISMATCH: \" + \"; \".join(...))；admit() 捕获 (SteeringInvariantViolation, ValueError) 后把 ValueError 包装成 SteeringInvariantViolation(f\"Task Contract candidate failed validation: {error}\")，仅当错误串以 REFINABLE_ADMISSION_FEEDBACK 中某一前缀开头时才调用 capability.refine 重试一次；第二次抛错时，若仍属 ValueError/SteeringInvariantViolation 则抛出 SemanticStepRefinementExhausted，否则原样抛出。该元组的第一条前缀正是 'Task Contract candidate failed validation'，与记录到的 CONTRACT_MISMATCH、attempt_count=2、second_error_type=ValueError、最终 ESCALATED 在形态上相容。另一条相容解释是结构性的：Human 只给出产品形态而未指定任何仓库路径，而源码注释声明只有 Human 明确写出的路径（含显式请求的新文件）才能进入显式目标通道，否则依赖只读仓库发现；在只有 README.md 的仓库上该通道可能无法产出符合见证要求的目标，使 DESIGN 步难以按该约束收敛。两种解释都无法用现有记录区分：缺少该次 refinement 的候选原文、capability.validate_production_scope 的具体实现以及当时的 Worker 加载版本。因此本报告只把该机制作为条件性比较，既不判定为能力缺陷，也不断言该次生成确实偏离；owner 的 SYSTEMIC_OR_NON_CONVERGING_INCIDENT 标签是分类标签，不是能力缺陷证明。",
+      "checked_boundaries": [
+        "本次关联读取仅限冻结导出 ca51c532d9261d6a755cda2d3649593c1a0f961dfcb7bcff559110656c9f7305 中主体 64b79ce0-ccdf-5c33-b401-1a7812acecea 的显式 Owner 引用（最多两跳）。返回 1 条记录，容量未读字段 0 项，省略关联记录 0 条。PRESENT 表示该字段已导出；READ 才表示原始片段已返回。REDACTED 表示值被脱敏，EMPTY 表示已导出的空值；二者均不表示历史未保存。字段未导出、未读取或关联范围外的信息保持 UNKNOWN；单一记录不能证明其他 Owner 或平台历史不存在。仓库比较不自动证明历史 Worker 版本；创建时间不自动证明后来的恢复状态。",
+        "仅在冻结导出 ca51c532d9261d6a755cda2d3649593c1a0f961dfcb7bcff559110656c9f7305 中检查 family=OWNER_RECORD, group=self_refine_events, field=/*：availability=PRESENT，匹配 25 项，扫描 1 条记录。字段状态：可用 25，脱敏 1，空值 3，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。"
+      ],
+      "classification": "UNKNOWN",
+      "epistemic_status": "UNKNOWN",
+      "fact": {
+        "citations": [
+          {
+            "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+            "field": "/affected_component",
+            "observed_value": "\"steering/semantic-step\"",
+            "observed_value_truncated": false,
+            "quote": null
+          },
+          {
+            "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+            "field": "/budget_decision",
+            "observed_value": "{\n    \"attempt_count\": 2,\n    \"bounded\": true,\n    \"human_escalated\": false\n  }",
+            "observed_value_truncated": false,
+            "quote": null
+          },
+          {
+            "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+            "field": "/diagnostic_evidence",
+            "observed_value": "{\n    \"basis_fingerprint\": \"1ed30baa3f8b7fbd79f6a870590758c892258d47b1121f0547990fd7edb2c855\",\n    \"first_validation_feedback\": \"Task Contract candidate failed validation: INTENT_COMPLETENESS_MISMATCH: Primary implementation is absent: the repository contains only README.md; there is no web server entry point, no package manifest and no browser console surface for a first-version operations admin backend.; Requested login behavior is unmet: no session/login surface, credential handling or account-management behavior is observed anywhere in the repository.; Requested account permission behavior is unmet: no role or permission model, checks, or enforcement points are observed in the repository.; Requested operator daily-work surface is unmet: no console view or operational module with a discoverable navigation entry is observed; a documentation-only artifact cannot satisfy this working-software change.; The candidate objective fixes src/server/main.ts as a single web server entry and package.json as the manifest, but neither path exists in the observed repository; the owner must propose concrete new-behavior targets grounded in actual implementation witnesses, including the browser-s",
+            "observed_value_truncated": true,
+            "quote": null
+          },
+          {
+            "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+            "field": "/final_result",
+            "observed_value": "\"ESCALATED\"",
+            "observed_value_truncated": false,
+            "quote": null
+          },
+          {
+            "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+            "field": "/refinement_class",
+            "observed_value": "\"SYSTEMIC_OR_NON_CONVERGING_INCIDENT\"",
+            "observed_value_truncated": false,
+            "quote": null
+          },
+          {
+            "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+            "field": "/work_resume_result",
+            "observed_value": "\"NOT_RESUMED\"",
+            "observed_value_truncated": false,
+            "quote": null
+          }
+        ],
+        "evidence_family": "OWNER_RECORD",
+        "statement": "被选事件 88b26b47-7310-4460-8cde-72a76338718b（位于 /lifecycle/advanced/owners/self_refine_events/0，families=[OWNER_RECORD, EXECUTION_RELATIONSHIP]）记录：affected_component='steering/semantic-step'；failure_family='CONTRACT_MISMATCH'；budget_decision={attempt_count:2, bounded:true, human_escalated:false}；diagnostic_evidence 含 first_validation_feedback（前缀 'Task Contract candidate failed validation: INTENT_COMPLETENESS_MISMATCH: …'）与 second_error_type='ValueError'；refinement_class='SYSTEMIC_OR_NON_CONVERGING_INCIDENT'；repairability='AUTONOMOUSLY_REPAIRABLE'；final_result='ESCALATED'；status='MITIGATED'；work_resume_result='NOT_RESUMED'；evidence_references=['steering-step:bd21eead-5e53-4c0d-aa88-c6acb9c47e9d']。"
+      },
+      "finding_id": "self-refine-0-intent-mismatch",
+      "handling": "INVESTIGATE",
+      "inspection_id": "a117b2c6-14d9-5af0-946b-94a0af8f678c",
+      "recommendation": "把该事件维持为 UNKNOWN 并按现有分类边界处置：继续核对原始记录而非扩大结论。具体地，若后续在该冻结导出或新导出中能读到该 refinement 的候选原文、refine 输入输出与 self_refine_actions，应先把它们与首轮反馈逐条比对，再考虑重新分类；在缺少这些来源前，不应把它升级为能力缺陷提案，也不应把已耗尽的同 basis 重试当作修复（Steering 记录已声明 Automatic retries stop、no authority or delivery is granted）。",
+      "regression_qualification": "在既有权限与预算内核对原始记录、关联与已检查范围；证据不足时保留 UNKNOWN，不扩大结论。允许在既有权限和预算内恢复或受治理地终止，不要求未来随机失败次数为零。",
+      "regression_scenario": "对抗性场景：若把 owner 的分类标签直接当作能力缺陷，可能触发一次未经证据支持的改造；若无视有界预算已耗尽而重启未变更的 Work，则会重复同一失败并消耗执行资源。另一方向的风险是把该事件一概归为正常模型方差而忽略「Human 未指定路径 + 仓库仅 README」这一结构性条件。",
+      "repository_citations": [
+        {
+          "evidence_id": "e32f7b5a-41fa-5825-9a7b-995ddd9116df",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "\"Task Contract candidate failed validation\","
+        },
+        {
+          "evidence_id": "41ae6600-4b15-5034-ac51-ed4663b99a00",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "error = SteeringInvariantViolation(f\"Task Contract candidate failed validation: {error}\")"
+        },
+        {
+          "evidence_id": "41ae6600-4b15-5034-ac51-ed4663b99a00",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "raise SemanticStepRefinementExhausted(str(second_error)) from second_error"
+        },
+        {
+          "evidence_id": "07500823-33d1-5c82-b4c6-e919bc12ba27",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "raise ValueError(\"INTENT_COMPLETENESS_MISMATCH: \" + \"; \".join("
+        },
+        {
+          "evidence_id": "07500823-33d1-5c82-b4c6-e919bc12ba27",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "# Provider-selected code_targets are hypotheses, not Human scope."
+        }
+      ],
+      "scope_check_ids": [],
+      "subject_evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+      "uncertainty": "1) 事件记录是 owner 的诊断，不是执行回执；字段角色把 diagnostic_evidence 标为 DIAGNOSIS_NOT_EXECUTION_RECEIPT，把 observed_reality/expected_reality 标为未观测/期望值，因此首轮拒绝理由描述的是 owner 记录的判断，不能替代被拒候选的原文。2) 该行 model_token_usage 为 REDACTED，无法据 token 用量核对实际调用次数；budget_decision.attempt_count=2 是被记录的策略计数，不自动等于真实模型调用数。3) 冻结导出中没有 self_refine_actions 分组，无法核对 refinement 实际执行了哪些动作、是否真的发起了第二次生成。4) 运行库读取（revision 3d154a1e…）是当前实现的比较证据，不能证明该 Work 当时加载的 Worker 源码；因此上面给出的抛出点与重试分支只是条件性比较。5) Work 记录是 2026-10-13 的 LIVE_ENTITY_LOOKUP 快照，且捕获声明 consistency=NON_ATOMIC_ACROSS_OWNERS；其中 updated_at 等于 created_at，不能据此推断状态迁移时间，也不能据快照证明 09:19:22 之后的状态。6) 快照 limits 明确 PWU、Candidate、Guardian 均 NOT_OBSERVED_OR_NOT_REACHED，故本报告不对 Candidate 内容或 Guardian 结论作任何陈述。7) 冻结导出内 PREVIEW_HTTP 家族 0 匹配，只能说明该导出内未采到预览观察，且此时 pwu_count=0、candidate_id 为空；这不构成平台级不存在或历史未发生的证明。",
+      "uncertainty_check_ids": [
+        "9676612c-3f19-579e-8eef-eb047a15f1aa"
+      ]
+    }
+  ],
+  "immediate_recovery": [
+    {
+      "evidence_family": "OWNER_RECORD",
+      "finding_ids": [
+        "self-refine-0-intent-mismatch"
+      ],
+      "statement": "就本 Work 的处置维持既有治理姿态：Steering 已记录 human_required=true，Automatic retries stop，no authority or delivery is granted，并给出「暂停这次生产」与「调整目标或边界」两个选项；Human 需在二者之间选择。若选择继续，建议 Human 明确首版要接入的可操作模块，并说明是否指定新的实现文件路径——因为该来源仓库在读取到的修订下仅含 README.md，而 DESIGN 候选的准入反馈要求新行为目标基于实际实现见证。不得据此获得生产权限，也不得用重启未变更 Work 的方式冒充修复。"
+    }
+  ],
+  "missing_evidence": [],
+  "original_objective": {
+    "citations": [
+      {
+        "evidence_id": "50f76e48-7411-55ca-bcee-65d83c7f25a4",
+        "field": null,
+        "observed_value": null,
+        "observed_value_truncated": false,
+        "quote": "我想做一个运营管理后台"
+      },
+      {
+        "evidence_id": "0559bfde-6410-56d9-809c-dca9d6eab0b7",
+        "field": "/product_name",
+        "observed_value": "\"运营管理后台\"",
+        "observed_value_truncated": false,
+        "quote": null
+      },
+      {
+        "evidence_id": "0559bfde-6410-56d9-809c-dca9d6eab0b7",
+        "field": "/work_mode",
+        "observed_value": "\"LONG_LIVED_STEERING\"",
+        "observed_value_truncated": false,
+        "quote": null
+      }
+    ],
+    "evidence_family": "OWNER_RECORD",
+    "statement": "报告范围声明：本次只对该历史 Work 的一个已捕获事件（self_refine_events 索引 0）做有界重建，并只给出一个详细 finding；时间线上其余条目、其它 Steering 决定以及未被导出或未被读取的记录保持未分析或 UNKNOWN，本报告不主张完整覆盖。该 Work 的原始意图来自 Human 首条输入，原文为「我想做一个运营管理后台」；Work 记录中的产品名为「运营管理后台」，Work 模式为 LONG_LIVED_STEERING。"
+  },
+  "platform_improvements": [
+    {
+      "evidence_family": "OWNER_RECORD",
+      "finding_ids": [
+        "self-refine-0-intent-mismatch"
+      ],
+      "statement": "为使同类事件可区分「正常模型方差」与「结构性能力缺口」，建议让该类事件导出保留 refinement 的候选原文、refine 输入/输出、self_refine_actions 与未脱敏的调用计数；就本次检索范围而言，该导出只有 1 条 self_refine_events 记录、其中 1 个字段被脱敏，且未观测到 self_refine_actions 分组。这是证据采集层面的建议，不构成对历史行为的断言，也不构成自动创建 Work、修改代码或部署的权限。"
+    }
+  ],
+  "schema_version": "watt-trace-analysis-report-v8",
+  "self_refine_opportunities": [
+    {
+      "evidence_family": "OWNER_RECORD",
+      "finding_ids": [
+        "self-refine-0-intent-mismatch"
+      ],
+      "statement": "本事件的有界 refinement 仅记录 attempt_count=2 即耗尽并升级为 Human 决策，符合「同 basis 有界纠正后受治理终止」的形态；该事件记录本身不含候选原文与 refine 输入或输出，本次检索范围内也未观测到 self_refine_actions 分组，因此无法核对第二次尝试是否遵守了首轮准入反馈。后续若要评估 Self-Refine 有效性，应先取回这些来源再作判断；在此之前不要求未来随机失败次数为零，仍以在既有权限与预算内恢复或受治理终止为准。"
+    }
+  ],
+  "timeline": [
+    {
+      "citations": [
+        {
+          "evidence_id": "50f76e48-7411-55ca-bcee-65d83c7f25a4",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "我想做一个运营管理后台"
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "owner_time_boundary": null,
+      "stage": "INTENT",
+      "statement": "Human 首次表达意图：「我想做一个运营管理后台」，产品名同为此文本。",
+      "time_interpretation": null,
+      "timestamp": null,
+      "timestamp_evidence_id": null,
+      "timestamp_field": null
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "c6a03731-38b9-5e4a-abc2-f4697e828037",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "你想搭建一个运营管理后台。"
+        },
+        {
+          "evidence_id": "4ed12ffb-8b84-5400-b9c2-195ef9cf4202",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "还是直接做成带登录和账号权限的日常操作台？"
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "owner_time_boundary": null,
+      "stage": "CONTEXT",
+      "statement": "Watt 在首轮回复中确认意图并建议第一版先做只读的运营概览看板，随后请 Human 在两条路线之间选择（原文含「第一版先按只读的运营概览看板来做，还是直接做成带登录和账号权限的日常操作台？」）。",
+      "time_interpretation": null,
+      "timestamp": null,
+      "timestamp_evidence_id": null,
+      "timestamp_field": null
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "38bf5734-140e-5d83-a2a2-d141f3788a85",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "还是做成带登录和账号的吧"
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "owner_time_boundary": "此时间仅表示Owner 记录的事件时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。",
+      "stage": "PLANNING",
+      "statement": "Human 做出产品形态选择：内容为「还是做成带登录和账号的吧」，该交互记录 processing_status=COMPLETED。",
+      "time_interpretation": "该时间为这条 Human 交流记录自身的事件时间；同一行其它字段是冻结快照值，不因该时间而自动成立。",
+      "timestamp": "2026-10-09T09:13:16.642750+00:00",
+      "timestamp_evidence_id": "38bf5734-140e-5d83-a2a2-d141f3788a85",
+      "timestamp_field": "timestamp"
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "80b3887f-fd35-53d9-9e19-9e8b016b0ab7",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "\"admitted_by\": \"human:owner\""
+        },
+        {
+          "evidence_id": "80b3887f-fd35-53d9-9e19-9e8b016b0ab7",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "The current governed production request authorizes Work formation."
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "owner_time_boundary": "此时间仅表示Owner 记录的事件时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。",
+      "stage": "PLANNING",
+      "statement": "Work Reality 第 1 版由 human:owner 准入：desired_outcome=「把第一版做成带登录与账号权限的日常操作台」，requests 同值，并记录两条约束；rationale 声明「The current governed production request authorizes Work formation.」，同时说明交付与最终验收仍另行治理。",
+      "time_interpretation": "该时间是该 Reality 修订记录自身的事件时间，只说明该记录何时被记录，不证明其后所有字段即时成立或后续状态已被更新。",
+      "timestamp": "2026-10-09T09:14:20.854381+00:00",
+      "timestamp_evidence_id": "80b3887f-fd35-53d9-9e19-9e8b016b0ab7",
+      "timestamp_field": "timestamp"
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "92db5979-5dfd-5e51-9168-54acf1b8d1c3",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "\"objective\": \"把第一版做成带登录与账号权限的日常操作台\""
+        },
+        {
+          "evidence_id": "92db5979-5dfd-5e51-9168-54acf1b8d1c3",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "A bounded design direction is supported by current Reality"
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "owner_time_boundary": "此时间仅表示记录创建时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。",
+      "stage": "EXECUTION",
+      "statement": "当前 Steering 计划步 bd21eead-5e53-4c0d-aa88-c6acb9c47e9d（type=DESIGN，position=1，state=CURRENT）被创建，其 objective 为「把第一版做成带登录与账号权限的日常操作台」，completion_condition 为「A bounded design direction is supported by current Reality」。",
+      "time_interpretation": "该时间为该 steering step 记录的创建时间；它不说明该步何时被执行或何时结束。",
+      "timestamp": "2026-10-09T09:14:23.003779+00:00",
+      "timestamp_evidence_id": "92db5979-5dfd-5e51-9168-54acf1b8d1c3",
+      "timestamp_field": "created_at"
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "Requested login behavior is unmet: no session/login surface, credential handling or account-management behavior is observed anywhere in the repository."
+        },
+        {
+          "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "The candidate objective fixes src/server/main.ts as a single web server entry and package.json as the manifest, but neither path exists in the observed repository"
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "owner_time_boundary": null,
+      "stage": "FAILURE",
+      "statement": "语义候选在准入校验中被拒，被记录的首轮反馈指出主实现缺失（仓库只有 README.md，没有 Web 服务入口、清单文件与浏览器控制台），登录行为、账号权限行为与运营人员日常操作面均为 unmet，并说明候选把 src/server/main.ts 与 package.json 当作目标而这两个路径在观察到的仓库中不存在。",
+      "time_interpretation": null,
+      "timestamp": null,
+      "timestamp_evidence_id": null,
+      "timestamp_field": null
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+          "field": "/budget_decision",
+          "observed_value": "{\n    \"attempt_count\": 2,\n    \"bounded\": true,\n    \"human_escalated\": false\n  }",
+          "observed_value_truncated": false,
+          "quote": null
+        },
+        {
+          "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+          "field": "/diagnostic_evidence",
+          "observed_value": "{\n    \"basis_fingerprint\": \"1ed30baa3f8b7fbd79f6a870590758c892258d47b1121f0547990fd7edb2c855\",\n    \"first_validation_feedback\": \"Task Contract candidate failed validation: INTENT_COMPLETENESS_MISMATCH: Primary implementation is absent: the repository contains only README.md; there is no web server entry point, no package manifest and no browser console surface for a first-version operations admin backend.; Requested login behavior is unmet: no session/login surface, credential handling or account-management behavior is observed anywhere in the repository.; Requested account permission behavior is unmet: no role or permission model, checks, or enforcement points are observed in the repository.; Requested operator daily-work surface is unmet: no console view or operational module with a discoverable navigation entry is observed; a documentation-only artifact cannot satisfy this working-software change.; The candidate objective fixes src/server/main.ts as a single web server entry and package.json as the manifest, but neither path exists in the observed repository; the owner must propose concrete new-behavior targets grounded in actual implementation witnesses, including the browser-s",
+          "observed_value_truncated": true,
+          "quote": null
+        },
+        {
+          "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+          "field": "/refinement_class",
+          "observed_value": "\"SYSTEMIC_OR_NON_CONVERGING_INCIDENT\"",
+          "observed_value_truncated": false,
+          "quote": null
+        },
+        {
+          "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+          "field": "/final_result",
+          "observed_value": "\"ESCALATED\"",
+          "observed_value_truncated": false,
+          "quote": null
+        },
+        {
+          "evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+          "field": "/work_resume_result",
+          "observed_value": "\"NOT_RESUMED\"",
+          "observed_value_truncated": false,
+          "quote": null
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "owner_time_boundary": "此时间仅表示记录创建时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。",
+      "stage": "RECOVERY_REFINEMENT",
+      "statement": "owner 记录了针对同一 basis 的一次有界 refinement：budget_decision={attempt_count:2, bounded:true, human_escalated:false}，second_error_type=ValueError，refinement_class=SYSTEMIC_OR_NON_CONVERGING_INCIDENT、repairability=AUTONOMOUSLY_REPAIRABLE、status=MITIGATED、final_result=ESCALATED、work_resume_result=NOT_RESUMED；证据引用为 steering-step:bd21eead-5e53-4c0d-aa88-c6acb9c47e9d。",
+      "time_interpretation": "该时间是该 refinement 事件记录的创建时间，只表示该行何时被记录；同一行的诊断字段是冻结快照值，不自动证明它们在该时刻已全部成立，也不证明恢复流程已完成。",
+      "timestamp": "2026-10-09T09:15:34.463951+00:00",
+      "timestamp_evidence_id": "64b79ce0-ccdf-5c33-b401-1a7812acecea",
+      "timestamp_field": "created_at"
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "c21722b5-39ed-5872-a483-35ba61ddb1d0",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "Only Human may change the admitted boundary or accept the exact result."
+        },
+        {
+          "evidence_id": "c21722b5-39ed-5872-a483-35ba61ddb1d0",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "Work convergence stopped: NON_CONVERGING; 1 failed no-progress outcomes, 1 boundary attempts, 0s. Missing acceptance: CANDIDATE_SEALED, PRODUCTION_PLAN_ADMITTED, REVIEW_RUNTIME_READY, SOURCE_VERIFIED."
+        },
+        {
+          "evidence_id": "c21722b5-39ed-5872-a483-35ba61ddb1d0",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "暂停这次生产"
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "owner_time_boundary": "此时间仅表示Owner 记录的事件时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。",
+      "stage": "FINAL_STATE",
+      "statement": "Steering 决定（attention_reason=MATERIAL_RISK_OR_COST_DECISION、human_required=true、next_step_type=HUMAN_DECISION）声明「Only Human may change the admitted boundary or accept the exact result.」，并给出两个受支持选项「暂停这次生产」与「调整目标或边界」；其 reason 说明 convergence 因 NON_CONVERGING 停止，且缺失的验收为 CANDIDATE_SEALED、PRODUCTION_PLAN_ADMITTED、REVIEW_RUNTIME_READY、SOURCE_VERIFIED。",
+      "time_interpretation": "该时间是该 Steering 决定记录自身的事件时间；它不表示 Work 在该时刻已经进入最终状态。",
+      "timestamp": "2026-10-09T09:15:34.688149+00:00",
+      "timestamp_evidence_id": "c21722b5-39ed-5872-a483-35ba61ddb1d0",
+      "timestamp_field": "timestamp"
+    },
+    {
+      "citations": [
+        {
+          "evidence_id": "77adbbf8-9327-5f19-a670-a5cda2f7c0fe",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "你现在因为什么卡住了？"
+        },
+        {
+          "evidence_id": "54033605-642f-5716-afa0-82ac8508c348",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false,
+          "quote": "卡在设计收束这一步：方案还没收敛，有一轮尝试没取得进展"
+        },
+        {
+          "evidence_id": "0559bfde-6410-56d9-809c-dca9d6eab0b7",
+          "field": "/latest_event",
+          "observed_value": "\"Human / Watt 交流\"",
+          "observed_value_truncated": false,
+          "quote": null
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "owner_time_boundary": null,
+      "stage": "FINAL_STATE",
+      "statement": "此后 Human 询问「你现在因为什么卡住了？」，Watt 生成的回复把问题描述为卡在设计收束；Work 快照随后仍显示 state=WAITING_HUMAN、无 Candidate（result_label「尚未形成 Candidate」）。该回复是生成内容而非独立证据，仅表示对 Human 的可见交流。",
+      "time_interpretation": null,
+      "timestamp": null,
+      "timestamp_evidence_id": null,
+      "timestamp_field": null
+    }
+  ],
+  "work_id": "408e408a-fab8-5a34-b101-b922043cb6fd"
+}
