@@ -448,9 +448,14 @@ metadata without rewriting any semantic conclusion or accepting an unread source
 The same original Native envelope now reserves two feedback cycles by projecting
 the submission route earlier, also when tool capacity reaches that boundary.
 
-Current delivery and qualification are recorded in
+The earlier assisted delivery and qualification are recorded in
 [the 2026-10-13 stage report](work-trace-self-analysis-minimum-20261013.md).
-The delivered real report required Codex-assisted revision; Native automatic
-completion remains FAILED and deployment is not qualified. Do not treat the
+That delivered real report required Codex-assisted revision; its Native automatic
+completion remains FAILED. Do not treat that
 assisted artifact, structural validation or model review as a successful Native
 terminal result or independent Human assurance.
+
+The subsequent [entry fix and live chain qualification](work-trace-entry-fix-20261013.md)
+admits quiescent Human waits. A new real Work analysis completed through Native
+drafting, revision, review and RESULT_READY without manual report edits; the API
+release was then deployed and verified. Earlier failed request records are unchanged.

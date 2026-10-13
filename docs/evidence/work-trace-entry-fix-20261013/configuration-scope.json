@@ -1,0 +1,9 @@
+{
+  "scope": "API_IMAGE_ONLY_LAST_OVERRIDE",
+  "preserved_existing_compose_files": [
+    "/data/watt/runtime/docker-compose.yml",
+    "/data/watt/trace-analysis-releases/0ad7bf83/rollback.override.private.yml",
+    "/data/watt/maintenance/cpu-fix-20261012/compose.admin-storage-no-df.yml"
+  ],
+  "other_configuration_identical": true
+}

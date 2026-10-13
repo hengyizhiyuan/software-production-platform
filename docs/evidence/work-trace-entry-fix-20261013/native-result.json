@@ -1,0 +1,31 @@
+{
+  "status": "COMPLETED",
+  "work_id": "f4fccf61-89ea-5abc-9871-55235df0b37d",
+  "request_id": "9e01e774-10a7-49c1-bc61-435d2285f0dc",
+  "started_at": "2026-10-13T04:11:16.190550+00:00",
+  "finished_at": "2026-10-13T04:20:16.697122+00:00",
+  "kernel_result": {
+    "failure_family": null,
+    "final_checkpoint_id": "ac32708b-6c75-4697-ab01-8b3220c74aef",
+    "inference_submissions": 11,
+    "observation_evidence": {},
+    "residual_obligations": [],
+    "resource_retryable": true,
+    "result_claim": {
+      "output_vector": {
+        "report_digest": "424a961285eeb6067418528229a749208e16f292b0cb7b92eb8f2cf5ea86dfcb"
+      },
+      "report_digest": "424a961285eeb6067418528229a749208e16f292b0cb7b92eb8f2cf5ea86dfcb",
+      "schema_version": "watt-trace-analysis-report-v8",
+      "scope": "CURRENT_REVIEWED_ADVISORY_ONLY",
+      "work_id": "f4fccf61-89ea-5abc-9871-55235df0b37d"
+    },
+    "runtime_mode": "FINISHED",
+    "step_count": 11,
+    "summary": "已完成对历史 Work f4fccf61-89ea-5abc-9871-55235df0b37d 的最小充分顾问式调查报告，并通过 analysis.review 取得报告摘要。报告以冻结导出 71fb4d2117a5e38cd75cf7d81652e4996614c9747b98454c18965e8a…（见下）中的原始 Owner 字段与当前 runtime 修订的对照源码为依据，重建了意图、期望结果、生产计划、已记录执行路径、失败与恢复以及终态。范围限定为单一详析事件：恢复记录 d2a31b70-ab41-5def-9198-189dd7b5c8f5（semantic/scope 的 SCOPE_INFLATION 局部义务恢复），归类为 RUNTIME_MODEL_VARIANCE 并以 ROOT_CAUSE_HYPOTHESIS 表述。其他事件、被拒绝候选的原始响应内容、historical loaded Worker 源码、model_token_usage 明细以及 PREVIEW_HTTP 面的全部观测均保留为 UNKNOWN，并在 missing_evidence 中以已执行的 evidence.check 收据标注。报告仅为顾问性质，不授予任何生产权利；仍须独立 Human 语义评审。",
+    "terminal_outcome": "RESULT_READY",
+    "tool_effects": 26
+  },
+  "verification": "CITATIONS_AND_STRUCTURE_PASS",
+  "manual_report_edit": false
+}

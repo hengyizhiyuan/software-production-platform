@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "source_commit": "e207b92ce7b6a670bd48e4a58639593447262637",
+  "image_tag": "watt-cloud-worker:trace-self-analysis-e207b92c",
+  "image_id": "sha256:2968973bd2554b27c8c1d71996cac917e7146df700702a96445ad05729131d9e",
+  "base_image": "sha256:0e2a46cb22a774b7fbc3cdb063e7bac6f6b93daf01943fd2b58f025dde229073",
+  "build_archive_sha256": "867452634e74fa52db8eda21af9d6e4a08b1e109c4e2c86acf431d696df95143",
+  "image_label_revision": "e207b92ce7b6a670bd48e4a58639593447262637",
+  "deployment_authority": "NONE; real Work semantic qualification required"
+}

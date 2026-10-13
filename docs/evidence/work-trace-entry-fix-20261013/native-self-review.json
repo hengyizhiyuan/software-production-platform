@@ -1,0 +1,153 @@
+{
+  "authority": "MODEL_SELF_REVIEW_PROPOSAL_NOT_INDEPENDENT_ASSURANCE",
+  "draft_id": "fe36f103-b353-5a1f-b051-2b1bfe796260",
+  "items": [
+    {
+      "countercheck": "两条引用分别来自 intent 投影（/lifecycle/first_human_input）与 Work 投影字段，属同一 Work 的不同展示面，服务解析出的原值彼此相容。未把本次调查契约的目标当作历史 Work 要求。未发现未说明的假设。",
+      "evidence_ids": [
+        "5eeb0a00-a2e1-525d-8a0e-bf11bba98ff1",
+        "c820c2b2-6cca-570a-bcf5-1f6fbf04a799"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "陈述与两条原始输入一致：首次 Human 输入引用为“我想做一个简易版植物大战僵尸的网页小游戏”，Work 投影的 /raw_user_requirement 为“制作一个可在浏览器网页中运行的简易版植物大战僵尸小游戏”。二者都是该 Work 自身的意图来源，未混入本次 INVESTIGATION 契约的目标。",
+      "target_path": "/original_objective",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "这是一条规则性期望表述，不证明其已达成；后续失败与等待记录与其并不矛盾。未把 completion_basis 之类规则当作已发生事件，也未把“期望预览”当作“预览已提供”。",
+      "evidence_ids": [
+        "c820c2b2-6cca-570a-bcf5-1f6fbf04a799"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "/desired_outcome 的原值即所引字符串：单关卡一局制可玩版本 + 对确切候选的独立验证 Preview。该字段是 Work/Steering 记录的准入期望，不是本次调查的验收标准。",
+      "target_path": "/expected_outcome",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "单元 state 与 verification result 都是记录快照：PROPOSED 既可能是未执行也可能是未记录，报告只报告记录状态而未断定未执行；PASS 是 PATH_SCOPE 单一义务的判定，不等于候选已封存或已验收。单元 metrics 中的耗时/调用数为 Owner 记录值，报告未把它们当作真实执行计数。",
+      "evidence_ids": [
+        "11895f9f-378b-51ac-9eba-4dac42077eb5",
+        "81435a4e-23f5-5202-9914-7856f6bceb5b",
+        "9033b0a6-a8bc-58cf-9794-94758c348c32",
+        "af6a5633-3cf9-56c8-8d98-edf7eeb50e63",
+        "c725106d-b9ef-5581-8ffa-90b6c399adfe",
+        "d98cefac-8313-569b-921d-cc92a7128a6a"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "计划修订 1 的 planning_rationale 与 parallel_overlap_policy、四个单元记录的 state（index、game 为 SATISFIED；styles、JOIN 为 PROPOSED）与 JOIN 的 dependencies，以及 verification/0 的 PATH_SCOPE PASS，均有对应原值。语句以“已记录的生产路径”描述快照，而非宣告完成。",
+      "target_path": "/actual_execution_path",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "该状态是捕获时的投影值，不能证明导出之后没有新的 Human 决定或验收；同一记录中 acceptance_decision/acceptance_id 为空、acceptance_label 为“尚无验收记录”，与“尚无验收”相容，但并不构成平台历史全局缺证。原始 available_tools 或状态标签也不等于真实执行次数。",
+      "evidence_ids": [
+        "c820c2b2-6cca-570a-bcf5-1f6fbf04a799"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "state=WAITING_HUMAN、stage=PRODUCE、failure_family=RUNTIME_PROVIDER_FAILURE、repair_result=FAILED、self_refine_count=3，以及 steering_reason 中 NON_CONVERGING 与所列缺失验收项，均与 Work 投影字段的原值一致。",
+      "target_path": "/current_state",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "时间戳是 Owner 行时间（created_at/updated_at/timestamp），不是事件发生时间：recovery 条目的时间只表示该诊断行被写入/更新的时刻。INTENT 与 FINAL_STATE 是无时间复合条目。两处 PLANNING 条目中，STEP_TRANSITION 条目未标注时间，而其底层记录创建时间 05:46:03.69 略早于前一条计划修订的 05:46:04.13，因此二者在列表中的先后不由时间戳确立。这不构成对已述事实的反证，也与“记录写入顺序不等于事件顺序”相容，仅提示排列顺序供人工复核。",
+      "evidence_ids": [
+        "089e6f9c-1357-533d-9f96-16df8c1c30e5",
+        "11895f9f-378b-51ac-9eba-4dac42077eb5",
+        "5eeb0a00-a2e1-525d-8a0e-bf11bba98ff1",
+        "794ae29c-20a5-5dbb-89f9-8a8ac02fe7ac",
+        "81435a4e-23f5-5202-9914-7856f6bceb5b",
+        "9033b0a6-a8bc-58cf-9794-94758c348c32",
+        "af6a5633-3cf9-56c8-8d98-edf7eeb50e63",
+        "c0569251-1f40-5695-972e-1cf775425a8d",
+        "c725106d-b9ef-5581-8ffa-90b6c399adfe",
+        "c820c2b2-6cca-570a-bcf5-1f6fbf04a799",
+        "d2a31b70-ab41-5def-9198-189dd7b5c8f5",
+        "d98cefac-8313-569b-921d-cc92a7128a6a"
+      ],
+      "judgment": "QUALIFIED",
+      "rationale": "各条目内容均有引用支持；带时间戳的条目按 05:46:04（计划修订）→ 05:49:33（verification/0）→ 05:53:18（recovery/1）→ 06:06:17（recovery/2）单调递增，符合时间先后要求，且时间均由被引 Owner 记录字段派生。",
+      "target_path": "/timeline",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "对照源码取自当前提交 e207b92c…，不能证明历史 Worker 实际加载的版本；被拒绝候选的原始文本未导出（/diagnostic_evidence/raw_response 在该捕获 3 条均未导出），候选内容本身不可核。未被现有记录排除的替代解释是：计划修订 1 的 verification_requirements 文本本身要求“run the available test.run capability over test/game.test.js”，候选把该路径提升为范围可能受此文本诱导，而非单纯由提供方自行扩大范围；candidate_paths 与 required_paths 的差异无法区分这两种来源。报告已正确不把 DEGRADING_OR_RECURRING_REFINEMENT/known_failure_match 当作重复执行或能力缺陷证据；同理 RUNTIME_MODEL_VARIANCE 也只是受范围约束的判定，报告以 ROOT_CAUSE_HYPOTHESIS 与 UNKNOWN 保留该边界，故判定为有保留通过而非需要改写。",
+      "evidence_ids": [
+        "223fb710-2d6e-58b7-b04a-9ec83ae61a63",
+        "58254dc2-d6a9-5510-b9ef-9e3a0ed125a3",
+        "82de42e7-e537-5528-9044-4c3101ae66d7",
+        "8734b243-114f-5441-ac4f-a052f6d8acdf",
+        "8ff158bf-9706-5352-843e-5850e92c5386",
+        "c12e697f-62fb-5cfa-a8a1-31d6881615c5",
+        "d2a31b70-ab41-5def-9198-189dd7b5c8f5",
+        "f9d21a6e-e5c6-5a10-acb6-c2ed682e2321"
+      ],
+      "judgment": "QUALIFIED",
+      "rationale": "事实部分逐字段有据：candidate_paths 含 index.html/src/game.js/src/styles.css/test/game.test.js，required_paths 为前三者，signal=SCOPE_INFLATION，authority_expanded=false，final_result=LOCAL_OBLIGATION_RECOVERED。条件性对照引用当前 runtime 修订 semantic_steps.py 中“当 code_targets 集合与 required_targets 不一致时写入受限细化并记录 SCOPE_INFLATION”的分支，引文与该实现文本一致，分类枚举 CANDIDATE_INCONSISTENT 亦被读取。",
+      "target_path": "/findings/0",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "该建议不承诺零未来错误，也不把分类标签当作重复执行证据；所引 finding 主体属 OWNER_RECORD 面，family 与主题相符（未借用无关 finding）。未主张自动创建 Work、修改代码、部署或放宽权限，符合“recommendations only”的验收含义。",
+      "evidence_ids": [
+        "8ff158bf-9706-5352-843e-5850e92c5386",
+        "d2a31b70-ab41-5def-9198-189dd7b5c8f5",
+        "f9d21a6e-e5c6-5a10-acb6-c2ed682e2321"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "建议基于已引证记录与当前实现分支，复用既有契约内路径：依据 candidate_paths 与 required_paths 差异重新校验修订候选，并保持 authority_expanded=false。它只提出建议，不授予新权限。",
+      "target_path": "/self_refine_opportunities",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "前提表述“被拒绝候选目前主要以路径摘要与 output_digest 形式留存”比已读证据更宽：recovery/0 的 diagnostic_evidence 中确见 candidate_paths/required_paths/rejected_behaviors/signal/authority_expanded，但该记录中未见 output_digest；output_digest 是在 recovery/1 的 observed_reality 中读到的，而那是一条 process.run 失败记录、并非被拒绝候选记录。故保留形式的具体范围未经完整核对，宜按 QUALIFIED 对待，提案方向不受影响。",
+      "evidence_ids": [
+        "8ff158bf-9706-5352-843e-5850e92c5386",
+        "d2a31b70-ab41-5def-9198-189dd7b5c8f5",
+        "f9d21a6e-e5c6-5a10-acb6-c2ed682e2321"
+      ],
+      "judgment": "QUALIFIED",
+      "rationale": "核心方向与已执行的检查一致：当前捕获中看不到被拒绝候选的原始文本（/diagnostic_evidence/raw_response 3 条未导出），因此建议在不扩大权限的前提下保留受限的候选摘要。建议本身属提案，未声称平台当前已具备该能力。",
+      "target_path": "/platform_improvements",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "推迟不等于断言历史不存在：未导出与脱敏只表示在该冻结导出中不可见。该条不自证能力缺陷，也不与已支持的正面观察（如 SCOPE_INFLATION 的局部恢复）冲突；它是缺口标注，不为其提供证明。",
+      "evidence_ids": [
+        "8ff158bf-9706-5352-843e-5850e92c5386",
+        "d2a31b70-ab41-5def-9198-189dd7b5c8f5",
+        "f9d21a6e-e5c6-5a10-acb6-c2ed682e2321"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "所推迟项（recovery/1、recovery/2 的原始内容、被拒绝候选原文、历史加载源码、PREVIEW_HTTP 观测）与已执行的检查一致：raw_response 3 条未导出、/model_token_usage 3 条脱敏、PREVIEW_HTTP 0 匹配 0 扫描。",
+      "target_path": "/deferred_items",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "PRESENT 只表示该族在冻结导出中有可用字段，不代表预览、下载交付或关联动作真实发生；DELIVERY_TRANSFER 的示例值尚未读取，评估文字已明示这一点。INCOMPLETE_CAPTURE 与“无匹配”限于该导出与选择器，不能推广为平台历史缺失或未采集全体。",
+      "evidence_ids": [
+        "223fb710-2d6e-58b7-b04a-9ec83ae61a63",
+        "42c731cd-901c-59d2-a159-27d1794147c3",
+        "5d635fd1-bd81-5010-8c08-8096ab2e8a4b",
+        "609e9eb5-0fad-5b2b-8fc1-3f7ace70f8e7",
+        "82de42e7-e537-5528-9044-4c3101ae66d7"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "五项评估的 check_id 与 availability 与对应检查回执一致：recovery field=/* 为 PRESENT（81 可用/3 脱敏/3 空/0 未导出，扫描 3 条）；verification /evidence/metadata/changed_paths 为 PRESENT（3 可用/5 未导出，扫描 8 条）；PREVIEW_HTTP 为 INCOMPLETE_CAPTURE（0 匹配/0 扫描）；DELIVERY_TRANSFER 为 PRESENT（1 条，示例 /lifecycle/served_delivery）；EXECUTION_RELATIONSHIP 为 PRESENT（206 可用/348 空，扫描 552 条）。",
+      "target_path": "/evidence_assessments",
+      "unsupported_assertions": []
+    },
+    {
+      "countercheck": "0 匹配不等于全局不存在；此处 0 匹配且 0 扫描属捕获缺口，报告以 UNKNOWN 表述，正确。preview_required=true 来自 verification/0 内嵌的产品意图原文，属已读原始内容，可作为“该 Work 期望预览”的依据，但不能据此断定预览必然已发生、也 不能断定历史缺失；报告未作此推断。脱敏字段也不能推断历史未保存。",
+      "evidence_ids": [
+        "223fb710-2d6e-58b7-b04a-9ec83ae61a63",
+        "58254dc2-d6a9-5510-b9ef-9e3a0ed125a3",
+        "c12e697f-62fb-5cfa-a8a1-31d6881615c5"
+      ],
+      "judgment": "SUPPORTED",
+      "rationale": "三条缺口各配已执行的同类检查：PREVIEW_HTTP（223fb710-2d6e-58b7-b04a-9ec83ae61a63，0 匹配/0 扫描，availability=INCOMPLETE_CAPTURE）、recovery /diagnostic_evidence/raw_response（58254dc2-d6a9-5510-b9ef-9e3a0ed125a3，3 条未导出）、recovery /model_token_usage（c12e697f-62fb-5cfa-a8a1-31d6881615c5，3 条脱敏）。表述与回执一致，且未把 PRESENT 证据说成缺失。",
+      "target_path": "/missing_evidence",
+      "unsupported_assertions": []
+    }
+  ],
+  "report_digest": "424a961285eeb6067418528229a749208e16f292b0cb7b92eb8f2cf5ea86dfcb"
+}

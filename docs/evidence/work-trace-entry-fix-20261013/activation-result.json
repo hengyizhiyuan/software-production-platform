@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "source_commit": "e207b92ce7b6a670bd48e4a58639593447262637",
+  "old_api_id": "8d14f496d5b40f0f7a6f15342c556a3813b7746bac4bec968365d72a21c80c6d",
+  "new_api_id": "b241a8948bf2684eb1ec0248c025187443fd9a74c2f1100aea7368b2de04f73f",
+  "old_image": "sha256:0e2a46cb22a774b7fbc3cdb063e7bac6f6b93daf01943fd2b58f025dde229073",
+  "new_image": "sha256:2968973bd2554b27c8c1d71996cac917e7146df700702a96445ad05729131d9e",
+  "started_at": "2026-10-13T04:25:38.034522151Z",
+  "health": "PASS",
+  "scope": "API_ONLY",
+  "existing_maintenance": "PRESERVED",
+  "existing_compose_files": [
+    "/data/watt/runtime/docker-compose.yml",
+    "/data/watt/trace-analysis-releases/0ad7bf83/rollback.override.private.yml",
+    "/data/watt/maintenance/cpu-fix-20261012/compose.admin-storage-no-df.yml"
+  ],
+  "deployment_override": "/data/watt/trace-analysis-releases/e207b92c/deployed-api.override.yml"
+}

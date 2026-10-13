@@ -1,0 +1,24 @@
+{
+  "independent_semantic_review": "PASS",
+  "source_commit": "e207b92ce7b6a670bd48e4a58639593447262637",
+  "native_status": "COMPLETED",
+  "work_id": "f4fccf61-89ea-5abc-9871-55235df0b37d",
+  "request_id": "9e01e774-10a7-49c1-bc61-435d2285f0dc",
+  "report_digest": "424a961285eeb6067418528229a749208e16f292b0cb7b92eb8f2cf5ea86dfcb",
+  "review_scope": "MINIMUM_SUFFICIENT_ADVISORY_CHAIN; NOT_EXHAUSTIVE_ROOT_CAUSE_CERTIFICATION",
+  "reviewer": "CODEX; no Human assurance claimed",
+  "checks": [
+    "Original objective and desired outcome match original Work evidence",
+    "Current Work remains WAITING_HUMAN; analysis completion does not claim Work completion",
+    "Candidate/required path lists attributed to refinement Owner; no execution of added test file claimed",
+    "Current source comparison explicitly conditional; historical loaded revision and specific provider binding remain UNKNOWN",
+    "Provider/process failures outside selected finding remain background or UNKNOWN",
+    "No complete delivery, preview or client save inferred from presence of a transfer record",
+    "Native source/structure validation and full target self-review returned matching digest"
+  ],
+  "limits": [
+    "Model-variance classification is a ROOT_CAUSE_HYPOTHESIS, not an independently verified exclusive cause",
+    "Scope only one detailed incident; no whole Work perfection or complete automatic improvement claim"
+  ],
+  "manual_report_edit": false
+}
