@@ -1,0 +1,16 @@
+{
+  "schema": "trace-product-scoped-migration-v1",
+  "source_revision": "0e5ba3a985fecd659097d894bb17197429aae55e",
+  "target_pre_migration_revision": "31028c15933e00898053845e4ca76e627fac9985",
+  "patch_sha256": "83cda4b1b4f3b250a4179607c03c6ab8cc7d4dbc1186f572d1ff01c7b3561320",
+  "migrated_files": {
+    "src/spg/web/admin.js": "3dedf4d9fc44ca7356e348040d194a12af18e847d3dbdf80a996e742bc8636e4",
+    "src/spg/web/admin.css": "ee82143f7ad0745308687285d22a577f4fa7f165cbe44ff26263502fbbaed464",
+    "tests/js/test_admin_surface.cjs": "5d2da340599039762f14791f172dd4e0aa571bd9fc858fab9e0b71a73ca465af"
+  },
+  "whole_branch_merged": false,
+  "old_branch_deleted": false,
+  "production_modified": false,
+  "original_evidence_changed": false,
+  "existing_api_and_native_implementation_reused": true
+}

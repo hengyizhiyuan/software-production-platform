@@ -4,8 +4,9 @@ function surface(route='/admin',authorization=true,run=null,trace=null,extra={})
  const nodes={'#admin-content':{innerHTML:''},'#admin-notice':{textContent:'',hidden:true}};const listeners={};const calls=[];
  const worker={name:'cloud-worker-1',status:'READY',capacity:{max_concurrency:1},active_execution_count:0,available_slots:1};
  const overview={watt_revision:'d'.repeat(40),quality:{campaigns:[],runs:[],cases:[],clusters:[]},assurance:{mode:'REQUIRED',store_observed:true,results:[],quality_evaluations:[]},operations:{state:'CURRENT',node:{node_id:'i-exact',hostname:'host',region:'cn-wulanchabu',observed_at:new Date().toISOString(),cpu_percent:5,cpu_count:4,memory:{used_bytes:1000,total_bytes:2000},disk:{used_bytes:1000,total_bytes:10000,free_bytes:9000},network:{eth0:{rx_bytes:100,tx_bytes:200}},uptime_seconds:3600},production:{workers:[worker],queue:[],queue_depth:0,active_executions:0,available_slots:1},services:[{service:'api',state:'running',health:'healthy',node_id:'i-exact'}],storage:{docker:{categories:[]},note:'scopes'},topology:{nodes:[{id:'i-exact',hostname:'host',region:'cn-wulanchabu'}],service_placements:[{service:'api',health:'healthy',node_id:'i-exact'}]}}};
- const context={URLSearchParams,document:{querySelector:s=>nodes[s],querySelectorAll:()=>[],addEventListener:(k,f)=>listeners[k]=f},window:{addEventListener(){}},location:{pathname:route,search:trace?(trace.work?'?kind=work&entity=ordinary-work':'?case=historical-case'):run?'?run='+run.id:''},history:{pushState(){}},setTimeout(){},console,HTMLFormElement:class {},FormData:class {},async fetch(url,opts){calls.push([url,opts]);const data=extra[url] || (trace && url.includes('/trace')?trace:run && url.startsWith('/api/admin/runs/') ? run : url==='/api/admin/overview'?overview:url==='/api/admin/arena'?{experiments:[],preferences:[],learning_signals:[],promotion_decisions:[]}:url==='/api/admin/operations/history'?[]:{});return{ok:authorization,status:authorization?200:401,json:async()=>data};}};
- vm.runInNewContext(source,context);return{nodes,listeners,calls,overview,ready:()=>new Promise(r=>setImmediate(r))};
+ const downloads=[];
+ const context={URLSearchParams,URL:{createObjectURL:()=> 'blob:diagnostic',revokeObjectURL(){}},document:{querySelector:s=>nodes[s],querySelectorAll:()=>[],createElement:()=>({click(){downloads.push(this.download)},remove(){}}),body:{appendChild(){}},addEventListener:(k,f)=>listeners[k]=f},window:{addEventListener(){}},location:{pathname:route,search:trace?(trace.work?'?kind=work&entity=ordinary-work':'?case=historical-case'):run?'?run='+run.id:''},history:{pushState(){}},setTimeout(){},console,HTMLFormElement:class {},FormData:class {},async fetch(url,opts){calls.push([url,opts]);const data=extra[url] || (trace && url.includes('/trace')?trace:run && url.startsWith('/api/admin/runs/') ? run : url==='/api/admin/overview'?overview:url==='/api/admin/arena'?{experiments:[],preferences:[],learning_signals:[],promotion_decisions:[]}:url==='/api/admin/operations/history'?[]:{});return{ok:authorization&&!data._httpStatus,status:data._httpStatus|| (authorization?200:401),json:async()=>data,blob:async()=>Buffer.from('fixture')};}};
+ vm.runInNewContext(source,context);return{nodes,listeners,calls,downloads,overview,context,ready:()=>new Promise(r=>setImmediate(r))};
 }
 test('Admin uses existing authenticated session and dedicated navigation',async()=>{const s=surface();await s.ready();assert.equal(s.calls[0][0],'/auth/session');assert.match(s.nodes['#admin-content'].innerHTML,/总览|概览/);assert.doesNotMatch(s.nodes['#admin-content'].innerHTML,/data-quadrant/);});
 test('Unauthenticated Admin does not load owner data',async()=>{const s=surface('/admin',false);await s.ready();assert.match(s.nodes['#admin-content'].innerHTML,/登录 Watt Admin/);assert.equal(s.calls.length,1);});
@@ -39,16 +40,28 @@ test('Zero qualification duration is not presented as instantaneous software pro
 test('Work has first-level navigation and bounded list without overview or Trace hydration',async()=>{
  const data={total:51,next_offset:50,items:[{work_id:'ordinary-work',title:'创建工律官网',product_name:'工律官网',state_label:'受阻',stage_label:'生产',result_label:'尚未形成 Candidate',pwu_count:1,issue_hint:'验证失败',raw_user_requirement:'原始需求',self_refine_count:1}],note:'owner 事实'};
  const s=surface('/admin/works',true,null,null,{'/api/admin/works?filter=ALL&limit=50&offset=0':data});await s.ready();
- const h=s.nodes['#admin-content'].innerHTML;for(const word of ['创建工律官网','受阻','查看 Trace','等待我','下一页'])assert.ok(h.includes(word));
+ const h=s.nodes['#admin-content'].innerHTML;for(const word of ['创建工律官网','受阻','查看 Trace','导出 AI 诊断包','等待我','下一页'])assert.ok(h.includes(word));
  assert.equal(s.calls.length,2);assert.ok(!s.calls.some(([p])=>p.includes('/trace')||p.includes('/overview')));
  assert.match(fs.readFileSync('src/spg/web/admin.html','utf8'),/data-admin-route="works">Work</);
  await s.listeners.click({target:{closest:()=>({dataset:{workOffset:'50'}})}});
  assert.ok(s.calls.at(-1)[0].endsWith('offset=50'));
 });
+test('Work diagnostic download is lazy and shows the server error',async()=>{
+ const data={total:1,next_offset:null,items:[{work_id:'ordinary-work',title:'诊断目标',state_label:'受阻',stage_label:'设计',result_label:'未形成',raw_user_requirement:'需求'}],note:'owner 事实'};
+ const path='/api/admin/works/ordinary-work/diagnostic?mode=compact';
+ const s=surface('/admin/works',true,null,null,{'/api/admin/works?filter=ALL&limit=50&offset=0':data});await s.ready();
+ assert.equal(s.calls.length,2);
+ await s.listeners.click({target:{closest:()=>({dataset:{diagnosticWork:'ordinary-work',diagnosticMode:'compact'}})}});
+ assert.equal(s.calls.at(-1)[0],path);assert.deepEqual(s.downloads,['watt-work-ordinary-work-diagnostic.zip']);
+ const failed=surface('/admin/works',true,null,null,{'/api/admin/works?filter=ALL&limit=50&offset=0':data,[path]:{_httpStatus:409,message:'导出容量超限'}});await failed.ready();
+ await failed.listeners.click({target:{closest:()=>({dataset:{diagnosticWork:'ordinary-work',diagnosticMode:'compact'},disabled:false})}});
+ assert.match(failed.nodes['#admin-notice'].textContent,/导出容量超限/);assert.equal(failed.downloads.length,0);
+});
 test('Ordinary incomplete Work reuses Trace modes and does not claim Quality PASS or delivery',async()=>{
  const t=traceFixture();Object.assign(t,{work:{work_id:'ordinary-work'},story:{product_name:'工律官网',latest_event:'Preview 已检查',latest_activity_at:'2026-10-07T01:00:00Z'},detail_level:'summary',preview:{status:'READY'},manifests:[],acceptance:[]});t.diagnosis.quality_label='受阻';t.diagnosis.production_result='尚无交付 Manifest';
  const s=surface('/admin/trace',true,null,t);await s.ready();const h=s.nodes['#admin-content'].innerHTML;
  assert.match(h,/这次 Work 的目标/);assert.match(h,/返回 Work/);assert.match(h,/Preview 已检查/);assert.doesNotMatch(h,/这个场景在检查什么|场景符合预期/);
+ assert.match(h,/完整证据包/);assert.match(h,/下载 trace.json/);
  assert.ok(s.calls.some(([p])=>p==='/api/admin/traces/work/ordinary-work?view=summary'));
  assert.equal((h.match(/role="tab"/g)||[]).length,9);
  await s.listeners.click({target:{closest:()=>({dataset:{traceTab:'artifacts'}})}});
@@ -60,4 +73,162 @@ test('Unauthenticated Work list never retrieves owner records',async()=>{const s
 test('Failed owner execution is visible even when the transport queue completed without Candidate',async()=>{
  const t=traceFixture();t.candidate=[];t.timeline=[{owner:'EXECUTION',title:'执行失败',state:'FAIL',source_ref:'execution_events:failure',timestamp:'2026-10-07T01:00:00Z',detail:{event_type:'ExecutionFailed'}},{owner:'EXECUTION',title:'执行器报告生产结果',state:'FAIL',source_ref:'provider_execution_reports:report',detail:{outcome:'FAILURE'}}];
  const s=surface('/admin/trace',true,null,t);await s.ready();await s.listeners.click({target:{closest:()=>({dataset:{traceTab:'execution'}})}});const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/执行失败/);assert.match(h,/执行器报告生产结果/);assert.match(h,/data-kind="bad">失败/);
+});
+
+
+test('Trace analysis is Human-triggered and history reads never create a Work',async()=>{
+ const data={total:1,next_offset:null,items:[{work_id:'ordinary-work',title:'分析目标',state:'COMPLETED',state_label:'已完成',raw_user_requirement:'需求'}],note:'owner'};
+ const path='/api/admin/works/ordinary-work/analyses';
+ const s=surface('/admin/works',true,null,null,{'/api/admin/works?filter=ALL&limit=50&offset=0':data,[path]:{items:[]}});await s.ready();
+ assert.match(s.nodes['#admin-content'].innerHTML,/用 Watt 分析 Trace/);
+ assert.ok(!s.calls.some(([,o])=>o.method==='POST'));
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisWork:'ordinary-work'}})}});
+ assert.equal(s.calls.at(-1)[0],path);assert.match(s.nodes['#admin-content'].innerHTML,/开始 Watt 分析/);
+ assert.ok(!s.calls.some(([,o])=>o.method==='POST'));
+});
+
+test('Analysis report escapes model text and preserves failed analysis evidence',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-one?view=summary';
+ const a={work_id:'ordinary-work',request_id:'request-one',status:'FAILED',failure:{error_type:'ProviderError'},kernel_result:{summary:'<script>bad()</script>'},report:null};
+ const s=surface('/admin',true,null,null,{[path]:a});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/未形成合格报告/);assert.match(h,/下载简明报告/);assert.doesNotMatch(h,/执行证据 JSON/);assert.equal((h.match(/role="tab"/g)||[]).length,4);
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'evidence'}})}});const detail=s.nodes['#admin-content'].innerHTML;assert.match(detail,/&lt;script&gt;/);assert.doesNotMatch(detail,/<script>bad/);
+});
+
+test('Analysis entry follows backend admission and explains active Work',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses';
+ const s=surface('/admin',true,null,null,{[path]:{items:[],can_analyze:false,work_state:'RUNNING'}});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisWork:'ordinary-work'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/type="submit" disabled/);assert.match(h,/该 Work 正在推进/);assert.match(h,/等待人工决定／验收/);
+ assert.ok(!s.calls.some(([,o])=>o.method==='POST'));
+});
+
+test('Analysis admission rejection is shown in Chinese rather than a raw code',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses?view=summary';
+ const s=surface('/admin',true,null,null,{[path]:{_httpStatus:409,code:'ANALYSIS_WORK_NOT_TERMINAL_OR_BLOCKED'}});await s.ready();
+ s.context.crypto={getRandomValues(b){b.fill(23);return b;}};s.context.FormData=class {get(){return 'Inspect current snapshot';}};
+ const f=new s.context.HTMLFormElement();f.dataset={traceAnalysisForm:'ordinary-work'};f.hasAttribute=n=>n==='data-trace-analysis-form';f.querySelector=()=>({});
+ await s.listeners.submit({target:f,preventDefault(){}});
+ assert.match(s.nodes['#admin-notice'].textContent,/该 Work 正在推进/);assert.doesNotMatch(s.nodes['#admin-notice'].textContent,/ANALYSIS_WORK_NOT_TERMINAL/);
+});
+
+
+test('Analysis submission generates a UUID on the existing HTTP origin and reuses it',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses?view=summary';
+ const response={work_id:'ordinary-work',request_id:'req',status:'FAILED',report:null};
+ const s=surface('/admin',true,null,null,{[path]:response});await s.ready();
+ s.context.crypto={getRandomValues(b){b.fill(23);return b;}};
+ s.context.FormData=class {get(){return 'Inspect historical Work';}};
+ const f=new s.context.HTMLFormElement();f.dataset={traceAnalysisForm:'ordinary-work'};
+ f.hasAttribute=name=>name==='data-trace-analysis-form';const button={};f.querySelector=()=>button;
+ await s.listeners.submit({target:f,preventDefault(){}});
+ const request=JSON.parse(s.calls.at(-1)[1].body);assert.match(request.request_id,/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+ await s.listeners.submit({target:f,preventDefault(){}});
+ assert.equal(JSON.parse(s.calls.at(-1)[1].body).request_id,request.request_id);
+});
+
+test('Analysis v2 renders scoped gaps safely and still reads legacy reports',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-one?view=summary';
+ const fact={statement:'Observed',citations:[]};
+ const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
+  timeline:[],findings:[],immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],deferred_items:[],
+  evidence_assessments:[{family:'PREVIEW_HTTP',availability:'PRESENT',statement:'HTTP receipt exists',check_id:'preview-check'}],
+  missing_evidence:[{statement:'<script>bad()</script>',availability:'INCOMPLETE_CAPTURE',check_id:'scope-check'}]};
+ const a={work_id:'ordinary-work',request_id:'request-one',status:'COMPLETED',report};
+ const s=surface('/admin',true,null,null,{[path]:a});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'evidence'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;
+ assert.match(h,/PREVIEW_HTTP.*PRESENT/);assert.match(h,/scope-check/);assert.match(h,/&lt;script&gt;/);assert.doesNotMatch(h,/<script>bad/);
+ report.missing_evidence=['legacy limitation'];delete report.evidence_assessments;
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'evidence'}})}});
+ assert.match(s.nodes['#admin-content'].innerHTML,/legacy limitation/);
+});
+
+test('Analysis v3 shows subject and governed regression scenario with escaping',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-v3?view=summary';
+ const fact={statement:'Observed',citations:[]};
+ const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
+  timeline:[],findings:[{finding_id:'incident',classification:'UNKNOWN',epistemic_status:'UNKNOWN',fact,
+   subject_evidence_id:'<subject>',analysis:'bounded',repository_citations:[],uncertainty:'unknown',
+   recommendation:'review',regression_qualification:'governed handling',regression_scenario:'<script>bad()</script>'}],
+  immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],deferred_items:[],missing_evidence:[]};
+ const a={work_id:'ordinary-work',request_id:'request-v3',status:'COMPLETED',report};
+ const s=surface('/admin',true,null,null,{[path]:a});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v3',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'improvements'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'evidence'}})}});assert.match(s.nodes['#admin-content'].innerHTML,/主体证据 &lt;subject&gt;/);assert.match(h,/回归场景：&lt;script&gt;/);
+ assert.doesNotMatch(h,/<script>bad/);
+});
+
+test('Analysis v4 displays the event-time boundary and escapes historical values',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-v4?view=summary';
+ const fact={statement:'Recorded snapshot',citations:[]};
+ const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
+  timeline:[{...fact,stage:'FAILURE',timestamp:'2026-10-05T10:00:00Z',time_interpretation:'记录创建时间；<unsafe>不证明恢复完成'}],
+  findings:[],immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],deferred_items:[],missing_evidence:[]};
+ const s=surface('/admin',true,null,null,{[path]:{status:'COMPLETED',report}});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v4',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'process'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;
+ assert.match(h,/记录创建时间；&lt;unsafe&gt;不证明恢复完成/);assert.doesNotMatch(h,/<unsafe>/);
+});
+
+
+test('Analysis v5 shows recommendation surfaces and preserves legacy rendering',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-v5?view=summary';
+ const fact={statement:'Recorded snapshot',citations:[]};
+ const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
+  timeline:[],findings:[],immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],
+  deferred_items:[{statement:'Inspect transfer',evidence_family:'<DELIVERY_TRANSFER>',finding_ids:['audit']}],missing_evidence:[]};
+ const s=surface('/admin',true,null,null,{[path]:{status:'COMPLETED',report}});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v5',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'improvements'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;
+ assert.match(h,/证据表面 &lt;DELIVERY_TRANSFER&gt;/);assert.doesNotMatch(h,/<DELIVERY_TRANSFER>/);
+ delete report.deferred_items[0].evidence_family;
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v5',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'improvements'}})}});
+ assert.match(s.nodes['#admin-content'].innerHTML,/Inspect transfer · 依据 audit/);
+});
+
+
+test('Analysis v7 preserves model wording and escapes separate checked boundaries and self-review',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-v7?view=summary';const fact={statement:'Recorded snapshot',citations:[]};
+ const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,
+  timeline:[{...fact,stage:'EXECUTION',time_interpretation:'自由解释',owner_time_boundary:'<owner-boundary>'}],
+  findings:[{finding_id:'f',classification:'UNKNOWN',epistemic_status:'UNKNOWN',fact,analysis:'保留模型原文',repository_citations:[],uncertainty:'自由限定',checked_boundaries:['<checked>'],recommendation:'继续取证',regression_qualification:'预算内恢复或停止'}],
+  immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],deferred_items:[],missing_evidence:[],evidence_assessments:[]};
+ const s=surface('/admin',true,null,null,{[path]:{status:'COMPLETED',report,native_self_review:{items:[{target_path:'/findings/0',judgment:'QUALIFIED',rationale:'<unsafe-review>'}]}}});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-v7',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'evidence'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'overview'}})}});assert.match(s.nodes['#admin-content'].innerHTML,/保留模型原文/);assert.match(h,/自由限定/);assert.match(h,/&lt;checked&gt;/);await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'process'}})}});assert.match(s.nodes['#admin-content'].innerHTML,/&lt;owner-boundary&gt;/);assert.match(h,/&lt;unsafe-review&gt;/);assert.match(h,/不能代替独立人工审查/);assert.doesNotMatch(h,/<unsafe-review>|<checked>|<owner-boundary>/);
+});
+
+
+test('Analysis field references display escaped observed values with original field identity',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-fields?view=summary';const fact={statement:'原始字段引用',citations:[{evidence_id:'owner-id',quote:null,field:'/semantic_input/argv',observed_value:'<original-value>'}]};
+ const report={original_objective:fact,expected_outcome:fact,actual_execution_path:fact,current_state:fact,timeline:[],findings:[],immediate_recovery:[],self_refine_opportunities:[],platform_improvements:[],deferred_items:[],missing_evidence:[]};
+ const s=surface('/admin',true,null,null,{[path]:{status:'COMPLETED',report}});await s.ready();await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-fields',analysisTarget:'ordinary-work'}})}});
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'process'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/&lt;original-value&gt;/);assert.match(h,/字段 \/semantic_input\/argv/);assert.doesNotMatch(h,/<original-value>/);
+});
+
+
+test('Analysis tabs switch locally and concise Markdown download never requests evidence JSON',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses/request-one?view=summary';
+ const a={work_id:'ordinary-work',request_id:'request-one',status:'FAILED',report:null,kernel_result:{summary:'工具不可用，修订未完成',inference_submissions:9,tool_effects:23},verification_receipts:[{verification:'FAIL',issues:[{location:['findings',0,'scope_check_ids'],reason:'PRESENT check cannot support absence'}]}]};
+ const s=surface('/admin',true,null,null,{[path]:a});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisResult:'request-one',analysisTarget:'ordinary-work'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;for(const label of ['失败现象','原因总结','改进方案','UNKNOWN'])assert.ok(h.includes(label));
+ const n=s.calls.length;await s.listeners.click({target:{closest:()=>({dataset:{analysisTab:'evidence'}})}});assert.equal(s.calls.length,n);
+ assert.match(s.nodes['#admin-content'].innerHTML,/推理 9 次/);assert.match(s.nodes['#admin-content'].innerHTML,/PRESENT check/);
+ await s.listeners.keydown({key:'Home',preventDefault(){},target:{closest:q=>q==='[data-analysis-tab]'?{dataset:{analysisTab:'evidence'}}:null}});
+ assert.match(s.nodes['#admin-content'].innerHTML,/id="analysis-tab-overview"[^>]*aria-selected="true"/);
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisDownload:'request-one',analysisTarget:'ordinary-work'}})}});
+ assert.equal(s.calls.at(-1)[0],'/api/admin/works/ordinary-work/analyses/request-one/report');
+ assert.deepEqual(s.downloads,['watt-work-ordinary-work-analysis-request-one.md']);assert.ok(!s.calls.some(([p])=>p.includes('detail=true')));
 });

@@ -271,6 +271,7 @@ def test_provider_failure_preserves_evidence_and_does_not_leak_exception_secrets
 
 def test_crash_capacity_lock_is_not_silently_stolen(tmp_path):
     s, snap, model = service(tmp_path)
+    s.root.mkdir(parents=True, exist_ok=True)  # A prior admitted, crashed investigation.
     (s.root / ".active-investigation").touch()
     with pytest.raises(QualityError, match="ANALYSIS_CAPACITY_BUSY"):
         asyncio.run(s.analyze("human:owner", uuid4_from(snap), AnalysisTrigger(request_id=uuid4(), rationale="Investigate")))

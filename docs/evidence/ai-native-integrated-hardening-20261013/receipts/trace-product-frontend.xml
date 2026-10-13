@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testcase name="Admin uses existing authenticated session and dedicated navigation" time="0.011684" classname="test"/>
+	<testcase name="Unauthenticated Admin does not load owner data" time="0.001051" classname="test"/>
+	<testcase name="Quality offers sealed holdout and separates canonical cohorts" time="0.000979" classname="test"/>
+	<testcase name="Operations preserves actual finite Worker capacity" time="0.017329" classname="test"/>
+	<testcase name="Infrastructure renders exact node placement and unknown health separately" time="0.001855" classname="test"/>
+	<testcase name="Assurance explicitly needs independent oracle" time="0.001225" classname="test"/>
+	<testcase name="Arena differences and approval require explicit Human submission" time="0.001155" classname="test"/>
+	<testcase name="Campaign page restores persisted Run and exposes safe controls and truthful queued case" time="0.001513" classname="test"/>
+	<testcase name="Completed run offers new immutable reruns and seals Holdout answers" time="0.001230" classname="test"/>
+	<testcase name="Historical Trace opens story with exact input, readable context and truthful non-deployment" time="0.002760" classname="test"/>
+	<testcase name="Story and diagnostic toggles use the same facts without new owner calls" time="0.001102" classname="test"/>
+	<testcase name="Trace escapes Human prose and preserves missing-data statements" time="0.001077" classname="test"/>
+	<testcase name="Operations exposes actual CPU, memory, disk and network on primary page" time="0.001792" classname="test"/>
+	<testcase name="Six primary navigation entries are human-readable and Workspace stays separate" time="0.000553" classname="test"/>
+	<testcase name="Trace summary avoids cockpit census and loads execution evidence only on demand" time="0.001409" classname="test"/>
+	<testcase name="Learning page starts with Human contribution and preserves explicit decisions" time="0.001207" classname="test"/>
+	<testcase name="Overview offers explicit periods and truthful unknown user metrics" time="0.001129" classname="test"/>
+	<testcase name="Run lists communicate intent and coverage before revision" time="0.000145" classname="test"/>
+	<testcase name="Execution shows actual tool target and qualified result instead of repeated generic records" time="0.001950" classname="test"/>
+	<testcase name="A/B uses exact comparison pairs rather than the newest promotion Holdout run" time="0.001171" classname="test"/>
+	<testcase name="Zero qualification duration is not presented as instantaneous software production" time="0.000863" classname="test"/>
+	<testcase name="Work has first-level navigation and bounded list without overview or Trace hydration" time="0.002362" classname="test"/>
+	<testcase name="Work diagnostic download is lazy and shows the server error" time="0.002024" classname="test"/>
+	<testcase name="Ordinary incomplete Work reuses Trace modes and does not claim Quality PASS or delivery" time="0.001165" classname="test"/>
+	<testcase name="Unauthenticated Work list never retrieves owner records" time="0.000656" classname="test"/>
+	<testcase name="Failed owner execution is visible even when the transport queue completed without Candidate" time="0.001064" classname="test"/>
+	<testcase name="Trace analysis is Human-triggered and history reads never create a Work" time="0.001215" classname="test"/>
+	<testcase name="Analysis report escapes model text and preserves failed analysis evidence" time="0.002057" classname="test"/>
+	<testcase name="Analysis entry follows backend admission and explains active Work" time="0.001329" classname="test"/>
+	<testcase name="Analysis admission rejection is shown in Chinese rather than a raw code" time="0.001874" classname="test"/>
+	<testcase name="Analysis submission generates a UUID on the existing HTTP origin and reuses it" time="0.001026" classname="test"/>
+	<testcase name="Analysis v2 renders scoped gaps safely and still reads legacy reports" time="0.001075" classname="test"/>
+	<testcase name="Analysis v3 shows subject and governed regression scenario with escaping" time="0.001191" classname="test"/>
+	<testcase name="Analysis v4 displays the event-time boundary and escapes historical values" time="0.001071" classname="test"/>
+	<testcase name="Analysis v5 shows recommendation surfaces and preserves legacy rendering" time="0.001016" classname="test"/>
+	<testcase name="Analysis v7 preserves model wording and escapes separate checked boundaries and self-review" time="0.001067" classname="test"/>
+	<testcase name="Analysis field references display escaped observed values with original field identity" time="0.000930" classname="test"/>
+	<testcase name="Analysis tabs switch locally and concise Markdown download never requests evidence JSON" time="0.001986" classname="test"/>
+	<!-- tests 38 -->
+	<!-- suites 0 -->
+	<!-- pass 38 -->
+	<!-- fail 0 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 0 -->
+	<!-- todo 0 -->
+	<!-- duration_ms 226.8949 -->
+</testsuites>

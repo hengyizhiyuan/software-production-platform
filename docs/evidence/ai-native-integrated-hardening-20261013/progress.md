@@ -105,3 +105,11 @@ Trace scoped 移植来源 `0e5ba3a985fecd659097d894bb17197429aae55e`，文件 SH
 联调确认并修复：Native registry 对已注册非内置工具错误访问未初始化 connector；新 Admin 只读/export 入口不应提前创建调查资源，改为通过原鉴权与 Work admission 后延迟创建；Context 复用 Trace 的容量内保留可用反馈策略和只能缩减的工具选择。原 C3 NativeContractExecutionView、精确来源、预算和全部效应门不回滚。
 
 受影响组合 `native-common-stable-1.xml` 423/423 PASS；PostgreSQL `postgresql-native-integration-2.xml` 4/4 PASS，含鉴权/CSRF/原 Owner 不变、导出以及 Formation 持久恢复。第一次 Trace import 和联合失败、缺 jsonschema 的 collection failure、PostgreSQL 只读目录失败全部保留；不能计为 PASS。稳定组合与后续确切镜像的真实非 Holdout、实际 Trace/G0、独立 Holdout 尚待完成。
+
+## 恢复及 Trace 统一基线指令（2026-10-13）
+
+Human 明确指定当前 C3 分支为后续相关能力的统一开发与验证基线；`codex/watt-trace-self-analysis` 停止新增开发，保留 `0e5ba3a985fecd659097d894bb17197429aae55e` 历史与资格作为迁移依据，不再计划整分支 merge、不删除。
+
+已核对并增量迁移 Admin 分析入口/交互、状态/历史、报告 Tabs、安全引用与 Markdown/诊断下载及对应 JS 回归，复用已迁 API/Owner 持久化与 Native 调查能力。前端 38/38 通过。Guardian 独立仓库与治理边界不变。
+
+上一轮 `31028c15` image `f18b6021...` 的安装身份 PASS，但 installed test suite 421 PASS/2 FAIL：崩溃锁 fixture 预期构造服务立即创建目录；UI 测试从测试树猜测 src 路径。修正测试准备与 installed resource 读取后局部 2/2 PASS；不修改 Runtime 或将原镜像测试 FAIL 追认为 PASS。原 receipt 与修正分别保留；下一冻结包括 UI 迁移和这两项测试修正。

@@ -2155,9 +2155,10 @@ def test_openai_quota_response_is_typed_and_parked_without_retry(
 
 
 def test_native_queue_and_controls_are_human_visible_without_claiming_trust() -> None:
-    root = Path(__file__).resolve().parents[1]
-    html = (root / "src" / "spg" / "web" / "advanced.html").read_text(encoding="utf-8")
-    javascript = (root / "src" / "spg" / "web" / "app.js").read_text(encoding="utf-8")
+    from importlib.resources import files
+    web = files("spg.web")
+    html = web.joinpath("advanced.html").read_text(encoding="utf-8")
+    javascript = web.joinpath("app.js").read_text(encoding="utf-8")
     for identity in (
         "execution-queue-state",
         "execution-queue-history",
@@ -2180,7 +2181,7 @@ def test_native_queue_and_controls_are_human_visible_without_claiming_trust() ->
     ]
     assert "trusted_result" not in queue_projection
     assert "Verification" not in queue_projection
-    primary = (root / "src" / "spg" / "web" / "experience.js").read_text(encoding="utf-8")
+    primary = web.joinpath("experience.js").read_text(encoding="utf-8")
     assert "function executionCopy(execution)" in primary
     assert "尚未进入 Worker 队列" in primary
     assert "独立验证已通过" in primary
