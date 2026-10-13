@@ -1055,7 +1055,12 @@ def test_context_compaction_preserves_exact_invariants_and_evidence_identity() -
     assert contract_fact["payload"] == contract.contract_payload
     assert checkpoint_fact["content_digest"] == checkpoint.content_digest
     assert checkpoint_fact["semantic_manifest"]["compacted"] is True
-    assert request.previous_results[0]["output"]["compacted"] is True
+    # Removing duplicate checkpoint history now leaves room for the actionable
+    # bounded log excerpt. Do not discard it just to mark every result compact.
+    selected = request.previous_results[0]["output"]["stdout"]
+    assert selected["selected_tail"] == output["stdout"][-2048:]
+    assert selected["full_receipt_digest"] == previous.output_digest
+    assert NativeContextAssembler._size(request) <= 6000
     assert request.previous_results[0]["output_digest"] == previous.output_digest
 
 

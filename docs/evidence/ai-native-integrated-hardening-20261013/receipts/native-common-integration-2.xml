@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="2" failures="0" skipped="0" tests="2" time="14.096" timestamp="2026-10-13T07:53:41.067735+00:00" hostname="0658b03c317e"><testcase classname="" name="tests.test_c3_generation_binding_prerequisites" time="0.000"><error message="collection failure">ImportError while importing test module '/work/tests/test_c3_generation_binding_prerequisites.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_generation_binding_prerequisites.py:8: in &lt;module&gt;
+    from jsonschema import Draft202012Validator
+E   ModuleNotFoundError: No module named 'jsonschema'</error></testcase><testcase classname="" name="tests.test_c3_module_adaptation" time="0.000"><error message="collection failure">ImportError while importing test module '/work/tests/test_c3_module_adaptation.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_c3_module_adaptation.py:6: in &lt;module&gt;
+    from jsonschema import Draft202012Validator
+E   ModuleNotFoundError: No module named 'jsonschema'</error></testcase></testsuite></testsuites>

@@ -1,0 +1,20 @@
+{
+  "source_revision": "0e5ba3a985fecd659097d894bb17197429aae55e",
+  "source_tree": "05832482a811fa7247574a6f4bbfcfb2efa5614f",
+  "raw_source_sha256": {
+    "src/spg/application/trace_analysis.py": "8bd48a7dc30295e7dfeb002de2e66918d7562e388f419efa88b29c1bbcd9044b",
+    "src/spg/application/trace_analysis_presentation.py": "bbdc7013ba14f5eeaa04bc67559b0f4aa758c5c21010ce546765ba8075db3192",
+    "src/spg/domain/trace_analysis.py": "76e6f36a2fa936d7e8e7b7dc66808f73364cf984143c2edf8f23d0d25d777f38",
+    "src/spg/infrastructure/trace_analysis_evidence.py": "5d5980b04dbaf6c756f954f7fdf228947e15485a8eba8c07b8eeae6099ae12c5",
+    "src/spg/evaluation/work_diagnostic_export.py": "eb78507ccfd86ac42bb7e7923297a8b31175236dc10329f1e59896f86492659a",
+    "tests/test_trace_analysis.py": "10c9414539b77edce53bade2139bb6e34aa1e8802301bfca943cbc16384e03db",
+    "tests/test_work_diagnostic_export.py": "b1c6570c0ea0942b6a1232ac888b78fa0d85080e6d824d07eaa8d3b3c576e934",
+    "tests/integration/test_trace_analysis.py": "341e1e2384a43add26cfff1ade9c1e14c19f2215281188bef1cbfba66aa9654f",
+    "tests/integration/test_work_diagnostic_export.py": "a8bac880935064bc1486310263f849c7119a13ff8634e5c5fc69d3af28e19910"
+  },
+  "targeted_wiring_patch_sha256": "46eeb430938f34505f83967182e445f7864863e58b5ecd710ff1e13f2742dbd4",
+  "whole_branch_merged": false,
+  "production_modified": false,
+  "historical_evidence_modified": false,
+  "trace_old_qualification_not_claimed_for_new_combination": true
+}

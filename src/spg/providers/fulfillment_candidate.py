@@ -376,6 +376,12 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
         _project_construction_route_contract(schema, "_FulfillmentCompactRoute", inventory, capabilities)
         schema["properties"]["remove"]["description"] = (
             "Explicit original-route removals only. Removal is not a coverage repair: the complete derived candidate must retain every original contribution and pass unchanged validation.")
+        if (owner_preconditions or {}).get("semantic_selection_input_contract") == _PRIMARY_MEANING_INPUT_CONTRACT:
+            choices = _formation_binding_choices(inventory, capabilities, owner_preconditions)
+            operand = _qualified_operand_generation_schema(inventory, capabilities, choices,
+                enforce_owner_prerequisites=True)
+            schema["$defs"]["_FulfillmentRouteReplacement"]["properties"]["route"] = deepcopy(operand)
+            schema["properties"]["append"]["items"] = deepcopy(operand)
         return schema
     if (owner_preconditions or {}).get("candidate_construction_contract") == _CANDIDATE_CONSTRUCTION_CONTRACT:
         from spg.providers.semantic_wire import _provider_strict_output_schema
@@ -383,6 +389,16 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
         _project_construction_route_contract(schema, "_FulfillmentSemanticRoute", inventory, capabilities)
         schema["properties"]["routes"]["description"] = (
             "Complete proposed component coverage for EVERY immutable source identity, including equal-text sources. Multiple legal components/consumers are allowed. Coverage is necessary geometry, not proof of semantic fulfillment.")
+        # The same pre-existing source/consumer proof requirements apply to
+        # semantic proposals. Changing representation must not drop them.
+        if (owner_preconditions or {}).get("semantic_selection_input_contract") == _PRIMARY_MEANING_INPUT_CONTRACT:
+            choices = _formation_binding_choices(inventory, capabilities, owner_preconditions)
+            schema["properties"]["routes"]["items"] = _qualified_operand_generation_schema(
+                inventory, capabilities, choices, enforce_owner_prerequisites=True,
+                route_definition="_FulfillmentSemanticRoute")
+        schema["properties"]["routes"]["allOf"] = [
+            {"contains": {"type": "object", "properties": {"s": {"enum": [i]}}, "required": ["s"]}}
+            for i in range(len(inventory["sources"]))]
         return schema
     schema = _fulfillment_wire_schema()
     if wire_metadata is not None:
@@ -557,7 +573,8 @@ def _whole_source_retention_prerequisite(choice):
     return None
 
 
-def _qualified_operand_generation_schema(inventory, capabilities, choices, *, enforce_owner_prerequisites=False):
+def _qualified_operand_generation_schema(inventory, capabilities, choices, *, enforce_owner_prerequisites=False,
+                                        route_definition="_FulfillmentCompactRoute"):
     """Request a subset of existing Wire operands, never choose semantic routes.
 
     Geometry depends only on original source identity; proof operands depend
@@ -575,7 +592,8 @@ def _qualified_operand_generation_schema(inventory, capabilities, choices, *, en
             key = None if alternatives is None else tuple(tuple(group) for group in alternatives)
             provenance_groups.setdefault(key, {}).setdefault(choice["source"], []).append(capability)
     geometry = [{"properties": {"s": {"enum": indices}}, "anyOf": [
-        {"properties": {"q": {"type": "null"}, "a": {"enum": [0]}, "z": {"enum": [length]}}},
+        {"properties": {"q": {"type": "null"}, **({"a": {"enum": [0]}, "z": {"enum": [length]}}
+            if route_definition == "_FulfillmentCompactRoute" else {})}},
         {"properties": {"q": {"type": "string", "minLength": 1}}}]}
         for length, indices in geometry_groups.items()]
     provenance = []
@@ -601,7 +619,7 @@ def _qualified_operand_generation_schema(inventory, capabilities, choices, *, en
                     operand["maxItems"] = 0
                 branch["properties"]["u"] = operand
             provenance.append(branch)
-    conditions = [{"$ref": "#/$defs/_FulfillmentCompactRoute"},
+    conditions = [{"$ref": "#/$defs/" + route_definition},
                   {"anyOf": geometry}, {"anyOf": provenance}]
     if enforce_owner_prerequisites:
         domains, partial_background = {}, {}

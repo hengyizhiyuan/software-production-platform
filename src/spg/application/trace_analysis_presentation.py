@@ -1,0 +1,104 @@
+"""Small, read-only projections of saved analysis receipts; no new inference."""
+from html import escape
+import re
+
+
+def analysis_summary(record):
+    """Exclude candidates, snapshots and execution payloads from the user view."""
+    result = {key: record.get(key) for key in (
+        "work_id", "request_id", "status", "phase", "started_at", "finished_at",
+        "verification", "semantic_qualification", "authority", "report",
+        "native_self_review", "liveness")}
+    kernel = record.get("kernel_result") or {}
+    result["kernel_result"] = {key: kernel.get(key) for key in (
+        "terminal_outcome", "inference_submissions", "tool_effects",
+        "summary", "residual_obligations")}
+    result["failure"] = {key: value for key, value in (record.get("failure") or {}).items()
+                         if key in {"error_type", "reason_code", "failure_code", "phase", "validation_issues"}}
+    receipts = record.get("verification_receipts") or []
+    result["verification_receipts"] = [{
+        "verification": item.get("verification"),
+        "draft_id": item.get("draft_id"),
+        "omitted_issues": item.get("omitted_issues", 0),
+        "issues": [{key: issue[key] for key in (
+            "type", "reason", "location", "evidence_id", "check_observation") if key in issue}
+            for issue in item.get("issues", [])[:12]],
+    } for item in receipts[-6:]]
+    # Translate protocol rejection codes for display only. No model prose is
+    # classified, repaired, or promoted by this projection.
+    issues = [issue for item in result["verification_receipts"] for issue in item["issues"]]
+    reason = str(issues[-1].get("reason", "")) if issues else ""
+    code = reason.split(";", 1)[0].split(":", 1)[0]
+    labels = {
+        "PRESENT_CHECK_CANNOT_SUPPORT_MISSING_FIELD_FINDING": "草稿曾把已存在的证据用作缺失证据，被校验拒绝。",
+        "MISSING_EVIDENCE_CONTRADICTS_LOOKUP_OR_UNCHECKED": "草稿的证据缺口与实际核查结果不一致，被校验拒绝。",
+        "MISSING_EVIDENCE_REQUIRES_SCOPED_FINDING": "草稿的证据缺口没有关联到对应的分析事件，被校验拒绝。",
+        "ORIGINAL_FIELD_REFERENCE_NOT_CAPTURED": "草稿引用了未捕获的原始字段，被校验拒绝。",
+        "ORIGINAL_FIELD_REFERENCE_NOT_FULLY_READ": "草稿引用了尚未完整读取的原始字段，被校验拒绝。",
+    }
+    result["failure_summary"] = (labels.get(code, "本次分析未形成通过最终校验的报告，具体未确认原因保持 UNKNOWN。")
+        + ("最终仍未形成合格报告；详细终止说明与拒绝项见证据与校验。" if code in labels else "")) if not result["report"] else None
+    result["omitted_verification_receipts"] = max(0, len(receipts) - 6)
+    result["boundary"] = "保存记录的展示摘要；失败草稿未作为生产诊断结论，UNKNOWN 不代表没有问题。"
+    return result
+
+
+def concise_analysis_markdown(record):
+    """Human-readable download, with provenance and bounded excerpts, not raw JSON."""
+    value = analysis_summary(record)
+    report = value.get("report")
+    def text(raw, limit=1200):
+        raw = str(raw or "UNKNOWN")
+        return re.sub(r"([\\`*_\[\]#|])", lambda match: "\\" + match.group(0), escape(raw[:limit] + ("（摘录；完整内容见页面对应 Tab）" if len(raw) > limit else ""), quote=False))
+    def paragraph(raw, limit=1200):
+        return text(raw, limit)
+    def refs(fact):
+        return "引用：" + text("；".join(
+            str(c.get("evidence_id")) + (" " + str(c["field"]) if c.get("field") is not None else "")
+            for c in fact.get("citations", [])), 1600)
+    sections = ["# Watt Trace 简明分析报告", paragraph(
+        f"Work：{value['work_id']} / 分析请求：{value['request_id']}", 500),
+        paragraph(f"分析状态：{value['status']} / 引用校验：{value['verification']}", 500),
+        paragraph("报告供人工审查；根因假设不等于已证实根因。本文件摘录重点，不包含执行证据整包。", 500)]
+    if report:
+        sections += ["## 目标与当前状态"]
+        for key in ("original_objective", "current_state"):
+            fact = report.get(key) or {}
+            sections += [paragraph(fact.get("statement")), refs(fact)]
+        for finding in report.get("findings", [])[:3]:
+            fact = finding.get("fact") or {}
+            sections += ["## 失败现象 / 偏离", paragraph(fact.get("statement")), refs(fact),
+                "## 原因总结", paragraph(f"{finding.get('epistemic_status', 'UNKNOWN')} · {finding.get('classification', 'UNKNOWN')}", 200),
+                paragraph(finding.get("analysis")), paragraph("边界：" + str(finding.get("uncertainty", "UNKNOWN"))),
+                "源码引用：" + text("；".join(str(c.get("evidence_id")) for c in finding.get("repository_citations", [])), 1200),
+                "## 改进方案", paragraph(finding.get("recommendation")),
+                paragraph("回归资格：" + str(finding.get("regression_qualification", "UNKNOWN")))]
+        if not report.get("findings"):
+            sections += [paragraph("未形成具体偏离的 Finding，原因保持 UNKNOWN。")]
+        for title, key in (("立即恢复", "immediate_recovery"), ("Self-Refine", "self_refine_opportunities"),
+                           ("平台改进", "platform_improvements"), ("延期事项", "deferred_items")):
+            sections += ["### " + title]
+            for item in report.get(key, [])[:3]:
+                sections += [paragraph(item.get("statement"), 900),
+                             "依据：" + text("、".join(item.get("finding_ids", [])), 300)]
+        sections += ["## 生产过程摘录"]
+        for event in report.get("timeline", [])[:12]:
+            sections += [paragraph(f"{event.get('stage')} · {event.get('timestamp') or '未记录单一事件时间'}", 200),
+                         paragraph(event.get("statement"), 350), refs(event)]
+        sections += ["## 缺失证据 / UNKNOWN"]
+        for gap in report.get("missing_evidence", [])[:6]:
+            sections += [paragraph(gap if isinstance(gap, str) else gap.get("statement"), 500)]
+    else:
+        kernel = value["kernel_result"]
+        sections += ["## 失败现象", paragraph("本次分析未形成合格报告；原 Work 的根因保持 UNKNOWN。"),
+            "## 原因总结（分析流程自身）", paragraph(value["failure_summary"], 500),
+            paragraph("终态：" + str(kernel.get("terminal_outcome") or "UNKNOWN"), 200),
+            paragraph("错误类型：" + str(value["failure"].get("error_type") or "未记录额外异常"), 200),
+            "### 保存的校验反馈"]
+        for receipt in value["verification_receipts"][-3:]:
+            for issue in receipt["issues"][:4]:
+                sections += [paragraph(f"{issue.get('location', '')}：{issue.get('reason') or issue.get('type')}", 700)]
+        sections += ["## 改进方案", paragraph(
+            "依据保存的校验反馈修订引用与证据范围，在原权限和预算内完成自审；未验证的生产原因保持 UNKNOWN。若仍无法形成报告，保留失败记录供人工审查。", 500)]
+    sections += [paragraph(f"推理：{value['kernel_result'].get('inference_submissions')} / 工具：{value['kernel_result'].get('tool_effects')}", 200)]
+    return ("\n\n".join(sections) + "\n").encode("utf-8")

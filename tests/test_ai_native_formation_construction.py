@@ -286,3 +286,30 @@ def test_missing_primary_source_is_locally_added_not_silently_covered_by_support
     assert construction["appended_count"] == 1
     assert construction["replaced_original_ordinals"] == construction["removed_original_ordinals"] == []
     assert construction["retained_original_ordinals"] == list(range(len(original["routes"])))
+
+
+def test_semantic_and_edit_schemas_keep_existing_conditional_owner_proofs():
+    from jsonschema import Draft202012Validator
+    _bindings,_provider,calls,_args,_touched,_original = local_edit_case(first="semantic-source-proof")
+    first_request,first_input = calls[0]
+    second_request,second_input = calls[1]
+    original = second_input["owner_source_preconditions"]["candidate_construction_state"]["repair_basis"]["original_wire"]
+    semantic = {"routes":[{k:v for k,v in r.items() if k not in {"a","z"}}
+        for r in original["routes"]]}
+    schema = first_request["output_schema"]
+    Draft202012Validator.check_schema(schema)
+    assert not Draft202012Validator(schema).is_valid(semantic)  # required u was removed
+    edit_schema = second_request["output_schema"]
+    Draft202012Validator.check_schema(edit_schema)
+    replacement = json.loads(second_input["same_basis_validation_feedback"])
+    assert replacement["violations"]  # exact bound feedback, not a model repair
+    # A source cannot disappear merely because another source cites it as u.
+    coverage_only = {"type":"object","properties":{"routes":{
+        "type":"array","allOf":schema["properties"]["routes"]["allOf"]}}}
+    assert Draft202012Validator(coverage_only).is_valid(semantic)
+    removed = semantic["routes"][0]["s"]
+    semantic["routes"] = [r for r in semantic["routes"] if r["s"] != removed]
+    assert not Draft202012Validator(coverage_only).is_valid(semantic)
+    operand = edit_schema["properties"]["append"]["items"]
+    assert operand == edit_schema["$defs"]["_FulfillmentRouteReplacement"]["properties"]["route"]
+    assert operand["allOf"][0]["$ref"] == "#/$defs/_FulfillmentCompactRoute"

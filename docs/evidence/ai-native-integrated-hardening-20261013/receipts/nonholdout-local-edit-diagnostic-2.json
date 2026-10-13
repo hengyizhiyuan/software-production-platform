@@ -1,0 +1,548 @@
+{
+  "schema": "nonholdout-local-edit-and-correspondence-diagnostic-v1",
+  "holdout_used": false,
+  "cases": [
+    {
+      "case": "ordinary34",
+      "attempts": [
+        {
+          "attempt": 1,
+          "failure_ref": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "edit_schema_errors": [],
+          "violations": [
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 10,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  6
+                ],
+                [
+                  7,
+                  10
+                ],
+                [
+                  11,
+                  16
+                ],
+                [
+                  17,
+                  24
+                ],
+                [
+                  25,
+                  28
+                ],
+                [
+                  29,
+                  38
+                ],
+                [
+                  39,
+                  42
+                ],
+                [
+                  43,
+                  48
+                ],
+                [
+                  49,
+                  50
+                ],
+                [
+                  51,
+                  61
+                ],
+                [
+                  62,
+                  72
+                ]
+              ],
+              "original_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 11,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  2
+                ],
+                [
+                  3,
+                  6
+                ],
+                [
+                  7,
+                  14
+                ],
+                [
+                  15,
+                  23
+                ],
+                [
+                  24,
+                  27
+                ],
+                [
+                  28,
+                  34
+                ],
+                [
+                  35,
+                  37
+                ],
+                [
+                  38,
+                  44
+                ],
+                [
+                  45,
+                  55
+                ]
+              ],
+              "original_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 12,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  3
+                ],
+                [
+                  4,
+                  10
+                ],
+                [
+                  11,
+                  14
+                ],
+                [
+                  15,
+                  19
+                ],
+                [
+                  20,
+                  22
+                ],
+                [
+                  23,
+                  42
+                ],
+                [
+                  43,
+                  47
+                ],
+                [
+                  48,
+                  59
+                ]
+              ],
+              "original_text_sha256": "57cb451611ece48c519970730d053123646136b1b1f355133abc42fe7384638f",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 13,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  12
+                ],
+                [
+                  13,
+                  15
+                ],
+                [
+                  16,
+                  19
+                ],
+                [
+                  20,
+                  25
+                ],
+                [
+                  26,
+                  34
+                ],
+                [
+                  35,
+                  42
+                ],
+                [
+                  43,
+                  46
+                ],
+                [
+                  47,
+                  56
+                ],
+                [
+                  57,
+                  62
+                ]
+              ],
+              "original_text_sha256": "739b15bc79375f46eff063aa8ddbff21cbeac67890f413337406f4719dc627f8",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 14,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  12
+                ],
+                [
+                  13,
+                  22
+                ],
+                [
+                  23,
+                  27
+                ],
+                [
+                  28,
+                  31
+                ],
+                [
+                  32,
+                  37
+                ],
+                [
+                  38,
+                  45
+                ]
+              ],
+              "original_text_sha256": "e5baed22a33dfb818a6a438f8e1c7595598c7c6c26b6caccf1945a979328be7c",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 15,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ],
+                [
+                  25,
+                  36
+                ]
+              ],
+              "original_text_sha256": "8f73931419beb5ccb80dbdd5aa3aa609513cff870ae39d6181a04d0b4fb9b1bd",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 16,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ],
+                [
+                  25,
+                  37
+                ]
+              ],
+              "original_text_sha256": "5b7cd03090c3931b77a8929c4e8aab12368a7f8fcb5d941b155013aac44be6fd",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 17,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ],
+                [
+                  25,
+                  31
+                ],
+                [
+                  32,
+                  38
+                ]
+              ],
+              "original_text_sha256": "8314fcbae674bc2d2d5f514db6776b0ba01afb427ff4a931c0be2907609cf114",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            },
+            {
+              "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+              "source": 18,
+              "uncovered_codepoint_ranges": [
+                [
+                  0,
+                  8
+                ],
+                [
+                  9,
+                  13
+                ],
+                [
+                  14,
+                  18
+                ],
+                [
+                  19,
+                  24
+                ],
+                [
+                  25,
+                  33
+                ],
+                [
+                  34,
+                  44
+                ]
+              ],
+              "original_text_sha256": "43c16d3a65f35160438c5b7952e55d3da51f243d4e0ba2a150578155c39b3786",
+              "observed_source_route_indices": [],
+              "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+            }
+          ],
+          "raw_shape_fields": [
+            "routes"
+          ],
+          "wire_sha256": "741d48a59d22ac35a44a57ab9915b2abc9ea6b1a1275b8d6c493bb5ee5c41c15"
+        },
+        {
+          "attempt": 2,
+          "failure_ref": "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID",
+          "edit_schema_errors": [
+            {
+              "raw_decode_error": "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID",
+              "cause_type": "ValueError"
+            },
+            {
+              "cause": "OBLIGATION_FORMATION_WIRE_DUPLICATE_KEY"
+            }
+          ],
+          "violations": [
+            {
+              "code": "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID"
+            }
+          ],
+          "raw_shape_fields": [
+            "append",
+            "basis",
+            "d",
+            "h",
+            "remove",
+            "replace",
+            "v"
+          ],
+          "wire_sha256": "3c9181610a946c1daa6834633194df6ef07c53d2876c6b15e648e372989a0091"
+        }
+      ]
+    },
+    {
+      "case": "ordinary41",
+      "attempts": [
+        {
+          "attempt": 1,
+          "failure_ref": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "edit_schema_errors": [],
+          "violations": [
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 13,
+              "source": 13,
+              "component_id": "45e3a589302e592560830606d2f5eb8bb3f4ecfe9038faac3aa1ee8eb5f9cd3e"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 14,
+              "source": 14,
+              "component_id": "17af930b0f4d4bba69570b6a49b16caf74dee23ebd8edd34255d798118a3101b"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 15,
+              "source": 15,
+              "component_id": "53e6cd0fe914b3c5f6e0a8fefa505b4fc74c791680b74ca34dc1f55793a23567"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 16,
+              "source": 16,
+              "component_id": "a4ddf952c134d19c42281b949df770bbb2f35300593caa2297fd5748861afa88"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 17,
+              "source": 17,
+              "component_id": "c3d9c2e1a36286fe81cad8373fa91099244afb3f732045cad86ec219e02c731c"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 18,
+              "source": 18,
+              "component_id": "06b50efc6e9c81ef77cb2ac9d2b0fb1c7e6f2a2ee68c119951ea6c86f1f7b58a"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 19,
+              "source": 19,
+              "component_id": "46466d268653516faf65cab0cd3980c2713a686b0e5c0b3c37094deafc5425c8"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 20,
+              "source": 20,
+              "component_id": "9cc6301185c9bb939029a65179799619745c6b86d3b46c8c4c66b9da6aa6b3bc"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 21,
+              "source": 21,
+              "component_id": "7449c15de7f02f96ec18b84c268294a36e695312dd87a92a6255a256e4aa7abd"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 22,
+              "source": 22,
+              "component_id": "74bc12f583f73d32ac8cf4b97352743940e196c857f54b82c7ed9f66871c2864"
+            }
+          ],
+          "raw_shape_fields": [
+            "routes"
+          ],
+          "wire_sha256": "c9dcc35312006ac94471631d8f07f513d241fd0c0863bfb53d0d0e44074432ff"
+        },
+        {
+          "attempt": 2,
+          "failure_ref": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "edit_schema_errors": [],
+          "violations": [
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 13,
+              "source": 13,
+              "component_id": "45e3a589302e592560830606d2f5eb8bb3f4ecfe9038faac3aa1ee8eb5f9cd3e"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 14,
+              "source": 14,
+              "component_id": "17af930b0f4d4bba69570b6a49b16caf74dee23ebd8edd34255d798118a3101b"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 15,
+              "source": 15,
+              "component_id": "53e6cd0fe914b3c5f6e0a8fefa505b4fc74c791680b74ca34dc1f55793a23567"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 16,
+              "source": 16,
+              "component_id": "a4ddf952c134d19c42281b949df770bbb2f35300593caa2297fd5748861afa88"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 17,
+              "source": 17,
+              "component_id": "c3d9c2e1a36286fe81cad8373fa91099244afb3f732045cad86ec219e02c731c"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 18,
+              "source": 18,
+              "component_id": "06b50efc6e9c81ef77cb2ac9d2b0fb1c7e6f2a2ee68c119951ea6c86f1f7b58a"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 19,
+              "source": 19,
+              "component_id": "46466d268653516faf65cab0cd3980c2713a686b0e5c0b3c37094deafc5425c8"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 20,
+              "source": 20,
+              "component_id": "9cc6301185c9bb939029a65179799619745c6b86d3b46c8c4c66b9da6aa6b3bc"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 21,
+              "source": 21,
+              "component_id": "7449c15de7f02f96ec18b84c268294a36e695312dd87a92a6255a256e4aa7abd"
+            },
+            {
+              "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+              "route": 22,
+              "source": 22,
+              "component_id": "74bc12f583f73d32ac8cf4b97352743940e196c857f54b82c7ed9f66871c2864"
+            }
+          ],
+          "raw_shape_fields": [
+            "append",
+            "basis",
+            "d",
+            "h",
+            "remove",
+            "replace",
+            "v"
+          ],
+          "wire_sha256": "1a91a64f6633ecedb300eeb0f5f73fcc56db9d881c96a9b8f28c64390702ae20"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="4" time="41.458" timestamp="2026-10-13T07:58:03.637937+00:00" hostname="e328b48bdaff"><testcase classname="tests.integration.test_trace_analysis" name="test_analysis_api_auth_csrf_scope_and_no_original_owner_mutation" time="4.084" /><testcase classname="tests.integration.test_work_diagnostic_export" name="test_design_stage_owner_isolation_auth_and_read_only" time="2.745"><failure message="OSError: [Errno 30] Read-only file system: '/work/.watt'">/usr/local/lib/python3.13/pathlib/_local.py:722: in mkdir
+    os.mkdir(self, mode)
+E   FileNotFoundError: [Errno 2] No such file or directory: '/work/.watt/native-executor/trace-analysis/blobs'
+
+During handling of the above exception, another exception occurred:
+/usr/local/lib/python3.13/pathlib/_local.py:722: in mkdir
+    os.mkdir(self, mode)
+E   FileNotFoundError: [Errno 2] No such file or directory: '/work/.watt/native-executor/trace-analysis'
+
+During handling of the above exception, another exception occurred:
+/usr/local/lib/python3.13/pathlib/_local.py:722: in mkdir
+    os.mkdir(self, mode)
+E   FileNotFoundError: [Errno 2] No such file or directory: '/work/.watt/native-executor'
+
+During handling of the above exception, another exception occurred:
+tests/integration/test_work_diagnostic_export.py:73: in test_design_stage_owner_isolation_auth_and_read_only
+    with client(db, tmp_path)[0] as api:
+         ^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_work_diagnostic_export.py:31: in client
+    install_admin(api, db, settings)
+src/spg/api/admin.py:28: in install_admin
+    trace_analysis = TraceAnalysisService(database, settings, exporter=diagnostic_exports)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/trace_analysis.py:304: in __init__
+    self.storage = ContentAddressedStorage(self.root / "blobs")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/infrastructure/executor_runtime/local_storage.py:38: in __init__
+    self.root.mkdir(parents=True, exist_ok=True)
+/usr/local/lib/python3.13/pathlib/_local.py:726: in mkdir
+    self.parent.mkdir(parents=True, exist_ok=True)
+/usr/local/lib/python3.13/pathlib/_local.py:726: in mkdir
+    self.parent.mkdir(parents=True, exist_ok=True)
+/usr/local/lib/python3.13/pathlib/_local.py:726: in mkdir
+    self.parent.mkdir(parents=True, exist_ok=True)
+/usr/local/lib/python3.13/pathlib/_local.py:722: in mkdir
+    os.mkdir(self, mode)
+E   OSError: [Errno 30] Read-only file system: '/work/.watt'</failure></testcase><testcase classname="tests.integration.test_work_diagnostic_export" name="test_production_work_has_pwu_candidate_and_exact_sources" time="20.913"><failure message="OSError: [Errno 30] Read-only file system: '/work/.watt'">/usr/local/lib/python3.13/pathlib/_local.py:722: in mkdir
+    os.mkdir(self, mode)
+E   FileNotFoundError: [Errno 2] No such file or directory: '/work/.watt/native-executor/trace-analysis/blobs'
+
+During handling of the above exception, another exception occurred:
+/usr/local/lib/python3.13/pathlib/_local.py:722: in mkdir
+    os.mkdir(self, mode)
+E   FileNotFoundError: [Errno 2] No such file or directory: '/work/.watt/native-executor/trace-analysis'
+
+During handling of the above exception, another exception occurred:
+/usr/local/lib/python3.13/pathlib/_local.py:722: in mkdir
+    os.mkdir(self, mode)
+E   FileNotFoundError: [Errno 2] No such file or directory: '/work/.watt/native-executor'
+
+During handling of the above exception, another exception occurred:
+tests/integration/test_work_diagnostic_export.py:114: in test_production_work_has_pwu_candidate_and_exact_sources
+    with client(db, tmp_path)[0] as api:
+         ^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_work_diagnostic_export.py:31: in client
+    install_admin(api, db, settings)
+src/spg/api/admin.py:28: in install_admin
+    trace_analysis = TraceAnalysisService(database, settings, exporter=diagnostic_exports)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/trace_analysis.py:304: in __init__
+    self.storage = ContentAddressedStorage(self.root / "blobs")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/infrastructure/executor_runtime/local_storage.py:38: in __init__
+    self.root.mkdir(parents=True, exist_ok=True)
+/usr/local/lib/python3.13/pathlib/_local.py:726: in mkdir
+    self.parent.mkdir(parents=True, exist_ok=True)
+/usr/local/lib/python3.13/pathlib/_local.py:726: in mkdir
+    self.parent.mkdir(parents=True, exist_ok=True)
+/usr/local/lib/python3.13/pathlib/_local.py:726: in mkdir
+    self.parent.mkdir(parents=True, exist_ok=True)
+/usr/local/lib/python3.13/pathlib/_local.py:722: in mkdir
+    os.mkdir(self, mode)
+E   OSError: [Errno 30] Read-only file system: '/work/.watt'</failure></testcase><testcase classname="tests.integration.test_ai_native_candidate_construction" name="test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration" time="3.839" /></testsuite></testsuites>

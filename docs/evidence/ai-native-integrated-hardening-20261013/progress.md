@@ -91,3 +91,17 @@ ordinary34 第一次漏来源 7，第二次局部编辑删掉更多必要贡献�
 `construction-domain-2.xml` 133/133 PASS（受控），`postgresql-domain-1.xml` 1/1 PASS（中断后剩余 Review 恢复，无候选重发）。首次修改有括号语法错误，collection FAIL 原收据 `construction-domain-1.xml` 保留，随后修正；不记作运行 PASS。下一实际资格须重新冻结并构建新镜像，原失败与库存不改。
 
 跨电脑恢复：完整私有 Owner 收据、运行身份及构建事实在 ECS `/data/watt/ai-native-evolution-20261013`；公开脱敏收据在本分支 `receipts/`。没有 Holdout 内容用于实现；Program/C3 仍未完成。
+
+## 第二次实际对照与 Owner 接线
+
+`dd5fc214` / Tree `d5c1bc022065d1659085d50100cbc6e63ade19fc` / image `sha256:7de19c0d2f505f48b4934c9d0f98c8979793c5c922326722125995a8cc502533` 安装态资格 PASS。两项非 Holdout 仍 FAIL，均 2 Formation、0 Review；ordinary41 已越过 FACT_KIND_INVALID，停于来源对应证明；ordinary34 初次漏 9 个来源，第二次原始 JSON duplicate key，被严格拒绝。Pydantic 在普通 json.loads 后表面合法不能覆盖原字节解析的失败；不能去重后冒充有效候选。
+
+第二次实际用量 Input 192984 / Output 6475 / Total 199459 / Cached 128 / Reasoning 0；耗时普通34 12.99s / 普通41 23.15s（Owner invocations），容器 40.04s。费用 UNKNOWN。无新 Work、原库存变化、生产变更或 Guardian 调用。私有收据在 ECS `nonholdout-2/private`，公开诊断只列稳定谓词、序号、SHA，不含原始对话/隐藏推理。
+
+确认第二项同类接线缺口：新 Schema 未消费原有选定 consumer 后的必要来源证明。现复用 `_qualified_operand_generation_schema` 与 `_formation_binding_choices`，语义 proposal 仅省掉 Owner 可精确提供的 a/z；局部 replacement/append 保留同一前提。完整来源覆盖的既有必要条件进入生成契约，但 Validator 不改，模型仍选择语义；拒绝 unsupported/UNRESOLVED 的意义不变。追加约束针对所有实际库存身份，不针对开发或 Holdout Case、文字、文件名、组件。
+
+Trace scoped 移植来源 `0e5ba3a985fecd659097d894bb17197429aae55e`，文件 SHA/接线 patch SHA 见 `trace-scoped-import.json`。复用已经实现的自主调查、自审、原文/字段引用、UNKNOWN、有限预算与原报告修订；未合并其整分支、未覆盖 C3 执行上下文保护、未部署正式服务。新理解/证据/收敛参考进入原 Native 观察，COMMIT 仅 advisory report，没有 Production/Human Authority。
+
+联调确认并修复：Native registry 对已注册非内置工具错误访问未初始化 connector；新 Admin 只读/export 入口不应提前创建调查资源，改为通过原鉴权与 Work admission 后延迟创建；Context 复用 Trace 的容量内保留可用反馈策略和只能缩减的工具选择。原 C3 NativeContractExecutionView、精确来源、预算和全部效应门不回滚。
+
+受影响组合 `native-common-stable-1.xml` 423/423 PASS；PostgreSQL `postgresql-native-integration-2.xml` 4/4 PASS，含鉴权/CSRF/原 Owner 不变、导出以及 Formation 持久恢复。第一次 Trace import 和联合失败、缺 jsonschema 的 collection failure、PostgreSQL 只读目录失败全部保留；不能计为 PASS。稳定组合与后续确切镜像的真实非 Holdout、实际 Trace/G0、独立 Holdout 尚待完成。
