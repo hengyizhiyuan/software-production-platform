@@ -122,6 +122,7 @@ class _FulfillmentCompactCandidate(BaseModel):
 _CANDIDATE_CONSTRUCTION_CONTRACT = "owner-local-wire-candidate-edits-v1"
 _SEMANTIC_EDIT_CONTRACT = "owner-local-semantic-candidate-edits-v2"
 _ROLE_REFERENCE_CONTRACT = "owner-local-role-reference-candidates-v3"
+_RAW_ROLE_REPAIR_CONTRACT = "existing-bound-unadmitted-role-repair-v1"
 _CANDIDATE_CONSTRUCTION_CONTRACTS = {_CANDIDATE_CONSTRUCTION_CONTRACT, _SEMANTIC_EDIT_CONTRACT, _ROLE_REFERENCE_CONTRACT}
 
 
@@ -322,8 +323,24 @@ def candidate_construction_preconditions(preconditions, inventory, feedback, *,
                     elif construction_contract == _ROLE_REFERENCE_CONTRACT:
                         role_basis = all('source_ref' in r for r in original['routes'])
                         model = _FulfillmentRoleProposal if role_basis else _FulfillmentSemanticProposal
+                        raw_role_repair = (role_basis and preconditions.get("candidate_schema_repair_contract")
+                            == _RAW_ROLE_REPAIR_CONTRACT)
+                        if raw_role_repair:
+                            # A privacy-safe, bounded raw proposal is a repair
+                            # basis, not a typed semantic claim or evidence.
+                            # Preserve every value verbatim; only explicit
+                            # replacements may repair an invalid field.
+                            fields = set(_FulfillmentRoleRoute.model_fields)
+                            if (not isinstance(original['routes'], list)
+                                    or not 0 < len(original['routes']) <= 1024
+                                    or not all(isinstance(r, dict) and set(r) <= fields
+                                        and isinstance(r.get('source_ref'), str)
+                                        and isinstance(r.get('capability'), str)
+                                        for r in original['routes'])):
+                                raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_UNAVAILABLE")
                         original = {"v":1,"h":binding["wire_request_fingerprint"],
-                            "d":binding["wire_table_fingerprint"],**model.model_validate(original).model_dump(mode="json")}
+                            "d":binding["wire_table_fingerprint"],**(deepcopy(original) if raw_role_repair
+                                else model.model_validate(original).model_dump(mode="json"))}
                         semantic_basis = True
                     else:
                         original, _ = _construct_semantic_proposal(original, inventory, binding)
@@ -2277,6 +2294,21 @@ def _fulfillment_wire_value(output, owner_preconditions=None, *, construct=True,
                 if isinstance(error, _FulfillmentWireValidationError) and owner_preconditions.get(
                         "candidate_construction_contract") in {_SEMANTIC_EDIT_CONTRACT,_ROLE_REFERENCE_CONTRACT}:
                     presentation["candidate_construction"]["diagnostics"] = error.diagnostics
+                elif owner_preconditions.get("candidate_schema_repair_contract") == _RAW_ROLE_REPAIR_CONTRACT:
+                    from pydantic import ValidationError
+                    if isinstance(error, ValidationError):
+                        violations = []
+                        known_fields = set(_FulfillmentRoleRoute.model_fields) | {'routes'}
+                        for issue in error.errors(include_input=False, include_url=False):
+                            location = [p if type(p) is int or p in known_fields else
+                                {'field_sha256':sha256(str(p).encode()).hexdigest()} for p in issue['loc']]
+                            violations.append({'code':'OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID',
+                                'location':location, 'schema_predicate':issue['type'],
+                                'status':'OBSERVED_INVALID_CANDIDATE; NO_VALUE_COERCION'})
+                        presentation["candidate_construction"]["diagnostics"] = {
+                            'violations':violations[:64],
+                            'additional_violation_count':max(0,len(violations)-64),
+                            'not_evaluable':['SOURCE_CORRESPONDENCE','SEMANTIC_REVIEW','ACTUAL_OWNER_EVIDENCE','ASSURANCE']}
     return body, presentation
 
 
@@ -2434,13 +2466,15 @@ def _safe_fulfillment_response_output(text, *, owner_preconditions=None):
 class ModelFulfillmentCandidateProvider:
     supports_source_consumption_proof = True
     def __init__(self, runtime_factory, *, candidate_construction=False,
-                 candidate_construction_contract=_CANDIDATE_CONSTRUCTION_CONTRACT):
+                 candidate_construction_contract=_CANDIDATE_CONSTRUCTION_CONTRACT,
+                 raw_role_repair=False):
         self.runtime_factory = runtime_factory
         self.last_observation = None
         self.supports_candidate_construction = candidate_construction
         if candidate_construction_contract not in _CANDIDATE_CONSTRUCTION_CONTRACTS:
             raise ValueError("OBLIGATION_FORMATION_CONSTRUCTION_CONTRACT_UNKNOWN")
         self.candidate_construction_contract = candidate_construction_contract
+        self.supports_raw_role_repair = raw_role_repair
 
     @classmethod
     def from_settings(cls, settings):
@@ -2461,7 +2495,7 @@ class ModelFulfillmentCandidateProvider:
                 max_output_tokens=settings.collaboration_provider_max_output_tokens)
             return WattModelRuntime(registry, PurposeProfileRouter({ModelPurpose.STEERING_SEMANTIC: profile}))
         return cls(runtime_factory, candidate_construction=True,
-            candidate_construction_contract=_ROLE_REFERENCE_CONTRACT)
+            candidate_construction_contract=_ROLE_REFERENCE_CONTRACT, raw_role_repair=True)
 
     def form_wire_metadata(self, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
         context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)

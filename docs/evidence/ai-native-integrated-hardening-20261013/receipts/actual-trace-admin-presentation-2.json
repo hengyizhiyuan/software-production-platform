@@ -1,0 +1,23 @@
+{
+  "schema": "actual-trace-admin-presentation-v2",
+  "source_revision": "65b9fdca1ddbc6b4deba9fe1f4ad1f7fb1b588fa",
+  "actual_work": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "actual_request": "3ad5e57d-a815-4432-8bc3-256e80ec9a93",
+  "real_record_status": "COMPLETED",
+  "actual_summary_sha256": "e7ab1dda6e38602f6e94c67248524b901d41d4095fce5b874e7d1af0d254af4d",
+  "admin_js_sha256": "588003235ba39875dcebeea18370e2574f6de7fe319e7a732f9b39d0df4fc15b",
+  "actual_installed_bytes_match": true,
+  "rendering": "PASS_REAL_PERSISTED_NATIVE_SUMMARY",
+  "panels_sha256": {
+    "overview": "f6cc527b2d61bd4d5245ed132ee60da9a782d3212ba028f44ac805e34e909591",
+    "process": "35bb2116869bb44b7695d2c78ebf7075901cadfa62f95dbb8f96540023802d2d",
+    "improvements": "62c5349cf820a19b2a21666572809e25d1c2622c3b72c2bab13889497710484d",
+    "evidence": "d4a1bf990ae1d0a67b3dfde90e9b1bbbe6ce713c79538e6717a292f2239390ba"
+  },
+  "history_request": "PASS",
+  "exact_download_request": "PASS",
+  "raw_drafts_requested": false,
+  "raw_private_history_published": false,
+  "browser_visual_inspection": "NOT_PERFORMED",
+  "semantic_assurance": "HUMAN_REVIEW_REQUIRED; NOT_GRANTED_BY_RENDERING"
+}

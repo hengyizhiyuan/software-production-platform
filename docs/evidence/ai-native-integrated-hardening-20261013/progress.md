@@ -153,3 +153,17 @@ Header/版本由实际请求 Owner 提供，模型不能新增声明。局部 ed
 输出字段变长是明确成本，不以缩短 JSON 为目标；减少模型对压缩字母/不同角色/精确编码的同时猜测负担。仍原 2 Formation/1 feedback/每候选最多1独立 Review、最多4逻辑调用；不提高模型预算、不改变 Provider。当前 Source/phase/evidence Validator 与 Guardian 不放宽。
 
 `role-reference-focused-2.xml` 169/169 受控通过；PostgreSQL v1/v2/v3 各自中断与持久恢复 `postgresql-role-reference-1.xml` 3/3，通过后仍需真实模型资格。两项新增测试准备错误（fixture 没 IR_CLAUSE、单独构造缺 presentation negotiation）均保留失败收据，随后修正并局部 2/2。不能将历史模型 Candidate 改写后当作成功。
+
+## 原始提案格式恢复前提（2026-10-13 恢复对账）
+
+`65b9fdca` / Tree `6329ca64a4456d0c66837dc6d6b46023a23b395a` / image `sha256:c9e6b31277430fc30733475818db10111a729346ebbf3e0853b5f8c82d76cb15` 安装身份及定向镜像验证通过。第六次非 Holdout 没有任何接纳投影或独立 Review，两个实际库存不能计为成功。Provider 三次均 completed、无传输重发；实测 Total 177424（Input 167143 / Output 10281 / Reasoning 0 / Cached 256），币种费用 UNKNOWN。
+
+普通34一份完整 JSON、20 条 role routes，三个 Route 的 current_fact_dependencies 含数字而非原来源引用。Schema 正确拒绝；既有修复 basis 必须先满足全部字段类型，导致安全原始提案也无法进入第二候选。这是恢复前提过强的已证实能力缺口，不是来源/权限门可被省略的理由。
+
+在既有 Owner 中增加已持久协商的 `existing-bound-unadmitted-role-repair-v1` 标记：仅完整、无重复键、隐私安全、bounded routes、已知字段且有明确 source_ref/capability 的原 JSON 可成为未接纳修复 basis。原值逐项保留，不转换数字、不补来源/语义。第二次显式 replacements 仍须严格类型和完整最终校验；未修字段继续拒绝。结构失败集合只含位置、稳定谓词和 NOT_EVALUABLE，不含敏感输入。旧无此标记的请求/停止按原机制重放，不能因新 Provider 默认而复活或漂移反馈身份。
+
+`raw-role-repair-1.xml` 定向验证通过；`postgresql-raw-role-repair-1.xml` 4 条持久恢复通过（包含原 v1/v2/v3 和新标记）。身份漂移、重复键、删除义务、无进展仍拒绝；第二响应后崩溃只恢复独立 Review，不重复模型生成。
+
+普通41第二候选已明确修正一个非法来源 ref，但剩余六项为真实候选缺陷：三个 Work Constraint 的候选支撑集合不具备原 Owner 所需证明，三个 GIT_DIFF_SCOPE Route 的目标路径集合为空。完整原文/作用范围没有被伪造或压缩；尚未证明 Validator 错拒。此分支不因预算耗尽继续盲目调用模型，亦不通过自动选择支撑/目标获得 PASS。只对有明确修复依据的普通34恢复缺口进行下一确切镜像资格。
+
+Trace 真实结果的 Admin 展示校验补充 `actual-trace-admin-presentation-2.json`：使用原始 Git blob / 实际已安装 JS 字节，修正前次 Windows 工作副本 CRLF hash 与已安装 LF hash 的区别。四个实际数据面板结果相同；旧收据保留，不冒称浏览器视觉验收。Trace/API/Native 源码在 Formation 后续修订没有改变；镜像只读重放 `trace-final-image-replay-2.json` 证明原 CAS、API 与下载兼容，未增加模型调用。

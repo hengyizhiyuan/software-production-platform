@@ -49,7 +49,7 @@ HTTP history/result/Markdown receipt and real-record Admin rendering are in:
 
 - [Native API result](receipts/trace-native-api-6545b19b.json)
 - [Actual container identity](receipts/trace-native-runtime-6545b19b.json)
-- [Actual record presentation](receipts/actual-trace-admin-presentation.json)
+- [Actual record presentation](receipts/actual-trace-admin-presentation-2.json)
 - [Usage/convergence with UNKNOWN preserved](receipts/trace-native-usage-and-convergence-v2.json)
 
 The presentation check uses real API data and the actual Admin script; browser
@@ -65,3 +65,4 @@ No formed Trace product feature currently requires separate old-branch
 development. Future improvements and any production activation use the unified
 branch and their actual authority gates. This migration does not close C3 or
 the Integrated Hardening Program.
+

@@ -16,7 +16,7 @@ from tests.test_c3_semantic_contract_calibration import review
 from tests.test_c3_source_consumption_proof import fixture_review_proof
 
 
-def local_edit_case(scale="small", outcome="repair", first="source-proof", *, semantic_edits=False,role_refs=False):
+def local_edit_case(scale="small", outcome="repair", first="source-proof", *, semantic_edits=False,role_refs=False,raw_role_repair=False):
     rev, ir, inventory, plan = controlled_capacity_case(scale)
     snapshots = deepcopy((rev, ir, inventory, plan))
     calls = []
@@ -76,6 +76,8 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof", *, se
                     for row in wire["routes"]]} if first.startswith("semantic-") else wire)
                 if role_refs:
                     proposal={'routes':[role(row) for row in wire['routes']]}
+                    if first == 'semantic-schema':
+                        proposal['routes'][touched]['current_fact_dependencies'] = [0, 1]
                     old_wire['routes']=deepcopy(proposal['routes'])
                 elif semantic_edits and first.startswith("semantic-"):
                     old_wire["routes"] = deepcopy(proposal["routes"])
@@ -140,7 +142,7 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof", *, se
         lambda: SimpleNamespace(generate=generate, close=lambda: None), candidate_construction=True,
         candidate_construction_contract='owner-local-role-reference-candidates-v3' if role_refs else
             "owner-local-semantic-candidate-edits-v2" if semantic_edits else
-            "owner-local-wire-candidate-edits-v1")
+            "owner-local-wire-candidate-edits-v1",raw_role_repair=raw_role_repair)
     kwargs = dict(provider=provider, exact_target_paths=inventory["exact_target_paths"])
     bindings = app.form_fulfillment_projection(rev, ir, **kwargs)
     assert (rev, ir, inventory, plan) == snapshots
@@ -429,3 +431,43 @@ def test_named_protocol_still_consumes_valid_wire_and_compact_semantic_variants(
     mixed['routes'][0]['source_ref']=inventory['sources'][0]['source_ref']
     with pytest.raises(ValueError):
         _decode_fulfillment_candidate_wire(json.dumps(mixed),inventory,caps,owner_preconditions=owner)
+
+
+@pytest.mark.parametrize('scale',('small','medium','complex'))
+def test_safe_untyped_role_fields_receive_explicit_local_repair_not_owner_coercion(scale):
+    bindings,provider,calls,args,touched,original=local_edit_case(scale,first='semantic-schema',
+        role_refs=True,raw_role_repair=True)
+    assert all(b.state!='UNRESOLVED' for b in bindings) and len(calls)==3
+    assert original['routes'][touched]['current_fact_dependencies']==[0,1]
+    feedback=json.loads(calls[1][1]['same_basis_validation_feedback'])
+    violations=feedback['violations']
+    assert any(v.get('schema_predicate')=='string_type' for v in violations)
+    basis=calls[1][1]['owner_source_preconditions']['candidate_construction_state']['repair_basis']
+    assert basis['original_wire']['routes'][touched]['current_fact_dependencies']==[0,1]
+    assert basis['raw_sha256']==next(r['candidate_output_sha256'] for r in provider._fulfillment_receipts
+        if r['stage']=='MODEL_RESPONSE_OBSERVED' and r['attempt']==1)
+    second=next(r for r in provider._fulfillment_receipts if r['stage']=='MODEL_RESPONSE_OBSERVED' and r['attempt']==2)
+    assert second['wire_presentation']['candidate_construction']['replaced_original_ordinals']==[touched]
+    # Restart negotiates the durable marker, not the new instance default.
+    provider.supports_raw_role_repair=False
+    rev,ir,kwargs=args
+    assert all(b.state!='UNRESOLVED' for b in app.form_fulfillment_projection(rev,ir,**kwargs))
+    assert len(calls)==3
+
+
+def test_old_schema_stop_is_not_reopened_by_new_repair_default():
+    bindings,provider,calls,args,_touched,_original=local_edit_case(first='semantic-schema',role_refs=True)
+    assert all(b.state=='UNRESOLVED' for b in bindings) and len(calls)==1
+    provider.supports_raw_role_repair=True
+    rev,ir,kwargs=args
+    assert all(b.state=='UNRESOLVED' for b in app.form_fulfillment_projection(rev,ir,**kwargs))
+    assert len(calls)==1
+
+
+@pytest.mark.parametrize('outcome',('drop','duplicate','duplicate-key','basis','repeat'))
+def test_raw_role_repair_preserves_all_original_governance_rejections(outcome):
+    bindings,provider,calls,_args,_touched,_original=local_edit_case(first='semantic-schema',role_refs=True,
+        raw_role_repair=True,outcome=outcome)
+    assert all(b.state=='UNRESOLVED' for b in bindings)
+    assert len(calls)==2
+    assert not any(r['stage']=='SEMANTIC_REVIEW_PENDING' for r in provider._fulfillment_receipts)

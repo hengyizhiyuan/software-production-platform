@@ -1,0 +1,37 @@
+{
+  "schema": "role-representation-controlled-size-v1",
+  "live_model_calls": 0,
+  "cases": [
+    {
+      "scale": "small",
+      "sources": 9,
+      "routes": 11,
+      "compact_semantic_bytes": 1320,
+      "role_reference_bytes": 3486,
+      "actual_provider_tokens": "UNKNOWN_NOT_CALLED",
+      "original_source_altered": false,
+      "same_semantic_methods_and_operands": true
+    },
+    {
+      "scale": "medium",
+      "sources": 13,
+      "routes": 15,
+      "compact_semantic_bytes": 1806,
+      "role_reference_bytes": 4887,
+      "actual_provider_tokens": "UNKNOWN_NOT_CALLED",
+      "original_source_altered": false,
+      "same_semantic_methods_and_operands": true
+    },
+    {
+      "scale": "complex",
+      "sources": 24,
+      "routes": 26,
+      "compact_semantic_bytes": 3151,
+      "role_reference_bytes": 8729,
+      "actual_provider_tokens": "UNKNOWN_NOT_CALLED",
+      "original_source_altered": false,
+      "same_semantic_methods_and_operands": true
+    }
+  ],
+  "interpretation": "Explicit roles cost more output bytes. This is a comprehension/construction change, not compression or proof of actual convergence."
+}

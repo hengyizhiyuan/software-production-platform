@@ -3008,6 +3008,12 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     and r.get("attempt") == row.get("attempt")), None)
                 if source_request is None:
                     raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                if preconditions.get("candidate_schema_repair_contract") is not None:
+                    from spg.providers.fulfillment_candidate import _RAW_ROLE_REPAIR_CONTRACT
+                    if (preconditions["candidate_schema_repair_contract"] != _RAW_ROLE_REPAIR_CONTRACT
+                            or preconditions["candidate_construction_contract"] != "owner-local-role-reference-candidates-v3"):
+                        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                    restored_preconditions["candidate_schema_repair_contract"] = _RAW_ROLE_REPAIR_CONTRACT
                 restored_preconditions = candidate_construction_preconditions(
                     restored_preconditions, inventory, source_request.get("feedback"),
                     construction_contract=preconditions["candidate_construction_contract"])
@@ -3787,6 +3793,11 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     original_preconditions = {key: value for key, value in
                         precondition_arguments["owner_preconditions"].items() if key not in {
                             "candidate_construction_contract", "candidate_construction_state"}}
+                    schema_repair = (getattr(provider, "supports_raw_role_repair", False) if initial_request is None
+                        else (initial_request.get("owner_source_preconditions") or {}).get("candidate_schema_repair_contract") is not None)
+                    if schema_repair and construction_contract == "owner-local-role-reference-candidates-v3":
+                        from spg.providers.fulfillment_candidate import _RAW_ROLE_REPAIR_CONTRACT
+                        original_preconditions["candidate_schema_repair_contract"] = _RAW_ROLE_REPAIR_CONTRACT
                     precondition_arguments["owner_preconditions"] = candidate_construction_preconditions(
                         original_preconditions, inventory, feedback, construction_contract=construction_contract)
                     decision = precondition_arguments["owner_preconditions"]["candidate_construction_state"]["convergence"]
