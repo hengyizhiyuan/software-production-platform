@@ -14,3 +14,6 @@ docs/evidence/core-production-semantic-convergence-c3-20261009/formation-module-
 # Preserve independent Holdout requalification publication hashes verbatim.
 docs/evidence/core-production-semantic-convergence-c3-20261009/holdout-requalification-20261013/**/*.json -text
 docs/evidence/core-production-semantic-convergence-c3-20261009/holdout-requalification-20261013/*.json -text
+# Retain integrated-hardening receipts exactly, including failed diagnostics.
+docs/evidence/ai-native-integrated-hardening-20261013/receipts/*.xml -text -whitespace
+docs/evidence/ai-native-integrated-hardening-20261013/receipts/*.json -text

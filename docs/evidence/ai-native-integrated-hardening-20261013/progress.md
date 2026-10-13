@@ -59,3 +59,11 @@ Source/格式/组件冲突均可在原一次反馈内局部修复；真正遗漏
 首次本机 Windows 收集停于 `fcntl` 缺失，未执行断言；之后改为隔离 Linux 容器，不修改业务代码适配测试。首次 PostgreSQL 停于测试库名称保护，之后在新建网络 none 的专用容器里创建允许的测试库；不触及业务数据库。第一次新恢复断言失败揭示派生编码键序不稳定，规范编码修复后通过。首轮 6 FAIL/8 PASS 的局部测试中失败仅为重放计时差异，最后断言排除每次调用自身 elapsed，但仍核对全部持久收据/绑定。
 
 当前角色接线只在 Formation，尚未宣布各模块完成迁移。Phase 1/2 的开发机制已有实际代码；真实非 Holdout、最终镜像、独立 Holdout 及后续 Trace/Core 迁移仍待完成。C3/Integrated Program 都未关闭。实际模型调用仍为 0，部署为 0。
+
+## 构建恢复检查点
+
+首批源码提交 `ddd517c04067f06f32f21c9b962ae05c2dc55224`，Tree `115e7f384a0c6a4e6eb21e690378a6fc2ab19104`，已推送。Raw Git blob 导出 279 个 src 文件，归档 SHA256 `260f29f299f1685756294997a2445fd9c5705222a849454261187f7749bc501b`，ECS 留存在 `/data/watt/ai-native-evolution-20261013`。
+
+第一构建 FAIL / `DEPENDENCY_LOCK_MISMATCH`，未重装源码成功，未取得镜像资格或模型调用。核对确认：原 attestor 的 lock 常量是旧 CRLF 捕获值 `ee2c5e...`；真实 Git blob 为 LF，SHA256 `ac853305...`。原 `f52d3996` 与新 `ddd517c0` 的 uv.lock Git blob 均为 `071627a271c51880c67cc58bc0a5c913c842c7ac`；旧镜像 lock 将 CRLF 转 LF 后与 Git blob 字节完全相同，TOML 包、版本、依赖及顶层元数据完全一致。
+
+因此仅更正 attestor 对真实 Git lock 字节的绑定，不改变依赖、不转码导出内容、不降低源/镜像校验。旧 attestation/失败与旧镜像保持不变。重新冻结这一构建检查修正后再构建；不得把旧镜像覆盖文件算作新资格。
