@@ -1,0 +1,22 @@
+{
+  "schema": "actual-output-counterfactual-contract-audit-v1",
+  "scope": "COUNTERFACTUAL_ONLY_NOT_REAL_MODEL_OR_PRODUCTION_QUALIFICATION",
+  "application_revision": "d27707cb49558a0bc0071d9e3c4250fe88234427",
+  "live_model_calls": 0,
+  "independent_review_executed": false,
+  "historical_records_modified": false,
+  "production_work_replayed": false,
+  "holdout_used": false,
+  "original_raw_output_sha256": [
+    "9eed616e6f0b490d7dede0c7739f3dd798445edba7402fde42b3f0e80cff7b51",
+    "b8719bdf02ba4498066693b0dddd87f41b390afda6fb84401e9aac85e26e7d3e"
+  ],
+  "deterministic_eligibility_for_review": false,
+  "projection_admitted": false,
+  "terminal_reason": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+  "failed_predicates": [
+    "OBLIGATION_FORMATION_ROLE_REFERENCE_UNKNOWN",
+    "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST"
+  ],
+  "meaning": "Original outputs remain unmodified; no historical PASS, Review or Authority is created."
+}

@@ -1,0 +1,445 @@
+{
+  "scope": "READONLY_NONHOLDOUT_ACTUAL_OWNER_PREDICATES",
+  "live_model_calls": 0,
+  "historical_records_modified": false,
+  "source_revision": "d27707cb49558a0bc0071d9e3c4250fe88234427",
+  "failures": [
+    {
+      "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+      "source": 20,
+      "route": 25,
+      "component_id": "9cc6301185c9bb939029a65179799619745c6b86d3b46c8c4c66b9da6aa6b3bc",
+      "source_kind": "WORK_CONSTRAINT",
+      "capability": "UNRESOLVED",
+      "selected_support_source_ordinals": [],
+      "required_proof_alternatives": [],
+      "available_owner_proof_methods": [
+        {
+          "capability": "ARTIFACT_CONTENT",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        },
+        {
+          "capability": "GIT_DIFF_SCOPE",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        },
+        {
+          "capability": "DENY_PREVIEW",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        },
+        {
+          "capability": "DENY_DEPLOY",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        },
+        {
+          "capability": "DENY_PUBLISH",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+      "source": 21,
+      "route": 26,
+      "component_id": "7449c15de7f02f96ec18b84c268294a36e695312dd87a92a6255a256e4aa7abd",
+      "source_kind": "WORK_CONSTRAINT",
+      "capability": "UNRESOLVED",
+      "selected_support_source_ordinals": [],
+      "required_proof_alternatives": [],
+      "available_owner_proof_methods": [
+        {
+          "capability": "ARTIFACT_CONTENT",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        },
+        {
+          "capability": "GIT_DIFF_SCOPE",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        },
+        {
+          "capability": "DENY_PREVIEW",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        },
+        {
+          "capability": "DENY_DEPLOY",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        },
+        {
+          "capability": "DENY_PUBLISH",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+      "source": 22,
+      "route": 27,
+      "component_id": "74bc12f583f73d32ac8cf4b97352743940e196c857f54b82c7ed9f66871c2864",
+      "source_kind": "WORK_CONSTRAINT",
+      "capability": "GIT_DIFF_SCOPE",
+      "selected_support_source_ordinals": [
+        6
+      ],
+      "required_proof_alternatives": [
+        [
+          [
+            5,
+            12
+          ],
+          [
+            6,
+            12
+          ],
+          [
+            7,
+            12
+          ],
+          [
+            8,
+            12
+          ],
+          [
+            11,
+            12
+          ]
+        ]
+      ],
+      "available_owner_proof_methods": [
+        {
+          "capability": "ARTIFACT_CONTENT",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        },
+        {
+          "capability": "GIT_DIFF_SCOPE",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        },
+        {
+          "capability": "DENY_PREVIEW",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        },
+        {
+          "capability": "DENY_DEPLOY",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        },
+        {
+          "capability": "DENY_PUBLISH",
+          "minimal_support_sets": [
+            [
+              5,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              7,
+              12
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              11,
+              12
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "independent_review_executed": false
+}

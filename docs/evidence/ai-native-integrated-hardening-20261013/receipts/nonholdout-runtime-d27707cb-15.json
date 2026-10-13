@@ -1,0 +1,18 @@
+{
+  "schema": "ai-native-nonholdout-actual-runtime-v1",
+  "actual_container": "bb7e86bcaa4808695367c0bd1e0a3d21a412d7ee319929a4456948419ad3cc61",
+  "actual_image_id": "sha256:73da30f5567f5766b9767855c1e772fc5421d93a9da54f99a971db9d2f48ce53",
+  "source_revision": "d27707cb49558a0bc0071d9e3c4250fe88234427",
+  "source_tree": "04f146f4937a7fc7b0bbda21cd70dcad40dd4053",
+  "actual_user": "10001:10001",
+  "database_credentials_passed": false,
+  "docker_socket_mounted": false,
+  "public_ports": false,
+  "runtime_source_overlay": false,
+  "holdout_used": false,
+  "input_mounts_readonly": true,
+  "started_at_utc": "2026-10-13T14:33:39.350603+00:00",
+  "status": "FINISHED",
+  "exit_code": 0,
+  "elapsed_seconds": 64.50712450908031
+}

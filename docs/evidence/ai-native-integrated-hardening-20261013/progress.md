@@ -237,3 +237,15 @@ Source `67b9f4922a71f59891ea201dd94135caf9259789` / Tree `9bde194ec5a0721cace61d
 已撤回“可能需要支持部分字段 patch”的未证实假设，不实施该变更。真正最小缺口是编辑命令同一原始索引的结构不一致：replace 用 index target object、remove 强制裸整数。在原局部编辑 Owner 内，新临时 v2 协商统一生成显式 index target；解码仍可消费同域的准确整数。没有字符串/布尔转整数、未知字段或越界接纳，duplicate/replace-remove 重叠仍拒绝。模型明确指定的原 Route 才可移除；最终完整来源、scope、权限、证明和独立 Review 门禁保持不变。没有 Scope/Subject Alias、语义猜测或新 Gate。
 
 原 v1 协商保留，包括原 object removal 的历史拒绝；恢复不升级默认、不复活终态，也不更改 Model 原始输出、反馈、父 basis 或预算。`explicit-index-targets-1.xml` 15 PASS；精确旧协商选择补充 `explicit-index-legacy-1.xml` 单项 PASS；PostgreSQL 新 object target 的第二响应中断恢复单项 PASS，仅执行剩余 Review。下一确切修订仍需实际 Provider 资格；受控解码 PASS 不等于真实语义或 C3 Closure。
+
+## 最终冻结的实际进展与资源决策边界
+
+Source `d27707cb49558a0bc0071d9e3c4250fe88234427` / Tree `04f146f4937a7fc7b0bbda21cd70dcad40dd4053` / image `sha256:73da30f5567f5766b9767855c1e772fc5421d93a9da54f99a971db9d2f48ce53`，attestor 与镜像内227项受影响回归通过；PostgreSQL object target 恢复收据单独留存，不将其当真实模型资格。
+
+普通41第十四次两次实际 Formation 后仍因两个 UNRESOLVED 及一个来源对应未证明停止，0 Review。只读 Owner 核验 source22 的 GIT_DIFF_SCOPE 实际选 support6，原每组必要 alternative 都包含 source12，不能靠 Watt 自动宣告覆盖来补足。source20/21 有原 Owner 必要证明方法，但模型仍选择未决；这些必要条件不代表语义批准。此结果没有证明 Validator 错拒。实际 Total144267（Input138322/Output5945/Reasoning0/Cached43776）。
+
+普通34第十五次：真实首次覆盖失败→显式局部修复→完整确定性资格→实际独立 Semantic Review，最终仍拒绝。实际 Total242506（Input227206/Output15300/Reasoning0/Cached5248）；模型均 completed，无传输重发或容量失败。两个内容 Fact 的额外 Git Diff 组件拒绝有真实契约依据；一个未来 Seal 方法要求实际证据现在可用的来源判断是 Reviewer 阶段推理偏差。不同失败分开记录，不能统称平台 Bug 或凭一个偏差自动放行整个方案。详见 `review15-attribution.md`。
+
+保留当前2候选/1反馈/最多4逻辑调用：新的语义修复加独立 Review 将需要第三候选和第五调用，属于真实资源决策边界，不自行增加预算或创建相同 Work 碰运气。`continuation-checkpoint.md` 与 `convergence-budget-decision-package.md` 提供确切剩余事项及有界决策材料。C3 和整个 Program 均未关闭。没有新 G0/PWU/Worker/Artifact/Candidate/Guardian；Holdout 未读未用。
+
+Trace 最终 d277 镜像只读 API/CAS/下载兼容验证通过（`trace-final-image-replay-5`）；原请求、报告字节和 history digest 不变，禁止 Provider，0新模型/Work。这复用此前真正 Admin→Native 完成结果；不将只读重放冒称新的自主调查。旧 Trace 分支仍待归档/停止独立开发，未删除。跨电脑恢复根、实际镜像与失败收据已写入检查点，正式环境/主干/凭据/历史工程事实未修改。

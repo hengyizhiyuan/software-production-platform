@@ -1,0 +1,280 @@
+{
+  "schema": "ai-native-nonholdout-formation-v1",
+  "source_revision": "d27707cb49558a0bc0071d9e3c4250fe88234427",
+  "actual_runtime_module": "/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py",
+  "actual_runtime_sha256": "760cb9355b2fd5578834617e4f41ff37a9cebe70a22e54e30e77385841747db7",
+  "holdout_used": false,
+  "new_work_created": false,
+  "database_access": false,
+  "historical_records_modified": false,
+  "model_profile": {
+    "provider": "DEEPSEEK",
+    "model": "deepseek-flash",
+    "reasoning_effort": "none",
+    "max_output_tokens": 16384,
+    "timeout_seconds": 120
+  },
+  "cases": [
+    {
+      "case": "ordinary34",
+      "started_at_utc": "2026-10-13T14:33:42.902580+00:00",
+      "elapsed_seconds": 59.903707980993204,
+      "input_basis_sha256": "aad0fa15b3b24c12aa5b4b1099f8fe7ef0d6f7044bbc79ba8650a68ad4c81998",
+      "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+      "source_count": 19,
+      "formation_calls": 2,
+      "review_calls": 1,
+      "legal_projection_admitted": false,
+      "terminal_reason": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+      "observations": [
+        {
+          "stage": "MODEL_RESPONSE_OBSERVED",
+          "attempt": 1,
+          "receipt_id": "66f53c9d-b2f7-4c9a-a4a7-ae3a3e001097",
+          "failed_predicate": null,
+          "validation_passed": null,
+          "terminal_reason": null,
+          "provider_observation": {
+            "request_id": "e1327db5-03f9-4646-837e-5ff1a6fd24eb",
+            "provider": "deepseek",
+            "requested_model": "deepseek-flash",
+            "effective_model": "deepseek-flash",
+            "usage": {
+              "input_tokens": 45027,
+              "output_tokens": 5303,
+              "cached_tokens": 1152,
+              "reasoning_tokens": 0,
+              "total_tokens": 50330,
+              "unknown": false
+            },
+            "timing": {
+              "request_sent_seconds": 0.0017545128939673305,
+              "first_response_event_seconds": 0.3294957960024476,
+              "first_token_seconds": 1.1166229438968003,
+              "completed_seconds": 20.237810601945966
+            },
+            "transport_retry_count": 0,
+            "output_sha256": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e",
+            "output_bytes": 15973,
+            "output_evidence": {
+              "provider_status": "completed",
+              "delta_sha256": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e",
+              "delta_bytes": 15973,
+              "terminal_text_observed": true,
+              "terminal_sha256": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e",
+              "terminal_bytes": 15973,
+              "selection": "TERMINAL_MATCHED_DELTA"
+            }
+          },
+          "construction": {
+            "contract": "owner-local-interpretation-role-construction-v4",
+            "representation": "SEMANTIC_QUOTE_PROPOSAL",
+            "proposal_sha256": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e",
+            "constructed_wire_sha256": "d8931310553a1bcce2a781297da67559761ffefb6c3cb0ec507567597e48d427",
+            "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+            "disposition": "OWNER_METADATA_ONLY; ALL_VALIDATION_AND_REVIEW_REQUIRED"
+          }
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "receipt_id": "9f11bb8c-618c-45fe-8f7b-fef91d07465d",
+          "failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "validation_passed": false,
+          "terminal_reason": null,
+          "error_codes": [
+            "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST"
+          ],
+          "feedback_sha256": "e3453b74164c512fcc110a9df22a35ca2d82e39b6d3ef6f88673ba816afcedd2"
+        },
+        {
+          "stage": "MODEL_RESPONSE_OBSERVED",
+          "attempt": 2,
+          "receipt_id": "b9e8bf3a-2757-4322-9679-940b91ee416c",
+          "failed_predicate": null,
+          "validation_passed": null,
+          "terminal_reason": null,
+          "provider_observation": {
+            "request_id": "e48311df-206d-4f61-9678-028806ff54df",
+            "provider": "deepseek",
+            "requested_model": "deepseek-flash",
+            "effective_model": "deepseek-flash",
+            "usage": {
+              "input_tokens": 87357,
+              "output_tokens": 3265,
+              "cached_tokens": 1536,
+              "reasoning_tokens": 0,
+              "total_tokens": 90622,
+              "unknown": false
+            },
+            "timing": {
+              "request_sent_seconds": 0.0030209700344130397,
+              "first_response_event_seconds": 0.6032361530233175,
+              "first_token_seconds": 1.827664267970249,
+              "completed_seconds": 12.964497889042832
+            },
+            "transport_retry_count": 0,
+            "output_sha256": "a406d457ffefa61b5c2122dadc40994005addbd653707b979a279ca44239c7fd",
+            "output_bytes": 9986,
+            "output_evidence": {
+              "provider_status": "completed",
+              "delta_sha256": "a406d457ffefa61b5c2122dadc40994005addbd653707b979a279ca44239c7fd",
+              "delta_bytes": 9986,
+              "terminal_text_observed": true,
+              "terminal_sha256": "a406d457ffefa61b5c2122dadc40994005addbd653707b979a279ca44239c7fd",
+              "terminal_bytes": 9986,
+              "selection": "TERMINAL_MATCHED_DELTA"
+            }
+          },
+          "construction": {
+            "contract": "owner-local-interpretation-role-construction-v4",
+            "parent_wire_sha256": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e",
+            "parent_binding": {
+              "work_id": "4af5b2db-716c-51d6-af06-4e1eb510e92b",
+              "work_reality_revision_id": "f1f690bd-4005-5104-a8a9-cb5563a3204c",
+              "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+              "source_revision": "0fbf5f553f8470f11b78a76e96f3eb59d4fb2ef1",
+              "exact_target_paths": [
+                "index.html"
+              ],
+              "attempt": 1,
+              "wire_output_fingerprint": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e",
+              "request_receipt_id": "0895c20b-63a2-4215-90de-2fdec8ea95eb",
+              "response_receipt_id": "66f53c9d-b2f7-4c9a-a4a7-ae3a3e001097",
+              "owner_repair_context_contract": "existing-owner-preconditions-v2",
+              "completion_feedback_contract": "existing-bounded-completion-feedback-v1",
+              "owner_source_preconditions_fingerprint": "757ab1f6c023032a16ea95b8d89e17e0d4d3e58bfccfba2ad911e6887f546a73",
+              "wire_presentation": {
+                "contract": "existing-lossless-json-frame-v1",
+                "representation": "ORIGINAL_JSON_VALUE",
+                "original_wire_sha256": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e",
+                "original_wire_bytes": 15973,
+                "inner_character_range": [
+                  0,
+                  15973
+                ],
+                "inner_utf8_byte_range": [
+                  0,
+                  15973
+                ],
+                "inner_sha256": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e",
+                "inner_bytes": 15973,
+                "disposition": "DERIVED_REPRESENTATION_ONLY; ALL_VALIDATION_AND_AUTHORITY_GATES_REQUIRED",
+                "candidate_construction": {
+                  "contract": "owner-local-interpretation-role-construction-v4",
+                  "representation": "SEMANTIC_QUOTE_PROPOSAL",
+                  "proposal_sha256": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e",
+                  "constructed_wire_sha256": "d8931310553a1bcce2a781297da67559761ffefb6c3cb0ec507567597e48d427",
+                  "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+                  "disposition": "OWNER_METADATA_ONLY; ALL_VALIDATION_AND_REVIEW_REQUIRED"
+                }
+              },
+              "provider_wire_version": "fulfillment-compact-v1",
+              "wire_request_fingerprint": "ad5db9279d8b63f9d80b8bd5901a9493babf25b78ea7bda3631627a3f83be397",
+              "wire_table_fingerprint": "048f904412dfb311c264e4af5c9c006febcbe6563c32e92989ee486cf6566eeb",
+              "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+              "candidate_fingerprint": null
+            },
+            "edit_response_sha256": "a406d457ffefa61b5c2122dadc40994005addbd653707b979a279ca44239c7fd",
+            "constructed_wire_sha256": "2dec2a802c84c08930108553559641b2891811f86479d527a7e3c21f387a4718",
+            "replaced_original_ordinals": [
+              5,
+              6,
+              7,
+              8,
+              9,
+              16,
+              17,
+              18,
+              19,
+              20,
+              25,
+              26,
+              27,
+              28,
+              29,
+              30,
+              31
+            ],
+            "removed_original_ordinals": [],
+            "appended_count": 0,
+            "retained_original_ordinals": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              21,
+              22,
+              23,
+              24
+            ],
+            "disposition": "DERIVED_CANDIDATE; NO_SEMANTIC_OR_EVIDENCE_ADMISSION"
+          }
+        },
+        {
+          "stage": "SEMANTIC_REVIEW_OBSERVED",
+          "attempt": 2,
+          "receipt_id": "00d1a5f7-3809-4665-8e6e-1575d12cee8e",
+          "failed_predicate": null,
+          "validation_passed": null,
+          "terminal_reason": null,
+          "provider_observation": {
+            "request_id": "3c22936a-e90f-49da-ba48-9e4c5863335c",
+            "provider": "deepseek",
+            "requested_model": "deepseek-flash",
+            "effective_model": "deepseek-flash",
+            "usage": {
+              "input_tokens": 94822,
+              "output_tokens": 6732,
+              "cached_tokens": 2560,
+              "reasoning_tokens": 0,
+              "total_tokens": 101554,
+              "unknown": false
+            },
+            "timing": {
+              "request_sent_seconds": 0.004295971943065524,
+              "first_response_event_seconds": 0.509240411920473,
+              "first_token_seconds": 2.066471906960942,
+              "completed_seconds": 25.32937267399393
+            },
+            "transport_retry_count": 0,
+            "output_sha256": "2c3bf21c34cc27c2b44b0d87b96afdf32dbcbfe34edbb875145122e099ea7f15",
+            "output_bytes": 24294,
+            "output_evidence": {
+              "provider_status": "completed",
+              "delta_sha256": "2c3bf21c34cc27c2b44b0d87b96afdf32dbcbfe34edbb875145122e099ea7f15",
+              "delta_bytes": 24294,
+              "terminal_text_observed": true,
+              "terminal_sha256": "2c3bf21c34cc27c2b44b0d87b96afdf32dbcbfe34edbb875145122e099ea7f15",
+              "terminal_bytes": 24294,
+              "selection": "TERMINAL_MATCHED_DELTA"
+            }
+          }
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 2,
+          "receipt_id": "184f4cc7-cb42-436e-9019-5f96a5fd854f",
+          "failed_predicate": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+          "validation_passed": false,
+          "terminal_reason": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+          "error_codes": [
+            "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+            "OBLIGATION_SEMANTIC_SOURCE_MISMATCH"
+          ],
+          "feedback_sha256": "9e6e5aa5c1d419569d238ecf1393a8c2f9917c66d072a6934173c5c7ecf6fdba"
+        }
+      ],
+      "actual_artifact_verification": "NOT_EXECUTED",
+      "guardian": "NOT_CALLED_DIAGNOSTIC_SCOPE",
+      "raw_receipt_sha256": "8eea94156781896350044e1c8635f76d648d3212c9a0663b27909ec2d7930d4f"
+    }
+  ]
+}

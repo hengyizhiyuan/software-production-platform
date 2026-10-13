@@ -1,0 +1,8 @@
+{
+  "exit_code": 0,
+  "actual_container": "8f2b4c2c154b34a6bcb0fabbdc251006dcba7f0d19f80774b4ae8930f1973d4f",
+  "actual_image": "sha256:73da30f5567f5766b9767855c1e772fc5421d93a9da54f99a971db9d2f48ce53",
+  "source_revision": "d27707cb49558a0bc0071d9e3c4250fe88234427",
+  "elapsed_seconds": 5.666463556000963,
+  "runtime_source_overlay": false
+}
