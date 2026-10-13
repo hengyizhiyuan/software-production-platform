@@ -1,0 +1,22 @@
+{
+  "schema": "actual-trace-admin-presentation-v1",
+  "source_revision": "6545b19b6d1c564bdbfbc180dc8075aaeaa09d20",
+  "actual_work": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "actual_request": "3ad5e57d-a815-4432-8bc3-256e80ec9a93",
+  "real_record_status": "COMPLETED",
+  "actual_summary_sha256": "e7ab1dda6e38602f6e94c67248524b901d41d4095fce5b874e7d1af0d254af4d",
+  "admin_js_sha256": "3dedf4d9fc44ca7356e348040d194a12af18e847d3dbdf80a996e742bc8636e4",
+  "rendering": "PASS_REAL_PERSISTED_NATIVE_SUMMARY",
+  "panels_sha256": {
+    "overview": "f6cc527b2d61bd4d5245ed132ee60da9a782d3212ba028f44ac805e34e909591",
+    "process": "35bb2116869bb44b7695d2c78ebf7075901cadfa62f95dbb8f96540023802d2d",
+    "improvements": "62c5349cf820a19b2a21666572809e25d1c2622c3b72c2bab13889497710484d",
+    "evidence": "d4a1bf990ae1d0a67b3dfde90e9b1bbbe6ce713c79538e6717a292f2239390ba"
+  },
+  "history_request": "PASS",
+  "exact_download_request": "PASS",
+  "raw_drafts_requested": false,
+  "raw_private_history_published": false,
+  "browser_visual_inspection": "NOT_PERFORMED",
+  "semantic_assurance": "HUMAN_REVIEW_REQUIRED; NOT_GRANTED_BY_RENDERING"
+}

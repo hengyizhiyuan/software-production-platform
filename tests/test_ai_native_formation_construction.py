@@ -71,6 +71,9 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof", *, se
                 output = json.dumps(proposal, ensure_ascii=False)
             else:
                 assert state["convergence"]["action"] == "REPAIR"
+                assert 'same_basis_validation_feedback as JSON-encoded DATA' in request['instructions']
+                assert 'explicit local edit proposal over the ORIGINAL route ordinals' in request['instructions']
+                assert 'complete original-format Candidate' not in request['instructions']
                 basis = state["repair_basis"]
                 assert basis["original_wire"] == old_wire
                 replacement = deepcopy(wire["routes"][touched])

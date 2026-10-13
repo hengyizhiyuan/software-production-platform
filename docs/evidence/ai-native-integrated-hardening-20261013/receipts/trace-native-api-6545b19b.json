@@ -1,0 +1,81 @@
+{
+  "schema": "unified-c3-real-admin-native-trace-v1",
+  "source_revision": "6545b19b6d1c564bdbfbc180dc8075aaeaa09d20",
+  "work_id": "6ba2cffa-0bf3-565a-81e0-7f3c6696f21e",
+  "request_id": "3ad5e57d-a815-4432-8bc3-256e80ec9a93",
+  "actual_model": "deepseek-flash",
+  "reasoning_effort": "high",
+  "original_native_budget": {
+    "inferences": 12,
+    "tools": 48,
+    "active_seconds": 600
+  },
+  "database_default_transaction_read_only": true,
+  "production_database_access": false,
+  "original_work_replayed": false,
+  "holdout_used": false,
+  "report_created_by_model_and_owner_only": true,
+  "migration_head": "20261007_72",
+  "entry_can_analyze": true,
+  "entry_state": "WAITING_HUMAN",
+  "status": "COMPLETED",
+  "elapsed_seconds": 563.3028928820277,
+  "http_status": 200,
+  "verification": "CITATIONS_AND_STRUCTURE_PASS",
+  "phase": "REPORT_VERIFICATION",
+  "failure": null,
+  "report_formed": true,
+  "native_self_review_recorded": true,
+  "semantic_qualification": "HUMAN_REVIEW_REQUIRED",
+  "authority": "ADVISORY_ONLY",
+  "production_work_created": false,
+  "kernel": {
+    "terminal_outcome": "RESULT_READY",
+    "inference_submissions": 12,
+    "tool_effects": 24,
+    "active_seconds": null
+  },
+  "event_counts": {
+    "INFERENCE_STARTED": 12,
+    "INFERENCE_FINISHED": 12,
+    "TOOL_STARTED": 24,
+    "TOOL_FINISHED": 24,
+    "CHECKPOINT": 12
+  },
+  "verification_history": [
+    {
+      "verification": "FAIL",
+      "issues_count": 1,
+      "draft_id": "2f4301c5-47ba-5e22-833f-ebb648fe4902"
+    },
+    {
+      "verification": "CITATIONS_AND_STRUCTURE_PASS",
+      "issues_count": 0,
+      "draft_id": "9e5da914-db45-5e53-b42b-e0ef9c25e793"
+    },
+    {
+      "verification": "NATIVE_SELF_REVIEW_REQUIRES_REVISION",
+      "issues_count": 3,
+      "draft_id": "9e5da914-db45-5e53-b42b-e0ef9c25e793"
+    },
+    {
+      "verification": "CITATIONS_AND_STRUCTURE_PASS",
+      "issues_count": 0,
+      "draft_id": "ce724f20-9f77-557c-9ef2-f8d3173522eb"
+    },
+    {
+      "verification": "CITATIONS_AND_STRUCTURE_PASS",
+      "issues_count": 0,
+      "draft_id": null
+    }
+  ],
+  "budget_states": [],
+  "api_history_and_result": "PASS",
+  "markdown_sha256": "c066c4c8904d64840524e2719ea9f22346589f9a2a38bd03c8fb3da374d92348",
+  "markdown_bytes": 14914,
+  "summary_report_sha256": "536360d0928c2d9ad0b2e7daacc031a6086374eaef64903a400f95da5e088f73",
+  "installed_admin_js_sha256": "588003235ba39875dcebeea18370e2574f6de7fe319e7a732f9b39d0df4fc15b",
+  "scoped_original_owner_digest_before": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+  "scoped_original_owner_digest_after": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+  "original_owner_records": "UNCHANGED_SCOPED_CAPTURE"
+}

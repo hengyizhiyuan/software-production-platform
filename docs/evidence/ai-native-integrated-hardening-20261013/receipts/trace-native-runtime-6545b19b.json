@@ -1,0 +1,30 @@
+{
+  "schema": "unified-trace-actual-runtime-v1",
+  "container": "44c18a80375a184122f0c3144ae4ca84dfbbe14be43a35e051212a33c9fcaaf0",
+  "actual_image": "sha256:9f3879c2ba7d33a4936a318a8444b525df02b72aa033f6b9289538fc4f93f625",
+  "source_revision": "6545b19b6d1c564bdbfbc180dc8075aaeaa09d20",
+  "source_tree": "496c7b5d69b0b8c1b61d5dcefe259e2ad9b732e9",
+  "actual_user": "10001:10001",
+  "started_at_utc": "2026-10-13T09:02:03.970597+00:00",
+  "status": "FINISHED",
+  "original_owner_mounts": [
+    {
+      "source": "/data/watt/c3-semantic-convergence-20261009/binding-g0-generation61-qualification-20261010/app",
+      "destination": "/var/lib/spg",
+      "read_only": true
+    },
+    {
+      "source": "/data/docker/volumes/watt-c3-bindingg0g61-workspaces-20261010/_data",
+      "destination": "/var/lib/spg/native-workspaces",
+      "read_only": true
+    }
+  ],
+  "original_database_access": "C3_QUALIFICATION_READ_ONLY_TRANSACTIONS",
+  "production_database_access": false,
+  "docker_socket_mounted": false,
+  "ports_published": false,
+  "runtime_source_overlay": false,
+  "old_container_modified": false,
+  "exit_code": 0,
+  "elapsed_seconds": 624.6130126189673
+}

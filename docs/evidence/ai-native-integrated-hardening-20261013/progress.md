@@ -125,3 +125,19 @@ Human 明确指定当前 C3 分支为后续相关能力的统一开发与验证�
 v2 是模块内部临时候选与恢复协议，不新增 Engineering Fact/Owner/状态机、正式 Wire Schema 或模型阶段/预算。已持久的 v1 请求按其原协议重算，不因新 Provider 默认而升级，库存/反馈/Attempt/原始 Wire 与持久收据仍精确绑定。隐藏推理及任意原始私有 Human 输入不进入公开报告。
 
 `semantic-unlocated-repair-1.xml` 100/100 受控定向 PASS；`postgresql-semantic-unlocated-1.xml` 2/2 PASS，分别覆盖 v1/v2 已观测第二编辑后的剩余 Review 恢复及终态重放。错误引用、删必要组件、重复原始 JSON key、无进展、错误父 basis、错误版本/身份继续拒绝。能力必须在下一确切镜像取得实际资格，未提前声明 C3 Closure。
+
+## Trace 产品能力收敛：真实资格
+
+统一分支 `6545b19b`、确切镜像 `9f3879c2...`，Admin POST `/api/admin/works/{work_id}/analyses` 在正常鉴权、Origin 和 Work admission 后，真实 DeepSeek Native 调查原 C3 Work `6ba2cffa-0bf3-565a-81e0-7f3c6696f21e`。请求 `3ad5e57d-a815-4432-8bc3-256e80ec9a93`：COMPLETED / RESULT_READY / CITATIONS_AND_STRUCTURE_PASS。Owner invocation 563.30s、12 inferences、24 tools，原 12/48/600 envelope 未提高。先引用失败→analysis.revise，再自审反馈→analysis.revise→重新自审，通过后才返回报告。
+
+只读 C3 qualification PostgreSQL 事务，Migration `20261007_72`；原 app/workspaces readonly，无 Docker socket、生产数据库、原生产重放或旧服务修改。范围内原 Owner 记录摘要前后相同。报告及 Native CAS 在 ECS `trace-native-api-1/`；HTTP history/result/Markdown hash 通过，真实 API summary 在当前 Admin 模板渲染四个 Tabs，带真实证据与未知边界，下载引用精确 request。前端检查不是浏览器视觉检查；未将展示视为独立语义 Assurance。
+
+报告仍 ADVISORY_ONLY / HUMAN_REVIEW_REQUIRED，自审不是 Guardian/Human Acceptance。使用实际 Provider ID/status/usage 收据；完整总 Token 暂 UNKNOWN，部分有 numeric usage，reasoning_tokens 已被旧通用 redactor 遮蔽。`trace-native-usage-and-convergence-v2.json` 分别列实测部分统计与未观测/已遮蔽字段，部分合计不是完整成本，不猜测。当前 `f423bd6a` 对 Trace/API/Native/页面无代码差异，此范围资格可追溯复用；不宣称 Formation 新源码已由旧调查验证。
+
+旧 `codex/watt-trace-self-analysis` 已完成必要产品能力增量迁移，标记 **待归档 / 停止新增开发**。本分支是后续统一基线；旧分支及历史资格保留、未删除。当前尚未发现需要该分支继续独立开发的已形成产品功能缺口；后续相关工作均在 C3。
+
+## 局部编辑的反馈消费接线
+
+第四次真实 Formation：ordinary34/41 均两候选、0 Review，仍 FAIL。可定位缺陷不再使第二候选提前丢失，但当前/未来贡献、来源对应与新引文偏差仍未收敛。准确错误集合见 `nonholdout-model-f423bd6a-4.json`，不根据标签冒称 Validator Bug。
+
+代码审查发现新局部协议覆盖了 `_formation_repair_instructions` 的原反馈读取方向，丢失原“完整拒绝集合与 Owner 观察”消费接线。修复为复用该机制并声明局部编辑输出形态，避免要求模型重生完整计划；没有追加业务词汇禁令、Owner 能力、权限或重试预算。`local-edit-feedback-1.xml` 定向 86/86 PASS。下一镜像只做受影响资格；不能把反馈说明自身视为实际模型收敛成功。

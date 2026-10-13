@@ -984,7 +984,7 @@ def _primary_meaning_instructions(owner_preconditions):
          if owner_preconditions.get("semantic_selection_input_contract") == _PRIMARY_MEANING_INPUT_CONTRACT else ""))
 
 
-def _formation_repair_instructions(instructions, validation_feedback):
+def _formation_repair_instructions(instructions, validation_feedback, *, local_edit=False):
     """Orient the existing one repair request; no feedback or plan rewriting.
 
     Feedback remains the exact identity-bound serialized value in the request.
@@ -1019,7 +1019,9 @@ def _formation_repair_instructions(instructions, validation_feedback):
         "do not enumerate proof alternatives or invent evidence. NOT_EVALUABLE is not PASS. "
         + joint_instructions +
         "If lawful recovery cannot be established preserve UNRESOLVED. Return only the "
-        "complete original-format Candidate with this request's exact header. All existing "
+        + ("explicit local edit proposal over the ORIGINAL route ordinals; the Owner constructs "
+           "the complete candidate. " if local_edit else "complete original-format Candidate ") +
+        "with this request's exact header. All existing "
         "validation, independent Review, authority and budget constraints still apply.\n\n"
         + instructions)
 
@@ -2552,6 +2554,8 @@ class ModelFulfillmentCandidateProvider:
                     "Choose all meanings, consumers and proof operands yourself. No automatic evidence or "
                     "permission is granted. The complete constructed candidate is revalidated and independently "
                     "reviewed. Keep the current h/d and exact parent basis. Do not output a new complete plan.")
+                formation_instructions = _formation_repair_instructions(
+                    formation_instructions, validation_feedback, local_edit=True)
             elif (owner_preconditions or {}).get("candidate_construction_contract") in _CANDIDATE_CONSTRUCTION_CONTRACTS:
                 formation_instructions = (
                     "Propose semantic contribution routes for the immutable source table. Select s/c/f/t/u "
