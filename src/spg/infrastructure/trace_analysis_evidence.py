@@ -1014,8 +1014,9 @@ class RepositorySnapshot:
 
 
 class AnalysisTools:
-    def __init__(self, catalog: EvidenceCatalog, repositories: dict[str, RepositorySnapshot]):
+    def __init__(self, catalog: EvidenceCatalog, repositories: dict[str, RepositorySnapshot], *, max_report_findings=None):
         self.catalog, self.repositories = catalog, repositories
+        self.max_report_findings = max_report_findings
         self.accepted_report = None
         self.accepted_digest = None
         self.pending_reports = {}
@@ -1053,12 +1054,13 @@ class AnalysisTools:
              {"draft_id": {"type": "string"}, "items": {"type": "array", "minItems": 1, "maxItems": 50,
               "items": {"type": "object", "properties": {
                   "target_path": {"type": "string"}, "judgment": {"enum": ["SUPPORTED", "QUALIFIED", "UNKNOWN", "REVISE"]},
-                  "evidence_ids": {"type": "array", "items": {"type": "string"}, "maxItems": 100},
+                  "evidence_ids": {"type": "array", "items": {"type": "string"}, "maxItems": 100,
+                    "description": "Optional explicit source-set assertion. If omitted, the Owner binds the exact verified draft target's sources. If supplied, it must match exactly; no alternative sources are admitted."},
                   "rationale": {"type": "string", "minLength": 1, "maxLength": 1600},
                   "countercheck": {"type": "string", "minLength": 1, "maxLength": 1600,
                     "description": "Public source/alternative audit in your own words: distinguish historical Work requirements from this investigation's contract; actual effects from labels/policy; test whether observations distinguish the proposed cause from other explanations. Later success alone does not establish an earlier failure cause. State unsupported assumptions."},
                   "unsupported_assertions": {"type": "array", "maxItems": 20, "items": {"type": "string", "minLength": 1,"maxLength": 1000}}},
-                  "required": ["target_path", "judgment", "evidence_ids", "rationale", "countercheck", "unsupported_assertions"], "additionalProperties": False}}}, ["draft_id", "items"]),
+                  "required": ["target_path", "judgment", "rationale", "countercheck", "unsupported_assertions"], "additionalProperties": False}}}, ["draft_id", "items"]),
             ("analysis.revise", "Explicitly correct a retained rejected report using bounded add/remove/replace JSON Pointer edits. Revalidate the entire report without regenerating it. This changes advisory artifacts only.",
              {"draft_id": {"type": "string"}, "edits": {"type": "array", "minItems": 1, "maxItems": 24,
               "items": {"type": "object", "properties": {"op": {"enum": ["add", "remove", "replace"]},
@@ -1086,6 +1088,8 @@ class AnalysisTools:
                 props["query"].update(minLength=1, maxLength=200)
             if identity == "analysis.submit":
                 report_schema = AnalysisReport.model_json_schema()
+                if self.max_report_findings is not None:
+                    report_schema["properties"]["findings"]["maxItems"] = self.max_report_findings
                 result["$defs"] = report_schema.pop("$defs")
                 props["report"] = report_schema
             return result
@@ -1170,13 +1174,19 @@ class AnalysisTools:
             elif identity == "analysis.review":
                 report = self.pending_reports[args["draft_id"]]
                 targets = {t["target_path"]: set(t["evidence_ids"]) for t in self.review_targets(report)}
-                items = args["items"]
+                items = deepcopy(args["items"])
                 if len(items) != len(targets) or {i["target_path"] for i in items} != set(targets):
                     raise ValueError("SELF_REVIEW_REQUIRES_COMPLETE_REPORT_COVERAGE")
                 for item in items:
-                    refs = set(item["evidence_ids"])
+                    expected = targets[item["target_path"]]
+                    refs = set(item.get("evidence_ids", expected))
                     if refs != targets[item["target_path"]] or not refs.issubset(self.catalog.observed):
                         raise ValueError("SELF_REVIEW_SOURCE_SCOPE_MISMATCH")
+                    # Source identity belongs to the immutable verified draft,
+                    # not to a second stochastic transcription. Preserve strict
+                    # checks on explicit assertions and bind the same source set
+                    # for omitted assertions; never rewrite semantic judgments.
+                    item["evidence_ids"] = sorted(expected)
                     if item["judgment"] not in {"SUPPORTED", "QUALIFIED", "UNKNOWN", "REVISE"} or not item["rationale"].strip():
                         raise ValueError("SELF_REVIEW_JUDGMENT_REQUIRED")
                     if not isinstance(item.get("countercheck"), str) or not item["countercheck"].strip() or not isinstance(item.get("unsupported_assertions"), list):
@@ -1239,6 +1249,8 @@ class AnalysisTools:
                 self.drafts[draft_id] = deepcopy(candidate)
                 edit_context = None
                 report = AnalysisReport.model_validate(candidate)
+                if self.max_report_findings is not None and len(report.findings) > self.max_report_findings:
+                    raise ValueError("CURRENT_REPORT_SCOPE_EXCEEDED; retain only the selected incident; other incidents remain explicitly unanalysed")
                 report = self.catalog.materialize_boundaries(report)
                 self.pending_reports[draft_id] = report.model_dump(mode="json")
                 self.accepted_report, self.accepted_digest, self.accepted_review = None, None, None

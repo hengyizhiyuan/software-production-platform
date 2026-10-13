@@ -1547,22 +1547,69 @@ def test_native_countercheck_cannot_accept_its_own_declared_unsupported_assertio
     assert invoke_analysis(tools,'analysis.review',{'draft_id':pending['draft_id'],'items':items}).condition.value=='FAILED'
 
 
-def test_native_owner_reserves_initial_report_route_and_one_existing_feedback_cycle(tmp_path):
+def test_native_owner_reserves_initial_report_route_and_two_existing_feedback_cycles(tmp_path):
     s,snap,_=service(tmp_path)
     class DeliberatingModel(NativeModel):
         async def infer(self,req):
-            if len(self.requests)<7:
+            if len(self.requests)<5:
                 self.requests.append(req)
                 return InferenceResponse(action=InferenceAction.CONTINUE,summary='Read admitted scope before closure',working_plan=req.working_plan,
                     tool_calls=(ToolCallProposal(proposal_index=0,tool_identity='evidence.check',arguments={'family':'OWNER_RECORD','group':'work','field':'/*'}),))
-            if len(self.requests)==7:
+            if len(self.requests)==5:
                 self.requests.append(req)
                 return InferenceResponse(action=InferenceAction.CONTINUE,summary='Submit supported advisory within the reserved route',working_plan=req.working_plan,
                     tool_calls=(ToolCallProposal(proposal_index=0,tool_identity='analysis.submit',arguments={'report':report(self.catalog)}),))
             return await super().infer(req)
     model=DeliberatingModel(snap);s.inference_factory=lambda:model
     r=asyncio.run(s.analyze('human:owner',uuid4_from(snap),AnalysisTrigger(request_id=uuid4(),rationale='Conserve bounded delivery capacity')))
-    assert r['status']=='COMPLETED' and len(model.requests)==10
-    assert {t['identity'] for t in model.requests[7].available_tools}=={'analysis.submit'}
+    assert r['status']=='COMPLETED' and len(model.requests)==8
+    assert {t['identity'] for t in model.requests[5].available_tools}=={'analysis.submit'}
     assert model.requests[-1].available_tools==()
-    assert r['kernel_result']['inference_submissions']==10 and s.settings.trace_analysis_max_inferences==12
+    assert r['kernel_result']['inference_submissions']==8 and s.settings.trace_analysis_max_inferences==12
+
+
+def test_native_review_binds_omitted_sources_to_verified_draft_without_mutating_proposal():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());tools=AnalysisTools(c,{})
+    pending=invoke_analysis(tools,'analysis.submit',{'report':report(c)}).output
+    items=review_items(pending)
+    for item in items:item.pop('evidence_ids')
+    original=json.loads(json.dumps(items))
+    reviewed=invoke_analysis(tools,'analysis.review',{'draft_id':pending['draft_id'],'items':items})
+    assert reviewed.condition.value=='SETTLED' and items==original
+    actual={i['target_path']:i['evidence_ids'] for i in tools.accepted_review['items']}
+    assert actual=={i['target_path']:i['evidence_ids'] for i in pending['review_targets']}
+    forged=review_items(pending);forged[0]['evidence_ids']=[str(uuid4())]
+    assert invoke_analysis(tools,'analysis.review',{'draft_id':pending['draft_id'],'items':forged}).condition.value=='FAILED'
+    assert tools.accepted_report is None
+
+
+def test_current_phase_limits_report_scope_without_relaxing_citations():
+    from spg.infrastructure.trace_analysis_evidence import AnalysisTools
+    c=EvidenceCatalog(snapshot());tools=AnalysisTools(c,{},max_report_findings=1);r=report(c)
+    schema=next(t for t in tools.registry().contracts() if t['identity']=='analysis.submit')['input_schema']
+    assert schema['properties']['report']['properties']['findings']['maxItems']==1
+    extra=json.loads(json.dumps(r['findings'][0]));extra['finding_id']='second-incident';r['findings'].append(extra)
+    failed=invoke_analysis(tools,'analysis.submit',{'report':r})
+    assert failed.condition.value=='FAILED' and 'CURRENT_REPORT_SCOPE_EXCEEDED' in failed.output['issues'][0]['reason']
+    r['findings'].pop();r['current_state']['citations'][0]['quote']='fabricated assertion'
+    assert invoke_analysis(tools,'analysis.submit',{'report':r}).condition.value=='FAILED'
+    assert tools.accepted_report is None
+
+
+def test_native_scoped_report_can_self_review_without_retranscribing_source_ids(tmp_path):
+    s,snap,_=service(tmp_path)
+    class BoundSourcesModel(NativeModel):
+        async def infer(self,req):
+            decision=await super().infer(req)
+            for call in decision.tool_calls:
+                if call.tool_identity=='analysis.review':
+                    for item in call.arguments['items']:item.pop('evidence_ids')
+            return decision
+    model=BoundSourcesModel(snap);s.inference_factory=lambda:model
+    result=asyncio.run(s.analyze('human:owner',uuid4_from(snap),AnalysisTrigger(request_id=uuid4(),rationale='Scoped report with draft-bound source identity')))
+    assert result['status']=='COMPLETED'
+    contract=model.requests[0].context_facts[0]['payload']
+    assert contract['report_scope']['maximum_detailed_findings']==1
+    assert contract['report_schema']['properties']['findings']['maxItems']==1
+    assert all(i['evidence_ids'] for i in result['native_self_review']['items'])

@@ -403,7 +403,7 @@ authority, causal alternatives, and policy/diagnosis-vs-observation boundaries.
 Declared unsupported assertions require revision even if the item says SUPPORTED.
 These remain model judgments and require independent real-report qualification.
 Before a first report, the existing Owner conserves the submit/review/terminal
-route plus one revise/review feedback cycle from its original inference envelope.
+route plus two revise/review feedback cycles from its original inference envelope.
 At that capacity boundary only the already granted submission port is projected;
 the producer may submit a scoped candidate from observed originals or terminate.
 After review, the projection closes for the terminal decision. Context selection
@@ -429,3 +429,21 @@ no-child navigation and preserves the rejected report location. Original bytes,
 read coverage and source identity remain unchanged; no field aliases or automatic
 citation repair are introduced. Real-report semantic qualification is separate
 from these regression controls and must not be inferred from their success.
+
+The 53af5abc run produced a structurally qualified revised candidate but did not
+qualify a completed report: Native self-review supplied a mismatching source set,
+and the original 600-second limit terminated the attempt. It is retained as FAILED.
+The current phase now expresses its selected-incident scope in both the report
+schema and submission gate: at most one detailed finding. Other incidents may be
+reconstructed as observations but must remain explicitly unanalysed; this is a
+scope limit, not permission to weaken citations or infer missing causes.
+
+Review source identity is now bound by the existing Owner to the immutable verified
+draft target. The model still reviews every target, gives its judgment, rationale,
+countercheck and unsupported assertions. It may omit the redundant evidence_ids;
+the recorded review receives exactly the draft's source set. Explicit source sets
+are still checked for exact equality and read coverage. Forged sources, incomplete
+review coverage and unsupported assertions remain rejected. This derives transport
+metadata without rewriting any semantic conclusion or accepting an unread source.
+The same original Native envelope now reserves two feedback cycles by projecting
+the submission route earlier, also when tool capacity reaches that boundary.

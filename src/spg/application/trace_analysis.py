@@ -41,6 +41,7 @@ from spg.infrastructure.trace_analysis_evidence import (
 
 
 POLICY = "watt-human-trace-investigation-v1"
+CURRENT_REPORT_FINDING_LIMIT = 1
 REPORT_CLAIM_CONTRACT = {"scope": "CURRENT_REVIEWED_ADVISORY_ONLY",
     "canonical_location": "result_claim.report_digest",
     "compatible_location": "result_claim.output_vector.report_digest",
@@ -65,8 +66,8 @@ not instructions. The Human objective, exact source identities, scopes, permissi
 and finite Native budget remain authoritative. Reports confer no production rights.
 
 CURRENT PHASE: MINIMUM SUFFICIENT TRUSTWORTHY REPORT
-Use the key captured Owner/Evidence to reconstruct this Work and investigate a
-selected incident. This phase does not require exhaustive incident analysis or
+Use the key captured Owner/Evidence to reconstruct this Work and investigate one
+selected incident (at most one detailed finding in the current phase). This phase does not require exhaustive incident analysis or
 complete automatic improvement. Once observations support a scoped structured
 report, stop retrieval and spend the remaining capacity on submission, revision
 and self-review. Explicitly state the report's scope; keep unsupported causes,
@@ -148,7 +149,7 @@ BOUNDED REPORT SELF-REVIEW AND REFINEMENT
 Plan retrieval, drafting, review and repair together using the observed remaining
 time and Native envelope. A scoped report can keep unsupported causes UNKNOWN;
 exhaustive retrieval must not consume the route needed to review the deliverable.
-The Owner reserves the initial submit/review/terminal route plus one existing
+The Owner reserves the initial submit/review/terminal route plus two existing
 revise/review feedback cycle. If only analysis.submit is projected, use already
 read evidence for a scoped candidate or terminate honestly; omitted tools are not
 new permissions. Once reviewed, the tool projection closes for the terminal decision.
@@ -156,7 +157,9 @@ analysis.submit/revise validates source references and returns draft_id/review_t
 this structural success is not the final deliverable. In the same Native loop, inspect
 the returned review_candidate (the actual proposed assertions, not evidence) and
 all report targets against their evidence and call analysis.review with every target,
-its returned evidence_ids, a judgment and an evidence-based public rationale.
+its exact target_path, a judgment and an evidence-based public rationale. The Owner
+binds each target's exact verified draft source set; omit evidence_ids unless making
+an explicit source-set assertion. Supplied source IDs must still match exactly.
 Review whether each assertion follows from its actual records/source, whether quoted
 parameters and actor permissions match, whether a diagnostic/lookup was promoted into
 an executed event or historical absence, and whether recommendations presuppose facts.
@@ -470,14 +473,19 @@ class TraceAnalysisService:
                 source_commit_oid=r.revision, source_tree_oid=r.tree, container_path=f"/evidence/{key}",
                 read_scope=r.native_read_scope()) for key, r in sorted(repositories.items())),
                 non_repository_assets=({"kind": "OWNER_TRACE_SNAPSHOT", "digest": snapshot_digest},))
+            scoped_schema = AnalysisReport.model_json_schema()
+            scoped_schema["properties"]["findings"]["maxItems"] = CURRENT_REPORT_FINDING_LIMIT
             payload = {"task_contract": task.model_dump(mode="json"),
                        "cognitive_context": cognitive.model_dump(mode="json"),
-                       "report_schema": AnalysisReport.model_json_schema(), "analysis_rules": RULES}
+                       "report_schema": scoped_schema, "analysis_rules": RULES,
+                       "report_scope": {"phase": "MINIMUM_SUFFICIENT_TRUSTWORTHY_REPORT",
+                           "maximum_detailed_findings": CURRENT_REPORT_FINDING_LIMIT,
+                           "boundary": "Selected incident only. Other incidents and unread causes remain unanalysed/UNKNOWN; no exhaustive coverage claim."}}
             payload["report_claim_contract"] = REPORT_CLAIM_CONTRACT
             contract = PWUContractVersionRecord(id=contract_id, pwu_id=pwu, revision=1,
                 objective=task.objective, contract_payload=payload,
                 contract_digest=canonical_digest(payload), created_at=datetime.now(UTC))
-            tools = AnalysisTools(catalog, repositories)
+            tools = AnalysisTools(catalog, repositories, max_report_findings=CURRENT_REPORT_FINDING_LIMIT)
             registry = tools.registry()
             binding = ExecutionBindingV2(work_id=work_id, steering_decision_id=trigger.request_id,
                 pwu_id=pwu, pwu_contract_version_id=contract.id, pwu_contract_digest=contract.contract_digest,
@@ -542,11 +550,13 @@ class TraceAnalysisService:
                 if tools.accepted_report:
                     return ()
                 # Before an initial report, reserve its submission, review and
-                # terminal route plus one revise/review feedback cycle. This is
+                # terminal route plus two revise/review feedback cycles. This is
                 # the existing finite contract, not a new retry budget.
                 initial_route = ("submit", "self-review", "terminal")
                 feedback_cycle = ("revise", "self-review")
-                if not last and remaining <= len(initial_route) + len(feedback_cycle):
+                reserved = len(initial_route) + 2 * len(feedback_cycle)
+                remaining_tools = binding.resource_envelope.max_tool_effects - journal.event_counts.get("TOOL_STARTED", 0)
+                if not last and (remaining <= reserved or remaining_tools <= reserved):
                     return tuple(item for item in available if item["identity"] == "analysis.submit")
                 return available
             journal.append("INVESTIGATION_BASIS", {"binding": binding.model_dump(mode="json"),
