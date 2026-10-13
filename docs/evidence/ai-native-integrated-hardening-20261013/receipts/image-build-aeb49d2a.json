@@ -1,0 +1,45 @@
+{
+  "schema": "ai-native-evolution-image-build-v1",
+  "started_at_utc": "2026-10-13T10:19:52.477002+00:00",
+  "elapsed_seconds": 35.082758923992515,
+  "exit_code": 0,
+  "revision": "aeb49d2af50b807fe7aaf8e376835ec622310172",
+  "tree": "83d1931916427b0834077820c888b02ed6c7475a",
+  "tag": "watt-ai-native-evolution:aeb49d2a-20261013",
+  "archive_sha256": "4f3e5f8fa469b7669cfbfdca970a904ee1470bfd4ff19b76ad20a324920d09b9",
+  "raw_git_blob_export": true,
+  "network": "none",
+  "source_reinstalled": true,
+  "owner_revisions": {
+    "watt": {
+      "revision": "aeb49d2af50b807fe7aaf8e376835ec622310172",
+      "tree": "83d1931916427b0834077820c888b02ed6c7475a"
+    },
+    "guardian": {
+      "revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+      "tree": "92ac992c03bd84923a569bbe9f314c0786457040"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "runtime_source_overlay": false,
+  "production_resources_modified": false,
+  "actual_image_id": "sha256:809206d0fe7d8182302f2f0622bf1e6927efda0caa133cc3cf56514c74c79fd4",
+  "repo_digests": [],
+  "labels": {
+    "org.opencontainers.image.revision": "aeb49d2af50b807fe7aaf8e376835ec622310172",
+    "watt.c3.base-image-id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+    "watt.c3.ecf-revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "watt.c3.ecf-tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "watt.c3.ecf-unsupported-revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+    "watt.c3.guardian-revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+    "watt.c3.guardian-tree": "92ac992c03bd84923a569bbe9f314c0786457040",
+    "watt.c3.source-tree": "83d1931916427b0834077820c888b02ed6c7475a"
+  }
+}

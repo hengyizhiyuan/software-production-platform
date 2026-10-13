@@ -167,3 +167,13 @@ Header/版本由实际请求 Owner 提供，模型不能新增声明。局部 ed
 普通41第二候选已明确修正一个非法来源 ref，但剩余六项为真实候选缺陷：三个 Work Constraint 的候选支撑集合不具备原 Owner 所需证明，三个 GIT_DIFF_SCOPE Route 的目标路径集合为空。完整原文/作用范围没有被伪造或压缩；尚未证明 Validator 错拒。此分支不因预算耗尽继续盲目调用模型，亦不通过自动选择支撑/目标获得 PASS。只对有明确修复依据的普通34恢复缺口进行下一确切镜像资格。
 
 Trace 真实结果的 Admin 展示校验补充 `actual-trace-admin-presentation-2.json`：使用原始 Git blob / 实际已安装 JS 字节，修正前次 Windows 工作副本 CRLF hash 与已安装 LF hash 的区别。四个实际数据面板结果相同；旧收据保留，不冒称浏览器视觉验收。Trace/API/Native 源码在 Formation 后续修订没有改变；镜像只读重放 `trace-final-image-replay-2.json` 证明原 CAS、API 与下载兼容，未增加模型调用。
+
+## Phase 2 内部语义理解 → 角色绑定
+
+第七次真实结果 `aeb49d2a` / image `809206d0...`：普通34两次 Formation、0 Review，仍未接纳。Provider 两次 completed、无重发；累计 Input 126355 / Output 8908 / Total 135263 / Reasoning 0 / Cached 37888。初次漏四条 Clause 原始贡献；第二次明确 remove/append，但重复 retained 的同一 Fact/Seal 组件，并使用不充分权限/来源证明。原始 JSON、反馈和终态保持不变；不冒称自动收敛成功。
+
+按已批准 Integrated Phase 2 的模块内分工实施[语义理解与绑定](formation-interpretation-binding.md)：第一候选可保存未审查的 source-referenced understanding/alternatives/unknowns；第二候选构造完整真实方法计划。原始库存、跨来源上下文、已接受 Fact 和正式 Wire v1 不改；2 Formation / 1 feedback / 最多4逻辑调用不增。完整最终 Validator、独立 Review、执行与 Guardian 门禁不改。安全但未被观察的来源/引文或不完整 Claim 保持 UNKNOWN，不提升为事实/证据；第二候选必须对所有原始要求合法绑定。
+
+临时协议 v4 是现有 Owner 的构造路径，不新增 Runtime 编排系统、IR、全局 Owner、跨项目 Evidence 契约或独立 Refine Coordinator。新实例不能升级旧收据；最终方法和原始事实之间的证明仍来自原 Authority/消费者，不来自第一候选的解释。此计划落实已有 Phase 2，尚不宣称其真实模型收益。
+
+`interpretation-binding-1.xml` 保存首轮 3 FAIL/79 PASS（测试读取不存在 Binding.inventory_fingerprint）；改为实际 formation receipt 字段后 `interpretation-binding-2.xml` 11 PASS。最后的未知 Claim/身份漂移扩充 `interpretation-binding-3.xml` 14 PASS，`postgresql-interpretation-binding-2.xml` 6 PASS。受控 Provider 仅证明机制，不替代真实生产。下一资格以新冻结的应用/镜像身份为准。

@@ -3011,7 +3011,8 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                 if preconditions.get("candidate_schema_repair_contract") is not None:
                     from spg.providers.fulfillment_candidate import _RAW_ROLE_REPAIR_CONTRACT
                     if (preconditions["candidate_schema_repair_contract"] != _RAW_ROLE_REPAIR_CONTRACT
-                            or preconditions["candidate_construction_contract"] != "owner-local-role-reference-candidates-v3"):
+                            or preconditions["candidate_construction_contract"] not in {
+                                "owner-local-role-reference-candidates-v3","owner-local-interpretation-role-construction-v4"}):
                         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
                     restored_preconditions["candidate_schema_repair_contract"] = _RAW_ROLE_REPAIR_CONTRACT
                 restored_preconditions = candidate_construction_preconditions(
@@ -3629,9 +3630,12 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
         first_request = next((r for r in rows if r["stage"] == "MODEL_REQUEST_PENDING"), None)
         if ((first_request or {}).get("owner_source_preconditions") or {}).get(
                 "candidate_construction_contract") in {
-                    "owner-local-wire-candidate-edits-v1", "owner-local-semantic-candidate-edits-v2", "owner-local-role-reference-candidates-v3"}:
+                    "owner-local-wire-candidate-edits-v1", "owner-local-semantic-candidate-edits-v2", "owner-local-role-reference-candidates-v3", "owner-local-interpretation-role-construction-v4"}:
             from spg.domain.refinement_contract import OwnerConvergenceDecision
             state = first_request["owner_source_preconditions"]["candidate_construction_state"]
+            if first_request['owner_source_preconditions']['candidate_construction_contract'] == 'owner-local-interpretation-role-construction-v4':
+                last_request = next(r for r in reversed(rows) if r['stage']=='MODEL_REQUEST_PENDING')
+                state = last_request['owner_source_preconditions']['candidate_construction_state']
             receipt["understanding_state"] = {**state["understanding"],
                 "unknowns": ["ACTUAL_OWNER_EVIDENCE", "ASSURANCE"] if passed else state["understanding"]["unknowns"]}
             receipt["candidate_space"] = [{"response_receipt_id": r["receipt_id"],
@@ -3787,7 +3791,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                         "candidate_construction_contract"))
                 construction_enabled = (getattr(provider, "supports_candidate_construction", False)
                     if initial_request is None else construction_contract in {
-                        "owner-local-wire-candidate-edits-v1", "owner-local-semantic-candidate-edits-v2", "owner-local-role-reference-candidates-v3"})
+                        "owner-local-wire-candidate-edits-v1", "owner-local-semantic-candidate-edits-v2", "owner-local-role-reference-candidates-v3", "owner-local-interpretation-role-construction-v4"})
                 if construction_enabled and precondition_arguments:
                     from spg.providers.fulfillment_candidate import candidate_construction_preconditions
                     original_preconditions = {key: value for key, value in
@@ -3795,7 +3799,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                             "candidate_construction_contract", "candidate_construction_state"}}
                     schema_repair = (getattr(provider, "supports_raw_role_repair", False) if initial_request is None
                         else (initial_request.get("owner_source_preconditions") or {}).get("candidate_schema_repair_contract") is not None)
-                    if schema_repair and construction_contract == "owner-local-role-reference-candidates-v3":
+                    if schema_repair and construction_contract in {"owner-local-role-reference-candidates-v3","owner-local-interpretation-role-construction-v4"}:
                         from spg.providers.fulfillment_candidate import _RAW_ROLE_REPAIR_CONTRACT
                         original_preconditions["candidate_schema_repair_contract"] = _RAW_ROLE_REPAIR_CONTRACT
                     precondition_arguments["owner_preconditions"] = candidate_construction_preconditions(

@@ -24,7 +24,8 @@ pytestmark = pytest.mark.postgresql
 
 @pytest.mark.parametrize('construction_contract,raw_role_repair',(
     ('owner-local-wire-candidate-edits-v1',False),('owner-local-semantic-candidate-edits-v2',False),
-    ('owner-local-role-reference-candidates-v3',False),('owner-local-role-reference-candidates-v3',True)))
+    ('owner-local-role-reference-candidates-v3',False),('owner-local-role-reference-candidates-v3',True),
+    ('owner-local-interpretation-role-construction-v4',False),('owner-local-interpretation-role-construction-v4',True)))
 def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(postgres_database, tmp_path, monkeypatch,construction_contract,raw_role_repair):
     declared = c1.DeclaredC1Fulfillment()
     calls = []
@@ -63,6 +64,10 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
                         s['source_ref'] for s in inventory['sources'] if s['kind']!='FACT')]
                     if raw_role_repair:proposal['routes'][0]['current_fact_dependencies']=[0,1]
                     output=json.dumps(proposal)
+                if construction_contract=='owner-local-interpretation-role-construction-v4':
+                    output=json.dumps({'components':[{'source_ref':s['source_ref'],'component_quote':None,
+                        'interpretation':'Unreviewed complete contribution','unknowns':['Need role binding'],
+                        'alternatives':[]} for s in inventory['sources']]})
             else:
                 basis = payload["owner_source_preconditions"]["candidate_construction_state"]["repair_basis"]
                 replacement=wire['routes'][0]
@@ -73,6 +78,8 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
                 if construction_contract=='owner-local-role-reference-candidates-v3':
                     output=json.dumps({'basis':basis['raw_sha256'],'replace':[{'index':0,'route':role(wire['routes'][0])}],
                         'remove':[],'append':[]})
+                if construction_contract=='owner-local-interpretation-role-construction-v4':
+                    output=json.dumps({'routes':[role(r) for r in wire['routes']]})
         return StructuredModelResult(output_text=output,provider=ModelProvider.DEEPSEEK,
             requested_model="controlled-pg-edit",effective_model="controlled-pg-edit",
             request_id=f"pg-edit-{len(calls)}",usage=ModelUsage(unknown=True),timing=ModelTiming(),retry_count=0)
