@@ -1,0 +1,607 @@
+{
+  "schema_version": "watt-trace-analysis-report-v8",
+  "work_id": "3ee622b5-b816-5679-afdc-e5de51cd2702",
+  "original_objective": {
+    "statement": "Human 首次输入要求新开一个独立有界 Work：只新增 services.html 服务介绍页与 news.html 公司新闻页，每页包含中文标题、简短说明和返回 index.html 的链接；两页分别原样使用各自指定文案；两页各自验证后整合并再次验证为同一事项的最终成果；不使用后端与外部资源；完成后形成候选成果，经真实 HTTP 预览与独立质量检查，等待 Human 明确验收，不自动接受。",
+    "citations": [
+      {
+        "evidence_id": "fc3ffa57-bab3-5598-8c1e-300ce6b9d1d8",
+        "quote": null,
+        "field": "",
+        "observed_value": "新开一个独立的有界 Work：独立新增 services.html 服务介绍页和 news.html 公司新闻页，每页包含中文标题、简短说明和返回 index.html 的链接。服务页使用明确文案「本演示官网提供企业信息展示与页面导航示例，不声明公司的真实业务范围。」；新闻页使用明确文案「暂无已公布新闻，本页面为静态演示栏目。」。两份成果完成各自验证后，整合并再次验证两页作为同一事项的最终成果。只新增 services.html 和 news.html，不修改其他文件，不用后端与外部资源。完成后形成候选成果，经过真实 HTTP 预览和独立质量检查，等待我明确验收，不自动接受。",
+        "observed_value_truncated": false
+      }
+    ],
+    "evidence_family": "OWNER_RECORD"
+  },
+  "expected_outcome": {
+    "statement": "该 Work 的既定期望是产出 services.html 与 news.html 两个静态页面并各自满足内容与导航要求，随后整合验证；候选成果须经真实 HTTP 预览与独立质量检查后交 Human 明确验收，不自动接受。work 记录把该期望概括为「独立新增 services.html 与 news.html 两个静态页面; Provide an independently verified Preview of the exact produced Candidate for Human review.」。期望是规则性表述，不等于预览或验收事件已发生。",
+    "citations": [
+      {
+        "evidence_id": "226cc9b7-9509-504f-961f-c16e4a420a88",
+        "quote": null,
+        "field": "/desired_outcome",
+        "observed_value": "\"独立新增 services.html 与 news.html 两个静态页面; Provide an independently verified Preview of the exact produced Candidate for Human review.\"",
+        "observed_value_truncated": false
+      },
+      {
+        "evidence_id": "fc3ffa57-bab3-5598-8c1e-300ce6b9d1d8",
+        "quote": "完成后形成候选成果，经过真实 HTTP 预览和独立质量检查，等待我明确验收，不自动接受。",
+        "field": null,
+        "observed_value": null,
+        "observed_value_truncated": false
+      }
+    ],
+    "evidence_family": "OWNER_RECORD"
+  },
+  "actual_execution_path": {
+    "statement": "冻结 Work 行记录 3 个 PWU、3 条 Self-Refine 事件。精确候选相对基线的最终净差异只列出 news.html 与 services.html；读取的候选两页包含各自指定文案和返回 index.html 的链接。这只说明两端提交的净变化，不能排除中间写入或外部副作用。本报告仅详细核对一次 process.run 拒绝；另外两条 Self-Refine 的根因、实际修复动作与重试次数未分析。",
+    "citations": [
+      {
+        "evidence_id": "226cc9b7-9509-504f-961f-c16e4a420a88",
+        "quote": null,
+        "field": "/pwu_count",
+        "observed_value": "3",
+        "observed_value_truncated": false
+      },
+      {
+        "evidence_id": "226cc9b7-9509-504f-961f-c16e4a420a88",
+        "quote": null,
+        "field": "/self_refine_count",
+        "observed_value": "3",
+        "observed_value_truncated": false
+      },
+      {
+        "evidence_id": "1d01703c-5302-5e8e-ba51-180e75015661",
+        "quote": null,
+        "field": "/changed_paths",
+        "observed_value": "[\n    \"news.html\",\n    \"services.html\"\n  ]",
+        "observed_value_truncated": false
+      },
+      {
+        "evidence_id": "b54db217-41fd-5200-9e59-ece37e2f9aa6",
+        "quote": null,
+        "field": "/content",
+        "observed_value": "\"<!DOCTYPE html>\\n<html lang=\\\"zh-CN\\\">\\n<head>\\n  <meta charset=\\\"UTF-8\\\">\\n  <meta name=\\\"viewport\\\" content=\\\"width=device-width, initial-scale=1\\\">\\n  <title>服务介绍 - 恒溢启源</title>\\n  <style>\\n    body { font-family: sans-serif; margin: 0; padding: 0; line-height: 1.7; color: #222; }\\n    header, main, footer { max-width: 720px; margin: 0 auto; padding: 16px 20px; }\\n    header { border-bottom: 1px solid #e5e5e5; }\\n    nav a { color: #0b5cad; text-decoration: none; }\\n    nav a:hover { text-decoration: underline; }\\n    h1 { font-size: 1.6rem; }\\n  </style>\\n</head>\\n<body>\\n  <header>\\n    <h1>服务介绍</h1>\\n    <nav>\\n      <a href=\\\"index.html\\\">返回首页</a>\\n    </nav>\\n  </header>\\n  <main>\\n    <p>本演示官网提供企业信息展示与页面导航示例，不声明公司的真实业务范围。</p>\\n  </main>\\n  <footer>\\n    <nav>\\n      <a href=\\\"index.html\\\">返回首页</a>\\n    </nav>\\n  </footer>\\n</body>\\n</html>\\n\"",
+        "observed_value_truncated": false
+      },
+      {
+        "evidence_id": "b3f83530-4019-5d81-8f8f-f54632655902",
+        "quote": null,
+        "field": "/content",
+        "observed_value": "\"<!DOCTYPE html>\\n<html lang=\\\"zh-CN\\\">\\n<head>\\n  <meta charset=\\\"UTF-8\\\">\\n  <meta name=\\\"viewport\\\" content=\\\"width=device-width, initial-scale=1.0\\\">\\n  <title>公司新闻 - 恒溢启源</title>\\n  <style>\\n    :root {\\n      color-scheme: light;\\n    }\\n    body {\\n      margin: 0;\\n      padding: 0;\\n      font-family: \\\"Microsoft YaHei\\\", \\\"PingFang SC\\\", \\\"Hiragino Sans GB\\\", sans-serif;\\n      line-height: 1.7;\\n      color: #23303f;\\n      background-color: #f5f7fa;\\n    }\\n    header {\\n      background-color: #1f3a5f;\\n      color: #ffffff;\\n      padding: 24px 16px;\\n    }\\n    header h1 {\\n      margin: 0 0 8px 0;\\n      font-size: 26px;\\n    }\\n    nav a {\\n      color: #cfe1f7;\\n      text-decoration: none;\\n      margin-right: 16px;\\n      font-size: 15px;\\n    }\\n    nav a:hover {\\n      text-decoration: underline;\\n    }\\n    main {\\n      max-width: 860px;\\n      margin: 0 auto;\\n      padding: 32px 16px 48px 16px;\\n    }\\n    main h2 {\\n      font-size: 20px;\\n      margin-top: 0;\\n    }\\n    .notice {\\n      background-color: #ffffff;\\n      border: 1px solid #dde4ed;\\n      border-radius: 6px;\\n      padding: 20px;\\n      margin: 16px 0;\\n    }\\n    footer {\\n      border-t",
+        "observed_value_truncated": true
+      }
+    ],
+    "evidence_family": "OWNER_RECORD"
+  },
+  "current_state": {
+    "statement": "冻结导出中的 work 记录显示 state=COMPLETED、bucket=COMPLETED、queue_condition=COMPLETED、complete=true、completion_outcome=PRODUCED、acceptance_decision=ACCEPT、candidate_state=SEALED、repair_status=VERIFIED、steering_outcome=COMPLETE。这些是该行的冻结快照值；latest_activity_at 表示记录内的最近活动时间，不证明各状态在该时刻发生转换。",
+    "citations": [
+      {
+        "evidence_id": "226cc9b7-9509-504f-961f-c16e4a420a88",
+        "quote": null,
+        "field": "",
+        "observed_value": "{\n  \"acceptance_decision\": \"ACCEPT\",\n  \"acceptance_id\": \"f1127996-a72c-45cf-9b94-ba8839ecf3a2\",\n  \"acceptance_label\": \"ACCEPT\",\n  \"active\": null,\n  \"admissibility_outcome\": \"ADMISSIBLE\",\n  \"attempt_id\": \"429a1f4c-8b31-4355-a67b-f2be0c01785d\",\n  \"authorized\": true,\n  \"bucket\": \"COMPLETED\",\n  \"candidate_fingerprint\": \"9208e9b2222f695c95e616a97f220a6cac00ec65718e9da7275f8a1ac21a7b00\",\n  \"candidate_id\": \"13c231ba-bc32-5f91-b391-aeeb930c91c4\",\n  \"candidate_state\": \"SEALED\",\n  \"complete\": true,\n  \"completion_outcome\": \"PRODUCED\",\n  \"condition\": \"READY\",\n  \"created_at\": \"2026-10-05T16:57:33.127532+00:00\",\n  \"current_work_reality_revision_id\": \"4058c957-1917-5bed-95bc-7bd272a7fe32\",\n  \"decision_matches_revision\": true,\n  \"deployment_id\": null,\n  \"deployment_state\": null,\n  \"desired_outcome\": \"独立新增 services.html 与 news.html 两个静态页面; Provide an independently verified Preview of the exact produced Candidate for Human review.\",\n  \"failure_family\": \"SEMANTIC_BINDING_FAILURE\",\n  \"issue_hint\": null,\n  \"latest_activity_at\": \"2026-10-05T17:34:47.061884+00:00\",\n  \"latest_event\": \"Human 交付验收\",\n  \"latest_event_label\": \"Human 交付验收\",\n  \"manifest_id\": \"a783ea78-c02d-52c6-a094-8e7f9018f9e1\",\n  \"open_findin",
+        "observed_value_truncated": true
+      }
+    ],
+    "evidence_family": "OWNER_RECORD"
+  },
+  "timeline": [
+    {
+      "statement": "Human 首次输入提出：新开一个独立有界 Work，新增 services.html 与 news.html，并规定中文标题与说明、返回 index.html 的链接、指定文案、整合验证、无后端与外部资源、真实 HTTP 预览与独立质量检查、最终由 Human 明确验收。该记录是纯文本原始输入，未观察到时间字段。",
+      "citations": [
+        {
+          "evidence_id": "fc3ffa57-bab3-5598-8c1e-300ce6b9d1d8",
+          "quote": null,
+          "field": "",
+          "observed_value": "新开一个独立的有界 Work：独立新增 services.html 服务介绍页和 news.html 公司新闻页，每页包含中文标题、简短说明和返回 index.html 的链接。服务页使用明确文案「本演示官网提供企业信息展示与页面导航示例，不声明公司的真实业务范围。」；新闻页使用明确文案「暂无已公布新闻，本页面为静态演示栏目。」。两份成果完成各自验证后，整合并再次验证两页作为同一事项的最终成果。只新增 services.html 和 news.html，不修改其他文件，不用后端与外部资源。完成后形成候选成果，经过真实 HTTP 预览和独立质量检查，等待我明确验收，不自动接受。",
+          "observed_value_truncated": false
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "INTENT",
+      "timestamp": null,
+      "timestamp_evidence_id": null,
+      "timestamp_field": null,
+      "time_interpretation": null,
+      "owner_time_boundary": null
+    },
+    {
+      "statement": "self-refine 事件（affected_component=semantic/scope）记录 signal=SCOPE_INFLATION、failure_family=CANDIDATE_INCONSISTENT，diagnostic_evidence 列出候选路径 services.html、news.html 与一份被拒绝行为清单（含「在 index.html 中添加指向新页面的导航链接」）。该清单是 Owner 诊断，不是已执行的文件写入证据。",
+      "citations": [
+        {
+          "evidence_id": "5175c590-1c90-5a47-acaf-b45601436cb0",
+          "quote": null,
+          "field": "/failure_family",
+          "observed_value": "\"CANDIDATE_INCONSISTENT\"",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "5175c590-1c90-5a47-acaf-b45601436cb0",
+          "quote": null,
+          "field": "/diagnostic_evidence",
+          "observed_value": "{\n    \"authority_expanded\": false,\n    \"candidate_paths\": [\n      \"services.html\",\n      \"news.html\"\n    ],\n    \"rejected_behaviors\": [\n      \"修改 index.html、README.md 或任何既有文件\",\n      \"添加后端服务、API、数据库或持久化\",\n      \"引入外部资源（CDN、外部图片、字体、脚本等）\",\n      \"新增 services.html/news.html 之外的页面或资源\",\n      \"在 index.html 中添加指向新页面的导航链接（Human 仅要求新页返回 index.html）\",\n      \"自动接受或跳过 Human 明确验收\",\n      \"创建仓库内预览、测试框架或审批文件\"\n    ],\n    \"required_paths\": [\n      \"services.html\",\n      \"news.html\"\n    ],\n    \"signal\": \"SCOPE_INFLATION\"\n  }",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "5175c590-1c90-5a47-acaf-b45601436cb0",
+          "quote": null,
+          "field": "/created_at",
+          "observed_value": "\"2026-10-05T16:58:12.766041+00:00\"",
+          "observed_value_truncated": false
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "FAILURE",
+      "timestamp": "2026-10-05T16:58:12.766041+00:00",
+      "timestamp_evidence_id": "5175c590-1c90-5a47-acaf-b45601436cb0",
+      "timestamp_field": "created_at",
+      "time_interpretation": "该时间为该 self-refine 事件记录的创建时间。",
+      "owner_time_boundary": "此时间仅表示记录创建时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。"
+    },
+    {
+      "statement": "冻结导出中的计划历史记录显示一次 STEP_TRANSITION：rationale 为「The current governed Step is ready to yield to the next admitted ordered Step」，其 reality_refs 中包含 kind=WORK 的 3ee622b5-b816-5679-afdc-e5de51cd2702 以及 GOVERNANCE_DECISION、SEMANTIC_RESULT、TRUSTED_BASELINE、WORK_REALITY_REVISION 引用。该记录是计划/步骤迁移事件，只记录迁移意图与引用。",
+      "citations": [
+        {
+          "evidence_id": "052d3c95-d143-5a93-886e-2ab3c620e8d3",
+          "quote": "The current governed Step is ready to yield to the next admitted ordered Step",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "052d3c95-d143-5a93-886e-2ab3c620e8d3",
+          "quote": "\"identity\": \"3ee622b5-b816-5679-afdc-e5de51cd2702\"",
+          "field": null,
+          "observed_value": null,
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "052d3c95-d143-5a93-886e-2ab3c620e8d3",
+          "quote": null,
+          "field": "/created_at",
+          "observed_value": "\"2026-10-05T16:58:13.408052+00:00\"",
+          "observed_value_truncated": false
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "PLANNING",
+      "timestamp": "2026-10-05T16:58:13.408052+00:00",
+      "timestamp_evidence_id": "052d3c95-d143-5a93-886e-2ab3c620e8d3",
+      "timestamp_field": "created_at",
+      "time_interpretation": "该时间为该计划历史记录的创建时间；同一行的其他字段是冻结快照值，不因此在该时刻成立。",
+      "owner_time_boundary": "此时间仅表示记录创建时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。"
+    },
+    {
+      "statement": "一次 process.run 效果被拒绝：semantic_input 为 {argv: [ls, -la], cwd: .}，对应 receipt 的 output 为 effect_observed=false、error_type=ValueError、message='process executable is not allowlisted: ls'。",
+      "citations": [
+        {
+          "evidence_id": "7c97f43c-007e-57be-8740-97763f6b50b8",
+          "quote": null,
+          "field": "/semantic_input",
+          "observed_value": "{\n    \"argv\": [\n      \"ls\",\n      \"-la\"\n    ],\n    \"cwd\": \".\"\n  }",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "1a0c3cf3-4db9-5a68-8bc0-6bf201de1787",
+          "quote": null,
+          "field": "/output",
+          "observed_value": "{\n    \"effect_observed\": false,\n    \"error_type\": \"ValueError\",\n    \"message\": \"process executable is not allowlisted: ls\"\n  }",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "1a0c3cf3-4db9-5a68-8bc0-6bf201de1787",
+          "quote": null,
+          "field": "/created_at",
+          "observed_value": "\"2026-10-05T16:59:24.631047+00:00\"",
+          "observed_value_truncated": false
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "FAILURE",
+      "timestamp": "2026-10-05T16:59:24.631047+00:00",
+      "timestamp_evidence_id": "1a0c3cf3-4db9-5a68-8bc0-6bf201de1787",
+      "timestamp_field": "created_at",
+      "time_interpretation": "该时间为该效果回执行记录的创建时间，不证明下层命令的执行时刻。",
+      "owner_time_boundary": "此时间仅表示记录创建时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。"
+    },
+    {
+      "statement": "原始验证记录 obligation=PATH_SCOPE、result=PASS，source_ref=verification:54a6b0dd-7e72-55ab-956e-04cfd7059e1e。该条结果不证明其他验证、真实 HTTP 响应、浏览器渲染或交付下载成功。",
+      "citations": [
+        {
+          "evidence_id": "de394107-6d51-5342-9688-eaf0f485936a",
+          "quote": null,
+          "field": "/obligation",
+          "observed_value": "\"PATH_SCOPE\"",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "de394107-6d51-5342-9688-eaf0f485936a",
+          "quote": null,
+          "field": "/result",
+          "observed_value": "\"PASS\"",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "de394107-6d51-5342-9688-eaf0f485936a",
+          "quote": null,
+          "field": "/source_ref",
+          "observed_value": "\"verification:54a6b0dd-7e72-55ab-956e-04cfd7059e1e\"",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "de394107-6d51-5342-9688-eaf0f485936a",
+          "quote": null,
+          "field": "/timestamp",
+          "observed_value": "\"2026-10-05T16:59:46.252619+00:00\"",
+          "observed_value_truncated": false
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "VERIFICATION",
+      "timestamp": "2026-10-05T16:59:46.252619+00:00",
+      "timestamp_evidence_id": "de394107-6d51-5342-9688-eaf0f485936a",
+      "timestamp_field": "timestamp",
+      "time_interpretation": null,
+      "owner_time_boundary": "此时间仅表示Owner 记录的事件时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。"
+    },
+    {
+      "statement": "recovery 记录（affected_component=native-tool-host/process.run）以 budget_decision.classification_basis='rejected tool recipe had no effect' 说明该被拒配方无副作用，final_result=LOCAL_OBLIGATION_RECOVERED，observation_confidence=CONFIRMED_FAILURE。这些是 Owner 的判定与策略字段，不是实际重试次数的证明。",
+      "citations": [
+        {
+          "evidence_id": "4c4cdf32-d4b0-5d99-b3f8-374e25abe288",
+          "quote": null,
+          "field": "/budget_decision",
+          "observed_value": "{\n    \"classification_basis\": \"rejected tool recipe had no effect\",\n    \"policy_version\": \"native-effect-repair-v1\"\n  }",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "4c4cdf32-d4b0-5d99-b3f8-374e25abe288",
+          "quote": null,
+          "field": "/final_result",
+          "observed_value": "\"LOCAL_OBLIGATION_RECOVERED\"",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "4c4cdf32-d4b0-5d99-b3f8-374e25abe288",
+          "quote": null,
+          "field": "/observation_confidence",
+          "observed_value": "\"CONFIRMED_FAILURE\"",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "4c4cdf32-d4b0-5d99-b3f8-374e25abe288",
+          "quote": null,
+          "field": "/updated_at",
+          "observed_value": "\"2026-10-05T17:00:20.983972+00:00\"",
+          "observed_value_truncated": false
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "RECOVERY_REFINEMENT",
+      "timestamp": "2026-10-05T17:00:20.983972+00:00",
+      "timestamp_evidence_id": "4c4cdf32-d4b0-5d99-b3f8-374e25abe288",
+      "timestamp_field": "updated_at",
+      "time_interpretation": "仅表示记录最后更新时间，不自动证明具体恢复动作或实际重试次数。",
+      "owner_time_boundary": "此时间仅表示记录最后更新时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。"
+    },
+    {
+      "statement": "执行效果 Owner 记录一次 file.read，semantic_input.path=services.html、condition=SETTLED。这里只证明该效果行记录的工具、参数及状态，不据此断言文件内容、验证通过或后续恢复配方。",
+      "citations": [
+        {
+          "evidence_id": "1c3a6189-0a54-568a-8a97-c22279f38521",
+          "quote": null,
+          "field": "",
+          "observed_value": "{\n  \"classification\": \"READ\",\n  \"condition\": \"SETTLED\",\n  \"conflict_domains\": [\n    \"services.html\"\n  ],\n  \"created_at\": \"2026-10-05T17:00:55.824054+00:00\",\n  \"id\": \"b0adf6d6-ffb4-4cf0-81a7-20b352fb6dc9\",\n  \"proposal_index\": 2,\n  \"semantic_input\": {\n    \"path\": \"services.html\"\n  },\n  \"semantic_input_digest\": \"45f6b3ecf1f501cc7f2e0af1c84eac0136944e5de271002399a8dedfeed4a39e\",\n  \"step_id\": \"20255610-7460-48e8-95f8-d4587b6a12e9\",\n  \"tool_identity\": \"file.read\",\n  \"tool_version\": \"1\"\n}",
+          "observed_value_truncated": false
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "EXECUTION",
+      "timestamp": "2026-10-05T17:00:55.824054+00:00",
+      "timestamp_evidence_id": "1c3a6189-0a54-568a-8a97-c22279f38521",
+      "timestamp_field": "created_at",
+      "time_interpretation": "效果记录创建时间，不等同于下层工具精确执行时刻。",
+      "owner_time_boundary": "此时间仅表示记录创建时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。"
+    },
+    {
+      "statement": "执行步骤 b4d11a60（kind=INFERENCE，condition=FAILED）的 result_payload 为 error_type=InferenceAdapterDecisionRejected、failure_code=INVALID_MODEL_RESPONSE、reason_code=NATIVE_DECISION_SCHEMA_REJECTED、validation_issues=[{location: [], type: json_invalid}]。被拒模型响应的具体内容未在该载荷中给出。",
+      "citations": [
+        {
+          "evidence_id": "6fc93cee-5308-5608-907d-d9b0ed5890db",
+          "quote": null,
+          "field": "/kind",
+          "observed_value": "\"INFERENCE\"",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "6fc93cee-5308-5608-907d-d9b0ed5890db",
+          "quote": null,
+          "field": "/result_payload",
+          "observed_value": "{\n    \"error_type\": \"InferenceAdapterDecisionRejected\",\n    \"failure_code\": \"INVALID_MODEL_RESPONSE\",\n    \"reason_code\": \"NATIVE_DECISION_SCHEMA_REJECTED\",\n    \"validation_issues\": [\n      {\n        \"location\": [],\n        \"type\": \"json_invalid\"\n      }\n    ]\n  }",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "6fc93cee-5308-5608-907d-d9b0ed5890db",
+          "quote": null,
+          "field": "/finished_at",
+          "observed_value": "\"2026-10-05T17:01:33.482220+00:00\"",
+          "observed_value_truncated": false
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "FAILURE",
+      "timestamp": "2026-10-05T17:01:33.482220+00:00",
+      "timestamp_evidence_id": "6fc93cee-5308-5608-907d-d9b0ed5890db",
+      "timestamp_field": "finished_at",
+      "time_interpretation": "该时间为该执行步骤的结束时间。",
+      "owner_time_boundary": "此时间仅表示记录的结束时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。"
+    },
+    {
+      "statement": "推理失败对应的 Recovery 投影记录 expected_reality.outcome=VALID_GOVERNED_DECISION、final_result=LOCAL_OBLIGATION_RECOVERED。期望与结果字段不证明实际执行了何种修复或重试了几次；投影不是新增事件。",
+      "citations": [
+        {
+          "evidence_id": "d7e7df09-3bbe-5d72-a9b7-6c8169cc5881",
+          "quote": null,
+          "field": "/expected_reality",
+          "observed_value": "{\n    \"contract_digest\": \"496f3e37e69ed90e77d14be457c6f10e7c6af654f6aaf68edf22b5d7be9be5e0\",\n    \"outcome\": \"VALID_GOVERNED_DECISION\"\n  }",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "d7e7df09-3bbe-5d72-a9b7-6c8169cc5881",
+          "quote": null,
+          "field": "/final_result",
+          "observed_value": "\"LOCAL_OBLIGATION_RECOVERED\"",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "d7e7df09-3bbe-5d72-a9b7-6c8169cc5881",
+          "quote": null,
+          "field": "/updated_at",
+          "observed_value": "\"2026-10-05T17:02:01.871500+00:00\"",
+          "observed_value_truncated": false
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "RECOVERY_REFINEMENT",
+      "timestamp": "2026-10-05T17:02:01.871500+00:00",
+      "timestamp_evidence_id": "d7e7df09-3bbe-5d72-a9b7-6c8169cc5881",
+      "timestamp_field": "updated_at",
+      "time_interpretation": "仅表示记录最后更新时间，不自动证明具体恢复动作或实际重试次数。",
+      "owner_time_boundary": "此时间仅表示记录最后更新时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。"
+    },
+    {
+      "statement": "验收 Owner 记录 Human 的 ACCEPT 决定，并绑定 manifest_id=a783ea78-c02d-52c6-a094-8e7f9018f9e1。Human 的决定不替代本报告对每项验证或 HTTP 响应的独立核对。",
+      "citations": [
+        {
+          "evidence_id": "e00219b7-497d-5912-b021-1053d01a830b",
+          "quote": null,
+          "field": "/payload",
+          "observed_value": "{\n    \"authority_identity\": \"human:owner\",\n    \"created_at\": \"2026-10-05T17:34:47.061884Z\",\n    \"decision\": \"ACCEPT\",\n    \"id\": \"f1127996-a72c-45cf-9b94-ba8839ecf3a2\",\n    \"manifest_fingerprint\": \"449b9d0facc993c00bff0a696f8c475fbe8713597acc2f958d8566e50305811a\",\n    \"manifest_id\": \"a783ea78-c02d-52c6-a094-8e7f9018f9e1\",\n    \"rationale\": \"专用 P0/P1 资格：两份独立成果与 JOIN 已通过各自验证及 Guardian，精确 HTTP 预览通过，明确接受本 Candidate；验证中断晋升的恢复，不涉及原有待验收数据。\"\n  }",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "e00219b7-497d-5912-b021-1053d01a830b",
+          "quote": null,
+          "field": "/created_at",
+          "observed_value": "\"2026-10-05T17:34:47.061884+00:00\"",
+          "observed_value_truncated": false
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "FINAL_STATE",
+      "timestamp": "2026-10-05T17:34:47.061884+00:00",
+      "timestamp_evidence_id": "e00219b7-497d-5912-b021-1053d01a830b",
+      "timestamp_field": "created_at",
+      "time_interpretation": null,
+      "owner_time_boundary": "此时间仅表示记录创建时间；同一行的其他字段是冻结快照值，不自动证明它们在该时刻已经成立。恢复完成须读取相应更新或结束记录。"
+    },
+    {
+      "statement": "交付审计记录未含可观察的交付动作：actions 为空数组，client_received 与 client_saved 均为 UNAVAILABLE，completion_basis 为 'ASGI_SEND_COMPLETED proves server send only'，historical_action_identity=NOT_RECORDED。因此本次观察未取得客户端送达或历史点击证据，也未据此否定此前的服务端发送。",
+      "citations": [
+        {
+          "evidence_id": "479142b6-7991-5409-9882-0c5979c82020",
+          "quote": null,
+          "field": "/actions",
+          "observed_value": "[]",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "479142b6-7991-5409-9882-0c5979c82020",
+          "quote": null,
+          "field": "/client_received",
+          "observed_value": "\"UNAVAILABLE\"",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "479142b6-7991-5409-9882-0c5979c82020",
+          "quote": null,
+          "field": "/client_saved",
+          "observed_value": "\"UNAVAILABLE\"",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "479142b6-7991-5409-9882-0c5979c82020",
+          "quote": null,
+          "field": "/completion_basis",
+          "observed_value": "\"ASGI_SEND_COMPLETED proves server send only\"",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "479142b6-7991-5409-9882-0c5979c82020",
+          "quote": null,
+          "field": "/historical_action_identity",
+          "observed_value": "\"NOT_RECORDED\"",
+          "observed_value_truncated": false
+        }
+      ],
+      "evidence_family": "DELIVERY_TRANSFER",
+      "stage": "VERIFICATION",
+      "timestamp": null,
+      "timestamp_evidence_id": null,
+      "timestamp_field": null,
+      "time_interpretation": null,
+      "owner_time_boundary": null
+    },
+    {
+      "statement": "work-output-1 相对基线 d4ad65db95fa1bb3ad7ec951ea844fd4939c2a3d 的最终净差异只包含两个新增文件 news.html 与 services.html，index.html 不在 changed_paths 中。这是两个提交之间的净变化观察，不证明中间过程没有其他写入或外部副作用，也不建立各状态的转换时刻。",
+      "citations": [
+        {
+          "evidence_id": "1d01703c-5302-5e8e-ba51-180e75015661",
+          "quote": null,
+          "field": "/changed_paths",
+          "observed_value": "[\n    \"news.html\",\n    \"services.html\"\n  ]",
+          "observed_value_truncated": false
+        },
+        {
+          "evidence_id": "1d01703c-5302-5e8e-ba51-180e75015661",
+          "quote": null,
+          "field": "/baseline",
+          "observed_value": "\"d4ad65db95fa1bb3ad7ec951ea844fd4939c2a3d\"",
+          "observed_value_truncated": false
+        }
+      ],
+      "evidence_family": "OWNER_RECORD",
+      "stage": "FINAL_STATE",
+      "timestamp": null,
+      "timestamp_evidence_id": null,
+      "timestamp_field": null,
+      "time_interpretation": null,
+      "owner_time_boundary": null
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "F1-process-run-allowlist-rejection",
+      "subject_evidence_id": "1a0c3cf3-4db9-5a68-8bc0-6bf201de1787",
+      "inspection_id": "b8d7a798-2a71-523b-9f6d-af04124771b0",
+      "uncertainty_check_ids": [
+        "60489d87-3730-59e0-8831-969321fae721"
+      ],
+      "scope_check_ids": [],
+      "classification": "UNKNOWN",
+      "epistemic_status": "UNKNOWN",
+      "fact": {
+        "statement": "Work 3ee622b5 执行期间的一次 process.run 效果 condition=FAILED：semantic_input 为 {argv: [ls, -la], cwd: .}，对应 receipt 的 output 为 {effect_observed: false, error_type: 'ValueError', message: 'process executable is not allowlisted: ls'}，同一效果的 execution_evidence 记录 evidence_type=TOOL_REJECTION。即该命令被宿主拒绝，未观察到任何执行效果。",
+        "citations": [
+          {
+            "evidence_id": "1a0c3cf3-4db9-5a68-8bc0-6bf201de1787",
+            "quote": null,
+            "field": "/condition",
+            "observed_value": "\"FAILED\"",
+            "observed_value_truncated": false
+          },
+          {
+            "evidence_id": "1a0c3cf3-4db9-5a68-8bc0-6bf201de1787",
+            "quote": null,
+            "field": "/output",
+            "observed_value": "{\n    \"effect_observed\": false,\n    \"error_type\": \"ValueError\",\n    \"message\": \"process executable is not allowlisted: ls\"\n  }",
+            "observed_value_truncated": false
+          },
+          {
+            "evidence_id": "7c97f43c-007e-57be-8740-97763f6b50b8",
+            "quote": null,
+            "field": "/semantic_input",
+            "observed_value": "{\n    \"argv\": [\n      \"ls\",\n      \"-la\"\n    ],\n    \"cwd\": \".\"\n  }",
+            "observed_value_truncated": false
+          },
+          {
+            "evidence_id": "50be8eb9-0f8e-5283-9fbf-ed5e4c3395e2",
+            "quote": null,
+            "field": "/evidence_type",
+            "observed_value": "\"TOOL_REJECTION\"",
+            "observed_value_truncated": false
+          }
+        ],
+        "evidence_family": "OWNER_RECORD"
+      },
+      "analysis": "已验证的源码对照：本次捕获的当前 runtime 实现包含可执行文件允许列表检查，在不允许的可执行文件进入子进程前拒绝；runtime_ports 的相应分支把这一拒绝消息归入可自主修复的无效果配方拒绝。历史回执的 ValueError 消息与这个分支相符。若历史 Worker 使用同构实现，这能解释观察，但历史加载版本和选择该参数的原始决策未核对，无法确认实际走了哪条实现路径，也无法把模型方差与平台缺陷作排他分类。Owner 的诊断标签及最终 ACCEPT 都不能补足上述因果证据，故分类与历史根因保持 UNKNOWN。",
+      "repository_citations": [
+        {
+          "evidence_id": "85341df8-a381-5be7-9dc8-54610c1ec7a2",
+          "quote": null,
+          "field": "/content",
+          "observed_value": "\"            )\\n            or argv[:3] in ([\\\"python\\\", \\\"-m\\\", \\\"pytest\\\"], [\\\"python3\\\", \\\"-m\\\", \\\"pytest\\\"])\\n            or argv[:2] == [\\\"npm\\\", \\\"test\\\"]\\n            or argv[:3] == [\\\"npm\\\", \\\"run\\\", \\\"test\\\"]\\n        )\\n        if not allowed:\\n            raise ValueError(\\\"test.run accepts only pytest, node, or npm test recipes\\\")\\n        validate_direct_test_argv(argv)\\n        return await self._run_argv(request, \\\"test.run\\\", argv=argv)\\n\\n    async def run_build(self, request: ToolExecutionRequest) -> ToolExecutionResult:\\n        argv = self._argv(request)\\n        if argv[:3] != [\\\"npm\\\", \\\"run\\\", \\\"build\\\"] and argv[:3] != [\\\"python\\\", \\\"-m\\\", \\\"build\\\"]:\\n            raise ValueError(\\\"build.run accepts only admitted npm or Python build recipes\\\")\\n        return await self._run_argv(request, \\\"build.run\\\", argv=argv)\\n\\n    async def sync_dependencies(self, request: ToolExecutionRequest) -> ToolExecutionResult:\\n        argv = self._argv(request)\\n        allowed = argv[:3] == [\\\"uv\\\", \\\"sync\\\", \\\"--locked\\\"] or argv[:2] == [\\\"npm\\\", \\\"ci\\\"]\\n        if not allowed:\\n            raise ValueError(\\\"dependency.sync requires a locked uv sync or npm ci recipe\\\")\\n",
+          "observed_value_truncated": true
+        },
+        {
+          "evidence_id": "7dca429a-664e-50f6-9ba9-3f3aa23303ae",
+          "quote": null,
+          "field": "/content",
+          "observed_value": "\"        if output.get(\\\"product_intent_change\\\") is True:\\n            return RepairabilityClassification.REQUIRES_HUMAN_DECISION, \\\"repair would change Product Intent\\\"\\n        grants = {grant.identity for grant in binding.capability_grants}\\n        if (condition is EffectCondition.FAILED and output.get(\\\"effect_observed\\\") is False\\n                and output.get(\\\"error_type\\\") == \\\"NativeExecutionConflict\\\"\\n                and (output.get(\\\"message\\\") in {\\n                    \\\"tool path is explicitly forbidden\\\", \\\"tool path is outside the granted scope\\\",\\n                    \\\"tool path escapes the workspace\\\", \\\"tool paths must use POSIX separators\\\",\\n                } or str(output.get(\\\"message\\\", \\\"\\\")).startswith(\\\"tool capability was not granted:\\\"))):\\n            return (RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE,\\n                \\\"denied recipe had no effect; use only already admitted paths and capabilities\\\")\\n        if (condition is EffectCondition.FAILED\\n                and output.get(\\\"effect_observed\\\") is False\\n                and output.get(\\\"error_type\\\") in {\\n                    \\\"CAPABILITY_PATH_INVALID\\\", \\\"TOOL_GRANT_MISMATCH\\\", \\\"CAP",
+          "observed_value_truncated": true
+        }
+      ],
+      "uncertainty": "历史 Worker 的实际加载源码、选择 ls -la 的决策依据、真实替代动作与实际重试次数均未核对。effect_observed=false 是这条回执的记录，不证明整次 Work 没有其他副作用。另两条 Self-Refine 未作根因分析。PREVIEW_HTTP 检查提供的是定位和存在状态，本报告未逐条核对其响应内容，不把它写成客户端下载或保存证据。",
+      "checked_boundaries": [
+        "本次关联读取仅限冻结导出 00efd73b3f0750794e1854393b2ed890977cf490e5680743d7bcfe1088987637 中主体 1a0c3cf3-4db9-5a68-8bc0-6bf201de1787 的显式 Owner 引用（最多两跳）。返回 4 条记录，容量未读字段 0 项，省略关联记录 0 条。PRESENT 表示该字段已导出；READ 才表示原始片段已返回。REDACTED 表示值被脱敏，EMPTY 表示已导出的空值；二者均不表示历史未保存。字段未导出、未读取或关联范围外的信息保持 UNKNOWN；单一记录不能证明其他 Owner 或平台历史不存在。仓库比较不自动证明历史 Worker 版本；创建时间不自动证明后来的恢复状态。",
+        "仅在冻结导出 00efd73b3f0750794e1854393b2ed890977cf490e5680743d7bcfe1088987637 中检查 family=OWNER_RECORD, group=self_refine_events, field=/*：availability=PRESENT，匹配 79 项，扫描 3 条记录。字段状态：可用 79，脱敏 3，空值 5，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。"
+      ],
+      "recommendation": "若后续再次遇到同类拒绝，先核对该次实际授予的权限、工具能力和回执，再在同一契约内选择确能满足需要的合法方案。不能仅凭工具名称认定它可列目录，也不扩大允许列表、增加重试上限或重放效果不确定的操作；证据或权限不足时受治理地终止。历史记录本身不构成重开该 Work 的授权。",
+      "handling": "INVESTIGATE",
+      "regression_scenario": "在允许列表限制下提交不获准的可执行文件，检查拒绝回执与显式效果关联；存在合法且足够的授权方案时，在原预算内恢复，否则有界终止。加入拒绝但未运行、效果不确定、历史实现无法定位等变体，不能据最终成功或分类标签排除其他原因。",
+      "regression_qualification": "保留权限、预算、原始记录和验证门禁；检查有证据的恢复或真实终止，不以零偏差、更多权限或无限重试作为通过条件。"
+    }
+  ],
+  "immediate_recovery": [
+    {
+      "statement": "若后续再次遇到同类拒绝，先核对该次实际授予的权限、工具能力和回执，再在同一契约内选择确能满足需要的合法方案。不能仅凭工具名称认定它可列目录，也不扩大允许列表、增加重试上限或重放效果不确定的操作；证据或权限不足时受治理地终止。历史记录本身不构成重开该 Work 的授权。",
+      "evidence_family": "OWNER_RECORD",
+      "finding_ids": [
+        "F1-process-run-allowlist-rejection"
+      ]
+    }
+  ],
+  "self_refine_opportunities": [
+    {
+      "statement": "已有 Owner 诊断与回执可支撑有界恢复的候选建议，但未读实际修复配方，不能宣称具体工具替代已经执行或一定足够。后续仅在原契约和预算内核对合法替代方案；不足则终止。",
+      "evidence_family": "OWNER_RECORD",
+      "finding_ids": [
+        "F1-process-run-allowlist-rejection"
+      ]
+    }
+  ],
+  "platform_improvements": [],
+  "deferred_items": [
+    {
+      "statement": "本次仅详细分析一起异常：semantic/scope 的 SCOPE_INFLATION 诊断（self_refine_events/0）与 native-executor/inference-decision 的 NATIVE_DECISION_SCHEMA_REJECTED（self_refine_events/2）只作背景记录；被提议步骤 c875e823 的请求载荷、被拒推理步骤的原始响应内容以及冻结导出中的 PREVIEW_HTTP 原始记录均未读取，保持 UNKNOWN，需在后续阶段或由 Human 决定是否继续。",
+      "evidence_family": "OWNER_RECORD",
+      "finding_ids": [
+        "F1-process-run-allowlist-rejection"
+      ]
+    }
+  ],
+  "evidence_assessments": [
+    {
+      "family": "OWNER_RECORD",
+      "check_id": "60489d87-3730-59e0-8831-969321fae721",
+      "availability": "PRESENT",
+      "statement": "对冻结导出中 group=self_refine_events 的 /* 字段检查返回 PRESENT：扫描 3 条记录、79 个匹配，其中 79 可用、3 脱敏、5 空值、0 未导出。三起 self-refine 事件因此有可读的原始诊断字段；脱敏字段内容不可见，且该检查不证明其他 group、其他 Owner 或平台历史。",
+      "checked_boundary": "仅在冻结导出 00efd73b3f0750794e1854393b2ed890977cf490e5680743d7bcfe1088987637 中检查 family=OWNER_RECORD, group=self_refine_events, field=/*：availability=PRESENT，匹配 79 项，扫描 3 条记录。字段状态：可用 79，脱敏 3，空值 5，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。"
+    },
+    {
+      "family": "PREVIEW_HTTP",
+      "check_id": "d9c21990-cb0d-5b6d-9445-22e37233c62e",
+      "availability": "PRESENT",
+      "statement": "冻结导出中 family=PREVIEW_HTTP 匹配 6 项、扫描 4 条记录，字段状态为可用 6、脱敏 0、空值 0、未导出 0。本次调查只取得该检查返回的定位示例，未逐条读取这些预览原始记录，故预览请求的状态、摘要与响应体在本次观察中保持 UNKNOWN；该结果也不证明其他 Owner 或完整响应体不存在。",
+      "checked_boundary": "仅在冻结导出 00efd73b3f0750794e1854393b2ed890977cf490e5680743d7bcfe1088987637 中检查 family=PREVIEW_HTTP, group=(producer scope), field=(family observations)：availability=PRESENT，匹配 6 项，扫描 4 条记录。字段状态：可用 6，脱敏 0，空值 0，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。"
+    },
+    {
+      "family": "DELIVERY_TRANSFER",
+      "check_id": "1429c806-cc14-5b51-9949-fd4f71805fb5",
+      "availability": "PRESENT",
+      "statement": "冻结导出中 family=DELIVERY_TRANSFER 匹配 1 项、扫描 1 条记录，字段可用 1。读取该唯一记录（479142b6-7991-5409-9882-0c5979c82020）显示 actions 为空、client_received/client_saved 均为 UNAVAILABLE、completion_basis='ASGI_SEND_COMPLETED proves server send only'、historical_action_identity=NOT_RECORDED，因此没有客户端送达或历史点击的观察；这不证明或否定预览 GET 状态与浏览器渲染。",
+      "checked_boundary": "仅在冻结导出 00efd73b3f0750794e1854393b2ed890977cf490e5680743d7bcfe1088987637 中检查 family=DELIVERY_TRANSFER, group=(producer scope), field=(family observations)：availability=PRESENT，匹配 1 项，扫描 1 条记录。字段状态：可用 1，脱敏 0，空值 0，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。"
+    },
+    {
+      "family": "EXECUTION_RELATIONSHIP",
+      "check_id": "d8d19972-0fd6-5e9a-ba97-f51e6ea92cfa",
+      "availability": "PRESENT",
+      "statement": "冻结导出中 family=EXECUTION_RELATIONSHIP 匹配 356 项、扫描 469 条记录（356 可用、218 空值、0 未导出、0 脱敏）。本次调查只沿主体 1a0c3cf3 与 6fc93cee 的显式引用读取了少量关联记录，未枚举全部匹配项，因此不能声称覆盖全部执行关联。",
+      "checked_boundary": "仅在冻结导出 00efd73b3f0750794e1854393b2ed890977cf490e5680743d7bcfe1088987637 中检查 family=EXECUTION_RELATIONSHIP, group=(producer scope), field=(family observations)：availability=PRESENT，匹配 356 项，扫描 469 条记录。字段状态：可用 356，脱敏 0，空值 218，未导出 0。脱敏表示值不可见，空值表示已导出的空值，均不能推断历史未保存。这不证明其他字段、其他 Owner、完整响应体或平台历史不存在；未读取、脱敏和未采集须保留 UNKNOWN。"
+    }
+  ],
+  "missing_evidence": []
+}

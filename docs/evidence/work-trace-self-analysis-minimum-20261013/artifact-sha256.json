@@ -1,0 +1,16 @@
+{
+  "assisted-read-receipts.json": "24c03bd290d8a70f44b1f520f7a6887c7a22a4e840a3ea2b4927ecaedd89f5b2",
+  "assisted-self-review.json": "2d6617a16a3470f4e923f8780a8b7862eb317ef166573decf9099f2f8f6a2b99",
+  "execution-summary.json": "0df65b9463969283deeebd613cf780dcdbd3708f3bab7683f4606b493fb8d018",
+  "failed-attempts.json": "8464c397a7b7d850cef3146f4b684897c568e186c8da41dae6c22b4dbe169818",
+  "image-build.json": "0050b4145ed14edc9b56b4febe8846c37c5700a7417014a0c0b56c05f9cad6b9",
+  "image-preflight.json": "e9012d60a8c6b413a24d91d026b08d726cc51e2342aaf615fd8902cc2afee6ce",
+  "native-draft.json": "03f58218dc11d56c3e5a34b25ab7dca0ae2b101605c8592aebf4ef9feb164fe3",
+  "qualification.json": "27e11b82927e92f349bc050f4d125ad00072bcfff23ccac810d011d2f729ac5f",
+  "regression.junit.xml": "1c05dc964af0e90efb6b9fcc5570f85a77df67bc7ee70c17c46dd2a2a90cd151",
+  "report-lineage.json": "ed74fb3397296bdbdb7168af5698ee328a7ce8006b38750bc2b1a5e57af2a8ce",
+  "report.json": "ef08f4c87c7955d9d01b162040409bbdbc8a7dbccb5e72968a45d24d45b8c1e6",
+  "report.zh.md": "0a9007962a45ed4de69a9361f54ab1b15d7d297041c944128113cc94d3c34ce5",
+  "semantic-review.json": "7fc6fa9b3b6cc1dd939c93b5dfb1f587419079aaf83c4fd54b6998fa1aeab3fd",
+  "source-references.json": "0f2d43c5da2094da737d03bf788ff5d24e66959c7f80aca63f015fa40f05919d"
+}

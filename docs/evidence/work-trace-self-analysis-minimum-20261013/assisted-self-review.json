@@ -1,0 +1,144 @@
+{
+  "draft_id": "887a8f31-5bdf-5848-b78a-985e1f932bf6",
+  "report_digest": "5e5247071cbfc808cfb3029e49b28958ddc247e019ffe4802a26a2e7afb3f3e5",
+  "items": [
+    {
+      "target_path": "/original_objective",
+      "evidence_ids": [
+        "fc3ffa57-bab3-5598-8c1e-300ce6b9d1d8"
+      ],
+      "judgment": "QUALIFIED",
+      "rationale": "原始用户输入与本次调查目标分离。",
+      "countercheck": "原始用户输入与本次调查目标分离。",
+      "unsupported_assertions": []
+    },
+    {
+      "target_path": "/expected_outcome",
+      "evidence_ids": [
+        "226cc9b7-9509-504f-961f-c16e4a420a88",
+        "fc3ffa57-bab3-5598-8c1e-300ce6b9d1d8"
+      ],
+      "judgment": "QUALIFIED",
+      "rationale": "历史期望不是预览或验收已经发生的证据。",
+      "countercheck": "历史期望不是预览或验收已经发生的证据。",
+      "unsupported_assertions": []
+    },
+    {
+      "target_path": "/actual_execution_path",
+      "evidence_ids": [
+        "1d01703c-5302-5e8e-ba51-180e75015661",
+        "226cc9b7-9509-504f-961f-c16e4a420a88",
+        "b3f83530-4019-5d81-8f8f-f54632655902",
+        "b54db217-41fd-5200-9e59-ece37e2f9aa6"
+      ],
+      "judgment": "QUALIFIED",
+      "rationale": "原始计数与最终净差异不能证明中间无副作用或重试次数。",
+      "countercheck": "原始计数与最终净差异不能证明中间无副作用或重试次数。",
+      "unsupported_assertions": []
+    },
+    {
+      "target_path": "/current_state",
+      "evidence_ids": [
+        "226cc9b7-9509-504f-961f-c16e4a420a88"
+      ],
+      "judgment": "QUALIFIED",
+      "rationale": "整行冻结状态引用，不宣称具体转换时刻。",
+      "countercheck": "整行冻结状态引用，不宣称具体转换时刻。",
+      "unsupported_assertions": []
+    },
+    {
+      "target_path": "/timeline",
+      "evidence_ids": [
+        "052d3c95-d143-5a93-886e-2ab3c620e8d3",
+        "1a0c3cf3-4db9-5a68-8bc0-6bf201de1787",
+        "1c3a6189-0a54-568a-8a97-c22279f38521",
+        "1d01703c-5302-5e8e-ba51-180e75015661",
+        "479142b6-7991-5409-9882-0c5979c82020",
+        "4c4cdf32-d4b0-5d99-b3f8-374e25abe288",
+        "5175c590-1c90-5a47-acaf-b45601436cb0",
+        "6fc93cee-5308-5608-907d-d9b0ed5890db",
+        "7c97f43c-007e-57be-8740-97763f6b50b8",
+        "d7e7df09-3bbe-5d72-a9b7-6c8169cc5881",
+        "de394107-6d51-5342-9688-eaf0f485936a",
+        "e00219b7-497d-5912-b021-1053d01a830b",
+        "fc3ffa57-bab3-5598-8c1e-300ce6b9d1d8"
+      ],
+      "judgment": "QUALIFIED",
+      "rationale": "时间来自被引用原字段并按时间排序；恢复投影、诊断、验证结果与验收决定分开。",
+      "countercheck": "时间来自被引用原字段并按时间排序；恢复投影、诊断、验证结果与验收决定分开。",
+      "unsupported_assertions": []
+    },
+    {
+      "target_path": "/findings/0",
+      "evidence_ids": [
+        "1a0c3cf3-4db9-5a68-8bc0-6bf201de1787",
+        "50be8eb9-0f8e-5283-9fbf-ed5e4c3395e2",
+        "60489d87-3730-59e0-8831-969321fae721",
+        "7c97f43c-007e-57be-8740-97763f6b50b8",
+        "7dca429a-664e-50f6-9ba9-3f3aa23303ae",
+        "85341df8-a381-5be7-9dc8-54610c1ec7a2",
+        "b8d7a798-2a71-523b-9f6d-af04124771b0"
+      ],
+      "judgment": "QUALIFIED",
+      "rationale": "显式效果关联支持参数与拒绝记录；当前实现仅条件对照，历史根因与排他分类保持 UNKNOWN。",
+      "countercheck": "显式效果关联支持参数与拒绝记录；当前实现仅条件对照，历史根因与排他分类保持 UNKNOWN。",
+      "unsupported_assertions": []
+    },
+    {
+      "target_path": "/immediate_recovery",
+      "evidence_ids": [
+        "1a0c3cf3-4db9-5a68-8bc0-6bf201de1787",
+        "50be8eb9-0f8e-5283-9fbf-ed5e4c3395e2",
+        "7c97f43c-007e-57be-8740-97763f6b50b8",
+        "7dca429a-664e-50f6-9ba9-3f3aa23303ae",
+        "85341df8-a381-5be7-9dc8-54610c1ec7a2"
+      ],
+      "judgment": "QUALIFIED",
+      "rationale": "建议受原权限、足够能力和预算约束，不把工具名称当等效功能，不授权重开历史 Work。",
+      "countercheck": "建议受原权限、足够能力和预算约束，不把工具名称当等效功能，不授权重开历史 Work。",
+      "unsupported_assertions": []
+    },
+    {
+      "target_path": "/self_refine_opportunities",
+      "evidence_ids": [
+        "1a0c3cf3-4db9-5a68-8bc0-6bf201de1787",
+        "50be8eb9-0f8e-5283-9fbf-ed5e4c3395e2",
+        "7c97f43c-007e-57be-8740-97763f6b50b8",
+        "7dca429a-664e-50f6-9ba9-3f3aa23303ae",
+        "85341df8-a381-5be7-9dc8-54610c1ec7a2"
+      ],
+      "judgment": "QUALIFIED",
+      "rationale": "未读实际配方，不声称具体恢复已执行；原预算内恢复或终止。",
+      "countercheck": "未读实际配方，不声称具体恢复已执行；原预算内恢复或终止。",
+      "unsupported_assertions": []
+    },
+    {
+      "target_path": "/deferred_items",
+      "evidence_ids": [
+        "1a0c3cf3-4db9-5a68-8bc0-6bf201de1787",
+        "50be8eb9-0f8e-5283-9fbf-ed5e4c3395e2",
+        "7c97f43c-007e-57be-8740-97763f6b50b8",
+        "7dca429a-664e-50f6-9ba9-3f3aa23303ae",
+        "85341df8-a381-5be7-9dc8-54610c1ec7a2"
+      ],
+      "judgment": "QUALIFIED",
+      "rationale": "另两事件和未读响应明确未覆盖；不声明历史丢弃或已确定平台缺陷。",
+      "countercheck": "另两事件和未读响应明确未覆盖；不声明历史丢弃或已确定平台缺陷。",
+      "unsupported_assertions": []
+    },
+    {
+      "target_path": "/evidence_assessments",
+      "evidence_ids": [
+        "1429c806-cc14-5b51-9949-fd4f71805fb5",
+        "60489d87-3730-59e0-8831-969321fae721",
+        "d8d19972-0fd6-5e9a-ba97-f51e6ea92cfa",
+        "d9c21990-cb0d-5b6d-9445-22e37233c62e"
+      ],
+      "judgment": "QUALIFIED",
+      "rationale": "存在状态是受检范围元数据；客户端 UNAVAILABLE 与空动作不能证明 HTTP 预览或历史发送成功。",
+      "countercheck": "存在状态是受检范围元数据；客户端 UNAVAILABLE 与空动作不能证明 HTTP 预览或历史发送成功。",
+      "unsupported_assertions": []
+    }
+  ],
+  "authority": "MODEL_SELF_REVIEW_PROPOSAL_NOT_INDEPENDENT_ASSURANCE"
+}

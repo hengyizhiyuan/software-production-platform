@@ -11,3 +11,5 @@ docs/evidence/action-generalization/**/*.sse -whitespace
 # Export sample hashes are calculated from LF bytes inside the adjacent ZIPs.
 docs/evidence/admin-work-diagnostic-export-v1/samples/**/*.md text eol=lf
 docs/evidence/admin-work-diagnostic-export-v1/samples/**/*.json text eol=lf
+# Preserve review artifact bytes and their recorded hashes.
+docs/evidence/work-trace-self-analysis-minimum-20261013/* -text

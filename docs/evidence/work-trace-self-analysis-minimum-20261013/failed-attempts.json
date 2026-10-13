@@ -1,0 +1,70 @@
+[
+  {
+    "source_commit": "eb6d3941",
+    "request_id": "6fa28a12-86a5-4d77-b90d-5fb34f48af64",
+    "status": "FAILED",
+    "failure": null,
+    "terminal_outcome": "UNABLE_TO_COMPLETE",
+    "event_counts": {
+      "INVESTIGATION_BASIS": 1,
+      "INFERENCE_STARTED": 10,
+      "INFERENCE_FINISHED": 10,
+      "TOOL_STARTED": 40,
+      "TOOL_FINISHED": 40,
+      "CHECKPOINT": 10,
+      "LOCAL_REFINEMENT_FEEDBACK": 4
+    },
+    "verification_issue_types": [
+      "JSONDecodeError"
+    ],
+    "native_report_published": false
+  },
+  {
+    "source_commit": "53af5abc",
+    "request_id": "a18d0f43-f51c-4630-be8f-2b5f5e4662e4",
+    "status": "FAILED",
+    "failure": {
+      "error_type": "TimeoutError",
+      "failure_code": null,
+      "phase": "NATIVE_KERNEL_INVESTIGATION",
+      "reason_code": null
+    },
+    "terminal_outcome": null,
+    "event_counts": {
+      "INVESTIGATION_BASIS": 1,
+      "INFERENCE_STARTED": 12,
+      "INFERENCE_FINISHED": 12,
+      "TOOL_STARTED": 43,
+      "TOOL_FINISHED": 43,
+      "CHECKPOINT": 11,
+      "LOCAL_REFINEMENT_FEEDBACK": 3
+    },
+    "verification_issue_types": [
+      "CitationRejected",
+      "ValueError"
+    ],
+    "native_report_published": false
+  },
+  {
+    "source_commit": "bde096d2",
+    "request_id": "1a9c6de8-8aea-4b80-aea9-e78331dcdd61",
+    "status": "FAILED",
+    "failure": null,
+    "terminal_outcome": "UNABLE_TO_COMPLETE",
+    "event_counts": {
+      "INVESTIGATION_BASIS": 1,
+      "INFERENCE_STARTED": 9,
+      "INFERENCE_FINISHED": 9,
+      "TOOL_STARTED": 26,
+      "TOOL_FINISHED": 26,
+      "CHECKPOINT": 9,
+      "LOCAL_REFINEMENT_FEEDBACK": 4
+    },
+    "verification_issue_types": [
+      "CitationRejected",
+      "missing",
+      "uuid_parsing"
+    ],
+    "native_report_published": false
+  }
+]

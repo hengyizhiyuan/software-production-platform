@@ -1,0 +1,42 @@
+{
+  "event": "FINISHED",
+  "status": "FAILED",
+  "request_id": "1a9c6de8-8aea-4b80-aea9-e78331dcdd61",
+  "verification": "REPORT_NOT_VERIFIED",
+  "failure": null,
+  "kernel_result": {
+    "runtime_mode": "FINISHED",
+    "terminal_outcome": "UNABLE_TO_COMPLETE",
+    "final_checkpoint_id": "7ceff3c6-2d12-4faf-90e1-23d55a5875de",
+    "step_count": 9,
+    "inference_submissions": 9,
+    "tool_effects": 26,
+    "summary": "无法在本步骤内产生经审阅的调查报告。保留的公开草稿（draft_id 32b1651d-5ec3-526b-92f0-d657de1b5a91）已两次经 analysis.revise 源校验失败，反馈明确且可修复：其一，timeline 的 observed execution 阶段必须用 settled/completed 的原始执行记录重建，而不是仅依靠 Owner 的 self_refine/recovery 诊断字段；其二，timeline 事件必须按原始 Owner 时间戳排序（当前 self_refine_events/0 的 created_at 2026-10-05T16:58:12.766041 早于 plan_history/0 的 2026-10-05T16:58:13.408052，位置颠倒）。这两项修复都在同一 Task Contract 与既有权限内，但本步骤 available_tools 为空，未投影 analysis.revise 与 analysis.review，因而既不能提交修订版，也不能取得 analysis.review 返回的 report_digest；缺少该精确摘要时作 RESULT_READY 会是虚假完成声明。已观察到的原始记录（work 3ee622b5 的 COMPLETED/ACCEPT/SEALED、work-output-1 最终净差异只新增 services.html 与 news.html、process.run 因 'ls' 不在允许列表而 effect_observed=false、以及一次 NATIVE_DECISION_SCHEMA_REJECTED 推理步骤）仍可作为下一轮修订的已读证据；真实 HTTP 预览响应、被拒推理响应的具体内容与另两起 self-refine 事件的详细分析保持 UNKNOWN。",
+    "result_claim": {
+      "status": "REPORT_NOT_REVIEWED",
+      "report_digest": null,
+      "retained_draft_id": "32b1651d-5ec3-526b-92f0-d657de1b5a91",
+      "blocking_issues": [
+        "OBSERVED_EXECUTION_STAGE_MUST_BE_RECONSTRUCTED; inspect settled/completed original records",
+        "TIMELINE_EVENTS_MUST_BE_CHRONOLOGICAL"
+      ],
+      "limitation": "本步骤未投影 analysis.revise/analysis.review，无法取得 analysis.review 返回的 report_digest，故不声明报告已提交或已审阅。"
+    },
+    "residual_obligations": [
+      "reconstruct",
+      "repository-grounding",
+      "classify",
+      "recommend",
+      "verify-report",
+      "semantic-self-review",
+      "在同一 Task Contract 内用已读的 settled/completed 执行记录重建 timeline 的 EXECUTION 阶段，并按原始 Owner 时间戳重排 timeline 后重新提交",
+      "取得 analysis.review 的 report_digest 前不得声明报告完成"
+    ],
+    "resource_retryable": true,
+    "failure_family": null,
+    "observation_evidence": {}
+  },
+  "original_owner_records": "UNCHANGED",
+  "original_owner_digest": "2e3b1d60025c720a12c4e24ccac3bb30fc27f0b5020328ee1cba04efed3ae9ca",
+  "storage_root": "/var/lib/spg/native-executor/trace-analysis"
+}

@@ -1,0 +1,12 @@
+{
+  "actor": "CODEX_ASSISTED_REVISION_NOT_WATT_NATIVE_COMPLETION",
+  "native_request_id": "1a9c6de8-8aea-4b80-aea9-e78331dcdd61",
+  "native_status": "FAILED",
+  "native_terminal": "UNABLE_TO_COMPLETE",
+  "source_draft_id": "32b1651d-5ec3-526b-92f0-d657de1b5a91",
+  "assisted_draft_id": "887a8f31-5bdf-5848-b78a-985e1f932bf6",
+  "report_digest": "5e5247071cbfc808cfb3029e49b28958ddc247e019ffe4802a26a2e7afb3f3e5",
+  "citation_structure_verification": "PASS_USING_EXISTING_ANALYSIS_OWNER",
+  "app_report_published": false,
+  "deployment": "NOT_DEPLOYED"
+}

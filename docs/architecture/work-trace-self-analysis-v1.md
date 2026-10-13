@@ -447,3 +447,10 @@ review coverage and unsupported assertions remain rejected. This derives transpo
 metadata without rewriting any semantic conclusion or accepting an unread source.
 The same original Native envelope now reserves two feedback cycles by projecting
 the submission route earlier, also when tool capacity reaches that boundary.
+
+Current delivery and qualification are recorded in
+[the 2026-10-13 stage report](work-trace-self-analysis-minimum-20261013.md).
+The delivered real report required Codex-assisted revision; Native automatic
+completion remains FAILED and deployment is not qualified. Do not treat the
+assisted artifact, structural validation or model review as a successful Native
+terminal result or independent Human assurance.

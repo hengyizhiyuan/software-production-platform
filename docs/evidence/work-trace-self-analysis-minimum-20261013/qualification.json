@@ -1,0 +1,19 @@
+{
+  "code_commit": "bde096d210894f9d249e7b3e5545b9df16b0ebe5",
+  "work_id": "3ee622b5-b816-5679-afdc-e5de51cd2702",
+  "request_id": "1a9c6de8-8aea-4b80-aea9-e78331dcdd61",
+  "report_digest": "5e5247071cbfc808cfb3029e49b28958ddc247e019ffe4802a26a2e7afb3f3e5",
+  "native_status": "FAILED",
+  "report_origin": "WATT_DRAFT_WITH_CODEX_ASSISTED_REVISION",
+  "watt_native_automatic_qualification": "FAILED_NOT_OVERRIDDEN",
+  "assisted_review": "PROPOSAL_NOT_HUMAN_ASSURANCE",
+  "independent_semantic_review": "ASSISTED_REPORT_SOURCE_AND_SEMANTIC_REVIEW_PASS",
+  "deployment": "NOT_DEPLOYED",
+  "coverage": "One selected detailed incident; remaining causes unanalysed or UNKNOWN; not a holdout or an exhaustive guarantee.",
+  "regression": {
+    "python": 254,
+    "js": 35,
+    "failures": 0
+  },
+  "phase_result": "ASSISTED_REPORT_DELIVERED; UNASSISTED_STABILITY_NOT_ESTABLISHED"
+}

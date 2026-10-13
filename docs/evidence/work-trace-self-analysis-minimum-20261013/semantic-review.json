@@ -1,0 +1,47 @@
+{
+  "scope": "Selected assisted report only; not Native automatic qualification or Human assurance",
+  "reviewer": "CODEX; also assisted revision; not an independent Human Governor",
+  "report_digest": "5e5247071cbfc808cfb3029e49b28958ddc247e019ffe4802a26a2e7afb3f3e5",
+  "status": "ASSISTED_REPORT_SOURCE_AND_SEMANTIC_REVIEW_PASS",
+  "native_automatic_status": "FAILED",
+  "checks": [
+    {
+      "subject": "Original intent and expected outcome",
+      "result": "MATCH",
+      "basis": "Original Human input and Work desired_outcome; no current investigation contract promoted into historical acceptance."
+    },
+    {
+      "subject": "Effect, receipt and execution evidence association",
+      "result": "MATCH",
+      "basis": "The receipt and execution evidence reference the exact captured effect 23d4b789-ef1d-472d-8246-bac1801a55eb; argv and cwd are explicit effect values."
+    },
+    {
+      "subject": "Timeline",
+      "result": "MATCH_WITH_TIME_BOUNDARIES",
+      "basis": "Original fields provide timestamps; dated entries are ordered; recovery uses updated_at; projections are not additional events; one settled file.read and one PATH_SCOPE PASS are explicitly cited."
+    },
+    {
+      "subject": "Cause and classification",
+      "result": "UNKNOWN_PRESERVED",
+      "basis": "Current Git implementation supports conditional comparison only. No historical loaded revision, original decision or exclusive model-variance diagnosis is established; eventual ACCEPT is not causal disambiguation."
+    },
+    {
+      "subject": "Preview and transfer",
+      "result": "NO_SURFACE_SUBSTITUTION",
+      "basis": "Transfer actions are empty and client observations UNAVAILABLE; no delivery completion or saved file is asserted. HTTP response bodies are unreviewed in this report; PRESENT lookup is not detailed response validation."
+    },
+    {
+      "subject": "Recommendations",
+      "result": "QUALIFIED",
+      "basis": "No assumption that named tools are equivalent or authorized; no retry-budget increase, replay of uncertain effects, automatic Work creation or deployment."
+    },
+    {
+      "subject": "Whole Work coverage",
+      "result": "PARTIAL_EXPLICIT",
+      "basis": "One detailed incident; other causes and recovery recipes unanalysed. Net diff does not prove no intermediate/external effects."
+    }
+  ],
+  "identified_remaining_citation_mismatch": [],
+  "identified_remaining_overinference": [],
+  "qualification_limit": "A source-consistent assisted artifact has been delivered. Unassisted Watt generation remains unqualified; this result does not meet deployment admission."
+}

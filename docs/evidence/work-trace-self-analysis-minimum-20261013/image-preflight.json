@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "source_commit": "bde096d210894f9d249e7b3e5545b9df16b0ebe5",
+  "schema": "watt-trace-analysis-report-v8",
+  "all_source_files": 276,
+  "actual_import": "/opt/spg-venv/lib/python3.13/site-packages/spg/application/trace_analysis.py",
+  "base_image": "sha256:0e2a46cb22a774b7fbc3cdb063e7bac6f6b93daf01943fd2b58f025dde229073",
+  "existing_cpu_maintenance": "PRESERVED",
+  "native_self_review": "SAME_OWNER_TOOL_WITHOUT_EXTRA_PIPELINE"
+}
