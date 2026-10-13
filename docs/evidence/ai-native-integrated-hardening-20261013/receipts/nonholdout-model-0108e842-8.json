@@ -1,0 +1,878 @@
+{
+  "schema": "ai-native-nonholdout-formation-v1",
+  "source_revision": "0108e84267f6ec989f268782630ede31332b3d6a",
+  "actual_runtime_module": "/opt/spg-venv/lib/python3.13/site-packages/spg/application/governed_obligations.py",
+  "actual_runtime_sha256": "b60b2687568f7c04b2a1d21d0caaa58f5ac617927bb8048d565fa1737f29a971",
+  "holdout_used": false,
+  "new_work_created": false,
+  "database_access": false,
+  "historical_records_modified": false,
+  "model_profile": {
+    "provider": "DEEPSEEK",
+    "model": "deepseek-flash",
+    "reasoning_effort": "none",
+    "max_output_tokens": 16384,
+    "timeout_seconds": 120
+  },
+  "cases": [
+    {
+      "case": "ordinary34",
+      "started_at_utc": "2026-10-13T11:04:09.051698+00:00",
+      "elapsed_seconds": 34.56292216607835,
+      "input_basis_sha256": "aad0fa15b3b24c12aa5b4b1099f8fe7ef0d6f7044bbc79ba8650a68ad4c81998",
+      "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+      "source_count": 19,
+      "formation_calls": 2,
+      "review_calls": 0,
+      "legal_projection_admitted": false,
+      "terminal_reason": "OBLIGATION_SOURCE_EVIDENCE_METHOD_REQUIRES_ADMITTED_FACT",
+      "observations": [
+        {
+          "stage": "MODEL_RESPONSE_OBSERVED",
+          "attempt": 1,
+          "receipt_id": "71c2eea8-8a97-48c9-8d00-24e038707eac",
+          "failed_predicate": null,
+          "validation_passed": null,
+          "terminal_reason": null,
+          "provider_observation": {
+            "request_id": "df9b8f89-b921-4635-ad27-d4953b539aa3",
+            "provider": "deepseek",
+            "requested_model": "deepseek-flash",
+            "effective_model": "deepseek-flash",
+            "usage": {
+              "input_tokens": 34937,
+              "output_tokens": 2863,
+              "cached_tokens": 0,
+              "reasoning_tokens": 0,
+              "total_tokens": 37800,
+              "unknown": false
+            },
+            "timing": {
+              "request_sent_seconds": 0.00037176196929067373,
+              "first_response_event_seconds": 0.5007548530120403,
+              "first_token_seconds": 0.8822615849785507,
+              "completed_seconds": 14.580155498930253
+            },
+            "transport_retry_count": 0,
+            "output_sha256": "813fd33105ede394e615e8f25d3e763c5fe543b9d15102df30a46998001d18a1",
+            "output_bytes": 12393,
+            "output_evidence": {
+              "provider_status": "completed",
+              "delta_sha256": "813fd33105ede394e615e8f25d3e763c5fe543b9d15102df30a46998001d18a1",
+              "delta_bytes": 12393,
+              "terminal_text_observed": true,
+              "terminal_sha256": "813fd33105ede394e615e8f25d3e763c5fe543b9d15102df30a46998001d18a1",
+              "terminal_bytes": 12393,
+              "selection": "TERMINAL_MATCHED_DELTA"
+            }
+          },
+          "construction": {
+            "rejected": true,
+            "code": "OBLIGATION_FORMATION_ROLE_MAPPING_REQUIRED",
+            "diagnostics": {
+              "violations": [
+                {
+                  "code": "OBLIGATION_FORMATION_ROLE_MAPPING_REQUIRED",
+                  "stage": "SEMANTIC_INTERPRETATION_OBSERVED",
+                  "claim_count": 19
+                }
+              ],
+              "component_observations": [
+                {
+                  "claim": 0,
+                  "source": 0,
+                  "claim_fingerprint": "35cbb3dbe185150bf2333d484cdd9acdce35475d5041d5d3d23a0970d560b40e",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "a24b1d48dd8fae804d8b7bf4e25740bf79c8716ebefc7201050f42b27e1296db",
+                  "quote_geometry": [
+                    0,
+                    48
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 2,
+                  "alternative_count": 2
+                },
+                {
+                  "claim": 1,
+                  "source": 1,
+                  "claim_fingerprint": "c7ddfa205003b5916864e4c87e8733bae461ee9700f6696501b561f5e2de8231",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "5be6714bf14eea3261e40966c1d1a4039f752f3f376e0320166e32266011c8c4",
+                  "quote_geometry": [
+                    0,
+                    55
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 2,
+                  "alternative_count": 2
+                },
+                {
+                  "claim": 2,
+                  "source": 2,
+                  "claim_fingerprint": "99b18babc22c2df5ce5b67cf07f416d3ebac992cfe649076f466cdcb9d596257",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+                  "quote_geometry": [
+                    0,
+                    27
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 2,
+                  "alternative_count": 2
+                },
+                {
+                  "claim": 3,
+                  "source": 3,
+                  "claim_fingerprint": "ef74b8e260af8a26febab48704fb4dbac798195b94a6072e237ba8dccb1029a1",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+                  "quote_geometry": [
+                    0,
+                    72
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 3,
+                  "alternative_count": 2
+                },
+                {
+                  "claim": 4,
+                  "source": 4,
+                  "claim_fingerprint": "7177fcc8df7a186385647d4e6550e0e96351549a90bc0cc04612f1d227f8ecc6",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+                  "quote_geometry": [
+                    0,
+                    55
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 2,
+                  "alternative_count": 2
+                },
+                {
+                  "claim": 5,
+                  "source": 5,
+                  "claim_fingerprint": "da534ee00cfe910469d97e94fff56b5b210c38913f9c1b0d7cefce00be654790",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "c01616d2fa1687d3f2dbde62f78b2d07c72c8f63034431eb8b263f2cd82e53b1",
+                  "quote_geometry": [
+                    0,
+                    49
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 2,
+                  "alternative_count": 2
+                },
+                {
+                  "claim": 6,
+                  "source": 6,
+                  "claim_fingerprint": "da4c8ffb182c3e0083c70a26cc93d7e79e6f72b4ab66f96829893bd27a3a2445",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "9268cc964f6cb6011eb23204032873bdfbfff04e950cfda4f190d57a1cae73aa",
+                  "quote_geometry": [
+                    0,
+                    91
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 2,
+                  "alternative_count": 2
+                },
+                {
+                  "claim": 7,
+                  "source": 7,
+                  "claim_fingerprint": "cd9a59a4e62e4751b14f2c612d44453e41e0d1da986ac7bb01d33971722ab28d",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "763311981a479580e9d52e736ecffbec46cfc41a94a3564badab89c5fa354e60",
+                  "quote_geometry": [
+                    0,
+                    48
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 2,
+                  "alternative_count": 2
+                },
+                {
+                  "claim": 8,
+                  "source": 8,
+                  "claim_fingerprint": "2081a12c90f8a22d80c0dcc2ef7f02c7070b0999c967ffaf7df86f123d854ea1",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+                  "quote_geometry": [
+                    0,
+                    132
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 3,
+                  "alternative_count": 2
+                },
+                {
+                  "claim": 9,
+                  "source": 9,
+                  "claim_fingerprint": "ce2c101cc178ffd82ad7bbd2f88c263788300339dd8789bfa2ccf9c2c821d0b3",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+                  "quote_geometry": [
+                    0,
+                    27
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 2,
+                  "alternative_count": 2
+                },
+                {
+                  "claim": 10,
+                  "source": 10,
+                  "claim_fingerprint": "831a3f24fc640e50c5b2d242ac34e1bb38916f27cd49694b052885f05e2a819f",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+                  "quote_geometry": [
+                    0,
+                    72
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 2,
+                  "alternative_count": 2
+                },
+                {
+                  "claim": 11,
+                  "source": 11,
+                  "claim_fingerprint": "c6909a4bc0f6d19cf02d2856c2c5097d212adae294115720f70820e3bd3576a4",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+                  "quote_geometry": [
+                    0,
+                    55
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 2,
+                  "alternative_count": 2
+                },
+                {
+                  "claim": 12,
+                  "source": 12,
+                  "claim_fingerprint": "b5f743e1148ec7d60342fea630b67d6758d72776b6a3c27a432a8d9e2f062531",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "57cb451611ece48c519970730d053123646136b1b1f355133abc42fe7384638f",
+                  "quote_geometry": [
+                    0,
+                    59
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 1,
+                  "alternative_count": 1
+                },
+                {
+                  "claim": 13,
+                  "source": 13,
+                  "claim_fingerprint": "7977c990c3093a1fc7c1ef74f095ac4392507382abd6cc502ef1d7248c6877a4",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "739b15bc79375f46eff063aa8ddbff21cbeac67890f413337406f4719dc627f8",
+                  "quote_geometry": [
+                    0,
+                    62
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 1,
+                  "alternative_count": 1
+                },
+                {
+                  "claim": 14,
+                  "source": 14,
+                  "claim_fingerprint": "3361211bfa4b2637f46d5582a72a85b3287d34a05a738eb12565c9a1cbeed9cc",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "e5baed22a33dfb818a6a438f8e1c7595598c7c6c26b6caccf1945a979328be7c",
+                  "quote_geometry": [
+                    0,
+                    45
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 1,
+                  "alternative_count": 1
+                },
+                {
+                  "claim": 15,
+                  "source": 15,
+                  "claim_fingerprint": "cb94ec82fe69d6b266bcab7ee16ad9a9f3776ae7553c06b76d3d09b5e92384e7",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "8f73931419beb5ccb80dbdd5aa3aa609513cff870ae39d6181a04d0b4fb9b1bd",
+                  "quote_geometry": [
+                    0,
+                    36
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 1,
+                  "alternative_count": 1
+                },
+                {
+                  "claim": 16,
+                  "source": 16,
+                  "claim_fingerprint": "26e5f7aef3588082acfc7d1bba40a2e67f8b3c5d95c8de5aeb670ce6f02daf8f",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "5b7cd03090c3931b77a8929c4e8aab12368a7f8fcb5d941b155013aac44be6fd",
+                  "quote_geometry": [
+                    0,
+                    37
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 1,
+                  "alternative_count": 1
+                },
+                {
+                  "claim": 17,
+                  "source": 17,
+                  "claim_fingerprint": "47751c16b0df6ecbbc15138ac7eb228afb4eeaccad8e6a3995605579c3c171bf",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "8314fcbae674bc2d2d5f514db6776b0ba01afb427ff4a931c0be2907609cf114",
+                  "quote_geometry": [
+                    0,
+                    38
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 1,
+                  "alternative_count": 1
+                },
+                {
+                  "claim": 18,
+                  "source": 18,
+                  "claim_fingerprint": "272b1f886c66cda4bee392e65700ab819695b7cb506547deed2926997e0e2491",
+                  "source_identity_status": "OBSERVED",
+                  "schema_status": "VALID_CLAIM_SHAPE",
+                  "original_text_sha256": "43c16d3a65f35160438c5b7952e55d3da51f243d4e0ba2a150578155c39b3786",
+                  "quote_geometry": [
+                    0,
+                    44
+                  ],
+                  "geometry_status": "OBSERVED",
+                  "interpretation_status": "UNREVIEWED_CLAIM",
+                  "evidence_status": "NOT_PROVIDED",
+                  "unknown_count": 1,
+                  "alternative_count": 1
+                }
+              ],
+              "sources_not_interpreted": [],
+              "not_evaluable": [
+                "SEMANTIC_APPROVAL",
+                "CONSUMER_BINDING",
+                "FULFILLMENT_EVIDENCE",
+                "ASSURANCE"
+              ]
+            }
+          }
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 1,
+          "receipt_id": "71682d94-0f29-410b-b3a1-b9f428bc9b75",
+          "failed_predicate": "OBLIGATION_FORMATION_ROLE_MAPPING_REQUIRED",
+          "validation_passed": false,
+          "terminal_reason": null,
+          "error_codes": [
+            "OBLIGATION_FORMATION_ROLE_MAPPING_REQUIRED"
+          ],
+          "feedback_sha256": "2a3a1449665fa26dc425f437d5609503aea13bd693dc7a148d9e23cf533d8434"
+        },
+        {
+          "stage": "MODEL_RESPONSE_OBSERVED",
+          "attempt": 2,
+          "receipt_id": "2201c570-ddb3-4dd5-aabd-d810c4eba1ac",
+          "failed_predicate": null,
+          "validation_passed": null,
+          "terminal_reason": null,
+          "provider_observation": {
+            "request_id": "786072ef-5d65-4694-a79b-6abccaaf8399",
+            "provider": "deepseek",
+            "requested_model": "deepseek-flash",
+            "effective_model": "deepseek-flash",
+            "usage": {
+              "input_tokens": 72170,
+              "output_tokens": 4849,
+              "cached_tokens": 0,
+              "reasoning_tokens": 0,
+              "total_tokens": 77019,
+              "unknown": false
+            },
+            "timing": {
+              "request_sent_seconds": 0.0016476799501106143,
+              "first_response_event_seconds": 0.3744193179300055,
+              "first_token_seconds": 1.3679173639975488,
+              "completed_seconds": 19.28831709793303
+            },
+            "transport_retry_count": 0,
+            "output_sha256": "b1b1c2fbe223edf3cc749476ce2cba82d7f89b5323babe2135e2756686ba7a04",
+            "output_bytes": 14137,
+            "output_evidence": {
+              "provider_status": "completed",
+              "delta_sha256": "b1b1c2fbe223edf3cc749476ce2cba82d7f89b5323babe2135e2756686ba7a04",
+              "delta_bytes": 14137,
+              "terminal_text_observed": true,
+              "terminal_sha256": "b1b1c2fbe223edf3cc749476ce2cba82d7f89b5323babe2135e2756686ba7a04",
+              "terminal_bytes": 14137,
+              "selection": "TERMINAL_MATCHED_DELTA"
+            }
+          },
+          "construction": {
+            "contract": "owner-local-interpretation-role-construction-v4",
+            "parent_wire_sha256": "813fd33105ede394e615e8f25d3e763c5fe543b9d15102df30a46998001d18a1",
+            "parent_binding": {
+              "work_id": "4af5b2db-716c-51d6-af06-4e1eb510e92b",
+              "work_reality_revision_id": "f1f690bd-4005-5104-a8a9-cb5563a3204c",
+              "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+              "source_revision": "0fbf5f553f8470f11b78a76e96f3eb59d4fb2ef1",
+              "exact_target_paths": [
+                "index.html"
+              ],
+              "attempt": 1,
+              "wire_output_fingerprint": "813fd33105ede394e615e8f25d3e763c5fe543b9d15102df30a46998001d18a1",
+              "request_receipt_id": "a6f6c5d8-fc40-4197-a8b3-6e99959bcca7",
+              "response_receipt_id": "71c2eea8-8a97-48c9-8d00-24e038707eac",
+              "owner_repair_context_contract": "existing-owner-preconditions-v2",
+              "completion_feedback_contract": "existing-bounded-completion-feedback-v1",
+              "owner_source_preconditions_fingerprint": "a550bcb2ee8143feccab1981ed3d5948ce3266f456cfd900586b1794216864a1",
+              "wire_presentation": {
+                "contract": "existing-lossless-json-frame-v1",
+                "representation": "ORIGINAL_JSON_VALUE",
+                "original_wire_sha256": "813fd33105ede394e615e8f25d3e763c5fe543b9d15102df30a46998001d18a1",
+                "original_wire_bytes": 12393,
+                "inner_character_range": [
+                  0,
+                  12393
+                ],
+                "inner_utf8_byte_range": [
+                  0,
+                  12393
+                ],
+                "inner_sha256": "813fd33105ede394e615e8f25d3e763c5fe543b9d15102df30a46998001d18a1",
+                "inner_bytes": 12393,
+                "disposition": "DERIVED_REPRESENTATION_ONLY; ALL_VALIDATION_AND_AUTHORITY_GATES_REQUIRED",
+                "candidate_construction": {
+                  "rejected": true,
+                  "code": "OBLIGATION_FORMATION_ROLE_MAPPING_REQUIRED",
+                  "diagnostics": {
+                    "violations": [
+                      {
+                        "code": "OBLIGATION_FORMATION_ROLE_MAPPING_REQUIRED",
+                        "stage": "SEMANTIC_INTERPRETATION_OBSERVED",
+                        "claim_count": 19
+                      }
+                    ],
+                    "component_observations": [
+                      {
+                        "claim": 0,
+                        "source": 0,
+                        "claim_fingerprint": "35cbb3dbe185150bf2333d484cdd9acdce35475d5041d5d3d23a0970d560b40e",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "a24b1d48dd8fae804d8b7bf4e25740bf79c8716ebefc7201050f42b27e1296db",
+                        "quote_geometry": [
+                          0,
+                          48
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 2,
+                        "alternative_count": 2
+                      },
+                      {
+                        "claim": 1,
+                        "source": 1,
+                        "claim_fingerprint": "c7ddfa205003b5916864e4c87e8733bae461ee9700f6696501b561f5e2de8231",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "5be6714bf14eea3261e40966c1d1a4039f752f3f376e0320166e32266011c8c4",
+                        "quote_geometry": [
+                          0,
+                          55
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 2,
+                        "alternative_count": 2
+                      },
+                      {
+                        "claim": 2,
+                        "source": 2,
+                        "claim_fingerprint": "99b18babc22c2df5ce5b67cf07f416d3ebac992cfe649076f466cdcb9d596257",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+                        "quote_geometry": [
+                          0,
+                          27
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 2,
+                        "alternative_count": 2
+                      },
+                      {
+                        "claim": 3,
+                        "source": 3,
+                        "claim_fingerprint": "ef74b8e260af8a26febab48704fb4dbac798195b94a6072e237ba8dccb1029a1",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+                        "quote_geometry": [
+                          0,
+                          72
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 3,
+                        "alternative_count": 2
+                      },
+                      {
+                        "claim": 4,
+                        "source": 4,
+                        "claim_fingerprint": "7177fcc8df7a186385647d4e6550e0e96351549a90bc0cc04612f1d227f8ecc6",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+                        "quote_geometry": [
+                          0,
+                          55
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 2,
+                        "alternative_count": 2
+                      },
+                      {
+                        "claim": 5,
+                        "source": 5,
+                        "claim_fingerprint": "da534ee00cfe910469d97e94fff56b5b210c38913f9c1b0d7cefce00be654790",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "c01616d2fa1687d3f2dbde62f78b2d07c72c8f63034431eb8b263f2cd82e53b1",
+                        "quote_geometry": [
+                          0,
+                          49
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 2,
+                        "alternative_count": 2
+                      },
+                      {
+                        "claim": 6,
+                        "source": 6,
+                        "claim_fingerprint": "da4c8ffb182c3e0083c70a26cc93d7e79e6f72b4ab66f96829893bd27a3a2445",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "9268cc964f6cb6011eb23204032873bdfbfff04e950cfda4f190d57a1cae73aa",
+                        "quote_geometry": [
+                          0,
+                          91
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 2,
+                        "alternative_count": 2
+                      },
+                      {
+                        "claim": 7,
+                        "source": 7,
+                        "claim_fingerprint": "cd9a59a4e62e4751b14f2c612d44453e41e0d1da986ac7bb01d33971722ab28d",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "763311981a479580e9d52e736ecffbec46cfc41a94a3564badab89c5fa354e60",
+                        "quote_geometry": [
+                          0,
+                          48
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 2,
+                        "alternative_count": 2
+                      },
+                      {
+                        "claim": 8,
+                        "source": 8,
+                        "claim_fingerprint": "2081a12c90f8a22d80c0dcc2ef7f02c7070b0999c967ffaf7df86f123d854ea1",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "f3cdd15c6a1bdfc7f207402b209b63ca1adbfe5523ea63adafe57ea9339cddcb",
+                        "quote_geometry": [
+                          0,
+                          132
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 3,
+                        "alternative_count": 2
+                      },
+                      {
+                        "claim": 9,
+                        "source": 9,
+                        "claim_fingerprint": "ce2c101cc178ffd82ad7bbd2f88c263788300339dd8789bfa2ccf9c2c821d0b3",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "a32759dfc7862fe690502c01cc3fcf726f2c6745fc3c7e7d1d616a7a038b9472",
+                        "quote_geometry": [
+                          0,
+                          27
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 2,
+                        "alternative_count": 2
+                      },
+                      {
+                        "claim": 10,
+                        "source": 10,
+                        "claim_fingerprint": "831a3f24fc640e50c5b2d242ac34e1bb38916f27cd49694b052885f05e2a819f",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+                        "quote_geometry": [
+                          0,
+                          72
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 2,
+                        "alternative_count": 2
+                      },
+                      {
+                        "claim": 11,
+                        "source": 11,
+                        "claim_fingerprint": "c6909a4bc0f6d19cf02d2856c2c5097d212adae294115720f70820e3bd3576a4",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+                        "quote_geometry": [
+                          0,
+                          55
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 2,
+                        "alternative_count": 2
+                      },
+                      {
+                        "claim": 12,
+                        "source": 12,
+                        "claim_fingerprint": "b5f743e1148ec7d60342fea630b67d6758d72776b6a3c27a432a8d9e2f062531",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "57cb451611ece48c519970730d053123646136b1b1f355133abc42fe7384638f",
+                        "quote_geometry": [
+                          0,
+                          59
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 1,
+                        "alternative_count": 1
+                      },
+                      {
+                        "claim": 13,
+                        "source": 13,
+                        "claim_fingerprint": "7977c990c3093a1fc7c1ef74f095ac4392507382abd6cc502ef1d7248c6877a4",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "739b15bc79375f46eff063aa8ddbff21cbeac67890f413337406f4719dc627f8",
+                        "quote_geometry": [
+                          0,
+                          62
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 1,
+                        "alternative_count": 1
+                      },
+                      {
+                        "claim": 14,
+                        "source": 14,
+                        "claim_fingerprint": "3361211bfa4b2637f46d5582a72a85b3287d34a05a738eb12565c9a1cbeed9cc",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "e5baed22a33dfb818a6a438f8e1c7595598c7c6c26b6caccf1945a979328be7c",
+                        "quote_geometry": [
+                          0,
+                          45
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 1,
+                        "alternative_count": 1
+                      },
+                      {
+                        "claim": 15,
+                        "source": 15,
+                        "claim_fingerprint": "cb94ec82fe69d6b266bcab7ee16ad9a9f3776ae7553c06b76d3d09b5e92384e7",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "8f73931419beb5ccb80dbdd5aa3aa609513cff870ae39d6181a04d0b4fb9b1bd",
+                        "quote_geometry": [
+                          0,
+                          36
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 1,
+                        "alternative_count": 1
+                      },
+                      {
+                        "claim": 16,
+                        "source": 16,
+                        "claim_fingerprint": "26e5f7aef3588082acfc7d1bba40a2e67f8b3c5d95c8de5aeb670ce6f02daf8f",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "5b7cd03090c3931b77a8929c4e8aab12368a7f8fcb5d941b155013aac44be6fd",
+                        "quote_geometry": [
+                          0,
+                          37
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 1,
+                        "alternative_count": 1
+                      },
+                      {
+                        "claim": 17,
+                        "source": 17,
+                        "claim_fingerprint": "47751c16b0df6ecbbc15138ac7eb228afb4eeaccad8e6a3995605579c3c171bf",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "8314fcbae674bc2d2d5f514db6776b0ba01afb427ff4a931c0be2907609cf114",
+                        "quote_geometry": [
+                          0,
+                          38
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 1,
+                        "alternative_count": 1
+                      },
+                      {
+                        "claim": 18,
+                        "source": 18,
+                        "claim_fingerprint": "272b1f886c66cda4bee392e65700ab819695b7cb506547deed2926997e0e2491",
+                        "source_identity_status": "OBSERVED",
+                        "schema_status": "VALID_CLAIM_SHAPE",
+                        "original_text_sha256": "43c16d3a65f35160438c5b7952e55d3da51f243d4e0ba2a150578155c39b3786",
+                        "quote_geometry": [
+                          0,
+                          44
+                        ],
+                        "geometry_status": "OBSERVED",
+                        "interpretation_status": "UNREVIEWED_CLAIM",
+                        "evidence_status": "NOT_PROVIDED",
+                        "unknown_count": 1,
+                        "alternative_count": 1
+                      }
+                    ],
+                    "sources_not_interpreted": [],
+                    "not_evaluable": [
+                      "SEMANTIC_APPROVAL",
+                      "CONSUMER_BINDING",
+                      "FULFILLMENT_EVIDENCE",
+                      "ASSURANCE"
+                    ]
+                  }
+                }
+              },
+              "provider_wire_version": "fulfillment-compact-v1",
+              "wire_request_fingerprint": "34f23cb9cc6b7620b9c7e0183c04b6fb39ea3b668b1722621d19e00049b03936",
+              "wire_table_fingerprint": "048f904412dfb311c264e4af5c9c006febcbe6563c32e92989ee486cf6566eeb",
+              "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+              "candidate_fingerprint": null
+            },
+            "interpretation_fingerprint": "bccd4410eda9c95b9db3ed12fb9467e4f9cf4542b07444df57177768741f46ab",
+            "role_response_sha256": "b1b1c2fbe223edf3cc749476ce2cba82d7f89b5323babe2135e2756686ba7a04",
+            "constructed_wire_sha256": "0b98395c35a6a1eeb1d3bc60811c9671f7592c911150f55a3f68ebcd1cc1a1e2",
+            "disposition": "UNREVIEWED_CLAIMS_TO_CANDIDATE_ONLY; ALL_ORIGINAL_GATES_REQUIRED"
+          }
+        },
+        {
+          "stage": "CANDIDATE_VALIDATED",
+          "attempt": 2,
+          "receipt_id": "fb632e37-bd52-4853-8b92-1a0328d661af",
+          "failed_predicate": "OBLIGATION_SOURCE_EVIDENCE_METHOD_REQUIRES_ADMITTED_FACT",
+          "validation_passed": false,
+          "terminal_reason": "OBLIGATION_SOURCE_EVIDENCE_METHOD_REQUIRES_ADMITTED_FACT",
+          "error_codes": [
+            "OBLIGATION_PERMISSION_REQUIRES_EXACT_CLAUSE",
+            "OBLIGATION_SOURCE_EVIDENCE_METHOD_REQUIRES_ADMITTED_FACT",
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ],
+          "feedback_sha256": "2a172f213653b7b194881d4c9f3a3d9f9e03fe7a6963a93d610e158cf95d3053"
+        }
+      ],
+      "actual_artifact_verification": "NOT_EXECUTED",
+      "guardian": "NOT_CALLED_DIAGNOSTIC_SCOPE",
+      "raw_receipt_sha256": "8b1c0af60b139e9c1f417b6159e7511441d3f1f8cd60f18318b6de7ad698e2c1"
+    }
+  ]
+}

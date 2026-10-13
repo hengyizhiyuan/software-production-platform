@@ -105,6 +105,60 @@ def test_interpretation_parent_drift_cannot_reopen_or_accept_a_projection():
     assert len(calls)==3
 
 
+def test_owner_payload_references_preserve_full_data_and_reduce_stored_duplication():
+    _bindings,provider,calls,args=interpretation_case()
+    raw=provider._fulfillment_receipts
+    request=next(r for r in raw if r['stage']=='MODEL_REQUEST_PENDING' and r['attempt']==2)
+    response=next(r for r in raw if r['stage']=='MODEL_RESPONSE_OBSERVED' and r['attempt']==2)
+    assert 'feedback' not in request and 'owner_source_preconditions' not in response
+    assert request['owner_payload_references']['feedback']['field']=='validation_feedback'
+    rev,ir,_kwargs=args
+    inventory=app.fulfillment_inventory(rev,ir,exact_target_paths=('index.html',))
+    resolved=app.FulfillmentFormationReceipts(rev,inventory,memory=raw).records()
+    ready=next(r for r in resolved if r['receipt_id']==request['receipt_id'])
+    feedback=next(r['validation_feedback'] for r in resolved if r['stage']=='CANDIDATE_VALIDATED' and r['attempt']==1)
+    assert ready['feedback']==feedback
+    assert len(json.dumps(request))<len(json.dumps(ready))
+    assert next(r for r in resolved if r['receipt_id']==response['receipt_id'])['owner_source_preconditions']==ready['owner_source_preconditions']
+    assert len(calls)==3
+
+
+@pytest.mark.parametrize('tamper',('hash','missing','field','work','parent-payload'))
+def test_reference_corruption_truthfully_stops_without_another_provider_call(tamper):
+    _bindings,provider,calls,args=interpretation_case()
+    row=next(r for r in provider._fulfillment_receipts if r['stage']=='MODEL_REQUEST_PENDING' and r['attempt']==2)
+    ref=row['owner_payload_references']['feedback']
+    if tamper=='hash':ref['sha256']='0'*64
+    elif tamper=='missing':ref['receipt_id']='missing-receipt'
+    elif tamper=='field':ref['field']='candidate_output'
+    elif tamper=='work':row['work_id']='foreign-work'
+    else:
+        parent=next(r for r in provider._fulfillment_receipts if r['receipt_id']==ref['receipt_id'])
+        parent['validation_feedback']='modified historical feedback'
+    rev,ir,kwargs=args
+    result=app.form_fulfillment_projection(rev,ir,**kwargs)
+    assert all(b.state=='UNRESOLVED' for b in result)
+    assert result[0].formation_receipt['terminal_reason']=='OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT'
+    assert len(calls)==3
+
+
+def test_capacity_stop_after_interpretation_does_not_crash_or_reopen(monkeypatch):
+    original=app.FulfillmentFormationReceipts.append
+    def large_request(self,stage,attempt,**values):
+        if stage=='MODEL_REQUEST_PENDING' and attempt==2:
+            values=deepcopy(values)
+            values['owner_source_preconditions']['oversized_controlled_context']='x'*140000
+        return original(self,stage,attempt,**values)
+    monkeypatch.setattr(app.FulfillmentFormationReceipts,'append',large_request)
+    bindings,provider,calls,args=interpretation_case()
+    assert len(calls)==1 and all(b.state=='UNRESOLVED' for b in bindings)
+    assert bindings[0].formation_receipt['terminal_reason']=='OBLIGATION_FORMATION_RECEIPT_LIMIT'
+    rev,ir,kwargs=args
+    replay=app.form_fulfillment_projection(rev,ir,**kwargs)
+    assert all(b.state=='UNRESOLVED' for b in replay) and len(calls)==1
+    assert replay[0].formation_receipt['terminal_reason']=='OBLIGATION_FORMATION_RECEIPT_LIMIT'
+
+
 @pytest.mark.parametrize('failure',('missing-source','wrong-source','wrong-path','unsupported-proof','fake-fact','duplicate','bad-quote'))
 def test_interpretation_does_not_supply_missing_proof_or_override_final_gates(failure):
     bindings,provider,calls,_args=interpretation_case(failure=failure)

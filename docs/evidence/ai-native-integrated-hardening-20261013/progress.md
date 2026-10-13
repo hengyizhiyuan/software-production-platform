@@ -177,3 +177,15 @@ Trace 真实结果的 Admin 展示校验补充 `actual-trace-admin-presentation-
 临时协议 v4 是现有 Owner 的构造路径，不新增 Runtime 编排系统、IR、全局 Owner、跨项目 Evidence 契约或独立 Refine Coordinator。新实例不能升级旧收据；最终方法和原始事实之间的证明仍来自原 Authority/消费者，不来自第一候选的解释。此计划落实已有 Phase 2，尚不宣称其真实模型收益。
 
 `interpretation-binding-1.xml` 保存首轮 3 FAIL/79 PASS（测试读取不存在 Binding.inventory_fingerprint）；改为实际 formation receipt 字段后 `interpretation-binding-2.xml` 11 PASS。最后的未知 Claim/身份漂移扩充 `interpretation-binding-3.xml` 14 PASS，`postgresql-interpretation-binding-2.xml` 6 PASS。受控 Provider 仅证明机制，不替代真实生产。下一资格以新冻结的应用/镜像身份为准。
+
+## Owner 收据引用与容量停止真实性
+
+`0108e842` / Tree `6e85899bdaaaf8dc80026c7201211ff022b3a650` / image `sha256:49f5738481eed9c7f01321d7d64476cb8b4359a1194e6576ae8fe3b7c42c16da` 安装身份及聚焦回归通过。真实非 Holdout 第八次：普通34第一步形成全部19条合法形状且原文位置已观察的理解候选，仍全部 UNREVIEWED_CLAIM / NOT_PROVIDED。第二步完整计划因非 Fact 使用 EXACT_PRODUCT_SOURCE_IDENTITY、权限和支撑对应缺失而拒绝，2 Formation/0 Review。实际 Source consumer 的 Fact-only 条件已经进入 Owner 的 ineligible_binding_prerequisites，不能把这次不遵守契约说成缺少 Gate 或 Validator 错拒。
+
+普通41随后在第二请求记录前触发既有 131072-byte receipt limit；容量停止丢弃最新大载荷后，finish 仍读取其 candidate_construction_state，产生 KeyError。没有第二请求成功资格，不能记 PASS。此诊断 harness 仅在整 Case 返回后写私有收据，异常导致该 Case 的完整内存观察未落盘，其实际 Provider Usage/输出和精确原始收据尺寸继续 UNKNOWN；不能从当前输入或时间推测历史数据。
+
+在同一个 FulfillmentFormationReceipts Owner 内修复重复载荷：新 v4 的第二请求通过原 CANDIDATE_VALIDATED 收据 ID 和完整字符串 fingerprint 引用反馈；响应通过同一 Attempt 的 MODEL_REQUEST_PENDING 收据引用完整 Owner 上下文。原父收据保留全部数据，实际 Provider 输入不改；读取对同 Work/Revision/Inventory/Source/路径、角色、Attempt、字段与 hash 校验后物化。缺父收据、改 hash、错用途、跨 Work、改父载荷或循环均由既有身份停止拒绝。旧无引用收据的格式与事实不改。
+
+容量停止不物化被裁减载荷、不复活终态；finish 只读取实际保留的理解状态，缺最新状态不会抛 KeyError 或伪造 PASS。原 131072-byte 界限和模型额度不增加。`owner-reference-capacity-1.xml` 的 1 FAIL 揭示原容量停止校验假定反馈必须被裁减；现精确校验保留的反馈引用，`owner-reference-capacity-2.xml` 78 PASS；`postgresql-owner-reference-1.xml` 6 PASS。原 FAIL 收据保留，不追认。
+
+下一验证仅重验该可证实的普通41记录阻断。对普通34正确的模型/治理拒绝不继续相同条件下盲目调用；尚未产生新的 Work、Artifact、Verification 或 Guardian 成果。C3 仍 PARTIAL，历史生产/Holdout 保持不变。

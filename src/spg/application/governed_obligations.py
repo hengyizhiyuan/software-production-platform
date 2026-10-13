@@ -1895,8 +1895,54 @@ class FulfillmentFormationReceipts:
             # The authoritative query already scoped the subject. A corrupt
             # scope fingerprint must remain visible to identity validation,
             # not disappear and reopen a model/budget slot.
-            return rows
-        return tuple(row for row in rows if row.get("inventory_fingerprint") == self.inventory["inventory_fingerprint"])
+        else:
+            rows=tuple(row for row in rows if row.get("inventory_fingerprint") == self.inventory["inventory_fingerprint"])
+        # Storage references point only into this existing Owner namespace.
+        # Materialization preserves every original payload and its exact hash;
+        # it cannot invent a missing receipt or repair an identity mismatch.
+        index={r['receipt_id']:r for r in rows}
+        resolved={}
+        def materialize(row,active=()):
+            rid=row['receipt_id']
+            if rid in resolved:return resolved[rid]
+            if rid in active:raise ValueError('RECEIPT_REFERENCE_CYCLE')
+            result=row
+            refs=row.get('owner_payload_references')
+            if row.get('capacity_observation') is not None:
+                # A historical terminal capacity stop is not repairable.
+                # Retained reference identities do not resurrect its payload.
+                resolved[rid]=row
+                return row
+            if refs is not None:
+                if not isinstance(refs,dict) or not refs or not set(refs)<={'feedback','owner_source_preconditions'}:
+                    raise ValueError('RECEIPT_REFERENCE_INVALID')
+                result=dict(row)
+                for field,ref in refs.items():
+                    expected_stage='MODEL_REQUEST_PENDING' if field=='feedback' else 'MODEL_RESPONSE_OBSERVED'
+                    if not isinstance(ref,dict) or set(ref)!={'receipt_id','field','sha256'} or field in row or row['stage']!=expected_stage:
+                        raise ValueError('RECEIPT_REFERENCE_INVALID')
+                    target=index.get(ref['receipt_id'])
+                    if target is None or any(target.get(k)!=row.get(k) for k in (
+                            'schema','owner','work_id','work_reality_revision_id','inventory_fingerprint','source_revision','exact_target_paths')):
+                        raise ValueError('RECEIPT_REFERENCE_IDENTITY_DRIFT')
+                    expected=('CANDIDATE_VALIDATED',row['attempt']-1,'validation_feedback') if field=='feedback' else (
+                        'MODEL_REQUEST_PENDING',row['attempt'],'owner_source_preconditions')
+                    if (target.get('stage'),target.get('attempt'),ref['field'])!=expected:
+                        raise ValueError('RECEIPT_REFERENCE_ROLE_DRIFT')
+                    parent=materialize(target,(*active,rid))
+                    value=parent.get(ref['field'])
+                    if value is None or canonical_fingerprint(value)!=ref['sha256']:
+                        raise ValueError('RECEIPT_REFERENCE_HASH_DRIFT')
+                    result[field]=value
+            resolved[rid]=result
+            return result
+        try:
+            if len(index)!=len(rows):raise ValueError('RECEIPT_REFERENCE_IDENTITY_DRIFT')
+            return tuple(materialize(r) for r in rows)
+        except (ValueError,KeyError,TypeError,RecursionError):
+            # Expose corruption to the existing identity stop, never hide rows
+            # and reopen a Provider/budget slot. Original storage is unchanged.
+            return tuple({**r,'receipt_reference_validation':'INVALID'} for r in rows)
 
     def append(self, stage, attempt, **values):
         from datetime import UTC, datetime
@@ -1925,6 +1971,22 @@ class FulfillmentFormationReceipts:
             row["validation_feedback_bytes"] = len(encoded_feedback)
         if row.get("terminal") and not row.get("validation_passed"):
             row["unresolved_source_refs"] = [source["source_ref"] for source in self.inventory["sources"]]
+        protocol=(row.get('owner_source_preconditions') or {}).get('candidate_construction_contract')
+        if protocol=='owner-local-interpretation-role-construction-v4':
+            prior=self.records();refs={}
+            if stage=='MODEL_REQUEST_PENDING' and attempt>1 and isinstance(row.get('feedback'),str):
+                parent=next((r for r in prior if r['stage']=='CANDIDATE_VALIDATED' and r['attempt']==attempt-1
+                    and r.get('validation_feedback')==row['feedback']),None)
+                if parent is not None:
+                    refs['feedback']={'receipt_id':parent['receipt_id'],'field':'validation_feedback',
+                        'sha256':canonical_fingerprint(row.pop('feedback'))}
+            if stage=='MODEL_RESPONSE_OBSERVED':
+                parent=next((r for r in prior if r['stage']=='MODEL_REQUEST_PENDING' and r['attempt']==attempt
+                    and r.get('owner_source_preconditions')==row.get('owner_source_preconditions')),None)
+                if parent is not None:
+                    refs['owner_source_preconditions']={'receipt_id':parent['receipt_id'],'field':'owner_source_preconditions',
+                        'sha256':canonical_fingerprint(row.pop('owner_source_preconditions'))}
+            if refs:row['owner_payload_references']=refs
         original_row_bytes = json.dumps(row, ensure_ascii=False, default=str).encode()
         if len(original_row_bytes) > 131072:
             dropped = {key: row[key] for key in ("candidate", "candidate_output", "feedback",
@@ -2913,6 +2975,24 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
         _decode_fulfillment_candidate_wire, _FulfillmentWireValidationError, _FulfillmentWireReceiptIdentityError,
         _FULFILLMENT_WIRE_METADATA_KEYS)
     for row in rows:
+        if row.get('receipt_reference_validation')=='INVALID':
+            raise _FulfillmentWireReceiptIdentityError('OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT')
+        references=row.get('owner_payload_references')
+        if references is not None and row.get('capacity_observation') is None:
+            if not isinstance(references,dict) or not references or not set(references)<={'feedback','owner_source_preconditions'}:
+                raise _FulfillmentWireReceiptIdentityError('OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT')
+            for field,ref in references.items():
+                parent=next((r for r in rows if r['receipt_id']==ref.get('receipt_id')),None) if isinstance(ref,dict) else None
+                expected=('CANDIDATE_VALIDATED',row['attempt']-1,'validation_feedback') if field=='feedback' else (
+                    'MODEL_REQUEST_PENDING',row['attempt'],'owner_source_preconditions')
+                if (not isinstance(ref,dict) or set(ref)!={'receipt_id','field','sha256'} or parent is None
+                        or row['stage']!=('MODEL_REQUEST_PENDING' if field=='feedback' else 'MODEL_RESPONSE_OBSERVED')
+                        or any(parent.get(k)!=row.get(k) for k in ('schema','owner','work_id','work_reality_revision_id',
+                            'inventory_fingerprint','source_revision','exact_target_paths'))
+                        or (parent.get('stage'),parent.get('attempt'),ref.get('field'))!=expected
+                        or field not in row or row[field]!=parent.get(ref['field'])
+                        or canonical_fingerprint(row[field])!=ref['sha256']):
+                    raise _FulfillmentWireReceiptIdentityError('OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT')
         capacity_observation = row.get("capacity_observation")
         if capacity_observation is not None:
             dropped = capacity_observation.get("dropped_fields", ()) if isinstance(capacity_observation, dict) else ()
@@ -3202,6 +3282,13 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                 raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
             encoded = json.dumps(parents[0]["validation_feedback"], ensure_ascii=False, default=str).encode()
             dropped = [d for d in capacity["dropped_fields"] if d["field"] == "feedback"]
+            reference=(start.get('owner_payload_references') or {}).get('feedback')
+            if reference is not None:
+                if (reference!={'receipt_id':parents[0]['receipt_id'],'field':'validation_feedback',
+                        'sha256':canonical_fingerprint(parents[0]['validation_feedback'])}
+                        or dropped or start.get('feedback_receipt_id')!=parents[0]['receipt_id']):
+                    raise _FulfillmentWireReceiptIdentityError('OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT')
+                continue
             if (len(dropped) != 1 or dropped[0]["bytes"] != len(encoded)
                     or dropped[0]["sha256"] != sha256(encoded).hexdigest()
                     or start.get("feedback_receipt_id") != parents[0].get("receipt_id")):
@@ -3634,7 +3721,8 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
             from spg.domain.refinement_contract import OwnerConvergenceDecision
             state = first_request["owner_source_preconditions"]["candidate_construction_state"]
             if first_request['owner_source_preconditions']['candidate_construction_contract'] == 'owner-local-interpretation-role-construction-v4':
-                last_request = next(r for r in reversed(rows) if r['stage']=='MODEL_REQUEST_PENDING')
+                last_request = next((r for r in reversed(rows) if r['stage']=='MODEL_REQUEST_PENDING'
+                    and isinstance((r.get('owner_source_preconditions') or {}).get('candidate_construction_state'),dict)),first_request)
                 state = last_request['owner_source_preconditions']['candidate_construction_state']
             receipt["understanding_state"] = {**state["understanding"],
                 "unknowns": ["ACTUAL_OWNER_EVIDENCE", "ASSURANCE"] if passed else state["understanding"]["unknowns"]}
