@@ -96,6 +96,23 @@ test('Analysis report escapes model text and preserves failed analysis evidence'
  assert.match(h,/&lt;script&gt;/);assert.doesNotMatch(h,/<script>bad/);
 });
 
+test('Analysis entry follows backend admission and explains active Work',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses';
+ const s=surface('/admin',true,null,null,{[path]:{items:[],can_analyze:false,work_state:'RUNNING'}});await s.ready();
+ await s.listeners.click({target:{closest:()=>({dataset:{analysisWork:'ordinary-work'}})}});
+ const h=s.nodes['#admin-content'].innerHTML;assert.match(h,/type="submit" disabled/);assert.match(h,/该 Work 正在推进/);assert.match(h,/等待人工决定／验收/);
+ assert.ok(!s.calls.some(([,o])=>o.method==='POST'));
+});
+
+test('Analysis admission rejection is shown in Chinese rather than a raw code',async()=>{
+ const path='/api/admin/works/ordinary-work/analyses';
+ const s=surface('/admin',true,null,null,{[path]:{_httpStatus:409,code:'ANALYSIS_WORK_NOT_TERMINAL_OR_BLOCKED'}});await s.ready();
+ s.context.crypto={getRandomValues(b){b.fill(23);return b;}};s.context.FormData=class {get(){return 'Inspect current snapshot';}};
+ const f=new s.context.HTMLFormElement();f.dataset={traceAnalysisForm:'ordinary-work'};f.hasAttribute=n=>n==='data-trace-analysis-form';f.querySelector=()=>({});
+ await s.listeners.submit({target:f,preventDefault(){}});
+ assert.match(s.nodes['#admin-notice'].textContent,/该 Work 正在推进/);assert.doesNotMatch(s.nodes['#admin-notice'].textContent,/ANALYSIS_WORK_NOT_TERMINAL/);
+});
+
 
 test('Analysis submission generates a UUID on the existing HTTP origin and reuses it',async()=>{
  const path='/api/admin/works/ordinary-work/analyses';

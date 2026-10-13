@@ -14,7 +14,7 @@
   const heading = (title, subtitle) => `<header class="admin-heading"><p class="eyebrow">Watt Admin</p><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></header>`;
   function table(headers, rows, empty = '暂时没有记录。') { return rows.length ? `<div class="admin-table-wrap"><table class="admin-table"><thead><tr>${headers.map(x => `<th>${esc(x)}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${row.map(x => `<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : `<p class="admin-empty">${esc(empty)}</p>`; }
   function notice(text) { const node = $('#admin-notice');node.textContent = text;node.hidden = false;setTimeout(() => {node.hidden = true;}, 7000); }
-  async function api(path, options = {}) { const response = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json'}, ...options, ...(options.body ? {body:JSON.stringify(options.body)} : {})});let data;try {data = await response.json();} catch (_) {data = {}; }if (!response.ok) {const error = new Error(data.message || data.code || '请求未完成');error.status = response.status;error.code = data.code;throw error;}return data; }
+  async function api(path, options = {}) { const response = await fetch(path, {credentials:'same-origin', headers:{'Content-Type':'application/json'}, ...options, ...(options.body ? {body:JSON.stringify(options.body)} : {})});let data;try {data = await response.json();} catch (_) {data = {}; }if (!response.ok) {const error = new Error(data.code==='ANALYSIS_WORK_NOT_TERMINAL_OR_BLOCKED'?'该 Work 正在推进，暂不能开始分析。请等待执行结束或进入等待人工决定／验收状态后再试。':data.message || data.code || '请求未完成');error.status = response.status;error.code = data.code;throw error;}return data; }
   async function downloadDiagnostic(workId,mode='compact',file=null) {
     const path=`/api/admin/works/${encodeURIComponent(workId)}/diagnostic?mode=${encodeURIComponent(mode)}${file?'&file='+encodeURIComponent(file):''}`;
     const response=await fetch(path,{credentials:'same-origin'});
@@ -36,7 +36,7 @@
     const r=await api(`/api/admin/works/${encodeURIComponent(workId)}/analyses`);
     content.innerHTML=heading('用 Watt 分析 Work Trace','由你发起工程调查。报告区分事实、根因假设与建议，供人工审查。')+
       `<button class="button secondary" data-trace-kind="work" data-trace-entity="${esc(workId)}">返回 Work Trace</button>`+
-      `<form class="admin-form" data-trace-analysis-form="${esc(workId)}"><label>调查目的<textarea name="rationale" maxlength="2000" required>重建这次 Work 的生产过程，调查偏离、根因、证据缺口和改进建议。</textarea></label><button class="button" type="submit">开始 Watt 分析</button><p>支持已完成、失败、受阻或停止的 Work。执行期间显示状态；分析失败的记录也会保留。</p></form>`+
+      `<form class="admin-form" data-trace-analysis-form="${esc(workId)}"><label>调查目的<textarea name="rationale" maxlength="2000" required>重建这次 Work 的生产过程，调查偏离、根因、证据缺口和改进建议。</textarea></label><button class="button" type="submit"${r.can_analyze===false?' disabled':''}>开始 Watt 分析</button><p>支持已完成、失败、受阻、停止，以及等待人工决定／验收的 Work。${r.can_analyze===false?'该 Work 正在推进，暂不能开始新的分析。':''}执行期间显示状态；分析失败的记录也会保留。</p></form>`+
       table(['时间','分析状态','报告'],r.items.map(a=>[esc(date(a.started_at)),esc(a.status),`<button class="button secondary" data-analysis-result="${esc(a.request_id)}" data-analysis-target="${esc(workId)}">查看分析记录</button>`]));
   }
   function analysisResult(a) {

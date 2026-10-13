@@ -42,6 +42,16 @@ from spg.infrastructure.trace_analysis_evidence import (
 
 POLICY = "watt-human-trace-investigation-v1"
 CURRENT_REPORT_FINDING_LIMIT = 1
+ANALYZABLE_WORK_STATES = frozenset({"COMPLETED", "FAILED", "BLOCKED", "STOPPED",
+                                    "WAITING_HUMAN", "WAITING_ACCEPTANCE"})
+
+
+def can_analyze_work(work):
+    # Human waits are quiescent investigation targets, not production admission.
+    # Work projection can prioritize HUMAN_ATTENTION over queue state; preserve
+    # the active-execution exclusion even for that combination.
+    return (work.get("state") in ANALYZABLE_WORK_STATES
+            and work.get("queue_condition") not in {"EXECUTING", "ALLOCATED", "QUEUED", "REQUEUED"})
 REPORT_CLAIM_CONTRACT = {"scope": "CURRENT_REVIEWED_ADVISORY_ONLY",
     "canonical_location": "result_claim.report_digest",
     "compatible_location": "result_claim.output_vector.report_digest",
@@ -344,11 +354,12 @@ class TraceAnalysisService:
         return record
 
     def list(self, owner, work_id):
-        self.authorize(owner, work_id)
+        work = self.authorize(owner, work_id)
         parent = self._pointer(work_id, uuid4()).parent
         paths = sorted(parent.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
         return {"items": [self.read(owner, work_id, UUID(path.stem)) for path in paths[:20]],
-                "truncated": len(paths) > 20}
+                "truncated": len(paths) > 20, "work_state": work.get("state"),
+                "can_analyze": can_analyze_work(work)}
 
     def repositories(self, work_id, snapshot):
         if self.repository_factory:
@@ -396,14 +407,14 @@ class TraceAnalysisService:
 
     async def analyze(self, owner: str, work_id: UUID, trigger: AnalysisTrigger):
         work = await asyncio.to_thread(self.authorize, owner, work_id)
-        if work.get("state") not in {"COMPLETED", "FAILED", "BLOCKED", "STOPPED"}:
-            raise QualityError("ANALYSIS_WORK_NOT_TERMINAL_OR_BLOCKED")
         pointer = self._pointer(work_id, trigger.request_id)
         if pointer.exists():
             existing = self.read(owner, work_id, trigger.request_id)
             if existing["rationale"] != trigger.rationale:
                 raise QualityError("ANALYSIS_REQUEST_ID_CONFLICT")
             return existing
+        if not can_analyze_work(work):
+            raise QualityError("ANALYSIS_WORK_NOT_TERMINAL_OR_BLOCKED")
         # One bounded investigation per API storage root, also across processes.
         # Crash leftovers are never silently stolen or automatically retried.
         lock = self.root / ".active-investigation"

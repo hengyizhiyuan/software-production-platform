@@ -228,6 +228,32 @@ def test_read_history_requires_current_owner(tmp_path):
         s.read("human:foreign", uuid4_from(snap), trigger.request_id, detail=True)
 
 
+@pytest.mark.parametrize('state',['WAITING_HUMAN','WAITING_ACCEPTANCE'])
+def test_quiescent_human_wait_runs_existing_analysis_loop(tmp_path,state):
+    s,snap,model=service(tmp_path);s.registry.state=state
+    assert s.list('human:owner',uuid4_from(snap))['can_analyze'] is True
+    result=asyncio.run(s.analyze('human:owner',uuid4_from(snap),AnalysisTrigger(request_id=uuid4(),rationale='Investigate saved evidence while waiting for Human')))
+    assert result['status']=='COMPLETED' and len(model.requests)==3
+    assert s.registry.state==state and s.exporter.calls==1
+
+
+@pytest.mark.parametrize('queue',['EXECUTING','ALLOCATED','QUEUED','REQUEUED'])
+def test_human_attention_projection_does_not_admit_active_queue(tmp_path,queue):
+    s,snap,model=service(tmp_path);original=s.registry.get
+    s.registry.get=lambda owner,wid:dict(original(owner,wid),state='WAITING_HUMAN',queue_condition=queue)
+    assert s.list('human:owner',uuid4_from(snap))['can_analyze'] is False
+    with pytest.raises(QualityError,match='ANALYSIS_WORK_NOT_TERMINAL_OR_BLOCKED'):
+        asyncio.run(s.analyze('human:owner',uuid4_from(snap),AnalysisTrigger(request_id=uuid4(),rationale='Do not analyze active execution')))
+    assert not model.requests and s.exporter.calls==0
+
+
+def test_existing_request_can_be_read_after_work_resumes_without_starting_analysis(tmp_path):
+    s,snap,model=service(tmp_path);trigger=AnalysisTrigger(request_id=uuid4(),rationale='Preserve idempotent history read')
+    first=asyncio.run(s.analyze('human:owner',uuid4_from(snap),trigger));s.registry.state='RUNNING'
+    assert asyncio.run(s.analyze('human:owner',uuid4_from(snap),trigger))==first
+    assert len(model.requests)==3 and s.exporter.calls==1
+
+
 def test_provider_failure_preserves_evidence_and_does_not_leak_exception_secrets(tmp_path):
     s, snap, _ = service(tmp_path)
     class Failed:
