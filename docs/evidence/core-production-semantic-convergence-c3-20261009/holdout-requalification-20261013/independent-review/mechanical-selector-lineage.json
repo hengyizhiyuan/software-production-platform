@@ -1,0 +1,8 @@
+{
+  "change": "One retention selector uses stable evidence method already independently invoked in original retention supplement; no Oracle, semantic predicate, or budget change",
+  "new_adapter_sha256": "fe954797540ad4025641bdc94e3296f65bfe5453822af0bb8d922a3c0c62be03",
+  "new_trial_not_old_subcomparison_replay": true,
+  "old_adapter_sha256": "6dff6f919bf514c3d2eb938406f0987482f1746c6cc306d7e96f4d178d0fd9f0",
+  "old_false_observation_and_supplement_preserved": true,
+  "schema": "c3-requalification-mechanical-adapter-lineage-v1"
+}

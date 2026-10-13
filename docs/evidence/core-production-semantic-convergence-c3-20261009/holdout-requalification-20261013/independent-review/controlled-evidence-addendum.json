@@ -1,0 +1,101 @@
+{
+  "basis": "EXISTING_IMMUTABLE_CONTROLLED_OWNER_OBSERVATIONS_ONLY",
+  "independent_guardian": {
+    "called_this_suite": false,
+    "historical_real_G0_pass": "SEPARATE_EVIDENCE_CLASS; NOT_REPLACEMENT_FOR_UNCALLED_NEGATIVE",
+    "missing_guardian_evidence_checked_this_suite": false,
+    "result": "NOT_CALLED_THIS_SUITE",
+    "wrong_guardian_evidence_checked_this_suite": false
+  },
+  "limits": {
+    "current_final_qualification": "NOT_QUALIFIED",
+    "evidence_insufficient_conclusion": "The stated Source/WorkReality/Review/capability identity negative probes rejected or returned ineligible. No universal missing-evidence PASS claim.",
+    "nonexistent_fact_conclusion": "No independently executed nonexistent/invented-content Fact negative in opaque4/5; no such PASS inferred from these probes.",
+    "old_v2_public_package_modified": false,
+    "semantic_guess_conclusion": "Controlled fixture does not qualify real model semantic inference; all four live trials remained unadmitted and Independent Review was not reached."
+  },
+  "model_calls_added": 0,
+  "new_tests_or_semantic_oracle_added": false,
+  "opaque_4": {
+    "checked_actual_predicates": [
+      "Frozen Source revision identity required by existing projection consumer",
+      "WorkReality revision identity required by existing projection consumer"
+    ],
+    "fixture_source_identity_is_not_real_Product_source_acceptance": true,
+    "not_checked": [
+      "Original artifact content mutation or exact output fact checker",
+      "Invented/nonexistent Fact contents",
+      "Independent Guardian missing/wrong evidence",
+      "Complete semantic equivalence of real model candidate"
+    ],
+    "positive_source_identity_control": {
+      "accepted_by_projection_validator": true,
+      "exception": null
+    },
+    "private_observation_sha256": "dbb81af20121f3bc8a6dc7a076bc45b29392ae08e857d604af5ca67840f733b3",
+    "scope": "CONTROLLED_OWNER_FIXTURE; validate_fulfillment_projection",
+    "source_version_negative": {
+      "exception": "ValueError",
+      "mutation_type": "WRONG_SOURCE_REVISION",
+      "rejected": true,
+      "stable_error": "OBLIGATION_PROJECTION_SOURCE_REVISION_DRIFT"
+    },
+    "work_reality_identity_negative": {
+      "exception": "ValueError",
+      "mutation_type": "WRONG_WORK_REALITY_REVISION",
+      "rejected": true,
+      "stable_error": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE"
+    }
+  },
+  "opaque_5": {
+    "candidate_seal_gate_negative_outcomes": {
+      "capabilities": [
+        false,
+        false
+      ],
+      "missing-review": [
+        false,
+        false
+      ],
+      "missing-review-observation": [
+        false,
+        false
+      ]
+    },
+    "candidate_seal_gate_positive_outcomes": [
+      true,
+      true
+    ],
+    "checked_actual_methods": [
+      "_exact_fact_git_scope",
+      "_candidate_seal_gate_required"
+    ],
+    "checked_actual_predicates": [
+      "Missing independent semantic Review result cannot make scope/seal eligibility true",
+      "Missing Review observation cannot make scope/seal eligibility true",
+      "Wrong capability fingerprint cannot make scope/seal eligibility true"
+    ],
+    "exact_fact_git_scope_negative_outcomes": {
+      "capabilities": false,
+      "missing-review": false,
+      "missing-review-observation": false
+    },
+    "exact_fact_git_scope_positive": true,
+    "negative_key_interpretation": {
+      "capabilities": "Wrong capability identity fingerprint in controlled receipt; consumer eligibility must be false",
+      "missing-review": "Remove semantic_review from existing controlled formation receipt; consumer eligibility must be false",
+      "missing-review-observation": "Remove SEMANTIC_REVIEW_OBSERVED actual-stage record from controlled receipt; consumer eligibility must be false"
+    },
+    "not_checked": [
+      "Actual artifact blob content verification",
+      "Fabricated/nonexistent Fact contents",
+      "Independent Guardian missing/wrong evidence",
+      "Human acceptance or actual Candidate sealing"
+    ],
+    "positive_result_is_eligibility_not_actual_artifact_verification_or_sealed_Candidate": true,
+    "private_observation_sha256": "e887d798a32a28229a9aecc2064f6ba96ddf9987e12aa949a5aeeb0afc1512f4",
+    "scope": "CONTROLLED_OWNER_FIXTURE; existing exact Fact Git scope and Candidate seal gate eligibility consumers"
+  },
+  "owner_calls_added": 0,
+  "schema": "c3-requalification-controlled-evidence-publication-addendum-v1"
+}

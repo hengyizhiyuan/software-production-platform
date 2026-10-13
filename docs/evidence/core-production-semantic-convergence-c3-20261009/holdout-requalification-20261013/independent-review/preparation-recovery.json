@@ -1,0 +1,8 @@
+{
+  "budget_reset": false,
+  "failure": "Network inventory IPAM.Config=None encountered before any Docker facility creation",
+  "model_calls": 0,
+  "old_trial_mutations": false,
+  "recovery": "Treat Docker host/null IPAM config as empty network-subnet list; retain same root/env/password; no case/model execution occurred",
+  "schema": "c3-new-trial-preparation-recovery-v1"
+}

@@ -1,0 +1,52 @@
+{
+  "candidate_or_oracle_modified": false,
+  "cases": [
+    {
+      "attempt": 1,
+      "candidate_is_authority": false,
+      "contains_json_escape_backslash": true,
+      "credential_or_secret_match_judgment": "NOT_ESTABLISHED; STABLE_UNSAFE_JSON_BRANCH_IS_DISTINCT_FROM_SECRET_BACKFILL_BRANCH",
+      "credential_or_secret_match_proved": false,
+      "json_failure_at_eof": false,
+      "json_failure_type": "EXTRA_DATA",
+      "model_output_sha256_matches_original_response": true,
+      "owner": "ModelFulfillmentCandidateProvider response privacy/receipt retention boundary",
+      "provider_status": "completed",
+      "raw_provider_response_bytes": 23773,
+      "raw_provider_response_sha256": "f990b5598f4d16810f70056dbdfcd9a726ba23a4fdba072b9b1654dc4a23b09e",
+      "raw_response_retention_scope": "Restricted low-level runtime observation only; no admitted canonical Candidate",
+      "retained_candidate_output": false,
+      "safe_category": "UNSAFE_JSON_RECEIPT_PRIVACY_NOT_PROVABLE_INVALID_JSON_WITH_ESCAPES",
+      "stable_error": "OBLIGATION_FORMATION_UNSAFE_JSON_RECEIPT",
+      "strict_original_json_valid": false
+    },
+    {
+      "attempt": 2,
+      "candidate_is_authority": false,
+      "contains_json_escape_backslash": true,
+      "credential_or_secret_match_judgment": "NOT_ESTABLISHED; STABLE_UNSAFE_JSON_BRANCH_IS_DISTINCT_FROM_SECRET_BACKFILL_BRANCH",
+      "credential_or_secret_match_proved": false,
+      "json_failure_at_eof": false,
+      "json_failure_type": "EXTRA_DATA",
+      "model_output_sha256_matches_original_response": true,
+      "owner": "ModelFulfillmentCandidateProvider response privacy/receipt retention boundary",
+      "provider_status": "completed",
+      "raw_provider_response_bytes": 7840,
+      "raw_provider_response_sha256": "3e53eab03d9fa718c38ab482bf4a6ae130190c6f7567e596da4804747fda3358",
+      "raw_response_retention_scope": "Restricted low-level runtime observation only; no admitted canonical Candidate",
+      "retained_candidate_output": false,
+      "safe_category": "UNSAFE_JSON_RECEIPT_PRIVACY_NOT_PROVABLE_INVALID_JSON_WITH_ESCAPES",
+      "stable_error": "OBLIGATION_FORMATION_UNSAFE_JSON_RECEIPT",
+      "strict_original_json_valid": false
+    }
+  ],
+  "classification_basis": "Read original frozen provider privacy branch and parse original retained runtime JSON read-only. Invalid JSON with backslash cannot be proved privacy safe; no prefix repair/escape removal or candidate synthesis performed.",
+  "guardian": "NOT_CALLED_THIS_SUITE",
+  "independent_review_calls": 0,
+  "model_calls_added": 0,
+  "opaque_ordinal": 3,
+  "original_records_unchanged": true,
+  "owner_calls_added": 0,
+  "response_privacy_refusal_not_false_assurance": true,
+  "schema": "c3-requalification-unsafe-json-private-readonly-classification-v1"
+}

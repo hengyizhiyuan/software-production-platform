@@ -1,0 +1,76 @@
+{
+  "schema": "c3-holdout-requalification-baseline-reference-v1",
+  "original_receipt_sha256": "9775ab3523c9cab6bdc80aacdd00a7ae71dcf83db0bc284affda05eef9a9ed42",
+  "original_image": "sha256:8e403fd29c33d4f5ed9aac1b59087e4943f4a05aac78f20071b55ed91624ce55",
+  "original_source": "01446afc7cccb03f99e8e6febbe4cfe9ed8388e4",
+  "historical_qualification": "NOT_QUALIFIED",
+  "original_trial_reopened": false,
+  "originals_modified": false,
+  "opaque_baseline": [
+    {
+      "opaque_ordinal": 0,
+      "table": "LIVE_MODEL_BOUNDARY",
+      "result": "FAIL_LIVE_MODEL_BOUNDARY",
+      "terminal_reason": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "source_inventory_fingerprint": "45d7ea207cd18361faf972b6b21fe65607251c11f86eb312318b7cd38062cf91",
+      "candidate_attempts": 2,
+      "independent_review_calls": 0,
+      "feedback_consumed_count": 1,
+      "unknown_model_outcomes": 0
+    },
+    {
+      "opaque_ordinal": 1,
+      "table": "LIVE_MODEL_BOUNDARY",
+      "result": "FAIL_LIVE_MODEL_BOUNDARY",
+      "terminal_reason": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "source_inventory_fingerprint": "803334b925fc2f2d003f2805bb701cbfe884a9160f74dadb23cb622e6816bb99",
+      "candidate_attempts": 2,
+      "independent_review_calls": 0,
+      "feedback_consumed_count": 1,
+      "unknown_model_outcomes": 0
+    },
+    {
+      "opaque_ordinal": 2,
+      "table": "LIVE_MODEL_BOUNDARY",
+      "result": "FAIL_LIVE_MODEL_BOUNDARY",
+      "terminal_reason": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "source_inventory_fingerprint": "26215e80da7b7a69f71d21d84df10daa1c33772efb8884088bb92e4094fe2fae",
+      "candidate_attempts": 2,
+      "independent_review_calls": 0,
+      "feedback_consumed_count": 1,
+      "unknown_model_outcomes": 0
+    },
+    {
+      "opaque_ordinal": 3,
+      "table": "LIVE_MODEL_BOUNDARY",
+      "result": "PASS_SCOPED_LIVE_WIC_IRK_FORMATION_REVIEW",
+      "terminal_reason": "VALIDATED_PROJECTION",
+      "source_inventory_fingerprint": "a13d2950db5303346a015e2f3a4d10ce49325f02ec2f9a2a23e15737db6154a6",
+      "candidate_attempts": 2,
+      "independent_review_calls": 1,
+      "feedback_consumed_count": 1,
+      "unknown_model_outcomes": 0
+    },
+    {
+      "opaque_ordinal": 4,
+      "table": "CONTROLLED_OWNER_NEGATIVE",
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "opaque_ordinal": 5,
+      "table": "CONTROLLED_OWNER_NEGATIVE",
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "opaque_ordinal": 6,
+      "table": "CONTROLLED_OWNER_NEGATIVE",
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    },
+    {
+      "opaque_ordinal": 7,
+      "table": "CONTROLLED_OWNER_NEGATIVE",
+      "result": "PASS_SCOPED_CONTROLLED_OWNER"
+    }
+  ],
+  "purpose": "Known sealed suite comparison only. New WIC regeneration may change inventories; no source-basis equality or isolated causal improvement assumed."
+}

@@ -1,0 +1,13 @@
+{
+  "bytes": 4444,
+  "existing_receipts_before_after_hash_equal": true,
+  "file": "/data/watt/c3-semantic-convergence-20261009/independent-holdout-requalification-20261013-020000Z/publication-addendum/controlled-evidence-addendum.json",
+  "model_calls_added": 0,
+  "owner_calls_added": 0,
+  "public_allowlist": [
+    "controlled-evidence-addendum.json",
+    "controlled-evidence-addendum-receipt.json"
+  ],
+  "schema": "c3-controlled-evidence-safe-addendum-receipt-v1",
+  "sha256": "16161d973a9410050cc8fa97519ac52e640961360fe9896a7537216126d32d28"
+}

@@ -1,0 +1,29 @@
+{
+  "credential_files_modes": "0600",
+  "new_trial_identity_separate": true,
+  "original_91_files_before_after_equal": true,
+  "original_terminal_trials_unchanged": true,
+  "private_file_count": 227,
+  "private_manifest_sha256": "be00064e2b3403f1a9a24dfe93dec446ecefb78561bdcbb22b210029ad5df151",
+  "private_recovery_manifest": "/data/watt/c3-semantic-convergence-20261009/independent-holdout-requalification-20261013-020000Z/private/private-recovery-manifest.json",
+  "private_root": "/data/watt/c3-semantic-convergence-20261009/independent-holdout-requalification-20261013-020000Z",
+  "schema": "c3-requalification-seal-and-recovery-v1",
+  "seals": [
+    {
+      "label": "original24",
+      "sha256": "770828adeabec942548218c17bc6e9dbb9222ce19df19bc89c260f28ed8f4cf0",
+      "unchanged": true
+    },
+    {
+      "label": "original8",
+      "sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0",
+      "unchanged": true
+    },
+    {
+      "label": "new_trial8_copy",
+      "sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0",
+      "unchanged": true
+    }
+  ],
+  "source_or_oracle_tuning": false
+}

@@ -1,0 +1,83 @@
+{
+  "case_terminal_count": 8,
+  "cases": [
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 18,
+      "journal_sha256": "8b5a7c360f2ebb8b91ee30f30dc94bf8fdb06ff220e885ae3a72c9d495f119e8",
+      "model_observed": 3,
+      "model_pending": 3,
+      "opaque_ordinal": 0,
+      "unknown": 0
+    },
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 20,
+      "journal_sha256": "0ae8586683b262797dd3f1fee1cf24536a13d99ebe063c3b17dc309a8fbb612f",
+      "model_observed": 4,
+      "model_pending": 4,
+      "opaque_ordinal": 1,
+      "unknown": 0
+    },
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 20,
+      "journal_sha256": "77072b4e92db0b3e7e728401d23dca534ff66acb636d4babf0366447a0492be9",
+      "model_observed": 4,
+      "model_pending": 4,
+      "opaque_ordinal": 2,
+      "unknown": 0
+    },
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 18,
+      "journal_sha256": "baac8056d5102589128d2d86ce9a85a08cd01333763dd31fc4bb9eec9c3bfca3",
+      "model_observed": 3,
+      "model_pending": 3,
+      "opaque_ordinal": 3,
+      "unknown": 0
+    },
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 4,
+      "journal_sha256": "524059b3bdf20b91b4173147d4fe954152b59f5867015744ee0d00e44431c871",
+      "model_observed": 0,
+      "model_pending": 0,
+      "opaque_ordinal": 4,
+      "unknown": 0
+    },
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 4,
+      "journal_sha256": "a0c83d10a4868361035290510592f59d82e66468a88abea7ef59a6eafc1bb1e9",
+      "model_observed": 0,
+      "model_pending": 0,
+      "opaque_ordinal": 5,
+      "unknown": 0
+    },
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 4,
+      "journal_sha256": "72466c7f64e4484905b69960b9eb7da1341053e5da01b3a573a0bd0b8ea4b4ca",
+      "model_observed": 0,
+      "model_pending": 0,
+      "opaque_ordinal": 6,
+      "unknown": 0
+    },
+    {
+      "case_terminal_count": 1,
+      "journal_rows": 4,
+      "journal_sha256": "851f94952abaab3f85d7c25ea5c070a287cb1c87cb5294f3bb95ab0e3ca33815",
+      "model_observed": 0,
+      "model_pending": 0,
+      "opaque_ordinal": 7,
+      "unknown": 0
+    }
+  ],
+  "new_wic_regenerated_and_preserved": true,
+  "original_91_file_manifest_sha256": "4321c6a7b9985f04c8a86797f3d3c69ca1c374993996f0f9900978c3152e6831",
+  "original_91_files_before_after_hashes_equal": true,
+  "pending_observed_equal": true,
+  "schema": "c3-new-trial-receipt-continuity-v1",
+  "unknown_outcomes": 0
+}

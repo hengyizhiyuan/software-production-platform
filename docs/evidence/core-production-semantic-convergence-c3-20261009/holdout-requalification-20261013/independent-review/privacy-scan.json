@@ -1,0 +1,20 @@
+{
+  "allowed_data_files": [
+    "controls-runtime.json",
+    "identity-final.json",
+    "live-runtime.json",
+    "mechanical-selector-lineage.json",
+    "preparation-recovery.json",
+    "qualification-final.json",
+    "receipt-continuity.json",
+    "resource-retention.json",
+    "seal-and-private-recovery.json",
+    "unsafe-json-classification.json",
+    "usage-final.json"
+  ],
+  "original_full_private_restoration_files_excluded": true,
+  "private_input_oracle_literals_or_credential_hits": 0,
+  "raw_wire_source_quotes_and_private_candidates_excluded": true,
+  "schema": "c3-requalification-public-privacy-v2",
+  "scripts_not_allowlisted": true
+}

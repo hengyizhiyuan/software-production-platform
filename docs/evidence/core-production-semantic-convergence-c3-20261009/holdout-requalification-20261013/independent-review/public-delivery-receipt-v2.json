@@ -1,0 +1,39 @@
+{
+  "actual_calls": 14,
+  "allowlist": [
+    "controls-runtime.json",
+    "identity-final.json",
+    "live-runtime.json",
+    "mechanical-selector-lineage.json",
+    "preparation-recovery.json",
+    "qualification-final.json",
+    "receipt-continuity.json",
+    "resource-retention.json",
+    "seal-and-private-recovery.json",
+    "unsafe-json-classification.json",
+    "usage-final.json",
+    "privacy-scan.json",
+    "public-manifest.json"
+  ],
+  "archive": "/data/watt/c3-semantic-convergence-20261009/independent-holdout-requalification-20261013-020000Z/public-delivery-v2.tar.gz",
+  "archive_bytes": 31614,
+  "archive_sha256": "4a01f9e8539ff2ea5451b75003abaf360512e688ea861908898fce7a967653af",
+  "controlled": {
+    "pass": 4,
+    "total": 4
+  },
+  "guardian": "NOT_CALLED_THIS_SUITE",
+  "live": {
+    "pass": 0,
+    "total": 4
+  },
+  "manifest_sha256": "142bbe2484e6340d8162e04e55aa2ff22241fb190bebf03a4e8508e7fa419091",
+  "original_91_unchanged": true,
+  "private_manifest_sha256": "be00064e2b3403f1a9a24dfe93dec446ecefb78561bdcbb22b210029ad5df151",
+  "private_root": "/data/watt/c3-semantic-convergence-20261009/independent-holdout-requalification-20261013-020000Z",
+  "qualification": "NOT_QUALIFIED",
+  "qualification_sha256": "b376174621f69da093a3c9870bf14f379086af9f67ff80abab135e3cb5dbdedd",
+  "schema": "c3-requalification-safe-delivery-v2",
+  "seal_unchanged": true,
+  "tokens": 665132
+}

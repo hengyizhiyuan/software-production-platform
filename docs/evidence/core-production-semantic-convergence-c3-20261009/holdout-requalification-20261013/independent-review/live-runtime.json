@@ -1,0 +1,11 @@
+{
+  "actual_image": "sha256:24d9f809ad3cd6b98d68948020fccd3997c09ee947f9cb5acd57e48abb44e5b1",
+  "container_id": "419aa2712157e90b0523bfdaad9d1667ea1d6a5e9190a5b01d179563346c223c",
+  "exit_code": 0,
+  "full_work_pass_claimed": false,
+  "phase": "live",
+  "production": false,
+  "runtime_source_overlay": false,
+  "schema": "c3-requalification-phase-runtime-v1",
+  "wall_seconds": 366.651832075906
+}

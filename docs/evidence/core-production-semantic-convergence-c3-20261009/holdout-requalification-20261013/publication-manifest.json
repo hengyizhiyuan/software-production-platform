@@ -1,0 +1,119 @@
+{
+  "schema": "c3-requalification-branch-publication-manifest-v1",
+  "created_at_utc": "2026-10-13T02:18:42.145031+00:00",
+  "application_source": "f52d39965826ba2e9ddcdba44c85e79bf5c43fc0",
+  "actual_image": "sha256:24d9f809ad3cd6b98d68948020fccd3997c09ee947f9cb5acd57e48abb44e5b1",
+  "independent_public_manifest_sha256": "142bbe2484e6340d8162e04e55aa2ff22241fb190bebf03a4e8508e7fa419091",
+  "independent_qualification_sha256": "b376174621f69da093a3c9870bf14f379086af9f67ff80abab135e3cb5dbdedd",
+  "model_calls": 14,
+  "total_tokens": 665132,
+  "live_pass": 0,
+  "controlled_pass": 4,
+  "guardian_this_suite": "NOT_CALLED",
+  "c3_status": "PARTIAL",
+  "root_private_inputs_oracle_candidates_read": false,
+  "files": [
+    {
+      "file": "authorization-and-boundary.md",
+      "bytes": 2315,
+      "sha256": "866e861cb1070b7fea88c943ed771e1937e7018e8ac707144197c6ce99108d51"
+    },
+    {
+      "file": "baseline-reference.json",
+      "bytes": 2979,
+      "sha256": "12fab304571e7cda93190dacbe04ad98d9810acd2bdf879483d88aae7723cae4"
+    },
+    {
+      "file": "independent-preflight.json",
+      "bytes": 3408,
+      "sha256": "2610448c5a4cb236cc481bc663d481a707506b09f164e4f1dca6861b58ce0538"
+    },
+    {
+      "file": "independent-review/controlled-evidence-addendum-receipt.json",
+      "bytes": 551,
+      "sha256": "7fdf88838c7c417a7e1e2c09250e195ab0554ffb2717657a4b748304da39222e"
+    },
+    {
+      "file": "independent-review/controlled-evidence-addendum.json",
+      "bytes": 4444,
+      "sha256": "16161d973a9410050cc8fa97519ac52e640961360fe9896a7537216126d32d28"
+    },
+    {
+      "file": "independent-review/controls-runtime.json",
+      "bytes": 404,
+      "sha256": "2ad3608ff188ea5137b2cd78e784e764ce11a515cb146d1efe0fe649c4489ced"
+    },
+    {
+      "file": "independent-review/identity-final.json",
+      "bytes": 39236,
+      "sha256": "9779e77d75e063f219071bb7e9d283c9ebcb0841ef8037078f3b236bc103b1bb"
+    },
+    {
+      "file": "independent-review/live-runtime.json",
+      "bytes": 399,
+      "sha256": "309e14ca61316f7d0b57157eb97b3348e5b95996b3b79e70330c5d28fc2226dc"
+    },
+    {
+      "file": "independent-review/mechanical-selector-lineage.json",
+      "bytes": 537,
+      "sha256": "6d970721fd8d9e71952218aefad6399047967c640763a6354d6fa75d79ecda44"
+    },
+    {
+      "file": "independent-review/preparation-recovery.json",
+      "bytes": 377,
+      "sha256": "fab8217f870a00fce72e8a05c65dab1769986bc2ebc1976d8a761d18dda6880e"
+    },
+    {
+      "file": "independent-review/privacy-scan.json",
+      "bytes": 652,
+      "sha256": "7bd1e2c7c6ecbdcc648bef14ade839295a4e016358f81b0e1023da8766b64bba"
+    },
+    {
+      "file": "independent-review/public-delivery-receipt-v2.json",
+      "bytes": 1404,
+      "sha256": "41e0b3bcdd2bd0773a9032be22d3239025a4fc2d0d0232efd921607e284ba1ba"
+    },
+    {
+      "file": "independent-review/public-manifest.json",
+      "bytes": 2125,
+      "sha256": "142bbe2484e6340d8162e04e55aa2ff22241fb190bebf03a4e8508e7fa419091"
+    },
+    {
+      "file": "independent-review/qualification-final.json",
+      "bytes": 48674,
+      "sha256": "b376174621f69da093a3c9870bf14f379086af9f67ff80abab135e3cb5dbdedd"
+    },
+    {
+      "file": "independent-review/receipt-continuity.json",
+      "bytes": 2455,
+      "sha256": "83c7dd271078f106253fb5e4daf28a08be87a94a20674dcec70501fefe516a01"
+    },
+    {
+      "file": "independent-review/resource-retention.json",
+      "bytes": 2279,
+      "sha256": "7f7e7636e3aec13f38a13836ffc4adb0b1e23e1e4311df736805ab43313917dd"
+    },
+    {
+      "file": "independent-review/seal-and-private-recovery.json",
+      "bytes": 1148,
+      "sha256": "d3b6c861894e428e8b1f1a40725c73f34d0b119e1878ed6b6f7c7c6ede3114f8"
+    },
+    {
+      "file": "independent-review/unsafe-json-classification.json",
+      "bytes": 2801,
+      "sha256": "b4755f088e654d215851538f7e1c76c968673912904ddb9164a24a9da1ad35ef"
+    },
+    {
+      "file": "independent-review/usage-final.json",
+      "bytes": 14167,
+      "sha256": "e7f2a364fea0d98b1de1f07ab1fdb27cefcea801012c275bbbc44623e70ced26"
+    },
+    {
+      "file": "report.md",
+      "bytes": 10377,
+      "sha256": "047c03445b3fbb350f9be6c36639f270643924a535f1831ea8d91c6d3c94864d"
+    }
+  ],
+  "ecs_private_recovery_root": "/data/watt/c3-semantic-convergence-20261009/independent-holdout-requalification-20261013-020000Z",
+  "public_boundary": "Reviewer-approved allowlist + root scope/report/reference; no raw input, Oracle or candidate. Additional key-pattern check only, not arbitrary privacy proof."
+}

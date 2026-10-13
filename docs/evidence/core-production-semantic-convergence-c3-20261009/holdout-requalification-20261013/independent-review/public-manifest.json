@@ -1,0 +1,70 @@
+{
+  "actual_calls": 14,
+  "controlled_pass": 4,
+  "created_at_utc": "2026-10-13T02:14:39.130648+00:00",
+  "files": [
+    {
+      "bytes": 404,
+      "file": "controls-runtime.json",
+      "sha256": "2ad3608ff188ea5137b2cd78e784e764ce11a515cb146d1efe0fe649c4489ced"
+    },
+    {
+      "bytes": 39236,
+      "file": "identity-final.json",
+      "sha256": "9779e77d75e063f219071bb7e9d283c9ebcb0841ef8037078f3b236bc103b1bb"
+    },
+    {
+      "bytes": 399,
+      "file": "live-runtime.json",
+      "sha256": "309e14ca61316f7d0b57157eb97b3348e5b95996b3b79e70330c5d28fc2226dc"
+    },
+    {
+      "bytes": 537,
+      "file": "mechanical-selector-lineage.json",
+      "sha256": "6d970721fd8d9e71952218aefad6399047967c640763a6354d6fa75d79ecda44"
+    },
+    {
+      "bytes": 377,
+      "file": "preparation-recovery.json",
+      "sha256": "fab8217f870a00fce72e8a05c65dab1769986bc2ebc1976d8a761d18dda6880e"
+    },
+    {
+      "bytes": 48674,
+      "file": "qualification-final.json",
+      "sha256": "b376174621f69da093a3c9870bf14f379086af9f67ff80abab135e3cb5dbdedd"
+    },
+    {
+      "bytes": 2455,
+      "file": "receipt-continuity.json",
+      "sha256": "83c7dd271078f106253fb5e4daf28a08be87a94a20674dcec70501fefe516a01"
+    },
+    {
+      "bytes": 2279,
+      "file": "resource-retention.json",
+      "sha256": "7f7e7636e3aec13f38a13836ffc4adb0b1e23e1e4311df736805ab43313917dd"
+    },
+    {
+      "bytes": 1148,
+      "file": "seal-and-private-recovery.json",
+      "sha256": "d3b6c861894e428e8b1f1a40725c73f34d0b119e1878ed6b6f7c7c6ede3114f8"
+    },
+    {
+      "bytes": 2801,
+      "file": "unsafe-json-classification.json",
+      "sha256": "b4755f088e654d215851538f7e1c76c968673912904ddb9164a24a9da1ad35ef"
+    },
+    {
+      "bytes": 14167,
+      "file": "usage-final.json",
+      "sha256": "e7f2a364fea0d98b1de1f07ab1fdb27cefcea801012c275bbbc44623e70ced26"
+    },
+    {
+      "bytes": 652,
+      "file": "privacy-scan.json",
+      "sha256": "7bd1e2c7c6ecbdcc648bef14ade839295a4e016358f81b0e1023da8766b64bba"
+    }
+  ],
+  "live_pass": 0,
+  "qualification": "NOT_QUALIFIED",
+  "schema": "c3-requalification-public-manifest-v2"
+}

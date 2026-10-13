@@ -1,0 +1,1084 @@
+{
+  "actual_image": "sha256:24d9f809ad3cd6b98d68948020fccd3997c09ee947f9cb5acd57e48abb44e5b1",
+  "budget_final": {
+    "candidate_budget_exhausted": true,
+    "candidate_generations_per_case": [
+      2,
+      2,
+      2,
+      2
+    ],
+    "candidate_limit": 2,
+    "feedback_limit": 1,
+    "feedback_per_case": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "independent_review_calls_per_case": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "limit": 16,
+    "new_trial_formation_review_logical_calls": 8,
+    "new_trial_systemic_failure_observed": "No unknown Provider outcome/capacity timeout or image/source/permission mismatch observed. Semantic and response retention failures retained at bounded terminal, no added retry.",
+    "unused_review_slots_are_not_new_candidate_or_replay_authority": true,
+    "wic_calls_separate": 6
+  },
+  "c3_closure_supported": false,
+  "case_count": 8,
+  "cases": [
+    {
+      "accepted_projection": {
+        "actual_verification_or_guardian_evidence_count": 0,
+        "admitted": false,
+        "candidate_route_count": null,
+        "canonical_admitted_component_count": 0,
+        "capability_counts": {},
+        "evidence_mapping": null,
+        "guardian_assurance": "NOT_CALLED",
+        "independent_semantic_component_count": "NOT_ESTABLISHED; NO_REVIEW_REACHED"
+      },
+      "basis": {
+        "exact_target_path_count": 1,
+        "inventory_fingerprint": "6b8ba237d991423a4a8d13d0b3521ae41c0b18283157b7a0bf64a0e8a69d7943",
+        "inventory_sha256": "e2926bda2783cc8b3c67b81e62a0c8a632a39a4dd9e2f090abca824d72dab6af",
+        "original_wic_facts_unchanged": true,
+        "original_wic_ir_unchanged": true,
+        "source_count": 21,
+        "source_kinds": {
+          "FACT": 5,
+          "IR_CLAUSE": 3,
+          "IR_CONSTRAINT": 4,
+          "WORK_CONSTRAINT": 9
+        },
+        "source_revision": "6a88377f38f1b11f5c2f4764d44c45025410d21a",
+        "wic_assessment_sha256": "4fb7cb3441f3cba946c9c55b59cb2512a9a380fda6b6d83f2448a942436f0529",
+        "work_reality_revision_id_hash": "e5e75e5c60f03e371573e9b7353e704555d3e0704b8d8a5957cc9d192a50bee7"
+      },
+      "calls_by_owner": {
+        "FORMATION": 2,
+        "WIC": 1
+      },
+      "comparison_to_prior_trial": {
+        "causal_attribution": "New WIC and Formation both executed; no Formation-only causal inference when source descriptors differ",
+        "inventory_exact_equal": false,
+        "new_result": "FAIL",
+        "new_source_count": 21,
+        "new_to_old_basis_semantic_fidelity": "UNKNOWN; WIC_REGENERATED_AND_SEMANTIC_SOURCE_DESCRIPTORS_DIFFER",
+        "new_wic_regenerated": true,
+        "new_wic_semantic_inventory_sha256": "56d9c1258d2f3036cb91bca161c08f865cc1f34c8e4c01015b8907f48af826d0",
+        "old_result": "FAIL",
+        "old_source_count": 18,
+        "old_source_kinds": {
+          "FACT": 5,
+          "IR_CLAUSE": 2,
+          "IR_CONSTRAINT": 3,
+          "WORK_CONSTRAINT": 7,
+          "WORK_CONTEXT": 1
+        },
+        "old_terminal_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+        "old_wic_semantic_inventory_sha256": "2f905b192f5a9087ebf35a92117406da65950decd3d0d70b16caa96a5d4781f1",
+        "recovery": "STILL_FAILED",
+        "semantic_source_descriptors_equal_excluding_volatile_ids": false
+      },
+      "database_business_counts_unchanged": true,
+      "failure_owner": "WORK_FULFILLMENT_PROJECTION",
+      "failure_stage": "DETERMINISTIC_CANDIDATE_VALIDATION",
+      "feedback_consumptions": 1,
+      "formation_candidates": 2,
+      "full_work_pass_claimed": false,
+      "guardian": "NOT_CALLED_THIS_SUITE",
+      "human_authority_created": false,
+      "independent_review_calls": 0,
+      "model_calls": 3,
+      "observation_sha256": "ceeb037edbd3f20d80676e755a36ab44625fb332eff6a431b517ed5e814d3f45",
+      "old_trial_preserved": true,
+      "opaque_ordinal": 0,
+      "proposal_observations": [
+        {
+          "attempt": 1,
+          "candidate_fingerprint": null,
+          "candidate_validated": false,
+          "coverage_and_evidence_judgment": "NOT_FULLY_EVALUATED; INDEPENDENT_REVIEW_AND_DOWNSTREAM_OWNER_EVIDENCE_NOT_REACHED",
+          "coverage_observation": {
+            "character_gap_observation_count": 0,
+            "semantic_equivalence": "NOT_INFERRED_FROM_CHARACTER_COVERAGE"
+          },
+          "explicit_provider_finish_reason": "NOT_CAPTURED",
+          "failed_predicate": "OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID",
+          "feedback": {
+            "additional_violation_count": 0,
+            "bindings_exact": true,
+            "codes": {
+              "OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID": 1
+            },
+            "next_attempt_binding": {
+              "actual_call_pending_input_sha_matches": true,
+              "feedback_text_exact": true,
+              "http_body_independent_capture": "UNKNOWN",
+              "provider_feedback_sha256_exact": true,
+              "receipt_id_matches": true
+            },
+            "owner_repair_context_bound": true,
+            "repair_feedback_bound": true,
+            "sha256": "7423b883be6a9361a4cde38909be15aaed79081052c5d73d94793557fda63589"
+          },
+          "inventory_fingerprint": "6b8ba237d991423a4a8d13d0b3521ae41c0b18283157b7a0bf64a0e8a69d7943",
+          "output_cap": 16384,
+          "output_cap_reached": false,
+          "output_tokens": 3655,
+          "proposal_not_authority": true,
+          "provider_status": "completed",
+          "provider_terminal_matches_delta": true,
+          "raw_proposal_capability_ordinal_counts": {
+            "0": 10,
+            "1": 4,
+            "10": 5,
+            "4": 3,
+            "5": 3,
+            "6": 2,
+            "7": 4,
+            "8": 2,
+            "9": 2
+          },
+          "raw_proposal_route_count": 35,
+          "raw_wire_bytes": 12328,
+          "raw_wire_sha256": "f5119589bd0dc0a5015a846fa18581c9c9f72df99cbb180b2abe642adb61581d",
+          "received_feedback_receipt_id_hash": null,
+          "received_response_candidate_retained": true,
+          "request_receipt_id_hash": "f060dbb312f9d99ccd8d9014972703dbd550d5c155f875893d969e8f21184405",
+          "response_receipt_id_hash": "b3c6150cb4690f9118d05e01bdaf66ed68f4906599e5de95dfc6d89f1b1467cd",
+          "source_revision": "6a88377f38f1b11f5c2f4764d44c45025410d21a",
+          "transport_retries": 0,
+          "validation_receipt_id_hash": "55172946592d50cb7bd089608cd7deabe729bdbfe1155247bfb6bb23d8bb6ea4",
+          "wire_request_fingerprint": "24accb536287276b091d56713c9b0d220c075868729f8577365a043e8ba37720",
+          "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+          "wire_table_fingerprint": "ce8db5454c8e05134cb90c7450d3fa48e79bd6d76358c567fa9f40ee8e3aec9a"
+        },
+        {
+          "attempt": 2,
+          "candidate_fingerprint": "7b1abdd9fbb45f17d1ec1be93f1083cdc4fd295a9c615a60b1a89909eca7868a",
+          "candidate_validated": false,
+          "coverage_and_evidence_judgment": "NOT_FULLY_EVALUATED; INDEPENDENT_REVIEW_AND_DOWNSTREAM_OWNER_EVIDENCE_NOT_REACHED",
+          "coverage_observation": {
+            "character_gap_observation_count": 0,
+            "semantic_equivalence": "NOT_INFERRED_FROM_CHARACTER_COVERAGE"
+          },
+          "explicit_provider_finish_reason": "NOT_CAPTURED",
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "feedback": {
+            "additional_violation_count": 0,
+            "bindings_exact": true,
+            "codes": {
+              "OBLIGATION_FUTURE_PHASE_SOURCE_UNPROVEN": 3,
+              "OBLIGATION_PROHIBITION_CANNOT_BE_FUTURE_PERMISSION": 1,
+              "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION": 1,
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN": 3
+            },
+            "owner_repair_context_bound": true,
+            "repair_feedback_bound": true,
+            "sha256": "b5f40b895b154808f103b1c258c1678bf0264ff0be787d3ecd34a62a2a4dac92"
+          },
+          "inventory_fingerprint": "6b8ba237d991423a4a8d13d0b3521ae41c0b18283157b7a0bf64a0e8a69d7943",
+          "output_cap": 16384,
+          "output_cap_reached": false,
+          "output_tokens": 3222,
+          "proposal_not_authority": true,
+          "provider_status": "completed",
+          "provider_terminal_matches_delta": true,
+          "raw_proposal_capability_ordinal_counts": {
+            "0": 10,
+            "1": 4,
+            "10": 1,
+            "4": 3,
+            "5": 3,
+            "6": 2,
+            "7": 4,
+            "8": 2,
+            "9": 2
+          },
+          "raw_proposal_route_count": 31,
+          "raw_wire_bytes": 10639,
+          "raw_wire_sha256": "5877d53f736c1f0694ad5ee4d22fe389b0fa5e293be05d69e529fa57b44ad9b7",
+          "received_feedback_receipt_id_hash": "55172946592d50cb7bd089608cd7deabe729bdbfe1155247bfb6bb23d8bb6ea4",
+          "received_response_candidate_retained": true,
+          "request_receipt_id_hash": "e0796a5125150e49ca09e2b5cf8e4784f5613dec21f039c40e417f1fbe9fb6f5",
+          "response_receipt_id_hash": "786f96c7e8392e902d3d2e7e66a77a42c98feed95b35b050ea01d7d7290d5c90",
+          "source_revision": "6a88377f38f1b11f5c2f4764d44c45025410d21a",
+          "transport_retries": 0,
+          "validation_receipt_id_hash": "7a6d61587d0aaa6fbee30a6c5805fdb8b997db506848ae9c333d831048f27c30",
+          "wire_request_fingerprint": "19b6d8a3e4094c48a9bc300364efa413a01ad0f33d761aa49c6bb6c8a544455b",
+          "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+          "wire_table_fingerprint": "ce8db5454c8e05134cb90c7450d3fa48e79bd6d76358c567fa9f40ee8e3aec9a"
+        }
+      ],
+      "qualification_kind": "KNOWN_SEALED_INVENTORY_REQUALIFICATION",
+      "real_work_admission": false,
+      "result": "FAIL",
+      "terminal_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "truth_boundary": "LIVE_WIC_IRK_AND_MODEL_IN_UNADMITTED_QUALIFICATION_BASIS",
+      "unresolved_evidence_mapping": {
+        "current_disposition": "UNRESOLVED; EVIDENCE_NOT_PRODUCED_OR_ELIGIBLE; FAILED_PROPOSAL_IS_NOT_BINDING_AUTHORITY",
+        "exact_failed_basis_A_B": "UNKNOWN",
+        "fallback_binding_map": {
+          "components": {
+            "unresolved": 21
+          },
+          "count": 21,
+          "evidence_methods": {
+            "UNRESOLVED": 21
+          },
+          "owners": {
+            "UNRESOLVED": 21
+          },
+          "phases": {
+            "UNRESOLVED": 21
+          },
+          "states": {
+            "UNRESOLVED": 21
+          }
+        },
+        "is_validated_projection": false
+      },
+      "wic_to_inventory_preservation": {
+        "clause_compared": 7,
+        "clause_unchanged": 7,
+        "constraints_exact": true,
+        "context_exact": true,
+        "fact_semantics_provenance_compared": 5,
+        "fact_semantics_provenance_unchanged": 5,
+        "item_compared": 7,
+        "item_unchanged": 7,
+        "literal_provenance_not_semantic_equivalence": true,
+        "production_intents_exact": true,
+        "provenance_exact_input_substrings": 32,
+        "provenance_not_exact_input_substrings": 0,
+        "saved_input_sha256_matches_seal": true
+      }
+    },
+    {
+      "accepted_projection": {
+        "actual_verification_or_guardian_evidence_count": 0,
+        "admitted": false,
+        "candidate_route_count": null,
+        "canonical_admitted_component_count": 0,
+        "capability_counts": {},
+        "evidence_mapping": null,
+        "guardian_assurance": "NOT_CALLED",
+        "independent_semantic_component_count": "NOT_ESTABLISHED; NO_REVIEW_REACHED"
+      },
+      "basis": {
+        "exact_target_path_count": 2,
+        "inventory_fingerprint": "3cf6ab5e3a6510df9135c0fbbffc419c434f7e1dcb0758585cc3b5f7e024bc75",
+        "inventory_sha256": "fc2e3367cb755bad174201e62615c7154f6cb814be52599ee91a874ca4421ef1",
+        "original_wic_facts_unchanged": true,
+        "original_wic_ir_unchanged": true,
+        "source_count": 24,
+        "source_kinds": {
+          "FACT": 5,
+          "IR_CLAUSE": 9,
+          "WORK_CONSTRAINT": 7,
+          "WORK_CONTEXT": 3
+        },
+        "source_revision": "bf5ba1e879cb998ca2cdbcf8c922d974aae8fe22",
+        "wic_assessment_sha256": "274260ebb7b5fb098fc5cad8a87d70b5e6142077a9bd1e571636df7c8be231ce",
+        "work_reality_revision_id_hash": "3b4f7e98b7bcf6ee71a5c886ec72bf89f1fc6716d7fdc909d8abe255f32be4e7"
+      },
+      "calls_by_owner": {
+        "FORMATION": 2,
+        "WIC": 2
+      },
+      "comparison_to_prior_trial": {
+        "causal_attribution": "New WIC and Formation both executed; no Formation-only causal inference when source descriptors differ",
+        "inventory_exact_equal": false,
+        "new_result": "FAIL",
+        "new_source_count": 24,
+        "new_to_old_basis_semantic_fidelity": "UNKNOWN; WIC_REGENERATED_AND_SEMANTIC_SOURCE_DESCRIPTORS_DIFFER",
+        "new_wic_regenerated": true,
+        "new_wic_semantic_inventory_sha256": "7e2c7980cdacaf21aeca20b961da372a5a423ea2f5c3dcd112aea336ac2d3ec8",
+        "old_result": "FAIL",
+        "old_source_count": 19,
+        "old_source_kinds": {
+          "FACT": 3,
+          "IR_CLAUSE": 3,
+          "IR_CONSTRAINT": 4,
+          "WORK_CONSTRAINT": 8,
+          "WORK_CONTEXT": 1
+        },
+        "old_terminal_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+        "old_wic_semantic_inventory_sha256": "dc4419c20ac78ecf0275bc63385ec9ad789820aec508061ccb0dee36d8fe2542",
+        "recovery": "STILL_FAILED",
+        "semantic_source_descriptors_equal_excluding_volatile_ids": false
+      },
+      "database_business_counts_unchanged": true,
+      "failure_owner": "WORK_FULFILLMENT_PROJECTION",
+      "failure_stage": "DETERMINISTIC_CANDIDATE_VALIDATION",
+      "feedback_consumptions": 1,
+      "formation_candidates": 2,
+      "full_work_pass_claimed": false,
+      "guardian": "NOT_CALLED_THIS_SUITE",
+      "human_authority_created": false,
+      "independent_review_calls": 0,
+      "model_calls": 4,
+      "observation_sha256": "b81504808e4a2d0e132f62fa8355e35630d240e26b9cc0e7f34e5cb753858c9a",
+      "old_trial_preserved": true,
+      "opaque_ordinal": 1,
+      "proposal_observations": [
+        {
+          "attempt": 1,
+          "candidate_fingerprint": "f1892eb0307eb7f9aaaa8aff26ab5766e85a27510ba81be0f747790869ab52e2",
+          "candidate_validated": false,
+          "coverage_and_evidence_judgment": "NOT_FULLY_EVALUATED; INDEPENDENT_REVIEW_AND_DOWNSTREAM_OWNER_EVIDENCE_NOT_REACHED",
+          "coverage_observation": {
+            "character_gap_observation_count": 0,
+            "semantic_equivalence": "NOT_INFERRED_FROM_CHARACTER_COVERAGE"
+          },
+          "explicit_provider_finish_reason": "NOT_CAPTURED",
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "feedback": {
+            "additional_violation_count": 0,
+            "bindings_exact": true,
+            "codes": {
+              "OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT": 5,
+              "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION": 4,
+              "OBLIGATION_REQUIRED_CONSTRAINT_CANNOT_BE_CONTEXT_ONLY": 1,
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN": 2
+            },
+            "next_attempt_binding": {
+              "actual_call_pending_input_sha_matches": true,
+              "feedback_text_exact": true,
+              "http_body_independent_capture": "UNKNOWN",
+              "provider_feedback_sha256_exact": true,
+              "receipt_id_matches": true
+            },
+            "owner_repair_context_bound": true,
+            "repair_feedback_bound": true,
+            "sha256": "a93a233bde0a2e7ba01af039f4a1673c36e84cf98b607d1be1e7585adeed2fdb"
+          },
+          "inventory_fingerprint": "3cf6ab5e3a6510df9135c0fbbffc419c434f7e1dcb0758585cc3b5f7e024bc75",
+          "output_cap": 16384,
+          "output_cap_reached": false,
+          "output_tokens": 5089,
+          "proposal_not_authority": true,
+          "provider_status": "completed",
+          "provider_terminal_matches_delta": true,
+          "raw_proposal_capability_ordinal_counts": {
+            "0": 9,
+            "1": 13,
+            "10": 4,
+            "3": 3,
+            "4": 5,
+            "5": 5,
+            "6": 5,
+            "7": 5
+          },
+          "raw_proposal_route_count": 49,
+          "raw_wire_bytes": 16578,
+          "raw_wire_sha256": "43dc329c8ddfa561dd850b8f657d849502a65f2bd7a45b06b8d29cea549264cc",
+          "received_feedback_receipt_id_hash": null,
+          "received_response_candidate_retained": true,
+          "request_receipt_id_hash": "c1ba02a75fb31ac7944169d07ac928ebcb42ba303a59f53559604734a6b69bea",
+          "response_receipt_id_hash": "65ba09c19480085bf1e34e37d8e201acb78b068956fe44cf52442fe12fec8e7d",
+          "source_revision": "bf5ba1e879cb998ca2cdbcf8c922d974aae8fe22",
+          "transport_retries": 0,
+          "validation_receipt_id_hash": "69e7936664979bf17ce899be783b16cda22f6d886773b15794773f030eed23f7",
+          "wire_request_fingerprint": "c83fc23e7fe7691836f4551b49c420961abaa00bdd5aef6bf6f2c82c218747bb",
+          "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+          "wire_table_fingerprint": "a587c0cb49cd72c571e4956b9054e082328b4df3b4dc989c6a42b0c3d61379ac"
+        },
+        {
+          "attempt": 2,
+          "candidate_fingerprint": "7df264db39a5dba89f5b6488cac9b6bcff831d6dd44fc9c9201990e878b487e5",
+          "candidate_validated": false,
+          "coverage_and_evidence_judgment": "NOT_FULLY_EVALUATED; INDEPENDENT_REVIEW_AND_DOWNSTREAM_OWNER_EVIDENCE_NOT_REACHED",
+          "coverage_observation": {
+            "character_gap_observation_count": 0,
+            "semantic_equivalence": "NOT_INFERRED_FROM_CHARACTER_COVERAGE"
+          },
+          "explicit_provider_finish_reason": "NOT_CAPTURED",
+          "failed_predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "feedback": {
+            "additional_violation_count": 0,
+            "bindings_exact": true,
+            "codes": {
+              "OBLIGATION_CONTEXT_CANNOT_AUTHORIZE_EFFECT": 5,
+              "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN": 2
+            },
+            "owner_repair_context_bound": true,
+            "repair_feedback_bound": true,
+            "sha256": "339a1728007401c0b9a4d445870f0a40b4849a5cf525cf2d8f5e57b027c14c84"
+          },
+          "inventory_fingerprint": "3cf6ab5e3a6510df9135c0fbbffc419c434f7e1dcb0758585cc3b5f7e024bc75",
+          "output_cap": 16384,
+          "output_cap_reached": false,
+          "output_tokens": 3815,
+          "proposal_not_authority": true,
+          "provider_status": "completed",
+          "provider_terminal_matches_delta": true,
+          "raw_proposal_capability_ordinal_counts": {
+            "0": 9,
+            "1": 13,
+            "4": 5,
+            "5": 5,
+            "6": 5,
+            "7": 6
+          },
+          "raw_proposal_route_count": 43,
+          "raw_wire_bytes": 13588,
+          "raw_wire_sha256": "6210ba75a02cbb5b06c878a69aa577a6e6a9f157cd8bd3c32137838da7c5675d",
+          "received_feedback_receipt_id_hash": "69e7936664979bf17ce899be783b16cda22f6d886773b15794773f030eed23f7",
+          "received_response_candidate_retained": true,
+          "request_receipt_id_hash": "3a343d76a97eb19320bce816d67bd9aaf6dbb13f0bb03199149589ebd6dd4256",
+          "response_receipt_id_hash": "68f2ad795629721247c20f6aaa7bfcd06cd8628ffcdfe87a55ee7231acaaeb72",
+          "source_revision": "bf5ba1e879cb998ca2cdbcf8c922d974aae8fe22",
+          "transport_retries": 0,
+          "validation_receipt_id_hash": "ba9070924b9c851e31551df7f72904e8a992758a2620e43d0a44ea010ddafca0",
+          "wire_request_fingerprint": "7da7c51d5e2896b437d91c3e0f3f181f4a161935bdc7f5bf60a00d0a2a0e1057",
+          "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+          "wire_table_fingerprint": "a587c0cb49cd72c571e4956b9054e082328b4df3b4dc989c6a42b0c3d61379ac"
+        }
+      ],
+      "qualification_kind": "KNOWN_SEALED_INVENTORY_REQUALIFICATION",
+      "real_work_admission": false,
+      "result": "FAIL",
+      "terminal_predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+      "truth_boundary": "LIVE_WIC_IRK_AND_MODEL_IN_UNADMITTED_QUALIFICATION_BASIS",
+      "unresolved_evidence_mapping": {
+        "current_disposition": "UNRESOLVED; EVIDENCE_NOT_PRODUCED_OR_ELIGIBLE; FAILED_PROPOSAL_IS_NOT_BINDING_AUTHORITY",
+        "exact_failed_basis_A_B": "UNKNOWN",
+        "fallback_binding_map": {
+          "components": {
+            "unresolved": 24
+          },
+          "count": 24,
+          "evidence_methods": {
+            "UNRESOLVED": 24
+          },
+          "owners": {
+            "UNRESOLVED": 24
+          },
+          "phases": {
+            "UNRESOLVED": 24
+          },
+          "states": {
+            "UNRESOLVED": 24
+          }
+        },
+        "is_validated_projection": false
+      },
+      "wic_to_inventory_preservation": {
+        "clause_compared": 9,
+        "clause_unchanged": 9,
+        "constraints_exact": true,
+        "context_exact": true,
+        "fact_semantics_provenance_compared": 5,
+        "fact_semantics_provenance_unchanged": 5,
+        "item_compared": 9,
+        "item_unchanged": 9,
+        "literal_provenance_not_semantic_equivalence": true,
+        "production_intents_exact": true,
+        "provenance_exact_input_substrings": 37,
+        "provenance_not_exact_input_substrings": 0,
+        "saved_input_sha256_matches_seal": true
+      }
+    },
+    {
+      "accepted_projection": {
+        "actual_verification_or_guardian_evidence_count": 0,
+        "admitted": false,
+        "candidate_route_count": null,
+        "canonical_admitted_component_count": 0,
+        "capability_counts": {},
+        "evidence_mapping": null,
+        "guardian_assurance": "NOT_CALLED",
+        "independent_semantic_component_count": "NOT_ESTABLISHED; NO_REVIEW_REACHED"
+      },
+      "basis": {
+        "exact_target_path_count": 1,
+        "inventory_fingerprint": "10fa76b4abdaf8385b5ddddef40f69d0a131848b5bb45eaae18fd851d746465f",
+        "inventory_sha256": "f1d61b044a0795ddd96451d22b2016f52112ed364f6925c46b4db0735b31f82b",
+        "original_wic_facts_unchanged": true,
+        "original_wic_ir_unchanged": true,
+        "source_count": 20,
+        "source_kinds": {
+          "FACT": 3,
+          "IR_CLAUSE": 3,
+          "IR_CONSTRAINT": 4,
+          "WORK_CONSTRAINT": 8,
+          "WORK_CONTEXT": 2
+        },
+        "source_revision": "067c69c9c6189a3ff8e7f49c00ad228db3a4b01a",
+        "wic_assessment_sha256": "070708115e87f240aabe293bdb81e29e0d49d109c17fc3dfaf4ce6c07d95a48b",
+        "work_reality_revision_id_hash": "b77bbdabf7dcb9bd45471c7ca958393127f688e82527c12ac6722bafae330fa5"
+      },
+      "calls_by_owner": {
+        "FORMATION": 2,
+        "WIC": 2
+      },
+      "comparison_to_prior_trial": {
+        "causal_attribution": "New WIC and Formation both executed; no Formation-only causal inference when source descriptors differ",
+        "inventory_exact_equal": false,
+        "new_result": "FAIL",
+        "new_source_count": 20,
+        "new_to_old_basis_semantic_fidelity": "UNKNOWN; WIC_REGENERATED_AND_SEMANTIC_SOURCE_DESCRIPTORS_DIFFER",
+        "new_wic_regenerated": true,
+        "new_wic_semantic_inventory_sha256": "31c49d8b85f97a9eee244f8a245a29a9efe60cbea17f786bfb8ccd3314c385ac",
+        "old_result": "FAIL",
+        "old_source_count": 25,
+        "old_source_kinds": {
+          "FACT": 6,
+          "IR_CLAUSE": 3,
+          "IR_CONSTRAINT": 4,
+          "WORK_CONSTRAINT": 10,
+          "WORK_CONTEXT": 2
+        },
+        "old_terminal_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+        "old_wic_semantic_inventory_sha256": "57a0e4a1e0694cce20476417b815d24e718691c0dfceee24d95fe7e0f5a60109",
+        "recovery": "STILL_FAILED",
+        "semantic_source_descriptors_equal_excluding_volatile_ids": false
+      },
+      "database_business_counts_unchanged": true,
+      "failure_owner": "WORK_FULFILLMENT_PROJECTION",
+      "failure_stage": "DETERMINISTIC_CANDIDATE_VALIDATION",
+      "feedback_consumptions": 1,
+      "formation_candidates": 2,
+      "full_work_pass_claimed": false,
+      "guardian": "NOT_CALLED_THIS_SUITE",
+      "human_authority_created": false,
+      "independent_review_calls": 0,
+      "model_calls": 4,
+      "observation_sha256": "bc7c23ca57a231100b4b4224ab2b0592aa4952efe5b69d60f2f97a56d09f1343",
+      "old_trial_preserved": true,
+      "opaque_ordinal": 2,
+      "proposal_observations": [
+        {
+          "attempt": 1,
+          "candidate_fingerprint": null,
+          "candidate_validated": false,
+          "coverage_and_evidence_judgment": "NOT_FULLY_EVALUATED; INDEPENDENT_REVIEW_AND_DOWNSTREAM_OWNER_EVIDENCE_NOT_REACHED",
+          "coverage_observation": {
+            "character_gap_observation_count": 0,
+            "semantic_equivalence": "NOT_INFERRED_FROM_CHARACTER_COVERAGE"
+          },
+          "explicit_provider_finish_reason": "NOT_CAPTURED",
+          "failed_predicate": "OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID",
+          "feedback": {
+            "additional_violation_count": 0,
+            "bindings_exact": true,
+            "codes": {
+              "OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID": 1
+            },
+            "next_attempt_binding": {
+              "actual_call_pending_input_sha_matches": true,
+              "feedback_text_exact": true,
+              "http_body_independent_capture": "UNKNOWN",
+              "provider_feedback_sha256_exact": true,
+              "receipt_id_matches": true
+            },
+            "owner_repair_context_bound": true,
+            "repair_feedback_bound": true,
+            "sha256": "6b3aeb3867afec5dfbaf7aecc74ebfb699a22560fcc26906d2115e2bc27b6416"
+          },
+          "inventory_fingerprint": "10fa76b4abdaf8385b5ddddef40f69d0a131848b5bb45eaae18fd851d746465f",
+          "output_cap": 16384,
+          "output_cap_reached": false,
+          "output_tokens": 4132,
+          "proposal_not_authority": true,
+          "provider_status": "completed",
+          "provider_terminal_matches_delta": true,
+          "raw_proposal_capability_ordinal_counts": {
+            "0": 8,
+            "1": 7,
+            "10": 2,
+            "3": 2,
+            "4": 3,
+            "5": 3,
+            "6": 7,
+            "7": 6,
+            "8": 6,
+            "9": 6
+          },
+          "raw_proposal_route_count": 50,
+          "raw_wire_bytes": 15784,
+          "raw_wire_sha256": "a40f1d7c5cfbf811c2b4dba91e135a2298ce27033afa257afef1cdf97266fe83",
+          "received_feedback_receipt_id_hash": null,
+          "received_response_candidate_retained": true,
+          "request_receipt_id_hash": "c804bf5b16a7f4e5da6dc943253f1b51b38f9038c2b20bfcf82a0ea4a752b356",
+          "response_receipt_id_hash": "dca50b15a93bdcc485fe518258b585c19503c9318cdaff3384a4c5a458a6922d",
+          "source_revision": "067c69c9c6189a3ff8e7f49c00ad228db3a4b01a",
+          "transport_retries": 0,
+          "validation_receipt_id_hash": "23d29dc06196ce402433b57ba949cd3bcc8109600c740fe7f70bbeb86f18933e",
+          "wire_request_fingerprint": "6b7d31f254e5b2570755301a8381d2e28eb51e7f89fe41de6546b02d059e1f71",
+          "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+          "wire_table_fingerprint": "22dfaa9dc78293608c02d7e7ca72e413b3d029f64a1d5d711ce6607d1ea12310"
+        },
+        {
+          "attempt": 2,
+          "candidate_fingerprint": null,
+          "candidate_validated": false,
+          "coverage_and_evidence_judgment": "NOT_FULLY_EVALUATED; INDEPENDENT_REVIEW_AND_DOWNSTREAM_OWNER_EVIDENCE_NOT_REACHED",
+          "coverage_observation": {
+            "character_gap_observation_count": 0,
+            "semantic_equivalence": "NOT_INFERRED_FROM_CHARACTER_COVERAGE"
+          },
+          "explicit_provider_finish_reason": "NOT_CAPTURED",
+          "failed_predicate": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+          "feedback": {
+            "additional_violation_count": 0,
+            "bindings_exact": true,
+            "codes": {
+              "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID": 30
+            },
+            "owner_repair_context_bound": true,
+            "repair_feedback_bound": true,
+            "sha256": "5972ab13768258b983cbbe75ea93b634916f317cbcbafc123432a6cc5a9b41f9"
+          },
+          "inventory_fingerprint": "10fa76b4abdaf8385b5ddddef40f69d0a131848b5bb45eaae18fd851d746465f",
+          "output_cap": 16384,
+          "output_cap_reached": false,
+          "output_tokens": 4060,
+          "proposal_not_authority": true,
+          "provider_status": "completed",
+          "provider_terminal_matches_delta": true,
+          "raw_proposal_capability_ordinal_counts": {
+            "0": 8,
+            "1": 7,
+            "10": 2,
+            "3": 2,
+            "4": 3,
+            "5": 3,
+            "6": 7,
+            "7": 6,
+            "8": 6,
+            "9": 6
+          },
+          "raw_proposal_route_count": 50,
+          "raw_wire_bytes": 15854,
+          "raw_wire_sha256": "16099a712243b4f273dc2912025f0507f3f9667dd5d81b698da6d196ab33d6dd",
+          "received_feedback_receipt_id_hash": "23d29dc06196ce402433b57ba949cd3bcc8109600c740fe7f70bbeb86f18933e",
+          "received_response_candidate_retained": true,
+          "request_receipt_id_hash": "ce7a7aef7d7bdf9b2eab59d901304710187a4a26bb667f249e5b4fe568e47236",
+          "response_receipt_id_hash": "027db1c7ed68aebb0528b2d87c31e4adfe77a806ed1cb9bbc0261dbcc696cc3e",
+          "source_revision": "067c69c9c6189a3ff8e7f49c00ad228db3a4b01a",
+          "transport_retries": 0,
+          "validation_receipt_id_hash": "44a4ffaec86903cb7bc1073840c72e787604b7d77d07d897327db6bd02adb8b3",
+          "wire_request_fingerprint": "873b2973ec9f0b701244c172f492523cb77621c1e8e32044a738350ad1abd9c3",
+          "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+          "wire_table_fingerprint": "22dfaa9dc78293608c02d7e7ca72e413b3d029f64a1d5d711ce6607d1ea12310"
+        }
+      ],
+      "qualification_kind": "KNOWN_SEALED_INVENTORY_REQUALIFICATION",
+      "real_work_admission": false,
+      "result": "FAIL",
+      "terminal_predicate": "OBLIGATION_FORMATION_WIRE_FACT_KIND_INVALID",
+      "truth_boundary": "LIVE_WIC_IRK_AND_MODEL_IN_UNADMITTED_QUALIFICATION_BASIS",
+      "unresolved_evidence_mapping": {
+        "current_disposition": "UNRESOLVED; EVIDENCE_NOT_PRODUCED_OR_ELIGIBLE; FAILED_PROPOSAL_IS_NOT_BINDING_AUTHORITY",
+        "exact_failed_basis_A_B": "UNKNOWN",
+        "fallback_binding_map": {
+          "components": {
+            "unresolved": 20
+          },
+          "count": 20,
+          "evidence_methods": {
+            "UNRESOLVED": 20
+          },
+          "owners": {
+            "UNRESOLVED": 20
+          },
+          "phases": {
+            "UNRESOLVED": 20
+          },
+          "states": {
+            "UNRESOLVED": 20
+          }
+        },
+        "is_validated_projection": false
+      },
+      "wic_to_inventory_preservation": {
+        "clause_compared": 7,
+        "clause_unchanged": 7,
+        "constraints_exact": true,
+        "context_exact": true,
+        "fact_semantics_provenance_compared": 3,
+        "fact_semantics_provenance_unchanged": 3,
+        "item_compared": 7,
+        "item_unchanged": 7,
+        "literal_provenance_not_semantic_equivalence": true,
+        "production_intents_exact": true,
+        "provenance_exact_input_substrings": 31,
+        "provenance_not_exact_input_substrings": 0,
+        "saved_input_sha256_matches_seal": true
+      }
+    },
+    {
+      "accepted_projection": {
+        "actual_verification_or_guardian_evidence_count": 0,
+        "admitted": false,
+        "candidate_route_count": null,
+        "canonical_admitted_component_count": 0,
+        "capability_counts": {},
+        "evidence_mapping": null,
+        "guardian_assurance": "NOT_CALLED",
+        "independent_semantic_component_count": "NOT_ESTABLISHED; NO_REVIEW_REACHED"
+      },
+      "basis": {
+        "exact_target_path_count": 1,
+        "inventory_fingerprint": "152de504fce5e8c08a0345ce252a3c4e2dc1853ee536f8a04c0ee54780dc4ac0",
+        "inventory_sha256": "e54af8f65fc4b7e9b775431d061d9b6bd6184fd8fad9c4f5e4be9e92f63e6091",
+        "original_wic_facts_unchanged": true,
+        "original_wic_ir_unchanged": true,
+        "source_count": 25,
+        "source_kinds": {
+          "FACT": 9,
+          "IR_CLAUSE": 5,
+          "WORK_CONSTRAINT": 7,
+          "WORK_CONTEXT": 4
+        },
+        "source_revision": "f57f57c25c1c0942e8657b543b5439892320e752",
+        "wic_assessment_sha256": "2e73e4e73ab4d56582efc0270437c529b921f6eee845cbfa88a55c4f057c71a9",
+        "work_reality_revision_id_hash": "20c864a45e3623e5b48979a323e37e1727b16b364b7edbd5d2bc5b0ed9b54526"
+      },
+      "calls_by_owner": {
+        "FORMATION": 2,
+        "WIC": 1
+      },
+      "comparison_to_prior_trial": {
+        "causal_attribution": "New WIC and Formation both executed; no Formation-only causal inference when source descriptors differ",
+        "inventory_exact_equal": false,
+        "new_result": "FAIL",
+        "new_source_count": 25,
+        "new_to_old_basis_semantic_fidelity": "UNKNOWN; WIC_REGENERATED_AND_SEMANTIC_SOURCE_DESCRIPTORS_DIFFER",
+        "new_wic_regenerated": true,
+        "new_wic_semantic_inventory_sha256": "f50da2ceafcff11e378d0736f15c1acdbcf1eb718040dfacd98388997ea1cd47",
+        "old_result": "PASS_SCOPED_LIVE_FORMATION_REVIEW",
+        "old_source_count": 16,
+        "old_source_kinds": {
+          "FACT": 3,
+          "IR_CLAUSE": 1,
+          "IR_CONSTRAINT": 4,
+          "WORK_CONSTRAINT": 8
+        },
+        "old_terminal_predicate": null,
+        "old_wic_semantic_inventory_sha256": "ce4ced475a1c59759a685cd10a6d8ff720c007bec6d2630b7208f011873c0c4b",
+        "recovery": "PRIOR_SCOPED_PASS_NOT_RETAINED_ON_REGENERATED_BASIS",
+        "semantic_source_descriptors_equal_excluding_volatile_ids": false
+      },
+      "database_business_counts_unchanged": true,
+      "failure_owner": "ModelFulfillmentCandidateProvider",
+      "failure_stage": "PROVIDER_RESPONSE_PRIVACY_RECEIPT_RETENTION",
+      "feedback_consumptions": 1,
+      "formation_candidates": 2,
+      "full_work_pass_claimed": false,
+      "guardian": "NOT_CALLED_THIS_SUITE",
+      "human_authority_created": false,
+      "independent_review_calls": 0,
+      "model_calls": 3,
+      "observation_sha256": "4714fee3bce743638ec25b12099da53e96fd19a3d61ca8e0f6dd784314fb830d",
+      "old_trial_preserved": true,
+      "opaque_ordinal": 3,
+      "proposal_observations": [
+        {
+          "attempt": 1,
+          "candidate_fingerprint": null,
+          "candidate_validated": false,
+          "coverage_and_evidence_judgment": "NOT_FULLY_EVALUATED; INDEPENDENT_REVIEW_AND_DOWNSTREAM_OWNER_EVIDENCE_NOT_REACHED",
+          "coverage_observation": {
+            "character_gap_observation_count": 0,
+            "semantic_equivalence": "NOT_INFERRED_FROM_CHARACTER_COVERAGE"
+          },
+          "explicit_provider_finish_reason": "NOT_CAPTURED",
+          "failed_predicate": "OBLIGATION_FORMATION_UNSAFE_JSON_RECEIPT",
+          "feedback": {
+            "additional_violation_count": 0,
+            "bindings_exact": null,
+            "codes": {},
+            "next_attempt_binding": {
+              "actual_call_pending_input_sha_matches": true,
+              "feedback_text_exact": true,
+              "http_body_independent_capture": "UNKNOWN",
+              "provider_feedback_sha256_exact": true,
+              "receipt_id_matches": true
+            },
+            "owner_repair_context_bound": null,
+            "repair_feedback_bound": null,
+            "sha256": "7c72417570f7a96f4166a4969754edc97142d7452d1a75aa78bb2d5b1de4f83e"
+          },
+          "inventory_fingerprint": "152de504fce5e8c08a0345ce252a3c4e2dc1853ee536f8a04c0ee54780dc4ac0",
+          "output_cap": 16384,
+          "output_cap_reached": false,
+          "output_tokens": 7024,
+          "proposal_not_authority": true,
+          "provider_status": "completed",
+          "provider_terminal_matches_delta": true,
+          "raw_proposal_capability_ordinal_counts": {},
+          "raw_proposal_route_count": null,
+          "raw_wire_bytes": 23773,
+          "raw_wire_sha256": "f990b5598f4d16810f70056dbdfcd9a726ba23a4fdba072b9b1654dc4a23b09e",
+          "received_feedback_receipt_id_hash": null,
+          "received_response_candidate_retained": false,
+          "request_receipt_id_hash": "5698e139c2c1ed7ad19b665286f56e8ba60dcc0d96e4c917d4b4909cb862afd5",
+          "response_receipt_id_hash": "787db05dc95d181b8a48718f5fd0a2ff07c712b56fbadd78876c327ee4437645",
+          "source_revision": "f57f57c25c1c0942e8657b543b5439892320e752",
+          "transport_retries": 0,
+          "validation_receipt_id_hash": "1f6e49e051e8f4ef8dcfede8376a2d5bd96affb80930f54ccc9306701113e551",
+          "wire_request_fingerprint": "5683289fd34944e3f7b9249a6f3c7e3d7993fe09d01bd9df99b011ecfb235bef",
+          "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+          "wire_table_fingerprint": "2e5752dee695cb17f38ac8976def8cfae9f822b36ceace09b887884f22af4e5a"
+        },
+        {
+          "attempt": 2,
+          "candidate_fingerprint": null,
+          "candidate_validated": false,
+          "coverage_and_evidence_judgment": "NOT_FULLY_EVALUATED; INDEPENDENT_REVIEW_AND_DOWNSTREAM_OWNER_EVIDENCE_NOT_REACHED",
+          "coverage_observation": {
+            "character_gap_observation_count": 0,
+            "semantic_equivalence": "NOT_INFERRED_FROM_CHARACTER_COVERAGE"
+          },
+          "explicit_provider_finish_reason": "NOT_CAPTURED",
+          "failed_predicate": "OBLIGATION_FORMATION_UNSAFE_JSON_RECEIPT",
+          "feedback": {
+            "additional_violation_count": 0,
+            "bindings_exact": null,
+            "codes": {},
+            "owner_repair_context_bound": null,
+            "repair_feedback_bound": null,
+            "sha256": "7c72417570f7a96f4166a4969754edc97142d7452d1a75aa78bb2d5b1de4f83e"
+          },
+          "inventory_fingerprint": "152de504fce5e8c08a0345ce252a3c4e2dc1853ee536f8a04c0ee54780dc4ac0",
+          "output_cap": 16384,
+          "output_cap_reached": false,
+          "output_tokens": 2621,
+          "proposal_not_authority": true,
+          "provider_status": "completed",
+          "provider_terminal_matches_delta": true,
+          "raw_proposal_capability_ordinal_counts": {},
+          "raw_proposal_route_count": null,
+          "raw_wire_bytes": 7840,
+          "raw_wire_sha256": "3e53eab03d9fa718c38ab482bf4a6ae130190c6f7567e596da4804747fda3358",
+          "received_feedback_receipt_id_hash": "1f6e49e051e8f4ef8dcfede8376a2d5bd96affb80930f54ccc9306701113e551",
+          "received_response_candidate_retained": false,
+          "request_receipt_id_hash": "e5aa2cc7c3c6d4c4a09315e4df9ff23346718dbc7a33f982b815ba333500f3d8",
+          "response_receipt_id_hash": "d586619003fb50939f106090f6dffa599c11abe2076be674820d06aae5ab65b3",
+          "source_revision": "f57f57c25c1c0942e8657b543b5439892320e752",
+          "transport_retries": 0,
+          "validation_receipt_id_hash": "c185f2d17bdfc3ffb05188c5f406f181f66020f7b683f04abb6e7cbaa7aa0349",
+          "wire_request_fingerprint": "5af0484c760cb44707edda41dc8cefe2b772b0bbdf383ef701171607c4a0fc44",
+          "wire_schema_fingerprint": "5668e226eb8d38c0f4bf9004ea8fc7aa363e9d388f64927783252f562d78ad40",
+          "wire_table_fingerprint": "2e5752dee695cb17f38ac8976def8cfae9f822b36ceace09b887884f22af4e5a"
+        }
+      ],
+      "qualification_kind": "KNOWN_SEALED_INVENTORY_REQUALIFICATION",
+      "real_work_admission": false,
+      "result": "FAIL",
+      "terminal_predicate": "OBLIGATION_FORMATION_UNSAFE_JSON_RECEIPT",
+      "truth_boundary": "LIVE_WIC_IRK_AND_MODEL_IN_UNADMITTED_QUALIFICATION_BASIS",
+      "unresolved_evidence_mapping": {
+        "current_disposition": "UNRESOLVED; EVIDENCE_NOT_PRODUCED_OR_ELIGIBLE; FAILED_PROPOSAL_IS_NOT_BINDING_AUTHORITY",
+        "exact_failed_basis_A_B": "UNKNOWN",
+        "fallback_binding_map": {
+          "components": {
+            "unresolved": 25
+          },
+          "count": 25,
+          "evidence_methods": {
+            "UNRESOLVED": 25
+          },
+          "owners": {
+            "UNRESOLVED": 25
+          },
+          "phases": {
+            "UNRESOLVED": 25
+          },
+          "states": {
+            "UNRESOLVED": 25
+          }
+        },
+        "is_validated_projection": false
+      },
+      "unsafe_json_classification": {
+        "candidate_or_oracle_modified": false,
+        "cases": [
+          {
+            "attempt": 1,
+            "candidate_is_authority": false,
+            "contains_json_escape_backslash": true,
+            "credential_or_secret_match_judgment": "NOT_ESTABLISHED; STABLE_UNSAFE_JSON_BRANCH_IS_DISTINCT_FROM_SECRET_BACKFILL_BRANCH",
+            "credential_or_secret_match_proved": false,
+            "json_failure_at_eof": false,
+            "json_failure_type": "EXTRA_DATA",
+            "model_output_sha256_matches_original_response": true,
+            "owner": "ModelFulfillmentCandidateProvider response privacy/receipt retention boundary",
+            "provider_status": "completed",
+            "raw_provider_response_bytes": 23773,
+            "raw_provider_response_sha256": "f990b5598f4d16810f70056dbdfcd9a726ba23a4fdba072b9b1654dc4a23b09e",
+            "raw_response_retention_scope": "Restricted low-level runtime observation only; no admitted canonical Candidate",
+            "retained_candidate_output": false,
+            "safe_category": "UNSAFE_JSON_RECEIPT_PRIVACY_NOT_PROVABLE_INVALID_JSON_WITH_ESCAPES",
+            "stable_error": "OBLIGATION_FORMATION_UNSAFE_JSON_RECEIPT",
+            "strict_original_json_valid": false
+          },
+          {
+            "attempt": 2,
+            "candidate_is_authority": false,
+            "contains_json_escape_backslash": true,
+            "credential_or_secret_match_judgment": "NOT_ESTABLISHED; STABLE_UNSAFE_JSON_BRANCH_IS_DISTINCT_FROM_SECRET_BACKFILL_BRANCH",
+            "credential_or_secret_match_proved": false,
+            "json_failure_at_eof": false,
+            "json_failure_type": "EXTRA_DATA",
+            "model_output_sha256_matches_original_response": true,
+            "owner": "ModelFulfillmentCandidateProvider response privacy/receipt retention boundary",
+            "provider_status": "completed",
+            "raw_provider_response_bytes": 7840,
+            "raw_provider_response_sha256": "3e53eab03d9fa718c38ab482bf4a6ae130190c6f7567e596da4804747fda3358",
+            "raw_response_retention_scope": "Restricted low-level runtime observation only; no admitted canonical Candidate",
+            "retained_candidate_output": false,
+            "safe_category": "UNSAFE_JSON_RECEIPT_PRIVACY_NOT_PROVABLE_INVALID_JSON_WITH_ESCAPES",
+            "stable_error": "OBLIGATION_FORMATION_UNSAFE_JSON_RECEIPT",
+            "strict_original_json_valid": false
+          }
+        ],
+        "classification_basis": "Read original frozen provider privacy branch and parse original retained runtime JSON read-only. Invalid JSON with backslash cannot be proved privacy safe; no prefix repair/escape removal or candidate synthesis performed.",
+        "guardian": "NOT_CALLED_THIS_SUITE",
+        "independent_review_calls": 0,
+        "model_calls_added": 0,
+        "opaque_ordinal": 3,
+        "original_records_unchanged": true,
+        "owner_calls_added": 0,
+        "response_privacy_refusal_not_false_assurance": true,
+        "schema": "c3-requalification-unsafe-json-private-readonly-classification-v1"
+      },
+      "wic_to_inventory_preservation": {
+        "clause_compared": 5,
+        "clause_unchanged": 5,
+        "constraints_exact": true,
+        "context_exact": true,
+        "fact_semantics_provenance_compared": 9,
+        "fact_semantics_provenance_unchanged": 9,
+        "item_compared": 5,
+        "item_unchanged": 5,
+        "literal_provenance_not_semantic_equivalence": true,
+        "production_intents_exact": true,
+        "provenance_exact_input_substrings": 59,
+        "provenance_not_exact_input_substrings": 0,
+        "saved_input_sha256_matches_seal": true
+      }
+    },
+    {
+      "calls_by_owner": {},
+      "controlled_fixture_not_real_model": true,
+      "controlled_predicates_passed": true,
+      "full_work_pass_claimed": false,
+      "guardian": "NOT_CALLED_THIS_SUITE",
+      "human_authority_created": false,
+      "model_calls": 0,
+      "observation_sha256": "dbb81af20121f3bc8a6dc7a076bc45b29392ae08e857d604af5ca67840f733b3",
+      "old_trial_preserved": true,
+      "opaque_ordinal": 4,
+      "qualification_kind": "KNOWN_SEALED_INVENTORY_REQUALIFICATION",
+      "real_work_admission": false,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER",
+      "truth_boundary": "CONTROLLED_OWNER_FIXTURE"
+    },
+    {
+      "calls_by_owner": {},
+      "controlled_fixture_not_real_model": true,
+      "controlled_predicates_passed": true,
+      "full_work_pass_claimed": false,
+      "guardian": "NOT_CALLED_THIS_SUITE",
+      "human_authority_created": false,
+      "model_calls": 0,
+      "observation_sha256": "e887d798a32a28229a9aecc2064f6ba96ddf9987e12aa949a5aeeb0afc1512f4",
+      "old_trial_preserved": true,
+      "opaque_ordinal": 5,
+      "qualification_kind": "KNOWN_SEALED_INVENTORY_REQUALIFICATION",
+      "real_work_admission": false,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER",
+      "truth_boundary": "CONTROLLED_OWNER_FIXTURE"
+    },
+    {
+      "calls_by_owner": {},
+      "continuous_permission_gate": {
+        "actual_owner_reads": 4,
+        "database_counts_unchanged": true,
+        "deploy_publish_reject_codes": {
+          "deploy": "OBLIGATION_DELIVERY_PROHIBITED",
+          "publish": "OBLIGATION_DELIVERY_PROHIBITED"
+        },
+        "external_effects_attempted": false
+      },
+      "controlled_fixture_not_real_model": true,
+      "controlled_predicates_passed": true,
+      "full_work_pass_claimed": false,
+      "guardian": "NOT_CALLED_THIS_SUITE",
+      "human_authority_created": false,
+      "model_calls": 0,
+      "observation_sha256": "2f127487c5526e880efa4594670576bd934c61226a3191c3fcbc0f5d0dd876c4",
+      "old_trial_preserved": true,
+      "opaque_ordinal": 6,
+      "qualification_kind": "KNOWN_SEALED_INVENTORY_REQUALIFICATION",
+      "real_work_admission": false,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER",
+      "truth_boundary": "CONTROLLED_OWNER_FIXTURE"
+    },
+    {
+      "calls_by_owner": {},
+      "controlled_fixture_not_real_model": true,
+      "controlled_predicates_passed": true,
+      "full_work_pass_claimed": false,
+      "future_context_gate": {
+        "future_human_authority": "PENDING",
+        "future_negative_results": {
+          "invented-authority": [
+            false,
+            false
+          ],
+          "missing-native": [
+            false,
+            false
+          ],
+          "missing-reference": [
+            false,
+            false
+          ]
+        },
+        "future_positive_results": [
+          true,
+          true
+        ],
+        "retention_owner_results": [
+          true,
+          true
+        ],
+        "software_seal_guardian": "NOT_CALLED_THIS_SUITE"
+      },
+      "guardian": "NOT_CALLED_THIS_SUITE",
+      "human_authority_created": false,
+      "model_calls": 0,
+      "observation_sha256": "3bf116a9a56068b9a5eeca3ed6b8b05c486e607c50105de63be1432b8c1e7862",
+      "old_trial_preserved": true,
+      "opaque_ordinal": 7,
+      "qualification_kind": "KNOWN_SEALED_INVENTORY_REQUALIFICATION",
+      "real_work_admission": false,
+      "result": "PASS_SCOPED_CONTROLLED_OWNER",
+      "truth_boundary": "CONTROLLED_OWNER_FIXTURE"
+    }
+  ],
+  "closure_verdict": "C3 REMAINS PARTIAL; FAILED LIVE CANNOT BE SUBSTITUTED BY CONTROLLED OR HISTORICAL_G0 PASS",
+  "controlled_owner_pass": 4,
+  "delivery_authorization": "NOT_AUTHORIZED",
+  "extra_retry_tuning_or_code_change": false,
+  "first_unseen_claim": false,
+  "frozen_revision": "f52d39965826ba2e9ddcdba44c85e79bf5c43fc0",
+  "full_work_or_product_pass_claimed": false,
+  "guardian_result": "NOT_CALLED_THIS_SUITE; HISTORICAL_REAL_G0_PASS_SEPARATE",
+  "human_acceptance": "PENDING",
+  "qualification": "NOT_QUALIFIED",
+  "schema": "c3-known-sealed-inventory-requalification-final-v1",
+  "scoped_live_pass": 0,
+  "seal_sha256": "3f093e0d09bec5d2f213ba4e823adbb6dcf42678acc4f76847bf4bb46b1eedb0"
+}

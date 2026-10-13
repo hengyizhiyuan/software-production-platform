@@ -11,3 +11,6 @@ docs/evidence/action-generalization/**/*.sse -whitespace
 # Preserve the exact C3 module-recovery receipts, including failed diagnostics.
 docs/evidence/core-production-semantic-convergence-c3-20261009/formation-module-adaptation-20261012/*.json -text
 docs/evidence/core-production-semantic-convergence-c3-20261009/formation-module-adaptation-20261012/*.xml -text -whitespace
+# Preserve independent Holdout requalification publication hashes verbatim.
+docs/evidence/core-production-semantic-convergence-c3-20261009/holdout-requalification-20261013/**/*.json -text
+docs/evidence/core-production-semantic-convergence-c3-20261009/holdout-requalification-20261013/*.json -text

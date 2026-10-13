@@ -1,0 +1,53 @@
+{
+  "containers": [
+    {
+      "exit_code": 0,
+      "host_ports_published": false,
+      "id": "b788a98cc2f0d5fdc36334def54cb669ac48ec0d598b333074d41c148c27b346",
+      "image": "sha256:24d9f809ad3cd6b98d68948020fccd3997c09ee947f9cb5acd57e48abb44e5b1",
+      "name": "watt-c3-requalification-20261013-020000z-migration",
+      "status": "exited"
+    },
+    {
+      "exit_code": 0,
+      "host_ports_published": false,
+      "id": "7fb3a54453336f7cc8ede9c17c7810c5c757eead0fe448c7569995576ae9b251",
+      "image": "sha256:24d9f809ad3cd6b98d68948020fccd3997c09ee947f9cb5acd57e48abb44e5b1",
+      "name": "watt-c3-requalification-20261013-020000z-attestation",
+      "status": "exited"
+    },
+    {
+      "exit_code": 0,
+      "host_ports_published": false,
+      "id": "1836172b0d4a56a47add439d821ebf9dd0cc518a444b76078bd64226d944ad2e",
+      "image": "sha256:24d9f809ad3cd6b98d68948020fccd3997c09ee947f9cb5acd57e48abb44e5b1",
+      "name": "watt-c3-requalification-20261013-020000z-controls",
+      "status": "exited"
+    },
+    {
+      "exit_code": 0,
+      "host_ports_published": false,
+      "id": "419aa2712157e90b0523bfdaad9d1667ea1d6a5e9190a5b01d179563346c223c",
+      "image": "sha256:24d9f809ad3cd6b98d68948020fccd3997c09ee947f9cb5acd57e48abb44e5b1",
+      "name": "watt-c3-requalification-20261013-020000z-live",
+      "status": "exited"
+    },
+    {
+      "exit_code": 0,
+      "host_ports_published": false,
+      "id": "4b4bf3ec7ce8917889f536c408133b716e580005765f215a97f5f200d917c0c3",
+      "image": "sha256:d741b376874687de90374fd34f55c6b2760e8f7bd7e4ae5cd47f50757fc08cf8",
+      "name": "watt-c3-requalification-20261013-020000z-pg",
+      "status": "exited"
+    }
+  ],
+  "credential_files_private_0600": true,
+  "dedicated_postgres_stopped": true,
+  "network_retained": "watt-c3-requalification-20261013-020000z-net",
+  "original_resources_modified": false,
+  "private_raw_input_wire_and_full_owner_observations_persisted": true,
+  "private_recovery_root": "/data/watt/c3-semantic-convergence-20261009/independent-holdout-requalification-20261013-020000Z",
+  "schema": "c3-requalification-resource-retention-v1",
+  "volume_retained": "watt-c3-requalification-20261013-020000z-pg",
+  "write_scope": "New evidence directory and dedicated fresh PG volume only"
+}
