@@ -1,0 +1,16 @@
+{
+  "critical_services": "PASS",
+  "critical_service_names": [
+    "watt-n1-worker-20261008",
+    "watt-cloud-worker-native-worker-1",
+    "watt-cloud-worker-quality-runner-1",
+    "watt-cloud-worker-native-coordinator-1",
+    "watt-cloud-worker-native-tool-host-1",
+    "watt-cloud-worker-gitea-1",
+    "watt-cloud-worker-postgres-1"
+  ],
+  "preexisting_non_api_containers": 24,
+  "unchanged_containers": 24,
+  "other_actor_or_transient_changes": [],
+  "scope": "Only API image declaration and API container recreated by this release; any unrelated lifecycle changes are recorded, not silently attributed."
+}

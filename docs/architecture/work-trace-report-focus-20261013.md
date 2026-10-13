@@ -73,3 +73,15 @@ Kernel 公开终止叙述仍提到一个较早草稿摘要；正式 result_claim
 - [容器隔离](../evidence/work-trace-report-focus-20261013/container-isolation.json)
 - [最终回归汇总](../evidence/work-trace-report-focus-20261013/regression.junit.xml)
 - [新布局截图](../evidence/work-trace-report-focus-20261013/report-tabs-completed-preview.jpg)：真实已保存报告在本地展示夹具中渲染；部署身份与 HTTP 资格由 ECS 证据单独确认。
+
+
+## 下载格式更新（同日）
+
+按 Human 要求，默认简明下载改为 UTF-8 Markdown（`.md`），源码 `32db38cac756ba120a180788ff31e9b4fea8fc6a`，已部署并保留原下载地址。内容、引用、UNKNOWN 与权限边界沿用已有保存报告，没有重新调用模型。
+
+- 下载格式／权限相关 Python 回归 2/2、JavaScript 回归 38/38 PASS。
+- ECS 实际 Content-Type 为 `text/markdown`，附件文件名以 `.md` 结尾，下载摘要与内容匹配。
+- 真实已完成报告 14,499 字节；历史失败报告 1,321 字节。
+- 部署前未释放分配 0、活动队列 0、分析锁不存在；仅替换 API，其他 24 个已有容器不变。
+- 镜像 `sha256:8bdb8db9b7ec8ed761a193131e64bb2454b5dfe0834c468cd5c774fda4c036af`；回滚 `watt-cloud-worker:trace-owner-rollback-32db38ca`。
+- [Markdown 报告](../evidence/work-trace-markdown-20261013/concise-report.md)、[实际 HTTP 验证](../evidence/work-trace-markdown-20261013/http-replay.json)、[部署结果](../evidence/work-trace-markdown-20261013/activation-result.json)、[隔离检查](../evidence/work-trace-markdown-20261013/container-isolation.json)。
