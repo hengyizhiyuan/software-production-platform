@@ -22,11 +22,12 @@ from tests.test_c3_source_consumption_proof import fixture_review_proof
 pytestmark = pytest.mark.postgresql
 
 
-@pytest.mark.parametrize('construction_contract,raw_role_repair',(
-    ('owner-local-wire-candidate-edits-v1',False),('owner-local-semantic-candidate-edits-v2',False),
-    ('owner-local-role-reference-candidates-v3',False),('owner-local-role-reference-candidates-v3',True),
-    ('owner-local-interpretation-role-construction-v4',False),('owner-local-interpretation-role-construction-v4',True)))
-def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(postgres_database, tmp_path, monkeypatch,construction_contract,raw_role_repair):
+@pytest.mark.parametrize('construction_contract,raw_role_repair,consumer_instructions',(
+    ('owner-local-wire-candidate-edits-v1',False,False),('owner-local-semantic-candidate-edits-v2',False,False),
+    ('owner-local-role-reference-candidates-v3',False,False),('owner-local-role-reference-candidates-v3',True,False),
+    ('owner-local-interpretation-role-construction-v4',False,False),('owner-local-interpretation-role-construction-v4',True,False),
+    ('owner-local-role-reference-candidates-v3',True,True),('owner-local-interpretation-role-construction-v4',True,True)))
+def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(postgres_database, tmp_path, monkeypatch,construction_contract,raw_role_repair,consumer_instructions):
     declared = c1.DeclaredC1Fulfillment()
     calls = []
     inventories = []
@@ -85,7 +86,8 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
             request_id=f"pg-edit-{len(calls)}",usage=ModelUsage(unknown=True),timing=ModelTiming(),retry_count=0)
 
     provider = ModelFulfillmentCandidateProvider(lambda:SimpleNamespace(generate=generate,close=lambda:None),
-        candidate_construction=True,candidate_construction_contract=construction_contract,raw_role_repair=raw_role_repair)
+        candidate_construction=True,candidate_construction_contract=construction_contract,raw_role_repair=raw_role_repair,
+        construction_consumer_instructions=consumer_instructions)
     monkeypatch.setattr(c1,"DeclaredC1Fulfillment",lambda:provider)
     class DurableEditObserved(BaseException):
         pass
@@ -102,6 +104,7 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
     monkeypatch.setattr(app.FulfillmentFormationReceipts,"append",original_append)
     inventory = inventories[-1]
     provider.supports_raw_role_repair=False
+    provider.supports_construction_consumer_instructions=False
     with postgres_database.unit_of_work() as uow:
         revision = ProductStore(uow.session).current_work_reality_revision(UUID(inventory["work_id"]))
         ir = InteractionStore(uow.session).assessment(revision.source_assessment_id).semantic_ir

@@ -197,3 +197,15 @@ Trace 真实结果的 Admin 展示校验补充 `actual-trace-admin-presentation-
 同 Owner 的 v4 失败反馈现在引用对应同 Attempt MODEL_RESPONSE_OBSERVED 的原 Wire 字符串：保存原字符串 SHA、JSON frame 的精确 prefix/suffix；只对唯一且与真实父响应完全相同的字段建立引用。读取恢复完全相同反馈字节，并核对完整反馈 SHA/bytes。没有重新编码其他字段、删除失败、缩减约束或生成不存在的证据。父/用途/Work/version/hash、prefix/suffix 漂移继续停止；历史被裁减的终态不复活。
 
 `feedback-wire-reference-2.xml` 定向正负与原容量回归通过；`postgresql-feedback-wire-reference-1.xml` 6 条持久恢复通过。这只是记录能力资格，不能让原非法 Candidate 合格，不宣称过去运行取得 PASS。后续实际模型资格仍需真正的合法方法计划和独立 Review。
+
+## 账号切换后的恢复与消费契约接线核验
+
+恢复 HEAD `c4dbbac5213b995bacec168bc55eb72eef854b99` / Tree `435b1e2eaffbf727c2ca67e1b8a9d76bd760d3f5`，没有遗留资格容器正在执行。镜像 `sha256:d936c1a8861c6d3658cfeba85b56859cc9b693e40312b5d624221354f83455bd` 的安装 attestor 和受影响镜像内回归通过。根工作区的其他分支和旧 g50/g51 未提交材料保持原样。
+
+只读使用普通41第九次实际保留的两个响应，在确切 c4 镜像中做反事实契约核验（network none，0 Provider 调用，原输入/收据 readonly，不重放生产 Work）。全部错误现在可以保留：重复组件、同组件矛盾处置、必须履约的 Clause/Constraint 被归背景、来源证明不充分以及 UNRESOLVED。最大新存储收据 94432 bytes，在原 131072 界限内。原候选仍非法；新的派生反馈 fingerprint 绑定本次反事实 Attempt，并非历史反馈身份或历史成功。
+
+代码对账发现共同的 B 类接线缺口：temporary construction 分支覆盖原 `_primary_meaning_instructions`；v4 角色绑定进一步覆盖本地反馈方向。原 `_SOURCE_CONSUMER_INSTRUCTIONS` 中已有的原意/Consumer/完整支撑集合、当前与未来职责、背景不能替代当前履约等消费语义未进入角色构造请求。这个缺口不意味着原 Validator 错拒，不允许放宽门禁或改历史提案。
+
+最小修复在原 Owner 中复用原消费说明的语义部分，将 Wire 编码说明与临时构造分开；只在实际角色计划构造/修复阶段提供，不把未来方法要求强加给第一步理解 Claim。临时字段名按已有表示映射，既不选业务消费者也不生成新事实。新请求持久绑定 `existing-consumer-semantics-in-construction-v1` 标记；旧无标记收据按原输入协议恢复，未知标记或身份漂移停止，不新增正式 Wire 版本、Owner、权限或请求额度。
+
+`construction-consumer-contract-1.xml` 39 PASS；阶段边界调整后受影响 7 项 `construction-consumer-contract-2.xml` PASS。`postgresql-construction-consumer-1.xml` 8 PASS，覆盖原协议及新角色构造标记：第二响应落盘后中断只调用剩余独立 Review，不重做 Formation。错来源、伪造 Fact、越权路径、重复和缺证明仍拒绝。必须继续冻结新修订、镜像并验证实际收益，受控结果不关闭 C3。

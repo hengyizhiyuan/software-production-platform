@@ -1,0 +1,12 @@
+{
+  "source_revision": "c4dbbac5213b995bacec168bc55eb72eef854b99",
+  "actual_image": "sha256:d936c1a8861c6d3658cfeba85b56859cc9b693e40312b5d624221354f83455bd",
+  "container": "bef51677b114caf3846aec4b2a87da9e6662a39e3fd61cbe61cb98dff8f713c2",
+  "started_at_utc": "2026-10-13T12:29:49.896217+00:00",
+  "elapsed_seconds": 4.6708735700231045,
+  "exit_code": 0,
+  "network": "none",
+  "live_model_calls": 0,
+  "historical_mount_readonly": true,
+  "production_access": false
+}

@@ -124,6 +124,7 @@ _SEMANTIC_EDIT_CONTRACT = "owner-local-semantic-candidate-edits-v2"
 _ROLE_REFERENCE_CONTRACT = "owner-local-role-reference-candidates-v3"
 _RAW_ROLE_REPAIR_CONTRACT = "existing-bound-unadmitted-role-repair-v1"
 _INTERPRETATION_ROLE_CONTRACT = "owner-local-interpretation-role-construction-v4"
+_CONSTRUCTION_CONSUMER_INSTRUCTION_CONTRACT = "existing-consumer-semantics-in-construction-v1"
 _CANDIDATE_CONSTRUCTION_CONTRACTS = {_CANDIDATE_CONSTRUCTION_CONTRACT, _SEMANTIC_EDIT_CONTRACT, _ROLE_REFERENCE_CONTRACT,
     _INTERPRETATION_ROLE_CONTRACT}
 
@@ -1258,6 +1259,23 @@ def _primary_meaning_instructions(owner_preconditions):
          "select a semantic consumer or certify any candidate. Read the original proof alternatives "
          "for the selected capability and choose one justified original support set; do not enumerate them."
          if owner_preconditions.get("semantic_selection_input_contract") == _PRIMARY_MEANING_INPUT_CONTRACT else ""))
+
+
+def _construction_consumer_instructions(contract):
+    """Reuse existing consumer semantics separately from Wire encoding directions.
+
+    Temporary construction changes representation, not the consumer contract.
+    Historical requests without this negotiated marker keep their old input.
+    """
+    if contract != _CONSTRUCTION_CONSUMER_INSTRUCTION_CONTRACT:
+        return ""
+    semantics = _SOURCE_CONSUMER_INSTRUCTIONS.split("Return exactly one JSON object", 1)[0]
+    # These are transport field labels, never Subject aliases or semantic choices.
+    import re
+    fields = {"s": "source_ref", "f": "current_fact_dependencies",
+              "t": "target_paths", "u": "provenance_support_refs", "q": "component_quote"}
+    semantics = re.sub(r"\b[sftuq]\b", lambda match: fields[match.group()], semantics)
+    return semantics.replace("source ordinals", "source references").replace("FACT ordinals", "FACT references")
 
 
 def _formation_repair_instructions(instructions, validation_feedback, *, local_edit=False):
@@ -2581,7 +2599,7 @@ class ModelFulfillmentCandidateProvider:
     supports_source_consumption_proof = True
     def __init__(self, runtime_factory, *, candidate_construction=False,
                  candidate_construction_contract=_CANDIDATE_CONSTRUCTION_CONTRACT,
-                 raw_role_repair=False):
+                 raw_role_repair=False, construction_consumer_instructions=False):
         self.runtime_factory = runtime_factory
         self.last_observation = None
         self.supports_candidate_construction = candidate_construction
@@ -2589,6 +2607,7 @@ class ModelFulfillmentCandidateProvider:
             raise ValueError("OBLIGATION_FORMATION_CONSTRUCTION_CONTRACT_UNKNOWN")
         self.candidate_construction_contract = candidate_construction_contract
         self.supports_raw_role_repair = raw_role_repair
+        self.supports_construction_consumer_instructions = construction_consumer_instructions
 
     @classmethod
     def from_settings(cls, settings):
@@ -2609,7 +2628,8 @@ class ModelFulfillmentCandidateProvider:
                 max_output_tokens=settings.collaboration_provider_max_output_tokens)
             return WattModelRuntime(registry, PurposeProfileRouter({ModelPurpose.STEERING_SEMANTIC: profile}))
         return cls(runtime_factory, candidate_construction=True,
-            candidate_construction_contract=_INTERPRETATION_ROLE_CONTRACT,raw_role_repair=True)
+            candidate_construction_contract=_INTERPRETATION_ROLE_CONTRACT,raw_role_repair=True,
+            construction_consumer_instructions=True)
 
     def form_wire_metadata(self, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
         context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
@@ -2916,6 +2936,14 @@ class ModelFulfillmentCandidateProvider:
                         'Formation allowance; uncertainty that cannot be resolved lawfully remains UNRESOLVED. '
                         'Return the complete role proposal matching this request schema. The Owner supplies '
                         'current request identity; NOT_EVALUABLE is never PASS.')
+            if (owner_preconditions or {}).get("candidate_construction_contract") in {
+                    _ROLE_REFERENCE_CONTRACT, _INTERPRETATION_ROLE_CONTRACT} and not (
+                    owner_preconditions.get("candidate_construction_contract") == _INTERPRETATION_ROLE_CONTRACT
+                    and not basis):
+                semantics = _construction_consumer_instructions(
+                    owner_preconditions.get("construction_consumer_instruction_contract"))
+                if semantics:
+                    formation_instructions = semantics + "\n\n" + formation_instructions
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,
                 instructions=formation_instructions, input_text=formation_input, output_schema=output_schema)
             self.last_observation = {"generation_schema_fingerprint": canonical_fingerprint(output_schema),

@@ -14,7 +14,7 @@ from tests.test_c3_semantic_contract_calibration import review
 from tests.test_c3_source_consumption_proof import fixture_review_proof
 
 
-def interpretation_case(scale='small', failure=None):
+def interpretation_case(scale='small', failure=None, *, consumer_instructions=False):
     rev,ir,inventory,plan=controlled_capacity_case(scale)
     snapshot=deepcopy((rev,ir,inventory,plan))
     calls=[]
@@ -63,11 +63,55 @@ def interpretation_case(scale='small', failure=None):
             requested_model='controlled-understanding',effective_model='controlled-understanding',
             request_id=f'understanding-{len(calls)}',usage=ModelUsage(unknown=True),timing=ModelTiming(),retry_count=0)
     provider=ModelFulfillmentCandidateProvider(lambda:SimpleNamespace(generate=generate,close=lambda:None),
-        candidate_construction=True,candidate_construction_contract='owner-local-interpretation-role-construction-v4')
+        candidate_construction=True,candidate_construction_contract='owner-local-interpretation-role-construction-v4',
+        construction_consumer_instructions=consumer_instructions)
     kwargs={'provider':provider,'exact_target_paths':inventory['exact_target_paths']}
     result=app.form_fulfillment_projection(rev,ir,**kwargs)
     assert (rev,ir,inventory,plan)==snapshot
     return result,provider,calls,(rev,ir,kwargs)
+
+
+@pytest.mark.parametrize('failure', (None, 'duplicate', 'unsupported-proof', 'fake-fact', 'wrong-path'))
+def test_constructing_claims_and_roles_retains_existing_consumer_semantics(failure):
+    from spg.providers.fulfillment_candidate import (
+        _construction_consumer_instructions, _CONSTRUCTION_CONSUMER_INSTRUCTION_CONTRACT)
+    bindings, provider, calls, args = interpretation_case(failure=failure, consumer_instructions=True)
+    contract = _construction_consumer_instructions(_CONSTRUCTION_CONSUMER_INSTRUCTION_CONTRACT)
+    for index, (request, payload) in enumerate(calls[:2]):
+        assert request['instructions'].startswith(contract) == (index == 1)
+        assert request['instructions'].count(contract) == index
+        assert 'Return exactly one JSON object matching unchanged Wire v1' not in request['instructions']
+        assert payload['owner_source_preconditions']['construction_consumer_instruction_contract'] == _CONSTRUCTION_CONSUMER_INSTRUCTION_CONTRACT
+    assert 'minimal_support_sets' in contract
+    assert 'not an extra archival route' in contract
+    assert all(b.state != 'UNRESOLVED' for b in bindings) == (failure is None)
+    assert len(calls) == (3 if failure is None else 2)
+    provider.supports_construction_consumer_instructions = False
+    rev, ir, kwargs = args
+    app.form_fulfillment_projection(rev, ir, **kwargs)
+    assert len(calls) == (3 if failure is None else 2)
+
+
+def test_old_construction_receipts_do_not_gain_new_instruction_identity():
+    _bindings, provider, calls, args = interpretation_case()
+    assert all('construction_consumer_instruction_contract' not in payload['owner_source_preconditions']
+        for _request, payload in calls[:2])
+    provider.supports_construction_consumer_instructions = True
+    rev, ir, kwargs = args
+    app.form_fulfillment_projection(rev, ir, **kwargs)
+    assert len(calls) == 3
+    assert all('construction_consumer_instruction_contract' not in row.get('owner_source_preconditions', {})
+        for row in provider._fulfillment_receipts)
+
+
+def test_construction_instruction_contract_drift_stops_without_another_request():
+    _bindings, provider, calls, args = interpretation_case(consumer_instructions=True)
+    row = next(r for r in provider._fulfillment_receipts if r['stage'] == 'MODEL_REQUEST_PENDING')
+    row['owner_source_preconditions']['construction_consumer_instruction_contract'] = 'invented-consumer-contract'
+    rev, ir, kwargs = args
+    bindings = app.form_fulfillment_projection(rev, ir, **kwargs)
+    assert all(b.state == 'UNRESOLVED' for b in bindings)
+    assert len(calls) == 3
 
 
 @pytest.mark.parametrize('scale,failure',(('small',None),('medium',None),('complex',None),('small','claim-source'),('small','claim-shape')))

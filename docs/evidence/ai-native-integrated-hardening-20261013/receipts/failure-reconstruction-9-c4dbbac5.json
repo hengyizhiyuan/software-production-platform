@@ -1,0 +1,129 @@
+{
+  "schema": "failed-observation-readonly-reconstruction-v1",
+  "application_revision": "c4dbbac5213b995bacec168bc55eb72eef854b99",
+  "scope": "COUNTERFACTUAL_EVALUATION_ONLY_NOT_LIVE_QUALIFICATION",
+  "live_model_calls": 0,
+  "production_work_replayed": false,
+  "historical_receipts_unchanged": true,
+  "holdout_used": false,
+  "legal_projection_admitted": false,
+  "terminal_reason": "OBLIGATION_PROJECTION_DUPLICATE_ROUTE",
+  "error_codes": [
+    "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+    "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+    "OBLIGATION_PROJECTION_DUPLICATE_ROUTE",
+    "OBLIGATION_PROJECTION_UNRESOLVED",
+    "OBLIGATION_REQUIRED_CONSTRAINT_CANNOT_BE_CONTEXT_ONLY",
+    "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+  ],
+  "stored_receipt_max_bytes": 94432,
+  "feedback_exact_sha256": "c81aceabed411ddb95548b7f7e748aaf72cd2b85ec0d4cdffed2f090682e8a90",
+  "original_raw_response_sha256": "84572c1c0c37af5ad7ad9b56347a4519cd47bd620a4884a98e13bd30e871cb96",
+  "failure_locations": [
+    {
+      "code": "OBLIGATION_PROJECTION_DUPLICATE_ROUTE",
+      "component_id": "a9e10974d8d80d3da07323c1ade9b43a307205936ab7ae3746a01b890fee2cd1"
+    },
+    {
+      "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+      "component_id": "06b50efc6e9c81ef77cb2ac9d2b0fb1c7e6f2a2ee68c119951ea6c86f1f7b58a"
+    },
+    {
+      "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "component_id": "06b50efc6e9c81ef77cb2ac9d2b0fb1c7e6f2a2ee68c119951ea6c86f1f7b58a",
+      "predicate": "SAME_ORIGINAL_COMPONENT_CANNOT_HAVE_EXECUTION_AND_CONTEXT_OR_UNRESOLVED_DISPOSITIONS"
+    },
+    {
+      "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+      "component_id": "46466d268653516faf65cab0cd3980c2713a686b0e5c0b3c37094deafc5425c8"
+    },
+    {
+      "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "component_id": "46466d268653516faf65cab0cd3980c2713a686b0e5c0b3c37094deafc5425c8",
+      "predicate": "SAME_ORIGINAL_COMPONENT_CANNOT_HAVE_EXECUTION_AND_CONTEXT_OR_UNRESOLVED_DISPOSITIONS"
+    },
+    {
+      "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+      "component_id": "9cc6301185c9bb939029a65179799619745c6b86d3b46c8c4c66b9da6aa6b3bc"
+    },
+    {
+      "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "component_id": "9cc6301185c9bb939029a65179799619745c6b86d3b46c8c4c66b9da6aa6b3bc",
+      "predicate": "SAME_ORIGINAL_COMPONENT_CANNOT_HAVE_EXECUTION_AND_CONTEXT_OR_UNRESOLVED_DISPOSITIONS"
+    },
+    {
+      "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+      "component_id": "7449c15de7f02f96ec18b84c268294a36e695312dd87a92a6255a256e4aa7abd"
+    },
+    {
+      "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "component_id": "7449c15de7f02f96ec18b84c268294a36e695312dd87a92a6255a256e4aa7abd",
+      "predicate": "SAME_ORIGINAL_COMPONENT_CANNOT_HAVE_EXECUTION_AND_CONTEXT_OR_UNRESOLVED_DISPOSITIONS"
+    },
+    {
+      "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+      "component_id": "74bc12f583f73d32ac8cf4b97352743940e196c857f54b82c7ed9f66871c2864"
+    },
+    {
+      "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "component_id": "74bc12f583f73d32ac8cf4b97352743940e196c857f54b82c7ed9f66871c2864",
+      "predicate": "SAME_ORIGINAL_COMPONENT_CANNOT_HAVE_EXECUTION_AND_CONTEXT_OR_UNRESOLVED_DISPOSITIONS"
+    },
+    {
+      "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+      "component_id": "c6da89e8c5f18e48ae8a19d22849537f4d7ccf7e89effc545ace99c0049d9cf9"
+    },
+    {
+      "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "component_id": "c6da89e8c5f18e48ae8a19d22849537f4d7ccf7e89effc545ace99c0049d9cf9",
+      "predicate": "SAME_ORIGINAL_COMPONENT_CANNOT_HAVE_EXECUTION_AND_CONTEXT_OR_UNRESOLVED_DISPOSITIONS"
+    },
+    {
+      "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+      "component_id": "3ab567278d3c50c99297700ac67e0ef4dbf1456d34ccf54bc76af56c1f73cd57"
+    },
+    {
+      "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "component_id": "3ab567278d3c50c99297700ac67e0ef4dbf1456d34ccf54bc76af56c1f73cd57",
+      "predicate": "SAME_ORIGINAL_COMPONENT_CANNOT_HAVE_EXECUTION_AND_CONTEXT_OR_UNRESOLVED_DISPOSITIONS"
+    },
+    {
+      "code": "OBLIGATION_CURRENT_CLAUSE_CANNOT_BE_CONTEXT_ONLY",
+      "component_id": "cc9dfe2027d1658fb11a66275cbe86ae091608a141a9aba8d645f3a265ac3202"
+    },
+    {
+      "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "component_id": "cc9dfe2027d1658fb11a66275cbe86ae091608a141a9aba8d645f3a265ac3202",
+      "predicate": "SAME_ORIGINAL_COMPONENT_CANNOT_HAVE_EXECUTION_AND_CONTEXT_OR_UNRESOLVED_DISPOSITIONS"
+    },
+    {
+      "code": "OBLIGATION_REQUIRED_CONSTRAINT_CANNOT_BE_CONTEXT_ONLY",
+      "component_id": "45e3a589302e592560830606d2f5eb8bb3f4ecfe9038faac3aa1ee8eb5f9cd3e"
+    },
+    {
+      "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "component_id": "45e3a589302e592560830606d2f5eb8bb3f4ecfe9038faac3aa1ee8eb5f9cd3e",
+      "predicate": "SAME_ORIGINAL_COMPONENT_CANNOT_HAVE_EXECUTION_AND_CONTEXT_OR_UNRESOLVED_DISPOSITIONS"
+    },
+    {
+      "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+      "component_id": "a9e10974d8d80d3da07323c1ade9b43a307205936ab7ae3746a01b890fee2cd1"
+    },
+    {
+      "code": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+      "component_id": "a9e10974d8d80d3da07323c1ade9b43a307205936ab7ae3746a01b890fee2cd1",
+      "predicate": "SAME_ORIGINAL_COMPONENT_CANNOT_HAVE_EXECUTION_AND_CONTEXT_OR_UNRESOLVED_DISPOSITIONS"
+    }
+  ],
+  "actual_usage_by_attempt": [
+    {
+      "attempt": 1,
+      "usage": {}
+    },
+    {
+      "attempt": 2,
+      "usage": {}
+    }
+  ],
+  "meaning": "Full failure set retained through exact original Wire references; invalid historical outputs remain invalid."
+}
