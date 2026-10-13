@@ -14,7 +14,7 @@ from tests.test_c3_semantic_contract_calibration import review
 from tests.test_c3_source_consumption_proof import fixture_review_proof
 
 
-def interpretation_case(scale='small', failure=None, *, consumer_instructions=False):
+def interpretation_case(scale='small', failure=None, *, consumer_instructions=False, first_format=None, unparsed_claim_repair=False):
     rev,ir,inventory,plan=controlled_capacity_case(scale)
     snapshot=deepcopy((rev,ir,inventory,plan))
     calls=[]
@@ -31,14 +31,19 @@ def interpretation_case(scale='small', failure=None, *, consumer_instructions=Fa
             if failure=='claim-source':first['components'][0]['source_ref']='unobserved-source-claim'
             elif failure=='claim-shape':first['components'][0]['unknowns']=17
             output=json.dumps(first)
+            if first_format == 'invalid-json':output=output[:-1]
+            elif first_format == 'duplicate-key':output=output[:-1]+',"components":[]}'
+            elif first_format == 'escaped-invalid':output='{"components":["\\u0061"'
         else:
             state=payload['owner_source_preconditions']['candidate_construction_state']
-            assert state['convergence']['action']=='CONTINUE'
-            assert state['convergence']['repair_strategy']=='INTERPRET_THEN_BIND_EXISTING_ROLES'
-            assert state['evidence']['evidence_refs']==[] and state['evidence']['inference_refs']
+            assert state['convergence']['action']==('REPAIR' if first_format else 'CONTINUE')
+            assert state['convergence']['repair_strategy']==('RECONSTRUCT_FROM_IMMUTABLE_INVENTORY_AND_BOUND_RAW_FEEDBACK'
+                if first_format else 'INTERPRET_THEN_BIND_EXISTING_ROLES')
+            assert state['evidence']['evidence_refs']==[]
+            assert bool(state['evidence']['inference_refs']) == (first_format is None)
             assert state['understanding']['alternatives'] and state['understanding']['confidence'] is None
             basis=state['repair_basis']
-            assert basis['representation']=='UNREVIEWED_INTERPRETATION_CLAIMS'
+            assert basis['representation']==('UNPARSED_PRIVACY_SAFE_PROPOSAL' if first_format else 'UNREVIEWED_INTERPRETATION_CLAIMS')
             wire,_=controlled_wire(inventory,plan,feedback=payload['same_basis_validation_feedback'],
                 owner_preconditions=payload['owner_source_preconditions'])
             caps=payload['existing_capability_contracts']
@@ -59,16 +64,63 @@ def interpretation_case(scale='small', failure=None, *, consumer_instructions=Fa
             elif failure=='duplicate':routes.append(deepcopy(routes[0]))
             elif failure=='bad-quote':routes[0]['component_quote']='unobserved invented content'
             output=json.dumps({'routes':routes})
+            if failure == 'repeat-format':output='{'  # Still invalid, never a third call.
         return StructuredModelResult(output_text=output,provider=ModelProvider.DEEPSEEK,
             requested_model='controlled-understanding',effective_model='controlled-understanding',
             request_id=f'understanding-{len(calls)}',usage=ModelUsage(unknown=True),timing=ModelTiming(),retry_count=0)
     provider=ModelFulfillmentCandidateProvider(lambda:SimpleNamespace(generate=generate,close=lambda:None),
         candidate_construction=True,candidate_construction_contract='owner-local-interpretation-role-construction-v4',
-        construction_consumer_instructions=consumer_instructions)
+        construction_consumer_instructions=consumer_instructions, unparsed_claim_repair=unparsed_claim_repair)
     kwargs={'provider':provider,'exact_target_paths':inventory['exact_target_paths']}
     result=app.form_fulfillment_projection(rev,ir,**kwargs)
     assert (rev,ir,inventory,plan)==snapshot
     return result,provider,calls,(rev,ir,kwargs)
+
+
+@pytest.mark.parametrize('failure', (None, 'duplicate', 'unsupported-proof', 'fake-fact', 'wrong-path', 'missing-source', 'repeat-format'))
+def test_unparsed_safe_claim_uses_remaining_candidate_without_manufacturing_a_parse(failure):
+    bindings, provider, calls, args = interpretation_case(failure=failure, first_format='invalid-json',
+        consumer_instructions=True, unparsed_claim_repair=True)
+    assert len(calls) == (3 if failure is None else 2)
+    assert all(b.state != 'UNRESOLVED' for b in bindings) == (failure is None)
+    request, payload = calls[1]
+    basis = payload['owner_source_preconditions']['candidate_construction_state']['repair_basis']
+    assert isinstance(basis['original_wire'], str)
+    assert basis['original_wire'] == next(r['candidate_output'] for r in provider._fulfillment_receipts
+        if r['stage'] == 'MODEL_RESPONSE_OBSERVED' and r['attempt'] == 1)
+    with pytest.raises(json.JSONDecodeError):json.loads(basis['original_wire'])
+    assert basis['raw_sha256'] == sha256(basis['original_wire'].encode()).hexdigest()
+    assert basis['format_observation']['semantic_status'] == 'NOT_EVALUABLE'
+    assert payload['owner_source_preconditions']['candidate_construction_state']['evidence']['evidence_refs'] == []
+    assert 'minimal_support_sets' in request['instructions']
+    assert 'routes' in request['output_schema']['properties']
+    assert 'replace' not in request['output_schema']['properties']
+    provider.supports_unparsed_claim_repair = False
+    rev, ir, kwargs = args
+    app.form_fulfillment_projection(rev, ir, **kwargs)
+    assert len(calls) == (3 if failure is None else 2)
+
+
+@pytest.mark.parametrize('first_format,enabled', (('invalid-json',False),('duplicate-key',True),('escaped-invalid',True)))
+def test_unparsed_claim_does_not_expand_legacy_or_unsafe_recovery(first_format,enabled):
+    bindings, _provider, calls, _args = interpretation_case(first_format=first_format, unparsed_claim_repair=enabled)
+    assert all(b.state == 'UNRESOLVED' for b in bindings)
+    assert len(calls) == 1
+
+
+@pytest.mark.parametrize('tamper', ('original-output', 'repair-contract'))
+def test_unparsed_claim_feedback_identity_cannot_drift(tamper):
+    _bindings, provider, calls, args = interpretation_case(first_format='invalid-json', unparsed_claim_repair=True)
+    if tamper == 'original-output':
+        row = next(r for r in provider._fulfillment_receipts if r['stage'] == 'MODEL_RESPONSE_OBSERVED' and r['attempt'] == 1)
+        row['candidate_output'] += ' '
+    else:
+        row = next(r for r in provider._fulfillment_receipts if r['stage'] == 'MODEL_REQUEST_PENDING')
+        row['owner_source_preconditions']['unparsed_claim_repair_contract'] = 'different-contract'
+    rev, ir, kwargs = args
+    bindings = app.form_fulfillment_projection(rev, ir, **kwargs)
+    assert all(b.state == 'UNRESOLVED' for b in bindings)
+    assert len(calls) == 3
 
 
 @pytest.mark.parametrize('failure', (None, 'duplicate', 'unsupported-proof', 'fake-fact', 'wrong-path'))

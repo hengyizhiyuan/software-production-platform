@@ -209,3 +209,11 @@ Trace 真实结果的 Admin 展示校验补充 `actual-trace-admin-presentation-
 最小修复在原 Owner 中复用原消费说明的语义部分，将 Wire 编码说明与临时构造分开；只在实际角色计划构造/修复阶段提供，不把未来方法要求强加给第一步理解 Claim。临时字段名按已有表示映射，既不选业务消费者也不生成新事实。新请求持久绑定 `existing-consumer-semantics-in-construction-v1` 标记；旧无标记收据按原输入协议恢复，未知标记或身份漂移停止，不新增正式 Wire 版本、Owner、权限或请求额度。
 
 `construction-consumer-contract-1.xml` 39 PASS；阶段边界调整后受影响 7 项 `construction-consumer-contract-2.xml` PASS。`postgresql-construction-consumer-1.xml` 8 PASS，覆盖原协议及新角色构造标记：第二响应落盘后中断只调用剩余独立 Review，不重做 Formation。错来源、伪造 Fact、越权路径、重复和缺证明仍拒绝。必须继续冻结新修订、镜像并验证实际收益，受控结果不关闭 C3。
+
+## 已观测格式偏差的原 Owner 有界恢复
+
+Source `148a25cece061d56365d9ba60e3dccfc39015274` / Tree `c0c8f614e68e5597efb2bea23952a8919d6feace` / image `sha256:1eb025875ec3c3dceca3174dfc20ca2b61610a0cb2a16638e7d3b9d8667de96f` 安装与镜像定向验证通过。普通41第十次仅 1 Formation/0 Review：Provider completed，原输出末尾 JSON 分隔符错误（位置16540，原文字符数16543，无 backslash），继有修复依据要求能先 parse，提前停在 LOCAL_REPAIR_BASIS_UNAVAILABLE。实际 Input40705 / Output3782 / Total44487 / Reasoning0 / Cached33536，无传输重发。此结果没有验证到第二步消费契约，不能假称已改善语义收敛。
+
+这是 A 类格式波动伴随 B 类恢复前提缺口。仅在原 v4 Owner 内，增加持久协商的 `existing-bound-unparsed-claim-repair-v1`：原已观测、安全、精确绑定且可归因 JSON 格式失败的输出可以保留为 UNPARSED_PRIVACY_SAFE_PROPOSAL。它没有组件解析、来源几何、语义批准或证据；不补逗号/括号、不默默修 JSON、不改原始输出。剩余原候选额度从不可变完整库存构造方法计划，保留原 Raw SHA、父收据、Attempt、库存与反馈绑定，然后照常执行全部确定性和独立 Review 门禁。
+
+无法证明隐私安全的 escape 输出、重复 JSON keys、身份/预算不明仍停止。旧请求不获得新协商能力，原 terminal 不复活；没有新增候选、Review、Token、权限、Owner 或正式 Schema。`unparsed-claim-repair-1.xml` 40 PASS，身份扩充后 `unparsed-claim-repair-2.xml` 11 PASS；PostgreSQL 新路径单项中断恢复 PASS，原8种协议仍使用上一已通过回归。再次格式失败必须在第二候选结束，不能追加第三次。控制证明只说明恢复可以合法执行，真实模型收敛尚待新冻结资格。

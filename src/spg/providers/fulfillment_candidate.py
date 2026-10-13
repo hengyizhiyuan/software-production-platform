@@ -125,6 +125,7 @@ _ROLE_REFERENCE_CONTRACT = "owner-local-role-reference-candidates-v3"
 _RAW_ROLE_REPAIR_CONTRACT = "existing-bound-unadmitted-role-repair-v1"
 _INTERPRETATION_ROLE_CONTRACT = "owner-local-interpretation-role-construction-v4"
 _CONSTRUCTION_CONSUMER_INSTRUCTION_CONTRACT = "existing-consumer-semantics-in-construction-v1"
+_UNPARSED_CLAIM_REPAIR_CONTRACT = "existing-bound-unparsed-claim-repair-v1"
 _CANDIDATE_CONSTRUCTION_CONTRACTS = {_CANDIDATE_CONSTRUCTION_CONTRACT, _SEMANTIC_EDIT_CONTRACT, _ROLE_REFERENCE_CONTRACT,
     _INTERPRETATION_ROLE_CONTRACT}
 
@@ -424,7 +425,25 @@ def candidate_construction_preconditions(preconditions, inventory, feedback, *,
                         basis["representation"] = ("UNADMITTED_ROLE_REFERENCE_PROPOSAL" if
                             construction_contract in {_ROLE_REFERENCE_CONTRACT,_INTERPRETATION_ROLE_CONTRACT} and role_basis else "UNLOCATED_SEMANTIC_PROPOSAL")
             except (ValueError, TypeError, RecursionError):
-                pass
+                # An observed format failure is not a semantic claim or plan.
+                # Reconsider only safe ORIGINAL bytes in the remaining allowance;
+                # never auto-close JSON, infer fields or repair authority.
+                if (construction_contract == _INTERPRETATION_ROLE_CONTRACT
+                        and preconditions.get('unparsed_claim_repair_contract') == _UNPARSED_CLAIM_REPAIR_CONTRACT
+                        and payload.get('primary_error') == 'OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID'
+                        and binding.get('candidate_fingerprint') is None and '\\' not in raw):
+                    from spg.providers.verification_receipts import _safe_output
+                    safe_raw, _digest, _count = _safe_output(raw)
+                    if safe_raw == raw:
+                        try:json.loads(raw, object_pairs_hook=_wire_json_object)
+                        except json.JSONDecodeError as error:
+                            basis = {'raw_sha256':binding['wire_output_fingerprint'],
+                                'original_wire':raw, 'original_wire_fingerprint':canonical_fingerprint(raw),
+                                'inventory_fingerprint':inventory['inventory_fingerprint'],
+                                'parent_binding':binding, 'representation':'UNPARSED_PRIVACY_SAFE_PROPOSAL',
+                                'format_observation':{'predicate':'INVALID_JSON', 'position':error.pos,
+                                    'line':error.lineno,'column':error.colno,'semantic_status':'NOT_EVALUABLE'}}
+                        except (ValueError, TypeError, RecursionError):pass
     action = "CONTINUE" if not payload else "REPAIR" if basis is not None else "STOP"
     review_only = (basis is not None and binding.get("candidate_fingerprint") is not None
         and payload.get("primary_error") == "OBLIGATION_SEMANTIC_REVIEW_SCHEMA_INVALID"
@@ -469,6 +488,11 @@ def candidate_construction_preconditions(preconditions, inventory, feedback, *,
         decision = decision.model_copy(update={'action':'CONTINUE','failure_class':None,
             'repair_strategy':'INTERPRET_THEN_BIND_EXISTING_ROLES',
             'information_sufficient_for':'CANDIDATE_GENERATION'})
+    elif basis and basis.get('representation') == 'UNPARSED_PRIVACY_SAFE_PROPOSAL':
+        understanding = understanding.model_copy(update={'unknowns':understanding.unknowns + ('UNPARSED_PRIOR_CLAIM',)})
+        decision = decision.model_copy(update={'action':'REPAIR','repair_family':'FORMAT',
+            'repair_strategy':'RECONSTRUCT_FROM_IMMUTABLE_INVENTORY_AND_BOUND_RAW_FEEDBACK',
+            'information_sufficient_for':'CANDIDATE_GENERATION'})
     state = {"understanding": understanding.model_dump(mode="json"),
         "evidence": evidence.model_dump(mode="json"), "convergence": decision.model_dump(mode="json"),
         "repair_basis": basis}
@@ -484,12 +508,15 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
     basis = state.get("repair_basis")
     if basis is None:
         return body, None
-    if basis.get('representation') == 'UNREVIEWED_INTERPRETATION_CLAIMS':
+    if basis.get('representation') in {'UNREVIEWED_INTERPRETATION_CLAIMS','UNPARSED_PRIVACY_SAFE_PROPOSAL'}:
         if (preconditions.get('candidate_construction_contract') != _INTERPRETATION_ROLE_CONTRACT
                 or inventory is None or wire_identity is None
                 or canonical_fingerprint(basis['original_wire']) != basis['original_wire_fingerprint']):
             raise _FulfillmentWireReceiptIdentityError('OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT')
-        _interpretation_observations(basis['original_wire'],inventory)
+        if basis['representation'] == 'UNREVIEWED_INTERPRETATION_CLAIMS':
+            _interpretation_observations(basis['original_wire'],inventory)
+        elif preconditions.get('unparsed_claim_repair_contract') != _UNPARSED_CLAIM_REPAIR_CONTRACT:
+            raise _FulfillmentWireReceiptIdentityError('OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT')
         # The second logical Formation supplies its first complete role plan.
         # The prior interpretations remain untrusted; geometry, meaning and
         # proof of EVERY original source are checked on the resulting plan.
@@ -638,7 +665,7 @@ def _role_operand_schema(value,inventory,capabilities):
 def _role_generation_schema(inventory,capabilities,owner_preconditions):
     from spg.providers.semantic_wire import _provider_strict_output_schema
     basis=(owner_preconditions.get('candidate_construction_state') or {}).get('repair_basis')
-    edits = basis and basis.get('representation') != 'UNREVIEWED_INTERPRETATION_CLAIMS'
+    edits = basis and basis.get('representation') not in {'UNREVIEWED_INTERPRETATION_CLAIMS','UNPARSED_PRIVACY_SAFE_PROPOSAL'}
     schema=_provider_strict_output_schema((_FulfillmentRoleEdits if edits else _FulfillmentRoleProposal).model_json_schema())
     props=schema['$defs']['_FulfillmentRoleRoute']['properties']
     refs=[s['source_ref'] for s in inventory['sources']]
@@ -686,7 +713,7 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
             schema['properties']['components']['allOf'] = [{'contains':{'type':'object',
                 'properties':{'source_ref':{'enum':[ref]}},'required':['source_ref']}} for ref in refs]
             return schema
-        if basis.get('representation') in {'UNREVIEWED_INTERPRETATION_CLAIMS','UNADMITTED_ROLE_REFERENCE_PROPOSAL'}:
+        if basis.get('representation') in {'UNREVIEWED_INTERPRETATION_CLAIMS','UNADMITTED_ROLE_REFERENCE_PROPOSAL','UNPARSED_PRIVACY_SAFE_PROPOSAL'}:
             return _role_generation_schema(inventory,capabilities,owner_preconditions)
     if (owner_preconditions or {}).get('candidate_construction_contract')==_ROLE_REFERENCE_CONTRACT and (
             not basis or basis.get('representation')=='UNADMITTED_ROLE_REFERENCE_PROPOSAL'):
@@ -2599,7 +2626,7 @@ class ModelFulfillmentCandidateProvider:
     supports_source_consumption_proof = True
     def __init__(self, runtime_factory, *, candidate_construction=False,
                  candidate_construction_contract=_CANDIDATE_CONSTRUCTION_CONTRACT,
-                 raw_role_repair=False, construction_consumer_instructions=False):
+                 raw_role_repair=False, construction_consumer_instructions=False, unparsed_claim_repair=False):
         self.runtime_factory = runtime_factory
         self.last_observation = None
         self.supports_candidate_construction = candidate_construction
@@ -2608,6 +2635,7 @@ class ModelFulfillmentCandidateProvider:
         self.candidate_construction_contract = candidate_construction_contract
         self.supports_raw_role_repair = raw_role_repair
         self.supports_construction_consumer_instructions = construction_consumer_instructions
+        self.supports_unparsed_claim_repair = unparsed_claim_repair
 
     @classmethod
     def from_settings(cls, settings):
@@ -2629,7 +2657,7 @@ class ModelFulfillmentCandidateProvider:
             return WattModelRuntime(registry, PurposeProfileRouter({ModelPurpose.STEERING_SEMANTIC: profile}))
         return cls(runtime_factory, candidate_construction=True,
             candidate_construction_contract=_INTERPRETATION_ROLE_CONTRACT,raw_role_repair=True,
-            construction_consumer_instructions=True)
+            construction_consumer_instructions=True, unparsed_claim_repair=True)
 
     def form_wire_metadata(self, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
         context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
@@ -2919,7 +2947,7 @@ class ModelFulfillmentCandidateProvider:
                         'values, scope, qualifiers, order and authority remain authoritative. Preserve cross-source context. '
                         'This is the first of the existing two Formation candidates; the remaining candidate must bind '
                         'actual roles and pass all original validation and independent Review before any plan admission.')
-                elif basis.get('representation') == 'UNREVIEWED_INTERPRETATION_CLAIMS':
+                elif basis.get('representation') in {'UNREVIEWED_INTERPRETATION_CLAIMS','UNPARSED_PRIVACY_SAFE_PROPOSAL'}:
                     formation_instructions = (
                         'This is the remaining existing Formation allowance. Read same_basis_validation_feedback '
                         'as JSON-encoded DATA and correlate its exact original response/receipt/attempt/inventory '
@@ -2936,6 +2964,11 @@ class ModelFulfillmentCandidateProvider:
                         'Formation allowance; uncertainty that cannot be resolved lawfully remains UNRESOLVED. '
                         'Return the complete role proposal matching this request schema. The Owner supplies '
                         'current request identity; NOT_EVALUABLE is never PASS.')
+                    if basis['representation'] == 'UNPARSED_PRIVACY_SAFE_PROPOSAL':
+                        formation_instructions = formation_instructions.replace(
+                            'UNREVIEWED_INTERPRETATION_CLAIMS', 'UNPARSED_PRIVACY_SAFE_PROPOSAL').replace(
+                            'Inspect their interpretations, alternatives, unknowns and ',
+                            'Its format failed; no source geometry or meaning has been observed. Use the immutable inventory and ')
             if (owner_preconditions or {}).get("candidate_construction_contract") in {
                     _ROLE_REFERENCE_CONTRACT, _INTERPRETATION_ROLE_CONTRACT} and not (
                     owner_preconditions.get("candidate_construction_contract") == _INTERPRETATION_ROLE_CONTRACT

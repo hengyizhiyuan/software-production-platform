@@ -3153,6 +3153,12 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                                 "owner-local-role-reference-candidates-v3", "owner-local-interpretation-role-construction-v4"}):
                         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
                     restored_preconditions["construction_consumer_instruction_contract"] = _CONSTRUCTION_CONSUMER_INSTRUCTION_CONTRACT
+                if preconditions.get("unparsed_claim_repair_contract") is not None:
+                    from spg.providers.fulfillment_candidate import _UNPARSED_CLAIM_REPAIR_CONTRACT
+                    if (preconditions["unparsed_claim_repair_contract"] != _UNPARSED_CLAIM_REPAIR_CONTRACT
+                            or preconditions["candidate_construction_contract"] != "owner-local-interpretation-role-construction-v4"):
+                        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                    restored_preconditions["unparsed_claim_repair_contract"] = _UNPARSED_CLAIM_REPAIR_CONTRACT
                 restored_preconditions = candidate_construction_preconditions(
                     restored_preconditions, inventory, source_request.get("feedback"),
                     construction_contract=preconditions["candidate_construction_contract"])
@@ -3954,6 +3960,11 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     if consumer_instructions and construction_contract in {"owner-local-role-reference-candidates-v3","owner-local-interpretation-role-construction-v4"}:
                         from spg.providers.fulfillment_candidate import _CONSTRUCTION_CONSUMER_INSTRUCTION_CONTRACT
                         original_preconditions["construction_consumer_instruction_contract"] = _CONSTRUCTION_CONSUMER_INSTRUCTION_CONTRACT
+                    unparsed_repair = (getattr(provider, "supports_unparsed_claim_repair", False) if initial_request is None
+                        else (initial_request.get("owner_source_preconditions") or {}).get("unparsed_claim_repair_contract") is not None)
+                    if unparsed_repair and construction_contract == "owner-local-interpretation-role-construction-v4":
+                        from spg.providers.fulfillment_candidate import _UNPARSED_CLAIM_REPAIR_CONTRACT
+                        original_preconditions["unparsed_claim_repair_contract"] = _UNPARSED_CLAIM_REPAIR_CONTRACT
                     precondition_arguments["owner_preconditions"] = candidate_construction_preconditions(
                         original_preconditions, inventory, feedback, construction_contract=construction_contract)
                     decision = precondition_arguments["owner_preconditions"]["candidate_construction_state"]["convergence"]
