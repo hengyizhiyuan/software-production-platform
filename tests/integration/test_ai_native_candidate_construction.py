@@ -22,7 +22,8 @@ from tests.test_c3_source_consumption_proof import fixture_review_proof
 pytestmark = pytest.mark.postgresql
 
 
-def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(postgres_database, tmp_path, monkeypatch):
+@pytest.mark.parametrize('construction_contract',('owner-local-wire-candidate-edits-v1','owner-local-semantic-candidate-edits-v2'))
+def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(postgres_database, tmp_path, monkeypatch,construction_contract):
     declared = c1.DeclaredC1Fulfillment()
     calls = []
     inventories = []
@@ -47,14 +48,17 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
                     for row in wire["routes"]]})
             else:
                 basis = payload["owner_source_preconditions"]["candidate_construction_state"]["repair_basis"]
+                replacement=wire['routes'][0]
+                if basis.get('representation')=='UNLOCATED_SEMANTIC_PROPOSAL':
+                    replacement={k:v for k,v in replacement.items() if k not in {'a','z'}}
                 output = json.dumps({"v":1,"h":wire["h"],"d":wire["d"],"basis":basis["raw_sha256"],
-                    "replace":[{"index":0,"route":wire["routes"][0]}],"remove":[],"append":[]})
+                    "replace":[{"index":0,"route":replacement}],"remove":[],"append":[]})
         return StructuredModelResult(output_text=output,provider=ModelProvider.DEEPSEEK,
             requested_model="controlled-pg-edit",effective_model="controlled-pg-edit",
             request_id=f"pg-edit-{len(calls)}",usage=ModelUsage(unknown=True),timing=ModelTiming(),retry_count=0)
 
     provider = ModelFulfillmentCandidateProvider(lambda:SimpleNamespace(generate=generate,close=lambda:None),
-        candidate_construction=True)
+        candidate_construction=True,candidate_construction_contract=construction_contract)
     monkeypatch.setattr(c1,"DeclaredC1Fulfillment",lambda:provider)
     class DurableEditObserved(BaseException):
         pass

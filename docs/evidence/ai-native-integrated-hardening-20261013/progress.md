@@ -113,3 +113,15 @@ Human 明确指定当前 C3 分支为后续相关能力的统一开发与验证�
 已核对并增量迁移 Admin 分析入口/交互、状态/历史、报告 Tabs、安全引用与 Markdown/诊断下载及对应 JS 回归，复用已迁 API/Owner 持久化与 Native 调查能力。前端 38/38 通过。Guardian 独立仓库与治理边界不变。
 
 上一轮 `31028c15` image `f18b6021...` 的安装身份 PASS，但 installed test suite 421 PASS/2 FAIL：崩溃锁 fixture 预期构造服务立即创建目录；UI 测试从测试树猜测 src 路径。修正测试准备与 installed resource 读取后局部 2/2 PASS；不修改 Runtime 或将原镜像测试 FAIL 追认为 PASS。原 receipt 与修正分别保留；下一冻结包括 UI 迁移和这两项测试修正。
+
+## 语义提案局部恢复资格
+
+统一 UI 源码 `6545b19b` / Tree `496c7b5d69b0b8c1b61d5dcefe259e2ad9b732e9` / image `sha256:9f3879c2ba7d33a4936a318a8444b525df02b72aa033f6b9289538fc4f93f625` 安装资格与镜像内 423 项受影响回归 PASS。
+
+第三次非 Holdout 对照两项均初次引文不存在，QUOTE_NOT_OBSERVED 正确拒绝；原修复机制将未能定位的安全语义提案认定无可用 basis，提前停止，未进入第二次 Formation/Review。不可记 PASS，也不能自动定位不存在的文字。
+
+已在既有模块修复这一恢复前提：新协商的临时候选编辑 v2 保留安全且结构完整的原始语义提案为 UNLOCATED_SEMANTIC_PROPOSAL；不是原文证明或 Fact。模型可在原第二候选额度内明确修改引用/消费者/来源选项，Owner 不自动修补语义；全部新引用精确定位后才构造正式 Wire v1，继续原 Validator/独立 Review。诊断包括所有可评估的 quote 失败、route/source/fingerprint，UNKNOWN 和 NOT_EVALUABLE 不转为证据。
+
+v2 是模块内部临时候选与恢复协议，不新增 Engineering Fact/Owner/状态机、正式 Wire Schema 或模型阶段/预算。已持久的 v1 请求按其原协议重算，不因新 Provider 默认而升级，库存/反馈/Attempt/原始 Wire 与持久收据仍精确绑定。隐藏推理及任意原始私有 Human 输入不进入公开报告。
+
+`semantic-unlocated-repair-1.xml` 100/100 受控定向 PASS；`postgresql-semantic-unlocated-1.xml` 2/2 PASS，分别覆盖 v1/v2 已观测第二编辑后的剩余 Review 恢复及终态重放。错误引用、删必要组件、重复原始 JSON key、无进展、错误父 basis、错误版本/身份继续拒绝。能力必须在下一确切镜像取得实际资格，未提前声明 C3 Closure。

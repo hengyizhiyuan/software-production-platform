@@ -3001,15 +3001,16 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                     "OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT") from error
             if preconditions.get("candidate_construction_contract") is not None:
                 from spg.providers.fulfillment_candidate import (
-                    _CANDIDATE_CONSTRUCTION_CONTRACT, candidate_construction_preconditions)
-                if preconditions["candidate_construction_contract"] != _CANDIDATE_CONSTRUCTION_CONTRACT:
+                    _CANDIDATE_CONSTRUCTION_CONTRACTS, candidate_construction_preconditions)
+                if preconditions["candidate_construction_contract"] not in _CANDIDATE_CONSTRUCTION_CONTRACTS:
                     raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
                 source_request = next((r for r in rows if r.get("stage") == "MODEL_REQUEST_PENDING"
                     and r.get("attempt") == row.get("attempt")), None)
                 if source_request is None:
                     raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
                 restored_preconditions = candidate_construction_preconditions(
-                    restored_preconditions, inventory, source_request.get("feedback"))
+                    restored_preconditions, inventory, source_request.get("feedback"),
+                    construction_contract=preconditions["candidate_construction_contract"])
             if preconditions != restored_preconditions:
                 raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if (row.get("stage") == "MODEL_RESPONSE_OBSERVED" and row.get("candidate_retained") is True
@@ -3621,7 +3622,8 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
             "meaning": "derived binding only; no evidence PASS, authority or effect"}
         first_request = next((r for r in rows if r["stage"] == "MODEL_REQUEST_PENDING"), None)
         if ((first_request or {}).get("owner_source_preconditions") or {}).get(
-                "candidate_construction_contract") == "owner-local-wire-candidate-edits-v1":
+                "candidate_construction_contract") in {
+                    "owner-local-wire-candidate-edits-v1", "owner-local-semantic-candidate-edits-v2"}:
             from spg.domain.refinement_contract import OwnerConvergenceDecision
             state = first_request["owner_source_preconditions"]["candidate_construction_state"]
             receipt["understanding_state"] = {**state["understanding"],
@@ -3774,16 +3776,19 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                         actual_preconditions["module_adaptation_contract"] = "existing-source-component-convergence-v1"
                     source_contract = ("v3" if precondition_arguments["owner_preconditions"].get("typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v2" if precondition_arguments["owner_preconditions"].get(
                         "typed_prerequisite_contract") in {"existing-owner-typed-prerequisites-v4", "existing-owner-typed-prerequisites-v5", "existing-owner-typed-prerequisites-v6", "existing-owner-typed-prerequisites-v7", "existing-owner-typed-prerequisites-v8", "existing-owner-typed-prerequisites-v9", "existing-owner-typed-prerequisites-v10", "existing-owner-typed-prerequisites-v11"} else "v1")
-                construction_enabled = (getattr(provider, "supports_candidate_construction", False)
+                construction_contract = (getattr(provider, "candidate_construction_contract", "owner-local-wire-candidate-edits-v1")
                     if initial_request is None else (initial_request.get("owner_source_preconditions") or {}).get(
-                        "candidate_construction_contract") == "owner-local-wire-candidate-edits-v1")
+                        "candidate_construction_contract"))
+                construction_enabled = (getattr(provider, "supports_candidate_construction", False)
+                    if initial_request is None else construction_contract in {
+                        "owner-local-wire-candidate-edits-v1", "owner-local-semantic-candidate-edits-v2"})
                 if construction_enabled and precondition_arguments:
                     from spg.providers.fulfillment_candidate import candidate_construction_preconditions
                     original_preconditions = {key: value for key, value in
                         precondition_arguments["owner_preconditions"].items() if key not in {
                             "candidate_construction_contract", "candidate_construction_state"}}
                     precondition_arguments["owner_preconditions"] = candidate_construction_preconditions(
-                        original_preconditions, inventory, feedback)
+                        original_preconditions, inventory, feedback, construction_contract=construction_contract)
                     decision = precondition_arguments["owner_preconditions"]["candidate_construction_state"]["convergence"]
                     if decision["action"] == "STOP":
                         recorder.append("FORMATION_STOPPED", attempt, terminal=True, validation_passed=False,

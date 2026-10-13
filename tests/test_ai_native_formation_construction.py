@@ -16,7 +16,7 @@ from tests.test_c3_semantic_contract_calibration import review
 from tests.test_c3_source_consumption_proof import fixture_review_proof
 
 
-def local_edit_case(scale="small", outcome="repair", first="source-proof"):
+def local_edit_case(scale="small", outcome="repair", first="source-proof", *, semantic_edits=False):
     rev, ir, inventory, plan = controlled_capacity_case(scale)
     snapshots = deepcopy((rev, ir, inventory, plan))
     calls = []
@@ -61,15 +61,21 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof"):
                     wire["routes"].append(duplicate)
                 elif first == "semantic-coverage":
                     wire["routes"].pop(touched)
+                elif first == "semantic-quote":
+                    wire["routes"][touched]["q"] = "a quote that was never in the immutable source"
                 old_wire = deepcopy(wire)
                 proposal = ({"routes":[{k:v for k,v in row.items() if k not in {"a","z"}}
                     for row in wire["routes"]]} if first.startswith("semantic-") else wire)
+                if semantic_edits and first.startswith("semantic-"):
+                    old_wire["routes"] = deepcopy(proposal["routes"])
                 output = json.dumps(proposal, ensure_ascii=False)
             else:
                 assert state["convergence"]["action"] == "REPAIR"
                 basis = state["repair_basis"]
                 assert basis["original_wire"] == old_wire
                 replacement = deepcopy(wire["routes"][touched])
+                if basis.get("representation") == "UNLOCATED_SEMANTIC_PROPOSAL":
+                    replacement = {k:v for k,v in replacement.items() if k not in {"a","z"}}
                 edit = {"v":1,"h":wire["h"],"d":wire["d"],"basis":basis["raw_sha256"],
                     "replace":[{"index":touched,"route":replacement}],"remove":[],"append":[]}
                 if outcome == "repeat":
@@ -114,7 +120,9 @@ def local_edit_case(scale="small", outcome="repair", first="source-proof"):
             timing=ModelTiming(), retry_count=0)
 
     provider = ModelFulfillmentCandidateProvider(
-        lambda: SimpleNamespace(generate=generate, close=lambda: None), candidate_construction=True)
+        lambda: SimpleNamespace(generate=generate, close=lambda: None), candidate_construction=True,
+        candidate_construction_contract="owner-local-semantic-candidate-edits-v2" if semantic_edits else
+            "owner-local-wire-candidate-edits-v1")
     kwargs = dict(provider=provider, exact_target_paths=inventory["exact_target_paths"])
     bindings = app.form_fulfillment_projection(rev, ir, **kwargs)
     assert (rev, ir, inventory, plan) == snapshots
@@ -313,3 +321,40 @@ def test_semantic_and_edit_schemas_keep_existing_conditional_owner_proofs():
     operand = edit_schema["properties"]["append"]["items"]
     assert operand == edit_schema["$defs"]["_FulfillmentRouteReplacement"]["properties"]["route"]
     assert operand["allOf"][0]["$ref"] == "#/$defs/_FulfillmentCompactRoute"
+
+
+def test_unlocated_semantic_quote_is_repairable_with_exact_raw_lineage_and_no_span_backfill():
+    bindings,provider,calls,args,touched,original = local_edit_case(first="semantic-quote",semantic_edits=True)
+    assert all(b.state!='UNRESOLVED' for b in bindings) and len(calls)==3
+    rejected = next(r for r in provider._fulfillment_receipts if r['stage']=='CANDIDATE_VALIDATED' and r['attempt']==1)
+    feedback = json.loads(rejected['validation_feedback'])
+    failure = next(v for v in feedback['violations'] if v['code']=='OBLIGATION_COMPONENT_QUOTE_NOT_OBSERVED')
+    assert failure['route']==touched and failure['source']==original['routes'][touched]['s']
+    assert failure['location_status'].startswith('UNKNOWN')
+    observed = next(r for r in provider._fulfillment_receipts if r['stage']=='MODEL_RESPONSE_OBSERVED' and r['attempt']==2)
+    edit = json.loads(observed['candidate_output'])
+    assert 'a' not in edit['replace'][0]['route'] and 'z' not in edit['replace'][0]['route']
+    state=calls[1][1]['owner_source_preconditions']['candidate_construction_state']
+    assert state['repair_basis']['representation']=='UNLOCATED_SEMANTIC_PROPOSAL'
+    assert state['repair_basis']['raw_sha256']==feedback['repair_feedback_binding']['wire_output_fingerprint']
+    assert state['convergence']['repair_family']=='SOURCE_CORRESPONDENCE'
+    rev,ir,kwargs=args
+    assert all(b.state!='UNRESOLVED' for b in app.form_fulfillment_projection(rev,ir,**kwargs))
+    assert len(calls)==3
+
+
+@pytest.mark.parametrize('outcome',('repeat','drop','basis','wrong-header','duplicate-key'))
+def test_unlocated_semantic_edits_do_not_admit_unknown_quotes_or_erase_requirements(outcome):
+    bindings,provider,calls,_args,_touched,_original = local_edit_case(
+        first='semantic-quote',semantic_edits=True,outcome=outcome)
+    assert all(b.state=='UNRESOLVED' for b in bindings) and len(calls)==2
+    assert not any(r['stage']=='SEMANTIC_REVIEW_PENDING' for r in provider._fulfillment_receipts)
+
+
+def test_old_construction_receipt_replays_under_new_provider_without_protocol_upgrade():
+    bindings,provider,calls,args,_touched,_original = local_edit_case(first='semantic-source-proof')
+    provider.candidate_construction_contract='owner-local-semantic-candidate-edits-v2'
+    rev,ir,kwargs=args
+    replay=app.form_fulfillment_projection(rev,ir,**kwargs)
+    assert all(b.state!='UNRESOLVED' for b in replay) and len(calls)==3
+    assert replay[0].formation_receipt['candidate_attempts']==bindings[0].formation_receipt['candidate_attempts']

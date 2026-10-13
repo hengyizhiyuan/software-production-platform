@@ -120,6 +120,8 @@ class _FulfillmentCompactCandidate(BaseModel):
 
 
 _CANDIDATE_CONSTRUCTION_CONTRACT = "owner-local-wire-candidate-edits-v1"
+_SEMANTIC_EDIT_CONTRACT = "owner-local-semantic-candidate-edits-v2"
+_CANDIDATE_CONSTRUCTION_CONTRACTS = {_CANDIDATE_CONSTRUCTION_CONTRACT, _SEMANTIC_EDIT_CONTRACT}
 
 
 class _FulfillmentSemanticRoute(BaseModel):
@@ -142,17 +144,26 @@ class _FulfillmentSemanticProposal(BaseModel):
 def _construct_semantic_proposal(value, inventory, wire_identity):
     proposal = _FulfillmentSemanticProposal.model_validate(value)
     routes = []
-    for item in proposal.routes:
+    failures = []
+    for index, item in enumerate(proposal.routes):
         if item.s >= len(inventory["sources"]):
             raise ValueError("OBLIGATION_FORMATION_WIRE_SOURCE_UNKNOWN")
         text = fulfillment_source_semantic_text(inventory["sources"][item.s])
         start = 0 if item.q is None else text.find(item.q)
         end = len(text) if item.q is None else start + len(item.q)
-        if start < 0 or end <= start:
-            raise ValueError("OBLIGATION_COMPONENT_QUOTE_NOT_OBSERVED")
-        if item.q is not None and text.find(item.q, start + 1) >= 0:
-            raise ValueError("OBLIGATION_COMPONENT_LOCATOR_AMBIGUOUS")
+        code = ("OBLIGATION_COMPONENT_QUOTE_NOT_OBSERVED" if start < 0 or end <= start else
+            "OBLIGATION_COMPONENT_LOCATOR_AMBIGUOUS" if item.q is not None and text.find(item.q, start + 1) >= 0 else None)
+        if code:
+            failures.append({"code":code,"route":index,"source":item.s,
+                "raw_route_fingerprint":canonical_fingerprint(item.model_dump(mode="json")),
+                "quote_sha256":sha256((item.q or "").encode()).hexdigest(),
+                "original_text_sha256":sha256(text.encode()).hexdigest(),
+                "location_status":"UNKNOWN; NO_QUOTE_OR_SPAN_REPAIR"})
+            continue
         routes.append({**item.model_dump(mode="json"), "a": start, "z": end})
+    if failures:
+        raise _FulfillmentWireValidationError(failures[0]["code"], {
+            "violations":failures[:64],"additional_violation_count":max(0,len(failures)-64)})
     wire = {"v": 1, "h": wire_identity["wire_request_fingerprint"],
         "d": wire_identity["wire_table_fingerprint"], "routes": routes}
     body = json.dumps(wire, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -184,7 +195,19 @@ class _FulfillmentCandidateEdits(BaseModel):
         return value
 
 
-def candidate_construction_preconditions(preconditions, inventory, feedback):
+class _FulfillmentSemanticReplacement(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    index: StrictInt = Field(ge=0)
+    route: _FulfillmentSemanticRoute
+
+
+class _FulfillmentSemanticEdits(_FulfillmentCandidateEdits):
+    replace: tuple[_FulfillmentSemanticReplacement, ...] = Field(max_length=64)
+    append: tuple[_FulfillmentSemanticRoute, ...] = Field(max_length=64)
+
+
+def candidate_construction_preconditions(preconditions, inventory, feedback, *,
+                                        construction_contract=_CANDIDATE_CONSTRUCTION_CONTRACT):
     """Reconstruct Owner-local state from exact records, without semantic repair."""
     from spg.domain.refinement_contract import (
         OwnerUnderstandingState, OwnerEvidenceState, OwnerConvergenceDecision)
@@ -209,6 +232,8 @@ def candidate_construction_preconditions(preconditions, inventory, feedback):
         claim_refs=tuple([binding["wire_output_fingerprint"]] if binding.get("wire_output_fingerprint") else []),
         missing_evidence=("INDEPENDENT_SEMANTIC_REVIEW", "APPLICABLE_FULFILLMENT_EVIDENCE"))
     basis = None
+    if construction_contract not in _CANDIDATE_CONSTRUCTION_CONTRACTS:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     if payload:
         raw = payload.get("untrusted_previous_wire")
         if (isinstance(raw, str) and binding.get("attempt") == 1
@@ -218,8 +243,18 @@ def candidate_construction_preconditions(preconditions, inventory, feedback):
             try:
                 text, _ = _fulfillment_wire_value(raw, preconditions)
                 original = json.loads(text, object_pairs_hook=_wire_json_object)
+                semantic_basis = False
                 if set(original) == {"routes"}:
-                    original, _ = _construct_semantic_proposal(original, inventory, binding)
+                    if construction_contract == _SEMANTIC_EDIT_CONTRACT:
+                        # Preserve a well-typed raw semantic proposal even when
+                        # its quote cannot be located. It is a claim, not source
+                        # proof. Only explicit model edits can repair it.
+                        original = {"v":1,"h":binding["wire_request_fingerprint"],
+                            "d":binding["wire_table_fingerprint"],
+                            **_FulfillmentSemanticProposal.model_validate(original).model_dump(mode="json")}
+                        semantic_basis = True
+                    else:
+                        original, _ = _construct_semantic_proposal(original, inventory, binding)
                 if (set(original) == {"v", "h", "d", "routes"} and type(original["v"]) is int
                         and original["v"] == 1
                         and original["h"] == binding.get("wire_request_fingerprint")
@@ -231,6 +266,8 @@ def candidate_construction_preconditions(preconditions, inventory, feedback):
                         "original_wire": original, "original_wire_fingerprint": canonical_fingerprint(original),
                         "inventory_fingerprint": inventory["inventory_fingerprint"],
                         "parent_binding": binding}
+                    if semantic_basis:
+                        basis["representation"] = "UNLOCATED_SEMANTIC_PROPOSAL"
             except (ValueError, TypeError, RecursionError):
                 pass
     action = "CONTINUE" if not payload else "REPAIR" if basis is not None else "STOP"
@@ -247,7 +284,8 @@ def candidate_construction_preconditions(preconditions, inventory, feedback):
                 "OBLIGATION_PROJECTION_DUPLICATE_ROUTE"}:
             families.add("SEMANTIC_CONFLICT")
         elif (error.startswith("OBLIGATION_SUPPORTING_SOURCE_") or error.startswith("OBLIGATION_SOURCE_")
-                or error == "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST"):
+                or error in {"OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+                    "OBLIGATION_COMPONENT_QUOTE_NOT_OBSERVED", "OBLIGATION_COMPONENT_LOCATOR_AMBIGUOUS"}):
             families.add("SOURCE_CORRESPONDENCE")
         elif error.startswith("OBLIGATION_SEMANTIC_REVIEW_"):
             families.add("SEMANTIC_REVIEW")
@@ -271,18 +309,22 @@ def candidate_construction_preconditions(preconditions, inventory, feedback):
         "repair_basis": basis}
     if _safe_value(state) != state:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
-    return {**preconditions, "candidate_construction_contract": _CANDIDATE_CONSTRUCTION_CONTRACT,
+    return {**preconditions, "candidate_construction_contract": construction_contract,
         "candidate_construction_state": state}
 
 
-def _construct_local_candidate(body, preconditions):
+def _construct_local_candidate(body, preconditions, *, inventory=None):
     """Apply only explicit model edits to the bound old proposal, never admit."""
     state = preconditions.get("candidate_construction_state") or {}
     basis = state.get("repair_basis")
     if basis is None:
         return body, None
+    semantic_basis = basis.get("representation") == "UNLOCATED_SEMANTIC_PROPOSAL"
+    if semantic_basis and preconditions.get("candidate_construction_contract") != _SEMANTIC_EDIT_CONTRACT:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
     try:
-        proposal = _FulfillmentCandidateEdits.model_validate(json.loads(body, object_pairs_hook=_wire_json_object))
+        model = _FulfillmentSemanticEdits if semantic_basis else _FulfillmentCandidateEdits
+        proposal = model.model_validate(json.loads(body, object_pairs_hook=_wire_json_object))
     except ValueError as error:
         raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID") from error
     if proposal.basis != basis["raw_sha256"]:
@@ -305,10 +347,15 @@ def _construct_local_candidate(body, preconditions):
     if canonical_fingerprint(routes) == canonical_fingerprint(original["routes"]) and not review_only:
         raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_NO_PROGRESS")
     wire = {"v": 1, "h": proposal.h, "d": proposal.d, "routes": routes}
+    if semantic_basis:
+        if inventory is None:
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
+        wire, _ = _construct_semantic_proposal({"routes":routes}, inventory,
+            {"wire_request_fingerprint":proposal.h,"wire_table_fingerprint":proposal.d})
     # JSONB may reorder object keys on restart. Derived bytes must be stable;
     # original Provider bytes remain unchanged in their separate receipt.
     constructed = json.dumps(wire, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    return constructed, {"contract": _CANDIDATE_CONSTRUCTION_CONTRACT,
+    return constructed, {"contract": preconditions["candidate_construction_contract"],
         "parent_wire_sha256": basis["raw_sha256"], "parent_binding": basis["parent_binding"],
         "edit_response_sha256": sha256(body.encode()).hexdigest(),
         "constructed_wire_sha256": sha256(constructed.encode()).hexdigest(),
@@ -369,21 +416,26 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
     """
     if (owner_preconditions or {}).get("candidate_construction_state", {}).get("repair_basis"):
         from spg.providers.semantic_wire import _provider_strict_output_schema
-        schema = _provider_strict_output_schema(_FulfillmentCandidateEdits.model_json_schema())
+        semantic_basis = owner_preconditions["candidate_construction_state"]["repair_basis"].get(
+            "representation") == "UNLOCATED_SEMANTIC_PROPOSAL"
+        model = _FulfillmentSemanticEdits if semantic_basis else _FulfillmentCandidateEdits
+        definition = "_FulfillmentSemanticRoute" if semantic_basis else "_FulfillmentCompactRoute"
+        replacement_definition = "_FulfillmentSemanticReplacement" if semantic_basis else "_FulfillmentRouteReplacement"
+        schema = _provider_strict_output_schema(model.model_json_schema())
         for field, key in (("h", "wire_request_fingerprint"), ("d", "wire_table_fingerprint")):
             schema["properties"][field]["enum"] = [wire_metadata[key]]
         schema["properties"]["basis"]["enum"] = [owner_preconditions["candidate_construction_state"]["repair_basis"]["raw_sha256"]]
-        _project_construction_route_contract(schema, "_FulfillmentCompactRoute", inventory, capabilities)
+        _project_construction_route_contract(schema, definition, inventory, capabilities)
         schema["properties"]["remove"]["description"] = (
             "Explicit original-route removals only. Removal is not a coverage repair: the complete derived candidate must retain every original contribution and pass unchanged validation.")
         if (owner_preconditions or {}).get("semantic_selection_input_contract") == _PRIMARY_MEANING_INPUT_CONTRACT:
             choices = _formation_binding_choices(inventory, capabilities, owner_preconditions)
             operand = _qualified_operand_generation_schema(inventory, capabilities, choices,
-                enforce_owner_prerequisites=True)
-            schema["$defs"]["_FulfillmentRouteReplacement"]["properties"]["route"] = deepcopy(operand)
+                enforce_owner_prerequisites=True, route_definition=definition)
+            schema["$defs"][replacement_definition]["properties"]["route"] = deepcopy(operand)
             schema["properties"]["append"]["items"] = deepcopy(operand)
         return schema
-    if (owner_preconditions or {}).get("candidate_construction_contract") == _CANDIDATE_CONSTRUCTION_CONTRACT:
+    if (owner_preconditions or {}).get("candidate_construction_contract") in _CANDIDATE_CONSTRUCTION_CONTRACTS:
         from spg.providers.semantic_wire import _provider_strict_output_schema
         schema = _provider_strict_output_schema(_FulfillmentSemanticProposal.model_json_schema())
         _project_construction_route_contract(schema, "_FulfillmentSemanticRoute", inventory, capabilities)
@@ -2032,13 +2084,16 @@ def _fulfillment_wire_value(output, owner_preconditions=None, *, construct=True,
         "inner_utf8_byte_range": [len(output[:start].encode()), len(output[:end].encode())],
         "inner_sha256": sha256(body.encode()).hexdigest(), "inner_bytes": len(body.encode()),
         "disposition": "DERIVED_REPRESENTATION_ONLY; ALL_VALIDATION_AND_AUTHORITY_GATES_REQUIRED"}
-    if construct and (owner_preconditions or {}).get("candidate_construction_contract") == _CANDIDATE_CONSTRUCTION_CONTRACT:
+    if construct and (owner_preconditions or {}).get("candidate_construction_contract") in _CANDIDATE_CONSTRUCTION_CONTRACTS:
         try:
-            body, construction = _construct_local_candidate(body, owner_preconditions)
+            body, construction = _construct_local_candidate(body, owner_preconditions, inventory=inventory)
         except ValueError as error:
             code = re.search(r"OBLIGATION_[A-Z0-9_]+", str(error))
             construction = {"rejected": True, "code": code.group() if code else
                 "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID"}
+            if isinstance(error, _FulfillmentWireValidationError) and owner_preconditions.get(
+                    "candidate_construction_contract") == _SEMANTIC_EDIT_CONTRACT:
+                construction["diagnostics"] = error.diagnostics
         if construction is not None:
             presentation["candidate_construction"] = construction
         elif inventory is not None and wire_identity is not None:
@@ -2048,7 +2103,7 @@ def _fulfillment_wire_value(output, owner_preconditions=None, *, construct=True,
                     original_body = body
                     _wire, body = _construct_semantic_proposal(proposal, inventory, wire_identity)
                     presentation["candidate_construction"] = {
-                        "contract": _CANDIDATE_CONSTRUCTION_CONTRACT, "representation": "SEMANTIC_QUOTE_PROPOSAL",
+                        "contract": owner_preconditions["candidate_construction_contract"], "representation": "SEMANTIC_QUOTE_PROPOSAL",
                         "proposal_sha256": sha256(original_body.encode()).hexdigest(),
                         "constructed_wire_sha256": sha256(body.encode()).hexdigest(),
                         "inventory_fingerprint": inventory["inventory_fingerprint"],
@@ -2057,6 +2112,9 @@ def _fulfillment_wire_value(output, owner_preconditions=None, *, construct=True,
                 code = re.search(r"OBLIGATION_[A-Z0-9_]+", str(error))
                 presentation["candidate_construction"] = {"rejected": True,
                     "code": code.group() if code else "OBLIGATION_FORMATION_WIRE_SCHEMA_INVALID"}
+                if isinstance(error, _FulfillmentWireValidationError) and owner_preconditions.get(
+                        "candidate_construction_contract") == _SEMANTIC_EDIT_CONTRACT:
+                    presentation["candidate_construction"]["diagnostics"] = error.diagnostics
     return body, presentation
 
 
@@ -2065,10 +2123,11 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
     """Expand only metadata; all semantic route choices remain model candidates."""
     from spg.providers.verification_receipts import _safe_output, _safe_value
     context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
-    if (owner_preconditions or {}).get("candidate_construction_contract") == _CANDIDATE_CONSTRUCTION_CONTRACT:
+    if (owner_preconditions or {}).get("candidate_construction_contract") in _CANDIDATE_CONSTRUCTION_CONTRACTS:
         base = {k: v for k, v in owner_preconditions.items() if k not in {
             "candidate_construction_contract", "candidate_construction_state"}}
-        if candidate_construction_preconditions(base, inventory, validation_feedback) != owner_preconditions:
+        if candidate_construction_preconditions(base, inventory, validation_feedback,
+                construction_contract=owner_preconditions["candidate_construction_contract"]) != owner_preconditions:
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
     if wire_metadata is not None and any(wire_metadata.get(key) != context[key]
             for key in _FULFILLMENT_WIRE_METADATA_KEYS):
@@ -2088,7 +2147,8 @@ def _decode_fulfillment_candidate_wire(output, inventory, capabilities, *,
         raise _FulfillmentWireValidationError(code, {**diagnostic_basis,
             "violations": [{"code": code}], "additional_violation_count": 0,
             "not_evaluable": ["CANONICAL_COMPONENT_VALIDATION", "INDEPENDENT_SEMANTIC_REVIEW",
-                "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"]})
+                "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"],
+            **presentation["candidate_construction"].get("diagnostics", {})})
     if presentation is not None:
         diagnostic_basis["wire_presentation"] = presentation
     try:
@@ -2211,10 +2271,14 @@ def _safe_fulfillment_response_output(text, *, owner_preconditions=None):
 
 class ModelFulfillmentCandidateProvider:
     supports_source_consumption_proof = True
-    def __init__(self, runtime_factory, *, candidate_construction=False):
+    def __init__(self, runtime_factory, *, candidate_construction=False,
+                 candidate_construction_contract=_CANDIDATE_CONSTRUCTION_CONTRACT):
         self.runtime_factory = runtime_factory
         self.last_observation = None
         self.supports_candidate_construction = candidate_construction
+        if candidate_construction_contract not in _CANDIDATE_CONSTRUCTION_CONTRACTS:
+            raise ValueError("OBLIGATION_FORMATION_CONSTRUCTION_CONTRACT_UNKNOWN")
+        self.candidate_construction_contract = candidate_construction_contract
 
     @classmethod
     def from_settings(cls, settings):
@@ -2234,7 +2298,8 @@ class ModelFulfillmentCandidateProvider:
                 timeout_seconds=settings.collaboration_provider_timeout_seconds,
                 max_output_tokens=settings.collaboration_provider_max_output_tokens)
             return WattModelRuntime(registry, PurposeProfileRouter({ModelPurpose.STEERING_SEMANTIC: profile}))
-        return cls(runtime_factory, candidate_construction=True)
+        return cls(runtime_factory, candidate_construction=True,
+            candidate_construction_contract=_SEMANTIC_EDIT_CONTRACT)
 
     def form_wire_metadata(self, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
         context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
@@ -2487,7 +2552,7 @@ class ModelFulfillmentCandidateProvider:
                     "Choose all meanings, consumers and proof operands yourself. No automatic evidence or "
                     "permission is granted. The complete constructed candidate is revalidated and independently "
                     "reviewed. Keep the current h/d and exact parent basis. Do not output a new complete plan.")
-            elif (owner_preconditions or {}).get("candidate_construction_contract") == _CANDIDATE_CONSTRUCTION_CONTRACT:
+            elif (owner_preconditions or {}).get("candidate_construction_contract") in _CANDIDATE_CONSTRUCTION_CONTRACTS:
                 formation_instructions = (
                     "Propose semantic contribution routes for the immutable source table. Select s/c/f/t/u "
                     "from its exact existing index domains; capability/Owner prerequisites are necessary "
