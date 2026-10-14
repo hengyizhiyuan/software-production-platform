@@ -1,0 +1,51 @@
+{
+  "recorded_at_utc": "2026-10-14T07:47:08.693893+00:00",
+  "mode": "preflight",
+  "revision": "a1d99fd8e60967e7601fe1e265fa9ef6c66ecc0e",
+  "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+  "source_count": 19,
+  "input_sha256": {
+    "capability-contracts.json": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+    "formation-owner-observations.json": "733d8fe3e0c452081d93638f64eeea6e90e6ae2f60dca8f39801adb61b8fe202",
+    "immutable-inventory.json": "f890af6ea4a85e481b03ea0e638651a61c9513042ad88761f6049f41ea895e85",
+    "basis.json": "aad0fa15b3b24c12aa5b4b1099f8fe7ef0d6f7044bbc79ba8650a68ad4c81998",
+    "historical-owner-receipts": "8eea94156781896350044e1c8635f76d648d3212c9a0663b27909ec2d7930d4f"
+  },
+  "terminal_reason": "SECOND_REQUEST_READY_NO_NETWORK",
+  "error_type": null,
+  "calls": [],
+  "elapsed_seconds": 0.7917262209812179,
+  "actual_calls": 0,
+  "new_work_created": false,
+  "historical_writes": false,
+  "terminal_replay_without_calls": null,
+  "stages": [
+    {
+      "stage": "MODEL_REQUEST_PENDING",
+      "attempt": 1,
+      "receipt_id": "907eee4c-c78f-414e-b3df-9b9100c30141"
+    },
+    {
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "attempt": 1,
+      "receipt_id": "5384d582-852a-449b-90ab-fbd0a1a7fabe"
+    },
+    {
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 1,
+      "receipt_id": "f41cff32-d942-48fc-adbb-110dd6dff373",
+      "validation_passed": false,
+      "terminal_reason": null,
+      "terminal": false
+    },
+    {
+      "stage": "MODEL_REQUEST_PENDING",
+      "attempt": 2,
+      "receipt_id": "64b7069a-26c2-41d5-ab4c-2119e9bdd3f7"
+    }
+  ],
+  "physical_receipt_max_bytes": 65049,
+  "owner_state_only": true,
+  "no_assurance_or_human_authority_granted": true,
+  "currency_cost": "UNKNOWN"
+}

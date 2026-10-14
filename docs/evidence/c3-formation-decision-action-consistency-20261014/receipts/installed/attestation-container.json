@@ -1,0 +1,16 @@
+{
+  "id": "37575b6cf4df28666658b85789a4aafc42082bb3dec3dd6211d10602c2853f73",
+  "actual_image": "sha256:58c07b462a438aa936ba59857624559e77230258d24bd960512706a90d121803",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/ai-native-evolution-20261013/decision-action-consistency-20261014/evidence/installed",
+      "Destination": "/evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "network_mode": "none",
+  "user": "spg"
+}

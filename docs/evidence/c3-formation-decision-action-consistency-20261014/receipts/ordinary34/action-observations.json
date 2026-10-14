@@ -1,0 +1,389 @@
+{
+  "original_wire_sha256": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e",
+  "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+  "response_receipt_id": "84bcaedd-939c-44de-8171-23db4c718489",
+  "response_sha256": "48d9d575159a5db2a99f92e97c73d79916d7e709a5c7ef16ed2b272a43127428",
+  "request_receipt_id": "e3247fe4-cace-4545-9b74-6c7b323b84cd",
+  "feedback_sha256": "4a66528ff9f82467b2c14494238e78a459012794daf99cf397c752ffe2f6d740",
+  "declared_dispositions": [
+    {
+      "original_route": 1,
+      "disposition": "revise",
+      "revised_fields": [
+        "capability"
+      ]
+    },
+    {
+      "original_route": 3,
+      "disposition": "revise",
+      "revised_fields": [
+        "capability"
+      ]
+    }
+  ],
+  "constructor_action_evidence": {
+    "contract": "formation-decision-revision-actions-v1",
+    "parent_binding_fingerprint": "416137db8550e976c512e15744ae5671fece3fe5d1a14db1a34709dc6e78595b",
+    "declarations_fingerprint": "88f5c9866cd36379b805784c450d6f5525a37477c6826ab78cc2f726cfd1ca24",
+    "decisions": [
+      {
+        "original_route": 1,
+        "disposition": "revise",
+        "operation": "replace",
+        "declared_revised_fields": [
+          "capability"
+        ],
+        "observed_changed_fields": [
+          "capability"
+        ],
+        "original_route_fingerprint": "4e9c58f635495bd81cf86fb5d8d933dd2dbf65dad4baaa34939332c6339f6308",
+        "justification_sha256": "d717d69b0b13bf6e3e11b4ea37f8f7c081784b4f3160237d0d399bfbc12aed51"
+      },
+      {
+        "original_route": 3,
+        "disposition": "revise",
+        "operation": "replace",
+        "declared_revised_fields": [
+          "capability"
+        ],
+        "observed_changed_fields": [
+          "capability"
+        ],
+        "original_route_fingerprint": "eb486dc75f3f5bf9e9c5b251b4cbb665b7a3ed10b5820c8082fc2498fd8c0649",
+        "justification_sha256": "d0e211f250e24aa1b720040c85ddd70d188b5e7508e88cc64f45d23d0867e3d9"
+      }
+    ],
+    "status": "STRUCTURALLY_CONSISTENT; SEMANTIC_VALIDITY_UNKNOWN"
+  },
+  "construction_rejected": false,
+  "decisions": [
+    {
+      "original_route": 1,
+      "operation": "replace",
+      "consumer_before": "GIT_DIFF_SCOPE",
+      "consumer_after": "ARTIFACT_CONTENT",
+      "changed_fields": [
+        "capability",
+        "rationale"
+      ]
+    },
+    {
+      "original_route": 3,
+      "operation": "replace",
+      "consumer_before": "GIT_DIFF_SCOPE",
+      "consumer_after": "ARTIFACT_CONTENT",
+      "changed_fields": [
+        "capability",
+        "rationale"
+      ]
+    }
+  ],
+  "actual_independent_review_calls": 0,
+  "candidate_validation": [
+    {
+      "attempt": 1,
+      "validation_passed": false,
+      "failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "failures": [
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 3
+        },
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 4
+        },
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 10
+        },
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 11
+        }
+      ],
+      "owner_prerequisite_failures": [
+        {
+          "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "source": 14,
+          "route": 25,
+          "component_id": "65b6cea440fc9d51ff445b459aa14d74ae347eff7d00e82bbcdb4fa4feecb185"
+        },
+        {
+          "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "source": 15,
+          "route": 26,
+          "component_id": "a003e98d82bb1f580bb6b625e07474b388d5ec2a7d92eea3f7e4a43d653d76ce"
+        },
+        {
+          "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "source": 15,
+          "route": 27,
+          "component_id": "a003e98d82bb1f580bb6b625e07474b388d5ec2a7d92eea3f7e4a43d653d76ce"
+        },
+        {
+          "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "source": 16,
+          "route": 28,
+          "component_id": "b52f39e7932b70f6fd55c0649032074484e8f11e6380667cf49f51273b18463a"
+        },
+        {
+          "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "source": 16,
+          "route": 29,
+          "component_id": "b52f39e7932b70f6fd55c0649032074484e8f11e6380667cf49f51273b18463a"
+        },
+        {
+          "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "source": 17,
+          "route": 30,
+          "component_id": "ef2fb7cfe681d54dd539df3e382a7648701ef7a696149199bb9ef8eb0bb006d7"
+        },
+        {
+          "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "source": 18,
+          "route": 31,
+          "component_id": "f293f481b215450da0a340dc06fe20469e51a15a17c5a20c6101d33e036c5a2d"
+        },
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 3
+        },
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 4
+        },
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 10
+        },
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 11
+        }
+      ]
+    },
+    {
+      "attempt": 2,
+      "validation_passed": false,
+      "failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "failures": [
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 3
+        },
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 4
+        },
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 10
+        },
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 11
+        }
+      ],
+      "owner_prerequisite_failures": [
+        {
+          "code": "OBLIGATION_PROJECTION_DUPLICATE_ROUTE",
+          "source": 0,
+          "route": 1,
+          "component_id": "7f9be2e6f3cfc7372c92f82cb78431afe7d1a81ba8433a87731438e335dbed62"
+        },
+        {
+          "code": "OBLIGATION_PROJECTION_DUPLICATE_ROUTE",
+          "source": 1,
+          "route": 3,
+          "component_id": "17696c29e9cde1515646aae8d546eeca8c5d6f161182349e2431dfa9e13be18f"
+        },
+        {
+          "code": "OBLIGATION_LINKED_FACT_CURRENT_PROOF_UNAVAILABLE",
+          "source": 3,
+          "route": 5,
+          "component_id": "3414953b0f383855cf123e5c78132250d2a7f06c0193c6e0862d25b7323dfacd"
+        },
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 3
+        },
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 4
+        },
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 10
+        },
+        {
+          "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "source": 11
+        }
+      ]
+    }
+  ],
+  "semantics_not_inferred_from_rationale": true,
+  "source_consumer_sets": {
+    "0": [
+      "ARTIFACT_CONTENT"
+    ],
+    "1": [
+      "ARTIFACT_CONTENT"
+    ],
+    "2": [
+      "GIT_DIFF_SCOPE"
+    ],
+    "3": [
+      "ARTIFACT_CONTENT",
+      "CANDIDATE_SEAL"
+    ],
+    "4": [
+      "DENY_DEPLOY",
+      "DENY_PUBLISH",
+      "GIT_DIFF_SCOPE"
+    ],
+    "5": [
+      "RETAIN_CONTEXT"
+    ],
+    "6": [
+      "ARTIFACT_CONTENT",
+      "GIT_DIFF_SCOPE"
+    ],
+    "7": [
+      "ARTIFACT_CONTENT"
+    ],
+    "8": [
+      "ARTIFACT_CONTENT"
+    ],
+    "9": [
+      "GIT_DIFF_SCOPE"
+    ],
+    "10": [
+      "ARTIFACT_CONTENT",
+      "CANDIDATE_SEAL"
+    ],
+    "11": [
+      "DENY_DEPLOY",
+      "DENY_PUBLISH",
+      "GIT_DIFF_SCOPE"
+    ],
+    "12": [
+      "ARTIFACT_CONTENT",
+      "GIT_DIFF_SCOPE"
+    ],
+    "13": [
+      "ARTIFACT_CONTENT",
+      "GIT_DIFF_SCOPE"
+    ],
+    "14": [
+      "CANDIDATE_SEAL"
+    ],
+    "15": [
+      "DENY_DEPLOY",
+      "GIT_DIFF_SCOPE"
+    ],
+    "16": [
+      "DENY_PUBLISH",
+      "GIT_DIFF_SCOPE"
+    ],
+    "17": [
+      "GIT_DIFF_SCOPE"
+    ],
+    "18": [
+      "GIT_DIFF_SCOPE"
+    ]
+  },
+  "geometry_failures": [
+    {
+      "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "source": 3,
+      "uncovered_codepoint_ranges": [
+        [
+          39,
+          42
+        ],
+        [
+          71,
+          72
+        ]
+      ],
+      "original_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "observed_source_route_indices": [
+        5,
+        6
+      ],
+      "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+    },
+    {
+      "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "source": 4,
+      "uncovered_codepoint_ranges": [
+        [
+          13,
+          14
+        ],
+        [
+          22,
+          23
+        ],
+        [
+          54,
+          55
+        ]
+      ],
+      "original_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "observed_source_route_indices": [
+        7,
+        8,
+        9
+      ],
+      "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+    },
+    {
+      "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "source": 10,
+      "uncovered_codepoint_ranges": [
+        [
+          39,
+          42
+        ],
+        [
+          71,
+          72
+        ]
+      ],
+      "original_text_sha256": "2f7b25d703983622234653c225a0e3a55cc438bca956622fb284faedcd57bafb",
+      "observed_source_route_indices": [
+        16,
+        17
+      ],
+      "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+    },
+    {
+      "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "source": 11,
+      "uncovered_codepoint_ranges": [
+        [
+          13,
+          14
+        ],
+        [
+          22,
+          23
+        ],
+        [
+          54,
+          55
+        ]
+      ],
+      "original_text_sha256": "e1f7069fe896d8f2bd81d5e49233f88e36d6931e374a1b5e738c8b2e718210a6",
+      "observed_source_route_indices": [
+        18,
+        19,
+        20
+      ],
+      "disposition": "UNADMITTED_COVERAGE_OBSERVATION; NO_SPAN_REPAIR_OR_SEMANTIC_COMPONENT_PROPOSAL"
+    }
+  ]
+}

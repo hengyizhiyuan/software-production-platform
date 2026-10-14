@@ -1,0 +1,61 @@
+{
+  "root": "/data/watt/ai-native-evolution-20261013/decision-action-consistency-20261014",
+  "scope": "Private qualification observations only; no authority or PASS",
+  "files": [
+    {
+      "relative_path": "private/qualification/preflight/calls.json",
+      "bytes": 778,
+      "sha256": "35aaa5d706eb0ac5660abe26de13761e3821bfcb9b1413d0491d6aa23fefe988"
+    },
+    {
+      "relative_path": "private/qualification/preflight/materialized-owner-receipts.json",
+      "bytes": 503433,
+      "sha256": "8364d62732e71a39c25c39f2aaa6963a9800e69d5f2fdd830b73c83d87492441"
+    },
+    {
+      "relative_path": "private/qualification/preflight/owner-receipts.json",
+      "bytes": 275830,
+      "sha256": "191dd6427ba83ff5a0ba5bd102929f1d6dc8a7c7886ae7c01e84d122044c06ef"
+    },
+    {
+      "relative_path": "private/qualification/preflight/request-1.json",
+      "bytes": 172222,
+      "sha256": "58fb1f3579a03aab6c6d8c921810ac4256573ba4c90d04b272e61c008df8f6cb"
+    },
+    {
+      "relative_path": "private/qualification/preflight/request-2.json",
+      "bytes": 334543,
+      "sha256": "8b9b9620c26b3058ecf0e89c3a3b1e1bbcabca1afd3c83643a579c13e6084fa7"
+    },
+    {
+      "relative_path": "private/qualification/retained-first/bindings.json",
+      "bytes": 875201,
+      "sha256": "baeeb23b128e58b49a56bf75bb8769011b66564b7a0c211f921651e8b70ffbf2"
+    },
+    {
+      "relative_path": "private/qualification/retained-first/calls.json",
+      "bytes": 1992,
+      "sha256": "2ab42e56c58eacce33b502031a2ac44e025cb31f1fb9a148e441d4146ea8c162"
+    },
+    {
+      "relative_path": "private/qualification/retained-first/materialized-owner-receipts.json",
+      "bytes": 774999,
+      "sha256": "4ca0c9f173463220fba9eb750b6c45ee5050ebd9b269f3691432b4b28235f5a3"
+    },
+    {
+      "relative_path": "private/qualification/retained-first/owner-receipts.json",
+      "bytes": 371592,
+      "sha256": "2fac896199b9b1da56a8ff6ca383783747e053280465028dda2da3f4d6edf907"
+    },
+    {
+      "relative_path": "private/qualification/retained-first/request-1.json",
+      "bytes": 172222,
+      "sha256": "58fb1f3579a03aab6c6d8c921810ac4256573ba4c90d04b272e61c008df8f6cb"
+    },
+    {
+      "relative_path": "private/qualification/retained-first/request-2.json",
+      "bytes": 334543,
+      "sha256": "b1167358adbe80be3f28eb3aeec8f6ae5056b4c0fa4a23a4c818bab607985e86"
+    }
+  ]
+}

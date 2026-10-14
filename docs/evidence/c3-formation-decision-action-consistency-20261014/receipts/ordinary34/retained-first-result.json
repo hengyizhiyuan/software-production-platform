@@ -1,0 +1,125 @@
+{
+  "recorded_at_utc": "2026-10-14T07:49:17.976411+00:00",
+  "mode": "retained-first",
+  "revision": "a1d99fd8e60967e7601fe1e265fa9ef6c66ecc0e",
+  "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+  "source_count": 19,
+  "input_sha256": {
+    "capability-contracts.json": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+    "formation-owner-observations.json": "733d8fe3e0c452081d93638f64eeea6e90e6ae2f60dca8f39801adb61b8fe202",
+    "immutable-inventory.json": "f890af6ea4a85e481b03ea0e638651a61c9513042ad88761f6049f41ea895e85",
+    "basis.json": "aad0fa15b3b24c12aa5b4b1099f8fe7ef0d6f7044bbc79ba8650a68ad4c81998",
+    "historical-owner-receipts": "8eea94156781896350044e1c8635f76d648d3212c9a0663b27909ec2d7930d4f"
+  },
+  "terminal_reason": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+  "error_type": null,
+  "calls": [
+    {
+      "role": "formation",
+      "logical_call": 1,
+      "retained_response_control": true,
+      "started_at_utc": "2026-10-14T07:48:59.308218+00:00",
+      "completed": true,
+      "elapsed_seconds": 2.8928974643349648e-05,
+      "request_id": "controlled-preflight",
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cached_tokens": null,
+        "reasoning_tokens": null,
+        "total_tokens": null,
+        "unknown": true
+      },
+      "timing": {
+        "request_sent_seconds": null,
+        "first_response_event_seconds": null,
+        "first_token_seconds": null,
+        "completed_seconds": null
+      },
+      "transport_retry_count": 0,
+      "output_evidence": null,
+      "response_sha256": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e"
+    },
+    {
+      "role": "formation",
+      "logical_call": 2,
+      "retained_response_control": false,
+      "started_at_utc": "2026-10-14T07:48:59.659765+00:00",
+      "completed": true,
+      "elapsed_seconds": 17.792483108933084,
+      "request_id": "bf74aa3e-13f7-4889-89dd-39c64441ee1f",
+      "usage": {
+        "input_tokens": 89606,
+        "output_tokens": 4303,
+        "cached_tokens": 1152,
+        "reasoning_tokens": 0,
+        "total_tokens": 93909,
+        "unknown": false
+      },
+      "timing": {
+        "request_sent_seconds": 0.0031100219348445535,
+        "first_response_event_seconds": 0.4774470189586282,
+        "first_token_seconds": 1.991556494962424,
+        "completed_seconds": 17.791682448005304
+      },
+      "transport_retry_count": 0,
+      "output_evidence": {
+        "provider_status": "completed",
+        "delta_sha256": "48d9d575159a5db2a99f92e97c73d79916d7e709a5c7ef16ed2b272a43127428",
+        "delta_bytes": 13677,
+        "terminal_text_observed": true,
+        "terminal_sha256": "48d9d575159a5db2a99f92e97c73d79916d7e709a5c7ef16ed2b272a43127428",
+        "terminal_bytes": 13677,
+        "selection": "TERMINAL_MATCHED_DELTA"
+      },
+      "response_sha256": "48d9d575159a5db2a99f92e97c73d79916d7e709a5c7ef16ed2b272a43127428"
+    }
+  ],
+  "elapsed_seconds": 18.98788860696368,
+  "actual_calls": 1,
+  "new_work_created": false,
+  "historical_writes": false,
+  "terminal_replay_without_calls": true,
+  "stages": [
+    {
+      "stage": "MODEL_REQUEST_PENDING",
+      "attempt": 1,
+      "receipt_id": "89b003d2-2bdd-410d-b22f-2e3e452479e6"
+    },
+    {
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "attempt": 1,
+      "receipt_id": "35ba4598-49ed-4ea0-a44e-0b837ec29e5a"
+    },
+    {
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 1,
+      "receipt_id": "47321ffc-6707-480b-b3f8-60d0d468f160",
+      "validation_passed": false,
+      "terminal_reason": null,
+      "terminal": false
+    },
+    {
+      "stage": "MODEL_REQUEST_PENDING",
+      "attempt": 2,
+      "receipt_id": "e3247fe4-cace-4545-9b74-6c7b323b84cd"
+    },
+    {
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "attempt": 2,
+      "receipt_id": "84bcaedd-939c-44de-8171-23db4c718489"
+    },
+    {
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 2,
+      "receipt_id": "811b33e2-b999-4ee3-a264-b638a6d34a45",
+      "validation_passed": false,
+      "terminal_reason": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "terminal": true
+    }
+  ],
+  "physical_receipt_max_bytes": 66257,
+  "owner_state_only": true,
+  "no_assurance_or_human_authority_granted": true,
+  "currency_cost": "UNKNOWN"
+}

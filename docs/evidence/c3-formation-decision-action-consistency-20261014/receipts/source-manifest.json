@@ -1,0 +1,8 @@
+{
+  "revision": "a1d99fd8e60967e7601fe1e265fa9ef6c66ecc0e",
+  "tree": "5aeaf6236c67e8f7ac7a510a720b1f82301c2c81",
+  "archive_sha256": "94de26c9bd476008a5c70aa3b117492328e6e1b29f5f06f38b399c7978ad16d0",
+  "export_configuration": {
+    "core.autocrlf": false
+  }
+}

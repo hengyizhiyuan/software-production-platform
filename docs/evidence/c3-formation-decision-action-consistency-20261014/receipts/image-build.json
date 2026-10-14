@@ -1,0 +1,42 @@
+{
+  "recorded_at_utc": "2026-10-14T07:46:12.136387+00:00",
+  "revision": "a1d99fd8e60967e7601fe1e265fa9ef6c66ecc0e",
+  "tree": "5aeaf6236c67e8f7ac7a510a720b1f82301c2c81",
+  "tag": "watt-c3-decision-revision:a1d99fd8",
+  "source_archive_sha256": "94de26c9bd476008a5c70aa3b117492328e6e1b29f5f06f38b399c7978ad16d0",
+  "elapsed_seconds": 35.09027372393757,
+  "exit_code": 0,
+  "network": "none",
+  "source_reinstalled": true,
+  "runtime_source_overlay": false,
+  "owner_sources": {
+    "watt": {
+      "revision": "a1d99fd8e60967e7601fe1e265fa9ef6c66ecc0e",
+      "tree": "5aeaf6236c67e8f7ac7a510a720b1f82301c2c81"
+    },
+    "guardian": {
+      "revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+      "tree": "92ac992c03bd84923a569bbe9f314c0786457040"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:58c07b462a438aa936ba59857624559e77230258d24bd960512706a90d121803",
+  "labels": {
+    "org.opencontainers.image.revision": "a1d99fd8e60967e7601fe1e265fa9ef6c66ecc0e",
+    "watt.c3.base-image-id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+    "watt.c3.ecf-revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "watt.c3.ecf-tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "watt.c3.ecf-unsupported-revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+    "watt.c3.guardian-revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+    "watt.c3.guardian-tree": "92ac992c03bd84923a569bbe9f314c0786457040",
+    "watt.c3.source-tree": "5aeaf6236c67e8f7ac7a510a720b1f82301c2c81"
+  },
+  "repo_digests": []
+}
