@@ -100,13 +100,20 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
                         assert any(t.get('decision_revision_ref') for t in payload['owner_source_preconditions']['candidate_construction_state']['repair_targets'])
                     output=(json.dumps({'basis':basis['raw_sha256'],'replace':[],
                         'remove':[{'index':len(basis['original_wire']['routes'])-2},{'index':len(basis['original_wire']['routes'])-1}],'append':[]}) if role_convergence else json.dumps({'routes':[role(r) for r in wire['routes']]}))
+                    if role_convergence:
+                        claim=json.loads(output)
+                        claim['decision_revisions']=[{'original_route':r['original_route'],'disposition':'remove',
+                            'revised_fields':[],'justification':'Drop the extra proposed consumer while preserving the original content contribution.'}
+                            for r in decisions['requests']]
+                        output=json.dumps(claim)
         return StructuredModelResult(output_text=output,provider=ModelProvider.DEEPSEEK,
             requested_model="controlled-pg-edit",effective_model="controlled-pg-edit",
             request_id=f"pg-edit-{len(calls)}",usage=ModelUsage(unknown=True),timing=ModelTiming(),retry_count=0)
 
     provider = ModelFulfillmentCandidateProvider(lambda:SimpleNamespace(generate=generate,close=lambda:None),
         candidate_construction=True,candidate_construction_contract=construction_contract,raw_role_repair=raw_role_repair,
-        construction_consumer_instructions=consumer_instructions,unparsed_claim_repair=unparsed_claim,role_convergence=role_convergence)
+        construction_consumer_instructions=consumer_instructions,unparsed_claim_repair=unparsed_claim,role_convergence=role_convergence,
+        decision_revision_actions=role_convergence)
     monkeypatch.setattr(c1,"DeclaredC1Fulfillment",lambda:provider)
     class DurableEditObserved(BaseException):
         pass
@@ -126,6 +133,7 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
     provider.supports_construction_consumer_instructions=False
     provider.supports_unparsed_claim_repair=False
     provider.supports_role_convergence=False
+    provider.supports_decision_revision_actions=False
     with postgres_database.unit_of_work() as uow:
         revision = ProductStore(uow.session).current_work_reality_revision(UUID(inventory["work_id"]))
         ir = InteractionStore(uow.session).assessment(revision.source_assessment_id).semantic_ir

@@ -2143,10 +2143,15 @@ def _wire_response_basis(rows, attempt, revision, inventory, capabilities):
     if (response.get("owner_repair_context_contract") != owner_contract
             or owner_contract not in (None, "existing-owner-preconditions-v1", "existing-owner-preconditions-v2")):
         drift()
-    from spg.providers.fulfillment_candidate import _DECISION_REVISION_CONTRACT
+    from spg.providers.fulfillment_candidate import _DECISION_REVISION_CONTRACT, _DECISION_ACTION_CONTRACT
     decision_contract = start.get("decision_revision_contract")
     if (decision_contract not in (None, _DECISION_REVISION_CONTRACT)
             or response.get("decision_revision_contract") != decision_contract):
+        drift()
+    action_contract = start.get("decision_revision_action_contract")
+    if (action_contract not in (None, _DECISION_ACTION_CONTRACT)
+            or response.get("decision_revision_action_contract") != action_contract
+            or (action_contract is not None and decision_contract != _DECISION_REVISION_CONTRACT)):
         drift()
     basis = {"work_id": str(revision.work_id), "work_reality_revision_id": str(revision.id),
         "inventory_fingerprint": inventory["inventory_fingerprint"],
@@ -2188,6 +2193,7 @@ def _wire_response_basis(rows, attempt, revision, inventory, capabilities):
         **({"owner_repair_context_contract": owner_contract} if owner_contract is not None else {}),
         **({"completion_feedback_contract": completion_contract} if completion_contract is not None else {}),
         **({"decision_revision_contract": decision_contract} if decision_contract is not None else {}),
+        **({"decision_revision_action_contract": action_contract} if action_contract is not None else {}),
         **({"owner_source_preconditions_fingerprint": canonical_fingerprint(preconditions)} if preconditions is not None else {}),
         **({"wire_presentation": presentation} if presentation is not None else {}),
         **{key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS}}
@@ -4082,13 +4088,18 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     else "existing-owner-preconditions-v1")} if wire_metadata else {}
                 if precondition_arguments:
                     owner_contract["owner_source_preconditions"] = precondition_arguments["owner_preconditions"]
-                    from spg.providers.fulfillment_candidate import _DECISION_REVISION_CONTRACT
+                    from spg.providers.fulfillment_candidate import _DECISION_REVISION_CONTRACT, _DECISION_ACTION_CONTRACT
                     decision_contract = (initial_request.get("decision_revision_contract") if initial_request is not None
                         else _DECISION_REVISION_CONTRACT
                         if precondition_arguments["owner_preconditions"].get("candidate_construction_contract") == "owner-local-interpretation-role-construction-v4"
                             and precondition_arguments["owner_preconditions"].get("role_convergence_contract") is not None else None)
                     if decision_contract is not None:
                         owner_contract["decision_revision_contract"] = decision_contract
+                    action_contract = (initial_request.get("decision_revision_action_contract") if initial_request is not None
+                        else _DECISION_ACTION_CONTRACT if decision_contract is not None
+                            and getattr(provider, "supports_decision_revision_actions", False) else None)
+                    if action_contract is not None:
+                        owner_contract["decision_revision_action_contract"] = action_contract
                     completion_contract = ("existing-bounded-completion-feedback-v1" if initial_request is None and source_contract in {"v2", "v3"}
                         else None if initial_request is None
                         else initial_request.get("completion_feedback_contract"))

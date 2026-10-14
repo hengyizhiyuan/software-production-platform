@@ -71,6 +71,7 @@ _FULFILLMENT_WIRE_VERSION = "fulfillment-compact-v1"
 _FULFILLMENT_WIRE_METADATA_KEYS = ("provider_wire_version", "wire_request_fingerprint",
     "wire_table_fingerprint", "wire_schema_fingerprint")
 _DECISION_REVISION_CONTRACT = "formation-decision-revision-requests-v1"
+_DECISION_ACTION_CONTRACT = "formation-decision-revision-actions-v1"
 
 
 class _FulfillmentWireReceiptIdentityError(RuntimeError):
@@ -416,7 +417,7 @@ def decision_revision_requests(payload, inventory):
             raise ValueError("DUPLICATE_DECISION")
     except (KeyError, IndexError, TypeError, ValueError) as error:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT") from error
-    return {"contract": _DECISION_REVISION_CONTRACT,
+    result = {"contract": _DECISION_REVISION_CONTRACT,
         "parent_binding_fingerprint": canonical_fingerprint(binding),
         "diagnostic_fingerprint": canonical_fingerprint(diagnostic),
         "status": "REOPEN_REQUIRED; SEMANTIC_VALIDITY_UNKNOWN; NO_REPLACEMENT_SELECTED",
@@ -427,6 +428,124 @@ def decision_revision_requests(payload, inventory):
         "reconsider": ["capability", "component_quote", "current_fact_dependencies", "target_paths", "provenance_support_refs", "rationale"],
         "all_repairs_ref": "violations AND owner_repair_context.violations; these remain required alongside decision reassessment",
         "response": "Use existing explicit local edits. A retained choice needs a justified interpretation, not cosmetic wording. Do not invent a new consumer, evidence or fact, enumerate alternatives as extra routes, or ignore other failures. All existing validation and Review remain required."}
+    if binding.get("decision_revision_action_contract") == _DECISION_ACTION_CONTRACT:
+        result["action_consistency"] = {"contract": _DECISION_ACTION_CONTRACT,
+            "response_field": "decision_revisions",
+            "identity": "Exactly one disposition for each requested ORIGINAL route; the existing basis binds all source/component/receipt identities.",
+            "outcomes": {
+                "retain": "Keep the original consumer with an inspectable justification. Other independently required operand repairs remain allowed; revised_fields is empty.",
+                "revise": "Explicitly replace the original route. revised_fields names non-rationale decision fields actually changed; each named field must differ. Do not claim revision for wording alone.",
+                "remove": "Explicitly remove the original route, do not replace it or reinsert the same structured choice. Preserve original meaning through other lawful contributions; revised_fields is empty.",
+                "unresolved": "Explicitly replace the original route with existing UNRESOLVED. This preserves uncertainty and cannot admit a fulfilled plan; revised_fields is empty."},
+            "authority": "STRUCTURAL_CLAIM_ACTION_CONSISTENCY_ONLY; NO_SEMANTIC_VERDICT. Rationale is never parsed as an operation; all original validation and independent Review remain required."}
+    return result
+
+
+def _decision_action_targets(preconditions):
+    state = (preconditions or {}).get("candidate_construction_state") or {}
+    basis = state.get("repair_basis") or {}
+    if (basis.get("parent_binding") or {}).get("decision_revision_action_contract") != _DECISION_ACTION_CONTRACT:
+        return []
+    return [t for t in state.get("repair_targets", []) if t.get("decision_revision_ref")]
+
+
+def _decision_action_schema(schema, preconditions):
+    targets = _decision_action_targets(preconditions)
+    if not targets:
+        return schema
+    schema["properties"]["decision_revisions"] = {"type": "array", "minItems": len(targets),
+        "maxItems": len(targets), "items": {"type": "object", "additionalProperties": False,
+            "properties": {"original_route": {"type": "integer", "enum": [t["original_route_indices"][0] for t in targets]},
+                "disposition": {"type": "string", "enum": ["retain", "revise", "remove", "unresolved"]},
+                "revised_fields": {"type": "array", "maxItems": 5, "items": {"type": "string", "enum": [
+                    "capability", "component_quote", "current_fact_dependencies", "target_paths", "provenance_support_refs"]}},
+                "justification": {"type": "string", "minLength": 1, "maxLength": 1000}},
+            "required": ["original_route", "disposition", "revised_fields", "justification"]}}
+    schema["required"].append("decision_revisions")
+    return schema
+
+
+def _decision_action_observation(claims, proposal, basis, targets, *, role_basis, capabilities):
+    """Existing local constructor checks explicit choices against explicit edits.
+
+    This checks no natural-language assertion, consumer meaning or evidence.
+    A structurally consistent choice still needs every existing admission gate.
+    """
+    code = "OBLIGATION_FORMATION_DECISION_ACTION_INCONSISTENT"
+    failures, observations = [], []
+    def reject(condition, index=None):
+        failures.append({"code": code, "condition": condition,
+            **({"original_route": index} if index is not None else {})})
+    expected = {t["original_route_indices"][0] for t in targets}
+    if not isinstance(claims, list) or len(claims) != len(expected):
+        reject("DISPOSITION_SET_REQUIRED")
+        claims = []
+    indices = [c.get("original_route") for c in claims if isinstance(c, dict)]
+    if (any(type(i) is not int for i in indices) or len(indices) != len(claims)
+            or len(set(indices)) != len(indices) or set(indices) != expected):
+        reject("DISPOSITION_TARGET_SET_MISMATCH")
+    replacements = {r.index: r.route.model_dump(mode="json") for r in proposal.replace}
+    removed = {r.index if isinstance(r, _FulfillmentRoleRemoval) else r for r in proposal.remove}
+    original = basis["original_wire"]["routes"]
+    aliases = {"capability": "c", "component_quote": "q", "current_fact_dependencies": "f",
+        "target_paths": "t", "provenance_support_refs": "u"}
+    source_key, consumer_key = ("source_ref", "capability") if role_basis else ("s", "c")
+    unresolved_consumer = ("UNRESOLVED" if role_basis else
+        next(i for i, c in enumerate(capabilities) if c["capability"] == "UNRESOLVED"))
+    for claim in claims:
+        if not isinstance(claim, dict):
+            reject("DISPOSITION_SHAPE_INVALID")
+            continue
+        index = claim.get("original_route")
+        if type(index) is not int or index not in expected:
+            continue
+        before = original[index]
+        after = None if index in removed else replacements.get(index, before)
+        fields = claim.get("revised_fields")
+        disposition = claim.get("disposition")
+        if (set(claim) != {"original_route", "disposition", "revised_fields", "justification"}
+                or not isinstance(fields, list) or any(not isinstance(f, str) or f not in aliases for f in fields)
+                or len(set(fields)) != len(fields)
+                or not isinstance(claim.get("justification"), str)
+                or not 1 <= len(claim["justification"].strip()) <= 1000):
+            reject("DISPOSITION_SHAPE_INVALID", index)
+            continue
+        changed = [f for f in aliases if after is not None
+            and canonical_fingerprint(before.get(f if role_basis else aliases[f])) != canonical_fingerprint(after.get(f if role_basis else aliases[f]))]
+        if after is not None and after[source_key] != before[source_key]:
+            reject("DISPOSITION_SOURCE_IDENTITY_CHANGED", index)
+        if disposition == "retain":
+            if after is None or after[consumer_key] != before[consumer_key] or fields:
+                reject("RETAIN_REQUIRES_SAME_CONSUMER", index)
+        elif disposition == "revise":
+            if index not in replacements or not fields or any(f not in changed for f in fields):
+                reject("REVISE_REQUIRES_DECLARED_FIELD_CHANGE", index)
+        elif disposition == "remove":
+            if index not in removed or index in replacements or fields:
+                reject("REMOVE_REQUIRES_EXPLICIT_REMOVE", index)
+            choices = lambda r: {k: v for k, v in r.items() if k not in {"rationale", "r"}}
+            survivors = [replacements.get(i, r) for i, r in enumerate(original) if i not in removed]
+            survivors += [r.model_dump(mode="json") for r in proposal.append]
+            if any(canonical_fingerprint(choices(r)) == canonical_fingerprint(choices(before)) for r in survivors):
+                reject("REMOVED_CHOICE_REINSERTED", index)
+        elif disposition == "unresolved":
+            if index not in replacements or after.get(consumer_key) != unresolved_consumer or fields:
+                reject("UNRESOLVED_REQUIRES_EXPLICIT_UNRESOLVED_ROUTE", index)
+        else:
+            reject("DISPOSITION_UNKNOWN", index)
+        observations.append({"original_route": index, "disposition": disposition,
+            "operation": "remove" if index in removed else "replace" if index in replacements else "unchanged",
+            "declared_revised_fields": fields, "observed_changed_fields": changed,
+            "original_route_fingerprint": canonical_fingerprint(before),
+            "justification_sha256": sha256(claim["justification"].encode()).hexdigest()})
+    evidence = {"contract": _DECISION_ACTION_CONTRACT, "parent_binding_fingerprint": canonical_fingerprint(basis["parent_binding"]),
+        "declarations_fingerprint": canonical_fingerprint(claims), "decisions": observations,
+        "status": "INCONSISTENT" if failures else "STRUCTURALLY_CONSISTENT; SEMANTIC_VALIDITY_UNKNOWN"}
+    if failures:
+        raise _FulfillmentWireValidationError(code, {"violations": failures,
+            "decision_revision_action_observation": evidence,
+            "not_evaluable": ["SEMANTIC_ACCEPTANCE", "INDEPENDENT_REVIEW", "ACTUAL_OWNER_EVIDENCE", "ASSURANCE"]})
+    return evidence
 
 
 def _decision_revision_targets(payload, basis, inventory):
@@ -657,7 +776,10 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
     try:
         model = (_FulfillmentRoleTargetEdits if preconditions.get('role_convergence_contract') == _ROLE_CONVERGENCE_CONTRACT
             else _FulfillmentRoleEdits) if role_basis else _FulfillmentSemanticEdits if semantic_basis else _FulfillmentCandidateEdits
-        proposal = model.model_validate(json.loads(body, object_pairs_hook=_wire_json_object))
+        value = json.loads(body, object_pairs_hook=_wire_json_object)
+        action_targets = _decision_action_targets(preconditions)
+        dispositions = value.pop("decision_revisions", None) if action_targets and isinstance(value, dict) else None
+        proposal = model.model_validate(value)
     except ValueError as error:
         raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID") from error
     if proposal.basis != basis["raw_sha256"]:
@@ -674,6 +796,9 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
         raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID")
     replacements = {r.index: r.route.model_dump(mode="json") for r in proposal.replace}
     removed = set(removed_indices)
+    action_observation = (_decision_action_observation(dispositions, proposal, basis, action_targets,
+        role_basis=role_basis, capabilities=wire_identity["tables"]["capabilities"])
+        if action_targets else None)
     routes = [deepcopy(replacements.get(i, r)) for i, r in enumerate(original["routes"]) if i not in removed]
     routes.extend(r.model_dump(mode="json") for r in proposal.append)
     if not routes or len(routes) > 1024:
@@ -702,6 +827,7 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
         "replaced_original_ordinals": [r.index for r in proposal.replace],
         "removed_original_ordinals": removed_indices, "appended_count": len(proposal.append),
         "retained_original_ordinals": [i for i in range(count) if i not in set(indices)],
+        **({"decision_revision_action_observation": action_observation} if action_observation else {}),
         "disposition": "DERIVED_CANDIDATE; NO_SEMANTIC_OR_EVIDENCE_ADMISSION"}
 
 
@@ -819,7 +945,7 @@ def _role_generation_schema(inventory,capabilities,owner_preconditions):
         schema['properties']['routes']['items']=operand
         schema['properties']['routes']['allOf']=[{'contains':{'type':'object','properties':{
             'source_ref':{'enum':[ref]}},'required':['source_ref']}} for ref in refs]
-    return schema
+    return _decision_action_schema(schema, owner_preconditions) if edits else schema
 
 
 def _formation_output_schema(inventory, capabilities, *, owner_preconditions=None, wire_metadata=None):
@@ -867,7 +993,7 @@ def _formation_output_schema(inventory, capabilities, *, owner_preconditions=Non
                 enforce_owner_prerequisites=True, route_definition=definition)
             schema["$defs"][replacement_definition]["properties"]["route"] = deepcopy(operand)
             schema["properties"]["append"]["items"] = deepcopy(operand)
-        return schema
+        return _decision_action_schema(schema, owner_preconditions)
     if (owner_preconditions or {}).get("candidate_construction_contract") in _CANDIDATE_CONSTRUCTION_CONTRACTS:
         from spg.providers.semantic_wire import _provider_strict_output_schema
         schema = _provider_strict_output_schema(_FulfillmentSemanticProposal.model_json_schema())
@@ -1478,6 +1604,11 @@ def _formation_repair_instructions(instructions, validation_feedback, *, local_e
          "The Owner constructs repair targets from these bound requests; you select any lawful "
          "revision or justified retention. The request supplies no replacement or verdict. "
          if isinstance(decision_revisions, dict) and decision_revisions.get("requests") else "") +
+        ("Return decision_revisions for every bound requested original route. Select retain, revise, remove or unresolved yourself, "
+         "then encode that same disposition using the existing local edit operations. A removal statement is not a remove operation. "
+         "Declare revised_fields only when those non-rationale fields actually change; justify lawful retention. "
+         "Structural consistency is not semantic approval and cannot discharge other repairs. "
+         if isinstance(decision_revisions, dict) and decision_revisions.get("action_consistency") else "") +
         ("Inspect owner_repair_context.consumer_mapping_diagnostics as UNREVIEWED route-specific "
          "method/meaning risks. Recompare the complete original Fact with the consumer's actual "
          "observable, retain a legitimate path-boundary method, and revise an unsupported extra "
@@ -2772,7 +2903,8 @@ class ModelFulfillmentCandidateProvider:
     def __init__(self, runtime_factory, *, candidate_construction=False,
                  candidate_construction_contract=_CANDIDATE_CONSTRUCTION_CONTRACT,
                  raw_role_repair=False, construction_consumer_instructions=False, unparsed_claim_repair=False,
-                 role_convergence=False, role_convergence_contract=_ROLE_CONVERGENCE_CONTRACT):
+                 role_convergence=False, role_convergence_contract=_ROLE_CONVERGENCE_CONTRACT,
+                 decision_revision_actions=False):
         self.runtime_factory = runtime_factory
         self.last_observation = None
         self.supports_candidate_construction = candidate_construction
@@ -2783,6 +2915,7 @@ class ModelFulfillmentCandidateProvider:
         self.supports_construction_consumer_instructions = construction_consumer_instructions
         self.supports_unparsed_claim_repair = unparsed_claim_repair
         self.supports_role_convergence = role_convergence
+        self.supports_decision_revision_actions = decision_revision_actions
         if role_convergence_contract not in _ROLE_CONVERGENCE_CONTRACTS:
             raise ValueError('OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID')
         self.role_convergence_contract = role_convergence_contract
@@ -2807,7 +2940,8 @@ class ModelFulfillmentCandidateProvider:
             return WattModelRuntime(registry, PurposeProfileRouter({ModelPurpose.STEERING_SEMANTIC: profile}))
         return cls(runtime_factory, candidate_construction=True,
             candidate_construction_contract=_INTERPRETATION_ROLE_CONTRACT,raw_role_repair=True,
-            construction_consumer_instructions=True, unparsed_claim_repair=True, role_convergence=True)
+            construction_consumer_instructions=True, unparsed_claim_repair=True, role_convergence=True,
+            decision_revision_actions=True)
 
     def form_wire_metadata(self, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
         context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
