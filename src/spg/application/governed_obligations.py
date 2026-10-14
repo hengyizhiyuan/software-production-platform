@@ -809,7 +809,8 @@ def _projection_binding(revision, ir, inventory, route, *, reviewed_background_r
                 if state != "UNRESOLVED" and not work_constraint_sources_correspond(ir, quote, supporting, component=component,
                         phase=phase, semantic_component_declared=route.component_basis is not None,
                         calibrated=allow_calibrated, source_contract=source_contract,
-                        exclusion_content_contract=exclusion_content_contract):
+                        exclusion_content_contract=exclusion_content_contract,
+                        revision=revision, exact_target_paths=inventory["exact_target_paths"]):
                     raise ValueError("OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN")
                 if state == "RETAINED_CONTEXT":
                     if not partial_background and (not supporting or not all(entry["kind"] == "IR_CLAUSE" and is_context_only_clause(
@@ -994,7 +995,29 @@ def _work_constraint_exclusion_sources(ir, quote, entries):
         for value in item.production.exclusions if quote == f"Excluded from this Work: {value}"]
 
 
-def work_constraint_sources_correspond(ir, quote, entries, *, component, phase, semantic_component_declared=False, calibrated=False, source_contract="v2", exclusion_content_contract=None):
+def _current_file_scope_source(revision, ir, entry, clause, exact_target_paths):
+    """Admitted file-boundary origin for a proposed Diff method, not evidence."""
+    from spg.domain.engineering_semantics import SemanticRelation
+    from spg.domain.governed_obligation import literal_file_scope_value_paths
+    if (revision is None or not exact_target_paths or clause.polarity != "AFFIRMATIVE"
+            or clause.temporal_scope != "CURRENT" or clause.requested_effects):
+        return False
+    item = next((item for item in ir.items if item.item_id == entry["item_id"]), None)
+    if (item is None or item.item_id not in clause.semantic_item_ids
+            or clause.source_record_id not in revision.source_record_ids
+            or getattr(ir, "source_record_id", clause.source_record_id) != clause.source_record_id
+            or not _human_clause_item(item, clause)):
+        return False
+    return any(fact.is_current and fact.relation is SemanticRelation.SCOPE
+        and fact.authority.value == "HUMAN_EXPLICIT"
+        and fact.epistemic_status.value == "CONFIRMED"
+        and clause.source_record_id in fact.provenance.source_record_ids
+        and fact.provenance.source_text == clause.source_text
+        and literal_file_scope_value_paths(fact) == tuple(exact_target_paths)
+        for fact in revision.engineering_semantic_facts)
+
+
+def work_constraint_sources_correspond(ir, quote, entries, *, component, phase, semantic_component_declared=False, calibrated=False, source_contract="v2", exclusion_content_contract=None, revision=None, exact_target_paths=()):
     """Prove exact original source support, never classify wrapper vocabulary."""
     if entries and all(_work_constraint_direct_source(ir, quote, entry) for entry in entries):
         return True
@@ -1003,6 +1026,8 @@ def work_constraint_sources_correspond(ir, quote, entries, *, component, phase, 
         return False
     values = {value for _, value in production_values}
     production_refs = {entry["source_ref"] for entry, _ in production_values}
+    current_origin = any(item.item_id == origin["item_id"] and item.production in ir.current_production
+        for origin, _ in production_values for item in ir.items)
     if source_contract == "v1":
         others = [entry for entry in entries if entry["source_ref"] not in production_refs]
     else:
@@ -1017,13 +1042,19 @@ def work_constraint_sources_correspond(ir, quote, entries, *, component, phase, 
                          source_contract == "v3" and component == "artifact-content"
                          and exclusion_content_contract == "existing-current-exclusion-content-correspondence-v1")))) or not others:
         return False
-    # This proves the exact original exclusion origin and CURRENT negation,
-    # not that static Content can establish its behavior. Semantic Review and
-    # actual exact-source Verification still independently decide sufficiency.
+    # The exact exclusion derivation needs an independent original contribution.
+    # A current file Scope may support a proposed Diff method without being
+    # retyped as a negative effect. Review and actual Diff still decide whether
+    # the complete original exclusion is proved; this grants no permission.
     for entry in others:
         if entry["kind"] not in {"IR_CLAUSE", "IR_CONSTRAINT"}:
             return False
         clause = next(c for c in ir.clauses if c.clause_id == entry["clause_id"])
+        if (source_contract == "v3" and calibrated and semantic_component_declared
+                and phase is FulfillmentPhase.CURRENT_VERIFICATION and component == "git-diff-scope"
+                and current_origin
+                and _current_file_scope_source(revision, ir, entry, clause, exact_target_paths)):
+            continue
         routes = [_TYPED_EFFECT_ROUTES.get(effect) for effect in clause.requested_effects]
         if (clause.polarity != "NEGATED" or clause.temporal_scope != "CURRENT"
                 or not semantic_component_declared and not all(value in clause.source_text for value in values)
@@ -2379,7 +2410,8 @@ def _owner_source_preconditions(revision, ir, inventory, capabilities, *, includ
                     original_clauses = [clauses[e["clause_id"]] for e in entries if e["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}]
                     if not work_constraint_sources_correspond(ir, quote, entries, component=component, phase=phase,
                             semantic_component_declared=True, calibrated=True, source_contract=source_contract,
-                            exclusion_content_contract=exclusion_content_contract):
+                            exclusion_content_contract=exclusion_content_contract,
+                            revision=revision, exact_target_paths=inventory["exact_target_paths"]):
                         continue
                     if (phase is FulfillmentPhase.CONTINUOUS_FROM_ADMISSION
                             and not any(c.polarity == "NEGATED" and c.temporal_scope == "CURRENT" for c in original_clauses)):
