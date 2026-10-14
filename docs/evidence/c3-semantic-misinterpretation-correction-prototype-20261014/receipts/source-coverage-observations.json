@@ -1,0 +1,233 @@
+{
+  "scope": "UNADMITTED_COMPLETE_OUTPUT_OBSERVATION; NO_PARTIAL_CANDIDATE_ADMISSION_OR_REVIEW",
+  "response_sha256": "3f1ad40064b1816a7de63881738dff91563ca982b37401aabb7d65d2a79586df",
+  "observation_unavailable": [],
+  "observed_route_count": 30,
+  "sources": [
+    {
+      "source_ordinal": 0,
+      "source_kind": "FACT",
+      "proposed_consumers": [
+        "ARTIFACT_CONTENT"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 1,
+      "source_kind": "FACT",
+      "proposed_consumers": [
+        "ARTIFACT_CONTENT"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 2,
+      "source_kind": "FACT",
+      "proposed_consumers": [
+        "GIT_DIFF_SCOPE"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 3,
+      "source_kind": "FACT",
+      "proposed_consumers": [
+        "ARTIFACT_CONTENT",
+        "CANDIDATE_SEAL"
+      ],
+      "uncovered_nonwhitespace_codepoints": 3,
+      "missing_unicode_categories": {
+        "Ll": 3
+      }
+    },
+    {
+      "source_ordinal": 4,
+      "source_kind": "FACT",
+      "proposed_consumers": [
+        "GIT_DIFF_SCOPE",
+        "DENY_DEPLOY",
+        "DENY_PUBLISH"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 5,
+      "source_kind": "IR_CLAUSE",
+      "proposed_consumers": [
+        "RETAIN_CONTEXT"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 6,
+      "source_kind": "IR_CLAUSE",
+      "proposed_consumers": [
+        "ARTIFACT_CONTENT",
+        "GIT_DIFF_SCOPE"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 7,
+      "source_kind": "IR_CLAUSE",
+      "proposed_consumers": [
+        "ARTIFACT_CONTENT"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 8,
+      "source_kind": "IR_CLAUSE",
+      "proposed_consumers": [
+        "ARTIFACT_CONTENT"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 9,
+      "source_kind": "IR_CLAUSE",
+      "proposed_consumers": [
+        "GIT_DIFF_SCOPE"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 10,
+      "source_kind": "IR_CLAUSE",
+      "proposed_consumers": [
+        "ARTIFACT_CONTENT",
+        "CANDIDATE_SEAL"
+      ],
+      "uncovered_nonwhitespace_codepoints": 3,
+      "missing_unicode_categories": {
+        "Ll": 3
+      }
+    },
+    {
+      "source_ordinal": 11,
+      "source_kind": "IR_CLAUSE",
+      "proposed_consumers": [
+        "DENY_DEPLOY",
+        "DENY_PUBLISH",
+        "GIT_DIFF_SCOPE"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 12,
+      "source_kind": "WORK_CONSTRAINT",
+      "proposed_consumers": [
+        "ARTIFACT_CONTENT",
+        "GIT_DIFF_SCOPE"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 13,
+      "source_kind": "WORK_CONSTRAINT",
+      "proposed_consumers": [
+        "ARTIFACT_CONTENT",
+        "GIT_DIFF_SCOPE"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 14,
+      "source_kind": "WORK_CONSTRAINT",
+      "proposed_consumers": [
+        "CANDIDATE_SEAL"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 15,
+      "source_kind": "WORK_CONSTRAINT",
+      "proposed_consumers": [
+        "DENY_DEPLOY",
+        "GIT_DIFF_SCOPE"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 16,
+      "source_kind": "WORK_CONSTRAINT",
+      "proposed_consumers": [
+        "DENY_PUBLISH",
+        "GIT_DIFF_SCOPE"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 17,
+      "source_kind": "WORK_CONSTRAINT",
+      "proposed_consumers": [
+        "GIT_DIFF_SCOPE"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    },
+    {
+      "source_ordinal": 18,
+      "source_kind": "WORK_CONSTRAINT",
+      "proposed_consumers": [
+        "GIT_DIFF_SCOPE"
+      ],
+      "uncovered_nonwhitespace_codepoints": 0,
+      "missing_unicode_categories": {}
+    }
+  ],
+  "replacement_sources_unchanged": true,
+  "replacement_targets_within_original_allowlist": true,
+  "replacement_rationale_sha256": {
+    "5": "81a146521c0b2da79dd8757aa88c63c3658240c71619e2468d22b1e06a1e17df",
+    "6": "1a15317d632fa628c80ec89d18a96d07aab0001887012b071c6e8ec1330f8a90",
+    "16": "ecd7ef7beffc8cbb805b0d4d3f1f3e3804b98375b78eed3684979b859b7d49c0",
+    "17": "d4211f43085fba5d948bb3e6ec519390ff24c362009e060fa7c5f98b245167e2",
+    "7": "36fd5608bb79b71e8b09b746880483dcaa5ae4f1fb5bc4a392350c08c8134283",
+    "8": "aaa03792fe01c204942b6b0d8823dae13c38eac5d8b5d3193c534d0759e124e8",
+    "9": "9d43af669c01da358aa67303d1152c6383ef894ac25716f4b45331ebb241133d",
+    "18": "7ddbbf55f38d4f0a641a2daa35583f2d514ef5e139ff7f14bb20f2d0e18b920d",
+    "19": "10f67b9937010a62d65caedf074261e6bd8b9379d787906252c2b1c1c3bc0d30",
+    "20": "768dc1423845c4b9ba8e10b501a5f0ef4c799506d9403496c7ca5da17d951235",
+    "26": "e2230ec702517f2b568d2229e4109f673037c0e923c725884724ef59a44e428e",
+    "27": "bb16d6b12ad71c2124b8b2b06e73747874540ace963a2b7070d0fa014f02139c",
+    "28": "42b931dc511e4e348d9453b66cc2ef45aeeae3d8f14d9b6d679231ad01edd8f1",
+    "29": "cc0d29c43c6768eafae64c0c0e36eb70381dd6b3fe4971ff811491a0b340181e",
+    "30": "86ece743c95f33cf8594b3223e371d0290959dce6577ccdc93f3530006b25e7c",
+    "31": "3a1495dc90de2bd880da3fe03a4414a6fe891faa2d3f3b058fc699ca79fa6d5d",
+    "25": "5d1e44e97c043bdcb65821e370546d51351ebf22934423ee86a49ebda1b90cc0"
+  },
+  "owner_context_violations": [
+    {
+      "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+      "source": 14,
+      "route": 23,
+      "component_id": "65b6cea440fc9d51ff445b459aa14d74ae347eff7d00e82bbcdb4fa4feecb185"
+    },
+    {
+      "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "source": 3
+    },
+    {
+      "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "source": 10
+    }
+  ],
+  "owner_context_additional_violation_count": 0,
+  "note": "Empty prerequisite errors do not prove semantic equivalence, fulfilled evidence, or full-plan validity."
+}

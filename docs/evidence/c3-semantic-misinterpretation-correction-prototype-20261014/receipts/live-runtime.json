@@ -1,0 +1,15 @@
+{
+  "recorded_at_utc": "2026-10-14T06:20:12.202922+00:00",
+  "container_id": "f6ecd592703cec29da1e4bbc5875b444f8092423812f1c47cd6f3e0417e205bf",
+  "actual_image_id": "sha256:73da30f5567f5766b9767855c1e772fc5421d93a9da54f99a971db9d2f48ce53",
+  "source_overlay": true,
+  "user": "10001:10001",
+  "network_mode": "bridge",
+  "read_only_root": true,
+  "input_mounts_read_only": true,
+  "business_database_access": false,
+  "docker_socket_mounted": false,
+  "mode": "live",
+  "status": "FINISHED",
+  "exit_code": 0
+}

@@ -1,0 +1,85 @@
+{
+  "contract": "isolated-semantic-assumption-review-prototype-v1",
+  "editing_basis": "ORIGINAL_FIRST_WIRE; PRIOR_INTERPRETATION_IS_ONLY_A_CLAIM_OBSERVATION",
+  "authority": "NO_AUTOMATIC_CONSUMER_SELECTION; NO_FACT_CHANGE; NO_VALIDITY_OR_REVIEW_VERDICT",
+  "requests": [
+    {
+      "decision_to_reopen": {
+        "original_route": 1,
+        "source_ref": "semantic-fact:f1baae6a-b455-523a-9a9a-5e180dc7618f",
+        "component_id": "7f9be2e6f3cfc7372c92f82cb78431afe7d1a81ba8433a87731438e335dbed62",
+        "original_route_fingerprint": "4e9c58f635495bd81cf86fb5d8d933dd2dbf65dad4baaa34939332c6339f6308"
+      },
+      "current_interpretation": {
+        "status": "UNADMITTED_PRIOR_PROPOSER_CLAIM; NOT_FACT_OR_REVIEW_EVIDENCE",
+        "origin_request_id": "095fd0ac-7701-49c2-8c75-8de5bceb83a5",
+        "origin_response_sha256": "b5ff1b986992a1423eaf4b5ae65b6d21d88f2af77f6acf9e1743680ea35fbc90",
+        "origin_replacement_index": 1,
+        "claim_sha256": "2d2ad649baf2807f64c22e58839bce88f6738a04be8ee3ea25733edfbbe9877e",
+        "proposed_consumer": "GIT_DIFF_SCOPE"
+      },
+      "assumption_under_review": {
+        "status": "ANALYST_HYPOTHESIS_EXTRACTED_FROM_PRIOR_CLAIM; NOT_ADMITTED_TRUTH",
+        "claim": "A file identity inside the primary Fact subject independently establishes an additional changed-path restriction, beyond that Fact's original predicate."
+      },
+      "why_the_assumption_may_be_invalid": {
+        "challenge": "Identify the original accepted relation, value, Scope or qualifier that entails the additional predicate asserted by this interpretation. Test whether the referent's identity establishes that predicate, or only identifies what the Fact concerns. A supporting provenance reference does not by itself import every obligation in that source. Recompare the proposed method's observable with this exact primary contribution.",
+        "authority": "HYPOTHESIS_CHALLENGE_ONLY; YOU_MAY_REFUTE_IT_USING_THE_ORIGINAL_FACT; NO_REPLACEMENT_CONSUMER_IS_SUPPLIED"
+      },
+      "facts_that_must_remain_unchanged": [
+        "original_source_identity_and_version",
+        "accepted_fact_relation_value_order_scope_qualifiers_authority",
+        "original_required_meaning_and_full_coverage",
+        "existing_permissions_and_gates",
+        "unrelated_lawful_decisions_unless_another_existing_failure_requires_edit"
+      ],
+      "fields_that_may_be_reconsidered": [
+        "capability",
+        "current_fact_dependencies",
+        "target_paths",
+        "provenance_support_refs",
+        "rationale"
+      ],
+      "source_of_truth_ref": "immutable_inventory.sources[0].payload"
+    },
+    {
+      "decision_to_reopen": {
+        "original_route": 3,
+        "source_ref": "semantic-fact:64507732-d7be-5aa0-90f8-6ec7ef76b488",
+        "component_id": "17696c29e9cde1515646aae8d546eeca8c5d6f161182349e2431dfa9e13be18f",
+        "original_route_fingerprint": "eb486dc75f3f5bf9e9c5b251b4cbb665b7a3ed10b5820c8082fc2498fd8c0649"
+      },
+      "current_interpretation": {
+        "status": "UNADMITTED_PRIOR_PROPOSER_CLAIM; NOT_FACT_OR_REVIEW_EVIDENCE",
+        "origin_request_id": "095fd0ac-7701-49c2-8c75-8de5bceb83a5",
+        "origin_response_sha256": "b5ff1b986992a1423eaf4b5ae65b6d21d88f2af77f6acf9e1743680ea35fbc90",
+        "origin_replacement_index": 3,
+        "claim_sha256": "a9a68c9e7d25faafa14cce3daa7d43010823e94eab754fcddcf82e7ab77820a3",
+        "proposed_consumer": "GIT_DIFF_SCOPE"
+      },
+      "assumption_under_review": {
+        "status": "ANALYST_HYPOTHESIS_EXTRACTED_FROM_PRIOR_CLAIM; NOT_ADMITTED_TRUTH",
+        "claim": "A file identity inside the primary Fact subject independently establishes an additional changed-path restriction, beyond that Fact's original predicate."
+      },
+      "why_the_assumption_may_be_invalid": {
+        "challenge": "Identify the original accepted relation, value, Scope or qualifier that entails the additional predicate asserted by this interpretation. Test whether the referent's identity establishes that predicate, or only identifies what the Fact concerns. A supporting provenance reference does not by itself import every obligation in that source. Recompare the proposed method's observable with this exact primary contribution.",
+        "authority": "HYPOTHESIS_CHALLENGE_ONLY; YOU_MAY_REFUTE_IT_USING_THE_ORIGINAL_FACT; NO_REPLACEMENT_CONSUMER_IS_SUPPLIED"
+      },
+      "facts_that_must_remain_unchanged": [
+        "original_source_identity_and_version",
+        "accepted_fact_relation_value_order_scope_qualifiers_authority",
+        "original_required_meaning_and_full_coverage",
+        "existing_permissions_and_gates",
+        "unrelated_lawful_decisions_unless_another_existing_failure_requires_edit"
+      ],
+      "fields_that_may_be_reconsidered": [
+        "capability",
+        "current_fact_dependencies",
+        "target_paths",
+        "provenance_support_refs",
+        "rationale"
+      ],
+      "source_of_truth_ref": "immutable_inventory.sources[1].payload"
+    }
+  ]
+}

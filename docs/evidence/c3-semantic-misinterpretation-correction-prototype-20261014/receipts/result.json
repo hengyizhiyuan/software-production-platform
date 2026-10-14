@@ -1,0 +1,127 @@
+{
+  "recorded_at_utc": "2026-10-14T06:20:26.525063+00:00",
+  "logical_formation_calls": 1,
+  "review_calls": 0,
+  "profile": {
+    "model": "deepseek-flash",
+    "reasoning_effort": "none",
+    "max_output_tokens": 16384,
+    "timeout_seconds": 120
+  },
+  "new_work_created": false,
+  "historical_work_modified": false,
+  "decoded_candidate": false,
+  "existing_candidate_validator": "NOT_PASSED",
+  "failure": {
+    "stage": "PROVIDER_OR_WIRE",
+    "type": "_FulfillmentWireValidationError",
+    "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST"
+  },
+  "failed_predicates": [
+    {
+      "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "source": 3
+    },
+    {
+      "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "source": 10
+    }
+  ],
+  "assumption_context_fingerprint": "e618cd1340ebc7929845f431fa507efed63763e6b4851dfa38c86ca42675dff6",
+  "provider": {
+    "request_id": "c8cdb73b-0228-45b4-bf75-242782296ad8",
+    "provider": "deepseek",
+    "requested_model": "deepseek-flash",
+    "effective_model": "deepseek-flash",
+    "usage": {
+      "input_tokens": 90345,
+      "output_tokens": 2811,
+      "cached_tokens": 82176,
+      "reasoning_tokens": 0,
+      "total_tokens": 93156,
+      "unknown": false
+    },
+    "timing": {
+      "request_sent_seconds": 0.0029029690194875,
+      "first_response_event_seconds": 0.4650193869601935,
+      "first_token_seconds": 2.233745008939877,
+      "completed_seconds": 10.356398758012801
+    },
+    "transport_retry_count": 0,
+    "output_evidence": {
+      "provider_status": "completed",
+      "delta_sha256": "3f1ad40064b1816a7de63881738dff91563ca982b37401aabb7d65d2a79586df",
+      "delta_bytes": 8476,
+      "terminal_text_observed": true,
+      "terminal_sha256": "3f1ad40064b1816a7de63881738dff91563ca982b37401aabb7d65d2a79586df",
+      "terminal_bytes": 8476,
+      "selection": "TERMINAL_MATCHED_DELTA"
+    },
+    "validation_feedback_sha256": "9dc192e61dfd83c8c4a0748400df4c04833e699c08cac64a99d83bc4f759e8e1",
+    "generation_input_sha256": "8012a4ecf7d61206c49bd881419426f949cbd05ee7b79248513363b7338b6ea1",
+    "generation_instructions_sha256": "63dd1838008364346588b0e83a4365bb0c7f09ce80a28a17aa2d53c423bee708"
+  },
+  "response_sha256": "3f1ad40064b1816a7de63881738dff91563ca982b37401aabb7d65d2a79586df",
+  "response_bytes": 8476,
+  "edit_observation": {
+    "decision_outcomes": [
+      {
+        "original_route": 1,
+        "operation": "REMOVE",
+        "capability_before": "GIT_DIFF_SCOPE",
+        "capability_after": null,
+        "changed_fields": [],
+        "fresh_rationale_sha256": null
+      },
+      {
+        "original_route": 3,
+        "operation": "REMOVE",
+        "capability_before": "GIT_DIFF_SCOPE",
+        "capability_after": null,
+        "changed_fields": [],
+        "fresh_rationale_sha256": null
+      }
+    ],
+    "replacement_ordinals": [
+      5,
+      6,
+      16,
+      17,
+      7,
+      8,
+      9,
+      18,
+      19,
+      20,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      25
+    ],
+    "removed_ordinals": [
+      1,
+      3
+    ],
+    "appended_count": 0,
+    "retained_original_ordinals": [
+      0,
+      2,
+      4,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      21,
+      22,
+      23,
+      24
+    ],
+    "interpretation": "EDIT_OBSERVATION_ONLY; NO_SEMANTIC_CORRECTNESS_VERDICT"
+  },
+  "independent_review_admission_guardian": "NOT_EXECUTED; NO_PASS_GRANTED"
+}
