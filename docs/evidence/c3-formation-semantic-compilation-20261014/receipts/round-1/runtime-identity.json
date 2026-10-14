@@ -1,0 +1,67 @@
+{
+  "schema": "c3-semantic-compilation-runtime-v1",
+  "actual_container": "9ae7199b8633b6d202bb72ab7b71887bb4d281054ad62a8def973129b848a79e",
+  "actual_image_id": "sha256:54c309a3474f4f8b7a5353f7d1a69bf79a651ac7c41e310a7c927c0e73c95980",
+  "source_revision": "f9519044cd6ac1c18e4c5894d56258156d5f47dd",
+  "source_tree": "16643e80baa40166126c8d71e9ba3f7640445a3b",
+  "actual_user": "10001:10001",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/ai-native-evolution-20261013/semantic-compilation-20261014/run_trials.py",
+      "Destination": "/run.py",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/non-holdout-cause-control-20261012/analyze_development.py",
+      "Destination": "/helper.py",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/ai-native-evolution-20261013/semantic-compilation-20261014/trials/evidence",
+      "Destination": "/evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/ai-native-evolution-20261013/semantic-compilation-20261014/trials/private",
+      "Destination": "/private",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/non-holdout-cause-control-20261012/private/ordinary34",
+      "Destination": "/inputs/ordinary34",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/non-holdout-cause-control-20261012/private/ordinary41",
+      "Destination": "/inputs/ordinary41",
+      "Mode": "",
+      "RW": false,
+      "Propagation": "rprivate"
+    }
+  ],
+  "database_credentials_passed": false,
+  "docker_socket_mounted": false,
+  "public_ports": false,
+  "runtime_source_overlay": false,
+  "holdout_used": false,
+  "started_at_utc": "2026-10-14T14:58:35.169042+00:00",
+  "status": "FINISHED",
+  "exit_code": 0,
+  "elapsed_seconds": 160.1479410380125
+}

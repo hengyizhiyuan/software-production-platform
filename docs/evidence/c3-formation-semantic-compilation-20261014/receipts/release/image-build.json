@@ -1,0 +1,42 @@
+{
+  "recorded_at_utc": "2026-10-14T16:09:11.573826+00:00",
+  "revision": "e13d82588877379c6021f30d73c9503ecb0a0ea5",
+  "tree": "949dfe2e9a90509746856ab7398422c173926b4d",
+  "tag": "watt-c3-semantic-compilation:e13d8258",
+  "source_archive_sha256": "a8084ddc04246677ebf8ebfa2b83f9019e657e22640830e9cd3be3cea84dd5ab",
+  "elapsed_seconds": 35.924896780983545,
+  "exit_code": 0,
+  "network": "none",
+  "source_reinstalled": true,
+  "runtime_source_overlay": false,
+  "owner_sources": {
+    "watt": {
+      "revision": "e13d82588877379c6021f30d73c9503ecb0a0ea5",
+      "tree": "949dfe2e9a90509746856ab7398422c173926b4d"
+    },
+    "guardian": {
+      "revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+      "tree": "92ac992c03bd84923a569bbe9f314c0786457040"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  },
+  "actual_image_id": "sha256:8485427d327b10a7d862eda57cc58af47f031a5855e4ddeef147b36217f683b0",
+  "labels": {
+    "org.opencontainers.image.revision": "e13d82588877379c6021f30d73c9503ecb0a0ea5",
+    "watt.c3.base-image-id": "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14",
+    "watt.c3.ecf-revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+    "watt.c3.ecf-tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460",
+    "watt.c3.ecf-unsupported-revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+    "watt.c3.guardian-revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+    "watt.c3.guardian-tree": "92ac992c03bd84923a569bbe9f314c0786457040",
+    "watt.c3.source-tree": "949dfe2e9a90509746856ab7398422c173926b4d"
+  },
+  "repo_digests": []
+}

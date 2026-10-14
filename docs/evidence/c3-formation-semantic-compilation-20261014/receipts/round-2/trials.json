@@ -1,0 +1,273 @@
+{
+  "schema": "c3-semantic-compilation-nonholdout-v1",
+  "source_revision": "397d106f21e9cb74814a366a3e28e4c74426b053",
+  "actual_runtime_sha256": "2dfbd62ea788b9b59faf3c797a05b984cf4746efb9923588797854eeabab5ad0",
+  "provider_runtime_sha256": "8c033a91e8f1c54065679a72a8844a831b4b8daac002621e588eaaef82602ea2",
+  "holdout_used": false,
+  "new_work_created": false,
+  "database_access": false,
+  "model_profile": {
+    "provider": "DEEPSEEK",
+    "model": "deepseek-flash",
+    "reasoning_effort": "none",
+    "max_output_tokens": 16384,
+    "timeout_seconds": 120
+  },
+  "trials": [
+    {
+      "trial": "ordinary34-t1",
+      "case": "ordinary34",
+      "started_at_utc": "2026-10-14T15:55:04.388538+00:00",
+      "elapsed_seconds": 67.73249843192752,
+      "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+      "source_count": 19,
+      "formation_calls": 2,
+      "review_calls": 1,
+      "tokens": 249633,
+      "terminal_reason": "OBLIGATION_SOURCE_CONSUMPTION_COVERAGE_LOST",
+      "error": null,
+      "terminal_replay_without_calls": true,
+      "attempts": [
+        {
+          "attempt": 1,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "codes": [
+            "OBLIGATION_FILE_SCOPE_OWNER_MISMATCH",
+            "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+            "OBLIGATION_PROJECTION_UNRESOLVED"
+          ]
+        },
+        {
+          "attempt": 2,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_SOURCE_CONSUMPTION_COVERAGE_LOST",
+          "codes": [
+            "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+            "OBLIGATION_SEMANTIC_SOURCE_MISMATCH",
+            "OBLIGATION_SOURCE_CONSUMPTION_COVERAGE_LOST"
+          ]
+        }
+      ],
+      "reexpressed_sources": [
+        0,
+        16
+      ],
+      "compilation_attachments": 0,
+      "non_punctuation_attachments": 0,
+      "admitted": false,
+      "request_ids": [
+        "289b0c6e-5b52-4239-837f-ee0c5324f0a1",
+        "bb6238b8-32c7-45f0-8a14-6c0326b3963b",
+        "2d184443-5857-4e38-8935-cf42818a6765"
+      ]
+    },
+    {
+      "trial": "ordinary34-t2",
+      "case": "ordinary34",
+      "started_at_utc": "2026-10-14T15:56:12.140515+00:00",
+      "elapsed_seconds": 46.92142086394597,
+      "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+      "source_count": 19,
+      "formation_calls": 2,
+      "review_calls": 1,
+      "tokens": 202628,
+      "terminal_reason": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "error": null,
+      "terminal_replay_without_calls": true,
+      "attempts": [
+        {
+          "attempt": 1,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+          "codes": [
+            "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+            "OBLIGATION_SEMANTIC_SOURCE_MISMATCH"
+          ]
+        },
+        {
+          "attempt": 2,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "codes": [
+            "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST"
+          ]
+        }
+      ],
+      "reexpressed_sources": [
+        0,
+        5
+      ],
+      "compilation_attachments": 1,
+      "non_punctuation_attachments": 0,
+      "admitted": false,
+      "request_ids": [
+        "e29993d1-73b2-45ba-b39d-92dd1b75d7d4",
+        "1616c770-682f-4943-ad77-c32e1082526b",
+        "ab97333c-3d91-450f-9b38-0f66ca6e3201"
+      ]
+    },
+    {
+      "trial": "ordinary34-t3",
+      "case": "ordinary34",
+      "started_at_utc": "2026-10-14T15:56:59.082187+00:00",
+      "elapsed_seconds": 42.91925697098486,
+      "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+      "source_count": 19,
+      "formation_calls": 1,
+      "review_calls": 1,
+      "tokens": 135076,
+      "terminal_reason": "VALIDATED_PROJECTION",
+      "error": null,
+      "terminal_replay_without_calls": true,
+      "attempts": [
+        {
+          "attempt": 1,
+          "passed": true,
+          "failed_predicate": null,
+          "codes": []
+        }
+      ],
+      "reexpressed_sources": [
+        0
+      ],
+      "compilation_attachments": 3,
+      "non_punctuation_attachments": 0,
+      "admitted": true,
+      "offline_problems": [],
+      "false_admission": false,
+      "request_ids": [
+        "219f9823-0840-402c-9758-c07a7b4f6283",
+        "e57b2e4d-8297-438e-8f3a-6b113f2c3f51"
+      ]
+    },
+    {
+      "trial": "ordinary41-t1",
+      "case": "ordinary41",
+      "started_at_utc": "2026-10-14T15:57:42.030758+00:00",
+      "elapsed_seconds": 48.02931300189812,
+      "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+      "source_count": 23,
+      "formation_calls": 2,
+      "review_calls": 1,
+      "tokens": 244514,
+      "terminal_reason": "OBLIGATION_SOURCE_CONSUMPTION_COVERAGE_LOST",
+      "error": null,
+      "terminal_replay_without_calls": true,
+      "attempts": [
+        {
+          "attempt": 1,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "codes": [
+            "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST"
+          ]
+        },
+        {
+          "attempt": 2,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_SOURCE_CONSUMPTION_COVERAGE_LOST",
+          "codes": [
+            "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+            "OBLIGATION_SEMANTIC_REVIEW_CONSUMPTION_INVALID",
+            "OBLIGATION_SEMANTIC_SOURCE_MISMATCH",
+            "OBLIGATION_SOURCE_CONSUMPTION_COVERAGE_LOST"
+          ]
+        }
+      ],
+      "reexpressed_sources": [
+        0,
+        7
+      ],
+      "compilation_attachments": 5,
+      "non_punctuation_attachments": 0,
+      "admitted": false,
+      "request_ids": [
+        "229ef637-3731-481d-b1a5-1b19825bc091",
+        "7e438f8a-8eb0-4b39-bf17-a2826342689c",
+        "46095623-07c5-4bbc-a62d-2de5547b4c59"
+      ]
+    },
+    {
+      "trial": "ordinary41-t2",
+      "case": "ordinary41",
+      "started_at_utc": "2026-10-14T15:58:30.084434+00:00",
+      "elapsed_seconds": 23.1831957049435,
+      "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+      "source_count": 23,
+      "formation_calls": 2,
+      "review_calls": 0,
+      "tokens": 138117,
+      "terminal_reason": "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID",
+      "error": null,
+      "terminal_replay_without_calls": true,
+      "attempts": [
+        {
+          "attempt": 1,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "codes": [
+            "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "attempt": 2,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID",
+          "codes": [
+            "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID"
+          ]
+        }
+      ],
+      "reexpressed_sources": [
+        0,
+        0
+      ],
+      "compilation_attachments": 1,
+      "non_punctuation_attachments": 0,
+      "admitted": false,
+      "request_ids": [
+        "5ab1d76f-f25d-459d-9ad5-6983ca99dcf1",
+        "d4abe707-bf66-4f7c-bd09-a75bc0ea5d7a"
+      ]
+    },
+    {
+      "trial": "ordinary41-t3",
+      "case": "ordinary41",
+      "started_at_utc": "2026-10-14T15:58:53.292081+00:00",
+      "elapsed_seconds": 42.06398727593478,
+      "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+      "source_count": 23,
+      "formation_calls": 2,
+      "review_calls": 1,
+      "tokens": 233303,
+      "terminal_reason": "OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT",
+      "error": "OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT",
+      "terminal_replay_without_calls": null,
+      "attempts": [
+        {
+          "attempt": 1,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+          "codes": [
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "reexpressed_sources": [
+        0,
+        2
+      ],
+      "compilation_attachments": 0,
+      "non_punctuation_attachments": 0,
+      "admitted": false,
+      "request_ids": [
+        "4eb02ca3-7415-43ee-90e8-7d8787d51b8e",
+        "49e86ff8-631e-4896-a170-1074f2cb2da6",
+        "60053732-64e0-451e-b949-708bde05fe88"
+      ]
+    }
+  ],
+  "tokens_spent": 1203271
+}

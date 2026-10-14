@@ -1,0 +1,3 @@
+services:
+  api:
+    image: watt-cloud-worker:c3-semantic-compilation-e13d8258

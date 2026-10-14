@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "source_commit": "e13d82588877379c6021f30d73c9503ecb0a0ea5",
+  "old_image": "sha256:8bdb8db9b7ec8ed761a193131e64bb2454b5dfe0834c468cd5c774fda4c036af",
+  "old_revision_label": "32db38cac756ba120a180788ff31e9b4fea8fc6a",
+  "new_image": "sha256:8485427d327b10a7d862eda57cc58af47f031a5855e4ddeef147b36217f683b0",
+  "new_api_id": "f9c5ae34f35e147ec88c790f9177b78f3c6ad5409f8e0eb2af85a76affd1266f",
+  "started_at": "2026-10-14T16:16:19.521687907Z",
+  "health": {
+    "service": "available",
+    "database": "available",
+    "application_initialized": true
+  },
+  "runtime_smoke": {
+    "revision": "e13d82588877379c6021f30d73c9503ecb0a0ea5",
+    "provider_configured": true,
+    "semantic_compilation": true,
+    "contract": "formation-semantic-contribution-compilation-v2"
+  },
+  "scope": "API_IMAGE_ONLY_LAST_OVERRIDE",
+  "compose_files_preserved": [
+    "/data/watt/runtime/docker-compose.yml",
+    "/data/watt/trace-analysis-releases/0ad7bf83/rollback.override.private.yml",
+    "/data/watt/maintenance/cpu-fix-20261012/compose.admin-storage-no-df.yml",
+    "/data/watt/trace-analysis-releases/e207b92c/deployed-api.override.yml",
+    "/data/watt/trace-analysis-releases/6c909521/deployed-api.override.yml",
+    "/data/watt/trace-analysis-releases/32db38ca/deployed-api.override.yml"
+  ],
+  "deployment_override": "/data/watt/ai-native-evolution-20261013/semantic-compilation-20261014/release-e13d8258/deploy/deployed-api.override.yml",
+  "rollback_tag": "watt-cloud-worker:c3-predeploy-rollback-e13d8258"
+}

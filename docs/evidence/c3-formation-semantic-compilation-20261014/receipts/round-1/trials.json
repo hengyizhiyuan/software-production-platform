@@ -1,0 +1,286 @@
+{
+  "schema": "c3-semantic-compilation-nonholdout-v1",
+  "source_revision": "f9519044cd6ac1c18e4c5894d56258156d5f47dd",
+  "actual_runtime_sha256": "2dfbd62ea788b9b59faf3c797a05b984cf4746efb9923588797854eeabab5ad0",
+  "provider_runtime_sha256": "08e736241a6a6b41cf261fb8cf4988656084a4ea151ffb4017e9e465a9e2b8f0",
+  "holdout_used": false,
+  "new_work_created": false,
+  "database_access": false,
+  "model_profile": {
+    "provider": "DEEPSEEK",
+    "model": "deepseek-flash",
+    "reasoning_effort": "none",
+    "max_output_tokens": 16384,
+    "timeout_seconds": 120
+  },
+  "trials": [
+    {
+      "trial": "ordinary34-t1",
+      "case": "ordinary34",
+      "started_at_utc": "2026-10-14T14:58:38.732315+00:00",
+      "elapsed_seconds": 21.455658287974074,
+      "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+      "source_count": 19,
+      "formation_calls": 2,
+      "review_calls": 0,
+      "tokens": 135143,
+      "terminal_reason": "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID",
+      "error": null,
+      "terminal_replay_without_calls": true,
+      "attempts": [
+        {
+          "attempt": 1,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_SEAL_CURRENT_CONTRIBUTION_MISSING",
+          "codes": [
+            "OBLIGATION_SEAL_CURRENT_CONTRIBUTION_MISSING"
+          ]
+        },
+        {
+          "attempt": 2,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID",
+          "codes": [
+            "OBLIGATION_FORMATION_LOCAL_EDIT_SCHEMA_INVALID"
+          ]
+        }
+      ],
+      "reexpressed_sources": [
+        0,
+        0
+      ],
+      "compilation_attachments": 0,
+      "non_punctuation_attachments": 0,
+      "admitted": false,
+      "request_ids": [
+        "38c3fef5-4c42-415f-a052-df0a9c8ac320",
+        "64b58ab6-28a7-4b5a-904a-70c5cd653d47"
+      ]
+    },
+    {
+      "trial": "ordinary34-t2",
+      "case": "ordinary34",
+      "started_at_utc": "2026-10-14T14:59:00.210155+00:00",
+      "elapsed_seconds": 28.201301811030135,
+      "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+      "source_count": 19,
+      "formation_calls": 2,
+      "review_calls": 0,
+      "tokens": 144751,
+      "terminal_reason": "OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID",
+      "error": null,
+      "terminal_replay_without_calls": true,
+      "attempts": [
+        {
+          "attempt": 1,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+          "codes": [
+            "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "attempt": 2,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID",
+          "codes": [
+            "OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID"
+          ]
+        }
+      ],
+      "reexpressed_sources": [
+        0,
+        0
+      ],
+      "compilation_attachments": 0,
+      "non_punctuation_attachments": 0,
+      "admitted": false,
+      "request_ids": [
+        "0500d4d6-24dc-4f37-91e7-8d296e9b0467",
+        "8b977532-8d6d-4bee-b5b9-20cef61f6171"
+      ]
+    },
+    {
+      "trial": "ordinary34-t3",
+      "case": "ordinary34",
+      "started_at_utc": "2026-10-14T14:59:28.432739+00:00",
+      "elapsed_seconds": 45.240283638006076,
+      "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+      "source_count": 19,
+      "formation_calls": 2,
+      "review_calls": 1,
+      "tokens": 226084,
+      "terminal_reason": "OBLIGATION_SOURCE_CONSUMPTION_COVERAGE_LOST",
+      "error": null,
+      "terminal_replay_without_calls": true,
+      "attempts": [
+        {
+          "attempt": 1,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_SOURCE_EVIDENCE_METHOD_REQUIRES_ADMITTED_FACT",
+          "codes": [
+            "OBLIGATION_PROJECTION_UNRESOLVED",
+            "OBLIGATION_SOURCE_EVIDENCE_METHOD_REQUIRES_ADMITTED_FACT"
+          ]
+        },
+        {
+          "attempt": 2,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_SOURCE_CONSUMPTION_COVERAGE_LOST",
+          "codes": [
+            "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+            "OBLIGATION_SEMANTIC_SOURCE_MISMATCH",
+            "OBLIGATION_SOURCE_CONSUMPTION_COVERAGE_LOST"
+          ]
+        }
+      ],
+      "reexpressed_sources": [
+        0,
+        0
+      ],
+      "compilation_attachments": 0,
+      "non_punctuation_attachments": 0,
+      "admitted": false,
+      "request_ids": [
+        "08d3fa91-a56c-4026-acc9-1cb466044f8e",
+        "93b37c59-25a2-4638-8412-b3fa4c52a995",
+        "2de23001-066e-4bf6-85b5-88cbd7dae02d"
+      ]
+    },
+    {
+      "trial": "ordinary41-t1",
+      "case": "ordinary41",
+      "started_at_utc": "2026-10-14T15:00:13.700923+00:00",
+      "elapsed_seconds": 25.83788087393623,
+      "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+      "source_count": 23,
+      "formation_calls": 2,
+      "review_calls": 0,
+      "tokens": 166578,
+      "terminal_reason": "OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID",
+      "error": null,
+      "terminal_replay_without_calls": true,
+      "attempts": [
+        {
+          "attempt": 1,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "codes": [
+            "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION",
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        },
+        {
+          "attempt": 2,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID",
+          "codes": [
+            "OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID"
+          ]
+        }
+      ],
+      "reexpressed_sources": [
+        0,
+        0
+      ],
+      "compilation_attachments": 2,
+      "non_punctuation_attachments": 0,
+      "admitted": false,
+      "request_ids": [
+        "ec0367e5-0d19-4e91-b8df-882d03705e86",
+        "37188f54-e5a6-4714-afc4-580947ac84f1"
+      ]
+    },
+    {
+      "trial": "ordinary41-t2",
+      "case": "ordinary41",
+      "started_at_utc": "2026-10-14T15:00:39.562187+00:00",
+      "elapsed_seconds": 16.835190400015563,
+      "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+      "source_count": 23,
+      "formation_calls": 2,
+      "review_calls": 0,
+      "tokens": 142674,
+      "terminal_reason": "OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID",
+      "error": null,
+      "terminal_replay_without_calls": true,
+      "attempts": [
+        {
+          "attempt": 1,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_COMPONENT_QUOTE_NOT_OBSERVED",
+          "codes": [
+            "OBLIGATION_COMPONENT_QUOTE_NOT_OBSERVED"
+          ]
+        },
+        {
+          "attempt": 2,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID",
+          "codes": [
+            "OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID"
+          ]
+        }
+      ],
+      "reexpressed_sources": [
+        0,
+        0
+      ],
+      "compilation_attachments": 0,
+      "non_punctuation_attachments": 0,
+      "admitted": false,
+      "request_ids": [
+        "734b9706-e0b0-495d-9264-b523f6bbcc24",
+        "36ed230c-75dc-4a74-9bd0-7b6e1621dca3"
+      ]
+    },
+    {
+      "trial": "ordinary41-t3",
+      "case": "ordinary41",
+      "started_at_utc": "2026-10-14T15:00:56.421638+00:00",
+      "elapsed_seconds": 18.18015493999701,
+      "inventory_fingerprint": "24cb332f3225bda169e3a393eac4470a826be2c3c665f37be296737deec0eb42",
+      "source_count": 23,
+      "formation_calls": 2,
+      "review_calls": 0,
+      "tokens": 140181,
+      "terminal_reason": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "error": null,
+      "terminal_replay_without_calls": true,
+      "attempts": [
+        {
+          "attempt": 1,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_COMPONENT_QUOTE_NOT_OBSERVED",
+          "codes": [
+            "OBLIGATION_COMPONENT_QUOTE_NOT_OBSERVED"
+          ]
+        },
+        {
+          "attempt": 2,
+          "passed": false,
+          "failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+          "codes": [
+            "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+          ]
+        }
+      ],
+      "reexpressed_sources": [
+        0,
+        3
+      ],
+      "compilation_attachments": 0,
+      "non_punctuation_attachments": 0,
+      "admitted": false,
+      "request_ids": [
+        "c5e3afa3-1ee2-4444-89cf-087c203ab5d1",
+        "aba3df95-0f57-4d36-a6d9-aef4ff06365a"
+      ]
+    }
+  ],
+  "tokens_spent": 955411
+}
