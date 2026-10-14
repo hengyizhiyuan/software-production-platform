@@ -120,23 +120,20 @@ def run_case(*, compile_contract=True, first="duplicate", repair="reexpress", eq
             else:
                 basis = payload["owner_source_preconditions"]["candidate_construction_state"]["repair_basis"]
                 old = basis["original_wire"]["routes"]
-                edited = {"basis": basis["raw_sha256"], "replace": [], "remove": [], "append": []}
-                if compile_contract:
-                    edited["source_reexpressions"] = []
-                if first == "punctuation":
-                    edited["replace"].append({"index": clipped, "route": roles[clipped]})
-                elif repair in {"reexpress", "conflict"}:
+                if not compile_contract:
+                    edited = {"basis": basis["raw_sha256"], "replace": [], "remove": [{"index": len(old) - 1}], "append": []}
+                elif first == "punctuation":
+                    edited = {"basis": basis["raw_sha256"], "sources": [
+                        {"source_ref": roles[clipped]["source_ref"], "routes": [roles[clipped]]}]}
+                else:
                     members = [i for i, r in enumerate(old) if r["source_ref"] == content_ref]
                     unique = []
                     for i in members:
                         choice = {k: v for k, v in old[i].items() if k != "rationale"}
                         if all(choice != {k: v for k, v in u.items() if k != "rationale"} for u in unique):
                             unique.append(deepcopy(old[i]))
-                    edited["source_reexpressions"].append({"source_ref": content_ref, "routes": unique})
-                    if repair == "conflict":
-                        edited["remove"].append({"index": members[-1]})
-                else:
-                    edited["remove"].append({"index": len(old) - 1})
+                    entry = {"source_ref": content_ref, "routes": unique}
+                    edited = {"basis": basis["raw_sha256"], "sources": [entry] * (2 if repair == "conflict" else 1)}
                 output = json.dumps(edited)
         return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
             requested_model="controlled-compilation", effective_model="controlled-compilation",
@@ -167,8 +164,8 @@ def test_marker_is_negotiated_and_projected_to_actual_construction_request():
     assert "contribution level" in first["instructions"]
     assert "Preserve punctuation and all nonspace characters" not in first["instructions"]
     assert "one component with the same consumer is ONE binding" in first["instructions"]
-    assert "source_reexpressions" in repair["instructions"]
-    assert "source_reexpressions" in repair["output_schema"]["properties"]
+    assert "per-source restatement" in repair["instructions"]
+    assert set(repair["output_schema"]["properties"]) == {"basis", "sources"}
 
 
 def test_source_reexpression_removes_duplicate_without_owner_selecting_routes():
@@ -178,14 +175,14 @@ def test_source_reexpression_removes_duplicate_without_owner_selecting_routes():
     repair = constructions[-1]
     # The model's restated set, not an Owner choice, removes the duplicate.
     assert len(repair["reexpressed_original_ordinals"]) == repair["restated_route_count"] + 1
-    assert repair["removed_original_ordinals"] == [] and repair["replaced_original_ordinals"] == []
+    assert repair["removed_original_ordinals"] == [] and repair["restated_sources"]
     assert "COVERAGE_GATE_UNCHANGED" in repair["geometry_compilation"]["status"]
     before = deepcopy(provider._fulfillment_receipts)
     owner.form_fulfillment_projection(revision, ir, **kwargs)
     assert len(calls) == 3 and provider._fulfillment_receipts == before
 
 
-def test_reexpression_conflicting_with_per_route_edit_is_rejected_before_review():
+def test_restating_one_source_twice_is_rejected_before_review():
     result, _, calls, _, _ = run_case(repair="conflict")
     assert len(calls) == 2 and all(b.state == "UNRESOLVED" for b in result)
     assert result[0].formation_receipt["terminal_reason"] == "OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID"
@@ -202,7 +199,7 @@ def test_unnegotiated_provider_keeps_historical_request_and_edit_shape():
     rows, constructions = _constructions(provider, revision, inventory)
     assert all("semantic_compilation_contract" not in (r.get("owner_source_preconditions") or {})
         for r in rows if r["stage"] == "MODEL_REQUEST_PENDING")
-    assert "source_reexpressions" not in calls[1][0]["output_schema"]["properties"]
+    assert "sources" not in calls[1][0]["output_schema"]["properties"]
     assert all("geometry_compilation" not in (c or {}) for c in constructions)
 
 
@@ -285,9 +282,9 @@ def run_decision_case(disposition, *, keep_consumer):
                 repaired["component_quote"] = None
                 restated = [deepcopy(r) for i, r in enumerate(old) if r["source_ref"] == content_ref
                     and (i != target or keep_consumer)]
-                output = json.dumps({"basis": basis["raw_sha256"], "replace": [{"index": broken, "route": repaired}],
-                    "remove": [], "append": [],
-                    "source_reexpressions": [{"source_ref": content_ref, "routes": restated}],
+                output = json.dumps({"basis": basis["raw_sha256"], "sources": [
+                    {"source_ref": repaired["source_ref"], "routes": [repaired]},
+                    {"source_ref": content_ref, "routes": restated}],
                     "decision_revisions": [{"original_route": target, "disposition": disposition,
                         "revised_fields": [], "justification": "Restated the complete source contribution set."}]})
         return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
@@ -313,3 +310,43 @@ def test_restatement_reproducing_original_choice_cannot_claim_remove_or_revise(d
     result, calls = run_decision_case(disposition, keep_consumer=True)
     assert len(calls) == 2 and all(b.state == "UNRESOLVED" for b in result)
     assert result[0].formation_receipt["terminal_reason"] == "OBLIGATION_FORMATION_DECISION_ACTION_INCONSISTENT"
+
+
+def test_source_omitted_by_parent_is_restored_by_naming_it():
+    """The first proposal leaves one source unrouted; the repair names it."""
+    revision, ir, inventory, plan, content_ref = content_and_scope_case()
+    calls = []
+    omitted = next(r.source_ref for r in plan.routes
+        if sum(o.source_ref == r.source_ref for o in plan.routes) == 1 and r.source_ref != content_ref)
+    def generate(**request):
+        payload = json.loads(request["input_text"])
+        calls.append(payload)
+        if "untrusted_fulfillment_candidate" in payload:
+            candidate = decode_review_input(payload)
+            output = fixture_review_proof(inventory, candidate, review(inventory, candidate), payload).model_dump_json()
+        else:
+            feedback = payload["same_basis_validation_feedback"]
+            wire, _ = controlled_wire(inventory, plan, feedback=feedback, owner_preconditions=payload["owner_source_preconditions"])
+            caps = payload["existing_capability_contracts"]
+            roles = [{"source_ref": inventory["sources"][row["s"]]["source_ref"],
+                "capability": caps[row["c"]]["capability"], "component_quote": row["q"],
+                "current_fact_dependencies": [inventory["sources"][i]["source_ref"] for i in row["f"]],
+                "target_paths": [inventory["exact_target_paths"][i] for i in row["t"]],
+                "provenance_support_refs": [inventory["sources"][i]["source_ref"] for i in row["u"]],
+                "rationale": row["r"]} for row in wire["routes"]]
+            if feedback is None:
+                output = json.dumps({"routes": [r for r in roles if r["source_ref"] != omitted]})
+            else:
+                basis = payload["owner_source_preconditions"]["candidate_construction_state"]["repair_basis"]
+                output = json.dumps({"basis": basis["raw_sha256"], "sources": [
+                    {"source_ref": omitted, "routes": [r for r in roles if r["source_ref"] == omitted]}]})
+        return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
+            requested_model="controlled-compilation", effective_model="controlled-compilation",
+            request_id=f"controlled-compilation-{len(calls)}", usage=ModelUsage(unknown=True), timing=ModelTiming(), retry_count=0)
+    provider = wire_owner.ModelFulfillmentCandidateProvider(
+        lambda: SimpleNamespace(generate=generate, close=lambda: None), candidate_construction=True,
+        candidate_construction_contract="owner-local-interpretation-role-construction-v4",
+        raw_role_repair=True, construction_consumer_instructions=True, role_convergence=True, semantic_compilation=True)
+    result = owner.form_fulfillment_projection(revision, ir, provider=provider,
+        source_revision=inventory["source_revision"], exact_target_paths=inventory["exact_target_paths"])
+    assert len(calls) == 3 and all(b.state != "UNRESOLVED" for b in result)

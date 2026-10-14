@@ -131,7 +131,7 @@ _UNPARSED_CLAIM_REPAIR_CONTRACT = "existing-bound-unparsed-claim-repair-v1"
 _ROLE_CONVERGENCE_LEGACY_CONTRACT = "existing-complete-role-candidate-and-bound-repair-targets-v1"
 _ROLE_CONVERGENCE_CONTRACT = "existing-complete-role-candidate-and-bound-repair-targets-v2"
 _ROLE_CONVERGENCE_CONTRACTS = {_ROLE_CONVERGENCE_LEGACY_CONTRACT, _ROLE_CONVERGENCE_CONTRACT}
-_SEMANTIC_COMPILATION_CONTRACT = "formation-semantic-contribution-compilation-v1"
+_SEMANTIC_COMPILATION_CONTRACT = "formation-semantic-contribution-compilation-v2"
 _CANDIDATE_CONSTRUCTION_CONTRACTS = {_CANDIDATE_CONSTRUCTION_CONTRACT, _SEMANTIC_EDIT_CONTRACT, _ROLE_REFERENCE_CONTRACT,
     _INTERPRETATION_ROLE_CONTRACT}
 
@@ -252,8 +252,15 @@ class _FulfillmentSourceReexpression(BaseModel):
     routes: tuple[_FulfillmentRoleRoute, ...] = Field(min_length=1, max_length=64)
 
 
-class _FulfillmentRoleCompilationEdits(_FulfillmentRoleTargetEdits):
-    source_reexpressions: tuple[_FulfillmentSourceReexpression, ...] = Field(max_length=64)
+class _FulfillmentSourceRestatementEdits(BaseModel):
+    """Repair as complete per-source contribution sets; no route ordinals.
+
+    Each listed source's routes are replaced by its restated set; every
+    unlisted source is retained verbatim. There is one way to express a change.
+    """
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    basis: str = Field(pattern=r"^[0-9a-f]{64}$")
+    sources: tuple[_FulfillmentSourceReexpression, ...] = Field(min_length=1, max_length=64)
 
 
 def _role_proposal_semantic_value(value,inventory,capabilities):
@@ -545,8 +552,8 @@ def _decision_action_observation(claims, proposal, basis, targets, *, role_basis
     if (any(type(i) is not int for i in indices) or len(indices) != len(claims)
             or len(set(indices)) != len(indices) or set(indices) != expected):
         reject("DISPOSITION_TARGET_SET_MISMATCH")
-    replacements = {r.index: r.route.model_dump(mode="json") for r in proposal.replace}
-    removed = {r.index if isinstance(r, _FulfillmentRoleRemoval) else r for r in proposal.remove}
+    replacements = {r.index: r.route.model_dump(mode="json") for r in getattr(proposal, "replace", ())}
+    removed = {r.index if isinstance(r, _FulfillmentRoleRemoval) else r for r in getattr(proposal, "remove", ())}
     original = basis["original_wire"]["routes"]
     aliases = {"capability": "c", "component_quote": "q", "current_fact_dependencies": "f",
         "target_paths": "t", "provenance_support_refs": "u"}
@@ -618,7 +625,7 @@ def _decision_action_observation(claims, proposal, basis, targets, *, role_basis
                 reject("REMOVE_REQUIRES_EXPLICIT_REMOVE", index)
             choices = lambda r: {k: v for k, v in r.items() if k not in {"rationale", "r"}}
             survivors = [replacements.get(i, r) for i, r in enumerate(original) if i not in removed]
-            survivors += [r.model_dump(mode="json") for r in proposal.append]
+            survivors += [r.model_dump(mode="json") for r in getattr(proposal, "append", ())]
             if any(canonical_fingerprint(choices(r)) == canonical_fingerprint(choices(before)) for r in survivors):
                 reject("REMOVED_CHOICE_REINSERTED", index)
         elif disposition == "unresolved":
@@ -872,7 +879,7 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
     try:
         compiling = role_basis and preconditions.get("semantic_compilation_contract") == _SEMANTIC_COMPILATION_CONTRACT
-        model = (_FulfillmentRoleCompilationEdits if compiling else _FulfillmentRoleTargetEdits
+        model = (_FulfillmentSourceRestatementEdits if compiling else _FulfillmentRoleTargetEdits
             if preconditions.get('role_convergence_contract') == _ROLE_CONVERGENCE_CONTRACT
             else _FulfillmentRoleEdits) if role_basis else _FulfillmentSemanticEdits if semantic_basis else _FulfillmentCandidateEdits
         value = json.loads(body, object_pairs_hook=_wire_json_object)
@@ -887,35 +894,33 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
     if canonical_fingerprint(original) != basis["original_wire_fingerprint"]:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
     count = len(original["routes"])
-    removed_indices = [r.index if isinstance(r, _FulfillmentRoleRemoval) else r for r in proposal.remove]
-    indices = [r.index for r in proposal.replace] + removed_indices
-    # A source re-expression replaces EVERY original route of that source with
-    # the model's restated set. The Owner resolves identities only; it selects
-    # no route to keep or drop. Mixing it with per-route edits of the same
-    # source would be two conflicting intents and is rejected.
-    reexpressed, restated = {}, []
-    for item in getattr(proposal, "source_reexpressions", ()):
-        members = [i for i, r in enumerate(original["routes"]) if r.get("source_ref") == item.source_ref]
-        if (not members or any(r.source_ref != item.source_ref for r in item.routes)
-                or any(i in reexpressed for i in members)):
+    removed_indices = [r.index if isinstance(r, _FulfillmentRoleRemoval) else r for r in getattr(proposal, "remove", ())]
+    indices = [r.index for r in getattr(proposal, "replace", ())] + removed_indices
+    appended = getattr(proposal, "append", ())
+    # A restated source replaces EVERY original route of that source with the
+    # model's complete set, including a source the parent failed to route.
+    # The Owner resolves identities only; it selects no route to keep or drop.
+    reexpressed, restated, restated_sources = {}, [], set()
+    for item in getattr(proposal, "sources", ()):
+        if item.source_ref in restated_sources or any(r.source_ref != item.source_ref for r in item.routes):
             raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID")
+        restated_sources.add(item.source_ref)
         routes_json = [r.model_dump(mode="json") for r in item.routes]
-        reexpressed.update({i: routes_json for i in members})
+        reexpressed.update({i: routes_json for i, r in enumerate(original["routes"])
+            if r.get("source_ref") == item.source_ref})
         restated.extend(routes_json)
-    if set(reexpressed) & set(indices):
-        raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID")
     review_only = state.get("convergence", {}).get("repair_strategy") == "RETAIN_VALID_CANDIDATE_REPAIR_REVIEW_OUTPUT"
-    if (not indices and not proposal.append and not reexpressed and not review_only) or len(set(indices)) != len(indices) or any(
+    if (not indices and not appended and not restated and not review_only) or len(set(indices)) != len(indices) or any(
             type(i) is not int or not 0 <= i < count for i in indices):
         raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID")
-    replacements = {r.index: r.route.model_dump(mode="json") for r in proposal.replace}
+    replacements = {r.index: r.route.model_dump(mode="json") for r in getattr(proposal, "replace", ())}
     removed = set(removed_indices)
     action_observation = (_decision_action_observation(dispositions, proposal, basis, action_targets,
         role_basis=role_basis, capabilities=wire_identity["tables"]["capabilities"], reexpressed=reexpressed)
         if action_targets else None)
     routes = [deepcopy(replacements.get(i, r)) for i, r in enumerate(original["routes"])
         if i not in removed and i not in reexpressed]
-    routes.extend(r.model_dump(mode="json") for r in proposal.append)
+    routes.extend(r.model_dump(mode="json") for r in appended)
     routes.extend(restated)
     if not routes or len(routes) > 1024:
         raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID")
@@ -941,10 +946,11 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
         "parent_wire_sha256": basis["raw_sha256"], "parent_binding": basis["parent_binding"],
         "edit_response_sha256": sha256(body.encode()).hexdigest(),
         "constructed_wire_sha256": sha256(constructed.encode()).hexdigest(),
-        "replaced_original_ordinals": [r.index for r in proposal.replace],
-        "removed_original_ordinals": removed_indices, "appended_count": len(proposal.append),
+        "replaced_original_ordinals": [r.index for r in getattr(proposal, "replace", ())],
+        "removed_original_ordinals": removed_indices, "appended_count": len(appended),
         "retained_original_ordinals": [i for i in range(count) if i not in set(indices) and i not in reexpressed],
-        **({"reexpressed_original_ordinals": sorted(reexpressed), "restated_route_count": len(restated)} if reexpressed else {}),
+        **({"restated_sources": sorted(restated_sources), "reexpressed_original_ordinals": sorted(reexpressed),
+            "restated_route_count": len(restated)} if compiling else {}),
         **({"geometry_compilation": {"contract": _SEMANTIC_COMPILATION_CONTRACT, "attachments": compilation,
             "status": "OWNER_PUNCTUATION_BOOKKEEPING_ONLY; NO_WORD_ATTACHED; COVERAGE_GATE_UNCHANGED"}}
            if compilation is not None else {}),
@@ -1034,7 +1040,7 @@ def _role_generation_schema(inventory,capabilities,owner_preconditions):
     from spg.providers.semantic_wire import _provider_strict_output_schema
     basis=(owner_preconditions.get('candidate_construction_state') or {}).get('repair_basis')
     edits = basis and basis.get('representation') not in {'UNREVIEWED_INTERPRETATION_CLAIMS','UNPARSED_PRIVACY_SAFE_PROPOSAL'}
-    edit_model = (_FulfillmentRoleCompilationEdits if owner_preconditions.get('semantic_compilation_contract') == _SEMANTIC_COMPILATION_CONTRACT
+    edit_model = (_FulfillmentSourceRestatementEdits if owner_preconditions.get('semantic_compilation_contract') == _SEMANTIC_COMPILATION_CONTRACT
         else _FulfillmentRoleTargetEdits if owner_preconditions.get('role_convergence_contract') == _ROLE_CONVERGENCE_CONTRACT
         else _FulfillmentRoleEdits)
     schema=_provider_strict_output_schema((edit_model if edits else _FulfillmentRoleProposal).model_json_schema())
@@ -1055,22 +1061,22 @@ def _role_generation_schema(inventory,capabilities,owner_preconditions):
         choices=_formation_binding_choices(inventory,capabilities,owner_preconditions)
         operand=_role_operand_schema(_qualified_operand_generation_schema(inventory,capabilities,choices,
             enforce_owner_prerequisites=True,route_definition='_FulfillmentSemanticRoute'),inventory,capabilities)
-    if edits:
-        if edit_model in {_FulfillmentRoleTargetEdits, _FulfillmentRoleCompilationEdits}:
+    if edits and edit_model is _FulfillmentSourceRestatementEdits:
+        schema['properties']['basis']['enum']=[basis['raw_sha256']]
+        restatement = schema['$defs']['_FulfillmentSourceReexpression']['properties']
+        restatement['source_ref']['enum'] = refs
+        restatement['routes']['items'] = deepcopy(operand)
+        schema['properties']['sources']['description'] = (
+            'The complete new contribution set of every source you change. Each listed source replaces all '
+            'of its previous routes; unlisted sources are kept exactly as they were.')
+    elif edits:
+        if edit_model is _FulfillmentRoleTargetEdits:
             # Prefer the same explicit target object used by replace. Existing
             # exact integer commands remain consumable at this local boundary.
             schema['properties']['remove']['items']={'$ref':'#/$defs/_FulfillmentRoleRemoval'}
         schema['properties']['basis']['enum']=[basis['raw_sha256']]
         schema['$defs']['_FulfillmentRoleReplacement']['properties']['route']=deepcopy(operand)
         schema['properties']['append']['items']=deepcopy(operand)
-        if edit_model is _FulfillmentRoleCompilationEdits:
-            restatement = schema['$defs']['_FulfillmentSourceReexpression']['properties']
-            restatement['source_ref']['enum'] = sorted({r['source_ref'] for r in basis['original_wire']['routes']
-                if isinstance(r, dict) and isinstance(r.get('source_ref'), str)})
-            restatement['routes']['items'] = deepcopy(operand)
-            schema['properties']['source_reexpressions']['description'] = (
-                'Optional. Restate the COMPLETE contribution set of one original source; it replaces every '
-                'original route of that source. Do not also replace/remove those routes individually.')
     else:
         schema['properties']['routes']['items']=operand
         schema['properties']['routes']['allOf']=[{'contains':{'type':'object','properties':{
@@ -1687,13 +1693,16 @@ _SEMANTIC_COMPILATION_INSTRUCTIONS = (
     "components and required contributions; never deduplicate by discarding meaning.")
 
 _SEMANTIC_COMPILATION_REPAIR_INSTRUCTIONS = (
-    "The repair unit is the complete candidate, not an isolated route. When a correction changes one "
-    "contribution, reconsider every other route of the same source and every route whose "
-    "current_fact_dependencies reference it: a revised consumer may duplicate a retained one or change "
-    "how many current proofs a dependent route has. To restate a source coherently, use "
-    "source_reexpressions with that source's complete new contribution set instead of patching its "
-    "routes one by one. Every original coverage failure and other reported failure must be addressed in "
-    "the same response; a rationale change alone repairs none of them. ")
+    "The repair unit is the complete candidate, not an isolated route. Answer with sources: for every "
+    "source you change, give its COMPLETE new contribution set; it replaces all of that source's previous "
+    "routes, and every unlisted source is kept exactly as it was. Include any source the previous proposal "
+    "left unrouted. When you change one source, also restate any other source whose routes depend on it "
+    "through current_fact_dependencies: a changed consumer can duplicate a retained one or change how many "
+    "current proofs a dependent route has. Every reported failure must be addressed in the same response; "
+    "a rationale change alone repairs none of them. A requested decision is expressed by the restatement: "
+    "retain keeps that consumer in its source's set (or leaves the source unlisted), revise restates it "
+    "with the declared fields changed, remove omits it from the restated set, unresolved restates it as "
+    "UNRESOLVED. ")
 
 
 def _construction_consumer_instructions(contract, *, compilation=None):
@@ -1764,7 +1773,7 @@ def _formation_repair_instructions(instructions, validation_feedback, *, local_e
          "revision or justified retention. The request supplies no replacement or verdict. "
          if isinstance(decision_revisions, dict) and decision_revisions.get("requests") else "") +
         ("Return decision_revisions for every bound requested original route. Select retain, revise, remove or unresolved yourself, "
-         "then encode that same disposition using the existing local edit operations. A removal statement is not a remove operation. "
+         "then encode that same disposition in the edit you return. A removal statement is not a removal. "
          "Declare revised_fields only when those non-rationale fields actually change; justify lawful retention. "
          "Structural consistency is not semantic approval and cannot discharge other repairs. "
          if isinstance(decision_revisions, dict) and decision_revisions.get("action_consistency") else "") +
@@ -1775,7 +1784,9 @@ def _formation_repair_instructions(instructions, validation_feedback, *, local_e
          "nor an independent Review verdict; do not delete a route solely because it appears there. "
          if isinstance(consumer_diagnostics, dict) and consumer_diagnostics.get("observations") else "") +
         "If lawful recovery cannot be established preserve UNRESOLVED. Return only the "
-        + ("explicit local edit proposal over the ORIGINAL route ordinals; the Owner constructs "
+        + ("per-source restatement; the Owner constructs the complete candidate. "
+           if local_edit and compilation == _SEMANTIC_COMPILATION_CONTRACT else
+           "explicit local edit proposal over the ORIGINAL route ordinals; the Owner constructs "
            "the complete candidate. " if local_edit else "complete original-format Candidate ") +
         "with this request's exact header. All existing "
         "validation, independent Review, authority and budget constraints still apply.\n\n"
@@ -3353,10 +3364,14 @@ class ModelFulfillmentCandidateProvider:
             if (owner_preconditions or {}).get("candidate_construction_state", {}).get("repair_basis"):
                 # The existing second proposal edits exact old route ordinals;
                 # the Owner constructs the full candidate and runs every gate.
-                formation_instructions = (
+                formation_instructions = ((
+                    "Propose complete per-source restatements over the unadmitted original Wire in "
+                    "candidate_construction_state.repair_basis. Preserve unrelated lawful contributions by "
+                    "leaving their sources unlisted. "
+                    if owner_preconditions.get("semantic_compilation_contract") == _SEMANTIC_COMPILATION_CONTRACT else
                     "Propose explicit local edits to the unadmitted original Wire in "
                     "candidate_construction_state.repair_basis. replace/remove refer only to ORIGINAL "
-                    "route ordinals; append adds new proposed routes. Preserve unrelated lawful contributions. "
+                    "route ordinals; append adds new proposed routes. Preserve unrelated lawful contributions. ") +
                     "Choose all meanings, consumers and proof operands yourself. No automatic evidence or "
                     "permission is granted. The complete constructed candidate is revalidated and independently "
                     "reviewed. Keep the current h/d and exact parent basis. Do not output a new complete plan.")
