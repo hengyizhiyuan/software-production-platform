@@ -1,0 +1,11 @@
+{
+  "failure": "DEPENDENCY_LOCK_MISMATCH",
+  "cause": "Git archive inherited Windows core.autocrlf=true",
+  "git_lock_changed": false,
+  "crlf_bytes": 415756,
+  "lf_bytes": 413832,
+  "normalized_equal": true,
+  "corrected_lock_sha256": "ac853305a52d1daf56df2ca020e984476fb4e58a83cac205e24f0892cd59b8a9",
+  "corrected_archive_sha256": "f2ab0604912ea0fb7e4c122a1a8466cb3f3e56e605c043406d0fc099bcaf22c4",
+  "guard_or_dependency_changes": false
+}

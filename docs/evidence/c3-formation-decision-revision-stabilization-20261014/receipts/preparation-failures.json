@@ -1,0 +1,8 @@
+{
+  "default_network_pool": "DOCKER_DEFAULT_ADDRESS_POOL_EXHAUSTED_BEFORE_TEST",
+  "explicit_subnet": "172.23.10.0/28",
+  "subnet_checked_against_docker_and_host_routes": true,
+  "initial_pg_setup": "ORIGINAL_LOCALHOST_SANDBOX_CHECK_REJECTED_DOCKER_DNS_HOST_BEFORE_TEST_BODY",
+  "final_pg_setup": "Fresh dedicated c1_contract_continuity DB, shared only with test container by container network namespace",
+  "production_database_accessed": false
+}

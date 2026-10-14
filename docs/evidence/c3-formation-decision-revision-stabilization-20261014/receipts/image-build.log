@@ -1,0 +1,92 @@
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            BuildKit is currently disabled; enable it by removing the DOCKER_BUILDKIT=0
+            environment-variable.
+
+Sending build context to Docker daemon  21.35MB
+Step 1/36 : ARG BASE_IMAGE
+Step 2/36 : FROM ${BASE_IMAGE} AS c3-runtime
+ ---> 6c1f48e35ec4
+Step 3/36 : USER root
+ ---> Using cache
+ ---> 99b149ab04f1
+Step 4/36 : WORKDIR /app
+ ---> Using cache
+ ---> 71f7d5e463a9
+Step 5/36 : ARG BASE_IMAGE
+ ---> Using cache
+ ---> dcb77d2594e3
+Step 6/36 : ARG BASE_IMAGE_ID=sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14
+ ---> Using cache
+ ---> c5cbaba14346
+Step 7/36 : ARG WATT_REVISION
+ ---> Using cache
+ ---> 7ff8f91126b1
+Step 8/36 : ARG WATT_TREE
+ ---> Using cache
+ ---> 998ac9ddecf0
+Step 9/36 : ARG GUARDIAN_REVISION
+ ---> Using cache
+ ---> 73b2a63c5cbd
+Step 10/36 : ARG GUARDIAN_TREE
+ ---> Using cache
+ ---> 972ee6e8973b
+Step 11/36 : ARG ECF_REVISION=5aa4f8833c359c15bd059eda5972aa3915bcc18c
+ ---> Using cache
+ ---> 34a0308e1c08
+Step 12/36 : ARG ECF_TREE=878d39d9c259272bb05f2e02bdf9d60c22fad460
+ ---> Using cache
+ ---> b45b3e3ee3d4
+Step 13/36 : ARG ECF_UNSUPPORTED_REVISION=c6b568d006022e39b95daebedfecfb55e562ebe5
+ ---> Using cache
+ ---> 3651fa0376de
+Step 14/36 : ARG ECF_UNSUPPORTED_TREE=f102fa082bbd0a1abd827e77d6aa1340db8b83c5
+ ---> Using cache
+ ---> cf75ea13b307
+Step 15/36 : RUN test "$BASE_IMAGE_ID" = "sha256:6c1f48e35ec485de278e8638f51d6aed75679b02a24d45355959bc8ddd7c0d14"     && printf '%s  /app/uv.lock\n' '279fba19bb5a40457739e49408137190d3d6f8e2e7171a273b3e742bae12a038' | sha256sum --check --status
+ ---> Running in 276899feaabf
+ ---> Removed intermediate container 276899feaabf
+ ---> c20f2ae9f292
+Step 16/36 : RUN rm -rf /app/src /app/build /app/dist /app/migrations /app/docker /qualification     /opt/c2-owners /opt/c2-test-deps /opt/c2-build /opt/c3-owners /opt/c3-test-deps /opt/c3-build
+ ---> Running in c9453cb75f11
+ ---> Removed intermediate container c9453cb75f11
+ ---> 1a0f6411bf34
+Step 17/36 : COPY watt/pyproject.toml watt/uv.lock watt/alembic.ini watt/README.md /app/
+ ---> 221a6d3c3cdd
+Step 18/36 : COPY watt/src/ /app/src/
+ ---> 903326fc7a36
+Step 19/36 : COPY watt/migrations/ /app/migrations/
+ ---> 1d347d4247c9
+Step 20/36 : COPY watt/docker/ /app/docker/
+ ---> d36d6ed55b4e
+Step 21/36 : COPY watt/tests/ /qualification/tests/
+ ---> ffa704341530
+Step 22/36 : COPY watt/migrations/ /qualification/migrations/
+ ---> 009afb821bdb
+Step 23/36 : COPY watt/pyproject.toml watt/alembic.ini /qualification/
+ ---> ee9a3ce579b7
+Step 24/36 : COPY guardian/src/ /opt/c3-owners/guardian/src/
+ ---> c658d5e03428
+Step 25/36 : COPY ecf/src/ /opt/c3-owners/ecf/src/
+ ---> 7a89f78f81ef
+Step 26/36 : COPY ecf-unsupported/src/ /qualification/ecf-current/src/
+ ---> 1dc45f3cbca0
+Step 27/36 : COPY test-deps/ /opt/c3-test-deps/
+ ---> 9265a67f6050
+Step 28/36 : COPY watt/docs/evidence/core-production-semantic-convergence-c3-20261009/Dockerfile.c3 /opt/c3-build/Dockerfile.c3
+ ---> aacbf3926b12
+Step 29/36 : COPY watt/docs/evidence/core-production-semantic-convergence-c3-20261009/attest_c3_image.py /opt/c3-build/attest_c3_image.py
+ ---> 4d21bdc328a0
+Step 30/36 : COPY c3-source-identity.json /opt/c3-build/c3-source-identity.json
+ ---> 3b52b29aae0b
+Step 31/36 : ENV SPG_RUNTIME_REVISION=${WATT_REVISION}     C3_WATT_TREE=${WATT_TREE}     C3_GUARDIAN_REVISION=${GUARDIAN_REVISION}     C3_GUARDIAN_TREE=${GUARDIAN_TREE}     C3_ECF_REVISION=${ECF_REVISION}     C3_ECF_TREE=${ECF_TREE}     C3_ECF_UNSUPPORTED_REVISION=${ECF_UNSUPPORTED_REVISION}     C3_ECF_UNSUPPORTED_TREE=${ECF_UNSUPPORTED_TREE}     C3_BASE_IMAGE_REF=${BASE_IMAGE}     C3_BASE_IMAGE_ID=${BASE_IMAGE_ID}     PYTHONDONTWRITEBYTECODE=1     PYTHONPATH=/opt/c3-owners/guardian/src:/opt/c3-owners/ecf/src:/opt/c3-test-deps     C1_ECF_CURRENT_MAIN_SOURCE=/qualification/ecf-current/src
+ ---> Running in 5780b8258231
+ ---> Removed intermediate container 5780b8258231
+ ---> f49742ff6fa8
+Step 32/36 : LABEL org.opencontainers.image.revision=${WATT_REVISION}     watt.c3.source-tree=${WATT_TREE}     watt.c3.guardian-revision=${GUARDIAN_REVISION}     watt.c3.guardian-tree=${GUARDIAN_TREE}     watt.c3.ecf-revision=${ECF_REVISION}     watt.c3.ecf-tree=${ECF_TREE}     watt.c3.ecf-unsupported-revision=${ECF_UNSUPPORTED_REVISION}     watt.c3.base-image-id=${BASE_IMAGE_ID}
+ ---> Running in bf1cec7594c1
+ ---> Removed intermediate container bf1cec7594c1
+ ---> 17719076a615
+Step 33/36 : RUN python /opt/c3-build/attest_c3_image.py --build-inputs-only     && uv sync --locked --no-dev --no-editable --reinstall-package spg-runtime --offline     && python /opt/c3-build/attest_c3_image.py --output /opt/c3-build/build-attestation.json
+ ---> Running in 7be6d5f90de6
+{"finding_code": "DEPENDENCY_LOCK_MISMATCH", "relative_path": null, "status": "FAIL"}
+The command '/bin/sh -c python /opt/c3-build/attest_c3_image.py --build-inputs-only     && uv sync --locked --no-dev --no-editable --reinstall-package spg-runtime --offline     && python /opt/c3-build/attest_c3_image.py --output /opt/c3-build/build-attestation.json' returned a non-zero code: 1

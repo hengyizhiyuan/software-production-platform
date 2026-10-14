@@ -1,0 +1,2453 @@
+{
+  "live": {
+    "attempts": [
+      {
+        "attempt": 1,
+        "response_receipt_id": "c4c063b0-825b-4e6b-93eb-c0b7df1af0f8",
+        "response_sha256": "7dc37bd022069f1b9d1b89f2f776574ecb3038c1a271d40b8e0dce89af3b0c29",
+        "route_count": 14,
+        "routes": [
+          {
+            "ordinal": 0,
+            "source": 0,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              48
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "56728f1c738af5a081068be58e6e5e18e67409c2d5b418b105ff7cb96f74f271"
+          },
+          {
+            "ordinal": 1,
+            "source": 1,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              55
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "fe455b368941c38cf71c821717408b57e65e4ef0cae1cb319fcfec0ad7f34025"
+          },
+          {
+            "ordinal": 2,
+            "source": 2,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              27
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "002e1f4bd31dc79d365aa5b58ab38b0e9bfdef3380de8840b2db280f2416ac85"
+          },
+          {
+            "ordinal": 3,
+            "source": 3,
+            "capability": "CANDIDATE_SEAL",
+            "source_span": [
+              0,
+              72
+            ],
+            "facts": [
+              0,
+              1
+            ],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "de9e597997909456beffb1080cb5f01542f122aed3e609c4cd71a10b5deeeb79"
+          },
+          {
+            "ordinal": 4,
+            "source": 4,
+            "capability": "DENY_DEPLOY",
+            "source_span": [
+              7,
+              13
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [],
+            "raw_route_fingerprint": "2699f732128f60c885982247e1967b7495f85a4416c9973be44667ee43f9252b"
+          },
+          {
+            "ordinal": 5,
+            "source": 4,
+            "capability": "DENY_PUBLISH",
+            "source_span": [
+              15,
+              22
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [],
+            "raw_route_fingerprint": "112bef4c99d9185d0cb52d452208a4f5c28e458c5c5d262e15204ce89ed52b5b"
+          },
+          {
+            "ordinal": 6,
+            "source": 11,
+            "capability": "DENY_DEPLOY",
+            "source_span": [
+              7,
+              13
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [],
+            "raw_route_fingerprint": "c65b8e02c96b69ae5ecd9901969b564b27f07c35886f3978d17017628f5810a2"
+          },
+          {
+            "ordinal": 7,
+            "source": 11,
+            "capability": "DENY_PUBLISH",
+            "source_span": [
+              15,
+              22
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [],
+            "raw_route_fingerprint": "aece367a96fa32d563814744da39aa887e8dcfb8821a5d5dc0ca1dc2f929b91c"
+          },
+          {
+            "ordinal": 8,
+            "source": 5,
+            "capability": "RETAIN_CONTEXT",
+            "source_span": [
+              0,
+              49
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [],
+            "raw_route_fingerprint": "6f86d74d8587f81181d19ddb0b6e0ce568e9fec4b14370c29b13e6c6cc7dc611"
+          },
+          {
+            "ordinal": 9,
+            "source": 6,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              91
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "00243bb4f01d88e8d764deb9558fc38d7285c8455403a8a7dc3892ccdb787124"
+          },
+          {
+            "ordinal": 10,
+            "source": 7,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              48
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "4a3f218228155d98a51f7ba1e8db6c3b6599308d3ddb6ffcf9ce133ff511a4f3"
+          },
+          {
+            "ordinal": 11,
+            "source": 8,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              132
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "59092a08ec57e5071cb1972436ffee670db83a9aaed09913efb52179bc3b2c0c"
+          },
+          {
+            "ordinal": 12,
+            "source": 9,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              27
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "6f5be96ed5e9a9f2e14dfc604ea179a264f6bd62066fd7e64fdda447903c802e"
+          },
+          {
+            "ordinal": 13,
+            "source": 10,
+            "capability": "CANDIDATE_SEAL",
+            "source_span": [
+              0,
+              72
+            ],
+            "facts": [
+              0,
+              1
+            ],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "cd2d7db6b90dde5d6c35d3f0d60095037dd920faa913441ba50462b4455ca998"
+          }
+        ],
+        "source_consumer_sets": {
+          "0": [
+            "ARTIFACT_CONTENT"
+          ],
+          "1": [
+            "ARTIFACT_CONTENT"
+          ],
+          "2": [
+            "GIT_DIFF_SCOPE"
+          ],
+          "3": [
+            "CANDIDATE_SEAL"
+          ],
+          "4": [
+            "DENY_DEPLOY",
+            "DENY_PUBLISH"
+          ],
+          "5": [
+            "RETAIN_CONTEXT"
+          ],
+          "6": [
+            "ARTIFACT_CONTENT"
+          ],
+          "7": [
+            "ARTIFACT_CONTENT"
+          ],
+          "8": [
+            "ARTIFACT_CONTENT"
+          ],
+          "9": [
+            "GIT_DIFF_SCOPE"
+          ],
+          "10": [
+            "CANDIDATE_SEAL"
+          ],
+          "11": [
+            "DENY_DEPLOY",
+            "DENY_PUBLISH"
+          ],
+          "12": [],
+          "13": [],
+          "14": [],
+          "15": [],
+          "16": [],
+          "17": [],
+          "18": []
+        },
+        "raw_geometry_failures": [
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 4
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 11
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 12
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 13
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 14
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 15
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 16
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 17
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 18
+          }
+        ],
+        "validation_passed": false,
+        "failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+        "validation_feedback_sha256": "941dfe9c4e4d763e1271f97210416d07946abb86a3f99052c096a3019e8ab3a6",
+        "wire_failures": [
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 4
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 11
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 12
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 13
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 14
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 15
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 16
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 17
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 18
+          }
+        ],
+        "owner_prerequisite_failures": [
+          {
+            "code": "OBLIGATION_SEAL_CURRENT_CONTRIBUTION_MISSING",
+            "source": 3,
+            "route": 3,
+            "component_id": "2607a1bb30912fc9951d349c1590d99aac9f705010c9003a94303bf467e9d1ad"
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 4
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 11
+          },
+          {
+            "code": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "source": 12
+          },
+          {
+            "code": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "source": 13
+          },
+          {
+            "code": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "source": 14
+          },
+          {
+            "code": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "source": 15
+          },
+          {
+            "code": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "source": 16
+          },
+          {
+            "code": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "source": 17
+          },
+          {
+            "code": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "source": 18
+          }
+        ],
+        "decision_revision_requests": null,
+        "edits": {
+          "replace_count": 0,
+          "remove": [],
+          "append_count": 0
+        },
+        "consumed_decision_revision_requests": null,
+        "decision_revision_observations": [],
+        "candidate_fingerprint": null
+      },
+      {
+        "attempt": 2,
+        "response_receipt_id": "1a869f16-9d49-434f-8e7f-ddd6f5e0d5c0",
+        "response_sha256": "95e8d05cee950d429d5e9f93e84adffcf169d7c0a40f2555646520669a04753a",
+        "route_count": 22,
+        "routes": [
+          {
+            "ordinal": 0,
+            "source": 0,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              48
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "6ad2c92cdb057d93a46e72607aace18b5b24105bd51f4ac8a07d5dc36ab122f7"
+          },
+          {
+            "ordinal": 1,
+            "source": 1,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              55
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "9679524c4e91707f024ec2e24438b39727feda1293844c94c892803619ce0963"
+          },
+          {
+            "ordinal": 2,
+            "source": 2,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              27
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "a83a8c2f17e0e4e0050b7f21e970a69cc49cb1e53a3cdb316f6e22a6e3e089cb"
+          },
+          {
+            "ordinal": 3,
+            "source": 3,
+            "capability": "CANDIDATE_SEAL",
+            "source_span": [
+              0,
+              72
+            ],
+            "facts": [
+              0,
+              1
+            ],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "e1e546fc0d0cb847bb6f2b11662480265e91a9ddf2b899af1bcfd50ffd767aec"
+          },
+          {
+            "ordinal": 4,
+            "source": 4,
+            "capability": "DENY_DEPLOY",
+            "source_span": [
+              0,
+              55
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [],
+            "raw_route_fingerprint": "772a32ed7a72ba48342d5f05b9a2db6f10325f7c4e829cbe4a021898f960ae75"
+          },
+          {
+            "ordinal": 5,
+            "source": 4,
+            "capability": "DENY_PUBLISH",
+            "source_span": [
+              0,
+              55
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [],
+            "raw_route_fingerprint": "15507f82c649cde9871097fd7d8d6b7b47cc50e00572cc24dd62e487868f9b71"
+          },
+          {
+            "ordinal": 6,
+            "source": 11,
+            "capability": "DENY_DEPLOY",
+            "source_span": [
+              0,
+              55
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [],
+            "raw_route_fingerprint": "8ac87ecd602ef418ad160b9096636315e06c070a6d2f8d5f6e17a2cae160f17d"
+          },
+          {
+            "ordinal": 7,
+            "source": 11,
+            "capability": "DENY_PUBLISH",
+            "source_span": [
+              0,
+              55
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [],
+            "raw_route_fingerprint": "91cd97779e152df5121d9bd5ee4fbdd96bc349b5fc7f64ecb1d91086b95ce99e"
+          },
+          {
+            "ordinal": 8,
+            "source": 5,
+            "capability": "RETAIN_CONTEXT",
+            "source_span": [
+              0,
+              49
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [],
+            "raw_route_fingerprint": "6d176996e8e4ee272b6133029b2e464672cb7e0771d0e7296087bc469c71ddd3"
+          },
+          {
+            "ordinal": 9,
+            "source": 6,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              91
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "6bc26a80dc22c2045737c7dc9f043952e7cf0b73036a2b214fa369d89ab31066"
+          },
+          {
+            "ordinal": 10,
+            "source": 7,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              48
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "e3973224166df05263fff192b2c8f076c5cbe6b0af9990bf43cb243c144d4286"
+          },
+          {
+            "ordinal": 11,
+            "source": 8,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              132
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "02a61e0b5d3e498b8d2b0440c3a06e2ef02b333805e5f30fd204d5efccd58d84"
+          },
+          {
+            "ordinal": 12,
+            "source": 9,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              27
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "10426246f1d57a980b873b34b0cd78d98b5578270d8704814649f7ed22ae1416"
+          },
+          {
+            "ordinal": 13,
+            "source": 10,
+            "capability": "CANDIDATE_SEAL",
+            "source_span": [
+              0,
+              72
+            ],
+            "facts": [
+              0,
+              1
+            ],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "0da4e8ee25857e51369508045da482bca359d3fa19732e6fe7b23779169ca542"
+          },
+          {
+            "ordinal": 14,
+            "source": 4,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              55
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "d0adde8ed40e4073bd8511f5532d39edfa69acebf68a3ee0c19d177cbdf01e48"
+          },
+          {
+            "ordinal": 15,
+            "source": 12,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              59
+            ],
+            "facts": [],
+            "support_sources": [
+              7
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "9ef957234bbeec6d67ba41f9896efc002e5a3a5b2eb6c5b4b4e87e11a56cabc9"
+          },
+          {
+            "ordinal": 16,
+            "source": 13,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              62
+            ],
+            "facts": [],
+            "support_sources": [
+              10
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "a6dc2e52cf48930a3f2b0e3acd510cdf39012ab5667f9e733d90b254438aa3f1"
+          },
+          {
+            "ordinal": 17,
+            "source": 14,
+            "capability": "CANDIDATE_SEAL",
+            "source_span": [
+              0,
+              45
+            ],
+            "facts": [
+              0,
+              1
+            ],
+            "support_sources": [
+              10
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "628748b7745a355b13c8d34b8a676b9134c492f44966b29ea5a97aa1d876a834"
+          },
+          {
+            "ordinal": 18,
+            "source": 15,
+            "capability": "DENY_DEPLOY",
+            "source_span": [
+              0,
+              36
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [],
+            "raw_route_fingerprint": "523a70e2113866d99c2ddcb6795efbc534501b208c083bf709e52afd9aa28038"
+          },
+          {
+            "ordinal": 19,
+            "source": 16,
+            "capability": "DENY_PUBLISH",
+            "source_span": [
+              0,
+              37
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [],
+            "raw_route_fingerprint": "76d20b788048506348521d56efe7d605a3832ee2e5730beaf36c8c24e47493ef"
+          },
+          {
+            "ordinal": 20,
+            "source": 17,
+            "capability": "DENY_PREVIEW",
+            "source_span": [
+              0,
+              38
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [],
+            "raw_route_fingerprint": "2fb1a42171cc20ed31f6e2341d2625f4392acdff5a454c82dd6be480090bea73"
+          },
+          {
+            "ordinal": 21,
+            "source": 18,
+            "capability": "UNRESOLVED",
+            "source_span": [
+              0,
+              44
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [],
+            "raw_route_fingerprint": "c71b687445056dadbb7e261306aee8d0991f8c4fbd1b8d162bb596f570f754cf"
+          }
+        ],
+        "source_consumer_sets": {
+          "0": [
+            "ARTIFACT_CONTENT"
+          ],
+          "1": [
+            "ARTIFACT_CONTENT"
+          ],
+          "2": [
+            "GIT_DIFF_SCOPE"
+          ],
+          "3": [
+            "CANDIDATE_SEAL"
+          ],
+          "4": [
+            "DENY_DEPLOY",
+            "DENY_PUBLISH",
+            "GIT_DIFF_SCOPE"
+          ],
+          "5": [
+            "RETAIN_CONTEXT"
+          ],
+          "6": [
+            "ARTIFACT_CONTENT"
+          ],
+          "7": [
+            "ARTIFACT_CONTENT"
+          ],
+          "8": [
+            "ARTIFACT_CONTENT"
+          ],
+          "9": [
+            "GIT_DIFF_SCOPE"
+          ],
+          "10": [
+            "CANDIDATE_SEAL"
+          ],
+          "11": [
+            "DENY_DEPLOY",
+            "DENY_PUBLISH"
+          ],
+          "12": [
+            "GIT_DIFF_SCOPE"
+          ],
+          "13": [
+            "ARTIFACT_CONTENT"
+          ],
+          "14": [
+            "CANDIDATE_SEAL"
+          ],
+          "15": [
+            "DENY_DEPLOY"
+          ],
+          "16": [
+            "DENY_PUBLISH"
+          ],
+          "17": [
+            "DENY_PREVIEW"
+          ],
+          "18": [
+            "UNRESOLVED"
+          ]
+        },
+        "raw_geometry_failures": [],
+        "validation_passed": false,
+        "failed_predicate": "OBLIGATION_SEAL_CURRENT_CONTRIBUTION_MISSING",
+        "validation_feedback_sha256": "7b7bd2887f17beda7c2a6b8e484797bb95101995017eaf27bd949f5b598ecd0f",
+        "wire_failures": [
+          {
+            "code": "OBLIGATION_SEAL_CURRENT_CONTRIBUTION_MISSING",
+            "source": 3,
+            "route": 3,
+            "component_id": "2607a1bb30912fc9951d349c1590d99aac9f705010c9003a94303bf467e9d1ad"
+          },
+          {
+            "code": "OBLIGATION_PROJECTION_UNRESOLVED",
+            "source": 18,
+            "route": 21,
+            "component_id": "f293f481b215450da0a340dc06fe20469e51a15a17c5a20c6101d33e036c5a2d"
+          }
+        ],
+        "owner_prerequisite_failures": [
+          {
+            "code": "OBLIGATION_SEAL_CURRENT_CONTRIBUTION_MISSING",
+            "source": 3,
+            "route": 3,
+            "component_id": "2607a1bb30912fc9951d349c1590d99aac9f705010c9003a94303bf467e9d1ad"
+          },
+          {
+            "code": "OBLIGATION_FACT_GATE_CORRESPONDENCE_UNPROVEN",
+            "source": 4,
+            "route": 14,
+            "component_id": "0335f33ef42e9ea56675b2b6cd5f58d5e889256ed84e9aca2137c2408b01c492",
+            "missing_same_capability_source_ordinals": [
+              11
+            ]
+          }
+        ],
+        "decision_revision_requests": null,
+        "edits": {
+          "replace_count": 14,
+          "remove": [],
+          "append_count": 8
+        },
+        "consumed_decision_revision_requests": null,
+        "decision_revision_observations": [],
+        "candidate_fingerprint": null
+      }
+    ],
+    "independent_review_calls": 0,
+    "consumer_correction_is_not_semantic_acceptance": true
+  },
+  "retained-first": {
+    "attempts": [
+      {
+        "attempt": 1,
+        "response_receipt_id": "6abb5014-2c5b-4b24-b42a-26dcd107a08f",
+        "response_sha256": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e",
+        "route_count": 32,
+        "routes": [
+          {
+            "ordinal": 0,
+            "source": 0,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              48
+            ],
+            "facts": [],
+            "support_sources": [
+              8
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "b6600eaebd4625188e15b8307b2b078e5119898fd39f729c66e59300c31b2f23"
+          },
+          {
+            "ordinal": 1,
+            "source": 0,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              48
+            ],
+            "facts": [],
+            "support_sources": [
+              8
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "4f73a25204f9e7a66d33cd82c5e89c416c805bd1d2898e5cd04ca686fbdf36af"
+          },
+          {
+            "ordinal": 2,
+            "source": 1,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              55
+            ],
+            "facts": [],
+            "support_sources": [
+              8
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "970f5d1d408a58587b9471d20ec7b33150b73b01bb9c996e1d1e50664b822dd1"
+          },
+          {
+            "ordinal": 3,
+            "source": 1,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              55
+            ],
+            "facts": [],
+            "support_sources": [
+              8
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "830e591aba7f6803d7664db290df747b9ce6f58d3765e3ebb79924adc4d3001f"
+          },
+          {
+            "ordinal": 4,
+            "source": 2,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              27
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "4df9e2c69286026e6e042205ef404a752bafecd7b0b76fc2362703ac531033a7"
+          },
+          {
+            "ordinal": 5,
+            "source": 3,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              38
+            ],
+            "facts": [
+              0,
+              1
+            ],
+            "support_sources": [
+              10
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "47245a2a5d3abd17645ddac9533d8fdfa06401bd44dde470f6f7317f837de24a"
+          },
+          {
+            "ordinal": 6,
+            "source": 3,
+            "capability": "CANDIDATE_SEAL",
+            "source_span": [
+              43,
+              71
+            ],
+            "facts": [],
+            "support_sources": [
+              10
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "e751fa19fd7dff2e18cb36da785e133f1367847df675c053b3c588c8c37009fb"
+          },
+          {
+            "ordinal": 7,
+            "source": 4,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              24,
+              54
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "84fa203428aca568b076859370a207f91da4a9fc4b33c45a502ea9a8c9479564"
+          },
+          {
+            "ordinal": 8,
+            "source": 4,
+            "capability": "DENY_DEPLOY",
+            "source_span": [
+              0,
+              13
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "9a6eed5a614162b50958359ec0444a286eeb1874b36a1a7a13a035f6046effa4"
+          },
+          {
+            "ordinal": 9,
+            "source": 4,
+            "capability": "DENY_PUBLISH",
+            "source_span": [
+              15,
+              22
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "83d87391906732665ebbef95be514695f5c0959f6b65aa2975009438c4e06867"
+          },
+          {
+            "ordinal": 10,
+            "source": 5,
+            "capability": "RETAIN_CONTEXT",
+            "source_span": [
+              0,
+              49
+            ],
+            "facts": [],
+            "support_sources": [
+              6,
+              8,
+              9,
+              10
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "7bfcc5eab09df901561c09a82bf8d350a9c323259fd6a517802b84c930f88d58"
+          },
+          {
+            "ordinal": 11,
+            "source": 6,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              91
+            ],
+            "facts": [],
+            "support_sources": [
+              8
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "6e9fb24db8908f0d9e31287a16955d057f11ec550729b66c4d0fa8971a25b461"
+          },
+          {
+            "ordinal": 12,
+            "source": 6,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              91
+            ],
+            "facts": [],
+            "support_sources": [
+              5
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "dfd01ad46ac57ae2ba60e279d106c39362cd5e3aa03d9ed321393875253437f7"
+          },
+          {
+            "ordinal": 13,
+            "source": 7,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              48
+            ],
+            "facts": [],
+            "support_sources": [
+              6
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "e8c22936e58f27fcac11ec9b73dcf89c1c1760c1cfc555b5de9a0270c190a99f"
+          },
+          {
+            "ordinal": 14,
+            "source": 8,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              132
+            ],
+            "facts": [],
+            "support_sources": [
+              0,
+              1
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "5cffe25dfd3d61b2340f880a69b7b00d7ebcc40c890df1e93193380adfe54b5e"
+          },
+          {
+            "ordinal": 15,
+            "source": 9,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              27
+            ],
+            "facts": [],
+            "support_sources": [
+              2
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "4e64900ecfff531d137d89c8cbccf546589bdb178b1afdfb13ed52023d654513"
+          },
+          {
+            "ordinal": 16,
+            "source": 10,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              38
+            ],
+            "facts": [
+              0,
+              1
+            ],
+            "support_sources": [
+              6
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "b961f64a0bbe9722fa90d19515b0b592e3e2c327373342c9eb0c34492e83a211"
+          },
+          {
+            "ordinal": 17,
+            "source": 10,
+            "capability": "CANDIDATE_SEAL",
+            "source_span": [
+              43,
+              71
+            ],
+            "facts": [],
+            "support_sources": [
+              3
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "14e6c49951375ffa4759d20a4f8aaa3077dd08c7058671dabdc050bd54f94131"
+          },
+          {
+            "ordinal": 18,
+            "source": 11,
+            "capability": "DENY_DEPLOY",
+            "source_span": [
+              0,
+              13
+            ],
+            "facts": [],
+            "support_sources": [
+              4
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "720c72b1c69c61690091c7b9d6fc1eef6a051f2c7dac7543f141f80cb4a46c7f"
+          },
+          {
+            "ordinal": 19,
+            "source": 11,
+            "capability": "DENY_PUBLISH",
+            "source_span": [
+              15,
+              22
+            ],
+            "facts": [],
+            "support_sources": [
+              4
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "bfdbdfc573d51f6d7a421a73fa14da304650bc5445a723bb5d800372085f786f"
+          },
+          {
+            "ordinal": 20,
+            "source": 11,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              24,
+              54
+            ],
+            "facts": [],
+            "support_sources": [
+              2
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "f9fa8aa096c833238670d84bc08c804e8bf84d1675e8e6dc501b61da14f56659"
+          },
+          {
+            "ordinal": 21,
+            "source": 12,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              59
+            ],
+            "facts": [],
+            "support_sources": [
+              6
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "1c2c6e0c409ccd8d6392496f014050607cd35f157a41a73912b8ea0f68bf6df6"
+          },
+          {
+            "ordinal": 22,
+            "source": 12,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              59
+            ],
+            "facts": [],
+            "support_sources": [
+              6
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "ee36f5609874fabfcc04394952a51e4deb996399cb8dfb9c8f70eea3be044afe"
+          },
+          {
+            "ordinal": 23,
+            "source": 13,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              62
+            ],
+            "facts": [
+              0,
+              1
+            ],
+            "support_sources": [
+              10
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "1902a8c4b29ee00e416cbefbbc482b9c73edecb9f9f911abe32e155006edb348"
+          },
+          {
+            "ordinal": 24,
+            "source": 13,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              62
+            ],
+            "facts": [],
+            "support_sources": [
+              10
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "3110d5d33daed26b40a974e48f04e87a362e195d05bac93021a8a0a730a9aaf7"
+          },
+          {
+            "ordinal": 25,
+            "source": 14,
+            "capability": "CANDIDATE_SEAL",
+            "source_span": [
+              0,
+              45
+            ],
+            "facts": [],
+            "support_sources": [
+              3
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "74f4cd08c1c104c1f9c55d939769d7cee6402971bac05d80769bab6f739204ab"
+          },
+          {
+            "ordinal": 26,
+            "source": 15,
+            "capability": "DENY_DEPLOY",
+            "source_span": [
+              0,
+              36
+            ],
+            "facts": [],
+            "support_sources": [
+              4
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "7d1c675d61780a0a88f4c498fa3a46cc549464422a84662527a0a06dece27d9e"
+          },
+          {
+            "ordinal": 27,
+            "source": 15,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              36
+            ],
+            "facts": [],
+            "support_sources": [
+              4
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "0cdd0e5b950ac80befbb278b6536ca4638261b7ee716090aae5a41864f02d297"
+          },
+          {
+            "ordinal": 28,
+            "source": 16,
+            "capability": "DENY_PUBLISH",
+            "source_span": [
+              0,
+              37
+            ],
+            "facts": [],
+            "support_sources": [
+              4
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "56533107adffd3e95cf6a0e4866385e0ec4c570c1c30a32b980de2406456d812"
+          },
+          {
+            "ordinal": 29,
+            "source": 16,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              37
+            ],
+            "facts": [],
+            "support_sources": [
+              4
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "f3f38398de54b64180732b548017eb8161198c510f921e359623bf3cab2756e0"
+          },
+          {
+            "ordinal": 30,
+            "source": 17,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              38
+            ],
+            "facts": [],
+            "support_sources": [
+              4
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "619bdf62445dbd3e0aaf945cdae07eb4e45570ab0799e03d1bb44c8d130033ee"
+          },
+          {
+            "ordinal": 31,
+            "source": 18,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              44
+            ],
+            "facts": [],
+            "support_sources": [
+              4
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "564bd05ffd8e967905fdad43c57b32fa1f8cfd6eca722be3555c87ad0634a131"
+          }
+        ],
+        "source_consumer_sets": {
+          "0": [
+            "ARTIFACT_CONTENT",
+            "GIT_DIFF_SCOPE"
+          ],
+          "1": [
+            "ARTIFACT_CONTENT",
+            "GIT_DIFF_SCOPE"
+          ],
+          "2": [
+            "GIT_DIFF_SCOPE"
+          ],
+          "3": [
+            "ARTIFACT_CONTENT",
+            "CANDIDATE_SEAL"
+          ],
+          "4": [
+            "DENY_DEPLOY",
+            "DENY_PUBLISH",
+            "GIT_DIFF_SCOPE"
+          ],
+          "5": [
+            "RETAIN_CONTEXT"
+          ],
+          "6": [
+            "ARTIFACT_CONTENT",
+            "GIT_DIFF_SCOPE"
+          ],
+          "7": [
+            "ARTIFACT_CONTENT"
+          ],
+          "8": [
+            "ARTIFACT_CONTENT"
+          ],
+          "9": [
+            "GIT_DIFF_SCOPE"
+          ],
+          "10": [
+            "ARTIFACT_CONTENT",
+            "CANDIDATE_SEAL"
+          ],
+          "11": [
+            "DENY_DEPLOY",
+            "DENY_PUBLISH",
+            "GIT_DIFF_SCOPE"
+          ],
+          "12": [
+            "ARTIFACT_CONTENT",
+            "GIT_DIFF_SCOPE"
+          ],
+          "13": [
+            "ARTIFACT_CONTENT",
+            "GIT_DIFF_SCOPE"
+          ],
+          "14": [
+            "CANDIDATE_SEAL"
+          ],
+          "15": [
+            "DENY_DEPLOY",
+            "GIT_DIFF_SCOPE"
+          ],
+          "16": [
+            "DENY_PUBLISH",
+            "GIT_DIFF_SCOPE"
+          ],
+          "17": [
+            "GIT_DIFF_SCOPE"
+          ],
+          "18": [
+            "GIT_DIFF_SCOPE"
+          ]
+        },
+        "raw_geometry_failures": [
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 3
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 4
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 10
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 11
+          }
+        ],
+        "validation_passed": false,
+        "failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+        "validation_feedback_sha256": "cb8fdf7b3b4d689c21e9a07a6d8d46b1a3700c6bd163826e57e16bf5b690ae1d",
+        "wire_failures": [
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 3
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 4
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 10
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 11
+          }
+        ],
+        "owner_prerequisite_failures": [
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "source": 14,
+            "route": 25,
+            "component_id": "65b6cea440fc9d51ff445b459aa14d74ae347eff7d00e82bbcdb4fa4feecb185"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "source": 15,
+            "route": 26,
+            "component_id": "a003e98d82bb1f580bb6b625e07474b388d5ec2a7d92eea3f7e4a43d653d76ce"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "source": 15,
+            "route": 27,
+            "component_id": "a003e98d82bb1f580bb6b625e07474b388d5ec2a7d92eea3f7e4a43d653d76ce"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "source": 16,
+            "route": 28,
+            "component_id": "b52f39e7932b70f6fd55c0649032074484e8f11e6380667cf49f51273b18463a"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "source": 16,
+            "route": 29,
+            "component_id": "b52f39e7932b70f6fd55c0649032074484e8f11e6380667cf49f51273b18463a"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "source": 17,
+            "route": 30,
+            "component_id": "ef2fb7cfe681d54dd539df3e382a7648701ef7a696149199bb9ef8eb0bb006d7"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "source": 18,
+            "route": 31,
+            "component_id": "f293f481b215450da0a340dc06fe20469e51a15a17c5a20c6101d33e036c5a2d"
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 3
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 4
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 10
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 11
+          }
+        ],
+        "decision_revision_requests": {
+          "contract": "formation-decision-revision-requests-v1",
+          "parent_binding_fingerprint": "e5a7af6c9648ffba9e882e564542881c68d6f027c26de1aca0a29a5c76b385f8",
+          "diagnostic_fingerprint": "f2eafb17e2c627d3229af92f67ff845abff03ee6ec2ecb0dad2ea59872777553",
+          "status": "REOPEN_REQUIRED; SEMANTIC_VALIDITY_UNKNOWN; NO_REPLACEMENT_SELECTED",
+          "requests": [
+            {
+              "original_route": 1,
+              "source": 0,
+              "source_ref": "semantic-fact:f1baae6a-b455-523a-9a9a-5e180dc7618f",
+              "component_id": "7f9be2e6f3cfc7372c92f82cb78431afe7d1a81ba8433a87731438e335dbed62",
+              "original_route_fingerprint": "4e9c58f635495bd81cf86fb5d8d933dd2dbf65dad4baaa34939332c6339f6308",
+              "current_interpretation": {
+                "ref": "untrusted_previous_wire.routes[1].rationale",
+                "sha256": "0ed0db50955cba0174126face8e4d48edaadb02e2b6eea47c0987bea3753134f",
+                "status": "UNADMITTED_CLAIM"
+              }
+            },
+            {
+              "original_route": 3,
+              "source": 1,
+              "source_ref": "semantic-fact:64507732-d7be-5aa0-90f8-6ec7ef76b488",
+              "component_id": "17696c29e9cde1515646aae8d546eeca8c5d6f161182349e2431dfa9e13be18f",
+              "original_route_fingerprint": "eb486dc75f3f5bf9e9c5b251b4cbb665b7a3ed10b5820c8082fc2498fd8c0649",
+              "current_interpretation": {
+                "ref": "untrusted_previous_wire.routes[3].rationale",
+                "sha256": "b60d57144442fc8daa8f389c24bb5000013493370138fd97886c0d6829f11c0b",
+                "status": "UNADMITTED_CLAIM"
+              }
+            }
+          ],
+          "assumption_under_review": "Whether the current interpretation infers an extra obligation from an object's identity or supporting provenance, rather than from the primary accepted relation, value, Scope and qualifiers.",
+          "why_review": "Identify which original accepted predicate entails the proposed consumer's additional claim. Distinguish the referent, provenance support and required outcome. Test this interpretation against the consumer's actual observable. The challenge is not a verdict and may be refuted from the original fact.",
+          "preserve": "Original source/version, relation/value/order/Scope/qualifiers/authority, complete contribution coverage, permissions and independent gates; unrelated lawful decisions remain unless another existing failure requires repair.",
+          "reconsider": [
+            "capability",
+            "component_quote",
+            "current_fact_dependencies",
+            "target_paths",
+            "provenance_support_refs",
+            "rationale"
+          ],
+          "all_repairs_ref": "violations AND owner_repair_context.violations; these remain required alongside decision reassessment",
+          "response": "Use existing explicit local edits. A retained choice needs a justified interpretation, not cosmetic wording. Do not invent a new consumer, evidence or fact, enumerate alternatives as extra routes, or ignore other failures. All existing validation and Review remain required."
+        },
+        "edits": {
+          "replace_count": 0,
+          "remove": [],
+          "append_count": 0
+        },
+        "consumed_decision_revision_requests": null,
+        "decision_revision_observations": [],
+        "candidate_fingerprint": null
+      },
+      {
+        "attempt": 2,
+        "response_receipt_id": "bc5e12bb-03c4-4807-80fd-24c9a6149dc8",
+        "response_sha256": "e9f99dce74bb979a17936a64707568f2f035cab5eddc588d22e0d5e827d3f578",
+        "route_count": 35,
+        "routes": [
+          {
+            "ordinal": 0,
+            "source": 0,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              48
+            ],
+            "facts": [],
+            "support_sources": [
+              8
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "b6600eaebd4625188e15b8307b2b078e5119898fd39f729c66e59300c31b2f23"
+          },
+          {
+            "ordinal": 1,
+            "source": 0,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              48
+            ],
+            "facts": [],
+            "support_sources": [
+              8
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "ae9e3ba930c5a3fafff4bd8bd2d6706c99aa659eedb154dc25ec8877c5953178"
+          },
+          {
+            "ordinal": 2,
+            "source": 1,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              55
+            ],
+            "facts": [],
+            "support_sources": [
+              8
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "970f5d1d408a58587b9471d20ec7b33150b73b01bb9c996e1d1e50664b822dd1"
+          },
+          {
+            "ordinal": 3,
+            "source": 1,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              55
+            ],
+            "facts": [],
+            "support_sources": [
+              8
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "e8fc998e46d7b4767808b07754d9323b602a9dd5b6e894e7052162bd78932025"
+          },
+          {
+            "ordinal": 4,
+            "source": 2,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              27
+            ],
+            "facts": [],
+            "support_sources": [],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "4df9e2c69286026e6e042205ef404a752bafecd7b0b76fc2362703ac531033a7"
+          },
+          {
+            "ordinal": 5,
+            "source": 4,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              24,
+              54
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "84fa203428aca568b076859370a207f91da4a9fc4b33c45a502ea9a8c9479564"
+          },
+          {
+            "ordinal": 6,
+            "source": 4,
+            "capability": "DENY_DEPLOY",
+            "source_span": [
+              0,
+              13
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "9a6eed5a614162b50958359ec0444a286eeb1874b36a1a7a13a035f6046effa4"
+          },
+          {
+            "ordinal": 7,
+            "source": 4,
+            "capability": "DENY_PUBLISH",
+            "source_span": [
+              15,
+              22
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "83d87391906732665ebbef95be514695f5c0959f6b65aa2975009438c4e06867"
+          },
+          {
+            "ordinal": 8,
+            "source": 5,
+            "capability": "RETAIN_CONTEXT",
+            "source_span": [
+              0,
+              49
+            ],
+            "facts": [],
+            "support_sources": [
+              6,
+              8,
+              9,
+              10
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "7bfcc5eab09df901561c09a82bf8d350a9c323259fd6a517802b84c930f88d58"
+          },
+          {
+            "ordinal": 9,
+            "source": 6,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              91
+            ],
+            "facts": [],
+            "support_sources": [
+              8
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "6e9fb24db8908f0d9e31287a16955d057f11ec550729b66c4d0fa8971a25b461"
+          },
+          {
+            "ordinal": 10,
+            "source": 6,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              91
+            ],
+            "facts": [],
+            "support_sources": [
+              5
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "dfd01ad46ac57ae2ba60e279d106c39362cd5e3aa03d9ed321393875253437f7"
+          },
+          {
+            "ordinal": 11,
+            "source": 7,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              48
+            ],
+            "facts": [],
+            "support_sources": [
+              6
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "e8c22936e58f27fcac11ec9b73dcf89c1c1760c1cfc555b5de9a0270c190a99f"
+          },
+          {
+            "ordinal": 12,
+            "source": 8,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              132
+            ],
+            "facts": [],
+            "support_sources": [
+              0,
+              1
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "5cffe25dfd3d61b2340f880a69b7b00d7ebcc40c890df1e93193380adfe54b5e"
+          },
+          {
+            "ordinal": 13,
+            "source": 9,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              27
+            ],
+            "facts": [],
+            "support_sources": [
+              2
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "4e64900ecfff531d137d89c8cbccf546589bdb178b1afdfb13ed52023d654513"
+          },
+          {
+            "ordinal": 14,
+            "source": 11,
+            "capability": "DENY_DEPLOY",
+            "source_span": [
+              0,
+              13
+            ],
+            "facts": [],
+            "support_sources": [
+              4
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "720c72b1c69c61690091c7b9d6fc1eef6a051f2c7dac7543f141f80cb4a46c7f"
+          },
+          {
+            "ordinal": 15,
+            "source": 11,
+            "capability": "DENY_PUBLISH",
+            "source_span": [
+              15,
+              22
+            ],
+            "facts": [],
+            "support_sources": [
+              4
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "bfdbdfc573d51f6d7a421a73fa14da304650bc5445a723bb5d800372085f786f"
+          },
+          {
+            "ordinal": 16,
+            "source": 11,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              24,
+              54
+            ],
+            "facts": [],
+            "support_sources": [
+              2
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "f9fa8aa096c833238670d84bc08c804e8bf84d1675e8e6dc501b61da14f56659"
+          },
+          {
+            "ordinal": 17,
+            "source": 12,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              59
+            ],
+            "facts": [],
+            "support_sources": [
+              6
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "1c2c6e0c409ccd8d6392496f014050607cd35f157a41a73912b8ea0f68bf6df6"
+          },
+          {
+            "ordinal": 18,
+            "source": 12,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              59
+            ],
+            "facts": [],
+            "support_sources": [
+              6
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "ee36f5609874fabfcc04394952a51e4deb996399cb8dfb9c8f70eea3be044afe"
+          },
+          {
+            "ordinal": 19,
+            "source": 13,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              62
+            ],
+            "facts": [
+              0,
+              1
+            ],
+            "support_sources": [
+              10
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "1902a8c4b29ee00e416cbefbbc482b9c73edecb9f9f911abe32e155006edb348"
+          },
+          {
+            "ordinal": 20,
+            "source": 13,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              62
+            ],
+            "facts": [],
+            "support_sources": [
+              10
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "3110d5d33daed26b40a974e48f04e87a362e195d05bac93021a8a0a730a9aaf7"
+          },
+          {
+            "ordinal": 21,
+            "source": 14,
+            "capability": "CANDIDATE_SEAL",
+            "source_span": [
+              0,
+              45
+            ],
+            "facts": [],
+            "support_sources": [
+              10
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "78b1f4a7cbe25ba5baf6b68fadfc7602c1556d012e65d70f97a99b8b0ed1faff"
+          },
+          {
+            "ordinal": 22,
+            "source": 15,
+            "capability": "DENY_DEPLOY",
+            "source_span": [
+              0,
+              36
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "b9aa8db4af949d50a308bde0e865447740edbf5e3c0bc04ae774205c9229bf18"
+          },
+          {
+            "ordinal": 23,
+            "source": 15,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              36
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "8ea979bf8e1cd430202767ca467d91caa7e508fc657c00a4421aedef5727a9ec"
+          },
+          {
+            "ordinal": 24,
+            "source": 16,
+            "capability": "DENY_PUBLISH",
+            "source_span": [
+              0,
+              37
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "b04d75e106a3e3a4ad762388006a6bb35a5e2ace6950c9f301b8d2135eab1d97"
+          },
+          {
+            "ordinal": 25,
+            "source": 16,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              37
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "f2ffc88ccaac1dec33785dd0bd965a71c2b0bf0fe2cb5d5752758335439f4273"
+          },
+          {
+            "ordinal": 26,
+            "source": 17,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              38
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "d011037acc26374e0d091c7ab66a31cab927eeb6e21e5c7ef96bdc5fa0d1b793"
+          },
+          {
+            "ordinal": 27,
+            "source": 18,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              44
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "abd5c7ff4b22134fb4432003903d9e8149db1967df998c2bf590f16751b9284c"
+          },
+          {
+            "ordinal": 28,
+            "source": 3,
+            "capability": "ARTIFACT_CONTENT",
+            "source_span": [
+              0,
+              72
+            ],
+            "facts": [
+              0,
+              1
+            ],
+            "support_sources": [
+              10
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "41e68ea871b6f8f9ca6cadc179507714af8bef48610c1f8346407beb1fa64baa"
+          },
+          {
+            "ordinal": 29,
+            "source": 3,
+            "capability": "CANDIDATE_SEAL",
+            "source_span": [
+              0,
+              72
+            ],
+            "facts": [],
+            "support_sources": [
+              10
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "cf286edefdd4ad8aa3b3c17ae69abd0b49d99a48be76c0d855606dad8ba2e414"
+          },
+          {
+            "ordinal": 30,
+            "source": 4,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              55
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "78a40cd21eb1fa27c94b6c9f109151e110938560c9749a1f07f6bc8901314523"
+          },
+          {
+            "ordinal": 31,
+            "source": 4,
+            "capability": "DENY_DEPLOY",
+            "source_span": [
+              0,
+              55
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "2a30a5d349c3f09a9551e50a25b20cf3ca891a91d5d51655017f868cd79fcf1e"
+          },
+          {
+            "ordinal": 32,
+            "source": 4,
+            "capability": "DENY_PUBLISH",
+            "source_span": [
+              15,
+              22
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "b200bc004e7742597f8fcfff09104aee015c69aa243e024ed7d732a478771589"
+          },
+          {
+            "ordinal": 33,
+            "source": 10,
+            "capability": "CANDIDATE_SEAL",
+            "source_span": [
+              43,
+              71
+            ],
+            "facts": [],
+            "support_sources": [
+              3
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "7736c5c09e1bdc159e3f7416fa3edc273b4b37a40bd6c9a1cc3b0875534c1c93"
+          },
+          {
+            "ordinal": 34,
+            "source": 11,
+            "capability": "GIT_DIFF_SCOPE",
+            "source_span": [
+              0,
+              55
+            ],
+            "facts": [],
+            "support_sources": [
+              11
+            ],
+            "targets": [
+              0
+            ],
+            "raw_route_fingerprint": "52eebe009d2ad2f523170d010bd02cdc42ae425e088993952d868156746ba8c3"
+          }
+        ],
+        "source_consumer_sets": {
+          "0": [
+            "ARTIFACT_CONTENT",
+            "GIT_DIFF_SCOPE"
+          ],
+          "1": [
+            "ARTIFACT_CONTENT",
+            "GIT_DIFF_SCOPE"
+          ],
+          "2": [
+            "GIT_DIFF_SCOPE"
+          ],
+          "3": [
+            "ARTIFACT_CONTENT",
+            "CANDIDATE_SEAL"
+          ],
+          "4": [
+            "DENY_DEPLOY",
+            "DENY_PUBLISH",
+            "GIT_DIFF_SCOPE"
+          ],
+          "5": [
+            "RETAIN_CONTEXT"
+          ],
+          "6": [
+            "ARTIFACT_CONTENT",
+            "GIT_DIFF_SCOPE"
+          ],
+          "7": [
+            "ARTIFACT_CONTENT"
+          ],
+          "8": [
+            "ARTIFACT_CONTENT"
+          ],
+          "9": [
+            "GIT_DIFF_SCOPE"
+          ],
+          "10": [
+            "CANDIDATE_SEAL"
+          ],
+          "11": [
+            "DENY_DEPLOY",
+            "DENY_PUBLISH",
+            "GIT_DIFF_SCOPE"
+          ],
+          "12": [
+            "ARTIFACT_CONTENT",
+            "GIT_DIFF_SCOPE"
+          ],
+          "13": [
+            "ARTIFACT_CONTENT",
+            "GIT_DIFF_SCOPE"
+          ],
+          "14": [
+            "CANDIDATE_SEAL"
+          ],
+          "15": [
+            "DENY_DEPLOY",
+            "GIT_DIFF_SCOPE"
+          ],
+          "16": [
+            "DENY_PUBLISH",
+            "GIT_DIFF_SCOPE"
+          ],
+          "17": [
+            "GIT_DIFF_SCOPE"
+          ],
+          "18": [
+            "GIT_DIFF_SCOPE"
+          ]
+        },
+        "raw_geometry_failures": [
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 10
+          }
+        ],
+        "validation_passed": false,
+        "failed_predicate": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+        "validation_feedback_sha256": "9fa9ccad721340c46f39aec5c4dc931952c9f6db121dc5db1a4a93e965c89fc2",
+        "wire_failures": [
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 10
+          }
+        ],
+        "owner_prerequisite_failures": [
+          {
+            "code": "OBLIGATION_PROJECTION_DUPLICATE_ROUTE",
+            "source": 4,
+            "route": 32,
+            "component_id": "0ade1c4cea1f7250391f4987da8c7bc98eca290079bae7c08ee7817d26b744a6"
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 10
+          }
+        ],
+        "decision_revision_requests": null,
+        "edits": {
+          "replace_count": 9,
+          "remove": [
+            {
+              "index": 5
+            },
+            {
+              "index": 6
+            },
+            {
+              "index": 16
+            },
+            {
+              "index": 17
+            }
+          ],
+          "append_count": 7
+        },
+        "consumed_decision_revision_requests": {
+          "contract": "formation-decision-revision-requests-v1",
+          "parent_binding_fingerprint": "e5a7af6c9648ffba9e882e564542881c68d6f027c26de1aca0a29a5c76b385f8",
+          "diagnostic_fingerprint": "f2eafb17e2c627d3229af92f67ff845abff03ee6ec2ecb0dad2ea59872777553",
+          "status": "REOPEN_REQUIRED; SEMANTIC_VALIDITY_UNKNOWN; NO_REPLACEMENT_SELECTED",
+          "requests": [
+            {
+              "original_route": 1,
+              "source": 0,
+              "source_ref": "semantic-fact:f1baae6a-b455-523a-9a9a-5e180dc7618f",
+              "component_id": "7f9be2e6f3cfc7372c92f82cb78431afe7d1a81ba8433a87731438e335dbed62",
+              "original_route_fingerprint": "4e9c58f635495bd81cf86fb5d8d933dd2dbf65dad4baaa34939332c6339f6308",
+              "current_interpretation": {
+                "ref": "untrusted_previous_wire.routes[1].rationale",
+                "sha256": "0ed0db50955cba0174126face8e4d48edaadb02e2b6eea47c0987bea3753134f",
+                "status": "UNADMITTED_CLAIM"
+              }
+            },
+            {
+              "original_route": 3,
+              "source": 1,
+              "source_ref": "semantic-fact:64507732-d7be-5aa0-90f8-6ec7ef76b488",
+              "component_id": "17696c29e9cde1515646aae8d546eeca8c5d6f161182349e2431dfa9e13be18f",
+              "original_route_fingerprint": "eb486dc75f3f5bf9e9c5b251b4cbb665b7a3ed10b5820c8082fc2498fd8c0649",
+              "current_interpretation": {
+                "ref": "untrusted_previous_wire.routes[3].rationale",
+                "sha256": "b60d57144442fc8daa8f389c24bb5000013493370138fd97886c0d6829f11c0b",
+                "status": "UNADMITTED_CLAIM"
+              }
+            }
+          ],
+          "assumption_under_review": "Whether the current interpretation infers an extra obligation from an object's identity or supporting provenance, rather than from the primary accepted relation, value, Scope and qualifiers.",
+          "why_review": "Identify which original accepted predicate entails the proposed consumer's additional claim. Distinguish the referent, provenance support and required outcome. Test this interpretation against the consumer's actual observable. The challenge is not a verdict and may be refuted from the original fact.",
+          "preserve": "Original source/version, relation/value/order/Scope/qualifiers/authority, complete contribution coverage, permissions and independent gates; unrelated lawful decisions remain unless another existing failure requires repair.",
+          "reconsider": [
+            "capability",
+            "component_quote",
+            "current_fact_dependencies",
+            "target_paths",
+            "provenance_support_refs",
+            "rationale"
+          ],
+          "all_repairs_ref": "violations AND owner_repair_context.violations; these remain required alongside decision reassessment",
+          "response": "Use existing explicit local edits. A retained choice needs a justified interpretation, not cosmetic wording. Do not invent a new consumer, evidence or fact, enumerate alternatives as extra routes, or ignore other failures. All existing validation and Review remain required."
+        },
+        "decision_revision_observations": [
+          {
+            "original_route": 1,
+            "replaced": true,
+            "removed": false,
+            "replacement_consumer": "GIT_DIFF_SCOPE",
+            "changed_fields": [
+              "rationale"
+            ]
+          },
+          {
+            "original_route": 3,
+            "replaced": true,
+            "removed": false,
+            "replacement_consumer": "GIT_DIFF_SCOPE",
+            "changed_fields": [
+              "rationale"
+            ]
+          }
+        ],
+        "candidate_fingerprint": null
+      }
+    ],
+    "independent_review_calls": 0,
+    "consumer_correction_is_not_semantic_acceptance": true
+  }
+}

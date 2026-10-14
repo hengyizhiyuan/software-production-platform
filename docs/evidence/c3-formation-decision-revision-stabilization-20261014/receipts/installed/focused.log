@@ -1,0 +1,8 @@
+........................................................................ [ 51%]
+.....................................................................    [100%]
+=============================== warnings summary ===============================
+../opt/c3-test-deps/_pytest/cacheprovider.py:469
+  /opt/c3-test-deps/_pytest/cacheprovider.py:469: PytestCacheWarning: could not create cache path /qualification/.pytest_cache/v/cache/nodeids: [Errno 13] Permission denied: '/qualification/pytest-cache-files-ubpcnxl2'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

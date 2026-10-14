@@ -1,0 +1,8 @@
+{
+  "archive_sha256": "f2ab0604912ea0fb7e4c122a1a8466cb3f3e56e605c043406d0fc099bcaf22c4",
+  "revision": "6afd558eabe5437b597611c3be39c99d8966941d",
+  "tree": "be0176138e7915bf831164819988787b29085b33",
+  "export_configuration": {
+    "core.autocrlf": false
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "recorded_at_utc": "2026-10-14T07:00:57.126208+00:00",
+  "mode": "live",
+  "revision": "6afd558eabe5437b597611c3be39c99d8966941d",
+  "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+  "source_count": 19,
+  "input_sha256": {
+    "capability-contracts.json": "168df11add7a49a46866aecfa3159f1d769302a8808c6479220ea4ea646cd2c1",
+    "formation-owner-observations.json": "733d8fe3e0c452081d93638f64eeea6e90e6ae2f60dca8f39801adb61b8fe202",
+    "immutable-inventory.json": "f890af6ea4a85e481b03ea0e638651a61c9513042ad88761f6049f41ea895e85",
+    "basis.json": "aad0fa15b3b24c12aa5b4b1099f8fe7ef0d6f7044bbc79ba8650a68ad4c81998",
+    "historical-owner-receipts": "8eea94156781896350044e1c8635f76d648d3212c9a0663b27909ec2d7930d4f"
+  },
+  "terminal_reason": "OBLIGATION_SEAL_CURRENT_CONTRIBUTION_MISSING",
+  "error_type": null,
+  "calls": [
+    {
+      "role": "formation",
+      "logical_call": 1,
+      "started_at_utc": "2026-10-14T07:00:28.174294+00:00",
+      "completed": true,
+      "elapsed_seconds": 11.176512603997253,
+      "request_id": "3f0d5643-4a40-457d-a1c3-50a7aaf1fca5",
+      "usage": {
+        "input_tokens": 45027,
+        "output_tokens": 2313,
+        "cached_tokens": 44800,
+        "reasoning_tokens": 0,
+        "total_tokens": 47340,
+        "unknown": false
+      },
+      "timing": {
+        "request_sent_seconds": 0.0018186750821769238,
+        "first_response_event_seconds": 0.36618134507443756,
+        "first_token_seconds": 1.4228575030574575,
+        "completed_seconds": 11.175893153995275
+      },
+      "transport_retry_count": 0,
+      "output_evidence": {
+        "provider_status": "completed",
+        "delta_sha256": "7dc37bd022069f1b9d1b89f2f776574ecb3038c1a271d40b8e0dce89af3b0c29",
+        "delta_bytes": 8034,
+        "terminal_text_observed": true,
+        "terminal_sha256": "7dc37bd022069f1b9d1b89f2f776574ecb3038c1a271d40b8e0dce89af3b0c29",
+        "terminal_bytes": 8034,
+        "selection": "TERMINAL_MATCHED_DELTA"
+      },
+      "response_sha256": "7dc37bd022069f1b9d1b89f2f776574ecb3038c1a271d40b8e0dce89af3b0c29"
+    },
+    {
+      "role": "formation",
+      "logical_call": 2,
+      "started_at_utc": "2026-10-14T07:00:39.665361+00:00",
+      "completed": true,
+      "elapsed_seconds": 16.989893564023077,
+      "request_id": "c4d4c539-1925-4caa-9455-232aabfe4896",
+      "usage": {
+        "input_tokens": 74967,
+        "output_tokens": 3962,
+        "cached_tokens": 11136,
+        "reasoning_tokens": 0,
+        "total_tokens": 78929,
+        "unknown": false
+      },
+      "timing": {
+        "request_sent_seconds": 0.005155770108103752,
+        "first_response_event_seconds": 0.5338267660699785,
+        "first_token_seconds": 2.0155126790050417,
+        "completed_seconds": 16.98884651903063
+      },
+      "transport_retry_count": 0,
+      "output_evidence": {
+        "provider_status": "completed",
+        "delta_sha256": "95e8d05cee950d429d5e9f93e84adffcf169d7c0a40f2555646520669a04753a",
+        "delta_bytes": 13038,
+        "terminal_text_observed": true,
+        "terminal_sha256": "95e8d05cee950d429d5e9f93e84adffcf169d7c0a40f2555646520669a04753a",
+        "terminal_bytes": 13038,
+        "selection": "TERMINAL_MATCHED_DELTA"
+      },
+      "response_sha256": "95e8d05cee950d429d5e9f93e84adffcf169d7c0a40f2555646520669a04753a"
+    }
+  ],
+  "elapsed_seconds": 29.275383036932908,
+  "actual_calls": 2,
+  "new_work_created": false,
+  "historical_writes": false,
+  "terminal_replay_without_calls": true,
+  "stages": [
+    {
+      "stage": "MODEL_REQUEST_PENDING",
+      "attempt": 1,
+      "receipt_id": "0b3b4cce-00de-48a8-ac29-8739c592f211"
+    },
+    {
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "attempt": 1,
+      "receipt_id": "c4c063b0-825b-4e6b-93eb-c0b7df1af0f8"
+    },
+    {
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 1,
+      "receipt_id": "58550da6-edf6-4c1b-822a-98af7189a7b2",
+      "validation_passed": false,
+      "terminal_reason": null,
+      "terminal": false
+    },
+    {
+      "stage": "MODEL_REQUEST_PENDING",
+      "attempt": 2,
+      "receipt_id": "958d538f-e4e0-414f-8656-1f85e68fd074"
+    },
+    {
+      "stage": "MODEL_RESPONSE_OBSERVED",
+      "attempt": 2,
+      "receipt_id": "1a869f16-9d49-434f-8e7f-ddd6f5e0d5c0"
+    },
+    {
+      "stage": "CANDIDATE_VALIDATED",
+      "attempt": 2,
+      "receipt_id": "b22e00a1-8000-484a-acd3-5d85a3a622da",
+      "validation_passed": false,
+      "terminal_reason": "OBLIGATION_SEAL_CURRENT_CONTRIBUTION_MISSING",
+      "terminal": true
+    }
+  ],
+  "physical_receipt_max_bytes": 59070,
+  "owner_state_only": true,
+  "no_assurance_or_human_authority_granted": true,
+  "currency_cost": "UNKNOWN"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "e215da0889fe7bb4b3d22d4a6daaf90a9800da3fb1a684d96604c1962a79de2b",
+  "actual_image": "sha256:e2883e109e5697fff5d932b9d606f6ffb333bc16c99c7fabf7ef2edbf22690e1",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/ai-native-evolution-20261013/decision-revision-stabilization-20261014/evidence/installed",
+      "Destination": "/evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    }
+  ],
+  "network_mode": "none",
+  "user": "spg"
+}

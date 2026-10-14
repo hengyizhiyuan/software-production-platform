@@ -1,0 +1,18 @@
+{
+  "recorded_at_utc": "2026-10-14T06:58:58.273382+00:00",
+  "mode": "preflight",
+  "revision": "6afd558eabe5437b597611c3be39c99d8966941d",
+  "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+  "source_count": 19,
+  "terminal_reason": "SECOND_REQUEST_READY_NO_NETWORK",
+  "error_type": null,
+  "elapsed_seconds": 0.7024954179069027,
+  "actual_calls": 0,
+  "new_work_created": false,
+  "historical_writes": false,
+  "terminal_replay_without_calls": null,
+  "physical_receipt_max_bytes": 64891,
+  "owner_state_only": true,
+  "no_assurance_or_human_authority_granted": true,
+  "currency_cost": "UNKNOWN"
+}

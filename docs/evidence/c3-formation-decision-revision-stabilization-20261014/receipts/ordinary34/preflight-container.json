@@ -1,0 +1,50 @@
+{
+  "id": "b223fe604c0b9039605ea39e30f7344315eca7cf0e1c03815486f79bee128102",
+  "actual_image": "sha256:e2883e109e5697fff5d932b9d606f6ffb333bc16c99c7fabf7ef2edbf22690e1",
+  "mounts": [
+    {
+      "Type": "bind",
+      "Source": "/data/watt/ai-native-evolution-20261013/decision-revision-stabilization-20261014/private/qualification",
+      "Destination": "/private",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/ai-native-evolution-20261013/decision-revision-stabilization-20261014/evidence/ordinary34",
+      "Destination": "/evidence",
+      "Mode": "",
+      "RW": true,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/ai-native-evolution-20261013/decision-revision-stabilization-20261014/qualify_ordinary34.py",
+      "Destination": "/probe.py",
+      "Mode": "ro",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/c3-semantic-convergence-20261009/non-holdout-cause-control-20261012/private/ordinary34",
+      "Destination": "/inventory",
+      "Mode": "ro",
+      "RW": false,
+      "Propagation": "rprivate"
+    },
+    {
+      "Type": "bind",
+      "Source": "/data/watt/ai-native-evolution-20261013/nonholdout-15/private/ordinary34-owner-receipts.json",
+      "Destination": "/historical-owner-receipts.json",
+      "Mode": "ro",
+      "RW": false,
+      "Propagation": "rprivate"
+    }
+  ],
+  "network_mode": "none",
+  "user": "spg",
+  "script_sha256": "55d2a8e5a7c6308aea2977e668fce7fc6ed1b5f4b37105a11e577767ce910877",
+  "runtime_source_overlay": false
+}

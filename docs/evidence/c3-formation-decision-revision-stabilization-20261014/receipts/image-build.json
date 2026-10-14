@@ -1,0 +1,30 @@
+{
+  "recorded_at_utc": "2026-10-14T06:50:30.350278+00:00",
+  "revision": "6afd558eabe5437b597611c3be39c99d8966941d",
+  "tree": "be0176138e7915bf831164819988787b29085b33",
+  "tag": "watt-c3-decision-revision:6afd558e",
+  "source_archive_sha256": "769520e509098e0ff527bb20ec8ffb7d271bc24a74b168d0f47497c648707770",
+  "elapsed_seconds": 20.66092062497046,
+  "exit_code": 1,
+  "network": "none",
+  "source_reinstalled": false,
+  "runtime_source_overlay": false,
+  "owner_sources": {
+    "watt": {
+      "revision": "6afd558eabe5437b597611c3be39c99d8966941d",
+      "tree": "be0176138e7915bf831164819988787b29085b33"
+    },
+    "guardian": {
+      "revision": "0d7aca954588c8ad3883dbedb730e59dc1d7b867",
+      "tree": "92ac992c03bd84923a569bbe9f314c0786457040"
+    },
+    "ecf": {
+      "revision": "5aa4f8833c359c15bd059eda5972aa3915bcc18c",
+      "tree": "878d39d9c259272bb05f2e02bdf9d60c22fad460"
+    },
+    "ecf-unsupported": {
+      "revision": "c6b568d006022e39b95daebedfecfb55e562ebe5",
+      "tree": "f102fa082bbd0a1abd827e77d6aa1340db8b83c5"
+    }
+  }
+}

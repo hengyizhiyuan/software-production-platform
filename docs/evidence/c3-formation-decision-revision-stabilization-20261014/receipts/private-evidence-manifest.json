@@ -1,0 +1,91 @@
+{
+  "scope": "Private qualification observations, not Human or Assurance authority",
+  "root": "/data/watt/ai-native-evolution-20261013/decision-revision-stabilization-20261014",
+  "files": [
+    {
+      "relative_path": "private/qualification/live/bindings.json",
+      "bytes": 728633,
+      "sha256": "1b3bd2e7d8b06c444939410bf1895b4fbfe2d786926a4be9e8e5a3c744be58a2"
+    },
+    {
+      "relative_path": "private/qualification/live/calls.json",
+      "bytes": 2349,
+      "sha256": "5bc430e51224f6e3818768a23f02856c973ac39c9765795fd6274e045cc51549"
+    },
+    {
+      "relative_path": "private/qualification/live/materialized-owner-receipts.json",
+      "bytes": 629382,
+      "sha256": "e252dc9e6da9fbd833937fb24c644254eca9f13562e18f675108a1bbf2856ba8"
+    },
+    {
+      "relative_path": "private/qualification/live/owner-receipts.json",
+      "bytes": 310698,
+      "sha256": "5ddfe6a67fb8c77a391286c5373a2aa557627b37cf82b64c7ef59330a8a1879d"
+    },
+    {
+      "relative_path": "private/qualification/live/request-1.json",
+      "bytes": 172222,
+      "sha256": "58fb1f3579a03aab6c6d8c921810ac4256573ba4c90d04b272e61c008df8f6cb"
+    },
+    {
+      "relative_path": "private/qualification/live/request-2.json",
+      "bytes": 289821,
+      "sha256": "3ded96e69e293000ef585de5bb2fabcf994d5c7210983fdca507072abd62751c"
+    },
+    {
+      "relative_path": "private/qualification/preflight/calls.json",
+      "bytes": 739,
+      "sha256": "4e22eee4f7e3968ce59f4a95203d90f5f5e3ed9b3f777d6246c83e04d068b7a7"
+    },
+    {
+      "relative_path": "private/qualification/preflight/materialized-owner-receipts.json",
+      "bytes": 498941,
+      "sha256": "b3aec9ec0f82644112c767129d938ab460cb7e5a1223ef69796edfe1e67e5251"
+    },
+    {
+      "relative_path": "private/qualification/preflight/owner-receipts.json",
+      "bytes": 274048,
+      "sha256": "ccaa582d96a417acba3a41514139778fee5a27b50bff54b54b9b36c6588dd156"
+    },
+    {
+      "relative_path": "private/qualification/preflight/request-1.json",
+      "bytes": 172222,
+      "sha256": "58fb1f3579a03aab6c6d8c921810ac4256573ba4c90d04b272e61c008df8f6cb"
+    },
+    {
+      "relative_path": "private/qualification/preflight/request-2.json",
+      "bytes": 331220,
+      "sha256": "737aa8f7f80ef75134fc1eecfda08c3fca1794e90822caf226d8e8b5f4a658d7"
+    },
+    {
+      "relative_path": "private/qualification/retained-first/bindings.json",
+      "bytes": 846020,
+      "sha256": "966e8832b967b56162b8c95a064e7b3245ee32f6dd6b7d8fe525b82b124eec0e"
+    },
+    {
+      "relative_path": "private/qualification/retained-first/calls.json",
+      "bytes": 1991,
+      "sha256": "e7bf1e9219aee569bd008b6681edbb4eee98909bf6f5e04a074a6072bdc65eee"
+    },
+    {
+      "relative_path": "private/qualification/retained-first/materialized-owner-receipts.json",
+      "bytes": 746761,
+      "sha256": "2fc18adec6c9859064a5bf10260d6e2ddb0a454229dab388801fdaaa470b7832"
+    },
+    {
+      "relative_path": "private/qualification/retained-first/owner-receipts.json",
+      "bytes": 354792,
+      "sha256": "9543dace18b10b724139899ba7aa67899e219c6ad1787b9896201dfab204fb52"
+    },
+    {
+      "relative_path": "private/qualification/retained-first/request-1.json",
+      "bytes": 172222,
+      "sha256": "58fb1f3579a03aab6c6d8c921810ac4256573ba4c90d04b272e61c008df8f6cb"
+    },
+    {
+      "relative_path": "private/qualification/retained-first/request-2.json",
+      "bytes": 331220,
+      "sha256": "955bf69ce73512fea1d94c07b895e96da5d4278b65a8946aec2d3722f1bbdcc2"
+    }
+  ]
+}

@@ -1,0 +1,246 @@
+{
+  "live": {
+    "review_calls": 0,
+    "attempts": [
+      {
+        "attempt": 1,
+        "consumers_0_1_2": {
+          "0": [
+            "ARTIFACT_CONTENT"
+          ],
+          "1": [
+            "ARTIFACT_CONTENT"
+          ],
+          "2": [
+            "GIT_DIFF_SCOPE"
+          ]
+        },
+        "geometry_failure_count": 9,
+        "owner_failures": [
+          {
+            "code": "OBLIGATION_SEAL_CURRENT_CONTRIBUTION_MISSING",
+            "source": 3,
+            "route": 3,
+            "component_id": "2607a1bb30912fc9951d349c1590d99aac9f705010c9003a94303bf467e9d1ad"
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 4
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 11
+          },
+          {
+            "code": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "source": 12
+          },
+          {
+            "code": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "source": 13
+          },
+          {
+            "code": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "source": 14
+          },
+          {
+            "code": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "source": 15
+          },
+          {
+            "code": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "source": 16
+          },
+          {
+            "code": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "source": 17
+          },
+          {
+            "code": "OBLIGATION_SOURCE_INVENTORY_INCOMPLETE",
+            "source": 18
+          }
+        ],
+        "decision_request_count": 0,
+        "edits": {
+          "replace_count": 0,
+          "remove": [],
+          "append_count": 0
+        }
+      },
+      {
+        "attempt": 2,
+        "consumers_0_1_2": {
+          "0": [
+            "ARTIFACT_CONTENT"
+          ],
+          "1": [
+            "ARTIFACT_CONTENT"
+          ],
+          "2": [
+            "GIT_DIFF_SCOPE"
+          ]
+        },
+        "geometry_failure_count": 0,
+        "owner_failures": [
+          {
+            "code": "OBLIGATION_SEAL_CURRENT_CONTRIBUTION_MISSING",
+            "source": 3,
+            "route": 3,
+            "component_id": "2607a1bb30912fc9951d349c1590d99aac9f705010c9003a94303bf467e9d1ad"
+          },
+          {
+            "code": "OBLIGATION_FACT_GATE_CORRESPONDENCE_UNPROVEN",
+            "source": 4,
+            "route": 14,
+            "component_id": "0335f33ef42e9ea56675b2b6cd5f58d5e889256ed84e9aca2137c2408b01c492",
+            "missing_same_capability_source_ordinals": [
+              11
+            ]
+          }
+        ],
+        "decision_request_count": 0,
+        "edits": {
+          "replace_count": 14,
+          "remove": [],
+          "append_count": 8
+        }
+      }
+    ]
+  },
+  "retained-first": {
+    "review_calls": 0,
+    "attempts": [
+      {
+        "attempt": 1,
+        "consumers_0_1_2": {
+          "0": [
+            "ARTIFACT_CONTENT",
+            "GIT_DIFF_SCOPE"
+          ],
+          "1": [
+            "ARTIFACT_CONTENT",
+            "GIT_DIFF_SCOPE"
+          ],
+          "2": [
+            "GIT_DIFF_SCOPE"
+          ]
+        },
+        "geometry_failure_count": 4,
+        "owner_failures": [
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "source": 14,
+            "route": 25,
+            "component_id": "65b6cea440fc9d51ff445b459aa14d74ae347eff7d00e82bbcdb4fa4feecb185"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "source": 15,
+            "route": 26,
+            "component_id": "a003e98d82bb1f580bb6b625e07474b388d5ec2a7d92eea3f7e4a43d653d76ce"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "source": 15,
+            "route": 27,
+            "component_id": "a003e98d82bb1f580bb6b625e07474b388d5ec2a7d92eea3f7e4a43d653d76ce"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "source": 16,
+            "route": 28,
+            "component_id": "b52f39e7932b70f6fd55c0649032074484e8f11e6380667cf49f51273b18463a"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "source": 16,
+            "route": 29,
+            "component_id": "b52f39e7932b70f6fd55c0649032074484e8f11e6380667cf49f51273b18463a"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "source": 17,
+            "route": 30,
+            "component_id": "ef2fb7cfe681d54dd539df3e382a7648701ef7a696149199bb9ef8eb0bb006d7"
+          },
+          {
+            "code": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN",
+            "source": 18,
+            "route": 31,
+            "component_id": "f293f481b215450da0a340dc06fe20469e51a15a17c5a20c6101d33e036c5a2d"
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 3
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 4
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 10
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 11
+          }
+        ],
+        "decision_request_count": 2,
+        "edits": {
+          "replace_count": 0,
+          "remove": [],
+          "append_count": 0
+        }
+      },
+      {
+        "attempt": 2,
+        "consumers_0_1_2": {
+          "0": [
+            "ARTIFACT_CONTENT",
+            "GIT_DIFF_SCOPE"
+          ],
+          "1": [
+            "ARTIFACT_CONTENT",
+            "GIT_DIFF_SCOPE"
+          ],
+          "2": [
+            "GIT_DIFF_SCOPE"
+          ]
+        },
+        "geometry_failure_count": 1,
+        "owner_failures": [
+          {
+            "code": "OBLIGATION_PROJECTION_DUPLICATE_ROUTE",
+            "source": 4,
+            "route": 32,
+            "component_id": "0ade1c4cea1f7250391f4987da8c7bc98eca290079bae7c08ee7817d26b744a6"
+          },
+          {
+            "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+            "source": 10
+          }
+        ],
+        "decision_request_count": 0,
+        "edits": {
+          "replace_count": 9,
+          "remove": [
+            {
+              "index": 5
+            },
+            {
+              "index": 6
+            },
+            {
+              "index": 16
+            },
+            {
+              "index": 17
+            }
+          ],
+          "append_count": 7
+        }
+      }
+    ]
+  }
+}

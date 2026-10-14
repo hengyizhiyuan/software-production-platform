@@ -1,0 +1,73 @@
+EEEEEEEEEE                                                               [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-wire-candidate-edits-v1-False-False-False-False] _
+tests/integration/test_c1_contract_continuity.py:107: in c1_schema
+    assert url.host in {"localhost", "127.0.0.1", "::1"}
+E   AssertionError: assert 'c3-decision-revision-postgres' in {'127.0.0.1', '::1', 'localhost'}
+E    +  where 'c3-decision-revision-postgres' = postgresql+psycopg://postgres:***@c3-decision-revision-postgres:5432/decision_revision.host
+_ ERROR at setup of test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-semantic-candidate-edits-v2-False-False-False-False] _
+tests/integration/test_c1_contract_continuity.py:107: in c1_schema
+    assert url.host in {"localhost", "127.0.0.1", "::1"}
+E   AssertionError: assert 'c3-decision-revision-postgres' in {'127.0.0.1', '::1', 'localhost'}
+E    +  where 'c3-decision-revision-postgres' = postgresql+psycopg://postgres:***@c3-decision-revision-postgres:5432/decision_revision.host
+_ ERROR at setup of test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-role-reference-candidates-v3-False-False-False-False] _
+tests/integration/test_c1_contract_continuity.py:107: in c1_schema
+    assert url.host in {"localhost", "127.0.0.1", "::1"}
+E   AssertionError: assert 'c3-decision-revision-postgres' in {'127.0.0.1', '::1', 'localhost'}
+E    +  where 'c3-decision-revision-postgres' = postgresql+psycopg://postgres:***@c3-decision-revision-postgres:5432/decision_revision.host
+_ ERROR at setup of test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-role-reference-candidates-v3-True-False-False-False] _
+tests/integration/test_c1_contract_continuity.py:107: in c1_schema
+    assert url.host in {"localhost", "127.0.0.1", "::1"}
+E   AssertionError: assert 'c3-decision-revision-postgres' in {'127.0.0.1', '::1', 'localhost'}
+E    +  where 'c3-decision-revision-postgres' = postgresql+psycopg://postgres:***@c3-decision-revision-postgres:5432/decision_revision.host
+_ ERROR at setup of test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-interpretation-role-construction-v4-False-False-False-False] _
+tests/integration/test_c1_contract_continuity.py:107: in c1_schema
+    assert url.host in {"localhost", "127.0.0.1", "::1"}
+E   AssertionError: assert 'c3-decision-revision-postgres' in {'127.0.0.1', '::1', 'localhost'}
+E    +  where 'c3-decision-revision-postgres' = postgresql+psycopg://postgres:***@c3-decision-revision-postgres:5432/decision_revision.host
+_ ERROR at setup of test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-interpretation-role-construction-v4-True-False-False-False] _
+tests/integration/test_c1_contract_continuity.py:107: in c1_schema
+    assert url.host in {"localhost", "127.0.0.1", "::1"}
+E   AssertionError: assert 'c3-decision-revision-postgres' in {'127.0.0.1', '::1', 'localhost'}
+E    +  where 'c3-decision-revision-postgres' = postgresql+psycopg://postgres:***@c3-decision-revision-postgres:5432/decision_revision.host
+_ ERROR at setup of test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-role-reference-candidates-v3-True-True-False-False] _
+tests/integration/test_c1_contract_continuity.py:107: in c1_schema
+    assert url.host in {"localhost", "127.0.0.1", "::1"}
+E   AssertionError: assert 'c3-decision-revision-postgres' in {'127.0.0.1', '::1', 'localhost'}
+E    +  where 'c3-decision-revision-postgres' = postgresql+psycopg://postgres:***@c3-decision-revision-postgres:5432/decision_revision.host
+_ ERROR at setup of test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-interpretation-role-construction-v4-True-True-False-False] _
+tests/integration/test_c1_contract_continuity.py:107: in c1_schema
+    assert url.host in {"localhost", "127.0.0.1", "::1"}
+E   AssertionError: assert 'c3-decision-revision-postgres' in {'127.0.0.1', '::1', 'localhost'}
+E    +  where 'c3-decision-revision-postgres' = postgresql+psycopg://postgres:***@c3-decision-revision-postgres:5432/decision_revision.host
+_ ERROR at setup of test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-interpretation-role-construction-v4-True-True-True-False] _
+tests/integration/test_c1_contract_continuity.py:107: in c1_schema
+    assert url.host in {"localhost", "127.0.0.1", "::1"}
+E   AssertionError: assert 'c3-decision-revision-postgres' in {'127.0.0.1', '::1', 'localhost'}
+E    +  where 'c3-decision-revision-postgres' = postgresql+psycopg://postgres:***@c3-decision-revision-postgres:5432/decision_revision.host
+_ ERROR at setup of test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-interpretation-role-construction-v4-True-True-False-True] _
+tests/integration/test_c1_contract_continuity.py:107: in c1_schema
+    assert url.host in {"localhost", "127.0.0.1", "::1"}
+E   AssertionError: assert 'c3-decision-revision-postgres' in {'127.0.0.1', '::1', 'localhost'}
+E    +  where 'c3-decision-revision-postgres' = postgresql+psycopg://postgres:***@c3-decision-revision-postgres:5432/decision_revision.host
+=============================== warnings summary ===============================
+../opt/c3-test-deps/_pytest/cacheprovider.py:469
+  /opt/c3-test-deps/_pytest/cacheprovider.py:469: PytestCacheWarning: could not create cache path /qualification/.pytest_cache/v/cache/nodeids: [Errno 13] Permission denied: '/qualification/pytest-cache-files-6so85vpj'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../opt/c3-test-deps/_pytest/cacheprovider.py:423
+  /opt/c3-test-deps/_pytest/cacheprovider.py:423: PytestCacheWarning: could not create cache path /qualification/.pytest_cache/v/cache/lastfailed: [Errno 13] Permission denied: '/qualification/pytest-cache-files-333l_ftg'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR tests/integration/test_ai_native_candidate_construction.py::test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-wire-candidate-edits-v1-False-False-False-False]
+ERROR tests/integration/test_ai_native_candidate_construction.py::test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-semantic-candidate-edits-v2-False-False-False-False]
+ERROR tests/integration/test_ai_native_candidate_construction.py::test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-role-reference-candidates-v3-False-False-False-False]
+ERROR tests/integration/test_ai_native_candidate_construction.py::test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-role-reference-candidates-v3-True-False-False-False]
+ERROR tests/integration/test_ai_native_candidate_construction.py::test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-interpretation-role-construction-v4-False-False-False-False]
+ERROR tests/integration/test_ai_native_candidate_construction.py::test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-interpretation-role-construction-v4-True-False-False-False]
+ERROR tests/integration/test_ai_native_candidate_construction.py::test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-role-reference-candidates-v3-True-True-False-False]
+ERROR tests/integration/test_ai_native_candidate_construction.py::test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-interpretation-role-construction-v4-True-True-False-False]
+ERROR tests/integration/test_ai_native_candidate_construction.py::test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-interpretation-role-construction-v4-True-True-True-False]
+ERROR tests/integration/test_ai_native_candidate_construction.py::test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration[owner-local-interpretation-role-construction-v4-True-True-False-True]

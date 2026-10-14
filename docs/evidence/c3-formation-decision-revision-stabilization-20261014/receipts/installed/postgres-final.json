@@ -1,0 +1,7 @@
+{
+  "recorded_at_utc": "2026-10-14T07:00:14.823794+00:00",
+  "actual_image": "sha256:e2883e109e5697fff5d932b9d606f6ffb333bc16c99c7fabf7ef2edbf22690e1",
+  "exit_code": 0,
+  "elapsed_seconds": 29.99513333500363,
+  "oom_killed": false
+}
