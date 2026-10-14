@@ -77,6 +77,11 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
                         duplicate=deepcopy(wire['routes'][0])
                         duplicate.update(c=next(i for i,c in enumerate(payload['existing_capability_contracts']) if c['capability']=='UNRESOLVED'),f=[],t=[],u=[])
                         wire['routes'].append(duplicate)
+                        # Persist an unreviewed consumer decision alongside the
+                        # existing structural repair, then resume both together.
+                        risk=deepcopy(wire['routes'][0])
+                        risk.update(c=next(i for i,c in enumerate(payload['existing_capability_contracts']) if c['capability']=='GIT_DIFF_SCOPE'),f=[],t=[0],u=[])
+                        wire['routes'].append(risk)
                         output=json.dumps({'routes':[role(r) for r in wire['routes']]})
             else:
                 basis = payload["owner_source_preconditions"]["candidate_construction_state"]["repair_basis"]
@@ -89,8 +94,12 @@ def test_observed_edit_resumes_after_postgresql_checkpoint_without_regeneration(
                     output=json.dumps({'basis':basis['raw_sha256'],'replace':[{'index':0,'route':role(wire['routes'][0])}],
                         'remove':[],'append':[]})
                 if construction_contract=='owner-local-interpretation-role-construction-v4':
+                    if role_convergence:
+                        decisions=json.loads(payload['same_basis_validation_feedback'])['owner_repair_context']['decision_revision_requests']
+                        assert decisions['requests'] and decisions['status'].startswith('REOPEN_REQUIRED')
+                        assert any(t.get('decision_revision_ref') for t in payload['owner_source_preconditions']['candidate_construction_state']['repair_targets'])
                     output=(json.dumps({'basis':basis['raw_sha256'],'replace':[],
-                        'remove':[{'index':len(basis['original_wire']['routes'])-1}],'append':[]}) if role_convergence else json.dumps({'routes':[role(r) for r in wire['routes']]}))
+                        'remove':[{'index':len(basis['original_wire']['routes'])-2},{'index':len(basis['original_wire']['routes'])-1}],'append':[]}) if role_convergence else json.dumps({'routes':[role(r) for r in wire['routes']]}))
         return StructuredModelResult(output_text=output,provider=ModelProvider.DEEPSEEK,
             requested_model="controlled-pg-edit",effective_model="controlled-pg-edit",
             request_id=f"pg-edit-{len(calls)}",usage=ModelUsage(unknown=True),timing=ModelTiming(),retry_count=0)

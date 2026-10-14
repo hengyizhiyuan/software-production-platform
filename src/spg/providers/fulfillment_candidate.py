@@ -70,6 +70,7 @@ def provider_failure_observation(error):
 _FULFILLMENT_WIRE_VERSION = "fulfillment-compact-v1"
 _FULFILLMENT_WIRE_METADATA_KEYS = ("provider_wire_version", "wire_request_fingerprint",
     "wire_table_fingerprint", "wire_schema_fingerprint")
+_DECISION_REVISION_CONTRACT = "formation-decision-revision-requests-v1"
 
 
 class _FulfillmentWireReceiptIdentityError(RuntimeError):
@@ -372,6 +373,77 @@ def _coverage_repair_targets(payload, basis, inventory):
     return targets
 
 
+def decision_revision_requests(payload, inventory):
+    """Describe bound interpretation decisions to reopen, never their answers.
+
+    The existing diagnostic selects observations. Their public interpretations
+    remain claims; the Owner resolves only exact identities and references.
+    No additional semantic classification, consumer or evidence is inferred.
+    """
+    context = payload.get("owner_repair_context") or {}
+    diagnostic = context.get("consumer_mapping_diagnostics") or {}
+    observations = diagnostic.get("observations", [])
+    if not observations:
+        return None
+    binding = payload.get("repair_feedback_binding") or {}
+    raw = payload.get("untrusted_previous_wire")
+    if (not isinstance(raw, str) or sha256(raw.encode()).hexdigest() != binding.get("wire_output_fingerprint")
+            or binding.get("inventory_fingerprint") != inventory["inventory_fingerprint"]
+            or binding.get("attempt") != 1):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    try:
+        body, _ = _fulfillment_wire_value(raw, {"wire_presentation_contract":
+            (binding.get("wire_presentation") or {}).get("contract")}, construct=False)
+        routes = json.loads(body, object_pairs_hook=_wire_json_object)["routes"]
+        requests = []
+        for observed in observations:
+            index, source_index = observed["route"], observed["source"]
+            if type(index) is not int or type(source_index) is not int or index < 0 or source_index < 0:
+                raise ValueError("INVALID_ORIGINAL_ORDINAL")
+            route, source = routes[index], inventory["sources"][source_index]
+            if (route.get("source_ref", source["source_ref"] if route.get("s") == source_index else None)
+                    != source["source_ref"]):
+                raise ValueError("ORIGINAL_SOURCE_MISMATCH")
+            field = "rationale" if "rationale" in route else "r"
+            if not isinstance(route[field], str):
+                raise ValueError("INTERPRETATION_NOT_OBSERVED")
+            requests.append({"original_route": index, "source": source_index,
+                "source_ref": source["source_ref"], "component_id": observed["component_id"],
+                "original_route_fingerprint": canonical_fingerprint(route),
+                "current_interpretation": {"ref": f"untrusted_previous_wire.routes[{index}].{field}",
+                    "sha256": sha256(route[field].encode()).hexdigest(), "status": "UNADMITTED_CLAIM"}})
+        if len({r["original_route"] for r in requests}) != len(requests):
+            raise ValueError("DUPLICATE_DECISION")
+    except (KeyError, IndexError, TypeError, ValueError) as error:
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT") from error
+    return {"contract": _DECISION_REVISION_CONTRACT,
+        "parent_binding_fingerprint": canonical_fingerprint(binding),
+        "diagnostic_fingerprint": canonical_fingerprint(diagnostic),
+        "status": "REOPEN_REQUIRED; SEMANTIC_VALIDITY_UNKNOWN; NO_REPLACEMENT_SELECTED",
+        "requests": requests,
+        "assumption_under_review": "Whether the current interpretation infers an extra obligation from an object's identity or supporting provenance, rather than from the primary accepted relation, value, Scope and qualifiers.",
+        "why_review": "Identify which original accepted predicate entails the proposed consumer's additional claim. Distinguish the referent, provenance support and required outcome. Test this interpretation against the consumer's actual observable. The challenge is not a verdict and may be refuted from the original fact.",
+        "preserve": "Original source/version, relation/value/order/Scope/qualifiers/authority, complete contribution coverage, permissions and independent gates; unrelated lawful decisions remain unless another existing failure requires repair.",
+        "reconsider": ["capability", "component_quote", "current_fact_dependencies", "target_paths", "provenance_support_refs", "rationale"],
+        "all_repairs_ref": "violations AND owner_repair_context.violations; these remain required alongside decision reassessment",
+        "response": "Use existing explicit local edits. A retained choice needs a justified interpretation, not cosmetic wording. Do not invent a new consumer, evidence or fact, enumerate alternatives as extra routes, or ignore other failures. All existing validation and Review remain required."}
+
+
+def _decision_revision_targets(payload, basis, inventory):
+    revision = (payload.get("owner_repair_context") or {}).get("decision_revision_requests")
+    if revision is None:
+        return []
+    if (not isinstance(revision, dict) or basis is None or revision.get("contract") != _DECISION_REVISION_CONTRACT
+            or basis["parent_binding"] != payload.get("repair_feedback_binding")
+            or revision != decision_revision_requests(payload, inventory)):
+        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+    return [{"status": "REOPEN_REQUIRED; NOT_A_VALIDATION_VERDICT",
+        "decision_revision_ref": f"owner_repair_context.decision_revision_requests.requests[{i}]",
+        "source_ref": row["source_ref"], "original_route_indices": [row["original_route"]],
+        "original_route_fingerprints": [row["original_route_fingerprint"]]}
+        for i, row in enumerate(revision["requests"])]
+
+
 def candidate_construction_preconditions(preconditions, inventory, feedback, *,
                                         construction_contract=_CANDIDATE_CONSTRUCTION_CONTRACT):
     """Reconstruct Owner-local state from exact records, without semantic repair."""
@@ -542,6 +614,7 @@ def candidate_construction_preconditions(preconditions, inventory, feedback, *,
         "repair_basis": basis}
     if preconditions.get('role_convergence_contract') in _ROLE_CONVERGENCE_CONTRACTS:
         state['repair_targets'] = _coverage_repair_targets(payload, basis, inventory)
+        state['repair_targets'].extend(_decision_revision_targets(payload, basis, inventory))
     if _safe_value(state) != state:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     return {**preconditions, "candidate_construction_contract": construction_contract,
@@ -1374,9 +1447,11 @@ def _formation_repair_instructions(instructions, validation_feedback, *, local_e
         repair_context = json.loads(validation_feedback).get("owner_repair_context", {})
         joint = repair_context.get("source_component_observations")
         consumer_diagnostics = repair_context.get("consumer_mapping_diagnostics")
+        decision_revisions = repair_context.get("decision_revision_requests")
     except (ValueError, TypeError, AttributeError):
         joint = None
         consumer_diagnostics = None
+        decision_revisions = None
     joint_instructions = (
         "Inspect source_component_observations: compare each original source's UNION coverage "
         "and each physical component's proposed dispositions jointly. COMPLETE is text geometry, "
@@ -1398,6 +1473,11 @@ def _formation_repair_instructions(instructions, validation_feedback, *, local_e
         "error, while retaining lawful unchanged contributions. Select corrections yourself; "
         "do not enumerate proof alternatives or invent evidence. NOT_EVALUABLE is not PASS. "
         + joint_instructions +
+        ("Consume owner_repair_context.decision_revision_requests together with all original failures. "
+         "Reopen the identified interpretation and examine its assumption, not only its wording. "
+         "The Owner constructs repair targets from these bound requests; you select any lawful "
+         "revision or justified retention. The request supplies no replacement or verdict. "
+         if isinstance(decision_revisions, dict) and decision_revisions.get("requests") else "") +
         ("Inspect owner_repair_context.consumer_mapping_diagnostics as UNREVIEWED route-specific "
          "method/meaning risks. Recompare the complete original Fact with the consumer's actual "
          "observable, retain a legitimate path-boundary method, and revise an unsupported extra "

@@ -2143,6 +2143,11 @@ def _wire_response_basis(rows, attempt, revision, inventory, capabilities):
     if (response.get("owner_repair_context_contract") != owner_contract
             or owner_contract not in (None, "existing-owner-preconditions-v1", "existing-owner-preconditions-v2")):
         drift()
+    from spg.providers.fulfillment_candidate import _DECISION_REVISION_CONTRACT
+    decision_contract = start.get("decision_revision_contract")
+    if (decision_contract not in (None, _DECISION_REVISION_CONTRACT)
+            or response.get("decision_revision_contract") != decision_contract):
+        drift()
     basis = {"work_id": str(revision.work_id), "work_reality_revision_id": str(revision.id),
         "inventory_fingerprint": inventory["inventory_fingerprint"],
         "source_revision": inventory["source_revision"], "exact_target_paths": inventory["exact_target_paths"]}
@@ -2182,6 +2187,7 @@ def _wire_response_basis(rows, attempt, revision, inventory, capabilities):
         "request_receipt_id": start["receipt_id"], "response_receipt_id": response["receipt_id"],
         **({"owner_repair_context_contract": owner_contract} if owner_contract is not None else {}),
         **({"completion_feedback_contract": completion_contract} if completion_contract is not None else {}),
+        **({"decision_revision_contract": decision_contract} if decision_contract is not None else {}),
         **({"owner_source_preconditions_fingerprint": canonical_fingerprint(preconditions)} if preconditions is not None else {}),
         **({"wire_presentation": presentation} if presentation is not None else {}),
         **{key: context[key] for key in _FULFILLMENT_WIRE_METADATA_KEYS}}
@@ -2895,6 +2901,13 @@ def _bind_repair_feedback(feedback, rows, attempt, revision, inventory, capabili
             repair_context_contract=start.get("owner_repair_context_contract") or "existing-owner-preconditions-v1",
             consumer_mapping_diagnostic_contract=start.get("consumer_mapping_diagnostic_contract"))
         payload["owner_repair_context"] = context
+        if start.get("decision_revision_contract") is not None and attempt == 1:
+            from spg.providers.fulfillment_candidate import _DECISION_REVISION_CONTRACT, decision_revision_requests
+            if start["decision_revision_contract"] != _DECISION_REVISION_CONTRACT:
+                raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+            requests = decision_revision_requests(payload, inventory)
+            if requests is not None:
+                context["decision_revision_requests"] = requests
     if _safe_value(payload) != payload:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     return json.dumps(payload, separators=(",", ":"))
@@ -4069,6 +4082,13 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                     else "existing-owner-preconditions-v1")} if wire_metadata else {}
                 if precondition_arguments:
                     owner_contract["owner_source_preconditions"] = precondition_arguments["owner_preconditions"]
+                    from spg.providers.fulfillment_candidate import _DECISION_REVISION_CONTRACT
+                    decision_contract = (initial_request.get("decision_revision_contract") if initial_request is not None
+                        else _DECISION_REVISION_CONTRACT
+                        if precondition_arguments["owner_preconditions"].get("candidate_construction_contract") == "owner-local-interpretation-role-construction-v4"
+                            and precondition_arguments["owner_preconditions"].get("role_convergence_contract") is not None else None)
+                    if decision_contract is not None:
+                        owner_contract["decision_revision_contract"] = decision_contract
                     completion_contract = ("existing-bounded-completion-feedback-v1" if initial_request is None and source_contract in {"v2", "v3"}
                         else None if initial_request is None
                         else initial_request.get("completion_feedback_contract"))
