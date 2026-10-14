@@ -2619,7 +2619,7 @@ def _source_component_observations(inventory, observations, unavailable):
         "meaning": "UNADMITTED_JOINT_OBSERVATION; NO_ROUTE_SELECTION_OR_REPAIR; NO_EVIDENCE_OR_ASSURANCE_PASS"}
 
 
-def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validation_feedback, owner_preconditions=None, located_candidate=None, repair_context_contract="existing-owner-preconditions-v1"):
+def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validation_feedback, owner_preconditions=None, located_candidate=None, repair_context_contract="existing-owner-preconditions-v1", consumer_mapping_diagnostic_contract=None):
     """Expose existing Owner prerequisites on the exact unadmitted proposal.
 
     Supporting provenance is not primary-source component coverage. These
@@ -2844,7 +2844,12 @@ def _owner_repair_context(raw, revision, ir, inventory, capabilities, *, validat
             for index,wire_route,route in observations if route.capability == "ARTIFACT_CONTENT"
             and route.source_ref.removeprefix("semantic-fact:") in dependencies
             and route.source_ref in route.component_basis.linked_fact_refs]
+    mapping_diagnostics = (_consumer_mapping_diagnostics(located_view, inventory, capabilities)
+        if consumer_mapping_diagnostic_contract == "existing-consumer-mapping-risk-v1"
+        and located_view is not None else None)
     return {"inventory_fingerprint": inventory["inventory_fingerprint"], **raw_operands,
+        **({"consumer_mapping_diagnostics": mapping_diagnostics}
+           if mapping_diagnostics and mapping_diagnostics["observations"] else {}),
         **({"source_component_observations": _source_component_observations(inventory, observations, unavailable)}
            if (owner_preconditions or {}).get("module_adaptation_contract") == "existing-source-component-convergence-v1" else {}),
         **({"quote_locator_operand_contract": {
@@ -2885,12 +2890,47 @@ def _bind_repair_feedback(feedback, rows, attempt, revision, inventory, capabili
         "candidate_fingerprint": None if candidate is None else fulfillment_candidate_fingerprint(candidate)})
     if include_owner_preconditions:
         start = next(row for row in rows if row["stage"] == "MODEL_REQUEST_PENDING" and row["attempt"] == attempt)
-        payload["owner_repair_context"] = _owner_repair_context(raw, revision, ir, inventory, capabilities,
+        context = _owner_repair_context(raw, revision, ir, inventory, capabilities,
             validation_feedback=start.get("feedback"), owner_preconditions=start.get("owner_source_preconditions"), located_candidate=candidate,
-            repair_context_contract=start.get("owner_repair_context_contract") or "existing-owner-preconditions-v1")
+            repair_context_contract=start.get("owner_repair_context_contract") or "existing-owner-preconditions-v1",
+            consumer_mapping_diagnostic_contract=start.get("consumer_mapping_diagnostic_contract"))
+        payload["owner_repair_context"] = context
     if _safe_value(payload) != payload:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     return json.dumps(payload, separators=(",", ":"))
+
+
+def _consumer_mapping_diagnostics(candidate, inventory, capabilities):
+    """Point repair at unreviewed method/meaning contrasts, without a verdict.
+
+    A typed Fact can legitimately use a reviewed Diff method even when its
+    relation is not SCOPE. This observation must never reject or edit it. The
+    independent Review still decides whether that method proves its meaning.
+    """
+    from spg.domain.governed_obligation import fulfillment_component_id, fulfillment_candidate_fingerprint
+
+    sources = {source["source_ref"]: (index, source)
+        for index, source in enumerate(inventory["sources"])}
+    methods = {row["capability"]: row["evidence_method"] for row in capabilities}
+    observations = []
+    for ordinal, route in enumerate(candidate.routes):
+        entry = sources.get(route.source_ref)
+        if entry is None or methods.get(route.capability) != "EXACT_GIT_DIFF_SCOPE":
+            continue
+        source_index, source = entry
+        if source["kind"] != "FACT" or source["payload"].get("relation") not in {"EQUALITY", "CARDINALITY"}:
+            continue
+        observations.append({"route": ordinal, "source": source_index,
+            "component_id": fulfillment_component_id(route, inventory["inventory_fingerprint"]),
+            "fact_relation": source["payload"]["relation"]})
+    return {"contract": "existing-consumer-mapping-risk-v1",
+        "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
+        "consumer": "GIT_DIFF_SCOPE", "observable": "EXACT_CHANGED_PATH_SET",
+        "original_fact_ref": "immutable_inventory.sources[source].payload",
+        "observations": observations[:16],
+        "additional_observation_count": max(0, len(observations) - 16),
+        "question": "Can the original Fact value and qualifiers be false while changed paths are identical? If so, this consumer alone cannot prove it. Check genuine path-boundary meaning separately.",
+        "status": "UNREVIEWED_RISK_ONLY; NOT_A_VIOLATION_OR_REVIEW_VERDICT; NO_EDIT_OR_PASS"}
 
 
 def _rejected_candidate_receipt_values(candidate, feedback, request):
@@ -3113,6 +3153,9 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         preconditions = row.get("owner_source_preconditions")
         if row.get("stage") == "MODEL_REQUEST_PENDING" and row.get("source_role_contract") not in (None, "v1", "v2", "v3"):
+            raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+        if row.get("stage") == "MODEL_REQUEST_PENDING" and row.get("consumer_mapping_diagnostic_contract") not in (
+                None, "existing-consumer-mapping-risk-v1"):
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
         if row.get("stage") == "MODEL_REQUEST_PENDING" and (
                 (row.get("source_role_contract") == "v3") !=
@@ -4034,6 +4077,8 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                 parents = [row for row in recorder.records() if row["stage"] == "CANDIDATE_VALIDATED"
                     and row["attempt"] == attempt - 1 and row.get("validation_feedback") is not None]
                 recorder.append("MODEL_REQUEST_PENDING", attempt, feedback=feedback, source_role_contract=source_contract, **wire_metadata, **owner_contract,
+                    **({"consumer_mapping_diagnostic_contract": "existing-consumer-mapping-risk-v1"}
+                       if attempt == 1 else {}),
                     **({"feedback_receipt_id": parents[0]["receipt_id"]} if len(parents) == 1 else {}))
                 accepts_callback = "receipt_callback" in inspect.signature(provider.form).parameters
                 def observed_callback(**values):

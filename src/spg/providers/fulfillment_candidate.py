@@ -1371,9 +1371,12 @@ def _formation_repair_instructions(instructions, validation_feedback, *, local_e
     if validation_feedback is None:
         return instructions
     try:
-        joint = json.loads(validation_feedback).get("owner_repair_context", {}).get("source_component_observations")
+        repair_context = json.loads(validation_feedback).get("owner_repair_context", {})
+        joint = repair_context.get("source_component_observations")
+        consumer_diagnostics = repair_context.get("consumer_mapping_diagnostics")
     except (ValueError, TypeError, AttributeError):
         joint = None
+        consumer_diagnostics = None
     joint_instructions = (
         "Inspect source_component_observations: compare each original source's UNION coverage "
         "and each physical component's proposed dispositions jointly. COMPLETE is text geometry, "
@@ -1395,6 +1398,12 @@ def _formation_repair_instructions(instructions, validation_feedback, *, local_e
         "error, while retaining lawful unchanged contributions. Select corrections yourself; "
         "do not enumerate proof alternatives or invent evidence. NOT_EVALUABLE is not PASS. "
         + joint_instructions +
+        ("Inspect owner_repair_context.consumer_mapping_diagnostics as UNREVIEWED route-specific "
+         "method/meaning risks. Recompare the complete original Fact with the consumer's actual "
+         "observable, retain a legitimate path-boundary method, and revise an unsupported extra "
+         "consumer only by your explicit local edit. A diagnostic is neither a Validator failure "
+         "nor an independent Review verdict; do not delete a route solely because it appears there. "
+         if isinstance(consumer_diagnostics, dict) and consumer_diagnostics.get("observations") else "") +
         "If lawful recovery cannot be established preserve UNRESOLVED. Return only the "
         + ("explicit local edit proposal over the ORIGINAL route ordinals; the Owner constructs "
            "the complete candidate. " if local_edit else "complete original-format Candidate ") +
