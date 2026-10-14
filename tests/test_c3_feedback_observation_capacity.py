@@ -95,3 +95,14 @@ def test_rejected_candidate_reference_retains_exact_wire_and_attempt(monkeypatch
         rejected=app.form_fulfillment_projection(revision,ir,**kwargs)
         assert rejected[0].formation_receipt['terminal_reason']=='OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
         assert len(calls)==3
+
+
+def test_distinct_observations_sharing_code_and_source_are_both_kept():
+    """Two different consumption checks of one source are not a repeat or drift."""
+    failures = [{'code': 'OBLIGATION_SOURCE_CONSUMPTION_CONSUMER_MISMATCH', 'source': 7,
+                 'source_consumption_comparison': {'check': 0}},
+                {'code': 'OBLIGATION_SOURCE_CONSUMPTION_CONSUMER_MISMATCH', 'source': 7,
+                 'source_consumption_comparison': {'check': 1}}]
+    grouped = app._group_repeated_feedback_predicates(deepcopy(failures))
+    assert grouped == failures
+    assert app._group_repeated_feedback_predicates([failures[0], deepcopy(failures[0])]) == [failures[0]]

@@ -1589,6 +1589,12 @@ def _group_repeated_feedback_predicates(failures):
             grouped[key] = dict(failure)
             continue
         current = grouped[key]
+        if "conflicting_routes" not in failure and failure != current:
+            # A distinct observation sharing code/source/route (e.g. two
+            # consumption checks of one source) is not a repeat. Keep it.
+            key = (*key, canonical_fingerprint(failure))
+            grouped.setdefault(key, dict(failure))
+            continue
         for field, value in failure.items():
             if field == "conflicting_routes":
                 peers = {p["route"]: p for p in current.get(field, ())}
