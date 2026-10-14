@@ -131,6 +131,7 @@ _UNPARSED_CLAIM_REPAIR_CONTRACT = "existing-bound-unparsed-claim-repair-v1"
 _ROLE_CONVERGENCE_LEGACY_CONTRACT = "existing-complete-role-candidate-and-bound-repair-targets-v1"
 _ROLE_CONVERGENCE_CONTRACT = "existing-complete-role-candidate-and-bound-repair-targets-v2"
 _ROLE_CONVERGENCE_CONTRACTS = {_ROLE_CONVERGENCE_LEGACY_CONTRACT, _ROLE_CONVERGENCE_CONTRACT}
+_SEMANTIC_COMPILATION_CONTRACT = "formation-semantic-contribution-compilation-v1"
 _CANDIDATE_CONSTRUCTION_CONTRACTS = {_CANDIDATE_CONSTRUCTION_CONTRACT, _SEMANTIC_EDIT_CONTRACT, _ROLE_REFERENCE_CONTRACT,
     _INTERPRETATION_ROLE_CONTRACT}
 
@@ -244,6 +245,17 @@ class _FulfillmentRoleTargetEdits(_FulfillmentRoleEdits):
     remove: tuple[StrictInt | _FulfillmentRoleRemoval, ...] = Field(max_length=64)
 
 
+class _FulfillmentSourceReexpression(BaseModel):
+    """The model's complete restated contribution set for ONE original source."""
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    source_ref: str = Field(min_length=1)
+    routes: tuple[_FulfillmentRoleRoute, ...] = Field(min_length=1, max_length=64)
+
+
+class _FulfillmentRoleCompilationEdits(_FulfillmentRoleTargetEdits):
+    source_reexpressions: tuple[_FulfillmentSourceReexpression, ...] = Field(max_length=64)
+
+
 def _role_proposal_semantic_value(value,inventory,capabilities):
     """Resolve explicit existing references only; never choose a semantic role."""
     proposal=_FulfillmentRoleProposal.model_validate(value)
@@ -278,7 +290,51 @@ def _role_proposal_semantic_value(value,inventory,capabilities):
     return {'routes':routes}
 
 
-def _construct_semantic_proposal(value, inventory, wire_identity):
+def _compile_contribution_geometry(routes, inventory):
+    """Attach separating punctuation between a source's own chosen components.
+
+    The model chooses semantic component boundaries; character bookkeeping of
+    pure punctuation between, before or after them is Owner encoding. Any gap
+    containing a letter, digit or symbol (conjunction, negation, qualifier) is
+    never attached: it stays uncovered for the unchanged coverage gate.
+    """
+    import unicodedata
+    observations = []
+    by_source = {}
+    for index, route in enumerate(routes):
+        by_source.setdefault(route["s"], []).append(index)
+    for source, indices in sorted(by_source.items()):
+        text = fulfillment_source_semantic_text(inventory["sources"][source])
+        covered = set()
+        for i in indices:
+            covered.update(range(routes[i]["a"], routes[i]["z"]))
+        offset = 0
+        while offset < len(text):
+            if offset in covered:
+                offset += 1
+                continue
+            end = offset
+            while end < len(text) and end not in covered:
+                end += 1
+            marks = [i for i in range(offset, end) if not text[i].isspace()]
+            if marks and all(unicodedata.category(text[i]).startswith("P") for i in marks):
+                left = [i for i in indices if routes[i]["z"] == offset]
+                right = [i for i in indices if routes[i]["a"] == end]
+                for i in left or right:
+                    before = [routes[i]["a"], routes[i]["z"]]
+                    if left:
+                        routes[i]["z"] = marks[-1] + 1
+                    else:
+                        routes[i]["a"] = marks[0]
+                    routes[i]["q"] = text[routes[i]["a"]:routes[i]["z"]]
+                    observations.append({"route": i, "source": source, "proposed_span": before,
+                        "compiled_span": [routes[i]["a"], routes[i]["z"]],
+                        "attached_codepoints": marks, "predicate": "PUNCTUATION_ONLY_SEPARATOR"})
+            offset = end
+    return observations
+
+
+def _construct_semantic_proposal(value, inventory, wire_identity, *, compilation=None):
     proposal = _FulfillmentSemanticProposal.model_validate(value)
     routes = []
     failures = []
@@ -301,6 +357,8 @@ def _construct_semantic_proposal(value, inventory, wire_identity):
     if failures:
         raise _FulfillmentWireValidationError(failures[0]["code"], {
             "violations":failures[:64],"additional_violation_count":max(0,len(failures)-64)})
+    if compilation is not None:
+        compilation.extend(_compile_contribution_geometry(routes, inventory))
     wire = {"v": 1, "h": wire_identity["wire_request_fingerprint"],
         "d": wire_identity["wire_table_fingerprint"], "routes": routes}
     body = json.dumps(wire, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -465,12 +523,15 @@ def _decision_action_schema(schema, preconditions):
     return schema
 
 
-def _decision_action_observation(claims, proposal, basis, targets, *, role_basis, capabilities):
+def _decision_action_observation(claims, proposal, basis, targets, *, role_basis, capabilities, reexpressed=None):
     """Existing local constructor checks explicit choices against explicit edits.
 
     This checks no natural-language assertion, consumer meaning or evidence.
     A structurally consistent choice still needs every existing admission gate.
+    A route whose whole source was re-expressed is compared with that source's
+    complete restated contribution set rather than with a single replacement.
     """
+    reexpressed = reexpressed or {}
     code = "OBLIGATION_FORMATION_DECISION_ACTION_INCONSISTENT"
     failures, observations = [], []
     def reject(condition, index=None):
@@ -500,9 +561,41 @@ def _decision_action_observation(claims, proposal, basis, targets, *, role_basis
         if type(index) is not int or index not in expected:
             continue
         before = original[index]
-        after = None if index in removed else replacements.get(index, before)
         fields = claim.get("revised_fields")
         disposition = claim.get("disposition")
+        if index in reexpressed:
+            restated = reexpressed[index]
+            choices = lambda r: {k: v for k, v in r.items() if k not in {"rationale", "r"}}
+            consumers = {r[consumer_key] for r in restated}
+            reproduced = any(canonical_fingerprint(choices(r)) == canonical_fingerprint(choices(before)) for r in restated)
+            if (set(claim) != {"original_route", "disposition", "revised_fields", "justification"}
+                    or not isinstance(fields, list) or any(not isinstance(f, str) or f not in aliases for f in fields)
+                    or len(set(fields)) != len(fields)
+                    or not isinstance(claim.get("justification"), str)
+                    or not 1 <= len(claim["justification"].strip()) <= 1000):
+                reject("DISPOSITION_SHAPE_INVALID", index)
+                continue
+            if disposition == "retain":
+                if before[consumer_key] not in consumers or fields:
+                    reject("RETAIN_REQUIRES_SAME_CONSUMER", index)
+            elif disposition == "revise":
+                if reproduced or not fields:
+                    reject("REVISE_REQUIRES_DECLARED_FIELD_CHANGE", index)
+            elif disposition == "remove":
+                if reproduced or before[consumer_key] in consumers or fields:
+                    reject("REMOVE_REQUIRES_EXPLICIT_REMOVE", index)
+            elif disposition == "unresolved":
+                if unresolved_consumer not in consumers or fields:
+                    reject("UNRESOLVED_REQUIRES_EXPLICIT_UNRESOLVED_ROUTE", index)
+            else:
+                reject("DISPOSITION_UNKNOWN", index)
+            observations.append({"original_route": index, "disposition": disposition,
+                "operation": "source_reexpression", "declared_revised_fields": fields,
+                "restated_consumers": sorted(consumers), "original_choice_reproduced": reproduced,
+                "original_route_fingerprint": canonical_fingerprint(before),
+                "justification_sha256": sha256(claim["justification"].encode()).hexdigest()})
+            continue
+        after = None if index in removed else replacements.get(index, before)
         if (set(claim) != {"original_route", "disposition", "revised_fields", "justification"}
                 or not isinstance(fields, list) or any(not isinstance(f, str) or f not in aliases for f in fields)
                 or len(set(fields)) != len(fields)
@@ -760,12 +853,16 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
         # proof of EVERY original source are checked on the resulting plan.
         raw = json.loads(body,object_pairs_hook=_wire_json_object)
         value = _role_proposal_semantic_value(raw,inventory,wire_identity['tables']['capabilities'])
-        _wire, constructed = _construct_semantic_proposal(value,inventory,wire_identity)
+        compilation = [] if preconditions.get("semantic_compilation_contract") == _SEMANTIC_COMPILATION_CONTRACT else None
+        _wire, constructed = _construct_semantic_proposal(value,inventory,wire_identity,compilation=compilation)
         return constructed, {'contract':_INTERPRETATION_ROLE_CONTRACT,
             'parent_wire_sha256':basis['raw_sha256'],'parent_binding':basis['parent_binding'],
             'interpretation_fingerprint':basis['original_wire_fingerprint'],
             'role_response_sha256':sha256(body.encode()).hexdigest(),
             'constructed_wire_sha256':sha256(constructed.encode()).hexdigest(),
+            **({'geometry_compilation': {'contract': _SEMANTIC_COMPILATION_CONTRACT, 'attachments': compilation,
+                'status': 'OWNER_PUNCTUATION_BOOKKEEPING_ONLY; NO_WORD_ATTACHED; COVERAGE_GATE_UNCHANGED'}}
+               if compilation is not None else {}),
             'disposition':'UNREVIEWED_CLAIMS_TO_CANDIDATE_ONLY; ALL_ORIGINAL_GATES_REQUIRED'}
     semantic_basis = basis.get("representation") == "UNLOCATED_SEMANTIC_PROPOSAL"
     role_basis = basis.get("representation") == "UNADMITTED_ROLE_REFERENCE_PROPOSAL"
@@ -774,7 +871,9 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
     if role_basis and preconditions.get("candidate_construction_contract") not in {_ROLE_REFERENCE_CONTRACT,_INTERPRETATION_ROLE_CONTRACT}:
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
     try:
-        model = (_FulfillmentRoleTargetEdits if preconditions.get('role_convergence_contract') == _ROLE_CONVERGENCE_CONTRACT
+        compiling = role_basis and preconditions.get("semantic_compilation_contract") == _SEMANTIC_COMPILATION_CONTRACT
+        model = (_FulfillmentRoleCompilationEdits if compiling else _FulfillmentRoleTargetEdits
+            if preconditions.get('role_convergence_contract') == _ROLE_CONVERGENCE_CONTRACT
             else _FulfillmentRoleEdits) if role_basis else _FulfillmentSemanticEdits if semantic_basis else _FulfillmentCandidateEdits
         value = json.loads(body, object_pairs_hook=_wire_json_object)
         action_targets = _decision_action_targets(preconditions)
@@ -790,26 +889,44 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
     count = len(original["routes"])
     removed_indices = [r.index if isinstance(r, _FulfillmentRoleRemoval) else r for r in proposal.remove]
     indices = [r.index for r in proposal.replace] + removed_indices
+    # A source re-expression replaces EVERY original route of that source with
+    # the model's restated set. The Owner resolves identities only; it selects
+    # no route to keep or drop. Mixing it with per-route edits of the same
+    # source would be two conflicting intents and is rejected.
+    reexpressed, restated = {}, []
+    for item in getattr(proposal, "source_reexpressions", ()):
+        members = [i for i, r in enumerate(original["routes"]) if r.get("source_ref") == item.source_ref]
+        if (not members or any(r.source_ref != item.source_ref for r in item.routes)
+                or any(i in reexpressed for i in members)):
+            raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID")
+        routes_json = [r.model_dump(mode="json") for r in item.routes]
+        reexpressed.update({i: routes_json for i in members})
+        restated.extend(routes_json)
+    if set(reexpressed) & set(indices):
+        raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID")
     review_only = state.get("convergence", {}).get("repair_strategy") == "RETAIN_VALID_CANDIDATE_REPAIR_REVIEW_OUTPUT"
-    if (not indices and not proposal.append and not review_only) or len(set(indices)) != len(indices) or any(
+    if (not indices and not proposal.append and not reexpressed and not review_only) or len(set(indices)) != len(indices) or any(
             type(i) is not int or not 0 <= i < count for i in indices):
         raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID")
     replacements = {r.index: r.route.model_dump(mode="json") for r in proposal.replace}
     removed = set(removed_indices)
     action_observation = (_decision_action_observation(dispositions, proposal, basis, action_targets,
-        role_basis=role_basis, capabilities=wire_identity["tables"]["capabilities"])
+        role_basis=role_basis, capabilities=wire_identity["tables"]["capabilities"], reexpressed=reexpressed)
         if action_targets else None)
-    routes = [deepcopy(replacements.get(i, r)) for i, r in enumerate(original["routes"]) if i not in removed]
+    routes = [deepcopy(replacements.get(i, r)) for i, r in enumerate(original["routes"])
+        if i not in removed and i not in reexpressed]
     routes.extend(r.model_dump(mode="json") for r in proposal.append)
+    routes.extend(restated)
     if not routes or len(routes) > 1024:
         raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_TARGET_INVALID")
     if canonical_fingerprint(routes) == canonical_fingerprint(original["routes"]) and not review_only:
         raise ValueError("OBLIGATION_FORMATION_LOCAL_EDIT_NO_PROGRESS")
+    compilation = [] if compiling else None
     if role_basis:
         if inventory is None or wire_identity is None:
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
         value = _role_proposal_semantic_value({'routes':routes},inventory,wire_identity['tables']['capabilities'])
-        wire, _ = _construct_semantic_proposal(value,inventory,wire_identity)
+        wire, _ = _construct_semantic_proposal(value,inventory,wire_identity,compilation=compilation)
     else:
         wire = {"v": 1, "h": proposal.h, "d": proposal.d, "routes": routes}
     if semantic_basis:
@@ -826,7 +943,11 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
         "constructed_wire_sha256": sha256(constructed.encode()).hexdigest(),
         "replaced_original_ordinals": [r.index for r in proposal.replace],
         "removed_original_ordinals": removed_indices, "appended_count": len(proposal.append),
-        "retained_original_ordinals": [i for i in range(count) if i not in set(indices)],
+        "retained_original_ordinals": [i for i in range(count) if i not in set(indices) and i not in reexpressed],
+        **({"reexpressed_original_ordinals": sorted(reexpressed), "restated_route_count": len(restated)} if reexpressed else {}),
+        **({"geometry_compilation": {"contract": _SEMANTIC_COMPILATION_CONTRACT, "attachments": compilation,
+            "status": "OWNER_PUNCTUATION_BOOKKEEPING_ONLY; NO_WORD_ATTACHED; COVERAGE_GATE_UNCHANGED"}}
+           if compilation is not None else {}),
         **({"decision_revision_action_observation": action_observation} if action_observation else {}),
         "disposition": "DERIVED_CANDIDATE; NO_SEMANTIC_OR_EVIDENCE_ADMISSION"}
 
@@ -913,7 +1034,8 @@ def _role_generation_schema(inventory,capabilities,owner_preconditions):
     from spg.providers.semantic_wire import _provider_strict_output_schema
     basis=(owner_preconditions.get('candidate_construction_state') or {}).get('repair_basis')
     edits = basis and basis.get('representation') not in {'UNREVIEWED_INTERPRETATION_CLAIMS','UNPARSED_PRIVACY_SAFE_PROPOSAL'}
-    edit_model = (_FulfillmentRoleTargetEdits if owner_preconditions.get('role_convergence_contract') == _ROLE_CONVERGENCE_CONTRACT
+    edit_model = (_FulfillmentRoleCompilationEdits if owner_preconditions.get('semantic_compilation_contract') == _SEMANTIC_COMPILATION_CONTRACT
+        else _FulfillmentRoleTargetEdits if owner_preconditions.get('role_convergence_contract') == _ROLE_CONVERGENCE_CONTRACT
         else _FulfillmentRoleEdits)
     schema=_provider_strict_output_schema((edit_model if edits else _FulfillmentRoleProposal).model_json_schema())
     props=schema['$defs']['_FulfillmentRoleRoute']['properties']
@@ -934,13 +1056,21 @@ def _role_generation_schema(inventory,capabilities,owner_preconditions):
         operand=_role_operand_schema(_qualified_operand_generation_schema(inventory,capabilities,choices,
             enforce_owner_prerequisites=True,route_definition='_FulfillmentSemanticRoute'),inventory,capabilities)
     if edits:
-        if edit_model is _FulfillmentRoleTargetEdits:
+        if edit_model in {_FulfillmentRoleTargetEdits, _FulfillmentRoleCompilationEdits}:
             # Prefer the same explicit target object used by replace. Existing
             # exact integer commands remain consumable at this local boundary.
             schema['properties']['remove']['items']={'$ref':'#/$defs/_FulfillmentRoleRemoval'}
         schema['properties']['basis']['enum']=[basis['raw_sha256']]
         schema['$defs']['_FulfillmentRoleReplacement']['properties']['route']=deepcopy(operand)
         schema['properties']['append']['items']=deepcopy(operand)
+        if edit_model is _FulfillmentRoleCompilationEdits:
+            restatement = schema['$defs']['_FulfillmentSourceReexpression']['properties']
+            restatement['source_ref']['enum'] = sorted({r['source_ref'] for r in basis['original_wire']['routes']
+                if isinstance(r, dict) and isinstance(r.get('source_ref'), str)})
+            restatement['routes']['items'] = deepcopy(operand)
+            schema['properties']['source_reexpressions']['description'] = (
+                'Optional. Restate the COMPLETE contribution set of one original source; it replaces every '
+                'original route of that source. Do not also replace/remove those routes individually.')
     else:
         schema['properties']['routes']['items']=operand
         schema['properties']['routes']['allOf']=[{'contains':{'type':'object','properties':{
@@ -1543,7 +1673,30 @@ def _primary_meaning_instructions(owner_preconditions):
          if owner_preconditions.get("semantic_selection_input_contract") == _PRIMARY_MEANING_INPUT_CONTRACT else ""))
 
 
-def _construction_consumer_instructions(contract):
+_SEMANTIC_COMPILATION_INSTRUCTIONS = (
+    "Express meaning at the contribution level. For each original source decide which complementary "
+    "consumers carry its complete admitted meaning and why. component_quote marks a semantic component "
+    "boundary, not a character ledger: when several consumers legitimately share one requirement, "
+    "prefer the complete original source (component_quote=null) for each of them rather than slicing "
+    "the sentence per consumer. Use a partial quote only for a genuinely distinct component, and keep "
+    "its governing negation, conjunction and qualifiers inside it. The Owner attaches separating "
+    "punctuation between your own components of the same source; it never attaches words, so an "
+    "omitted conjunction, negation or qualifier remains a real coverage failure. "
+    "Before returning, compare component identities and chosen consumers: one component with the same "
+    "consumer is ONE binding regardless of rationale or u wording. Preserve genuinely distinct "
+    "components and required contributions; never deduplicate by discarding meaning.")
+
+_SEMANTIC_COMPILATION_REPAIR_INSTRUCTIONS = (
+    "The repair unit is the complete candidate, not an isolated route. When a correction changes one "
+    "contribution, reconsider every other route of the same source and every route whose "
+    "current_fact_dependencies reference it: a revised consumer may duplicate a retained one or change "
+    "how many current proofs a dependent route has. To restate a source coherently, use "
+    "source_reexpressions with that source's complete new contribution set instead of patching its "
+    "routes one by one. Every original coverage failure and other reported failure must be addressed in "
+    "the same response; a rationale change alone repairs none of them. ")
+
+
+def _construction_consumer_instructions(contract, *, compilation=None):
     """Reuse existing consumer semantics separately from Wire encoding directions.
 
     Temporary construction changes representation, not the consumer contract.
@@ -1552,6 +1705,11 @@ def _construction_consumer_instructions(contract):
     if contract != _CONSTRUCTION_CONSUMER_INSTRUCTION_CONTRACT:
         return ""
     semantics = _SOURCE_CONSUMER_INSTRUCTIONS.split("Return exactly one JSON object", 1)[0]
+    if compilation == _SEMANTIC_COMPILATION_CONTRACT:
+        # Character bookkeeping of separators is Owner encoding under this
+        # contract; the remaining semantic guidance is unchanged.
+        semantics = semantics.replace("Preserve punctuation and all nonspace characters. ", "")
+        semantics += _SEMANTIC_COMPILATION_INSTRUCTIONS + " "
     # These are transport field labels, never Subject aliases or semantic choices.
     import re
     fields = {"s": "source_ref", "f": "current_fact_dependencies",
@@ -1560,7 +1718,7 @@ def _construction_consumer_instructions(contract):
     return semantics.replace("source ordinals", "source references").replace("FACT ordinals", "FACT references")
 
 
-def _formation_repair_instructions(instructions, validation_feedback, *, local_edit=False):
+def _formation_repair_instructions(instructions, validation_feedback, *, local_edit=False, compilation=None):
     """Orient the existing one repair request; no feedback or plan rewriting.
 
     Feedback remains the exact identity-bound serialized value in the request.
@@ -1599,6 +1757,7 @@ def _formation_repair_instructions(instructions, validation_feedback, *, local_e
         "error, while retaining lawful unchanged contributions. Select corrections yourself; "
         "do not enumerate proof alternatives or invent evidence. NOT_EVALUABLE is not PASS. "
         + joint_instructions +
+        (_SEMANTIC_COMPILATION_REPAIR_INSTRUCTIONS if local_edit and compilation == _SEMANTIC_COMPILATION_CONTRACT else "") +
         ("Consume owner_repair_context.decision_revision_requests together with all original failures. "
          "Reopen the identified interpretation and examine its assumption, not only its wording. "
          "The Owner constructs repair targets from these bound requests; you select any lawful "
@@ -2710,17 +2869,23 @@ def _fulfillment_wire_value(output, owner_preconditions=None, *, construct=True,
                         'not_evaluable':['SEMANTIC_APPROVAL','CONSUMER_BINDING','FULFILLMENT_EVIDENCE','ASSURANCE']})
                 if isinstance(proposal, dict) and set(proposal) == {"routes"}:
                     original_body = body
+                    compilation = None
                     if owner_preconditions.get('candidate_construction_contract') in {_ROLE_REFERENCE_CONTRACT,_INTERPRETATION_ROLE_CONTRACT}:
                         if all('source_ref' in r for r in proposal['routes']):
                             proposal=_role_proposal_semantic_value(proposal,inventory,wire_identity['tables']['capabilities'])
+                            if owner_preconditions.get("semantic_compilation_contract") == _SEMANTIC_COMPILATION_CONTRACT:
+                                compilation = []
                         else:
                             proposal=_FulfillmentSemanticProposal.model_validate(proposal).model_dump(mode='json')
-                    _wire, body = _construct_semantic_proposal(proposal, inventory, wire_identity)
+                    _wire, body = _construct_semantic_proposal(proposal, inventory, wire_identity, compilation=compilation)
                     presentation["candidate_construction"] = {
                         "contract": owner_preconditions["candidate_construction_contract"], "representation": "SEMANTIC_QUOTE_PROPOSAL",
                         "proposal_sha256": sha256(original_body.encode()).hexdigest(),
                         "constructed_wire_sha256": sha256(body.encode()).hexdigest(),
                         "inventory_fingerprint": inventory["inventory_fingerprint"],
+                        **({"geometry_compilation": {"contract": _SEMANTIC_COMPILATION_CONTRACT, "attachments": compilation,
+                            "status": "OWNER_PUNCTUATION_BOOKKEEPING_ONLY; NO_WORD_ATTACHED; COVERAGE_GATE_UNCHANGED"}}
+                           if compilation is not None else {}),
                         "disposition": "OWNER_METADATA_ONLY; ALL_VALIDATION_AND_REVIEW_REQUIRED"}
             except ValueError as error:
                 code = re.search(r"OBLIGATION_[A-Z0-9_]+", str(error))
@@ -2904,7 +3069,7 @@ class ModelFulfillmentCandidateProvider:
                  candidate_construction_contract=_CANDIDATE_CONSTRUCTION_CONTRACT,
                  raw_role_repair=False, construction_consumer_instructions=False, unparsed_claim_repair=False,
                  role_convergence=False, role_convergence_contract=_ROLE_CONVERGENCE_CONTRACT,
-                 decision_revision_actions=False):
+                 decision_revision_actions=False, semantic_compilation=False):
         self.runtime_factory = runtime_factory
         self.last_observation = None
         self.supports_candidate_construction = candidate_construction
@@ -2916,6 +3081,7 @@ class ModelFulfillmentCandidateProvider:
         self.supports_unparsed_claim_repair = unparsed_claim_repair
         self.supports_role_convergence = role_convergence
         self.supports_decision_revision_actions = decision_revision_actions
+        self.supports_semantic_compilation = semantic_compilation
         if role_convergence_contract not in _ROLE_CONVERGENCE_CONTRACTS:
             raise ValueError('OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID')
         self.role_convergence_contract = role_convergence_contract
@@ -2941,7 +3107,7 @@ class ModelFulfillmentCandidateProvider:
         return cls(runtime_factory, candidate_construction=True,
             candidate_construction_contract=_INTERPRETATION_ROLE_CONTRACT,raw_role_repair=True,
             construction_consumer_instructions=True, unparsed_claim_repair=True, role_convergence=True,
-            decision_revision_actions=True)
+            decision_revision_actions=True, semantic_compilation=True)
 
     def form_wire_metadata(self, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
         context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
@@ -3195,7 +3361,8 @@ class ModelFulfillmentCandidateProvider:
                     "permission is granted. The complete constructed candidate is revalidated and independently "
                     "reviewed. Keep the current h/d and exact parent basis. Do not output a new complete plan.")
                 formation_instructions = _formation_repair_instructions(
-                    formation_instructions, validation_feedback, local_edit=True)
+                    formation_instructions, validation_feedback, local_edit=True,
+                    compilation=owner_preconditions.get("semantic_compilation_contract"))
             elif (owner_preconditions or {}).get("candidate_construction_contract") in _CANDIDATE_CONSTRUCTION_CONTRACTS:
                 formation_instructions = (
                     "Propose semantic contribution routes for the immutable source table. Select s/c/f/t/u "
@@ -3258,7 +3425,8 @@ class ModelFulfillmentCandidateProvider:
                     owner_preconditions.get("candidate_construction_contract") == _INTERPRETATION_ROLE_CONTRACT
                     and not basis and owner_preconditions.get('role_convergence_contract') not in _ROLE_CONVERGENCE_CONTRACTS):
                 semantics = _construction_consumer_instructions(
-                    owner_preconditions.get("construction_consumer_instruction_contract"))
+                    owner_preconditions.get("construction_consumer_instruction_contract"),
+                    compilation=owner_preconditions.get("semantic_compilation_contract"))
                 if semantics:
                     formation_instructions = semantics + "\n\n" + formation_instructions
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,

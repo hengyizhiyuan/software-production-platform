@@ -3259,6 +3259,14 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                             or preconditions["candidate_construction_contract"] != "owner-local-interpretation-role-construction-v4"):
                         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
                     restored_preconditions["role_convergence_contract"] = preconditions["role_convergence_contract"]
+                if preconditions.get("semantic_compilation_contract") is not None:
+                    from spg.providers.fulfillment_candidate import _SEMANTIC_COMPILATION_CONTRACT
+                    if (preconditions["semantic_compilation_contract"] != _SEMANTIC_COMPILATION_CONTRACT
+                            or preconditions["candidate_construction_contract"] != "owner-local-interpretation-role-construction-v4"
+                            or preconditions.get("role_convergence_contract") is None
+                            or preconditions.get("construction_consumer_instruction_contract") is None):
+                        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                    restored_preconditions["semantic_compilation_contract"] = _SEMANTIC_COMPILATION_CONTRACT
                 restored_preconditions = candidate_construction_preconditions(
                     restored_preconditions, inventory, source_request.get("feedback"),
                     construction_contract=preconditions["candidate_construction_contract"])
@@ -4071,6 +4079,13 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                         from spg.providers.fulfillment_candidate import _ROLE_CONVERGENCE_CONTRACT
                         original_preconditions["role_convergence_contract"] = (getattr(provider, 'role_convergence_contract', _ROLE_CONVERGENCE_CONTRACT) if initial_request is None
                             else initial_request["owner_source_preconditions"]["role_convergence_contract"])
+                    compilation = (getattr(provider, "supports_semantic_compilation", False) if initial_request is None
+                        else (initial_request.get("owner_source_preconditions") or {}).get("semantic_compilation_contract") is not None)
+                    if (compilation and construction_contract == "owner-local-interpretation-role-construction-v4"
+                            and original_preconditions.get("role_convergence_contract") is not None
+                            and original_preconditions.get("construction_consumer_instruction_contract") is not None):
+                        from spg.providers.fulfillment_candidate import _SEMANTIC_COMPILATION_CONTRACT
+                        original_preconditions["semantic_compilation_contract"] = _SEMANTIC_COMPILATION_CONTRACT
                     precondition_arguments["owner_preconditions"] = candidate_construction_preconditions(
                         original_preconditions, inventory, feedback, construction_contract=construction_contract)
                     decision = precondition_arguments["owner_preconditions"]["candidate_construction_state"]["convergence"]
