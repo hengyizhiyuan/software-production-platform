@@ -1,0 +1,55 @@
+{
+  "schema": "c3-ordinary34-isolated-second-candidate-probe-v1",
+  "historical_work_modified": false,
+  "new_work_created": false,
+  "provider_logical_call_limit": 1,
+  "model": "deepseek-flash",
+  "reasoning_effort": "none",
+  "max_output_tokens": 16384,
+  "timeout_seconds": 120,
+  "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+  "original_wire_sha256": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e",
+  "bound_feedback_sha256": "6503e481b0ebfe6f5a4cc6a5817a7f065dcbcf99981bcd1973ef731296b67ffb",
+  "diagnostic_original_route_ordinals": [
+    1,
+    3
+  ],
+  "original_risky_diff_routes": 2,
+  "result_risky_diff_routes": null,
+  "original_content_routes_same_sources": 2,
+  "result_content_routes_same_sources": null,
+  "decoded_second_candidate": false,
+  "failure_type": "_FulfillmentWireValidationError",
+  "response_output_sha256": "45851f412a2ef5746ed201e5a3df647cf2de59018b4289a2688c4ea711e4c80c",
+  "response_bytes": 6786,
+  "provider_usage": {
+    "input_tokens": 87782,
+    "output_tokens": 2169,
+    "cached_tokens": 1152,
+    "reasoning_tokens": 0,
+    "total_tokens": 89951,
+    "unknown": false
+  },
+  "provider_timing": {
+    "request_sent_seconds": 0.0026507109869271517,
+    "first_response_event_seconds": 0.5124522269470617,
+    "first_token_seconds": 1.7505192919634283,
+    "completed_seconds": 10.25113062595483
+  },
+  "transport_retry_count": 0,
+  "request_id": "4f536808-993b-40c1-80f6-226c4d231d64",
+  "request_identity_observation": {
+    "validation_feedback_sha256": "6503e481b0ebfe6f5a4cc6a5817a7f065dcbcf99981bcd1973ef731296b67ffb",
+    "generation_input_sha256": "7cb31a7cff1ec4bbdd649f8b14e621ad03f08bc22db399cb1a7c9440d8154b84",
+    "generation_instructions_sha256": "63dd1838008364346588b0e83a4365bb0c7f09ce80a28a17aa2d53c423bee708",
+    "output_evidence": {
+      "provider_status": "completed",
+      "delta_sha256": "45851f412a2ef5746ed201e5a3df647cf2de59018b4289a2688c4ea711e4c80c",
+      "delta_bytes": 6786,
+      "terminal_text_observed": true,
+      "terminal_sha256": "45851f412a2ef5746ed201e5a3df647cf2de59018b4289a2688c4ea711e4c80c",
+      "terminal_bytes": 6786,
+      "selection": "TERMINAL_MATCHED_DELTA"
+    }
+  }
+}

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="3.128" timestamp="2026-10-14T05:41:01.263106+00:00" hostname="59c66ba1baa1"><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[duplicate-response]" time="0.167"><failure message="AssertionError: assert 'OBLIGATION_F...FERENCE_DRIFT' == 'OBLIGATION_F...DENTITY_DRIFT'&#10;  &#10;  - OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT&#10;  + OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT">change = 'duplicate-response'
+
+    @pytest.mark.parametrize('change', ('raw', 'raw-sha', 'raw-bytes', 'inventory', 'attempt',
+        'request-receipt', 'response-receipt', 'diagnostic-hash', 'violation', 'feedback',
+        'row-work', 'row-revision', 'row-source', 'row-paths', 'missing-diagnostics', 'duplicate-response', 'duplicate-validation',
+        'feedback-reorder', 'feedback-sha', 'feedback-bytes', 'missing-feedback-identity'))
+    def test_feedback_drift_stops_before_another_model_request(change):
+        revision, ir, inventory, plan = controlled_capacity_case()
+        provider, calls = provider_for_case(inventory, plan, checkpoint='first-validation')
+        with pytest.raises(Checkpoint): run_case(revision, ir, inventory, provider)
+        rows = provider._fulfillment_receipts
+        failed = next(r for r in rows if r['stage'] == 'CANDIDATE_VALIDATED')
+        response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+        diagnostics = failed['predecode_diagnostics']
+        if change == 'raw': response['candidate_output'] += ' '
+        elif change == 'raw-sha': response['candidate_output_sha256'] = '0'*64
+        elif change == 'raw-bytes': response['candidate_output_bytes'] += 1
+        elif change == 'inventory': diagnostics['binding']['inventory_fingerprint'] = '0'*64
+        elif change == 'attempt': diagnostics['binding']['attempt'] = 2
+        elif change == 'request-receipt': diagnostics['binding']['request_receipt_id'] = 'different-request'
+        elif change == 'response-receipt': diagnostics['binding']['response_receipt_id'] = 'different-response'
+        elif change == 'diagnostic-hash': diagnostics['diagnostic_fingerprint'] = '0'*64
+        elif change == 'violation': diagnostics['violations'][0]['referenced_source'] = 0
+        elif change == 'feedback': failed['validation_feedback'] += ' '
+        elif change == 'feedback-reorder': failed['validation_feedback'] = json.dumps(json.loads(failed['validation_feedback']),sort_keys=True)
+        elif change == 'feedback-sha': failed['validation_feedback_sha256']='0'*64
+        elif change == 'feedback-bytes': failed['validation_feedback_bytes']+=1
+        elif change == 'missing-feedback-identity':
+            failed.pop('validation_feedback_sha256'); failed.pop('validation_feedback_bytes')
+        elif change == 'missing-diagnostics': failed.pop('predecode_diagnostics')
+        elif change == 'duplicate-response': list.append(rows, deepcopy(response))
+        elif change == 'duplicate-validation': list.append(rows, deepcopy(failed))
+        else:
+            field = {'row-work':'work_id','row-revision':'work_reality_revision_id',
+                     'row-source':'source_revision','row-paths':'exact_target_paths'}[change]
+            failed[field] = ['wrong.html'] if field == 'exact_target_paths' else 'different-owner'
+        result = run_case(revision, ir, inventory, provider)
+        assert len(calls) == 1 and all(b.state == 'UNRESOLVED' for b in result)
+&gt;       assert result[0].formation_receipt['terminal_reason'] == 'OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
+E       AssertionError: assert 'OBLIGATION_F...FERENCE_DRIFT' == 'OBLIGATION_F...DENTITY_DRIFT'
+E         
+E         - OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT
+E         + OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT
+
+tests/test_c3_fulfillment_wire_feedback.py:211: AssertionError</failure></testcase><testcase classname="tests.test_c3_fulfillment_wire_feedback" name="test_feedback_drift_stops_before_another_model_request[duplicate-validation]" time="0.108"><failure message="AssertionError: assert 'OBLIGATION_F...FERENCE_DRIFT' == 'OBLIGATION_F...DENTITY_DRIFT'&#10;  &#10;  - OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT&#10;  + OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT">change = 'duplicate-validation'
+
+    @pytest.mark.parametrize('change', ('raw', 'raw-sha', 'raw-bytes', 'inventory', 'attempt',
+        'request-receipt', 'response-receipt', 'diagnostic-hash', 'violation', 'feedback',
+        'row-work', 'row-revision', 'row-source', 'row-paths', 'missing-diagnostics', 'duplicate-response', 'duplicate-validation',
+        'feedback-reorder', 'feedback-sha', 'feedback-bytes', 'missing-feedback-identity'))
+    def test_feedback_drift_stops_before_another_model_request(change):
+        revision, ir, inventory, plan = controlled_capacity_case()
+        provider, calls = provider_for_case(inventory, plan, checkpoint='first-validation')
+        with pytest.raises(Checkpoint): run_case(revision, ir, inventory, provider)
+        rows = provider._fulfillment_receipts
+        failed = next(r for r in rows if r['stage'] == 'CANDIDATE_VALIDATED')
+        response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+        diagnostics = failed['predecode_diagnostics']
+        if change == 'raw': response['candidate_output'] += ' '
+        elif change == 'raw-sha': response['candidate_output_sha256'] = '0'*64
+        elif change == 'raw-bytes': response['candidate_output_bytes'] += 1
+        elif change == 'inventory': diagnostics['binding']['inventory_fingerprint'] = '0'*64
+        elif change == 'attempt': diagnostics['binding']['attempt'] = 2
+        elif change == 'request-receipt': diagnostics['binding']['request_receipt_id'] = 'different-request'
+        elif change == 'response-receipt': diagnostics['binding']['response_receipt_id'] = 'different-response'
+        elif change == 'diagnostic-hash': diagnostics['diagnostic_fingerprint'] = '0'*64
+        elif change == 'violation': diagnostics['violations'][0]['referenced_source'] = 0
+        elif change == 'feedback': failed['validation_feedback'] += ' '
+        elif change == 'feedback-reorder': failed['validation_feedback'] = json.dumps(json.loads(failed['validation_feedback']),sort_keys=True)
+        elif change == 'feedback-sha': failed['validation_feedback_sha256']='0'*64
+        elif change == 'feedback-bytes': failed['validation_feedback_bytes']+=1
+        elif change == 'missing-feedback-identity':
+            failed.pop('validation_feedback_sha256'); failed.pop('validation_feedback_bytes')
+        elif change == 'missing-diagnostics': failed.pop('predecode_diagnostics')
+        elif change == 'duplicate-response': list.append(rows, deepcopy(response))
+        elif change == 'duplicate-validation': list.append(rows, deepcopy(failed))
+        else:
+            field = {'row-work':'work_id','row-revision':'work_reality_revision_id',
+                     'row-source':'source_revision','row-paths':'exact_target_paths'}[change]
+            failed[field] = ['wrong.html'] if field == 'exact_target_paths' else 'different-owner'
+        result = run_case(revision, ir, inventory, provider)
+        assert len(calls) == 1 and all(b.state == 'UNRESOLVED' for b in result)
+&gt;       assert result[0].formation_receipt['terminal_reason'] == 'OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
+E       AssertionError: assert 'OBLIGATION_F...FERENCE_DRIFT' == 'OBLIGATION_F...DENTITY_DRIFT'
+E         
+E         - OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT
+E         + OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT
+
+tests/test_c3_fulfillment_wire_feedback.py:211: AssertionError</failure></testcase></testsuite></testsuites>

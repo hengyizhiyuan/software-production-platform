@@ -1,0 +1,21 @@
+{
+  "candidate_fingerprint": "7a7d9e8d42943dba271e37b7a623359d6afbd9eb6370bd276da8487adfbc70d4",
+  "diagnostic_route_ordinals": [
+    1,
+    3
+  ],
+  "diagnostic_source_ordinals": [
+    0,
+    1
+  ],
+  "diagnostic_status": "UNREVIEWED_RISK_ONLY; NOT_A_VIOLATION_OR_REVIEW_VERDICT; NO_EDIT_OR_PASS",
+  "existing_feedback_reserialized_bytes": 65497,
+  "existing_feedback_stored_bytes": 65497,
+  "historical_validation_result": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+  "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+  "original_wire_sha256": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e",
+  "replay_kind": "READ_ONLY_HISTORICAL_FIRST_CANDIDATE; NOT_A_MODEL_RETRY_OR_REVIEW",
+  "updated_feedback_bytes": 66390,
+  "updated_feedback_sha256": "6503e481b0ebfe6f5a4cc6a5817a7f065dcbcf99981bcd1973ef731296b67ffb",
+  "wire_route_count": 32
+}

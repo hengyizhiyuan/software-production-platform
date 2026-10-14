@@ -1,0 +1,34 @@
+{
+  "recorded_at_utc": "2026-10-14T05:40:29.255610+00:00",
+  "image_id": "sha256:73da30f5567f5766b9767855c1e772fc5421d93a9da54f99a971db9d2f48ce53",
+  "qualification": "SOURCE_OVERLAY_PROTOTYPE; NOT_A_NEW_APPLICATION_IMAGE_OR_G0",
+  "source_sha256": {
+    "governed_obligations.py": "e64649a4a0012fb0f8696efbaa327a56e549059eabdef51dd0bfc09d8f3802f0",
+    "fulfillment_candidate.py": "0355d1522bbebf59bb517bebd3de9a9e2a8d9a9078789d3bae571432dc55a345",
+    "tests/test_c3_early_consumer_mapping_diagnostics.py": "acc890007a055c04b9d8ebaa7ca0cc055975805c81f6fc3ea98fa6ad13b4e1db"
+  },
+  "runs": [
+    {
+      "name": "prototype-focused",
+      "exit_code": 1,
+      "tests": 107,
+      "failures": [
+        "test_feedback_drift_stops_before_another_model_request[duplicate-response]",
+        "test_feedback_drift_stops_before_another_model_request[duplicate-validation]"
+      ],
+      "passed": 105,
+      "log_sha256": "85488f3806b0409520e7d5859fcee20203fb5fef06b367d1358e4c6d78defdb4"
+    },
+    {
+      "name": "unchanged-image-duplicate-controls",
+      "exit_code": 1,
+      "tests": 2,
+      "failures": [
+        "test_feedback_drift_stops_before_another_model_request[duplicate-response]",
+        "test_feedback_drift_stops_before_another_model_request[duplicate-validation]"
+      ],
+      "passed": 0,
+      "log_sha256": "4109ec204d1e464398e73870cf86a9aba84156ef2724f79f26d76f6ba008ef7f"
+    }
+  ]
+}
