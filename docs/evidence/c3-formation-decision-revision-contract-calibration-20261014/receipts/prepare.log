@@ -1,0 +1,41 @@
+{
+  "prototype": "ISOLATED_REQUEST_ONLY; NOT_INSTALLED_RUNTIME_CONTRACT",
+  "recorded_at_utc": "2026-10-14T05:57:43.329736+00:00",
+  "source_revision": "a5d7712e8978d9a26faa4ef8bb1379c22540d156",
+  "historical_receipts_sha256": "8eea94156781896350044e1c8635f76d648d3212c9a0663b27909ec2d7930d4f",
+  "inventory_file_sha256": "f890af6ea4a85e481b03ea0e638651a61c9513042ad88761f6049f41ea895e85",
+  "inventory_fingerprint": "b023bae819f456da05abe983f48da4f2157da60df412de909f9f834991bcef29",
+  "original_wire_sha256": "893f167cab558759ab2eb2a2a3664e2d57650e71a0077b2fcf6e5553928ebc4e",
+  "historical_attempt": 1,
+  "parent_request_receipt_id": "0895c20b-63a2-4215-90de-2fdec8ea95eb",
+  "parent_response_receipt_id": "66f53c9d-b2f7-4c9a-a4a7-ae3a3e001097",
+  "parent_validation_receipt_id": "9f11bb8c-618c-45fe-8f7b-fef91d07465d",
+  "prior_feedback_sha256": "6503e481b0ebfe6f5a4cc6a5817a7f065dcbcf99981bcd1973ef731296b67ffb",
+  "revised_feedback_sha256": "9a364b36536f8ca65bd12b407ab80efcd62e19d6f858c99ff651d769d6c1f88a",
+  "feedback_bytes_before": 66390,
+  "feedback_bytes_after": 68596,
+  "extension_fingerprint": "5440f129671601c319e5c52bf943019c2d76d41e2067b0c3934322c781f0f7ef",
+  "revision_original_route_ordinals": [
+    1,
+    3
+  ],
+  "old_repair_target_count": 4,
+  "revised_repair_target_count": 6,
+  "instructions_unchanged": true,
+  "output_schema_unchanged": true,
+  "original_feedback_and_preconditions_preserved": true,
+  "negative_controls_rejected": [
+    "raw-wire",
+    "inventory",
+    "diagnostic-route",
+    "parent-binding"
+  ],
+  "generation_input_sha256": "24dfae77d0c2afa2ef8023cd47759ce44775c9e8982cbd1b094f1b4fc617205d",
+  "generation_instructions_sha256": "63dd1838008364346588b0e83a4365bb0c7f09ce80a28a17aa2d53c423bee708",
+  "output_schema_fingerprint": "fc6afc4af5634c388ca17655e5c8d7830dce3bddee63817888cb9c4cb528890f",
+  "probe_script_sha256": "bf8117f61eac7d337507c8423d90292d1c076462ebb9f34b753ad7a508f2cb44",
+  "actual_source_module_sha256": {
+    "governed_obligations.py": "e64649a4a0012fb0f8696efbaa327a56e549059eabdef51dd0bfc09d8f3802f0",
+    "fulfillment_candidate.py": "0355d1522bbebf59bb517bebd3de9a9e2a8d9a9078789d3bae571432dc55a345"
+  }
+}

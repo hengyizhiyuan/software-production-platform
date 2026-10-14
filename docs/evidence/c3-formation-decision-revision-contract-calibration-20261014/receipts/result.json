@@ -1,0 +1,121 @@
+{
+  "recorded_at_utc": "2026-10-14T05:58:06.912077+00:00",
+  "preflight_extension_fingerprint": "5440f129671601c319e5c52bf943019c2d76d41e2067b0c3934322c781f0f7ef",
+  "logical_formation_calls": 1,
+  "review_calls": 0,
+  "profile": {
+    "model": "deepseek-flash",
+    "reasoning_effort": "none",
+    "max_output_tokens": 16384,
+    "timeout_seconds": 120
+  },
+  "new_work_created": false,
+  "historical_work_modified": false,
+  "decoded_candidate": false,
+  "failure": {
+    "type": "_FulfillmentWireReceiptIdentityError",
+    "code": "OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT"
+  },
+  "failed_predicates": [],
+  "provider": {
+    "request_id": "095fd0ac-7701-49c2-8c75-8de5bceb83a5",
+    "provider": "deepseek",
+    "requested_model": "deepseek-flash",
+    "effective_model": "deepseek-flash",
+    "usage": {
+      "input_tokens": 88853,
+      "output_tokens": 424,
+      "cached_tokens": 54528,
+      "reasoning_tokens": 0,
+      "total_tokens": 89277,
+      "unknown": false
+    },
+    "timing": {
+      "request_sent_seconds": 0.0027157070580869913,
+      "first_response_event_seconds": 0.4850166810210794,
+      "first_token_seconds": 1.4896161509677768,
+      "completed_seconds": 3.249419154948555
+    },
+    "transport_retry_count": 0,
+    "output_evidence": {
+      "provider_status": "completed",
+      "delta_sha256": "b5ff1b986992a1423eaf4b5ae65b6d21d88f2af77f6acf9e1743680ea35fbc90",
+      "delta_bytes": 1281,
+      "terminal_text_observed": true,
+      "terminal_sha256": "b5ff1b986992a1423eaf4b5ae65b6d21d88f2af77f6acf9e1743680ea35fbc90",
+      "terminal_bytes": 1281,
+      "selection": "TERMINAL_MATCHED_DELTA"
+    },
+    "validation_feedback_sha256": "9a364b36536f8ca65bd12b407ab80efcd62e19d6f858c99ff651d769d6c1f88a",
+    "generation_input_sha256": "24dfae77d0c2afa2ef8023cd47759ce44775c9e8982cbd1b094f1b4fc617205d",
+    "generation_instructions_sha256": "63dd1838008364346588b0e83a4365bb0c7f09ce80a28a17aa2d53c423bee708"
+  },
+  "response_sha256": "b5ff1b986992a1423eaf4b5ae65b6d21d88f2af77f6acf9e1743680ea35fbc90",
+  "response_bytes": 1281,
+  "edit_observation": {
+    "decision_outcomes": [
+      {
+        "original_route": 1,
+        "operation": "REPLACE",
+        "capability_before": "GIT_DIFF_SCOPE",
+        "capability_after": "GIT_DIFF_SCOPE",
+        "changed_fields": [
+          "component_quote",
+          "rationale"
+        ],
+        "fresh_rationale_sha256": "2d2ad649baf2807f64c22e58839bce88f6738a04be8ee3ea25733edfbbe9877e"
+      },
+      {
+        "original_route": 3,
+        "operation": "REPLACE",
+        "capability_before": "GIT_DIFF_SCOPE",
+        "capability_after": "GIT_DIFF_SCOPE",
+        "changed_fields": [
+          "component_quote",
+          "rationale"
+        ],
+        "fresh_rationale_sha256": "a9a68c9e7d25faafa14cce3daa7d43010823e94eab754fcddcf82e7ab77820a3"
+      }
+    ],
+    "replacement_ordinals": [
+      1,
+      3
+    ],
+    "removed_ordinals": [],
+    "appended_count": 0,
+    "retained_original_ordinals": [
+      0,
+      2,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "interpretation": "EDIT_OBSERVATION_ONLY; NO_SEMANTIC_CORRECTNESS_VERDICT"
+  },
+  "full_validator_review_admission_guardian": "NOT_EXECUTED; NO_PASS_GRANTED"
+}

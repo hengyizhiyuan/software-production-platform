@@ -1,0 +1,35 @@
+{
+  "actual_stop_owner": "WATT_CANDIDATE_CONSTRUCTION_PRECONDITION_RECONSTRUCTION",
+  "actual_failed_comparison": "candidate_construction_preconditions(base,inventory,feedback) != supplied_preconditions",
+  "changed_state_fields": [
+    "repair_targets"
+  ],
+  "supplied_target_count": 6,
+  "owner_rebuilt_target_count": 4,
+  "model_response_basis_matches_original": true,
+  "feedback_only_extension_matches_original_owner_projection": true,
+  "attribution": "REQUEST_ONLY_PROTOTYPE_WIRING_DEFECT; NOT_MODEL_BASIS_DRIFT_OR_VALIDATOR_FALSE_REJECTION",
+  "counterfactual_scope": "EXACT_SAVED_MODEL_OUTPUT_WITH_OWNER_REBUILT_PRECONDITIONS; DIFFERENT_REQUEST_CONTEXT; NOT_QUALIFIED_CANDIDATE",
+  "counterfactual_decode_result": {
+    "type": "_FulfillmentWireValidationError",
+    "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST"
+  },
+  "counterfactual_failed_predicates": [
+    {
+      "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "source": 3
+    },
+    {
+      "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "source": 4
+    },
+    {
+      "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "source": 10
+    },
+    {
+      "code": "OBLIGATION_COMPONENT_SOURCE_CONTRIBUTION_LOST",
+      "source": 11
+    }
+  ]
+}

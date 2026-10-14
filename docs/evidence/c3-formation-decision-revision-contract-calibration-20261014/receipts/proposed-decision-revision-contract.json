@@ -1,0 +1,45 @@
+{
+  "contract": "request-only-decision-revision-prototype-v1",
+  "parent_feedback_sha256": "6503e481b0ebfe6f5a4cc6a5817a7f065dcbcf99981bcd1973ef731296b67ffb",
+  "parent_binding_fingerprint": "f2da54019d6e40ca9bff853f322664fe0d6fdaba89f45d4405500b03faaac08a",
+  "diagnostic_fingerprint": "f2eafb17e2c627d3229af92f67ff845abff03ee6ec2ecb0dad2ea59872777553",
+  "decision_status": "REOPEN_REQUIRED; SEMANTIC_VALIDITY_UNKNOWN",
+  "invalidated_assumption": "THIS_OLD_CONSUMER_CHOICE_CAN_BE_PRESERVED_WITHOUT_REASSESSMENT",
+  "not_invalidated": "NO_CONSUMER_HAS_BEEN_DECLARED_WRONG_BY_THIS_RISK_DIAGNOSTIC",
+  "reason_ref": "owner_repair_context.consumer_mapping_diagnostics.question",
+  "reconsider_fields": [
+    "capability",
+    "current_fact_dependencies",
+    "target_paths",
+    "provenance_support_refs",
+    "rationale"
+  ],
+  "preserve": [
+    "original_source_identity_and_version",
+    "accepted_fact_relation_value_order_scope_qualifiers_authority",
+    "original_required_meaning_and_full_coverage",
+    "existing_permissions_and_gates",
+    "unrelated_lawful_decisions_unless_another_existing_failure_requires_edit"
+  ],
+  "observable_outcomes": {
+    "replace": "Propose a justified revised consumer and its dependent operands.",
+    "remove": "Remove an unjustified extra contribution only if required meaning remains covered.",
+    "retain": "You may keep this consumer after reassessment. Express the fresh method-to-meaning justification in its existing rationale through a same-choice replacement; this is a claim for Review, not evidence or PASS.",
+    "unresolved": "Keep uncertainty explicit under the existing contract if no lawful choice is established."
+  },
+  "requests": [
+    {
+      "original_route": 1,
+      "source_ref": "semantic-fact:f1baae6a-b455-523a-9a9a-5e180dc7618f",
+      "component_id": "7f9be2e6f3cfc7372c92f82cb78431afe7d1a81ba8433a87731438e335dbed62",
+      "original_route_fingerprint": "4e9c58f635495bd81cf86fb5d8d933dd2dbf65dad4baaa34939332c6339f6308"
+    },
+    {
+      "original_route": 3,
+      "source_ref": "semantic-fact:64507732-d7be-5aa0-90f8-6ec7ef76b488",
+      "component_id": "17696c29e9cde1515646aae8d546eeca8c5d6f161182349e2431dfa9e13be18f",
+      "original_route_fingerprint": "eb486dc75f3f5bf9e9c5b251b4cbb665b7a3ed10b5820c8082fc2498fd8c0649"
+    }
+  ],
+  "authority": "REPAIR_FOCUS_ONLY; NO_RECOMMENDED_CONSUMER_OR_NEW_VALIDITY_PREDICATE"
+}
