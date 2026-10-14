@@ -1,0 +1,44 @@
+{
+  "schema": "c3-semantic-boundary-calibration-evidence-v1",
+  "recorded_at_local": "2026-10-14 11:52:12 +08:00",
+  "code_commit": "f72707ab96ed67d167cd1dd26a8ddb55b716e323",
+  "code_tree": "8975640a56518a7bc5abc69dcab4a2c65c2b98e4",
+  "test_dependency_image": "sha256:73da30f5567f5766b9767855c1e772fc5421d93a9da54f99a971db9d2f48ce53",
+  "test_dependency_image_source": "d27707cb49558a0bc0071d9e3c4250fe88234427",
+  "test_method": "isolated Docker container; network none; changed source/test files mounted read-only over frozen test dependency image; no new application image qualification",
+  "targeted_regression": {
+    "test_files": [
+      "tests/test_c3_semantic_boundary_calibration.py",
+      "tests/test_c3_exclusion_content_correspondence.py",
+      "tests/test_c3_owner_repair_preconditions.py",
+      "tests/test_c3_source_role_contract.py",
+      "tests/test_c3_reviewer_contract_feedback.py",
+      "tests/test_c3_reviewed_fact_method_applicability.py"
+    ],
+    "passed": 161,
+    "failed": 0
+  },
+  "private_read_only_counterfactual": {
+    "ordinary41": {
+      "actual_final_source22_support_ordinals": [6],
+      "actual_final_source22_still_rejected": true,
+      "old_owner_support_pair_6_9_available": false,
+      "new_owner_support_pair_6_9_available": true,
+      "isolated_pair_6_9_method_state": "BOUND_PENDING_EVIDENCE",
+      "historical_final_predicate": "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
+    },
+    "ordinary34": {
+      "historical_false_source_ordinals": [0, 1, 3, 4, 11],
+      "historical_false_component_ordinals": [1, 3],
+      "current_validator_still_rejects_wrong_consumer": true,
+      "historical_final_predicate": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH"
+    }
+  },
+  "model_calls": 0,
+  "new_independent_review_calls": 0,
+  "historical_records_modified": false,
+  "holdout_used": false,
+  "production_changed": false,
+  "persisted_private_location": "/data/watt/ai-native-evolution-20261013/semantic-boundary-calibration-20261014",
+  "qualification_claim": "FOCUSED_CONTRACT_REGRESSION_AND_READONLY_HISTORICAL_COUNTERFACTUAL_ONLY; C3_PARTIAL"
+}
