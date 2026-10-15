@@ -29,11 +29,14 @@ _QUERY_SITES = os.environ.get('SPG_PERF_QUERY_SITES') == '1'
 
 def _query_site():
     import traceback
+    sites = []
     for frame in reversed(traceback.extract_stack()[:-3]):
         name = frame.filename.replace(os.sep, '/')
         if '/spg/' in name and '/persistence/' not in name and 'performance' not in name:
-            return f"{name.split('/spg/')[-1]}:{frame.lineno}:{frame.name}"
-    return 'unknown'
+            sites.append(f"{name.split('/spg/')[-1].replace('application/', '')}:{frame.lineno}:{frame.name}")
+            if len(sites) == 3:
+                break
+    return ' <- '.join(sites) or 'unknown'
 
 
 @dataclass

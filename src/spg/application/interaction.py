@@ -3428,13 +3428,14 @@ class WorkInteractionService:
         return self.get_shared_understanding(interaction_id)
 
     def get_assessment(self, assessment_id: UUID) -> InteractionAssessment:
-        # Assessment ids are intentionally resolved through their owning Interaction;
-        # this method is internal and keeps the store surface small.
-        for projection in self.list_interactions():
-            for assessment in self.assessment_history(projection.interaction.id):
-                if assessment.id == assessment_id:
-                    return assessment
-        raise InteractionRecordNotFound(f"Interaction assessment not found: {assessment_id}")
+        # Read the persisted assessment by id through the same store mapping that
+        # assessment_history uses; never project every Interaction to find one row
+        # (that scan grew with the system and cost ~10 s per Turn).
+        with self.database.unit_of_work() as uow:
+            assessment = InteractionStore(uow.session).assessment(assessment_id)
+        if assessment is None:
+            raise InteractionRecordNotFound(f"Interaction assessment not found: {assessment_id}")
+        return assessment
 
     def assessment_history(self, interaction_id: UUID) -> tuple[InteractionAssessment, ...]:
         with self.database.unit_of_work() as uow:
