@@ -8,6 +8,7 @@ from contextvars import ContextVar
 from dataclasses import dataclass, field
 from functools import wraps
 import logging
+import os
 from time import perf_counter
 from uuid import uuid4
 
@@ -21,11 +22,26 @@ def current_request_id():
     return None if observation is None else observation.request_id
 
 
+# Diagnostic only (SPG_PERF_QUERY_SITES=1): attribute each query to its nearest
+# application call site so N+1 patterns can be located. Off in normal operation.
+_QUERY_SITES = os.environ.get('SPG_PERF_QUERY_SITES') == '1'
+
+
+def _query_site():
+    import traceback
+    for frame in reversed(traceback.extract_stack()[:-3]):
+        name = frame.filename.replace(os.sep, '/')
+        if '/spg/' in name and '/persistence/' not in name and 'performance' not in name:
+            return f"{name.split('/spg/')[-1]}:{frame.lineno}:{frame.name}"
+    return 'unknown'
+
+
 @dataclass
 class Observation:
     request_id: str = field(default_factory=lambda: str(uuid4()))
     elapsed: dict = field(default_factory=dict)
     counts: dict = field(default_factory=dict)
+    query_sites: dict = field(default_factory=dict)
 
     def add(self, category, seconds):
         self.elapsed[category] = self.elapsed.get(category, 0) + seconds
@@ -38,7 +54,8 @@ class Observation:
             'counts': self.counts,
             'unmeasured': [k for k in ('model_provider','external_http','git','filesystem','subprocess',
                 'projection','serialization') if k not in self.elapsed],
-            'timing_semantics': 'inclusive spans; missing categories unknown; streaming total ends at last body'}
+            'timing_semantics': 'inclusive spans; missing categories unknown; streaming total ends at last body',
+            **({'query_sites': dict(sorted(self.query_sites.items(), key=lambda kv: -kv[1])[:15])} if self.query_sites else {})}
 
 
 @contextmanager
@@ -68,7 +85,11 @@ def observe_engine(engine):
     """A connection-local stack handles concurrent queries without SQL logging."""
     @event.listens_for(engine, 'before_cursor_execute')
     def before(connection, *_):
-        connection.info.setdefault('watt_query_times', []).append((_current.get(), perf_counter()))
+        observation = _current.get()
+        if _QUERY_SITES and observation is not None:
+            site = _query_site()
+            observation.query_sites[site] = observation.query_sites.get(site, 0) + 1
+        connection.info.setdefault('watt_query_times', []).append((observation, perf_counter()))
 
     def finish(connection, *_):
         stack = connection.info.get('watt_query_times', [])

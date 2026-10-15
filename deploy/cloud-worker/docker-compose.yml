@@ -93,6 +93,7 @@ services:
       <<: [*database-url, *runtime-state]
       SPG_APPLICATION_NAME: Watt Cloud Worker Runtime
       SPG_ADMIN_ENABLED: "true"
+      SPG_PERF_QUERY_SITES: ${SPG_PERF_QUERY_SITES:-0}
       SPG_ADMIN_NODE_ID: ${WATT_NODE_ID:?Set exact instance identity}
       SPG_ADMIN_REGION: ${WATT_NODE_REGION:?Set exact region}
       SPG_ADMIN_HOST_NAME: ${WATT_NODE_HOSTNAME:?Set observed hostname}
