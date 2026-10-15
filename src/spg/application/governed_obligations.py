@@ -124,8 +124,9 @@ def admitted_fulfillment_bindings(revision, assessment, *, provider=None,
     ir = assessment.semantic_ir
     if ir is None or getattr(ir, "legacy_typed_projection", False):
         return materialize_continuous_gates(revision, ir)
+    formation_round = formation_round_for(database, revision, source_revision)[0] if provider is not None else 1
     inventory = fulfillment_inventory(revision, ir, source_revision=source_revision,
-                                      exact_target_paths=exact_target_paths)
+                                      exact_target_paths=exact_target_paths, formation_round=formation_round)
     source_failure = admitted_clause_source_failure(revision, ir, database=database)
     if source_failure is not None:
         return unresolved_projection(revision, ir, inventory, reason=source_failure)
@@ -138,7 +139,7 @@ def admitted_fulfillment_bindings(revision, assessment, *, provider=None,
         return typed
     return form_fulfillment_projection(revision, ir, provider=provider,
         database=database, source_revision=source_revision,
-        exact_target_paths=exact_target_paths)
+        exact_target_paths=exact_target_paths, formation_round=formation_round)
 
 
 def validate_continuous_gates(bindings, revision, ir, *, source_revision=None, exact_target_paths=()) -> None:
@@ -580,7 +581,8 @@ def _reviewed_background_clause_retained(revision, ir, item_id, clause_id, bindi
         if receipt.get("capabilities_fingerprint") != canonical_fingerprint(fulfillment_capability_contracts()):
             return False
         inventory = fulfillment_inventory(revision, ir, source_revision=first.source_revision,
-            exact_target_paths=tuple(receipt.get("exact_target_paths", ())))
+            exact_target_paths=tuple(receipt.get("exact_target_paths", ())),
+            formation_round=receipt.get("formation_round", 1))
         inverse = {value: key for key, value in FULFILLMENT_CAPABILITIES.items()}
         from spg.domain.governed_obligation import FulfillmentRouteCandidate
         routes = tuple(FulfillmentRouteCandidate(source_ref=fulfillment_source_ref(binding),
@@ -663,8 +665,13 @@ def admitted_clause_source_failure(revision, ir, *, database=None, records=None)
     return None
 
 
-def fulfillment_inventory(revision, ir, *, source_revision=None, exact_target_paths=()):
-    """Full immutable source basis; the model only proposes how it is consumed."""
+def fulfillment_inventory(revision, ir, *, source_revision=None, exact_target_paths=(), formation_round=1):
+    """Full immutable source basis; the model only proposes how it is consumed.
+
+    A later Formation round (see formation_round_for) is part of the basis, so
+    each round owns a distinct inventory and its own unchanged two-candidate
+    budget. Round 1 keeps the historical basis byte for byte.
+    """
     sources = []
     for fact in revision.engineering_semantic_facts:
         if not fact.is_current:
@@ -722,7 +729,82 @@ def fulfillment_inventory(revision, ir, *, source_revision=None, exact_target_pa
         "context_facts": list(getattr(revision, "context_facts", ())),
         "exact_target_paths": list(target_paths),
         "production_intents": [goal.model_dump(mode="json") for goal in ir.current_production]}
+    if formation_round != 1:
+        if type(formation_round) is not int or not 1 < formation_round <= FORMATION_MAX_ROUNDS:
+            raise ValueError("OBLIGATION_FORMATION_ROUND_INVALID")
+        basis["formation_round"] = formation_round
     return {**basis, "inventory_fingerprint": canonical_fingerprint(basis)}
+
+
+# Bounded Formation rounds. A round ends with one durable stop observation; the
+# next round is a new inventory with the same two-candidate budget. Transient
+# Provider/transport outcomes and stochastic candidate defects may start a new
+# round; identity, source, capability and capacity stops never do.
+FORMATION_MAX_ROUNDS = 4
+FORMATION_MAX_TRANSIENT_RETRIES = 3
+FORMATION_MAX_GENERATOR_RETRIES = 1
+FORMATION_RETRY_WINDOW_SECONDS = 3600
+
+
+def formation_stop_kind(reason):
+    if not isinstance(reason, str):
+        return None
+    if reason.startswith("OBLIGATION_FORMATION_TRANSPORT_") or reason == "OBLIGATION_FORMATION_PENDING_OUTCOME_UNKNOWN":
+        return "TRANSIENT"
+    if (reason.startswith(("OBLIGATION_PROJECTION_", "OBLIGATION_SEMANTIC_", "OBLIGATION_COMPONENT_"))
+            or reason == "OBLIGATION_FORMATION_BUDGET_EXHAUSTED"):
+        return "GENERATOR"
+    return None
+
+
+def formation_retry_decision(stops, *, now):
+    """(round to use now, kind of the latest stop, retry permitted) from ordered stops.
+
+    `stops` are (created_at, terminal_reason) for distinct ended rounds of one
+    Work revision and source, oldest first. Pure: the same persisted stops give
+    the same answer after a restart.
+    """
+    if not stops:
+        return 1, None, False
+    kinds = [formation_stop_kind(reason) for _, reason in stops]
+    latest_at, latest_kind = stops[-1][0], kinds[-1]
+    permitted = bool(
+        latest_kind is not None
+        and len(stops) < FORMATION_MAX_ROUNDS
+        and kinds.count("TRANSIENT") <= FORMATION_MAX_TRANSIENT_RETRIES
+        and kinds.count("GENERATOR") <= FORMATION_MAX_GENERATOR_RETRIES
+        and (now - latest_at).total_seconds() <= FORMATION_RETRY_WINDOW_SECONDS)
+    return (len(stops) + 1 if permitted else len(stops)), latest_kind, permitted
+
+
+def formation_round_stops(database, revision, source_revision):
+    """Distinct ended rounds (one per inventory) for this exact Work revision and source."""
+    if database is None:
+        return ()
+    from sqlalchemy import select
+    from spg.infrastructure.persistence.runtime_schema import governance_records
+    with database.unit_of_work() as uow:
+        rows = uow.session.execute(select(governance_records.c.created_at, governance_records.c.scope).where(
+            governance_records.c.decision_type == "WORK_FULFILLMENT_STOP_OBSERVATION",
+            governance_records.c.authority_identity == "work-governance:derived-candidate-observation",
+            governance_records.c.scope["work_id"].astext == str(revision.work_id),
+            governance_records.c.scope["work_reality_revision_id"].astext == str(revision.id),
+            governance_records.c.scope["source_revision"].astext == str(source_revision),
+        ).order_by(governance_records.c.created_at)).all()
+    seen, stops = set(), []
+    for created_at, scope in rows:
+        inventory = scope.get("inventory_fingerprint")
+        if inventory in seen:
+            continue
+        seen.add(inventory)
+        stops.append((created_at, scope.get("terminal_reason")))
+    return tuple(stops)
+
+
+def formation_round_for(database, revision, source_revision, *, now=None):
+    from datetime import UTC, datetime
+    stops = formation_round_stops(database, revision, source_revision)
+    return formation_retry_decision(stops, now=now or datetime.now(UTC))
 
 
 def _capability_tuple(name):
@@ -1496,7 +1578,8 @@ def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=N
     if first.source_revision != expected_source:
         raise ValueError("OBLIGATION_PROJECTION_SOURCE_REVISION_DRIFT")
     inventory = fulfillment_inventory(revision, ir, source_revision=expected_source,
-                                     exact_target_paths=exact_target_paths)
+                                     exact_target_paths=exact_target_paths,
+                                     formation_round=(first.formation_receipt or {}).get("formation_round", 1))
     inverse = {route: key for key, route in FULFILLMENT_CAPABILITIES.items()}
     from spg.domain.governed_obligation import FulfillmentRouteCandidate
     routes = []
@@ -3790,10 +3873,10 @@ def _review_fulfillment_candidate(provider, candidate, inventory, recorder, atte
 
 
 def form_fulfillment_projection(revision, ir, *, provider, database=None,
-                                source_revision=None, exact_target_paths=()):
+                                source_revision=None, exact_target_paths=(), formation_round=1):
     arguments = dict(provider=provider, database=database,
         source_revision=source_revision, exact_target_paths=exact_target_paths,
-        _started=monotonic())
+        formation_round=formation_round, _started=monotonic())
     try:
         return _form_fulfillment_projection(revision, ir, **arguments)
     except FulfillmentReceiptCapacityStop:
@@ -3853,10 +3936,10 @@ def _unresolved_bindings_have_owner_methods(candidate, revision, ir, inventory, 
 
 
 def _form_fulfillment_projection(revision, ir, *, provider, database=None,
-                                source_revision=None, exact_target_paths=(), _started=None):
+                                source_revision=None, exact_target_paths=(), formation_round=1, _started=None):
     """Two cumulative candidates on one basis, with recoverable Owner receipts."""
     inventory = fulfillment_inventory(revision, ir, source_revision=source_revision,
-                                      exact_target_paths=exact_target_paths)
+                                      exact_target_paths=exact_target_paths, formation_round=formation_round)
     if not hasattr(provider, "_fulfillment_receipts"):
         provider._fulfillment_receipts = []
     recorder = FulfillmentFormationReceipts(revision, inventory, database=database,
@@ -3892,6 +3975,9 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
             "unresolved_source_refs": [] if passed else [source["source_ref"] for source in inventory["sources"]],
             "elapsed_seconds": monotonic() - started,
             "meaning": "derived binding only; no evidence PASS, authority or effect"}
+        if inventory.get("formation_round", 1) != 1:
+            # Consumers rebuild this exact inventory from the admitted bindings.
+            receipt["formation_round"] = inventory["formation_round"]
         first_request = next((r for r in rows if r["stage"] == "MODEL_REQUEST_PENDING"), None)
         if ((first_request or {}).get("owner_source_preconditions") or {}).get(
                 "candidate_construction_contract") in {

@@ -579,11 +579,17 @@ class PlanSteeringDriver:
             try:
                 result = self.iterate(work_id)
             except FulfillmentProjectionNotReady as error:
-                # The formation Owner already ended this exact basis. A stop
-                # observation is neither a new refinement attempt nor a Provider
-                # retry/permission decision, and cannot consume/reset its budget.
-                LOGGER.warning("Steering fulfillment admission blocked Work=%s observation=%s",
-                               work_id, error.observation_id)
+                # The formation Owner ended this exact round. A transient or
+                # stochastic stop may open the next bounded round (a new
+                # inventory with the same two-candidate budget); otherwise the
+                # stop stays projected as BLOCKED for the Human.
+                LOGGER.warning("Steering fulfillment admission blocked Work=%s observation=%s reason=%s",
+                               work_id, error.observation_id, error.scope.get("terminal_reason"))
+                if self._schedule_formation_round(work_id, error.scope):
+                    return SteeringActivationResult(work_id=work_id,
+                        iterations_executed=iterations,
+                        stop_reason=SteeringDriverStopReason.CAPABILITY_UNAVAILABLE,
+                        last_action=last_action)
                 return SteeringActivationResult(work_id=work_id,
                     iterations_executed=iterations, stop_reason=SteeringDriverStopReason.BLOCKED,
                     last_action=last_action)
@@ -1879,6 +1885,38 @@ class PlanSteeringDriver:
             return latest[0].expected_reality.get("work_revision_id") == (
                 None if revision is None else str(revision.id)
             )
+
+    def _schedule_formation_round(self, work_id: UUID, stop_scope: dict) -> bool:
+        """Open the next bounded Formation round after a retryable stop.
+
+        The decision is a pure function of persisted stop observations, so it
+        is the same after a restart. Transient stops wait with the existing
+        Provider backoff; a stochastic candidate defect starts its single fresh
+        round promptly. Each round is recorded in Work convergence.
+        """
+        from spg.application.governed_obligations import formation_round_for
+        from spg.infrastructure.persistence.product_store import ProductStore
+        with self.database.unit_of_work() as uow:
+            revision = ProductStore(uow.session).current_work_reality_revision(work_id)
+        if revision is None or str(revision.id) != stop_scope.get("work_reality_revision_id"):
+            return False
+        next_round, kind, permitted = formation_round_for(
+            self.database, revision, stop_scope.get("source_revision"))
+        if not permitted:
+            return False
+        # Traced in Work convergence, but not as a no-progress failure: rounds are
+        # already bounded by FORMATION_MAX_ROUNDS and must not trip the breaker.
+        self._observe_convergence(work_id, failed=False, boundary="FORMATION",
+            failure_signature=f"formation-round:{next_round}:{kind}")
+        LOGGER.info("Steering Formation round scheduled Work=%s round=%s after=%s",
+                    work_id, next_round, kind)
+        if kind == "GENERATOR":
+            self.schedule(work_id)
+        else:
+            with self._condition:
+                self._provider_retry_attempts[work_id] = next_round - 1
+            self._schedule_provider_retry(work_id)
+        return True
 
     def _provider_failure_is_retryable(self, work_id: UUID) -> bool:
         with self._condition:
