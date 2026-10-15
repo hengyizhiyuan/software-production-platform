@@ -87,6 +87,7 @@ product = (result.get("product") or {}).get("id")
 interaction = result.get("interaction_id")
 state.update(product=product, interaction=interaction)
 seen_turns, answered, previewed, authorized, published, accepted = set(), set(), False, set(), set(), set()
+answered_turns = set()
 previous = None
 while time.time() - start < args.deadline:
     conversation, _, _ = api("GET", f"/api/experience/interactions/{interaction}")
@@ -103,6 +104,15 @@ while time.time() - start < args.deadline:
         state["last_reply"] = replies[-1].get("content")
         mark("watt_reply", chars=len(state["last_reply"]), text=state["last_reply"][:600])
     work_id = conversation.get("current_work_id")
+    turns = conversation.get("turns", [])
+    if (not work_id and conversation.get("readiness") == "NOT_READY" and turns
+            and all(t.get("status") in {"COMPLETED", "FAILED"} for t in turns)
+            and len(turns) not in answered_turns and time.time() - last_change > 10):
+        # Watt asked in conversation (not as a typed Attention): accept its recommendation once.
+        answered_turns.add(len(turns))
+        out, _, code = api("POST", f"/api/experience/products/{product}/turns",
+            {"text": args.answer, "interaction_id": interaction})
+        mark("answered_conversation", turns=len(turns), http=code)
     if work_id and state.get("work") != work_id:
         state["work"] = work_id
         mark("work_admitted", work=work_id)
