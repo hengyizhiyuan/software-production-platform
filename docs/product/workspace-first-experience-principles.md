@@ -276,6 +276,21 @@ migration ownership.
 
 ## 11. Workspace Four-Quadrant Invariant
 
+> **Human Governor correction — 2026-10-15.** The semantics below were drifted:
+> the 2026-10-01 text kept the 2×2 grid but redefined its surfaces (Reality as a
+> status list, Code Assets moved out, Executor/Guardian activity reduced to one
+> sentence). The Human Governor restates the authoritative four quadrants:
+>
+> | | Left | Right |
+> |---|---|---|
+> | Top | **设计文档 / 代码** — before production: the guided design framework (topics, status, current focus, Watt-decided items, "以当前方案进入生产"); during and after production: the resulting design document and code (tree, diff, preview entry) | **执行 Agenda** — Plan Steering's execution agenda: stages and steps, where Work is now, what comes next and why, including re-planning from problem routing |
+> | Bottom | **人工操作** — only items that genuinely need the Human, each with its prompt and action buttons (material questions, controlled-authorization revoke, credentials/permissions, acceptance) | **生产状态** — live Executor activity (PWU, step, tool activity, progress, recovery) and Guardian activity (checking, gate, findings, repair progress) |
+>
+> Narrow screens stack 设计文档/代码 → 执行 Agenda → 人工操作 → 生产状态.
+> Conversation stays a subordinate surface outside the grid. This correction
+> supersedes the surface semantics of the table that follows; the immutability
+> rule (explicit Human Governor approval for structural change) still applies.
+
 `WORKSPACE_FOUR_QUADRANT_LAYOUT_IMMUTABLE = TRUE` is a permanent Human Governor
 product decision. The primary desktop Workspace is one two-by-two structure in
 this exact semantic and spatial order:
@@ -301,3 +316,16 @@ order, desktop placement, or primary status of any quadrant requires **explicit
 Human Governor approval**. Silence or a feature integration request is not
 approval. This constraint applies to future refactors, themes, integrations,
 responsive work and framework migrations.
+
+## 12. Conversation placement (restored — Human Governor, 2026-10-15)
+
+The Composer and Current Interaction follow the approved
+[Calibration Notes §18 and §21.2](watt-core-workspace-experience-calibration-notes.md#18-transient-current-interaction-layer):
+the Composer is a one-line dock at the bottom of the central Workspace that
+expands upward on focus and collapses after submission; the just-submitted
+Human turn and Watt's streaming reply stay together in the central Current
+Interaction; after a reading grace period (paused on hover, focus, selection or
+expansion) the pair calmly fades out of the center and fades into the right
+Conversation History, in order and exactly once. The right rail holds history
+and provenance only — no primary Composer. Governed effects remain in the four
+quadrants after the wording settles into history.
