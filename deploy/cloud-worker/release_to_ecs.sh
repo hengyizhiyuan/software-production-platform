@@ -48,9 +48,10 @@ else
   printf 'WATT_REVISION=%s\n' "$revision" >> "$runtime/.env"
 fi
 cd "$runtime"
-docker compose config --quiet
-docker compose run --rm --no-deps migrate
-docker compose up -d --no-build --force-recreate api native-coordinator native-tool-host native-worker
+compose=(docker compose -p watt-cloud-worker -f "$runtime/docker-compose.yml")
+"${compose[@]}" config --quiet
+"${compose[@]}" run --rm --no-deps migrate
+"${compose[@]}" up -d --no-build --force-recreate api native-coordinator native-tool-host native-worker
 for _ in $(seq 1 120); do
   if curl -fsS http://127.0.0.1:8080/health >/dev/null 2>&1; then break; fi
   sleep 3
