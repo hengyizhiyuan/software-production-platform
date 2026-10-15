@@ -176,6 +176,42 @@ def _validate_human_decision_boundaries(candidate, basis):
                 raise IntentRealizationViolation("HUMAN_DECISION_OPTION_UNGROUNDED")
 
 
+def bind_recommendation_acceptance(candidate: TurnSemanticCandidate, basis) -> TurnSemanticCandidate:
+    """Bind a Human acceptance to the one pending recommendation the system already holds.
+
+    Accepting the pending proposal used to require the model to reproduce the
+    prior IR id and paste the proposal text into the goal scope verbatim; it
+    could not do so reliably (G8, 2026-10-15: 18 of 23 repair failures), so a
+    plain "好，就按你说的" failed the whole Turn. The prior IR and its proposal are
+    persisted facts, so the system writes those two copies itself. Everything
+    the validator decides stays as strict: the acceptance must still carry
+    HUMAN_EXPLICIT provenance from the current Human record, the prior IR must
+    be the latest one with GUIDANCE_REQUIRED, and the accepted goal must keep a
+    proposed objective with an unchanged source meaning. A candidate that is
+    not an acceptance, or that names no proposed objective, is returned as is.
+    """
+    sufficiency = candidate.production_sufficiency
+    acceptance = None if sufficiency is None else sufficiency.recommendation_acceptance
+    if acceptance is None:
+        return candidate
+    history = getattr(basis, "governed_semantic_history", ())
+    previous = next((ir for ir in reversed(history) if ir.production_sufficiency), None)
+    if (previous is None or previous.production_sufficiency.status != "GUIDANCE_REQUIRED"
+            or not previous.production_sufficiency.proposal):
+        return candidate
+    proposal = previous.production_sufficiency.proposal
+    proposed = {item.production.objective for item in previous.items if item.production}
+    items = tuple(
+        item.model_copy(update={"production": item.production.model_copy(update={
+            "scope": (*item.production.scope, proposal)})})
+        if (item.production is not None and item.production.current
+            and item.production.objective in proposed and proposal not in item.production.scope)
+        else item
+        for item in candidate.items)
+    return candidate.model_copy(update={"items": items, "production_sufficiency": sufficiency.model_copy(
+        update={"recommendation_acceptance": acceptance.model_copy(update={"value": str(previous.id)})})})
+
+
 def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tuple[SemanticItem, ...]:
     _validate_human_decision_boundaries(candidate, basis)
     records = {r.id: r for r in basis.records}

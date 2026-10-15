@@ -276,6 +276,8 @@ class DeepSeekInteractionSemanticCapability:
                 if payload.semantic_intent is not None:
                     semantic, facts, removed = _discard_unbound_supersession(
                         payload.semantic_intent, payload.semantic_fact_candidates, basis)
+                    from spg.application.intent_realization import bind_recommendation_acceptance
+                    semantic = bind_recommendation_acceptance(semantic, basis)
                     payload = payload.model_copy(update={
                         "semantic_intent": semantic, "semantic_fact_candidates": facts})
                     self.last_structured_repair_count += int(bool(removed))

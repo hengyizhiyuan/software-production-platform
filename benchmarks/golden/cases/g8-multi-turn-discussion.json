@@ -1,0 +1,14 @@
+{
+  "case": "G8-team-standup-tool",
+  "purpose": "Multi-turn product discussion: keeps moving toward a buildable plan, no drift, no contradiction of confirmed decisions.",
+  "turns": [
+    "我想做一个新产品，给小团队用的每日站会小工具，先聊聊方案，暂时不要开工。",
+    "团队大概 5 到 8 个人，每个人每天填三项：昨天做了什么、今天打算做什么、有什么阻碍。",
+    "不需要账号登录，打开网页就能填，数据先只保存在浏览器本地就行。",
+    "等一下，我想了想，还是希望大家能看到彼此填的内容，但仍然不要登录。你觉得怎么做最简单？",
+    "好，就按你说的。另外界面要尽量简单，一页就够，不要多个页面。",
+    "我们前面确定的范围是什么？帮我完整复述一下，包括我改过主意的地方。",
+    "确认这个方案，可以开工了。"
+  ],
+  "product_name": "团队站会"
+}

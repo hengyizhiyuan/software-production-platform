@@ -225,3 +225,56 @@ def test_workspace_exposes_concrete_outcome_choice_without_authority_template():
     words=validate_wording(projection,safe_wording(projection))
     assert words.decisions[0].question==QUESTION and PROPOSAL in words.decisions[0].why_now
     assert '明确授权' not in words.decisions[0].question
+
+
+def _bound(answer, prior, *, provenance=None, objective='开发工律官网', scope=()):
+    """What the semantic Provider admits: the model's acceptance, then the system binding."""
+    from spg.application.intent_realization import bind_recommendation_acceptance
+    accepted = SemanticArgument(value='model-did-not-copy-the-id', provenance=provenance or SemanticProvenance(
+        origin=SemanticOrigin.HUMAN_EXPLICIT, source_record_id=answer.id, source_text=answer.content))
+    raw = meaning(answer, ProductionSufficiency(status='READY', reason='当前 Human 接受了上一轮建议并补充一条约束',
+        recommendation_acceptance=accepted), scope=scope)
+    raw = raw.model_copy(update={'items': (raw.items[0].model_copy(update={'production':
+        raw.items[0].production.model_copy(update={'objective': objective})}),)})
+    basis = SimpleNamespace(governed_semantic_history=(prior,))
+    return bind_recommendation_acceptance(raw, basis)
+
+
+def test_acceptance_is_bound_by_the_system_without_the_model_copying_id_or_proposal():
+    # G8 2026-10-15: "好，就按你说的。另外一页就够" failed the Turn because the model
+    # could not reproduce the prior IR id and proposal text verbatim.
+    first = _record('我要开发一个工律的官网'); prior = govern(meaning(first, guidance()), first)
+    answer = _record('好，就按你说的。另外一页就够', identity=2, sequence=2)
+    bound = _bound(answer, prior, scope=('单页',))
+    current = govern(bound, answer, history=(prior,))
+    _, _, readiness = projected(current, answer)
+    assert readiness.status.value == 'READY'
+    assert current.current_production[0].scope == ('单页', PROPOSAL)
+    assert current.production_sufficiency.recommendation_acceptance.value == str(prior.id)
+
+
+@pytest.mark.parametrize('problem', ['old-human', 'model', 'different-objective'])
+def test_system_binding_never_creates_authority_the_validator_would_reject(problem):
+    first = _record('我要开发一个工律的官网'); prior = govern(meaning(first, guidance()), first)
+    answer = _record('按你的建议来', identity=2, sequence=2)
+    provenance = (SemanticProvenance(origin=SemanticOrigin.MODEL_CANDIDATE, evidence_reference='compiler:inference')
+        if problem == 'model' else SemanticProvenance(origin=SemanticOrigin.HUMAN_EXPLICIT,
+            source_record_id=first.id if problem == 'old-human' else answer.id,
+            source_text=first.content if problem == 'old-human' else answer.content))
+    bound = _bound(answer, prior, provenance=provenance,
+                   objective='开发一个完全不同的产品' if problem == 'different-objective' else '开发工律官网')
+    with pytest.raises(IntentRealizationViolation):
+        govern(bound, answer, history=(prior,))
+
+
+def test_binding_leaves_candidates_without_acceptance_or_pending_guidance_unchanged():
+    from spg.application.intent_realization import bind_recommendation_acceptance
+    first = _record('我要开发一个工律的官网'); prior = govern(meaning(first, guidance()), first)
+    answer = _record('换个方向，先做客户后台', identity=2, sequence=2)
+    plain = meaning(answer, ProductionSufficiency(status='READY', reason='Human 选择了另一个具体方向，重新评估'))
+    assert bind_recommendation_acceptance(plain, SimpleNamespace(governed_semantic_history=(prior,))) is plain
+    accepted = _bound(answer, prior)
+    no_pending = bind_recommendation_acceptance(accepted.model_copy(update={'production_sufficiency':
+        accepted.production_sufficiency.model_copy(update={'recommendation_acceptance': accepted.production_sufficiency
+            .recommendation_acceptance.model_copy(update={'value': 'x'})})}), SimpleNamespace(governed_semantic_history=()))
+    assert no_pending.production_sufficiency.recommendation_acceptance.value == 'x'
