@@ -72,7 +72,7 @@ def test_ui_01_02_19_root_app_and_installed_assets_are_available() -> None:
     with _client() as client:
         root = client.get("/", follow_redirects=False)
         assert root.status_code == 200
-        assert '/assets/experience.js?v=3' in root.text
+        assert '/assets/experience.js?v=4' in root.text
         assert '/assets/cloud_delivery.js?v=5' in root.text
 
         page = client.get("/app")
@@ -554,3 +554,11 @@ def test_self_refine_work_and_platform_views_are_wired_to_durable_api() -> None:
     assert '/api/works/{work_id}/self-refine' in api
     assert '/api/self-refine/{event_id}' in api
     assert '@api.get("/api/self-refine")' in api
+
+
+def test_work_event_stream_is_explicitly_unavailable_without_postgres_notifications() -> None:
+    # Non-PostgreSQL runtimes keep the polling fallback; the stream must not hang.
+    with _client() as client:
+        response = client.get("/api/experience/works/00000000-0000-0000-0000-000000000001/events")
+        assert response.status_code == 503
+        assert response.json()["code"] == "WORK_EVENTS_UNAVAILABLE"

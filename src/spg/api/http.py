@@ -419,8 +419,18 @@ def create_http_application(
 
         selected_interaction.configure_work_execution_reality(execution_reality)
 
+    # Push Work changes to workspace streams (PostgreSQL only; tests on other
+    # stores keep the polling fallback).
+    work_changes = None
+    database_url = getattr(settings, "database_url", None)
+    if isinstance(database_url, str) and database_url.startswith("postgresql"):
+        from spg.infrastructure.work_changes import WorkChangeHub
+        work_changes = WorkChangeHub(database_url)
+
     @asynccontextmanager
     async def lifespan(_application: FastAPI):
+        if work_changes is not None:
+            work_changes.start()
         if getattr(settings, "admin_enabled", False):
             admin_operations.start()
         restore_repository_actions = getattr(asset_service, "restore_interaction_actions", None)
@@ -451,6 +461,8 @@ def create_http_application(
         try:
             yield
         finally:
+            if work_changes is not None:
+                work_changes.stop()
             experience.human_visible.shutdown()
             if getattr(settings, "admin_enabled", False):
                 admin_operations.shutdown()
@@ -1503,6 +1515,31 @@ def create_http_application(
     @api.get("/api/experience/products/{product_id}")
     def experience_product(product_id: UUID, http_request: Request):
         return experience.product(getattr(http_request.state, "actor_id", ACTOR_ID), product_id)
+
+    @api.get("/api/experience/works/{work_id}/events")
+    async def experience_work_events(work_id: UUID, request: Request) -> StreamingResponse:
+        """Signal each committed change of one Work; the client re-reads its projection."""
+        if work_changes is None:
+            raise ProductHttpError(503, "WORK_EVENTS_UNAVAILABLE", "Work change events are unavailable")
+        queue = work_changes.subscribe(work_id)
+
+        async def stream():
+            try:
+                yield "retry: 3000\nevent: work.ready\ndata: {}\n\n"
+                while not await request.is_disconnected():
+                    try:
+                        await asyncio.wait_for(queue.get(), timeout=15)
+                    except TimeoutError:
+                        yield ": keep-alive\n\n"
+                        continue
+                    yield "event: work.changed\ndata: " + json.dumps({"work_id": str(work_id)}) + "\n\n"
+                    # Coalesce bursts of row writes into one re-read per short window.
+                    await asyncio.sleep(0.3)
+            finally:
+                work_changes.unsubscribe(work_id, queue)
+
+        return StreamingResponse(stream(), media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
     @api.get("/api/experience/products/{product_id}/workspace")
     def experience_workspace(product_id: UUID, http_request: Request,

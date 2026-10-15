@@ -90,3 +90,67 @@ test('polling remains only as the fallback without EventSource', () => {
   assert.equal(h.sources.length, 0);
   assert.deepEqual(h.timers, [2600]);
 });
+
+const workStart = script.indexOf('  // Committed Work changes are pushed;');
+const workEnd = script.indexOf('  async function renderWorkspaceConversation(id) {');
+const workStreaming = script.slice(workStart, workEnd);
+
+function workHarness() {
+  const sources = [], renders = [];
+  class FakeEventSource {
+    constructor(url) { this.url = url; this.readyState = 1; this.listeners = {}; sources.push(this); }
+    addEventListener(name, fn) { (this.listeners[name] ||= []).push(fn); }
+    emit(name) { for (const fn of this.listeners[name] || []) fn({data: '{}'}); }
+    close() { this.readyState = 2; this.closed = true; }
+  }
+  FakeEventSource.CLOSED = 2;
+  let release;
+  const context = {state: {routeEpoch: 1, timer: 7}, EventSource: FakeEventSource, encodeURIComponent,
+    clearTimeout() {}, showNotice() {},
+    renderWorkspace: (id) => { renders.push([id, context.state.pushedRender]); return new Promise(r => { release = r; }); }};
+  vm.createContext(context);
+  vm.runInContext(workStreaming, context);
+  return {context, sources, renders, release: () => release()};
+}
+
+test('a Work is watched over one push stream that survives re-renders', () => {
+  const h = workHarness();
+  h.context.watchWork('p1', 'w1');
+  h.context.watchWork('p1', 'w1');
+  assert.equal(h.sources.length, 1);
+  assert.equal(h.sources[0].url, '/api/experience/works/w1/events');
+  h.sources[0].emit('work.ready');
+  assert.equal(h.context.state.timer, null);
+});
+
+test('change bursts coalesce into one in-flight re-render plus one follow-up', async () => {
+  const h = workHarness();
+  h.context.watchWork('p1', 'w1');
+  const source = h.sources[0];
+  source.emit('work.changed'); source.emit('work.changed'); source.emit('work.changed');
+  assert.equal(h.renders.length, 1);
+  assert.equal(h.renders[0][1], true);
+  h.release(); await new Promise(r => setImmediate(r));
+  assert.equal(h.renders.length, 2);
+});
+
+test('a reconnected stream re-reads once to cover changes missed while down', () => {
+  const h = workHarness();
+  h.context.watchWork('p1', 'w1');
+  const source = h.sources[0];
+  source.emit('work.ready');
+  assert.equal(h.renders.length, 0);
+  source.onerror();
+  source.emit('work.ready');
+  assert.equal(h.renders.length, 1);
+});
+
+test('switching Work or leaving closes the previous stream', () => {
+  const h = workHarness();
+  h.context.watchWork('p1', 'w1');
+  h.context.watchWork('p1', 'w2');
+  assert.equal(h.sources[0].closed, true);
+  h.context.closeWorkStream();
+  assert.equal(h.sources[1].closed, true);
+  assert.equal(h.context.state.workStream, null);
+});

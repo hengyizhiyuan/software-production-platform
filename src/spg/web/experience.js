@@ -202,6 +202,7 @@
     return `<section class="workspace-quadrant" data-workspace-quadrant="production" aria-labelledby="workspace-production-title"><div class="quadrant-heading"><p class="eyebrow">04 / 推进</p><h2 id="workspace-production-title">Watt 正在做</h2><p>Watt 当前正在做什么？</p></div><p class="production-current">${esc(focus.now)}</p><p class="production-explanation">${esc(focus.reason)}</p>${result}<div class="production-next"><span>接下来</span><strong>${esc(focus.next)}</strong></div></section>`;
   }
   async function renderWorkspace(id) {
+    const pushed = state.pushedRender === true; state.pushedRender = false;
     if (!state.authenticated) return gate();
     const previousComposer = $('#workspace-turn');
     const draft = previousComposer?.value || '';
@@ -211,6 +212,11 @@
     const workId = params.get('work'), interaction = params.get('interaction');
     const query = new URLSearchParams({...(workId ? {work:workId} : {}),...(interaction ? {interaction} : {})});
     const ws = await api(`/api/experience/products/${encodeURIComponent(id)}/workspace${query.size ? `?${query}` : ''}`);
+    // A pushed change that leaves the projection identical must not repaint the page.
+    const snapshot = JSON.stringify(ws);
+    if (pushed && state.workspaceSnapshot === snapshot && state.workspaceRenderedId === id) return state.workspaceConversation ?? null;
+    state.workspaceSnapshot = snapshot; state.workspaceRenderedId = id;
+    const scroll = window.scrollY;
     const p = ws.product, w = ws.work, r = ws.reality;
     const delivery = r.deliveries.find(entry => entry.current) || r.deliveries[0];
     const manifest = delivery?.manifest, acceptance = delivery?.acceptance, candidate = r.candidate;
@@ -219,6 +225,7 @@
     const focus = focusCopy(ws);
     const currentWorkId = w?.work_id;
     content.innerHTML = `<div class="workspace-banner"><p class="eyebrow">产品工作区 ${ws.historical ? '· 历史事项' : ''}</p><h1>${esc(p.name)}</h1><p>${esc(p.description || '持续建设的软件成果。')}${w ? ` · 当前事项：${esc(w.title || w.raw_user_requirement)}` : ''}</p><div class="link-row">${link(productPath(id),'产品概览','button quiet')}${link(`${productPath(id)}/code`,'代码资产','button quiet')}</div></div><div class="workspace-focus-strip"><span>当前焦点</span><strong>${esc(ws.focus?.title || '从你的想法开始')}</strong><span>${esc(focus.now)}</span></div><section class="workspace-quadrants" data-workspace-four-quadrant aria-label="产品工作区四象限">${renderWorkspaceAgenda(ws)}${renderWorkspaceReality(ws,reviewable,acceptance,currentWorkId)}${renderWorkspaceActions(ws,candidate,manifest,acceptance,currentWorkId,readOnly)}${renderWorkspaceProduction(ws,focus,reviewable,acceptance)}</section><section class="workspace-conversation" id="workspace-conversation"><div class="section-title"><h2>和 Watt 一起推进</h2><span class="muted">对话会结合当前产品事实</span></div><div id="workspace-messages" class="conversation-list"><p class="empty">${ws.interaction_id ? '正在读取对话…' : '告诉 Watt 你希望改变什么，或询问当前状态。'}</p></div>${readOnly ? `<p class="quadrant-empty">这是已结束事项的历史记录。${link(workspacePath(id),'回到当前产品工作区继续','button quiet')}</p>` : `<form class="composer" id="workspace-turn-form" data-product="${esc(id)}" data-interaction="${esc(ws.interaction_id || '')}"><label for="workspace-turn">下一句话</label><textarea id="workspace-turn" name="text" placeholder="例如：把客户资料保存问题修好" required></textarea><div class="form-bottom"><span class="form-hint">Watt 会根据产品与事项的真实状态继续。</span><button class="button" type="submit">发送</button></div></form>`}</section>`;
+    if (scroll) window.scrollTo(0, scroll);
     if (draft && $('#workspace-turn')) {
       $('#workspace-turn').value = draft;
       if (composerFocused) {
@@ -227,15 +234,43 @@
       }
     }
     const conversation = ws.interaction_id ? await renderWorkspaceConversation(ws.interaction_id) : null;
+    state.workspaceConversation = conversation;
+    const settling = ws.human_visible?.expression_state === 'PENDING' ||
+      (!ws.actions.length && ['READY','RUNNING'].includes(w?.status));
+    if (currentWorkId && !readOnly) watchWork(id, currentWorkId);
+    else closeWorkStream();
     if (!conversation?.turns.some(turn => turn.status === 'RECEIVED' || turn.status === 'PROCESSING') &&
-        (ws.human_visible?.expression_state === 'PENDING' ||
-         (!ws.actions.length && ['READY','RUNNING'].includes(w?.status)))) {
+        settling && !state.workStream?.open) {
+      // Fallback only: no push channel for this Work.
       const epoch = state.routeEpoch, route = `${location.pathname}${location.search}`;
       state.timer = setTimeout(() => {
         if (epoch === state.routeEpoch && route === `${location.pathname}${location.search}`)
           renderWorkspace(id).catch(failure => showNotice(failure.message, true));
       }, 5000);
     }
+  }
+  // Committed Work changes are pushed; the workspace re-reads its projection once per
+  // change burst. The stream survives re-renders of the same Work and is closed on
+  // navigation. A dropped stream reconnects automatically (EventSource retry).
+  function closeWorkStream() { if (state.workStream) { state.workStream.source.close(); state.workStream = null; } }
+  function watchWork(productId, workId) {
+    if (typeof EventSource !== 'function') return;
+    if (state.workStream?.workId === workId && state.workStream.source.readyState !== EventSource.CLOSED) return;
+    closeWorkStream();
+    const source = new EventSource(`/api/experience/works/${encodeURIComponent(workId)}/events`);
+    const stream = {source, workId, open: false, rendering: false, pending: false};
+    state.workStream = stream;
+    const epoch = state.routeEpoch;
+    const rerender = async()=>{
+      if (state.workStream !== stream || epoch !== state.routeEpoch) return;
+      if (stream.rendering) { stream.pending = true; return; }
+      stream.rendering = true;
+      try { state.pushedRender = true; await renderWorkspace(productId); } catch (failure) { showNotice(failure.message, true); }
+      finally { stream.rendering = false; if (stream.pending) { stream.pending = false; rerender(); } }
+    };
+    source.addEventListener('work.ready', ()=>{ const reconnect = stream.open === null; stream.open = true; if (state.timer) { clearTimeout(state.timer); state.timer = null; } if (reconnect) rerender(); });
+    source.addEventListener('work.changed', rerender);
+    source.onerror = ()=>{ if (state.workStream === stream) stream.open = null; };
   }
   async function renderWorkspaceConversation(id) { const box=$('#workspace-messages'); if(!box)return null; const data=await api(`/api/experience/interactions/${id}`); box.innerHTML = data.messages.length ? data.messages.map(m=>`<div class="message ${m.actor==='HUMAN'?'human':'watt'}"><span class="message-label">${m.actor==='HUMAN'?'你':'Watt'}</span>${esc(m.content)}</div>`).join('') : '<p class="empty">告诉 Watt 你希望改变什么。</p>'; if(data.turns.some(t=>t.status==='RECEIVED'||t.status==='PROCESSING')) box.innerHTML+='<p class="muted" role="status">Watt 正在回应…</p>'; scheduleConversationPoll(id,data); return data; }
   async function submitWorkspaceTurn(form) { const text=form.elements.namedItem('text').value.trim(); if(!text)return; const button=$('button',form); button.disabled=true; button.textContent='正在发送…'; try{const result=await api(`/api/experience/products/${form.dataset.product}/turns`,{method:'POST',body:{text,interaction_id:form.dataset.interaction||null,...(form.dataset.attentionId?{attention_id:form.dataset.attentionId}:{})}}); form.elements.namedItem('text').value=''; if(form.dataset.interaction!==result.interaction_id) navigate(workspacePath(form.dataset.product,null,result.interaction_id),true); else await renderWorkspace(form.dataset.product);}catch(failure){showNotice(failure.message,true);button.disabled=false;button.textContent='发送';} }
@@ -245,7 +280,7 @@
   function renderSettings() { const theme=document.documentElement.dataset.theme||'light';content.innerHTML=`${heading('设置','偏好设置','这里只提供当前真正生效的个人设置。')}<section class="detail-panel" style="max-width:660px"><h2>外观</h2><div class="field"><label for="theme-setting">界面主题</label><select id="theme-setting"><option value="light" ${theme==='light'?'selected':''}>浅色</option><option value="dark" ${theme==='dark'?'selected':''}>深色</option></select></div><p class="muted">仅保存在这台浏览器。账户与安全信息在${link('/user','我的账户')}中查看。</p></section>`; }
   function renderLogin() { const next=new URLSearchParams(location.search).get('next');content.innerHTML=`<section class="auth-wrap"><p class="eyebrow">欢迎回来</p><h1>登录 Watt</h1><p class="muted">回到你正在进行的产品与事项。</p>${loginForm(false)}${next?`<p class="muted">登录后返回此前打开的页面。</p>`:''}</section>`; }
   function renderRegister() { content.innerHTML=`<section class="auth-wrap"><p class="eyebrow">账户</p><h1>注册 Watt</h1><div class="auth-card"><p class="prose">当前部署面向单一拥有者，尚未开放自助注册。已有访问凭证的拥有者可以直接登录。</p>${link('/login','前往登录','button')}</div></section>`; }
-  async function render() { if(state.timer){clearTimeout(state.timer);state.timer=null;} closeTurnStream(); const epoch=++state.routeEpoch,path=location.pathname;navMark(path);clearNotice();busy();try{await auth();if(epoch!==state.routeEpoch)return;$('#connection-status').textContent=state.authenticated?'已连接当前账户':'未登录';if(path==='/'||path==='/app')await renderHome();else if(path==='/products')await renderCollection('products');else if(path==='/works')await renderCollection('works');else if(path==='/deliverables')await renderCollection('deliverables');else if(/^\/products\/[^/]+\/workspace$/.test(path))await renderWorkspace(path.split('/')[2]);else if(/^\/products\/[^/]+\/code$/.test(path))await renderCode(path.split('/')[2]);else if(/^\/products\/[^/]+$/.test(path))await renderProduct(path.split('/')[2]);else if(/^\/deliverables\/[^/]+$/.test(path))await renderDeliverable(path.split('/')[2]);else if(path==='/user')await renderUser();else if(path==='/settings')renderSettings();else if(path==='/login')renderLogin();else if(path==='/register')renderRegister();else errorView('这个页面不存在。');if(state.routeTransition && path.includes('/workspace')){showNotice(state.routeTransition);state.routeTransition=null;}}catch(failure){if(failure.status===401){state.authenticated=false;gate();}else errorView(failure.message);} }
+  async function render() { if(state.timer){clearTimeout(state.timer);state.timer=null;} closeTurnStream(); closeWorkStream(); state.workspaceSnapshot = null; state.workspaceRenderedId = null; const epoch=++state.routeEpoch,path=location.pathname;navMark(path);clearNotice();busy();try{await auth();if(epoch!==state.routeEpoch)return;$('#connection-status').textContent=state.authenticated?'已连接当前账户':'未登录';if(path==='/'||path==='/app')await renderHome();else if(path==='/products')await renderCollection('products');else if(path==='/works')await renderCollection('works');else if(path==='/deliverables')await renderCollection('deliverables');else if(/^\/products\/[^/]+\/workspace$/.test(path))await renderWorkspace(path.split('/')[2]);else if(/^\/products\/[^/]+\/code$/.test(path))await renderCode(path.split('/')[2]);else if(/^\/products\/[^/]+$/.test(path))await renderProduct(path.split('/')[2]);else if(/^\/deliverables\/[^/]+$/.test(path))await renderDeliverable(path.split('/')[2]);else if(path==='/user')await renderUser();else if(path==='/settings')renderSettings();else if(path==='/login')renderLogin();else if(path==='/register')renderRegister();else errorView('这个页面不存在。');if(state.routeTransition && path.includes('/workspace')){showNotice(state.routeTransition);state.routeTransition=null;}}catch(failure){if(failure.status===401){state.authenticated=false;gate();}else errorView(failure.message);} }
   async function openPreview(workId,manifestId) { try { const info=manifestId?await api(`/api/works/${workId}/deliveries/${manifestId}/runtime`,{method:'POST'}):await api(`/api/works/${workId}/candidate-preview`,{method:'POST'});if(info.url){window.open(info.url,'_blank','noopener');}else showNotice('当前版本尚无通过验证且可打开的预览；请查看当前生产与验证进展。',true);}catch(failure){showNotice(failure.message,true);} }
   async function publishDelivery(button) {
     button.disabled=true;
