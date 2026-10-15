@@ -195,6 +195,19 @@ def _repair_structured_result(
             "Human requested a source-grounded finding, retain the read action "
             "and leave the answer pending until owner evidence is observed. "
         )
+    if "clause is outside the current Human Turn" in validation_feedback:
+        repair_guidance += (
+            "Every SemanticClause must quote a span of the LATEST Human record only, "
+            "with that record's source_record_id. Delete clauses that quote earlier Human "
+            "messages; reach earlier meaning through clause.refers_to identities from "
+            "governed_semantic_history instead. Keep the latest record's own clauses intact. "
+        )
+    if "an old request cannot authorize a new effect" in validation_feedback:
+        repair_guidance += (
+            "Provenance that authorizes a current effect or acceptance must cite the LATEST "
+            "Human record. Earlier Human statements stay available through governed history "
+            "references; do not re-cite them as the source of this turn's consent. "
+        )
     if on_stage is not None:
         on_stage("structured_output_repair_started")
     result = runtime.generate(
