@@ -154,3 +154,25 @@ test('switching Work or leaving closes the previous stream', () => {
   assert.equal(h.sources[1].closed, true);
   assert.equal(h.context.state.workStream, null);
 });
+
+test('real stage progress shows before any reply text and never after it', () => {
+  const h = harness();
+  const statusLine = {textContent: '', dataset: {}, setAttribute() {}};
+  h.messages.querySelector = sel => sel === '[data-turn-status]' ? (h.messages.statusShown ? statusLine : null)
+    : sel === '[data-streaming-reply]' ? h.messages.children.find(c => c.streaming) || null : null;
+  h.context.document.createElement = () => { h.messages.statusShown = true; return statusLine; };
+  h.context.scheduleConversationPoll('i1', live);
+  const source = h.sources[0];
+  source.emit('turn.accepted', {});
+  assert.equal(statusLine.textContent, '已收到，开始处理');
+  source.emit('turn.progress', {metadata: {stage: 'UNDERSTANDING'}});
+  assert.equal(statusLine.textContent, '正在理解你的需求');
+  source.emit('turn.progress', {metadata: {stage: 'NOT_A_STAGE'}});
+  assert.equal(statusLine.textContent, '正在理解你的需求');
+});
+
+test('stage copy states what Watt is doing, never what the Human meant', () => {
+  const copy = vm.runInNewContext(`(${script.slice(script.indexOf('const turnStageCopy = '), script.indexOf('};', script.indexOf('const turnStageCopy = ')) + 2).replace('const turnStageCopy = ', '').replace(/;$/, '')})`);
+  assert.deepEqual(Object.keys(copy).sort(), ['COMPOSING_REPLY', 'PREPARING_WORK', 'READING_CONTEXT', 'UNDERSTANDING', 'UNDERSTOOD']);
+  for (const text of Object.values(copy)) assert.match(text, /^(正在|已理解)/);
+});

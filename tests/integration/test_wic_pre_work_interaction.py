@@ -917,6 +917,15 @@ def test_controlled_vnext_exposes_fast_and_settles_one_policy_governed_response(
     assert watt_messages[0].content == "".join(deltas)
     assert settled_events[-2].event_type is WicResponseEventType.FINAL_RESPONSE
     assert settled_events[-1].event_type is WicResponseEventType.TURN_COMPLETED
+    # Real stage boundaries are visible as progress before any reply text; each
+    # carries a stage code only, never content that could contradict the answer.
+    progress = [item for item in settled_events if item.event_type is WicResponseEventType.TURN_PROGRESS]
+    stages = [item.metadata["stage"] for item in progress]
+    assert stages and len(stages) == len(set(stages))
+    assert "COMPOSING_REPLY" in stages
+    assert all(item.content is None for item in progress)
+    first_delta = next(item.sequence for item in settled_events if item.event_type is WicResponseEventType.RESPONSE_DELTA)
+    assert all(item.sequence < first_delta for item in progress)
     timing = service.turn_timing(submitted.id)
     assert timing is not None
     assert timing["ttfsr_ms"] is not None

@@ -9,6 +9,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import asdict, dataclass, field, is_dataclass
 from datetime import UTC, datetime
 import hashlib
+import logging
 import json
 import re
 from threading import RLock
@@ -576,6 +577,8 @@ class UnavailableWorkInteractionCapability:
         )
 
 
+LOGGER = logging.getLogger(__name__)
+
 _TURN_TIMING_MILESTONES = (
     "acknowledged", "processing_started", "reality_load_started",
     "reality_load_completed", "basis_prepared", "assessment_cache_hit",
@@ -595,6 +598,18 @@ _TURN_TIMING_MILESTONES = (
 )
 
 
+# Stage boundaries the Human may see as progress. Each is emitted only when the
+# Turn actually crosses it; the payload is a stage code, never an interpretation
+# of the Human's meaning, so it cannot contradict the governed answer.
+_TURN_PROGRESS_STAGES = {
+    "reality_load_started": "READING_CONTEXT",
+    "provider_started": "UNDERSTANDING",
+    "assessment_persisted": "UNDERSTOOD",
+    "admission_started": "PREPARING_WORK",
+    "realization_started": "COMPOSING_REPLY",
+}
+
+
 @dataclass(slots=True)
 class _TurnTiming:
     """Bounded process-local diagnostics, never persisted collaboration truth."""
@@ -602,6 +617,8 @@ class _TurnTiming:
     received_at: datetime
     received_clock: float
     milestones: dict[str, tuple[datetime, float]] = field(default_factory=dict)
+    # Only controlled-mode Turns own a response event stream to report progress on.
+    reports_progress: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -1286,7 +1303,8 @@ class WorkInteractionService:
             store.touch_interaction(interaction_id, updated_by=identity, updated_at=now)
             uow.commit()
         with self._turn_lock:
-            self._turn_timings[turn_id] = _TurnTiming(received_at, received_clock)
+            self._turn_timings[turn_id] = _TurnTiming(received_at, received_clock,
+                reports_progress=self.runtime_mode is WicRuntimeMode.WIC_VNEXT_CONTROLLED)
             while len(self._turn_timings) > 128:
                 self._turn_timings.popitem(last=False)
         turn = self.get_turn(turn_id)
@@ -1401,7 +1419,8 @@ class WorkInteractionService:
             self._turn_response_streams.pop(turn_id, None)
             self._turn_fast_candidates.pop(turn_id, None)
             self._turn_realization_started.discard(turn_id)
-            self._turn_timings[turn_id] = _TurnTiming(datetime.now(UTC), monotonic())
+            self._turn_timings[turn_id] = _TurnTiming(datetime.now(UTC), monotonic(),
+                reports_progress=self.runtime_mode is WicRuntimeMode.WIC_VNEXT_CONTROLLED)
         if not self.schedule_turn(turn_id):
             # The failed processor can still be unwinding after its durable FAILED
             # transition. Re-enter only after that exact attempt releases ownership.
@@ -1664,10 +1683,23 @@ class WorkInteractionService:
     def _mark_turn_timing(self, turn_id: UUID, event: str) -> None:
         if event not in _TURN_TIMING_MILESTONES:
             return
+        first = False
         with self._turn_lock:
             timing = self._turn_timings.get(turn_id)
             if timing is not None and event not in timing.milestones:
                 timing.milestones[event] = (datetime.now(UTC), monotonic())
+                first = timing.reports_progress
+        stage = _TURN_PROGRESS_STAGES.get(event)
+        if first and stage is not None:
+            self._record_turn_progress(turn_id, stage)
+
+    def _record_turn_progress(self, turn_id: UUID, stage: str) -> None:
+        """Best effort: progress visibility must never fail or delay the Turn."""
+        try:
+            self._record_response_event(turn_id, WicResponseEventType.TURN_PROGRESS,
+                metadata={"stage": stage}, only_while_processing=True)
+        except Exception:  # noqa: BLE001
+            LOGGER.debug("Turn progress not recorded Turn=%s stage=%s", turn_id, stage, exc_info=True)
 
     def _forget_turn(self, turn_id: UUID, completed: Future[None]) -> None:
         with self._turn_lock:

@@ -1027,6 +1027,7 @@ def create_http_application(
                     cursor = max(cursor, latest_recovery.sequence - 1)
                 event_names = {
                     "TURN_ACCEPTED": "turn.accepted",
+                    "TURN_PROGRESS": "turn.progress",
                     "FAST_RECEPTION_STARTED": "fast.started",
                     "PROVISIONAL_RESPONSE": "response.provisional",
                     "FAST_SUPPRESSED": "fast.suppressed",
