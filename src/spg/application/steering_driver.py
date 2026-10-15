@@ -967,6 +967,7 @@ class PlanSteeringDriver:
                 and (
                     work.status in {WorkStatus.READY, WorkStatus.RUNNING}
                     or stale_attention_with_new_request
+                    or (work.status is WorkStatus.BLOCKED and self._formation_round_pending(work.work_id))
                 )
                 and not self.production_orchestrator.is_active(work.work_id)
                 and self._restart_eligible(work.work_id)
@@ -974,6 +975,23 @@ class PlanSteeringDriver:
             ):
                 scheduled.append(work.work_id)
         return tuple(scheduled)
+
+    def _formation_round_pending(self, work_id: UUID) -> bool:
+        """A permitted next Formation round survives a restart (its timer did not)."""
+        from sqlalchemy import select
+        from spg.application.governed_obligations import formation_round_for
+        from spg.infrastructure.persistence.runtime_schema import governance_records
+        try:
+            with self.database.unit_of_work() as uow:
+                revision = ProductStore(uow.session).current_work_reality_revision(work_id)
+                source = None if revision is None else uow.session.execute(
+                    select(governance_records.c.scope["source_revision"].astext).where(
+                        governance_records.c.decision_type == "WORK_FULFILLMENT_STOP_OBSERVATION",
+                        governance_records.c.scope["work_reality_revision_id"].astext == str(revision.id),
+                    ).order_by(governance_records.c.created_at.desc()).limit(1)).scalar()
+            return bool(source is not None and formation_round_for(self.database, revision, source)[2])
+        except (ValueError, ProductInvariantViolation):
+            return False
 
     def _unacknowledged_admitted_request(
         self, frame: PlanFrame, *, revision_acknowledged: bool | None = None,
