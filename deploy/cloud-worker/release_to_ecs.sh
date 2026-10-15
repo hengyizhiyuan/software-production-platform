@@ -58,8 +58,11 @@ for _ in $(seq 1 120); do
 done
 curl -fsS http://127.0.0.1:8080/health
 echo
+expected="$(docker image inspect --format '{{.Id}}' "$tag")"
 for service in api native-coordinator native-tool-host native-worker; do
-  printf '%s %s\n' "$service" "$(docker inspect --format '{{.Config.Image}} {{.State.Status}}' "watt-cloud-worker-${service}-1")"
+  actual="$(docker inspect --format '{{.Image}}' "watt-cloud-worker-${service}-1")"
+  printf '%s %s\n' "$service" "$actual"
+  test "$actual" = "$expected" || { echo "service $service is not running the release image" >&2; exit 1; }
 done
 REMOTE
 echo "released $revision"
