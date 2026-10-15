@@ -123,7 +123,6 @@ services:
       SPG_MANAGED_SOURCE_PASSWORD: ${WATT_GITEA_PASSWORD:?Set dedicated managed-source credential}
       SPG_MANAGED_SOURCE_NAMESPACE: watt-managed
       SPG_MANAGED_SOURCE_WORKSPACE_ROOT: /var/lib/spg/managed-source
-      PYTHONPATH: /opt/watt-owners/ecf/src:/opt/watt-owners/guardian/src:/app/src
     ports:
       # The existing FastAPI process serves both Watt Web assets and same-origin API.
       # Only this authenticated browser entrypoint is published on the test ECS.
@@ -140,8 +139,6 @@ services:
       - /proc/1/net:/host/network:ro
       - /data:/host/data:ro
       - /data/watt/native-executor:/var/lib/spg/native-executor
-      - /data/watt/owners/ecf:/opt/watt-owners/ecf:ro
-      - /data/watt/owners/guardian:/opt/watt-owners/guardian:ro
       - watt-native-workspaces:/var/lib/spg/native-workspaces
       - /var/run/docker.sock:/var/run/docker.sock
     group_add: ["${DOCKER_GID:?Set DOCKER_GID}"]
@@ -278,8 +275,6 @@ services:
     security_opt: [no-new-privileges:true]
     volumes:
       - ${WATT_QUALITY_SOURCE:-./source}:/qualification:ro
-      - /data/watt/owners/ecf:/opt/watt-owners/ecf:ro
-      - /data/watt/owners/guardian:/opt/watt-owners/guardian:ro
     logging: *bounded-logging
     networks: [control]
 

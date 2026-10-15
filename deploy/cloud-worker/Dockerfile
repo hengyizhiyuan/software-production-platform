@@ -23,6 +23,15 @@ RUN uv sync --locked --no-dev --no-editable
 COPY alembic.ini ./
 COPY migrations ./migrations
 COPY docker ./docker
+# Guardian and ECF are part of the same release unit: the exact sources pinned
+# in owners.lock, staged by deploy/cloud-worker/stage_owners.py before build.
+COPY owners.lock ./owners.lock
+COPY build/owners/ecf/src /opt/watt-owners/ecf/src
+COPY build/owners/guardian/src /opt/watt-owners/guardian/src
+COPY build/owners/ecf/OWNER_LOCK.json /opt/watt-owners/ecf/OWNER_LOCK.json
+COPY build/owners/guardian/OWNER_LOCK.json /opt/watt-owners/guardian/OWNER_LOCK.json
+ENV PYTHONPATH=/opt/watt-owners/ecf/src:/opt/watt-owners/guardian/src:/app/src
+COPY deploy/cloud-worker/release_gate.py /app/deploy/cloud-worker/release_gate.py
 
 RUN useradd --create-home --uid 10001 spg \
     && mkdir -p /var/lib/spg/native-workspaces \

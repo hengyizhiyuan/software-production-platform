@@ -7,4 +7,14 @@ COPY pyproject.toml uv.lock README.md /app/
 COPY src /app/src
 COPY migrations /app/migrations
 RUN uv sync --locked --no-dev --no-editable --offline
+COPY owners.lock /app/owners.lock
+RUN rm -rf /opt/watt-owners
+COPY build/owners/ecf/src /opt/watt-owners/ecf/src
+COPY build/owners/guardian/src /opt/watt-owners/guardian/src
+COPY build/owners/ecf/OWNER_LOCK.json /opt/watt-owners/ecf/OWNER_LOCK.json
+COPY build/owners/guardian/OWNER_LOCK.json /opt/watt-owners/guardian/OWNER_LOCK.json
+ENV PYTHONPATH=/opt/watt-owners/ecf/src:/opt/watt-owners/guardian/src:/app/src
+COPY deploy/cloud-worker/release_gate.py /app/deploy/cloud-worker/release_gate.py
+ARG WATT_REVISION
+ENV SPG_RUNTIME_REVISION=${WATT_REVISION}
 USER spg

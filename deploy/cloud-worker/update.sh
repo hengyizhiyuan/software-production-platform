@@ -19,7 +19,8 @@ test -n "$branch"
 git fetch origin --prune
 git merge --ff-only "origin/$branch"
 
-"$source_dir/deploy/cloud-worker/prepare-owners.sh"
+# Guardian and ECF are baked into the image from the exact commits in owners.lock.
+python3 "$source_dir/deploy/cloud-worker/stage_owners.py" --output "$source_dir/build/owners"   --cache /data/watt/owner-cache
 
 if ! grep -q '^WATT_GITEA_PASSWORD=' "$runtime/.env"; then
   umask 077
@@ -43,7 +44,9 @@ if [ "$expected_lock" = "$installed_lock" ]; then
 else
   docker compose build migrate
 fi
-docker compose up -d --no-build
+# Release-unit gate: the exact image must accept every cross-Owner contract.
+docker run --rm --network none --entrypoint python watt-cloud-worker:local   /app/deploy/cloud-worker/release_gate.py
+docker compose up -d --no-build --force-recreate
 if ! docker compose exec -T gitea gitea admin user list | grep -q 'watt-managed'; then
   WATT_GITEA_PASSWORD="$(sed -n 's/^WATT_GITEA_PASSWORD=//p' "$runtime/.env" | tail -1)"
   test -n "$WATT_GITEA_PASSWORD"

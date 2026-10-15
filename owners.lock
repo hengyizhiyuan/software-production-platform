@@ -1,0 +1,18 @@
+{
+  "schema": "watt-owners-lock-v1",
+  "description": "Exact Guardian and ECF Owner sources baked into the Watt image. Watt + these two commits form one release unit.",
+  "owners": {
+    "ecf": {
+      "repository": "https://github.com/hengyizhiyuan/engineering-context-fabric.git",
+      "branch": "claude/c3-formation-ai-native-convergence",
+      "commit": "1d3feddf0c7e7726fea23c58d194d64034547a7a",
+      "source_digest": "225d415597884ae923458a620b8c01abef2605cd093036aee159f5d445073702"
+    },
+    "guardian": {
+      "repository": "https://github.com/hengyizhiyuan/guardian.git",
+      "branch": "claude/c3-formation-ai-native-convergence",
+      "commit": "d07d2f621e50643611fcfb658e2ab2488cff788b",
+      "source_digest": "67fa5be707b8cd9ad4e9c44def21b7e7c85bd21cfb8630af3913e0639e4f931f"
+    }
+  }
+}
