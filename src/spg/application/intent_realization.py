@@ -258,7 +258,10 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
     represented = set()
     for clause in candidate.clauses:
         if clause.source_record_id != latest.id or clause.source_text not in latest.content:
-            raise IntentRealizationViolation("ACTION_ARGUMENT_PROVENANCE_INVALID: clause is outside the current Human Turn")
+            raise IntentRealizationViolation(
+                "ACTION_ARGUMENT_PROVENANCE_INVALID: clause is outside the current Human Turn "
+                f"(cited {'an earlier record' if clause.source_record_id != latest.id else 'text not in it'}: "
+                f"{clause.source_text[:60]!r})")
         if not set(clause.semantic_item_ids) <= ids:
             raise IntentRealizationViolation("PRIMARY_INTENT_CLAUSE_LOST: clause has no semantic realization")
         if not set(clause.refers_to) <= historical_items.keys():
