@@ -19,6 +19,40 @@ class NativeContextEvidenceError(RuntimeError):
     """A derived execution view cannot prove its immutable evidence binding."""
 
 
+def _stored_identity(row: dict[str, Any]) -> str:
+    """Identity of one Formation receipt in its compact stored form.
+
+    The Formation Owner stores some receipts with payload fields replaced by
+    references (`owner_payload_references`: field + sha256 of the value, or
+    `feedback_wire_reference`: the validation feedback framed around a prior
+    wire, checked by `validation_feedback_sha256`) and hands consumers the
+    materialized copy with those fields restored. Both are the same receipt
+    only if each restored field matches its reference; anything else is
+    real drift.
+    """
+    from hashlib import sha256
+
+    from spg.domain.governed_obligation import canonical_fingerprint
+
+    compact = dict(row)
+    refs = row.get("owner_payload_references")
+    if isinstance(refs, dict):
+        # Keys name the restored field; each `field` names the parent receipt's
+        # source field (e.g. feedback <- validation_feedback).
+        for field, ref in refs.items():
+            if field not in compact:
+                continue
+            if (not isinstance(ref, dict)
+                    or canonical_fingerprint(compact.pop(field)) != ref.get("sha256")):
+                raise NativeContextEvidenceError("NATIVE_CONTEXT_RECEIPT_IDENTITY_DRIFT")
+    if isinstance(row.get("feedback_wire_reference"), dict) and "validation_feedback" in compact:
+        feedback = compact.pop("validation_feedback")
+        if (not isinstance(feedback, str)
+                or sha256(feedback.encode()).hexdigest() != row.get("validation_feedback_sha256")):
+            raise NativeContextEvidenceError("NATIVE_CONTEXT_RECEIPT_IDENTITY_DRIFT")
+    return canonical_digest(compact)
+
+
 class NativeContractExecutionView:
     """Derive and resolve evidence references inside one admitted PWU snapshot.
 
@@ -76,8 +110,8 @@ class NativeContractExecutionView:
                 or row.get("candidate_is_authority") is not False):
             raise NativeContextEvidenceError("NATIVE_CONTEXT_HISTORY_OWNER_BINDING_INVALID")
         digest = canonical_digest(row)
-        prior = self._receipt_digests.setdefault(row["receipt_id"], digest)
-        if prior != digest:
+        prior = self._receipt_digests.setdefault(row["receipt_id"], _stored_identity(row))
+        if prior != _stored_identity(row):
             raise NativeContextEvidenceError("NATIVE_CONTEXT_RECEIPT_IDENTITY_DRIFT")
         self._records[digest] = deepcopy(row)
         self._locations.setdefault(digest, []).append(pointer)

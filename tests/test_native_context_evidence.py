@@ -148,3 +148,34 @@ def test_legacy_contract_without_history_retains_exact_representation():
     fact = NativeContractExecutionView(binding, contract).contract_fact()
     assert fact["payload"] == contract.contract_payload
     assert "payload_representation" not in fact
+
+
+def _referenced_receipt_contract(materialized_value):
+    """Plan keeps the compact stored receipt; the binding carries the materialized copy."""
+    from spg.domain.governed_obligation import canonical_fingerprint
+
+    binding, contract = _proof_contract()
+    payload = deepcopy(contract.contract_payload)
+    completion = payload["completion_contract"]
+    stored = completion["production_plan"]["fulfillment_formation_receipts"][0]
+    original = {"meaning": "NECESSARY_PROVENANCE_ONLY", "sources": [{"source": 0}]}
+    stored["owner_payload_references"] = {"owner_source_preconditions": {
+        "receipt_id": str(uuid4()), "field": "owner_source_preconditions",
+        "sha256": canonical_fingerprint(original)}}
+    completion["fulfillment_bindings"][0]["formation_receipt"]["candidate_attempts"] = [
+        {**stored, "owner_source_preconditions": materialized_value(original)}]
+    digest = canonical_digest(payload)
+    contract = contract.model_copy(update={"contract_payload": payload, "contract_digest": digest})
+    return binding.model_copy(update={"pwu_contract_digest": digest}), contract
+
+
+def test_stored_and_materialized_forms_of_one_receipt_are_the_same_identity():
+    binding, contract = _referenced_receipt_contract(lambda value: value)
+    view = NativeContractExecutionView(binding, contract)
+    assert len(view.references) == 2
+
+
+def test_materialized_payload_not_matching_its_reference_is_drift():
+    binding, contract = _referenced_receipt_contract(lambda value: {**value, "meaning": "tampered"})
+    with pytest.raises(NativeContextEvidenceError, match="IDENTITY_DRIFT"):
+        NativeContractExecutionView(binding, contract)
