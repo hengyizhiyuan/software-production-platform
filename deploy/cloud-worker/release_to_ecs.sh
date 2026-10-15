@@ -14,7 +14,7 @@ revision="$(git rev-parse HEAD)"
 tag="watt-cloud-worker:$revision"
 py="${PYTHON:-python}"
 "$py" deploy/cloud-worker/stage_owners.py --output build/owners "${@:2}"
-context="$(mktemp -d)"
+context="$(mktemp -d -p "${RELEASE_TMP:-/tmp}")"
 git -c core.autocrlf=false archive --format=tar "$revision" | tar -x -C "$context"
 cp -r build "$context/build"
 docker build -q -f "$context/deploy/cloud-worker/Dockerfile" --target runtime \
@@ -25,6 +25,7 @@ grep -q '"status": "PASS"' "$context/release-gate.json"
 remote="/data/watt/releases/${revision:0:12}"
 ssh -o BatchMode=yes "$host" "mkdir -p $remote"
 docker save "$tag" | gzip -1 | ssh -o BatchMode=yes "$host" "gunzip | docker load -q"
+rm -rf "$context/build"
 scp -q "$context/release-gate.json" "$context/deploy/cloud-worker/docker-compose.yml" "$host:$remote/"
 ssh -o BatchMode=yes "$host" bash -s -- "$remote" "$revision" <<'REMOTE'
 set -euo pipefail
