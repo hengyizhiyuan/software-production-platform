@@ -206,7 +206,14 @@ class ResponsesModelAdapter:
                             if response.status_code >= 400:
                                 self._raise_http_error(response, key)
                             stage("provider_response_accepted")
+                            # The httpx timeout bounds each read, not the whole
+                            # inference: a Provider emitting keep-alive comments
+                            # without progress would otherwise hold this call
+                            # (and its single-worker caller) indefinitely.
+                            deadline = sent_at + profile.timeout_seconds
                             for line in response.iter_lines():
+                                if monotonic() > deadline:
+                                    raise httpx2.ReadTimeout("Provider inference exceeded its total deadline")
                                 if not line.startswith("data:"):
                                     continue
                                 data = line[5:].strip()

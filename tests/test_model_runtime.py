@@ -255,3 +255,28 @@ def test_conflicting_terminal_and_delta_are_protocol_stop_not_candidate_repair(d
     assert failed.value.termination_reason == 'STREAM_TERMINAL_OUTPUT_MISMATCH'
     assert failed.value.request_id == 'terminal-output-identity'
     assert failed.value.observed_usage.total_tokens == 15
+
+
+def test_keepalive_only_stream_is_bounded_by_total_inference_deadline(monkeypatch) -> None:
+    """A Provider that only emits keep-alive comments cannot hold a call forever."""
+    import spg.infrastructure.model_runtime as runtime
+
+    clock = iter(float(second) for second in range(0, 10_000, 5))
+    monkeypatch.setattr(runtime, "monotonic", lambda: next(clock))
+
+    def keepalive_lines():
+        while True:
+            yield b": keep-alive\n\n"
+
+    def handler(request: httpx2.Request) -> httpx2.Response:
+        return httpx2.Response(200, content=keepalive_lines())
+
+    adapter = DeepSeekResponsesModelAdapter(
+        api_key=lambda: "test-secret", base_url="https://api.deepseek.com",
+        client=httpx2.Client(base_url="https://api.deepseek.com", transport=httpx2.MockTransport(handler)),
+    )
+    with pytest.raises(ModelProviderError) as failure:
+        adapter.generate(profile=_profile(), instructions="Watt contract", input_text="exact basis",
+            output_schema={"type": "object"})
+    assert failure.value.kind is ModelFailureKind.TIMEOUT_OR_NETWORK
+    assert failure.value.retryable is True
