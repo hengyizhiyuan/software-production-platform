@@ -746,13 +746,23 @@ FORMATION_MAX_GENERATOR_RETRIES = 1
 FORMATION_RETRY_WINDOW_SECONDS = 3600
 
 
-def formation_stop_kind(reason):
-    if not isinstance(reason, str):
+_FORMATION_NEVER_RETRY = ("OBLIGATION_FORMATION_RECEIPT_LIMIT", "OBLIGATION_FORMATION_LOCAL_REPAIR_BASIS_UNAVAILABLE",
+    "OBLIGATION_TYPED_CONTRACT_NOT_COMPLETE", "OBLIGATION_ADMITTED_", "OBLIGATION_OWNER_CAPABILITY_UNSUPPORTED")
+
+
+def formation_stop_kind(reason, *, candidates_validated=False):
+    """TRANSIENT, GENERATOR (a stochastic candidate defect) or None (not retryable).
+
+    A stop is a candidate defect when the Owner itself validated and rejected
+    both candidates of the round; the last failed predicate (one of many
+    validation codes) then describes the candidate, not the admitted basis.
+    Identity drift, capacity, admitted-source and capability stops never retry.
+    """
+    if not isinstance(reason, str) or "IDENTITY_DRIFT" in reason or reason.startswith(_FORMATION_NEVER_RETRY):
         return None
     if reason.startswith("OBLIGATION_FORMATION_TRANSPORT_") or reason == "OBLIGATION_FORMATION_PENDING_OUTCOME_UNKNOWN":
         return "TRANSIENT"
-    if (reason.startswith(("OBLIGATION_PROJECTION_", "OBLIGATION_SEMANTIC_", "OBLIGATION_COMPONENT_"))
-            or reason == "OBLIGATION_FORMATION_BUDGET_EXHAUSTED"):
+    if candidates_validated or reason == "OBLIGATION_FORMATION_BUDGET_EXHAUSTED":
         return "GENERATOR"
     return None
 
@@ -760,13 +770,13 @@ def formation_stop_kind(reason):
 def formation_retry_decision(stops, *, now):
     """(round to use now, kind of the latest stop, retry permitted) from ordered stops.
 
-    `stops` are (created_at, terminal_reason) for distinct ended rounds of one
+    `stops` are (created_at, terminal_reason, candidates_validated) for distinct ended rounds of one
     Work revision and source, oldest first. Pure: the same persisted stops give
     the same answer after a restart.
     """
     if not stops:
         return 1, None, False
-    kinds = [formation_stop_kind(reason) for _, reason in stops]
+    kinds = [formation_stop_kind(reason, candidates_validated=validated) for _, reason, validated in stops]
     latest_at, latest_kind = stops[-1][0], kinds[-1]
     permitted = bool(
         latest_kind is not None
@@ -783,7 +793,9 @@ def formation_round_stops(database, revision, source_revision):
         return ()
     from sqlalchemy import select
     from spg.infrastructure.persistence.runtime_schema import governance_records
+    from spg.infrastructure.persistence.runtime_store import RuntimeStore
     with database.unit_of_work() as uow:
+        governance = RuntimeStore(uow.session)
         rows = uow.session.execute(select(governance_records.c.created_at, governance_records.c.scope).where(
             governance_records.c.decision_type == "WORK_FULFILLMENT_STOP_OBSERVATION",
             governance_records.c.authority_identity == "work-governance:derived-candidate-observation",
@@ -791,13 +803,17 @@ def formation_round_stops(database, revision, source_revision):
             governance_records.c.scope["work_reality_revision_id"].astext == str(revision.id),
             governance_records.c.scope["source_revision"].astext == str(source_revision),
         ).order_by(governance_records.c.created_at)).all()
-    seen, stops = set(), []
-    for created_at, scope in rows:
-        inventory = scope.get("inventory_fingerprint")
-        if inventory in seen:
-            continue
-        seen.add(inventory)
-        stops.append((created_at, scope.get("terminal_reason")))
+        seen, stops = set(), []
+        for created_at, scope in rows:
+            inventory = scope.get("inventory_fingerprint")
+            if inventory in seen:
+                continue
+            seen.add(inventory)
+            # Both candidates of the round were validated by the Owner itself.
+            receipts = [record.scope for record in governance.governance_for_subject(inventory)
+                if record.decision_type == "WORK_FULFILLMENT_OBSERVATION"] if inventory else []
+            validated = {row.get("attempt") for row in receipts if row.get("stage") == "CANDIDATE_VALIDATED"}
+            stops.append((created_at, scope.get("terminal_reason"), validated == {1, 2}))
     return tuple(stops)
 
 

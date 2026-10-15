@@ -11,18 +11,22 @@ TRANSPORT = "OBLIGATION_FORMATION_TRANSPORT_ModelProviderError"
 PENDING = "OBLIGATION_FORMATION_PENDING_OUTCOME_UNKNOWN"
 CONFLICT = "OBLIGATION_PROJECTION_CONFLICTING_DISPOSITION"
 REVIEW = "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH"
+CORRESPONDENCE = "OBLIGATION_SUPPORTING_SOURCE_CORRESPONDENCE_UNPROVEN"
 
 
 def stops(*reasons, age_minutes=1):
-    return tuple((NOW - timedelta(minutes=age_minutes * (len(reasons) - i)), r) for i, r in enumerate(reasons))
+    # A rejected-candidate stop is one where the Owner validated both candidates.
+    return tuple((NOW - timedelta(minutes=age_minutes * (len(reasons) - i)), r, r in (CONFLICT, REVIEW, CORRESPONDENCE))
+                 for i, r in enumerate(reasons))
 
 
-@pytest.mark.parametrize("reason,kind", [(TRANSPORT, "TRANSIENT"), (PENDING, "TRANSIENT"),
-    (CONFLICT, "GENERATOR"), (REVIEW, "GENERATOR"), ("OBLIGATION_FORMATION_BUDGET_EXHAUSTED", "GENERATOR"),
-    ("OBLIGATION_FORMATION_WIRE_RECEIPT_IDENTITY_DRIFT", None), ("OBLIGATION_FORMATION_RECEIPT_LIMIT", None),
-    ("OBLIGATION_ADMITTED_ITEM_HUMAN_SOURCE_INVALID", None), (None, None)])
-def test_only_transient_and_stochastic_stops_are_retryable(reason, kind):
-    assert formation_stop_kind(reason) == kind
+@pytest.mark.parametrize("reason,validated,kind", [(TRANSPORT, False, "TRANSIENT"), (PENDING, False, "TRANSIENT"),
+    (CONFLICT, True, "GENERATOR"), (CORRESPONDENCE, True, "GENERATOR"), (CORRESPONDENCE, False, None),
+    ("OBLIGATION_FORMATION_BUDGET_EXHAUSTED", False, "GENERATOR"),
+    ("OBLIGATION_FORMATION_WIRE_RECEIPT_IDENTITY_DRIFT", True, None), ("OBLIGATION_FORMATION_RECEIPT_LIMIT", True, None),
+    ("OBLIGATION_ADMITTED_ITEM_HUMAN_SOURCE_INVALID", False, None), (None, True, None)])
+def test_only_transient_and_rejected_candidate_stops_are_retryable(reason, validated, kind):
+    assert formation_stop_kind(reason, candidates_validated=validated) == kind
 
 
 def test_first_round_has_no_stop_and_no_retry():
