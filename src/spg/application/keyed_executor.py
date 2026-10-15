@@ -28,7 +28,13 @@ class KeyedSerialExecutor:
                 queue.append((fn, args, future))
                 return future
             self._queues[key] = deque()
-        self._pool.submit(self._drain, key, fn, args, future)
+        try:
+            self._pool.submit(self._drain, key, fn, args, future)
+        except BaseException:
+            # The pool refused (e.g. shut down): never leave the key wedged.
+            with self._lock:
+                self._queues.pop(key, None)
+            raise
         return future
 
     def _drain(self, key: Hashable, fn: Callable, args: tuple, future: Future) -> None:

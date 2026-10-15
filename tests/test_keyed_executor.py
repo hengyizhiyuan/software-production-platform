@@ -62,3 +62,11 @@ def test_a_slow_interaction_does_not_delay_another():
     release.set()
     slow.result(5)
     executor.shutdown()
+
+
+def test_a_refused_submit_does_not_wedge_the_key():
+    executor = KeyedSerialExecutor(1, "t")
+    executor.shutdown()
+    with pytest.raises(RuntimeError):
+        executor.submit("a", lambda: None)
+    assert "a" not in executor._queues
