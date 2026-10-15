@@ -300,6 +300,45 @@ async def run_tool_flow_probe(settings: Settings) -> dict[str, object]:
     }
 
 
+async def _run_poll_loop(worker, offer, poll_seconds: float, heartbeat_task: asyncio.Task) -> None:
+    """Poll again after an idle result without delaying active task completion."""
+    loop = asyncio.get_running_loop()
+    active: set[asyncio.Task[bool]] = set()
+    next_poll_at = 0.0
+    try:
+        while True:
+            if heartbeat_task.done():
+                heartbeat_task.result()
+            if len(active) < offer.max_concurrency and loop.time() >= next_poll_at:
+                active.add(asyncio.create_task(worker.run_once(offer)))
+            if active:
+                timeout = poll_seconds
+                if len(active) < offer.max_concurrency and next_poll_at > loop.time():
+                    timeout = min(timeout, next_poll_at - loop.time())
+                done, _ = await asyncio.wait(
+                    active, timeout=timeout, return_when=asyncio.FIRST_COMPLETED,
+                )
+                did_work = False
+                was_idle = False
+                for task in done:
+                    active.remove(task)
+                    if task.result():
+                        did_work = True
+                    else:
+                        was_idle = True
+                if did_work:
+                    next_poll_at = 0.0
+                elif was_idle:
+                    next_poll_at = loop.time() + poll_seconds
+            else:
+                await asyncio.sleep(max(0.0, next_poll_at - loop.time()))
+    finally:
+        heartbeat_task.cancel()
+        for task in active:
+            task.cancel()
+        await asyncio.gather(heartbeat_task, *active, return_exceptions=True)
+
+
 async def run_worker() -> None:
     application = bootstrap()
     settings = application.settings
@@ -379,25 +418,9 @@ async def run_worker() -> None:
             await asyncio.to_thread(runtime.heartbeat_worker, offer)
 
     heartbeat_task = asyncio.create_task(idle_heartbeat())
-    active: set[asyncio.Task[bool]] = set()
     try:
-        while True:
-            if heartbeat_task.done():
-                heartbeat_task.result()
-            if len(active) < offer.max_concurrency:
-                active.add(asyncio.create_task(worker.run_once(offer)))
-            done, _ = await asyncio.wait(
-                active, timeout=settings.native_executor_poll_seconds,
-                return_when=asyncio.FIRST_COMPLETED,
-            )
-            for task in done:
-                active.remove(task)
-                task.result()
+        await _run_poll_loop(worker, offer, settings.native_executor_poll_seconds, heartbeat_task)
     finally:
-        heartbeat_task.cancel()
-        for task in active:
-            task.cancel()
-        await asyncio.gather(heartbeat_task, *active, return_exceptions=True)
         database.dispose()
 
 
