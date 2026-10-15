@@ -284,9 +284,14 @@ migration ownership.
 > | | Left | Right |
 > |---|---|---|
 > | Top | **设计文档 / 代码** — before production: the guided design framework (topics, status, current focus, Watt-decided items, "以当前方案进入生产"); during and after production: the resulting design document and code (tree, diff, preview entry) | **执行 Agenda** — Plan Steering's execution agenda: stages and steps, where Work is now, what comes next and why, including re-planning from problem routing |
-> | Bottom | **人工操作** — only items that genuinely need the Human, each with its prompt and action buttons (material questions, controlled-authorization revoke, credentials/permissions, acceptance) | **生产状态** — live Executor activity (PWU, step, tool activity, progress, recovery) and Guardian activity (checking, gate, findings, repair progress) |
+> | Bottom | **生产状态** — live Executor activity (PWU, step, tool activity, progress, recovery) and Guardian activity (checking, gate, findings, repair progress) | **人工操作** — only items that genuinely need the Human, each with its prompt and action buttons (material questions, controlled-authorization revoke, credentials/permissions, acceptance) |
 >
-> Narrow screens stack 设计文档/代码 → 执行 Agenda → 人工操作 → 生产状态.
+> **Human Governor structural approval — 2026-10-15 (later the same day).** The
+> two bottom quadrants are swapped: 生产状态 bottom-left, 人工操作 bottom-right,
+> because that reads more naturally in use. This is the explicit approval the
+> immutability rule below requires; it changes position only, not semantics.
+>
+> Narrow screens stack 设计文档/代码 → 执行 Agenda → 生产状态 → 人工操作.
 > Conversation stays a subordinate surface outside the grid. This correction
 > supersedes the surface semantics of the table that follows; the immutability
 > rule (explicit Human Governor approval for structural change) still applies.
