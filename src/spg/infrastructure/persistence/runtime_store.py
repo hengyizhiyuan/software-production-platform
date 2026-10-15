@@ -403,7 +403,10 @@ class RuntimeStore:
 
     def snapshot(self, snapshot_id: UUID) -> SnapshotRecord | None:
         row = first_for(self.session, production_snapshots, {'id':snapshot_id})
-        if row is None: row = self._one(production_snapshots, production_snapshots.c.id == snapshot_id)
+        # The projection read set preloads only snapshots reachable from existing
+        # runs. A snapshot outside it (e.g. the source of a Work stopped before its
+        # first run) must still be read, not reported as missing.
+        if not row: row = self._one(production_snapshots, production_snapshots.c.id == snapshot_id)
         if not row:
             return None
         values = dict(row)

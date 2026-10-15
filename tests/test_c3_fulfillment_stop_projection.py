@@ -31,6 +31,8 @@ class ReadOnlyRows:
         return iter(self.values)
     def all(self):
         return self.values
+    def one_or_none(self):
+        return self.values[0] if self.values else None
 
 
 class ReadOnlySession:
@@ -261,3 +263,22 @@ def test_malformed_or_modified_record_cannot_project_blocked(monkeypatch, malfor
         row["scope"] = {**row["scope"], "terminal_reason": "different-unsealed-reason"}
     basis.session.records = [row]
     assert read_fresh(basis).status is WorkStatus.READY
+
+
+def test_snapshot_outside_the_projection_read_set_is_still_read():
+    """G2/G1 2026-10-15: a Work stopped by Formation before its first run has no run,
+    so its source snapshot is not in the preloaded projection rows. The lookup must
+    fall back to the table instead of reporting the snapshot missing, otherwise the
+    stop is never projected and the Work shows as READY forever."""
+    source = SnapshotRecord(id=uuid4(), condition=SnapshotCondition.TRUSTED,
+        repository_identity="qualification:synthetic-owner-source", repository_ref="refs/heads/main",
+        repository_revision="a" * 40, repository_tree_identity="b" * 40,
+        source_baseline_id=None, created_at=NOW)
+
+    class Session(ReadOnlySession):
+        def __init__(self):
+            super().__init__([source.model_dump()])
+            self.info = {"watt_projection_rows": {"production_snapshots": []}}
+
+    found = RuntimeStore(Session()).snapshot(source.id)
+    assert found is not None and found.id == source.id and found.condition is SnapshotCondition.TRUSTED
