@@ -43,6 +43,9 @@ def api(method, path, body=None, raw=False):
             return (payload if raw else json.loads(payload or b"null")), elapsed, response.status
     except urllib.error.HTTPError as error:
         return {"http_error": error.code, "body": error.read().decode()[:2000]}, time.time() - begin, error.code
+    except (urllib.error.URLError, ConnectionError, TimeoutError) as error:
+        # A restarting API is an observation, not the end of the journey.
+        return {"http_error": 0, "body": repr(error)[:300]}, time.time() - begin, 0
 
 
 def mark(event, **detail):
@@ -87,6 +90,9 @@ seen_turns, answered, previewed, authorized, published, accepted = set(), set(),
 previous = None
 while time.time() - start < args.deadline:
     conversation, _, _ = api("GET", f"/api/experience/interactions/{interaction}")
+    if "http_error" in conversation:
+        time.sleep(3)
+        continue
     for turn in conversation.get("turns", []):
         key = (turn.get("id"), turn.get("status"))
         if key not in seen_turns:
