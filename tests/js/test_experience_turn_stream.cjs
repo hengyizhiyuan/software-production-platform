@@ -176,3 +176,16 @@ test('stage copy states what Watt is doing, never what the Human meant', () => {
   assert.deepEqual(Object.keys(copy).sort(), ['COMPOSING_REPLY', 'PREPARING_WORK', 'READING_CONTEXT', 'UNDERSTANDING', 'UNDERSTOOD']);
   for (const text of Object.values(copy)) assert.match(text, /^(正在|已理解)/);
 });
+
+test('a failed latest Turn is shown with its reason and a retry, not as the previous reply', () => {
+  const start = script.indexOf('  function turnFailure(');
+  const fn = script.slice(start, script.indexOf('\n', start));
+  const esc = v => String(v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const turnFailure = vm.runInNewContext(`${fn}; turnFailure`, {esc});
+  const html = turnFailure('i1', {id: 't9', status: 'FAILED', failure_message: '模型结果未通过校验 <b>'});
+  assert.match(html, /这一轮没有处理成功，你的消息已保存/);
+  assert.match(html, /data-retry-turn="t9"/);
+  assert.match(html, /data-retry-interaction="i1"/);
+  assert.match(html, /&lt;b&gt;/);
+  assert.match(script, /\/api\/interactions\/\$\{encodeURIComponent\(retry\.dataset\.retryInteraction\)\}\/turns\/\$\{encodeURIComponent\(retry\.dataset\.retryTurn\)\}\/retry/);
+});

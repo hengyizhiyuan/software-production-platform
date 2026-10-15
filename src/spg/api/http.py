@@ -1664,7 +1664,10 @@ def create_http_application(
             "messages": [{"actor": item.actor.value, "content": item.content,
                           "status": item.processing_status.value}
                          for item in observed.conversation_messages[-16:]],
-            "turns": [{"id": str(item.id), "status": item.status.value}
+            # A failed Turn must be visible with its reason so the Human can retry
+            # instead of seeing the previous reply as if it were the answer.
+            "turns": [{"id": str(item.id), "status": item.status.value,
+                       **({"failure_message": item.failure_message} if item.status.value == "FAILED" else {})}
                       for item in observed.turns[-5:]],
             "response": None if current is None else current.natural_response,
             "readiness": None if observed.readiness is None else
