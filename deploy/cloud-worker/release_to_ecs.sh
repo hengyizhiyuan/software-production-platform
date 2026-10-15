@@ -27,7 +27,8 @@ ssh -o BatchMode=yes "$host" "mkdir -p $remote"
 docker save "$tag" | gzip -1 | ssh -o BatchMode=yes "$host" "gunzip | docker load -q"
 rm -rf "$context/build"
 scp -q "$context/release-gate.json" "$context/deploy/cloud-worker/docker-compose.yml" "$host:$remote/"
-ssh -o BatchMode=yes "$host" bash -s -- "$remote" "$revision" <<'REMOTE'
+cat > "$context/remote-release.sh" <<'REMOTE'
+#!/usr/bin/env bash
 set -euo pipefail
 remote="$1"; revision="$2"; runtime=/data/watt/runtime; tag="watt-cloud-worker:$revision"
 docker run --rm --network none --entrypoint python "$tag" /app/deploy/cloud-worker/release_gate.py \
@@ -50,8 +51,8 @@ fi
 cd "$runtime"
 compose=(docker compose -p watt-cloud-worker -f "$runtime/docker-compose.yml")
 "${compose[@]}" config --quiet
-"${compose[@]}" run --rm --no-deps migrate
-"${compose[@]}" up -d --no-build --force-recreate api native-coordinator native-tool-host native-worker
+"${compose[@]}" run --rm --no-deps -T migrate < /dev/null
+"${compose[@]}" up -d --no-build --force-recreate api native-coordinator native-tool-host native-worker < /dev/null
 for _ in $(seq 1 120); do
   if curl -fsS http://127.0.0.1:8080/health >/dev/null 2>&1; then break; fi
   sleep 3
@@ -64,5 +65,9 @@ for service in api native-coordinator native-tool-host native-worker; do
   printf '%s %s\n' "$service" "$actual"
   test "$actual" = "$expected" || { echo "service $service is not running the release image" >&2; exit 1; }
 done
+echo RELEASE_REMOTE_PASS
 REMOTE
+scp -q "$context/remote-release.sh" "$host:$remote/remote-release.sh"
+ssh -o BatchMode=yes "$host" bash "$remote/remote-release.sh" "$remote" "$revision" < /dev/null | tee "$context/remote.log"
+grep -q RELEASE_REMOTE_PASS "$context/remote.log"
 echo "released $revision"
