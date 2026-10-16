@@ -124,9 +124,11 @@ def admitted_fulfillment_bindings(revision, assessment, *, provider=None,
     ir = assessment.semantic_ir
     if ir is None or getattr(ir, "legacy_typed_projection", False):
         return materialize_continuous_gates(revision, ir)
-    formation_round = formation_round_for(database, revision, source_revision)[0] if provider is not None else 1
+    formation_round, _, _, formation_episode = (formation_round_for(database, revision, source_revision)
+        if provider is not None else (1, None, False, None))
     inventory = fulfillment_inventory(revision, ir, source_revision=source_revision,
-                                      exact_target_paths=exact_target_paths, formation_round=formation_round)
+                                      exact_target_paths=exact_target_paths, formation_round=formation_round,
+                                      formation_episode=formation_episode)
     source_failure = admitted_clause_source_failure(revision, ir, database=database)
     if source_failure is not None:
         return unresolved_projection(revision, ir, inventory, reason=source_failure)
@@ -139,7 +141,8 @@ def admitted_fulfillment_bindings(revision, assessment, *, provider=None,
         return typed
     return form_fulfillment_projection(revision, ir, provider=provider,
         database=database, source_revision=source_revision,
-        exact_target_paths=exact_target_paths, formation_round=formation_round)
+        exact_target_paths=exact_target_paths, formation_round=formation_round,
+        formation_episode=formation_episode)
 
 
 def validate_continuous_gates(bindings, revision, ir, *, source_revision=None, exact_target_paths=()) -> None:
@@ -582,7 +585,8 @@ def _reviewed_background_clause_retained(revision, ir, item_id, clause_id, bindi
             return False
         inventory = fulfillment_inventory(revision, ir, source_revision=first.source_revision,
             exact_target_paths=tuple(receipt.get("exact_target_paths", ())),
-            formation_round=receipt.get("formation_round", 1))
+            formation_round=receipt.get("formation_round", 1),
+            formation_episode=receipt.get("formation_episode"))
         inverse = {value: key for key, value in FULFILLMENT_CAPABILITIES.items()}
         from spg.domain.governed_obligation import FulfillmentRouteCandidate
         routes = tuple(FulfillmentRouteCandidate(source_ref=fulfillment_source_ref(binding),
@@ -665,12 +669,14 @@ def admitted_clause_source_failure(revision, ir, *, database=None, records=None)
     return None
 
 
-def fulfillment_inventory(revision, ir, *, source_revision=None, exact_target_paths=(), formation_round=1):
+def fulfillment_inventory(revision, ir, *, source_revision=None, exact_target_paths=(), formation_round=1,
+                          formation_episode=None):
     """Full immutable source basis; the model only proposes how it is consumed.
 
     A later Formation round (see formation_round_for) is part of the basis, so
     each round owns a distinct inventory and its own unchanged two-candidate
-    budget. Round 1 keeps the historical basis byte for byte.
+    budget. A Human-restarted episode is part of the basis for the same reason.
+    Round 1 of the first episode keeps the historical basis byte for byte.
     """
     sources = []
     for fact in revision.engineering_semantic_facts:
@@ -733,6 +739,8 @@ def fulfillment_inventory(revision, ir, *, source_revision=None, exact_target_pa
         if type(formation_round) is not int or not 1 < formation_round <= FORMATION_MAX_ROUNDS:
             raise ValueError("OBLIGATION_FORMATION_ROUND_INVALID")
         basis["formation_round"] = formation_round
+    if formation_episode is not None:
+        basis["formation_episode"] = str(formation_episode)
     return {**basis, "inventory_fingerprint": canonical_fingerprint(basis)}
 
 
@@ -774,13 +782,17 @@ def formation_retry_decision(stops, *, now, human_restart_at=None):
     Work revision and source, oldest first. Pure: the same persisted stops give
     the same answer after a restart. The time window runs from the latest stop,
     or from a later explicit Human restart of the Work's convergence episode.
+
+    A Human restart after the latest stop opens a new episode: its rounds are
+    counted from that restart with the same unchanged budgets. A stop that may
+    never be retried (identity, capacity, admitted source) stays final.
     """
     if not stops:
         return 1, None, False
     kinds = [formation_stop_kind(reason, candidates_validated=validated) for _, reason, validated in stops]
     latest_at, latest_kind = stops[-1][0], kinds[-1]
     if human_restart_at is not None and human_restart_at > latest_at:
-        latest_at = human_restart_at
+        return 1, latest_kind, latest_kind is not None
     permitted = bool(
         latest_kind is not None
         and len(stops) < FORMATION_MAX_ROUNDS
@@ -790,8 +802,11 @@ def formation_retry_decision(stops, *, now, human_restart_at=None):
     return (len(stops) + 1 if permitted else len(stops)), latest_kind, permitted
 
 
-def formation_round_stops(database, revision, source_revision):
-    """Distinct ended rounds (one per inventory) for this exact Work revision and source."""
+def formation_round_stops(database, revision, source_revision, *, since=None):
+    """Distinct ended rounds (one per inventory) for this exact Work revision and source.
+
+    `since` limits the rounds to one Human-restarted episode.
+    """
     if database is None:
         return ()
     from sqlalchemy import select
@@ -809,7 +824,7 @@ def formation_round_stops(database, revision, source_revision):
         seen, stops = set(), []
         for created_at, scope in rows:
             inventory = scope.get("inventory_fingerprint")
-            if inventory in seen:
+            if inventory in seen or (since is not None and created_at <= since):
                 continue
             seen.add(inventory)
             # Both candidates of the round were validated by the Owner itself.
@@ -820,16 +835,44 @@ def formation_round_stops(database, revision, source_revision):
     return tuple(stops)
 
 
+def formation_episode_restart(database, revision):
+    """The latest Human restart of this exact Work revision, or None.
+
+    A restart recorded for an older revision does not reopen the current one.
+    """
+    if database is None:
+        return None
+    from spg.infrastructure.persistence.runtime_store import RuntimeStore
+    with database.unit_of_work() as uow:
+        restarts = [record for record in RuntimeStore(uow.session).governance_for_subject(str(revision.work_id))
+            if record.decision_type == "RESTART_CONVERGENCE_EPISODE"
+            and record.scope.get("work_reality_revision_id") in (None, str(revision.id))]
+    return max(restarts, key=lambda record: record.created_at, default=None)
+
+
 def formation_round_for(database, revision, source_revision, *, now=None):
+    """(round, latest stop kind, retry permitted, episode) for the current episode.
+
+    `episode` is the Human restart that opened the current episode, or None.
+    Every episode has its own rounds and therefore its own fresh inventories.
+    """
     from datetime import UTC, datetime
+    restart = formation_episode_restart(database, revision)
     stops = formation_round_stops(database, revision, source_revision)
-    restart_at = None
-    if database is not None and stops:
-        from spg.infrastructure.persistence.runtime_store import RuntimeStore
-        with database.unit_of_work() as uow:
-            restart_at = max((record.created_at for record in RuntimeStore(uow.session).governance_for_subject(
-                str(revision.work_id)) if record.decision_type == "RESTART_CONVERGENCE_EPISODE"), default=None)
-    return formation_retry_decision(stops, now=now or datetime.now(UTC), human_restart_at=restart_at)
+    episode_stops = stops if restart is None else formation_round_stops(
+        database, revision, source_revision, since=restart.created_at)
+    if restart is not None and stops and not episode_stops:
+        # The restart follows the previous episode's final stop: open round 1.
+        decision = formation_retry_decision(stops, now=now or datetime.now(UTC),
+                                            human_restart_at=restart.created_at)
+    elif restart is not None and not episode_stops:
+        decision = (1, None, False)
+    else:
+        decision = formation_retry_decision(episode_stops, now=now or datetime.now(UTC))
+    # Only a restart that actually ended an earlier episode of this revision
+    # becomes part of the basis; otherwise inventories stay byte for byte.
+    split = restart is not None and len(episode_stops) < len(stops)
+    return (*decision, str(restart.id) if split else None)
 
 
 def _capability_tuple(name):
@@ -1604,7 +1647,8 @@ def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=N
         raise ValueError("OBLIGATION_PROJECTION_SOURCE_REVISION_DRIFT")
     inventory = fulfillment_inventory(revision, ir, source_revision=expected_source,
                                      exact_target_paths=exact_target_paths,
-                                     formation_round=(first.formation_receipt or {}).get("formation_round", 1))
+                                     formation_round=(first.formation_receipt or {}).get("formation_round", 1),
+                                     formation_episode=(first.formation_receipt or {}).get("formation_episode"))
     inverse = {route: key for key, route in FULFILLMENT_CAPABILITIES.items()}
     from spg.domain.governed_obligation import FulfillmentRouteCandidate
     routes = []
@@ -3381,6 +3425,12 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
                             or preconditions.get("construction_consumer_instruction_contract") is None):
                         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
                     restored_preconditions["semantic_compilation_contract"] = _SEMANTIC_COMPILATION_CONTRACT
+                if preconditions.get("constraint_provenance_contract") is not None:
+                    from spg.providers.fulfillment_candidate import _CONSTRAINT_PROVENANCE_CONTRACT
+                    if (preconditions["constraint_provenance_contract"] != _CONSTRAINT_PROVENANCE_CONTRACT
+                            or preconditions.get("semantic_compilation_contract") is None):
+                        raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
+                    restored_preconditions["constraint_provenance_contract"] = _CONSTRAINT_PROVENANCE_CONTRACT
                 restored_preconditions = candidate_construction_preconditions(
                     restored_preconditions, inventory, source_request.get("feedback"),
                     construction_contract=preconditions["candidate_construction_contract"])
@@ -3898,10 +3948,11 @@ def _review_fulfillment_candidate(provider, candidate, inventory, recorder, atte
 
 
 def form_fulfillment_projection(revision, ir, *, provider, database=None,
-                                source_revision=None, exact_target_paths=(), formation_round=1):
+                                source_revision=None, exact_target_paths=(), formation_round=1,
+                                formation_episode=None):
     arguments = dict(provider=provider, database=database,
         source_revision=source_revision, exact_target_paths=exact_target_paths,
-        formation_round=formation_round, _started=monotonic())
+        formation_round=formation_round, formation_episode=formation_episode, _started=monotonic())
     try:
         return _form_fulfillment_projection(revision, ir, **arguments)
     except FulfillmentReceiptCapacityStop:
@@ -3961,10 +4012,12 @@ def _unresolved_bindings_have_owner_methods(candidate, revision, ir, inventory, 
 
 
 def _form_fulfillment_projection(revision, ir, *, provider, database=None,
-                                source_revision=None, exact_target_paths=(), formation_round=1, _started=None):
+                                source_revision=None, exact_target_paths=(), formation_round=1,
+                                formation_episode=None, _started=None):
     """Two cumulative candidates on one basis, with recoverable Owner receipts."""
     inventory = fulfillment_inventory(revision, ir, source_revision=source_revision,
-                                      exact_target_paths=exact_target_paths, formation_round=formation_round)
+                                      exact_target_paths=exact_target_paths, formation_round=formation_round,
+                                      formation_episode=formation_episode)
     if not hasattr(provider, "_fulfillment_receipts"):
         provider._fulfillment_receipts = []
     recorder = FulfillmentFormationReceipts(revision, inventory, database=database,
@@ -4003,6 +4056,8 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
         if inventory.get("formation_round", 1) != 1:
             # Consumers rebuild this exact inventory from the admitted bindings.
             receipt["formation_round"] = inventory["formation_round"]
+        if "formation_episode" in inventory:
+            receipt["formation_episode"] = inventory["formation_episode"]
         first_request = next((r for r in rows if r["stage"] == "MODEL_REQUEST_PENDING"), None)
         if ((first_request or {}).get("owner_source_preconditions") or {}).get(
                 "candidate_construction_contract") in {
@@ -4203,6 +4258,12 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                             and original_preconditions.get("construction_consumer_instruction_contract") is not None):
                         from spg.providers.fulfillment_candidate import _SEMANTIC_COMPILATION_CONTRACT
                         original_preconditions["semantic_compilation_contract"] = _SEMANTIC_COMPILATION_CONTRACT
+                        # Negotiated once per request; a replayed request keeps its own marker.
+                        provenance = (getattr(provider, "supports_constraint_provenance", False) if initial_request is None
+                            else (initial_request.get("owner_source_preconditions") or {}).get("constraint_provenance_contract") is not None)
+                        if provenance:
+                            from spg.providers.fulfillment_candidate import _CONSTRAINT_PROVENANCE_CONTRACT
+                            original_preconditions["constraint_provenance_contract"] = _CONSTRAINT_PROVENANCE_CONTRACT
                     precondition_arguments["owner_preconditions"] = candidate_construction_preconditions(
                         original_preconditions, inventory, feedback, construction_contract=construction_contract)
                     decision = precondition_arguments["owner_preconditions"]["candidate_construction_state"]["convergence"]

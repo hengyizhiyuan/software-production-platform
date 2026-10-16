@@ -169,20 +169,28 @@ def test_lawful_pending_evidence_routes_still_form_original_completion_contract(
 
 @pytest.mark.parametrize("round_permitted", [False, True])
 def test_driver_stop_blocks_unless_a_bounded_formation_round_is_scheduled(monkeypatch, round_permitted):
-    # A Formation stop never refines, escalates or resets the ended round. It is
+    # A Formation stop never refines, retries or resets the ended round. It is
     # BLOCKED unless the round policy opens a new bounded round (a new inventory
     # with the same two-candidate budget), which waits as CAPABILITY_UNAVAILABLE.
+    # With no further round the episode is visibly exhausted for the Human.
     service, request, database, revision, ir, oracle = setup_service(monkeypatch, failed=True)
     def iterate(_):
         service.admit_cycle(request)
         pytest.fail("Unresolved cannot reach a scheduled production action")
     def forbidden(*args, **kw):
         pytest.fail("Terminal observation must not refine/escalate/retry/reset")
+    exhausted = []
+    def observe(work_id, **kw):
+        assert kw == {"failed": True, "boundary": "FORMATION", "owner_budget_exhausted": True,
+                      "failure_signature": kw["failure_signature"]}
+        assert kw["failure_signature"].startswith("formation-exhausted:OBLIGATION_FORMATION_TRANSPORT_")
+        exhausted.append(work_id)
     scheduled = []
     driver = SimpleNamespace(_work_convergence_halted=lambda _: False,
         _provider_failure_escalated=lambda _: False,
         _stopping=SimpleNamespace(is_set=lambda: False), max_automatic_transitions=1,
-        iterate=iterate, _observe_convergence=forbidden, _record_provider_failure=forbidden,
+        iterate=iterate, _observe_convergence=forbidden if round_permitted else observe,
+        _record_provider_failure=forbidden,
         _clear_provider_failure=forbidden,
         _schedule_formation_round=lambda work_id, scope: scheduled.append(scope["terminal_reason"]) or round_permitted)
     for _ in range(2):
@@ -191,3 +199,4 @@ def test_driver_stop_blocks_unless_a_bounded_formation_round_is_scheduled(monkey
         assert result.iterations_executed == 0 and result.last_action is None
     assert len(database.governance) == 1 and len(oracle.calls) == 1
     assert scheduled and all(reason.startswith("OBLIGATION_FORMATION_TRANSPORT_") for reason in scheduled)
+    assert exhausted == ([] if round_permitted else [request.work_id] * 2)

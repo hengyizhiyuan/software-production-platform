@@ -132,6 +132,7 @@ _ROLE_CONVERGENCE_LEGACY_CONTRACT = "existing-complete-role-candidate-and-bound-
 _ROLE_CONVERGENCE_CONTRACT = "existing-complete-role-candidate-and-bound-repair-targets-v2"
 _ROLE_CONVERGENCE_CONTRACTS = {_ROLE_CONVERGENCE_LEGACY_CONTRACT, _ROLE_CONVERGENCE_CONTRACT}
 _SEMANTIC_COMPILATION_CONTRACT = "formation-semantic-contribution-compilation-v2"
+_CONSTRAINT_PROVENANCE_CONTRACT = "formation-unique-constraint-origin-compilation-v1"
 _CANDIDATE_CONSTRUCTION_CONTRACTS = {_CANDIDATE_CONSTRUCTION_CONTRACT, _SEMANTIC_EDIT_CONTRACT, _ROLE_REFERENCE_CONTRACT,
     _INTERPRETATION_ROLE_CONTRACT}
 
@@ -341,7 +342,35 @@ def _compile_contribution_geometry(routes, inventory):
     return observations
 
 
-def _construct_semantic_proposal(value, inventory, wire_identity, *, compilation=None):
+def _compile_constraint_provenance(routes, inventory, owner_preconditions):
+    """Resolve a Work constraint's self-citation to its single admitted origin.
+
+    A Work constraint is itself a derivation; it cannot be its own provenance.
+    When the Owner's necessary proof domain for the chosen consumer has exactly
+    one complete alternative, a route whose u names only its own primary
+    source is the model asking for that derivation. The Owner substitutes
+    that unique alternative and records it. Any other u is left untouched, so
+    every correspondence, phase, review and evidence gate decides unchanged.
+    """
+    observations = []
+    rows = {row["source"]: row for row in (owner_preconditions or {}).get("sources", ())}
+    for index, route in enumerate(routes):
+        source = inventory["sources"][route["s"]] if route["s"] < len(inventory["sources"]) else None
+        if source is None or source["kind"] != "WORK_CONSTRAINT" or list(route["u"]) != [route["s"]]:
+            continue
+        proof = next((p for p in rows.get(route["s"], {}).get("necessary_source_proofs", ())
+                      if p["capability"] == route["c"]), None)
+        alternatives = [] if proof is None else [list(group) for group in proof["minimal_support_sets"]]
+        if len(alternatives) != 1 or not alternatives[0] or route["s"] in alternatives[0]:
+            continue
+        observations.append({"route": index, "source": route["s"], "capability": route["c"],
+            "proposed_support": list(route["u"]), "compiled_support": alternatives[0],
+            "predicate": "WORK_CONSTRAINT_SELF_CITATION_TO_UNIQUE_ADMITTED_ORIGIN"})
+        route["u"] = alternatives[0]
+    return observations
+
+
+def _construct_semantic_proposal(value, inventory, wire_identity, *, compilation=None, owner_preconditions=None):
     proposal = _FulfillmentSemanticProposal.model_validate(value)
     routes = []
     failures = []
@@ -366,6 +395,8 @@ def _construct_semantic_proposal(value, inventory, wire_identity, *, compilation
             "violations":failures[:64],"additional_violation_count":max(0,len(failures)-64)})
     if compilation is not None:
         compilation.extend(_compile_contribution_geometry(routes, inventory))
+        if (owner_preconditions or {}).get("constraint_provenance_contract") == _CONSTRAINT_PROVENANCE_CONTRACT:
+            compilation.extend(_compile_constraint_provenance(routes, inventory, owner_preconditions))
     wire = {"v": 1, "h": wire_identity["wire_request_fingerprint"],
         "d": wire_identity["wire_table_fingerprint"], "routes": routes}
     body = json.dumps(wire, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -861,7 +892,8 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
         raw = json.loads(body,object_pairs_hook=_wire_json_object)
         value = _role_proposal_semantic_value(raw,inventory,wire_identity['tables']['capabilities'])
         compilation = [] if preconditions.get("semantic_compilation_contract") == _SEMANTIC_COMPILATION_CONTRACT else None
-        _wire, constructed = _construct_semantic_proposal(value,inventory,wire_identity,compilation=compilation)
+        _wire, constructed = _construct_semantic_proposal(value,inventory,wire_identity,compilation=compilation,
+            owner_preconditions=preconditions)
         return constructed, {'contract':_INTERPRETATION_ROLE_CONTRACT,
             'parent_wire_sha256':basis['raw_sha256'],'parent_binding':basis['parent_binding'],
             'interpretation_fingerprint':basis['original_wire_fingerprint'],
@@ -931,7 +963,8 @@ def _construct_local_candidate(body, preconditions, *, inventory=None, wire_iden
         if inventory is None or wire_identity is None:
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_LOCAL_EDIT_BASIS_DRIFT")
         value = _role_proposal_semantic_value({'routes':routes},inventory,wire_identity['tables']['capabilities'])
-        wire, _ = _construct_semantic_proposal(value,inventory,wire_identity,compilation=compilation)
+        wire, _ = _construct_semantic_proposal(value,inventory,wire_identity,compilation=compilation,
+            owner_preconditions=preconditions)
     else:
         wire = {"v": 1, "h": proposal.h, "d": proposal.d, "routes": routes}
     if semantic_basis:
@@ -1692,6 +1725,17 @@ _SEMANTIC_COMPILATION_INSTRUCTIONS = (
     "consumer is ONE binding regardless of rationale or u wording. Preserve genuinely distinct "
     "components and required contributions; never deduplicate by discarding meaning.")
 
+_CONSTRAINT_PROVENANCE_INSTRUCTIONS = (
+    "A Work constraint is a derived summary of earlier Human turns, not its own provenance. For its u, "
+    "cite the admitted origin from conditional_provenance_operands; if you cite the constraint itself "
+    "and the Owner has exactly one admitted origin for that consumer, the Owner substitutes that origin "
+    "and records it. Path-only checks (GIT_DIFF_SCOPE) are never required for a content, behavior or "
+    "form requirement; the change contract's own path scope already verifies changed files. Choose "
+    "GIT_DIFF_SCOPE only when the original text itself restricts which files may change. "
+    "whole_source_context_retention with whole_source_eligible=false means the whole source may NOT be "
+    "retained as context; never add RETAIN_CONTEXT or UNRESOLVED for a component that already has an "
+    "executable consumer.")
+
 _SEMANTIC_COMPILATION_REPAIR_INSTRUCTIONS = (
     "The repair unit is the complete candidate, not an isolated route. Answer with sources: for every "
     "source you change, give its COMPLETE new contribution set; it replaces all of that source's previous "
@@ -1705,7 +1749,7 @@ _SEMANTIC_COMPILATION_REPAIR_INSTRUCTIONS = (
     "UNRESOLVED. ")
 
 
-def _construction_consumer_instructions(contract, *, compilation=None):
+def _construction_consumer_instructions(contract, *, compilation=None, provenance=None):
     """Reuse existing consumer semantics separately from Wire encoding directions.
 
     Temporary construction changes representation, not the consumer contract.
@@ -1719,6 +1763,8 @@ def _construction_consumer_instructions(contract, *, compilation=None):
         # contract; the remaining semantic guidance is unchanged.
         semantics = semantics.replace("Preserve punctuation and all nonspace characters. ", "")
         semantics += _SEMANTIC_COMPILATION_INSTRUCTIONS + " "
+        if provenance == _CONSTRAINT_PROVENANCE_CONTRACT:
+            semantics += _CONSTRAINT_PROVENANCE_INSTRUCTIONS + " "
     # These are transport field labels, never Subject aliases or semantic choices.
     import re
     fields = {"s": "source_ref", "f": "current_fact_dependencies",
@@ -2888,7 +2934,8 @@ def _fulfillment_wire_value(output, owner_preconditions=None, *, construct=True,
                                 compilation = []
                         else:
                             proposal=_FulfillmentSemanticProposal.model_validate(proposal).model_dump(mode='json')
-                    _wire, body = _construct_semantic_proposal(proposal, inventory, wire_identity, compilation=compilation)
+                    _wire, body = _construct_semantic_proposal(proposal, inventory, wire_identity, compilation=compilation,
+                        owner_preconditions=owner_preconditions)
                     presentation["candidate_construction"] = {
                         "contract": owner_preconditions["candidate_construction_contract"], "representation": "SEMANTIC_QUOTE_PROPOSAL",
                         "proposal_sha256": sha256(original_body.encode()).hexdigest(),
@@ -3080,7 +3127,7 @@ class ModelFulfillmentCandidateProvider:
                  candidate_construction_contract=_CANDIDATE_CONSTRUCTION_CONTRACT,
                  raw_role_repair=False, construction_consumer_instructions=False, unparsed_claim_repair=False,
                  role_convergence=False, role_convergence_contract=_ROLE_CONVERGENCE_CONTRACT,
-                 decision_revision_actions=False, semantic_compilation=False):
+                 decision_revision_actions=False, semantic_compilation=False, constraint_provenance=False):
         self.runtime_factory = runtime_factory
         self.last_observation = None
         self.supports_candidate_construction = candidate_construction
@@ -3093,6 +3140,7 @@ class ModelFulfillmentCandidateProvider:
         self.supports_role_convergence = role_convergence
         self.supports_decision_revision_actions = decision_revision_actions
         self.supports_semantic_compilation = semantic_compilation
+        self.supports_constraint_provenance = constraint_provenance
         if role_convergence_contract not in _ROLE_CONVERGENCE_CONTRACTS:
             raise ValueError('OBLIGATION_FORMATION_REQUEST_VIEW_CONTRACT_INVALID')
         self.role_convergence_contract = role_convergence_contract
@@ -3118,7 +3166,7 @@ class ModelFulfillmentCandidateProvider:
         return cls(runtime_factory, candidate_construction=True,
             candidate_construction_contract=_INTERPRETATION_ROLE_CONTRACT,raw_role_repair=True,
             construction_consumer_instructions=True, unparsed_claim_repair=True, role_convergence=True,
-            decision_revision_actions=True, semantic_compilation=True)
+            decision_revision_actions=True, semantic_compilation=True, constraint_provenance=True)
 
     def form_wire_metadata(self, inventory, capabilities, *, validation_feedback=None, owner_preconditions=None):
         context = _fulfillment_wire_context(inventory, capabilities, validation_feedback=validation_feedback, owner_preconditions=owner_preconditions)
@@ -3441,7 +3489,8 @@ class ModelFulfillmentCandidateProvider:
                     and not basis and owner_preconditions.get('role_convergence_contract') not in _ROLE_CONVERGENCE_CONTRACTS):
                 semantics = _construction_consumer_instructions(
                     owner_preconditions.get("construction_consumer_instruction_contract"),
-                    compilation=owner_preconditions.get("semantic_compilation_contract"))
+                    compilation=owner_preconditions.get("semantic_compilation_contract"),
+                    provenance=owner_preconditions.get("constraint_provenance_contract"))
                 if semantics:
                     formation_instructions = semantics + "\n\n" + formation_instructions
             result = runtime.generate(purpose=ModelPurpose.STEERING_SEMANTIC,

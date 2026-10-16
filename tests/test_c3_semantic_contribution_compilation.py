@@ -350,3 +350,48 @@ def test_source_omitted_by_parent_is_restored_by_naming_it():
     result = owner.form_fulfillment_projection(revision, ir, provider=provider,
         source_revision=inventory["source_revision"], exact_target_paths=inventory["exact_target_paths"])
     assert len(calls) == 3 and all(b.state != "UNRESOLVED" for b in result)
+
+
+def _constraint_inventory():
+    return {"sources": [
+        {"kind": "IR_CLAUSE", "source_ref": "ir-clause:x:item:cl-3", "payload": {"clause": {"source_text": "图表区分"}}},
+        {"kind": "WORK_CONSTRAINT", "source_ref": "work-constraint:r:0", "payload": {"content": "Web 页面形式"}},
+        {"kind": "WORK_CONSTRAINT", "source_ref": "work-constraint:r:1", "payload": {"content": "两个来源"}}]}
+
+
+def _constraint_preconditions():
+    return {"constraint_provenance_contract": wire_owner._CONSTRAINT_PROVENANCE_CONTRACT, "sources": [
+        {"source": 0}, {"source": 1, "necessary_source_proofs": [{"capability": 0, "minimal_support_sets": [[0]]}]},
+        {"source": 2, "necessary_source_proofs": [{"capability": 0, "minimal_support_sets": [[0], [3]]}]}]}
+
+
+def test_a_constraint_self_citation_resolves_to_its_unique_admitted_origin():
+    routes = [{"s": 1, "c": 0, "u": [1]}, {"s": 2, "c": 0, "u": [2]}, {"s": 1, "c": 1, "u": [1]}, {"s": 0, "c": 0, "u": [0]}]
+    observations = wire_owner._compile_constraint_provenance(routes, _constraint_inventory(), _constraint_preconditions())
+    # Only the route with exactly one admitted alternative is compiled.
+    assert routes[0]["u"] == [0]
+    assert [o["route"] for o in observations] == [0]
+    assert observations[0]["predicate"] == "WORK_CONSTRAINT_SELF_CITATION_TO_UNIQUE_ADMITTED_ORIGIN"
+    # Ambiguous alternatives, consumers without a proof domain and clauses stay unchanged.
+    assert routes[1]["u"] == [2] and routes[2]["u"] == [1] and routes[3]["u"] == [0]
+
+
+def test_any_other_support_is_never_rewritten():
+    for u in ([], [0], [0, 1], [2]):
+        routes = [{"s": 1, "c": 0, "u": list(u)}]
+        assert wire_owner._compile_constraint_provenance(routes, _constraint_inventory(), _constraint_preconditions()) == []
+        assert routes[0]["u"] == list(u)
+
+
+def test_without_the_negotiated_contract_no_provenance_is_compiled():
+    from spg.providers.fulfillment_candidate import _construct_semantic_proposal
+    inventory = _constraint_inventory()
+    value = {"routes": [{"s": 1, "c": 0, "q": None, "f": [], "t": [], "u": [1], "r": "r"}]}
+    identity = {"wire_request_fingerprint": "0" * 64, "wire_table_fingerprint": "1" * 64}
+    plain = []
+    wire, _ = _construct_semantic_proposal(value, inventory, identity, compilation=plain, owner_preconditions={})
+    assert wire["routes"][0]["u"] == [1] and plain == []
+    compiled = []
+    wire, _ = _construct_semantic_proposal(value, inventory, identity, compilation=compiled,
+                                           owner_preconditions=_constraint_preconditions())
+    assert wire["routes"][0]["u"] == [0] and len(compiled) == 1

@@ -596,6 +596,11 @@ class PlanSteeringDriver:
                         iterations_executed=iterations,
                         stop_reason=SteeringDriverStopReason.CAPABILITY_UNAVAILABLE,
                         last_action=last_action)
+                # No further automatic round is permitted. Stop this episode
+                # visibly so the Human can retry, change the goal or pause.
+                self._observe_convergence(work_id, failed=True, boundary="FORMATION",
+                    owner_budget_exhausted=True,
+                    failure_signature=f"formation-exhausted:{error.scope.get('terminal_reason')}")
                 return SteeringActivationResult(work_id=work_id,
                     iterations_executed=iterations, stop_reason=SteeringDriverStopReason.BLOCKED,
                     last_action=last_action)
@@ -645,12 +650,17 @@ class PlanSteeringDriver:
                 SteeringDriverStopReason.NO_PROGRESS, SteeringDriverStopReason.BLOCKED,
                 SteeringDriverStopReason.CAPABILITY_UNAVAILABLE,
             }:
+                # A Work held only by a Formation stop that permits no further
+                # round has exhausted its episode; never wait silently on it.
+                exhausted = (result.stop_reason is SteeringDriverStopReason.BLOCKED
+                    and self._formation_exhausted(work_id))
                 observation = self._observe_convergence(work_id,
                     failed=result.stop_reason in {SteeringDriverStopReason.NO_PROGRESS,
                         SteeringDriverStopReason.BLOCKED, SteeringDriverStopReason.CAPABILITY_UNAVAILABLE},
                     failure_signature=None if result.stop_reason is None else canonical_digest(
                         {"stop_reason": result.stop_reason.value}),
-                    boundary="STEERING" if result.action is None else result.action.value)
+                    boundary="FORMATION" if exhausted else "STEERING" if result.action is None else result.action.value,
+                    owner_budget_exhausted=exhausted)
                 if observation.condition in {"NON_CONVERGING", "ESCALATED"}:
                     return SteeringActivationResult(work_id=work_id,
                         iterations_executed=iterations, stop_reason=SteeringDriverStopReason.BLOCKED,
@@ -782,7 +792,8 @@ class PlanSteeringDriver:
                 f"{observation.no_progress_count} failed no-progress outcomes, "
                 f"{observation.attempts} boundary attempts, {observation.elapsed_seconds}s. "
                 f"Missing acceptance: {', '.join(observation.missing_acceptance)}. "
-                "Evidence is preserved; restarting or changing candidate IDs does not reset this budget.")
+                "Evidence is preserved; changing candidate IDs does not reset this budget. "
+                "A Human retry opens one new episode with the same unchanged budgets.")
             current = fresh.reconstruction.latest_decision
             if not (
                 current is not None
@@ -805,13 +816,14 @@ class PlanSteeringDriver:
                     proposed_engineering_scope_fingerprint=fresh.engineering_scope_fingerprint,
                     attention_reason=SteeringAttentionReason.MATERIAL_RISK_OR_COST_DECISION,
                     human_decision_need=boundary_decision(
-                        fresh.work_objective, "连续的自动尝试未能推进当前成果。你希望暂停，还是修改这次的目标或边界后继续？",
+                        fresh.work_objective, "连续的自动尝试未能推进当前成果。你希望重新尝试、修改目标或边界，还是暂停？",
                         HumanDecisionEffect.COST_OR_RISK,
                         tuple(item.reference for item in fresh.basis.resolved_reality),
-                        (("暂停这次生产", "停止继续消耗执行资源，保留当前记录和已有成果。"),
-                         ("调整目标或边界", "通过新的明确指令修订当前生产边界，已有证据仍保留。")),
-                        why_now=reason, impact="The current unchanged Work has exhausted its bounded convergence budget; no further unchanged retries are authorized."),
-                    recommendation="Review preserved boundary diagnostics; do not restart the unchanged Work as a repair.",
+                        (("重新尝试", "按相同的有界预算重新开始一轮自动尝试，已有记录保留。"),
+                         ("调整目标或边界", "通过新的明确指令修订当前生产边界，已有证据仍保留。"),
+                         ("暂停这次生产", "停止继续消耗执行资源，保留当前记录和已有成果。")),
+                        why_now=reason, impact="The current episode has exhausted its bounded convergence budget; no further automatic retries run without a Human choice."),
+                    recommendation="Retry once if the stop looks stochastic; otherwise revise the goal or boundary, or pause.",
                     expected_impact="Automatic retries stop; no authority or delivery is granted."))
         return observation
 
@@ -989,6 +1001,11 @@ class PlanSteeringDriver:
                     work.status in {WorkStatus.READY, WorkStatus.RUNNING}
                     or stale_attention_with_new_request
                     or (work.status is WorkStatus.BLOCKED and self._formation_round_pending(work.work_id))
+                    # A silently exhausted Formation stop is surfaced as an incident.
+                    or (work.status is WorkStatus.BLOCKED
+                        and work.most_recent_meaningful_event == "OBLIGATION_PROJECTION_UNRESOLVED"
+                        and self._formation_exhausted(work.work_id)
+                        and not self._work_convergence_halted(work.work_id))
                 )
                 and not self.production_orchestrator.is_active(work.work_id)
                 and self._restart_eligible(work.work_id)
@@ -999,6 +1016,14 @@ class PlanSteeringDriver:
 
     def _formation_round_pending(self, work_id: UUID) -> bool:
         """A permitted next Formation round survives a restart (its timer did not)."""
+        return self._formation_round_state(work_id) is True
+
+    def _formation_exhausted(self, work_id: UUID) -> bool:
+        """The current revision has a Formation stop and no permitted next round."""
+        return self._formation_round_state(work_id) is False
+
+    def _formation_round_state(self, work_id: UUID) -> bool | None:
+        """None without a Formation stop; else whether a next round is permitted."""
         from sqlalchemy import select
         from spg.application.governed_obligations import formation_round_for
         from spg.infrastructure.persistence.runtime_schema import governance_records
@@ -1010,9 +1035,11 @@ class PlanSteeringDriver:
                         governance_records.c.decision_type == "WORK_FULFILLMENT_STOP_OBSERVATION",
                         governance_records.c.scope["work_reality_revision_id"].astext == str(revision.id),
                     ).order_by(governance_records.c.created_at.desc()).limit(1)).scalar()
-            return bool(source is not None and formation_round_for(self.database, revision, source)[2])
+            if source is None:
+                return None
+            return bool(formation_round_for(self.database, revision, source)[2])
         except (ValueError, ProductInvariantViolation):
-            return False
+            return None
 
     def _unacknowledged_admitted_request(
         self, frame: PlanFrame, *, revision_acknowledged: bool | None = None,
@@ -1939,7 +1966,7 @@ class PlanSteeringDriver:
             revision = ProductStore(uow.session).current_work_reality_revision(work_id)
         if revision is None or str(revision.id) != stop_scope.get("work_reality_revision_id"):
             return False
-        next_round, kind, permitted = formation_round_for(
+        next_round, kind, permitted, _ = formation_round_for(
             self.database, revision, stop_scope.get("source_revision"))
         if not permitted:
             return False
