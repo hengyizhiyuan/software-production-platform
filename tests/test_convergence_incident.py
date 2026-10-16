@@ -89,3 +89,22 @@ def test_a_resolved_incident_no_longer_asks_the_human():
     assert _convergence_incident_resolved([record("RESTART_CONVERGENCE_EPISODE", decision.id)], decision)
     assert _convergence_incident_resolved([record("PAUSE_AFTER_CONVERGENCE_INCIDENT", decision.id)], decision)
     assert not _convergence_incident_resolved([record("RESTART_CONVERGENCE_EPISODE", uuid4())], decision)
+
+
+def test_only_a_restart_lets_production_continue_past_the_incident(monkeypatch):
+    import spg.infrastructure.persistence.runtime_store as runtime_store
+    from spg.application.steering_production import SteeringProductionService
+    decision = incident(); decision.id = uuid4()
+    for kind, expected in (("RESTART_CONVERGENCE_EPISODE", True), ("PAUSE_AFTER_CONVERGENCE_INCIDENT", False)):
+        records = [SimpleNamespace(decision_type=kind, scope={"steering_decision_id": str(decision.id)})]
+        monkeypatch.setattr(runtime_store, "RuntimeStore", lambda _session, records=records: SimpleNamespace(
+            governance_for_subject=lambda _subject: records))
+
+        class UoW:
+            session = None
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+
+        service = SteeringProductionService.__new__(SteeringProductionService)
+        service.database = SimpleNamespace(unit_of_work=UoW)
+        assert service._convergence_incident_resolved(uuid4(), decision) is expected

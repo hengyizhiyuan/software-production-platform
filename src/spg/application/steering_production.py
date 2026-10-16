@@ -140,6 +140,15 @@ class SteeringProductionService:
                     "source_references": refs}
         return {"status": "READY", "source_references": refs}
 
+    def _convergence_incident_resolved(self, work_id: UUID, decision) -> bool:
+        """A convergence incident the Human answered with 重新尝试 no longer stops production."""
+        from spg.application.work import _convergence_incident_resolved
+        from spg.infrastructure.persistence.runtime_store import RuntimeStore
+        with self.database.unit_of_work() as uow:
+            records = [record for record in RuntimeStore(uow.session).governance_for_subject(str(work_id))
+                       if record.decision_type == "RESTART_CONVERGENCE_EPISODE"]
+        return _convergence_incident_resolved(records, decision)
+
     def materialize_request(self, work_id: UUID) -> SteeringProductionRequest:
         reconstruction = SteeringApplicationService(self.database).reconstruct(work_id)
         step = reconstruction.current_step
@@ -152,6 +161,7 @@ class SteeringProductionService:
             and reconstruction.latest_decision.current_step_id == step.id
             and reconstruction.latest_decision.steering_outcome
             is SteeringOutcome.HUMAN_ATTENTION
+            and not self._convergence_incident_resolved(work_id, reconstruction.latest_decision)
         ):
             raise SteeringInvariantViolation(
                 "Current PRODUCE Step is stopped at unresolved Human Attention"
