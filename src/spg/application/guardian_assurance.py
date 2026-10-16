@@ -209,6 +209,15 @@ class GuardianAssuranceClient:
             if kind == "verification":
                 record = runtime.verification_record(record_id)
                 return None if record is None else record.model_dump(mode="json")
+            if kind == "production-run":
+                record = runtime.run(record_id)
+                return None if record is None else record.model_dump(mode="json")
+            if kind == "production-plan":
+                record = runtime.plan_revision(record_id)
+                return None if record is None else record.model_dump(mode="json")
+            if kind == "proposal-admissibility":
+                return {"records": [record.model_dump(mode="json") for record in
+                    runtime.production_admissibility_for_snapshot(record_id)]}
             if kind == "candidate":
                 record = runtime.baseline_candidate(record_id)
                 if record is None:

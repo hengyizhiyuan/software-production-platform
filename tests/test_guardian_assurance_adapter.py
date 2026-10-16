@@ -35,6 +35,32 @@ class _Database:
         return _Uow()
 
 
+@pytest.mark.parametrize("kind,method,multiple", [
+    ("production-run", "run", False),
+    ("production-plan", "plan_revision", False),
+    ("proposal-admissibility", "production_admissibility_for_snapshot", True),
+])
+@pytest.mark.parametrize("present", [False, True])
+def test_guardian_resolves_raw_graph_owner_records(monkeypatch, kind, method, multiple, present):
+    identity = uuid4()
+    payload = {"id": str(uuid4()), "source_baseline_id": str(uuid4())}
+    row = SimpleNamespace(model_dump=lambda **_: payload)
+    calls = []
+
+    def lookup(record_id):
+        calls.append(record_id)
+        return ((row,) if present else ()) if multiple else (row if present else None)
+
+    monkeypatch.setattr("spg.application.guardian_assurance.RuntimeStore",
+        lambda _: SimpleNamespace(**{method: lookup}))
+    client = GuardianAssuranceClient.__new__(GuardianAssuranceClient)
+    client.delivery = SimpleNamespace(database=_Database())
+    observed = client._resolve_owner_evidence(f"{kind}:{identity}")
+    assert calls == [identity]
+    assert observed == ({"records": [payload] if present else []} if multiple
+                        else payload if present else None)
+
+
 def _basis(tmp_path, monkeypatch):
     work_id, revision_id, candidate_id, preview_id = (uuid4() for _ in range(4))
     work = SimpleNamespace(current_work_reality_revision_id=revision_id,

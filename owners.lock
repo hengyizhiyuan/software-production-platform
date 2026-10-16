@@ -11,8 +11,8 @@
     "guardian": {
       "repository": "https://github.com/hengyizhiyuan/guardian.git",
       "branch": "claude/c3-formation-ai-native-convergence",
-      "commit": "ab26128d767ba4608e6db22662d48f06f81c1bea",
-      "source_digest": "6995516050277bfc361720702a6c9ffdf8c368579a1f08175fa4ecce0ae52298"
+      "commit": "3836a9b2877584b4be5933da5545576e4b9bf1e7",
+      "source_digest": "1a9fc85142acc8b906e9f55403d77596269865d84cab6d878d6b1f83607cb09c"
     }
   }
 }
