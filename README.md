@@ -19,6 +19,14 @@ Open:
 
     http://127.0.0.1:8000/app
 
+For one-click single-owner login, set `SPG_LOGIN_PREFILL_ENABLED=true` alongside
+`SPG_OPERATOR_TOKEN` in `.env`, then recreate the app with
+`docker compose up -d --build app`. The login page, login dialog and Admin login
+read the runtime token and fill the password field; click **登录** to sign in.
+Token changes take effect when the app is recreated. Prefill is disabled by
+default: enabling it lets anyone who can reach this deployment sign in as owner.
+The token is served with `Cache-Control: no-store` and is not saved in browser storage.
+
 View application logs:
 
     docker compose logs -f app

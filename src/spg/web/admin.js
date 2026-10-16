@@ -68,7 +68,7 @@
       `<div class="admin-trace-tabs" role="tablist" aria-label="分析报告">${analysisTabs.map(([key,title])=>`<button id="analysis-tab-${key}" role="tab" data-analysis-tab="${key}" aria-selected="${key===tab}" tabindex="${key===tab?0:-1}" aria-controls="analysis-tab-panel">${title}</button>`).join('')}</div><section class="admin-panel admin-trace-panel" id="analysis-tab-panel" role="tabpanel" aria-labelledby="analysis-tab-${tab}">${panel}</section>`;
   }
   function navigate(section) {history.pushState({}, '', section === 'overview' ? '/admin' : `/admin/${section}`);currentRun = null;render();}
-  function login() { content.innerHTML = heading('登录 Watt Admin', '使用现有 Watt 拥有者凭证。质量证据和运行数据仅对已登录的拥有者开放。') + `<form class="admin-form" data-admin-login><label>登录凭证<input type="password" name="token" required autocomplete="current-password"></label><button class="button" type="submit">登录</button></form>`; }
+  function login() { content.innerHTML = heading('登录 Watt Admin', '使用现有 Watt 拥有者凭证。质量证据和运行数据仅对已登录的拥有者开放。') + `<form class="admin-form" data-admin-login><label>登录凭证<input type="password" name="token" required autocomplete="current-password"></label><button class="button" type="submit">登录</button></form>`; window.WattLogin.prefill($('[data-admin-login]')); }
   function cards(items) {return `<div class="admin-cards">${items.map(([title,value,detail]) => `<section class="admin-card"><h2>${esc(title)}</h2><strong>${value}</strong><p>${esc(detail || '')}</p></section>`).join('')}</div>`;}
   let tableSequence=0;
   function compactRows(headers, items, empty='暂无记录。') {

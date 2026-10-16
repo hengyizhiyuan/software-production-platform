@@ -29,6 +29,7 @@ services:
       SPG_REPOSITORY_PATH: /var/lib/spg/repository
       SPG_RUNTIME_PROFILE: local-docker-mvp
       SPG_OPERATOR_TOKEN: ${SPG_OPERATOR_TOKEN:?Set a dedicated Watt operator token of at least 32 characters}
+      SPG_LOGIN_PREFILL_ENABLED: ${SPG_LOGIN_PREFILL_ENABLED:-false}
       SPG_GITHUB_READ_TOKEN: ${SPG_GITHUB_READ_TOKEN:-}
       SPG_GITHUB_WRITE_TOKEN: ${SPG_GITHUB_WRITE_TOKEN:-}
       SPG_WEB_SEARCH_API_KEY: ${SPG_WEB_SEARCH_API_KEY:-}

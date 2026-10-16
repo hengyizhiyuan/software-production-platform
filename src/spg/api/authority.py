@@ -110,6 +110,15 @@ def install_authority_boundary(api: FastAPI, *, database, settings) -> None:
         return FileResponse(files("spg.web").joinpath("index.html"),
                             media_type="text/html")
 
+    @api.get("/auth/login-prefill", include_in_schema=False)
+    async def login_prefill():
+        # Explicit single-owner convenience: enabling this exposes the login
+        # credential to anyone who can reach this deployment's login form.
+        return JSONResponse(
+            {"token": secret if settings.login_prefill_enabled else None},
+            headers={"Cache-Control": "no-store"},
+        )
+
     @api.get("/auth/session", include_in_schema=False)
     async def current_actor():
         return {"actor_id": ACTOR_ID, "organization_id": ORGANIZATION_ID}
@@ -131,6 +140,8 @@ def install_authority_boundary(api: FastAPI, *, database, settings) -> None:
             public_pages and request.method in {"GET", "HEAD"}
         ) or (
             path == "/auth/session" and request.method == "POST"
+        ) or (
+            path == "/auth/login-prefill" and request.method == "GET"
         ):
             return await call_next(request)
         bearer = request.headers.get("authorization", "")

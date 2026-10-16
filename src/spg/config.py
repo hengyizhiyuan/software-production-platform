@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     quality_test_database_url: str | None = None
     auth_mode: Literal["required", "test-only-disabled"] = "required"
     operator_token: SecretStr | None = None
+    login_prefill_enabled: bool = False
     repository_path: Path = Field(default_factory=Path.cwd)
     workspace_root: Path = Path(".spg/workspaces")
     database_url: str | None = Field(
