@@ -600,7 +600,10 @@ class PlanSteeringDriver:
                 # visibly so the Human can retry, change the goal or pause.
                 self._observe_convergence(work_id, failed=True, boundary="FORMATION",
                     owner_budget_exhausted=True,
-                    failure_signature=f"formation-exhausted:{error.scope.get('terminal_reason')}")
+                    failure_signature=canonical_digest({"boundary": "FORMATION",
+                        "terminal_reason": error.scope.get("terminal_reason")}),
+                    failure_details={"terminal_reason": error.scope.get("terminal_reason"),
+                        "stop_observation_id": str(error.observation_id)})
                 return SteeringActivationResult(work_id=work_id,
                     iterations_executed=iterations, stop_reason=SteeringDriverStopReason.BLOCKED,
                     last_action=last_action)
@@ -762,7 +765,7 @@ class PlanSteeringDriver:
 
     def _observe_convergence(self, work_id: UUID, *, failed: bool,
         failure_signature: str | None = None, boundary: str = "STEERING",
-        owner_budget_exhausted: bool = False):
+        owner_budget_exhausted: bool = False, failure_details: dict | None = None):
         basis = self._convergence_basis(work_id)
         human_intervention_count = basis.pop("human_intervention_count")
         from spg.application.measurement import ProductionMeasurementService
@@ -784,7 +787,8 @@ class PlanSteeringDriver:
                 evidence={"source": "persisted Work/Runtime and Candidate Preview",
                     "product_id": economics["product_id"],
                     "human_acceptance": "PENDING", "delivery_authorized": False,
-                    "owner_budget_exhausted": owner_budget_exhausted})
+                    "owner_budget_exhausted": owner_budget_exhausted,
+                    **({"failure_details": failure_details} if failure_details else {})})
             uow.commit()
         if observation.condition in {"NON_CONVERGING", "ESCALATED"}:
             fresh = self.frames.assemble(work_id)
@@ -1815,8 +1819,16 @@ class PlanSteeringDriver:
     def _run_scheduled(self, work_id: UUID) -> None:
         try:
             outcome = self.activate(work_id)
-        except Exception:
+        except Exception as error:
             LOGGER.exception("Steering activation failed Work=%s", work_id)
+            try:
+                self._observe_convergence(work_id, failed=True, boundary="STEERING_ERROR",
+                    owner_budget_exhausted=True,
+                    failure_signature=canonical_digest({"boundary": "STEERING_ERROR",
+                        "error_type": type(error).__name__}),
+                    failure_details={"error_type": type(error).__name__})
+            except Exception:
+                LOGGER.exception("Steering stop persistence failed Work=%s", work_id)
             outcome = SteeringActivationResult(
                 work_id=work_id,
                 iterations_executed=0,

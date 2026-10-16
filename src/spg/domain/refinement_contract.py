@@ -98,7 +98,7 @@ class WorkConvergenceObservation(BaseModel):
     predecessor_id: UUID | None = None
     sequence: int = Field(ge=1)
     boundary: str
-    failure_signature: str | None = None
+    failure_signature: str | None = Field(default=None, max_length=64)
     candidate_identity: str | None = None
     reality_identity: str
     missing_acceptance: tuple[str, ...]

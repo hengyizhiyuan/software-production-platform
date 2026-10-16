@@ -182,8 +182,9 @@ def test_driver_stop_blocks_unless_a_bounded_formation_round_is_scheduled(monkey
     exhausted = []
     def observe(work_id, **kw):
         assert kw == {"failed": True, "boundary": "FORMATION", "owner_budget_exhausted": True,
-                      "failure_signature": kw["failure_signature"]}
-        assert kw["failure_signature"].startswith("formation-exhausted:OBLIGATION_FORMATION_TRANSPORT_")
+                      "failure_signature": kw["failure_signature"], "failure_details": kw["failure_details"]}
+        assert len(kw["failure_signature"]) == 64
+        assert kw["failure_details"]["terminal_reason"].startswith("OBLIGATION_FORMATION_TRANSPORT_")
         exhausted.append(work_id)
     scheduled = []
     driver = SimpleNamespace(_work_convergence_halted=lambda _: False,

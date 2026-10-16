@@ -141,3 +141,14 @@ def test_full_overflow_yields_explicit_partial_package_with_failure_chain(monkey
     assert 'Full owner row bodies excluded' in str(manifest['capture_warnings'])
     assert 'execution_events:failure' in body['report.md'].decode()
     assert sum(map(len, body.values())) <= 25000
+
+
+def test_trace_does_not_promote_historical_local_recovery_over_latest_escalation():
+    from spg.evaluation.production_trace import project_trace
+    old={'id':str(uuid4()),'created_at':'2026-10-16T15:14:47+00:00',
+         'final_result':'LOCAL_OBLIGATION_RECOVERED'}
+    latest={'id':str(uuid4()),'created_at':'2026-10-16T15:23:49+00:00',
+            'final_result':'ESCALATED','work_resume_result':'NOT_RESUMED'}
+    trace=project_trace({'self_refine_events':[latest,old]},scene='test',purpose='test')
+    assert trace['diagnosis']['recovered'] is False
+    assert '未恢复生产' in trace['diagnosis']['stability']

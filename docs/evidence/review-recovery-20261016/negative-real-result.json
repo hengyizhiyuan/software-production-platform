@@ -1,0 +1,39 @@
+{
+  "scenario": "Real Review of a deliberately wrong content-as-retention route; declared isolated fixture",
+  "production_mutations": false,
+  "real_call_count": 1,
+  "rejection": "OBLIGATION_SOURCE_CONSUMPTION_CONSUMER_MISMATCH",
+  "source_verdict": false,
+  "model": {
+    "request_id": "ddbc42c9-e0a6-4214-ab40-4522abf10c2f",
+    "provider": "deepseek",
+    "requested_model": "deepseek-flash",
+    "effective_model": "deepseek-flash",
+    "usage": {
+      "input_tokens": 36877,
+      "output_tokens": 2876,
+      "cached_tokens": 0,
+      "reasoning_tokens": 0,
+      "total_tokens": 39753,
+      "unknown": false
+    },
+    "timing": {
+      "request_sent_seconds": 0.0015887760091573,
+      "first_response_event_seconds": 4.9902039570733905,
+      "first_token_seconds": 6.6153843421489,
+      "completed_seconds": 17.642433742061257
+    },
+    "transport_retry_count": 0,
+    "output_sha256": "176275b7e66936e980037803936e7ba3f31df93655b6fd7822b82011306dd27e",
+    "output_bytes": 11076,
+    "output_evidence": {
+      "provider_status": "completed",
+      "delta_sha256": "176275b7e66936e980037803936e7ba3f31df93655b6fd7822b82011306dd27e",
+      "delta_bytes": 11076,
+      "terminal_text_observed": true,
+      "terminal_sha256": "176275b7e66936e980037803936e7ba3f31df93655b6fd7822b82011306dd27e",
+      "terminal_bytes": 11076,
+      "selection": "TERMINAL_MATCHED_DELTA"
+    }
+  }
+}

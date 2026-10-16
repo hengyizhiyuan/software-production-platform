@@ -71,6 +71,7 @@ def test_invalid_critic_identity_is_bound_to_review_not_mislabeled_as_mapping_fa
             review["component_results"] = review["component_results"][:1]
             review["component_results"][0]["component_id"] = review["component_results"][0]["component_id"][:48]
     provider, calls = controlled_model_provider(inventory, plan, review_change=change)
+    provider.supports_same_candidate_review_repair = False  # Retained generation-repair lineage contract.
     kwargs = {"provider": provider, "exact_target_paths": inventory["exact_target_paths"]}
     result = a.form_fulfillment_projection(revision, ir, **kwargs)
     assert result[0].formation_receipt["terminal_reason"] == "VALIDATED_PROJECTION" and len(calls) == 4
@@ -130,6 +131,7 @@ def test_observed_only_invalid_json_review_recovers_without_repeating_critic():
                 result = replace(result, output_text='{')
         return result
     runtime.generate = invalid_once
+    provider.supports_same_candidate_review_repair = False  # Exercise historical observed-only replay.
     original_review = provider.review
     class AfterObserved(BaseException):
         pass
@@ -478,6 +480,7 @@ def test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_withou
             else:
                 for route in wire["routes"]:route["r"]="Unadmitted controlled repeated proposal. "*6
     provider,calls=controlled_model_provider(inventory,plan,wire_change=oversized)
+    provider.supports_same_candidate_review_repair = False  # Exercise the historical next-generation capacity stop.
     result=a.form_fulfillment_projection(revision,ir,provider=provider,exact_target_paths=inventory["exact_target_paths"])
     failed=next(r for r in provider._fulfillment_receipts if r["stage"]=="CANDIDATE_VALIDATED" and r["attempt"]==1)
     assert failed["failed_predicate"]=="OBLIGATION_FORMATION_EXPANDED_RECEIPT_LIMIT"

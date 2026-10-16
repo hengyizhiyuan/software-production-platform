@@ -1692,7 +1692,7 @@ def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=N
             terminal = terminals[0]
             attempt = terminal["attempt"]
             pending = [r for r in rows if r.get("stage") == "MODEL_REQUEST_PENDING" and r.get("attempt") == attempt]
-            review_rows = [r for r in rows if r.get("stage") == "SEMANTIC_REVIEW_VALIDATED"
+            review_rows = [r for r in rows if r.get("stage") in {"SEMANTIC_REVIEW_VALIDATED", "SEMANTIC_REVIEW_REPAIR_VALIDATED"}
                 and r.get("attempt") == attempt and r.get("validation_passed") is True]
             reconstructed = FulfillmentProjectionCandidate(inventory_fingerprint=inventory["inventory_fingerprint"], routes=tuple(routes))
             original = FulfillmentProjectionCandidate.model_validate(terminal.get("candidate"))
@@ -1707,8 +1707,9 @@ def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=N
             wire_candidate = _decode_fulfillment_candidate_wire(raw, inventory, capabilities,
                 validation_feedback=start.get("feedback"), owner_preconditions=start.get("owner_source_preconditions"))
             wire_candidate, _ = locate_projection_components(wire_candidate, inventory)
-            review_pending = [r for r in rows if r.get("stage") == "SEMANTIC_REVIEW_PENDING" and r.get("attempt") == attempt]
-            review_observed = [r for r in rows if r.get("stage") == "SEMANTIC_REVIEW_OBSERVED" and r.get("attempt") == attempt]
+            review_prefix = "SEMANTIC_REVIEW_REPAIR_" if review_rows and review_rows[0]["stage"] == "SEMANTIC_REVIEW_REPAIR_VALIDATED" else "SEMANTIC_REVIEW_"
+            review_pending = [r for r in rows if r.get("stage") == review_prefix+"PENDING" and r.get("attempt") == attempt]
+            review_observed = [r for r in rows if r.get("stage") == review_prefix+"OBSERVED" and r.get("attempt") == attempt]
             if (fulfillment_candidate_fingerprint(wire_candidate) != fulfillment_candidate_fingerprint(original)
                     or len(review_pending) != 1 or len(review_observed) != 1
                     or review_pending[0].get("candidate_fingerprint") != fulfillment_candidate_fingerprint(original)
@@ -2277,6 +2278,15 @@ class FulfillmentFormationReceipts:
     def _check_append(prior, stage, attempt):
         if any(row.get("terminal") for row in prior):
             raise ValueError("OBLIGATION_FORMATION_PENDING_OR_TERMINAL")
+        if stage in {"SEMANTIC_REVIEW_PENDING", "SEMANTIC_REVIEW_REPAIR_PENDING"}:
+            if sum(row["stage"] in {"SEMANTIC_REVIEW_PENDING", "SEMANTIC_REVIEW_REPAIR_PENDING"}
+                    for row in prior) >= 2:
+                raise ValueError("OBLIGATION_SEMANTIC_REVIEW_BUDGET_EXHAUSTED")
+        if stage == "SEMANTIC_REVIEW_REPAIR_PENDING":
+            if (any(row["stage"] == stage for row in prior)
+                    or not any(row["stage"] == "SEMANTIC_REVIEW_VALIDATED" and row["attempt"] == attempt
+                        and row.get("validation_passed") is False for row in prior)):
+                raise ValueError("OBLIGATION_SEMANTIC_REVIEW_BUDGET_EXHAUSTED")
         if stage == "SEMANTIC_REVIEW_PENDING":
             if (any(row["stage"] == stage and row["attempt"] == attempt for row in prior)
                     or not any(row["stage"] == "MODEL_RESPONSE_OBSERVED" and row["attempt"] == attempt for row in prior)):
@@ -3160,6 +3170,9 @@ def _semantic_repair_observation(rows, attempt, candidate, inventory, capabiliti
     """Only a rejected, persisted independent Review may feed semantic repair."""
     from spg.providers.fulfillment_candidate import _FulfillmentWireReceiptIdentityError
     def single(stage):
+        if stage.startswith("SEMANTIC_REVIEW_") and any(
+                r.get("stage") == "SEMANTIC_REVIEW_REPAIR_VALIDATED" and r.get("attempt") == attempt for r in rows):
+            stage = stage.replace("SEMANTIC_REVIEW_", "SEMANTIC_REVIEW_REPAIR_", 1)
         matches = [r for r in rows if r.get("stage") == stage and r.get("attempt") == attempt]
         if len(matches) != 1:
             raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
@@ -3652,6 +3665,7 @@ def _validate_wire_feedback_lineage(rows, revision, ir, inventory, capabilities)
             if len(parents) != 1 or start.get("feedback_receipt_id") != parents[0].get("receipt_id"):
                 raise _FulfillmentWireReceiptIdentityError("OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT")
     _validate_review_repair_receipts(rows, revision, inventory, capabilities)
+    _validate_same_candidate_reviews(rows, revision, inventory, capabilities)
 
 
 def plan_with_formation_receipts(database, work_id, plan, *, inventory_fingerprint=None):
@@ -3847,7 +3861,199 @@ def _validate_review_repair_receipts(rows, revision, inventory, capabilities):
                     drift()
 
 
-def _review_fulfillment_candidate(provider, candidate, inventory, recorder, attempt, capabilities,
+_REVIEW_REPAIR_PREFIX = "SEMANTIC_REVIEW_REPAIR_"
+_REVIEW_PENDING_STAGES = {"SEMANTIC_REVIEW_PENDING", "SEMANTIC_REVIEW_REPAIR_PENDING"}
+
+
+def _same_candidate_review_feedback(rows, attempt, revision, inventory, capabilities, candidate):
+    """Recompute critic defects on the retained candidate, never propose a verdict."""
+    from spg.providers.fulfillment_candidate import _FulfillmentWireReceiptIdentityError
+    original = tuple(r for r in rows if not r['stage'].startswith(_REVIEW_REPAIR_PREFIX))
+    observation = _semantic_repair_observation(original, attempt, candidate, inventory, capabilities)
+    start = next(r for r in rows if r['stage'] == 'MODEL_REQUEST_PENDING' and r['attempt'] == attempt)
+    preconditions = start.get('owner_source_preconditions') or {}
+    if 'review_contract_failure' in observation:
+        errors = [{'code': observation['failed_predicate'],
+                   'review_contract_failure': observation['review_contract_failure']}]
+    else:
+        review = FulfillmentSemanticReviewCandidate.model_validate(observation['review'])
+        errors = [r for r in _review_consumption_failures(candidate, inventory, review,
+            required=preconditions.get('review_source_consumption_contract') in _SOURCE_CONSUMPTION_CONTRACTS,
+            validate_negative_claims=preconditions.get('review_source_consumption_contract') == _SOURCE_CONSUMPTION_CONTRACT)
+            if r.get('failed_owner') == 'INDEPENDENT_SEMANTIC_REVIEW_OUTPUT']
+    if not errors:
+        return None
+    _, basis = _wire_response_basis(rows, attempt, revision, inventory, capabilities)
+    basis = {**basis, 'candidate_fingerprint': fulfillment_candidate_fingerprint(candidate),
+        'components_fingerprint': fulfillment_components_fingerprint(candidate)}
+    return {'contract': 'existing-independent-review-feedback-v1', 'same_candidate': True,
+        'formation_attempt': attempt, 'review_slot': 2,
+        'previous_formation_wire_binding': basis, 'current_formation_wire_binding': basis,
+        'previous_review_binding': {k:v for k,v in observation.items() if k != 'review'},
+        'rejected_previous_mechanical_checks': errors,
+        'instruction': 'Review the SAME retained candidate independently. These are rejected mechanical observations, '
+            'not a semantic answer. Use request-bound consumer operands. Preserve every requirement and independent '
+            'verdict. This consumes the remaining second Review slot; no new Formation call or budget reset.'}
+
+
+def _validate_same_candidate_reviews(rows, revision, inventory, capabilities):
+    from spg.providers.fulfillment_candidate import _decode_fulfillment_candidate_wire, _FulfillmentWireReceiptIdentityError
+    def drift():
+        raise _FulfillmentWireReceiptIdentityError('OBLIGATION_SAME_CANDIDATE_REVIEW_IDENTITY_DRIFT')
+    repairs = [r for r in rows if r['stage'].startswith(_REVIEW_REPAIR_PREFIX)]
+    if not repairs:
+        return
+    pending = [r for r in repairs if r['stage'] == _REVIEW_REPAIR_PREFIX + 'PENDING']
+    if len(pending) != 1 or sum(r['stage'] in _REVIEW_PENDING_STAGES for r in rows) > 2:
+        drift()
+    parent = pending[0]; attempt = parent['attempt']
+    start = next((r for r in rows if r['stage'] == 'MODEL_REQUEST_PENDING' and r['attempt'] == attempt), None)
+    if start is None:
+        drift()
+    raw, _ = _wire_response_basis(rows, attempt, revision, inventory, capabilities)
+    candidate = _decode_fulfillment_candidate_wire(raw, inventory, capabilities,
+        validation_feedback=start.get('feedback'), owner_preconditions=start.get('owner_source_preconditions'))
+    candidate, _ = locate_projection_components(candidate, inventory)
+    expected = _same_candidate_review_feedback(rows, attempt, revision, inventory, capabilities, candidate)
+    if (expected is None or parent.get('review_repair_context') != expected
+            or parent.get('review_repair_context_fingerprint') != canonical_fingerprint(expected)
+            or parent.get('candidate_fingerprint') != fulfillment_candidate_fingerprint(candidate)
+            or parent.get('components_fingerprint') != fulfillment_components_fingerprint(candidate)
+            or parent.get('capabilities_fingerprint') != canonical_fingerprint(capabilities)):
+        drift()
+    for suffix in ('OBSERVED', 'VALIDATED'):
+        if sum(r['stage'] == _REVIEW_REPAIR_PREFIX + suffix for r in repairs) > 1:
+            drift()
+    if any(r['attempt'] != attempt or r['stage'] not in {
+            _REVIEW_REPAIR_PREFIX+s for s in ('PENDING', 'OBSERVED', 'VALIDATED')} for r in repairs):
+        drift()
+    observed = next((r for r in repairs if r['stage'].endswith('_OBSERVED')), None)
+    validated = next((r for r in repairs if r['stage'].endswith('_VALIDATED')), None)
+    if observed is None:
+        if validated is not None: drift()
+        return  # Unknown transport outcome is never dispatched again.
+    output = observed.get('review_output')
+    if (observed.get('review_repair_context_fingerprint') != parent['review_repair_context_fingerprint']
+            or (observed.get('model') or {}).get('review_repair_context_fingerprint') != parent['review_repair_context_fingerprint']
+            or (observed.get('review_identity_binding') or {}).get('consumer_operand_contract') != 'request-bound-consumer-operands-v1'
+            or observed.get('capabilities_fingerprint') != canonical_fingerprint(capabilities)
+            or not isinstance(output, str) or observed.get('review_retained') is not True
+            or observed.get('review_output_sha256') != sha256(output.encode()).hexdigest()
+            or observed.get('review_output_bytes') != len(output.encode())):
+        drift()
+    try:
+        result = FulfillmentSemanticReviewCandidate.model_validate(_review_wire_representation(
+            output, inventory=inventory, candidate=candidate, observed=observed))
+    except _FulfillmentWireReceiptIdentityError:
+        raise
+    except ValueError:
+        from spg.providers.fulfillment_candidate import _review_schema_failure_observation
+        diagnostic = _review_schema_failure_observation(output, inventory, candidate,
+            observed.get('review_identity_binding'), (observed.get('model') or {}).get('request_id'))
+        if validated is not None and (validated.get('validation_passed') is not False
+                or validated.get('failed_predicate') != 'OBLIGATION_SEMANTIC_REVIEW_SCHEMA_INVALID'
+                or validated.get('review_contract_failure') != diagnostic):
+            drift()
+        return
+    if validated is None:
+        return
+    if (validated.get('semantic_review') != result.model_dump(mode='json')
+            or validated.get('capabilities_fingerprint') != canonical_fingerprint(capabilities)):
+        drift()
+    try:
+        validate_projection_components(candidate, inventory, semantic_review=result,
+            review_source_consumption_contract=(start.get('owner_source_preconditions') or {}).get('review_source_consumption_contract'))
+    except ValueError as error:
+        if validated.get('validation_passed') is not False or validated.get('failed_predicate') != str(error): drift()
+    else:
+        if validated.get('validation_passed') is not True or validated.get('failed_predicate') is not None: drift()
+
+
+def _repair_same_candidate_review(provider, candidate, inventory, recorder, attempt, capabilities, revision):
+    """One remaining Review slot on the same candidate with append-only receipts."""
+    from spg.providers.fulfillment_candidate import _FulfillmentWireReceiptIdentityError
+    rows = recorder.records()
+    _validate_same_candidate_reviews(rows, revision, inventory, capabilities)
+    validated = next((r for r in rows if r['stage'] == _REVIEW_REPAIR_PREFIX+'VALIDATED'), None)
+    if validated is not None:
+        if not validated.get('validation_passed'):
+            raise ValueError(validated['failed_predicate'])
+        return validated['semantic_review']
+    context = _same_candidate_review_feedback(rows, attempt, revision, inventory, capabilities, candidate)
+    if context is None:
+        raise ValueError('OBLIGATION_SEMANTIC_COMPONENT_MISMATCH')
+    fingerprint = canonical_fingerprint(context)
+    observed = next((r for r in rows if r['stage'] == _REVIEW_REPAIR_PREFIX+'OBSERVED'), None)
+    if observed is None:
+        if any(r['stage'] == _REVIEW_REPAIR_PREFIX+'PENDING' for r in rows):
+            raise FulfillmentReviewOutcomeUnknown('OBLIGATION_SEMANTIC_REVIEW_PENDING_OUTCOME_UNKNOWN')
+        if sum(r['stage'] in _REVIEW_PENDING_STAGES for r in rows) >= 2:
+            raise ValueError('OBLIGATION_SEMANTIC_REVIEW_BUDGET_EXHAUSTED')
+        recorder.append(_REVIEW_REPAIR_PREFIX+'PENDING', attempt,
+            candidate_fingerprint=fulfillment_candidate_fingerprint(candidate),
+            components_fingerprint=fulfillment_components_fingerprint(candidate),
+            capabilities_fingerprint=canonical_fingerprint(capabilities),
+            review_repair_context=context, review_repair_context_fingerprint=fingerprint)
+        def callback(**values):
+            recorder.append(_REVIEW_REPAIR_PREFIX+'OBSERVED', attempt,
+                capabilities_fingerprint=canonical_fingerprint(capabilities),
+                review_repair_context_fingerprint=fingerprint, **values)
+        start = next(r for r in rows if r['stage']=='MODEL_REQUEST_PENDING' and r['attempt']==attempt)
+        try:
+            provider.review(inventory, candidate, capabilities=capabilities,
+                owner_preconditions=start.get('owner_source_preconditions'),
+                receipt_callback=callback, review_feedback=context)
+        except ValueError:
+            if not any(r['stage']==_REVIEW_REPAIR_PREFIX+'OBSERVED' for r in recorder.records()):
+                raise
+            # The original response was retained by the callback; the common
+            # parse path below records its rejection without replaying inference.
+        observed = next(r for r in recorder.records() if r['stage']==_REVIEW_REPAIR_PREFIX+'OBSERVED')
+    try:
+        result = FulfillmentSemanticReviewCandidate.model_validate(_review_wire_representation(
+            observed['review_output'], inventory=inventory, candidate=candidate, observed=observed))
+    except _FulfillmentWireReceiptIdentityError:
+        raise
+    except ValueError:
+        from spg.providers.fulfillment_candidate import _review_schema_failure_observation
+        diagnostic = _review_schema_failure_observation(observed['review_output'], inventory, candidate,
+            observed.get('review_identity_binding'), (observed.get('model') or {}).get('request_id'))
+        recorder.append(_REVIEW_REPAIR_PREFIX+'VALIDATED', attempt,
+            capabilities_fingerprint=canonical_fingerprint(capabilities), validation_passed=False,
+            failed_predicate='OBLIGATION_SEMANTIC_REVIEW_SCHEMA_INVALID', review_contract_failure=diagnostic)
+        raise ValueError('OBLIGATION_SEMANTIC_REVIEW_SCHEMA_INVALID')
+    try:
+        validate_projection_components(candidate, inventory, semantic_review=result,
+            review_source_consumption_contract=(next(r for r in recorder.records()
+                if r['stage']=='MODEL_REQUEST_PENDING' and r['attempt']==attempt).get('owner_source_preconditions') or {}).get('review_source_consumption_contract'))
+    except ValueError as error:
+        recorder.append(_REVIEW_REPAIR_PREFIX+'VALIDATED', attempt,
+            capabilities_fingerprint=canonical_fingerprint(capabilities), semantic_review=result.model_dump(mode='json'),
+            validation_passed=False, failed_predicate=str(error))
+        raise
+    recorder.append(_REVIEW_REPAIR_PREFIX+'VALIDATED', attempt,
+        capabilities_fingerprint=canonical_fingerprint(capabilities), semantic_review=result.model_dump(mode='json'),
+        validation_passed=True, failed_predicate=None)
+    return result.model_dump(mode='json')
+
+
+def _review_fulfillment_candidate(provider, candidate, inventory, recorder, attempt, capabilities, *, revision=None):
+    try:
+        return _review_fulfillment_once(provider, candidate, inventory, recorder, attempt, capabilities, revision=revision)
+    except ValueError:
+        rows = recorder.records()
+        observed = next((r for r in rows if r['stage']=='SEMANTIC_REVIEW_OBSERVED' and r['attempt']==attempt), {})
+        if (revision is None or not getattr(provider, 'supports_same_candidate_review_repair', False)
+                or (observed.get('review_identity_binding') or {}).get('consumer_operand_contract') != 'request-bound-consumer-operands-v1'
+                or not any(r['stage']=='SEMANTIC_REVIEW_VALIDATED' and r['attempt']==attempt for r in rows)):
+            raise
+        context = _same_candidate_review_feedback(rows, attempt, revision, inventory, capabilities, candidate)
+        if context is None:
+            raise  # A genuine semantic rejection belongs to candidate generation.
+        return _repair_same_candidate_review(provider, candidate, inventory, recorder, attempt, capabilities, revision)
+
+
+def _review_fulfillment_once(provider, candidate, inventory, recorder, attempt, capabilities,
                                  *, revision=None):
     if not any(route.component_basis is not None for route in candidate.routes):
         return None
@@ -4040,7 +4246,7 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
         rows = recorder.records()
         semantic_review = next((row.get("semantic_review") for row in reversed(rows)
             if row["stage"] == "CANDIDATE_VALIDATED" and row.get("validation_passed")), None)
-        review_row = next((row for row in reversed(rows) if row["stage"] == "SEMANTIC_REVIEW_VALIDATED"
+        review_row = next((row for row in reversed(rows) if row["stage"] in {"SEMANTIC_REVIEW_VALIDATED", "SEMANTIC_REVIEW_REPAIR_VALIDATED"}
             and row.get("validation_passed") and row.get("semantic_review") == semantic_review), None)
         capability_fingerprint = canonical_fingerprint(capabilities) if semantic_review is None else (
             None if review_row is None else review_row.get("capabilities_fingerprint"))
@@ -4050,11 +4256,12 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
             "inventory_fingerprint": inventory["inventory_fingerprint"],
             "source_revision": inventory["source_revision"], "work_reality_revision_id": str(revision.id),
             "exact_target_paths": inventory["exact_target_paths"], "bounded_feedback_limit": 1,
-            "candidate_attempt_limit": 2, "semantic_review_calls_per_candidate_limit": 1, "maximum_model_calls": 4,
+            "candidate_attempt_limit": 2, "semantic_review_calls_per_candidate_limit": 2 if any(r["stage"].startswith(_REVIEW_REPAIR_PREFIX) for r in rows) else 1, "maximum_model_calls": 4,
+            "semantic_review_call_limit": 2,
             "semantic_review": semantic_review, "capabilities_fingerprint": capability_fingerprint,
             "semantic_review_receipt_refs": [f"work-plan-receipt:{row['receipt_id']}" for row in rows if row["stage"].startswith("SEMANTIC_REVIEW_")],
-            "provider_call_count": sum(row["stage"] in {"MODEL_REQUEST_PENDING", "SEMANTIC_REVIEW_PENDING"} for row in rows),
-            "observed_model_call_count": sum(row["stage"] in {"MODEL_RESPONSE_OBSERVED", "SEMANTIC_REVIEW_OBSERVED"}
+            "provider_call_count": sum(row["stage"] in {"MODEL_REQUEST_PENDING", "SEMANTIC_REVIEW_PENDING", "SEMANTIC_REVIEW_REPAIR_PENDING"} for row in rows),
+            "observed_model_call_count": sum(row["stage"] in {"MODEL_RESPONSE_OBSERVED", "SEMANTIC_REVIEW_OBSERVED", "SEMANTIC_REVIEW_REPAIR_OBSERVED"}
                 and isinstance(row.get("model"), dict) and not row["model"].get("fixture", False) for row in rows),
             "attempt_count": sum(row["stage"] == "MODEL_REQUEST_PENDING" for row in rows),
             "receipt_refs": [f"work-plan-receipt:{row['receipt_id']}" for row in rows],
@@ -4359,6 +4566,10 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
             raise
         except _FulfillmentWireReceiptIdentityError as error:
             return stop_identity(str(error))
+        except FulfillmentReviewOutcomeUnknown as error:
+            recorder.append("FORMATION_STOPPED", attempt, terminal=True, validation_passed=False,
+                terminal_reason=str(error), failure_stage="SEMANTIC_REVIEW_OUTCOME_UNKNOWN")
+            return finish(None, str(error), False)
         except ValueError as error:
             if not any(row["stage"] == "MODEL_REQUEST_PENDING" and row["attempt"] == attempt
                     for row in recorder.records()):
@@ -4399,17 +4610,18 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
                         revision, inventory, capabilities, candidate, ir=ir, include_owner_preconditions=True)
                 except _FulfillmentWireReceiptIdentityError as drift:
                     return stop_identity(str(drift))
+            review_budget_ended = any(r["stage"].startswith(_REVIEW_REPAIR_PREFIX) for r in recorder.records())
             passed, reason = False, json.loads(feedback)["primary_error"]
             current_request = next(row for row in recorder.records() if row["stage"] == "MODEL_REQUEST_PENDING" and row["attempt"] == attempt)
             rejected_values = _rejected_candidate_receipt_values(candidate, feedback, current_request)
             recorder.append("CANDIDATE_VALIDATED", attempt, **rejected_values,
-                semantic_review=semantic_review, failed_predicate=reason, validation_feedback=feedback, validation_passed=False, terminal=attempt == 2,
-                terminal_reason=reason if attempt == 2 else None,
+                semantic_review=semantic_review, failed_predicate=reason, validation_feedback=feedback, validation_passed=False, terminal=attempt == 2 or review_budget_ended,
+                terminal_reason=reason if attempt == 2 or review_budget_ended else None,
                 **({"repair_feedback_bound": True} if "repair_feedback_binding" in json.loads(feedback) else {}),
                 **({"owner_repair_context_bound": True} if "owner_repair_context" in json.loads(feedback) else {}),
                 **({"semantic_feedback_contract": "existing-independent-review-feedback-v1"} if semantic_observation is not None else {}),
                 **({"predecode_diagnostics": wire_diagnostics} if wire_diagnostics is not None else {}))
-            if attempt < 2:
+            if attempt < 2 and not review_budget_ended:
                 continue
         except Exception as error:
             # Transport/unknown failures cannot justify a probability retry.
@@ -4425,10 +4637,10 @@ def _form_fulfillment_projection(revision, ir, *, provider, database=None,
         else:
             recorder.append("CANDIDATE_VALIDATED", attempt, candidate=candidate.model_dump(mode="json"),
                 semantic_review=semantic_review, failed_predicate=None if passed else reason, validation_passed=passed, terminal=True, terminal_reason=reason)
-        if attempt == 2 and database is not None:
+        if (attempt == 2 or any(r["stage"].startswith(_REVIEW_REPAIR_PREFIX) for r in recorder.records())) and database is not None:
             from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
             from spg.domain.refinement_contract import RefinementSignalKind
-            model_rows = [row.get("model", {}) for row in recorder.records() if row["stage"] in {"MODEL_RESPONSE_OBSERVED", "SEMANTIC_REVIEW_OBSERVED"}]
+            model_rows = [row.get("model", {}) for row in recorder.records() if row["stage"] in {"MODEL_RESPONSE_OBSERVED", "SEMANTIC_REVIEW_OBSERVED", "SEMANTIC_REVIEW_REPAIR_OBSERVED"}]
             usage = [row.get("usage", {}) for row in model_rows if isinstance(row, dict)]
             with database.unit_of_work() as uow:
                 NativeExecutionStore(uow.session).record_bounded_refinement(work_id=revision.work_id,

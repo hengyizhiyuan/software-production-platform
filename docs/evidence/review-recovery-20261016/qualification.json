@@ -1,0 +1,49 @@
+{
+  "starting_head": "f744110ee2952b8e5f9f6822be74f69f8517af6e",
+  "qualification": "BOUNDED_OWNER_REPAIR_ONLY; NO_REAL_WORK_OR_DEPLOYMENT_CLAIM",
+  "source_files": {
+    "src/spg/application/governed_obligations.py": "5af0efc48fe7e88943ef9ba75e36e625487a2df53cc8cc466ac39b08dcf8e6c0",
+    "src/spg/application/steering_driver.py": "6c7e5a6b0b7615b2e39698db9f64142ffe8ed757efa42754a91728065b7945a4",
+    "src/spg/domain/refinement_contract.py": "07d373872b617ef3f425641b2e6098e87ccc99b79644fa3067f4e6f20bbf9107",
+    "src/spg/evaluation/production_trace.py": "7bc60631e144e5f1bf8d7f6b8294398f1ddeafe5b1dc31ab26a8671b02720d37",
+    "src/spg/providers/fulfillment_candidate.py": "46ae50c6aba211879fb558b09c3ceab06d124eb2527627996798a4dc0e2e6dc4"
+  },
+  "tests": {
+    "focused": 80,
+    "final_reference_group_batch": 90,
+    "postgres": 7,
+    "broad_passed": 979,
+    "broad_known_baseline_failures": 3
+  },
+  "artifacts": {
+    "check_live_recovery.py": "aae89affd4aad80568ca05997648110f23bb5e8cbe685daa2b7cc6bc8d32e822",
+    "mission.md": "ce9645a184aaa92e822ef4ba42b139a73a97ddac879086db1f992ac4c40af4c5",
+    "focused-tests.log": "b7f5e76f14fae45b3b92408ca298f8fd2b03671a15a31f393b2d797968040c13",
+    "final-negative-real-result.json": "3688ae1c93ab468a00bd21a72c93972e9560b8a8949162a4d0f3e676483d56dd",
+    "report.md": "699ceb92767f754e54bed474d7176358e38d09d722148b026e7ce87342ae2d86",
+    "negative-real-response.json.gz": "3058575cbec6a14c7779a75bca3fd7d44783d2795a4f6a3090bd37888c37dfb7",
+    "baseline-capacity-failure.log": "325df2a4c9855bd554c18dc89b8b0f24a126ede4fc3548dbacfd67fcd9e3b07b",
+    "check_live_negative.py": "0d0b4ee082e2b08138f31f09d5d12fc6df8f61ab231fcc38398703f4632a90fd",
+    "baseline-duplicate-failures.log": "d384f1b636c5a818c10c86e90ff631ef9b6274b7460484e4f962d974449f5ff1",
+    "heterogeneous-consumer-stop.json": "8a1f9b7936abb641ddde8e1249d788e44feb49fd2753b5fe907810de70948d73",
+    "final-negative-real-response.json.gz": "59ba3e6a96d4fa8d377084264af314c9ad1574cd51507641edb628a26a49306a",
+    "final-reference-group-tests.log": "740524c885c56d9aefc7663362c1963e8280a75b4bf4ec9a53f73250705bfa84",
+    "recovery-before-final-guards.json.gz": "3dac2d5af03ea99d30a08551972072683d7c9ac75cdab785ef5f24e6286c4a7b",
+    "heterogeneous-consumer-stop-receipts.json.gz": "4994842b5451947a739ca62ccd6f0cf822a3719a5c5d0c14ec2c32f9c1c49e2d",
+    "final-tests.log": "35cda5cacb3f8c6b7b0aea263313dc4bc49fe95db682fac4632fd14054067094",
+    "negative-transport-failure.json": "3a6b0b5033afdbc489448590905676a5ae15b79a20b8c1b9e9d2ddd28cd8c2ca",
+    "postgres-tests.log": "83a1593c5b5783693fe3006d1f6597bcb4f3a5968f23b59481ee09a0477f910a",
+    "final-real-recovery-receipts.json.gz": "1d1ee1608944bd190592ab9e40df5923054cbf85f0ce8a7f032e0cbcd1732552",
+    "negative-real-result.json": "36a703151759d33c3fa3c637ad13bf69090c4ff6f9e0a6711f950c4ea56c244e",
+    "final-real-recovery.json": "188051443233805c331d68d0ffe8cc33fc2f8995132a4f0d4eeeefa77333a142",
+    "initial-real-trial-receipts.json.gz": "cf529361ff8c86bf88e43928fb9cb9a68d7dcb0535a73d105cba4c1fa6b1f1f4",
+    "initial-real-trial.json": "87cbef222db8053b69f98ca9adaa519eb816ae596fcad5b185f4bc29f17f328e"
+  },
+  "final_real_checks": {
+    "recovery": "VALIDATED_PROJECTION; ONE Formation + TWO Reviews (first two calls controlled fixtures)",
+    "negative": "FALSE semantic verdict, rejected by independent semantic gate; ONE real Review",
+    "full_work_qualification": false,
+    "deployed": false,
+    "failed_work_restarted": false
+  }
+}

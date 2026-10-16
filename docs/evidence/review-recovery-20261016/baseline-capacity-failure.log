@@ -1,0 +1,17 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[next_request_limit] _
+tests/test_c3_generation_projection_economy.py:496: in test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation
+    assert terminal["stage"]=="MODEL_REQUEST_PENDING"
+E   AssertionError: assert 'CANDIDATE_VALIDATED' == 'MODEL_REQUEST_PENDING'
+E     
+E     - MODEL_REQUEST_PENDING
+E     + CANDIDATE_VALIDATED
+=============================== warnings summary ===============================
+.venv/lib/python3.13/site-packages/_pytest/config/__init__.py:1345
+  /Users/yu/Documents/dev/software-production-platform/.venv/lib/python3.13/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; anyio
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_c3_generation_projection_economy.py::test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[next_request_limit]

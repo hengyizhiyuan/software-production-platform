@@ -339,11 +339,14 @@ def project_trace(tables, *, scene, purpose, first_input=None, case=None, basis=
     artifacts = [{'path':a.get('artifact_path'), 'change':a.get('change_type'), 'source_ref':f"work-product:{a['id']}"}
         for a in tables.get('work_product_references', [])]
     repairs = tables.get('self_refine_events', [])
+    latest_repair = max(repairs, key=lambda r: str(r.get('updated_at') or r.get('created_at') or ''), default={})
+    locally_recovered = latest_repair.get('final_result') == 'LOCAL_OBLIGATION_RECOVERED'
     deployment = tables.get('cloud_deployments', [])
     diagnosis = outcome_projection(case or {'state':'UNKNOWN'})
     diagnosis.update(production_result='候选已封存，尚需 Human 授权或验收' if candidate else '未形成候选，详见已观测生产记录',
-        stability='经过自修复后推进' if repairs else '没有已保存的自修复记录，不能据此断言没有重试',
-        repair_count=len(repairs), recovered=any(r.get('final_result')=='LOCAL_OBLIGATION_RECOVERED' for r in repairs),
+        stability=('最近局部自修复已通过，后续生产状态见当前阶段' if locally_recovered else
+            '最近自修复未恢复生产，需查看停止原因' if repairs else '没有已保存的自修复记录，不能据此断言没有重试'),
+        repair_count=len(repairs), recovered=locally_recovered,
         regression=case.get('lineage',{}).get('regression',None) if case else None,
         safety='存在独立验证或 Guardian 证据' if verifications or guardian else '未采集到完整保护证据')
     if repairs and diagnosis['divergence_label']=='尚未观测到可归因偏离':

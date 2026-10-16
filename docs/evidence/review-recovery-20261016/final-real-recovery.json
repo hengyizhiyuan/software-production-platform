@@ -1,0 +1,44 @@
+{
+  "scenario": "Declared non-game admitted fixture, controlled Formation and initial malformed Review; ONE real independent recovery Review",
+  "source_files": {
+    "src/spg/application/governed_obligations.py": "5af0efc48fe7e88943ef9ba75e36e625487a2df53cc8cc466ac39b08dcf8e6c0",
+    "src/spg/providers/fulfillment_candidate.py": "46ae50c6aba211879fb558b09c3ceab06d124eb2527627996798a4dc0e2e6dc4"
+  },
+  "production_mutations": false,
+  "real_calls": [
+    {
+      "request_id": "b074f8ae-00f5-4366-8d53-d1aca0ee43de",
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 41221,
+        "output_tokens": 3038,
+        "cached_tokens": 2816,
+        "reasoning_tokens": 0,
+        "total_tokens": 44259,
+        "unknown": false
+      },
+      "output_sha256": "28c1da8b84847836a27a53663591f6121ed1d7e8d7a4cb58db1df1b6f64ee287"
+    }
+  ],
+  "formation_calls": 1,
+  "review_calls": 2,
+  "terminal_reason": "VALIDATED_PROJECTION",
+  "admitted_derived_plan": true,
+  "repair": [
+    {
+      "receipt_id": "8141c4cd-c505-45f8-ac86-17e7da09c055",
+      "stage": "SEMANTIC_REVIEW_REPAIR_PENDING"
+    },
+    {
+      "receipt_id": "c08b551f-a5eb-4f07-b6db-07da2dd371db",
+      "stage": "SEMANTIC_REVIEW_REPAIR_OBSERVED"
+    },
+    {
+      "receipt_id": "41383553-3e91-4d31-9b9d-8aa9b0462fbc",
+      "stage": "SEMANTIC_REVIEW_REPAIR_VALIDATED",
+      "validation_passed": true,
+      "failed_predicate": null
+    }
+  ]
+}

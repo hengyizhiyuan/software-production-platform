@@ -1,0 +1,40 @@
+{
+  "scenario": "Declared non-game admitted fixture, controlled Formation and initial malformed Review; ONE real independent recovery Review",
+  "production_mutations": false,
+  "real_calls": [
+    {
+      "request_id": "de6f5d3b-1457-4a7d-a324-c8361a347832",
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 39558,
+        "output_tokens": 2680,
+        "cached_tokens": 0,
+        "reasoning_tokens": 0,
+        "total_tokens": 42238,
+        "unknown": false
+      },
+      "output_sha256": "31f0ba570e52efcbc2ecb725426235df1b2338c22754f88692c8e195bf758342"
+    }
+  ],
+  "formation_calls": 1,
+  "review_calls": 2,
+  "terminal_reason": "OBLIGATION_SOURCE_CONSUMPTION_CONSUMER_MISMATCH",
+  "admitted_derived_plan": false,
+  "repair": [
+    {
+      "receipt_id": "d52c043e-9125-45cc-b29a-799ed799c09e",
+      "stage": "SEMANTIC_REVIEW_REPAIR_PENDING"
+    },
+    {
+      "receipt_id": "7a10663c-ca29-426e-994f-777e96a68eed",
+      "stage": "SEMANTIC_REVIEW_REPAIR_OBSERVED"
+    },
+    {
+      "receipt_id": "b5818187-4dec-404f-b2a0-39d7822da16a",
+      "stage": "SEMANTIC_REVIEW_REPAIR_VALIDATED",
+      "validation_passed": false,
+      "failed_predicate": "OBLIGATION_SOURCE_CONSUMPTION_CONSUMER_MISMATCH"
+    }
+  ]
+}

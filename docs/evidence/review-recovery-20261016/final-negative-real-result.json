@@ -1,0 +1,43 @@
+{
+  "scenario": "Real Review of a deliberately wrong content-as-retention route; declared isolated fixture",
+  "source_files": {
+    "src/spg/application/governed_obligations.py": "5af0efc48fe7e88943ef9ba75e36e625487a2df53cc8cc466ac39b08dcf8e6c0",
+    "src/spg/providers/fulfillment_candidate.py": "46ae50c6aba211879fb558b09c3ceab06d124eb2527627996798a4dc0e2e6dc4"
+  },
+  "production_mutations": false,
+  "real_call_count": 1,
+  "rejection": "OBLIGATION_SEMANTIC_COMPONENT_MISMATCH",
+  "source_verdict": false,
+  "model": {
+    "request_id": "149114a7-2c1f-449b-8e3b-2500a11506c8",
+    "provider": "deepseek",
+    "requested_model": "deepseek-flash",
+    "effective_model": "deepseek-flash",
+    "usage": {
+      "input_tokens": 38551,
+      "output_tokens": 2272,
+      "cached_tokens": 2560,
+      "reasoning_tokens": 0,
+      "total_tokens": 40823,
+      "unknown": false
+    },
+    "timing": {
+      "request_sent_seconds": 0.0020051610190421343,
+      "first_response_event_seconds": 2.4393731199670583,
+      "first_token_seconds": 2.8261540639214218,
+      "completed_seconds": 12.030928818043321
+    },
+    "transport_retry_count": 0,
+    "output_sha256": "c1c5fa4c192dc568700c6fdc5b75a92a788121ac19cf8b4b2765e6c030cc256b",
+    "output_bytes": 8401,
+    "output_evidence": {
+      "provider_status": "completed",
+      "delta_sha256": "c1c5fa4c192dc568700c6fdc5b75a92a788121ac19cf8b4b2765e6c030cc256b",
+      "delta_bytes": 8401,
+      "terminal_text_observed": true,
+      "terminal_sha256": "c1c5fa4c192dc568700c6fdc5b75a92a788121ac19cf8b4b2765e6c030cc256b",
+      "terminal_bytes": 8401,
+      "selection": "TERMINAL_MATCHED_DELTA"
+    }
+  }
+}

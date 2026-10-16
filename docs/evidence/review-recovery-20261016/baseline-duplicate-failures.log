@@ -1,0 +1,25 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+__ test_feedback_drift_stops_before_another_model_request[duplicate-response] __
+tests/test_c3_fulfillment_wire_feedback.py:211: in test_feedback_drift_stops_before_another_model_request
+    assert result[0].formation_receipt['terminal_reason'] == 'OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
+E   AssertionError: assert 'OBLIGATION_F...FERENCE_DRIFT' == 'OBLIGATION_F...DENTITY_DRIFT'
+E     
+E     - OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT
+E     + OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT
+_ test_feedback_drift_stops_before_another_model_request[duplicate-validation] _
+tests/test_c3_fulfillment_wire_feedback.py:211: in test_feedback_drift_stops_before_another_model_request
+    assert result[0].formation_receipt['terminal_reason'] == 'OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
+E   AssertionError: assert 'OBLIGATION_F...FERENCE_DRIFT' == 'OBLIGATION_F...DENTITY_DRIFT'
+E     
+E     - OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT
+E     + OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT
+=============================== warnings summary ===============================
+.venv/lib/python3.13/site-packages/_pytest/config/__init__.py:1345
+  /Users/yu/Documents/dev/software-production-platform/.venv/lib/python3.13/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; anyio
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_c3_fulfillment_wire_feedback.py::test_feedback_drift_stops_before_another_model_request[duplicate-response]
+FAILED tests/test_c3_fulfillment_wire_feedback.py::test_feedback_drift_stops_before_another_model_request[duplicate-validation]

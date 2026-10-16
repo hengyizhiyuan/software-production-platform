@@ -1,0 +1,6 @@
+{
+  "status": "FAILED_TRANSPORT",
+  "observed_error": "ModelProviderError: deepseek transport failed: ConnectError",
+  "usage": "UNKNOWN_NOT_REPORTED_AS_SUCCESS",
+  "source_log_sha256": "03155275faa2aadf6198fd0f98a5f9dcd282bd1c9244af710605f45649a78a54"
+}

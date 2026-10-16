@@ -16,7 +16,8 @@ from tests.test_c3_source_consumption_proof import fixture_review_proof
 from tests.test_c3_fulfillment_wire_feedback import Checkpoint
 
 
-def run_case(*, checkpoint=False, semantic_only=False, omit_optional_defaults=False):
+def run_case(*, checkpoint=False, semantic_only=False, omit_optional_defaults=False,
+             same_candidate=False, second_invalid=False, second_semantic=False, empty_operands=False):
     rev, ir, inv, plan = controlled_capacity_case()
     calls = []
     def generate(**request):
@@ -25,12 +26,18 @@ def run_case(*, checkpoint=False, semantic_only=False, omit_optional_defaults=Fa
         if 'untrusted_fulfillment_candidate' in payload:
             current = decode_review_input(payload)
             result = fixture_review_proof(inv, current, review(inv, current), payload).model_dump(mode='json')
-            if len(calls) == 2:
+            if len(calls) == 2 or second_invalid and len(calls) == 3:
                 if semantic_only:
                     result['source_results'][0]['complete_and_equivalent'] = False
+                elif empty_operands:
+                    for source in result['source_results']:
+                        for check in source['consumption_checks']:
+                            check['target_paths'] = []
                 else:
                     result['source_results'][0]['consumption_checks'].append(
                         deepcopy(result['source_results'][0]['consumption_checks'][0]))
+            if second_semantic and len(calls) == 3:
+                result['source_results'][0]['complete_and_equivalent'] = False
             if omit_optional_defaults:
                 for source in result['source_results']:
                     for check in source.get('consumption_checks') or ():
@@ -50,11 +57,13 @@ def run_case(*, checkpoint=False, semantic_only=False, omit_optional_defaults=Fa
             usage=ModelUsage(input_tokens=100, output_tokens=20, total_tokens=120, unknown=False),
             timing=ModelTiming(), retry_count=0)
     class Provider(p.ModelFulfillmentCandidateProvider):
+        # Default exercises historical two-generation feedback/replay unchanged.
+        supports_same_candidate_review_repair = same_candidate
         def review(self, *args, capabilities, receipt_callback=None, review_feedback=None,
                    owner_preconditions=None, **kwargs):
             def observed(**row):
                 receipt_callback(**row)
-                if checkpoint and len(calls) == 4:
+                if checkpoint and len(calls) == (3 if same_candidate else 4):
                     raise Checkpoint()
             return super().review(*args, receipt_callback=observed,
                 review_feedback=review_feedback, capabilities=capabilities,

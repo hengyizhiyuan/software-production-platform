@@ -2503,7 +2503,7 @@ def _review_reuse_instructions(instructions, reuse):
         "Return the unchanged canonical review schema, ",
         "Return the existing review result shape with request-bound null identity operands, ")
 
-def _review_identity_binding(inventory, candidate, output, request_id):
+def _review_identity_binding(inventory, candidate, output, request_id, *, consumer_references=False):
     """Request-local binding of existing ordered result slots, never a verdict."""
     slots = _review_result_identity_slots(inventory, candidate)
     return {"inventory_fingerprint": inventory["inventory_fingerprint"],
@@ -2511,7 +2511,8 @@ def _review_identity_binding(inventory, candidate, output, request_id):
         "components_fingerprint": fulfillment_components_fingerprint(candidate),
         "result_slots_fingerprint": canonical_fingerprint(slots),
         "review_output_sha256": sha256(output.encode()).hexdigest(),
-        "review_output_bytes": len(output.encode()), "model_request_id": request_id}
+        "review_output_bytes": len(output.encode()), "model_request_id": request_id,
+        **({"consumer_operand_contract": "request-bound-consumer-operands-v1"} if consumer_references else {})}
 
 
 def _resolve_review_identities(output, inventory, candidate, binding=None, request_id=None):
@@ -2522,7 +2523,8 @@ def _resolve_review_identities(output, inventory, candidate, binding=None, reque
     expanded to the unchanged canonical Owner contract. No boolean is supplied.
     """
     if binding is not None and (not request_id
-            or binding != _review_identity_binding(inventory, candidate, output, request_id)):
+            or binding != _review_identity_binding(inventory, candidate, output, request_id,
+                consumer_references=binding.get("consumer_operand_contract") == "request-bound-consumer-operands-v1")):
         raise _FulfillmentWireReceiptIdentityError("OBLIGATION_SEMANTIC_REVIEW_IDENTITY_BINDING_DRIFT")
     raw = json.loads(output, object_pairs_hook=_wire_json_object)
     if binding is None:
@@ -2530,6 +2532,28 @@ def _resolve_review_identities(output, inventory, candidate, binding=None, reque
     slots = _review_result_identity_slots(inventory, candidate)
     if not isinstance(raw, dict):
         raise ValueError("OBLIGATION_SEMANTIC_REVIEW_RESULT_SLOTS_INVALID")
+    if binding.get("consumer_operand_contract") == "request-bound-consumer-operands-v1":
+        for row in raw.get("source_results") or ():
+            if not isinstance(row, dict):
+                raise ValueError("OBLIGATION_SEMANTIC_REVIEW_RESULT_SLOTS_INVALID")
+            for check in row.get("consumption_checks") or ():
+                if not isinstance(check, dict):
+                    raise ValueError("OBLIGATION_SEMANTIC_REVIEW_CONSUMER_REFERENCE_INVALID")
+                if "target_paths" not in check:
+                    raise ValueError("OBLIGATION_SEMANTIC_REVIEW_CONSUMER_REFERENCE_MISSING")
+                if check["target_paths"] is not None:
+                    continue  # Explicit wrong/empty operands are never repaired.
+                indices = check.get("route_indices")
+                if (not isinstance(indices, list) or not indices
+                        or any(type(i) is not int or not 0 <= i < len(candidate.routes) for i in indices)
+                        or len(set(indices)) != len(indices)):
+                    raise ValueError("OBLIGATION_SEMANTIC_REVIEW_CONSUMER_REFERENCE_INVALID")
+                operands = candidate.routes[indices[0]].target_paths
+                if any(candidate.routes[i].target_paths != operands for i in indices):
+                    raise ValueError("OBLIGATION_SEMANTIC_REVIEW_CONSUMER_REFERENCE_AMBIGUOUS")
+                # Reuse observed operands only. Required capability/method/phase,
+                # source meaning, coverage and every verdict remain untrusted.
+                check["target_paths"] = list(operands)
     uses_slots = any(field in raw and raw[field] is None for field in (
         "inventory_fingerprint", "candidate_fingerprint", "components_fingerprint")) or any(
         key in row and row[key] is None
@@ -2566,6 +2590,7 @@ def _resolve_review_identities(output, inventory, candidate, binding=None, reque
 
 def _review_generation_schema(inventory, candidate, **kwargs):
     """Reuse existing positional identities without asking the model to copy IDs."""
+    consumer_references = kwargs.pop("consumer_references", False)
     schema = _review_output_schema(inventory, candidate, **kwargs)
     if not kwargs.get("route_scoped"):
         return schema
@@ -2577,6 +2602,35 @@ def _review_generation_schema(inventory, candidate, **kwargs):
             for key in keys:
                 entry["properties"][key] = {"type": "null", "description":
                     "Null reuses this exact ordered result slot identity; never choose another source or component."}
+    if consumer_references and kwargs.get("source_consumption"):
+        from spg.application.governed_obligations import fulfillment_capability_contracts
+        contracts = {c["capability"]: c for c in fulfillment_capability_contracts()}
+        for entry in schema["properties"]["source_results"]["prefixItems"]:
+            check = entry["properties"]["consumption_checks"]["items"]
+            original = check["properties"]["target_paths"]
+            check["properties"]["target_paths"] = {"anyOf": [{"type": "null"}, original],
+                "description": "Use null with nonempty route_indices to reference those actual consumers' exact operands. "
+                "All selected routes must share operands. With no submitted consumer, state required operands explicitly. "
+                "This reference supplies no required method or semantic verdict."}
+            check["required"] = list(dict.fromkeys([*check.get("required", []), "target_paths"]))
+            # A reference describes one actual consumer configuration. The
+            # critic still independently selects required meaning/methods and
+            # may reject every submitted route or identify a missing method.
+            eligible = check["properties"]["route_indices"]["items"]["enum"]
+            groups = {}
+            for ordinal in eligible:
+                route = candidate.routes[ordinal]
+                groups.setdefault((route.capability, route.target_paths), []).append(ordinal)
+            check["anyOf"] = [{"properties": {
+                "route_indices": {"type": "array", "maxItems": 0},
+                "target_paths": original}}] + [{"properties": {
+                    "route_indices": {"type": "array", "minItems": 1,
+                        "items": {"type": "integer", "enum": ordinals}},
+                    "required_capability": {"enum": [capability]},
+                    "required_evidence_method": {"enum": [contracts[capability]["evidence_method"]]},
+                    "required_phase": {"enum": [contracts[capability]["phase"]]},
+                    "target_paths": {"type": "null"}}}
+                for (capability, _), ordinals in groups.items()]
     return schema
 
 def _review_output_schema(inventory, candidate, *, route_scoped=False, source_consumption=False,
@@ -3122,6 +3176,7 @@ def _safe_fulfillment_response_output(text, *, owner_preconditions=None):
 
 
 class ModelFulfillmentCandidateProvider:
+    supports_same_candidate_review_repair = True
     supports_source_consumption_proof = True
     def __init__(self, runtime_factory, *, candidate_construction=False,
                  candidate_construction_contract=_CANDIDATE_CONSTRUCTION_CONTRACT,
@@ -3561,7 +3616,8 @@ class ModelFulfillmentCandidateProvider:
                 "work_id": inventory["work_id"],
                 "work_reality_revision_id": inventory["work_reality_revision_id"],
                 "source_revision": inventory["source_revision"],
-                "exact_target_paths": inventory["exact_target_paths"], "attempt": 2,
+                "exact_target_paths": inventory["exact_target_paths"], "attempt": (
+                    review_feedback.get("formation_attempt") if review_feedback.get("same_candidate") is True else 2),
                 "candidate_fingerprint": fulfillment_candidate_fingerprint(candidate),
                 "components_fingerprint": fulfillment_components_fingerprint(candidate)}
             if (not isinstance(review_feedback, dict)
@@ -3579,6 +3635,10 @@ class ModelFulfillmentCandidateProvider:
                 instructions=_review_reuse_instructions((("Identity operands are fixed by this request, not generated semantic judgments. "
                     "Return null for the three fingerprint fields, every source_ref, component_id and capability "
                     "in the existing ordered result slots. Watt binds those nulls losslessly to this exact request. "
+                    "Every consumption_check MUST include target_paths. With actual route_indices, use target_paths=null to reference the "
+                    "selected consumers' exact operands; do not transcribe their path lists. Split checks when "
+                    "consumers have different operands. With empty route_indices, specify required targets explicitly. "
+                    "Required capability, method, phase and semantic sufficiency remain your independent judgement. "
                     "Keep source_results and component_results in supplied order, with every verdict and reason "
                     "independently filled. Never omit a result or use another slot. This supplies no semantic answer. "
                     if identity_reuse else "") + ((("For EACH original source compare its COMPLETE meaning to the UNION of its "
@@ -3766,6 +3826,7 @@ class ModelFulfillmentCandidateProvider:
                        if review_feedback is not None else ""))), identity_reuse),
                 input_text=json.dumps(review_input, ensure_ascii=False),
                 output_schema=_review_generation_schema(inventory, candidate,
+                    consumer_references=identity_reuse and self.supports_same_candidate_review_repair,
                     route_scoped=(owner_preconditions or {}).get("review_input_contract") in _ROUTE_SCOPED_REVIEW_INPUTS,
                     source_consumption=(owner_preconditions or {}).get("review_source_consumption_contract") in {
                         "existing-source-consumption-proof-v1", "existing-source-consumption-proof-v2"},
@@ -3783,7 +3844,8 @@ class ModelFulfillmentCandidateProvider:
                 self.last_observation["output_evidence"] = result.output_evidence
             output, digest, count, privacy_failure = (
                 _safe_fulfillment_response_output(result.output_text))
-            identity_binding = (_review_identity_binding(inventory, candidate, output, result.request_id)
+            identity_binding = (_review_identity_binding(inventory, candidate, output, result.request_id,
+                consumer_references=self.supports_same_candidate_review_repair)
                 if identity_reuse and output is not None else None)
             if receipt_callback is not None:
                 receipt_callback(review_output=output, review_output_sha256=digest, review_output_bytes=count,
