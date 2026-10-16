@@ -3154,6 +3154,8 @@ class WorkApplicationService:
                         decision.current_step_id
                     )
                 )
+                incident_resolved = bool(decision is not None and _convergence_incident_resolved(
+                    runtime.governance_for_subject(str(projection.work_id)), decision))
                 proposal_review_resolved = bool(
                     decision is not None
                     and decision.attention_reason
@@ -3191,6 +3193,7 @@ class WorkApplicationService:
                 and decision.attention_reason is not None
                 and decision.human_decision_need is not None
                 and not proposal_review_resolved
+                and not incident_resolved
             ):
                 action_title, action_reason, action_recommendation, action_impact = (
                     _HUMAN_ACTION_COPY[decision.attention_reason]
@@ -3385,7 +3388,9 @@ class WorkApplicationService:
                     "authority_identity": request.authority_identity,
                     "subject_type": "WORK_CONVERGENCE_INCIDENT",
                     "subject_identity": str(attention.work_id),
-                    "scope": {"work_id": str(attention.work_id), "steering_decision_id": decision_id},
+                    "scope": {"work_id": str(attention.work_id), "steering_decision_id": decision_id,
+                              "work_reality_revision_id": str(ProductStore(unit_of_work.session)
+                                  .work(attention.work_id).current_work_reality_revision_id)},
                     "rationale": request.rationale or kind,
                     "created_at": datetime.now(UTC)})
             unit_of_work.commit()
@@ -3764,6 +3769,11 @@ class WorkApplicationService:
             and latest_steering_decision.steering_outcome
             is SteeringOutcome.HUMAN_ATTENTION
         )
+        if steering_attention and _is_convergence_incident(latest_steering_decision):
+            # Retry restarts the episode (Steering continues); pause keeps it stopped.
+            resolutions = RuntimeStore(store.session).governance_for_subject(str(work.id))
+            if _convergence_incident_resolved(resolutions, latest_steering_decision):
+                steering_attention = False
         if (
             steering_attention
             and latest_steering_decision is not None
@@ -4891,4 +4901,11 @@ def _is_convergence_incident(decision) -> bool:
     """The Steering decision admitted when a Work convergence episode stopped."""
     return bool(decision.steering_outcome is SteeringOutcome.HUMAN_ATTENTION
         and decision.attention_reason is SteeringAttentionReason.MATERIAL_RISK_OR_COST_DECISION
-        and (decision.reason or "").startswith("Work convergence stopped:"))
+        and (getattr(decision, "reason", None) or "").startswith("Work convergence stopped:"))
+
+
+def _convergence_incident_resolved(records, decision) -> bool:
+    """The Human already chose retry or pause for this exact incident decision."""
+    return bool(_is_convergence_incident(decision) and any(
+        record.decision_type in {"RESTART_CONVERGENCE_EPISODE", "PAUSE_AFTER_CONVERGENCE_INCIDENT"}
+        and record.scope.get("steering_decision_id") == str(decision.id) for record in records))

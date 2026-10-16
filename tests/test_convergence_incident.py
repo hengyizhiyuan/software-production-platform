@@ -47,6 +47,8 @@ def resolve(monkeypatch, action, decision):
 
     monkeypatch.setattr(work_module, "SteeringStore", lambda _: SimpleNamespace(decision=lambda _id: decision))
     monkeypatch.setattr(work_module, "RuntimeStore", lambda _: runtime)
+    monkeypatch.setattr(work_module, "ProductStore", lambda _: SimpleNamespace(
+        work=lambda _id: SimpleNamespace(current_work_reality_revision_id=uuid4())))
     service = WorkApplicationService.__new__(WorkApplicationService)
     service.database = SimpleNamespace(unit_of_work=UoW)
     service.get_work = lambda wid: wid
@@ -77,3 +79,13 @@ def test_only_a_restart_record_changes_the_convergence_episode():
     restart_id = uuid4()
     assert canonical_digest(base) != canonical_digest({**base, "episode": str(restart_id)})
     assert canonical_digest({**base, "episode": str(restart_id)}) == canonical_digest({**base, "episode": str(restart_id)})
+
+
+def test_a_resolved_incident_no_longer_asks_the_human():
+    from spg.application.work import _convergence_incident_resolved
+    decision = incident(); decision.id = uuid4()
+    record = lambda kind, did: SimpleNamespace(decision_type=kind, scope={"steering_decision_id": str(did)})
+    assert not _convergence_incident_resolved([], decision)
+    assert _convergence_incident_resolved([record("RESTART_CONVERGENCE_EPISODE", decision.id)], decision)
+    assert _convergence_incident_resolved([record("PAUSE_AFTER_CONVERGENCE_INCIDENT", decision.id)], decision)
+    assert not _convergence_incident_resolved([record("RESTART_CONVERGENCE_EPISODE", uuid4())], decision)

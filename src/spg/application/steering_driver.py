@@ -733,6 +733,15 @@ class PlanSteeringDriver:
             "human_intervention_count": len(human_decisions) + int(facts.authorization_id is not None)}
 
     def _work_convergence_halted(self, work_id: UUID) -> bool:
+        with self.database.unit_of_work() as uow:
+            # The latest Human choice on a convergence incident wins: a pause
+            # holds until a later restart or a revised Work Reality.
+            revision = ProductStore(uow.session).work(work_id).current_work_reality_revision_id
+            choices = [record for record in RuntimeStore(uow.session).governance_for_subject(str(work_id))
+                       if record.decision_type in {"RESTART_CONVERGENCE_EPISODE", "PAUSE_AFTER_CONVERGENCE_INCIDENT"}]
+        if (choices and choices[-1].decision_type == "PAUSE_AFTER_CONVERGENCE_INCIDENT"
+                and choices[-1].scope.get("work_reality_revision_id") == str(revision)):
+            return True
         basis = self._convergence_basis(work_id)
         with self.database.unit_of_work() as uow:
             history = NativeExecutionStore(uow.session).work_convergence_history(work_id)
