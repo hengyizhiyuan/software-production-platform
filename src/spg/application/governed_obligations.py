@@ -1645,6 +1645,15 @@ def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=N
     expected_source = source_revision or revision.source_revision or revision.revision_fingerprint
     if first.source_revision != expected_source:
         raise ValueError("OBLIGATION_PROJECTION_SOURCE_REVISION_DRIFT")
+    # The plan is formed and reviewed once over the Work's complete admitted
+    # target set. A multi-PWU leaf owns a subset of it; its own PATH_SCOPE
+    # still enforces that subset. Rebuild the original inventory, never a
+    # narrowed one, and never accept a target outside the admitted set.
+    admitted_targets = tuple((first.formation_receipt or {}).get("exact_target_paths") or ())
+    if admitted_targets and exact_target_paths and tuple(exact_target_paths) != admitted_targets:
+        if not set(exact_target_paths) <= set(admitted_targets):
+            raise ValueError("OBLIGATION_SCOPE_EXPANSION")
+        exact_target_paths = admitted_targets
     inventory = fulfillment_inventory(revision, ir, source_revision=expected_source,
                                      exact_target_paths=exact_target_paths,
                                      formation_round=(first.formation_receipt or {}).get("formation_round", 1),

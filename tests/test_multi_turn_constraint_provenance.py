@@ -79,3 +79,24 @@ def test_live_self_citation_compiles_to_the_proof_the_owner_already_requires():
             component="artifact-content", phase=owner.FulfillmentPhase.CURRENT_VERIFICATION,
             semantic_component_declared=True, calibrated=True, source_contract="v3",
             revision=revision, exact_target_paths=inventory["exact_target_paths"])
+
+
+def test_a_multi_pwu_leaf_rechecks_the_plan_over_the_admitted_target_set():
+    """Live Work e88d6f02: the plan was formed over three files, the leaf owns one."""
+    import pytest
+    from spg.domain.governed_obligation import FulfillmentProjectionCandidate, FulfillmentRouteCandidate
+    revision, ir = multi_turn_case()
+    admitted = ("index.html", "app.js", "styles.css")
+    inventory = owner.fulfillment_inventory(revision, ir, source_revision="a" * 40, exact_target_paths=admitted)
+    clause = next(s["source_ref"] for s in inventory["sources"] if s["kind"] == "IR_CLAUSE")
+    routes = tuple(FulfillmentRouteCandidate(source_ref=s["source_ref"], capability="ARTIFACT_CONTENT",
+        work_constraint_indices=(s["index"],) if s["kind"] == "WORK_CONSTRAINT" else (), target_paths=admitted,
+        supporting_source_refs=(clause,) if s["kind"] == "WORK_CONSTRAINT" else (), rationale="oracle")
+        for s in inventory["sources"])
+    bindings = owner.validate_projection_candidate(FulfillmentProjectionCandidate(
+        inventory_fingerprint=inventory["inventory_fingerprint"], routes=routes), revision, ir, inventory, source_contract="v1")
+    bindings = tuple(b.model_copy(update={"formation_receipt": {"exact_target_paths": list(admitted)}}) for b in bindings)
+    for leaf in (("styles.css",), ("index.html", "app.js"), admitted):
+        owner.validate_fulfillment_projection(bindings, revision, ir, source_revision="a" * 40, exact_target_paths=leaf)
+    with pytest.raises(ValueError, match="OBLIGATION_SCOPE_EXPANSION"):
+        owner.validate_fulfillment_projection(bindings, revision, ir, source_revision="a" * 40, exact_target_paths=("evil.js",))
