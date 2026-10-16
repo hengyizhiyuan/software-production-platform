@@ -767,17 +767,20 @@ def formation_stop_kind(reason, *, candidates_validated=False):
     return None
 
 
-def formation_retry_decision(stops, *, now):
+def formation_retry_decision(stops, *, now, human_restart_at=None):
     """(round to use now, kind of the latest stop, retry permitted) from ordered stops.
 
     `stops` are (created_at, terminal_reason, candidates_validated) for distinct ended rounds of one
     Work revision and source, oldest first. Pure: the same persisted stops give
-    the same answer after a restart.
+    the same answer after a restart. The time window runs from the latest stop,
+    or from a later explicit Human restart of the Work's convergence episode.
     """
     if not stops:
         return 1, None, False
     kinds = [formation_stop_kind(reason, candidates_validated=validated) for _, reason, validated in stops]
     latest_at, latest_kind = stops[-1][0], kinds[-1]
+    if human_restart_at is not None and human_restart_at > latest_at:
+        latest_at = human_restart_at
     permitted = bool(
         latest_kind is not None
         and len(stops) < FORMATION_MAX_ROUNDS
@@ -820,7 +823,13 @@ def formation_round_stops(database, revision, source_revision):
 def formation_round_for(database, revision, source_revision, *, now=None):
     from datetime import UTC, datetime
     stops = formation_round_stops(database, revision, source_revision)
-    return formation_retry_decision(stops, now=now or datetime.now(UTC))
+    restart_at = None
+    if database is not None and stops:
+        from spg.infrastructure.persistence.runtime_store import RuntimeStore
+        with database.unit_of_work() as uow:
+            restart_at = max((record.created_at for record in RuntimeStore(uow.session).governance_for_subject(
+                str(revision.work_id)) if record.decision_type == "RESTART_CONVERGENCE_EPISODE"), default=None)
+    return formation_retry_decision(stops, now=now or datetime.now(UTC), human_restart_at=restart_at)
 
 
 def _capability_tuple(name):

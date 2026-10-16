@@ -69,3 +69,11 @@ def test_a_later_round_is_a_distinct_inventory_and_round_one_is_unchanged():
     assert second["formation_round"] == 2 and second["inventory_fingerprint"] != first["inventory_fingerprint"]
     with pytest.raises(ValueError):
         fulfillment_inventory(revision, ir, source_revision=revision.source_revision, formation_round=FORMATION_MAX_ROUNDS + 1)
+
+
+def test_a_human_restart_reopens_the_window_but_not_the_round_budget():
+    old = stops(CONFLICT, age_minutes=600)
+    assert formation_retry_decision(old, now=NOW)[2] is False
+    assert formation_retry_decision(old, now=NOW, human_restart_at=NOW - timedelta(minutes=1)) == (2, "GENERATOR", True)
+    spent = stops(CONFLICT, REVIEW, age_minutes=600)
+    assert formation_retry_decision(spent, now=NOW, human_restart_at=NOW)[2] is False
