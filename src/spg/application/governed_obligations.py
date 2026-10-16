@@ -135,6 +135,10 @@ def admitted_fulfillment_bindings(revision, assessment, *, provider=None,
     typed = deterministic_fulfillment_projection(revision, ir, inventory)
     if not any(binding.state == "UNRESOLVED" for binding in typed):
         return typed
+    from spg.application.production_brief import production_brief_bindings
+    brief = production_brief_bindings(revision, ir, inventory)
+    if brief is not None:
+        return brief
     if provider is None:
         # Typed capabilities are retained; only actually unknown dispositions
         # remain unresolved. One known route never conceals the other sources.
@@ -1658,6 +1662,10 @@ def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=N
                                      exact_target_paths=exact_target_paths,
                                      formation_round=(first.formation_receipt or {}).get("formation_round", 1),
                                      formation_episode=(first.formation_receipt or {}).get("formation_episode"))
+    from spg.application.production_brief import CONTRACT, validate_production_brief
+    if (first.formation_receipt or {}).get("source_role_contract") == CONTRACT:
+        validate_production_brief(bindings, revision, ir, inventory)
+        return
     inverse = {route: key for key, route in FULFILLMENT_CAPABILITIES.items()}
     from spg.domain.governed_obligation import FulfillmentRouteCandidate
     routes = []

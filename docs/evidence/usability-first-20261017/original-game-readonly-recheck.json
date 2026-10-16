@@ -1,0 +1,15 @@
+{
+  "status": "PENDING_BRIEF_ONLY",
+  "snapshot_sha256": "1c10932c5744809bc97698a3fbcd652465901ada80faee7a53cb8795e0c74534",
+  "work_id": "b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9",
+  "work_reality_revision_id": "bfcb502b-855d-58d3-bacb-e93208997e1b",
+  "qualification_target_assumption": [
+    "index.html"
+  ],
+  "source_role_contract": "source-preserving-production-brief-v1",
+  "binding_count": 9,
+  "model_calls": 0,
+  "executed": false,
+  "work_mutated": false,
+  "candidate_verified": false
+}

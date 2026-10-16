@@ -1,0 +1,11 @@
+{
+  "passed": 1046,
+  "failed": 3,
+  "skipped": 55,
+  "errors": 0,
+  "unchanged_baseline_failure_ids": [
+    "tests/test_c3_generation_projection_economy.py::test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[next_request_limit]",
+    "tests/test_c3_fulfillment_wire_feedback.py::test_feedback_drift_stops_before_another_model_request[duplicate-response]",
+    "tests/test_c3_fulfillment_wire_feedback.py::test_feedback_drift_stops_before_another_model_request[duplicate-validation]"
+  ]
+}

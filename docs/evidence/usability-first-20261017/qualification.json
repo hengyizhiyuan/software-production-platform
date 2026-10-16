@@ -1,0 +1,73 @@
+{
+  "mission": "usability-first-20261017",
+  "starting_revision": "48365c53e1d1ab9b5ad17f13db1933564f7a6b64",
+  "application_revision": "CONTAINING_COMMIT",
+  "branch": "claude/c3-formation-ai-native-convergence",
+  "source_files": {
+    "src/spg/application/production_brief.py": "55fab99dc285d3ce6701a078d8c2fcf9c412ba0d7a86d7dfb2e86bc5b1785ecb",
+    "src/spg/application/governed_obligations.py": "64d2d98b340ec4555681a926b4104f411310a242d592e3112893d91f738a077b",
+    "src/spg/providers/managed_context_fulfillment.py": "7e3e0fe74060906d16f8ca29b7df68375421ed9bf5fcd5acb7daee8ac885321d",
+    "deploy/cloud-worker/release_gate.py": "8f555fb340c089a459e319904e34810f8d140cf9d6f392b914be2b1d9663ed47",
+    "owners.lock": "6d2aae596a1b5f11a8ba9a0b9d1b719e53022f9401534233e0bd22e12f2f80aa"
+  },
+  "owners": {
+    "ecf": {
+      "repository": "https://github.com/hengyizhiyuan/engineering-context-fabric.git",
+      "branch": "claude/c3-formation-ai-native-convergence",
+      "commit": "1d3feddf0c7e7726fea23c58d194d64034547a7a",
+      "source_digest": "225d415597884ae923458a620b8c01abef2605cd093036aee159f5d445073702"
+    },
+    "guardian": {
+      "repository": "https://github.com/hengyizhiyuan/guardian.git",
+      "branch": "codex/usability-first-20261017",
+      "commit": "7910649aefadc6ed5447bda33ffe493f856b3f23",
+      "source_digest": "19fb1e9e54c6e59786acb3289ad6614f6f354e82384abccb05dc4643363e63d8"
+    }
+  },
+  "qualification": {
+    "scope": "unchanged admitted bounded brief to actual content verification; ordinary local single-page production",
+    "status": "PASS_WITH_RETAINED_FINDINGS",
+    "work_id": "de0d0971-0765-5ec6-8d02-f41d9699feff",
+    "pwu_id": "a50a6541-a486-4187-8e96-afb99b856b2b",
+    "attempt_id": "0594069c-8676-473c-820a-7cbc9e21c00e",
+    "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+    "candidate_commit": "fc2d5b72f327f315330309da53529b0bbf0298f3",
+    "candidate_tree": "52c82cf69001b0c358da655c709d5a71fb692b64",
+    "artifact_sha256": "6a3ba2d756666afbdf535d0414bf39df7565d71210d76f08a8777b6b0db64e1e",
+    "guardian_request_id": "bdc20a43-53bb-51e4-b1b4-e9444f89d8d8",
+    "guardian_gate": "PASS",
+    "guardian_findings": 0,
+    "formation_model_calls": 0,
+    "formation_review_calls": 0,
+    "independent_verification": "PASS",
+    "preview_status": "READY",
+    "human_acceptance": "PENDING",
+    "integration": "NOT_PERFORMED",
+    "delivery": "NOT_AUTHORIZED",
+    "original_production_work_mutated": false,
+    "final_diagnostic_zip_sha256": "b93967508be00f272483a8cb31f3bc65f1596542d6b1bda873703847a1c59f90"
+  },
+  "test_results": {
+    "guardian_passed": 318,
+    "focused_brief_passed": 25,
+    "postgres_passed": 5,
+    "pre_owner_regression_passed": 1033,
+    "pre_owner_regression_known_baseline_failures": 3,
+    "release_regression": {
+      "passed": 1046,
+      "failed": 3,
+      "skipped": 55,
+      "errors": 0,
+      "unchanged_baseline_failure_ids": [
+        "tests/test_c3_generation_projection_economy.py::test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[next_request_limit]",
+        "tests/test_c3_fulfillment_wire_feedback.py::test_feedback_drift_stops_before_another_model_request[duplicate-response]",
+        "tests/test_c3_fulfillment_wire_feedback.py::test_feedback_drift_stops_before_another_model_request[duplicate-validation]"
+      ]
+    }
+  },
+  "limitations": [
+    "Earlier real failures retained in report; no history reset.",
+    "Future Preview/Human/Delivery obligations, unsupported consumers, unresolved authority and interpretive sources retain the existing reviewed formation.",
+    "No claim that the original game Work resumed; no Human product acceptance."
+  ]
+}

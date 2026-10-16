@@ -1,0 +1,116 @@
+{
+  "work_id": "de0d0971-0765-5ec6-8d02-f41d9699feff",
+  "work_objective": "Create 拾页, a single-page personal reading list at the repository root in one file, index.html, using only native HTML/CSS/JavaScript. The page shows the reading list as its primary surface, provides an add form accepting both title and author, allows toggling each entry between read and unread, provides an unread filter (with a way to view all), and persists the list including read state in browser localStorage so entries and states survive a page refresh. The entry point remains index.html opened directly as a static browser page; no build step, framework, CDN, account, cloud sync, or additional files are introduced. Inline CSS/JS live inside index.html only.",
+  "steering_enabled": true,
+  "steering_plan_id": "8094af42-be55-4c1e-8c58-661e0dcd1b92",
+  "active_revision_id": "b89c08bb-f5b3-4efa-a8e8-012b47bc3177",
+  "active_revision_number": 1,
+  "completed_steps": [
+    {
+      "step_id": "1966f270-0412-49e2-ab4d-c7f55407ecb9",
+      "type": "DESIGN",
+      "objective": "Create a new single-page reading-list web page with add, mark-read, filter-unread and localStorage persistence.",
+      "completion_condition": "A bounded design direction is supported by current Reality",
+      "position": 1,
+      "state": "CLOSED",
+      "design_issue_key": null
+    }
+  ],
+  "current_step": {
+    "step_id": "4cf45f64-7839-45df-a09d-99b98a7e53dd",
+    "type": "PRODUCE",
+    "objective": "Produce the next exact change admitted from current Reality",
+    "completion_condition": "The exact bounded production cycle reaches trusted Runtime Commit",
+    "position": 2,
+    "state": "CURRENT",
+    "design_issue_key": null
+  },
+  "known_next_steps": [
+    {
+      "step_id": "2a40727c-e75c-4048-bdf0-594c2539a85e",
+      "type": "VERIFY_ACCEPT",
+      "objective": "Assess the trusted result against the long-lived outcome",
+      "completion_condition": "Governed evidence supports product acceptance",
+      "position": 3,
+      "state": "KNOWN",
+      "design_issue_key": null
+    },
+    {
+      "step_id": "885bec80-6a5d-4966-bbda-6e228ea49603",
+      "type": "COMPLETE",
+      "objective": "Complete the admitted long-lived Work",
+      "completion_condition": "The admitted Work outcome is satisfied",
+      "position": 4,
+      "state": "KNOWN",
+      "design_issue_key": null
+    }
+  ],
+  "plan_changes": [],
+  "latest_decision": {
+    "decision_id": "fbcad9c3-745d-4a70-8940-fec4fb34b8a6",
+    "next_step_type": "HUMAN_DECISION",
+    "objective": "Resolve the bounded Work convergence incident",
+    "reason": "Work convergence stopped: NON_CONVERGING; 1 failed no-progress outcomes, 3 boundary attempts, 173s. Missing acceptance: REVIEW_RUNTIME_READY. Evidence is preserved; changing candidate IDs does not reset this budget. A Human retry opens one new episode with the same unchanged budgets.",
+    "outcome": "HUMAN_ATTENTION",
+    "human_required": true,
+    "attention_reason": "MATERIAL_RISK_OR_COST_DECISION",
+    "reality_refs": [
+      {
+        "kind": "CANDIDATE",
+        "identity": "cd731404-0366-5d1a-99f3-ba25b43e8e4b"
+      },
+      {
+        "kind": "COMPLETION",
+        "identity": "b1fbdbdf-ec59-5f49-8a4d-17990d494a02"
+      },
+      {
+        "kind": "GOVERNANCE_DECISION",
+        "identity": "2e7f8e77-0af2-54ac-aa54-3dce00d85fa4"
+      },
+      {
+        "kind": "GOVERNANCE_DECISION",
+        "identity": "645eb8a6-b1cf-5114-a25c-91a09b9d9814"
+      },
+      {
+        "kind": "REPOSITORY_OBSERVATION",
+        "identity": "4733357a-552e-4e9f-9548-e81f2f3515d1"
+      },
+      {
+        "kind": "REPOSITORY_OBSERVATION",
+        "identity": "4f4f1618-8727-46e0-8c34-ab1ca9f26a7e"
+      },
+      {
+        "kind": "SEMANTIC_RESULT",
+        "identity": "25c090f9-2410-4117-8a42-f227e015803f"
+      },
+      {
+        "kind": "TRUSTED_BASELINE",
+        "identity": "62156842-82bc-4413-a06d-5aa15ee3b985"
+      },
+      {
+        "kind": "VERIFICATION",
+        "identity": "5d09c20a-b582-52b2-b889-4fc9f4a5c497"
+      },
+      {
+        "kind": "VERIFICATION",
+        "identity": "d80ad046-0c2f-5037-8d51-62b1cd38246e"
+      },
+      {
+        "kind": "WORK",
+        "identity": "de0d0971-0765-5ec6-8d02-f41d9699feff"
+      },
+      {
+        "kind": "WORK_REALITY_REVISION",
+        "identity": "c6f84324-4645-563d-bccb-6f7d42b3d9ac"
+      }
+    ]
+  },
+  "selection_rationale": "Work convergence stopped: NON_CONVERGING; 1 failed no-progress outcomes, 3 boundary attempts, 173s. Missing acceptance: REVIEW_RUNTIME_READY. Evidence is preserved; changing candidate IDs does not reset this budget. A Human retry opens one new episode with the same unchanged budgets.",
+  "steering_outcome": "HUMAN_ATTENTION",
+  "automatic_progression_state": "STOPPED",
+  "current_production_cycle_number": 1,
+  "current_production_run_id": "1d23080f-6ec4-40cd-9bde-d95da65228b5",
+  "current_production_cycle_trusted": false,
+  "human_attention_required": true,
+  "last_stop_reason": "HUMAN_ATTENTION"
+}

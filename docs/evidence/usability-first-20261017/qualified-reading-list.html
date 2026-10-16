@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>拾页 · 个人阅读清单</title>
+<style>
+  :root {
+    --bg: #f6f4ef;
+    --card: #ffffff;
+    --ink: #2b2823;
+    --muted: #7d766b;
+    --accent: #3d6b57;
+    --accent-soft: #e6efe9;
+    --line: #e4dfd6;
+    --danger: #a2544a;
+    --radius: 12px;
+    --shadow: 0 1px 2px rgba(43, 40, 35, .06), 0 6px 18px rgba(43, 40, 35, .05);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 16px 64px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 720px; margin: 0 auto; }
+  .masthead { margin-bottom: 24px; }
+  .masthead h1 { margin: 0; font-size: 2rem; font-weight: 600; letter-spacing: .18em; }
+  .tagline { margin: 4px 0 0; color: var(--muted); font-size: .92rem; letter-spacing: .04em; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .add-form {
+    padding: 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+  }
+  .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .field label { font-size: .76rem; letter-spacing: .1em; color: var(--muted); }
+  .field input {
+    font: inherit;
+    padding: 9px 12px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: #fdfcfa;
+    color: inherit;
+    min-width: 0;
+  }
+  .field input:focus-visible { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  button { font: inherit; cursor: pointer; border-radius: 9px; border: 1px solid transparent; }
+  .btn-primary { padding: 10px 22px; background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-primary:hover { filter: brightness(1.07); }
+  .form-error { margin: 8px 2px 0; color: var(--danger); font-size: .86rem; }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    margin: 24px 0 12px;
+  }
+  .filters { display: inline-flex; gap: 4px; padding: 4px; background: #efece5; border-radius: 999px; }
+  .filter { padding: 6px 16px; background: transparent; color: var(--muted); border-radius: 999px; font-size: .9rem; }
+  .filter:hover { color: var(--ink); }
+  .filter.is-active { background: var(--card); color: var(--accent); font-weight: 600; box-shadow: 0 1px 2px rgba(43, 40, 35, .08); }
+  .stats { color: var(--muted); font-size: .85rem; }
+  .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .book {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 16px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .book.is-read { background: #fbfaf7; }
+  .book.is-read .book-title { text-decoration: line-through; color: var(--muted); }
+  .book-main { flex: 1 1 auto; min-width: 0; }
+  .book-title { font-weight: 600; word-break: break-word; }
+  .book-author { font-size: .87rem; color: var(--muted); word-break: break-word; }
+  .badge {
+    flex: 0 0 auto;
+    font-size: .72rem;
+    letter-spacing: .06em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .book.is-read .badge { background: #f0ede6; color: var(--muted); }
+  .book-actions { flex: 0 0 auto; display: flex; gap: 6px; }
+  .btn-ghost { padding: 6px 12px; font-size: .82rem; background: transparent; border-color: var(--line); color: var(--ink); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger:hover { border-color: var(--danger); color: var(--danger); }
+  .empty {
+    margin: 0;
+    padding: 28px 16px;
+    text-align: center;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+  }
+  @media (max-width: 560px) {
+    .add-form { grid-template-columns: 1fr; }
+    .btn-primary { width: 100%; }
+    .book { flex-wrap: wrap; }
+    .book-actions { width: 100%; justify-content: flex-end; }
+  }
+</style>
+</head>
+<body>
+<div class='page'>
+  <header class='masthead'>
+    <h1>拾页</h1>
+    <p class='tagline'>个人阅读清单 · 数据保存在本机浏览器</p>
+  </header>
+
+  <main>
+    <form id='add-form' class='card add-form' autocomplete='off' novalidate>
+      <div class='field'>
+        <label for='book-title'>书名</label>
+        <input id='book-title' name='title' type='text' placeholder='例如：长安的荔枝' maxlength='120'>
+      </div>
+      <div class='field'>
+        <label for='book-author'>作者</label>
+        <input id='book-author' name='author' type='text' placeholder='例如：马伯庸' maxlength='120'>
+      </div>
+      <button type='submit' class='btn-primary'>添加</button>
+    </form>
+    <p id='form-error' class='form-error' role='alert' hidden>请填写书名和作者。</p>
+
+    <div class='toolbar'>
+      <div class='filters' role='group' aria-label='筛选书目'>
+        <button type='button' class='filter is-active' data-filter='all' aria-pressed='true'>全部</button>
+        <button type='button' class='filter' data-filter='unread' aria-pressed='false'>未读</button>
+        <button type='button' class='filter' data-filter='read' aria-pressed='false'>已读</button>
+      </div>
+      <span id='stats' class='stats'></span>
+    </div>
+
+    <ul id='book-list' class='list'></ul>
+    <p id='empty-state' class='empty' hidden></p>
+  </main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'shiye.reading-list.v1';
+
+  var form = document.getElementById('add-form');
+  var titleInput = document.getElementById('book-title');
+  var authorInput = document.getElementById('book-author');
+  var formError = document.getElementById('form-error');
+  var listEl = document.getElementById('book-list');
+  var emptyEl = document.getElementById('empty-state');
+  var statsEl = document.getElementById('stats');
+  var filterButtons = Array.prototype.slice.call(document.querySelectorAll('.filter'));
+
+  var books = loadBooks();
+  var currentFilter = 'all';
+
+  function loadBooks() {
+    var raw = null;
+    try {
+      raw = window.localStorage.getItem(STORAGE_KEY);
+    } catch (err) {
+      return [];
+    }
+    if (!raw) { return []; }
+    try {
+      var parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) { return []; }
+      return parsed.filter(function (item) {
+        return item && typeof item === 'object' && typeof item.title === 'string';
+      }).map(function (item, index) {
+        return {
+          id: typeof item.id === 'string' ? item.id : 'legacy-' + index,
+          title: item.title,
+          author: typeof item.author === 'string' ? item.author : '',
+          read: item.read === true,
+          addedAt: typeof item.addedAt === 'number' ? item.addedAt : index
+        };
+      });
+    } catch (err) {
+      return [];
+    }
+  }
+
+  function saveBooks() {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
+    } catch (err) {
+      /* localStorage may be unavailable (e.g. private mode); the page still works in memory. */
+    }
+  }
+
+  function createId() {
+    return 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function unreadCount() {
+    return books.filter(function (book) { return !book.read; }).length;
+  }
+
+  function visibleBooks() {
+    if (currentFilter === 'unread') {
+      return books.filter(function (book) { return !book.read; });
+    }
+    if (currentFilter === 'read') {
+      return books.filter(function (book) { return book.read; });
+    }
+    return books.slice();
+  }
+
+  function buildRow(book) {
+    var li = document.createElement('li');
+    li.className = 'book' + (book.read ? ' is-read' : '');
+    li.setAttribute('data-id', book.id);
+
+    var main = document.createElement('div');
+    main.className = 'book-main';
+
+    var title = document.createElement('div');
+    title.className = 'book-title';
+    title.textContent = book.title;
+
+    var author = document.createElement('div');
+    author.className = 'book-author';
+    author.textContent = book.author ? book.author : '未知作者';
+
+    main.appendChild(title);
+    main.appendChild(author);
+
+    var badge = document.createElement('span');
+    badge.className = 'badge';
+    badge.textContent = book.read ? '已读' : '未读';
+
+    var actions = document.createElement('div');
+    actions.className = 'book-actions';
+
+    var toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'btn-ghost';
+    toggle.setAttribute('data-action', 'toggle');
+    toggle.setAttribute('aria-label', (book.read ? '标记未读：' : '标记已读：') + book.title);
+    toggle.textContent = book.read ? '标记未读' : '标记已读';
+
+    var remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'btn-ghost btn-danger';
+    remove.setAttribute('data-action', 'remove');
+    remove.setAttribute('aria-label', '删除：' + book.title);
+    remove.textContent = '删除';
+
+    actions.appendChild(toggle);
+    actions.appendChild(remove);
+
+    li.appendChild(main);
+    li.appendChild(badge);
+    li.appendChild(actions);
+    return li;
+  }
+
+  function render() {
+    var items = visibleBooks();
+    var unread = unreadCount();
+
+    listEl.textContent = '';
+    items.forEach(function (book) {
+      listEl.appendChild(buildRow(book));
+    });
+
+    statsEl.textContent = '共 ' + books.length + ' 本 · 未读 ' + unread + ' 本 · 已读 ' + (books.length - unread) + ' 本';
+
+    if (items.length === 0) {
+      emptyEl.hidden = false;
+      if (books.length === 0) {
+        emptyEl.textContent = '还没有书目，添加第一本吧。';
+      } else if (currentFilter === 'unread') {
+        emptyEl.textContent = '没有未读的书。';
+      } else {
+        emptyEl.textContent = '还没有已读的书。';
+      }
+    } else {
+      emptyEl.hidden = true;
+      emptyEl.textContent = '';
+    }
+  }
+
+  function addBook(title, author) {
+    books.push({
+      id: createId(),
+      title: title,
+      author: author,
+      read: false,
+      addedAt: Date.now()
+    });
+    saveBooks();
+    render();
+  }
+
+  function toggleRead(id) {
+    for (var i = 0; i < books.length; i += 1) {
+      if (books[i].id === id) {
+        books[i].read = !books[i].read;
+        break;
+      }
+    }
+    saveBooks();
+    render();
+  }
+
+  function removeBook(id) {
+    books = books.filter(function (book) { return book.id !== id; });
+    saveBooks();
+    render();
+  }
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    var title = titleInput.value.trim();
+    var author = authorInput.value.trim();
+    if (!title || !author) {
+      formError.hidden = false;
+      if (title) { authorInput.focus(); } else { titleInput.focus(); }
+      return;
+    }
+    formError.hidden = true;
+    addBook(title, author);
+    form.reset();
+    titleInput.focus();
+  });
+
+  listEl.addEventListener('click', function (event) {
+    var target = event.target;
+    if (!target || typeof target.closest !== 'function') { return; }
+    var button = target.closest('button[data-action]');
+    if (!button) { return; }
+    var row = button.closest('li[data-id]');
+    if (!row) { return; }
+    var id = row.getAttribute('data-id');
+    var action = button.getAttribute('data-action');
+    if (action === 'toggle') {
+      toggleRead(id);
+    } else if (action === 'remove') {
+      removeBook(id);
+    }
+  });
+
+  filterButtons.forEach(function (button) {
+    button.addEventListener('click', function () {
+      currentFilter = button.getAttribute('data-filter') || 'all';
+      filterButtons.forEach(function (other) {
+        var active = other === button;
+        other.classList.toggle('is-active', active);
+        other.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

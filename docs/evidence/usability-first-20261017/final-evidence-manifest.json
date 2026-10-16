@@ -1,0 +1,95 @@
+{
+  "capture_consistency": "NON_ATOMIC_ACROSS_OWNERS",
+  "capture_timestamp": "2026-10-16T17:52:14.005735+00:00",
+  "capture_warnings": [
+    "Live Work/Registry, owner database rows and Preview/Guardian files were read at separate instants; no global atomic snapshot.",
+    "Full owner row bodies excluded due to capacity; use the exact Owner references in the remaining Trace.",
+    "Duplicated owner/event projections excluded due to capacity; timeline and exact source references retained."
+  ],
+  "evidence_scope": "selected authorized Work only",
+  "evidence_source": "ProductionTraceService + WorkRegistryService (existing owners)",
+  "export_mode": "full",
+  "exported_files": {
+    "diagnosis-context.md": {
+      "bytes": 892,
+      "sha256": "b5fe16f149c25eafcc3d62c93099cf812856b3197d79ecc66bdc5102a2d4d2e2"
+    },
+    "report.md": {
+      "bytes": 10055,
+      "sha256": "17c2fe7b85c24f74b922cbfffe9730364259ba76614af0bd5fdcaebf985351d2"
+    },
+    "trace.json": {
+      "bytes": 10104415,
+      "sha256": "9330f8a61981e0611873babce203448d5e9f31b9f0d0896bca44ec6f48113002"
+    }
+  },
+  "individual_download_consistency": "Each file request is a new live capture; hashes in this manifest apply only to files from the same ZIP capture.",
+  "manifest_hash_strategy": "Manifest lists only other files; it does not hash itself.",
+  "missing_evidence": [],
+  "qualification_scope": "Export only; no Work or Quality PASS claim",
+  "redaction_summary": {
+    "policy": "field suppression + free-text credentials, URL, personal data redaction",
+    "redacted_values": 959,
+    "shortened_texts": 0
+  },
+  "runtime_owner_identity": "LIVE_ENTITY_LOOKUP; per-event Owner/source_ref in trace.json",
+  "schema_version": "watt-work-diagnostic-v1",
+  "source_revision": "a0d1235f72ea123c0fc4fe3b7933ac8840160613",
+  "source_tree": null,
+  "truncated_records": {
+    "advanced_owner_rows": {
+      "baseline_candidates": 1,
+      "checkpoint_bundles": 11,
+      "completion_evaluations": 1,
+      "context_packages": 1,
+      "effect_receipts": 14,
+      "execution_allocations": 2,
+      "execution_attempts": 2,
+      "execution_dispatches": 2,
+      "execution_effects": 14,
+      "execution_events": 17,
+      "execution_evidence": 23,
+      "execution_sessions": 1,
+      "execution_steps": 11,
+      "execution_workspaces": 2,
+      "executor_queue": 2,
+      "governance_records": 2,
+      "interaction_assessments": 1,
+      "interaction_messages": 2,
+      "interaction_records": 1,
+      "interaction_response_events": 16,
+      "interaction_turn_obligations": 1,
+      "interaction_turn_realizations": 1,
+      "interaction_turns": 1,
+      "plan_revisions": 1,
+      "product_interactions": 1,
+      "product_works": 1,
+      "production_admissibility_records": 1,
+      "production_runs": 1,
+      "production_snapshots": 1,
+      "production_work_units": 1,
+      "proposed_repository_snapshots": 1,
+      "provider_execution_reports": 2,
+      "pwu_contract_versions": 1,
+      "repository_observations": 2,
+      "self_refine_events": 4,
+      "semantic_step_results": 1,
+      "software_products": 1,
+      "steering_decisions": 3,
+      "steering_history_events": 1,
+      "steering_plan_revisions": 1,
+      "steering_plans": 1,
+      "steering_steps": 4,
+      "verification_records": 2,
+      "work_product_references": 1,
+      "work_reality_revisions": 1,
+      "work_runtime_bindings": 1,
+      "work_source_bases": 1
+    },
+    "diagnostic_owners": 13,
+    "embedded_unit_events": 99,
+    "governance": 2,
+    "tool_calls": 28
+  },
+  "work_id": "de0d0971-0765-5ec6-8d02-f41d9699feff"
+}

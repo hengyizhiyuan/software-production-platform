@@ -1,0 +1,31 @@
+{
+  "id": "64729979-2abe-4037-88c7-7aa0b3c1ea2e",
+  "work_id": "de0d0971-0765-5ec6-8d02-f41d9699feff",
+  "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+  "candidate_fingerprint": "99b4be54e1f53ca2d119102fd4a6fcb9c70106d8ef717084fd7a0b4b28392e62",
+  "repository_identity": "watt://work-branches/de0d0971-0765-5ec6-8d02-f41d9699feff",
+  "repository_revision": "fc2d5b72f327f315330309da53529b0bbf0298f3",
+  "repository_tree": "52c82cf69001b0c358da655c709d5a71fb692b64",
+  "workspace_id": "3cc6084a-759f-45f4-ac39-01923ae8e6d4",
+  "environment_id": "4d0f92c0-30aa-4dc4-83f7-0d7735e4baa4",
+  "mode": "STATIC_PREVIEW",
+  "status": "REQUESTED",
+  "definition_version": "static-git-preview-v1",
+  "endpoint": null,
+  "image_reference": null,
+  "service_identities": [],
+  "resource_references": [],
+  "evidence": [
+    {
+      "kind": "REFINEMENT_LINEAGE",
+      "previous_preview_id": "d226ef91-62b6-436e-94cc-0480f324e520",
+      "attempt": 2,
+      "previous_failure_code": null
+    }
+  ],
+  "failure_code": null,
+  "failure_reason": null,
+  "version": 1,
+  "created_at": "2026-10-16T17:50:53.769619Z",
+  "updated_at": "2026-10-16T17:50:53.769619Z"
+}

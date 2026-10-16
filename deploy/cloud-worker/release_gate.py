@@ -57,6 +57,10 @@ def check_guardian_contract(results: dict) -> None:
     assert hasattr(JsonSoftwareAssuranceStore, "assess") and JsonAssuranceIntakeStore is not None
     resolver = "owner_evidence_resolver" in inspect.signature(JsonSoftwareAssuranceStore).parameters
     assert resolver, "Guardian store lacks owner_evidence_resolver"
+    from guardian.production_brief import CONTRACT as guardian_brief, source_preserving_plan
+    from spg.application.production_brief import CONTRACT as watt_brief
+    assert guardian_brief == watt_brief and callable(source_preserving_plan), "unchanged production brief unsupported"
+    results["guardian_production_brief"] = {"contract": guardian_brief, "independent_source_validation": True}
     results["guardian_contract"] = {"types": sorted(imported), "request_fields": sorted(sent), "owner_evidence_resolver": resolver}
 
 

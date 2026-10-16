@@ -507,6 +507,18 @@ authorized representative production journey.
 
 ### 13.4 Proportionate regression
 
+Human Governor direction, 2026-10-17: prioritize a usable production journey.
+At admission, preserve the complete admitted brief and enforce source, scope
+and effect authority. Passing unchanged requirements to an existing artifact
+Verification Owner does not require another model to decompose and review their
+meaning first. Such a handoff is pending evidence, never semantic approval or
+completion. Interpretive transformation still needs its existing Owner's
+validation. Check implementation requirements against the actual candidate;
+keep continuous effect prohibitions armed from admission and final independent
+Verification, Guardian and Human acceptance at their applicable boundaries.
+Internal protocol/recovery failures belong to the system, not a request for the
+Human to repeat an unchanged goal.
+
 * Local change: validate the changed invariant and its immediate failure paths.
 * Grouped changes: run focused contract and persistence regression across the
   affected Owners and recovery boundaries.

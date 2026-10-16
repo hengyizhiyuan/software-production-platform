@@ -1,0 +1,490 @@
+{
+  "revision": "986fcb3f1cf9d7729d82dcf521aa8b671a0cf4c0059e66534bfdccf15f6ab40b",
+  "product": {
+    "id": "5fb35519-0c1c-47a6-831f-626702b26588",
+    "name": "可用性验证·本地阅读清单20261017",
+    "description": "Isolated real-model normal-entry qualification; final Human acceptance remains pending.",
+    "status": "ACTIVE",
+    "updated_at": "2026-10-16T17:25:26.892687+00:00",
+    "accepted_version": 0,
+    "accepted_revision": "a0d1235f72ea123c0fc4fe3b7933ac8840160613",
+    "current_work": {
+      "id": "de0d0971-0765-5ec6-8d02-f41d9699feff",
+      "product_id": "5fb35519-0c1c-47a6-831f-626702b26588",
+      "product_name": "可用性验证·本地阅读清单20261017",
+      "title": "Implement a single-page personal reading list web page titled 拾页.",
+      "requirement": "Implement a single-page personal reading list web page titled 拾页.",
+      "status": "NEEDS_ATTENTION",
+      "created_at": "2026-10-16T17:25:50.630874+00:00",
+      "updated_at": "2026-10-16T17:26:10.413257+00:00",
+      "reality_revision_id": "c6f84324-4645-563d-bccb-6f7d42b3d9ac"
+    },
+    "recent_works": [
+      {
+        "id": "de0d0971-0765-5ec6-8d02-f41d9699feff",
+        "product_id": "5fb35519-0c1c-47a6-831f-626702b26588",
+        "product_name": "可用性验证·本地阅读清单20261017",
+        "title": "Implement a single-page personal reading list web page titled 拾页.",
+        "requirement": "Implement a single-page personal reading list web page titled 拾页.",
+        "status": "NEEDS_ATTENTION",
+        "created_at": "2026-10-16T17:25:50.630874+00:00",
+        "updated_at": "2026-10-16T17:26:10.413257+00:00",
+        "reality_revision_id": "c6f84324-4645-563d-bccb-6f7d42b3d9ac"
+      }
+    ],
+    "recent_deliverables": [],
+    "work_count": 1,
+    "deliverable_count": 0,
+    "revision": "f4dd5739e6d9ceb7015ec7fd33a1895b2eba5b2e10e94626799dd7d798dee6d3"
+  },
+  "work": {
+    "work_id": "de0d0971-0765-5ec6-8d02-f41d9699feff",
+    "goal_id": null,
+    "mode": "LONG_LIVED_STEERING",
+    "raw_user_requirement": "Implement a single-page personal reading list web page titled 拾页.",
+    "title": "Implement a single-page personal reading list web page titled 拾页.",
+    "desired_outcome": "Create a new single-page reading-list web page with add, mark-read, filter-unread and localStorage persistence.",
+    "constraints": [
+      "All HTML/CSS/JavaScript must be written in a single index.html using native technologies.",
+      "The first version must not include user accounts or cloud sync.",
+      "Data must be saved with browser localStorage and remain after refresh.",
+      "Single-page personal reading list web page",
+      "Add book with title and author",
+      "Mark book as read",
+      "Filter unread books",
+      "Persist data in browser localStorage across refresh",
+      "Excluded from this Work: User accounts",
+      "Excluded from this Work: Cloud sync"
+    ],
+    "target_kind": "CODE_WORK",
+    "artifact_target": null,
+    "change_proposal": {
+      "proposal_id": "7f8a0dcd-8204-5db1-9368-c2f91fee9f38",
+      "target_kind": "CODE_WORK",
+      "engineering_resource_id": "91ce8b73-3d30-4edb-9603-1b8adb53d278",
+      "repository_identity": "watt://work-branches/de0d0971-0765-5ec6-8d02-f41d9699feff",
+      "source_baseline_id": "62156842-82bc-4413-a06d-5aa15ee3b985",
+      "source_ref": "refs/heads/work-de0d097107655ec68d02f41d9699feff",
+      "source_revision": "a0d1235f72ea123c0fc4fe3b7933ac8840160613",
+      "proposed_targets": [
+        {
+          "path": "index.html",
+          "operation": "CREATE",
+          "disposition": "REQUIRED",
+          "rationale": "The refinement supplied this exact repository target.",
+          "evidence": "Exact path in refined intent; inspected at a0d1235f72ea.",
+          "confidence": "HIGH"
+        }
+      ],
+      "allowed_areas": [],
+      "forbidden_areas": [
+        "README.md"
+      ],
+      "rationale": "Proposed from exact targets in refinement and exact-baseline inspection.",
+      "confidence": "HIGH",
+      "verification_obligations": [
+        {
+          "kind": "PATH_SCOPE",
+          "target": null
+        },
+        {
+          "kind": "GIT_DIFF_CHECK",
+          "target": null
+        }
+      ],
+      "provenance": {
+        "provider_identity": "provider:repository-aware-change-proposal-lite",
+        "provider_version": "v1",
+        "inspection_method": "git-object-read-only:path-enumeration+text-search"
+      },
+      "unresolved_scope_questions": []
+    },
+    "change_contract": null,
+    "production_plan": {
+      "proposal_id": "dd3cf720-addf-51fe-92d8-05694293c717",
+      "target_kind": "CODE_WORK",
+      "objective": "Create a new single-page reading-list web page with add, mark-read, filter-unread and localStorage persistence.",
+      "desired_outcome": "Create a new single-page reading-list web page with add, mark-read, filter-unread and localStorage persistence.",
+      "ordered_steps": [
+        {
+          "position": 1,
+          "instruction": "Inspect the admitted Source of Truth and existing repository conventions."
+        },
+        {
+          "position": 2,
+          "instruction": "Prepare the repository-inspected code targets: index.html."
+        },
+        {
+          "position": 3,
+          "instruction": "Run the admitted targeted verification and report the resulting evidence."
+        }
+      ],
+      "graph": null,
+      "artifact_targets": [],
+      "change_proposal": {
+        "proposal_id": "7f8a0dcd-8204-5db1-9368-c2f91fee9f38",
+        "target_kind": "CODE_WORK",
+        "engineering_resource_id": "91ce8b73-3d30-4edb-9603-1b8adb53d278",
+        "repository_identity": "watt://work-branches/de0d0971-0765-5ec6-8d02-f41d9699feff",
+        "source_baseline_id": "62156842-82bc-4413-a06d-5aa15ee3b985",
+        "source_ref": "refs/heads/work-de0d097107655ec68d02f41d9699feff",
+        "source_revision": "a0d1235f72ea123c0fc4fe3b7933ac8840160613",
+        "proposed_targets": [
+          {
+            "path": "index.html",
+            "operation": "CREATE",
+            "disposition": "REQUIRED",
+            "rationale": "The refinement supplied this exact repository target.",
+            "evidence": "Exact path in refined intent; inspected at a0d1235f72ea.",
+            "confidence": "HIGH"
+          }
+        ],
+        "allowed_areas": [],
+        "forbidden_areas": [
+          "README.md"
+        ],
+        "rationale": "Proposed from exact targets in refinement and exact-baseline inspection.",
+        "confidence": "HIGH",
+        "verification_obligations": [
+          {
+            "kind": "PATH_SCOPE",
+            "target": null
+          },
+          {
+            "kind": "GIT_DIFF_CHECK",
+            "target": null
+          }
+        ],
+        "provenance": {
+          "provider_identity": "provider:repository-aware-change-proposal-lite",
+          "provider_version": "v1",
+          "inspection_method": "git-object-read-only:path-enumeration+text-search"
+        },
+        "unresolved_scope_questions": []
+      },
+      "change_contract": null,
+      "inherited_constraints": [
+        "All HTML/CSS/JavaScript must be written in a single index.html using native technologies.",
+        "The first version must not include user accounts or cloud sync.",
+        "Data must be saved with browser localStorage and remain after refresh.",
+        "Single-page personal reading list web page",
+        "Add book with title and author",
+        "Mark book as read",
+        "Filter unread books",
+        "Persist data in browser localStorage across refresh",
+        "Excluded from this Work: User accounts",
+        "Excluded from this Work: Cloud sync"
+      ],
+      "verification_approach": "Verify the admitted desired outcome against the exact Candidate, run repository-appropriate checks, and provide a real preview when requested; do not add unrequested functionality or deliver without Human authorization.",
+      "assumptions": [
+        "The admitted Work can be executed through one governed PWU and Attempt lineage."
+      ],
+      "unresolved_questions": [],
+      "fit_classification": "ONE_PWU_FIT",
+      "engineering_resource_id": "91ce8b73-3d30-4edb-9603-1b8adb53d278",
+      "repository_identity": "watt://work-branches/de0d0971-0765-5ec6-8d02-f41d9699feff",
+      "source_baseline_id": "62156842-82bc-4413-a06d-5aa15ee3b985",
+      "source_revision": "a0d1235f72ea123c0fc4fe3b7933ac8840160613",
+      "fulfillment_formation_receipts": []
+    },
+    "production_plan_runtime": null,
+    "tags": [],
+    "engineering_scope": {
+      "id": "cadc0d8c-0b0d-5944-87f1-dfb0261fccaf",
+      "work_id": "de0d0971-0765-5ec6-8d02-f41d9699feff",
+      "summary": "Long-lived Work authority envelope for watt://work-branches/de0d0971-0765-5ec6-8d02-f41d9699feff at refs/heads/work-de0d097107655ec68d02f41d9699feff",
+      "fingerprint": "619cef71d9b2e27bc2be67d960383c16c3e6e48f8c4b1823eedfc6c022a87f73",
+      "condition": "ADMITTED",
+      "bindings": [
+        {
+          "id": "a5362071-c7a2-5872-b94f-39cbfab4d08e",
+          "engineering_scope_id": "cadc0d8c-0b0d-5944-87f1-dfb0261fccaf",
+          "resource_id": "91ce8b73-3d30-4edb-9603-1b8adb53d278",
+          "condition": "ACTIVE",
+          "created_at": "2026-10-16T17:25:50.630874Z"
+        }
+      ],
+      "created_at": "2026-10-16T17:25:50.630874Z",
+      "updated_at": "2026-10-16T17:25:50.630874Z"
+    },
+    "status": "NEEDS_ATTENTION",
+    "current_production_step": "PRODUCE",
+    "most_recent_meaningful_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+    "what_happens_next": "Human must resolve the material Steering decision",
+    "human_attention_required": true,
+    "result_summary": "1 independently observed artifact change(s)",
+    "current_work_reality_revision_id": "c6f84324-4645-563d-bccb-6f7d42b3d9ac",
+    "steering_enabled": true,
+    "current_steering_step_id": "4cf45f64-7839-45df-a09d-99b98a7e53dd",
+    "current_steering_step_type": "PRODUCE",
+    "current_production_cycle_number": 1,
+    "current_production_run_id": "1d23080f-6ec4-40cd-9bde-d95da65228b5",
+    "current_production_cycle_trusted": false,
+    "latest_trusted_runtime_commit_id": null,
+    "work_complete": false
+  },
+  "historical": false,
+  "agenda": [
+    {
+      "id": "1966f270-0412-49e2-ab4d-c7f55407ecb9",
+      "type": "DESIGN",
+      "title": "Create a new single-page reading-list web page with add, mark-read, filter-unread and localStorage persistence.",
+      "state": "closed",
+      "human_visible": "整理实施方案"
+    },
+    {
+      "id": "4cf45f64-7839-45df-a09d-99b98a7e53dd",
+      "type": "PRODUCE",
+      "title": "Produce the next exact change admitted from current Reality",
+      "state": "current",
+      "human_visible": "准备与执行当前改动"
+    },
+    {
+      "id": "2a40727c-e75c-4048-bdf0-594c2539a85e",
+      "type": "VERIFY_ACCEPT",
+      "title": "Assess the trusted result against the long-lived outcome",
+      "state": "known",
+      "human_visible": "核对成果并准备审阅"
+    },
+    {
+      "id": "885bec80-6a5d-4966-bbda-6e228ea49603",
+      "type": "COMPLETE",
+      "title": "Complete the admitted long-lived Work",
+      "state": "known",
+      "human_visible": "确认本次目标已满足"
+    }
+  ],
+  "focus": {
+    "title": "Implement a single-page personal reading list web page titled 拾页.",
+    "status": "PRODUCE",
+    "reason": "OUTPUT_OBLIGATIONS_EVALUATED",
+    "next": "Human must resolve the material Steering decision",
+    "human_action": true
+  },
+  "reality": {
+    "work_status": "NEEDS_ATTENTION",
+    "accepted_version": 0,
+    "accepted_revision": "a0d1235f72ea123c0fc4fe3b7933ac8840160613",
+    "candidate": {
+      "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+      "candidate_fingerprint": "99b4be54e1f53ca2d119102fd4a6fcb9c70106d8ef717084fd7a0b4b28392e62",
+      "repository_revision": "fc2d5b72f327f315330309da53529b0bbf0298f3",
+      "tree": "52c82cf69001b0c358da655c709d5a71fb692b64",
+      "entrypoint": "index.html",
+      "preview_kind": "STATIC_WEB",
+      "artifacts": [
+        "index.html"
+      ],
+      "verification": [
+        "PATH_SCOPE: PASS",
+        "GIT_DIFF_CHECK: PASS"
+      ],
+      "authorization_pending": true
+    },
+    "execution": {
+      "execution_id": "0594069c-8676-473c-820a-7cbc9e21c00e",
+      "work_id": "de0d0971-0765-5ec6-8d02-f41d9699feff",
+      "task_contract_reference": "2de6b413-7df7-5758-a0af-b72018bcca64",
+      "priority": 0,
+      "status": "COMPLETED",
+      "created_at": "2026-10-16T17:30:55.461032Z",
+      "worker_id": null,
+      "lease_expire_at": null,
+      "queue_entry_id": "ef4c0025-5c23-473f-938e-aa92eccfa9a9",
+      "recovery_reason": null,
+      "queue_condition": "COMPLETED",
+      "wait_reason": null,
+      "wait_age_seconds": 1277,
+      "fairness_group": "work:de0d0971-0765-5ec6-8d02-f41d9699feff",
+      "scheduling_policy_version": "fair-round-robin-v2",
+      "scheduling": {
+        "progression_state": "NOT_APPLICABLE",
+        "reason": "Queue allocation is not currently pending.",
+        "scheduler_alive": true,
+        "compatible_worker_count": 1,
+        "occupied_worker_count": 0,
+        "compatible_slots": 1,
+        "occupied_slots": 0,
+        "available_slots": 1,
+        "draining_worker_count": 0,
+        "observed_at": "2026-10-16T17:52:12.886287Z"
+      }
+    },
+    "admission_context": null,
+    "production_plan": null,
+    "guardian": {
+      "status": "PASS",
+      "gate": "PASS",
+      "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+      "request_id": "bdc20a43-53bb-51e4-b1b4-e9444f89d8d8",
+      "result_ref": "guardian:assurance-result:bdc20a43-53bb-51e4-b1b4-e9444f89d8d8",
+      "result_refs": [
+        "guardian:assurance-result:bdc20a43-53bb-51e4-b1b4-e9444f89d8d8"
+      ],
+      "required_pwu_ids": [
+        "a50a6541-a486-4187-8e96-afb99b856b2b"
+      ],
+      "finding_count": 0,
+      "finding_ids": [],
+      "summary": "",
+      "evidence_ref": "guardian:evidence:a269fc54-6ad7-48b6-8302-06cb28772223",
+      "required": true
+    },
+    "deliveries": []
+  },
+  "actions": [
+    {
+      "id": "c371269d-ef39-5d47-a0ea-b43935cc328b",
+      "work_id": "de0d0971-0765-5ec6-8d02-f41d9699feff",
+      "product_id": "5fb35519-0c1c-47a6-831f-626702b26588",
+      "product_name": "可用性验证·本地阅读清单20261017",
+      "work_title": "Implement a single-page personal reading list web page titled 拾页.",
+      "kind": "CANDIDATE_AUTHORIZATION",
+      "decision": "Authorize exact sealed Candidate integration?",
+      "reason": "Repository integration requires exact Human Authority.",
+      "human_decision_need": null,
+      "actions": [
+        "AUTHORIZE"
+      ],
+      "conversation_prompt": null,
+      "recommended_action": null,
+      "recommendation": null,
+      "expected_impact": null,
+      "governed_subject_ref": "baseline-candidate:cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+      "interaction_id": "27964d75-ef3d-4146-ae5b-ee0a0dfe3b9c",
+      "interaction_assessment_id": null,
+      "expected_work_reality_revision_id": null,
+      "steering_plan_revision_id": null,
+      "steering_step_id": null,
+      "human_visible": {
+        "id": "c371269d-ef39-5d47-a0ea-b43935cc328b",
+        "title": "审阅当前候选成果",
+        "question": "请查看当前成果和范围，再明确授权或要求修改。",
+        "why_now": "这一授权由你决定；系统不会自动接受或扩大范围。"
+      }
+    }
+  ],
+  "interaction_id": "27964d75-ef3d-4146-ae5b-ee0a0dfe3b9c",
+  "human_visible": {
+    "basis_fingerprint": "986fcb3f1cf9d7729d82dcf521aa8b671a0cf4c0059e66534bfdccf15f6ab40b",
+    "source_references": [
+      "product:5fb35519-0c1c-47a6-831f-626702b26588",
+      "work:de0d0971-0765-5ec6-8d02-f41d9699feff",
+      "semantic-ir:0c89a550-e128-5cd3-9655-dd93f795085d",
+      "baseline-candidate:cd731404-0366-5d1a-99f3-ba25b43e8e4b"
+    ],
+    "wording": {
+      "headline": "Implement a single-page personal reading list web page titled 拾页.",
+      "summary": "Implement a single-page personal reading list web page titled 拾页.。需要处理当前阻塞；执行已完成。",
+      "current_activity": "执行已完成",
+      "next_step": "先处理下方的具体决定，再依据你的选择推进。",
+      "agenda": [
+        {
+          "id": "1966f270-0412-49e2-ab4d-c7f55407ecb9",
+          "text": "整理实施方案"
+        },
+        {
+          "id": "4cf45f64-7839-45df-a09d-99b98a7e53dd",
+          "text": "准备与执行当前改动"
+        },
+        {
+          "id": "2a40727c-e75c-4048-bdf0-594c2539a85e",
+          "text": "核对成果并准备审阅"
+        },
+        {
+          "id": "885bec80-6a5d-4966-bbda-6e228ea49603",
+          "text": "确认本次目标已满足"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "c371269d-ef39-5d47-a0ea-b43935cc328b",
+          "title": "审阅当前候选成果",
+          "question": "请查看当前成果和范围，再明确授权或要求修改。",
+          "why_now": "这一授权由你决定；系统不会自动接受或扩大范围。"
+        }
+      ],
+      "production_units": []
+    },
+    "expression_finding": null,
+    "owner_facts": {
+      "work": {
+        "work_id": "de0d0971-0765-5ec6-8d02-f41d9699feff",
+        "status": "NEEDS_ATTENTION",
+        "current_work_reality_revision_id": "c6f84324-4645-563d-bccb-6f7d42b3d9ac",
+        "current_production_step": "PRODUCE",
+        "most_recent_meaningful_event": "OUTPUT_OBLIGATIONS_EVALUATED",
+        "what_happens_next": "Human must resolve the material Steering decision",
+        "work_complete": false
+      },
+      "execution": {
+        "execution_id": "0594069c-8676-473c-820a-7cbc9e21c00e",
+        "id": null,
+        "status": "COMPLETED",
+        "state": null,
+        "worker_id": null,
+        "attempt_id": null,
+        "blocked_reason": null,
+        "failure_code": null,
+        "recovery_reason": null
+      },
+      "scheduling": {
+        "progression_state": "NOT_APPLICABLE",
+        "compatible_slots": 1,
+        "draining_worker_count": 0
+      },
+      "candidate": {
+        "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+        "candidate_fingerprint": "99b4be54e1f53ca2d119102fd4a6fcb9c70106d8ef717084fd7a0b4b28392e62",
+        "repository_revision": "fc2d5b72f327f315330309da53529b0bbf0298f3",
+        "tree": "52c82cf69001b0c358da655c709d5a71fb692b64",
+        "entrypoint": "index.html",
+        "preview_kind": "STATIC_WEB",
+        "artifacts": [
+          "index.html"
+        ],
+        "verification": [
+          "PATH_SCOPE: PASS",
+          "GIT_DIFF_CHECK: PASS"
+        ],
+        "authorization_pending": true
+      },
+      "guardian": {
+        "status": "PASS",
+        "gate": "PASS",
+        "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+        "request_id": "bdc20a43-53bb-51e4-b1b4-e9444f89d8d8",
+        "result_ref": "guardian:assurance-result:bdc20a43-53bb-51e4-b1b4-e9444f89d8d8",
+        "result_refs": [
+          "guardian:assurance-result:bdc20a43-53bb-51e4-b1b4-e9444f89d8d8"
+        ],
+        "required_pwu_ids": [
+          "a50a6541-a486-4187-8e96-afb99b856b2b"
+        ],
+        "finding_count": 0,
+        "finding_ids": [],
+        "summary": "",
+        "evidence_ref": "guardian:evidence:a269fc54-6ad7-48b6-8302-06cb28772223",
+        "required": true
+      },
+      "accepted_version": 0,
+      "accepted_revision": "a0d1235f72ea123c0fc4fe3b7933ac8840160613",
+      "admission_context": null,
+      "deliveries": [],
+      "cloud_deployment": null
+    },
+    "facts": {
+      "work": "需要处理当前阻塞",
+      "execution": "执行已完成",
+      "verification": "独立验证已通过（2 项）",
+      "guardian": "质量检查通过",
+      "candidate": "已形成，等待你授权",
+      "acceptance": "尚待你明确决定",
+      "review": "质量条件已满足；请查看预览与改动，再明确决定是否授权当前候选。",
+      "cloud": "未部署",
+      "blocker": "",
+      "production_result": "候选成果已满足质量条件，等待你的明确决定。"
+    },
+    "expression_state": "PENDING"
+  }
+}

@@ -1,0 +1,295 @@
+{
+  "contract_version": "watt-guardian-software-assurance-v1",
+  "result_id": "6cfbb658-24b9-406e-a557-caa610e66c25",
+  "request_id": "1c41831f-4758-540e-9450-e929cfa75b03",
+  "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+  "candidate_fingerprint": "99b4be54e1f53ca2d119102fd4a6fcb9c70106d8ef717084fd7a0b4b28392e62",
+  "source_revision": "fc2d5b72f327f315330309da53529b0bbf0298f3",
+  "source_tree": "52c82cf69001b0c358da655c709d5a71fb692b64",
+  "runtime_ref": "candidate-preview:d226ef91-62b6-436e-94cc-0480f324e520",
+  "gate": "BLOCKED",
+  "coverage_obligation_refs": [
+    "work-route:index.html"
+  ],
+  "evidence": [
+    {
+      "evidence_id": "491902b4-a33d-4329-be6d-8cc49454cfdd",
+      "obligation_ref": "work-route:index.html",
+      "observation": "GET /index.html returned HTTP 200 with exact Candidate identity",
+      "status_code": 200,
+      "response_sha256": "6a3ba2d756666afbdf535d0414bf39df7565d71210d76f08a8777b6b0db64e1e",
+      "runtime_ref": "candidate-preview:d226ef91-62b6-436e-94cc-0480f324e520",
+      "observed_at": "2026-10-16T17:33:41.406186Z"
+    },
+    {
+      "evidence_id": "d3ff98ed-c9ee-403f-9c5b-114670900eec",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:0",
+      "observation": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:0@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "status_code": null,
+      "response_sha256": null,
+      "runtime_ref": "candidate-preview:d226ef91-62b6-436e-94cc-0480f324e520",
+      "observed_at": "2026-10-16T17:33:41.542640Z"
+    },
+    {
+      "evidence_id": "50ea1664-af61-40ef-9271-d7e6d43a86e7",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:1",
+      "observation": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:1@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "status_code": null,
+      "response_sha256": null,
+      "runtime_ref": "candidate-preview:d226ef91-62b6-436e-94cc-0480f324e520",
+      "observed_at": "2026-10-16T17:33:41.854674Z"
+    },
+    {
+      "evidence_id": "0d64effc-e19d-473c-b681-1083b8be37d6",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:2",
+      "observation": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:2@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "status_code": null,
+      "response_sha256": null,
+      "runtime_ref": "candidate-preview:d226ef91-62b6-436e-94cc-0480f324e520",
+      "observed_at": "2026-10-16T17:33:42.023045Z"
+    },
+    {
+      "evidence_id": "989f8c91-3719-4e00-be26-dd7b74c465dc",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:3",
+      "observation": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:3@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "status_code": null,
+      "response_sha256": null,
+      "runtime_ref": "candidate-preview:d226ef91-62b6-436e-94cc-0480f324e520",
+      "observed_at": "2026-10-16T17:33:42.196146Z"
+    },
+    {
+      "evidence_id": "60d9c629-f914-4365-9d57-0737993d36b8",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:4",
+      "observation": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:4@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "status_code": null,
+      "response_sha256": null,
+      "runtime_ref": "candidate-preview:d226ef91-62b6-436e-94cc-0480f324e520",
+      "observed_at": "2026-10-16T17:33:42.377979Z"
+    },
+    {
+      "evidence_id": "9abc423e-595f-45e7-8d4b-9252e72d22e8",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:5",
+      "observation": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:5@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "status_code": null,
+      "response_sha256": null,
+      "runtime_ref": "candidate-preview:d226ef91-62b6-436e-94cc-0480f324e520",
+      "observed_at": "2026-10-16T17:33:42.496117Z"
+    },
+    {
+      "evidence_id": "5c6981eb-06b9-4335-9893-36545d084ab4",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:6",
+      "observation": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:6@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "status_code": null,
+      "response_sha256": null,
+      "runtime_ref": "candidate-preview:d226ef91-62b6-436e-94cc-0480f324e520",
+      "observed_at": "2026-10-16T17:33:42.656013Z"
+    },
+    {
+      "evidence_id": "2dde999e-6d13-4189-98ef-6064a99558ce",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:7",
+      "observation": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:7@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "status_code": null,
+      "response_sha256": null,
+      "runtime_ref": "candidate-preview:d226ef91-62b6-436e-94cc-0480f324e520",
+      "observed_at": "2026-10-16T17:33:42.831709Z"
+    },
+    {
+      "evidence_id": "7a8c9021-64db-4f1f-9e29-b0acfe740e93",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:8",
+      "observation": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:8@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "status_code": null,
+      "response_sha256": null,
+      "runtime_ref": "candidate-preview:d226ef91-62b6-436e-94cc-0480f324e520",
+      "observed_at": "2026-10-16T17:33:42.970979Z"
+    },
+    {
+      "evidence_id": "b3028850-6fbb-49cf-852e-1834d2ac38dc",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:9",
+      "observation": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:9@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "status_code": null,
+      "response_sha256": null,
+      "runtime_ref": "candidate-preview:d226ef91-62b6-436e-94cc-0480f324e520",
+      "observed_at": "2026-10-16T17:33:43.112152Z"
+    },
+    {
+      "evidence_id": "1f37fcfa-5c8a-4d20-ac6c-8397a56a5f9d",
+      "obligation_ref": "ecf:PRODUCT_INTENT:greenfield-product-intent",
+      "observation": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-product-intent@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "status_code": null,
+      "response_sha256": null,
+      "runtime_ref": "candidate-preview:d226ef91-62b6-436e-94cc-0480f324e520",
+      "observed_at": "2026-10-16T17:33:43.294098Z"
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "402676b1-dcdb-489d-a342-367da8c121b1",
+      "request_id": "1c41831f-4758-540e-9450-e929cfa75b03",
+      "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+      "category": "CONTEXT_COVERAGE_GAP",
+      "severity": "BLOCKER",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:0",
+      "expected_behavior": "Protected ECF obligation has exact coverage",
+      "observed_reality": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:0@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "evidence_ids": [
+        "d3ff98ed-c9ee-403f-9c5b-114670900eec"
+      ],
+      "repairable": false,
+      "lifecycle": "OPEN"
+    },
+    {
+      "finding_id": "9e20a208-60cd-47a4-8c23-d46039965255",
+      "request_id": "1c41831f-4758-540e-9450-e929cfa75b03",
+      "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+      "category": "CONTEXT_COVERAGE_GAP",
+      "severity": "BLOCKER",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:1",
+      "expected_behavior": "Protected ECF obligation has exact coverage",
+      "observed_reality": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:1@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "evidence_ids": [
+        "50ea1664-af61-40ef-9271-d7e6d43a86e7"
+      ],
+      "repairable": false,
+      "lifecycle": "OPEN"
+    },
+    {
+      "finding_id": "11dce07f-e9a7-4c82-91cc-f3ad7688f7e9",
+      "request_id": "1c41831f-4758-540e-9450-e929cfa75b03",
+      "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+      "category": "CONTEXT_COVERAGE_GAP",
+      "severity": "BLOCKER",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:2",
+      "expected_behavior": "Protected ECF obligation has exact coverage",
+      "observed_reality": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:2@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "evidence_ids": [
+        "0d64effc-e19d-473c-b681-1083b8be37d6"
+      ],
+      "repairable": false,
+      "lifecycle": "OPEN"
+    },
+    {
+      "finding_id": "76dcaa49-b78e-434d-94ff-8e9a8b001fc8",
+      "request_id": "1c41831f-4758-540e-9450-e929cfa75b03",
+      "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+      "category": "CONTEXT_COVERAGE_GAP",
+      "severity": "BLOCKER",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:3",
+      "expected_behavior": "Protected ECF obligation has exact coverage",
+      "observed_reality": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:3@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "evidence_ids": [
+        "989f8c91-3719-4e00-be26-dd7b74c465dc"
+      ],
+      "repairable": false,
+      "lifecycle": "OPEN"
+    },
+    {
+      "finding_id": "4eb2d215-50bf-4b62-9b66-3007d961673f",
+      "request_id": "1c41831f-4758-540e-9450-e929cfa75b03",
+      "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+      "category": "CONTEXT_COVERAGE_GAP",
+      "severity": "BLOCKER",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:4",
+      "expected_behavior": "Protected ECF obligation has exact coverage",
+      "observed_reality": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:4@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "evidence_ids": [
+        "60d9c629-f914-4365-9d57-0737993d36b8"
+      ],
+      "repairable": false,
+      "lifecycle": "OPEN"
+    },
+    {
+      "finding_id": "76ef1666-0e18-43ea-8d29-acd04369a817",
+      "request_id": "1c41831f-4758-540e-9450-e929cfa75b03",
+      "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+      "category": "CONTEXT_COVERAGE_GAP",
+      "severity": "BLOCKER",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:5",
+      "expected_behavior": "Protected ECF obligation has exact coverage",
+      "observed_reality": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:5@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "evidence_ids": [
+        "9abc423e-595f-45e7-8d4b-9252e72d22e8"
+      ],
+      "repairable": false,
+      "lifecycle": "OPEN"
+    },
+    {
+      "finding_id": "0d31ddd1-4c68-47f7-8391-8e417e107593",
+      "request_id": "1c41831f-4758-540e-9450-e929cfa75b03",
+      "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+      "category": "CONTEXT_COVERAGE_GAP",
+      "severity": "BLOCKER",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:6",
+      "expected_behavior": "Protected ECF obligation has exact coverage",
+      "observed_reality": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:6@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "evidence_ids": [
+        "5c6981eb-06b9-4335-9893-36545d084ab4"
+      ],
+      "repairable": false,
+      "lifecycle": "OPEN"
+    },
+    {
+      "finding_id": "663c0712-1130-4145-bc08-80e791e3f610",
+      "request_id": "1c41831f-4758-540e-9450-e929cfa75b03",
+      "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+      "category": "CONTEXT_COVERAGE_GAP",
+      "severity": "BLOCKER",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:7",
+      "expected_behavior": "Protected ECF obligation has exact coverage",
+      "observed_reality": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:7@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "evidence_ids": [
+        "2dde999e-6d13-4189-98ef-6064a99558ce"
+      ],
+      "repairable": false,
+      "lifecycle": "OPEN"
+    },
+    {
+      "finding_id": "1a369ceb-5e1d-4286-9b59-b43ae25a73ea",
+      "request_id": "1c41831f-4758-540e-9450-e929cfa75b03",
+      "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+      "category": "CONTEXT_COVERAGE_GAP",
+      "severity": "BLOCKER",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:8",
+      "expected_behavior": "Protected ECF obligation has exact coverage",
+      "observed_reality": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:8@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "evidence_ids": [
+        "7a8c9021-64db-4f1f-9e29-b0acfe740e93"
+      ],
+      "repairable": false,
+      "lifecycle": "OPEN"
+    },
+    {
+      "finding_id": "ce6125fa-7271-4811-b227-5668d9cb93e8",
+      "request_id": "1c41831f-4758-540e-9450-e929cfa75b03",
+      "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+      "category": "CONTEXT_COVERAGE_GAP",
+      "severity": "BLOCKER",
+      "obligation_ref": "ecf:APPROVED_CONSTRAINT:greenfield-constraint:9",
+      "expected_behavior": "Protected ECF obligation has exact coverage",
+      "observed_reality": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-constraint:9@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "evidence_ids": [
+        "b3028850-6fbb-49cf-852e-1834d2ac38dc"
+      ],
+      "repairable": false,
+      "lifecycle": "OPEN"
+    },
+    {
+      "finding_id": "bbcd4c24-c9d9-4230-9fd0-459ed6af4be4",
+      "request_id": "1c41831f-4758-540e-9450-e929cfa75b03",
+      "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+      "category": "CONTEXT_COVERAGE_GAP",
+      "severity": "BLOCKER",
+      "obligation_ref": "ecf:PRODUCT_INTENT:greenfield-product-intent",
+      "expected_behavior": "Protected ECF obligation has exact coverage",
+      "observed_reality": "No exact verification or Guardian effect covers work-reality:de0d0971-0765-5ec6-8d02-f41d9699feff:greenfield-product-intent@288b43a2668b4b5dfe684aaec6c870f1bfde91a99885b9fed465bc7bfd27a233",
+      "evidence_ids": [
+        "1f37fcfa-5c8a-4d20-ac6c-8397a56a5f9d"
+      ],
+      "repairable": false,
+      "lifecycle": "OPEN"
+    }
+  ],
+  "supersedes_finding_ids": [],
+  "acceptance_state": "PENDING",
+  "delivery_authorization_state": "NOT_AUTHORIZED",
+  "assessed_at": "2026-10-16T17:33:43.294248Z"
+}

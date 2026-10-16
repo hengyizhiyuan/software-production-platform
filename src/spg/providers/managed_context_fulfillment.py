@@ -487,7 +487,8 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
     from spg.application.governed_obligations import (
         _FACT_METHOD_APPLICABILITY_CONTRACTS, validate_fulfillment_projection)
     receipt = (bindings[0].formation_receipt or {}) if bindings else {}
-    negotiated = any((row.get("owner_source_preconditions") or {}).get(
+    from spg.application.production_brief import CONTRACT as PRODUCTION_BRIEF
+    negotiated = receipt.get("source_role_contract") == PRODUCTION_BRIEF or any((row.get("owner_source_preconditions") or {}).get(
         "fact_method_applicability_contract") in _FACT_METHOD_APPLICABILITY_CONTRACTS
         for row in receipt.get("candidate_attempts", ()) if row.get("stage") == "MODEL_REQUEST_PENDING")
     component_facts = {identity for identity, routes in routes_by_fact.items()

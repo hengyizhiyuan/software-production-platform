@@ -1,0 +1,53 @@
+{
+  "contract_version": "watt-guardian-software-assurance-v1",
+  "result_id": "b4aa189b-e32b-4a50-9376-ed9c9f8abea8",
+  "request_id": "bdc20a43-53bb-51e4-b1b4-e9444f89d8d8",
+  "candidate_id": "cd731404-0366-5d1a-99f3-ba25b43e8e4b",
+  "candidate_fingerprint": "99b4be54e1f53ca2d119102fd4a6fcb9c70106d8ef717084fd7a0b4b28392e62",
+  "source_revision": "fc2d5b72f327f315330309da53529b0bbf0298f3",
+  "source_tree": "52c82cf69001b0c358da655c709d5a71fb692b64",
+  "runtime_ref": "candidate-preview:64729979-2abe-4037-88c7-7aa0b3c1ea2e",
+  "gate": "PASS",
+  "coverage_obligation_refs": [
+    "work-route:index.html",
+    "ecf:APPROVED_CONSTRAINT:greenfield-constraint:0",
+    "ecf:APPROVED_CONSTRAINT:greenfield-constraint:1",
+    "ecf:APPROVED_CONSTRAINT:greenfield-constraint:2",
+    "ecf:APPROVED_CONSTRAINT:greenfield-constraint:3",
+    "ecf:APPROVED_CONSTRAINT:greenfield-constraint:4",
+    "ecf:APPROVED_CONSTRAINT:greenfield-constraint:5",
+    "ecf:APPROVED_CONSTRAINT:greenfield-constraint:6",
+    "ecf:APPROVED_CONSTRAINT:greenfield-constraint:7",
+    "ecf:APPROVED_CONSTRAINT:greenfield-constraint:8",
+    "ecf:APPROVED_CONSTRAINT:greenfield-constraint:9",
+    "ecf:PRODUCT_INTENT:greenfield-product-intent"
+  ],
+  "evidence": [
+    {
+      "evidence_id": "a269fc54-6ad7-48b6-8302-06cb28772223",
+      "obligation_ref": "work-route:index.html",
+      "observation": "GET /index.html returned HTTP 200 with exact Candidate identity",
+      "status_code": 200,
+      "response_sha256": "6a3ba2d756666afbdf535d0414bf39df7565d71210d76f08a8777b6b0db64e1e",
+      "runtime_ref": "candidate-preview:64729979-2abe-4037-88c7-7aa0b3c1ea2e",
+      "observed_at": "2026-10-16T17:50:56.099509Z"
+    }
+  ],
+  "findings": [],
+  "supersedes_finding_ids": [
+    "402676b1-dcdb-489d-a342-367da8c121b1",
+    "9e20a208-60cd-47a4-8c23-d46039965255",
+    "11dce07f-e9a7-4c82-91cc-f3ad7688f7e9",
+    "76dcaa49-b78e-434d-94ff-8e9a8b001fc8",
+    "4eb2d215-50bf-4b62-9b66-3007d961673f",
+    "76ef1666-0e18-43ea-8d29-acd04369a817",
+    "0d31ddd1-4c68-47f7-8391-8e417e107593",
+    "663c0712-1130-4145-bc08-80e791e3f610",
+    "1a369ceb-5e1d-4286-9b59-b43ae25a73ea",
+    "ce6125fa-7271-4811-b227-5668d9cb93e8",
+    "bbcd4c24-c9d9-4230-9fd0-459ed6af4be4"
+  ],
+  "acceptance_state": "PENDING",
+  "delivery_authorization_state": "NOT_AUTHORIZED",
+  "assessed_at": "2026-10-16T17:51:05.395699Z"
+}

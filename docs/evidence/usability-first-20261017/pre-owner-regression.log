@@ -1,0 +1,193 @@
+........................................................................ [  6%]
+........................................................................ [ 13%]
+........................................................................ [ 20%]
+........................................................................ [ 27%]
+.............................................FF......................... [ 34%]
+........................................................................ [ 41%]
+......................................................................F. [ 48%]
+........................................................................ [ 55%]
+........................................................................ [ 62%]
+........................................................................ [ 69%]
+........................................................................ [ 76%]
+........................................................................ [ 83%]
+........................................................................ [ 90%]
+........................................................................ [ 97%]
+............................                                             [100%]
+=================================== FAILURES ===================================
+__ test_feedback_drift_stops_before_another_model_request[duplicate-response] __
+
+change = 'duplicate-response'
+
+    @pytest.mark.parametrize('change', ('raw', 'raw-sha', 'raw-bytes', 'inventory', 'attempt',
+        'request-receipt', 'response-receipt', 'diagnostic-hash', 'violation', 'feedback',
+        'row-work', 'row-revision', 'row-source', 'row-paths', 'missing-diagnostics', 'duplicate-response', 'duplicate-validation',
+        'feedback-reorder', 'feedback-sha', 'feedback-bytes', 'missing-feedback-identity'))
+    def test_feedback_drift_stops_before_another_model_request(change):
+        revision, ir, inventory, plan = controlled_capacity_case()
+        provider, calls = provider_for_case(inventory, plan, checkpoint='first-validation')
+        with pytest.raises(Checkpoint): run_case(revision, ir, inventory, provider)
+        rows = provider._fulfillment_receipts
+        failed = next(r for r in rows if r['stage'] == 'CANDIDATE_VALIDATED')
+        response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+        diagnostics = failed['predecode_diagnostics']
+        if change == 'raw': response['candidate_output'] += ' '
+        elif change == 'raw-sha': response['candidate_output_sha256'] = '0'*64
+        elif change == 'raw-bytes': response['candidate_output_bytes'] += 1
+        elif change == 'inventory': diagnostics['binding']['inventory_fingerprint'] = '0'*64
+        elif change == 'attempt': diagnostics['binding']['attempt'] = 2
+        elif change == 'request-receipt': diagnostics['binding']['request_receipt_id'] = 'different-request'
+        elif change == 'response-receipt': diagnostics['binding']['response_receipt_id'] = 'different-response'
+        elif change == 'diagnostic-hash': diagnostics['diagnostic_fingerprint'] = '0'*64
+        elif change == 'violation': diagnostics['violations'][0]['referenced_source'] = 0
+        elif change == 'feedback': failed['validation_feedback'] += ' '
+        elif change == 'feedback-reorder': failed['validation_feedback'] = json.dumps(json.loads(failed['validation_feedback']),sort_keys=True)
+        elif change == 'feedback-sha': failed['validation_feedback_sha256']='0'*64
+        elif change == 'feedback-bytes': failed['validation_feedback_bytes']+=1
+        elif change == 'missing-feedback-identity':
+            failed.pop('validation_feedback_sha256'); failed.pop('validation_feedback_bytes')
+        elif change == 'missing-diagnostics': failed.pop('predecode_diagnostics')
+        elif change == 'duplicate-response': list.append(rows, deepcopy(response))
+        elif change == 'duplicate-validation': list.append(rows, deepcopy(failed))
+        else:
+            field = {'row-work':'work_id','row-revision':'work_reality_revision_id',
+                     'row-source':'source_revision','row-paths':'exact_target_paths'}[change]
+            failed[field] = ['wrong.html'] if field == 'exact_target_paths' else 'different-owner'
+        result = run_case(revision, ir, inventory, provider)
+        assert len(calls) == 1 and all(b.state == 'UNRESOLVED' for b in result)
+>       assert result[0].formation_receipt['terminal_reason'] == 'OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
+E       AssertionError: assert 'OBLIGATION_F...FERENCE_DRIFT' == 'OBLIGATION_F...DENTITY_DRIFT'
+E         
+E         - OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT
+E         + OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT
+
+tests/test_c3_fulfillment_wire_feedback.py:211: AssertionError
+_ test_feedback_drift_stops_before_another_model_request[duplicate-validation] _
+
+change = 'duplicate-validation'
+
+    @pytest.mark.parametrize('change', ('raw', 'raw-sha', 'raw-bytes', 'inventory', 'attempt',
+        'request-receipt', 'response-receipt', 'diagnostic-hash', 'violation', 'feedback',
+        'row-work', 'row-revision', 'row-source', 'row-paths', 'missing-diagnostics', 'duplicate-response', 'duplicate-validation',
+        'feedback-reorder', 'feedback-sha', 'feedback-bytes', 'missing-feedback-identity'))
+    def test_feedback_drift_stops_before_another_model_request(change):
+        revision, ir, inventory, plan = controlled_capacity_case()
+        provider, calls = provider_for_case(inventory, plan, checkpoint='first-validation')
+        with pytest.raises(Checkpoint): run_case(revision, ir, inventory, provider)
+        rows = provider._fulfillment_receipts
+        failed = next(r for r in rows if r['stage'] == 'CANDIDATE_VALIDATED')
+        response = next(r for r in rows if r['stage'] == 'MODEL_RESPONSE_OBSERVED')
+        diagnostics = failed['predecode_diagnostics']
+        if change == 'raw': response['candidate_output'] += ' '
+        elif change == 'raw-sha': response['candidate_output_sha256'] = '0'*64
+        elif change == 'raw-bytes': response['candidate_output_bytes'] += 1
+        elif change == 'inventory': diagnostics['binding']['inventory_fingerprint'] = '0'*64
+        elif change == 'attempt': diagnostics['binding']['attempt'] = 2
+        elif change == 'request-receipt': diagnostics['binding']['request_receipt_id'] = 'different-request'
+        elif change == 'response-receipt': diagnostics['binding']['response_receipt_id'] = 'different-response'
+        elif change == 'diagnostic-hash': diagnostics['diagnostic_fingerprint'] = '0'*64
+        elif change == 'violation': diagnostics['violations'][0]['referenced_source'] = 0
+        elif change == 'feedback': failed['validation_feedback'] += ' '
+        elif change == 'feedback-reorder': failed['validation_feedback'] = json.dumps(json.loads(failed['validation_feedback']),sort_keys=True)
+        elif change == 'feedback-sha': failed['validation_feedback_sha256']='0'*64
+        elif change == 'feedback-bytes': failed['validation_feedback_bytes']+=1
+        elif change == 'missing-feedback-identity':
+            failed.pop('validation_feedback_sha256'); failed.pop('validation_feedback_bytes')
+        elif change == 'missing-diagnostics': failed.pop('predecode_diagnostics')
+        elif change == 'duplicate-response': list.append(rows, deepcopy(response))
+        elif change == 'duplicate-validation': list.append(rows, deepcopy(failed))
+        else:
+            field = {'row-work':'work_id','row-revision':'work_reality_revision_id',
+                     'row-source':'source_revision','row-paths':'exact_target_paths'}[change]
+            failed[field] = ['wrong.html'] if field == 'exact_target_paths' else 'different-owner'
+        result = run_case(revision, ir, inventory, provider)
+        assert len(calls) == 1 and all(b.state == 'UNRESOLVED' for b in result)
+>       assert result[0].formation_receipt['terminal_reason'] == 'OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT'
+E       AssertionError: assert 'OBLIGATION_F...FERENCE_DRIFT' == 'OBLIGATION_F...DENTITY_DRIFT'
+E         
+E         - OBLIGATION_FORMATION_WIRE_FEEDBACK_IDENTITY_DRIFT
+E         + OBLIGATION_FORMATION_RECEIPT_REFERENCE_DRIFT
+
+tests/test_c3_fulfillment_wire_feedback.py:211: AssertionError
+_ test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[next_request_limit] _
+
+case = 'next_request_limit'
+
+    @pytest.mark.parametrize("case", ["feedback_fits", "row_limit", "next_request_limit"])
+    def test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation(case):
+        revision,ir,inventory,plan=controlled_capacity_case()
+        if case=="feedback_fits":
+            # Legitimate long original source, kept losslessly; only its unadmitted
+            # repeated proposal exceeds the expanded Candidate limit.
+            first=revision.engineering_semantic_facts[0]
+            text=first.provenance.source_text+" Original controlled provenance."*800
+            first=first.model_copy(update={"provenance":first.provenance.model_copy(update={"source_text":text})})
+            revision.engineering_semantic_facts=(first,*revision.engineering_semantic_facts[1:])
+            inventory=a.fulfillment_inventory(revision,ir,exact_target_paths=inventory["exact_target_paths"])
+            changed=plan.routes[0].model_copy(update={"component_basis":plan.routes[0].component_basis.model_copy(update={"source_span_end":len(text),"source_component_quote":text})})
+            plan=plan.model_copy(update={"inventory_fingerprint":inventory["inventory_fingerprint"],"routes":(changed,*plan.routes[1:])})
+        attempts=0
+        def oversized(wire):
+            nonlocal attempts
+            attempts+=1
+            if attempts==1:
+                if case=="feedback_fits":
+                    wire["routes"].extend([deepcopy(wire["routes"][0]),deepcopy(wire["routes"][0])])
+                    return
+                count=64 if case=="next_request_limit" else 130
+                wire["routes"]=[deepcopy(wire["routes"][i%len(wire["routes"])]) for i in range(count)]
+                if case=="next_request_limit":
+                    # Reach the real expanded limit using untrusted rationale, while
+                    # retaining an affordable number of source/route observations.
+                    base=plan.model_copy(update={"routes":tuple(plan.routes[i%len(plan.routes)].model_copy(update={"rationale":""}) for i in range(count))})
+                    size=(MAX_CANDIDATE_BYTES+128-len(base.model_dump_json().encode()))//count+1
+                    assert 0<size<=1000
+                    for route in wire["routes"]:route["r"]="x"*size
+                else:
+                    for route in wire["routes"]:route["r"]="Unadmitted controlled repeated proposal. "*6
+        provider,calls=controlled_model_provider(inventory,plan,wire_change=oversized)
+        provider.supports_same_candidate_review_repair = False  # Exercise the historical next-generation capacity stop.
+        result=a.form_fulfillment_projection(revision,ir,provider=provider,exact_target_paths=inventory["exact_target_paths"])
+        failed=next(r for r in provider._fulfillment_receipts if r["stage"]=="CANDIDATE_VALIDATED" and r["attempt"]==1)
+        assert failed["failed_predicate"]=="OBLIGATION_FORMATION_EXPANDED_RECEIPT_LIMIT"
+        assert failed.get("candidate") is None and failed["validation_passed"] is False
+        if case in {"row_limit", "next_request_limit"}:
+            assert result[0].formation_receipt["terminal_reason"]=="OBLIGATION_FORMATION_RECEIPT_LIMIT"
+            assert all(b.state=="UNRESOLVED" for b in result) and len(calls)==1
+            terminal=next(r for r in reversed(provider._fulfillment_receipts) if r.get("terminal"))
+            assert "validation_feedback" not in terminal
+            assert terminal["capacity_observation"]["original_row_bytes"]>131072
+            if case=="next_request_limit":
+                assert failed["repair_feedback_bound"] and failed["owner_repair_context_bound"]
+>               assert terminal["stage"]=="MODEL_REQUEST_PENDING"
+E               AssertionError: assert 'CANDIDATE_VALIDATED' == 'MODEL_REQUEST_PENDING'
+E                 
+E                 - MODEL_REQUEST_PENDING
+E                 + CANDIDATE_VALIDATED
+
+tests/test_c3_generation_projection_economy.py:496: AssertionError
+=============================== warnings summary ===============================
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers0]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers1]
+tests/test_c3_generation_owner_domains.py::test_v3_literal_scope_claim_keeps_qualifiers_and_requires_independent_component_review[qualifiers2]
+  /Users/yu/Documents/dev/software-production-platform/.venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['index.html'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+tests/test_c3_semantic_contract_calibration.py::test_negative_file_component_preserves_original_exclusion_and_requires_real_diff
+  /Users/yu/Documents/dev/software-production-platform/.venv/lib/python3.13/site-packages/pydantic/main.py:475: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `str` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `float` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `bool` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    PydanticSerializationUnexpectedValue(Expected `tuple[Union[str, int, float, bool], ...]` - serialized value may not be as expected [field_name='value', input_value=['external release'], input_type=list])
+    return self.__pydantic_serializer__.to_python(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_c3_fulfillment_wire_feedback.py::test_feedback_drift_stops_before_another_model_request[duplicate-response]
+FAILED tests/test_c3_fulfillment_wire_feedback.py::test_feedback_drift_stops_before_another_model_request[duplicate-validation]
+FAILED tests/test_c3_generation_projection_economy.py::test_expanded_capacity_reject_provides_same_wire_bound_owner_feedback_without_relaxation[next_request_limit]
