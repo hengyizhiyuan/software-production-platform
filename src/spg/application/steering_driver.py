@@ -208,7 +208,13 @@ class PlanSteeringDriver:
         repository_action = self._repository_action_iteration(frame, before)
         if repository_action is not None:
             return repository_action
-        if work.status is WorkStatus.BLOCKED or other_blockers:
+        # A Work projected BLOCKED only because its Formation round stopped may
+        # continue into the next permitted round; any other block still stops.
+        formation_round_open = (work.status is WorkStatus.BLOCKED and not other_blockers
+            and work.most_recent_meaningful_event == "OBLIGATION_PROJECTION_UNRESOLVED"
+            and current.type is SteeringStepType.PRODUCE
+            and self._formation_round_pending(work_id))
+        if (work.status is WorkStatus.BLOCKED and not formation_round_open) or other_blockers:
             return self._result(
                 work_id,
                 before,
@@ -696,8 +702,14 @@ class PlanSteeringDriver:
                         if record is not None and record.actor is InteractionActor.HUMAN:
                             human_decisions.add(identity)
             resource = store.resource_for_work(work_id)
+            # A Human-authorized restart starts a new convergence episode: the
+            # lineage key changes, prior observations stay as history, and the
+            # new episode has the same unchanged budgets.
+            restart = next((record.id for record in reversed(RuntimeStore(uow.session).governance_for_subject(
+                str(work_id))) if record.decision_type == "RESTART_CONVERGENCE_EPISODE"), None)
             intent = canonical_digest({"raw_requirement": work.raw_user_requirement,
-                "desired_outcome": work.desired_outcome, "constraints": work.constraints})
+                "desired_outcome": work.desired_outcome, "constraints": work.constraints,
+                **({"episode": str(restart)} if restart is not None else {})})
             missing = []
             if resource is None:
                 missing.append("REPOSITORY_BOUND")

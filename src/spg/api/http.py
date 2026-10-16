@@ -1760,7 +1760,11 @@ def create_http_application(
             attention = None if work_id is None else next((item for item in
                 work_service.list_attention(work_id=work_id)
                 if item.id == request.attention_id), None)
-            if (attention is None or attention.available_actions
+            # A conversational answer applies to question-only decisions; a
+            # convergence incident also accepts a goal change in conversation.
+            if (attention is None
+                    or (attention.available_actions and set(attention.available_actions)
+                        != {AttentionAction.APPROVE, AttentionAction.REJECT})
                     or not attention.governed_subject_ref.startswith("steering-decision:")
                     or attention.interaction_id not in {None, interaction_id}):
                 raise ProductHttpError(409, "ATTENTION_STALE",
@@ -2417,12 +2421,18 @@ def create_http_application(
                         raise CandidatePreviewUnavailable("Functional Candidate Preview is unavailable")
                     candidate_runtime_preview.require_ready(attention.work_id, UUID(context["candidate_id"]))
                     preview_authorization_work = attention.work_id
+        attention_kind = next((item.kind for item in work_service.list_attention()
+            if item.id == attention_id), None)
         projection = work_service.resolve_attention(attention_id, resolution)
         if preview_authorization_work is not None:
             candidate_runtime_preview.record_authorization(
                 preview_authorization_work, request.authority_identity,
             )
-        if request.action is AttentionAction.APPROVE:
+        if attention_kind is AttentionKind.STEERING_DECISION_REQUIRED:
+            # A convergence incident: APPROVE restarted the episode, REJECT paused.
+            if request.action is AttentionAction.APPROVE:
+                selected_steering_driver.schedule(projection.work_id)
+        elif request.action is AttentionAction.APPROVE:
             projection = selected_post_admission.activate(projection.work_id)
         elif projection.status in {WorkStatus.READY, WorkStatus.RUNNING}:
             selected_orchestrator.schedule(projection.work_id)

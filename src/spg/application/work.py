@@ -3243,7 +3243,12 @@ class WorkApplicationService:
                         ),
                         reason=conversation_prompt or action_reason,
                         available_actions=(
-                            (
+                            # A convergence incident offers the Human a bounded
+                            # retry (new episode) or a pause; changing the goal
+                            # stays a conversation that revises Work Reality.
+                            (AttentionAction.APPROVE, AttentionAction.REJECT)
+                            if _is_convergence_incident(decision)
+                            else (
                                 AttentionAction.REQUEST_REFINEMENT,
                             )
                             if implementation_prerequisite_missing
@@ -3355,6 +3360,37 @@ class WorkApplicationService:
             # Watt recovery/operator path, not the Human Attention surface.
         return tuple(items)
 
+    def _resolve_convergence_incident(self, attention, request):
+        """Record the Human's choice on a stopped convergence episode.
+
+        APPROVE authorizes one new bounded episode: the breaker lineage restarts
+        from this governance record, all prior evidence is kept, and every budget
+        of the new episode is the same as before. REJECT pauses the Work.
+        Neither grants delivery, acceptance or any effect.
+        """
+        decision_id = attention.governed_subject_ref.removeprefix("steering-decision:")
+        with self.database.unit_of_work() as unit_of_work:
+            steering = SteeringStore(unit_of_work.session)
+            runtime = RuntimeStore(unit_of_work.session)
+            decision = steering.decision(UUID(decision_id))
+            if decision is None or not _is_convergence_incident(decision):
+                raise ProductInvariantViolation("Attention is not a convergence incident")
+            kind = ("RESTART_CONVERGENCE_EPISODE" if request.action is AttentionAction.APPROVE
+                    else "PAUSE_AFTER_CONVERGENCE_INCIDENT")
+            governance_id = uuid5(NAMESPACE_URL, f"spg:convergence-incident:{decision_id}:{kind}")
+            if not any(record.id == governance_id
+                       for record in runtime.governance_for_subject(str(attention.work_id))):
+                runtime.insert_governance({
+                    "id": governance_id, "decision_type": kind,
+                    "authority_identity": request.authority_identity,
+                    "subject_type": "WORK_CONVERGENCE_INCIDENT",
+                    "subject_identity": str(attention.work_id),
+                    "scope": {"work_id": str(attention.work_id), "steering_decision_id": decision_id},
+                    "rationale": request.rationale or kind,
+                    "created_at": datetime.now(UTC)})
+            unit_of_work.commit()
+        return self.get_work(attention.work_id)
+
     def resolve_attention(
         self,
         attention_id: UUID,
@@ -3414,6 +3450,10 @@ class WorkApplicationService:
                 rationale=request.rationale,
             )
 
+        if (attention.kind is AttentionKind.STEERING_DECISION_REQUIRED
+                and request.action in {AttentionAction.APPROVE, AttentionAction.REJECT}
+                and attention.governed_subject_ref.startswith("steering-decision:")):
+            return self._resolve_convergence_incident(attention, request)
         if attention.kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW:
             if (
                 attention.steering_step_id is None
@@ -4845,3 +4885,10 @@ class WorkApplicationService:
             ensure_ascii=False,
         ).encode()
         return sha256(canonical).hexdigest()
+
+
+def _is_convergence_incident(decision) -> bool:
+    """The Steering decision admitted when a Work convergence episode stopped."""
+    return bool(decision.steering_outcome is SteeringOutcome.HUMAN_ATTENTION
+        and decision.attention_reason is SteeringAttentionReason.MATERIAL_RISK_OR_COST_DECISION
+        and (decision.reason or "").startswith("Work convergence stopped:"))
