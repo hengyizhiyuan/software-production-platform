@@ -230,6 +230,10 @@ def verify_managed_context(*, request, task, contract, repository, baseline,
                 observations.append(("COVERED" if len(matches) == 1 else "UNVERIFIED",
                     "EXACT_CONTINUOUS_PERMISSION_GATES",
                     tuple(f"{source}:gate:{gate}:binding:{digest}" for source, gate, digest in matches), route))
+            elif method == "EXACT_CANDIDATE_REVIEW_READINESS":
+                proof = _review_readiness_pending(route, revision, ir, bindings, native_record)
+                observations.append(("PENDING_CANDIDATE_GATE" if proof else "UNVERIFIED",
+                    "EXACT_CANDIDATE_REVIEW_REQUIRED", (ref,), route))
             elif (method == "EXACT_SEALED_CANDIDATE" and route.phase.value == "CANDIDATE_SEAL"
                   and route.owner.value == "CANDIDATE"
                   and route.gate_ref == "candidate-owner:sealed-after-verification"
@@ -380,6 +384,16 @@ def _future_gate_evidence(bindings, native_record):
 
 
 def _retained_context_route(binding, revision, ir, bindings=()):
+    from spg.application.production_brief import STAGED_CONTRACT, observed_repository_annotation
+    if (bindings and (bindings[0].formation_receipt or {}).get("source_role_contract") == STAGED_CONTRACT
+            and binding.source_kind.value == "FACT"):
+        fact = next((f for f in revision.engineering_semantic_facts if f.id == binding.fact_id), None)
+        if fact is not None and observed_repository_annotation(fact, ir):
+            from spg.application.governed_obligations import validate_fulfillment_projection
+            receipt = bindings[0].formation_receipt
+            validate_fulfillment_projection(bindings, revision, ir, source_revision=binding.source_revision,
+                exact_target_paths=tuple(receipt["exact_target_paths"]))
+            return True
     from spg.application.governed_obligations import calibrated_background_binding_permitted
     if calibrated_background_binding_permitted(binding, revision, ir, bindings):
         return True
@@ -465,7 +479,7 @@ def linked_component_dependency_failures(facts, bindings):
 
 def verify_fulfillment_fact_routes(*, repository, request, contract, references,
         admitted_facts, revision, ir, baseline, bindings, plan_repair,
-        static_verifier=None, task=None, receipt_recorder=None):
+        static_verifier=None, task=None, receipt_recorder=None, native_record=None):
     """Consume typed projected Fact roles while preserving all current checks.
 
     Legacy requests retain their existing checker. A disposition is not evidence
@@ -487,8 +501,8 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
     from spg.application.governed_obligations import (
         _FACT_METHOD_APPLICABILITY_CONTRACTS, validate_fulfillment_projection)
     receipt = (bindings[0].formation_receipt or {}) if bindings else {}
-    from spg.application.production_brief import CONTRACT as PRODUCTION_BRIEF
-    negotiated = receipt.get("source_role_contract") == PRODUCTION_BRIEF or any((row.get("owner_source_preconditions") or {}).get(
+    from spg.application.production_brief import CONTRACTS as PRODUCTION_BRIEFS
+    negotiated = receipt.get("source_role_contract") in PRODUCTION_BRIEFS or any((row.get("owner_source_preconditions") or {}).get(
         "fact_method_applicability_contract") in _FACT_METHOD_APPLICABILITY_CONTRACTS
         for row in receipt.get("candidate_attempts", ()) if row.get("stage") == "MODEL_REQUEST_PENDING")
     component_facts = {identity for identity, routes in routes_by_fact.items()
@@ -580,14 +594,17 @@ def verify_fulfillment_fact_routes(*, repository, request, contract, references,
                         "candidate_tree": request.tree_identity})
             elif binding.evidence_method != "EXACT_CANDIDATE_CONTENT":
                 evaluations.append(False)
-        retained = bool(routes and not current and all(_retained_context_route(binding, revision, ir, bindings)
+        retained = bool(routes and not current and all(_retained_binding_proof(binding, revision, ir, bindings)
             and binding.phase.value == "CONTEXT_RETENTION" for binding in routes))
         # Continuous gate routes are independently evaluated by the existing
         # Native helper; no future-only Fact can bypass a current contribution.
         only_continuous = bool(routes and not current and all(
             binding.phase.value == "CONTINUOUS_FROM_ADMISSION" for binding in routes))
-        passed = bool(evaluations and all(evaluations)) or retained
-        disposition = ("CONTEXT_RETAINED" if retained else "VERIFIED_CURRENT" if passed else "UNVERIFIABLE_CURRENT")
+        review_pending = bool(routes and not current and all(
+            b.evidence_method == "EXACT_CANDIDATE_REVIEW_READINESS" and
+            _review_readiness_pending(b, revision, ir, bindings, native_record) for b in routes))
+        passed = bool(evaluations and all(evaluations)) or retained or review_pending
+        disposition = ("CONTEXT_RETAINED" if retained else "CURRENT_VERIFIED_FUTURE_GATE_PENDING" if review_pending else "VERIFIED_CURRENT" if passed else "UNVERIFIABLE_CURRENT")
         if check is not None and not passed:
             disposition = check["disposition"]
         row = {**(check or {"fact_id": identity, "subject": reference.subject, "scope": reference.scope}),
@@ -667,6 +684,9 @@ def verify_binding_inventory(*, request, task, contract, repository, baseline, r
                 and binding.fact_id is not None and check.get("fact_id") == str(binding.fact_id)
                 and check.get("current_evidence_verified") is True]
             status = "VERIFIED_CURRENT" if len(matches) == 1 else "UNVERIFIABLE"
+        elif method == "EXACT_CANDIDATE_REVIEW_READINESS":
+            if _review_readiness_pending(binding, revision, ir, bindings, native_record):
+                status = "PENDING_CANDIDATE_GATE"
         elif method == "EXACT_SEALED_CANDIDATE":
             if (binding.gate_ref == "candidate-owner:sealed-after-verification" and ir.current_production
                     and _candidate_seal_gate_required(binding, revision, ir, bindings)
@@ -762,3 +782,23 @@ def _exact_fact_git_scope(reference, binding, targets, changed, *, revision=None
         return False
     return bool(changed and set(binding.target_paths) == set(paths) and set(targets) == set(paths)
                 and not set(changed) - set(paths))
+
+
+def _review_readiness_pending(binding, revision, ir, bindings, native_record):
+    """Check the armed envelope; later actual Preview remains unproved here."""
+    from spg.application.production_brief import STAGED_CONTRACT, REVIEW_METHOD
+    from spg.application.governed_obligations import validate_fulfillment_projection
+    from spg.domain.governed_obligation import fulfillment_source_ref
+    if (not bindings or not native_record or binding not in bindings
+            or (bindings[0].formation_receipt or {}).get("source_role_contract") != STAGED_CONTRACT
+            or binding.evidence_method != REVIEW_METHOD or binding.owner.value != "CANDIDATE"
+            or binding.phase.value != "CANDIDATE_SEAL"
+            or binding.gate_ref != "candidate-owner:review-readiness"
+            or fulfillment_source_ref(binding) not in native_record.binding.obligation_references):
+        return False
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=binding.source_revision,
+        exact_target_paths=tuple(bindings[0].formation_receipt["exact_target_paths"]))
+    forbidden = {"cloud.deploy", "cloud.delivery", "remote.publish", "remote.delivery", "github.publish",
+        "human.authorize", "repository.integrate", "candidate.accept"}
+    grants = native_record.binding.capability_grants
+    return bool(grants) and not {g.identity for g in grants} & forbidden

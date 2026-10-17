@@ -1,0 +1,1 @@
+{"status":"PASS","artifact_sha256":"77425f61c4fb420af115b51ff80e0e4265825af58f278dea5d05b0a61f4eaaf1","checks":["actual-script-add-handler","cancel-keeps-exact-local-storage-and-count","confirm-deletes-and-updates-count"],"scope":"Node VM execution of exact candidate script with DOM/storage/confirm test doubles; real browser prompt separately observed"}

@@ -166,6 +166,9 @@ class GuardianAssuranceClient:
             record_id = UUID(identity)
         except ValueError:
             return None
+        if kind == "candidate-preview":
+            preview = self.preview_store.get_candidate_preview(record_id)
+            return None if preview is None else preview.model_dump(mode="json")
         with self.delivery.database.unit_of_work() as uow:
             runtime = RuntimeStore(uow.session)
             if kind == "work-plan-receipt":

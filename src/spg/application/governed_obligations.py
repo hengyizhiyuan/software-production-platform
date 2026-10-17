@@ -1662,8 +1662,8 @@ def validate_fulfillment_projection(bindings, revision, ir, *, source_revision=N
                                      exact_target_paths=exact_target_paths,
                                      formation_round=(first.formation_receipt or {}).get("formation_round", 1),
                                      formation_episode=(first.formation_receipt or {}).get("formation_episode"))
-    from spg.application.production_brief import CONTRACT, validate_production_brief
-    if (first.formation_receipt or {}).get("source_role_contract") == CONTRACT:
+    from spg.application.production_brief import CONTRACTS, validate_production_brief
+    if (first.formation_receipt or {}).get("source_role_contract") in CONTRACTS:
         validate_production_brief(bindings, revision, ir, inventory)
         return
     inverse = {route: key for key, route in FULFILLMENT_CAPABILITIES.items()}

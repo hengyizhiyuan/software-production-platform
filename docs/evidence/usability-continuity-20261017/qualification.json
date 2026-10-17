@@ -1,0 +1,219 @@
+{
+  "started_at": "2026-10-17T02:05:57.245100+00:00",
+  "source_files": {
+    "deploy/cloud-worker/release_gate.py": "8e39b678e45efbf4b5dd912599f277fd570001d1137ce363137a46c533b2c55a",
+    "src/spg/application/governed_obligations.py": "d0139efd3abdbae574edfbc943aacaac6d2639f1a27a918402bdeb2977b5a9fe",
+    "src/spg/application/guardian_assurance.py": "6324a6f3c1b2459a5cb00cd193de14ca758b0efc2ec55a16801d47d3ba794bac",
+    "src/spg/application/human_visible.py": "c23392780396fabb1c38a1e558049b7c41dbfe0949a95431c3b84a56bba9450b",
+    "src/spg/application/managed_greenfield_context.py": "3233ce43b00ba3c581df5883b2755617de4e6b888ede06d597acade64030deeb",
+    "src/spg/application/production_brief.py": "691890ed2eeb510465e188b867ce218c18983977705fa24ca59af9fc4c0d8baf",
+    "src/spg/application/semantic_steps.py": "b8cabec5e286f6090b789c45a23b2a50c749585f721e7babe7af01b6934bb6a2",
+    "src/spg/application/steering_driver.py": "2ad418d7c46457b79608f5aaaa9d604db81fe6229398db09b2a0f391cf1bb5ba",
+    "src/spg/application/work.py": "77db6b1ebded50584ee08990203e7610a49c848798338e0b1c9dda33baf82729",
+    "src/spg/domain/refinement.py": "c94ee6adf5f4770bbf158fbfaf7081ba0e2ed8ca37700f1ef7b19f323083cceb",
+    "src/spg/executor/kernel.py": "bbd1b69f451cca6ea20835fdc2cfd14a6947c9adcf2516ba32c9fda0515b6c78",
+    "src/spg/infrastructure/executor_runtime/runtime_ports.py": "0b15661f645f983a2d8f423d1d8f27450603304213c91343a6c09e7098bdd57b",
+    "src/spg/providers/managed_context_fulfillment.py": "d7cd06da659a064cade86f52ed9f5bef01fe06f0731bf1cbe0eac6bedc37cec1",
+    "src/spg/providers/repository_change_proposal.py": "e976b0ae42de9aa50cd9c288cc5ab36069ecda9ab8ab07ef73d9673436e69bb0",
+    "src/spg/providers/repository_code_verifier.py": "33ba9a2a12611ab13ab1a18eabbccdc33ee93e0c82d74d68bb89248f43d42a40",
+    "src/spg/providers/rule_based_planner.py": "09d67842d1274e4916d426f629cd3498f99bd8f55581ef9ff71a7730812ba0b7",
+    "owners.lock": "95ca3a8ff263ce94fd527e889ae0306e11a39a2a428acbe41f43416c76564b75"
+  },
+  "owners": {
+    "ecf": {
+      "repository": "https://github.com/hengyizhiyuan/engineering-context-fabric.git",
+      "branch": "claude/c3-formation-ai-native-convergence",
+      "commit": "1d3feddf0c7e7726fea23c58d194d64034547a7a",
+      "source_digest": "225d415597884ae923458a620b8c01abef2605cd093036aee159f5d445073702"
+    },
+    "guardian": {
+      "repository": "https://github.com/hengyizhiyuan/guardian.git",
+      "branch": "codex/usability-continuity-20261017",
+      "commit": "e9019c91a21d954a9d7e243c54b6d01d2bdaa231",
+      "source_digest": "a02d34e79ec5db057f81efd9a0b6b72823d269aeedfaccc403851aa57eb8e51f"
+    }
+  },
+  "production_modified": false,
+  "mission": "usability-continuity-20261017",
+  "starting_revision": "d13ae31e86a1ceb34faeea901e95cd20384e96c0",
+  "application_revision": "CONTAINING_COMMIT",
+  "branch": "claude/c3-formation-ai-native-convergence",
+  "qualified_at": "2026-10-17T02:07:47.360379+00:00",
+  "status": "PASS_REPRESENTATIVE_JOURNEYS_WITH_RETAINED_BASELINE_FAILURES",
+  "journeys": [
+    {
+      "journey": "mixed",
+      "product_id": "f186e50c-739e-458c-8cb7-55f1d715888c",
+      "work_id": "70e93d20-e7e7-532f-a050-981f67de2e82",
+      "candidate": {
+        "candidate_id": "a11ba4f5-c210-521c-ad63-2a84dc37299b",
+        "candidate_fingerprint": "12e35ea1ab4a88a34b694e8c6308ff694b3a67049a1a9e9b5d0cbaff522bcf6a",
+        "repository_revision": "0cc8c11a68d989184ccaebf9c39814d81e80d909",
+        "tree": "423a8db950ff90d00650edff0d6254dd39ae5eb2",
+        "entrypoint": "index.html",
+        "preview_kind": "STATIC_WEB",
+        "artifacts": [
+          "index.html"
+        ],
+        "verification": [
+          "PATH_SCOPE: PASS",
+          "GIT_DIFF_CHECK: PASS"
+        ],
+        "authorization_pending": true
+      },
+      "preview_session_id": "848587c8-2ebe-4741-8d9e-944a1975c8d7",
+      "guardian_request_ids": [
+        "38e945e4-91f0-5794-9bb8-f4058cf24636"
+      ],
+      "guardian_gate": "PASS",
+      "guardian_findings": 0,
+      "artifacts_sha256": {
+        "index.html": "7c365258859bc8b59cc45350955af56b3f0dd6b3b45615316ad6a99a1690aab9"
+      },
+      "human_acceptance": "PENDING",
+      "integration": "NOT_PERFORMED",
+      "delivery": "NOT_AUTHORIZED",
+      "historical_diagnostic_sha256": "6d34a923b661f12e27723597e5497746ed3a2c9edd8c0d1d5ff640bfb826deec",
+      "historical_trace_sha256": "eb1161a7e0283e6cfd8e4fd9d049307cbf2878b6762c721fe28f4267b71821c1"
+    },
+    {
+      "journey": "game",
+      "product_id": "dca1bf73-fc90-4800-92db-a9f8c9868c59",
+      "work_id": "7a206dca-49b8-5822-af0f-cdf9a136dbc0",
+      "candidate": {
+        "candidate_id": "c9d4672b-fc1a-524c-bd6e-142758b1955a",
+        "candidate_fingerprint": "2a73b44187640f1510347dd8a0fed3551df20d1eacfab63685af7a5e705d744d",
+        "repository_revision": "0ca027ac286a0a73970317ba84cb33a750ec6a71",
+        "tree": "806cf17d791f33caf4b41c0cfea3cf88d96d30c3",
+        "entrypoint": "pvz-core-loop/index.html",
+        "preview_kind": "STATIC_WEB",
+        "artifacts": [
+          "pvz-core-loop/game.js",
+          "pvz-core-loop/index.html",
+          "pvz-core-loop/style.css"
+        ],
+        "verification": [
+          "PATH_SCOPE: PASS",
+          "GIT_DIFF_CHECK: PASS"
+        ],
+        "authorization_pending": true
+      },
+      "preview_session_id": "0e993372-955c-4486-801d-ed1ca0444fe2",
+      "guardian_request_ids": [
+        "4b035d64-d8e4-52d1-8d36-e55b26733872",
+        "da5c01ad-6026-575c-93bf-a735d33fec31",
+        "a347fd7b-4e68-5a92-8147-8c8cac88ef68"
+      ],
+      "guardian_gate": "PASS",
+      "guardian_findings": 0,
+      "artifacts_sha256": {
+        "pvz-core-loop/game.js": "837f7ef75c9987d0c4e86c110a4178c4d69fa2c2f6c2dc2ca3cb551359fa98c8",
+        "pvz-core-loop/index.html": "1839ebdd1372988e3de875749def75b175179de00332d05b099324c612518797",
+        "pvz-core-loop/style.css": "7846820d00602982cbdb66808cb297e06e8060b4de23ca9bd6857b0ce649bf1c"
+      },
+      "human_acceptance": "PENDING",
+      "integration": "NOT_PERFORMED",
+      "delivery": "NOT_AUTHORIZED",
+      "historical_diagnostic_sha256": "c44e643eedc08d07482d85b53c1da3430a968a90035958caa0b1453083473b74",
+      "historical_trace_sha256": "87fe9e810a97316c34438794a4a0c9eee093193dede356535fffba59b1545fd7"
+    },
+    {
+      "journey": "multifile",
+      "product_id": "13cfdb97-9ee8-4574-9a03-2d23e10f3f2e",
+      "work_id": "5073fb63-18a7-53d6-9e93-a18326b100e7",
+      "candidate": {
+        "candidate_id": "fcf1c9ac-c1e0-59e7-942e-63ba4d00fa00",
+        "candidate_fingerprint": "676123484fb6c98764cb9927766e319b2d745afcc042e6b87b4929a7222fca94",
+        "repository_revision": "69eeb5f5ddb471ffbcbd03060d355bd29af0682c",
+        "tree": "94599d7a01551de0f2ea88498596554fca85242b",
+        "entrypoint": "index.html",
+        "preview_kind": "STATIC_WEB",
+        "artifacts": [
+          "app.js",
+          "index.html",
+          "styles.css"
+        ],
+        "verification": [
+          "PATH_SCOPE: PASS",
+          "GIT_DIFF_CHECK: PASS"
+        ],
+        "authorization_pending": true
+      },
+      "preview_session_id": "c210411f-2c54-4747-b4ae-f83a97a10368",
+      "guardian_request_ids": [
+        "1e12d569-b0ed-547c-8b87-0cfad9b6c391"
+      ],
+      "guardian_gate": "PASS",
+      "guardian_findings": 0,
+      "artifacts_sha256": {
+        "app.js": "0e187c960faa1a1703f347236c2eceb8c870712d5778b1e0b46cdae07236b270",
+        "index.html": "010646606557dd4fa2b2e3578c630e0ab46260b639fc86f0bb8703319e6dce5a",
+        "styles.css": "df21e16cb88011bf22974b64aee6d1ce772f8f4ffcf2ec6d0f7111d6407b976c"
+      },
+      "human_acceptance": "PENDING",
+      "integration": "NOT_PERFORMED",
+      "delivery": "NOT_AUTHORIZED",
+      "historical_diagnostic_sha256": "b0efa5c38eb0de9006bda554b70437a8fdf2c9f453320aa8d38ccc1ecd7918c3",
+      "historical_trace_sha256": "e0a7c49f49b09f15deda2c76129c44a860566bd370ae1365116cc0c6dc291670"
+    },
+    {
+      "journey": "feedback",
+      "product_id": "3faca8ca-e355-4cfa-b840-576c78248ec0",
+      "work_id": "a4f4b20f-4724-5bc7-b41e-eb17ad696c5e",
+      "candidate": {
+        "candidate_id": "2fd75de1-208c-5307-9dde-8f66102f075e",
+        "candidate_fingerprint": "bf956e5a24ba9fdc2a5b9e5da438bdf6d9f83f0998aa423b9779ceb1437fd408",
+        "repository_revision": "adfa1f4d080472249e19cced40fc642806f12b56",
+        "tree": "5b2e13b6edaae42b9b84a17382742ef1b25e0ce2",
+        "entrypoint": "index.html",
+        "preview_kind": "STATIC_WEB",
+        "artifacts": [
+          "index.html"
+        ],
+        "verification": [
+          "PATH_SCOPE: PASS",
+          "GIT_DIFF_CHECK: PASS"
+        ],
+        "authorization_pending": true
+      },
+      "preview_session_id": "ce4c57a1-7715-4407-980b-d0504ae5ef26",
+      "guardian_request_ids": [
+        "65d9fdb2-26e0-5ac8-8a52-0266e51745b8"
+      ],
+      "guardian_gate": "PASS",
+      "guardian_findings": 0,
+      "artifacts_sha256": {
+        "index.html": "b82bd175533a2327a1fe69b28b46e5dec311c0319e5b66a1e6f67979d1363c02"
+      },
+      "human_acceptance": "PENDING",
+      "integration": "NOT_PERFORMED",
+      "delivery": "NOT_AUTHORIZED",
+      "historical_diagnostic_sha256": "ec00cd68087a2bcd6f397cd6a84535c736b753cf853c3a2721fd7486a43fb20b",
+      "historical_trace_sha256": "6b43046a81bb4e193d8e75826ead4add867ab48e29cb3e831a11072277ff5bb1"
+    }
+  ],
+  "initial_imported_edit_candidate_id": "bbc28a78-6b43-5457-bcda-6d5b777e4046",
+  "production_work_id_preserved": "b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9",
+  "test_results": {
+    "affected_regression_passed": 1174,
+    "affected_regression_known_baseline_failed": 3,
+    "affected_regression_postgres_skipped": 55,
+    "final_focused_passed": 179,
+    "final_staged_passed": 18,
+    "guardian_full_passed_before_imported_fixture": 331,
+    "guardian_final_staged_passed": 17,
+    "postgres_focused_passed": 5,
+    "additional_partial_postgres_failures": 7,
+    "same_seven_reproduced_at_starting_revision": true,
+    "packaging_configured_passed": 4,
+    "initial_packaging_missing_required_env_failed": 1
+  },
+  "limitations": [
+    "Bounded static web implementation surfaces; unsupported interpretation/authority/effect shapes retain existing Owners.",
+    "Historical over-split multifile Work f6eb6337-b5db-5e5b-961d-bc960ca16d64 remains stopped with all failures retained. The unchanged full input passed in fresh Work 5073fb63-18a7-53d6-9e93-a18326b100e7 after planner correction. Existing attempted graph topology is not silently rewritten.",
+    "Actual generation and Verification occurred during engineering iteration; final frozen source/pinned Owners re-served the exact Candidates and independently re-assessed them. Old records were not rewritten.",
+    "Native confirm automation accepted the displayed dialog before a cancellable handle was available. Cancellation behavior was separately checked by executing the exact candidate script with a confirm=false test double.",
+    "Game browser qualification observed planting, zombie waves, loss and restart; no browser victory playthrough or original-asset reproduction claim.",
+    "No Human acceptance, Product source promotion, integration or public delivery of generated qualification products."
+  ]
+}

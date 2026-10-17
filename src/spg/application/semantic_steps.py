@@ -809,6 +809,60 @@ class SemanticStepApplicationService:
                 step_id
             )
 
+    def _source_preserving_scope(self, semantic_input, proposal):
+        """Freeze reversible implementation paths; judge the complete artifact later.
+
+        This is pending source scope, not a necessity or behavior PASS. Existing
+        implementations without exact Human-selected paths keep scope review.
+        """
+        from spg.application.production_brief import production_brief_bindings
+        from spg.application.governed_obligations import fulfillment_inventory
+        from spg.domain.refinement import RepositoryScopeValidation, RepositoryTargetNecessityProof
+        from spg.domain.intent_realization import GovernedSemanticIR
+        from spg.providers.repository_change_proposal import RepositoryAwareChangeProposalProvider
+        if (proposal.target_kind is not ProductionTargetKind.CODE_WORK or not proposal.code_targets
+                or proposal.allowed_areas or semantic_input.canonical_allowed_areas
+                or not semantic_input.governed_semantic_ir or semantic_input.required_intermediate_artifacts
+                or not semantic_input.repository_identity
+                or not semantic_input.human_explicit_requests):
+            return None
+        ir = GovernedSemanticIR.model_validate(semantic_input.governed_semantic_ir)
+        paths = tuple(proposal.code_targets)
+        explicit = set(semantic_input.canonical_explicit_targets)
+        if (explicit and set(paths) != explicit or not explicit
+                and not semantic_input.repository_identity.startswith("watt://work-branches/")):
+            return None
+        inspector = RepositoryAwareChangeProposalProvider()
+        repository = Path(semantic_input.repository_location)
+        inspector._require_revision(repository, semantic_input.source_revision)
+        tree_paths = inspector._tree_paths(repository, semantic_input.source_revision)
+        tree = inspector._tree_identity(repository, semantic_input.source_revision)
+        if semantic_input.source_tree != tree:
+            return None
+        # Existing files are eligible only within exact admitted Human targets.
+        # New-surface choice is implementation HOW, and cannot touch an existing
+        # implementation or choose conflicting file/directory prefixes.
+        if not explicit and (any(Path(p).suffix in {".html", ".css", ".js", ".ts", ".py"}
+                for p in tree_paths) or any(p in tree_paths for p in paths)):
+            return None
+        with self.database.unit_of_work() as uow:
+            revision = ProductStore(uow.session).current_work_reality_revision(semantic_input.work_id)
+        if (revision is None or revision.source_revision != semantic_input.source_revision
+                or revision.source_assessment_id is None):
+            return None
+        inventory = fulfillment_inventory(revision, ir, source_revision=semantic_input.source_revision,
+            exact_target_paths=paths)
+        if production_brief_bindings(revision, ir, inventory) is None:
+            return None
+        proofs = tuple(RepositoryTargetNecessityProof(path=p, evidence_kind="NEW_TARGET_PENDING_VERIFICATION",
+            source_revision=semantic_input.source_revision, source_tree=tree,
+            human_clause=semantic_input.human_explicit_requests[-1],
+            necessity="Reversible implementation surface for the unchanged admitted brief; behavior and necessity remain pending actual artifact Verification.")
+            for p in paths if p not in tree_paths)
+        return RepositoryScopeValidation(evidence_status="PENDING_ARTIFACT_VERIFICATION",
+            required_targets=proofs, rejected_behaviors=(), requirement_coverage=(),
+            explanation="Exact bounded source scope only. All admitted sources are preserved by the production brief; actual Verification and independent Guardian must validate the produced artifact.")
+
     def _materialize_production_plan(
         self,
         semantic_input: SemanticStepInput,
@@ -822,9 +876,11 @@ class SemanticStepApplicationService:
         assert proposal is not None
         change_proposal = None
         validate_scope = getattr(getattr(self, "capability", None), "validate_production_scope", None)
-        scope_validation = (validate_scope(semantic_input, proposal)
-            if callable(validate_scope) and (proposal.target_kind is ProductionTargetKind.CODE_WORK
-                or not semantic_input.required_intermediate_artifacts) else None)
+        scope_validation = self._source_preserving_scope(semantic_input, proposal)
+        if scope_validation is None:
+            scope_validation = (validate_scope(semantic_input, proposal)
+                if callable(validate_scope) and (proposal.target_kind is ProductionTargetKind.CODE_WORK
+                    or not semantic_input.required_intermediate_artifacts) else None)
         if scope_validation is not None and scope_validation.missing_acceptance_requirements:
             raise ValueError("INTENT_COMPLETENESS_MISMATCH: " + "; ".join(
                 scope_validation.missing_acceptance_requirements))

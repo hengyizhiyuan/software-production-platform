@@ -2622,3 +2622,60 @@ def test_worker_parks_quota_failure_with_checkpoint_residual_work() -> None:
     assert runtime.result.residual_obligations == (
         "run only the stale verification",
     )
+
+
+def test_kernel_does_not_requeue_a_wait_caused_by_its_own_no_progress_tool_limit():
+    binding, contract = _binding()
+    binding = binding.model_copy(update={'capability_grants':(CapabilityGrant(identity='test.run',version='1',scope={}),),
+        'resource_envelope':binding.resource_envelope.model_copy(update={'max_inference_submissions':4,'max_tool_effects':4})})
+    async def test(request):
+        return ToolExecutionResult(delivery_id=request.delivery_id,tool_identity='test.run',
+            condition=EffectCondition.SETTLED,output={'returncode':0},output_digest=canonical_digest({'returncode':0}))
+    responses=tuple(InferenceResponse(action=InferenceAction.CONTINUE,summary='repeat same check',working_plan=_plan(i),
+        tool_calls=(ToolCallProposal(proposal_index=0,tool_identity='test.run',arguments={}),),residual_obligations=('implement',))
+        for i in (2,3,4))
+    inference=ScriptedInferenceAdapter((*responses,InferenceResponse(action=InferenceAction.WAITING_RESOURCE,
+        summary='tools were withheld; write unavailable',working_plan=_plan(5),residual_obligations=('implement',))))
+    result=asyncio.run(NativeExecutorKernel(inference=inference,
+        tools=NativeToolRegistry((ToolDefinition('test.run','1','test',{},'READ_ONLY_PROCESS',test),)),
+        checkpoints=_Checkpoints()).run(binding=binding,contract=contract,worker_epoch=1,working_plan=_plan()))
+    assert result.runtime_mode is ExecutionMode.FINISHED
+    assert result.terminal_outcome is AttemptTerminalOutcome.UNABLE_TO_COMPLETE
+    assert result.failure_family=='EXECUTOR_NO_PROGRESS'
+    assert result.final_checkpoint_id is not None
+
+
+def test_generic_provider_recovery_does_not_remove_an_already_granted_write_tool():
+    binding,contract=_binding()
+    binding=binding.model_copy(update={'capability_grants':(CapabilityGrant(identity='file.write',version='1',scope={'paths':['src/main.py']}),)})
+    class Audit(NullKernelAudit):
+        def recent_repair_reality(self):
+            return ({'operation_id':str(binding.attempt_id),'status':'OPEN','failure_family':'RUNTIME_PROVIDER_FAILURE',
+                'repairability':RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE.value},)
+    inference=ScriptedInferenceAdapter((InferenceResponse(action=InferenceAction.UNABLE_TO_COMPLETE,
+        summary='bounded diagnostic trial',working_plan=_plan(2),residual_obligations=('implement',)),))
+    async def write(request):raise AssertionError('No write requested')
+    asyncio.run(NativeExecutorKernel(inference=inference,
+        tools=NativeToolRegistry((ToolDefinition('file.write','1','write',{},'LOCAL_MUTATION',write),)),
+        checkpoints=_Checkpoints(),audit=Audit()).run(binding=binding,contract=contract,worker_epoch=1,working_plan=_plan()))
+    assert [t['identity'] for t in inference.requests[0].available_tools]==['file.write']
+
+
+@pytest.mark.parametrize("changed", [None, "unknown", "outside-scope", "no-write", "no-output", "human-choice", "intent-change", "fake-returncode"])
+def test_observed_diagnostic_failure_can_repair_only_existing_authorized_scope(changed):
+    binding, _ = _binding()
+    payload = {"task_contract": {"authority_lineage": ["human:source"],
+        "acceptance_meaning": ["Keep the original admitted behavior"], "scope": ["src"]}}
+    output = {"verification_evidence": "FAILED", "test_environment_readiness": "OBSERVED_EXECUTION",
+        "returncode": 1, "stderr": "Actual diagnostic assertion failed"}
+    condition = EffectCondition.FAILED
+    if changed == "unknown": condition = EffectCondition.UNKNOWN
+    elif changed == "outside-scope": payload["task_contract"]["scope"] = ["private"]
+    elif changed == "no-write": binding = binding.model_copy(update={"capability_grants": ()})
+    elif changed == "no-output": output.pop("stderr")
+    elif changed == "human-choice": output["product_choice_required"] = True
+    elif changed == "intent-change": output["product_intent_change"] = True
+    elif changed == "fake-returncode": output["returncode"] = True
+    classification, _ = DurableKernelAudit._classify_repairability(payload, binding=binding,
+        tool="test.run", condition=condition, output=output)
+    assert (classification is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE) is (changed is None)

@@ -265,3 +265,16 @@ def test_successor_uses_accepted_source_proof_and_keeps_work_scope_separate(tmp_
     with pytest.raises(DecisionContextAuthorityMissing):
         project_accepted_successor_context(**successor,
             accepted_version=accepted,inherited=inherited)
+
+
+@pytest.mark.parametrize('heading',[None,'## Product Intent','## Product Invariant','## Approved Decision'])
+def test_captured_import_retains_existing_repository_context_declarations(tmp_path,heading):
+    from spg.application.managed_greenfield_context import imported_repository_has_context_declarations
+    repo=tmp_path/'import';repo.mkdir();git(repo,'init','-b','main')
+    git(repo,'config','user.name','Qualification');git(repo,'config','user.email','test@example.invalid')
+    (repo/'README.md').write_text('# Existing project\n'+(('\n'+heading+'\nExisting owner policy\n') if heading else ''))
+    git(repo,'add','.');git(repo,'commit','-m','captured import')
+    revision=git(repo,'rev-parse','HEAD')
+    # Uncommitted documents cannot change the exact imported tree's policy.
+    (repo/'README.md').write_text('## Product Invariant\nUncommitted candidate\n')
+    assert imported_repository_has_context_declarations(str(repo),revision) is (heading is not None)

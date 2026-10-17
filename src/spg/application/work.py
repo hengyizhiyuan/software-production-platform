@@ -2373,7 +2373,9 @@ class WorkApplicationService:
                     "production retry lineage is incomplete"
                 )
             if (
-                report.outcome.value not in {"FAILURE", "UNKNOWN"}
+                not (report.outcome.value in {"FAILURE", "UNKNOWN"}
+                    or report.outcome.value == "SUCCESS" and any(
+                        value in {"FAIL", "UNKNOWN"} for value in facts.verification_results))
                 or facts.runtime_commit_id is not None
                 or facts.candidate_id is not None
                 or facts.authorization_id is not None
@@ -3394,7 +3396,38 @@ class WorkApplicationService:
                     "rationale": request.rationale or kind,
                     "created_at": datetime.now(UTC)})
             unit_of_work.commit()
+        if request.action is AttentionAction.APPROVE:
+            self._resume_failed_production_after_retry(attention.work_id,
+                authority_identity=request.authority_identity)
         return self.get_work(attention.work_id)
+
+    def _resume_failed_production_after_retry(self, work_id, *, authority_identity):
+        """A retry must dispatch a successor when the current production failed.
+
+        Opening a convergence episode alone cannot revive a failed Attempt or
+        Verification. Reuse the existing bounded Attempt owner; uncertain effects,
+        sealed/authorized results and any revised source remain ineligible.
+        """
+        with self.database.unit_of_work() as uow:
+            product = ProductStore(uow.session)
+            binding = self._runtime_binding_for_current_context(product, work_id)
+            if binding is None:
+                return
+            facts = product.runtime_summary(binding)
+            if (facts.attempt_id is None or facts.dispatch_id is None or facts.candidate_id is not None
+                    or facts.runtime_commit_id is not None or facts.authorization_id is not None):
+                return
+            report = RuntimeStore(uow.session).provider_execution_report(facts.dispatch_id)
+            if report is None or report.outcome.value == "UNKNOWN":
+                return
+            from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
+            queue = NativeExecutionStore(uow.session).queue_for_attempt(facts.attempt_id)
+            if queue is not None and queue.condition.value not in {"COMPLETED", "FAILED", "CANCELLED"}:
+                return
+            failed = (report.outcome.value == "FAILURE" or report.outcome.value == "SUCCESS"
+                and any(value in {"FAIL", "UNKNOWN"} for value in facts.verification_results))
+        if failed:
+            self.retry_failed_production(work_id, authority_identity=authority_identity)
 
     def resolve_attention(
         self,

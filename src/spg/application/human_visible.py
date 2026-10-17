@@ -166,7 +166,8 @@ def safe_wording(projection):
             title={'CANDIDATE_AUTHORIZATION':'审阅当前候选成果','WORK_APPROVAL':'确认本次生产范围',
                    'WORK_REVISION_APPROVAL':'确认新要求对当前事项的影响'}.get(item['kind'],'审阅当前授权事项')
             question='请查看当前成果和范围，再明确授权或要求修改。';why='这一授权由你决定；系统不会自动接受或扩大范围。'
-        decisions.append({'id':item['id'],'title':title,'question':question,'why_now':why})
+        decisions.append({'id':item['id'],'title':title if len(title) <= 150 else title[:149]+'…',
+            'question':question,'why_now':why})
     return HumanVisibleWording(headline=motive,summary=summary,current_activity=activity,next_step=next_step,
         agenda=tuple({'id':a['id'],'text':PHASE.get(a['type'],'继续当前生产目标')} for a in projection.agenda),
         decisions=tuple(decisions),production_units=tuple({'id':u['pwu_id'], 'text':

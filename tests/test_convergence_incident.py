@@ -52,6 +52,7 @@ def resolve(monkeypatch, action, decision):
     service = WorkApplicationService.__new__(WorkApplicationService)
     service.database = SimpleNamespace(unit_of_work=UoW)
     service.get_work = lambda wid: wid
+    service._resume_failed_production_after_retry = lambda *a, **kw: None
     attention = SimpleNamespace(work_id=work_id, kind=AttentionKind.STEERING_DECISION_REQUIRED,
                                 governed_subject_ref=f"steering-decision:{decision_id}")
     request = SimpleNamespace(action=action, authority_identity="human:owner", rationale=None)
@@ -108,3 +109,59 @@ def test_only_a_restart_lets_production_continue_past_the_incident(monkeypatch):
         service = SteeringProductionService.__new__(SteeringProductionService)
         service.database = SimpleNamespace(unit_of_work=UoW)
         assert service._convergence_incident_resolved(uuid4(), decision) is expected
+
+
+def test_internal_formation_failure_does_not_ask_human_to_rewrite_a_valid_goal():
+    from spg.application.steering_driver import convergence_recovery_guidance
+    question, reason, options = convergence_recovery_guidance('FORMATION', 3)
+    assert '尚未进入执行' in question and '无需重新描述' in question
+    assert '内部故障' in reason
+    assert [label for label, _ in options] == ['重新尝试', '暂停这次生产']
+    assert all('调整目标' not in label for label, _ in options)
+
+
+def test_long_incident_subject_cannot_break_the_normal_workspace_projection():
+    from spg.application.human_visible import safe_wording
+    from spg.domain.human_visible import HumanVisibleProjection
+    title='具体实现要求' * 50
+    need={'decision_subject':title,'question':'当前执行没有进展，要重试还是暂停？',
+        'why_now':'本轮恢复已停止，现有需求与历史完整保留。',
+        'supported_options':[{'label':'重试','consequence':'继续有界恢复'},{'label':'暂停','consequence':'保留历史'}]}
+    projection=HumanVisibleProjection(basis_fingerprint='a'*64,governed_motive='保留完整需求',
+        governed_semantic_ir=None,owner_facts={},agenda=(),production_units=(),source_references=(),
+        decision_needs=({'id':'incident','kind':'STEERING_DECISION_REQUIRED','human_decision_need':need},))
+    result=safe_wording(projection)
+    assert len(result.decisions[0].title)<=150
+    assert need['decision_subject']==title
+    assert result.decisions[0].question==need['question']
+
+
+@pytest.mark.parametrize('outcome,verification,queue,candidate,expected', [
+    ('SUCCESS',('FAIL',),'COMPLETED',None,True),
+    ('SUCCESS',('UNKNOWN',),'COMPLETED',None,True),
+    ('SUCCESS',('PASS',),'COMPLETED',None,False),
+    ('FAILURE',(),'COMPLETED',None,True),
+    ('UNKNOWN',(),'RECOVERY_REQUIRED',None,False),
+    ('FAILURE',(),'EXECUTING',None,False),
+    ('FAILURE',(),'COMPLETED','sealed-candidate',False),
+])
+def test_incident_retry_restarts_failed_production_but_never_uncertain_effects(monkeypatch,outcome,verification,queue,candidate,expected):
+    from contextlib import contextmanager
+    import spg.infrastructure.executor_runtime.postgres_store as native
+    work_id=uuid4()
+    facts=SimpleNamespace(attempt_id=uuid4(),dispatch_id=uuid4(),candidate_id=candidate,
+        runtime_commit_id=None,authorization_id=None,verification_results=verification)
+    monkeypatch.setattr(work_module,'ProductStore',lambda _:SimpleNamespace(runtime_summary=lambda _:facts))
+    monkeypatch.setattr(work_module,'RuntimeStore',lambda _:SimpleNamespace(
+        provider_execution_report=lambda _:SimpleNamespace(outcome=SimpleNamespace(value=outcome))))
+    monkeypatch.setattr(native,'NativeExecutionStore',lambda _:SimpleNamespace(
+        queue_for_attempt=lambda _:SimpleNamespace(condition=SimpleNamespace(value=queue))))
+    @contextmanager
+    def uow():yield SimpleNamespace(session=None)
+    service=WorkApplicationService.__new__(WorkApplicationService)
+    service.database=SimpleNamespace(unit_of_work=uow)
+    service._runtime_binding_for_current_context=lambda *a:object()
+    called=[]
+    service.retry_failed_production=lambda wid,**kw:called.append((wid,kw))
+    service._resume_failed_production_after_retry(work_id,authority_identity='human:owner')
+    assert bool(called) is expected

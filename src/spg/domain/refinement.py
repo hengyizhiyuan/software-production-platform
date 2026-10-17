@@ -132,7 +132,7 @@ class RepositoryTargetNecessityProof(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     path: str = Field(min_length=1)
     # Legacy existing-source witnesses retain their original strict contract.
-    evidence_kind: Literal["EXISTING_IMPLEMENTATION", "NEW_TARGET"] = "EXISTING_IMPLEMENTATION"
+    evidence_kind: Literal["EXISTING_IMPLEMENTATION", "NEW_TARGET", "NEW_TARGET_PENDING_VERIFICATION"] = "EXISTING_IMPLEMENTATION"
     source_path: str | None = Field(default=None, min_length=1)
     repository_quote: str | None = Field(default=None, min_length=5, max_length=2000)
     source_revision: str | None = Field(default=None, pattern=r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
@@ -147,7 +147,7 @@ class RepositoryTargetNecessityProof(BaseModel):
 
     @model_validator(mode="after")
     def require_exact_evidence_basis(self) -> "RepositoryTargetNecessityProof":
-        if self.evidence_kind == "NEW_TARGET":
+        if self.evidence_kind in {"NEW_TARGET", "NEW_TARGET_PENDING_VERIFICATION"}:
             if (self.source_revision is None or self.source_tree is None
                     or self.source_path is not None or self.repository_quote is not None):
                 raise ValueError("New target proof requires exact revision/tree and no invented existing-source witness")
@@ -178,7 +178,7 @@ def scope_target_proof_issues(proof: RepositoryTargetNecessityProof, *,
         issues.append("Scope necessity proof has stale source revision")
     if proof.source_tree is not None and proof.source_tree != source_tree:
         issues.append("Scope necessity proof has stale source tree")
-    if proof.evidence_kind == "NEW_TARGET":
+    if proof.evidence_kind in {"NEW_TARGET", "NEW_TARGET_PENDING_VERIFICATION"}:
         # Use the complete exact Git tree, never absence from a sampled context.
         if (proof.path in tree_paths
                 or any(proof.path.startswith(path + "/") or path.startswith(proof.path + "/")
@@ -214,6 +214,7 @@ class ScopeRequirementCoverage(BaseModel):
 
 class RepositoryScopeValidation(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
+    evidence_status: Literal["REVIEWED_SCOPE", "PENDING_ARTIFACT_VERIFICATION"] = "REVIEWED_SCOPE"
     required_targets: tuple[RepositoryTargetNecessityProof, ...]
     rejected_behaviors: tuple[str, ...]
     explanation: str = Field(min_length=10)

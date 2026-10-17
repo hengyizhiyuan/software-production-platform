@@ -1,0 +1,16 @@
+mixed guardian-assurance {'id': None, 'status': 'PASS', 'gate': 'PASS', 'summary': ''}
+mixed functional-preview/stop {'id': '24d56af4-d2d2-437d-b86e-f8a9bb3bf0b9', 'status': 'STOPPED', 'gate': None, 'summary': None}
+mixed functional-preview {'id': '848587c8-2ebe-4741-8d9e-944a1975c8d7', 'status': 'REQUESTED', 'gate': None, 'summary': None}
+game guardian-assurance {'id': None, 'status': 'PASS', 'gate': 'PASS', 'summary': ''}
+game functional-preview/stop {'id': '02770307-8032-4ebb-af8a-9cd7543d5ca5', 'status': 'STOPPED', 'gate': None, 'summary': None}
+game functional-preview {'id': '0e993372-955c-4486-801d-ed1ca0444fe2', 'status': 'REQUESTED', 'gate': None, 'summary': None}
+multifile guardian-assurance {'id': None, 'status': 'PASS', 'gate': 'PASS', 'summary': ''}
+multifile functional-preview/stop {'id': 'e613245e-1f43-4366-b4b9-9162f5dc12ce', 'status': 'STOPPED', 'gate': None, 'summary': None}
+multifile functional-preview {'id': 'c210411f-2c54-4747-b4ae-f83a97a10368', 'status': 'REQUESTED', 'gate': None, 'summary': None}
+feedback guardian-assurance {'id': None, 'status': 'PASS', 'gate': 'PASS', 'summary': ''}
+feedback functional-preview/stop {'id': '2377a463-69d8-4a2e-be4c-53d698b0d305', 'status': 'STOPPED', 'gate': None, 'summary': None}
+feedback functional-preview {'id': 'ce4c57a1-7715-4407-980b-d0504ae5ef26', 'status': 'REQUESTED', 'gate': None, 'summary': None}
+mixed FROZEN GUARDIAN PASS 38e945e4-91f0-5794-9bb8-f4058cf24636
+game FROZEN GUARDIAN PASS 4b035d64-d8e4-52d1-8d36-e55b26733872
+multifile FROZEN GUARDIAN PASS 1e12d569-b0ed-547c-8b87-0cfad9b6c391
+feedback FROZEN GUARDIAN PASS 65d9fdb2-26e0-5ac8-8a52-0266e51745b8

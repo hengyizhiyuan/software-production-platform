@@ -91,7 +91,7 @@ class RepositoryAwareChangeProposalProvider:
                 continue
             evidence = (f"Exact {request.source_revision} tree {source_tree}: target {proof.path} is absent; "
                         "necessity judged against the governed requested behavior."
-                        if proof.evidence_kind == "NEW_TARGET" else
+                        if proof.evidence_kind in {"NEW_TARGET", "NEW_TARGET_PENDING_VERIFICATION"} else
                         f"Exact {request.source_revision}:{proof.source_path} witness: {proof.repository_quote}")
             targets.append(self._target(path=proof.path, paths=path_set,
                 disposition=ProposalTargetDisposition.REQUIRED,

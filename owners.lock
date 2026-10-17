@@ -10,9 +10,9 @@
     },
     "guardian": {
       "repository": "https://github.com/hengyizhiyuan/guardian.git",
-      "branch": "codex/usability-first-20261017",
-      "commit": "7910649aefadc6ed5447bda33ffe493f856b3f23",
-      "source_digest": "19fb1e9e54c6e59786acb3289ad6614f6f354e82384abccb05dc4643363e63d8"
+      "branch": "codex/usability-continuity-20261017",
+      "commit": "e9019c91a21d954a9d7e243c54b6d01d2bdaa231",
+      "source_digest": "a02d34e79ec5db057f81efd9a0b6b72823d269aeedfaccc403851aa57eb8e51f"
     }
   }
 }

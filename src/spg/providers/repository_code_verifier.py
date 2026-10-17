@@ -48,7 +48,7 @@ def _exact_protected_context_coverage(request: VerificationCapabilityRequest,
             and len(observed) == len(expected) and set(observed) == set(expected)
             and all(item.get("coverage") in {"COVERED", "PENDING_CANDIDATE_GATE", "PENDING_HUMAN_GATE", "CONTEXT_RETAINED"}
                     and (item.get("coverage") != "PENDING_CANDIDATE_GATE"
-                         or item.get("evidence_method") == "EXACT_CANDIDATE_SEAL_REQUIRED")
+                         or item.get("evidence_method") in {"EXACT_CANDIDATE_SEAL_REQUIRED", "EXACT_CANDIDATE_REVIEW_REQUIRED"})
                     and (item.get("coverage") != "PENDING_HUMAN_GATE"
                          or item.get("evidence_method") == "EXACT_HUMAN_AUTHORIZATION_REQUIRED")
                     and (item.get("coverage") != "CONTEXT_RETAINED"
@@ -224,7 +224,8 @@ class RepositoryCodeVerifier:
                     references=work_unit.completion_contract.semantic_fact_obligations,
                     admitted_facts=admitted_facts, revision=admitted_revision, ir=admitted_ir,
                     baseline=source, bindings=gate_bindings, plan_repair=plan_repair,
-                    static_verifier=self.context_verifier, task=work_unit.completion_contract.task_contract, receipt_recorder=receipt_recorder)
+                    static_verifier=self.context_verifier, task=work_unit.completion_contract.task_contract,
+                    receipt_recorder=receipt_recorder, native_record=native_binding)
                 if gate_bindings:
                     from spg.application.governed_obligations import evaluate_continuous_gates
                     semantic_checks = evaluate_continuous_gates(

@@ -1,0 +1,896 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+FFFFFFF                                                                  [100%]
+=================================== FAILURES ===================================
+_ test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls[literal-bound-work] _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), session_factory=sessionma...=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), autoflush=False, expire_on_commit=False))
+tmp_path = PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-1903/test_reviewed_original_file_bo0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c3248a0>
+admission = 'work', fact_shape = 'literal-bound'
+
+    @pytest.mark.parametrize('admission', ('work', 'steering'))
+    @pytest.mark.parametrize('fact_shape', ('literal-bound', 'semantic-scope', 'semantic-scope-wire-defaults'))
+    def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls(postgres_database, tmp_path, monkeypatch, admission, fact_shape):
+        import json
+        from copy import deepcopy
+        from types import SimpleNamespace
+        from spg.domain.engineering_semantics import SemanticRelation
+        from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+        from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+        from tests.integration import test_c1_contract_continuity as c1
+        from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+        from tests.test_c3_semantic_contract_calibration import review
+        meaning = c1.DeclaredC1Meaning
+        declared = c1.DeclaredC1Fulfillment()
+        class OriginalBoundMeaning(meaning):
+            def interpret(self, basis):
+                candidate = super().interpret(basis)
+                original = candidate.semantic_fact_candidates[0]
+                bound = original.model_copy(update={'candidate_id': 'controlled-file-bound',
+                    'subject': 'controlled.repository.bound',
+                    'relation': SemanticRelation.BOUND if fact_shape == 'literal-bound' else SemanticRelation.SCOPE,
+                    'value': 'index.html' if fact_shape == 'literal-bound' else 'index.html only',
+                    'scope': None, 'qualifiers': {}, 'source_text': c1.CONSTRAINTS[0]})
+                return candidate.model_copy(update={'semantic_fact_candidates': (*candidate.semantic_fact_candidates, bound)})
+        monkeypatch.setattr(c1, 'DeclaredC1Meaning', OriginalBoundMeaning)
+        calls = []
+        def generate(**request):
+            payload = json.loads(request['input_text']); calls.append(payload)
+            inv = _restore_formation_inventory_view(payload['immutable_inventory'], payload.get('existing_ir_item_table', {}))
+            if 'untrusted_fulfillment_candidate' in payload:
+                plan = decode_review_input(payload)
+                output = fixture_review_proof(inv, plan, review(inv, plan), payload).model_dump_json()
+                if fact_shape == 'semantic-scope-wire-defaults':
+                    raw = json.loads(output)
+                    omitted = 0
+                    for source in raw['source_results']:
+                        for check in source.get('consumption_checks') or ():
+                            if check.get('target_paths') == []:
+                                check.pop('target_paths'); omitted += 1
+                    assert omitted > 0
+                    output = json.dumps(raw)
+            else:
+                plan = declared.form(inv, payload['existing_capability_contracts'])
+                bounded = {s['source_ref'] for s in inv['sources'] if s['kind'] == 'FACT' and s['payload']['subject'] == 'controlled.repository.bound'}
+                routes = tuple(r.model_copy(update={'capability': 'GIT_DIFF_SCOPE', 'component_basis':
+                    r.component_basis.model_copy(update={'linked_fact_refs': ()})}) if r.source_ref in bounded
+                    else r.model_copy(update={'component_basis': r.component_basis.model_copy(update={
+                        'linked_fact_refs': tuple(ref for ref in r.component_basis.linked_fact_refs if ref not in bounded)})})
+                    for r in plan.routes)
+                plan = plan.model_copy(update={'routes': routes})
+                wire, _ = controlled_wire(inv, plan, owner_preconditions=payload.get('owner_source_preconditions'))
+                output = json.dumps(wire)
+            return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
+                requested_model='controlled-original-bound', effective_model='controlled-original-bound',
+                request_id=f'controlled-original-bound-{len(calls)}', usage=ModelUsage(), timing=ModelTiming(), retry_count=0)
+        provider = ModelFulfillmentCandidateProvider(lambda: SimpleNamespace(generate=generate, close=lambda: None))
+        monkeypatch.setattr(c1, 'DeclaredC1Fulfillment', lambda: provider)
+        admitted = c1._admit_c1(postgres_database, tmp_path, admission)
+        _, work_id, revision, ir, _, baseline, pwu = admitted
+        original = next(f for f in revision.engineering_semantic_facts if f.subject == 'controlled.repository.bound')
+        binding = next(b for b in pwu.completion_contract.fulfillment_bindings if b.fact_id == original.id)
+        assert binding.evidence_method == 'EXACT_GIT_DIFF_SCOPE' and binding.state == 'BOUND_PENDING_EVIDENCE'
+        assert len(calls) == 2
+        inv = binding.projection_inventory_fingerprint
+        with postgres_database.unit_of_work() as uow:
+            before = deepcopy([r.scope for r in RuntimeStore(uow.session).governance_for_subject(inv)])
+            assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
+        replay = form_fulfillment_projection(revision, ir, provider=NeverCallAgain(), database=postgres_database,
+            source_revision=baseline.repository_revision, exact_target_paths=('index.html',))
+        assert all(b.state != 'UNRESOLVED' for b in replay)
+        with postgres_database.unit_of_work() as uow:
+            after = [r.scope for r in RuntimeStore(uow.session).governance_for_subject(inv)]
+            assert after == before
+            assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
+    
+    
+>       chain = c1._produce_chain(postgres_database, tmp_path, admitted)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_c3_fulfillment_receipts.py:162: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+database = Database(engine=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), session_factory=sessionma...=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), autoflush=False, expire_on_commit=False))
+tmp_path = PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-1903/test_reviewed_original_file_bo0')
+admitted = (<spg.application.work.WorkApplicationService object at 0x10bcebe00>, UUID('09801f5f-d7cb-41b9-bfdd-b11cf320b593'), Wo...rce_baseline_id=None, created_at=datetime.datetime(2026, 10, 17, 2, 3, 39, 728196, tzinfo=datetime.timezone.utc)), ...)
+
+    def _produce_chain(database, tmp_path, admitted):
+        works, work_id, revision, ir, repository, baseline, pwu = admitted
+        runtime = RuntimeService(database)
+        attempt = runtime.create_initial_attempt(pwu.id)
+        preparation = PreparationService(database)
+        package = preparation.assemble_context_package(pwu.id, repository, ContextPackageRequest(
+            artifacts=(ContextArtifactSelection(semantic_role=ContextSemanticRole.PROJECT_CONTEXT,
+                                                 repository_relative_path="AI_context.md"),)))
+        prepared = preparation.prepare_attempt(attempt.id, package.id, ExecutorBinding(
+            binding_ref="binding:c1-contract", capability_identity="capability:watt-native-executor",
+            profile_identity="profile:c1-controlled"), repository, tmp_path / "attempt-workspaces")
+        native_runtime = NativeExecutorRuntimeService(database)
+        native_executor = NativeQueuedExecutorCapability(database, native_runtime,
+            provider_profile="fixture:c1", resource_profile="standard", environment_profile="fixture:c1",
+            strict_production_context=True)
+        local_output = DeterministicTestExecutor(DeterministicExecutionSpecification(
+            operations=(DeterministicFileOperation(operation=DeterministicFileOperationType.CREATE,
+                repository_relative_path="index.html", content=CONTENT),),
+            reported_outcome=ProviderReportedOutcome.SUCCESS, summary="Controlled C1 contract output"))
+        class NativeBoundFixtureExecutor:
+            def dispatch(self, request):
+                admission = native_executor._admission(request)
+                native_runtime.admit(admission)
+                return local_output.dispatch(request)
+        execution = ExecutionService(database, preparation=preparation)
+        produced = execution.dispatch_and_observe(attempt.id, NativeBoundFixtureExecutor())
+        assert produced.provider_report.outcome is ProviderReportedOutcome.SUCCESS
+        completion = CompletionService(database, observer=execution.observer).evaluate_observation(produced.observation.id)
+        verification = VerificationService(database, observer=execution.observer)
+        snapshot = verification.create_proposed_snapshot(completion.evaluation.id)
+        provider = RepositoryCodeVerifier(database, context_verifier=StaticProtectedContextVerifier(_never_generate))
+        records = tuple(verification.verify_obligation(snapshot.id, obligation, provider)
+                        for obligation in pwu.completion_contract.verification_obligations)
+>       assert all(item.result is VerificationResultValue.PASS for item in records), [
+            item.evidence.metadata for item in records]
+E       AssertionError: [{'kind': 'PATH_SCOPE', 'mode': 'contract-driven-code-verification', 'target': None, 'failure_type': 'AssertionError', ...}, {'kind': 'GIT_DIFF_CHECK', 'mode': 'contract-driven-code-verification', 'target': None, 'exit_code': 0, ...}]
+E       assert False
+E        +  where False = all(<generator object _produce_chain.<locals>.<genexpr> at 0x10c7bc450>)
+
+tests/integration/test_c1_contract_continuity.py:536: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+_ test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls[literal-bound-steering] _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), session_factory=sessionma...=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), autoflush=False, expire_on_commit=False))
+tmp_path = PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-1903/test_reviewed_original_file_bo1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109e13e10>
+admission = 'steering', fact_shape = 'literal-bound'
+
+    @pytest.mark.parametrize('admission', ('work', 'steering'))
+    @pytest.mark.parametrize('fact_shape', ('literal-bound', 'semantic-scope', 'semantic-scope-wire-defaults'))
+    def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls(postgres_database, tmp_path, monkeypatch, admission, fact_shape):
+        import json
+        from copy import deepcopy
+        from types import SimpleNamespace
+        from spg.domain.engineering_semantics import SemanticRelation
+        from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+        from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+        from tests.integration import test_c1_contract_continuity as c1
+        from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+        from tests.test_c3_semantic_contract_calibration import review
+        meaning = c1.DeclaredC1Meaning
+        declared = c1.DeclaredC1Fulfillment()
+        class OriginalBoundMeaning(meaning):
+            def interpret(self, basis):
+                candidate = super().interpret(basis)
+                original = candidate.semantic_fact_candidates[0]
+                bound = original.model_copy(update={'candidate_id': 'controlled-file-bound',
+                    'subject': 'controlled.repository.bound',
+                    'relation': SemanticRelation.BOUND if fact_shape == 'literal-bound' else SemanticRelation.SCOPE,
+                    'value': 'index.html' if fact_shape == 'literal-bound' else 'index.html only',
+                    'scope': None, 'qualifiers': {}, 'source_text': c1.CONSTRAINTS[0]})
+                return candidate.model_copy(update={'semantic_fact_candidates': (*candidate.semantic_fact_candidates, bound)})
+        monkeypatch.setattr(c1, 'DeclaredC1Meaning', OriginalBoundMeaning)
+        calls = []
+        def generate(**request):
+            payload = json.loads(request['input_text']); calls.append(payload)
+            inv = _restore_formation_inventory_view(payload['immutable_inventory'], payload.get('existing_ir_item_table', {}))
+            if 'untrusted_fulfillment_candidate' in payload:
+                plan = decode_review_input(payload)
+                output = fixture_review_proof(inv, plan, review(inv, plan), payload).model_dump_json()
+                if fact_shape == 'semantic-scope-wire-defaults':
+                    raw = json.loads(output)
+                    omitted = 0
+                    for source in raw['source_results']:
+                        for check in source.get('consumption_checks') or ():
+                            if check.get('target_paths') == []:
+                                check.pop('target_paths'); omitted += 1
+                    assert omitted > 0
+                    output = json.dumps(raw)
+            else:
+                plan = declared.form(inv, payload['existing_capability_contracts'])
+                bounded = {s['source_ref'] for s in inv['sources'] if s['kind'] == 'FACT' and s['payload']['subject'] == 'controlled.repository.bound'}
+                routes = tuple(r.model_copy(update={'capability': 'GIT_DIFF_SCOPE', 'component_basis':
+                    r.component_basis.model_copy(update={'linked_fact_refs': ()})}) if r.source_ref in bounded
+                    else r.model_copy(update={'component_basis': r.component_basis.model_copy(update={
+                        'linked_fact_refs': tuple(ref for ref in r.component_basis.linked_fact_refs if ref not in bounded)})})
+                    for r in plan.routes)
+                plan = plan.model_copy(update={'routes': routes})
+                wire, _ = controlled_wire(inv, plan, owner_preconditions=payload.get('owner_source_preconditions'))
+                output = json.dumps(wire)
+            return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
+                requested_model='controlled-original-bound', effective_model='controlled-original-bound',
+                request_id=f'controlled-original-bound-{len(calls)}', usage=ModelUsage(), timing=ModelTiming(), retry_count=0)
+        provider = ModelFulfillmentCandidateProvider(lambda: SimpleNamespace(generate=generate, close=lambda: None))
+        monkeypatch.setattr(c1, 'DeclaredC1Fulfillment', lambda: provider)
+        admitted = c1._admit_c1(postgres_database, tmp_path, admission)
+        _, work_id, revision, ir, _, baseline, pwu = admitted
+        original = next(f for f in revision.engineering_semantic_facts if f.subject == 'controlled.repository.bound')
+        binding = next(b for b in pwu.completion_contract.fulfillment_bindings if b.fact_id == original.id)
+        assert binding.evidence_method == 'EXACT_GIT_DIFF_SCOPE' and binding.state == 'BOUND_PENDING_EVIDENCE'
+        assert len(calls) == 2
+        inv = binding.projection_inventory_fingerprint
+        with postgres_database.unit_of_work() as uow:
+            before = deepcopy([r.scope for r in RuntimeStore(uow.session).governance_for_subject(inv)])
+            assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
+        replay = form_fulfillment_projection(revision, ir, provider=NeverCallAgain(), database=postgres_database,
+            source_revision=baseline.repository_revision, exact_target_paths=('index.html',))
+        assert all(b.state != 'UNRESOLVED' for b in replay)
+        with postgres_database.unit_of_work() as uow:
+            after = [r.scope for r in RuntimeStore(uow.session).governance_for_subject(inv)]
+            assert after == before
+            assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
+    
+    
+>       chain = c1._produce_chain(postgres_database, tmp_path, admitted)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_c3_fulfillment_receipts.py:162: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+database = Database(engine=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), session_factory=sessionma...=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), autoflush=False, expire_on_commit=False))
+tmp_path = PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-1903/test_reviewed_original_file_bo1')
+admitted = (<spg.application.work.WorkApplicationService object at 0x10cc9a990>, UUID('60d85358-5702-5b91-9218-525ea0d730a8'), Wo...ource_baseline_id=None, created_at=datetime.datetime(2026, 10, 17, 2, 3, 51, 8366, tzinfo=datetime.timezone.utc)), ...)
+
+    def _produce_chain(database, tmp_path, admitted):
+        works, work_id, revision, ir, repository, baseline, pwu = admitted
+        runtime = RuntimeService(database)
+        attempt = runtime.create_initial_attempt(pwu.id)
+        preparation = PreparationService(database)
+        package = preparation.assemble_context_package(pwu.id, repository, ContextPackageRequest(
+            artifacts=(ContextArtifactSelection(semantic_role=ContextSemanticRole.PROJECT_CONTEXT,
+                                                 repository_relative_path="AI_context.md"),)))
+        prepared = preparation.prepare_attempt(attempt.id, package.id, ExecutorBinding(
+            binding_ref="binding:c1-contract", capability_identity="capability:watt-native-executor",
+            profile_identity="profile:c1-controlled"), repository, tmp_path / "attempt-workspaces")
+        native_runtime = NativeExecutorRuntimeService(database)
+        native_executor = NativeQueuedExecutorCapability(database, native_runtime,
+            provider_profile="fixture:c1", resource_profile="standard", environment_profile="fixture:c1",
+            strict_production_context=True)
+        local_output = DeterministicTestExecutor(DeterministicExecutionSpecification(
+            operations=(DeterministicFileOperation(operation=DeterministicFileOperationType.CREATE,
+                repository_relative_path="index.html", content=CONTENT),),
+            reported_outcome=ProviderReportedOutcome.SUCCESS, summary="Controlled C1 contract output"))
+        class NativeBoundFixtureExecutor:
+            def dispatch(self, request):
+                admission = native_executor._admission(request)
+                native_runtime.admit(admission)
+                return local_output.dispatch(request)
+        execution = ExecutionService(database, preparation=preparation)
+        produced = execution.dispatch_and_observe(attempt.id, NativeBoundFixtureExecutor())
+        assert produced.provider_report.outcome is ProviderReportedOutcome.SUCCESS
+        completion = CompletionService(database, observer=execution.observer).evaluate_observation(produced.observation.id)
+        verification = VerificationService(database, observer=execution.observer)
+        snapshot = verification.create_proposed_snapshot(completion.evaluation.id)
+        provider = RepositoryCodeVerifier(database, context_verifier=StaticProtectedContextVerifier(_never_generate))
+        records = tuple(verification.verify_obligation(snapshot.id, obligation, provider)
+                        for obligation in pwu.completion_contract.verification_obligations)
+>       assert all(item.result is VerificationResultValue.PASS for item in records), [
+            item.evidence.metadata for item in records]
+E       AssertionError: [{'kind': 'PATH_SCOPE', 'mode': 'contract-driven-code-verification', 'target': None, 'failure_type': 'AssertionError', ...}, {'kind': 'GIT_DIFF_CHECK', 'mode': 'contract-driven-code-verification', 'target': None, 'exit_code': 0, ...}]
+E       assert False
+E        +  where False = all(<generator object _produce_chain.<locals>.<genexpr> at 0x10c3764d0>)
+
+tests/integration/test_c1_contract_continuity.py:536: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+_ test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls[semantic-scope-work] _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), session_factory=sessionma...=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), autoflush=False, expire_on_commit=False))
+tmp_path = PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-1903/test_reviewed_original_file_bo2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cbb27b0>
+admission = 'work', fact_shape = 'semantic-scope'
+
+    @pytest.mark.parametrize('admission', ('work', 'steering'))
+    @pytest.mark.parametrize('fact_shape', ('literal-bound', 'semantic-scope', 'semantic-scope-wire-defaults'))
+    def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls(postgres_database, tmp_path, monkeypatch, admission, fact_shape):
+        import json
+        from copy import deepcopy
+        from types import SimpleNamespace
+        from spg.domain.engineering_semantics import SemanticRelation
+        from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+        from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+        from tests.integration import test_c1_contract_continuity as c1
+        from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+        from tests.test_c3_semantic_contract_calibration import review
+        meaning = c1.DeclaredC1Meaning
+        declared = c1.DeclaredC1Fulfillment()
+        class OriginalBoundMeaning(meaning):
+            def interpret(self, basis):
+                candidate = super().interpret(basis)
+                original = candidate.semantic_fact_candidates[0]
+                bound = original.model_copy(update={'candidate_id': 'controlled-file-bound',
+                    'subject': 'controlled.repository.bound',
+                    'relation': SemanticRelation.BOUND if fact_shape == 'literal-bound' else SemanticRelation.SCOPE,
+                    'value': 'index.html' if fact_shape == 'literal-bound' else 'index.html only',
+                    'scope': None, 'qualifiers': {}, 'source_text': c1.CONSTRAINTS[0]})
+                return candidate.model_copy(update={'semantic_fact_candidates': (*candidate.semantic_fact_candidates, bound)})
+        monkeypatch.setattr(c1, 'DeclaredC1Meaning', OriginalBoundMeaning)
+        calls = []
+        def generate(**request):
+            payload = json.loads(request['input_text']); calls.append(payload)
+            inv = _restore_formation_inventory_view(payload['immutable_inventory'], payload.get('existing_ir_item_table', {}))
+            if 'untrusted_fulfillment_candidate' in payload:
+                plan = decode_review_input(payload)
+                output = fixture_review_proof(inv, plan, review(inv, plan), payload).model_dump_json()
+                if fact_shape == 'semantic-scope-wire-defaults':
+                    raw = json.loads(output)
+                    omitted = 0
+                    for source in raw['source_results']:
+                        for check in source.get('consumption_checks') or ():
+                            if check.get('target_paths') == []:
+                                check.pop('target_paths'); omitted += 1
+                    assert omitted > 0
+                    output = json.dumps(raw)
+            else:
+                plan = declared.form(inv, payload['existing_capability_contracts'])
+                bounded = {s['source_ref'] for s in inv['sources'] if s['kind'] == 'FACT' and s['payload']['subject'] == 'controlled.repository.bound'}
+                routes = tuple(r.model_copy(update={'capability': 'GIT_DIFF_SCOPE', 'component_basis':
+                    r.component_basis.model_copy(update={'linked_fact_refs': ()})}) if r.source_ref in bounded
+                    else r.model_copy(update={'component_basis': r.component_basis.model_copy(update={
+                        'linked_fact_refs': tuple(ref for ref in r.component_basis.linked_fact_refs if ref not in bounded)})})
+                    for r in plan.routes)
+                plan = plan.model_copy(update={'routes': routes})
+                wire, _ = controlled_wire(inv, plan, owner_preconditions=payload.get('owner_source_preconditions'))
+                output = json.dumps(wire)
+            return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
+                requested_model='controlled-original-bound', effective_model='controlled-original-bound',
+                request_id=f'controlled-original-bound-{len(calls)}', usage=ModelUsage(), timing=ModelTiming(), retry_count=0)
+        provider = ModelFulfillmentCandidateProvider(lambda: SimpleNamespace(generate=generate, close=lambda: None))
+        monkeypatch.setattr(c1, 'DeclaredC1Fulfillment', lambda: provider)
+        admitted = c1._admit_c1(postgres_database, tmp_path, admission)
+        _, work_id, revision, ir, _, baseline, pwu = admitted
+        original = next(f for f in revision.engineering_semantic_facts if f.subject == 'controlled.repository.bound')
+        binding = next(b for b in pwu.completion_contract.fulfillment_bindings if b.fact_id == original.id)
+        assert binding.evidence_method == 'EXACT_GIT_DIFF_SCOPE' and binding.state == 'BOUND_PENDING_EVIDENCE'
+        assert len(calls) == 2
+        inv = binding.projection_inventory_fingerprint
+        with postgres_database.unit_of_work() as uow:
+            before = deepcopy([r.scope for r in RuntimeStore(uow.session).governance_for_subject(inv)])
+            assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
+        replay = form_fulfillment_projection(revision, ir, provider=NeverCallAgain(), database=postgres_database,
+            source_revision=baseline.repository_revision, exact_target_paths=('index.html',))
+        assert all(b.state != 'UNRESOLVED' for b in replay)
+        with postgres_database.unit_of_work() as uow:
+            after = [r.scope for r in RuntimeStore(uow.session).governance_for_subject(inv)]
+            assert after == before
+            assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
+    
+    
+>       chain = c1._produce_chain(postgres_database, tmp_path, admitted)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_c3_fulfillment_receipts.py:162: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+database = Database(engine=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), session_factory=sessionma...=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), autoflush=False, expire_on_commit=False))
+tmp_path = PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-1903/test_reviewed_original_file_bo2')
+admitted = (<spg.application.work.WorkApplicationService object at 0x10ced8a50>, UUID('faed2eeb-25af-4c43-9a29-278202c61204'), Wo...urce_baseline_id=None, created_at=datetime.datetime(2026, 10, 17, 2, 4, 3, 798585, tzinfo=datetime.timezone.utc)), ...)
+
+    def _produce_chain(database, tmp_path, admitted):
+        works, work_id, revision, ir, repository, baseline, pwu = admitted
+        runtime = RuntimeService(database)
+        attempt = runtime.create_initial_attempt(pwu.id)
+        preparation = PreparationService(database)
+        package = preparation.assemble_context_package(pwu.id, repository, ContextPackageRequest(
+            artifacts=(ContextArtifactSelection(semantic_role=ContextSemanticRole.PROJECT_CONTEXT,
+                                                 repository_relative_path="AI_context.md"),)))
+        prepared = preparation.prepare_attempt(attempt.id, package.id, ExecutorBinding(
+            binding_ref="binding:c1-contract", capability_identity="capability:watt-native-executor",
+            profile_identity="profile:c1-controlled"), repository, tmp_path / "attempt-workspaces")
+        native_runtime = NativeExecutorRuntimeService(database)
+        native_executor = NativeQueuedExecutorCapability(database, native_runtime,
+            provider_profile="fixture:c1", resource_profile="standard", environment_profile="fixture:c1",
+            strict_production_context=True)
+        local_output = DeterministicTestExecutor(DeterministicExecutionSpecification(
+            operations=(DeterministicFileOperation(operation=DeterministicFileOperationType.CREATE,
+                repository_relative_path="index.html", content=CONTENT),),
+            reported_outcome=ProviderReportedOutcome.SUCCESS, summary="Controlled C1 contract output"))
+        class NativeBoundFixtureExecutor:
+            def dispatch(self, request):
+                admission = native_executor._admission(request)
+                native_runtime.admit(admission)
+                return local_output.dispatch(request)
+        execution = ExecutionService(database, preparation=preparation)
+        produced = execution.dispatch_and_observe(attempt.id, NativeBoundFixtureExecutor())
+        assert produced.provider_report.outcome is ProviderReportedOutcome.SUCCESS
+        completion = CompletionService(database, observer=execution.observer).evaluate_observation(produced.observation.id)
+        verification = VerificationService(database, observer=execution.observer)
+        snapshot = verification.create_proposed_snapshot(completion.evaluation.id)
+        provider = RepositoryCodeVerifier(database, context_verifier=StaticProtectedContextVerifier(_never_generate))
+        records = tuple(verification.verify_obligation(snapshot.id, obligation, provider)
+                        for obligation in pwu.completion_contract.verification_obligations)
+>       assert all(item.result is VerificationResultValue.PASS for item in records), [
+            item.evidence.metadata for item in records]
+E       AssertionError: [{'kind': 'PATH_SCOPE', 'mode': 'contract-driven-code-verification', 'target': None, 'failure_type': 'AssertionError', ...}, {'kind': 'GIT_DIFF_CHECK', 'mode': 'contract-driven-code-verification', 'target': None, 'exit_code': 0, ...}]
+E       assert False
+E        +  where False = all(<generator object _produce_chain.<locals>.<genexpr> at 0x10cf1df20>)
+
+tests/integration/test_c1_contract_continuity.py:536: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+_ test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls[semantic-scope-steering] _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), session_factory=sessionma...=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), autoflush=False, expire_on_commit=False))
+tmp_path = PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-1903/test_reviewed_original_file_bo3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ce69d00>
+admission = 'steering', fact_shape = 'semantic-scope'
+
+    @pytest.mark.parametrize('admission', ('work', 'steering'))
+    @pytest.mark.parametrize('fact_shape', ('literal-bound', 'semantic-scope', 'semantic-scope-wire-defaults'))
+    def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls(postgres_database, tmp_path, monkeypatch, admission, fact_shape):
+        import json
+        from copy import deepcopy
+        from types import SimpleNamespace
+        from spg.domain.engineering_semantics import SemanticRelation
+        from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+        from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+        from tests.integration import test_c1_contract_continuity as c1
+        from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+        from tests.test_c3_semantic_contract_calibration import review
+        meaning = c1.DeclaredC1Meaning
+        declared = c1.DeclaredC1Fulfillment()
+        class OriginalBoundMeaning(meaning):
+            def interpret(self, basis):
+                candidate = super().interpret(basis)
+                original = candidate.semantic_fact_candidates[0]
+                bound = original.model_copy(update={'candidate_id': 'controlled-file-bound',
+                    'subject': 'controlled.repository.bound',
+                    'relation': SemanticRelation.BOUND if fact_shape == 'literal-bound' else SemanticRelation.SCOPE,
+                    'value': 'index.html' if fact_shape == 'literal-bound' else 'index.html only',
+                    'scope': None, 'qualifiers': {}, 'source_text': c1.CONSTRAINTS[0]})
+                return candidate.model_copy(update={'semantic_fact_candidates': (*candidate.semantic_fact_candidates, bound)})
+        monkeypatch.setattr(c1, 'DeclaredC1Meaning', OriginalBoundMeaning)
+        calls = []
+        def generate(**request):
+            payload = json.loads(request['input_text']); calls.append(payload)
+            inv = _restore_formation_inventory_view(payload['immutable_inventory'], payload.get('existing_ir_item_table', {}))
+            if 'untrusted_fulfillment_candidate' in payload:
+                plan = decode_review_input(payload)
+                output = fixture_review_proof(inv, plan, review(inv, plan), payload).model_dump_json()
+                if fact_shape == 'semantic-scope-wire-defaults':
+                    raw = json.loads(output)
+                    omitted = 0
+                    for source in raw['source_results']:
+                        for check in source.get('consumption_checks') or ():
+                            if check.get('target_paths') == []:
+                                check.pop('target_paths'); omitted += 1
+                    assert omitted > 0
+                    output = json.dumps(raw)
+            else:
+                plan = declared.form(inv, payload['existing_capability_contracts'])
+                bounded = {s['source_ref'] for s in inv['sources'] if s['kind'] == 'FACT' and s['payload']['subject'] == 'controlled.repository.bound'}
+                routes = tuple(r.model_copy(update={'capability': 'GIT_DIFF_SCOPE', 'component_basis':
+                    r.component_basis.model_copy(update={'linked_fact_refs': ()})}) if r.source_ref in bounded
+                    else r.model_copy(update={'component_basis': r.component_basis.model_copy(update={
+                        'linked_fact_refs': tuple(ref for ref in r.component_basis.linked_fact_refs if ref not in bounded)})})
+                    for r in plan.routes)
+                plan = plan.model_copy(update={'routes': routes})
+                wire, _ = controlled_wire(inv, plan, owner_preconditions=payload.get('owner_source_preconditions'))
+                output = json.dumps(wire)
+            return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
+                requested_model='controlled-original-bound', effective_model='controlled-original-bound',
+                request_id=f'controlled-original-bound-{len(calls)}', usage=ModelUsage(), timing=ModelTiming(), retry_count=0)
+        provider = ModelFulfillmentCandidateProvider(lambda: SimpleNamespace(generate=generate, close=lambda: None))
+        monkeypatch.setattr(c1, 'DeclaredC1Fulfillment', lambda: provider)
+        admitted = c1._admit_c1(postgres_database, tmp_path, admission)
+        _, work_id, revision, ir, _, baseline, pwu = admitted
+        original = next(f for f in revision.engineering_semantic_facts if f.subject == 'controlled.repository.bound')
+        binding = next(b for b in pwu.completion_contract.fulfillment_bindings if b.fact_id == original.id)
+        assert binding.evidence_method == 'EXACT_GIT_DIFF_SCOPE' and binding.state == 'BOUND_PENDING_EVIDENCE'
+        assert len(calls) == 2
+        inv = binding.projection_inventory_fingerprint
+        with postgres_database.unit_of_work() as uow:
+            before = deepcopy([r.scope for r in RuntimeStore(uow.session).governance_for_subject(inv)])
+            assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
+        replay = form_fulfillment_projection(revision, ir, provider=NeverCallAgain(), database=postgres_database,
+            source_revision=baseline.repository_revision, exact_target_paths=('index.html',))
+        assert all(b.state != 'UNRESOLVED' for b in replay)
+        with postgres_database.unit_of_work() as uow:
+            after = [r.scope for r in RuntimeStore(uow.session).governance_for_subject(inv)]
+            assert after == before
+            assert ProductStore(uow.session).current_work_reality_revision(work_id) == revision
+    
+    
+>       chain = c1._produce_chain(postgres_database, tmp_path, admitted)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_c3_fulfillment_receipts.py:162: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+database = Database(engine=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), session_factory=sessionma...=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), autoflush=False, expire_on_commit=False))
+tmp_path = PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-1903/test_reviewed_original_file_bo3')
+admitted = (<spg.application.work.WorkApplicationService object at 0x10cebb950>, UUID('43e82ab8-b7a9-57d2-b091-2c71b4279601'), Wo...rce_baseline_id=None, created_at=datetime.datetime(2026, 10, 17, 2, 4, 13, 609013, tzinfo=datetime.timezone.utc)), ...)
+
+    def _produce_chain(database, tmp_path, admitted):
+        works, work_id, revision, ir, repository, baseline, pwu = admitted
+        runtime = RuntimeService(database)
+        attempt = runtime.create_initial_attempt(pwu.id)
+        preparation = PreparationService(database)
+        package = preparation.assemble_context_package(pwu.id, repository, ContextPackageRequest(
+            artifacts=(ContextArtifactSelection(semantic_role=ContextSemanticRole.PROJECT_CONTEXT,
+                                                 repository_relative_path="AI_context.md"),)))
+        prepared = preparation.prepare_attempt(attempt.id, package.id, ExecutorBinding(
+            binding_ref="binding:c1-contract", capability_identity="capability:watt-native-executor",
+            profile_identity="profile:c1-controlled"), repository, tmp_path / "attempt-workspaces")
+        native_runtime = NativeExecutorRuntimeService(database)
+        native_executor = NativeQueuedExecutorCapability(database, native_runtime,
+            provider_profile="fixture:c1", resource_profile="standard", environment_profile="fixture:c1",
+            strict_production_context=True)
+        local_output = DeterministicTestExecutor(DeterministicExecutionSpecification(
+            operations=(DeterministicFileOperation(operation=DeterministicFileOperationType.CREATE,
+                repository_relative_path="index.html", content=CONTENT),),
+            reported_outcome=ProviderReportedOutcome.SUCCESS, summary="Controlled C1 contract output"))
+        class NativeBoundFixtureExecutor:
+            def dispatch(self, request):
+                admission = native_executor._admission(request)
+                native_runtime.admit(admission)
+                return local_output.dispatch(request)
+        execution = ExecutionService(database, preparation=preparation)
+        produced = execution.dispatch_and_observe(attempt.id, NativeBoundFixtureExecutor())
+        assert produced.provider_report.outcome is ProviderReportedOutcome.SUCCESS
+        completion = CompletionService(database, observer=execution.observer).evaluate_observation(produced.observation.id)
+        verification = VerificationService(database, observer=execution.observer)
+        snapshot = verification.create_proposed_snapshot(completion.evaluation.id)
+        provider = RepositoryCodeVerifier(database, context_verifier=StaticProtectedContextVerifier(_never_generate))
+        records = tuple(verification.verify_obligation(snapshot.id, obligation, provider)
+                        for obligation in pwu.completion_contract.verification_obligations)
+>       assert all(item.result is VerificationResultValue.PASS for item in records), [
+            item.evidence.metadata for item in records]
+E       AssertionError: [{'kind': 'PATH_SCOPE', 'mode': 'contract-driven-code-verification', 'target': None, 'failure_type': 'AssertionError', ...}, {'kind': 'GIT_DIFF_CHECK', 'mode': 'contract-driven-code-verification', 'target': None, 'exit_code': 0, ...}]
+E       assert False
+E        +  where False = all(<generator object _produce_chain.<locals>.<genexpr> at 0x10cefa330>)
+
+tests/integration/test_c1_contract_continuity.py:536: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+_ test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls[semantic-scope-wire-defaults-work] _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), session_factory=sessionma...=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), autoflush=False, expire_on_commit=False))
+tmp_path = PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-1903/test_reviewed_original_file_bo4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10bcdacf0>
+admission = 'work', fact_shape = 'semantic-scope-wire-defaults'
+
+    @pytest.mark.parametrize('admission', ('work', 'steering'))
+    @pytest.mark.parametrize('fact_shape', ('literal-bound', 'semantic-scope', 'semantic-scope-wire-defaults'))
+    def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls(postgres_database, tmp_path, monkeypatch, admission, fact_shape):
+        import json
+        from copy import deepcopy
+        from types import SimpleNamespace
+        from spg.domain.engineering_semantics import SemanticRelation
+        from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+        from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+        from tests.integration import test_c1_contract_continuity as c1
+        from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+        from tests.test_c3_semantic_contract_calibration import review
+        meaning = c1.DeclaredC1Meaning
+        declared = c1.DeclaredC1Fulfillment()
+        class OriginalBoundMeaning(meaning):
+            def interpret(self, basis):
+                candidate = super().interpret(basis)
+                original = candidate.semantic_fact_candidates[0]
+                bound = original.model_copy(update={'candidate_id': 'controlled-file-bound',
+                    'subject': 'controlled.repository.bound',
+                    'relation': SemanticRelation.BOUND if fact_shape == 'literal-bound' else SemanticRelation.SCOPE,
+                    'value': 'index.html' if fact_shape == 'literal-bound' else 'index.html only',
+                    'scope': None, 'qualifiers': {}, 'source_text': c1.CONSTRAINTS[0]})
+                return candidate.model_copy(update={'semantic_fact_candidates': (*candidate.semantic_fact_candidates, bound)})
+        monkeypatch.setattr(c1, 'DeclaredC1Meaning', OriginalBoundMeaning)
+        calls = []
+        def generate(**request):
+            payload = json.loads(request['input_text']); calls.append(payload)
+            inv = _restore_formation_inventory_view(payload['immutable_inventory'], payload.get('existing_ir_item_table', {}))
+            if 'untrusted_fulfillment_candidate' in payload:
+                plan = decode_review_input(payload)
+                output = fixture_review_proof(inv, plan, review(inv, plan), payload).model_dump_json()
+                if fact_shape == 'semantic-scope-wire-defaults':
+                    raw = json.loads(output)
+                    omitted = 0
+                    for source in raw['source_results']:
+                        for check in source.get('consumption_checks') or ():
+                            if check.get('target_paths') == []:
+                                check.pop('target_paths'); omitted += 1
+                    assert omitted > 0
+                    output = json.dumps(raw)
+            else:
+                plan = declared.form(inv, payload['existing_capability_contracts'])
+                bounded = {s['source_ref'] for s in inv['sources'] if s['kind'] == 'FACT' and s['payload']['subject'] == 'controlled.repository.bound'}
+                routes = tuple(r.model_copy(update={'capability': 'GIT_DIFF_SCOPE', 'component_basis':
+                    r.component_basis.model_copy(update={'linked_fact_refs': ()})}) if r.source_ref in bounded
+                    else r.model_copy(update={'component_basis': r.component_basis.model_copy(update={
+                        'linked_fact_refs': tuple(ref for ref in r.component_basis.linked_fact_refs if ref not in bounded)})})
+                    for r in plan.routes)
+                plan = plan.model_copy(update={'routes': routes})
+                wire, _ = controlled_wire(inv, plan, owner_preconditions=payload.get('owner_source_preconditions'))
+                output = json.dumps(wire)
+            return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
+                requested_model='controlled-original-bound', effective_model='controlled-original-bound',
+                request_id=f'controlled-original-bound-{len(calls)}', usage=ModelUsage(), timing=ModelTiming(), retry_count=0)
+        provider = ModelFulfillmentCandidateProvider(lambda: SimpleNamespace(generate=generate, close=lambda: None))
+        monkeypatch.setattr(c1, 'DeclaredC1Fulfillment', lambda: provider)
+>       admitted = c1._admit_c1(postgres_database, tmp_path, admission)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_c3_fulfillment_receipts.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_c1_contract_continuity.py:478: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+/tmp/watt-continuity-baseline/src/spg/application/governed_obligations.py:158: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+/tmp/watt-continuity-baseline/src/spg/application/governed_obligations.py:1683: in validate_fulfillment_projection
+    expected = validate_projection_candidate(FulfillmentProjectionCandidate(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+candidate = FulfillmentProjectionCandidate(inventory_fingerprint='fcfa9e102b66052ac61aba6f4f24d14029d961bb322a6b60fae3a8f887202ebf...g_source_refs=(), rationale='Revalidate persisted projection against immutable owner sources.', component_basis=None)))
+revision = WorkRealityRevision(id=UUID('7ec2b103-8c52-49b2-b5a9-074c4c5c2927'), work_id=UUID('f5caaa4a-c86e-4140-8f2a-87151d64a84...rsion='wic-work-reality-v3', created_at=datetime.datetime(2026, 10, 17, 2, 4, 25, 22181, tzinfo=datetime.timezone.utc))
+ir = GovernedSemanticIR(items=(SemanticItem(item_id='meaning', kind=<SemanticKind.PRODUCTION_INTENT: 'PRODUCTION_INTENT'>, ..._ids=())), compiler_reference='fixture:c1-declared-meaning', legacy_typed_projection=False, work_question_step_id=None)
+inventory = {'work_id': 'f5caaa4a-c86e-4140-8f2a-87151d64a846', 'work_reality_revision_id': '7ec2b103-8c52-49b2-b5a9-074c4c5c2927'...edd7468aa52862c93976682520ebce0f7d4ba94f0564ef269916eb', 'semantic_ir_id': 'eb48df6d-3b65-534f-9f16-f9dccc33313a', ...}
+semantic_review = None, allow_review_pending = False, source_contract = 'v3'
+owner_preconditions = {'meaning': 'NECESSARY_PROVENANCE_ONLY; SEMANTIC_MATCH_AND_COMPLETE_PLAN_UNPROVEN; NO_PERMISSION_OR_EVIDENCE_PASS', 's...e-prerequisites-v1', 'component_rule': 'COMPLETE_OWN_SOURCE_SPANS; NO_CONFLICTING_DISPOSITION_FOR_SAME_COMPONENT', ...}
+
+    def validate_projection_candidate(candidate, revision, ir, inventory, *, semantic_review=None, allow_review_pending=False, source_contract="v2", owner_preconditions=None):
+        if source_contract not in {"v1", "v2", "v3"}:
+            raise ValueError("OBLIGATION_SOURCE_ROLE_CONTRACT_UNSUPPORTED")
+        if source_contract == "v3" and any(route.component_basis is None for route in candidate.routes):
+>           raise ValueError("OBLIGATION_COMPONENT_INVENTORY_INCOMPLETE")
+E           ValueError: OBLIGATION_COMPONENT_INVENTORY_INCOMPLETE
+
+/tmp/watt-continuity-baseline/src/spg/application/governed_obligations.py:1538: ValueError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+_ test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls[semantic-scope-wire-defaults-steering] _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), session_factory=sessionma...=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), autoflush=False, expire_on_commit=False))
+tmp_path = PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-1903/test_reviewed_original_file_bo5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cb92550>
+admission = 'steering', fact_shape = 'semantic-scope-wire-defaults'
+
+    @pytest.mark.parametrize('admission', ('work', 'steering'))
+    @pytest.mark.parametrize('fact_shape', ('literal-bound', 'semantic-scope', 'semantic-scope-wire-defaults'))
+    def test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls(postgres_database, tmp_path, monkeypatch, admission, fact_shape):
+        import json
+        from copy import deepcopy
+        from types import SimpleNamespace
+        from spg.domain.engineering_semantics import SemanticRelation
+        from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+        from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+        from tests.integration import test_c1_contract_continuity as c1
+        from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+        from tests.test_c3_semantic_contract_calibration import review
+        meaning = c1.DeclaredC1Meaning
+        declared = c1.DeclaredC1Fulfillment()
+        class OriginalBoundMeaning(meaning):
+            def interpret(self, basis):
+                candidate = super().interpret(basis)
+                original = candidate.semantic_fact_candidates[0]
+                bound = original.model_copy(update={'candidate_id': 'controlled-file-bound',
+                    'subject': 'controlled.repository.bound',
+                    'relation': SemanticRelation.BOUND if fact_shape == 'literal-bound' else SemanticRelation.SCOPE,
+                    'value': 'index.html' if fact_shape == 'literal-bound' else 'index.html only',
+                    'scope': None, 'qualifiers': {}, 'source_text': c1.CONSTRAINTS[0]})
+                return candidate.model_copy(update={'semantic_fact_candidates': (*candidate.semantic_fact_candidates, bound)})
+        monkeypatch.setattr(c1, 'DeclaredC1Meaning', OriginalBoundMeaning)
+        calls = []
+        def generate(**request):
+            payload = json.loads(request['input_text']); calls.append(payload)
+            inv = _restore_formation_inventory_view(payload['immutable_inventory'], payload.get('existing_ir_item_table', {}))
+            if 'untrusted_fulfillment_candidate' in payload:
+                plan = decode_review_input(payload)
+                output = fixture_review_proof(inv, plan, review(inv, plan), payload).model_dump_json()
+                if fact_shape == 'semantic-scope-wire-defaults':
+                    raw = json.loads(output)
+                    omitted = 0
+                    for source in raw['source_results']:
+                        for check in source.get('consumption_checks') or ():
+                            if check.get('target_paths') == []:
+                                check.pop('target_paths'); omitted += 1
+                    assert omitted > 0
+                    output = json.dumps(raw)
+            else:
+                plan = declared.form(inv, payload['existing_capability_contracts'])
+                bounded = {s['source_ref'] for s in inv['sources'] if s['kind'] == 'FACT' and s['payload']['subject'] == 'controlled.repository.bound'}
+                routes = tuple(r.model_copy(update={'capability': 'GIT_DIFF_SCOPE', 'component_basis':
+                    r.component_basis.model_copy(update={'linked_fact_refs': ()})}) if r.source_ref in bounded
+                    else r.model_copy(update={'component_basis': r.component_basis.model_copy(update={
+                        'linked_fact_refs': tuple(ref for ref in r.component_basis.linked_fact_refs if ref not in bounded)})})
+                    for r in plan.routes)
+                plan = plan.model_copy(update={'routes': routes})
+                wire, _ = controlled_wire(inv, plan, owner_preconditions=payload.get('owner_source_preconditions'))
+                output = json.dumps(wire)
+            return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
+                requested_model='controlled-original-bound', effective_model='controlled-original-bound',
+                request_id=f'controlled-original-bound-{len(calls)}', usage=ModelUsage(), timing=ModelTiming(), retry_count=0)
+        provider = ModelFulfillmentCandidateProvider(lambda: SimpleNamespace(generate=generate, close=lambda: None))
+        monkeypatch.setattr(c1, 'DeclaredC1Fulfillment', lambda: provider)
+>       admitted = c1._admit_c1(postgres_database, tmp_path, admission)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_c3_fulfillment_receipts.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_c1_contract_continuity.py:470: in _admit_c1
+    bridge.admit_cycle(bridge.materialize_request(admitted.work_id))
+/tmp/watt-continuity-baseline/src/spg/application/steering_production.py:393: in admit_cycle
+    plan, completion_contract, horizon, objective = self._production_contract(request)
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/watt-continuity-baseline/src/spg/application/steering_production.py:515: in _production_contract
+    self._stop_unresolved_fulfillment(request, baseline, fulfillment_bindings)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <spg.application.steering_production.SteeringProductionService object at 0x10cc991d0>
+request = SteeringProductionRequest(work_id=UUID('4a9bee29-bf13-5708-a771-13208def0d33'), work_reality_revision_id=UUID('f83ea2e...H_SCOPE, GIT_DIFF_CHECK', task_mode=<TaskMode.GENERAL: 'GENERAL'>, required_prerequisites=(), prerequisite_evidence=())
+baseline = SnapshotRecord(id=UUID('109d2cb0-5b16-46f3-80c8-fee489f149ac'), condition=<SnapshotCondition.TRUSTED: 'TRUSTED'>, repo...', source_baseline_id=None, created_at=datetime.datetime(2026, 10, 17, 2, 4, 28, 579778, tzinfo=datetime.timezone.utc))
+bindings = (FulfillmentBinding(fact_id=UUID('788cd567-b434-5325-b993-668e09119aa9'), source_kind=<FulfillmentSourceKind.FACT: 'FA...nstraint_indices=(), supporting_source_refs=(), formation_receipt=None, component_basis=None, state='UNRESOLVED'), ...)
+
+    def _stop_unresolved_fulfillment(self, request, baseline, bindings) -> None:
+        """Record an idempotent stop observation, never a repair or authority grant."""
+        from spg.domain.governed_obligation import canonical_fingerprint, fulfillment_source_ref
+        from spg.providers.verification_receipts import _safe_value
+    
+        receipt = next((binding.formation_receipt for binding in bindings
+                        if binding.formation_receipt is not None), {})
+        scope = _safe_value({
+            "schema": "work-fulfillment-stop-observation-v1",
+            "owner": "WORK_FULFILLMENT_PROJECTION",
+            "work_id": str(request.work_id),
+            "work_reality_revision_id": str(request.work_reality_revision_id),
+            "steering_step_id": str(request.steering_step_id),
+            "source_baseline_id": str(baseline.id),
+            "source_revision": baseline.repository_revision,
+            "inventory_fingerprint": next((binding.projection_inventory_fingerprint
+                for binding in bindings if binding.projection_inventory_fingerprint is not None), None),
+            "source_refs": list(dict.fromkeys(fulfillment_source_ref(binding) for binding in bindings)),
+            "unresolved_source_refs": list(dict.fromkeys(fulfillment_source_ref(binding)
+                for binding in bindings if binding.state == "UNRESOLVED")),
+            "formation_receipt_refs": receipt.get("receipt_refs", []),
+            "terminal_reason": receipt.get("terminal_reason"),
+            "condition": "OBLIGATION_PROJECTION_UNRESOLVED",
+            "candidate_is_authority": False,
+            "runtime_admitted": False,
+        })
+        basis = canonical_fingerprint(scope)
+        observation_id = uuid5(NAMESPACE_URL, f"spg:work-fulfillment-stop:{basis}")
+        with self.database.unit_of_work() as uow:
+            product = ProductStore(uow.session)
+            work = product.work(request.work_id, for_update=True)
+            if (work is None or work.current_work_reality_revision_id != request.work_reality_revision_id):
+                raise ProductInvariantViolation("Work Reality changed before fulfillment stop observation")
+            runtime = RuntimeStore(uow.session)
+            prior = next((row for row in runtime.governance_for_subject(basis)
+                          if row.id == observation_id), None)
+            if prior is None:
+                runtime.insert_governance({
+                    "id": observation_id,
+                    "decision_type": "WORK_FULFILLMENT_STOP_OBSERVATION",
+                    "authority_identity": "work-governance:derived-candidate-observation",
+                    "subject_type": "WORK_FULFILLMENT_STOP_BASIS",
+                    "subject_identity": basis,
+                    "scope": scope,
+                    "rationale": "Unresolved fulfillment stopped before Runtime admission; no repair, PASS, Human authority or effect was granted.",
+                    "created_at": datetime.now(UTC),
+                })
+                uow.commit()
+>       raise FulfillmentProjectionNotReady(observation_id, scope)
+E       spg.application.steering_production.FulfillmentProjectionNotReady: OBLIGATION_PROJECTION_UNRESOLVED
+
+/tmp/watt-continuity-baseline/src/spg/application/steering_production.py:648: FulfillmentProjectionNotReady
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+_ test_rejected_independent_review_feedback_persists_and_replays_in_postgresql[semantic-optional-defaults] _
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), session_factory=sessionma...=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/c1_contract_continuity), autoflush=False, expire_on_commit=False))
+tmp_path = PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-1903/test_rejected_independent_revi0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cb93450>
+first_failure = 'semantic-optional-defaults'
+
+    @pytest.mark.parametrize('first_failure', ('semantic', 'semantic-optional-defaults', 'semantic-jsonb-order', 'semantic-identity-slots', 'semantic-framed', 'incomplete', 'critic-schema', 'critic-json', 'consumption-proof', 'critic-duplicate'))
+    def test_rejected_independent_review_feedback_persists_and_replays_in_postgresql(postgres_database, tmp_path, monkeypatch, first_failure):
+        import json
+        from types import SimpleNamespace
+        from spg.domain.model_runtime import ModelProvider, ModelTiming, ModelUsage, StructuredModelResult
+        from spg.providers.fulfillment_candidate import ModelFulfillmentCandidateProvider
+        from tests.integration import test_c1_contract_continuity as c1
+        from tests.test_c3_fulfillment_capacity_representation import controlled_wire
+        from tests.test_c3_semantic_contract_calibration import review
+        declared = c1.DeclaredC1Fulfillment()
+        calls, reviews = [], []
+        def generate(**request):
+            payload = json.loads(request['input_text']); calls.append(payload)
+            inventory = _restore_formation_inventory_view(payload['immutable_inventory'], payload.get('existing_ir_item_table', {}))
+            if 'untrusted_fulfillment_candidate' in payload:
+                candidate = decode_review_input(payload)
+                verdict = fixture_review_proof(inventory, candidate, review(inventory, candidate), payload)
+                if not reviews and first_failure.startswith('semantic'):
+                    first, *rest = verdict.component_results
+                    verdict = verdict.model_copy(update={'component_results': (
+                        first.model_copy(update={'complete_and_equivalent': False, 'reason': 'Controlled rejected interpretation.'}), *rest)})
+                if not reviews and first_failure == 'critic-schema':
+                    first = verdict.component_results[0]
+                    verdict = verdict.model_copy(update={'component_results': (
+                        first.model_copy(update={'component_id': first.component_id[:48]}),)})
+                if not reviews and first_failure == 'consumption-proof':
+                    raw = verdict.model_dump(mode="json")
+                    raw["source_results"][0]["consumption_checks"][0]["route_indices"] = []
+                    verdict = type(verdict).model_validate(raw)
+                if not reviews and first_failure == 'critic-duplicate':
+                    from copy import deepcopy
+                    raw = verdict.model_dump(mode='json')
+                    raw['source_results'][0]['consumption_checks'].append(
+                        deepcopy(raw['source_results'][0]['consumption_checks'][0]))
+                    verdict = type(verdict).model_validate(raw)
+                reviews.append(verdict)
+                output = verdict.model_dump_json()
+                if first_failure == 'semantic-identity-slots':
+                    from tests.test_c3_review_identity_binding import null_identities
+                    output = json.dumps(null_identities(json.loads(output)))
+                if first_failure == 'semantic-optional-defaults':
+                    raw = json.loads(output)
+                    omitted = 0
+                    for source in raw['source_results']:
+                        for check in source.get('consumption_checks') or ():
+                            if check.get('target_paths') == []:
+                                check.pop('target_paths'); omitted += 1
+                    assert omitted > 0
+                    output = json.dumps(raw)
+                if len(reviews) == 1 and first_failure == 'critic-json':
+                    output = '{'
+            else:
+                plan = declared.form(inventory, payload['existing_capability_contracts'],
+                    validation_feedback=payload.get('same_basis_validation_feedback'))
+                if first_failure == 'incomplete' and payload.get('same_basis_validation_feedback') is None:
+                    plan = plan.model_copy(update={'routes': tuple(r.model_copy(update={
+                        'capability': 'UNRESOLVED', 'target_paths': (), 'supporting_source_refs': ()})
+                        if r.source_ref.startswith('semantic-fact:') else r for r in plan.routes)})
+                wire, _ = controlled_wire(inventory, plan, feedback=payload.get('same_basis_validation_feedback'),
+                    owner_preconditions=payload.get('owner_source_preconditions'))
+                output = json.dumps(wire)
+                if first_failure == 'semantic-framed':
+                    output = '```json\n' + output + '\n```'
+            return StructuredModelResult(output_text=output, provider=ModelProvider.DEEPSEEK,
+                requested_model='controlled-pg-semantic-feedback', effective_model='controlled-pg-semantic-feedback',
+                request_id=f'controlled-pg-feedback-{len(calls)}', usage=ModelUsage(), timing=ModelTiming(), retry_count=0)
+        provider = ModelFulfillmentCandidateProvider(lambda: SimpleNamespace(generate=generate, close=lambda: None))
+        monkeypatch.setattr(c1, 'DeclaredC1Fulfillment', lambda: provider)
+>       _, work_id, revision, ir, _, baseline, pwu = c1._admit_c1(postgres_database, tmp_path, 'work')
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_c3_fulfillment_receipts.py:238: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_c1_contract_continuity.py:478: in _admit_c1
+    validate_continuous_gates(bindings, revision, ready.latest_assessment.semantic_ir,
+/tmp/watt-continuity-baseline/src/spg/application/governed_obligations.py:158: in validate_continuous_gates
+    validate_fulfillment_projection(bindings, revision, ir, source_revision=source_revision, exact_target_paths=exact_target_paths)
+/tmp/watt-continuity-baseline/src/spg/application/governed_obligations.py:1683: in validate_fulfillment_projection
+    expected = validate_projection_candidate(FulfillmentProjectionCandidate(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+candidate = FulfillmentProjectionCandidate(inventory_fingerprint='d3a9d26afa4b5448c3b9b86d7721c89bb5aece0d13c5ad2bce8bd5c965cefb7f...g_source_refs=(), rationale='Revalidate persisted projection against immutable owner sources.', component_basis=None)))
+revision = WorkRealityRevision(id=UUID('b86fa1ea-12c4-49e2-80da-c6407d7e55b1'), work_id=UUID('7f6ed970-9b6a-41b3-b133-c6fb4e51543...sion='wic-work-reality-v3', created_at=datetime.datetime(2026, 10, 17, 2, 4, 33, 520396, tzinfo=datetime.timezone.utc))
+ir = GovernedSemanticIR(items=(SemanticItem(item_id='meaning', kind=<SemanticKind.PRODUCTION_INTENT: 'PRODUCTION_INTENT'>, ...ids=()),), compiler_reference='fixture:c1-declared-meaning', legacy_typed_projection=False, work_question_step_id=None)
+inventory = {'work_id': '7f6ed970-9b6a-41b3-b133-c6fb4e51543d', 'work_reality_revision_id': 'b86fa1ea-12c4-49e2-80da-c6407d7e55b1'...efedf4578b00e1235e5ca0b6057a44f44de5806d723a2adcf64f05', 'semantic_ir_id': 'd4f0f592-2e59-5d98-9ad6-d6606d31adac', ...}
+semantic_review = None, allow_review_pending = False, source_contract = 'v3'
+owner_preconditions = {'meaning': 'NECESSARY_PROVENANCE_ONLY; SEMANTIC_MATCH_AND_COMPLETE_PLAN_UNPROVEN; NO_PERMISSION_OR_EVIDENCE_PASS', 's...e-prerequisites-v1', 'component_rule': 'COMPLETE_OWN_SOURCE_SPANS; NO_CONFLICTING_DISPOSITION_FOR_SAME_COMPONENT', ...}
+
+    def validate_projection_candidate(candidate, revision, ir, inventory, *, semantic_review=None, allow_review_pending=False, source_contract="v2", owner_preconditions=None):
+        if source_contract not in {"v1", "v2", "v3"}:
+            raise ValueError("OBLIGATION_SOURCE_ROLE_CONTRACT_UNSUPPORTED")
+        if source_contract == "v3" and any(route.component_basis is None for route in candidate.routes):
+>           raise ValueError("OBLIGATION_COMPONENT_INVENTORY_INCOMPLETE")
+E           ValueError: OBLIGATION_COMPONENT_INVENTORY_INCOMPLETE
+
+/tmp/watt-continuity-baseline/src/spg/application/governed_obligations.py:1538: ValueError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+=========================== short test summary info ============================
+FAILED tests/integration/test_c3_fulfillment_receipts.py::test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls[literal-bound-work]
+FAILED tests/integration/test_c3_fulfillment_receipts.py::test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls[literal-bound-steering]
+FAILED tests/integration/test_c3_fulfillment_receipts.py::test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls[semantic-scope-work]
+FAILED tests/integration/test_c3_fulfillment_receipts.py::test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls[semantic-scope-steering]
+FAILED tests/integration/test_c3_fulfillment_receipts.py::test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls[semantic-scope-wire-defaults-work]
+FAILED tests/integration/test_c3_fulfillment_receipts.py::test_reviewed_original_file_bound_persists_without_retyping_or_new_replay_calls[semantic-scope-wire-defaults-steering]
+FAILED tests/integration/test_c3_fulfillment_receipts.py::test_rejected_independent_review_feedback_persists_and_replays_in_postgresql[semantic-optional-defaults]
+7 failed, 48 deselected in 59.64s

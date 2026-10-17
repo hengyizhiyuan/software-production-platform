@@ -798,6 +798,8 @@ class PlanSteeringDriver:
                 f"Missing acceptance: {', '.join(observation.missing_acceptance)}. "
                 "Evidence is preserved; changing candidate IDs does not reset this budget. "
                 "A Human retry opens one new episode with the same unchanged budgets.")
+            recovery_question, recovery_reason, recovery_options = convergence_recovery_guidance(
+                boundary, observation.no_progress_count)
             current = fresh.reconstruction.latest_decision
             if not (
                 current is not None
@@ -820,13 +822,11 @@ class PlanSteeringDriver:
                     proposed_engineering_scope_fingerprint=fresh.engineering_scope_fingerprint,
                     attention_reason=SteeringAttentionReason.MATERIAL_RISK_OR_COST_DECISION,
                     human_decision_need=boundary_decision(
-                        fresh.work_objective, "连续的自动尝试未能推进当前成果。你希望重新尝试、修改目标或边界，还是暂停？",
+                        fresh.work_objective, recovery_question,
                         HumanDecisionEffect.COST_OR_RISK,
                         tuple(item.reference for item in fresh.basis.resolved_reality),
-                        (("重新尝试", "按相同的有界预算重新开始一轮自动尝试，已有记录保留。"),
-                         ("调整目标或边界", "通过新的明确指令修订当前生产边界，已有证据仍保留。"),
-                         ("暂停这次生产", "停止继续消耗执行资源，保留当前记录和已有成果。")),
-                        why_now=reason, impact="The current episode has exhausted its bounded convergence budget; no further automatic retries run without a Human choice."),
+                        recovery_options,
+                        why_now=recovery_reason, impact="本轮自动恢复次数已用尽；重新尝试会继续消耗执行资源，不会授予部署或验收权限。"),
                     recommendation="Retry once if the stop looks stochastic; otherwise revise the goal or boundary, or pause.",
                     expected_impact="Automatic retries stop; no authority or delivery is granted."))
         return observation
@@ -2026,3 +2026,16 @@ class PlanSteeringDriver:
             if self._stopping.is_set():
                 return
         self.schedule(work_id)
+
+
+def convergence_recovery_guidance(boundary, no_progress_count):
+    """Expose the actual stopped Owner without asking users to repair its protocol."""
+    options = (("重新尝试", "保留完整需求和历史，重新启动一轮有界恢复；若原因未消除，仍会明确停止。"),
+        ("暂停这次生产", "停止继续消耗执行资源，保留当前记录和已有成果。"))
+    if boundary == "FORMATION":
+        return ("系统在分配需求与验证任务时停止，尚未进入执行。需求已保存，无需重新描述；修复后可重试，也可先暂停。",
+            "内部任务分配未能完成，本轮自动恢复已停止。反复点击不会修复同一个内部故障；系统需要先核对并修复阻塞原因。",
+            options)
+    return ("本轮自动尝试未能推进成果。你可以保留当前需求重新尝试，或先暂停。",
+        f"本轮已有 {no_progress_count} 次失败且没有进展，现有自动恢复已停止。重试会保留历史并开启下一轮有界尝试。",
+        options)

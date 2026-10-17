@@ -139,3 +139,18 @@ def test_graph_rejects_hierarchy_cycle():
     )
     with pytest.raises(ValueError, match="hierarchy cycle"):
         ProductionPlanGraph(nodes=(a, b, work), planning_rationale="invalid")
+
+
+@pytest.mark.parametrize('root',['','web/','nested/site/'])
+def test_one_page_styles_and_script_form_one_verifiable_implementation(root):
+    request=_request(*(root+p for p in ['index.html','styles.css','app.js']))
+    plan=RuleBasedProductionPlanner().propose(request)
+    assert plan.graph is None
+    assert plan.fit_classification is OnePwuFitClassification.ONE_PWU_FIT
+    assert {t.path for t in plan.artifact_targets}=={root+p for p in ['index.html','styles.css','app.js']}
+
+
+def test_distinct_pages_keep_separate_implementation_units():
+    plan=RuleBasedProductionPlanner().propose(_request('index.html','contact.html','app.js','styles.css'))
+    assert plan.graph is not None
+    assert plan.fit_classification is OnePwuFitClassification.MULTI_PWU_FIT

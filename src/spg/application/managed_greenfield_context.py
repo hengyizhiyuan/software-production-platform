@@ -3,7 +3,7 @@
 No context truth is stored here. IRK/Work/Governance records remain the owners.
 A context role is typed by IRK; this adapter never classifies Human prose.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from hashlib import sha256
 import json
 from uuid import UUID
@@ -171,7 +171,7 @@ def read_managed_greenfield_context(session, *, work, product_id, repository_ide
         select(engineering_resources.c.repository_identity).where(
             engineering_resources.c.id==basis['resource_id'])).scalar_one_or_none())
     if (source is None or basis is None or source['provider_kind']!='gitea'
-            or source['origin'] or resource_identity!=repository_identity
+            or resource_identity!=repository_identity
             or basis['product_id']!=product_id):
         return None
     if not _historical and (source['version'],source['accepted_revision'],source['accepted_tree']) != (
@@ -192,9 +192,26 @@ def read_managed_greenfield_context(session, *, work, product_id, repository_ide
     ir=(next(iter(history),None) if _pinned_revision_id else
         canonical_ir_for_work(session,work.id))
     if basis['source_version']==0:
-        return project_greenfield_context(product_id=product_id,work=work,revision=revision,
+        origin=source['origin']
+        if origin:
+            # An exact captured import is already a lawful Source Owner basis.
+            # Missing product-policy documents do not invent mandatory Human
+            # decisions. Existing repository declarations keep their own policy.
+            if (not origin.get('repository_identity') or origin.get('revision')!=basis['source_revision']
+                    or origin.get('tree')!=basis['source_tree']):
+                raise DecisionContextAuthorityMissing('MANAGED_IMPORTED_SOURCE_BASIS_MISMATCH')
+            location=session.execute(select(engineering_resources.c.location_ref).where(
+                engineering_resources.c.id==basis['resource_id'])).scalar_one()
+            if imported_repository_has_context_declarations(location,basis['source_revision']):
+                return None
+        context=project_greenfield_context(product_id=product_id,work=work,revision=revision,
                                           ir=ir,governance=governance,semantic_history=history,
                                           managed_source_identity=source['repository_identity'])
+        if context is not None and origin:
+            identity=sha256(json.dumps(origin,sort_keys=True).encode()).hexdigest()
+            context=replace(context,source_revision=sha256((context.source_revision+identity).encode()).hexdigest(),
+                provenance=context.provenance+';captured-import:'+identity)
+        return context
     accepted=session.execute(select(product_source_versions).where(
         product_source_versions.c.product_id==product_id,
         product_source_versions.c.version==basis['source_version'])).mappings().one_or_none()
@@ -229,3 +246,16 @@ def read_managed_greenfield_context(session, *, work, product_id, repository_ide
     return project_accepted_successor_context(product_id=product_id,work=work,
         revision=revision,ir=ir,governance=governance,accepted_version=accepted,
         inherited=inherited)
+
+
+def imported_repository_has_context_declarations(location, revision):
+    """Read the fixed Source Owner tree, preserving the repository ECF policy."""
+    from pathlib import Path
+    from spg.application.decision_context import _git, _section
+    repository=Path(location)
+    paths=_git(repository,'ls-tree','--name-only',revision).splitlines()
+    if 'README.md' not in paths:
+        return False
+    document=_git(repository,'show',revision+':README.md')
+    return any(_section(document,heading) is not None for heading in (
+        '## Product Intent','## Product Invariant','## Approved Decision'))

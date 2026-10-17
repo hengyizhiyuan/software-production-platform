@@ -149,6 +149,7 @@ class NativeExecutorKernel:
             evidence_required = any(
                 item.get("operation_id") == str(binding.attempt_id)
                 and item.get("status") == "OPEN"
+                and item.get("failure_family") != "RUNTIME_PROVIDER_FAILURE"
                 and item.get("repairability") == RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE.value
                 for item in repair_history
             )
@@ -457,6 +458,18 @@ class NativeExecutorKernel:
             )
             final_checkpoint_id = checkpoint.id
             if response.action is InferenceAction.WAITING_RESOURCE:
+                if ineffective_rounds >= 3:
+                    # The kernel withheld tools to request a final decision.
+                    # That is an exhausted no-progress bound, not an external
+                    # resource outage. Requeueing it would hide granted tools
+                    # again and replay the same ineffective cycle indefinitely.
+                    return KernelRunResult(runtime_mode=ExecutionMode.FINISHED,
+                        terminal_outcome=AttemptTerminalOutcome.UNABLE_TO_COMPLETE,
+                        final_checkpoint_id=final_checkpoint_id, step_count=step_sequence,
+                        inference_submissions=inference_count, tool_effects=tool_count,
+                        summary="Execution stopped after three rounds without new evidence or mutations; no external resource shortage was established. " + response.summary,
+                        residual_obligations=response.residual_obligations,
+                        failure_family="EXECUTOR_NO_PROGRESS")
                 return KernelRunResult(
                     runtime_mode=ExecutionMode.WAITING_RESOURCE,
                     final_checkpoint_id=final_checkpoint_id,

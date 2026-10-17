@@ -517,7 +517,17 @@ validation. Check implementation requirements against the actual candidate;
 keep continuous effect prohibitions armed from admission and final independent
 Verification, Guardian and Human acceptance at their applicable boundaries.
 Internal protocol/recovery failures belong to the system, not a request for the
-Human to repeat an unchanged goal.
+Human to repeat an unchanged goal. The approved continuity work applies this
+at ordinary bounded implementation boundaries: exact Human-selected paths and
+new reversible implementation surfaces may be frozen with artifact validation
+still pending; optional compiler implementation questions remain advisory while
+the complete Human clauses remain obligations. A captured managed import with
+no existing repository product-policy declarations may use its admitted Work
+and exact Source Owner records; absence alone does not manufacture mandatory
+product invariants or decisions. Existing repository declarations retain their
+policy. A single page and its stylesheet/script are one implementation unit.
+Future Preview readiness is checked against the actual served exact Candidate,
+never treated as current content evidence or permission to accept/deliver it.
 
 * Local change: validate the changed invariant and its immediate failure paths.
 * Grouped changes: run focused contract and persistence regression across the

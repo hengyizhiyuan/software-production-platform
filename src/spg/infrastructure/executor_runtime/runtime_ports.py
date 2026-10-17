@@ -729,6 +729,26 @@ class DurableKernelAudit:
         if not isinstance(task, dict):
             completion = contract_payload.get("completion_contract")
             task = completion.get("task_contract") if isinstance(completion, dict) else None
+        if (tool == "test.run" and condition is EffectCondition.FAILED
+                and output.get("verification_evidence") == "FAILED"
+                and output.get("test_environment_readiness") == "OBSERVED_EXECUTION"
+                and type(output.get("returncode")) is int and output["returncode"] != 0
+                and (output.get("stdout") or output.get("stderr"))
+                and isinstance(task, dict) and task.get("authority_lineage")
+                and task.get("acceptance_meaning") and task.get("scope")
+                and "file.write" in grants
+                and isinstance(task["scope"], list) and bool(task["scope"])
+                and all(isinstance(path, str)
+                    and any(path in grant.scope.get("paths", []) for grant in binding.capability_grants
+                        if grant.identity == "file.write")
+                    and any(m.writable and path in m.write_scope for m in binding.workspace.mounts)
+                    for path in task["scope"])):
+            # Real failing test output is feedback for a bounded implementation
+            # repair. It is not an acceptance grant or permission to redefine
+            # the oracle. Existing write scopes and independent Verification
+            # still decide whether the resulting artifact satisfies the brief.
+            return (RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE,
+                "observed diagnostic test failure; repair within existing implementation scope while preserving original acceptance criteria")
         if isinstance(assertion, dict) and isinstance(task, dict):
             identity = assertion.get("id")
             expected = assertion.get("expected")

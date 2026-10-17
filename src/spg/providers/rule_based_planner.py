@@ -179,12 +179,19 @@ class RuleBasedProductionPlanner:
         def family(path: str) -> str:
             pure = PurePosixPath(path)
             stem = pure.stem.removeprefix("test_").removesuffix("_test").removesuffix(".test")
-            if pure.suffix == ".html" and stem == "index":
+            if pure.suffix in {".html", ".css"}:
                 scripts = tuple(source for source in production_paths if (
                     PurePosixPath(source).parent == pure.parent
                     and PurePosixPath(source).suffix in {".js", ".cjs", ".mjs"}
                 ))
-                if len(scripts) == 1:
+                entries = tuple(source for source in production_paths if (
+                    PurePosixPath(source).parent == pure.parent
+                    and PurePosixPath(source).suffix == ".html"
+                ))
+                if len(scripts) == 1 and len(entries) == 1:
+                    # One page, its stylesheet and its script form one
+                    # implementation. File extensions are not independent
+                    # product capabilities or independently verifiable goals.
                     return PurePosixPath(scripts[0]).stem
             if path.startswith("tests/"):
                 source_stems = {

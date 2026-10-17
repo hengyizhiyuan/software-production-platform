@@ -1,0 +1,88 @@
+{
+  "mode": "STATIC_PREVIEW",
+  "status": "READY",
+  "candidate_revision": "adfa1f4d080472249e19cced40fc642806f12b56",
+  "candidate_fingerprint": "bf956e5a24ba9fdc2a5b9e5da438bdf6d9f83f0998aa423b9779ceb1437fd408",
+  "session": {
+    "id": "ce4c57a1-7715-4407-980b-d0504ae5ef26",
+    "work_id": "a4f4b20f-4724-5bc7-b41e-eb17ad696c5e",
+    "candidate_id": "2fd75de1-208c-5307-9dde-8f66102f075e",
+    "candidate_fingerprint": "bf956e5a24ba9fdc2a5b9e5da438bdf6d9f83f0998aa423b9779ceb1437fd408",
+    "repository_identity": "watt://work-branches/a4f4b20f-4724-5bc7-b41e-eb17ad696c5e",
+    "repository_revision": "adfa1f4d080472249e19cced40fc642806f12b56",
+    "repository_tree": "5b2e13b6edaae42b9b84a17382742ef1b25e0ce2",
+    "workspace_id": "b9ca5832-b870-4e57-b915-75c572d5a45f",
+    "environment_id": "5af553eb-4643-4903-bdd1-fc05b546b548",
+    "mode": "STATIC_PREVIEW",
+    "status": "READY",
+    "definition_version": "static-git-preview-v1",
+    "endpoint": "http://127.0.0.1:53822/",
+    "image_reference": "git-tree:5b2e13b6edaae42b9b84a17382742ef1b25e0ce2",
+    "service_identities": [
+      "static-git:ce4c57a1-7715-4407-980b-d0504ae5ef26"
+    ],
+    "resource_references": [
+      "/Users/yu/Documents/dev/software-production-platform/.watt/continuity-20261017/environments/candidate-preview-runtime/ce4c57a1-7715-4407-980b-d0504ae5ef26/workspace"
+    ],
+    "evidence": [
+      {
+        "kind": "REFINEMENT_LINEAGE",
+        "previous_preview_id": "2377a463-69d8-4a2e-be4c-53d698b0d305",
+        "attempt": 2,
+        "previous_failure_code": null
+      },
+      {
+        "kind": "WORKSPACE",
+        "workspace": "/Users/yu/Documents/dev/software-production-platform/.watt/continuity-20261017/environments/candidate-preview-runtime/ce4c57a1-7715-4407-980b-d0504ae5ef26/workspace",
+        "revision": "adfa1f4d080472249e19cced40fc642806f12b56",
+        "tree": "5b2e13b6edaae42b9b84a17382742ef1b25e0ce2",
+        "topology_preflight": {
+          "verifier_namespace": "api-private-static-observation"
+        }
+      },
+      {
+        "kind": "BUILD",
+        "image_id": "git-tree:5b2e13b6edaae42b9b84a17382742ef1b25e0ce2",
+        "build_log": "/Users/yu/Documents/dev/software-production-platform/.watt/continuity-20261017/environments/candidate-preview-runtime/evidence/ce4c57a1-7715-4407-980b-d0504ae5ef26/static-build.json",
+        "build_log_sha256": "916260445588c4ba742f7e7c4992139590bac20266da26ba8f86674944151f6d"
+      },
+      {
+        "kind": "SERVED_VERIFICATION",
+        "result": "PASS",
+        "candidate_revision": "adfa1f4d080472249e19cced40fc642806f12b56",
+        "candidate_tree": "5b2e13b6edaae42b9b84a17382742ef1b25e0ce2",
+        "http_status": 200,
+        "entrypoint_sha256": "b82bd175533a2327a1fe69b28b46e5dec311c0319e5b66a1e6f67979d1363c02",
+        "entrypoint": "index.html"
+      },
+      {
+        "kind": "RUNTIME",
+        "endpoint": "http://127.0.0.1:53822/",
+        "services": [
+          "static-git:ce4c57a1-7715-4407-980b-d0504ae5ef26"
+        ],
+        "resources": [
+          "/Users/yu/Documents/dev/software-production-platform/.watt/continuity-20261017/environments/candidate-preview-runtime/ce4c57a1-7715-4407-980b-d0504ae5ef26/workspace"
+        ],
+        "health": {
+          "application": "READY",
+          "repository_revision": "adfa1f4d080472249e19cced40fc642806f12b56",
+          "repository_tree": "5b2e13b6edaae42b9b84a17382742ef1b25e0ce2"
+        },
+        "topology": {
+          "frontend": "immutable-git-blobs"
+        }
+      },
+      {
+        "kind": "PRODUCTION_RECORD",
+        "reference": "production-record:188a2fcd-42ca-568b-9f5e-4f70041eab4a",
+        "digest": "ec99b37691abb47136304f0f06f514cd0bbf66c025beb9b3514033ebdd42eef9"
+      }
+    ],
+    "failure_code": null,
+    "failure_reason": null,
+    "version": 6,
+    "created_at": "2026-10-17T02:06:33.620200Z",
+    "updated_at": "2026-10-17T02:06:40.426628Z"
+  }
+}
