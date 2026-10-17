@@ -121,3 +121,12 @@ escaping rather than tolerating malformed output or inventing evidence. The
 selected regression passes 74 tests, including full-character/CRLF coverage,
 unknown/duplicate/empty/requirements-only selections and comparison-source
 witness refusal. No game source or original requirement was changed.
+
+The source-reference assessment passed structural/coverage/evidence admission;
+its only negative judgments were two already-admitted APPROVED_DECISION sources,
+misread as requiring source code to prove historical Human approval or completed
+future review. The existing content policy now explicitly checks actual artifact
+conformance to those decisions, preserving historical approval and future Human
+gates. The static-content selection passes with three additional positive,
+contradicted and unverifiable decision cases: prior approval never manufactures
+artifact conformance. The original FAIL and all original obligations remain.

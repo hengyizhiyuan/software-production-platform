@@ -848,6 +848,10 @@ evidence references. Selecting a reference resolves to the exact current
 path/quote; the model need not reproduce source text or escape it into JSON.
 Unknown, duplicate, empty positive or requirements-only evidence still fails.
 The Owner checks the selected literal source without interpreting it as a PASS.
+An APPROVED_DECISION is already-admitted source truth. Its content check judges
+current artifact conformance, without requiring code to prove that historical
+approval occurred or that separately pending Human review is complete. Actual
+artifact contradictions or unverified conformance retain their negative results.
 For relative refinement checks, Verification may read the exact already-sealed
 Candidate of the same Work's immediate predecessor revision. Repository,
 commit/tree, original Verification and sealing-before-revision identities are

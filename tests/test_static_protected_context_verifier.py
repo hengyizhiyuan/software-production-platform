@@ -379,3 +379,23 @@ def test_source_passages_cover_every_character_without_normalization():
     assert ''.join(p['quote'] for p in passages)==source
     assert len({p['witness_ref'] for p in passages})==len(passages)
     assert [p['first_line'] for p in passages]==[1,9,17,25]
+
+
+@pytest.mark.parametrize('disposition',['SATISFIED','CONTRADICTED','UNVERIFIABLE'])
+def test_approved_decision_checks_artifact_conformance_without_reproving_human_approval(subject,disposition):
+    from spg.domain.model_runtime import ModelUsage
+    repo,base,request,task,contract=subject
+    obligation=request.protected_context_obligations[0].model_copy(update={'context_class':'APPROVED_DECISION'})
+    request=request.model_copy(update={'protected_context_obligations':(obligation,)})
+    task.decision_context.protected_obligations=(obligation,)
+    def generate(**kwargs):
+        assert 'already approved source-owned choices' in kwargs['instructions']
+        assert 'Actual artifact inconsistency still contradicts it' in kwargs['instructions']
+        data=json.loads(kwargs['input_text']);ref=next(p['witness_ref'] for p in data['candidate_source_passages'] if p['path']=='index.html')
+        return SimpleNamespace(output_text=json.dumps({'checks':[{'check_ref':'c0',
+            'disposition':disposition,'reason':'Judge actual artifact under existing approval',
+            'witness_refs':[ref]}]}),provider=SimpleNamespace(value='test'),effective_model='test',request_id='test',usage=ModelUsage())
+    runtime=SimpleNamespace(generate=generate,registry=SimpleNamespace(close=lambda:None))
+    row=StaticProtectedContextVerifier(lambda:runtime).verify(request,task,contract,repo,base)[0]
+    assert row['context_class']=='APPROVED_DECISION' and row['disposition']==disposition
+    assert (row['coverage']=='COVERED') is (disposition=='SATISFIED')
