@@ -1,0 +1,31 @@
+{
+  "attempt_id": "7658fa59-754b-4cc8-a0a4-d685c0bb1f70",
+  "generation": 3,
+  "result": "UNABLE_TO_COMPLETE",
+  "trace_sha256": "2ab97abaa205d036114b1e167914818874d27bdc9447f412f88646149a0a6bb2",
+  "effects": [
+    {
+      "tool": "file.read",
+      "condition": "SETTLED"
+    },
+    {
+      "tool": "git.status",
+      "condition": "SETTLED"
+    },
+    {
+      "tool": "file.read",
+      "condition": "SETTLED"
+    },
+    {
+      "tool": "file.read",
+      "condition": "SETTLED"
+    },
+    {
+      "tool": "git.status",
+      "condition": "SETTLED"
+    }
+  ],
+  "file_writes": 0,
+  "terminal_sequence": 15,
+  "source_unchanged": true
+}

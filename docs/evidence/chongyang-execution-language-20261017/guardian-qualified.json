@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "gate": "PASS",
+  "candidate_id": "acbe4875-bbf5-56ab-997a-003be8dcba30",
+  "request_id": "7c13ab6f-1cad-5b9b-89ce-c9f7af287ca6",
+  "result_ref": "guardian:assurance-result:7c13ab6f-1cad-5b9b-89ce-c9f7af287ca6",
+  "result_refs": [
+    "guardian:assurance-result:7c13ab6f-1cad-5b9b-89ce-c9f7af287ca6"
+  ],
+  "required_pwu_ids": [
+    "48053658-8145-4430-8dfc-03c844a0f813"
+  ],
+  "finding_count": 0,
+  "finding_ids": [],
+  "summary": "",
+  "evidence_ref": "guardian:evidence:12ef9402-0a46-4375-b046-3acc9596f91e",
+  "required": true
+}
