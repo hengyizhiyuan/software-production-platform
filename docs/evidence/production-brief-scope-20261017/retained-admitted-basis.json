@@ -1,0 +1,333 @@
+{
+  "revision": {
+    "id": "75b59841-9d53-5cd9-96af-bca15e184347",
+    "work_id": "f6cf8820-f461-53b1-8b3e-193b187c108e",
+    "revision_number": 1,
+    "previous_revision_id": null,
+    "basis_fingerprint": "079a2898b67bfcfc3e86c63a83467a6310c9d50db2de5f075a2314c735b10e22",
+    "revision_fingerprint": "d17dfdc7182477a685e7ee2ebea9d77e86608219c1e9e413bce2147eeb9be0f8",
+    "source_interaction_id": "ef91c254-54f5-4c15-85b9-9fe22feedeed",
+    "source_kind": "INTERACTION_ASSESSMENT",
+    "source_assessment_id": "954c2a09-cef0-48fe-99fc-ed727986f5c7",
+    "source_record_ids": [
+      "f83325ac-a34c-4475-b1e6-bb3d0e16c3dd",
+      "1705f5fc-4585-479b-ba1a-3a1bd8c9a37a"
+    ],
+    "motive": "提供一个小学课后辅导的 H5 客资收集页面，让家长留下联系方式与意向信息",
+    "desired_outcome": "按单页移动端 H5 表单实现，采集姓名、手机号、年级、意向学科，提交后显示确认，不含账号与登录; Provide an independently verified Preview of the exact produced Candidate for Human review.",
+    "context_facts": [
+      "Human accepts a single-page form for the first version and states that accounts and login are not needed."
+    ],
+    "constraints": [
+      "The first version excludes account and login functionality.",
+      "移动端单页 H5 客资收集表单",
+      "字段：姓名、手机号、年级、意向学科",
+      "提交后的确认反馈",
+      "先做一个移动端单页 H5 客资收集表单：顶部一句辅导服务介绍，表单包含姓名、手机号、年级（下拉选择）、意向学科（标签多选），手机号做基本格式校验，提交后展示致谢确认。",
+      "Excluded from this Work: 账号功能",
+      "Excluded from this Work: 登录功能"
+    ],
+    "requests": [
+      "按单页移动端 H5 表单实现，采集姓名、手机号、年级、意向学科，提交后显示确认，不含账号与登录"
+    ],
+    "engineering_semantic_facts": [
+      {
+        "id": "11a270f1-a1df-5e79-a861-6ba8cf49af12",
+        "subject": "lead_form.captured_fields",
+        "relation": "ORDERED_COMPONENT",
+        "reference_role": null,
+        "value": [
+          "姓名",
+          "手机号",
+          "年级",
+          "意向学科"
+        ],
+        "unit": null,
+        "scope": "小学课后辅导 H5 客资收集页",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "f83325ac-a34c-4475-b1e6-bb3d0e16c3dd"
+          ],
+          "source_text": "让用户留下姓名、手机号、年级、意向学科等信息",
+          "source_extraction_ids": [
+            "ne-fields"
+          ],
+          "role_origin": "EXPLICIT",
+          "semantic_ir_id": "f5355b16-d0f4-5cf5-8dfa-15a24648a2ef",
+          "governed_provenance": [
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_record_id": "f83325ac-a34c-4475-b1e6-bb3d0e16c3dd",
+              "source_text": "我想做一个小学课后辅导的H5客资收集页面，让用户留下姓名、手机号、年级、意向学科等信息",
+              "evidence_reference": null
+            },
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_record_id": "f83325ac-a34c-4475-b1e6-bb3d0e16c3dd",
+              "source_text": "让用户留下姓名、手机号、年级、意向学科等信息",
+              "evidence_reference": null
+            }
+          ]
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": "75b59841-9d53-5cd9-96af-bca15e184347"
+      },
+      {
+        "id": "9e69fdaa-2743-51f1-938e-560cb3eaa695",
+        "subject": "lead_form.channel",
+        "relation": "EQUALITY",
+        "reference_role": null,
+        "value": "H5",
+        "unit": null,
+        "scope": "小学课后辅导 H5 客资收集页",
+        "qualifiers": {},
+        "authority": "HUMAN_EXPLICIT",
+        "epistemic_status": "CONFIRMED",
+        "provenance": {
+          "source_record_ids": [
+            "f83325ac-a34c-4475-b1e6-bb3d0e16c3dd"
+          ],
+          "source_text": "小学课后辅导的H5客资收集页面",
+          "source_extraction_ids": [
+            "ne-scope-h5"
+          ],
+          "role_origin": "EXPLICIT",
+          "semantic_ir_id": "f5355b16-d0f4-5cf5-8dfa-15a24648a2ef",
+          "governed_provenance": [
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_record_id": "f83325ac-a34c-4475-b1e6-bb3d0e16c3dd",
+              "source_text": "我想做一个小学课后辅导的H5客资收集页面，让用户留下姓名、手机号、年级、意向学科等信息",
+              "evidence_reference": null
+            },
+            {
+              "origin": "HUMAN_EXPLICIT",
+              "source_record_id": "f83325ac-a34c-4475-b1e6-bb3d0e16c3dd",
+              "source_text": "让用户留下姓名、手机号、年级、意向学科等信息",
+              "evidence_reference": null
+            }
+          ]
+        },
+        "supersedes_fact_ids": [],
+        "admitted_work_revision_id": "75b59841-9d53-5cd9-96af-bca15e184347"
+      }
+    ],
+    "engineering_scope_id": "6155f75a-22e1-5e58-aaeb-4199ee0769ca",
+    "engineering_resource_id": "1211af69-964b-4760-9aaa-3a45cc32d1ad",
+    "scope_basis_fingerprint": "17eccf1707bb74b7cc78f19d901b56c08aae6841d0a3d1a292a10ec535c3eb36",
+    "repository_identity": "watt://work-branches/f6cf8820-f461-53b1-8b3e-193b187c108e",
+    "repository_ref": "refs/heads/work-f6cf8820f46153b18b3e193b187c108e",
+    "source_baseline_id": "2ecd4f7e-ef47-4efc-9080-c658ec9bba5a",
+    "source_revision": "81e26e64892b64b4be5afe278679041458d8ae46",
+    "governance_record_id": "7394fb04-4ed6-5fed-b485-5da79dd971f3",
+    "supporting_references": [
+      "INTERACTION_RECORD:f83325ac-a34c-4475-b1e6-bb3d0e16c3dd",
+      "INTERACTION_RECORD:1705f5fc-4585-479b-ba1a-3a1bd8c9a37a"
+    ],
+    "change_set": [],
+    "rationale": "The current governed production request authorizes Work formation. Source acquisition or managed-source preparation follows the typed source basis; delivery and final acceptance remain separately governed.",
+    "admitted_by": "human:owner",
+    "schema_version": "wic-work-reality-v3",
+    "created_at": "2026-10-17T04:00:52.166819Z"
+  },
+  "ir": {
+    "items": [
+      {
+        "item_id": "si-decision-single-page",
+        "kind": "FACT",
+        "statement": "Human accepts a single-page form for the first version and states that accounts and login are not needed.",
+        "subject": "approved_product_decision",
+        "answer": null,
+        "observed_facts": {},
+        "provenance": [
+          {
+            "origin": "HUMAN_EXPLICIT",
+            "source_record_id": "1705f5fc-4585-479b-ba1a-3a1bd8c9a37a",
+            "source_text": "按单页表单做，不需要账号和登录等",
+            "evidence_reference": null
+          }
+        ],
+        "action": null,
+        "production": null,
+        "design_frame": null,
+        "depends_on": [],
+        "supersedes": [],
+        "confidence": 0.93,
+        "requires_human": false
+      },
+      {
+        "item_id": "si-constraint-no-auth",
+        "kind": "CONSTRAINT",
+        "statement": "The first version excludes account and login functionality.",
+        "subject": "product_invariant",
+        "answer": null,
+        "observed_facts": {},
+        "provenance": [
+          {
+            "origin": "HUMAN_EXPLICIT",
+            "source_record_id": "1705f5fc-4585-479b-ba1a-3a1bd8c9a37a",
+            "source_text": "不需要账号和登录等",
+            "evidence_reference": null
+          }
+        ],
+        "action": null,
+        "production": null,
+        "design_frame": null,
+        "depends_on": [],
+        "supersedes": [],
+        "confidence": 0.9,
+        "requires_human": false
+      },
+      {
+        "item_id": "si-production-single-page",
+        "kind": "PRODUCTION_INTENT",
+        "statement": "Human requests producing the accepted single-page mobile H5 lead-collection form with fields 姓名、手机号、年级、意向学科, a submission acknowledgment, and no accounts or login.",
+        "subject": "小学课后辅导 H5 客资收集页",
+        "answer": null,
+        "observed_facts": {},
+        "provenance": [
+          {
+            "origin": "HUMAN_EXPLICIT",
+            "source_record_id": "1705f5fc-4585-479b-ba1a-3a1bd8c9a37a",
+            "source_text": "按单页表单做，不需要账号和登录等",
+            "evidence_reference": null
+          }
+        ],
+        "action": null,
+        "production": {
+          "objective": "提供一个小学课后辅导的 H5 客资收集页面，让家长留下联系方式与意向信息",
+          "primary_change": "按单页移动端 H5 表单实现，采集姓名、手机号、年级、意向学科，提交后显示确认，不含账号与登录",
+          "scope": [
+            "移动端单页 H5 客资收集表单",
+            "字段：姓名、手机号、年级、意向学科",
+            "提交后的确认反馈",
+            "先做一个移动端单页 H5 客资收集表单：顶部一句辅导服务介绍，表单包含姓名、手机号、年级（下拉选择）、意向学科（标签多选），手机号做基本格式校验，提交后展示致谢确认。"
+          ],
+          "exclusions": [
+            "账号功能",
+            "登录功能"
+          ],
+          "target_paths": [],
+          "allowed_areas": [],
+          "current": true,
+          "bounded_change": false,
+          "systemic_design": false,
+          "new_work": true,
+          "repository_reference": null,
+          "repository_required": false,
+          "preview_required": true,
+          "acceptance_required": true,
+          "delivery_authorized": false,
+          "unresolved": [],
+          "unresolved_arguments": []
+        },
+        "design_frame": null,
+        "depends_on": [],
+        "supersedes": [],
+        "confidence": 0.9,
+        "requires_human": false
+      }
+    ],
+    "clauses": [
+      {
+        "clause_id": "cl-1",
+        "source_record_id": "1705f5fc-4585-479b-ba1a-3a1bd8c9a37a",
+        "source_text": "按单页表单做，不需要账号和登录等",
+        "semantic_item_ids": [
+          "si-decision-single-page",
+          "si-constraint-no-auth",
+          "si-production-single-page"
+        ],
+        "speech_act": "EXPLICIT_REQUEST",
+        "polarity": "AFFIRMATIVE",
+        "modality": "REQUEST",
+        "temporal_scope": "CURRENT",
+        "requested_effects": [],
+        "refers_to": [
+          "f5355b16-d0f4-5cf5-8dfa-15a24648a2ef:si-request-build-h5-lead-page"
+        ],
+        "supersedes": []
+      }
+    ],
+    "unresolved": [],
+    "human_abstraction_level": "SOLUTION",
+    "uncertain": false,
+    "questions": [],
+    "human_decisions": [],
+    "production_sufficiency": {
+      "status": "READY",
+      "reason": "Human accepted the proposed single-page lead-capture form and excluded account/login workflows, so the first-version outcome is bounded enough for code production.",
+      "gaps": [
+        {
+          "subject": "年级与意向学科选项取值",
+          "kind": "SAFE_DEFAULT",
+          "consequence": "可先用常见小学年级与学科标签作为候选，后续可替换。"
+        },
+        {
+          "subject": "表单提交后的数据落点",
+          "kind": "ROUTINE_HOW",
+          "consequence": "由实现方在源码勘察后确定，可先用占位实现并保留替换点。"
+        },
+        {
+          "subject": "页面文件名与样式细节",
+          "kind": "ROUTINE_HOW",
+          "consequence": "属于实现方常规选择，可在生产时确定并可逆调整。"
+        }
+      ],
+      "proposal": "按单页表单来实现：移动端一屏完成姓名、手机号、年级、意向学科的填写与提交，提交后显示致谢确认，不做账号与登录。",
+      "proposal_basis": "你已确认单页表单方向且明确不需要账号和登录，首版范围已经清晰，可以先跑通获客闭环。",
+      "question": null,
+      "context_references": [
+        "product-context:fb7a2937-529d-4ef5-99fe-a562a5b0d137:2026-10-17T03:59:26.544336+00:00",
+        "product-source:fb7a2937-529d-4ef5-99fe-a562a5b0d137:0"
+      ],
+      "recommendation_acceptance": {
+        "value": "f5355b16-d0f4-5cf5-8dfa-15a24648a2ef",
+        "provenance": {
+          "origin": "HUMAN_EXPLICIT",
+          "source_record_id": "1705f5fc-4585-479b-ba1a-3a1bd8c9a37a",
+          "source_text": "按单页表单做，不需要账号和登录等",
+          "evidence_reference": null
+        }
+      }
+    },
+    "schema_version": "irk-semantic-ir-v1",
+    "id": "14e0fb6a-7273-599d-b69b-49f0858952f0",
+    "interaction_id": "ef91c254-54f5-4c15-85b9-9fe22feedeed",
+    "source_record_id": "1705f5fc-4585-479b-ba1a-3a1bd8c9a37a",
+    "basis_fingerprint": "079a2898b67bfcfc3e86c63a83467a6310c9d50db2de5f075a2314c735b10e22",
+    "engineering_fact_ids": [
+      "11a270f1-a1df-5e79-a861-6ba8cf49af12",
+      "9e69fdaa-2743-51f1-938e-560cb3eaa695"
+    ],
+    "neutral_semantic_extractions": [
+      {
+        "extraction_id": "ne-exclusions",
+        "kind": "SCOPE",
+        "values": [
+          "账号",
+          "登录"
+        ],
+        "unit": null,
+        "source_record_id": "1705f5fc-4585-479b-ba1a-3a1bd8c9a37a",
+        "source_text": "不需要账号和登录等",
+        "explicit_roles": [
+          "排除项",
+          "排除项"
+        ]
+      }
+    ],
+    "semantic_fact_candidates": [],
+    "compiler_reference": "deepseek-responses:semantic:request:9dcef0d2-ef34-4d79-afbf-369fbd315cfa",
+    "legacy_typed_projection": false,
+    "work_question_step_id": null
+  },
+  "exact_target_paths": [
+    "index.html",
+    "assets/styles.css",
+    "assets/app.js"
+  ]
+}

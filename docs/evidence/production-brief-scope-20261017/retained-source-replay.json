@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "classification": "REAL_RETAINED_SOURCE_ADMISSION_REPLAY_ONLY",
+  "work_id": "f6cf8820-f461-53b1-8b3e-193b187c108e",
+  "work_reality_revision_id": "75b59841-9d53-5cd9-96af-bca15e184347",
+  "source_revision": "81e26e64892b64b4be5afe278679041458d8ae46",
+  "early_bounded_change": [
+    false
+  ],
+  "systemic_design": [
+    false
+  ],
+  "exact_target_paths": [
+    "index.html",
+    "assets/styles.css",
+    "assets/app.js"
+  ],
+  "baseline_handoff": "DECLINED",
+  "corrected_handoff": "PENDING_ACTUAL_CANDIDATE_VERIFICATION",
+  "sources": 13,
+  "bindings": 13,
+  "provider_call_count": 0,
+  "basis_sha256": "098b93ab1cf92d5b0e6fa8c3c4acafb69b984e92a48cbf1f5c4f27121edf7334",
+  "actual_artifact_verification": "NOT_YET_RUN",
+  "human_acceptance": "PENDING"
+}

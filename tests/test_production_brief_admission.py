@@ -118,6 +118,36 @@ def test_missing_actual_content_consumer_is_not_a_promise_of_later_verification(
     assert production_brief_bindings(revision, ir, inv) is None
 
 
+@pytest.mark.parametrize("early_bounded", [False, True])
+def test_inspected_implementation_scope_does_not_require_wic_sizing_agreement(early_bounded):
+    revision, ir = brief_case()
+    item = ir.items[-1]
+    goal = item.production.model_copy(update={"bounded_change": early_bounded})
+    ir.items = (*ir.items[:-1], item.model_copy(update={"production": goal}))
+    ir.current_production = (goal,)
+    paths = ("index.html", "assets/styles.css", "assets/app.js")
+    bindings = admit(revision, ir, targets=paths)
+    assert bindings[0].formation_receipt["provider_call_count"] == 0
+    assert all(b.target_paths == paths for b in bindings if b.evidence_method == "EXACT_CANDIDATE_CONTENT")
+    assert all(b.state in {"BOUND_PENDING_EVIDENCE", "RETAINED_CONTEXT"} for b in bindings)
+    assert {fulfillment_source_ref(b) for b in bindings} == {
+        s["source_ref"] for s in fulfillment_inventory(revision, ir, exact_target_paths=paths)["sources"]}
+    validate_fulfillment_projection(bindings, revision, ir,
+        source_revision=revision.source_revision, exact_target_paths=paths)
+
+
+@pytest.mark.parametrize("change", ["systemic_design", "unresolved_arguments"])
+def test_inspected_files_do_not_resolve_design_or_missing_authority_arguments(change):
+    revision, ir = brief_case()
+    item = ir.items[-1]
+    goal = item.production.model_copy(update={"bounded_change": False,
+        change: True if change == "systemic_design" else ("objective",)})
+    ir.items = (*ir.items[:-1], item.model_copy(update={"production": goal}))
+    ir.current_production = (goal,)
+    inv = fulfillment_inventory(revision, ir, exact_target_paths=("index.html",))
+    assert production_brief_bindings(revision, ir, inv) is None
+
+
 def test_mixed_production_clauses_keep_full_negative_business_requirements():
     revision, ir = brief_case()
     production = ir.clauses[-1]

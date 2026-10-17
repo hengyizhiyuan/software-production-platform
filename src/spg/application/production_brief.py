@@ -99,7 +99,10 @@ def _production_brief_bindings(revision, ir, inventory, *, contract):
     if not StaticProtectedContextVerifier.supports(SimpleNamespace(allowed_areas=(), exact_targets=tuple(
             SimpleNamespace(path=p) for p in inventory["exact_target_paths"]))):
         return None
-    if any(not goal.bounded_change or goal.unresolved_arguments for goal in ir.current_production):
+    # The inspected exact targets above are the implementation boundary.
+    # WIC's earlier sizing assessment is not another authority prerequisite
+    # for copying an admitted brief to actual artifact verification.
+    if any(goal.systemic_design or goal.unresolved_arguments for goal in ir.current_production):
         return None
     staged = contract == STAGED_CONTRACT
     items = {item.item_id: item for item in ir.items}
