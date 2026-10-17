@@ -275,6 +275,8 @@ assets with their byte identities and format metadata alongside implementation
 text. Such observations prove neither playback nor subjective audio quality;
 actual Verification, served Preview, Guardian and Human acceptance remain owned
 by their existing gates.
+The same bounded Web scope with local audio must receive its existing managed
+Product/Work/Source ECF lineage; an asset cannot silently remove that context.
 
 ### 4.7 Work Transition Proposal
 

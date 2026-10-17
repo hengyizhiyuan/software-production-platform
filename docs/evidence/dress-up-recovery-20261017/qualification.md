@@ -32,3 +32,15 @@ static preview surfaces, correct MP3/WAVE MIME and Candidate revision/tree
 headers. Stale fingerprints, undeclared/secret paths, symlinks, oversized audio
 and unchanged oversized-text limits remain rejected. CSP is unchanged. This
 transport fixture claims no audio quality verdict.
+
+Actual first recovery: the original Work admitted PWU
+`f0cf800d-cf65-47df-beb1-68021df72f21` with all 20 pending v3 bindings and zero
+formation calls. Its initial Attempt `76b3d4e6-d453-453e-8908-69a0b53b9267`
+stopped before Native admission: the managed Web context selector excluded the
+audio path, leaving the immutable Task's decision_context null. No Native queue
+or execution effect was recorded. This is a further media-profile consumer gap,
+not a passed execution. The selector correction passes 38 context tests and
+6 real PostgreSQL Product/Work/source/freshness cases, including mixed local
+audio scope and rejection of audio-only/arbitrary backend scopes. Old Task and
+Attempt evidence must remain unchanged; successor production uses the existing
+Steering revision Owner under the original Work and exact source.

@@ -32,11 +32,12 @@ class Compiler(DeclaredCompiler):
         return c.model_copy(update={'semantic_intent':raw})
 
 
+@pytest.mark.parametrize('target_paths', [('index.html',), ('index.html','styles/main.css','src/main.js','assets/audio/theme.mp3')])
 @pytest.mark.parametrize('role,text,expected',[
     (None,None,{'PRODUCT_INTENT','APPROVED_CONSTRAINT'}),
     ('product_invariant','产品不变量：官网所有页面必须使用中文。',{'PRODUCT_INTENT','PRODUCT_INVARIANT'}),
     ('approved_product_decision','我决定第一版只做品牌展示，不加入登录和客户后台。',{'PRODUCT_INTENT','APPROVED_DECISION'})],ids=['minimal','explicit-invariant','explicit-approved-decision'])
-def test_persisted_greenfield_owner_context_binds_task_and_freshness(postgres_database,tmp_path,role,text,expected):
+def test_persisted_greenfield_owner_context_binds_task_and_freshness(postgres_database,tmp_path,role,text,expected,target_paths):
     identity='watt://qualification/'+str(uuid4());work,_=_services_for_resource(postgres_database,tmp_path,identity)
     interaction=WorkInteractionService(postgres_database,capability=Compiler(role,text));origin=interaction.create_interaction(human_identity='human:test')
     content='我要开发一个工律的官网'+('；'+text if text else '')
@@ -54,8 +55,13 @@ def test_persisted_greenfield_owner_context_binds_task_and_freshness(postgres_da
         u.session.execute(insert(product_managed_sources).values(product_id=pid,repository_identity=identity+'-product',provider_kind='gitea',provider_reference='qualification',accepted_ref='refs/heads/main',accepted_revision=sha,accepted_tree=tree,origin={},version=0))
         u.session.execute(insert(work_source_bases).values(work_id=record.id,product_id=pid,resource_id=resource.id,source_version=0,source_revision=sha,source_tree=tree,work_ref='refs/heads/main'))
         u.commit()
-    lineage=lineage_for_work_task(postgres_database,work_id=record.id,repository_identity=identity,repository_path=repo,repository_revision=sha,target_paths=('index.html',))
+    lineage=lineage_for_work_task(postgres_database,work_id=record.id,repository_identity=identity,repository_path=repo,repository_revision=sha,target_paths=target_paths)
     assert lineage.contract_id=='MANAGED_GREENFIELD_PRODUCTION'
+    # Unsupported code and audio without a Web implementation cannot acquire
+    # this surface merely by carrying an audio extension.
+    for outside in [('assets/audio/theme.mp3',), ('index.html','service.py')]:
+        assert lineage_for_work_task(postgres_database,work_id=record.id,repository_identity=identity,
+            repository_path=repo,repository_revision=sha,target_paths=outside) is None
     # The Product source and Work branch have separate identities at milestone
     # evaluation too; only their exact admitted source version/tree may join.
     closure=MilestoneClosureContextService(postgres_database).assess_work_milestone(record.id)

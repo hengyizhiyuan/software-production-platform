@@ -42,3 +42,12 @@ artifact routes excluding audio and returning generic binary MIME. Extend those
 existing routes only for the same MP3/PCM WAVE profile, sharing the 8 MB per-audio
 bound with Verification. Preserve exact Candidate/path/staleness checks, regular
 Git blobs, text/document limits, CSP and all authentication/acceptance gates.
+
+The first real recovery crossed formation and admitted a PWU but stopped before
+Native admission: the managed Web context selector excluded the same audio
+target, producing a Task with no ECF lineage. Extend that selector only for
+the existing local-audio Web profile, retaining Product/Work/Source authority
+and freshness. Preserve the failed immutable Task/Attempt; use the existing
+Steering revision Owner for a successor production step under the unchanged
+Work, source, requirements and normal budgets. No context forgery or mutation
+of an executed/previously prepared Task is authorized.

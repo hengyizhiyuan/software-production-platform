@@ -249,14 +249,16 @@ def lineage_for_work_task(database, *, work_id: UUID,
         return None
     watt_source = remote in _WATT_SOURCE_REMOTES
     surface = policy_for_targets(target_paths) if watt_source else None
-    # A managed web change may update the root README as its source-bearing
-    # companion. Keep other non-web targets outside this ECF surface.
+    # A bounded Web implementation may carry its local audio and root README.
+    # Assets do not remove the actual source/Work context gate or create a new
+    # permission; arbitrary non-Web targets retain their own context owner.
+    from spg.application.preview_security import STATIC_AUDIO_SUFFIXES
     managed_web_paths = tuple(
         path for path in target_paths
         if Path(path).suffix.lower() in {".html", ".css", ".js"}
     )
     if (not watt_source and managed_web_paths and all(
-        path in managed_web_paths or path == "README.md"
+        path in managed_web_paths or path == "README.md" or Path(path).suffix.lower() in STATIC_AUDIO_SUFFIXES
         for path in target_paths
     )):
         surface = MANAGED_WEB_SURFACE
