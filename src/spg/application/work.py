@@ -253,6 +253,7 @@ class WorkApplicationService:
         self.candidate_review_preparer: Callable[[UUID], None] | None = None
         self.candidate_review_readiness: Callable[[UUID, UUID], bool] | None = None
         self.candidate_review_state: Callable[[UUID], dict] | None = None
+        self.working_preview_preparer: Callable[[UUID, UUID], object] | None = None
         self.integration = RepositoryIntegrationService(database)
         self.runtime_commit = RuntimeCommitService(database, settings=self.settings)
 
@@ -2372,6 +2373,10 @@ class WorkApplicationService:
                 raise ProductInvariantViolation(
                     "production retry lineage is incomplete"
                 )
+            if self._verification_owner_recovery(runtime, facts):
+                raise ProductInvariantViolation(
+                    "Verification must recover its evidence; regenerating the artifact cannot resolve an unknown or invalid check"
+                )
             if (
                 not (report.outcome.value in {"FAILURE", "UNKNOWN"}
                     or report.outcome.value == "SUCCESS" and any(
@@ -2638,6 +2643,47 @@ class WorkApplicationService:
             uow.commit()
         return self.get_work(work_id)
 
+    @staticmethod
+    def _human_paused(runtime, work) -> bool:
+        choices = [r for r in runtime.governance_for_subject(str(work.id))
+                   if r.decision_type in {"WORK_PAUSED", "PAUSE_AFTER_CONVERGENCE_INCIDENT",
+                                          "RESTART_CONVERGENCE_EPISODE"}]
+        return bool(choices and choices[-1].decision_type != "RESTART_CONVERGENCE_EPISODE"
+                    and choices[-1].scope.get("work_reality_revision_id") ==
+                    str(work.current_work_reality_revision_id))
+
+    def is_paused(self, work_id: UUID) -> bool:
+        with self.database.unit_of_work() as uow:
+            work = self._required_work(ProductStore(uow.session), work_id)
+            return self._human_paused(RuntimeStore(uow.session), work)
+
+    def pause_work(self, work_id: UUID, *, command_id: UUID, authority_identity: str, reason: str):
+        if not authority_identity.strip() or not reason.strip():
+            raise ProductInvariantViolation("Work pause requires Human identity and reason")
+        with self.database.unit_of_work() as uow:
+            work = self._required_work(ProductStore(uow.session), work_id)
+            runtime = RuntimeStore(uow.session)
+            if not any(r.id == command_id for r in runtime.governance_for_subject(str(work_id))):
+                runtime.insert_governance({"id": command_id, "decision_type": "WORK_PAUSED",
+                    "authority_identity": authority_identity, "subject_type": "WORK",
+                    "subject_identity": str(work_id), "scope": {"work_id": str(work_id),
+                        "work_reality_revision_id": str(work.current_work_reality_revision_id)},
+                    "rationale": reason, "created_at": datetime.now(UTC)})
+                uow.commit()
+        return self.get_work(work_id)
+
+    @staticmethod
+    def _verification_owner_recovery(runtime, facts) -> bool:
+        if facts.proposed_snapshot_id is None:
+            return False
+        for record in runtime.verification_records_for_snapshot(facts.proposed_snapshot_id):
+            if record.result is VerificationResultValue.UNKNOWN:
+                return True
+            if any(check.get("evidence_method") == "NO_LAWFUL_FULFILLMENT_BINDING"
+                   for check in record.evidence.metadata.get("protected_context_checks", ())):
+                return True
+        return False
+
     def advance_work(self, work_id: UUID) -> WorkProjection:
         """Perform at most one currently legal governed production action."""
 
@@ -2645,6 +2691,8 @@ class WorkApplicationService:
             product = ProductStore(unit_of_work.session)
             runtime_store = RuntimeStore(unit_of_work.session)
             work = self._required_work(product, work_id)
+            if self._human_paused(runtime_store, work):
+                return self._projection(product, work)
             binding = self._runtime_binding_for_current_context(product, work_id)
             if binding is None:
                 return self._projection(product, work)
@@ -2769,7 +2817,14 @@ class WorkApplicationService:
             return self.get_work(work_id)
 
         if summary.proposed_snapshot_id is None:
-            self.verification.create_proposed_snapshot(summary.completion_id)
+            proposed = self.verification.create_proposed_snapshot(summary.completion_id)
+            preparer = getattr(self, "working_preview_preparer", None)
+            if preparer is not None:
+                try:
+                    preparer(work_id, proposed.id)
+                except Exception:
+                    import logging
+                    logging.getLogger(__name__).exception("Working preview could not start Work=%s", work_id)
             return self.get_work(work_id)
 
         required = work_unit.completion_contract.verification_obligations
@@ -2973,7 +3028,7 @@ class WorkApplicationService:
             facts = product.runtime_summary(binding.model_copy(update={"work_unit_id": unit.id}))
             queue = None if facts.attempt_id is None else NativeExecutionStore(product.session).queue_for_attempt(facts.attempt_id)
             if queue is not None and queue.condition.value == "CANCELLED":
-                continue
+                return None
             failed = facts.completion_outcome == "NOT_PRODUCED" or (
                 facts.admissibility_outcome is not None
                 and facts.admissibility_outcome != ProductionAdmissibilityOutcome.ADMISSIBLE.value
@@ -2982,8 +3037,11 @@ class WorkApplicationService:
                 if node.kind is ProductionNodeKind.JOIN and WorkApplicationService._join_human_decision_domain(runtime, facts):
                     continue
                 attempt = None if facts.attempt_id is None else runtime.attempt(facts.attempt_id)
-                if attempt is None or attempt.generation >= 3:
-                    continue
+                if (attempt is None or attempt.generation >= 3
+                        or WorkApplicationService._verification_owner_recovery(runtime, facts)):
+                    # Required branches cannot reach their Join. Stop spending
+                    # resources on sibling generations once completion is impossible.
+                    return None
                 stage = 8
             elif facts.attempt_id is None:
                 stage = 0
@@ -3893,11 +3951,11 @@ class WorkApplicationService:
             elif conflict_attention:
                 status = WorkStatus.NEEDS_ATTENTION
                 next_action = "Review the unresolved Join conflict and re-enter Steering if its meaning is ambiguous"
-            elif any(item in {"BLOCKED", "CANCELLED"} for item in pwu_states) and all(item in {"VERIFIED", "BLOCKED", "CANCELLED", "DEPENDENCIES_PENDING"} for item in pwu_states) and not any(
-                item.get("autonomous_retry_available", False) for item in multi_runtime["pwus"]
-            ):
+            elif any(item["state"] in {"BLOCKED", "CANCELLED"}
+                     and not item.get("autonomous_retry_available", False)
+                     for item in multi_runtime["pwus"]):
                 status = WorkStatus.BLOCKED
-                next_action = "Resolve the recorded PWU blocker or re-enter Steering"
+                next_action = "Required production cannot finish; repair the recorded blocker before scheduling more branches"
             else:
                 status = WorkStatus.RUNNING
                 next_action = "Continue eligible PWUs; verified outputs activate successors automatically"
@@ -3919,6 +3977,10 @@ class WorkApplicationService:
             result_summary = (
                 f"{len(summary.artifact_paths)} independently observed artifact change(s)"
             )
+        paused = self._human_paused(RuntimeStore(store.session), work)
+        if paused:
+            status, event = WorkStatus.BLOCKED, "WORK_PAUSED_BY_HUMAN"
+            next_action = "Paused by the Human; no automatic generation or verification will be scheduled"
         return WorkProjection(
             work_id=work.id,
             goal_id=work.goal_id,
@@ -3945,7 +4007,7 @@ class WorkApplicationService:
             engineering_scope=scope,
             status=status,
             current_production_step=step,
-            most_recent_meaningful_event=summary.latest_event or event,
+            most_recent_meaningful_event=event if paused else summary.latest_event or event,
             what_happens_next=next_action,
             human_attention_required=status
             in {
@@ -4057,7 +4119,8 @@ class WorkApplicationService:
                 if unit.reconciliation_evidence else 0,
                 "semantic_conflict_domain": semantic_conflict,
                 "autonomous_retry_available": state == "BLOCKED" and current_attempt is not None
-                and current_attempt.generation < 3 and semantic_conflict is None,
+                and current_attempt.generation < 3 and semantic_conflict is None
+                and not WorkApplicationService._verification_owner_recovery(runtime, facts),
                 "input_baseline_id": None if source is None else str(source.id),
                 "input_revision": None if source is None else source.repository_revision,
                 "verified_output_baseline_id": None if output is None else str(output.id),

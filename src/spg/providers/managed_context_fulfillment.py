@@ -342,6 +342,18 @@ def verify_managed_context(*, request, task, contract, repository, baseline,
                  else "UNVERIFIED",
         method="EXACT_ADMITTED_INTENT_AND_CHILD_OBLIGATIONS",
         evidence_refs=tuple(f"ecf:{key[0]}:{key[1]}" for key in results))
+    # Existing repository declarations have their own authoritative ECF source.
+    # They need content evidence, not a second, invented Work-clause binding.
+    policy = tuple(item for item in obligations
+                   if item.context_class in {"PRODUCT_INVARIANT", "APPROVED_DECISION"})
+    if policy:
+        if static_verifier is None or not static_verifier.supports(contract):
+            raise ValueError("OBLIGATION_CONTENT_CONSUMER_UNAVAILABLE")
+        for check in static_verifier.verify(request, task, contract, repository, baseline,
+                obligations=policy, receipt_recorder=receipt_recorder):
+            results[(check["context_class"], check["semantic_key"])] = {
+                **check, "evidence_owner": "VERIFICATION",
+                "evidence_method": "EXACT_CANDIDATE_SOURCE_WITNESS"}
     return tuple(results.get((item.context_class, item.semantic_key)) or
                  _result(item, request, coverage="UNVERIFIED",
                          method="NO_LAWFUL_FULFILLMENT_BINDING")
@@ -644,7 +656,7 @@ def verify_binding_inventory(*, request, task, contract, repository, baseline, r
     from spg.domain.governed_obligation import fulfillment_source_ref
     from spg.application.governed_obligations import canonical_fingerprint
     known = []
-    for check in protected_checks:
+    for check in (*semantic_checks, *protected_checks):
         for evidence in check.get("current_component_evidence", ()):
             known.append(evidence)
     pending_content = []

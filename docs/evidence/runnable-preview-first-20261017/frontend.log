@@ -1,0 +1,20 @@
+✔ a live Turn opens one SSE stream instead of a 2.6 s poll (5.309464ms)
+✔ response deltas render incrementally and the final text replaces them (1.774154ms)
+✔ Turn completion closes the stream and re-reads the conversation once (1.13551ms)
+✔ no live Turn opens nothing; a stale route ignores late events (1.036789ms)
+✔ polling remains only as the fallback without EventSource (0.997128ms)
+✔ a Work is watched over one push stream that survives re-renders (1.537945ms)
+✔ change bursts coalesce into one in-flight re-render plus one follow-up (9.542327ms)
+✔ a reconnected stream re-reads once to cover changes missed while down (1.279362ms)
+✔ switching Work or leaving closes the previous stream (1.050316ms)
+✔ real stage progress shows before any reply text and never after it (1.411666ms)
+✔ stage copy states what Watt is doing, never what the Human meant (1.317162ms)
+✔ a failed latest Turn is shown with its reason and a retry, not as the previous reply (1.707386ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 236.625131

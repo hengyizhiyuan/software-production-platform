@@ -69,7 +69,7 @@ class RepositoryCodeVerifier:
         self.timeout_seconds = timeout_seconds
         self._binding = VerificationProviderBinding(
             provider_identity="provider:repository-code-contract",
-            provider_version="v3-reviewed-responsibility-plan" if context_verifier is not None else "v1",
+            provider_version="v4-single-candidate-content-assessment" if context_verifier is not None else "v1",
         )
 
     @property
@@ -83,6 +83,7 @@ class RepositoryCodeVerifier:
         target: str | None = None
         metadata = {"mode": "contract-driven-code-verification"}
         receipt_recorder = None
+        content_verifier = self.context_verifier
         try:
             with self.database.unit_of_work() as unit_of_work:
                 store = RuntimeStore(unit_of_work.session)
@@ -196,6 +197,13 @@ class RepositoryCodeVerifier:
                 work_id=None if admitted_revision is None else admitted_revision.work_id,
                 work_revision_id=None if admitted_revision is None else admitted_revision.id,
                 pwu_id=work_unit.id, attempt_id=proposed.attempt_id)
+            if (content_verifier is not None and gate_bindings
+                    and any(b.projection_inventory_fingerprint for b in gate_bindings)
+                    and hasattr(content_verifier, "for_candidate")):
+                content_verifier = content_verifier.for_candidate(request,
+                    work_unit.completion_contract.task_contract, contract,
+                    dispatch.workspace.repository_path, source.repository_revision,
+                    bindings=gate_bindings, receipt_recorder=receipt_recorder)
             plan_repair = (None if self.context_verifier is None else StaticHTMLPlanRepair(
                 self.context_verifier.runtime_factory, receipt_recorder=receipt_recorder))
             result, metadata = self._evaluate(
@@ -224,7 +232,7 @@ class RepositoryCodeVerifier:
                     references=work_unit.completion_contract.semantic_fact_obligations,
                     admitted_facts=admitted_facts, revision=admitted_revision, ir=admitted_ir,
                     baseline=source, bindings=gate_bindings, plan_repair=plan_repair,
-                    static_verifier=self.context_verifier, task=work_unit.completion_contract.task_contract,
+                    static_verifier=content_verifier, task=work_unit.completion_contract.task_contract,
                     receipt_recorder=receipt_recorder, native_record=native_binding)
                 if gate_bindings:
                     from spg.application.governed_obligations import evaluate_continuous_gates
@@ -274,11 +282,11 @@ class RepositoryCodeVerifier:
                             baseline=source.repository_revision,
                             revision=admitted_revision, ir=admitted_ir,
                             semantic_checks=metadata.get("static_html_semantic_checks", ()),
-                            static_verifier=self.context_verifier,
+                            static_verifier=content_verifier,
                             fulfillment_bindings=gate_bindings,
                             receipt_recorder=receipt_recorder, native_record=native_binding)
                     else:
-                        checks = self.context_verifier.verify(
+                        checks = content_verifier.verify(
                             request, task, contract,
                             dispatch.workspace.repository_path, source.repository_revision,
                             receipt_recorder=receipt_recorder)
@@ -296,7 +304,7 @@ class RepositoryCodeVerifier:
                     revision=admitted_revision, ir=admitted_ir, bindings=gate_bindings,
                     semantic_checks=metadata.get("static_html_semantic_checks", ()),
                     protected_checks=metadata.get("protected_context_checks", ()),
-                    static_verifier=self.context_verifier, receipt_recorder=receipt_recorder,
+                    static_verifier=content_verifier, receipt_recorder=receipt_recorder,
                     native_record=native_binding)
                 metadata["fulfillment_binding_results"] = outcomes
                 metadata["fulfillment_binding_checks"] = derived_checks

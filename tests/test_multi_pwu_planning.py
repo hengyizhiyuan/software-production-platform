@@ -65,7 +65,7 @@ def test_web_entrypoint_script_and_named_test_remain_one_coherent_pwu():
 
 def test_shared_interface_risk_forces_serial_baseline_evolution():
     plan = RuleBasedProductionPlanner().propose(_request(
-        "src/auth.py", "src/billing.py", requirement="Update shared interface across auth and billing",
+        "src/auth.py", "src/billing.py", requirement="Independent capabilities: update shared interface across auth and billing",
     ))
     assert plan.graph is not None
     executable = [node for node in plan.graph.nodes if node.kind is not ProductionNodeKind.GROUP]
@@ -154,3 +154,20 @@ def test_distinct_pages_keep_separate_implementation_units():
     plan=RuleBasedProductionPlanner().propose(_request('index.html','contact.html','app.js','styles.css'))
     assert plan.graph is not None
     assert plan.fit_classification is OnePwuFitClassification.MULTI_PWU_FIT
+
+
+def test_ordinary_multifile_application_is_one_actual_verification_subject():
+    paths = ('index.html', 'src/main.js', 'src/game/state.js', 'src/game/units.js',
+             'src/render/renderer.js', 'src/assets/manifest.js')
+    plan = RuleBasedProductionPlanner().propose(_request(*paths,
+        requirement='Create one playable browser application using these modules'))
+    assert plan.graph is None
+    assert plan.fit_classification is OnePwuFitClassification.ONE_PWU_FIT
+    assert tuple(t.path for t in plan.artifact_targets) == paths
+
+
+def test_filenames_do_not_establish_independent_capabilities():
+    plan = RuleBasedProductionPlanner().propose(_request('src/users.py', 'src/storage.py',
+        requirement='Implement the admitted feature across these files'))
+    assert plan.graph is None
+    assert plan.fit_classification is OnePwuFitClassification.ONE_PWU_FIT

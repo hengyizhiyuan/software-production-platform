@@ -1,0 +1,36 @@
+{
+  "starting_revision": "2bae5c584eecb8ad3d0ab2b5a953aefa92d626c2",
+  "source_files": {
+    "src/spg/web/experience.js": "e423b3cc01029e63e65e550918039835badb445b48b1f12bc772e66714a659f6",
+    "src/spg/providers/protected_context_verifier.py": "0c427e0f51c81f52633753a29e339a200fa967c83109fe23d47f08510fbe350c",
+    "src/spg/providers/rule_based_planner.py": "13e85d04097d11b752508efaad7e631bbadc3fc6d71c2d522694f81557a56e08",
+    "src/spg/providers/managed_context_fulfillment.py": "77e44137504e8de0885343a6c5eaeb9c24473f41885369081db53e52fd74c96f",
+    "src/spg/providers/repository_code_verifier.py": "839b1c97e27a831dccd1e9ce675cfe1c0e5eb89f3ab98c89bd87877b7fcdddf9",
+    "src/spg/api/http.py": "74e79d3957b9f301c5b75d87144b3fa35a61b3146ad4dd3c3d83d8799e5656f7",
+    "src/spg/api/dto.py": "7314269b4421ed7e6b8861add94dacb82e468d20106a9c9da8cf0d467c9c283f",
+    "src/spg/application/human_visible.py": "9ecda8fb9b888cf84bb64ee50e42d96938d534b87686f1fbda34181cd670ee62",
+    "src/spg/application/recovery_preview.py": "1706bbbdbb032ad9b50d6c6a280a2c3e2384ce71571b0acf86d1484da3e807b3",
+    "src/spg/application/work.py": "d6a557c5de1b30d942450912a57fc20ca17a13191c9585957f4169ba3c0b7d8c",
+    "src/spg/application/steering_driver.py": "06092574ce2f8b63c9b9413631d3e08330ed68b45064eb084e9ca0a63788ff72",
+    "src/spg/application/executor_runtime.py": "15f92059fb375cfeb7552eecdac25d646ed5a67ca1e0285f56d2fe599d42fdd5",
+    "src/spg/domain/native_execution.py": "d6c9022b29100479515baf35cd0cdaed7fe7a19e14d5a77290dd27b05cbf7280",
+    "owners.lock": "95ca3a8ff263ce94fd527e889ae0306e11a39a2a428acbe41f43416c76564b75"
+  },
+  "recovered_work_id": "b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9",
+  "preview_snapshot": "6a3cf55153cf5e1e58fe062ae0b5bacb1ca14c232d27edb039b93af56a5021fe",
+  "checks": {
+    "focused": 105,
+    "frontend": 12,
+    "postgres_control": 3,
+    "broader_initial_passed": 1276,
+    "broader_initial_failed": 11,
+    "new_projection_fixture_failures_fixed": 8,
+    "retained_known_baseline_failures": 3,
+    "live_source_consumer_probe": "FAILED_PROTECTED_CONTEXT_WITNESS_NOT_OBSERVED",
+    "production_browser": "PASS_START_PLANT_FIRST_WAVE",
+    "postgres_graph": 6,
+    "postgres_work_progression": 2
+  },
+  "full_game_acceptance": "PENDING",
+  "automatic_original_work_restart": false
+}

@@ -162,6 +162,8 @@ class PlanSteeringDriver:
 
         before = self.reality_fingerprint(work_id)
         work = self.work_service.get_work(work_id)
+        if work.most_recent_meaningful_event == "WORK_PAUSED_BY_HUMAN":
+            return self._result(work_id, before, action=None, stop=SteeringDriverStopReason.BLOCKED)
         if work.status is WorkStatus.COMPLETED:
             return self._result(
                 work_id,
@@ -751,8 +753,8 @@ class PlanSteeringDriver:
             # holds until a later restart or a revised Work Reality.
             revision = ProductStore(uow.session).work(work_id).current_work_reality_revision_id
             choices = [record for record in RuntimeStore(uow.session).governance_for_subject(str(work_id))
-                       if record.decision_type in {"RESTART_CONVERGENCE_EPISODE", "PAUSE_AFTER_CONVERGENCE_INCIDENT"}]
-        if (choices and choices[-1].decision_type == "PAUSE_AFTER_CONVERGENCE_INCIDENT"
+                       if record.decision_type in {"RESTART_CONVERGENCE_EPISODE", "PAUSE_AFTER_CONVERGENCE_INCIDENT", "WORK_PAUSED"}]
+        if (choices and choices[-1].decision_type in {"PAUSE_AFTER_CONVERGENCE_INCIDENT", "WORK_PAUSED"}
                 and choices[-1].scope.get("work_reality_revision_id") == str(revision)):
             return True
         basis = self._convergence_basis(work_id)

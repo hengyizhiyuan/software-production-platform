@@ -37,6 +37,7 @@ from spg.api.dto import (
     InteractionWorkRevisionDecisionRequest,
     InteractionWorkTransitionDecisionRequest,
     NativeExecutionControlRequest,
+    WorkPauseRequest,
     NativeQueueEntryResponse,
     CloudExecutionRequestResponse,
     CloudWorkerResponse,
@@ -323,6 +324,9 @@ def create_http_application(
         selected_orchestrator,
         repository_assets=asset_service,
     )
+    from spg.application.recovery_preview import capture_working_preview
+    work_service.working_preview_preparer = lambda wid, sid: capture_working_preview(
+        selected_database, settings.native_executor_storage_root.parent / "recovery-preview", wid, sid)
     if candidate_runtime_preview is not None:
         candidate_runtime_preview.outcome_listener = selected_steering_driver.preview_outcome
         if guardian_assurance_client is not None:
@@ -1550,6 +1554,10 @@ def create_http_application(
             raise ProductHttpError(404, "INTERACTION_NOT_FOUND",
                 "Conversation is not in this Product Workspace")
         result = experience.workspace(actor, product_id, work, interaction, realize=False)
+        if result.get("work"):
+            from spg.application.recovery_preview import recovery_preview_context
+            result["reality"]["recovery_preview"] = recovery_preview_context(
+                selected_database, UUID(result["work"]["work_id"]))
         accepted = next((item for item in result["reality"]["deliveries"]
             if item["current"] and item["acceptance"] and
             item["acceptance"]["decision"] == "ACCEPT" and
@@ -2230,6 +2238,25 @@ def create_http_application(
         except NativeContextEvidenceError as error:
             raise ProductHttpError(409, str(error), "Evidence binding cannot be verified") from error
 
+    @api.post("/api/works/{work_id}/pause")
+    def pause_work(work_id: UUID, request: WorkPauseRequest, http_request: Request):
+        command_id = request.command_id
+        actor = getattr(http_request.state, "actor_id", ACTOR_ID)
+        work_service.pause_work(work_id, command_id=command_id,
+            authority_identity=actor, reason=request.reason)
+        with selected_database.unit_of_work() as uow:
+            from sqlalchemy import select
+            from spg.infrastructure.persistence.native_execution_schema import executor_queue
+            attempts = uow.session.execute(select(executor_queue.c.attempt_id).where(
+                executor_queue.c.work_id == work_id,
+                executor_queue.c.condition.notin_(("COMPLETED", "CANCELLED", "FAILED")))).scalars().all()
+            states = [NativeExecutionStore(uow.session).attempt_state(a) for a in attempts]
+        receipts = [native_execution_control(state.attempt_id, NativeExecutionControlRequest(
+            command_id=uuid5(command_id, str(state.attempt_id)), action="PAUSE",
+            expected_control_version=state.control_version, actor_identity=actor,
+            reason="Human paused this Work")) for state in states]
+        return {"work_id": str(work_id), "status": "PAUSED", "execution_controls": receipts}
+
     @api.post("/api/native-execution/attempts/{attempt_id}/control")
     def native_execution_control(attempt_id: UUID, request: NativeExecutionControlRequest):
         if not getattr(settings, "native_executor_enabled", False):
@@ -2664,6 +2691,20 @@ def create_http_application(
         return Response(delivery_service.candidate_code_diff(work_id, candidate_fingerprint),
             media_type="text/plain; charset=utf-8", headers={"X-Content-Type-Options": "nosniff",
                 "Cache-Control": "no-store", "Content-Security-Policy": "default-src 'none'; sandbox"})
+
+    @api.get("/api/works/{work_id}/recovery-preview")
+    def recovery_preview(work_id: UUID):
+        from spg.application.recovery_preview import recovery_preview_context
+        return recovery_preview_context(selected_database, work_id) or {"status": "NOT_AVAILABLE"}
+
+    @api.get("/api/works/{work_id}/recovery-preview/{snapshot}/{path:path}")
+    def recovery_preview_file(work_id: UUID, snapshot: str, path: str):
+        from spg.application.recovery_preview import recovery_preview_artifact
+        root = settings.native_executor_storage_root.parent / "recovery-preview"
+        return Response(recovery_preview_artifact(selected_database, root, work_id, snapshot, path),
+            media_type=artifact_media_type(path), headers={"X-Content-Type-Options": "nosniff",
+                "Cache-Control": "no-store", "Content-Security-Policy": PREVIEW_CONTENT_SECURITY_POLICY,
+                "X-Watt-Recovery-Snapshot": snapshot})
 
     @api.get("/api/works/{work_id}/candidate-preview/{candidate_fingerprint}/{path:path}")
     def candidate_preview_artifact(work_id: UUID, candidate_fingerprint: str, path: str):

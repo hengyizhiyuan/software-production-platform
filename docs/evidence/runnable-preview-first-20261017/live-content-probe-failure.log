@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/tmp/watt-runnable-live-content.py", line 60, in <module>
+    current=session.verify_fulfillment_bindings(request,task,contract,repo,baseline,bindings=(binding,))
+  File "/Users/yu/Documents/dev/software-production-platform/src/spg/providers/protected_context_verifier.py", line 430, in verify_fulfillment_bindings
+    self._assess()
+    ~~~~~~~~~~~~^^
+  File "/Users/yu/Documents/dev/software-production-platform/src/spg/providers/protected_context_verifier.py", line 417, in _assess
+    self.checks = self.verifier.verify(request, task, contract, repository, baseline,
+                  ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        obligations=obligations, receipt_recorder=self.recorder,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        fulfillment_bindings=self.bindings, derived_bindings=current) if obligations else []
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yu/Documents/dev/software-production-platform/src/spg/providers/protected_context_verifier.py", line 358, in verify
+    raise VerificationCandidateFailure(failure, recorder)
+spg.providers.verification_receipts.VerificationCandidateFailure: PROTECTED_CONTEXT_WITNESS_NOT_OBSERVED

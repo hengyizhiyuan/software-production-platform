@@ -526,6 +526,21 @@ no existing repository product-policy declarations may use its admitted Work
 and exact Source Owner records; absence alone does not manufacture mandatory
 product invariants or decisions. Existing repository declarations retain their
 policy. A single page and its stylesheet/script are one implementation unit.
+Human Governor direction, 2026-10-17 (runnable-preview-first mission): ordinary
+bounded multi-file implementations remain one coherent production unit; file
+names alone do not establish independently verifiable capabilities. Explicit
+independent baseline/dependency requirements and observed execution sizing may
+justify decomposition. Assess current content once per exact candidate and
+reuse its exact binding evidence across Fact, Work constraint and inventory
+projections, including negative results. Existing authoritative repository policy
+is checked against the artifact directly; do not invent an additional Work-clause
+binding as a prerequisite. Internal verification protocol, evidence or ownership
+failures stop at the responsible system Owner without regenerating unrelated
+business code. Stop scheduling sibling work when a required branch cannot finish.
+The existing Preview Owner may expose a bounded exact observed static snapshot
+after cheap source/scope checks and before semantic qualification, for an
+admitted implementation or explicitly authorized recovery. Its availability
+establishes no Verification PASS, Guardian approval, delivery or Human acceptance.
 Future Preview readiness is checked against the actual served exact Candidate,
 never treated as current content evidence or permission to accept/deliver it.
 

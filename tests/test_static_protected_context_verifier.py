@@ -194,3 +194,61 @@ def test_related_future_binding_cannot_substitute_original_source(subject, drift
         verifier.verify_fulfillment_bindings(request, task, contract, repo, baseline,
             bindings=(plan[0],), fulfillment_bindings=(plan[0], invalid))
     assert calls == []
+
+
+@pytest.mark.parametrize('disposition', ['SATISFIED', 'CONTRADICTED'])
+def test_one_candidate_assessment_reused_across_fact_constraint_and_repository_policy(subject, disposition):
+    from tests.test_c3_reviewed_fact_method_applicability import case, preconditions, verdict
+    from spg.application import governed_obligations as admission
+    from spg.domain.engineering_semantics import semantic_fact_reference
+    from spg.domain.model_runtime import ModelUsage
+    repo, baseline, request, task, contract = subject
+    revision, ir, inventory, proposal = case(mixed=True)
+    plan = admission.validate_projection_candidate(proposal, revision, ir, inventory,
+        source_contract='v3', owner_preconditions=preconditions(revision, ir, inventory),
+        semantic_review=verdict(inventory, proposal))
+    current = plan[0].model_copy(update={'source_revision': baseline, 'work_constraint_indices': (0,)})
+    future = plan[1].model_copy(update={'source_revision': baseline, 'work_constraint_indices': (0,)})
+    constraint = request.protected_context_obligations[0].model_copy(update={
+        'context_class': 'APPROVED_CONSTRAINT', 'semantic_key': 'greenfield-constraint:0',
+        'source_ref': 'work-constraint:0', 'content': current.source_quote,
+        'content_digest': sha256(current.source_quote.encode()).hexdigest()})
+    policy = constraint.model_copy(update={'context_class': 'APPROVED_DECISION',
+        'semantic_key': 'existing-policy', 'source_ref': 'repository:policy',
+        'content': 'Company Home', 'content_digest': sha256(b'Company Home').hexdigest()})
+    task.decision_context.protected_obligations = (constraint, policy)
+    request = request.model_copy(update={'protected_context_obligations': (constraint, policy),
+        'semantic_fact_obligations': (semantic_fact_reference(
+            revision.engineering_semantic_facts[0], work_revision_id=revision.id),)})
+    calls = []
+    def generate(**kwargs):
+        payload = json.loads(kwargs['input_text']); calls.append(payload)
+        return SimpleNamespace(output_text=json.dumps({'checks': [{
+            'context_class': o['context_class'], 'semantic_key': o['semantic_key'],
+            'disposition': disposition, 'reason': 'Controlled exact-source inspection',
+            'witnesses': [{'path': 'index.html', 'quote': 'Company Home'}],
+        } for o in payload['protected_obligations']]}), provider=SimpleNamespace(value='test'),
+            effective_model='test', request_id='test', usage=ModelUsage())
+    runtime = SimpleNamespace(generate=generate, registry=SimpleNamespace(close=lambda: None))
+    verifier = StaticProtectedContextVerifier(lambda: runtime)
+    session = verifier.for_candidate(request, task, contract, repo, baseline,
+        bindings=(current, future), receipt_recorder=None)
+    fact_checks = session.verify_fulfillment_bindings(request, task, contract, repo, baseline,
+        bindings=(current,), fulfillment_bindings=(current, future))
+    projected = session.verify(request, task, contract, repo, baseline,
+        obligations=(constraint, policy), fulfillment_bindings=(current, future))
+    repeated = session.verify_fulfillment_bindings(request, task, contract, repo, baseline, bindings=(current,))
+    assert len(calls) == 1
+    assert len(calls[0]['protected_obligations']) == 2
+    assert repeated == fact_checks
+    assert all(row['coverage'] == ('COVERED' if disposition == 'SATISFIED' else 'UNVERIFIED')
+               for row in (*fact_checks, *projected))
+    assert projected[0]['source_ref'] == constraint.source_ref
+    assert projected[1]['source_ref'] == policy.source_ref
+    assert len(calls[0]['assigned_fulfillment_bindings']) == 2
+    with pytest.raises(ValueError, match='BATCH_BASIS_MISMATCH'):
+        session.verify(request.model_copy(update={'tree_identity': '0'*40}), task, contract,
+                       repo, baseline, obligations=(constraint,))
+    with pytest.raises(ValueError, match='NOT_ASSIGNED'):
+        session.verify_fulfillment_bindings(request, task, contract, repo, baseline,
+            bindings=(current.model_copy(update={'source_quote': 'changed'}),))

@@ -694,6 +694,11 @@ class NativeExecutorRuntimeService:
             allocation = store.allocation_for_attempt(execution_id)
             lease = store.lease_for_attempt(execution_id)
             context = binding.binding.production_context
+            work = ProductStore(uow.session).work(queue.work_id)
+            work_paused = False
+            if work is not None:
+                from spg.application.work import WorkApplicationService
+                work_paused = WorkApplicationService._human_paused(RuntimeStore(uow.session), work)
             verification_state = None
             if context is not None:
                 records = self._attempt_verifications(
@@ -702,10 +707,15 @@ class NativeExecutorRuntimeService:
                 observed = {item.obligation: item.result for item in records}
                 if any(value is VerificationResultValue.FAIL for value in observed.values()):
                     verification_state = "FAILED"
+                elif any(value is VerificationResultValue.UNKNOWN for value in observed.values()):
+                    verification_state = "UNKNOWN"
                 elif all(observed.get(item) is VerificationResultValue.PASS
                          for item in context.verification_requirements):
                     verification_state = "VERIFIED"
-            if state.grant_state is AttemptGrantState.FENCED or state.runtime_mode is ExecutionMode.RECONCILING:
+            if (state.runtime_mode is ExecutionMode.PAUSED or work_paused
+                    and queue.condition not in {QueueCondition.ALLOCATED, QueueCondition.EXECUTING}):
+                status = CloudExecutionStatus.PAUSED
+            elif state.grant_state is AttemptGrantState.FENCED or state.runtime_mode is ExecutionMode.RECONCILING:
                 status = CloudExecutionStatus.RECOVERY_REQUIRED
             elif queue.condition is QueueCondition.ALLOCATED:
                 status = CloudExecutionStatus.ASSIGNED
@@ -716,7 +726,7 @@ class NativeExecutorRuntimeService:
             elif queue.condition is QueueCondition.COMPLETED:
                 status = (
                     CloudExecutionStatus.FAILED
-                    if verification_state == "FAILED"
+                    if verification_state in {"FAILED", "UNKNOWN"}
                     else CloudExecutionStatus.COMPLETED
                     if store.work_unit_condition(queue.pwu_id) == "SATISFIED"
                     and (context is None or verification_state == "VERIFIED")
@@ -738,7 +748,9 @@ class NativeExecutorRuntimeService:
                 worker_id=allocation.worker_id if allocation else None,
                 lease_expire_at=lease.deadline if lease else None,
                 queue_entry_id=queue.id,
-                recovery_reason=("VERIFICATION_FAILED" if verification_state == "FAILED"
+                recovery_reason=("WORK_PAUSED_BY_HUMAN" if work_paused else
+                                 "VERIFICATION_FAILED" if verification_state == "FAILED"
+                                 else "VERIFICATION_OUTCOME_UNKNOWN" if verification_state == "UNKNOWN"
                                  else "; ".join(state.blocker_reasons) or None),
                 queue_condition=queue.condition, wait_reason=queue.wait_reason,
                 wait_age_seconds=max(0, int((self._now() - queue.enqueued_at).total_seconds())),

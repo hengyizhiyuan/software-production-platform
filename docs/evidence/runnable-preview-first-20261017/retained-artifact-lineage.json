@@ -1,0 +1,50 @@
+[
+  {
+    "path": "index.html",
+    "attempt_id": "7e32c4bc-49f5-4091-a678-0c1158fe70fb",
+    "generation": 3,
+    "source": "/var/lib/spg/native-workspaces/7e32c4bc-49f5-4091-a678-0c1158fe70fb/index.html"
+  },
+  {
+    "path": "src/game/state.js",
+    "attempt_id": "04ed43c2-5901-4a6e-8de8-52ebb5811e8c",
+    "generation": 3,
+    "source": "/var/lib/spg/native-workspaces/04ed43c2-5901-4a6e-8de8-52ebb5811e8c/src/game/state.js"
+  },
+  {
+    "path": "src/game/sun.js",
+    "attempt_id": "ebc61fff-0322-4dc2-8008-460db46012f2",
+    "generation": 2,
+    "source": "/var/lib/spg/native-workspaces/ebc61fff-0322-4dc2-8008-460db46012f2/src/game/sun.js"
+  },
+  {
+    "path": "src/game/plants.js",
+    "attempt_id": "36b61924-1568-42ea-bbcf-1f20676cccc4",
+    "generation": 2,
+    "source": "/var/lib/spg/native-workspaces/36b61924-1568-42ea-bbcf-1f20676cccc4/src/game/plants.js"
+  },
+  {
+    "path": "src/game/zombies.js",
+    "attempt_id": "a4711f3d-37eb-48f6-b840-2d1883aa607c",
+    "generation": 2,
+    "source": "/var/lib/spg/native-workspaces/a4711f3d-37eb-48f6-b840-2d1883aa607c/src/game/zombies.js"
+  },
+  {
+    "path": "src/game/level.js",
+    "attempt_id": "462cbb30-8073-44ee-97bc-54f6220a0418",
+    "generation": 2,
+    "source": "/var/lib/spg/native-workspaces/462cbb30-8073-44ee-97bc-54f6220a0418/src/game/level.js"
+  },
+  {
+    "path": "src/render/renderer.js",
+    "attempt_id": "79b27278-c9b2-460f-9fec-7595479fcd9a",
+    "generation": 1,
+    "source": "/var/lib/spg/native-workspaces/79b27278-c9b2-460f-9fec-7595479fcd9a/src/render/renderer.js"
+  },
+  {
+    "path": "src/assets/assetManifest.js",
+    "attempt_id": "0df43e80-8bee-4eeb-b574-9b6939cbcc9f",
+    "generation": 1,
+    "source": "/var/lib/spg/native-workspaces/0df43e80-8bee-4eeb-b574-9b6939cbcc9f/src/assets/assetManifest.js"
+  }
+]

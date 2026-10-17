@@ -77,7 +77,7 @@ def test_multi_pwu_plan_persists_three_units_and_blocks_join_before_parents(post
     targets = tuple(ProductionPlanArtifactTarget(path=f"docs/{stem}.md", operation=PlannedArtifactOperation.CREATE)
                     for stem in ("auth", "billing"))
     plan = RuleBasedProductionPlanner().propose(ProductionPlanningRequest(
-        work_id=uuid4(), admitted_requirement="Implement independent auth and billing guides",
+        work_id=uuid4(), admitted_requirement="Implement independent capabilities: auth and billing guides",
         desired_outcome="Both guides exist", production_objective="Produce two guides",
         artifact_targets=targets, verification_expectation="Verify both guides",
         engineering_scope_summary="one repository", engineering_resource_id=uuid4(),
@@ -137,7 +137,7 @@ def test_serial_baseline_progression_and_replan_preserve_completed_history(postg
 
     def plan_for(paths, objective):
         return RuleBasedProductionPlanner().propose(ProductionPlanningRequest(
-            work_id=uuid4(), admitted_requirement="shared interface requires serial baseline progression",
+            work_id=uuid4(), admitted_requirement="independently governed sequential work: shared interface requires serial baseline progression",
             desired_outcome="three related guides", production_objective=objective,
             artifact_targets=paths, verification_expectation="Verify guides",
             engineering_scope_summary="one repository", engineering_resource_id=uuid4(),
@@ -243,7 +243,7 @@ def test_three_serial_pwus_inherit_exact_verified_predecessor_baselines(postgres
     )).snapshot
     paths = ("docs/alpha.md", "docs/beta.md", "docs/gamma.md")
     plan = RuleBasedProductionPlanner().propose(ProductionPlanningRequest(
-        work_id=uuid4(), admitted_requirement="shared interface serial work",
+        work_id=uuid4(), admitted_requirement="independently governed sequential work with a shared interface",
         desired_outcome="all three guides", production_objective="Produce three guides",
         artifact_targets=tuple(ProductionPlanArtifactTarget(
             path=path, operation=PlannedArtifactOperation.CREATE,
@@ -439,7 +439,7 @@ def test_real_parallel_branch_outputs_join_only_after_verification(postgres_data
     targets = tuple(ProductionPlanArtifactTarget(path=f"docs/{stem}.md", operation=PlannedArtifactOperation.CREATE)
                     for stem in ("auth", "billing", "final"))
     plan = RuleBasedProductionPlanner().propose(ProductionPlanningRequest(
-        work_id=uuid4(), admitted_requirement="Implement independent auth and billing guides",
+        work_id=uuid4(), admitted_requirement="Implement independent capabilities: auth and billing guides",
         desired_outcome="Both guides exist", production_objective="Produce two guides",
         artifact_targets=targets, verification_expectation="Verify both guides",
         engineering_scope_summary="one repository", engineering_resource_id=uuid4(),

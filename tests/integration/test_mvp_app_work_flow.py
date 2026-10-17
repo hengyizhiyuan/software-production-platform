@@ -68,7 +68,7 @@ ALL_TABLE_NAMES = {table.name for table in (*product_tables, *runtime_tables)}
 
 
 def test_multi_pwu_work_automatically_starts_both_ready_roots(app_facts: "AppFacts") -> None:
-    submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
+    submitted = app_facts.service.submit_work("Update independent capabilities: Python and web, as separate governed production units")
     draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
         code_exact_targets=("src/spg_example.py", "src/spg/web/app.js"),
     ))
@@ -101,7 +101,7 @@ def test_multi_pwu_work_automatically_starts_both_ready_roots(app_facts: "AppFac
 
 
 def test_multi_pwu_nonblocking_dispatch_keeps_two_root_authorities_across_restart(app_facts: "AppFacts") -> None:
-    submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
+    submitted = app_facts.service.submit_work("Update independent capabilities: Python and web, as separate governed production units")
     draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
         code_exact_targets=("src/spg_example.py", "src/spg/web/app.js"),
     ))
@@ -144,7 +144,7 @@ def test_multi_pwu_terminal_queue_handoff_race_collects_existing_result(app_fact
     from types import SimpleNamespace
     from spg.application.orchestration import ProductionOrchestrator, OrchestrationStopReason
     from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
-    submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
+    submitted = app_facts.service.submit_work("Update independent capabilities: Python and web, as separate governed production units")
     draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
         code_exact_targets=("src/spg_example.py", "src/spg/web/app.js"),
     ))
@@ -196,7 +196,7 @@ def test_multi_pwu_terminal_queue_handoff_race_collects_existing_result(app_fact
 
 
 def test_multi_pwu_replan_api_replaces_active_revision_without_widening_scope(app_facts: "AppFacts") -> None:
-    submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
+    submitted = app_facts.service.submit_work("Update independent capabilities: Python and web, as separate governed production units")
     draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
         code_exact_targets=("src/spg_example.py", "src/spg/web/app.js"),
     ))
@@ -223,7 +223,7 @@ def test_multi_pwu_replan_api_replaces_active_revision_without_widening_scope(ap
 def test_multi_pwu_explicit_native_cancellation_never_becomes_a_retry(app_facts: "AppFacts", monkeypatch) -> None:
     from types import SimpleNamespace
     from spg.infrastructure.executor_runtime.postgres_store import NativeExecutionStore
-    submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
+    submitted = app_facts.service.submit_work("Update independent capabilities: Python and web, as separate governed production units")
     draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
         code_exact_targets=("src/spg_example.py", "src/spg/web/app.js"),
     ))
@@ -294,7 +294,7 @@ def test_multi_pwu_serial_context_consumes_only_this_works_verified_revision(app
 
 
 def test_multi_pwu_terminal_no_output_is_evaluated_and_bounded(app_facts: "AppFacts") -> None:
-    submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
+    submitted = app_facts.service.submit_work("Update independent capabilities: Python and web, as separate governed production units")
     draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
         code_exact_targets=("src/spg_example.py", "src/spg/web/app.js")))
     app_facts.service.approve_work(draft.work_id, authority_identity="human:multi-no-output")
@@ -317,7 +317,7 @@ def test_multi_pwu_terminal_no_output_is_evaluated_and_bounded(app_facts: "AppFa
 def test_multi_pwu_work_runs_two_code_units_join_and_human_delivery(app_facts: "AppFacts") -> None:
     """One admitted Work reaches Candidate, authorization, and trusted commit."""
 
-    submitted = app_facts.service.submit_work("Update independent Python and web capabilities")
+    submitted = app_facts.service.submit_work("Update independent capabilities: Python and web, as separate governed production units")
     draft = app_facts.service.refine_work(submitted.work_id, WorkRefinementRequest(
         code_exact_targets=("src/spg_example.py", "src/spg/web/app.js"),
     ))

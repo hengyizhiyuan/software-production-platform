@@ -175,6 +175,16 @@ class RuleBasedProductionPlanner:
         )
         if len(targets) < 2:
             return None
+        # A filename is not an independently verifiable capability. Keep an
+        # ordinary bounded implementation together so imports, interfaces and
+        # runtime behavior can be produced and checked on one actual artifact.
+        # Independent baselines remain available when explicitly requested.
+        normalized_requirement = "\n".join((request.admitted_requirement,
+            request.production_objective, request.desired_outcome, *request.constraints)).casefold()
+        decomposition_markers = (*RuleBasedProductionPlanner._MULTI_PWU_MARKERS,
+                                 "independent capabilities", "predecessor", "依赖前一步")
+        if not any(marker in normalized_requirement for marker in decomposition_markers):
+            return None
         production_paths = tuple(path for path in targets if not path.startswith("tests/"))
         def family(path: str) -> str:
             pure = PurePosixPath(path)

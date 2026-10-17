@@ -74,6 +74,11 @@ def fixture_basis(monkeypatch):
         fields.update(changes)
         return GovernanceRecord(**fields)
     session = ReadOnlySession([record()])
+    # Human pause is a separate existing Work governance read, outside the
+    # fulfillment-stop query whose absence/scope these cases exercise.
+    monkeypatch.setattr(RuntimeStore, "governance_for_subject", lambda _, subject: [
+        r for r in session.records
+        if (r.subject_identity if isinstance(r, GovernanceRecord) else r.get("subject_identity")) == subject])
     step = SimpleNamespace(id=step_id, type=SimpleNamespace(value="PRODUCE"),
         state=SimpleNamespace(value="CURRENT"))
     steering = SimpleNamespace(plan_for_work=lambda _: SimpleNamespace(id=uuid4()),

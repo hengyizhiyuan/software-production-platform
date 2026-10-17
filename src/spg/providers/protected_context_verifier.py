@@ -111,12 +111,23 @@ class StaticProtectedContextVerifier:
         return bool(not contract.allowed_areas and contract.exact_targets
             and all(PurePosixPath(t.path).suffix in suffixes for t in contract.exact_targets))
 
+    def for_candidate(self, request, task, contract, repository, baseline, *, bindings, receipt_recorder):
+        return CandidateContentChecks(self, request, task, contract, repository, baseline,
+                                      tuple(bindings), receipt_recorder)
+
     def verify_fulfillment_bindings(self, request, task, contract, repository, baseline, *, bindings, receipt_recorder=None, fulfillment_bindings=None):
         selected = self._derived_obligations(bindings, request.decision_context_fingerprint)
+        responsibility_plan = self._responsibility_plan(bindings,
+            bindings if fulfillment_bindings is None else fulfillment_bindings)
+        return self.verify(request, task, contract, repository, baseline, obligations=selected,
+            receipt_recorder=receipt_recorder, fulfillment_bindings=responsibility_plan, derived_bindings=bindings)
+
+    @staticmethod
+    def _responsibility_plan(bindings, fulfillment_bindings):
         from spg.domain.governed_obligation import fulfillment_source_ref
         source_refs = {fulfillment_source_ref(binding) for binding in bindings}
         responsibility_plan = tuple(binding for binding in
-            (bindings if fulfillment_bindings is None else fulfillment_bindings)
+            fulfillment_bindings
             if fulfillment_source_ref(binding) in source_refs)
         if any(binding not in responsibility_plan for binding in bindings):
             raise ValueError("OBLIGATION_CURRENT_COMPONENT_NOT_ASSIGNED")
@@ -128,8 +139,7 @@ class StaticProtectedContextVerifier:
             current = next(b for b in bindings if fulfillment_source_ref(b) == fulfillment_source_ref(binding))
             if any(getattr(binding, key) != getattr(current, key) for key in source_fields):
                 raise ValueError("OBLIGATION_RESPONSIBILITY_SOURCE_MISMATCH")
-        return self.verify(request, task, contract, repository, baseline, obligations=selected,
-            receipt_recorder=receipt_recorder, fulfillment_bindings=responsibility_plan, derived_bindings=bindings)
+        return responsibility_plan
 
     @staticmethod
     def _derived_obligations(bindings, package_fingerprint):
@@ -167,9 +177,11 @@ class StaticProtectedContextVerifier:
                     else tuple(obligations))
         selected_ids = [(item.context_class, item.semantic_key, item.source_ref,
                          item.source_revision, item.content_digest) for item in selected]
+        derived_obligations = self._derived_obligations(derived_bindings, request.decision_context_fingerprint)
         if (not selected or len(set(selected_ids)) != len(selected_ids)
-                or (not derived_bindings and any(item not in request.protected_context_obligations for item in selected))
-                or (derived_bindings and selected != self._derived_obligations(derived_bindings, request.decision_context_fingerprint))):
+                or any(item not in (*derived_obligations, *request.protected_context_obligations)
+                       for item in selected)
+                or any(item not in selected for item in derived_obligations)):
             raise ValueError("PROTECTED_CONTEXT_SUBSET_IDENTITY_MISMATCH")
         revision = request.proposed_commit_identity
         if git(repository, "rev-parse", revision + "^{tree}").decode().strip() != request.tree_identity:
@@ -199,7 +211,8 @@ class StaticProtectedContextVerifier:
         contributions = {(item.context_class, item.semantic_key): _current_contributions(item, fulfillment_bindings)
                          for item in selected}
         if any(getattr(binding, "component_basis", None) is not None for binding in fulfillment_bindings) and any(
-                not contributions[(item.context_class, item.semantic_key)] for item in selected):
+                not contributions[(item.context_class, item.semantic_key)] for item in selected
+                if item.context_class not in {"PRODUCT_INVARIANT", "APPROVED_DECISION"}):
             raise ValueError("OBLIGATION_CURRENT_COMPONENT_NOT_ASSIGNED")
         fact_ids = {str(binding.fact_id) for binding in derived_bindings if binding.source_kind.value == "FACT"}
         original_facts = [ref.model_dump(mode="json") for ref in getattr(request, "semantic_fact_obligations", ())
@@ -351,7 +364,8 @@ class StaticProtectedContextVerifier:
             if runtime is not None:
                 runtime.registry.close()
         checks = []
-        derived_by_key = {(item.context_class, item.semantic_key): binding for item, binding in zip(selected, derived_bindings)}
+        derived_by_key = {(item.context_class, item.semantic_key): binding
+                          for item, binding in zip(derived_obligations, derived_bindings)}
         for check in observed.checks:
             obligation = expected[(check.context_class, check.semantic_key)]
             checks.append({**obligation.model_dump(mode="json"),
@@ -368,3 +382,87 @@ class StaticProtectedContextVerifier:
             if (check.context_class, check.semantic_key) in derived_by_key:
                 checks[-1]["binding"] = derived_by_key[(check.context_class, check.semantic_key)].model_dump(mode="json")
         return checks
+
+
+class CandidateContentChecks:
+    """One independent content assessment shared by this exact verification call.
+
+    Facts, Work constraints and binding inventories are projections of the same
+    admitted obligations. Reuse exact binding evidence, including negative results;
+    never ask the model again just because a downstream projection has another name.
+    No cache survives the request or crosses an artifact/source/responsibility change.
+    """
+    def __init__(self, verifier, request, task, contract, repository, baseline, bindings, recorder):
+        self.verifier = verifier
+        self.basis = (request, task, contract, repository, baseline)
+        self.bindings = bindings
+        self.recorder = recorder
+        self.checks = None
+
+    def supports(self, contract):
+        return self.verifier.supports(contract)
+
+    def _assess(self):
+        if self.checks is not None:
+            return
+        request, task, contract, repository, baseline = self.basis
+        current = tuple(b for b in self.bindings
+                        if b.phase.value == "CURRENT_VERIFICATION"
+                        and b.evidence_method == "EXACT_CANDIDATE_CONTENT"
+                        and not (b.component_basis and b.component_basis.linked_fact_refs))
+        self.verifier._responsibility_plan(current, self.bindings)
+        policy = tuple(o for o in request.protected_context_obligations
+                       if o.context_class in {"PRODUCT_INVARIANT", "APPROVED_DECISION"})
+        obligations = (*self.verifier._derived_obligations(current, request.decision_context_fingerprint), *policy)
+        self.checks = self.verifier.verify(request, task, contract, repository, baseline,
+            obligations=obligations, receipt_recorder=self.recorder,
+            fulfillment_bindings=self.bindings, derived_bindings=current) if obligations else []
+
+    def _assert_basis(self, request, task, contract, repository, baseline):
+        if (request, task, contract, repository, baseline) != self.basis:
+            raise ValueError("PROTECTED_CONTEXT_BATCH_BASIS_MISMATCH")
+
+    def verify_fulfillment_bindings(self, request, task, contract, repository, baseline, *,
+                                    bindings, receipt_recorder=None, fulfillment_bindings=None):
+        self._assert_basis(request, task, contract, repository, baseline)
+        if any(b not in self.bindings for b in bindings):
+            raise ValueError("OBLIGATION_CURRENT_COMPONENT_NOT_ASSIGNED")
+        self._assess()
+        results = []
+        for binding in bindings:
+            matches = [row for row in self.checks if row.get("binding") == binding.model_dump(mode="json")]
+            if len(matches) != 1:
+                raise ValueError("PROTECTED_CONTEXT_BATCH_COVERAGE_MISSING")
+            results.append(matches[0])
+        return results
+
+    def verify(self, request, task, contract, repository, baseline, *, obligations=None,
+               receipt_recorder=None, fulfillment_bindings=()):
+        self._assert_basis(request, task, contract, repository, baseline)
+        self._assess()
+        selected = request.protected_context_obligations if obligations is None else obligations
+        results = []
+        for obligation in selected:
+            if obligation not in request.protected_context_obligations:
+                raise ValueError("PROTECTED_CONTEXT_SUBSET_IDENTITY_MISMATCH")
+            direct = [row for row in self.checks if row["context_class"] == obligation.context_class
+                      and row["semantic_key"] == obligation.semantic_key]
+            if direct:
+                results.append(direct[0])
+                continue
+            contributions = _current_contributions(obligation, self.bindings)
+            rows = [row for c in contributions for row in self.checks if row.get("binding") == c["binding"]]
+            if not contributions or len(rows) != len(contributions):
+                raise ValueError("PROTECTED_CONTEXT_BATCH_COVERAGE_MISSING")
+            passed = all(row["coverage"] == "COVERED" for row in rows)
+            results.append({**rows[0], **obligation.model_dump(mode="json"),
+                "coverage": "COVERED" if passed else "UNVERIFIED",
+                "disposition": "SATISFIED" if passed else "CONTRADICTED" if any(
+                    row["disposition"] == "CONTRADICTED" for row in rows) else "UNVERIFIABLE",
+                "reason": "; ".join(row["reason"] for row in rows),
+                "witnesses": [w for row in rows for w in row["witnesses"]],
+                "observed_source_digests": {p: d for row in rows
+                                            for p, d in row["observed_source_digests"].items()},
+                "source_component_evidence": contributions,
+                "reused_binding_checks": [row["semantic_key"] for row in rows]})
+        return results

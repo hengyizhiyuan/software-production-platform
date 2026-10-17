@@ -105,7 +105,7 @@
     }
     return ({QUEUED:'排队中',ASSIGNED:'Worker 已领取',RUNNING:'Worker 正在执行',
       VERIFYING:'正在独立验证',VERIFIED:'独立验证已通过',COMPLETED:'执行和验证已完成',
-      RECOVERY_REQUIRED:'正在恢复执行',FAILED:'执行或验证失败',CANCELLED:'执行已取消'})
+      RECOVERY_REQUIRED:'正在恢复执行',FAILED:'执行或验证失败',CANCELLED:'执行已取消',PAUSED:'执行与验证已暂停'})
       [execution.status] || '执行状态待确认';
   }
   function verificationCopy(candidate, execution) {
@@ -195,6 +195,8 @@
     return `<p class="delivery-package-summary">${manifest.software ? '软件交付包' : '文档交付包'}${manifest.software ? ` · 入口：${esc(manifest.software.runtime_recipe.entrypoint || '应用运行环境')}` : ' · 仅含文档成果'} · 文件：${manifest.artifacts?.length ?? '未记录'}<br>精确版本：${esc(manifest.repository_revision)}<br>Verification：${manifest.verification_record_ids?.length ? 'PASS' : '未记录'} · Guardian：${esc(guardian?.gate || guardian?.status || '未记录')}</p>`;
   }
   function renderWorkspaceActions(ws, candidate, manifest, acceptance, workId, readOnly) {
+    const recovery = ws.reality.recovery_preview;
+    const recoveryAction = recovery?.url ? `<div class="workspace-review"><h3>已有成果预览</h3><p>可以先打开页面查看效果，完整功能尚未验收。</p><a class="button" href="${esc(recovery.url)}" target="_blank" rel="noopener noreferrer">打开已有成果预览</a></div>` : '';
     const assuranceReady = !ws.reality.guardian?.required || ws.reality.guardian?.gate === 'PASS';
     const attention = ws.actions.length ? `<div class="action-list">${ws.actions.map(renderAttention).join('')}</div>` : '';
     const review = candidate?.candidate_fingerprint ? `<div class="workspace-review"><h3>${acceptance ? acceptanceCopy(ws, acceptance) : '查看新版本'}</h3><p>${ws.human_visible?.facts?.review || (acceptance ? acceptanceCopy(ws, acceptance) : assuranceReady ? '质量条件已满足；请查看预览与改动，再明确决定是否授权当前候选。' : '机器验证已通过，质量检查尚未通过；当前版本还不能授权或验收。')}</p><div class="candidate-actions"><button class="button" data-preview="${esc(workId)}" data-preview-manifest="${esc(manifest?.id || '')}" type="button">打开预览</button><button class="button secondary" data-diff="${esc(workId)}" data-fingerprint="${esc(candidate.candidate_fingerprint)}" type="button">查看改动</button>${manifest && !acceptance && !readOnly && assuranceReady ? `<button class="button secondary" data-accept="${esc(workId)}" data-manifest="${esc(manifest.id)}" data-manifest-fingerprint="${esc(manifest.fingerprint)}" type="button">验收结果</button>` : ''}${manifest ? `${deliverySummary(manifest,ws.reality.guardian)}${link(`/deliverables/${manifest.id}`,'查看并下载交付包','button secondary')}` : !candidate.authorization_pending && assuranceReady ? `<button class="button secondary" data-publish-delivery="${esc(workId)}" data-fingerprint="${esc(candidate.candidate_fingerprint)}" data-revision="${esc(candidate.repository_revision)}" type="button">形成精确交付包</button><p class="muted">基于已授权的新成果形成交付清单；不会代替你的正式验收，也不会导出旧正式源码。</p>` : ''}${readOnly ? '' : '<button class="button quiet" data-focus-composer type="button">继续修改</button>'}</div>${!manifest && !acceptance ? '<p class="muted">交付物形成后可做正式验收。</p>' : ''}</div>` : '';
@@ -205,7 +207,7 @@
     const cloudAction = ws.reality.cloud_deliverable_id && acceptance?.decision === 'ACCEPT' &&
       ws.reality.cloud_deployment?.state !== 'SUCCEEDED' ?
       `<div class="workspace-review"><h3>阿里云部署</h3><p>${ws.reality.cloud_deployment?.blocker ? esc(ws.human_visible?.facts?.blocker || '部署条件未满足，尚未通过验证。') : '可查看当前部署事实，或为这个已验收版本选择目标 ECS。'}</p>${link(`/deliverables/${ws.reality.cloud_deliverable_id}`,'查看部署','button secondary')}</div>` : '';
-    return `<section class="workspace-quadrant" data-workspace-quadrant="actions" aria-labelledby="workspace-actions-title"><div class="quadrant-heading"><p class="eyebrow">03 / 决定</p><h2 id="workspace-actions-title">待你处理</h2><p>Watt 现在真正需要我做什么？</p></div>${attention}${!attention && !needsReview && !cloudAction ? '<p class="quadrant-empty">当前无需你操作</p>' : ''}${review}${retryPromotion}${cloudAction}</section>`;
+    return `<section class="workspace-quadrant" data-workspace-quadrant="actions" aria-labelledby="workspace-actions-title"><div class="quadrant-heading"><p class="eyebrow">03 / 决定</p><h2 id="workspace-actions-title">待你处理</h2><p>Watt 现在真正需要我做什么？</p></div>${recoveryAction}${attention}${!attention && !needsReview && !cloudAction ? '<p class="quadrant-empty">当前无需你操作</p>' : ''}${review}${retryPromotion}${cloudAction}</section>`;
   }
   function renderWorkspaceProduction(ws, focus, reviewable, acceptance) {
     const guardian = ws.reality.guardian?.status;

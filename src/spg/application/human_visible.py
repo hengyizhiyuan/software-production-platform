@@ -23,7 +23,7 @@ STATUS = {'READY':'准备中','RUNNING':'正在生产','NEEDS_ATTENTION':'需要
 EXECUTION = {'CREATED':'等待进入执行队列','QUEUED':'已排队，等待可用执行容量','ASSIGNED':'Worker 已领取',
     'RUNNING':'Worker 正在执行','VERIFYING':'正在验证执行成果','VERIFIED':'执行成果已通过验证',
     'COMPLETED':'执行已完成','FAILED':'执行失败，保留诊断与恢复记录','RECOVERY_REQUIRED':'执行中断，等待恢复',
-    'CANCELLED':'执行已取消'}
+    'CANCELLED':'执行已取消','PAUSED':'执行与验证已暂停'}
 UNIT = {**EXECUTION,'READY':'已就绪','WAITING_CAPACITY':'等待执行容量','DEPENDENCIES_PENDING':'等待前序成果验证',
     'WAITING_RESOURCE':'等待执行条件恢复','PREPARING':'正在准备执行','BLOCKED':'当前生产单元受阻'}
 GUARDIAN = {'PASS':'质量检查通过','FAIL':'质量检查未通过','NOT_STARTED':'尚未开始质量检查',
@@ -57,6 +57,8 @@ def projection_for_workspace(database, workspace):
         'accepted_version':reality.get('accepted_version'),
         'accepted_revision':reality.get('accepted_revision'),
         'admission_context':reality.get('admission_context'),
+        'recovery_preview':{k:(reality.get('recovery_preview') or {}).get(k)
+                            for k in ('snapshot','verification','governance_record_id')},
         'deliveries':reality.get('deliveries',()),'cloud_deployment':reality.get('cloud_deployment')}
     agenda = tuple(workspace['agenda'])
     decisions = tuple({k:a.get(k) for k in ('id','kind','human_decision_need','actions','governed_subject_ref',
@@ -151,6 +153,10 @@ def safe_wording(projection):
         summary=f'{motive}。{context_blocker}'
         next_step='先核对并补齐已有授权的生产依据，再重新检查准入；不会代替你批准缺失的决定。'
     if projection.decision_needs:next_step='先处理下方的具体决定，再依据你的选择推进。'
+    if work.get('most_recent_meaningful_event') == 'WORK_PAUSED_BY_HUMAN':
+        activity='已按你的要求暂停生产与验证'
+        summary=f'{motive}。{activity}，现有成果和历史记录已保留。'
+        next_step='可查看已有成果；当前不会自动继续生成或验证。'
     decisions=[]
     for item in projection.decision_needs:
         need=item.get('human_decision_need')
@@ -216,8 +222,12 @@ def fact_wording(facts):
     verification=candidate.get('verification') or ()
     verified=bool(verification) and all(v.endswith(': PASS') for v in verification)
     verification_text=(f'独立验证已通过（{len(verification)} 项）' if verified else
+        '验证未能得出结论，已停止自动重试' if execution.get('recovery_reason')=='VERIFICATION_OUTCOME_UNKNOWN' else
         '独立验证未通过' if any(v.endswith(': FAIL') for v in verification) or execution.get('recovery_reason')=='VERIFICATION_FAILED' else
         '正在独立验证' if state=='VERIFYING' else '独立验证已通过' if state in {'VERIFIED','COMPLETED'} else '尚无验证结果')
+    if work.get('most_recent_meaningful_event') == 'WORK_PAUSED_BY_HUMAN':
+        running='已按你的要求暂停'
+        verification_text='验证已暂停，保留此前结果'
     guardian_text=GUARDIAN.get(guardian.get('status'),'质量检查状态待确认')
     if guardian.get('status')=='RUNNING':guardian_text='质量检查正在重新验证'
     acceptance_text=('本次成果未被接受' if acceptance and acceptance.get('decision')!='ACCEPT' else
@@ -284,6 +294,8 @@ class HumanVisibleRealizationService:
             'source_references': list(projection.source_references),
             'wording': wording.model_dump(mode='json'), 'expression_finding': None,
             'owner_facts': projection.owner_facts, 'facts': fact_wording(projection.owner_facts)}
+        if (projection.owner_facts.get('work') or {}).get('most_recent_meaningful_event') == 'WORK_PAUSED_BY_HUMAN':
+            return {**result, 'expression_state': 'QUALIFIED_FACTS'}
         fingerprint = projection.basis_fingerprint
         with self._pending_lock:
             if fingerprint not in self._pending and len(self._pending) < 32:

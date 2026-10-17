@@ -1558,6 +1558,11 @@ class CloudWorkerDrainRequest(ApiDto):
     draining: bool
 
 
+class WorkPauseRequest(ApiDto):
+    command_id: UUID
+    reason: str = Field(default="Human requested pause", min_length=1)
+
+
 class NativeExecutionControlRequest(ApiDto):
     command_id: UUID
     action: ControlAction

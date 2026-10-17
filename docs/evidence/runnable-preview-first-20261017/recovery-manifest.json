@@ -1,0 +1,21 @@
+{
+  "work_id": "b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9",
+  "work_reality_revision_id": "bfcb502b-855d-58d3-bacb-e93208997e1b",
+  "snapshot": "6a3cf55153cf5e1e58fe062ae0b5bacb1ca14c232d27edb039b93af56a5021fe",
+  "files": {
+    "index.html": "2b311d4334459c67176abded6945badbfb99dad0b746f7696373bc6c53b1f6bd",
+    "src/assets/assetManifest.js": "6049ca66197477682a88ca4aa1cc4b276441e22f602c05f41a0153b15c303b8c",
+    "src/game/level.js": "c2fbf1ddb0abb9015fa1050776b8ae1c120a993c33071d4a9801bfa248634eb2",
+    "src/game/plants.js": "dd88e377193236d4f5208297d1f9f813cecbe5a0d8b18cffeb7999c351f9ebe7",
+    "src/game/state.js": "fbe4b299e5298a835e65a1f9388e048e31c3df1b2e50942d0693a7cc70df2c4e",
+    "src/game/sun.js": "ed090946d929f09d12eb440a22200a9a68f24da0995423f4d2666ee0cade12c6",
+    "src/game/zombies.js": "a95f574c97adcfaae6cbbf6ec0e0747a2f47195b8acd296a482454fdb7368741",
+    "src/main.js": "9ac18b14638b57851719673b092e513b9ccfb2a041e665db37a06e8c94c7db16",
+    "src/render/renderer.js": "7735d829e060c7ffbf5198ddf345df671c3d53e7c14e9e4ab99190b6b97d7c26"
+  },
+  "verification": "NOT_QUALIFIED",
+  "repairs": [
+    "src/main.js (missing entrypoint and module wiring)",
+    "index.html (inline empty favicon)"
+  ]
+}
