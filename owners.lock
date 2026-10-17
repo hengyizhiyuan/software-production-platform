@@ -11,8 +11,8 @@
     "guardian": {
       "repository": "https://github.com/hengyizhiyuan/guardian.git",
       "branch": "codex/usability-continuity-20261017",
-      "commit": "41ee9d5e9d25e9455c84c7346ab93887af0efd8c",
-      "source_digest": "a861fa5c702dfa92cdc8448c408c70f8296e57668ff78aa18dbe68e961b10f37"
+      "commit": "26bb402563bb781731749b7b8fb4fe5aed74f669",
+      "source_digest": "e5973aa54cca9ecfbf339a872fa8683a957519c2d6603dc4fccc19b16b2a89a9"
     }
   }
 }

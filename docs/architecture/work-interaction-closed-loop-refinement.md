@@ -262,6 +262,20 @@ facts and revisions remain historical. `overwrite Work JSON from latest chat`
 is prohibited. Facts, Verification, Runtime evidence, and Baselines remain
 owned by their source domains and are referenced by identity.
 
+At the implementation boundary, a supplemental turn need not repeat an original
+confirmed Human requirement. The source-preserving production brief v3 keeps
+that admitted assertion's complete quote, value, provenance and original record
+identity, assigning actual current content Verification and pending exact
+Candidate review readiness. It neither reinterprets the assertion nor proves
+acceptance. The current production must require Preview and retain no delivery
+authorization; missing either contribution, unresolved authority or an unknown
+effect remains blocking. Historical v1/v2 bindings keep their original meanings.
+The static Web Verification adapter may observe bounded exact local MP3/PCM WAVE
+assets with their byte identities and format metadata alongside implementation
+text. Such observations prove neither playback nor subjective audio quality;
+actual Verification, served Preview, Guardian and Human acceptance remain owned
+by their existing gates.
+
 ### 4.7 Work Transition Proposal
 
 When input should not mutate the focused Work, WIC may propose continuation of

@@ -20,7 +20,9 @@ from spg.domain.semantic_provenance import SemanticOrigin
 
 CONTRACT = "source-preserving-production-brief-v1"
 STAGED_CONTRACT = "source-preserving-production-brief-v2"
-CONTRACTS = {CONTRACT, STAGED_CONTRACT}
+CONTINUITY_CONTRACT = "source-preserving-production-brief-v3"
+STAGED_CONTRACTS = {STAGED_CONTRACT, CONTINUITY_CONTRACT}
+CONTRACTS = {CONTRACT, *STAGED_CONTRACTS}
 REVIEW_METHOD = "EXACT_CANDIDATE_REVIEW_READINESS"
 
 
@@ -28,7 +30,17 @@ def production_brief_bindings(revision, ir, inventory, *, contract=None):
     if contract is not None:
         return _production_brief_bindings(revision, ir, inventory, contract=contract)
     return (_production_brief_bindings(revision, ir, inventory, contract=CONTRACT)
-        or _production_brief_bindings(revision, ir, inventory, contract=STAGED_CONTRACT))
+        or _production_brief_bindings(revision, ir, inventory, contract=STAGED_CONTRACT)
+        or _production_brief_bindings(revision, ir, inventory, contract=CONTINUITY_CONTRACT))
+
+
+def current_assertion_source(fact, revision):
+    """An admitted Human fact survives a later turn that only supplies a delta."""
+    return (fact.is_current and fact.relation is SemanticRelation.ACCEPTANCE_ASSERTION
+        and fact.authority.value == "HUMAN_EXPLICIT" and fact.epistemic_status.value == "CONFIRMED"
+        and fact.qualifiers.get("negated") is not True and bool(fact.provenance.source_text)
+        and bool(fact.provenance.source_record_ids)
+        and set(fact.provenance.source_record_ids) <= set(revision.source_record_ids))
 
 
 def advisory_question_ids(ir):
@@ -82,7 +94,7 @@ def _production_brief_bindings(revision, ir, inventory, *, contract):
     Selection uses admitted types and exact field derivations. It does not
     classify words, split meaning, or ask a critic to approve a copied request.
     """
-    if contract == STAGED_CONTRACT:
+    if contract in STAGED_CONTRACTS:
         inventory = staged_inventory(ir, inventory)
     from spg.application.governed_obligations import (
         FULFILLMENT_CAPABILITIES, _TYPED_EFFECT_ROUTES, _human_clause_item,
@@ -104,7 +116,8 @@ def _production_brief_bindings(revision, ir, inventory, *, contract):
     # for copying an admitted brief to actual artifact verification.
     if any(goal.systemic_design or goal.unresolved_arguments for goal in ir.current_production):
         return None
-    staged = contract == STAGED_CONTRACT
+    staged = contract in STAGED_CONTRACTS
+    continuity = contract == CONTINUITY_CONTRACT
     items = {item.item_id: item for item in ir.items}
     clauses = {clause.clause_id: clause for clause in ir.clauses}
     future = tuple(c for c in ir.clauses if staged and c.temporal_scope == "FUTURE"
@@ -139,6 +152,13 @@ def _production_brief_bindings(revision, ir, inventory, *, contract):
                     methods = ("RETAIN_CONTEXT",)
                 elif staged and fact.reference_role is None and isinstance(fact.value, str) and fact.value in inventory["exact_target_paths"]:
                     methods = ("ARTIFACT_CONTENT",)
+            elif (continuity and current_assertion_source(fact, revision)
+                    and all(g.preview_required for g in ir.current_production)
+                    and not any(g.delivery_authorized for g in ir.current_production)):
+                # Copy the entire source to both real owners. The current
+                # content check cannot stand in for later Preview or Human
+                # decisions; neither has happened at this admission boundary.
+                methods = ("ARTIFACT_CONTENT", "REVIEW_READINESS")
             elif (staged and fact.relation is SemanticRelation.ACCEPTANCE_ASSERTION
                     and not any(g.acceptance_required or g.preview_required for g in ir.current_production) and any(
                     c.temporal_scope == "CURRENT" and c.source_record_id in fact.provenance.source_record_ids

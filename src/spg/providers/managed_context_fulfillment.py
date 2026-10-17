@@ -408,8 +408,8 @@ def _future_gate_evidence(bindings, native_record):
 
 
 def _retained_context_route(binding, revision, ir, bindings=()):
-    from spg.application.production_brief import STAGED_CONTRACT, observed_repository_annotation
-    if (bindings and (bindings[0].formation_receipt or {}).get("source_role_contract") == STAGED_CONTRACT
+    from spg.application.production_brief import STAGED_CONTRACTS, observed_repository_annotation
+    if (bindings and (bindings[0].formation_receipt or {}).get("source_role_contract") in STAGED_CONTRACTS
             and binding.source_kind.value == "FACT"):
         fact = next((f for f in revision.engineering_semantic_facts if f.id == binding.fact_id), None)
         if fact is not None and observed_repository_annotation(fact, ir):
@@ -810,11 +810,11 @@ def _exact_fact_git_scope(reference, binding, targets, changed, *, revision=None
 
 def _review_readiness_pending(binding, revision, ir, bindings, native_record):
     """Check the armed envelope; later actual Preview remains unproved here."""
-    from spg.application.production_brief import STAGED_CONTRACT, REVIEW_METHOD
+    from spg.application.production_brief import STAGED_CONTRACTS, REVIEW_METHOD
     from spg.application.governed_obligations import validate_fulfillment_projection
     from spg.domain.governed_obligation import fulfillment_source_ref
     if (not bindings or not native_record or binding not in bindings
-            or (bindings[0].formation_receipt or {}).get("source_role_contract") != STAGED_CONTRACT
+            or (bindings[0].formation_receipt or {}).get("source_role_contract") not in STAGED_CONTRACTS
             or binding.evidence_method != REVIEW_METHOD or binding.owner.value != "CANDIDATE"
             or binding.phase.value != "CANDIDATE_SEAL"
             or binding.gate_ref != "candidate-owner:review-readiness"
