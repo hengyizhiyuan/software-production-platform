@@ -55,3 +55,17 @@ protect both paths. The source-language/provider check also exercises actual
 bounded citation feedback and exhausted termination without visible provisional
 acknowledgements or authority changes. Chinese coalesced WIC expression uses
 Chinese policy as well, preserving its exact frame/meaning retention contract.
+
+The real revision-2 continuation crossed WIC but hit formation again: nine
+retained exact Work constraints have no origin in the current delta IR. A
+read-only source-only capture reproduces brief v1–v3 returning unavailable.
+Version v4 uses the exact admitted successor Work as its full constraint source,
+copying content to pending artifact Verification. Initial/no-parent revisions,
+unknown typed prohibitions, transformed quotes and incomplete inventories remain
+refused. The actual source-only fixture and unrelated retained-constraint cases
+pass (54 focused tests). Independent Guardian now passes 366 tests at canonical
+commit c7c3fd8a1d093cc1c4e9ee977f7f44bf5c54528e, source digest
+404daa69072bf9788feacad3f96d6f0fc0c62ef64f61ee81aad8250185acfca9.
+This is pending-content handoff qualification, not an executed Candidate PASS.
+The final provider/follow-up selection passes 99 tests, and four isolated
+PostgreSQL revision/active-cycle cases pass after the continuity correction.

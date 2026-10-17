@@ -289,6 +289,15 @@ by their existing gates.
 The same bounded Web scope with local audio must receive its existing managed
 Product/Work/Source ECF lineage; an asset cannot silently remove that context.
 
+A successor Work revision owns the complete retained constraint text, even
+when its current IR contains only the latest Human delta. Source-preserving
+brief v4 copies those whole Work-owned constraints to pending exact artifact
+content Verification without requiring new current-Human clauses. It is bounded
+to successor Work revisions and preserves all source identities and complete
+inventory. It grants no permission or semantic/evidence PASS. Typed current
+prohibitions, unresolved facts, capability gates and independent downstream
+checks remain mandatory; historical brief v1–v3 producer semantics are unchanged.
+
 ### 4.7 Work Transition Proposal
 
 When input should not mutate the focused Work, WIC may propose continuation of

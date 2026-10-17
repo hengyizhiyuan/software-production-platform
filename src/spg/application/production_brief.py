@@ -21,7 +21,8 @@ from spg.domain.semantic_provenance import SemanticOrigin
 CONTRACT = "source-preserving-production-brief-v1"
 STAGED_CONTRACT = "source-preserving-production-brief-v2"
 CONTINUITY_CONTRACT = "source-preserving-production-brief-v3"
-STAGED_CONTRACTS = {STAGED_CONTRACT, CONTINUITY_CONTRACT}
+REVISED_WORK_CONTRACT = "source-preserving-production-brief-v4"
+STAGED_CONTRACTS = {STAGED_CONTRACT, CONTINUITY_CONTRACT, REVISED_WORK_CONTRACT}
 CONTRACTS = {CONTRACT, *STAGED_CONTRACTS}
 REVIEW_METHOD = "EXACT_CANDIDATE_REVIEW_READINESS"
 
@@ -31,7 +32,8 @@ def production_brief_bindings(revision, ir, inventory, *, contract=None):
         return _production_brief_bindings(revision, ir, inventory, contract=contract)
     return (_production_brief_bindings(revision, ir, inventory, contract=CONTRACT)
         or _production_brief_bindings(revision, ir, inventory, contract=STAGED_CONTRACT)
-        or _production_brief_bindings(revision, ir, inventory, contract=CONTINUITY_CONTRACT))
+        or _production_brief_bindings(revision, ir, inventory, contract=CONTINUITY_CONTRACT)
+        or _production_brief_bindings(revision, ir, inventory, contract=REVISED_WORK_CONTRACT))
 
 
 def current_assertion_source(fact, revision):
@@ -117,7 +119,11 @@ def _production_brief_bindings(revision, ir, inventory, *, contract):
     if any(goal.systemic_design or goal.unresolved_arguments for goal in ir.current_production):
         return None
     staged = contract in STAGED_CONTRACTS
-    continuity = contract == CONTINUITY_CONTRACT
+    continuity = contract in {CONTINUITY_CONTRACT, REVISED_WORK_CONTRACT}
+    revised_work = contract == REVISED_WORK_CONTRACT
+    if revised_work and (getattr(revision, "revision_number", 1) < 2
+            or not getattr(revision, "previous_revision_id", None)):
+        return None
     items = {item.item_id: item for item in ir.items}
     clauses = {clause.clause_id: clause for clause in ir.clauses}
     future = tuple(c for c in ir.clauses if staged and c.temporal_scope == "FUTURE"
@@ -217,6 +223,13 @@ def _production_brief_bindings(revision, ir, inventory, *, contract):
                 # provenance needs no invented second negative Human clause.
                 methods = (("ARTIFACT_CONTENT", "REVIEW_READINESS") if staged and future and not direct else ("ARTIFACT_CONTENT",) if not direct else tuple(dict.fromkeys(
                     method for s in origins for method in assignments[s["source_ref"]])))
+            elif revised_work:
+                # The exact admitted Work revision owns the complete retained
+                # requirement, even when the current IR contains only a delta.
+                # Copy it whole to actual content Verification, not to an effect
+                # gate or a semantic PASS. Typed current prohibitions/facts above
+                # keep their independent mandatory routes and refusal checks.
+                methods = ("ARTIFACT_CONTENT",)
         if not methods:
             return None
         assignments[source["source_ref"]] = methods

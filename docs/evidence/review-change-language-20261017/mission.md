@@ -30,3 +30,14 @@ Human 于 2026-10-17 授权两项工作：中文需求尽量以中文交给模�
 发布流程部署，然后只恢复此原 Turn，观察新修订、真实后继加工及 Preview/Guardian。
 保留旧版本、已失败事件与所有累计执行边界；不恢复其他暂停 Work，不替 Human
 接受候选、整合、发布或交付。实际资格与局部测试/设计意图区分记录。
+
+首次实际恢复已跨过 WIC，建立 revision 2
+`7dc3a612-2de8-5ff1-8f24-4f7aad0a5e34`，保留原九条约束及新增四条。
+Steering 已重建四文件有界生产提案，但 formation 再次停止。确切当前 Work/IR 的
+只读复现证明：原九条约束不在本轮 delta IR 中，v1–v3 无法交接完整已准入 Work，
+错误地要求旧要求重新获得本轮语句证明。依 §13.4，在现有来源保真交接中增加 v4：
+仅 successor Work revision 可将完整 Work-owned 约束原样交给实际内容 Verification；
+不另造 Human 子句、支持引用或语义 PASS。已有事实、当前 typed prohibitions、effect
+gate、版本身份和独立 Guardian 保留；历史 v1–v3 不变，失败记录保留。修复后仅在
+此 revision 的现有 attention Owner 启动正常后继恢复，不重复已完成 Turn、扩预算或
+接纳旧候选。
