@@ -1,0 +1,102 @@
+{
+  "application_revision": "dae74a146b32438bdf8cfc5044383a3685fd488d",
+  "work_id": "f6cf8820-f461-53b1-8b3e-193b187c108e",
+  "snapshot_id": "97758418-2bed-51c9-9cfc-2aac332e3e96",
+  "candidate_revision": "9a234dff393d51c53dc00fe4a300bb7812cd956e",
+  "candidate_tree": "3f9a1e1c963f7e3f62873eb7c2adfee9779d1144",
+  "attempt_id": "3b746f39-b6d3-4806-aff5-c1b3b48d1ccb",
+  "old_verification_records_preserved": [
+    "42177cb4-1688-5edb-9f5e-71cc47abaace",
+    "32772d84-0578-5591-9e99-cfb40ce48870"
+  ],
+  "records": [
+    {
+      "id": "ac1dbe60-23fe-5d30-aa08-4aabb0f52d2c",
+      "obligation": "PATH_SCOPE",
+      "result": "PASS",
+      "provider_version": "v5-managed-context-source-correspondence",
+      "failure_code": null,
+      "protected_context_failure": null,
+      "binding_results": [
+        {
+          "source_ref": "semantic-fact:11a270f1-a1df-5e79-a861-6ba8cf49af12",
+          "disposition": "VERIFIED_CURRENT",
+          "current_stage_satisfied": true
+        },
+        {
+          "source_ref": "semantic-fact:9e69fdaa-2743-51f1-938e-560cb3eaa695",
+          "disposition": "VERIFIED_CURRENT",
+          "current_stage_satisfied": true
+        },
+        {
+          "source_ref": "ir-clause:14e0fb6a-7273-599d-b69b-49f0858952f0:si-decision-single-page:cl-1",
+          "disposition": "VERIFIED_CURRENT",
+          "current_stage_satisfied": true
+        },
+        {
+          "source_ref": "ir-constraint:si-constraint-no-auth:cl-1",
+          "disposition": "VERIFIED_CURRENT",
+          "current_stage_satisfied": true
+        },
+        {
+          "source_ref": "ir-clause:14e0fb6a-7273-599d-b69b-49f0858952f0:si-production-single-page:cl-1",
+          "disposition": "VERIFIED_CURRENT",
+          "current_stage_satisfied": true
+        },
+        {
+          "source_ref": "work-constraint:75b59841-9d53-5cd9-96af-bca15e184347:0",
+          "disposition": "VERIFIED_CURRENT",
+          "current_stage_satisfied": true
+        },
+        {
+          "source_ref": "work-constraint:75b59841-9d53-5cd9-96af-bca15e184347:1",
+          "disposition": "VERIFIED_CURRENT",
+          "current_stage_satisfied": true
+        },
+        {
+          "source_ref": "work-constraint:75b59841-9d53-5cd9-96af-bca15e184347:2",
+          "disposition": "VERIFIED_CURRENT",
+          "current_stage_satisfied": true
+        },
+        {
+          "source_ref": "work-constraint:75b59841-9d53-5cd9-96af-bca15e184347:3",
+          "disposition": "VERIFIED_CURRENT",
+          "current_stage_satisfied": true
+        },
+        {
+          "source_ref": "work-constraint:75b59841-9d53-5cd9-96af-bca15e184347:4",
+          "disposition": "VERIFIED_CURRENT",
+          "current_stage_satisfied": true
+        },
+        {
+          "source_ref": "work-constraint:75b59841-9d53-5cd9-96af-bca15e184347:5",
+          "disposition": "VERIFIED_CURRENT",
+          "current_stage_satisfied": true
+        },
+        {
+          "source_ref": "work-constraint:75b59841-9d53-5cd9-96af-bca15e184347:6",
+          "disposition": "VERIFIED_CURRENT",
+          "current_stage_satisfied": true
+        },
+        {
+          "source_ref": "work-context:75b59841-9d53-5cd9-96af-bca15e184347:0",
+          "disposition": "CONTEXT_RETAINED",
+          "current_stage_satisfied": true
+        }
+      ]
+    },
+    {
+      "id": "32aded1c-9864-56ed-8b10-35fc10c775c0",
+      "obligation": "GIT_DIFF_CHECK",
+      "result": "PASS",
+      "provider_version": "v5-managed-context-source-correspondence",
+      "failure_code": null,
+      "protected_context_failure": null,
+      "binding_results": []
+    }
+  ],
+  "admissibility": "ADMISSIBLE",
+  "work_unit_condition": "SATISFIED",
+  "artifact_regenerated": false,
+  "human_acceptance": "PENDING"
+}
