@@ -150,9 +150,9 @@ class StaticProtectedContextVerifier:
             and any(PurePosixPath(t.path).suffix in TEXT_SUFFIXES for t in contract.exact_targets)
             and all(PurePosixPath(t.path).suffix in TEXT_SUFFIXES | AUDIO_SUFFIXES for t in contract.exact_targets))
 
-    def for_candidate(self, request, task, contract, repository, baseline, *, bindings, receipt_recorder):
+    def for_candidate(self, request, task, contract, repository, baseline, *, bindings, receipt_recorder, comparison_candidates=()):
         return CandidateContentChecks(self, request, task, contract, repository, baseline,
-                                      tuple(bindings), receipt_recorder)
+                                      tuple(bindings), receipt_recorder, comparison_candidates)
 
     def verify_fulfillment_bindings(self, request, task, contract, repository, baseline, *, bindings, receipt_recorder=None, fulfillment_bindings=None):
         selected = self._derived_obligations(bindings, request.decision_context_fingerprint)
@@ -204,7 +204,7 @@ class StaticProtectedContextVerifier:
         return tuple(selected)
 
     def verify(self, request, task, contract, repository, baseline, *, obligations=None, receipt_recorder=None,
-               fulfillment_bindings=(), derived_bindings=()):
+               fulfillment_bindings=(), derived_bindings=(), comparison_candidates=()):
         if (task is None or task.decision_context is None
                 or task.decision_context.package_fingerprint != request.decision_context_fingerprint
                 or tuple(task.decision_context.protected_obligations) != request.protected_context_obligations):
@@ -277,6 +277,7 @@ class StaticProtectedContextVerifier:
             "protected_obligations": [item.model_dump(mode="json") for item in selected],
             "candidate_sources": materials,
             "candidate_assets": assets,
+            "comparison_candidates": comparison_candidates,
             "immutable_fact_references": original_facts,
             "assigned_fulfillment_bindings": [binding.model_dump(mode="json") for binding in fulfillment_bindings],
             "current_component_contributions": [{"context_class": key[0], "semantic_key": key[1],
@@ -332,6 +333,9 @@ class StaticProtectedContextVerifier:
             " Return check_ref from each protected_obligations entry instead of copying "
             "context_class or semantic_key. The Owner resolves it to the unchanged exact "
             "identity; every supplied check_ref must occur exactly once. Never invent a reference.")
+        instructions += (" comparison_candidates are exact sealed predecessor artifacts for relative "
+            "change comparison only, not trusted baselines or current PASS/permission. Use them when "
+            "checking refinement or preservation; all positive witnesses must still quote current candidate_sources.")
         from spg.application.model_language import uses_chinese
         if uses_chinese(task.objective):
             instructions = (
@@ -350,6 +354,8 @@ class StaticProtectedContextVerifier:
                 "证据无法判断返回 UNVERIFIABLE；不伪造证据，不改验收标准，不自动接受产品。"
                 "不创建或执行代码、测试、shell。判断理由和新自然语言保持中文，确切引文、代码、路径不翻译。"
                 "仅返回 schema 中 checks，每项含 check_ref、disposition、reason、witnesses。")
+            instructions += ("comparison_candidates 是原事项上一修订的确切封存成果，仅用于比较改进与保留行为，"
+                "不成为可信基线，不赋予本轮通过或权限。相对修改应结合它比较；SATISFIED 的 witness 仍须来自当前 candidate_sources。")
         previous_checks = tuple(Check.model_validate(c) for c in recorder.previous_checks(component))
         model_attempts = []
         completed = recorder.completed(component)
@@ -463,6 +469,8 @@ class StaticProtectedContextVerifier:
                 "model_attempts": model_attempts,
                 "verification_candidate_receipts": recorder.metadata(),
                 "source_component_evidence": contributions[(check.context_class, check.semantic_key)],
+                "comparison_candidate_references": [{key: value for key, value in item.items() if key != "sources"}
+                    for item in comparison_candidates],
                 "model": {"provider": response.provider.value, "effective_model": response.effective_model,
                     "request_id": response.request_id, "usage": asdict(response.usage)}})
             if (check.context_class, check.semantic_key) in derived_by_key:
@@ -478,11 +486,12 @@ class CandidateContentChecks:
     never ask the model again just because a downstream projection has another name.
     No cache survives the request or crosses an artifact/source/responsibility change.
     """
-    def __init__(self, verifier, request, task, contract, repository, baseline, bindings, recorder):
+    def __init__(self, verifier, request, task, contract, repository, baseline, bindings, recorder, comparison_candidates=()):
         self.verifier = verifier
         self.basis = (request, task, contract, repository, baseline)
         self.bindings = bindings
         self.recorder = recorder
+        self.comparison_candidates = tuple(comparison_candidates)
         self.checks = None
 
     def supports(self, contract):
@@ -502,7 +511,8 @@ class CandidateContentChecks:
         obligations = (*self.verifier._derived_obligations(current, request.decision_context_fingerprint), *policy)
         self.checks = self.verifier.verify(request, task, contract, repository, baseline,
             obligations=obligations, receipt_recorder=self.recorder,
-            fulfillment_bindings=self.bindings, derived_bindings=current) if obligations else []
+            fulfillment_bindings=self.bindings, derived_bindings=current,
+            comparison_candidates=self.comparison_candidates) if obligations else []
 
     def _assert_basis(self, request, task, contract, repository, baseline):
         if (request, task, contract, repository, baseline) != self.basis:

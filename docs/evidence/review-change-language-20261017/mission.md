@@ -64,3 +64,13 @@ PROTECTED_CONTEXT_INCOMPLETE_COVERAGE。允许模型评价语义与源码证据�
 形成新的 exact-subject Verification，不更换游戏源码、不新建生成 Attempt，
 旧两次失败作为旧 provider-version 证据保留。本次用户要求修复并继续的授权
 覆盖这次系统修复后的验证恢复，不需要用户重复业务意图。
+
+短引用恢复已完成真实独立检查：不再出现 UUID 覆盖错误；剩余唯一内容判断为
+UNVERIFIABLE，确切原因是无法取得上一版角色文件作对照，非实现源码缺失。
+该 Work 的 immediate predecessor revision 有已封存且验证通过的未接受候选。
+在既有 Verification 的来源读取中补齐该候选，限制相同 Work 的直接父修订、
+当前修订建立之前封存、相同仓库身份、精确 commit/tree 和原 PASS 记录；只读
+当前准入目标内的有界文本文件，附候选/父修订身份及文件散列。它只作相对改动
+的对照，不改变当前 Source Baseline、授予权限、接受旧候选或继承旧 PASS。
+当前 witness 仍必须来自当前成果。补齐的是缺失输入，不减验收内容、不重写
+原 negative/unknown，新的 provider version 在确切同一游戏 tree 上独立重验。

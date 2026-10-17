@@ -843,6 +843,12 @@ quotes still fail within the same two-candidate repair budget. Exact legacy
 receipts remain readable. A corrected provider version produces separate
 exact-subject evidence; prior failed checks and their budgets remain historical
 facts, never rewritten as PASS. Chinese content checks use Chinese instructions.
+For relative refinement checks, Verification may read the exact already-sealed
+Candidate of the same Work's immediate predecessor revision. Repository,
+commit/tree, original Verification and sealing-before-revision identities are
+checked, and only bounded current-target text enters the comparison. This input
+grants no current PASS or source promotion; implementation witnesses still quote
+the current artifact. Absent comparison stays absent rather than being invented.
 
 A terminal BLOCKED production outcome stops Work convergence and produces durable
 diagnostic attention. Human intervention measurement counts distinct source-bound

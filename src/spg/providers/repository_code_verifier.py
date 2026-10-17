@@ -69,7 +69,7 @@ class RepositoryCodeVerifier:
         self.timeout_seconds = timeout_seconds
         self._binding = VerificationProviderBinding(
             provider_identity="provider:repository-code-contract",
-            provider_version="v6-owner-bound-check-references" if context_verifier is not None else "v1",
+            provider_version="v7-sealed-predecessor-comparison" if context_verifier is not None else "v1",
         )
 
     @property
@@ -200,10 +200,14 @@ class RepositoryCodeVerifier:
             if (content_verifier is not None and gate_bindings
                     and any(b.projection_inventory_fingerprint for b in gate_bindings)
                     and hasattr(content_verifier, "for_candidate")):
+                from spg.application.verification_comparison import predecessor_candidate_sources
+                comparisons = predecessor_candidate_sources(self.database,
+                    None if admitted_revision is None else admitted_revision.id, contract)
                 content_verifier = content_verifier.for_candidate(request,
                     work_unit.completion_contract.task_contract, contract,
                     dispatch.workspace.repository_path, source.repository_revision,
-                    bindings=gate_bindings, receipt_recorder=receipt_recorder)
+                    bindings=gate_bindings, receipt_recorder=receipt_recorder,
+                    comparison_candidates=comparisons)
             plan_repair = (None if self.context_verifier is None else StaticHTMLPlanRepair(
                 self.context_verifier.runtime_factory, receipt_recorder=receipt_recorder))
             result, metadata = self._evaluate(

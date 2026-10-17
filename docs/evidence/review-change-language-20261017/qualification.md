@@ -98,3 +98,15 @@ introduced. Provider versions are advanced explicitly for separate exact-subject
 Verification; the actual old failed records are retained. Current working
 preview opened in the browser, and campus-style and specific skirt selection
 both visibly updated before the browser bridge later timed out.
+
+The first live short-reference assessment returned an actual content FAIL with
+one UNVERIFIABLE comparison: prior character artwork was absent from its input.
+This is retained as Verification 14c97ac5-e71c-5d30-98cb-b36fb1815b7d; it is not
+claimed PASS. The Verification source reader now selects only the exact sealed
+Candidate of the immediate predecessor Work revision, sealed before the current
+revision, with matching repository/commit/tree and actual original PASS records.
+It supplies bounded current-target text for comparison only. Eleven source-owner
+cases use real Git, including absent parent, other revision, future candidate,
+unknown verification, source/tree/workspace drift and no source promotion. The
+combined comparison/content/brief/receipt selection passes 66 tests. Actual final
+assessment remains a separate live obligation on the unchanged game tree.
