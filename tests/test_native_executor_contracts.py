@@ -2752,3 +2752,83 @@ def test_local_process_can_list_workspace_without_shell_or_inline_code(tmp_path)
     escaped = request.model_copy(update={'proposal': request.proposal.model_copy(update={'arguments': {'argv': ['ls', '../outside'], 'cwd': '.'}})})
     with pytest.raises(ValueError, match='escape'):
         asyncio.run(LocalNativeToolHost(tmp_path).registry().execute(escaped))
+
+
+def test_first_absence_is_source_evidence_but_repeated_absence_cannot_buy_budget():
+    binding, contract = _binding()
+    binding = binding.model_copy(update={'capability_grants': (
+        CapabilityGrant(identity='file.read', version='1'), CapabilityGrant(identity='file.write', version='1')),
+        'resource_envelope': binding.resource_envelope.model_copy(update={'max_inference_submissions': 6, 'max_tool_effects': 6})})
+
+    async def read(request):
+        output = {'path': 'src/new.html', 'exists': False, 'content': None, 'bytes': 0}
+        return ToolExecutionResult(delivery_id=request.delivery_id, tool_identity='file.read',
+            condition=EffectCondition.SETTLED, output=output, output_digest=canonical_digest(output))
+
+    async def write(request):
+        raise AssertionError('No write was proposed')
+
+    reads = tuple(InferenceResponse(action=InferenceAction.CONTINUE, summary='inspect', working_plan=_plan(i+2),
+        tool_calls=(ToolCallProposal(proposal_index=0, tool_identity='file.read', arguments={'path': 'src/new.html'}),)) for i in range(4))
+    inference = ScriptedInferenceAdapter((*reads, InferenceResponse(action=InferenceAction.WAITING_RESOURCE,
+        summary='no progress', working_plan=_plan(6))))
+    result = asyncio.run(NativeExecutorKernel(inference=inference,
+        tools=NativeToolRegistry((ToolDefinition('file.read','1','read',{},'READ',read),
+            ToolDefinition('file.write','1','write',{},'LOCAL_MUTATION',write))), checkpoints=_Checkpoints()).run(
+                binding=binding, contract=contract, worker_epoch=1, working_plan=_plan()))
+    progress = [next(f for f in r.context_facts if f['fact_type']=='EXECUTION_PROGRESS') for r in inference.requests]
+    assert [f['consecutive_ineffective_rounds'] for f in progress] == [0, 0, 1, 2, 3]
+    assert 'file.write' in {t['identity'] for t in inference.requests[3].available_tools}
+    assert inference.requests[4].available_tools == ()
+    assert result.terminal_outcome is AttemptTerminalOutcome.UNABLE_TO_COMPLETE
+    assert result.failure_family == 'EXECUTOR_NO_PROGRESS'
+    absent = asyncio.run(read(SimpleNamespace(delivery_id=uuid4())))
+    empty = absent.model_copy(update={'output': {'path':'src/new.html','exists':True,'content':''}})
+    assert NativeExecutorKernel._source_observation(absent) != NativeExecutorKernel._source_observation(empty)
+    assert NativeExecutorKernel._source_observation(absent.model_copy(update={'condition':EffectCondition.UNKNOWN})) is None
+
+
+def test_stalled_inspected_creation_focuses_existing_write_then_restores_checks(tmp_path):
+    binding, contract = _binding()
+    payload = {**contract.contract_payload, 'completion_contract': {'change_contract': {
+        'exact_targets': [{'operation':'CREATE','path':'src/new.html'}]}}}
+    contract = contract.model_copy(update={'contract_payload':payload,'contract_digest':canonical_digest(payload)})
+    binding = binding.model_copy(update={'pwu_contract_digest':contract.contract_digest,
+        'capability_grants':(CapabilityGrant(identity='file.read',version='1'),
+            CapabilityGrant(identity='file.write',version='1',scope={'paths':['src']})),
+        'resource_envelope':binding.resource_envelope.model_copy(update={'max_inference_submissions':4,'max_tool_effects':4})})
+    reads = tuple(InferenceResponse(action=InferenceAction.CONTINUE, summary='inspect target', working_plan=_plan(i+2),
+        tool_calls=(ToolCallProposal(proposal_index=0,tool_identity='file.read',arguments={'path':'src/new.html'}),)) for i in range(2))
+    inference = ScriptedInferenceAdapter((*reads,
+        InferenceResponse(action=InferenceAction.CONTINUE,summary='produce admitted artifact',working_plan=_plan(4),
+            tool_calls=(ToolCallProposal(proposal_index=0,tool_identity='file.write',arguments={'path':'src/new.html','content':'<main>New page</main>'}),)),
+        InferenceResponse(action=InferenceAction.RESULT_READY,summary='submit for independent verification',working_plan=_plan(5),
+            result_claim={'output_vector':{'files':['src/new.html']},'evidence_ids':[]})))
+    result = asyncio.run(NativeExecutorKernel(inference=inference,tools=LocalNativeToolHost(tmp_path).registry(),
+        checkpoints=_Checkpoints()).run(binding=binding,contract=contract,worker_epoch=1,working_plan=_plan()))
+    assert [t['identity'] for t in inference.requests[2].available_tools] == ['file.write']
+    assert {t['identity'] for t in inference.requests[3].available_tools} == {'file.read','file.write'}
+    assert (tmp_path/'src/new.html').read_text() == '<main>New page</main>'
+    assert result.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
+    assert result.inference_submissions == 4 and result.tool_effects == 3
+    assert inference.requests[2].context_facts[0]['payload'] == payload
+    grants = next(f['capability_grants'] for f in inference.requests[2].context_facts if f['fact_type']=='EXECUTION_ENVELOPE')
+    assert grants == [g.model_dump(mode='json') for g in binding.capability_grants]
+
+
+@pytest.mark.parametrize('boundary', ['existing','unobserved','modify','unknown','prior-effect','no-write','diagnostic-only'])
+def test_creation_focus_never_supplies_missing_grants_or_assumes_absent_source(boundary):
+    _, contract = _binding()
+    payload={'completion_contract':{'change_contract':{'exact_targets':[{'operation':'CREATE','path':'src/new.html'}]}}}
+    if boundary=='modify':payload['completion_contract']['change_contract']['exact_targets'][0]['operation']='MODIFY'
+    contract=contract.model_copy(update={'contract_payload':payload})
+    output={'path':'src/new.html','exists':boundary=='existing','content':None}
+    receipts=(ToolExecutionResult(delivery_id=uuid4(),tool_identity='file.read',
+        condition=EffectCondition.UNKNOWN if boundary=='unknown' else EffectCondition.SETTLED,
+        output=output,output_digest=canonical_digest(output)),)
+    if boundary=='unobserved':receipts=()
+    if boundary=='prior-effect':receipts=(*receipts,ToolExecutionResult(delivery_id=uuid4(),tool_identity='process.run',
+        condition=EffectCondition.SETTLED,output={'returncode':0},output_digest=canonical_digest({'returncode':0})))
+    tools=({'identity':'file.read'},) if boundary in {'no-write','diagnostic-only'} else ({'identity':'file.read'},{'identity':'file.write'})
+    assert NativeExecutorKernel._creation_repair_tools(tools,contract=contract,
+        previous_results=receipts,ineffective_rounds=1)==tools

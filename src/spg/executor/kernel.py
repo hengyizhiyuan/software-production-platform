@@ -181,6 +181,15 @@ class NativeExecutorKernel:
                 )
 
             step_sequence += 1
+            available_tools = tuple(
+                item for item in self.tools.contracts()
+                if item.get("identity") in {grant.identity for grant in binding.capability_grants}
+                and (not evidence_required or item.get("identity") in self._DIAGNOSTIC_TOOLS)
+            ) if ineffective_rounds < 3 else ()
+            available_tools = self._creation_repair_tools(
+                available_tools, contract=contract, previous_results=prior_results,
+                ineffective_rounds=ineffective_rounds,
+            )
             request = self.context.assemble(
                 binding=binding,
                 contract=contract,
@@ -192,21 +201,12 @@ class NativeExecutorKernel:
                 # follow-up verification may still be required. The ineffective
                 # round bound below still forces a terminal decision after three
                 # rounds without new source evidence or settled mutations.
-                available_tools=(
-                    tuple(
-                        item for item in self.tools.contracts()
-                        if item.get("identity") in {
-                            grant.identity for grant in binding.capability_grants
-                        }
-                        and (not evidence_required or item.get("identity") in self._DIAGNOSTIC_TOOLS)
-                    )
-                    if ineffective_rounds < 3
-                    else ()
-                ),
+                available_tools=available_tools,
                 residual_obligations=residual_obligations,
                 previous_results=prior_results,
                 checkpoint=prior_checkpoint,
                 repair_history=repair_history,
+                ineffective_rounds=ineffective_rounds,
             )
             inference_step_id = await self.audit.begin_inference(request)
             try:
@@ -538,7 +538,38 @@ class NativeExecutorKernel:
         )
 
     @staticmethod
-    def _source_observation(receipt: ToolExecutionResult) -> tuple[str, str] | None:
+    def _creation_repair_tools(tools, *, contract, previous_results, ineffective_rounds):
+        """Focus a stalled, observed new-file creation on its existing write grant.
+
+        This is one inference's HOW selection, never a new grant or fulfillment
+        verdict. Any effect/uncertainty or existing target keeps the full surface;
+        after a successful write the normal inspection/verification tools return.
+        """
+        if not ineffective_rounds or not any(t.get("identity") == "file.write" for t in tools):
+            return tools
+        completion = contract.contract_payload.get("completion_contract", {})
+        change = completion.get("change_contract") if isinstance(completion, dict) else None
+        targets = change.get("exact_targets") if isinstance(change, dict) else None
+        if (not isinstance(targets, list) or not targets
+                or any(not isinstance(t, dict) or t.get("operation") != "CREATE"
+                    or not isinstance(t.get("path"), str) for t in targets)):
+            return tools
+        observations = {}
+        read_tools = {"file.read", "git.status", "git.diff", "preview.inspect"}
+        for result in previous_results:
+            if result.condition is EffectCondition.UNKNOWN or (
+                    result.tool_identity not in read_tools
+                    and result.output.get("effect_observed") is not False):
+                return tools
+            if (result.tool_identity == "file.read" and result.condition is EffectCondition.SETTLED
+                    and isinstance(result.output.get("path"), str)):
+                observations[result.output["path"]] = result.output.get("exists")
+        if any(observations.get(t["path"]) is not False for t in targets):
+            return tools
+        return tuple(t for t in tools if t.get("identity") == "file.write")
+
+    @staticmethod
+    def _source_observation(receipt: ToolExecutionResult) -> tuple[str, bool, str] | None:
         """Count observed source changes, excluding receipt/process identities.
 
         The full checkpoint frontier survives Self-Resume. Re-reading unchanged
@@ -548,10 +579,11 @@ class NativeExecutorKernel:
         output = receipt.output
         if (receipt.tool_identity == "file.read"
                 and receipt.condition is EffectCondition.SETTLED
-                and output.get("exists") is True
-                and isinstance(output.get("path"), str)
-                and isinstance(output.get("content"), str)):
-            return output["path"], output["content"]
+                and isinstance(output.get("path"), str)):
+            if output.get("exists") is False:
+                return output["path"], False, ""
+            if output.get("exists") is True and isinstance(output.get("content"), str):
+                return output["path"], True, output["content"]
         return None
 
     async def _checkpoint(

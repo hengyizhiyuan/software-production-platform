@@ -1,0 +1,172 @@
+{
+  "work_id": "159cdb9d-570d-5540-9e64-3d46eba2f6c2",
+  "original_diagnostic_sha256": "93b8e8c7d2d7d2c5ead36c58745be193caaae6587b97b12d4ef14688d822475b",
+  "original_trace_sha256": "bea3a8c2366c976bfe98f35c97f65db39ce18ac7223f27720ac1fcbb6f9f85df",
+  "original_artifact_file_writes": 0,
+  "failures": {
+    "2be18480-e7d2-45cf-895d-7d299e60184f": {
+      "tool": "process.run",
+      "output": {
+        "effect_observed": false,
+        "error_type": "ValueError",
+        "message": "process executable is not allowlisted: ls"
+      },
+      "digest": "0931d5c7a4e3c896ac0ba6f49d8297fe88363f605f77344eb6303f7c8a60c586"
+    },
+    "ac315926-ced8-4619-9176-0de2a582dd45": {
+      "tool": "build.run",
+      "output": {
+        "effect_observed": false,
+        "error_type": "ValueError",
+        "message": "tool argv must be a non-empty string array"
+      },
+      "digest": "ff8545ff931a77e326837ac53a13fa93320150b45ff08d9f91080b604c2df31f"
+    }
+  },
+  "steps": [
+    {
+      "attempt_id": "9738e4e4-583f-4f13-8209-f248b2f03545",
+      "step": 1,
+      "at": "2026-10-17T08:00:43.306370+00:00",
+      "available_tools": [
+        "file.read",
+        "file.write",
+        "process.run",
+        "git.status",
+        "git.diff",
+        "test.run",
+        "build.run",
+        "dependency.sync",
+        "preview.inspect"
+      ]
+    },
+    {
+      "attempt_id": "9738e4e4-583f-4f13-8209-f248b2f03545",
+      "step": 2,
+      "at": "2026-10-17T08:00:46.760442+00:00",
+      "available_tools": [
+        "file.read",
+        "file.write",
+        "process.run",
+        "git.status",
+        "git.diff",
+        "test.run",
+        "build.run",
+        "dependency.sync",
+        "preview.inspect"
+      ]
+    },
+    {
+      "attempt_id": "9738e4e4-583f-4f13-8209-f248b2f03545",
+      "step": 3,
+      "at": "2026-10-17T08:02:22.959314+00:00",
+      "available_tools": [
+        "file.read",
+        "file.write",
+        "process.run",
+        "git.status",
+        "git.diff",
+        "test.run",
+        "build.run",
+        "dependency.sync",
+        "preview.inspect"
+      ]
+    },
+    {
+      "attempt_id": "9738e4e4-583f-4f13-8209-f248b2f03545",
+      "step": 4,
+      "at": "2026-10-17T08:04:00.460216+00:00",
+      "available_tools": []
+    },
+    {
+      "attempt_id": "7bfef657-62b5-40cf-88b1-e23fc5c76a93",
+      "step": 5,
+      "at": "2026-10-17T08:04:53.083213+00:00",
+      "available_tools": [
+        "file.read",
+        "file.write",
+        "process.run",
+        "git.status",
+        "git.diff",
+        "test.run",
+        "build.run",
+        "dependency.sync",
+        "preview.inspect"
+      ]
+    },
+    {
+      "attempt_id": "7bfef657-62b5-40cf-88b1-e23fc5c76a93",
+      "step": 6,
+      "at": "2026-10-17T08:04:55.347129+00:00",
+      "available_tools": [
+        "file.read",
+        "file.write",
+        "process.run",
+        "git.status",
+        "git.diff",
+        "test.run",
+        "build.run",
+        "dependency.sync",
+        "preview.inspect"
+      ]
+    },
+    {
+      "attempt_id": "7bfef657-62b5-40cf-88b1-e23fc5c76a93",
+      "step": 7,
+      "at": "2026-10-17T08:04:59.425215+00:00",
+      "available_tools": [
+        "file.read",
+        "git.status",
+        "git.diff",
+        "test.run",
+        "build.run",
+        "preview.inspect"
+      ]
+    },
+    {
+      "attempt_id": "7bfef657-62b5-40cf-88b1-e23fc5c76a93",
+      "step": 8,
+      "at": "2026-10-17T08:05:03.822431+00:00",
+      "available_tools": [
+        "file.read",
+        "git.status",
+        "git.diff",
+        "test.run",
+        "build.run",
+        "preview.inspect"
+      ]
+    },
+    {
+      "attempt_id": "7bfef657-62b5-40cf-88b1-e23fc5c76a93",
+      "step": 9,
+      "at": "2026-10-17T08:05:25.992886+00:00",
+      "available_tools": [
+        "file.read",
+        "git.status",
+        "git.diff",
+        "test.run",
+        "build.run",
+        "preview.inspect"
+      ]
+    },
+    {
+      "attempt_id": "7bfef657-62b5-40cf-88b1-e23fc5c76a93",
+      "step": 10,
+      "at": "2026-10-17T08:05:32.004515+00:00",
+      "available_tools": [
+        "file.read",
+        "git.status",
+        "git.diff",
+        "test.run",
+        "build.run",
+        "preview.inspect"
+      ]
+    },
+    {
+      "attempt_id": "7bfef657-62b5-40cf-88b1-e23fc5c76a93",
+      "step": 11,
+      "at": "2026-10-17T08:05:38.506908+00:00",
+      "available_tools": []
+    }
+  ]
+}

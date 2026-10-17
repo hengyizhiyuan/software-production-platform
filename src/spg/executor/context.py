@@ -47,6 +47,7 @@ class NativeContextAssembler:
         previous_results: tuple[ToolExecutionResult, ...] = (),
         checkpoint: CheckpointBundleRecord | None = None,
         repair_history: tuple[dict[str, object], ...] = (),
+        ineffective_rounds: int = 0,
     ) -> InferenceRequest:
         facts: list[dict[str, object]] = [
             NativeContractExecutionView(binding, contract).contract_fact(),
@@ -95,6 +96,21 @@ class NativeContextAssembler:
                 ),
             },
         ]
+        facts.append({
+            "fact_type": "EXECUTION_PROGRESS",
+            "consecutive_ineffective_rounds": ineffective_rounds,
+            "no_progress_round_limit": 3,
+            "rule": (
+                "Settled receipts are current observations. First observation of a file's "
+                "existence or absence is evidence; repeating an unchanged read/check is not "
+                "implementation progress. Advance the admitted objective with available "
+                "granted tools, or report a concrete authority/capability boundary. "
+                "Historical failures do not remove current grants or reset budgets. "
+                "The tool projection may focus a stalled, already inspected creation on "
+                "its admitted write capability. This is temporary action selection, not "
+                "a resource outage; ordinary inspection tools return after the write."
+            ),
+        })
         if self.observation_provider is not None:
             facts.append({"fact_type": "CURRENT_ATTEMPT_OBSERVATION",
                 "payload": deepcopy(self.observation_provider()),

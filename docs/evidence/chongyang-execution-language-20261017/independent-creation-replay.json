@@ -1,0 +1,44 @@
+{
+  "label": "minimal-create",
+  "request_sha256": "8396ca4a2bc19da1281d6f1fe00c0e6d43f2a73549af6090580cbda8aa3c94ac",
+  "action": "CONTINUE",
+  "tools": [
+    {
+      "identity": "file.write",
+      "argument_keys": [
+        "path",
+        "content"
+      ],
+      "path": "src/vector.py",
+      "content_bytes": 473
+    }
+  ],
+  "provider_observation": {
+    "provider_identity": "deepseek",
+    "requested_model": "deepseek-flash",
+    "effective_model": "deepseek-flash",
+    "provider_request_id": "8ef81858-9bad-4108-bdef-9ea8ff270f9c",
+    "response_status": "completed",
+    "usage": {
+      "input_tokens": 2907,
+      "output_tokens": 197,
+      "total_tokens": 3104,
+      "cached_input_tokens": 2048,
+      "reasoning_tokens": 18
+    },
+    "transport": {
+      "mode": "stream",
+      "response_headers_received": true,
+      "response_status_code": 200,
+      "headers_elapsed_ms": 1401,
+      "first_byte_elapsed_ms": 1401,
+      "elapsed_ms": 2254,
+      "received_bytes": 69057,
+      "received_events": 167,
+      "terminal_received": true,
+      "syntactically_complete": true,
+      "failure_code": null
+    }
+  },
+  "no_tools_executed": true
+}

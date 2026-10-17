@@ -681,7 +681,15 @@ class ResponsesInferenceAdapter:
             "are environment prerequisites, not failed source assertions. "
             "When available_tools is empty, return a terminal action (RESULT_READY, "
             "UNABLE_TO_COMPLETE, BOUNDARY_CROSSING_REQUIRED, or WAITING_RESOURCE); "
-            "never return CONTINUE or repeat an already successful check."
+            "never return CONTINUE or repeat an already successful check. "
+            "A settled absent file is new source evidence on its first observation, including "
+            "a CREATE target before implementation. Once observed, do not reread the same "
+            "absent file as a substitute for producing it. Use existing admitted mutation "
+            "tools for the required implementation, or identify a concrete missing "
+            "authority/capability. Independent Verification, served Preview and Guardian "
+            "are downstream Owners after artifact submission; their pending evidence is "
+            "not a prerequisite to authoring the admitted artifact. Report your own "
+            "observed checks and any remaining downstream verification honestly."
         )
 
     @staticmethod

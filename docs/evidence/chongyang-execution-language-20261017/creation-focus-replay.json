@@ -1,0 +1,44 @@
+{
+  "label": "write-focus",
+  "request_sha256": "bb99172794e13c742b8194502bae2f08420517b5b9abd3f58853c0ac87265ef7",
+  "action": "CONTINUE",
+  "tools": [
+    {
+      "identity": "file.write",
+      "argument_keys": [
+        "path",
+        "content"
+      ],
+      "path": "index.html",
+      "content_bytes": 38821
+    }
+  ],
+  "provider_observation": {
+    "provider_identity": "deepseek",
+    "requested_model": "deepseek-flash",
+    "effective_model": "deepseek-flash",
+    "provider_request_id": "56fcf6cf-330b-4431-b5ab-4a0eb322b728",
+    "response_status": "completed",
+    "usage": {
+      "input_tokens": 22787,
+      "output_tokens": 30642,
+      "total_tokens": 53429,
+      "cached_input_tokens": 768,
+      "reasoning_tokens": 17309
+    },
+    "transport": {
+      "mode": "stream",
+      "response_headers_received": true,
+      "response_status_code": 200,
+      "headers_elapsed_ms": 2290,
+      "first_byte_elapsed_ms": 2306,
+      "elapsed_ms": 102304,
+      "received_bytes": 6732184,
+      "received_events": 30615,
+      "terminal_received": true,
+      "syntactically_complete": true,
+      "failure_code": null
+    }
+  },
+  "no_tools_executed": true
+}
