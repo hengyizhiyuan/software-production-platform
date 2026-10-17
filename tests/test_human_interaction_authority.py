@@ -341,3 +341,27 @@ def test_review_copy_uses_actual_artifact_surface_and_preserves_quality_gate():
     assert '预览与改动' in fact_wording(facts)['review']
     facts['guardian']={'required':True,'status':'NOT_STARTED'}
     assert '还不能授权或验收' in fact_wording(facts)['review']
+
+
+@pytest.mark.parametrize('entry',['read','realize'])
+def test_cached_wording_reuses_prose_but_refreshes_current_fact_labels(entry):
+    from contextlib import nullcontext
+    from spg.application.human_visible import HumanVisibleRealizationService
+    ir,_=declared_ir(ROUTINE[0][1]);projection,_=presentation(ir)
+    facts={**projection.owner_facts,'candidate':{'candidate_fingerprint':'exact',
+        'verification':['Document: PASS'],'preview_kind':None,'artifacts':['docs/plan.md']},
+        'guardian':{'required':False}}
+    projection=projection.model_copy(update={'owner_facts':facts})
+    cached={'wording':safe_wording(projection).model_dump(mode='json'),
+        'owner_facts':facts,'source_references':list(projection.source_references),
+        'facts':{'review':'质量条件已满足；请查看预览与改动。'}}
+    original=deepcopy(cached)
+    session=SimpleNamespace(scalar=lambda *_:cached,execute=lambda *_:None)
+    database=SimpleNamespace(unit_of_work=lambda:nullcontext(SimpleNamespace(session=session)))
+    service=HumanVisibleRealizationService(database)
+    try:result=getattr(service,entry)(projection)
+    finally:service.shutdown()
+    assert result['wording']==cached['wording']
+    assert result['owner_facts']==cached['owner_facts']
+    assert '成果文件与改动' in result['facts']['review']
+    assert cached==original  # No rewrite of stored evidence or fresh model generation.

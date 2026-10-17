@@ -285,7 +285,8 @@ class HumanVisibleRealizationService:
                 validate_wording(projection, HumanVisibleWording.model_validate(old['wording']))
                 if (old['owner_facts'] == projection.owner_facts
                         and old['source_references'] == list(projection.source_references)):
-                    return {**old, 'expression_state': 'READY'}
+                    return {**old, 'facts': fact_wording(projection.owner_facts),
+                        'expression_state': 'READY'}
             except ValueError:
                 pass
         if not callable(getattr(self.realizer, 'realize_human_projection', None)):
@@ -331,7 +332,7 @@ class HumanVisibleRealizationService:
             if old is not None:
                 try:
                     validate_wording(projection, HumanVisibleWording.model_validate(old['wording']))
-                    return old
+                    return {**old, 'facts': fact_wording(projection.owner_facts)}
                 except ValueError:
                     pass  # Disposable expression cache must satisfy the current gate.
             wording=None;finding=None

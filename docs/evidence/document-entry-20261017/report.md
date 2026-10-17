@@ -20,7 +20,8 @@ Candidate with no preview instead of requesting an unavailable preview.
 Focused UI/reader contracts: 22 pass. This includes real reader-function
 invocation, exact path/fingerprint URL, full untruncated inert text, arbitrary
 Chinese/punctuation paths, multiple/mixed artifacts, stale-read failure and
-late-response isolation. WIC/authority unit checks: 51 pass. Complete JS suite:
+late-response isolation. WIC/authority unit checks: 51 initially pass; final cache-hit coverage adds two
+checks and all 53 pass. Complete JS suite:
 165 pass / two unchanged Admin fixture failures. Both fail because the old
 standalone Admin harness lacks window.WattLogin.prefill. The Admin source and
 fixture are byte-for-byte identical to starting commit 2229d2a3; their repeated
@@ -42,3 +43,10 @@ PERMANENT_TESTS: test_workspace_document_review.cjs, existing quadrant/authority
 checks and the document HTTP lineage fixture. TEST_LEVEL: UI contract plus HTTP
 integration. GOLDEN_JOURNEY_IMPACT: strengthen existing document review; no new
 expensive journey or workspace structural change.
+
+The first deployed read exposed an additional consumer defect: cached prose
+returned previously cached deterministic fact labels, retaining the unavailable
+Preview instruction. Both cache-hit paths now derive those labels from the
+current exact Owner facts while reusing qualified prose unchanged. No stored
+records, basis identity or model generation is rewritten. Initial deployment
+receipt is retained separately; final deployment qualification is pending.
