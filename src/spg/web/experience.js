@@ -156,8 +156,9 @@
   };
   function renderWorkspaceAgenda(ws) {
     const outcome = ws.human_visible?.wording?.headline;
+    const paused = ws.work?.most_recent_meaningful_event === 'WORK_PAUSED_BY_HUMAN';
     const steps = ws.agenda.map(step => {
-      const state = step.state === 'closed' ? '已完成' : step.state === 'current' ? '正在推进' : '待推进';
+      const state = step.state === 'closed' ? '已完成' : step.state === 'current' ? paused ? '已暂停' : '正在推进' : '待推进';
       const mark = step.state === 'closed' ? '✓' : step.state === 'current' ? '•' : '○';
       return `<li data-agenda-state="${esc(step.state)}"><span class="agenda-dot" aria-hidden="true">${mark}</span><div><span class="agenda-state">${state}</span><p>${esc(step.human_visible || '正在读取当前计划说明')}</p></div></li>`;
     }).join('');

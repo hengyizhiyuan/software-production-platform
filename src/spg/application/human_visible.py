@@ -252,7 +252,8 @@ def fact_wording(facts):
         'BLOCKED_APPROVED_PACKAGE_INSTALL':'主机所需组件未能安全安装，已停止且没有部署交付物。',
         'BLOCKED_ROOTLESS_SETUP':'非 root 容器运行时未能安全完成准备，已停止且没有部署交付物。',
         'BLOCKED_ROOTLESS_VERIFICATION':'非 root 容器运行时未能通过验证，已停止且没有部署交付物。'}
-    return {'work':STATUS.get(work.get('status'),'尚无具体事项'),'execution':running,
+    return {'work':'已暂停' if work.get('most_recent_meaningful_event') == 'WORK_PAUSED_BY_HUMAN'
+            else STATUS.get(work.get('status'),'尚无具体事项'),'execution':running,
         'verification':verification_text,'guardian':guardian_text,
         'candidate':acceptance_text if acceptance else '已形成，等待你授权' if candidate.get('authorization_pending') else '已形成，可查看' if candidate else '尚未形成',
         'acceptance':acceptance_text,'review':review,'cloud':cloud_text,

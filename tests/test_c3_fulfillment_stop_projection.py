@@ -287,3 +287,31 @@ def test_snapshot_outside_the_projection_read_set_is_still_read():
 
     found = RuntimeStore(Session()).snapshot(source.id)
     assert found is not None and found.id == source.id and found.condition is SnapshotCondition.TRUSTED
+
+
+def test_paused_work_projects_pending_units_as_paused_without_rewriting_failure_history(monkeypatch):
+    basis = fixture_basis(monkeypatch)
+    binding = SimpleNamespace(work_reality_revision_id=basis.work.current_work_reality_revision_id,
+        production_run_id=uuid4(), plan_revision_id=uuid4(), cycle_number=1)
+    basis.product.runtime_binding = lambda _: binding
+    basis.product.runtime_binding_for_step = lambda _: binding
+    basis.product.runtime_bindings = lambda _: (binding,)
+    basis.product.runtime_summary = lambda _: RuntimeFactSummary(attempt_id=uuid4())
+    monkeypatch.setattr(RuntimeStore, 'run', lambda *args: SimpleNamespace(current_plan_revision_id=binding.plan_revision_id))
+    basis.session.records.append(GovernanceRecord(id=uuid4(), decision_type='WORK_PAUSED',
+        authority_identity='human:owner', subject_type='WORK', subject_identity=str(basis.work.id),
+        scope={'work_reality_revision_id': str(basis.work.current_work_reality_revision_id)},
+        rationale='Human requested pause', created_at=NOW))
+    service = WorkApplicationService.__new__(WorkApplicationService)
+    service.candidate_review_readiness = service.candidate_review_state = None
+    service.executor = service.verifier = SimpleNamespace()
+    units = [{'kind': 'PWU', 'state': 'VERIFYING', 'autonomous_retry_available': False},
+             {'kind': 'PWU', 'state': 'BLOCKED', 'blocked_reason': 'Preserved real verification failure',
+              'autonomous_retry_available': True}]
+    service._multi_pwu_projection = lambda *args: {'pwus': units}
+    result = service._projection(basis.product, basis.work)
+    assert result.most_recent_meaningful_event == 'WORK_PAUSED_BY_HUMAN'
+    assert result.production_plan_runtime['pwus'][0]['state'] == 'PAUSED'
+    assert result.production_plan_runtime['pwus'][1]['state'] == 'BLOCKED'
+    assert result.production_plan_runtime['pwus'][1]['blocked_reason'] == 'Preserved real verification failure'
+    assert not any(u['autonomous_retry_available'] for u in result.production_plan_runtime['pwus'])

@@ -3981,6 +3981,12 @@ class WorkApplicationService:
         if paused:
             status, event = WorkStatus.BLOCKED, "WORK_PAUSED_BY_HUMAN"
             next_action = "Paused by the Human; no automatic generation or verification will be scheduled"
+            for unit in (multi_runtime or {}).get("pwus", ()):
+                unit["autonomous_retry_available"] = False
+                if unit["state"] in {"READY", "PREPARING", "VERIFYING", "RUNNING", "ASSIGNED",
+                                     "WAITING_CAPACITY", "WAITING_RESOURCE"}:
+                    unit["state"] = "PAUSED"
+                    unit["blocked_reason"] = "Human paused this Work; prior results are preserved"
         return WorkProjection(
             work_id=work.id,
             goal_id=work.goal_id,
