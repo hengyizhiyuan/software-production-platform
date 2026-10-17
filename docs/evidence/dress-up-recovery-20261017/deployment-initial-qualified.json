@@ -1,0 +1,160 @@
+{
+  "status": "PASS",
+  "observed_at_utc": "2026-10-17T11:28:24.135539+00:00",
+  "revision": "057a9682b897db57ac0e08ee2afe84e2555e17ed",
+  "source_bundle_sha256": "ea03bd90887a4e9503d153fa2b2884c307275f8401bc060529e832162b31257d",
+  "image_id": "sha256:5430dba8de90658e2bdb7aa9e6b3ce75df7c6ed90f4ca57cf739210412707c04",
+  "services": {
+    "api": {
+      "image": "sha256:5430dba8de90658e2bdb7aa9e6b3ce75df7c6ed90f4ca57cf739210412707c04",
+      "running": true,
+      "health": "healthy"
+    },
+    "native-coordinator": {
+      "image": "sha256:5430dba8de90658e2bdb7aa9e6b3ce75df7c6ed90f4ca57cf739210412707c04",
+      "running": true,
+      "health": null
+    },
+    "native-tool-host": {
+      "image": "sha256:5430dba8de90658e2bdb7aa9e6b3ce75df7c6ed90f4ca57cf739210412707c04",
+      "running": true,
+      "health": "healthy"
+    },
+    "native-worker": {
+      "image": "sha256:5430dba8de90658e2bdb7aa9e6b3ce75df7c6ed90f4ca57cf739210412707c04",
+      "running": true,
+      "health": null
+    }
+  },
+  "runtime": {
+    "revision": "057a9682b897db57ac0e08ee2afe84e2555e17ed",
+    "source_files": {
+      "src/spg/web/experience.js": "a49fc707b89bb0b8e78718674ded9803fc20df15b6192a03a03f3b453c635927",
+      "src/spg/providers/protected_context_verifier.py": "e5e81f96a3e010756169dced0d324a944d2e6badbb9ec8c969a97043f57cae17",
+      "src/spg/providers/rule_based_planner.py": "13e85d04097d11b752508efaad7e631bbadc3fc6d71c2d522694f81557a56e08",
+      "src/spg/providers/managed_context_fulfillment.py": "631725a9421a57c163013325142c64ebb6a310df1926b40a8db0a7cc0da65d05",
+      "src/spg/providers/repository_code_verifier.py": "6550cf8d4c6ac15e2727444713f448a3ae48ef5ca11d325d9982f3a63983e9b0",
+      "src/spg/api/http.py": "74e79d3957b9f301c5b75d87144b3fa35a61b3146ad4dd3c3d83d8799e5656f7",
+      "src/spg/api/dto.py": "7314269b4421ed7e6b8861add94dacb82e468d20106a9c9da8cf0d467c9c283f",
+      "src/spg/application/human_visible.py": "981aff5af5971900c377a64f3b818085a2c951336c8a20f629edc0cdb4302740",
+      "src/spg/application/recovery_preview.py": "1706bbbdbb032ad9b50d6c6a280a2c3e2384ce71571b0acf86d1484da3e807b3",
+      "src/spg/application/work.py": "20c1e915277bb06e0dded341d87e870f18b7d3d0b21913c9ce4207451354b2b8",
+      "src/spg/application/steering_driver.py": "06092574ce2f8b63c9b9413631d3e08330ed68b45064eb084e9ca0a63788ff72",
+      "src/spg/application/executor_runtime.py": "15f92059fb375cfeb7552eecdac25d646ed5a67ca1e0285f56d2fe599d42fdd5",
+      "src/spg/domain/native_execution.py": "3d5af9722b8b916a1a1346068a8b3607267447792f721a97edfe6ecc74384828",
+      "owners.lock": "7ea1a1819b142dd44e2a1d62bc7f0e1e7a9fbc059df20b8fc799e5aecf7363ac",
+      "src/spg/application/production_brief.py": "21f8542b2ef1e020e90837620c9241b696fca5c0b6cf53c39bc1c67aad4116e4",
+      "src/spg/application/interaction.py": "2e2fd7975b4c5e20913e4fdaec283ef108c97eb86bd8089003eca187f0ba4d75",
+      "src/spg/application/wic_response.py": "e8096e03ee0a63a217b5190ceeae12ce696165bc788602dacd49cce49631da6c",
+      "src/spg/executor/tools.py": "c7227bbadd9a0547062e5fb0c18d756f8b93a78fa4559eb5fbab724c57b4b913",
+      "src/spg/infrastructure/executor_runtime/production_environment_tool_host.py": "6378b419e386a71b3324b19c533274cd3f74d96a46a464901fd597a4f6feb540",
+      "src/spg/infrastructure/executor_runtime/runtime_ports.py": "a3c3759b59667dd5899a01c33f3e00ba25ab970050ee3d881beb459d2dfa45e8",
+      "src/spg/infrastructure/executor_runtime/tool_host.py": "8d92c503a52e0f4c74b28236ab448fb3cb9884d2042cd252144ddbedb084b0ba",
+      "src/spg/providers/interaction_contract.py": "2b791ccd5ebbffc7fef5bbeeba865692b9e9833ee6984d8675ba7ff5cbe0f555",
+      "src/spg/executor/context.py": "05d208fbffb4d0fcb91026070c3c8280bb86a7dd4bb33c1653db0c26338ae9ed",
+      "src/spg/executor/kernel.py": "f1006fd80af31c8e9978da68bac7df4b97e16fbe2f221e7cf36d3c8208c65c36",
+      "src/spg/infrastructure/executor_runtime/inference.py": "698f22aee798ed9990540f795cdcbccf89fd193b16a1d7408561e4b95d86925a",
+      "src/spg/providers/deepseek_semantic.py": "b1430d9e30d9d9906863c3f06817613102eb32ad834f36cda6fa425649610fa3",
+      "src/spg/web/experience.css": "8ffcaab5e7bd09b1f04173c5374bfb0b7446360e3381d18f0fea725e32cbb043",
+      "src/spg/providers/static_web_audio.py": "6166d724a9b36e906d5eedf94d404065d2d8944b2a80da35db7a3f76e3d9159f"
+    },
+    "login_prefill_enabled": true,
+    "production_brief_contract": "source-preserving-production-brief-v1",
+    "staged_production_brief_contract": "source-preserving-production-brief-v2",
+    "same_candidate_review_repair": true,
+    "failure_signature_max_length": 64
+  },
+  "health": {
+    "service": "available",
+    "database": "available",
+    "application_initialized": true
+  },
+  "owner_release_gate": {
+    "status": "PASS",
+    "results": {
+      "ecf": {
+        "commit": "1d3feddf0c7e7726fea23c58d194d64034547a7a",
+        "source_digest": "225d415597884ae923458a620b8c01abef2605cd093036aee159f5d445073702",
+        "import_root": "/opt/watt-owners/ecf/src"
+      },
+      "guardian": {
+        "commit": "26bb402563bb781731749b7b8fb4fe5aed74f669",
+        "source_digest": "e5973aa54cca9ecfbf339a872fa8683a957519c2d6603dc4fccc19b16b2a89a9",
+        "import_root": "/opt/watt-owners/guardian/src"
+      },
+      "guardian_production_brief": {
+        "contracts": [
+          "source-preserving-production-brief-v1",
+          "source-preserving-production-brief-v2",
+          "source-preserving-production-brief-v3"
+        ],
+        "independent_source_validation": true
+      },
+      "guardian_contract": {
+        "types": [
+          "AssuranceRequest",
+          "EffectRequirement",
+          "ProductionEvidenceLineage",
+          "ProtectedContextEvidence"
+        ],
+        "request_fields": [
+          "acceptance_state",
+          "artifact_refs",
+          "authority_ref",
+          "candidate_fingerprint",
+          "candidate_id",
+          "constraints",
+          "decision_context_fingerprint",
+          "delivery_authorization_state",
+          "disposable_preview",
+          "evidence_contract_version",
+          "governed_intent_ref",
+          "objective",
+          "prior_finding_ids",
+          "product_ref",
+          "production_lineage",
+          "protected_context",
+          "request_id",
+          "required_effects",
+          "runtime_ref",
+          "runtime_url",
+          "source_revision",
+          "source_tree",
+          "submitted_at",
+          "task_contract_ref",
+          "verification_refs",
+          "work_ref"
+        ],
+        "owner_evidence_resolver": true
+      },
+      "ecf_contract": {
+        "version": "0.1",
+        "managed_greenfield": true
+      }
+    },
+    "failures": []
+  },
+  "rollback_image": "sha256:56e499d02e5e9dbdcb2796de7b218c79f2ccc9e12d126558a3ee904c05490d8f",
+  "failed_work_explicitly_retried": false,
+  "preserved_production_work": {
+    "records": {
+      "executor_queue": {
+        "records": 23,
+        "sha256": "3246d6c96e593b32e4a237425026de5d173d60729f256b12a4d8e160a7ebc95b"
+      },
+      "product_works": {
+        "records": 1,
+        "sha256": "47a37ad314e870736c81a742d7784930e0a3232504cffe9d7dad925f0e1ca4be"
+      },
+      "work_reality_revisions": {
+        "records": 3,
+        "sha256": "80434e7a1c2c2e238b3ffc9823cd1d57c920870bad40818c92157aaccc22eb3c"
+      },
+      "work_runtime_bindings": {
+        "records": 1,
+        "sha256": "751b9bb9e382971c46b9ef4c6aed4d79dbf6fd21b1536f4fcde581af21e8c095"
+      }
+    },
+    "work_id": "b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9"
+  }
+}

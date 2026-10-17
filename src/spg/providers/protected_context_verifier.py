@@ -14,9 +14,10 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 from spg.domain.model_runtime import ModelPurpose
+from spg.application.preview_security import MAX_STATIC_AUDIO_BYTES, STATIC_AUDIO_SUFFIXES
 
 TEXT_SUFFIXES = {".html", ".css", ".js", ".json", ".svg", ".txt", ".md"}
-AUDIO_SUFFIXES = {".mp3", ".wav"}
+AUDIO_SUFFIXES = STATIC_AUDIO_SUFFIXES
 
 
 class Witness(BaseModel):
@@ -213,7 +214,7 @@ class StaticProtectedContextVerifier:
                 from spg.providers.static_web_audio import audio_observation
                 size = int(git(repository, "cat-file", "-s", oid))
                 asset_sizes += size
-                if size > 8000000 or asset_sizes > 16000000 or len(assets) >= 16:
+                if size > MAX_STATIC_AUDIO_BYTES or asset_sizes > 2 * MAX_STATIC_AUDIO_BYTES or len(assets) >= 16:
                     raise ValueError("PROTECTED_CONTEXT_SOURCE_LIMIT")
                 body = git(repository, "cat-file", "blob", oid)
                 assets[path] = {"sha256": sha256(body).hexdigest(), "bytes": size,

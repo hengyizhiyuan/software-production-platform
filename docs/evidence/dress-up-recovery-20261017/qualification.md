@@ -25,3 +25,10 @@ records and paths. It admits 20 pending bindings with no extra model call and
 round/episode identity preserved. Guardian independently checks eligibility;
 this fixture claims no executed PWU, produced Candidate or successful preview.
 Live recovery and user-facing observations are recorded separately.
+
+Preview audio follow-through: 34 affected tests pass, including exact bytes
+larger than the text inspection limit through both Human and private Guardian
+static preview surfaces, correct MP3/WAVE MIME and Candidate revision/tree
+headers. Stale fingerprints, undeclared/secret paths, symlinks, oversized audio
+and unchanged oversized-text limits remain rejected. CSP is unchanged. This
+transport fixture claims no audio quality verdict.

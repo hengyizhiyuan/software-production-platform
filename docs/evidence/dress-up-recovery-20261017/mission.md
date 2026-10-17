@@ -36,3 +36,9 @@ existing Human retry/attention API, and observe real Candidate/Preview/Guardian
 evidence. Preserve all Work revisions, failed attempts, original scope and
 budgets. Do not resume paused Work b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9 or
 other Works, accept a Candidate, integrate, or authorize delivery.
+
+Preview-consumer follow-through: inspection also found both exact static
+artifact routes excluding audio and returning generic binary MIME. Extend those
+existing routes only for the same MP3/PCM WAVE profile, sharing the 8 MB per-audio
+bound with Verification. Preserve exact Candidate/path/staleness checks, regular
+Git blobs, text/document limits, CSP and all authentication/acceptance gates.

@@ -51,7 +51,7 @@ class DockerCandidatePreviewRuntime:
         on Watt's authenticated, sandboxed exact-Candidate artifact route.
         """
         from spg.application.delivery import read_artifact, artifact_media_type
-        from spg.application.preview_security import PREVIEW_CONTENT_SECURITY_POLICY
+        from spg.application.preview_security import PREVIEW_CONTENT_SECURITY_POLICY, STATIC_AUDIO_SUFFIXES
 
         repository = self._workspace(preview_id)
         record_path = self._static_record_path(preview_id)
@@ -66,7 +66,7 @@ class DockerCandidatePreviewRuntime:
         entrypoint = "index.html" if "index.html" in html else html[0]
         allowed = {path for path in paths if Path(path).suffix.lower() in {
             ".html", ".css", ".js", ".mjs", ".json", ".svg", ".png", ".jpg",
-            ".jpeg", ".gif", ".ico", ".webp", ".woff", ".woff2", ".ttf"}}
+            ".jpeg", ".gif", ".ico", ".webp", ".woff", ".woff2", ".ttf", *STATIC_AUDIO_SUFFIXES}}
 
         class Handler(BaseHTTPRequestHandler):
             def do_GET(self):

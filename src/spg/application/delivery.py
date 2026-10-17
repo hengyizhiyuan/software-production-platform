@@ -26,6 +26,7 @@ from spg.infrastructure.persistence.product_store import ProductStore
 from spg.infrastructure.persistence.runtime_store import RuntimeStore
 from spg.infrastructure.persistence.runtime_schema import work_product_references
 from spg.domain.verification import VerificationResultValue
+from spg.application.preview_security import MAX_STATIC_AUDIO_BYTES, STATIC_AUDIO_SUFFIXES
 
 MAX_ARTIFACT_BYTES = 1024 * 1024
 MAX_PACKAGE_BYTES = 10 * MAX_ARTIFACT_BYTES
@@ -59,8 +60,9 @@ def read_artifact(repository: str, revision: str, path: str, *, software: bool =
         raise ProductInvariantViolation("Delivery requires a regular Git blob; links and submodules are not deliverables")
     blob = revision + ":" + path
     size = int(git("cat-file", "-s", blob))
-    if size > MAX_ARTIFACT_BYTES:
-        raise ProductInvariantViolation("Delivery artifact exceeds the 1 MiB inspection limit")
+    limit = MAX_STATIC_AUDIO_BYTES if software and parts.suffix in STATIC_AUDIO_SUFFIXES else MAX_ARTIFACT_BYTES
+    if size > limit:
+        raise ProductInvariantViolation("Delivery artifact exceeds its bounded inspection limit")
     data = git("cat-file", "blob", blob)
     if not software:
         try:
@@ -74,7 +76,8 @@ def artifact_media_type(path: str) -> str:
     return {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
         ".mjs": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
         ".json": "application/json", ".md": "text/markdown; charset=utf-8",
-        ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon"}.get(PurePosixPath(path).suffix, "application/octet-stream")
+        ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon",
+        ".mp3": "audio/mpeg", ".wav": "audio/wav"}.get(PurePosixPath(path).suffix, "application/octet-stream")
 
 
 @timed('git')
@@ -283,7 +286,8 @@ class DeliveryApplicationService:
         context = self.candidate_context(work_id)
         if context is None or context["candidate_fingerprint"] != candidate_fingerprint:
             raise ProductInvariantViolation("Candidate preview is stale against current Work Reality")
-        if path not in context["paths"] or not path.endswith((".html", ".js", ".mjs", ".css", ".json", ".svg", ".png", ".ico")):
+        if path not in context["paths"] or PurePosixPath(path).suffix not in {
+                ".html", ".js", ".mjs", ".css", ".json", ".svg", ".png", ".ico", *STATIC_AUDIO_SUFFIXES}:
             raise ProductRecordNotFound("Candidate artifact is not previewable")
         return read_artifact(context["repository_path"], context["repository_revision"], path, software=True)
 
