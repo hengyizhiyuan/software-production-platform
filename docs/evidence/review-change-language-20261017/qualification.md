@@ -130,3 +130,19 @@ conformance to those decisions, preserving historical approval and future Human
 gates. The static-content selection passes with three additional positive,
 contradicted and unverifiable decision cases: prior approval never manufactures
 artifact conformance. The original FAIL and all original obligations remain.
+
+Final real qualification: same game commit
+7e7ce2e0a9c106d10f317a761f1687bf6bc049e3 and tree
+d8eaffbb61cd70d4af7ad2d71b72872c7c698b6e pass full content/PATH_SCOPE as
+acc76f76-8899-5e23-a10b-e7333dacc6aa, retain GIT_DIFF_CHECK PASS, and satisfy
+PWU under admissibility 3e1cdbd4-0838-5392-b472-18f90996be8f. New sealed
+Candidate ab0abbb3-a82a-5cb0-a4a9-2a8345b583da has READY official Preview
+590e3e8c-be3a-4538-b474-2e28e550bd32 and served PASS. Independent Guardian
+request a8ce2ae9-3161-530e-8814-6ebc32631d11 PASS applies to this exact
+Candidate/PWU with zero Findings. All four official candidate URLs returned
+200 and exact manifest hashes, recorded in served-candidate.json. Human-visible
+workspace wording is Chinese, identifies the checked revision and requests only
+Candidate integration authorization. Acceptance, integration and delivery remain
+pending; the prior accepted source/version is unchanged. The frozen deployment
+is 85fa2e43834569dbab58147c0466d3bf095d02c1, independent of this evidence
+closure commit. No full-suite/GJ or subjective Human acceptance is claimed.

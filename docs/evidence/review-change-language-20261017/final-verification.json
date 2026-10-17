@@ -1,0 +1,17 @@
+{
+  "runtime_revision": "85fa2e43834569dbab58147c0466d3bf095d02c1",
+  "snapshot_id": "a9765d09-5141-5ab6-916a-4ccc13b08dc0",
+  "candidate_revision": "7e7ce2e0a9c106d10f317a761f1687bf6bc049e3",
+  "candidate_tree": "d8eaffbb61cd70d4af7ad2d71b72872c7c698b6e",
+  "new_verification_id": "acc76f76-8899-5e23-a10b-e7333dacc6aa",
+  "provider_binding": {
+    "provider_identity": "provider:contract-driven-repository",
+    "provider_version": "v8-approved-decision-conformance"
+  },
+  "result": "PASS",
+  "failure_code": null,
+  "failure_type": null,
+  "admissibility_id": "3e1cdbd4-0838-5392-b472-18f90996be8f",
+  "admissibility_outcome": "ADMISSIBLE",
+  "work_unit_condition": "SATISFIED"
+}

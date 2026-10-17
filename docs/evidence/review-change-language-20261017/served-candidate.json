@@ -1,0 +1,39 @@
+{
+  "observed_at": "2026-10-17T17:03:06.206372+00:00",
+  "snapshot": "ea1592edc2846e9d674a4b70e0ab05ffce83f589eedc250394c832a4ad44c940",
+  "files": [
+    {
+      "path": "index.html",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "bytes": 2540,
+      "sha256": "9be3174fdd5c6063e74ff1ad9f43c0047a881dc0adcbc1c52a8dd33067e90185",
+      "matches_observed_manifest": true
+    },
+    {
+      "path": "src/main.js",
+      "status": 200,
+      "content_type": "text/javascript; charset=utf-8",
+      "bytes": 14044,
+      "sha256": "c3da98182dde38e86c0e9c7d976e7020e02735b1cdf27ead379c44df2dafd4b9",
+      "matches_observed_manifest": true
+    },
+    {
+      "path": "styles/main.css",
+      "status": 200,
+      "content_type": "text/css; charset=utf-8",
+      "bytes": 13464,
+      "sha256": "99fad1868d7a98c23adf0993909c17db768b37404e64267a37c94f1e470a9c7a",
+      "matches_observed_manifest": true
+    },
+    {
+      "path": "src/wardrobe-data.js",
+      "status": 200,
+      "content_type": "text/javascript; charset=utf-8",
+      "bytes": 40514,
+      "sha256": "3b6756bbd2a6c6519fd2177b6b12cbcd119c10b800fffbc97784c4739ed60b6f",
+      "matches_observed_manifest": true
+    }
+  ],
+  "qualification": "EXACT_SERVED_SEALED_CANDIDATE; VERIFICATION_AND_GUARDIAN_PASS; HUMAN_REVIEW_PENDING"
+}

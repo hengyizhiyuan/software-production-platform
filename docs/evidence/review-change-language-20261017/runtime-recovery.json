@@ -1,6 +1,6 @@
 {
-  "observed_at_utc": "2026-10-17T16:14:33Z",
-  "qualification": "CURRENT_REVISED_WORK_RUNNING; NEW_CANDIDATE_PENDING",
+  "observed_at_utc": "2026-10-17T17:01:40Z",
+  "qualification": "REAL_REVISED_WORK_READY_FOR_HUMAN_REVIEW",
   "work_id": "12cecacf-a97d-515f-8515-9845abadaea9",
   "interaction_id": "649b4c7b-3eec-4e3d-b61f-6ce0fcee6244",
   "preserved_human_turn_id": "1d57a64f-252f-4f13-8e94-c6f2695db0fb",
@@ -16,20 +16,70 @@
   "preserved_failed_native_attempt": "5c7dd61c-b7bf-48a8-81ee-402ddccf6fe8",
   "failed_attempt_terminal": "BOUNDARY_CROSSING_REQUIRED",
   "exact_failure": "Completed read-only ls returned 2 for absent styles directory; following preplanned write was refused before execution",
-  "deployed_revision": "b44e7e7df5f9a3ede1db0c0e85aa71fa52119e8f",
-  "deployed_image": "sha256:8d3a99209ae001db6828fb45783761e85311bf30f00af703605d7199b149dfd5",
+  "deployed_revision": "85fa2e43834569dbab58147c0466d3bf095d02c1",
+  "deployed_image": "sha256:4e92a58a970e56d5d28036bd1976021012e55b7c3ad83877840d082129465e64",
   "recovery_attention_id": "6ddfb303-253e-58ad-90a8-59b6cd853dfd",
   "current_native_attempt_id": "56268b32-e5b5-4131-a4b5-f882547b0e51",
   "current_queue_id": "677c5eba-eeda-44b2-9d05-06d7ced740c2",
-  "current_queue_condition": "EXECUTING",
-  "current_grant_state": "GRANTED",
-  "current_runtime_mode": "RUNNING",
-  "current_inference_sequence": 21,
+  "current_queue_condition": "COMPLETED",
+  "current_grant_state": "RELEASED",
+  "current_runtime_mode": "FINISHED",
+  "current_inference_sequence": 28,
   "recovery_source_continuity": "Prior attempt and session step history are preserved. Successor workspace uses the original admitted source baseline; observed reads of index.html and src/wardrobe-data.js return exists=false. Prior failed-attempt files are not carried into this successor; complete Work requirements remain pending actual generation.",
-  "new_candidate": null,
-  "new_candidate_verification": "PENDING",
-  "new_candidate_preview": "PENDING",
-  "new_candidate_guardian": "PENDING",
+  "new_candidate": {
+    "candidate_id": "ab0abbb3-a82a-5cb0-a4a9-2a8345b583da",
+    "candidate_fingerprint": "ea1592edc2846e9d674a4b70e0ab05ffce83f589eedc250394c832a4ad44c940",
+    "repository_revision": "7e7ce2e0a9c106d10f317a761f1687bf6bc049e3",
+    "tree": "d8eaffbb61cd70d4af7ad2d71b72872c7c698b6e",
+    "entrypoint": "index.html",
+    "preview_kind": "STATIC_WEB",
+    "artifacts": [
+      "index.html",
+      "src/main.js",
+      "src/wardrobe-data.js",
+      "styles/main.css"
+    ],
+    "verification": [
+      "PATH_SCOPE: PASS",
+      "GIT_DIFF_CHECK: PASS"
+    ],
+    "authorization_pending": true
+  },
+  "new_candidate_verification": {
+    "PATH_SCOPE": {
+      "result": "PASS",
+      "record_id": "acc76f76-8899-5e23-a10b-e7333dacc6aa"
+    },
+    "GIT_DIFF_CHECK": {
+      "result": "PASS",
+      "record_id": "927a48e3-3b8f-5e57-a33d-87e34a9b20df"
+    }
+  },
+  "new_candidate_preview": {
+    "session_id": "590e3e8c-be3a-4538-b474-2e28e550bd32",
+    "status": "READY",
+    "served_verification": "PASS",
+    "candidate_revision": "7e7ce2e0a9c106d10f317a761f1687bf6bc049e3",
+    "candidate_tree": "d8eaffbb61cd70d4af7ad2d71b72872c7c698b6e"
+  },
+  "new_candidate_guardian": {
+    "status": "PASS",
+    "gate": "PASS",
+    "candidate_id": "ab0abbb3-a82a-5cb0-a4a9-2a8345b583da",
+    "request_id": "a8ce2ae9-3161-530e-8814-6ebc32631d11",
+    "result_ref": "guardian:assurance-result:a8ce2ae9-3161-530e-8814-6ebc32631d11",
+    "result_refs": [
+      "guardian:assurance-result:a8ce2ae9-3161-530e-8814-6ebc32631d11"
+    ],
+    "required_pwu_ids": [
+      "318c343d-1378-40b3-9b5e-640c6f1ca75e"
+    ],
+    "finding_count": 0,
+    "finding_ids": [],
+    "summary": "",
+    "evidence_ref": "guardian:evidence:56586af8-c603-4115-974f-6da4967cd9df",
+    "required": true
+  },
   "human_acceptance": "PENDING",
   "integration_authorized": false,
   "game_delivery_authorized": false,
@@ -93,5 +143,83 @@
     },
     "method": "Execute exact observed data source in isolated Node VM, no filesystem/network bindings; Native also executed node file successfully",
     "qualification": "DATA_ONLY; NOT_ENTIRE_GAME_PASS"
-  }
+  },
+  "current_native_outcome": "RESULT_READY",
+  "production_admissibility": {
+    "id": "3e1cdbd4-0838-5392-b472-18f90996be8f",
+    "outcome": "ADMISSIBLE",
+    "work_unit_condition": "SATISFIED"
+  },
+  "workspace_current_human_action": "CANDIDATE_AUTHORIZATION",
+  "workspace_current_wording": "换装游戏修改候选已通过检查，等待你授权整合",
+  "intermediate_verification_history": [
+    {
+      "record_id": "2580d4b3-6ff0-529f-a8d5-d95b9149b8ec",
+      "result": "UNKNOWN",
+      "reason": "nonliteral source witness followed by UUID echo mismatch"
+    },
+    {
+      "record_id": "14c97ac5-e71c-5d30-98cb-b36fb1815b7d",
+      "result": "FAIL",
+      "reason": "previous art unavailable for relative comparison"
+    },
+    {
+      "record_id": "548cb373-f167-5ffb-92cb-0eb98df9c6ea",
+      "result": "UNKNOWN",
+      "reason": "nonliteral source witness followed by malformed JSON"
+    },
+    {
+      "record_id": "ca23e24f-acae-5e55-9f3c-cc15674686f9",
+      "result": "FAIL",
+      "reason": "already-admitted decisions misread as requiring code proof of historical Human approval or completed future review"
+    }
+  ],
+  "game_tree_changed_by_verification_recovery": false,
+  "browser_observations": {
+    "current_working_preview_opened": true,
+    "campus_style_selection_visibly_changed": true,
+    "specific_skirt_selection_visibly_changed": true,
+    "audio_audibility_verified": false,
+    "screenshot_export": "Browser bridge timed out; no screenshot qualification claimed"
+  },
+  "final_served_candidate_observation": {
+    "observed_at": "2026-10-17T17:03:06.206372+00:00",
+    "snapshot": "ea1592edc2846e9d674a4b70e0ab05ffce83f589eedc250394c832a4ad44c940",
+    "files": [
+      {
+        "path": "index.html",
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "bytes": 2540,
+        "sha256": "9be3174fdd5c6063e74ff1ad9f43c0047a881dc0adcbc1c52a8dd33067e90185",
+        "matches_observed_manifest": true
+      },
+      {
+        "path": "src/main.js",
+        "status": 200,
+        "content_type": "text/javascript; charset=utf-8",
+        "bytes": 14044,
+        "sha256": "c3da98182dde38e86c0e9c7d976e7020e02735b1cdf27ead379c44df2dafd4b9",
+        "matches_observed_manifest": true
+      },
+      {
+        "path": "styles/main.css",
+        "status": 200,
+        "content_type": "text/css; charset=utf-8",
+        "bytes": 13464,
+        "sha256": "99fad1868d7a98c23adf0993909c17db768b37404e64267a37c94f1e470a9c7a",
+        "matches_observed_manifest": true
+      },
+      {
+        "path": "src/wardrobe-data.js",
+        "status": 200,
+        "content_type": "text/javascript; charset=utf-8",
+        "bytes": 40514,
+        "sha256": "3b6756bbd2a6c6519fd2177b6b12cbcd119c10b800fffbc97784c4739ed60b6f",
+        "matches_observed_manifest": true
+      }
+    ],
+    "qualification": "EXACT_SERVED_SEALED_CANDIDATE; VERIFICATION_AND_GUARDIAN_PASS; HUMAN_REVIEW_PENDING"
+  },
+  "final_assessment_recorded_at_utc": "2026-10-17T17:03:54Z"
 }
