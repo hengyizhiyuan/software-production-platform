@@ -1,0 +1,59 @@
+{
+  "observed_at_utc": "2026-10-17T16:08:47Z",
+  "qualification": "CURRENT_REVISED_WORK_RUNNING; NEW_CANDIDATE_PENDING",
+  "work_id": "12cecacf-a97d-515f-8515-9845abadaea9",
+  "interaction_id": "649b4c7b-3eec-4e3d-b61f-6ce0fcee6244",
+  "preserved_human_turn_id": "1d57a64f-252f-4f13-8e94-c6f2695db0fb",
+  "turn_recovery": "COMPLETED_WITHOUT_DUPLICATE_HUMAN_INPUT",
+  "work_reality_revision_id": "7dc3a612-2de8-5ff1-8f24-4f7aad0a5e34",
+  "semantic_ir_id": "8e98f782-d40c-5496-bf83-8a4b5cb4d077",
+  "production_run_id": "7ec76c22-0056-4c76-852d-e8080aff6b90",
+  "production_work_unit_id": "318c343d-1378-40b3-9b5e-640c6f1ca75e",
+  "formation_contract": "source-preserving-production-brief-v4",
+  "fulfillment_bindings": 32,
+  "formation_model_calls": 0,
+  "formation_evidence_status": "PENDING_ACTUAL_CANDIDATE_VERIFICATION",
+  "preserved_failed_native_attempt": "5c7dd61c-b7bf-48a8-81ee-402ddccf6fe8",
+  "failed_attempt_terminal": "BOUNDARY_CROSSING_REQUIRED",
+  "exact_failure": "Completed read-only ls returned 2 for absent styles directory; following preplanned write was refused before execution",
+  "deployed_revision": "b44e7e7df5f9a3ede1db0c0e85aa71fa52119e8f",
+  "deployed_image": "sha256:8d3a99209ae001db6828fb45783761e85311bf30f00af703605d7199b149dfd5",
+  "recovery_attention_id": "6ddfb303-253e-58ad-90a8-59b6cd853dfd",
+  "current_native_attempt_id": "56268b32-e5b5-4131-a4b5-f882547b0e51",
+  "current_queue_id": "677c5eba-eeda-44b2-9d05-06d7ced740c2",
+  "current_queue_condition": "EXECUTING",
+  "current_grant_state": "GRANTED",
+  "current_runtime_mode": "RUNNING",
+  "current_inference_sequence": 15,
+  "recovery_source_continuity": "Prior attempt and session step history are preserved. Successor workspace uses the original admitted source baseline; observed reads of index.html and src/wardrobe-data.js return exists=false. Prior failed-attempt files are not carried into this successor; complete Work requirements remain pending actual generation.",
+  "new_candidate": null,
+  "new_candidate_verification": "PENDING",
+  "new_candidate_preview": "PENDING",
+  "new_candidate_guardian": "PENDING",
+  "human_acceptance": "PENDING",
+  "integration_authorized": false,
+  "game_delivery_authorized": false,
+  "preserved_old_unaccepted_candidate_id": "be81eb65-fa9d-5ae1-83a6-ef9ff254aaa9",
+  "old_candidate_assurance_is_current_assurance": false,
+  "protected_other_work_id": "b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9",
+  "protected_other_work_modified_or_resumed": false,
+  "actual_successor_effects": [
+    {
+      "tool": "file.write",
+      "path": "src/wardrobe-data.js",
+      "condition": "SETTLED",
+      "observed_at_utc": "2026-10-17T16:04:11Z"
+    },
+    {
+      "tool": "file.read",
+      "path": "src/wardrobe-data.js",
+      "condition": "SETTLED"
+    }
+  ],
+  "provider_incomplete_response": {
+    "sequence": 11,
+    "condition": "FAILED",
+    "failure_code": "INCOMPLETE_RESPONSE",
+    "automatic_recovery": "Subsequent inference 12 completed and produced an actual file write; current attempt still RUNNING"
+  }
+}
