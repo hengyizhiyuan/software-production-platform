@@ -1014,16 +1014,11 @@ class ConversationContract:
         collaboration: StructuredCollaborationResult,
     ) -> str:
         if collaboration.response_language.startswith("zh"):
+            from spg.application.conversation import conversation_response_policy_zh
             return (
-                "你是 Watt 的对话表达能力，仅将已提供的结构化协作结果和有界上下文表达成自然中文。"
-                "不重新解释意图，不创建或修改 Work、计划、事实、权限及工程真相，不调用工具或依赖隐藏记忆。"
-                "保留全部已确认约束与证据，不把假设、推断或建议当作用户事实，不虚构能力、批准或完成。"
-                "先回答本轮实际问题；执行命令只需简短确认与真实下一动作，修改先说变化，纠正后继续。"
-                "创建请求给具体可逆首版建议，推荐给优先选择、依据与下一步，探索给有区别的实质想法。"
-                "不重述已知需求、不讲内部流程、不列发现问卷；至多一个真正改变下一决定的问题，没有问题很正常。"
-                "异议须核对实际新依据，不为迎合反转已有判断；未知如实说明。"
-                "中文目标和约束保持中文，原文引述、代码、路径、技术标识和历史事实不改写；不输出内部字段或枚举。"
-                "按 requested detail 决定信息量，段落各增信息；仅返回包含唯一 natural_response 字符串的 JSON。"
+                "你是 Watt 的对话表达能力，仅将结构化协作结果和有界上下文表达成自然中文。"
+                + conversation_response_policy_zh()
+                + "仅返回包含唯一 natural_response 字符串的 JSON。"
                 "\n交流上下文：\n" + json.dumps(context.model_dump(mode="json"), ensure_ascii=False)
                 + "\n结构化协作结果：\n" + json.dumps(collaboration.model_dump(mode="json"), ensure_ascii=False))
         return (
@@ -1307,6 +1302,18 @@ class WorkInteractionPipeline:
 
     @staticmethod
     def coalesced_instruction(basis: InteractionInterpretationInput) -> str:
+        from spg.application.model_language import chinese_interaction
+        if chinese_interaction(basis):
+            from spg.application.conversation import conversation_response_policy_zh
+            return (InteractionSemanticContract.instruction(basis, coalesced=True)
+                + "\n对话表达规则：\n" + conversation_response_policy_zh()
+                + "\n只返回一个 JSON，先 natural_response 后 semantics；两者采用同一解释，完整校验前仍只是候选。"
+                "保留当前事实、约束、请求和删除意见。未改变的旧 meaning 用 retained_prior_meaning_indexes 引用，不改写；"
+                "meanings 只放新增或修订的来源解释，省略被取代或无关旧项，未保留用 []。新 meaning 只引用已提供记录。"
+                "整个旧 frame 完全未改且本轮及新 meanings 都无 CORRECTION 时，才可设 reuse_prior_design_intent_frame=true，"
+                "此时 collaboration.design_intent_frame=null 并复用确切旧值。否则 reuse=false 并给完整新 frame；"
+                "没有旧 frame 且无设计意图才可不复用而填 null。任何 CORRECTION 均须完整替换 frame，即使只改准入顺序或仓库前置条件。"
+                "不要在 JSON 之外输出文本。")
         return (
             InteractionSemanticContract.instruction(basis, coalesced=True)
             + "\n\nConversation Intelligence expression policy:\n"

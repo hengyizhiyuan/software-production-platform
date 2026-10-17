@@ -128,9 +128,9 @@ class _Adapter:
                 {"natural_response": "先确认目标，再说明下一步。"},
                 ensure_ascii=False,
             )
-            if options.get("input_text", "").startswith("Realize this governed")
+            if set(options.get("output_schema", {}).get("properties", {})) == {"natural_response"}
             else _semantics()
-            if options.get("input_text", "").startswith("Return the WIC semantic")
+            if "semantics" not in options.get("output_schema", {}).get("properties", {})
             else _envelope()
         )
         callback = options.get("on_output_delta")
@@ -187,10 +187,10 @@ def test_pre_work_coalesces_to_one_request_and_streams_only_human_text() -> None
     assert capability.last_pipeline_evidence.coalesced_retry_count == 0
     assert "provider_first_token" in stages
     assert "validation_completed" in stages
-    assert "Watt is an AI-native software production system" in adapter.requests[0]["instructions"]
-    assert "must not claim external submission" in adapter.requests[0]["instructions"]
-    assert "A technical topic alone is not a production goal" in adapter.requests[0]["instructions"]
-    assert "BUILD or ACTION_REQUEST must not be reduced" in adapter.requests[0]["instructions"]
+    assert "Watt 是 AI 原生软件生产系统" in adapter.requests[0]["instructions"]
+    assert "没有实际集成、权限和证据，不得宣称已提交" in adapter.requests[0]["instructions"]
+    assert "技术话题本身不等于生产目标" in adapter.requests[0]["instructions"]
+    assert "不拿大段复制代码代替受治理生产" in adapter.requests[0]["instructions"]
 
 
 def test_controlled_pre_work_repairs_one_root_json_failure_without_visible_delta() -> None:
@@ -215,8 +215,8 @@ def test_controlled_pre_work_repairs_one_root_json_failure_without_visible_delta
     assert capability.last_pipeline_evidence.semantic_structured_repair_count == 1
     assert "structured_output_repair_started" in stages
     assert "structured_output_repair_completed" in stages
-    assert "Observed validation locations/types: root:json_invalid" in adapter.requests[1]["instructions"]
-    assert "must be SYSTEM_INFERRED with WORKING_ASSUMPTION or UNRESOLVED" in adapter.requests[1]["instructions"]
+    assert "确切校验反馈：root:json_invalid" in adapter.requests[1]["instructions"]
+    assert "SYSTEM_INFERRED 加 WORKING_ASSUMPTION/UNRESOLVED" in adapter.requests[1]["instructions"]
     assert "我想做一个运营管理平台" in adapter.requests[1]["instructions"]
 
 
@@ -294,7 +294,7 @@ def test_controlled_pre_work_uses_semantics_then_governed_realizer_stream() -> N
     assert capability.last_pipeline_evidence.pipeline_mode == "governed_pre_work_semantic"
     assert capability.last_pipeline_evidence.conversation_request_id is None
     assert adapter.requests[0]["input_text"] == (
-        "Return the WIC semantic result for the exact supplied basis."
+        "按确切交流依据返回 WIC 语义结果，中文自然语言内容保持中文。"
     )
     assert "provider_first_response_event" in stages
     assert "semantic_payload_validated" in stages
@@ -321,7 +321,7 @@ def test_controlled_pre_work_uses_semantics_then_governed_realizer_stream() -> N
     )
     assert adapter.calls == 2
     assert "".join(realized_deltas) == realization.content
-    assert adapter.requests[1]["input_text"].startswith("Realize this governed")
+    assert adapter.requests[1]["input_text"].startswith("将已准入含义表达成自然中文")
 
 
 def test_controlled_pre_work_repairs_valid_json_with_schema_errors() -> None:
@@ -404,7 +404,7 @@ def test_shadow_pre_work_repairs_schema_error_once_without_weakening_contract() 
     assert result.design_intent_frame.design_subject == "微信小程序"
     assert adapter.calls == 2
     assert adapter.requests[1]["on_output_delta"] is None
-    assert "structural repair only" in adapter.requests[1]["instructions"]
+    assert "这是有界结构修复" in adapter.requests[1]["instructions"]
     assert "".join(visible) == invalid["natural_response"]
 
 
@@ -637,8 +637,8 @@ def test_governed_realizer_repairs_closed_schema_without_changing_stream_or_auth
     assert result.structural_repair_count == 1
     assert result.content == ''.join(deltas) == content
     assert adapter.requests[-1]['on_output_delta'] is None
-    assert 'Do not infer new facts' in adapter.requests[-1]['instructions']
-    assert 'Original governing contract and exact basis' in adapter.requests[-1]['instructions']
+    assert '不创造事实、建议、权限或工程真相' in adapter.requests[-1]['instructions']
+    assert '原治理合同与真实依据' in adapter.requests[-1]['instructions']
 
 
 def test_governed_realizer_structural_repair_is_bounded_and_preserves_terminal_failure():
@@ -673,7 +673,7 @@ def test_explicit_action_missing_binding_is_repaired_in_same_turn_without_visibl
     assert adapter.calls == 2 and visible == []
     assert result.semantic_intent.items[0].action.arguments['target_branch'].value == 'feature/semantic'
     assert capability.last_pipeline_evidence.semantic_action_repair_signal == 'EXPLICIT_ACTION_LOST_BEFORE_EXECUTION'
-    assert 'original exact latest Human record' in adapter.requests[1]['instructions']
+    assert '确切本轮 Human 来源' in adapter.requests[1]['instructions']
 
 
 def test_action_binding_repair_is_bounded_and_does_not_invent_human_argument():

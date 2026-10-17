@@ -4096,8 +4096,10 @@ class WorkInteractionService:
         motive = (current.motive if bounded_continuation and not correction else candidate.interpreted_motive or current.motive).strip()
         outcome = ("; ".join(dict.fromkeys((current.desired_outcome, candidate.desired_outcome)))
             if bounded_continuation and candidate.desired_outcome else candidate.desired_outcome or current.desired_outcome).strip()
-        context = candidate.candidate_context or current.context_facts
-        constraints = candidate.candidate_constraints or current.constraints
+        context = (tuple(dict.fromkeys((*current.context_facts, *candidate.candidate_context)))
+            if bounded_continuation and not correction else candidate.candidate_context or current.context_facts)
+        constraints = (tuple(dict.fromkeys((*current.constraints, *candidate.candidate_constraints)))
+            if bounded_continuation and not correction else candidate.candidate_constraints or current.constraints)
         requests = tuple(dict.fromkeys((*current.requests, *candidate.current_requests))) if bounded_continuation else candidate.current_requests or current.requests
         values = {
             "motive": motive,

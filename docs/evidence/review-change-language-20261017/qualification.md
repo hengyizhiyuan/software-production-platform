@@ -44,3 +44,14 @@ expression instruction preserves the exact same selected response payload.
 - Exact composed Owner compatibility is staged from canonical source repositories,
   not edited under build/owners. Runtime recovery and real Candidate qualification
   remain pending and must be recorded separately.
+
+Further source inspection found that current-IR projection replaces the advisory
+constraint list with this turn's delta. Bounded continuation already retained
+the old objective and requests but could lose original constraints/context.
+The Work Owner now unions unchanged original constraints/context for additive
+bounded continuation. A typed CORRECTION retains the existing replacement path;
+no language-pattern correction detector is added. Calendar follow-up variants
+protect both paths. The source-language/provider check also exercises actual
+bounded citation feedback and exhausted termination without visible provisional
+acknowledgements or authority changes. Chinese coalesced WIC expression uses
+Chinese policy as well, preserving its exact frame/meaning retention contract.

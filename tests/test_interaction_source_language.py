@@ -70,6 +70,37 @@ def test_reference_rejection_reaches_existing_compiler_repair_before_admission()
     DeepSeekInteractionSemanticCapability._validate_action_semantics(payload, value)
 
 
+@pytest.mark.parametrize("repairable", [True, False])
+def test_real_provider_reference_feedback_converges_or_stops_with_existing_budget(repairable):
+    from tests.test_deepseek_wic_provider import _basis, _semantics, _runtime, _Adapter
+    from spg.providers.deepseek_interaction import DeepSeekWorkInteractionCapability
+    from spg.domain.interaction import StructuredResponseSchemaViolation
+    source = "VERIFICATION:" + str(uuid4())
+    value = _basis().model_copy(update={"observed_reality": (
+        ObservedEffect(owner="verification", evidence_references=(source,), facts={"result": "PASS"}),)})
+    bad = json.loads(_semantics())
+    bad["supporting_references"] = ["VERIFICATION:" + str(uuid4())]
+    good = {**bad, "supporting_references": [source]}
+    outputs = [json.dumps(bad), json.dumps(good)] if repairable else [json.dumps(bad)] * 4
+    runtime, adapter = _runtime(_Adapter(outputs))
+    capability = DeepSeekWorkInteractionCapability(runtime=runtime)
+    emitted = []
+    def interpret():
+        return capability.interpret_controlled_stream_observed(value,
+            on_response_delta=emitted.append, on_pipeline_stage=lambda _: None)
+    if repairable:
+        result = interpret()
+        assert result.supporting_references == (source,)
+        assert adapter.calls == 2
+    else:
+        with pytest.raises(StructuredResponseSchemaViolation, match="bounded_repair_exhausted"):
+            interpret()
+        assert adapter.calls == 4
+    assert emitted == []
+    assert "SEMANTIC_SUPPORTING_REFERENCE_UNGROUNDED" in adapter.requests[1]["instructions"]
+    assert source in adapter.requests[1]["instructions"]
+
+
 def test_sufficiency_accepts_exact_active_context_but_not_unobserved_context():
     value, record, ref = basis()
     candidate = semantic_candidate(record).model_copy(update={"production_sufficiency":
@@ -117,3 +148,30 @@ def test_executor_prompt_changes_language_without_changing_contract_or_tool_gran
     assert json.loads(payload["input"]) == before
     assert "CONTINUE 仅能用 API 函数调用" in payload["instructions"]
     assert names and before == request.model_dump(mode="json")
+
+
+@pytest.mark.parametrize("correction", [False, True])
+def test_bounded_followup_retains_original_constraints_unless_typed_correction_replaces_them(correction):
+    from spg.application.interaction import WorkInteractionService
+    from spg.domain.interaction import InteractionAssessmentCandidate, WorkSatisfactionState
+    from spg.domain.intent_realization import ProductionIntent, SemanticKind
+    value, record, _ = basis("把日历加上周数和节气，先改一版再看看。")
+    current = NS(motive="家庭日历", desired_outcome="单页可用家庭日历", context_facts=("原有配色保持",),
+        constraints=("单页离线可用", "不接入第三方账户"), requests=("原始日历请求",))
+    active = NS(work_revision=current, active_production_binding_id=uuid4(),
+        satisfaction_state=WorkSatisfactionState.IN_PROGRESS)
+    raw = semantic_candidate(record, production=ProductionIntent(objective=current.motive,
+        primary_change="增加周数和节气", current=True, bounded_change=True))
+    if correction:
+        raw = raw.model_copy(update={"items": (*raw.items,
+            raw.items[0].model_copy(update={"item_id": "correction", "kind": SemanticKind.CORRECTION, "production": None}))})
+    candidate = InteractionAssessmentCandidate(semantic_intent=raw, interpreted_motive=current.motive,
+        desired_outcome="增加周数和节气", candidate_constraints=("显示周数与节气",),
+        candidate_context=("新的可逆展示细节",), current_requests=(record.content,),
+        natural_response="继续调整当前日历。", provider_identity="declared:test")
+    _, _, change = WorkInteractionService._normalize_active_candidate(candidate, active,
+        latest_human_record_id=record.id)
+    assert change is not None
+    assert change.constraints == (("显示周数与节气",) if correction else (*current.constraints, "显示周数与节气"))
+    assert ("原有配色保持" in change.context_facts) is (not correction)
+    assert current.constraints == ("单页离线可用", "不接入第三方账户")
