@@ -12,7 +12,7 @@ import signal
 import stat
 from uuid import UUID
 
-from spg.domain.native_execution import EffectCondition, ToolExecutionRequest, ToolExecutionResult
+from spg.domain.native_execution import ToolArgumentsInvalid, EffectCondition, ToolExecutionRequest, ToolExecutionResult
 from spg.executor.tools import (
     PUBLIC_NATIVE_TOOL_CONTRACTS,
     NativeToolRegistry,
@@ -408,7 +408,7 @@ class LocalNativeToolHost:
     def _argv(request: ToolExecutionRequest) -> list[str]:
         argv = request.proposal.arguments.get("argv")
         if not isinstance(argv, list) or not argv or not all(isinstance(item, str) for item in argv):
-            raise ValueError("tool argv must be a non-empty string array")
+            raise ToolArgumentsInvalid("tool argv must be a non-empty string array; correct argv or choose another granted tool")
         return argv
 
     def _content_path(self, relative: str) -> Path:

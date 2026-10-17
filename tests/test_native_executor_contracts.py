@@ -2681,21 +2681,12 @@ def test_observed_diagnostic_failure_can_repair_only_existing_authorized_scope(c
     assert (classification is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE) is (changed is None)
 
 
-def test_malformed_tool_recipe_keeps_existing_write_capability_for_bounded_repair():
-    from spg.executor.tools import PUBLIC_NATIVE_TOOL_CONTRACTS
+def test_malformed_tool_recipe_keeps_existing_write_capability_for_bounded_repair(tmp_path):
     binding, contract = _binding()
     binding = binding.model_copy(update={"capability_grants": (
         CapabilityGrant(identity="build.run", version="1"),
         CapabilityGrant(identity="file.write", version="1", scope={"paths": ["src"]}),
     )})
-    calls = []
-
-    async def handler(request):
-        calls.append(request.proposal.tool_identity)
-        assert request.proposal.tool_identity == "file.write", "Invalid build arguments must never run"
-        return ToolExecutionResult(delivery_id=request.delivery_id, tool_identity="file.write",
-            condition=EffectCondition.SETTLED, output={}, output_digest=canonical_digest({}))
-
     class Audit(NullKernelAudit):
         repairability = None
 
@@ -2712,9 +2703,7 @@ def test_malformed_tool_recipe_keeps_existing_write_capability_for_bounded_repai
                 "status": "OPEN", "failure_family": "DEPENDENCY_BUILD_FAILURE",
                 "repairability": self.repairability.value},)
 
-    registry = NativeToolRegistry(tuple(ToolDefinition(str(c['identity']), '1', str(c['description']),
-        c['input_schema'], str(c['effect_classification']), handler)
-        for c in PUBLIC_NATIVE_TOOL_CONTRACTS if c['identity'] in {'build.run', 'file.write'}))
+    registry = LocalNativeToolHost(tmp_path).registry()
     inference = ScriptedInferenceAdapter((
         InferenceResponse(action=InferenceAction.CONTINUE, summary="invalid recipe", working_plan=_plan(2),
             tool_calls=(ToolCallProposal(proposal_index=0, tool_identity="build.run", arguments={"path": "src/page.html"}),)),
@@ -2727,10 +2716,10 @@ def test_malformed_tool_recipe_keeps_existing_write_capability_for_bounded_repai
         audit=Audit(), checkpoints=_Checkpoints()).run(binding=binding, contract=contract,
             worker_epoch=1, working_plan=_plan()))
     assert result.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
-    assert calls == ["file.write"]
+    assert (tmp_path / "src/page.html").read_text() == "<main>Page</main>"
     feedback = inference.requests[1].previous_results[0]['output']
     assert feedback['error_type'] == 'TOOL_ARGUMENTS_INVALID' and feedback['effect_observed'] is False
-    assert {item['rule'] for item in feedback['validation_issues']} == {'required', 'additionalProperties'}
+    assert 'argv must be a non-empty string array' in feedback['message']
     assert 'file.write' in {item['identity'] for item in inference.requests[1].available_tools}
     assert result.inference_submissions == 3 and result.tool_effects == 2
 

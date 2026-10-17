@@ -6,12 +6,11 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
-from jsonschema import Draft202012Validator
-
 from spg.domain.native_execution import (
     CapabilityGrant,
     EffectCondition,
     NativeExecutionConflict,
+    ToolArgumentsInvalid,
     ToolExecutionRequest,
     ToolExecutionResult,
     canonical_digest,
@@ -256,22 +255,15 @@ class NativeToolRegistry:
         ):
             raise NativeExecutionConflict("Destructive operation lacks explicit Work permission")
         self._validate_path_scope(request, grant)
-        # A malformed model recipe has not reached its handler. Give the
-        # existing Executor repair loop precise feedback instead of classifying
-        # a missing argument as an unknown implementation/build failure.
-        issues = tuple(Draft202012Validator(definition.input_schema).iter_errors(
-            request.proposal.arguments
-        ))
-        if issues:
+        try:
+            result = await definition.handler(request)
+        except ToolArgumentsInvalid as error:
+            # Only a typed, pre-effect rejection can retain autonomous recipe
+            # correction. Other handler errors keep their existing semantics.
             output = {
                 "error_type": "TOOL_ARGUMENTS_INVALID",
                 "effect_observed": False,
-                "message": "Correct the arguments using this tool's advertised input_schema, or select another granted tool.",
-                "validation_issues": [
-                    {"location": list(issue.absolute_path), "rule": issue.validator,
-                     "expected": issue.validator_value}
-                    for issue in issues
-                ],
+                "message": str(error),
             }
             digest = canonical_digest(output)
             return ToolExecutionResult(
@@ -279,7 +271,6 @@ class NativeToolRegistry:
                 condition=EffectCondition.FAILED, output=output, output_digest=digest,
                 evidence=({"type": "TOOL_REJECTION", "digest": digest},),
             )
-        result = await definition.handler(request)
         if result.delivery_id != request.delivery_id:
             raise NativeExecutionConflict("tool result delivery identity differs")
         if result.tool_identity != definition.identity:

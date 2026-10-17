@@ -31,6 +31,10 @@ def canonical_digest(value: BaseModel | dict[str, Any] | list[Any] | tuple[Any, 
     return sha256(encoded).hexdigest()
 
 
+class ToolArgumentsInvalid(ValueError):
+    """A handler rejected argument shape before starting any external effect."""
+
+
 class NativeExecutionError(RuntimeError):
     """Base error for native execution contract violations."""
 

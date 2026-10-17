@@ -11,6 +11,7 @@ from uuid import UUID
 
 from spg.domain.native_execution import (
     EffectCondition,
+    ToolArgumentsInvalid,
     ToolExecutionRequest,
     ToolExecutionResult,
     WorkspaceManifest,
@@ -657,7 +658,7 @@ print(len(updated))
     def _argv(request: ToolExecutionRequest) -> list[str]:
         argv = request.proposal.arguments.get("argv")
         if not isinstance(argv, list) or not argv or not all(isinstance(item, str) for item in argv):
-            raise ValueError("tool argv must be a non-empty string array")
+            raise ToolArgumentsInvalid("tool argv must be a non-empty string array; correct argv or choose another granted tool")
         return argv
 
     @staticmethod

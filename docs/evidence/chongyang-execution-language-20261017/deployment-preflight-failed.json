@@ -1,0 +1,25 @@
+{
+  "status": "FAIL",
+  "results": {
+    "ecf": {
+      "commit": "1d3feddf0c7e7726fea23c58d194d64034547a7a",
+      "source_digest": "225d415597884ae923458a620b8c01abef2605cd093036aee159f5d445073702",
+      "import_root": "/opt/watt-owners/ecf/src"
+    },
+    "guardian": {
+      "commit": "41ee9d5e9d25e9455c84c7346ab93887af0efd8c",
+      "source_digest": "a861fa5c702dfa92cdc8448c408c70f8296e57668ff78aa18dbe68e961b10f37",
+      "import_root": "/opt/watt-owners/guardian/src"
+    }
+  },
+  "failures": [
+    {
+      "check": "check_guardian_contract",
+      "error": "ModuleNotFoundError(\"No module named 'jsonschema'\")"
+    },
+    {
+      "check": "check_ecf_contract",
+      "error": "ImportError(\"cannot import name 'application' from 'spg' (/app/src/spg/__init__.py)\")"
+    }
+  ]
+}

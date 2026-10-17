@@ -442,3 +442,12 @@ def test_native_process_allows_bounded_directory_listing_in_production_environme
     with pytest.raises(ValueError, match='escape'):
         asyncio.run(host.run_process(request))
     assert len(commands) == 1
+    from spg.domain.native_execution import CapabilityGrant, EffectCondition
+    request.proposal.tool_identity = 'process.run'
+    request.proposal.arguments = {'path': 'index.html'}
+    request.capability_grants = (CapabilityGrant(identity='process.run', version='1'),)
+    rejected = asyncio.run(host.registry().execute(request))
+    assert rejected.condition is EffectCondition.FAILED
+    assert rejected.output['error_type'] == 'TOOL_ARGUMENTS_INVALID'
+    assert rejected.output['effect_observed'] is False
+    assert len(commands) == 1
