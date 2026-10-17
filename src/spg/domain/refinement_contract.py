@@ -169,6 +169,22 @@ def compilation_execution_evidence(output: dict) -> dict:
     return {"diagnostic_code": "PYTHON_SYNTAX_ERROR", "path": target}
 
 
+def directory_listing_evidence(output: dict) -> dict:
+    """Identify a completed system listing, without interpreting its text as truth.
+
+    Only the installed bare executable is covered; a workspace program named
+    ls, an interrupted process or an unobserved exit cannot establish this fact.
+    This says nothing about artifact correctness or permitted write paths.
+    """
+    argv = output.get("argv")
+    if (not isinstance(argv, (list, tuple)) or not argv or argv[0] != "ls"
+            or type(output.get("returncode")) is not int
+            or output.get("timed_out") is not False
+            or output.get("process_group_terminated") is not False):
+        return {}
+    return {"process_observation_kind": "DIRECTORY_LISTING", "effect_observed": False}
+
+
 def classify_refinement(
     *, converged: bool, same_signature_count: int = 1,
     prior_occurrences: int = 0, budget_exhausted: bool = False,

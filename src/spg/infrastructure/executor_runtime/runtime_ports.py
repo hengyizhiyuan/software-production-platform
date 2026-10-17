@@ -670,6 +670,14 @@ class DurableKernelAudit:
         if output.get("product_intent_change") is True:
             return RepairabilityClassification.REQUIRES_HUMAN_DECISION, "repair would change Product Intent"
         grants = {grant.identity for grant in binding.capability_grants}
+        if (tool == "process.run" and "process.run" in grants
+                and condition is EffectCondition.FAILED
+                and output.get("process_observation_kind") == "DIRECTORY_LISTING"
+                and output.get("effect_observed") is False):
+            from spg.domain.refinement_contract import directory_listing_evidence
+            if directory_listing_evidence(output):
+                return (RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE,
+                    "completed read-only directory listing; use observed paths and existing grants, preserving acceptance criteria")
         if (condition is EffectCondition.FAILED and output.get("effect_observed") is False
                 and output.get("error_type") == "NativeExecutionConflict"
                 and (output.get("message") in {

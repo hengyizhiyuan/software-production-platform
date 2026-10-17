@@ -823,7 +823,13 @@ Native repairability treats authoritative confirmed no-effect capability failure
 and pre-execution path/grant rejections as repairable through an already admitted
 alternative. It does not grant access to the rejected path or tool, and uncertain
 effects, conflicting receipt identities and Human-owned choices retain their
-existing safeguards. A missing executable reported by OCI before a test process
+existing safeguards. A completed system directory listing retains its actual
+exit status and failure receipt; an absent path alone does not require a new
+acceptance oracle before an already admitted write. The Tool Host identifies
+only the installed bare listing executable as read-only, with observed exit and
+no interruption. Unknown effects, other/workspace executables, missing grants
+and Human-owned input/choices do not acquire this recovery classification.
+A missing executable reported by OCI before a test process
 starts is incomplete test-environment evidence, not an executed source assertion.
 Real compilation diagnostics can bind an invoked Python source target to its
 failed compilation receipt; subsequent observed in-scope source evidence can

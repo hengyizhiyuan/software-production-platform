@@ -7,6 +7,7 @@ from collections.abc import Callable
 from pydantic import ValidationError
 
 from spg.application.executor_runtime import NativeExecutorRuntimeService
+from spg.application.model_language import uses_chinese
 from spg.domain.native_execution import (
     AttemptTerminalOutcome,
     ControlAction,
@@ -143,14 +144,17 @@ class NativeExecutionWorker:
         )
         semantic = checkpoint.semantic_manifest if checkpoint else {}
         plan_payload = semantic.get("working_plan") if isinstance(semantic, dict) else None
+        chinese = uses_chinese(str(contract.contract_payload.get("objective", "")))
         working_plan = (
             WorkingPlan.model_validate(plan_payload)
             if isinstance(plan_payload, dict)
             else WorkingPlan(
                 version=1,
                 objective_reference=str(contract.id),
-                chosen_approach="Inspect governed Reality and execute the bounded PWU contract.",
-                approach_rationale="No prior checkpoint exists for this execution session.",
+                chosen_approach=("检查确切工程现状并执行有界 PWU 合同。" if chinese else
+                    "Inspect governed Reality and execute the bounded PWU contract."),
+                approach_rationale=("本次执行会话尚无先前检查点。" if chinese else
+                    "No prior checkpoint exists for this execution session."),
                 obligation_ids=tuple(binding_record.binding.obligation_references),
             )
         )

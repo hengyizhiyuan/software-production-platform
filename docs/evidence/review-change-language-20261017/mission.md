@@ -41,3 +41,14 @@ Steering 已重建四文件有界生产提案，但 formation 再次停止。确
 gate、版本身份和独立 Guardian 保留；历史 v1–v3 不变，失败记录保留。修复后仅在
 此 revision 的现有 attention Owner 启动正常后继恢复，不重复已完成 Turn、扩预算或
 接纳旧候选。
+
+实际 Native 第一轮在 15:42 UTC 暴露了后续系统缺陷：模型已写入两个文件，
+随后同一批次执行 `ls -la src styles`，因尚未创建 styles 返回 2。普通只读目录
+检查失败被归类为缺少验收 oracle，紧随的已授权写入因此直接触发
+BOUNDARY_CROSSING_REQUIRED。这是消费者将已观测、无修改效果的技术检查误当
+权限扩张，不是 Human 意图不足。修复只在现有 Tool Host 记录系统 ls 的完成
+类型及无修改效果，并由 Native repair Owner 保留 FAILED 原记录、允许既有
+权限内继续加工。未知效果、超时/中断、工作区自制 ls、其他进程、缺 grant、
+Human 输入/决定仍不适用；不按 stderr、游戏文本或缺失目录名判业务 PASS。
+修复后通过既有 retry-production 创建后继 Attempt，保留累计代次、旧失败与
+全部验收要求。新自然语言 PWU 目标包装和首次执行计划也跟随目标语言。

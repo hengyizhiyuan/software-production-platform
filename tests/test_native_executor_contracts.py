@@ -2832,3 +2832,74 @@ def test_creation_focus_never_supplies_missing_grants_or_assumes_absent_source(b
     tools=({'identity':'file.read'},) if boundary in {'no-write','diagnostic-only'} else ({'identity':'file.read'},{'identity':'file.write'})
     assert NativeExecutorKernel._creation_repair_tools(tools,contract=contract,
         previous_results=receipts,ineffective_rounds=1)==tools
+
+
+@pytest.mark.skipif(os.name != 'posix', reason='system ls is a POSIX inspection command')
+def test_missing_directory_listing_keeps_granted_write_in_same_native_batch(tmp_path):
+    binding, contract = _binding()
+    binding = binding.model_copy(update={'capability_grants': (
+        CapabilityGrant(identity='process.run', version='1'),
+        CapabilityGrant(identity='file.write', version='1', scope={'paths': ['src']}),
+    )})
+
+    class Audit(NullKernelAudit):
+        classification = None
+
+        async def finish_tool(self, effect_id, request, result, error):
+            assert error is None
+            if result.condition is EffectCondition.FAILED:
+                self.classification, _ = DurableKernelAudit._classify_repairability(
+                    contract.contract_payload, binding=binding,
+                    tool=request.proposal.tool_identity, condition=result.condition,
+                    output=result.output)
+            return self.classification
+
+    audit = Audit()
+    inference = ScriptedInferenceAdapter((
+        InferenceResponse(action=InferenceAction.CONTINUE, summary='inspect then create within existing scope',
+            working_plan=_plan(2), tool_calls=(
+                ToolCallProposal(proposal_index=0, tool_identity='process.run',
+                    arguments={'argv': ['ls', '-la', 'src'], 'cwd': '.'}),
+                ToolCallProposal(proposal_index=1, tool_identity='file.write',
+                    arguments={'path': 'src/report.html', 'content': '<main>Report</main>'}),
+            )),
+        InferenceResponse(action=InferenceAction.RESULT_READY, summary='submit exact artifact for independent checks',
+            working_plan=_plan(3), result_claim={'output_vector': {'files': ['src/report.html']}, 'evidence_ids': []}),
+    ))
+    result = asyncio.run(NativeExecutorKernel(inference=inference,
+        tools=LocalNativeToolHost(tmp_path).registry(), audit=audit,
+        checkpoints=_Checkpoints()).run(binding=binding, contract=contract,
+            worker_epoch=1, working_plan=_plan()))
+    assert result.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
+    assert audit.classification is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE
+    assert (tmp_path / 'src/report.html').read_text() == '<main>Report</main>'
+    receipt = inference.requests[1].previous_results[0]
+    assert receipt['condition'] == 'FAILED' and receipt['output']['returncode'] != 0
+    assert receipt['output']['effect_observed'] is False
+    assert result.inference_submissions == 2 and result.tool_effects == 2
+
+
+@pytest.mark.parametrize('changed', ['unobserved', 'timeout', 'interrupted', 'local-program',
+    'other-program', 'no-grant', 'missing-input', 'product-choice', 'no-classification', 'effect', 'fake-exit'])
+def test_listing_feedback_cannot_create_effect_certainty_or_human_authority(changed):
+    from spg.domain.refinement_contract import directory_listing_evidence
+    binding, _ = _binding()
+    binding = binding.model_copy(update={'capability_grants': (CapabilityGrant(identity='process.run', version='1'),)})
+    output = {'argv': ['ls', '-la', 'src'], 'returncode': 2, 'timed_out': False,
+        'process_group_terminated': False}
+    output.update(directory_listing_evidence(output))
+    condition = EffectCondition.FAILED
+    if changed == 'unobserved': condition = EffectCondition.UNKNOWN
+    elif changed == 'timeout': output['timed_out'] = True
+    elif changed == 'interrupted': output['process_group_terminated'] = True
+    elif changed == 'local-program': output['argv'] = ['./ls', 'src']
+    elif changed == 'other-program': output['argv'] = ['node', 'src/app.js']
+    elif changed == 'no-grant': binding = binding.model_copy(update={'capability_grants': ()})
+    elif changed == 'missing-input': output['missing_human_input'] = True
+    elif changed == 'product-choice': output['product_choice_required'] = True
+    elif changed == 'no-classification': output.pop('process_observation_kind')
+    elif changed == 'effect': output['effect_observed'] = True
+    elif changed == 'fake-exit': output['returncode'] = True
+    classification, _ = DurableKernelAudit._classify_repairability({}, binding=binding,
+        tool='process.run', condition=condition, output=output)
+    assert classification is not RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE

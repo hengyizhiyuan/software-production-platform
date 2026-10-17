@@ -419,13 +419,14 @@ def test_historical_pe_handle_keeps_unknown_image():
     assert restored.runtime_image_observation is None
 
 
-def test_native_process_allows_bounded_directory_listing_in_production_environment():
+@pytest.mark.parametrize('exit_code', [0, 2])
+def test_native_process_allows_bounded_directory_listing_in_production_environment(exit_code):
     commands = []
 
     class RecordingProvider:
         def execute_observed(self, _handle, command):
             commands.append(command)
-            return EnvironmentCommandObservation(result=EnvironmentCommandResult(command=command, exit_code=0),
+            return EnvironmentCommandObservation(result=EnvironmentCommandResult(command=command, exit_code=exit_code),
                 stdout='README.md\n', stderr='')
 
     host = ProductionEnvironmentNativeToolHost(provider=RecordingProvider(),
@@ -436,6 +437,10 @@ def test_native_process_allows_bounded_directory_listing_in_production_environme
         proposal=SimpleNamespace(arguments={'cwd': '.', 'argv': ['ls', '-la']}))
     result = asyncio.run(host.run_process(request))
     assert result.output['stdout'] == 'README.md\n'
+    assert result.output['process_observation_kind'] == 'DIRECTORY_LISTING'
+    assert result.output['effect_observed'] is False
+    assert result.output['returncode'] == exit_code
+    assert result.condition.value == ('SETTLED' if exit_code == 0 else 'FAILED')
     assert len(commands) == 1 and commands[0].argv == ('ls', '-la')
     assert commands[0].working_directory == '/workspace/primary'
     request.proposal.arguments['argv'] = ['ls', '/etc']

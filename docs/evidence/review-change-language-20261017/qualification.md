@@ -69,3 +69,15 @@ commit c7c3fd8a1d093cc1c4e9ee977f7f44bf5c54528e, source digest
 This is pending-content handoff qualification, not an executed Candidate PASS.
 The final provider/follow-up selection passes 99 tests, and four isolated
 PostgreSQL revision/active-cycle cases pass after the continuity correction.
+
+Live Native after v4 admitted the full brief with 32 bindings, zero formation
+model calls, and executed actual file writes. It then stopped at the precise
+read-only listing classification defect documented in the mission amendment.
+A real local tool/kernel case reproduces a missing unrelated creation directory
+in a mixed inspection/write batch, retains the FAILED listing receipt, and
+continues only the admitted write. Eleven negatives protect unknown/timeout/
+interruption, workspace executables, other programs, missing grants, Human
+inputs/choices, missing host classification, effect contradiction and invalid
+exit types. The changed Native/objective/WIC contract selection passes 170 tests;
+PE-host listing tests cover both observed successful and failed exits. No actual
+revised game Candidate or current Guardian PASS is claimed at this checkpoint.

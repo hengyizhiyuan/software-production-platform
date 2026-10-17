@@ -4714,12 +4714,22 @@ class WorkApplicationService:
 
     @staticmethod
     def _code_change_objective(contract: CodeChangeContract) -> str:
+        from spg.application.model_language import uses_chinese
+
         exact = "\n".join(
             f"- {target.operation.value} {target.path}"
             for target in contract.exact_targets
         )
         areas = "\n".join(f"- {area}" for area in contract.allowed_areas)
         constraints = "\n".join(f"- {item}" for item in contract.constraints)
+        if uses_chinese(contract.desired_outcome):
+            return (
+                "完成已准入的代码修改。\n"
+                f"预期成果：{contract.desired_outcome}\n"
+                f"已准入约束：\n{constraints or '- 无。'}\n"
+                f"确切目标：\n{exact or '- 无。'}\n"
+                f"有界区域：\n{areas or '- 无。'}"
+            )
         return (
             f"Produce the admitted code change.\n"
             f"Desired outcome: {contract.desired_outcome}\n"
@@ -4981,7 +4991,15 @@ class WorkApplicationService:
 
     @staticmethod
     def _artifact_objective(contract: ArtifactContract) -> str:
+        from spg.application.model_language import uses_chinese
+
         constraint_text = "\n".join(f"- {item}" for item in contract.constraints)
+        if uses_chinese(contract.expected_outcome):
+            return (
+                f"对确切成果 {contract.artifact_path} 执行 {contract.operation.value}。\n"
+                f"预期成果：{contract.expected_outcome}\n"
+                f"约束：\n{constraint_text or '- 无已准入合同之外的约束。'}"
+            )
         return (
             f"{contract.operation.value} the exact artifact {contract.artifact_path}.\n"
             f"Intended outcome: {contract.expected_outcome}\n"

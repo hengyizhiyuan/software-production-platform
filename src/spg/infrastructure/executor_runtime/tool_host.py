@@ -379,6 +379,9 @@ class LocalNativeToolHost:
         elif identity in {"build.run", "process.run"}:
             from spg.domain.refinement_contract import compilation_execution_evidence
             output.update(compilation_execution_evidence(output))
+        if identity == "process.run":
+            from spg.domain.refinement_contract import directory_listing_evidence
+            output.update(directory_listing_evidence(output))
         return self._result(
             request.delivery_id,
             identity,
