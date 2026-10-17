@@ -32,7 +32,7 @@ document case passes on real PostgreSQL/Git/HTTP after correcting the new
 fixture assertion to compare the boolean trusted_result to False, not None.
 The document downloads before authorization; forged fingerprint and
 outside-inventory paths are rejected; reading leaves authorization pending.
-Deployed exact-Candidate qualification is pending.
+Final deployment and exact Candidate HTTP/entry qualification are recorded below.
 No production rerun or Candidate authorization is needed for this UI repair.
 
 BUG_CLASS: existing artifact inventory omitted by review projection consumer.
@@ -49,4 +49,26 @@ returned previously cached deterministic fact labels, retaining the unavailable
 Preview instruction. Both cache-hit paths now derive those labels from the
 current exact Owner facts while reusing qualified prose unchanged. No stored
 records, basis identity or model generation is rewritten. Initial deployment
-receipt is retained separately; final deployment qualification is pending.
+receipt is retained separately; final deployment qualification follows.
+
+Final deployment: application a08284b6c7489afa691f8f95f1873a23895416d2,
+image sha256:56e499d02e5e9dbdcb2796de7b218c79f2ccc9e12d126558a3ee904c05490d8f.
+All four services share that image; health, exact source hashes and the existing
+independent owner release gate pass. The paused unrelated Work is preserved.
+
+The original Preview error was reproduced in the actual browser before repair.
+After deployment, actual browser DOM on the same Product workspace shows
+"成果文件", docs/design.md, "查看文档" and "下载文档" at the exact sealed Candidate
+URL, with no Preview button. Review copy now requests files instead of Preview.
+Full browser reader click/readback was not conclusively completed: browser
+control repeatedly timed out after refresh, and a screenshot could not be
+obtained. Do not present that limitation as a successful browser reader test.
+
+The served JS/CSS match the exact deployed source. Its real reader function,
+invoked in a VM against the actual authenticated Candidate HTTP endpoint, assigns
+the full original 9,724-byte Chinese plan to textContent; SHA-256 exactly matches
+the previously sealed artifact. This is a live served-code/HTTP contract check,
+not a browser interaction claim. Both that receipt and actual HTTP proof are
+retained. Original Work Reality, Candidate identity/content and pending Human
+authorization are unchanged. No production retry, integration, acceptance,
+delivery or game implementation was performed. See qualification.json.

@@ -1,0 +1,9 @@
+{
+  "qualification": "Served JavaScript reader function with actual authenticated Candidate HTTP data in a VM; not browser interaction",
+  "endpoint": "/api/works/82523845-5957-5601-a5f3-8dc703425d7e/candidate-download/33514d8745ddf1ad98d4772c28802e4c3e9c642e4693ef9756102a4a0e672728/docs/design.md",
+  "bytes": 9724,
+  "sha256": "d571e485bc53eb5f1158fb83f8c0b79407e05e61fa1d3e4f46827f6a4ab515f8",
+  "full_text_assigned": true,
+  "document_title": "# 奥特曼塔防 H5 小游戏 · 设计方案（待评审，暂未实施）",
+  "production_effects": false
+}

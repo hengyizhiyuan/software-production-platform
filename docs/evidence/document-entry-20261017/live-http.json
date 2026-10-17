@@ -1,0 +1,13 @@
+{
+  "candidate_id": "dd956f08-57cb-5176-92e4-ab5e91659301",
+  "candidate_fingerprint": "33514d8745ddf1ad98d4772c28802e4c3e9c642e4693ef9756102a4a0e672728",
+  "candidate_revision": "50ba60d17b5be69b2eca98d15b93368a9178f259",
+  "document_path": "docs/design.md",
+  "bytes": 9724,
+  "sha256": "d571e485bc53eb5f1158fb83f8c0b79407e05e61fa1d3e4f46827f6a4ab515f8",
+  "authorization_pending": true,
+  "work_reality_unchanged": true,
+  "artifact_unchanged": true,
+  "served_ui_matches_source": true,
+  "human_review": "质量条件已满足；请查看成果文件与改动，再明确决定是否授权当前候选。"
+}
