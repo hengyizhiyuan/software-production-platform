@@ -1144,9 +1144,10 @@ def _work_constraint_direct_source(ir, quote, entry):
 
 
 def _work_constraint_exclusion_sources(ir, quote, entries):
+    from spg.application.model_language import exclusion_constraint_forms
     return [(entry, value) for entry in entries if entry["kind"] in {"IR_CLAUSE", "IR_CONSTRAINT"}
         for item in ir.items if item.item_id == entry["item_id"] and item.production is not None
-        for value in item.production.exclusions if quote == f"Excluded from this Work: {value}"]
+        for value in item.production.exclusions if quote in exclusion_constraint_forms(value)]
 
 
 def _current_file_scope_source(revision, ir, entry, clause, exact_target_paths):
@@ -2434,7 +2435,8 @@ def _existing_source_type_projection(revision, ir, inventory, *, include_admissi
                         "original_value_fingerprint": canonical_fingerprint(value)})
             if include_admission_derivations and item.production in ir.current_production:
                 for ordinal, value in enumerate(item.production.exclusions):
-                    if f"Excluded from this Work: {value}" == text:
+                    from spg.application.model_language import exclusion_constraint_forms
+                    if text in exclusion_constraint_forms(value):
                         admission_origins.append({"semantic_ir_id": str(ir.id), "item_id": item.item_id,
                             "field": "production.exclusions", "index": ordinal,
                             "existing_type_contract_ref": "exclusions",

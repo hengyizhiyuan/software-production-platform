@@ -126,39 +126,51 @@ class RuleBasedProductionPlanner:
         request: ProductionPlanningRequest,
         fit: OnePwuFitClassification,
     ) -> tuple[str, ...]:
+        from spg.application.model_language import uses_chinese
+        chinese = uses_chinese(request.production_objective)
+        def wording(english, chinese_text):
+            return chinese_text if chinese else english
         if fit not in {
             OnePwuFitClassification.ONE_PWU_FIT,
             OnePwuFitClassification.MULTI_PWU_FIT,
         }:
-            return ("Resolve the listed planning blocker before production admission.",)
+            return (wording("Resolve the listed planning blocker before production admission.",
+                "先解决已列出的规划阻塞，再进入生产。"),)
 
         steps: list[str] = [
-            "Inspect the admitted Source of Truth and existing repository conventions.",
+            wording("Inspect the admitted Source of Truth and existing repository conventions.",
+                "检查已准入的事实来源与现有仓库约定。"),
         ]
         for target in request.artifact_targets:
             action = target.operation.value.lower()
             steps.append(
-                f"{action.capitalize()} the exact authorized artifact {target.path}."
+                wording(f"{action.capitalize()} the exact authorized artifact {target.path}.",
+                    f"按 {target.operation.value} 操作处理确切已授权成果：{target.path}。")
             )
         if request.change_proposal is not None:
             required = ", ".join(
                 target.path for target in request.change_proposal.required_targets
             )
             if required:
-                steps.append(f"Prepare the repository-inspected code targets: {required}.")
+                steps.append(wording(f"Prepare the repository-inspected code targets: {required}.",
+                    f"准备经过仓库检查的代码目标：{required}。"))
             if request.change_proposal.allowed_areas:
                 areas = ", ".join(request.change_proposal.allowed_areas)
-                steps.append(f"Keep any Human-admitted code changes inside: {areas}.")
+                steps.append(wording(f"Keep any Human-admitted code changes inside: {areas}.",
+                    f"将用户已准入的代码改动限制在：{areas}。"))
         if request.change_contract is not None:
             if request.change_contract.exact_targets:
                 paths = ", ".join(
                     target.path for target in request.change_contract.exact_targets
                 )
-                steps.append(f"Modify only the admitted exact code targets: {paths}.")
+                steps.append(wording(f"Modify only the admitted exact code targets: {paths}.",
+                    f"只修改已准入的确切代码目标：{paths}。"))
             if request.change_contract.allowed_areas:
                 areas = ", ".join(request.change_contract.allowed_areas)
-                steps.append(f"Keep all other code changes inside: {areas}.")
-        steps.append("Run the admitted targeted verification and report the resulting evidence.")
+                steps.append(wording(f"Keep all other code changes inside: {areas}.",
+                    f"其他代码改动限制在：{areas}。"))
+        steps.append(wording("Run the admitted targeted verification and report the resulting evidence.",
+            "执行已准入的针对性验证，并报告实际证据。"))
         return tuple(dict.fromkeys(steps))
 
     @staticmethod

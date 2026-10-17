@@ -567,7 +567,7 @@ class ResponsesInferenceAdapter:
             format_payload["strict"] = False
         payload: dict[str, object] = {
             "model": self.model,
-            "instructions": self._instructions(),
+            "instructions": self._request_instructions(inference_request),
             "input": json.dumps(
                 inference_request.model_dump(mode="json"), ensure_ascii=False
             ),
@@ -617,6 +617,13 @@ class ResponsesInferenceAdapter:
                 }
             )
         return tuple(issues)
+
+    def _request_instructions(self, request: InferenceRequest) -> str:
+        from spg.application.model_language import uses_chinese
+        if uses_chinese(request.objective):
+            from spg.providers.production_prompt_zh import executor_instruction_zh
+            return executor_instruction_zh(native_tools=isinstance(self, DeepSeekResponsesInferenceAdapter))
+        return self._instructions()
 
     def _instructions(self) -> str:
         return (

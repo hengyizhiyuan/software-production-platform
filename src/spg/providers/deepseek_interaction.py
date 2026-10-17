@@ -16,6 +16,7 @@ from spg.application.response_contract_expression import (
     response_contract_expression_guidance,
 )
 from spg.application.conversation import ConversationResponseComposer
+from spg.application.model_language import chinese_interaction
 from spg.domain.conversation import (
     ConversationTurnIntent,
     ConversationContext,
@@ -210,9 +211,21 @@ def _repair_structured_result(
         )
     if on_stage is not None:
         on_stage("structured_output_repair_started")
+    from spg.application.model_language import uses_chinese
+    chinese_repair = (
+        f"修复一个已完成的 {contract_name} JSON，使其符合给定确切 schema 与下方被拒绝的绑定约束。"
+        "这是有界结构修复，保留所有有效业务含义、原始中文及用户表达；只有满足明确校验错误时才作必要调整。"
+        "删除多余字段，不创造事实、建议、权限或工程真相，不把旧命令当作本轮同意。"
+        "若动作缺规范绑定，从确切本轮 Human 来源恢复；若缺真实来源，仅使用当前已提供引用，不编造身份。"
+        "种类与动作冲突时保留原子句及限制，使用合法非执行条目，不能丢弃所有语义来绕过校验。"
+        "只返回修复后的 JSON，不重做已经有效的业务判断。机器键、枚举、代码、路径、引用及确切 source_text 保持原样。\n"
+        f"确切校验反馈：{validation_feedback}\n"
+        f"补充约束反馈：{repair_guidance}\n"
+        "以下为原治理合同与真实依据，仅用于修复被拒绝的字段及跨字段约束：\n" + original_instruction
+        if uses_chinese(original_instruction) else None)
     result = runtime.generate(
         purpose=purpose,
-        instructions=(
+        instructions=chinese_repair or (
             f"Repair one completed {contract_name} JSON result to the supplied exact "
             "schema. This is structural repair only. Preserve every existing business "
             "meaning and Human-facing statement exactly unless a change is strictly "
@@ -274,7 +287,9 @@ class DeepSeekInteractionSemanticCapability:
         result = self.runtime.generate(
             purpose=ModelPurpose.WIC_SEMANTIC,
             instructions=instruction,
-            input_text="Return the WIC semantic result for the exact supplied basis.",
+            input_text=("按确切交流依据返回 WIC 语义结果，中文自然语言内容保持中文。"
+                if chinese_interaction(basis)
+                else "Return the WIC semantic result for the exact supplied basis."),
             output_schema=InteractionSemanticContract.output_schema(),
             on_stage=on_stage,
         )
@@ -339,6 +354,13 @@ class DeepSeekInteractionSemanticCapability:
     @staticmethod
     def _validate_action_semantics(payload, basis) -> None:
         from spg.application.intent_realization import validate_semantic_candidate
+        from spg.application.interaction_references import validate_supporting_references
+        try:
+            validate_supporting_references(getattr(payload, "supporting_references", ()), basis)
+        except InteractionInvariantViolation as error:
+            # Return reference errors to this existing bounded compiler repair,
+            # before a valid IR reaches final admission. No new retry budget.
+            raise ValueError("SEMANTIC_SUPPORTING_REFERENCE_UNGROUNDED: " + str(error)) from error
         if payload.semantic_intent is None:
             signal = "EXPLICIT_ACTION_LOST_BEFORE_EXECUTION" if payload.collaboration.turn_intent is ConversationTurnIntent.ACTION_REQUEST else "SEMANTIC_TYPE_MISMATCH"
             raise ValueError(f"{signal}: IRK compiler omitted semantic_intent")
@@ -572,7 +594,8 @@ class DeepSeekGovernedResponseRealizer:
         result = self.runtime.generate(
             purpose=ModelPurpose.CONVERSATION_RESPONSE,
             instructions=instruction,
-            input_text="Realize this governed response without changing its semantics.",
+            input_text=("将已准入含义表达成自然中文，不改变语义或权限。" if envelope.response_language.startswith("zh") else
+                "Realize this governed response without changing its semantics."),
             output_schema=ConversationContract.output_schema(),
             on_output_delta=receive,
         )

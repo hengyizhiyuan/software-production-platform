@@ -217,6 +217,17 @@ product requirement; an ever-growing requirements document is not.
 
 ### 4.5 Impact Assessment
 
+Citation eligibility uses the exact current interpretation basis: attached
+Interaction evidence, active Work Reality references and observed Owner
+references. Provider repair and final admission use the same source eligibility;
+a Human need not reattach a Verification/Completion reference the current Work
+Owner already supplied. Supporting-reference type/UUID checks remain strict;
+other reference families remain in their own typed fields. Unknown or removed
+references are rejected. Context citation is neither an observed claim nor an
+authority grant, and it cannot accept an old Candidate or authorize delivery.
+Final admission reconstructs current Owner sources and retains exact basis and
+Work/Plan/production freshness checks.
+
 Impact Assessment answers: **What does this input mean for the current governed
 Work and any active production cycle?** It binds the exact Interpretation
 Candidate and basis, including applicable Motive, current Work Reality revision,

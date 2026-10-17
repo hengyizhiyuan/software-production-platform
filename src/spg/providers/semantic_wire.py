@@ -245,6 +245,10 @@ class SemanticStepWireContract:
             mode="json",
             exclude={"repository_location"},
         )
+        from spg.application.model_language import uses_chinese
+        if uses_chinese(getattr(input, "desired_outcome", "")):
+            from spg.providers.production_prompt_zh import semantic_step_instruction_zh
+            return semantic_step_instruction_zh(governed)
         return (
             "Execute exactly one governed semantic Steering Step. This is read-only "
             "reasoning: do not modify files, create production authority, commit, or "

@@ -3140,13 +3140,9 @@ class WorkInteractionService:
                     for reference in record.supporting_references
                 )
             )
-            candidate_references = self._normalize_supporting_references(
-                candidate.supporting_references
-            )
-            if not set(candidate_references).issubset(record_references):
-                raise InteractionInvariantViolation(
-                    "Interpretation cannot invent supporting Reality references"
-                )
+            from spg.application.interaction_references import validate_supporting_references
+            candidate_references = validate_supporting_references(
+                candidate.supporting_references, semantic_basis)
             supporting_references = tuple(
                 dict.fromkeys((*record_references, *candidate_references))
             )
@@ -4188,26 +4184,8 @@ class WorkInteractionService:
 
     @staticmethod
     def _normalize_supporting_references(values: tuple[str, ...]) -> tuple[str, ...]:
-        allowed = {"VERIFICATION", "RUNTIME_FACT", "COMPLETION", "ENGINEERING_FINDING",
-                   "STEERING_DECISION"}
-        normalized: list[str] = []
-        for raw in values:
-            value = raw.strip()
-            if not value:
-                continue
-            kind, separator, identity = value.partition(":")
-            if separator != ":" or kind not in allowed:
-                raise InteractionInvariantViolation(
-                    "Supporting Reality reference must use an allowed typed identity"
-                )
-            try:
-                UUID(identity)
-            except ValueError as error:
-                raise InteractionInvariantViolation(
-                    "Supporting Reality reference identity must be a UUID"
-                ) from error
-            normalized.append(f"{kind}:{identity}")
-        return tuple(dict.fromkeys(normalized))
+        from spg.application.interaction_references import normalize_supporting_references
+        return normalize_supporting_references(values)
 
     @staticmethod
     def _revision_admission_status(

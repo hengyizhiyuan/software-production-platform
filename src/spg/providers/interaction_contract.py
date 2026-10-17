@@ -455,6 +455,17 @@ class InteractionSemanticContract:
             }
             for schema in design_schema_registry()
         ]
+        from spg.application.model_language import chinese_interaction
+        if chinese_interaction(basis):
+            from spg.providers.interaction_prompt_zh import semantic_instruction_zh
+            return semantic_instruction_zh(basis, payload, coalesced=coalesced,
+                schemas={"currently_selected": None if selected_schema is None else {
+                    "identity": selected_schema.identity, "version": selected_schema.version,
+                    "title": selected_schema.title}, "candidates": schema_candidates},
+                capability_version=capability_reality.version)
+        from spg.application.interaction_references import (
+            available_interaction_references, available_supporting_references,
+        )
         output_contract = (
             "This is the WIC semantic boundary: populate the semantics object in the "
             "joint transport envelope. The natural_response field belongs to "
@@ -842,10 +853,11 @@ class InteractionSemanticContract:
             "source record; do not normalize spacing, punctuation, casing, or wording, and "
             "cite the record that actually contains that exact text. "
             + active_work_instruction
-            + "supporting_references may only repeat exact values from the source records supporting_references arrays. "
-            "Allowed kinds are VERIFICATION, RUNTIME_FACT, COMPLETION and ENGINEERING_FINDING, each with a UUID. "
-            "Do not copy active Work, design, agenda, semantic-result or governance references into this field. "
-            "If source records contain no supporting_references, return an empty array. Every "
+            + "supporting_references may only repeat exact identities from this current Owner-derived allowlist: "
+            + json.dumps(available_supporting_references(basis))
+            + ". production_sufficiency.context_references may use only the supplied exact context references: "
+            + json.dumps(available_interaction_references(basis))
+            + ". These citations are evidence references, never new authority or proof of a claim. Every "
             "meaning must cite only source_record_ids in the basis. Recent Watt dialogue "
             "is advisory wording for conversational continuity, not Human input or "
             "governed evidence; it cannot override source records or Work Reality. "
@@ -1001,6 +1013,19 @@ class ConversationContract:
         context: ConversationContext,
         collaboration: StructuredCollaborationResult,
     ) -> str:
+        if collaboration.response_language.startswith("zh"):
+            return (
+                "你是 Watt 的对话表达能力，仅将已提供的结构化协作结果和有界上下文表达成自然中文。"
+                "不重新解释意图，不创建或修改 Work、计划、事实、权限及工程真相，不调用工具或依赖隐藏记忆。"
+                "保留全部已确认约束与证据，不把假设、推断或建议当作用户事实，不虚构能力、批准或完成。"
+                "先回答本轮实际问题；执行命令只需简短确认与真实下一动作，修改先说变化，纠正后继续。"
+                "创建请求给具体可逆首版建议，推荐给优先选择、依据与下一步，探索给有区别的实质想法。"
+                "不重述已知需求、不讲内部流程、不列发现问卷；至多一个真正改变下一决定的问题，没有问题很正常。"
+                "异议须核对实际新依据，不为迎合反转已有判断；未知如实说明。"
+                "中文目标和约束保持中文，原文引述、代码、路径、技术标识和历史事实不改写；不输出内部字段或枚举。"
+                "按 requested detail 决定信息量，段落各增信息；仅返回包含唯一 natural_response 字符串的 JSON。"
+                "\n交流上下文：\n" + json.dumps(context.model_dump(mode="json"), ensure_ascii=False)
+                + "\n结构化协作结果：\n" + json.dumps(collaboration.model_dump(mode="json"), ensure_ascii=False))
         return (
             "You are Watt's dedicated Human-facing Conversation Provider. Turn the "
             "supplied structured collaboration result and bounded conversation context "

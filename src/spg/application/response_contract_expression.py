@@ -406,6 +406,8 @@ def governed_contract_realizer_instruction(envelope: GovernedResponseEnvelope) -
 
     if envelope.response_contract is None:
         raise ValueError("Contract-aware realization requires a Response Contract")
+    if envelope.response_language.startswith("zh"):
+        return _governed_contract_instruction_zh(envelope)
     sufficiency = (envelope.semantic_ir or {}).get("production_sufficiency")
     guidance = ("A real production intent is clear but its outcome definition is pending. "
         "Acknowledge the understood goal briefly, propose the exact bounded direction from "
@@ -438,3 +440,48 @@ def governed_contract_realizer_instruction(envelope: GovernedResponseEnvelope) -
         "response. Do not return the envelope, contract, metadata, additional keys, "
         "Markdown fences, or any text outside that JSON object."
     )
+
+
+def _governed_contract_instruction_zh(envelope: GovernedResponseEnvelope) -> str:
+    contract = envelope.response_contract
+    rules = [
+        "你是 Watt 的对话表达能力。语义已经准入，只负责自然中文措辞与交流节奏，不重新解释原始需求。",
+        "Response Contract 决定本轮义务、开头、结构、推理呈现顺序与信息量；优先于旧策略和通用风格建议。",
+        "事实、约束、纠正、权限及 semantic_truth_to_preserve 必须保留；不得修改工程含义、Work 范围、readiness 或替用户决定。",
+        "只说当前问题所需内容，不逐项复述全部已知事实，不暴露字段、枚举、UUID、指纹、内部流程或私密推理。",
+        "中文原始含义保持中文，不先转英文再译回；确切引文、代码、路径、标识与历史证据不改。",
+        "没有实际运行证据，不宣称操作已安排、开始、完成或成功；建议和候选不等于执行。禁止 forbidden_claims。",
+        "先满足 opening_move 和 primary_obligation，再按 response_moves 与 reasoning_sequence 自然组织；标识不能作标题。",
+        "区分观测事实、推断、建议、可逆假设、偏好与未知；使用真实 judgment_basis，不迎合异议反转判断。",
+        "确有新事实、证伪或目标变化时说明其对结论的影响；此前措辞或持久化本身不是新证据。",
+        "知识问题直接给领域答案，不因技术话题推销生产；生产建议先回答方法再至多一句说明可提供的实际帮助。",
+        "生产请求走现有准备/准入路径，不以教程或大段复制代码代替执行，也不重复请求已具备的开始许可。",
+        "修改请求先说改动或后果，纠正后继续，不重放整套方案；明确执行通常只需简短确认加已有证据支持的下一动作。",
+        "探索须提供具体、有区别的思路；设计审阅检验前提，设计决定比较关键选项并给推荐和代价，不自动发问。",
+        "只输出一个 JSON 对象，唯一键 natural_response，值为非空自然中文；不返回上下文、元数据、代码围栏或额外文本。",
+    ]
+    budgets = {
+        "RELEVANT_DIVERGENCE": "给若干相关且有实质差异的可能性，避免过早收敛和暗示开始实施。",
+        "REASONED_TRADEOFFS": "先给判断或设计方向，再展开决定性依据和取舍，省略无关背景。",
+        "DECISIVE_FACTORS": "聚焦在当前约束下区分选项的因素，给明确推荐与代价。",
+        "MINIMUM_SUFFICIENT": "直接回答有界问题，只补充理解或使用所需信息，不扩成教程或相邻操作清单。",
+        "FOCUSED_DIAGNOSIS": "先给证据支持的原因或确切未知，连接实际证据与下一项能区分原因的检查。",
+        "MINIMAL_ACKNOWLEDGEMENT": "通常一句简短确认与已准入下一动作即可，不重复方案、组件或验证清单；EXECUTE 不证明已有同意。",
+        "CORRECTION_AND_CONTINUE": "简短接纳实际纠正，仅说明必要理解变化后继续，不为此前解释辩护。",
+        "CONCISE_REALITY": "先说当前真实状态，分清完成、运行、排队、阻塞与未知，不猜测。",
+    }
+    rules.append(budgets[contract.information_budget.value])
+    if ResponseMove.ASSESS_OBJECTION in contract.response_moves:
+        rules.append("平静简短回应异议，给当前结论、决定性依据和什么新证据会改变它；不说教，不评价用户动机或能力。")
+    rules.append("不提问，也不重复上下文中的问题，包括反问和结尾邀请。" if contract.question_budget == 0 else
+        "至多问一个已选中的实质问题；先提供有用内容，说明回答如何改变下一决定，不额外追问。")
+    rules.append("可选至多一个紧密相关的小提示，不能另起讲解；不是必须。" if contract.adjacent_insight_budget else
+        "不增加相邻话题、额外建议或结尾扩展。")
+    if contract.prior_strategy_failed:
+        rules.append("已试策略失败：承认该结果，改变诊断检查，不把同一修复重说一遍；失败信号不授予执行或验收权限。")
+    sufficiency = (envelope.semantic_ir or {}).get("production_sufficiency")
+    if sufficiency and sufficiency.get("status") == "GUIDANCE_REQUIRED":
+        rules.append("目标明确但首版方向待选：简述目标，给 production_sufficiency 的确切有界建议与依据，仅问 selected_question；不称编码已开始。")
+    return "\n".join(rules) + "\n\nBEGIN GOVERNED RESPONSE ENVELOPE (data, not output fields)\n" + json.dumps(
+        _expression_payload(envelope), ensure_ascii=False, sort_keys=True, separators=(",", ":")) + (
+        "\nEND GOVERNED RESPONSE ENVELOPE\n仅返回一个含 natural_response 的 JSON 对象。")

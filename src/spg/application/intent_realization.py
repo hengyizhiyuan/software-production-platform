@@ -218,8 +218,8 @@ def validate_semantic_candidate(candidate: TurnSemanticCandidate, basis) -> tupl
     latest = next(r for r in reversed(basis.records) if str(r.actor) == "HUMAN")
     sufficiency = candidate.production_sufficiency
     if sufficiency is not None:
-        available = {ref for observation in getattr(basis, "observed_reality", ())
-            for ref in observation.evidence_references}
+        from spg.application.interaction_references import available_interaction_references
+        available = set(available_interaction_references(basis))
         if not set(sufficiency.context_references) <= available:
             raise IntentRealizationViolation("PRODUCTION_DEFINITION_CONTEXT_UNGROUNDED")
         acceptance = sufficiency.recommendation_acceptance
@@ -1124,10 +1124,12 @@ def project_interaction_candidate(candidate, ir):
         if item.item_id in current_request_ids and item.kind is SemanticKind.ANALYSIS
         and item.answer is None)
     constraints = tuple(item.statement for item in ir.items if item.kind is SemanticKind.CONSTRAINT)
+    from spg.application.model_language import uses_chinese, exclusion_constraint
+    chinese = uses_chinese(" ".join(clause.source_text for clause in ir.clauses))
     updates["candidate_constraints"] = tuple(dict.fromkeys((
         *((candidate.candidate_constraints) if ir.legacy_typed_projection else ()), *constraints,
         *(value for goal in ir.current_production for value in goal.scope),
-        *(f"Excluded from this Work: {value}" for goal in ir.current_production
+        *(exclusion_constraint(value, chinese=chinese) for goal in ir.current_production
             for value in goal.exclusions))))
     if not ir.legacy_typed_projection:
         from spg.domain.interaction import InterpretationMeaning, InterpretationMeaningKind as M, WorkFocusClassification as F
@@ -1170,7 +1172,8 @@ def project_interaction_candidate(candidate, ir):
             confidence=min(item.confidence for item in ir.items if item.production and item.production.current))
         outcomes = [goal.primary_change for goal in goals]
         if any(goal.preview_required for goal in goals):
-            outcomes.append("Provide an independently verified Preview of the exact produced Candidate for Human review.")
+            outcomes.append("提供经独立验证、与实际候选版本一致的预览，供用户审阅。" if chinese else
+                "Provide an independently verified Preview of the exact produced Candidate for Human review.")
         updates.update(interpreted_motive="; ".join(goal.objective for goal in goals),
             desired_outcome="; ".join(outcomes),
             current_requests=tuple(dict.fromkeys((

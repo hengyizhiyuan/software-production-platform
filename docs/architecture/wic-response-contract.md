@@ -1,5 +1,20 @@
 # WIC Response Contract
 
+## Language continuity
+
+Human direction, 2026-10-17: a Chinese request should remain Chinese through
+semantic interpretation, planning, execution and expression. Those current
+model boundaries select Chinese instructions and author new natural-language
+semantic descriptions in Chinese; structuring meaning does not require an
+English translation. Non-Chinese conversations retain their language path.
+Exact source quotes, provenance, code, paths, URLs, typed keys/enums and technical
+identities stay unchanged. Previously admitted English or mixed-language facts
+remain immutable, without retroactive translation or authority changes.
+New Chinese exclusion projections use `本次工作不包含：` around the exact typed
+value; the historical English wrapper remains readable. No new language
+rejection gate or translation model is introduced. System prompts are policy;
+the enclosed Human and Owner evidence remains data with its original identity.
+
 Date: 2026-09-21
 
 Status: **IMPLEMENTED / HUMAN_ACCEPTED_WITHIN_WIC_INTERACTION_SCOPE** for the

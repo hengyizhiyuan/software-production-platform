@@ -264,7 +264,7 @@ def test_execute_envelope_projects_current_semantic_truth_without_reinterpreting
     )[1].split("\nEND GOVERNED RESPONSE ENVELOPE", 1)[0]
     payload = json.loads(embedded)
     assert payload["semantic_truth_to_preserve"] == list(expected)
-    assert "do not derive a new meaning from the original phrase" in instruction
+    assert "不重新解释原始需求" in instruction
 
 
 def test_legacy_envelope_builder_creates_a_contract_from_admitted_turn_intent() -> None:
@@ -500,9 +500,9 @@ def test_contract_realizer_instruction_has_one_clear_data_section_and_exact_outp
         mode="json", exclude={"previous_response_contract"},
     )
     assert instruction.count(start) == 1
-    assert "not a requirement to restate every supplied detail" in instruction
-    assert "Return exactly one JSON object containing exactly one property named natural_response" in instruction
-    assert instruction.index(end) < instruction.index("Return exactly one JSON object")
+    assert "不逐项复述全部已知事实" in instruction
+    assert "唯一键 natural_response" in instruction
+    assert instruction.index(end) < instruction.index("仅返回一个含 natural_response")
     assert "Preserve every fact" not in instruction
     assert "When candidate_first is true" not in instruction
 
@@ -554,8 +554,8 @@ def test_execute_expression_omits_settled_prose_but_preserves_exact_boundaries()
         "PRIOR_JUDGMENT_NOT_NEEDED", "PRIOR_DESIGN_REASONING_NOT_NEEDED", "PRIOR_LONG_DESIGN",
     ):
         assert irrelevant not in instruction
-    assert "Do not enumerate settled components" in instruction
-    assert "The acknowledgement plus that next action is the complete response" in instruction
+    assert "不重复方案、组件或验证清单" in instruction
+    assert "一句简短确认与已准入下一动作即可" in instruction
     assert envelope.model_dump(mode="json") == before
 
 
@@ -641,8 +641,8 @@ def test_new_execute_request_does_not_assert_that_an_approved_plan_exists() -> N
         "governed_content": "Investigate the click handler and repair its failure.",
     })
     instruction = governed_contract_realizer_instruction(envelope)
-    assert "EXECUTE alone does not imply a prior plan" in instruction
-    assert "EXECUTE is not evidence that an earlier or approved plan exists" in instruction
+    assert "EXECUTE 不证明已有同意" in instruction
+    assert "不重放整套方案" in instruction
     assert "the Human already approved" not in instruction
     assert envelope.latest_human_input in instruction
 
