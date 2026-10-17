@@ -1,0 +1,271 @@
+{
+  "status": "PASS",
+  "observed_at_utc": "2026-10-17T03:37:21.511143+00:00",
+  "revision": "536e6bb010f350e7c79b79a497d153d03e242cef",
+  "source_bundle_sha256": "8a28d0ed61c49c438ad166334c7621428ffe4e3e351960334d2654329aa88533",
+  "image_id": "sha256:fb12adc6803532991554551eada71335a9be219dce366c8ba6956f3a2399d7e3",
+  "services": {
+    "api": {
+      "image": "sha256:fb12adc6803532991554551eada71335a9be219dce366c8ba6956f3a2399d7e3",
+      "running": true,
+      "health": "healthy"
+    },
+    "native-coordinator": {
+      "image": "sha256:fb12adc6803532991554551eada71335a9be219dce366c8ba6956f3a2399d7e3",
+      "running": true,
+      "health": null
+    },
+    "native-tool-host": {
+      "image": "sha256:fb12adc6803532991554551eada71335a9be219dce366c8ba6956f3a2399d7e3",
+      "running": true,
+      "health": "healthy"
+    },
+    "native-worker": {
+      "image": "sha256:fb12adc6803532991554551eada71335a9be219dce366c8ba6956f3a2399d7e3",
+      "running": true,
+      "health": null
+    }
+  },
+  "runtime": {
+    "revision": "536e6bb010f350e7c79b79a497d153d03e242cef",
+    "source_files": {
+      "src/spg/web/experience.js": "e423b3cc01029e63e65e550918039835badb445b48b1f12bc772e66714a659f6",
+      "src/spg/providers/protected_context_verifier.py": "0c427e0f51c81f52633753a29e339a200fa967c83109fe23d47f08510fbe350c",
+      "src/spg/providers/rule_based_planner.py": "13e85d04097d11b752508efaad7e631bbadc3fc6d71c2d522694f81557a56e08",
+      "src/spg/providers/managed_context_fulfillment.py": "77e44137504e8de0885343a6c5eaeb9c24473f41885369081db53e52fd74c96f",
+      "src/spg/providers/repository_code_verifier.py": "839b1c97e27a831dccd1e9ce675cfe1c0e5eb89f3ab98c89bd87877b7fcdddf9",
+      "src/spg/api/http.py": "74e79d3957b9f301c5b75d87144b3fa35a61b3146ad4dd3c3d83d8799e5656f7",
+      "src/spg/api/dto.py": "7314269b4421ed7e6b8861add94dacb82e468d20106a9c9da8cf0d467c9c283f",
+      "src/spg/application/human_visible.py": "9ecda8fb9b888cf84bb64ee50e42d96938d534b87686f1fbda34181cd670ee62",
+      "src/spg/application/recovery_preview.py": "1706bbbdbb032ad9b50d6c6a280a2c3e2384ce71571b0acf86d1484da3e807b3",
+      "src/spg/application/work.py": "d6a557c5de1b30d942450912a57fc20ca17a13191c9585957f4169ba3c0b7d8c",
+      "src/spg/application/steering_driver.py": "06092574ce2f8b63c9b9413631d3e08330ed68b45064eb084e9ca0a63788ff72",
+      "src/spg/application/executor_runtime.py": "15f92059fb375cfeb7552eecdac25d646ed5a67ca1e0285f56d2fe599d42fdd5",
+      "src/spg/domain/native_execution.py": "d6c9022b29100479515baf35cd0cdaed7fe7a19e14d5a77290dd27b05cbf7280",
+      "owners.lock": "95ca3a8ff263ce94fd527e889ae0306e11a39a2a428acbe41f43416c76564b75"
+    },
+    "login_prefill_enabled": true,
+    "production_brief_contract": "source-preserving-production-brief-v1",
+    "staged_production_brief_contract": "source-preserving-production-brief-v2",
+    "same_candidate_review_repair": true,
+    "failure_signature_max_length": 64
+  },
+  "health": {
+    "service": "available",
+    "database": "available",
+    "application_initialized": true
+  },
+  "owner_release_gate": {
+    "status": "PASS",
+    "results": {
+      "ecf": {
+        "commit": "1d3feddf0c7e7726fea23c58d194d64034547a7a",
+        "source_digest": "225d415597884ae923458a620b8c01abef2605cd093036aee159f5d445073702",
+        "import_root": "/opt/watt-owners/ecf/src"
+      },
+      "guardian": {
+        "commit": "e9019c91a21d954a9d7e243c54b6d01d2bdaa231",
+        "source_digest": "a02d34e79ec5db057f81efd9a0b6b72823d269aeedfaccc403851aa57eb8e51f",
+        "import_root": "/opt/watt-owners/guardian/src"
+      },
+      "guardian_production_brief": {
+        "contracts": [
+          "source-preserving-production-brief-v1",
+          "source-preserving-production-brief-v2"
+        ],
+        "independent_source_validation": true
+      },
+      "guardian_contract": {
+        "types": [
+          "AssuranceRequest",
+          "EffectRequirement",
+          "ProductionEvidenceLineage",
+          "ProtectedContextEvidence"
+        ],
+        "request_fields": [
+          "acceptance_state",
+          "artifact_refs",
+          "authority_ref",
+          "candidate_fingerprint",
+          "candidate_id",
+          "constraints",
+          "decision_context_fingerprint",
+          "delivery_authorization_state",
+          "disposable_preview",
+          "evidence_contract_version",
+          "governed_intent_ref",
+          "objective",
+          "prior_finding_ids",
+          "product_ref",
+          "production_lineage",
+          "protected_context",
+          "request_id",
+          "required_effects",
+          "runtime_ref",
+          "runtime_url",
+          "source_revision",
+          "source_tree",
+          "submitted_at",
+          "task_contract_ref",
+          "verification_refs",
+          "work_ref"
+        ],
+        "owner_evidence_resolver": true
+      },
+      "ecf_contract": {
+        "version": "0.1",
+        "managed_greenfield": true
+      }
+    },
+    "failures": []
+  },
+  "rollback_image": "sha256:af6736f7f3997a181e5372522703bc899de7377b5d159ee13014e68c796eb3f6",
+  "failed_work_explicitly_retried": false,
+  "preserved_production_work": {
+    "records": {
+      "executor_queue": {
+        "records": 23,
+        "sha256": "3246d6c96e593b32e4a237425026de5d173d60729f256b12a4d8e160a7ebc95b"
+      },
+      "product_works": {
+        "records": 1,
+        "sha256": "47a37ad314e870736c81a742d7784930e0a3232504cffe9d7dad925f0e1ca4be"
+      },
+      "work_reality_revisions": {
+        "records": 3,
+        "sha256": "80434e7a1c2c2e238b3ffc9823cd1d57c920870bad40818c92157aaccc22eb3c"
+      },
+      "work_runtime_bindings": {
+        "records": 1,
+        "sha256": "751b9bb9e382971c46b9ef4c6aed4d79dbf6fd21b1536f4fcde581af21e8c095"
+      }
+    },
+    "work_id": "b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9"
+  },
+  "post_deployment_browser": {
+    "application_revision": "536e6bb010f350e7c79b79a497d153d03e242cef",
+    "pause": {
+      "work_id": "b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9",
+      "status": "PAUSED",
+      "execution_controls": []
+    },
+    "work_status": "BLOCKED",
+    "event": "WORK_PAUSED_BY_HUMAN",
+    "execution_status": "PAUSED",
+    "focus": {
+      "title": "A high-fidelity Plants vs. Zombies web game using original assets and an experience close to the original.",
+      "status": "PRODUCE",
+      "reason": "WORK_PAUSED_BY_HUMAN",
+      "next": "Paused by the Human; no automatic generation or verification will be scheduled",
+      "human_action": false
+    },
+    "wording": {
+      "headline": "A high-fidelity Plants vs. Zombies web game using original assets and an experience close to the original.",
+      "summary": "A high-fidelity Plants vs. Zombies web game using original assets and an experience close to the original.。已按你的要求暂停生产与验证，现有成果和历史记录已保留。",
+      "current_activity": "已按你的要求暂停生产与验证",
+      "next_step": "可查看已有成果；当前不会自动继续生成或验证。",
+      "agenda": [
+        {
+          "id": "db4bd9bd-e7c0-4711-b01c-ae055a4be9e1",
+          "text": "整理实施方案"
+        },
+        {
+          "id": "9cae972b-b4dd-438a-9bea-1c92b3e2adfc",
+          "text": "准备与执行当前改动"
+        },
+        {
+          "id": "f3111dcf-5d01-4b97-a1c5-6c9d5b6df3c9",
+          "text": "核对成果并准备审阅"
+        },
+        {
+          "id": "11c22ccd-1ce8-4781-b7a6-f9a9f4ef039c",
+          "text": "确认本次目标已满足"
+        }
+      ],
+      "decisions": [],
+      "production_units": [
+        {
+          "id": "3273bb6f-2a6d-5de6-a8be-9ca4975fba2f",
+          "text": "第 1 个生产单元：当前生产单元受阻"
+        },
+        {
+          "id": "daef939f-c1dd-5cce-9607-5ed89ef09400",
+          "text": "第 2 个生产单元：当前生产单元受阻"
+        },
+        {
+          "id": "fbcea0f2-2546-5133-9f7d-7628b8fe6304",
+          "text": "第 3 个生产单元：当前生产单元受阻"
+        },
+        {
+          "id": "01c98137-3a38-5f65-82ad-0f7dbc73e1d6",
+          "text": "第 4 个生产单元：当前生产单元受阻"
+        },
+        {
+          "id": "a4a6813e-bf41-5430-b48a-1636825151ca",
+          "text": "第 5 个生产单元：当前生产单元受阻"
+        },
+        {
+          "id": "393e6e9c-14aa-5446-999f-5022513ebaff",
+          "text": "第 6 个生产单元：当前生产单元受阻"
+        },
+        {
+          "id": "5f06de9f-5c48-5959-acc2-ca5e2de259a9",
+          "text": "第 7 个生产单元：当前生产单元受阻"
+        },
+        {
+          "id": "98b24b92-9f4b-5a04-b70e-65dfbf8b65c2",
+          "text": "第 8 个生产单元：正在验证执行成果"
+        },
+        {
+          "id": "afac1ca9-6c65-52c8-9eaa-783e592f555c",
+          "text": "第 9 个生产单元：正在验证执行成果"
+        },
+        {
+          "id": "e59cc16b-849c-51f2-b862-e7a9391de0e0",
+          "text": "第 10 个生产单元：等待前序成果验证"
+        }
+      ]
+    },
+    "preview": {
+      "status": "AVAILABLE",
+      "work_id": "b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9",
+      "snapshot": "6a3cf55153cf5e1e58fe062ae0b5bacb1ca14c232d27edb039b93af56a5021fe",
+      "url": "/api/works/b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9/recovery-preview/6a3cf55153cf5e1e58fe062ae0b5bacb1ca14c232d27edb039b93af56a5021fe/index.html",
+      "verification": "NOT_QUALIFIED",
+      "authorization_pending": true,
+      "governance_record_id": "060c8542-24ef-5511-9c5e-bc72f5ef0438",
+      "files": {
+        "index.html": "2b311d4334459c67176abded6945badbfb99dad0b746f7696373bc6c53b1f6bd",
+        "src/main.js": "9ac18b14638b57851719673b092e513b9ccfb2a041e665db37a06e8c94c7db16",
+        "src/game/sun.js": "ed090946d929f09d12eb440a22200a9a68f24da0995423f4d2666ee0cade12c6",
+        "src/game/level.js": "c2fbf1ddb0abb9015fa1050776b8ae1c120a993c33071d4a9801bfa248634eb2",
+        "src/game/state.js": "fbe4b299e5298a835e65a1f9388e048e31c3df1b2e50942d0693a7cc70df2c4e",
+        "src/game/plants.js": "dd88e377193236d4f5208297d1f9f813cecbe5a0d8b18cffeb7999c351f9ebe7",
+        "src/game/zombies.js": "a95f574c97adcfaae6cbbf6ec0e0747a2f47195b8acd296a482454fdb7368741",
+        "src/render/renderer.js": "7735d829e060c7ffbf5198ddf345df671c3d53e7c14e9e4ab99190b6b97d7c26",
+        "src/assets/assetManifest.js": "6049ca66197477682a88ca4aa1cc4b276441e22f602c05f41a0153b15c303b8c"
+      }
+    },
+    "workspace_preview_link_visible": true,
+    "preview_url": "http://8.130.172.58:8080/api/works/b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9/recovery-preview/6a3cf55153cf5e1e58fe062ae0b5bacb1ca14c232d27edb039b93af56a5021fe/index.html",
+    "preview_startup": "PASS",
+    "script_errors": []
+  },
+  "post_deployment_work_observation": {
+    "observed_at_utc": "2026-10-17 03:39:16.198556+00:00",
+    "revision": "536e6bb010f350e7c79b79a497d153d03e242cef",
+    "work_id": "b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9",
+    "active_execution_count": 0,
+    "new_execution_after_human_pause": 0,
+    "governance": [
+      {
+        "decision_type": "PAUSE_AFTER_CONVERGENCE_INCIDENT",
+        "created_at": "2026-10-17 03:01:10.913625+00:00"
+      },
+      {
+        "decision_type": "WORK_RECOVERY_PREVIEW",
+        "created_at": "2026-10-17 03:07:31.156181+00:00"
+      }
+    ]
+  }
+}
