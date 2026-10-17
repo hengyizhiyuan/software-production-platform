@@ -16,7 +16,7 @@ from spg.domain.governed_obligation import fulfillment_source_ref
 from spg.domain.intent_realization import ProductionIntent, SemanticClause, SemanticItem, SemanticKind
 from spg.domain.model_runtime import ModelUsage
 from spg.domain.semantic_provenance import SemanticOrigin, SemanticProvenance
-from spg.providers.managed_context_fulfillment import verify_binding_inventory, verify_fulfillment_fact_routes
+from spg.providers.managed_context_fulfillment import verify_binding_inventory, verify_fulfillment_fact_routes, verify_managed_context
 from spg.providers.protected_context_verifier import StaticProtectedContextVerifier
 from tests.test_fulfillment_projection import basis
 from tests.test_governed_obligation_fulfillment import fact
@@ -187,6 +187,63 @@ def model_verifier(disposition, calls):
             effective_model="fixture", request_id="controlled-independent-check", usage=ModelUsage())
     return StaticProtectedContextVerifier(lambda: SimpleNamespace(generate=generate,
         registry=SimpleNamespace(close=lambda: None)))
+
+
+@pytest.mark.parametrize("drift", [None, "content", "source", "digest"])
+def test_ecf_constraint_projection_uses_exact_work_sources_after_policy_deduplication(subject, drift):
+    from hashlib import sha256
+    from spg.providers.protected_context_verifier import _current_contributions
+    from tests.test_governed_obligation_fulfillment import protected, git
+
+    repo, baseline, request, task, contract = subject
+    (repo / "index.html").write_text("<main>Company Home</main><!-- Candidate -->")
+    git(repo, "add", "index.html")
+    git(repo, "commit", "-m", "Actual candidate")
+    revision, ir = brief_case(with_fact=False)
+    revision.source_revision = baseline
+    bindings = admit(revision, ir)
+    # ECF retains the first declaration as a Product invariant and indexes
+    # its ordinary-constraint projection independently of the Work inventory.
+    constraints = tuple(protected("APPROVED_CONSTRAINT", f"greenfield-constraint:{i}",
+        value, revision, "f" * 64) for i, value in enumerate(revision.constraints[1:]))
+    invariant = protected("PRODUCT_INVARIANT", "greenfield-invariant:original",
+        revision.constraints[0], revision, "f" * 64)
+    intent = protected("PRODUCT_INTENT", "greenfield-product-intent", json.dumps({
+        "desired_outcome": "Company Home", "governed_production_intents": [
+            g.model_dump(mode="json") for g in ir.current_production]}), revision, "f" * 64)
+    revision.desired_outcome = "Company Home"
+    if drift:
+        updates = {"content": "An unadmitted replacement", "source": "work-reality:other:greenfield-constraint:0",
+            "digest": "0" * 64}
+        field = {"content": "content", "source": "source_ref", "digest": "content_digest"}[drift]
+        update = {field: updates[drift]}
+        if drift == "content": update["content_digest"] = sha256(updates[drift].encode()).hexdigest()
+        constraints = (constraints[0].model_copy(update=update), *constraints[1:])
+    obligations = (*constraints, invariant, intent)
+    request = request.model_copy(update={"proposed_commit_identity": git(repo, "rev-parse", "HEAD"),
+        "tree_identity": git(repo, "rev-parse", "HEAD^{tree}"), "protected_context_obligations": obligations})
+    task.decision_context = SimpleNamespace(work_id=str(revision.work_id), repository_revision=baseline,
+        package_fingerprint="f" * 64, protected_obligations=obligations)
+    args = dict(request=request, task=task, contract=contract, repository=repo, baseline=baseline,
+        revision=revision, ir=ir, semantic_checks=(), fulfillment_bindings=bindings,
+        static_verifier=model_verifier("SATISFIED", []))
+    if drift:
+        with pytest.raises(ValueError, match="NOT_ADMITTED_WORK"):
+            verify_managed_context(**args)
+        return
+    checks = verify_managed_context(**args)
+    assert len(checks) == len(obligations) and all(c["coverage"] == "COVERED" for c in checks)
+    contributions = _current_contributions(constraints[0], bindings)
+    assert len(contributions) == 1
+    assert contributions[0]["binding"]["work_constraint_indices"] == [1]
+    # Omitting a duplicate ECF projection never discharges the Work's
+    # continuous prohibition: its independent canonical inventory still fails
+    # without real Native permission-gate evidence.
+    outcomes, _ = verify_binding_inventory(**{k:v for k,v in args.items()
+        if k not in {"fulfillment_bindings"}}, bindings=bindings,
+        protected_checks=checks, receipt_recorder=None, native_record=None)
+    assert any(o["evidence_method"] == "EXACT_PERMISSION_GATE"
+        and o["current_stage_satisfied"] is False for o in outcomes)
 
 
 @pytest.mark.parametrize("disposition,passed", [("SATISFIED", True), ("CONTRADICTED", False), ("UNVERIFIABLE", False)])

@@ -62,7 +62,9 @@ def _current_contributions(obligation, bindings):
         ref = fulfillment_source_ref(binding)
         matches = obligation.semantic_key == ref or obligation.source_ref == ref or any(
             obligation.context_class == "APPROVED_CONSTRAINT"
-            and obligation.semantic_key == f"greenfield-constraint:{index}"
+            and (binding.source_quote == obligation.content
+                 if binding.projection_inventory_fingerprint and binding.source_kind.value == "WORK_CONSTRAINT"
+                 else obligation.semantic_key == f"greenfield-constraint:{index}")
             for index in binding.work_constraint_indices)
         if obligation.context_class == "DERIVED_VERIFICATION_OBLIGATION" and ":component:" in obligation.semantic_key:
             matches = obligation.semantic_key == ref + ":component:" + fulfillment_component_id(

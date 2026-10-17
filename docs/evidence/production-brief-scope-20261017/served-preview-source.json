@@ -1,0 +1,32 @@
+{
+  "status": "AVAILABLE",
+  "work_id": "f6cf8820-f461-53b1-8b3e-193b187c108e",
+  "snapshot": "62047673fe91475692ed8b3a3e19ffcf0c1cb70e2369f99c8c66e4b7cfc51aa2",
+  "url": "/api/works/f6cf8820-f461-53b1-8b3e-193b187c108e/recovery-preview/62047673fe91475692ed8b3a3e19ffcf0c1cb70e2369f99c8c66e4b7cfc51aa2/index.html",
+  "verification": "NOT_QUALIFIED",
+  "authorization_pending": true,
+  "governance_record_id": "a4dca21d-e82d-5c7d-a25c-655ccf5c618b",
+  "files": {
+    "index.html": "2d634dfb6efac700f311f7ab39f770bfc4d3a4075c22243ee5314928e1573ef5",
+    "assets/app.js": "b67f88a5c364d87a4c3bfc7a3c5d276410e3cc97ee201d95d9ce1633e5667182",
+    "assets/styles.css": "9fb46df04bae6b718495851ab6498d24b684e14101ce57e7aa4f6632a8cea311"
+  },
+  "observed_files": {
+    "index.html": {
+      "bytes": 4821,
+      "sha256": "2d634dfb6efac700f311f7ab39f770bfc4d3a4075c22243ee5314928e1573ef5",
+      "http_status": 200
+    },
+    "assets/app.js": {
+      "bytes": 5987,
+      "sha256": "b67f88a5c364d87a4c3bfc7a3c5d276410e3cc97ee201d95d9ce1633e5667182",
+      "http_status": 200
+    },
+    "assets/styles.css": {
+      "bytes": 5562,
+      "sha256": "9fb46df04bae6b718495851ab6498d24b684e14101ce57e7aa4f6632a8cea311",
+      "http_status": 200
+    }
+  },
+  "browser_interaction": "UNVERIFIED_CUA_TAB_TIMEOUT"
+}

@@ -22,13 +22,13 @@ def _checked_paths(repository, source_revision, candidate_revision):
     return tuple(result.stdout.splitlines())
 
 
-def _exact_source(obligation, revision, index):
+def _exact_source(obligation, revision, index, *, work_index=None):
     return (obligation is not None
             and obligation.context_class == "APPROVED_CONSTRAINT"
             and obligation.semantic_key == f"greenfield-constraint:{index}"
             and obligation.source_ref ==
                 f"work-reality:{revision.work_id}:greenfield-constraint:{index}"
-            and obligation.content == revision.constraints[index]
+            and obligation.content == revision.constraints[index if work_index is None else work_index]
             and obligation.content_digest == sha256(obligation.content.encode()).hexdigest())
 
 
@@ -148,10 +148,20 @@ def verify_managed_context(*, request, task, contract, repository, baseline,
         raise ValueError("OBLIGATION_CONTEXT_DUPLICATE")
     constraints = tuple(item for item in obligations
                         if item.context_class == "APPROVED_CONSTRAINT")
-    if (len(constraints) != len(revision.constraints)
-            or any(not _exact_source(by_key.get(
-                ("APPROVED_CONSTRAINT", f"greenfield-constraint:{index}")),
-                revision, index) for index in range(len(revision.constraints)))):
+    # ECF indexes its own projection: a Product invariant may legitimately
+    # replace a duplicate ordinary constraint there. The canonical Work binding
+    # inventory is validated separately and still checks every Work source.
+    # Match projected constraints to their exact Work content, not list position.
+    projected = any(b.projection_inventory_fingerprint for b in fulfillment_bindings)
+    source_indices = {}
+    for index in range(len(constraints) if projected else len(revision.constraints)):
+        item = by_key.get(("APPROVED_CONSTRAINT", f"greenfield-constraint:{index}"))
+        origins = tuple(i for i, value in enumerate(revision.constraints)
+            if item is not None and item.content == value) if projected else (index,)
+        if not origins or not all(_exact_source(item, revision, index, work_index=i) for i in origins):
+            raise ValueError("OBLIGATION_CONTEXT_NOT_ADMITTED_WORK")
+        source_indices[index] = origins
+    if not projected and len(constraints) != len(revision.constraints):
         raise ValueError("OBLIGATION_CONTEXT_NOT_ADMITTED_WORK")
     if any(item["passed"] is not True for item in semantic_checks):
         raise ValueError("OBLIGATION_ADMITTED_FACT_UNVERIFIED")
@@ -182,7 +192,7 @@ def verify_managed_context(*, request, task, contract, repository, baseline,
                 (source_ref, binding["gate_ref"], digest))
     from spg.domain.governed_obligation import fulfillment_source_ref
     bindings = tuple(fulfillment_bindings)
-    by_constraint = {index: [] for index in range(len(revision.constraints))}
+    by_constraint = {index: [] for index in source_indices}
     for binding in bindings:
         indices = binding.work_constraint_indices
         # Compatibility for the existing typed IR_CONSTRAINT path: this is
@@ -194,13 +204,15 @@ def verify_managed_context(*, request, task, contract, repository, baseline,
                 indices = tuple(index for index, text in enumerate(revision.constraints)
                                 if text == source_item.statement)
         for index in indices:
-            if index not in by_constraint:
+            if not 0 <= index < len(revision.constraints):
                 raise ValueError("OBLIGATION_CONTEXT_INDEX_INVALID")
-            by_constraint[index].append(binding)
+        for index, origins in source_indices.items():
+            if set(indices).intersection(origins):
+                by_constraint[index].append(binding)
     results = {}
     content_items = []
     content_routes = {}
-    for index in range(len(revision.constraints)):
+    for index in source_indices:
         item = by_key[("APPROVED_CONSTRAINT", f"greenfield-constraint:{index}")]
         routes = tuple(by_constraint[index])
         if not routes:
