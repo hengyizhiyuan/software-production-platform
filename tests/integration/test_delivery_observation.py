@@ -226,11 +226,29 @@ def test_document_only_http_delivery_stays_document_and_preserves_acceptance(pos
     proposal=next(a for a in service.list_attention(work_id=projection.work_id) if a.kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW)
     service.resolve_attention(proposal.id,AttentionResolutionRequest(action=AttentionAction.APPROVE,authority_identity='human:test'))
     driver.activate(projection.work_id)
+    review_checked=False
     for _ in range(20):
         service.advance_work(projection.work_id)
         for a in service.list_attention(work_id=projection.work_id):
-            if a.kind is AttentionKind.CANDIDATE_AUTHORIZATION:service.resolve_attention(a.id,AttentionResolutionRequest(action=AttentionAction.AUTHORIZE,authority_identity='human:test'))
+            if a.kind is AttentionKind.CANDIDATE_AUTHORIZATION:
+                # The Human must be able to read the document before deciding
+                # whether to authorize this exact Candidate's integration.
+                review_delivery=DeliveryApplicationService(db)
+                candidate=review_delivery.candidate_context(projection.work_id)
+                assert candidate['authorization_pending'] and candidate['preview_kind'] is None
+                review_client,_=client(db,service,tmp_path)
+                prefix=f"/api/works/{projection.work_id}/candidate-download/{candidate['candidate_fingerprint']}"
+                response=review_client.get(prefix+'/docs/design.md')
+                assert response.status_code==200 and response.text=='# Governed document\n\nExact approved design.\n'
+                assert 'attachment;' in response.headers['content-disposition']
+                assert review_client.get(prefix+'/unrequested.md').status_code>=400
+                assert review_client.get(f"/api/works/{projection.work_id}/candidate-download/"+('0'*64)+'/docs/design.md').status_code>=400
+                assert review_delivery.candidate_context(projection.work_id)['authorization_pending']
+                assert service.get_work_result(projection.work_id).trusted_result is False
+                review_client.close();review_checked=True
+                service.resolve_attention(a.id,AttentionResolutionRequest(action=AttentionAction.AUTHORIZE,authority_identity='human:test'))
         if service.get_work_result(projection.work_id).trusted_result:break
+    assert review_checked
     delivery=DeliveryApplicationService(db)
     delivery.set_target(projection.work_id,DeliveryTargetRequest(kind='DOCUMENT_PACKAGE',title='Document only',acceptance_criteria=('Inspect approved design',),authority_identity='human:test'))
     manifest=delivery.publish(projection.work_id);assert manifest.software is None

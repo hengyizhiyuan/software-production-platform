@@ -1,0 +1,63 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+___ test_document_only_http_delivery_stays_document_and_preserves_acceptance ___
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/spg_int_document_entry_20261017), session_factory=...ostgresql+psycopg://spg:***@127.0.0.1:54329/spg_int_document_entry_20261017), autoflush=False, expire_on_commit=False))
+tmp_path = PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-1937/test_document_only_http_delive0')
+
+    def test_document_only_http_delivery_stays_document_and_preserves_acceptance(postgres_database,tmp_path):
+        from tests.integration.test_work_delivery import admit_empty,create_asset,bind,DesignCapability,_SchedulingOrchestrator
+        from spg.application.assets import RepositoryAssetService
+        from spg.application.work import WorkApplicationService
+        from spg.application.steering_bootstrap import SteeringBootstrapService
+        from spg.application.steering_driver import PlanSteeringDriver
+        from spg.domain.delivery import DeliveryTargetRequest
+        from spg.domain.product import AttentionKind,AttentionAction,AttentionResolutionRequest
+        from spg.domain.execution import ProviderReportedOutcome
+        from spg.providers.deterministic_executor import DeterministicTestExecutor,DeterministicExecutionSpecification,DeterministicFileOperation,DeterministicFileOperationType
+        from spg.providers.contract_verifier import ContractDrivenRepositoryVerifier
+        db=postgres_database;work,projection=admit_empty(db,tmp_path)
+        assets=RepositoryAssetService(db,tmp_path/'assets',tmp_path/'imports')
+        projection=bind(work,projection,create_asset(assets,'Observed document delivery'))
+        executor=DeterministicTestExecutor(DeterministicExecutionSpecification(operations=(DeterministicFileOperation(
+            operation=DeterministicFileOperationType.CREATE,repository_relative_path='docs/design.md',
+            content='# Governed document\n\nExact approved design.\n'),),reported_outcome=ProviderReportedOutcome.SUCCESS))
+        service=WorkApplicationService(db,workspace_root=tmp_path/'workspaces',executor=executor,verifier=ContractDrivenRepositoryVerifier(db))
+        SteeringBootstrapService(db).bootstrap(projection.work_id)
+        driver=PlanSteeringDriver(db,service,_SchedulingOrchestrator(),semantic_capability=DesignCapability())
+        driver.activate(projection.work_id)
+        proposal=next(a for a in service.list_attention(work_id=projection.work_id) if a.kind is AttentionKind.PRODUCTION_PROPOSAL_REVIEW)
+        service.resolve_attention(proposal.id,AttentionResolutionRequest(action=AttentionAction.APPROVE,authority_identity='human:test'))
+        driver.activate(projection.work_id)
+        review_checked=False
+        for _ in range(20):
+            service.advance_work(projection.work_id)
+            for a in service.list_attention(work_id=projection.work_id):
+                if a.kind is AttentionKind.CANDIDATE_AUTHORIZATION:
+                    # The Human must be able to read the document before deciding
+                    # whether to authorize this exact Candidate's integration.
+                    review_delivery=DeliveryApplicationService(db)
+                    candidate=review_delivery.candidate_context(projection.work_id)
+                    assert candidate['authorization_pending'] and candidate['preview_kind'] is None
+                    review_client,_=client(db,service,tmp_path)
+                    prefix=f"/api/works/{projection.work_id}/candidate-download/{candidate['candidate_fingerprint']}"
+                    response=review_client.get(prefix+'/docs/design.md')
+                    assert response.status_code==200 and response.text=='# Governed document\n\nExact approved design.\n'
+                    assert 'attachment;' in response.headers['content-disposition']
+                    assert review_client.get(prefix+'/unrequested.md').status_code>=400
+                    assert review_client.get(f"/api/works/{projection.work_id}/candidate-download/"+('0'*64)+'/docs/design.md').status_code>=400
+                    assert review_delivery.candidate_context(projection.work_id)['authorization_pending']
+>                   assert service.get_work_result(projection.work_id).trusted_result is None
+E                   AssertionError: assert False is None
+E                    +  where False = WorkResultProjection(work_id=UUID('b934ac0e-d0f5-5316-b828-db6b52d88542'), status=<WorkStatus.NEEDS_ATTENTION: 'NEEDS_...sted_result=False, remaining_blocker_or_risk='Human must authorize the exact Candidate', human_attention_required=True).trusted_result
+E                    +    where WorkResultProjection(work_id=UUID('b934ac0e-d0f5-5316-b828-db6b52d88542'), status=<WorkStatus.NEEDS_ATTENTION: 'NEEDS_...sted_result=False, remaining_blocker_or_risk='Human must authorize the exact Candidate', human_attention_required=True) = get_work_result(UUID('b934ac0e-d0f5-5316-b828-db6b52d88542'))
+E                    +      where get_work_result = <spg.application.work.WorkApplicationService object at 0x104def020>.get_work_result
+E                    +      and   UUID('b934ac0e-d0f5-5316-b828-db6b52d88542') = WorkProjection(work_id=UUID('b934ac0e-d0f5-5316-b828-db6b52d88542'), goal_id=None, mode=<WorkMode.LONG_LIVED_STEERING:...uction_run_id=None, current_production_cycle_trusted=False, latest_trusted_runtime_commit_id=None, work_complete=False).work_id
+
+tests/integration/test_delivery_observation.py:247: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+=========================== short test summary info ============================
+FAILED tests/integration/test_delivery_observation.py::test_document_only_http_delivery_stays_document_and_preserves_acceptance
+1 failed, 2 passed in 167.06s (0:02:47)

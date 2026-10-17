@@ -328,3 +328,16 @@ def test_missing_context_observation_stops_without_consuming_refinement_budget()
         _observe_convergence=lambda *a,**k:pytest.fail('Unchanged missing source must not consume retry budget'))
     result=PlanSteeringDriver.activate(driver,uuid4())
     assert result.stop_reason.value=='BLOCKED' and result.iterations_executed==0
+
+
+def test_review_copy_uses_actual_artifact_surface_and_preserves_quality_gate():
+    from spg.application.human_visible import fact_wording
+    facts={'candidate':{'candidate_fingerprint':'exact','verification':['Document scope: PASS'],
+        'preview_kind':None,'artifacts':['docs/review.md'],'authorization_pending':True},
+        'guardian':{'required':False}}
+    assert '成果文件与改动' in fact_wording(facts)['review']
+    assert '查看预览' not in fact_wording(facts)['review']
+    facts['candidate']['preview_kind']='STATIC_WEB'
+    assert '预览与改动' in fact_wording(facts)['review']
+    facts['guardian']={'required':True,'status':'NOT_STARTED'}
+    assert '还不能授权或验收' in fact_wording(facts)['review']

@@ -1,0 +1,60 @@
+✔ Admin uses existing authenticated session and dedicated navigation (25.002872ms)
+✖ Unauthenticated Admin does not load owner data (3.157377ms)
+✔ Quality offers sealed holdout and separates canonical cohorts (5.636466ms)
+✔ Operations preserves actual finite Worker capacity (59.024088ms)
+✔ Infrastructure renders exact node placement and unknown health separately (2.955454ms)
+✔ Assurance explicitly needs independent oracle (1.967821ms)
+✔ Arena differences and approval require explicit Human submission (2.186694ms)
+✔ Campaign page restores persisted Run and exposes safe controls and truthful queued case (3.214329ms)
+✔ Completed run offers new immutable reruns and seals Holdout answers (2.278154ms)
+✔ Historical Trace opens story with exact input, readable context and truthful non-deployment (6.025068ms)
+✔ Story and diagnostic toggles use the same facts without new owner calls (1.966227ms)
+✔ Trace escapes Human prose and preserves missing-data statements (2.088125ms)
+✔ Operations exposes actual CPU, memory, disk and network on primary page (1.952411ms)
+✔ Six primary navigation entries are human-readable and Workspace stays separate (0.86995ms)
+✔ Trace summary avoids cockpit census and loads execution evidence only on demand (3.534636ms)
+✔ Learning page starts with Human contribution and preserves explicit decisions (2.260079ms)
+✔ Overview offers explicit periods and truthful unknown user metrics (2.480681ms)
+✔ Run lists communicate intent and coverage before revision (0.386002ms)
+✔ Execution shows actual tool target and qualified result instead of repeated generic records (4.275378ms)
+✔ A/B uses exact comparison pairs rather than the newest promotion Holdout run (2.441196ms)
+✔ Zero qualification duration is not presented as instantaneous software production (2.180794ms)
+✔ Work has first-level navigation and bounded list without overview or Trace hydration (2.865718ms)
+✔ Work diagnostic download is lazy and shows the server error (5.087603ms)
+✔ Ordinary incomplete Work reuses Trace modes and does not claim Quality PASS or delivery (2.48577ms)
+✖ Unauthenticated Work list never retrieves owner records (1.869304ms)
+✔ Failed owner execution is visible even when the transport queue completed without Candidate (6.58963ms)
+✔ Trace analysis is Human-triggered and history reads never create a Work (2.430983ms)
+✔ Analysis report escapes model text and preserves failed analysis evidence (4.569607ms)
+✔ Analysis entry follows backend admission and explains active Work (1.722ms)
+✔ Analysis admission rejection is shown in Chinese rather than a raw code (2.151809ms)
+✔ Analysis submission generates a UUID on the existing HTTP origin and reuses it (2.398447ms)
+✔ Analysis v2 renders scoped gaps safely and still reads legacy reports (2.130514ms)
+✔ Analysis v3 shows subject and governed regression scenario with escaping (2.093206ms)
+✔ Analysis v4 displays the event-time boundary and escapes historical values (1.872848ms)
+✔ Analysis v5 shows recommendation surfaces and preserves legacy rendering (1.922045ms)
+✔ Analysis v7 preserves model wording and escapes separate checked boundaries and self-review (2.038767ms)
+✔ Analysis field references display escaped observed values with original field identity (2.006682ms)
+✔ Analysis tabs switch locally and concise Markdown download never requests evidence JSON (2.972554ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 36
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 456.753868
+
+✖ failing tests:
+
+test at tests/js/test_admin_surface.cjs:12:1
+✖ Unauthenticated Admin does not load owner data (3.157377ms)
+  TypeError: Cannot read properties of undefined (reading 'prefill')
+      at login (evalmachine.<anonymous>:71:324)
+      at render (evalmachine.<anonymous>:276:1709)
+
+test at tests/js/test_admin_surface.cjs:70:1
+✖ Unauthenticated Work list never retrieves owner records (1.869304ms)
+  TypeError: Cannot read properties of undefined (reading 'prefill')
+      at login (evalmachine.<anonymous>:71:324)
+      at render (evalmachine.<anonymous>:276:1709)

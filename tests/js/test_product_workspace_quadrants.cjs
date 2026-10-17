@@ -111,7 +111,7 @@ for (const [status, gate] of [['NOT_STARTED', null], ['RUNNING', null],
         esc: value => String(value ?? ''), link: () => '', renderAttention: () => '',
       });
     const ws = {actions:[], reality:{guardian:{required:true,status,gate}}};
-    const candidate = {candidate_fingerprint:'exact-current-candidate'};
+    const candidate = {candidate_fingerprint:'exact-current-candidate',preview_kind:'STATIC_WEB'};
     const manifest = {id:'manifest',fingerprint:'exact-manifest'};
     const actions = renderWorkspaceActions(ws,candidate,manifest,null,'work',false);
     const production = renderWorkspaceProduction(ws,{now:'验证候选',reason:'独立证据',next:'质量检查'},true,null);

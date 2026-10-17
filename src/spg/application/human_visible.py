@@ -239,7 +239,7 @@ def fact_wording(facts):
         '候选成果尚未通过独立验证，不能授权或验收。' if not verified else
         '机器验证已通过，质量检查尚未通过；当前版本还不能授权或验收。' if verified and not ready else
         '质量检查尚未通过；当前版本还不能授权或验收。' if not ready else
-        '质量条件已满足；请查看预览与改动，再明确决定是否授权当前候选。')
+        f"质量条件已满足；请查看{'预览' if candidate.get('preview_kind') else '成果文件'}与改动，再明确决定是否授权当前候选。")
     cloud=facts.get('cloud_deployment') or {}
     cloud_text={'SUCCEEDED':'部署成功','FAILED':'部署失败','ROLLED_BACK':'已回滚','NEEDS_HUMAN_ATTENTION':'部署受阻',
         'PRECHECK':'检查环境','STAGING':'传送成果','PREPARING':'正在部署','VERIFYING':'正在验证'}.get(cloud.get('state'),'未部署')

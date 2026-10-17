@@ -1,0 +1,30 @@
+✔ primary Product Workspace has exactly four named quadrants in governed order (5.048462ms)
+✔ Actions and Production retain the existing review and attention paths (0.453269ms)
+✔ canonical Product principle requires Human Governor approval for structural changes (0.336371ms)
+✔ Workspace reports persisted Execution and verification without claiming early success (3.277595ms)
+✔ multi-unit Reality preserves waiting, dependency and reconciliation meaning (2.062163ms)
+✔ required Guardian NOT_STARTED controls Human acceptance without changing quadrants (1.781071ms)
+✔ required Guardian RUNNING controls Human acceptance without changing quadrants (1.164938ms)
+✔ required Guardian FINDINGS_PRESENT controls Human acceptance without changing quadrants (1.089812ms)
+✔ required Guardian BLOCKED controls Human acceptance without changing quadrants (1.069486ms)
+✔ required Guardian PASS controls Human acceptance without changing quadrants (1.135195ms)
+✔ immutable acceptance distinguishes Product promotion PENDING (1.75908ms)
+✔ immutable acceptance distinguishes Product promotion BLOCKED (1.018452ms)
+✔ immutable acceptance distinguishes Product promotion COMPLETED (1.101969ms)
+✔ normal quadrants use one WIC realization and never fall through to owner prose (1.316712ms)
+✔ qualified Actions render WIC questions while preserving exact authority controls (1.280662ms)
+✔ READY Work still exposes an actual admission blocker through WIC owner facts (1.234342ms)
+✔ sealed document is readable and downloadable before authorization without advertising Preview (4.399843ms)
+✔ mixed artifact Candidate preserves its actual software Preview and offers every file (0.488321ms)
+✔ file labels cannot inject attributes and non-text artifacts retain download only (0.385443ms)
+✔ reader GET consumes exact bound artifact as inert full text without authorizing or opening Preview (1.546994ms)
+✔ stale or failed artifact reads surface the actual error and grant no new authority (2.525181ms)
+✔ late response does not replace a closed or superseded reader (1.140473ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 282.102005
