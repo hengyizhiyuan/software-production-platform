@@ -1,0 +1,59 @@
+..............F........                                                  [100%]
+=================================== FAILURES ===================================
+_____________ test_sem_11_authority_expansion_stops_before_runtime _____________
+
+postgres_database = Database(engine=Engine(postgresql+psycopg://spg:***@127.0.0.1:54329/spg_int_ultraman_design_20261017), session_factory...stgresql+psycopg://spg:***@127.0.0.1:54329/spg_int_ultraman_design_20261017), autoflush=False, expire_on_commit=False))
+product = (<spg.application.work.WorkApplicationService object at 0x10a9cd480>, PosixPath('/private/var/folders/16/7wzh7jzx59z0y6mqxpd41hw80000gn/T/pytest-of-yu/pytest-1934/test_sem_11_authority_expansio0/semantic-repository'))
+
+    def test_sem_11_authority_expansion_stops_before_runtime(
+        postgres_database: Database,
+        product,
+    ) -> None:
+        works, _repository = product
+        admitted, plan = _admitted_plan(works)
+        assert plan.current_step is not None
+        orchestrator = ProductionOrchestrator(works)
+        driver = PlanSteeringDriver(
+            postgres_database,
+            works,
+            orchestrator,
+            semantic_capability=_SemanticCapability(
+                step_type=SteeringStepType.DESIGN,
+                expansion=True,
+            ),
+        )
+        try:
+>           stopped = driver.iterate(admitted.work_id)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_mvp_semantic_step_execution.py:874: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/spg/application/steering_driver.py:260: in iterate
+    return self._semantic_iteration(frame, before)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/steering_driver.py:1397: in _semantic_iteration
+    result = self.semantic.execute(frame.work_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/semantic_steps.py:422: in execute
+    return self.admit(semantic_input, candidate)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/spg/application/semantic_steps.py:591: in admit
+    require_human_decision(candidate.human_decision_need, evidence=fresh.reality_refs,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+need = None
+basis = {'evidence': (RealityReference(kind=<RealityReferenceKind.GOVERNANCE_DECISION: 'GOVERNANCE_DECISION'>, identity=UUID('...kind=<RealityReferenceKind.WORK: 'WORK'>, identity=UUID('8ebcd158-7423-4988-84ba-e9213b33725c'))), 'semantic_ir': None}
+
+    def require_human_decision(need, **basis):
+        failures = qualify_human_decision(need, **basis)
+        if failures:
+>           raise SteeringInvariantViolation("ATTENTION_NOT_QUALIFIED: " + ", ".join(failures))
+E           spg.domain.steering.SteeringInvariantViolation: ATTENTION_NOT_QUALIFIED: DECISION_OBJECT_MISSING
+
+src/spg/application/human_attention.py:66: SteeringInvariantViolation
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+=========================== short test summary info ============================
+FAILED tests/integration/test_mvp_semantic_step_execution.py::test_sem_11_authority_expansion_stops_before_runtime
+1 failed, 22 passed in 65.73s (0:01:05)

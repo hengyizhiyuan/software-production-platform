@@ -1,0 +1,22 @@
+{
+  "work_id": "82523845-5957-5601-a5f3-8dc703425d7e",
+  "source_revision": "c335a94429cb97442d5ce0c2709928ae68b98e9c",
+  "source_tree": "4949d7784ce169a513a020da8f1b30af27664a0b",
+  "input_sha256": "5548e20d6d97e40f1074d0cb1ba0d9d890d1455cfd1a92a180135ce7f0562a35",
+  "scope_missing": [],
+  "target_kind": "DOCUMENTATION_WORK",
+  "artifact_paths": [
+    "docs/design.md"
+  ],
+  "request_id": "3b24aebe-0650-47e8-aaf4-6f5e53848fe2",
+  "usage": {
+    "input_tokens": 14754,
+    "output_tokens": 2722,
+    "cached_tokens": 12800,
+    "reasoning_tokens": 0,
+    "total_tokens": 17476,
+    "unknown": false
+  },
+  "no_production_effects": true,
+  "only_local_repository_location_changed": true
+}

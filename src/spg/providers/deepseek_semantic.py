@@ -13,6 +13,7 @@ from pathlib import Path
 import subprocess
 from pydantic import ValidationError
 
+from spg.domain.change import ProductionTargetKind
 from spg.domain.model_runtime import ModelPurpose, ModelProvider, ModelUsage, StructuredModelResult, WattModelRuntime
 from spg.domain.refinement import RepositoryScopeValidation, scope_target_proof_issues
 from spg.domain.steering import (
@@ -182,7 +183,12 @@ class DeepSeekSemanticStepCapability:
             raise ValueError("SCOPE_SOURCE_TREE_MISMATCH")
         new_target_requirements = tuple(dict.fromkeys(
             (*input.work_requests, input.desired_outcome, *input.constraints)))
-        paths = tuple(dict.fromkeys((*proposal.code_targets,
+        # The typed proposal separates document artifacts from code targets.
+        # Both need the same exact-source proof checks against their actual
+        # candidate paths; an empty code target list is normal for documents.
+        candidate_paths = (tuple(target.path for target in proposal.artifact_targets)
+            if proposal.target_kind is ProductionTargetKind.DOCUMENTATION_WORK else proposal.code_targets)
+        paths = tuple(dict.fromkeys((*candidate_paths,
             *(item.repository_relative_path for item in input.context_materials),
             *(path for path in input.repository_tree_paths
                 if not path.startswith(("tests/", "docs/"))
@@ -255,13 +261,13 @@ class DeepSeekSemanticStepCapability:
                 "canonical_outcome": input.desired_outcome,
                 "canonical_requests": input.work_requests,
                 "human_authority_requests": input.human_explicit_requests, "constraints": input.constraints,
-                "candidate_paths": proposal.code_targets, "candidate_objective": proposal.objective,
+                "candidate_paths": candidate_paths, "candidate_objective": proposal.objective,
                 "candidate_target_kind": proposal.target_kind.value,
                 "candidate_artifact_targets": [item.model_dump(mode="json") for item in proposal.artifact_targets],
                 "required_intermediate_artifacts": input.required_intermediate_artifacts,
                 "repository_tree_paths": input.repository_tree_paths,
                 "exact_revision": input.source_revision, "exact_source_tree": exact_tree,
-                "candidate_path_exists": {path: path in exact_tree_paths for path in proposal.code_targets},
+                "candidate_path_exists": {path: path in exact_tree_paths for path in candidate_paths},
                 "new_target_scope_requirements": new_target_requirements, "observed_sources": materials}
         schema = _provider_strict_output_schema(RepositoryScopeValidation.model_json_schema())
         results: list[StructuredModelResult] = []
@@ -292,7 +298,7 @@ class DeepSeekSemanticStepCapability:
                     issues = ("Scope necessity proofs contain duplicate candidate paths",)
                 for proof in validation.required_targets:
                     issues = (*issues, *scope_target_proof_issues(proof,
-                        candidate_paths=proposal.code_targets, tree_paths=exact_tree_paths,
+                        candidate_paths=candidate_paths, tree_paths=exact_tree_paths,
                         source_revision=input.source_revision, source_tree=exact_tree,
                         human_authority_text="\n".join(input.human_explicit_requests), observed_sources=materials))
                 actual_new_targets = tuple(proof.path for proof in validation.required_targets

@@ -1,0 +1,19 @@
+{
+  "same_real_model_scope_result_sha256": "acc0d7a45ee74d5121bb6467c0edcab658a0e0d792e4f6ec46b325aab406fba9",
+  "baseline": {
+    "missing": [
+      "Scope necessity proof is outside observed candidate Reality"
+    ],
+    "calls": 2,
+    "candidate_paths": []
+  },
+  "corrected": {
+    "missing": [],
+    "calls": 1,
+    "candidate_paths": [
+      "docs/design.md"
+    ]
+  },
+  "no_tools_executed": true,
+  "original_work_unchanged": true
+}
