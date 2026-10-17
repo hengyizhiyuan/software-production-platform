@@ -81,3 +81,20 @@ inputs/choices, missing host classification, effect contradiction and invalid
 exit types. The changed Native/objective/WIC contract selection passes 170 tests;
 PE-host listing tests cover both observed successful and failed exits. No actual
 revised game Candidate or current Guardian PASS is claimed at this checkpoint.
+
+Live post-deployment reproduction observed the same `ls -la src styles` failure
+without another boundary stop; subsequent actual file writes continued. The
+current data-only runtime reports five styles, thirteen slots and 195 items
+with no reported data problems, compared with the old Candidate's five styles,
+three slots and fifteen items. Page and stylesheet writes are settled as well.
+This is observed progress, not a whole game, Preview or Guardian PASS.
+
+The short-reference protocol selection passes 37 Static Content / revised-Work
+brief tests, with positive, contradiction, unverifiable, unknown/missing/duplicate
+reference, invented quote, mixed schema and Chinese-policy cases. Existing
+Verification receipt budget/replay checks pass 18 tests. Legacy exact identity
+checks remain; no approximate UUID matching or witness-text normalization is
+introduced. Provider versions are advanced explicitly for separate exact-subject
+Verification; the actual old failed records are retained. Current working
+preview opened in the browser, and campus-style and specific skirt selection
+both visibly updated before the browser bridge later timed out.

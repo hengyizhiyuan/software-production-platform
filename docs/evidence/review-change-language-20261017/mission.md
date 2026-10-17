@@ -52,3 +52,15 @@ BOUNDARY_CROSSING_REQUIRED。这是消费者将已观测、无修改效果的技
 Human 输入/决定仍不适用；不按 stderr、游戏文本或缺失目录名判业务 PASS。
 修复后通过既有 retry-production 创建后继 Attempt，保留累计代次、旧失败与
 全部验收要求。新自然语言 PWU 目标包装和首次执行计划也跟随目标语言。
+
+实际新版已于 2026-10-18 00:16 完成 Native 产出，四个文件、同一确切 tree 与可
+打开的 working preview 均保留。PATH_SCOPE 的内容检查第一轮引文不精确；第二
+轮 30 项检查齐全但模型将其中一项 UUID 抄错一位，终止为
+PROTECTED_CONTEXT_INCOMPLETE_COVERAGE。允许模型评价语义与源码证据，不必重新
+制造来源身份。最小修复在既有 StaticProtectedContextVerifier：Owner 生成本批
+短引用并回填原身份，新 schema 仅要求模型回显短引用；未知/重复/缺失引用与
+虚构 witness 仍失败，旧格式仅接受全量精确身份。来源、完整义务、否定判断、
+两次校验反馈预算、原失败与独立 Guardian 不变。修复的 verifier binding 升版
+形成新的 exact-subject Verification，不更换游戏源码、不新建生成 Attempt，
+旧两次失败作为旧 provider-version 证据保留。本次用户要求修复并继续的授权
+覆盖这次系统修复后的验证恢复，不需要用户重复业务意图。

@@ -835,6 +835,15 @@ Real compilation diagnostics can bind an invoked Python source target to its
 failed compilation receipt; subsequent observed in-scope source evidence can
 enable the existing bounded compiler repair policy.
 
+Static content Verification issues batch-local short references for selected
+obligations and resolves model judgments back to the unchanged exact source
+identities. The model need not reproduce UUIDs. Every reference remains required
+exactly once; unknown, missing or duplicate references and unobserved witness
+quotes still fail within the same two-candidate repair budget. Exact legacy
+receipts remain readable. A corrected provider version produces separate
+exact-subject evidence; prior failed checks and their budgets remain historical
+facts, never rewritten as PASS. Chinese content checks use Chinese instructions.
+
 A terminal BLOCKED production outcome stops Work convergence and produces durable
 diagnostic attention. Human intervention measurement counts distinct source-bound
 Human decisions in admitted revisions and actual Candidate authorization; the

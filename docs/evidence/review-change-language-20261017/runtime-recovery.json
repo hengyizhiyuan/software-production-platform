@@ -1,5 +1,5 @@
 {
-  "observed_at_utc": "2026-10-17T16:08:47Z",
+  "observed_at_utc": "2026-10-17T16:14:33Z",
   "qualification": "CURRENT_REVISED_WORK_RUNNING; NEW_CANDIDATE_PENDING",
   "work_id": "12cecacf-a97d-515f-8515-9845abadaea9",
   "interaction_id": "649b4c7b-3eec-4e3d-b61f-6ce0fcee6244",
@@ -24,7 +24,7 @@
   "current_queue_condition": "EXECUTING",
   "current_grant_state": "GRANTED",
   "current_runtime_mode": "RUNNING",
-  "current_inference_sequence": 15,
+  "current_inference_sequence": 21,
   "recovery_source_continuity": "Prior attempt and session step history are preserved. Successor workspace uses the original admitted source baseline; observed reads of index.html and src/wardrobe-data.js return exists=false. Prior failed-attempt files are not carried into this successor; complete Work requirements remain pending actual generation.",
   "new_candidate": null,
   "new_candidate_verification": "PENDING",
@@ -42,12 +42,32 @@
       "tool": "file.write",
       "path": "src/wardrobe-data.js",
       "condition": "SETTLED",
-      "observed_at_utc": "2026-10-17T16:04:11Z"
+      "observed_at_utc": "2026-10-17T16:12:59Z",
+      "bytes": 40514
     },
     {
-      "tool": "file.read",
-      "path": "src/wardrobe-data.js",
-      "condition": "SETTLED"
+      "tool": "process.run",
+      "argv": [
+        "node",
+        "src/wardrobe-data.js"
+      ],
+      "condition": "SETTLED",
+      "returncode": 0,
+      "stdout": "[wardrobe-data] styles=5 slots=13 items=195 problems=none"
+    },
+    {
+      "tool": "file.write",
+      "path": "index.html",
+      "condition": "SETTLED",
+      "observed_at_utc": "2026-10-17T16:14:32Z",
+      "bytes": 2540
+    },
+    {
+      "tool": "file.write",
+      "path": "styles/main.css",
+      "condition": "SETTLED",
+      "observed_at_utc": "2026-10-17T16:14:32Z",
+      "bytes": 13464
     }
   ],
   "provider_incomplete_response": {
@@ -55,5 +75,23 @@
     "condition": "FAILED",
     "failure_code": "INCOMPLETE_RESPONSE",
     "automatic_recovery": "Subsequent inference 12 completed and produced an actual file write; current attempt still RUNNING"
+  },
+  "listing_fix_live_regression": {
+    "observation": "Same system ls -la src styles failed with absent styles; subsequent reads, writes and inference continued within the same attempt",
+    "condition": "FAILED receipt retained, no boundary termination"
+  },
+  "wardrobe_data_comparison": {
+    "old": {
+      "styles": 5,
+      "slots": 3,
+      "items": 15
+    },
+    "current_in_progress": {
+      "styles": 5,
+      "slots": 13,
+      "items": 195
+    },
+    "method": "Execute exact observed data source in isolated Node VM, no filesystem/network bindings; Native also executed node file successfully",
+    "qualification": "DATA_ONLY; NOT_ENTIRE_GAME_PASS"
   }
 }

@@ -252,3 +252,64 @@ def test_one_candidate_assessment_reused_across_fact_constraint_and_repository_p
     with pytest.raises(ValueError, match='NOT_ASSIGNED'):
         session.verify_fulfillment_bindings(request, task, contract, repo, baseline,
             bindings=(current.model_copy(update={'source_quote': 'changed'}),))
+
+
+@pytest.mark.parametrize('disposition', ['SATISFIED', 'CONTRADICTED', 'UNVERIFIABLE'])
+def test_owner_batch_reference_resolves_exact_identity_without_model_uuid_echo(subject, disposition):
+    from spg.domain.model_runtime import ModelUsage
+    repo,base,request,task,contract=subject
+    payloads=[]
+    def generate(**kwargs):
+        payload=json.loads(kwargs['input_text']);payloads.append(payload)
+        assert kwargs['output_schema']['$defs']['ReferencedCheck']['properties']['check_ref']['enum']==['c0']
+        assert payload['protected_obligations'][0]['semantic_key']=='homepage'
+        assert payload['protected_obligations'][0]['source_revision']==base
+        return SimpleNamespace(output_text=json.dumps({'checks':[{
+            'check_ref':payload['protected_obligations'][0]['check_ref'],
+            'disposition':disposition,'reason':'Observed exact source under unchanged acceptance criteria',
+            'witnesses':[{'path':'index.html','quote':'Company Home'}]}]}),
+            provider=SimpleNamespace(value='test'),effective_model='test',request_id='test',usage=ModelUsage())
+    runtime=SimpleNamespace(generate=generate,registry=SimpleNamespace(close=lambda:None))
+    result=StaticProtectedContextVerifier(lambda:runtime).verify(request,task,contract,repo,base)
+    assert len(payloads)==1
+    assert result[0]['semantic_key']=='homepage' and result[0]['source_revision']==base
+    assert result[0]['disposition']==disposition
+    assert (result[0]['coverage']=='COVERED') is (disposition=='SATISFIED')
+    assert result[0]['candidate_tree']==request.tree_identity
+
+
+@pytest.mark.parametrize('change',['missing','duplicate','unknown','fake-witness','mixed-shape'])
+def test_short_references_do_not_waive_coverage_or_witness_validation(subject, change):
+    from spg.domain.model_runtime import ModelUsage
+    repo,base,request,task,contract=subject
+    c={'check_ref':'c0','disposition':'SATISFIED','reason':'Check exact implementation',
+        'witnesses':[{'path':'index.html','quote':'Company Home'}]}
+    rows=[c]
+    if change=='missing':rows=[]
+    elif change=='duplicate':rows=[c,c]
+    elif change=='unknown':rows=[{**c,'check_ref':'c99'}]
+    elif change=='fake-witness':rows=[{**c,'witnesses':[{'path':'index.html','quote':'Fabricated'}]}]
+    else:rows=[{**c,'semantic_key':'homepage'}]
+    calls=[]
+    def generate(**kwargs):
+        calls.append(kwargs)
+        return SimpleNamespace(output_text=json.dumps({'checks':rows}),provider=SimpleNamespace(value='test'),
+            effective_model='test',request_id='test',usage=ModelUsage())
+    runtime=SimpleNamespace(generate=generate,registry=SimpleNamespace(close=lambda:None))
+    with pytest.raises(ValueError):
+        StaticProtectedContextVerifier(lambda:runtime).verify(request,task,contract,repo,base)
+    assert len(calls)==2
+
+
+def test_chinese_content_review_keeps_language_and_exact_source(subject):
+    from spg.domain.model_runtime import ModelUsage
+    repo,base,request,task,contract=subject
+    task.objective='调整现有阅读页字号。'
+    def generate(**kwargs):
+        assert '新自然语言保持中文' in kwargs['instructions']
+        assert 'Company Home' in kwargs['input_text']
+        return SimpleNamespace(output_text=json.dumps({'checks':[{
+            'check_ref':'c0','disposition':'UNVERIFIABLE','reason':'当前证据不能证明全部运行效果。','witnesses':[]}]}),
+            provider=SimpleNamespace(value='test'),effective_model='test',request_id='test',usage=ModelUsage())
+    runtime=SimpleNamespace(generate=generate,registry=SimpleNamespace(close=lambda:None))
+    assert StaticProtectedContextVerifier(lambda:runtime).verify(request,task,contract,repo,base)[0]['coverage']=='UNVERIFIED'
