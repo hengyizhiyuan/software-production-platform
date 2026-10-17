@@ -53,10 +53,30 @@ class ReferencedContextChecks(BaseModel):
     checks: list[ReferencedCheck]
 
 
-def _checks_from_wire(text, expected):
+def _source_passages(materials):
+    passages = []
+    for path, content in materials.items():
+        lines = content.splitlines(keepends=True)
+        for start in range(0, len(lines), 8):
+            passages.append({"witness_ref": f"s{len(passages)}", "path": path,
+                "first_line": start + 1, "quote": "".join(lines[start:start + 8])})
+    return passages
+
+
+def _checks_from_wire(text, expected, source_passages=()):
     """Resolve only Owner-issued batch references; never guess a mistyped identity."""
     raw = json.loads(text)
     rows = raw.get("checks") if isinstance(raw, dict) else None
+    if isinstance(rows, list) and any(isinstance(row, dict) and "witness_refs" in row for row in rows):
+        catalog = {entry["witness_ref"]: entry for entry in source_passages}
+        for row in rows:
+            if not isinstance(row, dict) or "witnesses" in row:
+                raise ValueError("PROTECTED_CONTEXT_WITNESS_REFERENCE_SHAPE_INVALID")
+            refs = row.pop("witness_refs", None)
+            if (not isinstance(refs, list) or any(not isinstance(ref, str) or ref not in catalog for ref in refs)
+                    or len(set(refs)) != len(refs)):
+                raise ValueError("PROTECTED_CONTEXT_WITNESS_REFERENCE_NOT_OBSERVED")
+            row["witnesses"] = [{key: catalog[ref][key] for key in ("path", "quote")} for ref in refs]
     if isinstance(rows, list) and any(isinstance(row, dict) and "check_ref" in row for row in rows):
         wire = ReferencedContextChecks.model_validate(raw)
         identities = {f"c{index}": key for index, key in enumerate(expected)}
@@ -324,11 +344,19 @@ class StaticProtectedContextVerifier:
                 sort_keys=True).encode()).hexdigest())
         expected = {(item.context_class, item.semantic_key): item for item in selected}
         check_refs = {key: f"c{index}" for index, key in enumerate(expected)}
+        source_passages = _source_passages(materials)
+        payload.pop("candidate_sources")
+        payload["candidate_source_passages"] = source_passages
         payload["protected_obligations"] = [
             {**item.model_dump(mode="json"), "check_ref": check_refs[(item.context_class, item.semantic_key)]}
             for item in selected]
         output_schema = _provider_strict_output_schema(ReferencedContextChecks.model_json_schema())
         output_schema["$defs"]["ReferencedCheck"]["properties"]["check_ref"]["enum"] = list(check_refs.values())
+        check_schema = output_schema["$defs"]["ReferencedCheck"]
+        check_schema["properties"].pop("witnesses")
+        check_schema["properties"]["witness_refs"] = {"type": "array", "items": {
+            "type": "string", "enum": [entry["witness_ref"] for entry in source_passages]}}
+        check_schema["required"] = ["witness_refs" if key == "witnesses" else key for key in check_schema["required"]]
         instructions += (
             " Return check_ref from each protected_obligations entry instead of copying "
             "context_class or semantic_key. The Owner resolves it to the unchanged exact "
@@ -356,6 +384,16 @@ class StaticProtectedContextVerifier:
                 "仅返回 schema 中 checks，每项含 check_ref、disposition、reason、witnesses。")
             instructions += ("comparison_candidates 是原事项上一修订的确切封存成果，仅用于比较改进与保留行为，"
                 "不成为可信基线，不赋予本轮通过或权限。相对修改应结合它比较；SATISFIED 的 witness 仍须来自当前 candidate_sources。")
+        instructions = instructions.replace("candidate_sources", "candidate_source_passages")
+        instructions += (" 当前完整源码逐段原样保存在 candidate_source_passages；选择其中能证明判断的 witness_ref，"
+            "只返回 witness_refs 数组，不抄写 path、quote 或 witnesses。Owner 会回填该片段的确切源码。"
+            "SATISFIED 至少选择一个实施文件片段；CONTRADICTED 或 UNVERIFIABLE 不必伪造不存在的证据。"
+            "只返回 check_ref、disposition、reason、witness_refs，不添加其他字段。"
+            if uses_chinese(task.objective) else
+            " Complete exact source is in candidate_source_passages. Select supporting witness_ref values and return "
+            "witness_refs only, without path, quote or witnesses. The Owner resolves each exact current source passage. "
+            "SATISFIED requires implementation evidence; negative judgments need not invent evidence. "
+            "Return only check_ref, disposition, reason and witness_refs.")
         previous_checks = tuple(Check.model_validate(c) for c in recorder.previous_checks(component))
         model_attempts = []
         completed = recorder.completed(component)
@@ -401,7 +439,7 @@ class StaticProtectedContextVerifier:
                 failure = None
                 feedback = None
                 try:
-                    observed = _checks_from_wire(response.output_text, expected)
+                    observed = _checks_from_wire(response.output_text, expected, source_passages)
                     if any(prior.disposition != "SATISFIED" and current.disposition == "SATISFIED"
                             and (prior.context_class, prior.semantic_key) == (current.context_class, current.semantic_key)
                             for prior in previous_checks for current in observed.checks):

@@ -313,3 +313,69 @@ def test_chinese_content_review_keeps_language_and_exact_source(subject):
             provider=SimpleNamespace(value='test'),effective_model='test',request_id='test',usage=ModelUsage())
     runtime=SimpleNamespace(generate=generate,registry=SimpleNamespace(close=lambda:None))
     assert StaticProtectedContextVerifier(lambda:runtime).verify(request,task,contract,repo,base)[0]['coverage']=='UNVERIFIED'
+
+
+@pytest.mark.parametrize('use_old_witness',[False, True])
+def test_predecessor_is_comparison_only_and_cannot_prove_current_implementation(subject,use_old_witness):
+    from spg.domain.model_runtime import ModelUsage
+    repo,base,request,task,contract=subject
+    comparison={'candidate_id':str(uuid4()),'candidate_revision':'a'*40,'candidate_tree':'b'*40,
+        'comparison_only':True,'grants_current_pass_or_authority':False,
+        'sources':{'index.html':{'sha256':'c'*64,'content':'Old report layout'}}}
+    def generate(**kwargs):
+        payload=json.loads(kwargs['input_text'])
+        assert payload['comparison_candidates']==[comparison]
+        assert payload['baseline_revision']==base
+        quote='Old report layout' if use_old_witness else 'Company Home'
+        return SimpleNamespace(output_text=json.dumps({'checks':[{
+            'check_ref':'c0','disposition':'SATISFIED','reason':'Compare against exact earlier source',
+            'witnesses':[{'path':'index.html','quote':quote}]}]}),provider=SimpleNamespace(value='test'),
+            effective_model='test',request_id='test',usage=ModelUsage())
+    runtime=SimpleNamespace(generate=generate,registry=SimpleNamespace(close=lambda:None))
+    def run():return StaticProtectedContextVerifier(lambda:runtime).verify(request,task,contract,repo,base,
+        comparison_candidates=(comparison,))
+    if use_old_witness:
+        with pytest.raises(ValueError,match='WITNESS_NOT_OBSERVED'):run()
+    else:
+        row=run()[0]
+        assert row['candidate_tree']==request.tree_identity
+        assert row['comparison_candidate_references']==[{k:v for k,v in comparison.items() if k!='sources'}]
+        assert row['observed_source_digests']=={'index.html':sha256(b'<main>Company Home</main>').hexdigest()}
+
+
+@pytest.mark.parametrize('change',[None,'unknown','duplicate','empty','requirements-only'])
+def test_owner_source_passages_preserve_exact_proof_and_refuse_invalid_selection(subject,change):
+    from spg.domain.model_runtime import ModelUsage
+    repo,base,request,task,contract=subject
+    calls=[]
+    def generate(**kwargs):
+        calls.append(kwargs)
+        data=json.loads(kwargs['input_text']);passages=data['candidate_source_passages']
+        assert 'candidate_sources' not in data
+        path='README.md' if change=='requirements-only' else 'index.html'
+        selected=[p['witness_ref'] for p in passages if p['path']==path]
+        assert kwargs['output_schema']['$defs']['ReferencedCheck']['properties']['witness_refs']['items']['enum']==[p['witness_ref'] for p in passages]
+        if change=='unknown':selected=['unobserved']
+        elif change=='duplicate':selected=selected*2
+        elif change=='empty':selected=[]
+        return SimpleNamespace(output_text=json.dumps({'checks':[{'check_ref':'c0',
+            'disposition':'SATISFIED','reason':'Actual implementation is selected','witness_refs':selected}]}),
+            provider=SimpleNamespace(value='test'),effective_model='test',request_id='test',usage=ModelUsage())
+    runtime=SimpleNamespace(generate=generate,registry=SimpleNamespace(close=lambda:None))
+    def run():return StaticProtectedContextVerifier(lambda:runtime).verify(request,task,contract,repo,base)
+    if change is None:
+        row=run()[0]
+        assert row['witnesses']==[{'path':'index.html','quote':'<main>Company Home</main>'}]
+        assert row['observed_source_digests']['index.html']==sha256(b'<main>Company Home</main>').hexdigest()
+    else:
+        with pytest.raises(ValueError):run()
+        assert len(calls)==2
+
+
+def test_source_passages_cover_every_character_without_normalization():
+    from spg.providers.protected_context_verifier import _source_passages
+    source='\r\n'.join('第'+str(i)+'行' for i in range(25))+'\r\n  '
+    passages=_source_passages({'src/display.js':source})
+    assert ''.join(p['quote'] for p in passages)==source
+    assert len({p['witness_ref'] for p in passages})==len(passages)
+    assert [p['first_line'] for p in passages]==[1,9,17,25]

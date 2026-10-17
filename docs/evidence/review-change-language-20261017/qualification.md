@@ -110,3 +110,14 @@ cases use real Git, including absent parent, other revision, future candidate,
 unknown verification, source/tree/workspace drift and no source promotion. The
 combined comparison/content/brief/receipt selection passes 66 tests. Actual final
 assessment remains a separate live obligation on the unchanged game tree.
+
+The real comparison-enabled model returned a nonliteral source quote, then
+malformed JSON during its bounded repair. UNKNOWN remains preserved as record
+548cb373-f167-5ffb-92cb-0eb98df9c6ea. Current source is now presented losslessly
+as consecutively indexed passages; the model selects observed source references,
+and the same Owner resolves exact current path/quote and applies the existing
+literal-source and implementation-witness checks. This reduces copying and JSON
+escaping rather than tolerating malformed output or inventing evidence. The
+selected regression passes 74 tests, including full-character/CRLF coverage,
+unknown/duplicate/empty/requirements-only selections and comparison-source
+witness refusal. No game source or original requirement was changed.

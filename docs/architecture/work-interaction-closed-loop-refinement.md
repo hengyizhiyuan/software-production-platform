@@ -843,6 +843,11 @@ quotes still fail within the same two-candidate repair budget. Exact legacy
 receipts remain readable. A corrected provider version produces separate
 exact-subject evidence; prior failed checks and their budgets remain historical
 facts, never rewritten as PASS. Chinese content checks use Chinese instructions.
+Current source is presented as consecutive lossless passages with Owner-issued
+evidence references. Selecting a reference resolves to the exact current
+path/quote; the model need not reproduce source text or escape it into JSON.
+Unknown, duplicate, empty positive or requirements-only evidence still fails.
+The Owner checks the selected literal source without interpreting it as a PASS.
 For relative refinement checks, Verification may read the exact already-sealed
 Candidate of the same Work's immediate predecessor revision. Repository,
 commit/tree, original Verification and sealing-before-revision identities are
