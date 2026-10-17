@@ -36,7 +36,38 @@ DECISION_OBJECT_MISSING. Re-running that test with the original source at
 remains blocked; this mission does not weaken that guard or repair unrelated
 fixture semantics. Both logs are retained. This is not an all-suite PASS.
 
-Deployment and actual Work recovery qualification are pending in this initial
-implementation report. The authorized endpoint is a reviewable design
-artifact; game implementation, Candidate acceptance and delivery remain
-unapproved.
+Deployment qualified application 7461217a910cb6904da4e4b4bab4fcb6450b14d3,
+image sha256:010d6a5ab4a54e351c7f84d8dfae3c43f64e10070159ee1c6b6d8439666c64d9.
+All four services use the same image, service/database health and the existing
+independent owner release gate pass. The separately paused game Work's records
+are unchanged across deployment. See deployment-qualified.json.
+
+Actual recovery used only the existing recorded Steering attention approval,
+with the Human's repair instruction and explicit design-only limit. The original
+Work Reality revision and historical self-refine event are byte-for-byte
+unchanged. One production Attempt completed and its PWU is SATISFIED. Exact
+observed changes contain only ADDED docs/design.md. Candidate
+dd956f08-57cb-5176-92e4-ab5e91659301 at
+50ba60d17b5be69b2eca98d15b93368a9178f259 is SEALED. Independent document
+Verification passes, including plan content and no game source/build output.
+The authenticated exact Candidate download matches the observed Git blob and
+is preserved as produced-design.md (9,724 bytes, Chinese). See qualification.json.
+
+The Work now truthfully waits for Human Candidate review/authorization. No
+Candidate authorization, Runtime Commit, repository integration, acceptance or
+delivery was performed. The current document has no runnable Preview and its
+existing Guardian projection says required=false / NOT_STARTED; this is not a
+game Preview/Guardian PASS claim. The Chinese workspace summary explicitly
+says the plan awaits approval and game implementation has not started. Browser
+UI interaction was not performed; exact artifact download and workspace API
+were checked. The authorized recovery endpoint is achieved; game implementation
+still requires Human approval.
+
+BUG_CLASS: typed artifact path omitted at scope consumption.
+ROOT_CAUSE: code_targets was used for both proposal variants.
+PROTECTED_INVARIANT: scope/proof/source observation must share the actual typed
+Candidate paths, while retaining exact evidence and complete obligations.
+PERMANENT_TESTS: tests/test_documentation_scope_proofs.py and neighboring existing
+code-scope tests. TEST_LEVEL: contract/unit, with PostgreSQL boundary regression
+and one real existing Work qualification. GOLDEN_JOURNEY_IMPACT: existing
+documentation production/review boundary strengthened; no new expensive journey.

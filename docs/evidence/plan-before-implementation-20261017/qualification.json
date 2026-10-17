@@ -1,0 +1,85 @@
+{
+  "observed_at_utc": "2026-10-17T09:31:05.199262+00:00",
+  "application_revision": "7461217a910cb6904da4e4b4bab4fcb6450b14d3",
+  "work_id": "82523845-5957-5601-a5f3-8dc703425d7e",
+  "work_reality_revision_id": "2ac62ff7-d865-529c-8335-33a090d51598",
+  "original_source_revision": "c335a94429cb97442d5ce0c2709928ae68b98e9c",
+  "attempt_id": "49654b5b-990d-4eb0-b15d-9926e5ba29da",
+  "attempt_count": 1,
+  "pwu_state": "SATISFIED",
+  "candidate": {
+    "completion_evaluation_ids": [
+      "7be3bec3-9452-5205-920b-d24a7a82c691"
+    ],
+    "condition": "SEALED",
+    "expected_source_repository_revision": "c335a94429cb97442d5ce0c2709928ae68b98e9c",
+    "fingerprint": "33514d8745ddf1ad98d4772c28802e4c3e9c642e4693ef9756102a4a0e672728",
+    "id": "dd956f08-57cb-5176-92e4-ab5e91659301",
+    "plan_revision_id": "4e4d9384-5384-400e-a742-18034faea37d",
+    "production_admissibility_basis_fingerprint": "153c4146c4e6b58b5364f41fe137a7186aa111e17efe60d937e695d832690513",
+    "production_admissibility_id": "3c388b20-ce74-5399-b81a-0554bc198a9f",
+    "production_run_id": "e84e8b10-13bf-4f63-ac91-247eff58c28f",
+    "proposed_commit_identity": "50ba60d17b5be69b2eca98d15b93368a9178f259",
+    "proposed_snapshot_id": "883cea53-313b-52e2-b998-f33810c29ddc",
+    "proposed_tree_identity": "4af0cbde10931f01202c8acfce40ff62bb2047ba",
+    "repository_identity": "watt://work-branches/82523845-5957-5601-a5f3-8dc703425d7e",
+    "satisfied_work_unit_ids": [
+      "b044d1bf-ed7f-4583-8b3b-16195fa7af8e"
+    ],
+    "sealed_at": "2026-10-17T09:29:24.778027+00:00",
+    "source_baseline_id": "b5f51474-770f-4d7e-94f2-b19ecb5dfd64",
+    "target_authoritative_ref": "refs/heads/work-8252384559575601a5f38dc703425d7e",
+    "verification_record_ids": [
+      "dd896adc-1bb4-5cbe-aa1e-3918762be53f"
+    ],
+    "work_product_reference_ids": [
+      "d6165134-dd6e-5907-9e45-c5a9ace309fb"
+    ]
+  },
+  "verification": [
+    {
+      "obligation": "Verify docs/design.md exists and is readable at the proposed path; confirm it contains bounded sections addressing (1) non-grid map/path presentation with no grid/chessboard tile layout, (2) Ultraman-versus-monster theme, (3) PvZ-inspired lane/defense mechanics (placement cost, attacks, waves), (4) win/lose conditions and controls, and (5) a clearly marked implementation outline pending Human approval. Confirm no game source files or build artifacts were created.",
+      "result": "PASS",
+      "source_ref": "verification:dd896adc-1bb4-5cbe-aa1e-3918762be53f"
+    }
+  ],
+  "actual_changes": [
+    {
+      "change": "ADDED",
+      "path": "docs/design.md",
+      "source_ref": "work-product:d6165134-dd6e-5907-9e45-c5a9ace309fb"
+    }
+  ],
+  "artifact": {
+    "path": "docs/design.md",
+    "bytes": 9724,
+    "sha256": "d571e485bc53eb5f1158fb83f8c0b79407e05e61fa1d3e4f46827f6a4ab515f8",
+    "git_blob": "fc1ae6d7c364bc9449958b382f87b9435d2ad6b7",
+    "exact_candidate_download": true,
+    "language": "Chinese"
+  },
+  "human_review": "PENDING",
+  "game_implementation": "NOT_STARTED",
+  "candidate_authorization": "PENDING",
+  "integration_effects": 0,
+  "delivery": "NOT_AUTHORIZED",
+  "guardian": {
+    "status": "NOT_STARTED",
+    "gate": null,
+    "finding_count": 0,
+    "required": false
+  },
+  "functional_preview": {
+    "mode": null,
+    "status": "NOT_REQUESTED",
+    "reason": "Current artifact is a design document; there is no runnable game Candidate."
+  },
+  "historical_failure_receipt_preserved": "5b012311-3e92-4377-8887-15e1357cc4c4",
+  "final_trace_sha256": "868ee718d552ed9c91003175b059a62f6f26c0c5b9138f5850bab85a2538ad90",
+  "human_visible": {
+    "headline": "奥特曼塔防 H5 方案已产出，等待你授权整合",
+    "summary": "目标是做一款简版 H5 塔防小游戏：奥特曼打怪兽，玩法类似植物大战僵尸，但不使用棋盘格地图。目前已产出一份方案文档，并通过了文件存在性与内容范围核对；这还不等于方案已获批准，游戏源码也尚未开始实现。",
+    "next_step": "请你决定是否授权将这份已封存的方案候选整合到仓库；授权之后，才会继续后续验证与验收。"
+  },
+  "browser_ui_interaction": "NOT_PERFORMED; authenticated exact artifact download and workspace API checked"
+}
