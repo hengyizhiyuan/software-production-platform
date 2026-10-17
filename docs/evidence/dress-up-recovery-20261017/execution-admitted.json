@@ -1,0 +1,98 @@
+{
+  "runtime_revision": "24ceccf9a70f72193a643d52897dcbb9f803476b",
+  "work": [
+    {
+      "id": "12cecacf-a97d-515f-8515-9845abadaea9",
+      "condition": "READY",
+      "created_at": "2026-10-17 10:58:29.601330+00:00",
+      "updated_at": "2026-10-17 10:59:46.105068+00:00",
+      "current_work_reality_revision_id": "7d90f52b-7a76-51c4-8bbd-430a94623457"
+    }
+  ],
+  "runtime_bindings": [
+    {
+      "work_id": "12cecacf-a97d-515f-8515-9845abadaea9",
+      "production_run_id": "6029d1c7-7625-497f-a929-0630d8b241d3",
+      "work_unit_id": "f0cf800d-cf65-47df-beb1-68021df72f21",
+      "created_at": "2026-10-17 11:35:16.243960+00:00",
+      "id": "5d90f23d-e103-4536-b858-72aa1cb251f7",
+      "condition": "ADMITTED"
+    },
+    {
+      "work_id": "12cecacf-a97d-515f-8515-9845abadaea9",
+      "production_run_id": "d9faf024-8763-4c4e-80b9-fad17f6d48aa",
+      "work_unit_id": "bdafe96e-0158-4283-92ef-e1b25c55fef1",
+      "created_at": "2026-10-17 11:48:43.917002+00:00",
+      "id": "967eeb3f-9b1f-4d7c-8b35-70fc459ac5e6",
+      "condition": "ADMITTED"
+    }
+  ],
+  "queue": [
+    {
+      "id": "50f310e7-29b4-4f59-808d-681f22a02e30",
+      "work_id": "12cecacf-a97d-515f-8515-9845abadaea9",
+      "pwu_id": "bdafe96e-0158-4283-92ef-e1b25c55fef1",
+      "attempt_id": "8d8df8b8-97dd-4a13-ad74-352388aea1fb",
+      "condition": "EXECUTING",
+      "wait_reason": null
+    }
+  ],
+  "pwus": [
+    {
+      "id": "bdafe96e-0158-4283-92ef-e1b25c55fef1",
+      "production_run_id": "d9faf024-8763-4c4e-80b9-fad17f6d48aa",
+      "condition": "PROPOSED",
+      "created_at": "2026-10-17 11:48:43.712069+00:00",
+      "fulfillment_bindings": 20,
+      "formation_receipt": {
+        "evidence_status": "PENDING_ACTUAL_CANDIDATE_VERIFICATION",
+        "formation_round": 1,
+        "formation_episode": "0eaf9189-abd3-5b31-b8e5-54cfacd04b49",
+        "exact_target_paths": [
+          "index.html",
+          "src/wardrobe-data.js",
+          "src/main.js",
+          "styles/main.css",
+          "assets/audio/theme.mp3"
+        ],
+        "provider_call_count": 0,
+        "source_role_contract": "source-preserving-production-brief-v3",
+        "inventory_fingerprint": "f9451345d8a1add56811ebd4e49f3733fbb262da059f39807c9edb53d4d747df"
+      }
+    },
+    {
+      "id": "f0cf800d-cf65-47df-beb1-68021df72f21",
+      "production_run_id": "6029d1c7-7625-497f-a929-0630d8b241d3",
+      "condition": "PROPOSED",
+      "created_at": "2026-10-17 11:35:16.047952+00:00",
+      "fulfillment_bindings": 20,
+      "formation_receipt": {
+        "evidence_status": "PENDING_ACTUAL_CANDIDATE_VERIFICATION",
+        "formation_round": 1,
+        "formation_episode": "16d6518c-7b6a-524d-ab4d-895765b3ca31",
+        "exact_target_paths": [
+          "index.html",
+          "src/wardrobe-data.js",
+          "src/main.js",
+          "styles/main.css",
+          "assets/audio/theme.mp3"
+        ],
+        "provider_call_count": 0,
+        "source_role_contract": "source-preserving-production-brief-v3",
+        "inventory_fingerprint": "9b37671675f2a1c5e1bfc08e2e5beb776d007e4a01408b1c18144233e9747f19"
+      }
+    }
+  ],
+  "verification": [],
+  "native_states": [
+    {
+      "attempt_id": "8d8df8b8-97dd-4a13-ad74-352388aea1fb",
+      "grant_state": "GRANTED",
+      "runtime_mode": "RUNNING",
+      "terminal_outcome": null,
+      "current_step_sequence": 1,
+      "blocker_reasons": [],
+      "updated_at": "2026-10-17 11:48:53.874027+00:00"
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 # Local qualification and limitations
 
-Exact composed sources: Watt pending source on the original branch; ECF
+Exact composed sources: Watt changes published in `057a9682`, `8da6e028` and
+`24ceccf9a70f72193a643d52897dcbb9f803476b` on the original branch; ECF
 `1d3feddf0c7e7726fea23c58d194d64034547a7a`; independently published Guardian
 `26bb402563bb781731749b7b8fb4fe5aed74f669`, canonical src digest
 `e5973aa54cca9ecfbf339a872fa8683a957519c2d6603dc4fccc19b16b2a89a9`.

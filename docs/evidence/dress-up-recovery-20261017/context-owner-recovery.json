@@ -1,0 +1,14 @@
+{
+  "status": "READY_FOR_EXISTING_WORK_ACTIVATION",
+  "runtime_revision": "24ceccf9a70f72193a643d52897dcbb9f803476b",
+  "work_id": "12cecacf-a97d-515f-8515-9845abadaea9",
+  "work_reality_revision_id": "7d90f52b-7a76-51c4-8bbd-430a94623457",
+  "original_requirements_unchanged": true,
+  "original_task_and_attempt_unchanged": true,
+  "old_native_admission_absent": true,
+  "old_steering_revision_id": "8f8f5996-a677-4ce6-8cd9-51d8117aab76",
+  "new_steering_revision_id": "ec47d1b1-adea-49e3-93df-1788aef5833f",
+  "new_produce_step_id": "474d2d4e-0eec-4c49-98a2-cdb3750a8ec6",
+  "human_acceptance": "NOT_GRANTED",
+  "delivery_authorization": "NOT_GRANTED"
+}
