@@ -1,0 +1,88 @@
+{
+  "mode": "STATIC_PREVIEW",
+  "status": "READY",
+  "candidate_revision": "9a234dff393d51c53dc00fe4a300bb7812cd956e",
+  "candidate_fingerprint": "36cb962f994a1567cd5d5708e3471050251d15550ae495b883e2d0ccb13bf1f3",
+  "session": {
+    "id": "fdc365c3-6396-45bd-b126-6239e7d1a36d",
+    "work_id": "f6cf8820-f461-53b1-8b3e-193b187c108e",
+    "candidate_id": "cd7bc2d5-dd84-54c8-b09b-2a9d7c92dbae",
+    "candidate_fingerprint": "36cb962f994a1567cd5d5708e3471050251d15550ae495b883e2d0ccb13bf1f3",
+    "repository_identity": "watt://work-branches/f6cf8820-f461-53b1-8b3e-193b187c108e",
+    "repository_revision": "9a234dff393d51c53dc00fe4a300bb7812cd956e",
+    "repository_tree": "3f9a1e1c963f7e3f62873eb7c2adfee9779d1144",
+    "workspace_id": "ef48ef86-9565-4711-ba4e-e6ee1678b54a",
+    "environment_id": "14fda47c-3ff1-4f14-bfc4-17a4cb486d4e",
+    "mode": "STATIC_PREVIEW",
+    "status": "READY",
+    "definition_version": "static-git-preview-v1",
+    "endpoint": "http://127.0.0.1:40609/",
+    "image_reference": "git-tree:3f9a1e1c963f7e3f62873eb7c2adfee9779d1144",
+    "service_identities": [
+      "static-git:fdc365c3-6396-45bd-b126-6239e7d1a36d"
+    ],
+    "resource_references": [
+      "/var/lib/spg/production-environments/candidate-preview-runtime/fdc365c3-6396-45bd-b126-6239e7d1a36d/workspace"
+    ],
+    "evidence": [
+      {
+        "kind": "REFINEMENT_LINEAGE",
+        "previous_preview_id": "d0fd5a8d-a1a4-45db-bbae-205d82411fc8",
+        "attempt": 2,
+        "previous_failure_code": null
+      },
+      {
+        "kind": "WORKSPACE",
+        "workspace": "/var/lib/spg/production-environments/candidate-preview-runtime/fdc365c3-6396-45bd-b126-6239e7d1a36d/workspace",
+        "revision": "9a234dff393d51c53dc00fe4a300bb7812cd956e",
+        "tree": "3f9a1e1c963f7e3f62873eb7c2adfee9779d1144",
+        "topology_preflight": {
+          "verifier_namespace": "api-private-static-observation"
+        }
+      },
+      {
+        "kind": "BUILD",
+        "image_id": "git-tree:3f9a1e1c963f7e3f62873eb7c2adfee9779d1144",
+        "build_log": "/var/lib/spg/production-environments/candidate-preview-runtime/evidence/fdc365c3-6396-45bd-b126-6239e7d1a36d/static-build.json",
+        "build_log_sha256": "99c4b3235c47d056c89da3606bae6aa874cde0864070628d581ddc7533a3fb1e"
+      },
+      {
+        "kind": "SERVED_VERIFICATION",
+        "result": "PASS",
+        "candidate_revision": "9a234dff393d51c53dc00fe4a300bb7812cd956e",
+        "candidate_tree": "3f9a1e1c963f7e3f62873eb7c2adfee9779d1144",
+        "http_status": 200,
+        "entrypoint_sha256": "2d634dfb6efac700f311f7ab39f770bfc4d3a4075c22243ee5314928e1573ef5",
+        "entrypoint": "index.html"
+      },
+      {
+        "kind": "RUNTIME",
+        "endpoint": "http://127.0.0.1:40609/",
+        "services": [
+          "static-git:fdc365c3-6396-45bd-b126-6239e7d1a36d"
+        ],
+        "resources": [
+          "/var/lib/spg/production-environments/candidate-preview-runtime/fdc365c3-6396-45bd-b126-6239e7d1a36d/workspace"
+        ],
+        "health": {
+          "application": "READY",
+          "repository_revision": "9a234dff393d51c53dc00fe4a300bb7812cd956e",
+          "repository_tree": "3f9a1e1c963f7e3f62873eb7c2adfee9779d1144"
+        },
+        "topology": {
+          "frontend": "immutable-git-blobs"
+        }
+      },
+      {
+        "kind": "PRODUCTION_RECORD",
+        "reference": "production-record:e2454e26-29d3-5b80-8b17-dee111f7de20",
+        "digest": "a319d7f51b079679a914b28526aa152ebd956c5907997e953d0eedacf82609d0"
+      }
+    ],
+    "failure_code": null,
+    "failure_reason": null,
+    "version": 6,
+    "created_at": "2026-10-17T07:47:05.270844Z",
+    "updated_at": "2026-10-17T07:47:05.789585Z"
+  }
+}

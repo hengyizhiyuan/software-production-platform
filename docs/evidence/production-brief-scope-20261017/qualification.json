@@ -1,0 +1,112 @@
+{
+  "status": "QUALIFIED_TO_HUMAN_REVIEW",
+  "observed_at_utc": "2026-10-17T07:50:08.175913+00:00",
+  "application_revision": "722d72dd9eb05989dc3272c7b4a4639b6ed03ece",
+  "guardian_revision": "41ee9d5e9d25e9455c84c7346ab93887af0efd8c",
+  "work_id": "f6cf8820-f461-53b1-8b3e-193b187c108e",
+  "candidate": {
+    "candidate_id": "cd7bc2d5-dd84-54c8-b09b-2a9d7c92dbae",
+    "candidate_fingerprint": "36cb962f994a1567cd5d5708e3471050251d15550ae495b883e2d0ccb13bf1f3",
+    "repository_revision": "9a234dff393d51c53dc00fe4a300bb7812cd956e",
+    "tree": "3f9a1e1c963f7e3f62873eb7c2adfee9779d1144",
+    "entrypoint": "index.html",
+    "preview_kind": "STATIC_WEB",
+    "artifacts": [
+      "assets/app.js",
+      "assets/styles.css",
+      "index.html"
+    ],
+    "verification": [
+      "PATH_SCOPE: PASS",
+      "GIT_DIFF_CHECK: PASS"
+    ],
+    "authorization_pending": true
+  },
+  "guardian": {
+    "status": "PASS",
+    "gate": "PASS",
+    "candidate_id": "cd7bc2d5-dd84-54c8-b09b-2a9d7c92dbae",
+    "request_id": "468d9cbf-90d4-55ec-a332-dd99eb3743cc",
+    "result_ref": "guardian:assurance-result:468d9cbf-90d4-55ec-a332-dd99eb3743cc",
+    "result_refs": [
+      "guardian:assurance-result:468d9cbf-90d4-55ec-a332-dd99eb3743cc"
+    ],
+    "required_pwu_ids": [
+      "6829f009-42ac-43a7-9df8-5d86792d8f71"
+    ],
+    "finding_count": 0,
+    "finding_ids": [],
+    "summary": "",
+    "evidence_ref": "guardian:evidence:89f9d1da-3f0d-4551-8a94-e8b03ba8d4ae",
+    "required": true
+  },
+  "preview_status": "READY",
+  "preview_session_id": "fdc365c3-6396-45bd-b126-6239e7d1a36d",
+  "preview_url": "http://8.130.172.58:8080/api/works/f6cf8820-f461-53b1-8b3e-193b187c108e/candidate-preview/36cb962f994a1567cd5d5708e3471050251d15550ae495b883e2d0ccb13bf1f3/index.html",
+  "served_files": {
+    "index.html": {
+      "http_status": 200,
+      "sha256": "2d634dfb6efac700f311f7ab39f770bfc4d3a4075c22243ee5314928e1573ef5",
+      "bytes": 4821
+    },
+    "assets/app.js": {
+      "http_status": 200,
+      "sha256": "b67f88a5c364d87a4c3bfc7a3c5d276410e3cc97ee201d95d9ce1633e5667182",
+      "bytes": 5987
+    },
+    "assets/styles.css": {
+      "http_status": 200,
+      "sha256": "9fb46df04bae6b718495851ab6498d24b684e14101ce57e7aa4f6632a8cea311",
+      "bytes": 5562
+    }
+  },
+  "attention": [
+    {
+      "kind": "CANDIDATE_AUTHORIZATION",
+      "available_actions": [
+        "AUTHORIZE"
+      ]
+    }
+  ],
+  "human_acceptance": "PENDING",
+  "generated_code_regenerated_for_validator_repair": false,
+  "browser_interaction": "UNVERIFIED_CUA_TAB_TIMEOUT",
+  "preserved_paused_work": {
+    "id": "b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9",
+    "status": "BLOCKED",
+    "event": "STEERING_STOPPED_BLOCKED"
+  },
+  "lineage": {
+    "application_revision": "722d72dd9eb05989dc3272c7b4a4639b6ed03ece",
+    "attempt_id": "3b746f39-b6d3-4806-aff5-c1b3b48d1ccb",
+    "generation": 1,
+    "candidate_id": "cd7bc2d5-dd84-54c8-b09b-2a9d7c92dbae",
+    "preserved_game_human_pause": true,
+    "old_guardian_gate_preserved": "BLOCKED",
+    "old_guardian_request_id": "9f37e2e2-74e2-5681-a701-e794a047d13e",
+    "authorization": "PENDING",
+    "runtime_commit": null,
+    "queues": {
+      "f6cf8820-f461-53b1-8b3e-193b187c108e": {
+        "queue_records": 1,
+        "active_queue": 0
+      },
+      "b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9": {
+        "queue_records": 23,
+        "active_queue": 0
+      }
+    },
+    "guardian_lock": {
+      "name": "guardian",
+      "repository": "https://github.com/hengyizhiyuan/guardian.git",
+      "branch": "codex/usability-continuity-20261017",
+      "commit": "41ee9d5e9d25e9455c84c7346ab93887af0efd8c",
+      "source_digest": "a861fa5c702dfa92cdc8448c408c70f8296e57668ff78aa18dbe68e961b10f37"
+    }
+  },
+  "tests": {
+    "watt_focused": 108,
+    "postgres_owner_recovery": 2,
+    "guardian_full": 338
+  }
+}

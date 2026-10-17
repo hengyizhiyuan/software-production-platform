@@ -1,0 +1,146 @@
+{
+  "status": "PASS",
+  "observed_at_utc": "2026-10-17T07:46:47.154336+00:00",
+  "revision": "722d72dd9eb05989dc3272c7b4a4639b6ed03ece",
+  "source_bundle_sha256": "6eb829de05e0377dc504f5cb2b7c5f57f0f1a937083070ece2c1507ee104a0c8",
+  "image_id": "sha256:8953486b56b90bc0bbdde5ddac35f7864d65fad7069c3dc9c1ee191632ed83ce",
+  "services": {
+    "api": {
+      "image": "sha256:8953486b56b90bc0bbdde5ddac35f7864d65fad7069c3dc9c1ee191632ed83ce",
+      "running": true,
+      "health": "healthy"
+    },
+    "native-coordinator": {
+      "image": "sha256:8953486b56b90bc0bbdde5ddac35f7864d65fad7069c3dc9c1ee191632ed83ce",
+      "running": true,
+      "health": null
+    },
+    "native-tool-host": {
+      "image": "sha256:8953486b56b90bc0bbdde5ddac35f7864d65fad7069c3dc9c1ee191632ed83ce",
+      "running": true,
+      "health": "healthy"
+    },
+    "native-worker": {
+      "image": "sha256:8953486b56b90bc0bbdde5ddac35f7864d65fad7069c3dc9c1ee191632ed83ce",
+      "running": true,
+      "health": null
+    }
+  },
+  "runtime": {
+    "revision": "722d72dd9eb05989dc3272c7b4a4639b6ed03ece",
+    "source_files": {
+      "src/spg/web/experience.js": "65782e77d6a5bc579a3a62fd821e1868077a2430e931b31afaa3aef21f8020d3",
+      "src/spg/providers/protected_context_verifier.py": "ddfb9b80451ecf328beb4aa7dfb104a48e0c64826d28b1b2e2fd0b8ae1f89e19",
+      "src/spg/providers/rule_based_planner.py": "13e85d04097d11b752508efaad7e631bbadc3fc6d71c2d522694f81557a56e08",
+      "src/spg/providers/managed_context_fulfillment.py": "5f6194ce9911838988a925394d30b6a2cd97fdd705b4e64e6c8c121eb683c4ff",
+      "src/spg/providers/repository_code_verifier.py": "6550cf8d4c6ac15e2727444713f448a3ae48ef5ca11d325d9982f3a63983e9b0",
+      "src/spg/api/http.py": "74e79d3957b9f301c5b75d87144b3fa35a61b3146ad4dd3c3d83d8799e5656f7",
+      "src/spg/api/dto.py": "7314269b4421ed7e6b8861add94dacb82e468d20106a9c9da8cf0d467c9c283f",
+      "src/spg/application/human_visible.py": "01c75dcff5388a98fe478fc4dc6bbd27bf3b96863608669e6831a953316b3892",
+      "src/spg/application/recovery_preview.py": "1706bbbdbb032ad9b50d6c6a280a2c3e2384ce71571b0acf86d1484da3e807b3",
+      "src/spg/application/work.py": "20c1e915277bb06e0dded341d87e870f18b7d3d0b21913c9ce4207451354b2b8",
+      "src/spg/application/steering_driver.py": "06092574ce2f8b63c9b9413631d3e08330ed68b45064eb084e9ca0a63788ff72",
+      "src/spg/application/executor_runtime.py": "15f92059fb375cfeb7552eecdac25d646ed5a67ca1e0285f56d2fe599d42fdd5",
+      "src/spg/domain/native_execution.py": "d6c9022b29100479515baf35cd0cdaed7fe7a19e14d5a77290dd27b05cbf7280",
+      "owners.lock": "0fba9278097d029562f29380090c84051a30f821667dd6969556bf200dab9ea2",
+      "src/spg/application/production_brief.py": "16ace25c7b345a8c584b0c4511b679f74938f0d338bba576f5c95f585c9091c6"
+    },
+    "login_prefill_enabled": true,
+    "production_brief_contract": "source-preserving-production-brief-v1",
+    "staged_production_brief_contract": "source-preserving-production-brief-v2",
+    "same_candidate_review_repair": true,
+    "failure_signature_max_length": 64
+  },
+  "health": {
+    "service": "available",
+    "database": "available",
+    "application_initialized": true
+  },
+  "owner_release_gate": {
+    "status": "PASS",
+    "results": {
+      "ecf": {
+        "commit": "1d3feddf0c7e7726fea23c58d194d64034547a7a",
+        "source_digest": "225d415597884ae923458a620b8c01abef2605cd093036aee159f5d445073702",
+        "import_root": "/opt/watt-owners/ecf/src"
+      },
+      "guardian": {
+        "commit": "41ee9d5e9d25e9455c84c7346ab93887af0efd8c",
+        "source_digest": "a861fa5c702dfa92cdc8448c408c70f8296e57668ff78aa18dbe68e961b10f37",
+        "import_root": "/opt/watt-owners/guardian/src"
+      },
+      "guardian_production_brief": {
+        "contracts": [
+          "source-preserving-production-brief-v1",
+          "source-preserving-production-brief-v2"
+        ],
+        "independent_source_validation": true
+      },
+      "guardian_contract": {
+        "types": [
+          "AssuranceRequest",
+          "EffectRequirement",
+          "ProductionEvidenceLineage",
+          "ProtectedContextEvidence"
+        ],
+        "request_fields": [
+          "acceptance_state",
+          "artifact_refs",
+          "authority_ref",
+          "candidate_fingerprint",
+          "candidate_id",
+          "constraints",
+          "decision_context_fingerprint",
+          "delivery_authorization_state",
+          "disposable_preview",
+          "evidence_contract_version",
+          "governed_intent_ref",
+          "objective",
+          "prior_finding_ids",
+          "product_ref",
+          "production_lineage",
+          "protected_context",
+          "request_id",
+          "required_effects",
+          "runtime_ref",
+          "runtime_url",
+          "source_revision",
+          "source_tree",
+          "submitted_at",
+          "task_contract_ref",
+          "verification_refs",
+          "work_ref"
+        ],
+        "owner_evidence_resolver": true
+      },
+      "ecf_contract": {
+        "version": "0.1",
+        "managed_greenfield": true
+      }
+    },
+    "failures": []
+  },
+  "rollback_image": "sha256:a42126e60606af3ebba44a56947e76860cb0d2dc04d7bc571d42d5fdda45fdb0",
+  "failed_work_explicitly_retried": false,
+  "preserved_production_work": {
+    "records": {
+      "executor_queue": {
+        "records": 23,
+        "sha256": "3246d6c96e593b32e4a237425026de5d173d60729f256b12a4d8e160a7ebc95b"
+      },
+      "product_works": {
+        "records": 1,
+        "sha256": "47a37ad314e870736c81a742d7784930e0a3232504cffe9d7dad925f0e1ca4be"
+      },
+      "work_reality_revisions": {
+        "records": 3,
+        "sha256": "80434e7a1c2c2e238b3ffc9823cd1d57c920870bad40818c92157aaccc22eb3c"
+      },
+      "work_runtime_bindings": {
+        "records": 1,
+        "sha256": "751b9bb9e382971c46b9ef4c6aed4d79dbf6fd21b1536f4fcde581af21e8c095"
+      }
+    },
+    "work_id": "b1e59aa3-eaf3-5c6a-8bc0-fa0eff470ad9"
+  }
+}
