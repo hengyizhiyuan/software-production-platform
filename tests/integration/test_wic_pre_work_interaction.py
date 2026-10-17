@@ -1872,3 +1872,56 @@ def test_plain_interaction_does_not_create_pre_work(
     ).create_interaction(human_identity="human:test")
     assert interaction.current_work_id is None
     assert _count(postgres_database, product_works) == 0
+
+
+@pytest.mark.parametrize('reconstructed', [True, False])
+def test_provider_wording_shortcut_applies_only_to_unreconstructed_human_prose(postgres_database, reconstructed):
+    from spg.domain.intent_realization import ProductionIntent
+    from tests.test_guided_interaction_calibration import guidance
+
+    class Capability:
+        last_pipeline_evidence = {'pipeline_mode': 'coalesced_pre_work', 'provider_call_count': 1}
+
+        def interpret(self, basis):
+            record = basis.records[-1]
+            raw = semantic_candidate(record, production=ProductionIntent(
+                objective='Create a festival H5 card', primary_change='Create a festival H5 card',
+                current=True, new_work=True, bounded_change=True)) if reconstructed else semantic_candidate(record, kind=SemanticKind.ANALYSIS)
+            if reconstructed:
+                raw = raw.model_copy(update={'production_sufficiency': guidance(
+                    proposal='Start with a single-screen festival card',
+                    proposal_basis='A focused card delivers a complete first version',
+                    question='Should we start with one screen or multiple scenes?')})
+            return InteractionAssessmentCandidate(semantic_intent=raw,
+                natural_response='建议先制作节日卡片，支持后续扩展。', provider_identity='fixture:coalesced-wording')
+
+    class Realizer:
+        provider_identity = 'fixture:expression-only'
+        model_identity = 'fixture'
+        envelopes = []
+
+        def realize_stream(self, envelope, *, on_response_delta):
+            self.envelopes.append(envelope)
+            assert envelope.response_language == 'zh-CN'
+            assert envelope.semantic_ir['production_sufficiency']['proposal'] == 'Start with a single-screen festival card'
+            assert envelope.selected_question == 'Should we start with one screen or multiple scenes?'
+            content = '建议先做一个单屏节日 H5 卡片，便于先完成可分享的首版。首版先做单屏，还是多场景？'
+            on_response_delta(content)
+            return GovernedResponseRealization(content=content, provider_identity=self.provider_identity)
+
+    realizer = Realizer()
+    service = WorkInteractionService(postgres_database, capability=Capability(), response_realizer=realizer,
+        runtime_mode=WicRuntimeMode.WIC_VNEXT_CONTROLLED)
+    try:
+        interaction = service.create_interaction(human_identity='human:test')
+        submitted = service.submit_turn(interaction.id, '做一个节日 H5 卡片', human_identity='human:test')
+        turn = _wait_for_turn(service, submitted.id)
+        assert turn.status is InteractionTurnStatus.COMPLETED, turn.failure_message
+        assert len(realizer.envelopes) == (1 if reconstructed else 0)
+        final = next(event.content for event in service.response_events(turn.id)
+            if event.event_type is WicResponseEventType.FINAL_RESPONSE)
+        assert 'Start with' not in final
+        if reconstructed:
+            assert '单屏节日 H5 卡片' in final and final.count('？') == 1
+    finally:
+        service.shutdown()

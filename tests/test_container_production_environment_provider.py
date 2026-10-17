@@ -417,3 +417,28 @@ def test_historical_pe_handle_keeps_unknown_image():
     raw = handle.model_dump(mode="json", exclude={"runtime_image_observation"})
     restored = ProviderEnvironmentHandle.model_validate(raw)
     assert restored.runtime_image_observation is None
+
+
+def test_native_process_allows_bounded_directory_listing_in_production_environment():
+    commands = []
+
+    class RecordingProvider:
+        def execute_observed(self, _handle, command):
+            commands.append(command)
+            return EnvironmentCommandObservation(result=EnvironmentCommandResult(command=command, exit_code=0),
+                stdout='README.md\n', stderr='')
+
+    host = ProductionEnvironmentNativeToolHost(provider=RecordingProvider(),
+        handle=ProviderEnvironmentHandle(provider_identity='test:production-environment',
+            environment_id=uuid4(), opaque_reference='test-environment'),
+        environment_reference='production-environment:test', workspace_reference='production-workspace:test')
+    request = SimpleNamespace(delivery_id=uuid4(), max_log_bytes=1024,
+        proposal=SimpleNamespace(arguments={'cwd': '.', 'argv': ['ls', '-la']}))
+    result = asyncio.run(host.run_process(request))
+    assert result.output['stdout'] == 'README.md\n'
+    assert len(commands) == 1 and commands[0].argv == ('ls', '-la')
+    assert commands[0].working_directory == '/workspace/primary'
+    request.proposal.arguments['argv'] = ['ls', '/etc']
+    with pytest.raises(ValueError, match='escape'):
+        asyncio.run(host.run_process(request))
+    assert len(commands) == 1

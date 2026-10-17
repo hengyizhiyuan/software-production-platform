@@ -540,7 +540,7 @@ def governed_response_envelope(
         semantic_policy_revision=semantics.semantic_policy_revision,
         question_policy_revision=semantics.question_policy_revision,
         response_language=(
-            "zh-CN" if re.search(r"[\u4e00-\u9fff]", governed_content) else "en"
+            "zh-CN" if re.search(r"[\u4e00-\u9fff]", latest_human_input) else "en"
         ),
         interaction_strategy=strategy,
         cognitive_context_package=cognitive_context,

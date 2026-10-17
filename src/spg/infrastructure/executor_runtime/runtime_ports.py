@@ -682,6 +682,7 @@ class DurableKernelAudit:
                 and output.get("effect_observed") is False
                 and output.get("error_type") in {
                     "CAPABILITY_PATH_INVALID", "TOOL_GRANT_MISMATCH", "CAPABILITY_UNAVAILABLE",
+                    "TOOL_ARGUMENTS_INVALID",
                 }):
             return (RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE,
                 "confirmed no effect; select an alternative within existing capability grants and Task Contract")

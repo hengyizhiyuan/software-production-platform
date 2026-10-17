@@ -6,11 +6,15 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
+from jsonschema import Draft202012Validator
+
 from spg.domain.native_execution import (
     CapabilityGrant,
+    EffectCondition,
     NativeExecutionConflict,
     ToolExecutionRequest,
     ToolExecutionResult,
+    canonical_digest,
 )
 
 
@@ -88,7 +92,7 @@ PUBLIC_NATIVE_TOOL_CONTRACTS: tuple[dict[str, object], ...] = (
         "identity": "process.run",
         "version": "1",
         "description": (
-            "Run one allowlisted argv process without a shell. Do not use sed, tail, or wc; "
+            "Run one allowlisted argv process without a shell. Use ls for directory listing. Do not use sed, tail, or wc; "
             "they are not allowlisted. Edit files with file.write, including its exact old_text/new_text mode. "
             "The command must terminate on its own. Do not start a web server, daemon, "
             "watch mode, or any other persistent process through process.run. "
@@ -252,6 +256,29 @@ class NativeToolRegistry:
         ):
             raise NativeExecutionConflict("Destructive operation lacks explicit Work permission")
         self._validate_path_scope(request, grant)
+        # A malformed model recipe has not reached its handler. Give the
+        # existing Executor repair loop precise feedback instead of classifying
+        # a missing argument as an unknown implementation/build failure.
+        issues = tuple(Draft202012Validator(definition.input_schema).iter_errors(
+            request.proposal.arguments
+        ))
+        if issues:
+            output = {
+                "error_type": "TOOL_ARGUMENTS_INVALID",
+                "effect_observed": False,
+                "message": "Correct the arguments using this tool's advertised input_schema, or select another granted tool.",
+                "validation_issues": [
+                    {"location": list(issue.absolute_path), "rule": issue.validator,
+                     "expected": issue.validator_value}
+                    for issue in issues
+                ],
+            }
+            digest = canonical_digest(output)
+            return ToolExecutionResult(
+                delivery_id=request.delivery_id, tool_identity=definition.identity,
+                condition=EffectCondition.FAILED, output=output, output_digest=digest,
+                evidence=({"type": "TOOL_REJECTION", "digest": digest},),
+            )
         result = await definition.handler(request)
         if result.delivery_id != request.delivery_id:
             raise NativeExecutionConflict("tool result delivery identity differs")

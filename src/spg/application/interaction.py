@@ -1761,8 +1761,9 @@ class WorkInteractionService:
         if branch_status_answer is not None:
             deep_content = branch_status_answer
         definition = None if assessment.semantic_ir is None else assessment.semantic_ir.production_sufficiency
-        if (definition is not None and definition.status == 'GUIDANCE_REQUIRED'
-                and not assessment.semantic_ir.operational_requests):
+        reconstructed_guidance = (definition is not None and definition.status == 'GUIDANCE_REQUIRED'
+                and not assessment.semantic_ir.operational_requests)
+        if reconstructed_guidance:
             # The pending Work obligation explains the stop; its fallback owner
             # prose cannot replace WIC's proposal and exact outcome question.
             from spg.application.wic_response import production_guidance_content
@@ -1857,17 +1858,19 @@ class WorkInteractionService:
             obligations = IntentRealizationStore(uow.session).obligations(turn_id)
         envelope = envelope.model_copy(update={"obligation_ledger": tuple(o.model_dump(mode="json") for o in obligations)})
         response_realizer = self.response_realizer
-        if branch_status_answer is not None and envelope.production_admission_state != "WORK_CREATED":
+        if (branch_status_answer is not None and not reconstructed_guidance
+                and envelope.production_admission_state != "WORK_CREATED"):
             response_realizer = DeterministicGovernedResponseRealizer()
         pipeline_evidence = getattr(self.capability, "last_pipeline_evidence", None)
-        if ((_provider_supplied_human_wording(pipeline_evidence) and
+        if ((_provider_supplied_human_wording(pipeline_evidence) and not reconstructed_guidance and
                  envelope.production_admission_state != "WORK_CREATED")
                 or assessment.provider_identity == "watt-native:work-reality-query"
                 or (assessment.basis_work_revision_id is not None and assessment.semantic_ir is not None
                     and any(item.kind is SemanticKind.STATUS_QUERY and item.subject in {
                         "WORK_CURRENT", "WORK_HISTORY", "WORK_DIAGNOSTIC"} for item in assessment.semantic_ir.items))):
             # The dedicated/coalesced Conversation provider already supplied
-            # natural wording. After semantic policy and Interaction Strategy
+            # natural wording, unless policy rebuilt it from internal IR fields.
+            # After semantic policy and Interaction Strategy
             # admission, another external wording call adds latency and can only
             # introduce drift. Keep the Realizer seam, but make it deterministic.
             response_realizer = DeterministicGovernedResponseRealizer()

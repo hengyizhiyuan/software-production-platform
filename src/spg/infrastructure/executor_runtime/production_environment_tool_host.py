@@ -35,7 +35,7 @@ class ProductionEnvironmentNativeToolHost:
     """Implement the current Native tools while PE owns their execution location."""
 
     _PROCESS_ALLOWLIST = {
-        "python", "python3", "pytest", "node", "npm", "git", "uv",
+        "python", "python3", "pytest", "node", "npm", "git", "uv", "ls",
         "pnpm", "yarn", "pip", "poetry", "mvn", "gradle", "go", "cargo", "dotnet",
         "ruff", "mypy", "eslint", "prettier", "npx", "alembic", "rg",
         "psql", "mysql", "sqlite3", "redis-cli",

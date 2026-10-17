@@ -2679,3 +2679,87 @@ def test_observed_diagnostic_failure_can_repair_only_existing_authorized_scope(c
     classification, _ = DurableKernelAudit._classify_repairability(payload, binding=binding,
         tool="test.run", condition=condition, output=output)
     assert (classification is RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE) is (changed is None)
+
+
+def test_malformed_tool_recipe_keeps_existing_write_capability_for_bounded_repair():
+    from spg.executor.tools import PUBLIC_NATIVE_TOOL_CONTRACTS
+    binding, contract = _binding()
+    binding = binding.model_copy(update={"capability_grants": (
+        CapabilityGrant(identity="build.run", version="1"),
+        CapabilityGrant(identity="file.write", version="1", scope={"paths": ["src"]}),
+    )})
+    calls = []
+
+    async def handler(request):
+        calls.append(request.proposal.tool_identity)
+        assert request.proposal.tool_identity == "file.write", "Invalid build arguments must never run"
+        return ToolExecutionResult(delivery_id=request.delivery_id, tool_identity="file.write",
+            condition=EffectCondition.SETTLED, output={}, output_digest=canonical_digest({}))
+
+    class Audit(NullKernelAudit):
+        repairability = None
+
+        async def finish_tool(self, effect_id, request, result, error):
+            assert error is None
+            if result.condition is EffectCondition.FAILED:
+                self.repairability, _ = DurableKernelAudit._classify_repairability(
+                    contract.contract_payload, binding=binding, tool=request.proposal.tool_identity,
+                    condition=result.condition, output=result.output)
+            return self.repairability
+
+        def recent_repair_reality(self):
+            return () if self.repairability is None else ({"operation_id": str(binding.attempt_id),
+                "status": "OPEN", "failure_family": "DEPENDENCY_BUILD_FAILURE",
+                "repairability": self.repairability.value},)
+
+    registry = NativeToolRegistry(tuple(ToolDefinition(str(c['identity']), '1', str(c['description']),
+        c['input_schema'], str(c['effect_classification']), handler)
+        for c in PUBLIC_NATIVE_TOOL_CONTRACTS if c['identity'] in {'build.run', 'file.write'}))
+    inference = ScriptedInferenceAdapter((
+        InferenceResponse(action=InferenceAction.CONTINUE, summary="invalid recipe", working_plan=_plan(2),
+            tool_calls=(ToolCallProposal(proposal_index=0, tool_identity="build.run", arguments={"path": "src/page.html"}),)),
+        InferenceResponse(action=InferenceAction.CONTINUE, summary="correct within admitted scope", working_plan=_plan(3),
+            tool_calls=(ToolCallProposal(proposal_index=0, tool_identity="file.write", arguments={"path": "src/page.html", "content": "<main>Page</main>"}),)),
+        InferenceResponse(action=InferenceAction.RESULT_READY, summary="submit for independent verification", working_plan=_plan(4),
+            result_claim={"output_vector": {"files": ["src/page.html"]}, "evidence_ids": []}),
+    ))
+    result = asyncio.run(NativeExecutorKernel(inference=inference, tools=registry,
+        audit=Audit(), checkpoints=_Checkpoints()).run(binding=binding, contract=contract,
+            worker_epoch=1, working_plan=_plan()))
+    assert result.terminal_outcome is AttemptTerminalOutcome.RESULT_READY
+    assert calls == ["file.write"]
+    feedback = inference.requests[1].previous_results[0]['output']
+    assert feedback['error_type'] == 'TOOL_ARGUMENTS_INVALID' and feedback['effect_observed'] is False
+    assert {item['rule'] for item in feedback['validation_issues']} == {'required', 'additionalProperties'}
+    assert 'file.write' in {item['identity'] for item in inference.requests[1].available_tools}
+    assert result.inference_submissions == 3 and result.tool_effects == 2
+
+
+@pytest.mark.parametrize("changed,expected", [
+    ({}, RepairabilityClassification.AUTONOMOUSLY_REPAIRABLE),
+    ({"effect_observed": True}, RepairabilityClassification.REPAIRABLE_WITH_SUFFICIENT_EVIDENCE),
+    ({"missing_human_input": True}, RepairabilityClassification.REQUIRES_HUMAN_INPUT),
+    ({"product_choice_required": True}, RepairabilityClassification.REQUIRES_HUMAN_DECISION),
+])
+def test_argument_feedback_cannot_supply_missing_effect_or_human_authority(changed, expected):
+    binding, _ = _binding()
+    output = {"error_type": "TOOL_ARGUMENTS_INVALID", "effect_observed": False, **changed}
+    assert DurableKernelAudit._classify_repairability({}, binding=binding, tool='build.run',
+        condition=EffectCondition.FAILED, output=output)[0] is expected
+    assert DurableKernelAudit._classify_repairability({}, binding=binding, tool='build.run',
+        condition=EffectCondition.UNKNOWN, output=output)[0] is RepairabilityClassification.UNSAFE_TO_AUTOREPAIR
+
+
+@pytest.mark.skipif(os.name != 'posix', reason='ls is a POSIX inspection command')
+def test_local_process_can_list_workspace_without_shell_or_inline_code(tmp_path):
+    binding, _ = _binding()
+    (tmp_path / 'page.html').write_text('<main>Page</main>')
+    request = ToolExecutionRequest(delivery_id=uuid4(), attempt_id=binding.attempt_id, worker_epoch=1,
+        step_id=uuid4(), proposal=ToolCallProposal(proposal_index=0, tool_identity='process.run',
+            arguments={'argv': ['ls', '-la'], 'cwd': '.'}),
+        capability_grants=(CapabilityGrant(identity='process.run', version='1'),), workspace=binding.workspace)
+    result = asyncio.run(LocalNativeToolHost(tmp_path).registry().execute(request))
+    assert result.condition is EffectCondition.SETTLED and 'page.html' in result.output['stdout']
+    escaped = request.model_copy(update={'proposal': request.proposal.model_copy(update={'arguments': {'argv': ['ls', '../outside'], 'cwd': '.'}})})
+    with pytest.raises(ValueError, match='escape'):
+        asyncio.run(LocalNativeToolHost(tmp_path).registry().execute(escaped))

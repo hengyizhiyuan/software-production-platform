@@ -108,7 +108,7 @@ class LocalNativeToolHost:
         workspace_root: Path,
         *,
         process_allowlist: tuple[str, ...] = (
-            "python", "python3", "pytest", "node", "npm", "git", "uv"
+            "python", "python3", "pytest", "node", "npm", "git", "uv", "ls"
         ),
         timeout_seconds: int = 120,
         process_supervisor: NativeProcessSupervisor | None = None,

@@ -278,3 +278,21 @@ def test_binding_leaves_candidates_without_acceptance_or_pending_guidance_unchan
         accepted.production_sufficiency.model_copy(update={'recommendation_acceptance': accepted.production_sufficiency
             .recommendation_acceptance.model_copy(update={'value': 'x'})})}), SimpleNamespace(governed_semantic_history=()))
     assert no_pending.production_sufficiency.recommendation_acceptance.value == 'x'
+
+
+@pytest.mark.parametrize('human,internal,language', [
+    ('做一个端午节 H5 页面', 'Build a festival card', 'zh-CN'),
+    ('Build a festival page', '制作节日卡片', 'en'),
+])
+def test_expression_language_comes_from_human_not_internal_semantic_wording(human, internal, language):
+    from spg.application.wic_response import governed_response_envelope
+    from spg.domain.wic_response import ResponseReconciliation
+    record = _record(human)
+    ir = govern(meaning(record, guidance()), record)
+    candidate, semantics, readiness = projected(ir, record)
+    assessment = _assessment(semantic_ir=ir, readiness=readiness, progressive_semantics=semantics)
+    envelope = governed_response_envelope(assessment, governed_content=internal,
+        provisional_content=None, reconciliation=ResponseReconciliation.REFINE, latest_human_input=human)
+    assert envelope.response_language == language
+    assert envelope.semantic_ir == ir.model_dump(mode='json')
+    assert envelope.latest_human_input is None
